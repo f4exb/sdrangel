@@ -55,6 +55,7 @@
         <file>webapi/doc/swagger/include/Structs.yaml</file>
         <file>webapi/doc/swagger/include/TestSource.yaml</file>
         <file>webapi/doc/swagger/include/TestMI.yaml</file>
+        <file>webapi/doc/swagger/include/TestMOSync.yaml</file>
         <file>webapi/doc/swagger/include/UDPSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSink.yaml</file>
         <file>webapi/doc/swagger/include/WFMDemod.yaml</file>

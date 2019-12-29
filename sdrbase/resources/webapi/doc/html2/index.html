@@ -157,7 +157,7 @@ h={};g()}};typeof define==="function"&&define.amd&&define("google-code-prettify"
     });
   </script>
   <style type="text/css">
-
+  
 /*!
  * Bootstrap v2.3.2
  *
@@ -1568,6 +1568,42 @@ margin-bottom: 20px;
   },
   "description" : "A bandwidth expressed in Hertz (Hz)"
 };
+            defs.BeamSteeringCWModSettings = {
+  "properties" : {
+    "steerDegrees" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "BeamSteeringCWMod"
+};
             defs.BladeRF1InputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1775,7 +1811,7 @@ margin-bottom: 20px;
     "log2Decim" : {
       "type" : "integer"
     },
-    "fcPos" : {
+    "fcPosRx" : {
       "type" : "integer",
       "description" : "See BladeRF2MIMO::fcPos_t"
     },
@@ -1820,6 +1856,10 @@ margin-bottom: 20px;
     },
     "log2Interp" : {
       "type" : "integer"
+    },
+    "fcPosTx" : {
+      "type" : "integer",
+      "description" : "See BladeRF2MIMO::fcPos_t"
     },
     "txBandwidth" : {
       "type" : "integer"
@@ -1970,6 +2010,10 @@ margin-bottom: 20px;
             defs.Channel = {
   "required" : [ "deltaFrequency", "id", "index", "title", "uid" ],
   "properties" : {
+    "direction" : {
+      "type" : "integer",
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any direction (MIMO)"
+    },
     "index" : {
       "type" : "integer",
       "description" : "Index in the list of channels"
@@ -2201,6 +2245,9 @@ margin-bottom: 20px;
     },
     "ATVModSettings" : {
       "$ref" : "#/definitions/ATVModSettings"
+    },
+    "BeamSteeringCWModSettings" : {
+      "$ref" : "#/definitions/BeamSteeringCWModSettings"
     },
     "BFMDemodSettings" : {
       "$ref" : "#/definitions/BFMDemodSettings"
@@ -2874,6 +2921,9 @@ margin-bottom: 20px;
     "testMISettings" : {
       "$ref" : "#/definitions/TestMISettings"
     },
+    "testMOSyncSettings" : {
+      "$ref" : "#/definitions/TestMOSyncSettings"
+    },
     "xtrxInputSettings" : {
       "$ref" : "#/definitions/XtrxInputSettings"
     },
@@ -2884,11 +2934,10 @@ margin-bottom: 20px;
   "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
 };
             defs.DeviceState = {
-  "required" : [ "state" ],
   "properties" : {
     "state" : {
       "type" : "string",
-      "description" : "State: notStarted, idle, ready, running, error"
+      "description" : "Unique state: notStarted, idle, ready, running, error"
     }
   },
   "description" : "Device running state"
@@ -4303,6 +4352,10 @@ margin-bottom: 20px;
     "filterChainHash" : {
       "type" : "integer"
     },
+    "play" : {
+      "type" : "integer",
+      "description" : "boolean (1 to play, 0 to stop)"
+    },
     "streamIndex" : {
       "type" : "integer",
       "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
@@ -4343,6 +4396,10 @@ margin-bottom: 20px;
     },
     "filterChainHash" : {
       "type" : "integer"
+    },
+    "play" : {
+      "type" : "integer",
+      "description" : "boolean (1 to play, 0 to stop)"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -5852,7 +5909,7 @@ margin-bottom: 20px;
   "description" : "A sample rate expressed in samples per second (S/s)"
 };
             defs.SamplingDevice = {
-  "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial", "state" ],
+  "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial" ],
   "properties" : {
     "index" : {
       "type" : "integer",
@@ -5893,7 +5950,15 @@ margin-bottom: 20px;
     },
     "state" : {
       "type" : "string",
-      "description" : "State: notStarted, idle, ready, running, error"
+      "description" : "Single subsystem state: notStarted, idle, ready, running, error"
+    },
+    "stateRx" : {
+      "type" : "string",
+      "description" : "Rx subsystem state (MIMO): notStarted, idle, ready, running, error"
+    },
+    "stateTx" : {
+      "type" : "string",
+      "description" : "Tx subsystem state (MIMO): notStarted, idle, ready, running, error"
     }
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
@@ -6228,6 +6293,26 @@ margin-bottom: 20px;
     }
   },
   "description" : "TestMISettings"
+};
+            defs.TestMOSyncSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "fcPosTx" : {
+      "type" : "integer",
+      "description" : "See BladeRF2MIMO::fcPos_t"
+    }
+  },
+  "description" : "TestMOSync"
 };
             defs.TestMiStreamSettings = {
   "properties" : {
@@ -7185,6 +7270,15 @@ margin-bottom: 20px;
                     <li data-group="DeviceSet" data-name="devicesetDeviceSettingsPut" class="">
                       <a href="#api-DeviceSet-devicesetDeviceSettingsPut">devicesetDeviceSettingsPut</a>
                     </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunDelete" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceSubsystemRunDelete">devicesetDeviceSubsystemRunDelete</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunGet" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceSubsystemRunGet">devicesetDeviceSubsystemRunGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunPost" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceSubsystemRunPost">devicesetDeviceSubsystemRunPost</a>
+                    </li>
                     <li data-group="DeviceSet" data-name="devicesetFocusPatch" class="">
                       <a href="#api-DeviceSet-devicesetFocusPatch">devicesetFocusPatch</a>
                     </li>
@@ -7304,7 +7398,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.11.6</div>
+              <div class="app-desc">Version: 5.0.0</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -7370,7 +7464,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of channel in the channels list
@@ -7464,7 +7558,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of channel in the channels list
@@ -7510,7 +7604,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of channel in the channels list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelDelete(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -7531,7 +7625,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of channel in the channels list
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_delete(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -7864,7 +7958,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         ChannelSettings body = ; // ChannelSettings | Channel identification (no settings data)
@@ -7958,7 +8052,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new ChannelSettings(); // ChannelSettings | Channel identification (no settings data)
@@ -8004,7 +8098,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel identification (no settings data)
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelPost(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -8025,7 +8119,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # ChannelSettings | Channel identification (no settings data)
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_post(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -8377,7 +8471,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -8471,7 +8565,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -8517,7 +8611,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelReportGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -8538,7 +8632,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_report_get(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -8871,7 +8965,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -8965,7 +9059,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -9011,7 +9105,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelSettingsGet(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex);
     print Dumper($result);
 };
@@ -9032,7 +9126,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_settings_get(deviceSetIndex, channelIndex)
     pprint(api_response)
 except ApiException as e:
@@ -9365,7 +9459,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -9465,7 +9559,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -9514,7 +9608,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelSettingsPatch(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
@@ -9536,7 +9630,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 body =  # ChannelSettings | Channel settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_settings_patch(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -9911,7 +10005,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         Integer channelIndex = 56; // Integer | Index of the channel in the channels list for this device set
@@ -10011,7 +10105,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var channelIndex = 56;  // Integer | Index of the channel in the channels list for this device set
@@ -10060,7 +10154,7 @@ my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $channelIndex = 56; # Integer | Index of the channel in the channels list for this device set
 my $body = SWGSDRangel::Object::ChannelSettings->new(); # ChannelSettings | Channel settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelSettingsPut(deviceSetIndex => $deviceSetIndex, channelIndex => $channelIndex, body => $body);
     print Dumper($result);
 };
@@ -10082,7 +10176,7 @@ deviceSetIndex = 56 # Integer | Index of device set in the device set list
 channelIndex = 56 # Integer | Index of the channel in the channels list for this device set
 body =  # ChannelSettings | Channel settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_channel_settings_put(deviceSetIndex, channelIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -10457,7 +10551,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -10545,7 +10639,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -10588,7 +10682,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetChannelsReportGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -10608,7 +10702,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_channels_report_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -10918,7 +11012,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceListItem body = ; // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
@@ -11012,7 +11106,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceListItem(); // DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
@@ -11058,7 +11152,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceListItem->new(); # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDevicePut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -11079,7 +11173,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceListItem | Device item to look for. Specify only the fields you want to search for. You must at least specify one among displayedName, hwType or serial. index and deviceŃbStreams are ignored. Rx is assumed by default.
 
-try:
+try: 
     api_response = api_instance.deviceset_device_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -11431,7 +11525,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -11519,7 +11613,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -11562,7 +11656,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceReportGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -11582,7 +11676,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_report_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -11855,7 +11949,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">stop device</p>
+                        <p class="marked">stop device for a single subsystem device (Rx or Tx)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/run</span></code></pre>
@@ -11892,7 +11986,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
@@ -11956,7 +12050,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var opts = {
+var opts = { 
   'body':  // {DeviceSettings} Originator information in the reverse API case
 };
 
@@ -11987,10 +12081,10 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
@@ -12033,7 +12127,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceRunDelete(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -12054,7 +12148,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_run_delete(deviceSetIndex, body=body)
     pprint(api_response)
 except ApiException as e:
@@ -12369,7 +12463,7 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">get device rune status</p>
+                        <p class="marked">get device run status for a single subsystem device (Rx or Tx)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/run</span></code></pre>
@@ -12406,7 +12500,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -12494,7 +12588,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -12537,7 +12631,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceRunGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -12557,7 +12651,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_run_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -12830,7 +12924,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">start device</p>
+                        <p class="marked">start device for a single subsystem device (Rx or Tx)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/run</span></code></pre>
@@ -12867,7 +12961,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
@@ -12931,7 +13025,7 @@ var api = new SdRangel.DeviceSetApi()
 
 var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
 
-var opts = {
+var opts = { 
   'body':  // {DeviceSettings} Originator information in the reverse API case
 };
 
@@ -12962,10 +13056,10 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
-            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
 
             try
             {
@@ -13008,7 +13102,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceRunPost(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -13029,7 +13123,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Originator information in the reverse API case (optional)
 
-try:
+try: 
     api_response = api_instance.deviceset_device_run_post(deviceSetIndex, body=body)
     pprint(api_response)
 except ApiException as e:
@@ -13381,7 +13475,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -13469,7 +13563,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -13512,7 +13606,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSettingsGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -13532,7 +13626,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_device_settings_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -13799,7 +13893,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Device settings to apply
@@ -13893,7 +13987,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceSettings(); // DeviceSettings | Device settings to apply
@@ -13939,7 +14033,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Device settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSettingsPatch(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -13960,7 +14054,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Device settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_device_settings_patch(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -14269,7 +14363,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         DeviceSettings body = ; // DeviceSettings | Device settings to apply
@@ -14363,7 +14457,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
             var body = new DeviceSettings(); // DeviceSettings | Device settings to apply
@@ -14409,7 +14503,7 @@ my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Device settings to apply
 
-eval {
+eval { 
     my $result = $api_instance->devicesetDeviceSettingsPut(deviceSetIndex => $deviceSetIndex, body => $body);
     print Dumper($result);
 };
@@ -14430,7 +14524,7 @@ api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 body =  # DeviceSettings | Device settings to apply
 
-try:
+try: 
     api_response = api_instance.deviceset_device_settings_put(deviceSetIndex, body)
     pprint(api_response)
 except ApiException as e:
@@ -14693,6 +14787,1594 @@ $(document).ready(function() {
                         </article>
                       </div>
                       <hr>
+                    <div id="api-DeviceSet-devicesetDeviceSubsystemRunDelete">
+                      <article id="api-DeviceSet-devicesetDeviceSubsystemRunDelete-0" data-group="User" data-name="devicesetDeviceSubsystemRunDelete" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceSubsystemRunDelete</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">stop device for a multi-subsystem device (Rx/Tx combination i.e. MIMO)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *subsystemIndex = 56; // Index of subsystem (0 for Rx, 1 for Tx)
+DeviceSettings *body = ; // Originator information in the reverse API case (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceSubsystemRunDeleteWith:deviceSetIndex
+    subsystemIndex:subsystemIndex
+    body:body
+              completionHandler: ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
+
+var opts = { 
+  'body':  // {DeviceSettings} Originator information in the reverse API case
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceSubsystemRunDeleteExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
+
+            try
+            {
+                DeviceState result = apiInstance.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceSubsystemRunDelete: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+$body = ; // DeviceSettings | Originator information in the reverse API case
+
+try {
+    $result = $api_instance->devicesetDeviceSubsystemRunDelete($deviceSetIndex, $subsystemIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunDelete: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
+
+eval { 
+    my $result = $api_instance->devicesetDeviceSubsystemRunDelete(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunDelete: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+body =  # DeviceSettings | Originator information in the reverse API case (optional)
+
+try: 
+    api_response = api_instance.deviceset_device_subsystem_run_delete(deviceSetIndex, subsystemIndex, body=body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunDelete: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunDelete_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">subsystemIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunDelete_subsystemIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of subsystem (0 for Rx, 1 for Tx)
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body </td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Originator information in the reverse API case",
+  "required" : false,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceSubsystemRunDelete_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceSubsystemRunDelete_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return state before change </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-200-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return state before change",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-400-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or subsystem not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-404-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or subsystem not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-500-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-501-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetDeviceSubsystemRunGet">
+                      <article id="api-DeviceSet-devicesetDeviceSubsystemRunGet-0" data-group="User" data-name="devicesetDeviceSubsystemRunGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceSubsystemRunGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get device run status for a multi-subsystem device (Rx/Tx combination i.e. MIMO)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *subsystemIndex = 56; // Index of subsystem (0 for Rx, 1 for Tx)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceSubsystemRunGetWith:deviceSetIndex
+    subsystemIndex:subsystemIndex
+              completionHandler: ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceSubsystemRunGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+            try
+            {
+                DeviceState result = apiInstance.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceSubsystemRunGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+try {
+    $result = $api_instance->devicesetDeviceSubsystemRunGet($deviceSetIndex, $subsystemIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+eval { 
+    my $result = $api_instance->devicesetDeviceSubsystemRunGet(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+try: 
+    api_response = api_instance.deviceset_device_subsystem_run_get(deviceSetIndex, subsystemIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">subsystemIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunGet_subsystemIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of subsystem (0 for Rx, 1 for Tx)
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return current state </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-200-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return current state",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-400-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or subsystem not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-404-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or subsystem not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-500-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-501-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetDeviceSubsystemRunPost">
+                      <article id="api-DeviceSet-devicesetDeviceSubsystemRunPost-0" data-group="User" data-name="devicesetDeviceSubsystemRunPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceSubsystemRunPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">start device for a multi-subsystem device (Rx/Tx combination i.e. MIMO)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *subsystemIndex = 56; // Index of subsystem (0 for Rx, 1 for Tx)
+DeviceSettings *body = ; // Originator information in the reverse API case (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceSubsystemRunPostWith:deviceSetIndex
+    subsystemIndex:subsystemIndex
+    body:body
+              completionHandler: ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
+
+var opts = { 
+  'body':  // {DeviceSettings} Originator information in the reverse API case
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceSubsystemRunPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
+
+            try
+            {
+                DeviceState result = apiInstance.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceSubsystemRunPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+$body = ; // DeviceSettings | Originator information in the reverse API case
+
+try {
+    $result = $api_instance->devicesetDeviceSubsystemRunPost($deviceSetIndex, $subsystemIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
+
+eval { 
+    my $result = $api_instance->devicesetDeviceSubsystemRunPost(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+body =  # DeviceSettings | Originator information in the reverse API case (optional)
+
+try: 
+    api_response = api_instance.deviceset_device_subsystem_run_post(deviceSetIndex, subsystemIndex, body=body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunPost_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">subsystemIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunPost_subsystemIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of subsystem (0 for Rx, 1 for Tx)
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body </td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Originator information in the reverse API case",
+  "required" : false,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceSubsystemRunPost_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceSubsystemRunPost_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return state before change </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-200-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return state before change",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-400-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or subsystem not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-404-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or subsystem not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-500-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-501-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-DeviceSet-devicesetFocusPatch">
                       <article id="api-DeviceSet-devicesetFocusPatch-0" data-group="User" data-name="devicesetFocusPatch" data-version="0">
                         <div class="pull-left">
@@ -14739,7 +16421,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -14827,7 +16509,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -14870,7 +16552,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetFocusPatch(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -14890,7 +16572,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_focus_patch(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -15200,7 +16882,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
         try {
@@ -15288,7 +16970,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
             var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
 
@@ -15331,7 +17013,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
 
-eval {
+eval { 
     my $result = $api_instance->devicesetGet(deviceSetIndex => $deviceSetIndex);
     print Dumper($result);
 };
@@ -15351,7 +17033,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 deviceSetIndex = 56 # Integer | Index of device set in the device set list
 
-try:
+try: 
     api_response = api_instance.deviceset_get(deviceSetIndex)
     pprint(api_response)
 except ApiException as e:
@@ -15618,7 +17300,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         try {
             SuccessResponse result = apiInstance.instanceDeviceSetDelete();
@@ -15656,7 +17338,7 @@ public class DeviceSetApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
-[apiInstance instanceDeviceSetDeleteWithCompletionHandler:
+[apiInstance instanceDeviceSetDeleteWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -15700,7 +17382,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
 
             try
@@ -15740,7 +17422,7 @@ use SWGSDRangel::DeviceSetApi;
 
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceDeviceSetDelete();
     print Dumper($result);
 };
@@ -15759,7 +17441,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.DeviceSetApi()
 
-try:
+try: 
     api_response = api_instance.instance_device_set_delete()
     pprint(api_response)
 except ApiException as e:
@@ -15996,7 +17678,7 @@ import java.util.*;
 public class DeviceSetApiExample {
 
     public static void main(String[] args) {
-
+        
         DeviceSetApi apiInstance = new DeviceSetApi();
         Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
@@ -16054,7 +17736,7 @@ DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
 
 var api = new SdRangel.DeviceSetApi()
 
-var opts = {
+var opts = { 
   'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
@@ -16085,9 +17767,9 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new DeviceSetApi();
-            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
@@ -16128,7 +17810,7 @@ use SWGSDRangel::DeviceSetApi;
 my $api_instance = SWGSDRangel::DeviceSetApi->new();
 my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
-eval {
+eval { 
     my $result = $api_instance->instanceDeviceSetPost(direction => $direction);
     print Dumper($result);
 };
@@ -16148,7 +17830,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.DeviceSetApi()
 direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
-try:
+try: 
     api_response = api_instance.instance_device_set_post(direction=direction)
     pprint(api_response)
 except ApiException as e:
@@ -16372,7 +18054,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             SuccessResponse result = apiInstance.instanceAMBEDevicesDelete();
@@ -16410,7 +18092,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAMBEDevicesDeleteWithCompletionHandler:
+[apiInstance instanceAMBEDevicesDeleteWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -16454,7 +18136,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -16494,7 +18176,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAMBEDevicesDelete();
     print Dumper($result);
 };
@@ -16513,7 +18195,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_ambe_devices_delete()
     pprint(api_response)
 except ApiException as e:
@@ -16707,7 +18389,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             AMBEDevices result = apiInstance.instanceAMBEDevicesGet();
@@ -16745,7 +18427,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAMBEDevicesGetWithCompletionHandler:
+[apiInstance instanceAMBEDevicesGetWithCompletionHandler: 
               ^(AMBEDevices output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -16789,7 +18471,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -16829,7 +18511,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAMBEDevicesGet();
     print Dumper($result);
 };
@@ -16848,7 +18530,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_ambe_devices_get()
     pprint(api_response)
 except ApiException as e:
@@ -17042,7 +18724,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AMBEDevices body = ; // AMBEDevices | List of AMBE devices (serial or address)
         try {
@@ -17130,7 +18812,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AMBEDevices(); // AMBEDevices | List of AMBE devices (serial or address)
 
@@ -17173,7 +18855,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AMBEDevices->new(); # AMBEDevices | List of AMBE devices (serial or address)
 
-eval {
+eval { 
     my $result = $api_instance->instanceAMBEDevicesPatch(body => $body);
     print Dumper($result);
 };
@@ -17193,7 +18875,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AMBEDevices | List of AMBE devices (serial or address)
 
-try:
+try: 
     api_response = api_instance.instance_ambe_devices_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -17429,7 +19111,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AMBEDevices body = ; // AMBEDevices | List of AMBE devices (serial or address)
         try {
@@ -17517,7 +19199,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AMBEDevices(); // AMBEDevices | List of AMBE devices (serial or address)
 
@@ -17560,7 +19242,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AMBEDevices->new(); # AMBEDevices | List of AMBE devices (serial or address)
 
-eval {
+eval { 
     my $result = $api_instance->instanceAMBEDevicesPut(body => $body);
     print Dumper($result);
 };
@@ -17580,7 +19262,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AMBEDevices | List of AMBE devices (serial or address)
 
-try:
+try: 
     api_response = api_instance.instance_ambe_devices_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -17816,7 +19498,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             DVSerialDevices result = apiInstance.instanceAMBESerialGet();
@@ -17854,7 +19536,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAMBESerialGetWithCompletionHandler:
+[apiInstance instanceAMBESerialGetWithCompletionHandler: 
               ^(DVSerialDevices output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -17898,7 +19580,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -17938,7 +19620,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAMBESerialGet();
     print Dumper($result);
 };
@@ -17957,7 +19639,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_ambe_serial_get()
     pprint(api_response)
 except ApiException as e:
@@ -18151,7 +19833,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             AudioDevices result = apiInstance.instanceAudioGet();
@@ -18189,7 +19871,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioGetWithCompletionHandler:
+[apiInstance instanceAudioGetWithCompletionHandler: 
               ^(AudioDevices output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -18233,7 +19915,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -18273,7 +19955,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioGet();
     print Dumper($result);
 };
@@ -18292,7 +19974,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_audio_get()
     pprint(api_response)
 except ApiException as e:
@@ -18486,7 +20168,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             SuccessResponse result = apiInstance.instanceAudioInputCleanupPatch();
@@ -18524,7 +20206,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioInputCleanupPatchWithCompletionHandler:
+[apiInstance instanceAudioInputCleanupPatchWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -18568,7 +20250,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -18608,7 +20290,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioInputCleanupPatch();
     print Dumper($result);
 };
@@ -18627,7 +20309,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_audio_input_cleanup_patch()
     pprint(api_response)
 except ApiException as e:
@@ -18821,7 +20503,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioInputDevice body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device.
         try {
@@ -18909,7 +20591,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioInputDevice(); // AudioInputDevice | Audio input parameters. Index is used to identify the device.
 
@@ -18952,7 +20634,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioInputDevice->new(); # AudioInputDevice | Audio input parameters. Index is used to identify the device.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioInputDelete(body => $body);
     print Dumper($result);
 };
@@ -18972,7 +20654,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioInputDevice | Audio input parameters. Index is used to identify the device.
 
-try:
+try: 
     api_response = api_instance.instance_audio_input_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -19251,7 +20933,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioInputDevice body = ; // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
         try {
@@ -19339,7 +21021,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioInputDevice(); // AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
@@ -19382,7 +21064,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioInputDevice->new(); # AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioInputPatch(body => $body);
     print Dumper($result);
 };
@@ -19402,7 +21084,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioInputDevice | Audio input parameters. Index is used to identify the device. Only settable fields are considered.
 
-try:
+try: 
     api_response = api_instance.instance_audio_input_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -19681,7 +21363,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             SuccessResponse result = apiInstance.instanceAudioOutputCleanupPatch();
@@ -19719,7 +21401,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceAudioOutputCleanupPatchWithCompletionHandler:
+[apiInstance instanceAudioOutputCleanupPatchWithCompletionHandler: 
               ^(SuccessResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -19763,7 +21445,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -19803,7 +21485,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioOutputCleanupPatch();
     print Dumper($result);
 };
@@ -19822,7 +21504,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_audio_output_cleanup_patch()
     pprint(api_response)
 except ApiException as e:
@@ -20016,7 +21698,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioOutputDevice body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device.
         try {
@@ -20104,7 +21786,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioOutputDevice(); // AudioOutputDevice | Audio output parameters. Index is used to identify the device.
 
@@ -20147,7 +21829,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioOutputDevice->new(); # AudioOutputDevice | Audio output parameters. Index is used to identify the device.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioOutputDelete(body => $body);
     print Dumper($result);
 };
@@ -20167,7 +21849,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioOutputDevice | Audio output parameters. Index is used to identify the device.
 
-try:
+try: 
     api_response = api_instance.instance_audio_output_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -20446,7 +22128,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         AudioOutputDevice body = ; // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
         try {
@@ -20534,7 +22216,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new AudioOutputDevice(); // AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
 
@@ -20577,7 +22259,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::AudioOutputDevice->new(); # AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
 
-eval {
+eval { 
     my $result = $api_instance->instanceAudioOutputPatch(body => $body);
     print Dumper($result);
 };
@@ -20597,7 +22279,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # AudioOutputDevice | Audio output parameters. Index is used to identify the device. Only settable fields are considered.
 
-try:
+try: 
     api_response = api_instance.instance_audio_output_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -20876,7 +22558,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
@@ -20934,7 +22616,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 var api = new SdRangel.InstanceApi()
 
-var opts = {
+var opts = { 
   'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
@@ -20965,9 +22647,9 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
-            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
@@ -21008,7 +22690,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
-eval {
+eval { 
     my $result = $api_instance->instanceChannels(direction => $direction);
     print Dumper($result);
 };
@@ -21028,7 +22710,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
-try:
+try: 
     api_response = api_instance.instance_channels(direction=direction)
     pprint(api_response)
 except ApiException as e:
@@ -21249,7 +22931,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceConfigResponse result = apiInstance.instanceConfigGet();
@@ -21287,7 +22969,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceConfigGetWithCompletionHandler:
+[apiInstance instanceConfigGetWithCompletionHandler: 
               ^(InstanceConfigResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -21331,7 +23013,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -21371,7 +23053,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigGet();
     print Dumper($result);
 };
@@ -21390,7 +23072,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_config_get()
     pprint(api_response)
 except ApiException as e:
@@ -21584,7 +23266,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         InstanceConfigResponse body = ; // InstanceConfigResponse | Config information
         try {
@@ -21672,7 +23354,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new InstanceConfigResponse(); // InstanceConfigResponse | Config information
 
@@ -21715,7 +23397,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::InstanceConfigResponse->new(); # InstanceConfigResponse | Config information
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigPatch(body => $body);
     print Dumper($result);
 };
@@ -21735,7 +23417,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # InstanceConfigResponse | Config information
 
-try:
+try: 
     api_response = api_instance.instance_config_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -21971,7 +23653,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         InstanceConfigResponse body = ; // InstanceConfigResponse | Config information
         try {
@@ -22059,7 +23741,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new InstanceConfigResponse(); // InstanceConfigResponse | Config information
 
@@ -22102,7 +23784,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::InstanceConfigResponse->new(); # InstanceConfigResponse | Config information
 
-eval {
+eval { 
     my $result = $api_instance->instanceConfigPut(body => $body);
     print Dumper($result);
 };
@@ -22122,7 +23804,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # InstanceConfigResponse | Config information
 
-try:
+try: 
     api_response = api_instance.instance_config_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -22358,7 +24040,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceSummaryResponse result = apiInstance.instanceDelete();
@@ -22396,7 +24078,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceDeleteWithCompletionHandler:
+[apiInstance instanceDeleteWithCompletionHandler: 
               ^(InstanceSummaryResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -22440,7 +24122,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -22480,7 +24162,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceDelete();
     print Dumper($result);
 };
@@ -22499,7 +24181,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_delete()
     pprint(api_response)
 except ApiException as e:
@@ -22736,7 +24418,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             DeviceSetList result = apiInstance.instanceDeviceSetsGet();
@@ -22774,7 +24456,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceDeviceSetsGetWithCompletionHandler:
+[apiInstance instanceDeviceSetsGetWithCompletionHandler: 
               ^(DeviceSetList output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -22818,7 +24500,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -22858,7 +24540,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceDeviceSetsGet();
     print Dumper($result);
 };
@@ -22877,7 +24559,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_device_sets_get()
     pprint(api_response)
 except ApiException as e:
@@ -23071,7 +24753,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         Integer direction = 56; // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         try {
@@ -23129,7 +24811,7 @@ InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
 var api = new SdRangel.InstanceApi()
 
-var opts = {
+var opts = { 
   'direction': 56 // {Integer} 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 };
 
@@ -23160,9 +24842,9 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
-            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
+            var direction = 56;  // Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional) 
 
             try
             {
@@ -23203,7 +24885,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $direction = 56; # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
 
-eval {
+eval { 
     my $result = $api_instance->instanceDevices(direction => $direction);
     print Dumper($result);
 };
@@ -23223,7 +24905,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 direction = 56 # Integer | 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0) (optional)
 
-try:
+try: 
     api_response = api_instance.instance_devices(direction=direction)
     pprint(api_response)
 except ApiException as e:
@@ -23444,7 +25126,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             LocationInformation result = apiInstance.instanceLocationGet();
@@ -23482,7 +25164,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceLocationGetWithCompletionHandler:
+[apiInstance instanceLocationGetWithCompletionHandler: 
               ^(LocationInformation output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -23526,7 +25208,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -23566,7 +25248,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceLocationGet();
     print Dumper($result);
 };
@@ -23585,7 +25267,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_location_get()
     pprint(api_response)
 except ApiException as e:
@@ -23779,7 +25461,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         LocationInformation body = ; // LocationInformation | Location of instance in latitude and longitude
         try {
@@ -23867,7 +25549,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new LocationInformation(); // LocationInformation | Location of instance in latitude and longitude
 
@@ -23910,7 +25592,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::LocationInformation->new(); # LocationInformation | Location of instance in latitude and longitude
 
-eval {
+eval { 
     my $result = $api_instance->instanceLocationPut(body => $body);
     print Dumper($result);
 };
@@ -23930,7 +25612,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # LocationInformation | Location of instance in latitude and longitude
 
-try:
+try: 
     api_response = api_instance.instance_location_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -24174,7 +25856,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             LoggingInfo result = apiInstance.instanceLoggingGet();
@@ -24212,7 +25894,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceLoggingGetWithCompletionHandler:
+[apiInstance instanceLoggingGetWithCompletionHandler: 
               ^(LoggingInfo output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -24256,7 +25938,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -24296,7 +25978,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceLoggingGet();
     print Dumper($result);
 };
@@ -24315,7 +25997,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_logging_get()
     pprint(api_response)
 except ApiException as e:
@@ -24509,7 +26191,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         LoggingInfo body = ; // LoggingInfo | Logging information
         try {
@@ -24597,7 +26279,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new LoggingInfo(); // LoggingInfo | Logging information
 
@@ -24640,7 +26322,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::LoggingInfo->new(); # LoggingInfo | Logging information
 
-eval {
+eval { 
     my $result = $api_instance->instanceLoggingPut(body => $body);
     print Dumper($result);
 };
@@ -24660,7 +26342,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # LoggingInfo | Logging information
 
-try:
+try: 
     api_response = api_instance.instance_logging_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -24939,7 +26621,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetIdentifier body = ; // PresetIdentifier | delete this preset
         try {
@@ -25027,7 +26709,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetIdentifier(); // PresetIdentifier | delete this preset
 
@@ -25070,7 +26752,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetIdentifier->new(); # PresetIdentifier | delete this preset
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetDelete(body => $body);
     print Dumper($result);
 };
@@ -25090,7 +26772,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetIdentifier | delete this preset
 
-try:
+try: 
     api_response = api_instance.instance_preset_delete(body)
     pprint(api_response)
 except ApiException as e:
@@ -25412,7 +27094,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetExport body = ; // PresetExport | export details
         try {
@@ -25500,7 +27182,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetExport(); // PresetExport | export details
 
@@ -25543,7 +27225,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetExport->new(); # PresetExport | export details
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetFilePost(body => $body);
     print Dumper($result);
 };
@@ -25563,7 +27245,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetExport | export details
 
-try:
+try: 
     api_response = api_instance.instance_preset_file_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -25885,7 +27567,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetImport body = ; // PresetImport | import details
         try {
@@ -25973,7 +27655,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetImport(); // PresetImport | import details
 
@@ -26016,7 +27698,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetImport->new(); # PresetImport | import details
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetFilePut(body => $body);
     print Dumper($result);
 };
@@ -26036,7 +27718,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetImport | import details
 
-try:
+try: 
     api_response = api_instance.instance_preset_file_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -26358,7 +28040,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             Presets result = apiInstance.instancePresetGet();
@@ -26396,7 +28078,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instancePresetGetWithCompletionHandler:
+[apiInstance instancePresetGetWithCompletionHandler: 
               ^(Presets output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -26440,7 +28122,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -26480,7 +28162,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetGet();
     print Dumper($result);
 };
@@ -26499,7 +28181,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_preset_get()
     pprint(api_response)
 except ApiException as e:
@@ -26693,7 +28375,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetTransfer body = ; // PresetTransfer | Load preset settings to the device set
         try {
@@ -26781,7 +28463,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetTransfer(); // PresetTransfer | Load preset settings to the device set
 
@@ -26824,7 +28506,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetTransfer->new(); # PresetTransfer | Load preset settings to the device set
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetPatch(body => $body);
     print Dumper($result);
 };
@@ -26844,7 +28526,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetTransfer | Load preset settings to the device set
 
-try:
+try: 
     api_response = api_instance.instance_preset_patch(body)
     pprint(api_response)
 except ApiException as e:
@@ -27166,7 +28848,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetTransfer body = ; // PresetTransfer | save device set settings on a new preset
         try {
@@ -27254,7 +28936,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetTransfer(); // PresetTransfer | save device set settings on a new preset
 
@@ -27297,7 +28979,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetTransfer->new(); # PresetTransfer | save device set settings on a new preset
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetPost(body => $body);
     print Dumper($result);
 };
@@ -27317,7 +28999,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetTransfer | save device set settings on a new preset
 
-try:
+try: 
     api_response = api_instance.instance_preset_post(body)
     pprint(api_response)
 except ApiException as e:
@@ -27682,7 +29364,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         PresetTransfer body = ; // PresetTransfer | save device set settings to the preset
         try {
@@ -27770,7 +29452,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
             var body = new PresetTransfer(); // PresetTransfer | save device set settings to the preset
 
@@ -27813,7 +29495,7 @@ use SWGSDRangel::InstanceApi;
 my $api_instance = SWGSDRangel::InstanceApi->new();
 my $body = SWGSDRangel::Object::PresetTransfer->new(); # PresetTransfer | save device set settings to the preset
 
-eval {
+eval { 
     my $result = $api_instance->instancePresetPut(body => $body);
     print Dumper($result);
 };
@@ -27833,7 +29515,7 @@ from pprint import pprint
 api_instance = swagger_sdrangel.InstanceApi()
 body =  # PresetTransfer | save device set settings to the preset
 
-try:
+try: 
     api_response = api_instance.instance_preset_put(body)
     pprint(api_response)
 except ApiException as e:
@@ -28155,7 +29837,7 @@ import java.util.*;
 public class InstanceApiExample {
 
     public static void main(String[] args) {
-
+        
         InstanceApi apiInstance = new InstanceApi();
         try {
             InstanceSummaryResponse result = apiInstance.instanceSummary();
@@ -28193,7 +29875,7 @@ public class InstanceApiExample {
                               <pre class="prettyprint"><code class="language-cpp">
 InstanceApi *apiInstance = [[InstanceApi alloc] init];
 
-[apiInstance instanceSummaryWithCompletionHandler:
+[apiInstance instanceSummaryWithCompletionHandler: 
               ^(InstanceSummaryResponse output, NSError* error) {
                             if (output) {
                                 NSLog(@"%@", output);
@@ -28237,7 +29919,7 @@ namespace Example
     {
         public void main()
         {
-
+            
             var apiInstance = new InstanceApi();
 
             try
@@ -28277,7 +29959,7 @@ use SWGSDRangel::InstanceApi;
 
 my $api_instance = SWGSDRangel::InstanceApi->new();
 
-eval {
+eval { 
     my $result = $api_instance->instanceSummary();
     print Dumper($result);
 };
@@ -28296,7 +29978,7 @@ from pprint import pprint
 # create an instance of the API class
 api_instance = swagger_sdrangel.InstanceApi()
 
-try:
+try: 
     api_response = api_instance.instance_summary()
     pprint(api_response)
 except ApiException as e:
@@ -28458,7 +30140,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-09-15T23:01:58.850+02:00
+              Generated 2019-12-29T19:22:04.482+01:00
             </div>
           </div>
       </div>
@@ -28963,7 +30645,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	// style-loader: Adds some css to the DOM by adding a <style> tag
-
+	
 	// load the styles
 	var content = __webpack_require__(3);
 	if(typeof content === 'string') content = [[module.id, content, '']];
@@ -28990,11 +30672,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports = module.exports = __webpack_require__(4)();
 	// imports
-
-
+	
+	
 	// module
 	exports.push([module.id, ".json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-row,\n.json-formatter-row a,\n.json-formatter-row a:hover {\n  color: black;\n  text-decoration: none;\n}\n.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-row .json-formatter-string {\n  color: green;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-row .json-formatter-number {\n  color: blue;\n}\n.json-formatter-row .json-formatter-boolean {\n  color: red;\n}\n.json-formatter-row .json-formatter-null {\n  color: #855A00;\n}\n.json-formatter-row .json-formatter-undefined {\n  color: #ca0b69;\n}\n.json-formatter-row .json-formatter-function {\n  color: #FF20ED;\n}\n.json-formatter-row .json-formatter-date {\n  background-color: rgba(0, 0, 0, 0.05);\n}\n.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: blue;\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-bracket {\n  color: blue;\n}\n.json-formatter-row .json-formatter-key {\n  color: #00008B;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"\\25BA\";\n}\n.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n.json-formatter-dark.json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-dark.json-formatter-row,\n.json-formatter-dark.json-formatter-row a,\n.json-formatter-dark.json-formatter-row a:hover {\n  color: white;\n  text-decoration: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-string {\n  color: #31F031;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-number {\n  color: #66C2FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-boolean {\n  color: #EC4242;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-null {\n  color: #EEC97D;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-undefined {\n  color: #ef8fbe;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-function {\n  color: #FD48CB;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-date {\n  background-color: rgba(255, 255, 255, 0.05);\n}\n.json-formatter-dark.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: #027BFF;\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-bracket {\n  color: #9494FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-key {\n  color: #23A0DB;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"\\25BA\";\n}\n.json-formatter-dark.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-dark.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n", "", {"version":3,"sources":["/./src/style.less","/./src/style.less"],"names":[],"mappings":"AA0GA;EA3FE,uBAAA;CCbD;ADcC;;;EACE,aAAA;EACA,sBAAA;CCVH;ADkGD;EApFI,kBAAA;CCXH;ADeG;EACE,aAAA;EACA,kBAAA;CCbL;ADeK;EAAU,cAAA;CCZf;ADaK;EAAgC,yBAAA;CCVrC;ADWK;EAA+B,cAAA;CCRpC;ADkFD;EArEI,aAAA;EACA,iBAAA;EACA,sBAAA;CCVH;AD6ED;EAjE2B,YAAA;CCT1B;AD0ED;EAhE4B,WAAA;CCP3B;ADuED;EA/DyB,eAAA;CCLxB;ADoED;EA9D8B,eAAA;CCH7B;ADiED;EA7D6B,eAAA;CCD5B;AD8DD;EA5DyB,sCAAA;CCCxB;AD2DD;EA1DI,2BAAA;EACA,YAAA;EACA,gBAAA;CCEH;ADsDD;EArD4B,YAAA;CCE3B;ADmDD;EAnDI,eAAA;EACA,gBAAA;EACA,sBAAA;CCGH;AD8CD;EA9CI,gBAAA;CCGH;AD2CD;EA1CI,oBAAA;EACA,kBAAA;EACA,uBAAA;EACA,aAAA;EACA,gBAAA;EACA,sBAAA;CCEH;ADAG;EACE,sBAAA;EACA,oCAAA;EACA,iBAAA;CCEL;AD8BD;EA1BI,WAAA;EACA,kCAAA;EACA,mBAAA;CCDH;ADGC;EACE,aAAA;CCDH;ADKC;EAEI,yBAAA;CCJL;ADEC;EAKI,sBAAA;CCJL;ADDC;EAQI,cAAA;CCJL;ADMG;EACE,eAAA;CCJL;ADeD;EAhGE,uBAAA;CCoFD;ADnFC;;;EACE,aAAA;EACA,sBAAA;CCuFH;ADMD;EAzFI,kBAAA;CCsFH;ADlFG;EACE,aAAA;EACA,kBAAA;CCoFL;ADlFK;EAAU,cAAA;CCqFf;ADpFK;EAAgC,yBAAA;CCuFrC;ADtFK;EAA+B,cAAA;CCyFpC;ADVD;EA1EI,eAAA;EACA,iBAAA;EACA,sBAAA;CCuFH;ADfD;EAtE2B,eAAA;CCwF1B;ADlBD;EArE4B,eAAA;CC0F3B;ADrBD;EApEyB,eAAA;CC4FxB;ADxBD;EAnE8B,eAAA;CC8F7B;AD3BD;EAlE6B,eAAA;CCgG5B;AD9BD;EAjEyB,4CAAA;CCkGxB;ADjCD;EA/DI,2BAAA;EACA,eAAA;EACA,gBAAA;CCmGH;ADtCD;EA1D4B,eAAA;CCmG3B;ADzCD;EAxDI,eAAA;EACA,gBAAA;EACA,sBAAA;CCoGH;AD9CD;EAnDI,gBAAA;CCoGH;ADjDD;EA/CI,oBAAA;EACA,kBAAA;EACA,uBAAA;EACA,aAAA;EACA,gBAAA;EACA,sBAAA;CCmGH;ADjGG;EACE,sBAAA;EACA,oCAAA;EACA,iBAAA;CCmGL;AD9DD;EA/BI,WAAA;EACA,kCAAA;EACA,mBAAA;CCgGH;AD9FC;EACE,aAAA;CCgGH;AD5FC;EAEI,yBAAA;CC6FL;AD/FC;EAKI,sBAAA;CC6FL;ADlGC;EAQI,cAAA;CC6FL;AD3FG;EACE,eAAA;CC6FL","file":"style.less","sourcesContent":[".theme(\n  @default-color: black,\n  @string-color: green,\n  @number-color: blue,\n  @boolean-color: red,\n  @null-color: #855A00,\n  @undefined-color: rgb(202, 11, 105),\n  @function-color: #FF20ED,\n  @rotate-time: 100ms,\n  @toggler-opacity: 0.6,\n  @toggler-color: #45376F,\n  @bracket-color: blue,\n  @key-color: #00008B,\n  @url-color: blue ){\n\n  font-family: monospace;\n  &, a, a:hover {\n    color: @default-color;\n    text-decoration: none;\n  }\n\n  .json-formatter-row {\n    margin-left: 1rem;\n  }\n\n  .json-formatter-children {\n    &.json-formatter-empty {\n      opacity: 0.5;\n      margin-left: 1rem;\n\n      &:after { display: none; }\n      &.json-formatter-object:after { content: \"No properties\"; }\n      &.json-formatter-array:after { content: \"[]\"; }\n    }\n  }\n\n  .json-formatter-string {\n    color: @string-color;\n    white-space: pre;\n    word-wrap: break-word;\n  }\n  .json-formatter-number { color: @number-color; }\n  .json-formatter-boolean { color: @boolean-color; }\n  .json-formatter-null { color: @null-color; }\n  .json-formatter-undefined { color: @undefined-color; }\n  .json-formatter-function { color: @function-color; }\n  .json-formatter-date { background-color: fade(@default-color, 5%); }\n  .json-formatter-url {\n    text-decoration: underline;\n    color: @url-color;\n    cursor: pointer;\n  }\n\n  .json-formatter-bracket { color: @bracket-color; }\n  .json-formatter-key {\n    color: @key-color;\n    cursor: pointer;\n    padding-right: 0.2rem;\n  }\n  .json-formatter-constructor-name {\n    cursor: pointer;\n  }\n\n  .json-formatter-toggler {\n    line-height: 1.2rem;\n    font-size: 0.7rem;\n    vertical-align: middle;\n    opacity: @toggler-opacity;\n    cursor: pointer;\n    padding-right: 0.2rem;\n\n    &:after {\n      display: inline-block;\n      transition: transform @rotate-time ease-in;\n      content: \"►\";\n    }\n  }\n\n  // Inline preview on hover (optional)\n  > a > .json-formatter-preview-text {\n    opacity: 0;\n    transition: opacity .15s ease-in;\n    font-style: italic;\n  }\n  &:hover > a > .json-formatter-preview-text {\n    opacity: 0.6;\n  }\n\n  // Open state\n  &.json-formatter-open {\n    > .json-formatter-toggler-link .json-formatter-toggler:after{\n      transform: rotate(90deg);\n    }\n    > .json-formatter-children:after {\n      display: inline-block;\n    }\n    > a > .json-formatter-preview-text {\n      display: none;\n    }\n    &.json-formatter-empty:after {\n      display: block;\n    }\n  }\n}\n\n// Default theme\n.json-formatter-row {\n  .theme();\n}\n\n// Dark theme\n.json-formatter-dark.json-formatter-row {\n  .theme(\n    @default-color: white,\n    @string-color: #31F031,\n    @number-color: #66C2FF,\n    @boolean-color: #EC4242,\n    @null-color: #EEC97D,\n    @undefined-color: rgb(239, 143, 190),\n    @function-color: #FD48CB,\n    @rotate-time: 100ms,\n    @toggler-opacity: 0.6,\n    @toggler-color: #45376F,\n    @bracket-color: #9494FF,\n    @key-color: #23A0DB,\n    @url-color: #027BFF);\n}\n",".json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-row,\n.json-formatter-row a,\n.json-formatter-row a:hover {\n  color: black;\n  text-decoration: none;\n}\n.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-row .json-formatter-string {\n  color: green;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-row .json-formatter-number {\n  color: blue;\n}\n.json-formatter-row .json-formatter-boolean {\n  color: red;\n}\n.json-formatter-row .json-formatter-null {\n  color: #855A00;\n}\n.json-formatter-row .json-formatter-undefined {\n  color: #ca0b69;\n}\n.json-formatter-row .json-formatter-function {\n  color: #FF20ED;\n}\n.json-formatter-row .json-formatter-date {\n  background-color: rgba(0, 0, 0, 0.05);\n}\n.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: blue;\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-bracket {\n  color: blue;\n}\n.json-formatter-row .json-formatter-key {\n  color: #00008B;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"►\";\n}\n.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n.json-formatter-dark.json-formatter-row {\n  font-family: monospace;\n}\n.json-formatter-dark.json-formatter-row,\n.json-formatter-dark.json-formatter-row a,\n.json-formatter-dark.json-formatter-row a:hover {\n  color: white;\n  text-decoration: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-row {\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty {\n  opacity: 0.5;\n  margin-left: 1rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty:after {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-object:after {\n  content: \"No properties\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-children.json-formatter-empty.json-formatter-array:after {\n  content: \"[]\";\n}\n.json-formatter-dark.json-formatter-row .json-formatter-string {\n  color: #31F031;\n  white-space: pre;\n  word-wrap: break-word;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-number {\n  color: #66C2FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-boolean {\n  color: #EC4242;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-null {\n  color: #EEC97D;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-undefined {\n  color: #ef8fbe;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-function {\n  color: #FD48CB;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-date {\n  background-color: rgba(255, 255, 255, 0.05);\n}\n.json-formatter-dark.json-formatter-row .json-formatter-url {\n  text-decoration: underline;\n  color: #027BFF;\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-bracket {\n  color: #9494FF;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-key {\n  color: #23A0DB;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-constructor-name {\n  cursor: pointer;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler {\n  line-height: 1.2rem;\n  font-size: 0.7rem;\n  vertical-align: middle;\n  opacity: 0.6;\n  cursor: pointer;\n  padding-right: 0.2rem;\n}\n.json-formatter-dark.json-formatter-row .json-formatter-toggler:after {\n  display: inline-block;\n  transition: transform 100ms ease-in;\n  content: \"►\";\n}\n.json-formatter-dark.json-formatter-row > a > .json-formatter-preview-text {\n  opacity: 0;\n  transition: opacity 0.15s ease-in;\n  font-style: italic;\n}\n.json-formatter-dark.json-formatter-row:hover > a > .json-formatter-preview-text {\n  opacity: 0.6;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-toggler-link .json-formatter-toggler:after {\n  transform: rotate(90deg);\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > .json-formatter-children:after {\n  display: inline-block;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open > a > .json-formatter-preview-text {\n  display: none;\n}\n.json-formatter-dark.json-formatter-row.json-formatter-open.json-formatter-empty:after {\n  display: block;\n}\n"],"sourceRoot":"webpack://"}]);
-
+	
 	// exports
 
 
@@ -29009,7 +30691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// css base code, injected by the css-loader
 	module.exports = function() {
 		var list = [];
-
+	
 		// return the list of modules as css string
 		list.toString = function toString() {
 			var result = [];
@@ -29023,7 +30705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			return result.join("");
 		};
-
+	
 		// import a list of modules into the list
 		list.i = function(modules, mediaQuery) {
 			if(typeof modules === "string")
@@ -29079,23 +30761,23 @@ return /******/ (function(modules) { // webpackBootstrap
 		singletonElement = null,
 		singletonCounter = 0,
 		styleElementsInsertedAtTop = [];
-
+	
 	module.exports = function(list, options) {
 		if(false) {
 			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
 		}
-
+	
 		options = options || {};
 		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
 		// tags it will allow on a page
 		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
-
+	
 		// By default, add <style> tags to the bottom of <head>.
 		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
-
+	
 		var styles = listToStyles(list);
 		addStylesToDom(styles, options);
-
+	
 		return function update(newList) {
 			var mayRemove = [];
 			for(var i = 0; i < styles.length; i++) {
@@ -29118,7 +30800,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		};
 	}
-
+	
 	function addStylesToDom(styles, options) {
 		for(var i = 0; i < styles.length; i++) {
 			var item = styles[i];
@@ -29140,7 +30822,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	}
-
+	
 	function listToStyles(list) {
 		var styles = [];
 		var newStyles = {};
@@ -29158,7 +30840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		return styles;
 	}
-
+	
 	function insertStyleElement(options, styleElement) {
 		var head = getHeadElement();
 		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
@@ -29177,7 +30859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
 		}
 	}
-
+	
 	function removeStyleElement(styleElement) {
 		styleElement.parentNode.removeChild(styleElement);
 		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
@@ -29185,24 +30867,24 @@ return /******/ (function(modules) { // webpackBootstrap
 			styleElementsInsertedAtTop.splice(idx, 1);
 		}
 	}
-
+	
 	function createStyleElement(options) {
 		var styleElement = document.createElement("style");
 		styleElement.type = "text/css";
 		insertStyleElement(options, styleElement);
 		return styleElement;
 	}
-
+	
 	function createLinkElement(options) {
 		var linkElement = document.createElement("link");
 		linkElement.rel = "stylesheet";
 		insertStyleElement(options, linkElement);
 		return linkElement;
 	}
-
+	
 	function addStyle(obj, options) {
 		var styleElement, update, remove;
-
+	
 		if (options.singleton) {
 			var styleIndex = singletonCounter++;
 			styleElement = singletonElement || (singletonElement = createStyleElement(options));
@@ -29228,9 +30910,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				removeStyleElement(styleElement);
 			};
 		}
-
+	
 		update(obj);
-
+	
 		return function updateStyle(newObj) {
 			if(newObj) {
 				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
@@ -29241,19 +30923,19 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		};
 	}
-
+	
 	var replaceText = (function () {
 		var textStore = [];
-
+	
 		return function (index, replacement) {
 			textStore[index] = replacement;
 			return textStore.filter(Boolean).join('\n');
 		};
 	})();
-
+	
 	function applyToSingletonTag(styleElement, index, remove, obj) {
 		var css = remove ? "" : obj.css;
-
+	
 		if (styleElement.styleSheet) {
 			styleElement.styleSheet.cssText = replaceText(index, css);
 		} else {
@@ -29267,15 +30949,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	}
-
+	
 	function applyToTag(styleElement, obj) {
 		var css = obj.css;
 		var media = obj.media;
-
+	
 		if(media) {
 			styleElement.setAttribute("media", media)
 		}
-
+	
 		if(styleElement.styleSheet) {
 			styleElement.styleSheet.cssText = css;
 		} else {
@@ -29285,22 +30967,22 @@ return /******/ (function(modules) { // webpackBootstrap
 			styleElement.appendChild(document.createTextNode(css));
 		}
 	}
-
+	
 	function updateLink(linkElement, obj) {
 		var css = obj.css;
 		var sourceMap = obj.sourceMap;
-
+	
 		if(sourceMap) {
             // https://developer.mozilla.org/en/docs/Web/API/WindowBase64/Base64_encoding_and_decoding
 			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
 		}
-
+	
 		var blob = new Blob([css], { type: "text/css" });
-
+	
 		var oldSrc = linkElement.href;
-
+	
 		linkElement.href = URL.createObjectURL(blob);
-
+	
 		if(oldSrc)
 			URL.revokeObjectURL(oldSrc);
 	}
