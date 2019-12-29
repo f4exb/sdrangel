@@ -72,11 +72,14 @@ QByteArray InterferometerGUI::serialize() const
 
 bool InterferometerGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         applySettings(true);
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -95,6 +98,13 @@ bool InterferometerGUI::handleMessage(const Message& message)
         m_sampleRate = notif.getSampleRate();
         m_centerFrequency = notif.getCenterFrequency();
         displayRateAndShift();
+        return true;
+    }
+    else if (Interferometer::MsgConfigureInterferometer::match(message))
+    {
+        const Interferometer::MsgConfigureInterferometer& notif = (const Interferometer::MsgConfigureInterferometer&) message;
+        m_settings = notif.getSettings();
+        displaySettings();
         return true;
     }
     else

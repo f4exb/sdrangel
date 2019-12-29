@@ -80,7 +80,9 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channel.udpsrc", "UDPSinkSettings"}, // remap
     {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
-    {"sdrangel.channeltx.modwfm", "WFMModSettings"}
+    {"sdrangel.channeltx.modwfm", "WFMModSettings"},
+    {"sdrangel.channel.beamsteeringcwmod", "BeamSteeringCWModSettings"},
+    {"sdrangel.channelmimo.interferometer", "InterferometerSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
@@ -148,7 +150,9 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"UDPSink", "UDPSourceSettings"},
     {"UDPSource", "UDPSinkSettings"},
     {"WFMDemod", "WFMDemodSettings"},
-    {"WFMMod", "WFMModSettings"}
+    {"WFMMod", "WFMModSettings"},
+    {"BeamSteeringCWMod", "BeamSteeringCWModSettings"},
+    {"Interferometer", "InterferometerSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
@@ -2647,6 +2651,16 @@ bool WebAPIRequestMapper::getChannel(
         {
             channelSettings->setWfmModSettings(new SWGSDRangel::SWGWFMModSettings());
             channelSettings->getWfmModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "BeamSteeringCWModSettings")
+        {
+            channelSettings->setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
+            channelSettings->getBeamSteeringCwModSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "InterferometerSettings")
+        {
+            channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
+            channelSettings->getInterferometerSettings()->fromJsonObject(settingsJsonObject);
         }
         else
         {

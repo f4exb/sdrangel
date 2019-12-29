@@ -149,7 +149,7 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
-    InterferometerBaseband* m_basbandSink;
+    InterferometerBaseband* m_basebandSink;
     BasebandSampleSink* m_spectrumSink;
     BasebandSampleSink* m_scopeSink;
     InterferometerSettings m_settings;

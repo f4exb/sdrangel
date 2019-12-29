@@ -72,6 +72,14 @@ void BeamSteeringCWMod::startSources()
     qDebug("BeamSteeringCWMod::startSources");
     m_basebandSource->reset();
     m_thread->start();
+
+    BeamSteeringCWModBaseband::MsgSignalNotification *sig = BeamSteeringCWModBaseband::MsgSignalNotification::create(
+        m_basebandSampleRate);
+    m_basebandSource->getInputMessageQueue()->push(sig);
+
+    BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband *msg = BeamSteeringCWModBaseband::MsgConfigureBeamSteeringCWModBaseband::create(
+        m_settings, true);
+    m_basebandSource->getInputMessageQueue()->push(msg);
 }
 
 void BeamSteeringCWMod::stopSources()
@@ -236,6 +244,12 @@ int BeamSteeringCWMod::webapiSettingsPutPatch(
 
     MsgConfigureBeamSteeringCWMod *msg = MsgConfigureBeamSteeringCWMod::create(settings, force);
     m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureBeamSteeringCWMod *msgToGUI = MsgConfigureBeamSteeringCWMod::create(settings, force);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
 
     webapiFormatChannelSettings(response, settings);
 

@@ -247,3 +247,12 @@ bool InterferometerBaseband::handleMessage(const Message& cmd)
         return false;
     }
 }
+
+void InterferometerBaseband::setBasebandSampleRate(unsigned int sampleRate)
+{
+    for (int istream = 0; istream < 2; istream++)
+    {
+        m_channelizers[istream]->setBasebandSampleRate(sampleRate);
+        m_sinks[istream].reset();
+    }
+}

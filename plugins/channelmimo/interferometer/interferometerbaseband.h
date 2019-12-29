@@ -109,6 +109,7 @@ public:
     void setPhase(int phase) { m_correlator.setPhase(phase); }
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
+    void setBasebandSampleRate(unsigned int sampleRate);
 
 private:
     void processFifo(const std::vector<SampleVector>& data, unsigned int ibegin, unsigned int iend);

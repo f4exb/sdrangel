@@ -49,8 +49,8 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
-    m_basbandSink = new InterferometerBaseband(m_fftSize);
-    m_basbandSink->moveToThread(m_thread);
+    m_basebandSink = new InterferometerBaseband(m_fftSize);
+    m_basebandSink->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
@@ -66,26 +66,34 @@ Interferometer::~Interferometer()
 
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeMIMOChannel(this);
-    delete m_basbandSink;
+    delete m_basebandSink;
     delete m_thread;
 }
 
 void Interferometer::setSpectrumSink(BasebandSampleSink *spectrumSink)
 {
     m_spectrumSink = spectrumSink;
-    m_basbandSink->setSpectrumSink(spectrumSink);
+    m_basebandSink->setSpectrumSink(spectrumSink);
 }
 
 void Interferometer::setScopeSink(BasebandSampleSink *scopeSink)
 {
     m_scopeSink = scopeSink;
-    m_basbandSink->setScopeSink(scopeSink);
+    m_basebandSink->setScopeSink(scopeSink);
 }
 
 void Interferometer::startSinks()
 {
-    m_basbandSink->reset();
+    if (m_deviceSampleRate != 0) {
+        m_basebandSink->setBasebandSampleRate(m_deviceSampleRate);
+    }
+
+    m_basebandSink->reset();
     m_thread->start();
+
+    InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
+        m_settings.m_log2Decim, m_settings.m_filterChainHash);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 void Interferometer::stopSinks()
@@ -96,7 +104,7 @@ void Interferometer::stopSinks()
 
 void Interferometer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int sinkIndex)
 {
-    m_basbandSink->feed(begin, end, sinkIndex);
+    m_basebandSink->feed(begin, end, sinkIndex);
 }
 
 void Interferometer::pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex)
@@ -126,18 +134,18 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
     {
         InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(
             settings.m_log2Decim, settings.m_filterChainHash);
-        m_basbandSink->getInputMessageQueue()->push(msg);
+        m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if ((m_settings.m_correlationType != settings.m_correlationType) || force)
     {
         InterferometerBaseband::MsgConfigureCorrelation *msg = InterferometerBaseband::MsgConfigureCorrelation::create(
             settings.m_correlationType);
-        m_basbandSink->getInputMessageQueue()->push(msg);
+        m_basebandSink->getInputMessageQueue()->push(msg);
     }
 
     if ((m_settings.m_phase != settings.m_phase) || force) {
-        m_basbandSink->setPhase(settings.m_phase);
+        m_basebandSink->setPhase(settings.m_phase);
     }
 
     m_settings = settings;
@@ -185,7 +193,7 @@ bool Interferometer::handleMessage(const Message& cmd)
                 m_deviceSampleRate, notif.getCenterFrequency(), notif.getIndex()
             );
             qDebug() << "Interferometer::handleMessage: DSPMIMOSignalNotification: push to sink";
-            m_basbandSink->getInputMessageQueue()->push(sig);
+            m_basebandSink->getInputMessageQueue()->push(sig);
 
             if (getMessageQueueToGUI())
             {
@@ -247,7 +255,7 @@ void Interferometer::calculateFrequencyOffset()
 void Interferometer::applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash)
 {
     InterferometerBaseband::MsgConfigureChannelizer *msg = InterferometerBaseband::MsgConfigureChannelizer::create(log2Decim, filterChainHash);
-    m_basbandSink->getInputMessageQueue()->push(msg);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 int Interferometer::webapiSettingsGet(
@@ -273,6 +281,12 @@ int Interferometer::webapiSettingsPutPatch(
 
     MsgConfigureInterferometer *msg = MsgConfigureInterferometer::create(settings, force);
     m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureInterferometer *msgToGUI = MsgConfigureInterferometer::create(settings, force);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
 
     webapiFormatChannelSettings(response, settings);
 
