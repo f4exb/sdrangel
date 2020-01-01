@@ -51,6 +51,10 @@ Since version 4 the `sdrangelsrv` binary launches a server mode SDRangel instanc
 
 Since version 4.1 the previously separated project SDRdaemon has been modified and included in SDRangel. The `sdrangelsrv` headless variant can be used for this purpose using the Remote source or sink channels.
 
+<h2>MIMO support</h2>
+
+Since version 5 and exclusively on the `v5` branch of the repository. This supports devices and channels with simultaneous and coherent handling of several input and/or output streams in parallel.
+
 <h1>Notes on pulseaudio setup</h1>
 
 The audio devices with Qt are supported through pulseaudio and unless you are using a single sound chip (or card) with a single output port or you are an expert with pulseaudio config files you may get into trouble when trying to route the audio to a different output port. These notes are a follow-up of issue #31 with my own experiments with HDMI audio output on the Udoo x86 board. So using this example of HDMI output you can do the following:
