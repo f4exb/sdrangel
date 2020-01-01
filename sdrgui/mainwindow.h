@@ -361,7 +361,6 @@ private:
 
 	void addSourceDevice(int deviceIndex);
 	void addSinkDevice();
-    void addMIMODevice();
     void removeLastDevice();
     void deleteChannel(int deviceSetIndex, int channelIndex);
 

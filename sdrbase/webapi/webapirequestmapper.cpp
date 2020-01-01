@@ -117,7 +117,6 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.soapysdrinput", "soapySDRInputSettings"},
     {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
     {"sdrangel.samplesource.testsource", "testSourceSettings"},
-    {"sdrangel.samplemimo.testmi", "testMISettings"},
     {"sdrangel.samplesource.xtrx", "XtrxInputSettings"},
     {"sdrangel.samplesink.xtrx", "XtrxOutputSettings"}
 };
@@ -181,10 +180,6 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
     {"RemoteOutput", "remoteOutputSettings"},
     {"SoapySDR", "soapySDROutputSettings"},
     {"XTRX", "XtrxOutputSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
-    {"TestMI", "testMISettings"}
 };
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -2152,14 +2147,6 @@ bool WebAPIRequestMapper::validateDeviceSettings(
     {
         if (m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
             deviceSettingsKey = m_sinkDeviceHwIdToSettingsKey[*deviceHwType];
-        } else {
-            return false;
-        }
-    }
-    else if (deviceSettings.getDirection() == 2) // MIMO
-    {
-        if (m_mimoDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
-            deviceSettingsKey = m_mimoDeviceHwIdToSettingsKey[*deviceHwType];
         } else {
             return false;
         }

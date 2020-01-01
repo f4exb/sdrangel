@@ -145,8 +145,6 @@ bool MainCore::handleMessage(const Message& cmd)
             addSinkDevice();
         } else if (direction == 0) { // Single stream Rx
             addSourceDevice();
-        } else if (direction == 2) { // MIMO
-            addMIMODevice();
         }
 
         return true;
@@ -360,49 +358,6 @@ void MainCore::addSourceDevice()
     DeviceSampleSource *source = m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
             m_deviceSets.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceSets.back()->m_deviceAPI);
     m_deviceSets.back()->m_deviceAPI->setSampleSource(source);
-}
-
-void MainCore::addMIMODevice()
-{
-    DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
-    dspDeviceMIMOEngine->start();
-
-    uint dspDeviceMIMOEngineUID =  dspDeviceMIMOEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceMIMOEngineUID);
-
-    int deviceTabIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
-    m_deviceSets.back()->m_deviceSourceEngine = nullptr;
-    m_deviceSets.back()->m_deviceSinkEngine = nullptr;
-    m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
-
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "M%d", deviceTabIndex);
-
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
-
-    // create a test MIMO by default
-    int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
-    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceSets.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
-
-    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
-
-    if (userArgs.size() > 0) {
-        m_deviceSets.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
-    }
-
-    DeviceSampleMIMO *mimo = m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
-            m_deviceSets.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceSets.back()->m_deviceAPI);
-    m_deviceSets.back()->m_deviceAPI->setSampleMIMO(mimo);
 }
 
 void MainCore::removeLastDevice()

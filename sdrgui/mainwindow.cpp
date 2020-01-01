@@ -431,92 +431,6 @@ void MainWindow::addSinkDevice()
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
 }
 
-void MainWindow::addMIMODevice()
-{
-    DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
-    dspDeviceMIMOEngine->start();
-
-    uint dspDeviceMIMOEngineUID =  dspDeviceMIMOEngine->getUID();
-    char uidCStr[16];
-    sprintf(uidCStr, "UID:%d", dspDeviceMIMOEngineUID);
-
-    int deviceTabIndex = m_deviceUIs.size();
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 2, m_masterTimer));
-    m_deviceUIs.back()->m_deviceSourceEngine = nullptr;
-    m_deviceUIs.back()->m_deviceSinkEngine = nullptr;
-    m_deviceUIs.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
-
-    char tabNameCStr[16];
-    sprintf(tabNameCStr, "M%d", deviceTabIndex);
-
-    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
-
-    m_deviceUIs.back()->m_deviceAPI = deviceAPI;
-    m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
-    QComboBox *channelSelector = m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector();
-    // Add Rx channels
-    QList<QString> rxChannelNames;
-    m_pluginManager->listRxChannels(rxChannelNames);
-    QStringList rxChannelNamesList(rxChannelNames);
-    channelSelector->addItems(rxChannelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableRxChannels(rxChannelNamesList.size());
-    // Add Tx channels
-    QList<QString> txChannelNames;
-    m_pluginManager->listTxChannels(txChannelNames);
-    QStringList txChannelNamesList(txChannelNames);
-    channelSelector->addItems(txChannelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableTxChannels(txChannelNamesList.size());
-
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
-
-    dspDeviceMIMOEngine->addSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
-    ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
-    ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
-    ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
-
-    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(sampleMIMOChanged()));
-
-    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
-    ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
-
-    // create a test MIMO by default
-    int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
-    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
-
-    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
-
-    if (userArgs.size() > 0) {
-        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
-    }
-
-    m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(testMIMODeviceIndex);
-
-    // delete previous plugin GUI if it exists
-    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
-
-    DeviceSampleMIMO *mimo = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
-    m_deviceUIs.back()->m_deviceAPI->setSampleMIMO(mimo);
-    QWidget *gui;
-    PluginInstanceGUI *pluginUI = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(),
-            &gui,
-            m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
-    m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->init();
-    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), 2);
-}
-
 void MainWindow::removeLastDevice()
 {
 	if (m_deviceUIs.back()->m_deviceSourceEngine) // source tab
@@ -1012,8 +926,6 @@ bool MainWindow::handleMessage(const Message& cmd)
             addSinkDevice();
         } else if (direction == 0) { // Single stream Rx
             addSourceDevice(-1); // create with file source device by default
-        } else if (direction == 2) { // MIMO
-            addMIMODevice();
         }
 
         return true;
@@ -1987,11 +1899,7 @@ void MainWindow::on_action_addSinkDevice_triggered()
 
 void MainWindow::on_action_addMIMODevice_triggered()
 {
-    if (m_dspEngine->getMIMOSupport()) {
-        addMIMODevice();
-    } else {
-        QMessageBox::information(this, tr("Message"), tr("MIMO not supported in this version"));
-    }
+    QMessageBox::information(this, tr("Message"), tr("MIMO not supported in this version"));
 }
 
 void MainWindow::on_action_removeLastDevice_triggered()
