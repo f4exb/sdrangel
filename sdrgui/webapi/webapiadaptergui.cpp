@@ -1707,7 +1707,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
 
         if (query.getDirection() == 0) // Single Rx
         {
-            if (!deviceSet->m_deviceSourceEngine || !deviceSet->m_deviceMIMOEngine)
+            if (!deviceSet->m_deviceSourceEngine && !deviceSet->m_deviceMIMOEngine)
             {
                 error.init();
                 *error.getMessage() = QString("Device set at %1 is not a receive capable device set").arg(deviceSetIndex);
@@ -1743,7 +1743,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
         }
         else if (query.getDirection() == 1) // single Tx
         {
-            if (!deviceSet->m_deviceSinkEngine || !deviceSet->m_deviceMIMOEngine)
+            if (!deviceSet->m_deviceSinkEngine && !deviceSet->m_deviceMIMOEngine)
             {
                 error.init();
                 *error.getMessage() = QString("Device set at %1 is not a transmit capable device set").arg(deviceSetIndex);
