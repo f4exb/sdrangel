@@ -1,0 +1,48 @@
+LimeRFESettings:
+  description: LimeRFE
+  properties:
+    devicePath:
+      description: Path to the device serial interface (ex /dev/ttyUSB2)
+      type: string
+    rxChannels:
+      description: Rx channels group (see LimeRFEController.ChannelGroups enumeration)
+      type: integer
+    rxWidebandChannel:
+      descrition: Rx wideband channel selection (see LimeRFEController.WidebandChannel enumeration)
+      type: integer
+    rxHAMChannel:
+      description: Rx HAM channel selection (see LimeRFEController.HAMChannel enumeration)
+      type: integer
+    rxCellularChannel:
+      description: Rx cellular channel selection (see LimeRFEController.HAMChannel enumeration)
+      type: integer
+    rxPort:
+      description: Rx port selected (see LimeRFEController.RxPort enumeration)
+      type: integer
+    attenuationFactor:
+      description: Rx attenuation factor. Attenuation is 2 times this factor in dB (0..7 => 0..14dB)
+      type: integer
+    amfmNotch:
+      desciption: Rx AM/FM notch filter (boolean)
+      type: integer
+    txChannels:
+      description: Tx channels group (see LimeRFEController.ChannelGroups enumeration)
+      type: integer
+    txWidebandChannel:
+      descrition: Tx wideband channel selection (see LimeRFEController.WidebandChannel enumeration)
+      type: integer
+    txHAMChannel:
+      description: Tx HAM channel selection (see LimeRFEController.HAMChannel enumeration)
+      type: integer
+    txCellularChannel:
+      description: Tx cellular channel selection (see LimeRFEController.HAMChannel enumeration)
+      type: integer
+    txPort:
+      description: Tx port selected (see LimeRFEController.TxPort enumeration)
+      type: integer
+    rxOn:
+      description: Boolean 1 if Rx is active else 0
+      type: integer
+    txOn:
+      description: Boolean 1 if Tx is active else 0
+      type: integer
