@@ -31,6 +31,19 @@ else(FFTW3F_FOUND)
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
+if (LIMERFE_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        limerfe/limerfecontroller.cpp
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        limerfe/limerfecontroller.h
+    )
+    include_directories(${LIMESUITE_INCLUDE_DIR})
+    set(sdrbase_LIMERFE_LIB ${LIMESUITE_LIBRARY})
+endif (LIMERFE_FOUND)
+
 # serialdv now required
 add_definitions(-DDSD_USE_SERIALDV)
 include_directories(${LIBSERIALDV_INCLUDE_DIR})
@@ -132,6 +145,7 @@ set(sdrbase_SOURCES
     util/syncmessenger.cpp
     util/samplesourceserializer.cpp
     util/simpleserializer.cpp
+    util/serialutil.cpp
     #util/spinlock.cpp
     util/uid.cpp
     util/timeutil.cpp
@@ -280,6 +294,7 @@ set(sdrbase_HEADERS
     util/syncmessenger.h
     util/samplesourceserializer.h
     util/simpleserializer.h
+    util/serialutil.h
     #util/spinlock.h
     util/uid.h
     util/timeutil.h
@@ -313,6 +328,7 @@ target_link_libraries(sdrbase
     ${OPUS_LIBRARIES}
     ${sdrbase_FFTW3F_LIB}
     ${sdrbase_SERIALDV_LIB}
+    ${sdrbase_LIMERFE_LIB}
     Qt5::Core
     Qt5::Multimedia
     httpserver

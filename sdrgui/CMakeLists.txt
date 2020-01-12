@@ -176,6 +176,23 @@ set(sdrgui_FORMS
   soapygui/arginfogui.ui
   )
 
+if (LIMERFE_FOUND)
+  set(sdrgui_SOURCES
+    ${sdrgui_SOURCES}
+    limerfegui/limerfeusbdialog.cpp
+  )
+  set(sdrgui_HEADERS
+    ${sdrgui_HEADERS}
+    limerfegui/limerfeusbdialog.h
+  )
+  set(sdrgui_FORMS
+    ${sdrgui_FORMS}
+    limerfegui/limerfeusbdialog.ui
+  )
+  include_directories(${LIMESUITE_INCLUDE_DIR})
+  set(sdrgui_LIMERFE_LIB ${LIMESUITE_LIBRARY})
+endif (LIMERFE_FOUND)
+
 qt5_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
 
 include_directories(
@@ -199,6 +216,7 @@ target_link_libraries(sdrgui
   Qt5::OpenGL
   Qt5::Multimedia
   ${OPENGL_LIBRARIES}
+  ${sdrgui_LIMERFE_LIB}
   sdrbase
   logging
   )
