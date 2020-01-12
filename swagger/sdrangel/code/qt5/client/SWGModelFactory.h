@@ -93,6 +93,9 @@
 #include "SWGInterferometerSettings.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGKiwiSDRSettings.h"
+#include "SWGLimeRFEDevice.h"
+#include "SWGLimeRFEDevices.h"
+#include "SWGLimeRFESettings.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputReport.h"
@@ -410,6 +413,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGKiwiSDRSettings").compare(type) == 0) {
       return new SWGKiwiSDRSettings();
+    }
+    if(QString("SWGLimeRFEDevice").compare(type) == 0) {
+      return new SWGLimeRFEDevice();
+    }
+    if(QString("SWGLimeRFEDevices").compare(type) == 0) {
+      return new SWGLimeRFEDevices();
+    }
+    if(QString("SWGLimeRFESettings").compare(type) == 0) {
+      return new SWGLimeRFESettings();
     }
     if(QString("SWGLimeSdrInputReport").compare(type) == 0) {
       return new SWGLimeSdrInputReport();
