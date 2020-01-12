@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.11.6"
+  version: "4.12.5"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -526,6 +526,111 @@ paths:
           description: On success return list of devices
           schema:
             $ref: "#/definitions/AMBEDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/limerfe/serial:
+    x-swagger-router-controller: instance
+    get:
+      description: get a list of available serial interfaces to LimeRFE device
+      operationId: instanceLimeRFESerialGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return list of device paths possibly empty
+          schema:
+            $ref: "#/definitions/LimeRFEDevices"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/limerfe/config:
+    x-swagger-router-controller: instance
+    get:
+      description: get LimeRFE configuration
+      operationId: instanceLimeRFEConfigGet
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: serial
+          in: query
+          description: device serial path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: On success return configuration information for the given device in input
+          schema:
+            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: replace LimeRFE configuration
+      operationId: instanceLimeRFEConfigPut
+      tags:
+        - Instance
+      consumes:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+          required: true
+          schema:
+            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: LimeRFE device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/limerfe/run:
+    x-swagger-router-controller: instance
+    put:
+      description: set Rx and Tx on or off
+      operationId: instanceLimeRFERunPut
+      tags:
+        - Instance
+      parameters:
+        - name: body
+          in: body
+          description: Give device serial path in devicePath field and run status in rxOn and txOn
+          required: true
+          schema:
+            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: LimeRFE device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -1938,6 +2043,27 @@ definitions:
       delete:
         description: "1 if device is to be removed from active list"
         type: integer
+
+  LimeRFEDevices:
+    description: "List of LimeRFE devices (serial or server address)"
+    required:
+      - nbDevices
+    properties:
+      nbDevices:
+        description: "Number of LimeRFE serial interfaces"
+        type: integer
+      limeRFEDevices:
+        description: "List of LimeRFE devices"
+        type: array
+        items:
+          $ref: "#/definitions/LimeRFEDevice"
+
+  LimeRFEDevice:
+    description: "LimeRFE device active in the system"
+    properties:
+      deviceRef:
+        description: "Serial device name or server address"
+        type: string
 
   Presets:
     description: "Settings presets"

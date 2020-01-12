@@ -1775,7 +1775,7 @@ margin-bottom: 20px;
     "log2Decim" : {
       "type" : "integer"
     },
-    "fcPos" : {
+    "fcPosRx" : {
       "type" : "integer",
       "description" : "See BladeRF2MIMO::fcPos_t"
     },
@@ -1820,6 +1820,10 @@ margin-bottom: 20px;
     },
     "log2Interp" : {
       "type" : "integer"
+    },
+    "fcPosTx" : {
+      "type" : "integer",
+      "description" : "See BladeRF2MIMO::fcPos_t"
     },
     "txBandwidth" : {
       "type" : "integer"
@@ -1970,6 +1974,10 @@ margin-bottom: 20px;
             defs.Channel = {
   "required" : [ "deltaFrequency", "id", "index", "title", "uid" ],
   "properties" : {
+    "direction" : {
+      "type" : "integer",
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any direction (MIMO)"
+    },
     "index" : {
       "type" : "integer",
       "description" : "Index in the list of channels"
@@ -2868,9 +2876,6 @@ margin-bottom: 20px;
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
     },
-    "testMISettings" : {
-      "$ref" : "#/definitions/TestMISettings"
-    },
     "xtrxInputSettings" : {
       "$ref" : "#/definitions/XtrxInputSettings"
     },
@@ -2881,11 +2886,10 @@ margin-bottom: 20px;
   "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
 };
             defs.DeviceState = {
-  "required" : [ "state" ],
   "properties" : {
     "state" : {
       "type" : "string",
-      "description" : "State: notStarted, idle, ready, running, error"
+      "description" : "Unique state: notStarted, idle, ready, running, error"
     }
   },
   "description" : "Device running state"
@@ -3905,6 +3909,94 @@ margin-bottom: 20px;
   },
   "description" : "KiwiSDR"
 };
+            defs.LimeRFEDevice = {
+  "properties" : {
+    "deviceRef" : {
+      "type" : "string",
+      "description" : "Serial device name or server address"
+    }
+  },
+  "description" : "LimeRFE device active in the system"
+};
+            defs.LimeRFEDevices = {
+  "required" : [ "nbDevices" ],
+  "properties" : {
+    "nbDevices" : {
+      "type" : "integer",
+      "description" : "Number of LimeRFE serial interfaces"
+    },
+    "limeRFEDevices" : {
+      "type" : "array",
+      "description" : "List of LimeRFE devices",
+      "items" : {
+        "$ref" : "#/definitions/LimeRFEDevice"
+      }
+    }
+  },
+  "description" : "List of LimeRFE devices (serial or server address)"
+};
+            defs.LimeRFESettings = {
+  "properties" : {
+    "devicePath" : {
+      "type" : "string",
+      "description" : "Path to the device serial interface (ex /dev/ttyUSB2)"
+    },
+    "rxChannels" : {
+      "type" : "integer",
+      "description" : "Rx channels group (see LimeRFEController.ChannelGroups enumeration)"
+    },
+    "rxWidebandChannel" : {
+      "type" : "integer"
+    },
+    "rxHAMChannel" : {
+      "type" : "integer",
+      "description" : "Rx HAM channel selection (see LimeRFEController.HAMChannel enumeration)"
+    },
+    "rxCellularChannel" : {
+      "type" : "integer",
+      "description" : "Rx cellular channel selection (see LimeRFEController.HAMChannel enumeration)"
+    },
+    "rxPort" : {
+      "type" : "integer",
+      "description" : "Rx port selected (see LimeRFEController.RxPort enumeration)"
+    },
+    "attenuationFactor" : {
+      "type" : "integer",
+      "description" : "Rx attenuation factor. Attenuation is 2 times this factor in dB (0..7 => 0..14dB)"
+    },
+    "amfmNotch" : {
+      "type" : "integer"
+    },
+    "txChannels" : {
+      "type" : "integer",
+      "description" : "Tx channels group (see LimeRFEController.ChannelGroups enumeration)"
+    },
+    "txWidebandChannel" : {
+      "type" : "integer"
+    },
+    "txHAMChannel" : {
+      "type" : "integer",
+      "description" : "Tx HAM channel selection (see LimeRFEController.HAMChannel enumeration)"
+    },
+    "txCellularChannel" : {
+      "type" : "integer",
+      "description" : "Tx cellular channel selection (see LimeRFEController.HAMChannel enumeration)"
+    },
+    "txPort" : {
+      "type" : "integer",
+      "description" : "Tx port selected (see LimeRFEController.TxPort enumeration)"
+    },
+    "rxOn" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if Rx is active else 0"
+    },
+    "txOn" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if Tx is active else 0"
+    }
+  },
+  "description" : "LimeRFE"
+};
             defs.LimeSdrInputReport = {
   "properties" : {
     "success" : {
@@ -4257,6 +4349,10 @@ margin-bottom: 20px;
     "filterChainHash" : {
       "type" : "integer"
     },
+    "play" : {
+      "type" : "integer",
+      "description" : "boolean (1 to play, 0 to stop)"
+    },
     "streamIndex" : {
       "type" : "integer",
       "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
@@ -4297,6 +4393,10 @@ margin-bottom: 20px;
     },
     "filterChainHash" : {
       "type" : "integer"
+    },
+    "play" : {
+      "type" : "integer",
+      "description" : "boolean (1 to play, 0 to stop)"
     },
     "streamIndex" : {
       "type" : "integer",
@@ -5806,7 +5906,7 @@ margin-bottom: 20px;
   "description" : "A sample rate expressed in samples per second (S/s)"
 };
             defs.SamplingDevice = {
-  "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial", "state" ],
+  "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial" ],
   "properties" : {
     "index" : {
       "type" : "integer",
@@ -5847,7 +5947,15 @@ margin-bottom: 20px;
     },
     "state" : {
       "type" : "string",
-      "description" : "State: notStarted, idle, ready, running, error"
+      "description" : "Single subsystem state: notStarted, idle, ready, running, error"
+    },
+    "stateRx" : {
+      "type" : "string",
+      "description" : "Rx subsystem state (MIMO): notStarted, idle, ready, running, error"
+    },
+    "stateTx" : {
+      "type" : "string",
+      "description" : "Tx subsystem state (MIMO): notStarted, idle, ready, running, error"
     }
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
@@ -6154,96 +6262,6 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
-};
-            defs.TestMISettings = {
-  "properties" : {
-    "fileRecordName" : {
-      "type" : "string"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "streams" : {
-      "type" : "array",
-      "description" : "Settings for each of the streams",
-      "items" : {
-        "$ref" : "#/definitions/TestMiStreamSettings"
-      }
-    }
-  },
-  "description" : "TestMISettings"
-};
-            defs.TestMiStreamSettings = {
-  "properties" : {
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "Index of the stream to which the settings apply"
-    },
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "frequencyShift" : {
-      "type" : "integer"
-    },
-    "sampleRate" : {
-      "type" : "integer"
-    },
-    "log2Decim" : {
-      "type" : "integer"
-    },
-    "fcPos" : {
-      "type" : "integer"
-    },
-    "sampleSizeIndex" : {
-      "type" : "integer"
-    },
-    "amplitudeBits" : {
-      "type" : "integer"
-    },
-    "autoCorrOptions" : {
-      "type" : "integer"
-    },
-    "modulation" : {
-      "type" : "integer"
-    },
-    "modulationTone" : {
-      "type" : "integer"
-    },
-    "amModulation" : {
-      "type" : "integer"
-    },
-    "fmDeviation" : {
-      "type" : "integer"
-    },
-    "dcFactor" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "iFactor" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "qFactor" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "phaseImbalance" : {
-      "type" : "number",
-      "format" : "float"
-    }
-  },
-  "description" : "TestMiStreamSettings"
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -7139,6 +7157,15 @@ margin-bottom: 20px;
                     <li data-group="DeviceSet" data-name="devicesetDeviceSettingsPut" class="">
                       <a href="#api-DeviceSet-devicesetDeviceSettingsPut">devicesetDeviceSettingsPut</a>
                     </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunDelete" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceSubsystemRunDelete">devicesetDeviceSubsystemRunDelete</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunGet" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceSubsystemRunGet">devicesetDeviceSubsystemRunGet</a>
+                    </li>
+                    <li data-group="DeviceSet" data-name="devicesetDeviceSubsystemRunPost" class="">
+                      <a href="#api-DeviceSet-devicesetDeviceSubsystemRunPost">devicesetDeviceSubsystemRunPost</a>
+                    </li>
                     <li data-group="DeviceSet" data-name="devicesetFocusPatch" class="">
                       <a href="#api-DeviceSet-devicesetFocusPatch">devicesetFocusPatch</a>
                     </li>
@@ -7209,6 +7236,18 @@ margin-bottom: 20px;
                     <li data-group="Instance" data-name="instanceDevices" class="">
                       <a href="#api-Instance-instanceDevices">instanceDevices</a>
                     </li>
+                    <li data-group="Instance" data-name="instanceLimeRFEConfigGet" class="">
+                      <a href="#api-Instance-instanceLimeRFEConfigGet">instanceLimeRFEConfigGet</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceLimeRFEConfigPut" class="">
+                      <a href="#api-Instance-instanceLimeRFEConfigPut">instanceLimeRFEConfigPut</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceLimeRFERunPut" class="">
+                      <a href="#api-Instance-instanceLimeRFERunPut">instanceLimeRFERunPut</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceLimeRFESerialGet" class="">
+                      <a href="#api-Instance-instanceLimeRFESerialGet">instanceLimeRFESerialGet</a>
+                    </li>
                     <li data-group="Instance" data-name="instanceLocationGet" class="">
                       <a href="#api-Instance-instanceLocationGet">instanceLocationGet</a>
                     </li>
@@ -7258,7 +7297,7 @@ margin-bottom: 20px;
         <div id="header">
           <div id="api-_">
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
-              <div class="app-desc">Version: 4.11.6</div>
+              <div class="app-desc">Version: 4.12.5</div>
             <hr>
             <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
 <hr />
@@ -11809,7 +11848,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">stop device</p>
+                        <p class="marked">stop device for a single subsystem device (Rx or Tx)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/run</span></code></pre>
@@ -12323,7 +12362,7 @@ $(document).ready(function() {
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">get device rune status</p>
+                        <p class="marked">get device run status for a single subsystem device (Rx or Tx)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/run</span></code></pre>
@@ -12784,7 +12823,7 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">start device</p>
+                        <p class="marked">start device for a single subsystem device (Rx or Tx)</p>
                         <p></p>
                         <br />
                         <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/device/run</span></code></pre>
@@ -14641,6 +14680,1594 @@ $(document).ready(function() {
                                     </script>
                                   </div>
                                   <input id='responses-devicesetDeviceSettingsPut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetDeviceSubsystemRunDelete">
+                      <article id="api-DeviceSet-devicesetDeviceSubsystemRunDelete-0" data-group="User" data-name="devicesetDeviceSubsystemRunDelete" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceSubsystemRunDelete</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">stop device for a multi-subsystem device (Rx/Tx combination i.e. MIMO)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X DELETE "http://localhost/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunDelete");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *subsystemIndex = 56; // Index of subsystem (0 for Rx, 1 for Tx)
+DeviceSettings *body = ; // Originator information in the reverse API case (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceSubsystemRunDeleteWith:deviceSetIndex
+    subsystemIndex:subsystemIndex
+    body:body
+              completionHandler: ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
+
+var opts = { 
+  'body':  // {DeviceSettings} Originator information in the reverse API case
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceSubsystemRunDeleteExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
+
+            try
+            {
+                DeviceState result = apiInstance.devicesetDeviceSubsystemRunDelete(deviceSetIndex, subsystemIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceSubsystemRunDelete: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+$body = ; // DeviceSettings | Originator information in the reverse API case
+
+try {
+    $result = $api_instance->devicesetDeviceSubsystemRunDelete($deviceSetIndex, $subsystemIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunDelete: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
+
+eval { 
+    my $result = $api_instance->devicesetDeviceSubsystemRunDelete(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunDelete: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunDelete-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+body =  # DeviceSettings | Originator information in the reverse API case (optional)
+
+try: 
+    api_response = api_instance.deviceset_device_subsystem_run_delete(deviceSetIndex, subsystemIndex, body=body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunDelete: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunDelete_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">subsystemIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunDelete_subsystemIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of subsystem (0 for Rx, 1 for Tx)
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body </td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Originator information in the reverse API case",
+  "required" : false,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceSubsystemRunDelete_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceSubsystemRunDelete_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return state before change </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-200-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return state before change",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-400-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or subsystem not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-404-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or subsystem not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-500-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunDelete-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunDelete-501-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunDelete-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunDelete-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunDelete-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunDelete-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetDeviceSubsystemRunGet">
+                      <article id="api-DeviceSet-devicesetDeviceSubsystemRunGet-0" data-group="User" data-name="devicesetDeviceSubsystemRunGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceSubsystemRunGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get device run status for a multi-subsystem device (Rx/Tx combination i.e. MIMO)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *subsystemIndex = 56; // Index of subsystem (0 for Rx, 1 for Tx)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceSubsystemRunGetWith:deviceSetIndex
+    subsystemIndex:subsystemIndex
+              completionHandler: ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceSubsystemRunGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+            try
+            {
+                DeviceState result = apiInstance.devicesetDeviceSubsystemRunGet(deviceSetIndex, subsystemIndex);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceSubsystemRunGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+try {
+    $result = $api_instance->devicesetDeviceSubsystemRunGet($deviceSetIndex, $subsystemIndex);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+eval { 
+    my $result = $api_instance->devicesetDeviceSubsystemRunGet(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+
+try: 
+    api_response = api_instance.deviceset_device_subsystem_run_get(deviceSetIndex, subsystemIndex)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunGet_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">subsystemIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunGet_subsystemIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of subsystem (0 for Rx, 1 for Tx)
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return current state </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-200-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return current state",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-400-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or subsystem not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-404-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or subsystem not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-500-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunGet-501-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-DeviceSet-devicesetDeviceSubsystemRunPost">
+                      <article id="api-DeviceSet-devicesetDeviceSubsystemRunPost-0" data-group="User" data-name="devicesetDeviceSubsystemRunPost" data-version="0">
+                        <div class="pull-left">
+                          <h1>devicesetDeviceSubsystemRunPost</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">start device for a multi-subsystem device (Rx/Tx combination i.e. MIMO)</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-java">Java</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X POST "http://localhost/sdrangel/deviceset/{deviceSetIndex}/subdevice/{subsystemIndex}/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.DeviceSetApi;
+
+import java.io.File;
+import java.util.*;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.DeviceSetApi;
+
+public class DeviceSetApiExample {
+
+    public static void main(String[] args) {
+        DeviceSetApi apiInstance = new DeviceSetApi();
+        Integer deviceSetIndex = 56; // Integer | Index of device set in the device set list
+        Integer subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+        DeviceSettings body = ; // DeviceSettings | Originator information in the reverse API case
+        try {
+            DeviceState result = apiInstance.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling DeviceSetApi#devicesetDeviceSubsystemRunPost");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">Integer *deviceSetIndex = 56; // Index of device set in the device set list
+Integer *subsystemIndex = 56; // Index of subsystem (0 for Rx, 1 for Tx)
+DeviceSettings *body = ; // Originator information in the reverse API case (optional)
+
+DeviceSetApi *apiInstance = [[DeviceSetApi alloc] init];
+
+[apiInstance devicesetDeviceSubsystemRunPostWith:deviceSetIndex
+    subsystemIndex:subsystemIndex
+    body:body
+              completionHandler: ^(DeviceState output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.DeviceSetApi()
+
+var deviceSetIndex = 56; // {Integer} Index of device set in the device set list
+
+var subsystemIndex = 56; // {Integer} Index of subsystem (0 for Rx, 1 for Tx)
+
+var opts = { 
+  'body':  // {DeviceSettings} Originator information in the reverse API case
+};
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, opts, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class devicesetDeviceSubsystemRunPostExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new DeviceSetApi();
+            var deviceSetIndex = 56;  // Integer | Index of device set in the device set list
+            var subsystemIndex = 56;  // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+            var body = new DeviceSettings(); // DeviceSettings | Originator information in the reverse API case (optional) 
+
+            try
+            {
+                DeviceState result = apiInstance.devicesetDeviceSubsystemRunPost(deviceSetIndex, subsystemIndex, body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling DeviceSetApi.devicesetDeviceSubsystemRunPost: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\DeviceSetApi();
+$deviceSetIndex = 56; // Integer | Index of device set in the device set list
+$subsystemIndex = 56; // Integer | Index of subsystem (0 for Rx, 1 for Tx)
+$body = ; // DeviceSettings | Originator information in the reverse API case
+
+try {
+    $result = $api_instance->devicesetDeviceSubsystemRunPost($deviceSetIndex, $subsystemIndex, $body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunPost: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::DeviceSetApi;
+
+my $api_instance = SWGSDRangel::DeviceSetApi->new();
+my $deviceSetIndex = 56; # Integer | Index of device set in the device set list
+my $subsystemIndex = 56; # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+my $body = SWGSDRangel::Object::DeviceSettings->new(); # DeviceSettings | Originator information in the reverse API case
+
+eval { 
+    my $result = $api_instance->devicesetDeviceSubsystemRunPost(deviceSetIndex => $deviceSetIndex, subsystemIndex => $subsystemIndex, body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunPost: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-DeviceSet-devicesetDeviceSubsystemRunPost-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.DeviceSetApi()
+deviceSetIndex = 56 # Integer | Index of device set in the device set list
+subsystemIndex = 56 # Integer | Index of subsystem (0 for Rx, 1 for Tx)
+body =  # DeviceSettings | Originator information in the reverse API case (optional)
+
+try: 
+    api_response = api_instance.deviceset_device_subsystem_run_post(deviceSetIndex, subsystemIndex, body=body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DeviceSetApi->devicesetDeviceSubsystemRunPost: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+                            <div class="methodsubtabletitle">Path parameters</div>
+                            <table id="methodsubtable">
+                                <tr>
+                                  <th width="150px">Name</th>
+                                  <th>Description</th>
+                                </tr>
+                                  <tr><td style="width:150px;">deviceSetIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunPost_deviceSetIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of device set in the device set list
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                                  <tr><td style="width:150px;">subsystemIndex*</td>
+<td>
+
+
+    <div id="d2e199_devicesetDeviceSubsystemRunPost_subsystemIndex">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    Integer
+                </span>
+
+                    <div class="inner description">
+                        Index of subsystem (0 for Rx, 1 for Tx)
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body </td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Originator information in the reverse API case",
+  "required" : false,
+  "schema" : {
+    "$ref" : "#/definitions/DeviceSettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_devicesetDeviceSubsystemRunPost_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_devicesetDeviceSubsystemRunPost_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return state before change </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-200-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return state before change",
+  "schema" : {
+    "$ref" : "#/definitions/DeviceState"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Invalid device set index </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-400-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Invalid device set index",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - Device or subsystem not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-404-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Device or subsystem not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-500-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-devicesetDeviceSubsystemRunPost-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-devicesetDeviceSubsystemRunPost-501-schema">
+                                  <div id='responses-devicesetDeviceSubsystemRunPost-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-devicesetDeviceSubsystemRunPost-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-devicesetDeviceSubsystemRunPost-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-devicesetDeviceSubsystemRunPost-501-schema-data' type='hidden' value=''></input>
                                 </div>
                             </div>
 
@@ -23352,6 +24979,1662 @@ except ApiException as e:
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceLimeRFEConfigGet">
+                      <article id="api-Instance-instanceLimeRFEConfigGet-0" data-group="User" data-name="instanceLimeRFEConfigGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceLimeRFEConfigGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get LimeRFE configuration</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/limerfe/config</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceLimeRFEConfigGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceLimeRFEConfigGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/limerfe/config?serial="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        String serial = serial_example; // String | device serial path
+        try {
+            LimeRFESettings result = apiInstance.instanceLimeRFEConfigGet(serial);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFEConfigGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        String serial = serial_example; // String | device serial path
+        try {
+            LimeRFESettings result = apiInstance.instanceLimeRFEConfigGet(serial);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFEConfigGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">String *serial = serial_example; // device serial path
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceLimeRFEConfigGetWith:serial
+              completionHandler: ^(LimeRFESettings output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var serial = serial_example; // {String} device serial path
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceLimeRFEConfigGet(serial, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceLimeRFEConfigGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var serial = serial_example;  // String | device serial path
+
+            try
+            {
+                LimeRFESettings result = apiInstance.instanceLimeRFEConfigGet(serial);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceLimeRFEConfigGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$serial = serial_example; // String | device serial path
+
+try {
+    $result = $api_instance->instanceLimeRFEConfigGet($serial);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceLimeRFEConfigGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $serial = serial_example; # String | device serial path
+
+eval { 
+    my $result = $api_instance->instanceLimeRFEConfigGet(serial => $serial);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceLimeRFEConfigGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+serial = serial_example # String | device serial path
+
+try: 
+    api_response = api_instance.instance_lime_rfe_config_get(serial)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceLimeRFEConfigGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">serial*</td>
+<td>
+
+
+    <div id="d2e199_instanceLimeRFEConfigGet_serial">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description">
+                        device serial path
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return configuration information for the given device in input </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigGet-200-schema">
+                                  <div id='responses-instanceLimeRFEConfigGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return configuration information for the given device in input",
+  "schema" : {
+    "$ref" : "#/definitions/LimeRFESettings"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigGet-500-schema">
+                                  <div id='responses-instanceLimeRFEConfigGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigGet-501-schema">
+                                  <div id='responses-instanceLimeRFEConfigGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Instance-instanceLimeRFEConfigPut">
+                      <article id="api-Instance-instanceLimeRFEConfigPut-0" data-group="User" data-name="instanceLimeRFEConfigPut" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceLimeRFEConfigPut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">replace LimeRFE configuration</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/limerfe/config</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceLimeRFEConfigPut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEConfigPut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceLimeRFEConfigPut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/limerfe/config"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        LimeRFESettings body = ; // LimeRFESettings | Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+        try {
+            SuccessResponse result = apiInstance.instanceLimeRFEConfigPut(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFEConfigPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        LimeRFESettings body = ; // LimeRFESettings | Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+        try {
+            SuccessResponse result = apiInstance.instanceLimeRFEConfigPut(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFEConfigPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">LimeRFESettings *body = ; // Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceLimeRFEConfigPutWith:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var body = ; // {LimeRFESettings} Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceLimeRFEConfigPut(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceLimeRFEConfigPutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var body = new LimeRFESettings(); // LimeRFESettings | Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+
+            try
+            {
+                SuccessResponse result = apiInstance.instanceLimeRFEConfigPut(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceLimeRFEConfigPut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$body = ; // LimeRFESettings | Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+
+try {
+    $result = $api_instance->instanceLimeRFEConfigPut($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceLimeRFEConfigPut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $body = SWGSDRangel::Object::LimeRFESettings->new(); # LimeRFESettings | Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+
+eval { 
+    my $result = $api_instance->instanceLimeRFEConfigPut(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceLimeRFEConfigPut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEConfigPut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+body =  # LimeRFESettings | Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
+
+try: 
+    api_response = api_instance.instance_lime_rfe_config_put(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceLimeRFEConfigPut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/LimeRFESettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_instanceLimeRFEConfigPut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_instanceLimeRFEConfigPut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Success </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigPut-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigPut-200-schema">
+                                  <div id='responses-instanceLimeRFEConfigPut-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Success",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigPut-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigPut-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigPut-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigPut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigPut-400-schema">
+                                  <div id='responses-instanceLimeRFEConfigPut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigPut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigPut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigPut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - LimeRFE device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigPut-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigPut-404-schema">
+                                  <div id='responses-instanceLimeRFEConfigPut-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "LimeRFE device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigPut-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigPut-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigPut-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigPut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigPut-500-schema">
+                                  <div id='responses-instanceLimeRFEConfigPut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigPut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigPut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigPut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEConfigPut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEConfigPut-501-schema">
+                                  <div id='responses-instanceLimeRFEConfigPut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEConfigPut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEConfigPut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEConfigPut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Instance-instanceLimeRFERunPut">
+                      <article id="api-Instance-instanceLimeRFERunPut-0" data-group="User" data-name="instanceLimeRFERunPut" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceLimeRFERunPut</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">set Rx and Tx on or off</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/sdrangel/limerfe/run</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceLimeRFERunPut-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFERunPut-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceLimeRFERunPut-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X PUT "http://localhost/sdrangel/limerfe/run"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        LimeRFESettings body = ; // LimeRFESettings | Give device serial path in devicePath field and run status in rxOn and txOn
+        try {
+            SuccessResponse result = apiInstance.instanceLimeRFERunPut(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFERunPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        LimeRFESettings body = ; // LimeRFESettings | Give device serial path in devicePath field and run status in rxOn and txOn
+        try {
+            SuccessResponse result = apiInstance.instanceLimeRFERunPut(body);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFERunPut");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">LimeRFESettings *body = ; // Give device serial path in devicePath field and run status in rxOn and txOn
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceLimeRFERunPutWith:body
+              completionHandler: ^(SuccessResponse output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var body = ; // {LimeRFESettings} Give device serial path in devicePath field and run status in rxOn and txOn
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceLimeRFERunPut(body, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceLimeRFERunPutExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var body = new LimeRFESettings(); // LimeRFESettings | Give device serial path in devicePath field and run status in rxOn and txOn
+
+            try
+            {
+                SuccessResponse result = apiInstance.instanceLimeRFERunPut(body);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceLimeRFERunPut: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$body = ; // LimeRFESettings | Give device serial path in devicePath field and run status in rxOn and txOn
+
+try {
+    $result = $api_instance->instanceLimeRFERunPut($body);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceLimeRFERunPut: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $body = SWGSDRangel::Object::LimeRFESettings->new(); # LimeRFESettings | Give device serial path in devicePath field and run status in rxOn and txOn
+
+eval { 
+    my $result = $api_instance->instanceLimeRFERunPut(body => $body);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceLimeRFERunPut: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFERunPut-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+body =  # LimeRFESettings | Give device serial path in devicePath field and run status in rxOn and txOn
+
+try: 
+    api_response = api_instance.instance_lime_rfe_run_put(body)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceLimeRFERunPut: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+                            <div class="methodsubtabletitle">Body parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">body <span style="color:red;">*</span></td>
+<td>
+
+
+<script>
+$(document).ready(function() {
+  var schemaWrapper = {
+  "in" : "body",
+  "name" : "body",
+  "description" : "Give device serial path in devicePath field and run status in rxOn and txOn",
+  "required" : true,
+  "schema" : {
+    "$ref" : "#/definitions/LimeRFESettings"
+  }
+};
+  var schema = schemaWrapper.schema;
+  if (schema.$ref != null) {
+    schema = defsParser.$refs.get(schema.$ref);
+  } else {
+    schemaWrapper.definitions = Object.assign({}, defs);
+    $RefParser.dereference(schemaWrapper).catch(function(err) {
+      console.log(err);
+    });
+  }
+
+  var view = new JSONSchemaView(schema,2,{isBodyParam: true});
+  var result = $('#d2e199_instanceLimeRFERunPut_body');
+  result.empty();
+  result.append(view.render());
+});
+</script>
+<div id="d2e199_instanceLimeRFERunPut_body"></div>
+</td>
+</tr>
+
+                            </table>
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - Success </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFERunPut-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFERunPut-200-schema">
+                                  <div id='responses-instanceLimeRFERunPut-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Success",
+  "schema" : {
+    "$ref" : "#/definitions/SuccessResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFERunPut-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFERunPut-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFERunPut-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFERunPut-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFERunPut-400-schema">
+                                  <div id='responses-instanceLimeRFERunPut-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFERunPut-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFERunPut-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFERunPut-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 404 - LimeRFE device not found </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFERunPut-404-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFERunPut-404-schema">
+                                  <div id='responses-instanceLimeRFERunPut-404-schema-404' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "LimeRFE device not found",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFERunPut-404-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFERunPut-404-schema-404');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFERunPut-404-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFERunPut-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFERunPut-500-schema">
+                                  <div id='responses-instanceLimeRFERunPut-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFERunPut-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFERunPut-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFERunPut-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFERunPut-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFERunPut-501-schema">
+                                  <div id='responses-instanceLimeRFERunPut-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFERunPut-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFERunPut-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFERunPut-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
+                    <div id="api-Instance-instanceLimeRFESerialGet">
+                      <article id="api-Instance-instanceLimeRFESerialGet-0" data-group="User" data-name="instanceLimeRFESerialGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceLimeRFESerialGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get a list of available serial interfaces to LimeRFE device</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/limerfe/serial</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceLimeRFESerialGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFESerialGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceLimeRFESerialGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/limerfe/serial"</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            LimeRFEDevices result = apiInstance.instanceLimeRFESerialGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFESerialGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        try {
+            LimeRFEDevices result = apiInstance.instanceLimeRFESerialGet();
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFESerialGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceLimeRFESerialGetWithCompletionHandler: 
+              ^(LimeRFEDevices output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceLimeRFESerialGet(callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceLimeRFESerialGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+
+            try
+            {
+                LimeRFEDevices result = apiInstance.instanceLimeRFESerialGet();
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceLimeRFESerialGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+
+try {
+    $result = $api_instance->instanceLimeRFESerialGet();
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceLimeRFESerialGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+
+eval { 
+    my $result = $api_instance->instanceLimeRFESerialGet();
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceLimeRFESerialGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFESerialGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+
+try: 
+    api_response = api_instance.instance_lime_rfe_serial_get()
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceLimeRFESerialGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return list of device paths possibly empty </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFESerialGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFESerialGet-200-schema">
+                                  <div id='responses-instanceLimeRFESerialGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return list of device paths possibly empty",
+  "schema" : {
+    "$ref" : "#/definitions/LimeRFEDevices"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFESerialGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFESerialGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFESerialGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFESerialGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFESerialGet-500-schema">
+                                  <div id='responses-instanceLimeRFESerialGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFESerialGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFESerialGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFESerialGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFESerialGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFESerialGet-501-schema">
+                                  <div id='responses-instanceLimeRFESerialGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFESerialGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFESerialGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFESerialGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Instance-instanceLocationGet">
                       <article id="api-Instance-instanceLocationGet-0" data-group="User" data-name="instanceLocationGet" data-version="0">
                         <div class="pull-left">
@@ -28412,7 +31695,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2019-09-22T20:19:36.344+02:00
+              Generated 2020-01-12T00:34:18.665+01:00
             </div>
           </div>
       </div>
