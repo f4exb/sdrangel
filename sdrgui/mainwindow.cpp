@@ -80,6 +80,10 @@
 #include <QDebug>
 #include <QSplashScreen>
 
+#if defined(HAS_LIMERFE) and not defined(__APPLE__)
+#include "limerfegui/limerfeusbdialog.h"
+#endif
+
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeletePreset, Message)
@@ -245,6 +249,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 #ifdef __APPLE__
     ui->menuPreferences->removeAction(ui->action_AMBE);
+#endif
+#if not defined(HAS_LIMERFE) or defined(__APPLE__)
+    ui->menuPreferences->removeAction(ui->action_LimeRFE);
 #endif
 
     delete splash;
@@ -1598,6 +1605,17 @@ void MainWindow::on_action_AMBE_triggered()
 #ifndef __APPLE__
     AMBEDevicesDialog ambeDevicesDialog(m_dspEngine->getAMBEEngine(), this);
     ambeDevicesDialog.exec();
+#endif
+}
+
+void MainWindow::on_action_LimeRFE_triggered()
+{
+    qDebug("MainWindow::on_action_LimeRFE_triggered");
+#if defined(HAS_LIMERFE) and not defined(__APPLE__)
+    qDebug("MainWindow::on_action_LimeRFE_triggered: activated");
+    LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(this);
+    limeRFEUSBDialog->setModal(false);
+    limeRFEUSBDialog->show();
 #endif
 }
 

@@ -125,8 +125,9 @@
     </widget>
     <addaction name="action_Audio"/>
     <addaction name="action_Logging"/>
-    <addaction name="action_AMBE"/>
     <addaction name="action_My_Position"/>
+    <addaction name="action_AMBE"/>
+    <addaction name="action_LimeRFE"/>
     <addaction name="menuDevices"/>
    </widget>
    <addaction name="menu_File"/>
@@ -941,6 +942,11 @@
   <action name="action_AMBE">
    <property name="text">
     <string>AMBE</string>
+   </property>
+  </action>
+  <action name="action_LimeRFE">
+   <property name="text">
+    <string>LimeRFE</string>
    </property>
   </action>
   <zorder>presetDock</zorder>
