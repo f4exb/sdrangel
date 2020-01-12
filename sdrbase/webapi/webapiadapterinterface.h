@@ -42,6 +42,8 @@ namespace SWGSDRangel
     class SWGLocationInformation;
     class SWGDVSerialDevices;
     class SWGAMBEDevices;
+    class SWGLimeRFEDevices;
+    class SWGLimeRFESettings;
     class SWGPresets;
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
@@ -417,6 +419,68 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/limerfe/serial (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLimeRFESerialGet(
+            SWGSDRangel::SWGLimeRFEDevices& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/limerfe/config (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLimeRFEConfigGet(
+            const QString& serial,
+            SWGSDRangel::SWGLimeRFESettings& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) serial;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/limerfe/config (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLimeRFEConfigPut(
+            SWGSDRangel::SWGLimeRFESettings& query,
+            SWGSDRangel::SWGLimeRFESettings& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/limerfe/run (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLimeRFERunPut(
+            SWGSDRangel::SWGLimeRFESettings& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) query;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -904,6 +968,9 @@ public:
     static QString instanceLocationURL;
     static QString instanceAMBESerialURL;
     static QString instanceAMBEDevicesURL;
+    static QString instanceLimeRFESerialURL;
+    static QString instanceLimeRFEConfigURL;
+    static QString instanceLimeRFERunURL;
     static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;
