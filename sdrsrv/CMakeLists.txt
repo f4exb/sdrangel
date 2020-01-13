@@ -1,8 +1,8 @@
 project (sdrsrv)
 
 set(sdrsrv_SOURCES
-    maincore.cpp   
-    device/deviceset.cpp 
+    maincore.cpp
+    device/deviceset.cpp
     webapi/webapiadaptersrv.cpp
 )
 
@@ -12,12 +12,17 @@ set(sdrsrv_HEADERS
     webapi/webapiadaptersrv.h
 )
 
+if (LIMERFE_FOUND)
+  include_directories(${LIMESUITE_INCLUDE_DIR})
+  set(sdrgui_LIMERFE_LIB ${LIMESUITE_LIBRARY})
+endif (LIMERFE_FOUND)
+
 include_directories(
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/sdrbase
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/httpserver
-    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client    
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${OPENGL_INCLUDE_DIR}
 )
 

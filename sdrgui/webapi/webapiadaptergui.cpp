@@ -38,6 +38,7 @@
 #include "plugin/pluginmanager.h"
 #include "channel/channelapi.h"
 #include "webapi/webapiadapterbase.h"
+#include "util/serialutil.h"
 
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceConfigResponse.h"
@@ -63,6 +64,12 @@
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 #include "SWGDeviceState.h"
+#include "SWGLimeRFEDevices.h"
+#include "SWGLimeRFESettings.h"
+
+#ifdef HAS_LIMERFE
+#include "limerfe/limerfecontroller.h"
+#endif
 
 #include "webapiadaptergui.h"
 
@@ -828,6 +835,162 @@ int WebAPIAdapterGUI::instanceAMBEDevicesPatch(
     instanceAMBEDevicesGet(response, error);
     return 200;
 }
+
+#ifdef HAS_LIMERFE
+int WebAPIAdapterGUI::instanceLimeRFESerialGet(
+        SWGSDRangel::SWGLimeRFEDevices& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    std::vector<std::string> comPorts;
+    SerialUtil::getComPorts(comPorts, "ttyUSB[0-9]+"); // regex is for Linux only
+    response.setNbDevices((int) comPorts.size());
+    QList<SWGSDRangel::SWGLimeRFEDevice*> *deviceNamesList = response.getLimeRfeDevices();
+    std::vector<std::string>::iterator it = comPorts.begin();
+
+    while (it != comPorts.end())
+    {
+        deviceNamesList->append(new SWGSDRangel::SWGLimeRFEDevice);
+        deviceNamesList->back()->init();
+        *deviceNamesList->back()->getDeviceRef() = QString::fromStdString(*it);
+        ++it;
+    }
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceLimeRFEConfigGet(
+        const QString& serial,
+        SWGSDRangel::SWGLimeRFESettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    LimeRFEController controller;
+    int rc = controller.openDevice(serial.toStdString());
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error opening LimeRFE device %1: %2")
+            .arg(serial).arg(controller.getError(rc).c_str());
+        return 400;
+    }
+
+    rc = controller.getState();
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error getting config from LimeRFE device %1: %2")
+            .arg(serial).arg(controller.getError(rc).c_str());
+        return 500;
+    }
+
+    controller.closeDevice();
+
+    LimeRFEController::LimeRFESettings settings;
+    controller.stateToSettings(settings);
+    response.init();
+    response.setDevicePath(new QString(serial));
+    response.setRxChannels((int) settings.m_rxChannels);
+    response.setRxWidebandChannel((int) settings.m_rxWidebandChannel);
+    response.setRxHamChannel((int) settings.m_rxHAMChannel);
+    response.setRxCellularChannel((int) settings.m_rxCellularChannel);
+    response.setRxPort((int) settings.m_rxPort);
+    response.setRxOn(settings.m_rxOn ? 1 : 0);
+    response.setAmfmNotch(settings.m_amfmNotch ? 1 : 0);
+    response.setAttenuationFactor(settings.m_attenuationFactor);
+    response.setTxChannels((int) settings.m_txChannels);
+    response.setTxWidebandChannel((int) settings.m_txWidebandChannel);
+    response.setTxHamChannel((int) settings.m_txHAMChannel);
+    response.setTxCellularChannel((int) settings.m_txCellularChannel);
+    response.setTxPort((int) settings.m_txPort);
+    response.setTxOn(settings.m_txOn ? 1 : 0);
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
+        SWGSDRangel::SWGLimeRFESettings& query,
+        SWGSDRangel::SWGLimeRFESettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    LimeRFEController controller;
+    int rc = controller.openDevice(query.getDevicePath()->toStdString());
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error opening LimeRFE device %1: %2")
+            .arg(*query.getDevicePath()).arg(controller.getError(rc).c_str());
+        return 400;
+    }
+
+    LimeRFEController::LimeRFESettings settings;
+    settings.m_rxChannels = (LimeRFEController::ChannelGroups) query.getRxChannels();
+    settings.m_rxWidebandChannel = (LimeRFEController::WidebandChannel) query.getRxWidebandChannel();
+    settings.m_rxHAMChannel = (LimeRFEController::HAMChannel) query.getRxHamChannel();
+    settings.m_rxCellularChannel = (LimeRFEController::CellularChannel) query.getRxCellularChannel();
+    settings.m_rxPort = (LimeRFEController::RxPort) query.getRxPort();
+    settings.m_amfmNotch = query.getAmfmNotch() != 0;
+    settings.m_attenuationFactor = query.getAttenuationFactor();
+    settings.m_txChannels = (LimeRFEController::ChannelGroups) query.getTxChannels();
+    settings.m_txWidebandChannel = (LimeRFEController::WidebandChannel) query.getTxWidebandChannel();
+    settings.m_txHAMChannel = (LimeRFEController::HAMChannel) query.getTxHamChannel();
+    settings.m_txCellularChannel = (LimeRFEController::CellularChannel) query.getTxCellularChannel();
+    settings.m_txPort = (LimeRFEController::TxPort) query.getTxPort();
+
+    controller.settingsToState(settings);
+
+    rc = controller.configure();
+
+    response.init();
+    response = query;
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error configuring LimeRFE device %1: %2")
+            .arg(*query.getDevicePath()).arg(controller.getError(rc).c_str());
+        return 500;
+    }
+
+    return 200;
+}
+
+int WebAPIAdapterGUI::instanceLimeRFERunPut(
+        SWGSDRangel::SWGLimeRFESettings& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    LimeRFEController controller;
+    int rc = controller.openDevice(query.getDevicePath()->toStdString());
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error opening LimeRFE device %1: %2")
+            .arg(*query.getDevicePath()).arg(controller.getError(rc).c_str());
+        return 400;
+    }
+
+    LimeRFEController::LimeRFESettings settings;
+    settings.m_rxOn = query.getRxOn() != 0;
+    settings.m_txOn = query.getTxOn() != 0;
+
+    rc = controller.setRx(settings, settings.m_rxOn);
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error setting Rx/Tx LimeRFE device %1: %2")
+            .arg(*query.getDevicePath()).arg(controller.getError(rc).c_str());
+        return 400;
+    }
+
+    response.init();
+    return 200;
+}
+#endif
 
 int WebAPIAdapterGUI::instancePresetsGet(
         SWGSDRangel::SWGPresets& response,
