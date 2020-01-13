@@ -145,10 +145,6 @@ int LimeRFEController::setRx(LimeRFESettings& settings, bool rxOn)
         return -1;
     }
 
-    if (settings.m_txRxDriven) {
-        return 0;
-    }
-
     int mode = rxOn && settings.m_txOn ?
         RFE_MODE_TXRX : rxOn ?
             RFE_MODE_RX : settings.m_txOn ?
@@ -169,10 +165,6 @@ int LimeRFEController::setTx(LimeRFESettings& settings, bool txOn)
         return -1;
     }
 
-    if (settings.m_txRxDriven) {
-        return 0;
-    }
-
     int mode = txOn && settings.m_rxOn ?
         RFE_MODE_TXRX : txOn ?
             RFE_MODE_TX : settings.m_rxOn ?
@@ -181,7 +173,7 @@ int LimeRFEController::setTx(LimeRFESettings& settings, bool txOn)
     int rc = RFE_Mode(m_rfeDevice, mode);
 
     if (rc == 0) {
-        settings.m_rxOn = txOn;
+        settings.m_txOn = txOn;
     }
 
     return rc;
