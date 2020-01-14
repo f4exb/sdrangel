@@ -3935,6 +3935,19 @@ margin-bottom: 20px;
   },
   "description" : "List of LimeRFE devices (serial or server address)"
 };
+            defs.LimeRFEPower = {
+  "properties" : {
+    "forward" : {
+      "type" : "integer",
+      "description" : "relative forward power in centi-Bels"
+    },
+    "reflected" : {
+      "type" : "integer",
+      "description" : "relative reflected power in centi-Bels"
+    }
+  },
+  "description" : "report of forward and reflected power measurements"
+};
             defs.LimeRFESettings = {
   "properties" : {
     "devicePath" : {
@@ -3985,6 +3998,14 @@ margin-bottom: 20px;
     "txPort" : {
       "type" : "integer",
       "description" : "Tx port selected (see LimeRFEController.TxPort enumeration)"
+    },
+    "swrEnable" : {
+      "type" : "integer",
+      "description" : "Boolean if SWR measurements are enabled else 0"
+    },
+    "swrSource" : {
+      "type" : "integer",
+      "description" : "SWR measurement source (see LimeRFEController.SWRSource)"
     },
     "rxOn" : {
       "type" : "integer",
@@ -7241,6 +7262,9 @@ margin-bottom: 20px;
                     </li>
                     <li data-group="Instance" data-name="instanceLimeRFEConfigPut" class="">
                       <a href="#api-Instance-instanceLimeRFEConfigPut">instanceLimeRFEConfigPut</a>
+                    </li>
+                    <li data-group="Instance" data-name="instanceLimeRFEPowerGet" class="">
+                      <a href="#api-Instance-instanceLimeRFEPowerGet">instanceLimeRFEPowerGet</a>
                     </li>
                     <li data-group="Instance" data-name="instanceLimeRFERunPut" class="">
                       <a href="#api-Instance-instanceLimeRFERunPut">instanceLimeRFERunPut</a>
@@ -25784,6 +25808,424 @@ $(document).ready(function() {
                         </article>
                       </div>
                       <hr>
+                    <div id="api-Instance-instanceLimeRFEPowerGet">
+                      <article id="api-Instance-instanceLimeRFEPowerGet-0" data-group="User" data-name="instanceLimeRFEPowerGet" data-version="0">
+                        <div class="pull-left">
+                          <h1>instanceLimeRFEPowerGet</h1>
+                          <p></p>
+                        </div>
+                        <div class="pull-right"></div>
+                        <div class="clearfix"></div>
+                        <p></p>
+                        <p class="marked">get forward and reflected relative powers in centi-Bels</p>
+                        <p></p>
+                        <br />
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/sdrangel/limerfe/power</span></code></pre>
+                        <p>
+                          <h3>Usage and SDK Samples</h3>
+                        </p>
+                        <ul class="nav nav-tabs nav-tabs-examples">
+                          <li class="active"><a href="#examples-Instance-instanceLimeRFEPowerGet-0-curl">Curl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-java">Java</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-android">Android</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-groovy">Groovy</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-objc">Obj-C</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-javascript">JavaScript</a></li>
+                          <!--<li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-angular">Angular</a></li>-->
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-csharp">C#</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-php">PHP</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-perl">Perl</a></li>
+                          <li class=""><a href="#examples-Instance-instanceLimeRFEPowerGet-0-python">Python</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                          <div class="tab-pane active" id="examples-Instance-instanceLimeRFEPowerGet-0-curl">
+                            <pre class="prettyprint"><code class="language-bsh">curl -X GET "http://localhost/sdrangel/limerfe/power?serial="</code></pre>
+                          </div>
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-java">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.*;
+import SWGSDRangel.auth.*;
+import SWGSDRangel.model.*;
+import SWGSDRangel.api.InstanceApi;
+
+import java.io.File;
+import java.util.*;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        
+        InstanceApi apiInstance = new InstanceApi();
+        String serial = serial_example; // String | device serial path
+        try {
+            LimeRFEPower result = apiInstance.instanceLimeRFEPowerGet(serial);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFEPowerGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+
+                          <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-android">
+                            <pre class="prettyprint"><code class="language-java">import SWGSDRangel.api.InstanceApi;
+
+public class InstanceApiExample {
+
+    public static void main(String[] args) {
+        InstanceApi apiInstance = new InstanceApi();
+        String serial = serial_example; // String | device serial path
+        try {
+            LimeRFEPower result = apiInstance.instanceLimeRFEPowerGet(serial);
+            System.out.println(result);
+        } catch (ApiException e) {
+            System.err.println("Exception when calling InstanceApi#instanceLimeRFEPowerGet");
+            e.printStackTrace();
+        }
+    }
+}</code></pre>
+                          </div>
+  <!--
+  <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-groovy">
+  <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+  </div> -->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-objc">
+                              <pre class="prettyprint"><code class="language-cpp">String *serial = serial_example; // device serial path
+
+InstanceApi *apiInstance = [[InstanceApi alloc] init];
+
+[apiInstance instanceLimeRFEPowerGetWith:serial
+              completionHandler: ^(LimeRFEPower output, NSError* error) {
+                            if (output) {
+                                NSLog(@"%@", output);
+                            }
+                            if (error) {
+                                NSLog(@"Error: %@", error);
+                            }
+                        }];
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-javascript">
+                              <pre class="prettyprint"><code class="language-js">var SdRangel = require('sd_rangel');
+
+var api = new SdRangel.InstanceApi()
+
+var serial = serial_example; // {String} device serial path
+
+
+var callback = function(error, data, response) {
+  if (error) {
+    console.error(error);
+  } else {
+    console.log('API called successfully. Returned data: ' + data);
+  }
+};
+api.instanceLimeRFEPowerGet(serial, callback);
+</code></pre>
+                            </div>
+
+                            <!--<div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-angular">
+              <pre class="prettyprint language-json prettyprinted" data-type="json"><code>Coming Soon!</code></pre>
+            </div>-->
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-csharp">
+                              <pre class="prettyprint"><code class="language-cs">using System;
+using System.Diagnostics;
+using SWGSDRangel.Api;
+using SWGSDRangel.Client;
+using SWGSDRangel.Model;
+
+namespace Example
+{
+    public class instanceLimeRFEPowerGetExample
+    {
+        public void main()
+        {
+            
+            var apiInstance = new InstanceApi();
+            var serial = serial_example;  // String | device serial path
+
+            try
+            {
+                LimeRFEPower result = apiInstance.instanceLimeRFEPowerGet(serial);
+                Debug.WriteLine(result);
+            }
+            catch (Exception e)
+            {
+                Debug.Print("Exception when calling InstanceApi.instanceLimeRFEPowerGet: " + e.Message );
+            }
+        }
+    }
+}
+</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-php">
+                              <pre class="prettyprint"><code class="language-php"><&#63;php
+require_once(__DIR__ . '/vendor/autoload.php');
+
+$api_instance = new Swagger\Client\Api\InstanceApi();
+$serial = serial_example; // String | device serial path
+
+try {
+    $result = $api_instance->instanceLimeRFEPowerGet($serial);
+    print_r($result);
+} catch (Exception $e) {
+    echo 'Exception when calling InstanceApi->instanceLimeRFEPowerGet: ', $e->getMessage(), PHP_EOL;
+}
+?></code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-perl">
+                              <pre class="prettyprint"><code class="language-perl">use Data::Dumper;
+use SWGSDRangel::Configuration;
+use SWGSDRangel::InstanceApi;
+
+my $api_instance = SWGSDRangel::InstanceApi->new();
+my $serial = serial_example; # String | device serial path
+
+eval { 
+    my $result = $api_instance->instanceLimeRFEPowerGet(serial => $serial);
+    print Dumper($result);
+};
+if ($@) {
+    warn "Exception when calling InstanceApi->instanceLimeRFEPowerGet: $@\n";
+}</code></pre>
+                            </div>
+
+                            <div class="tab-pane" id="examples-Instance-instanceLimeRFEPowerGet-0-python">
+                              <pre class="prettyprint"><code class="language-python">from __future__ import print_statement
+import time
+import swagger_sdrangel
+from swagger_sdrangel.rest import ApiException
+from pprint import pprint
+
+# create an instance of the API class
+api_instance = swagger_sdrangel.InstanceApi()
+serial = serial_example # String | device serial path
+
+try: 
+    api_response = api_instance.instance_lime_rfe_power_get(serial)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling InstanceApi->instanceLimeRFEPowerGet: %s\n" % e)</code></pre>
+                            </div>
+                          </div>
+
+                          <h2>Parameters</h2>
+
+
+
+
+
+                            <div class="methodsubtabletitle">Query parameters</div>
+                            <table id="methodsubtable">
+                              <tr>
+                                <th width="150px">Name</th>
+                                <th>Description</th>
+                              </tr>
+                                <tr><td style="width:150px;">serial*</td>
+<td>
+
+
+    <div id="d2e199_instanceLimeRFEPowerGet_serial">
+        <div class="json-schema-view">
+            <div class="primitive">
+                <span class="type">
+                    String
+                </span>
+
+                    <div class="inner description">
+                        device serial path
+                    </div>
+            </div>
+                <div class="inner required">
+                    Required
+                </div>
+        </div>
+    </div>
+</td>
+</tr>
+
+                            </table>
+
+                          <h2>Responses</h2>
+                            <h3> Status: 200 - On success return forward and reflected powers in centi-Bels </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEPowerGet-200-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEPowerGet-200-schema">
+                                  <div id='responses-instanceLimeRFEPowerGet-200-schema-200' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "On success return forward and reflected powers in centi-Bels",
+  "schema" : {
+    "$ref" : "#/definitions/LimeRFEPower"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEPowerGet-200-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEPowerGet-200-schema-200');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEPowerGet-200-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEPowerGet-400-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEPowerGet-400-schema">
+                                  <div id='responses-instanceLimeRFEPowerGet-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEPowerGet-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEPowerGet-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEPowerGet-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 500 - Error </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEPowerGet-500-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEPowerGet-500-schema">
+                                  <div id='responses-instanceLimeRFEPowerGet-500-schema-500' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Error",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEPowerGet-500-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEPowerGet-500-schema-500');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEPowerGet-500-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                            <h3> Status: 501 - Function not implemented </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-instanceLimeRFEPowerGet-501-schema">Schema</a>
+                                </li>
+
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-instanceLimeRFEPowerGet-501-schema">
+                                  <div id='responses-instanceLimeRFEPowerGet-501-schema-501' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Function not implemented",
+  "schema" : {
+    "$ref" : "#/definitions/ErrorResponse"
+  }
+};
+                                        var schema = schemaWrapper.schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.definitions = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-instanceLimeRFEPowerGet-501-schema-data').val(stringify(schema));
+                                        var result = $('#responses-instanceLimeRFEPowerGet-501-schema-501');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-instanceLimeRFEPowerGet-501-schema-data' type='hidden' value=''></input>
+                                </div>
+                            </div>
+
+                        </article>
+                      </div>
+                      <hr>
                     <div id="api-Instance-instanceLimeRFERunPut">
                       <article id="api-Instance-instanceLimeRFERunPut-0" data-group="User" data-name="instanceLimeRFERunPut" data-version="0">
                         <div class="pull-left">
@@ -31609,7 +32051,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-01-14T01:04:56.442+01:00
+              Generated 2020-01-15T00:01:43.073+01:00
             </div>
           </div>
       </div>
