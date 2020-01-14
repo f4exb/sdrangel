@@ -35,6 +35,7 @@ QString WebAPIAdapterInterface::instanceAMBEDevicesURL = "/sdrangel/ambe/devices
 QString WebAPIAdapterInterface::instanceLimeRFESerialURL = "/sdrangel/limerfe/serial";
 QString WebAPIAdapterInterface::instanceLimeRFEConfigURL = "/sdrangel/limerfe/config";
 QString WebAPIAdapterInterface::instanceLimeRFERunURL = "/sdrangel/limerfe/run";
+QString WebAPIAdapterInterface::instanceLimeRFEPowerURL = "/sdrangel/limerfe/power";
 QString WebAPIAdapterInterface::instancePresetsURL = "/sdrangel/presets";
 QString WebAPIAdapterInterface::instancePresetURL = "/sdrangel/preset";
 QString WebAPIAdapterInterface::instancePresetFileURL = "/sdrangel/preset/file";

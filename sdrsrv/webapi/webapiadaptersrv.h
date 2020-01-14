@@ -159,6 +159,11 @@ public:
             SWGSDRangel::SWGLimeRFESettings& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int instanceLimeRFEPowerGet(
+            const QString& serial,
+            SWGSDRangel::SWGLimeRFEPower& response,
+            SWGSDRangel::SWGErrorResponse& error);
 #endif
 
     virtual int instancePresetFilePut(

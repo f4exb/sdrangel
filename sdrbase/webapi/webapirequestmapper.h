@@ -68,6 +68,7 @@ private:
     void instanceLimeRFESerialService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLimeRFEConfigService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceLimeRFERunService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceLimeRFEPowerService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instancePresetFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);

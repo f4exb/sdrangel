@@ -44,6 +44,7 @@ namespace SWGSDRangel
     class SWGAMBEDevices;
     class SWGLimeRFEDevices;
     class SWGLimeRFESettings;
+    class SWGLimeRFEPower;
     class SWGPresets;
     class SWGPresetTransfer;
     class SWGPresetIdentifier;
@@ -481,6 +482,22 @@ public:
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) query;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/limerfe/power (GET) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int instanceLimeRFEPowerGet(
+            const QString& serial,
+            SWGSDRangel::SWGLimeRFEPower& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) serial;
         (void) response;
     	error.init();
     	*error.getMessage() = QString("Function not implemented");
@@ -971,6 +988,7 @@ public:
     static QString instanceLimeRFESerialURL;
     static QString instanceLimeRFEConfigURL;
     static QString instanceLimeRFERunURL;
+    static QString instanceLimeRFEPowerURL;
     static QString instancePresetsURL;
     static QString instancePresetURL;
     static QString instancePresetFileURL;
