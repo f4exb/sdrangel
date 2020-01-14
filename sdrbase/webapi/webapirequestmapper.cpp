@@ -1024,7 +1024,7 @@ void WebAPIRequestMapper::instanceLimeRFEConfigService(qtwebapp::HttpRequest& re
     else if (request.getMethod() == "PUT")
     {
         SWGSDRangel::SWGLimeRFESettings query;
-        SWGSDRangel::SWGLimeRFESettings normalResponse;
+        SWGSDRangel::SWGSuccessResponse normalResponse;
         QString jsonStr = request.getBody();
         QJsonObject jsonObject;
 

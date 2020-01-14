@@ -461,7 +461,7 @@ public:
      */
     virtual int instanceLimeRFEConfigPut(
             SWGSDRangel::SWGLimeRFESettings& query,
-            SWGSDRangel::SWGLimeRFESettings& response,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) query;

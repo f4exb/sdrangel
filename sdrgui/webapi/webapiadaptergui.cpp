@@ -842,6 +842,7 @@ int WebAPIAdapterGUI::instanceLimeRFESerialGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
+    response.init();
     std::vector<std::string> comPorts;
     SerialUtil::getComPorts(comPorts, "ttyUSB[0-9]+"); // regex is for Linux only
     response.setNbDevices((int) comPorts.size());
@@ -911,7 +912,7 @@ int WebAPIAdapterGUI::instanceLimeRFEConfigGet(
 
 int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
         SWGSDRangel::SWGLimeRFESettings& query,
-        SWGSDRangel::SWGLimeRFESettings& response,
+        SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
     LimeRFEController controller;
@@ -931,6 +932,7 @@ int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
     settings.m_rxHAMChannel = (LimeRFEController::HAMChannel) query.getRxHamChannel();
     settings.m_rxCellularChannel = (LimeRFEController::CellularChannel) query.getRxCellularChannel();
     settings.m_rxPort = (LimeRFEController::RxPort) query.getRxPort();
+    settings.m_rxOn = query.getRxOn() != 0;
     settings.m_amfmNotch = query.getAmfmNotch() != 0;
     settings.m_attenuationFactor = query.getAttenuationFactor();
     settings.m_txChannels = (LimeRFEController::ChannelGroups) query.getTxChannels();
@@ -938,13 +940,11 @@ int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
     settings.m_txHAMChannel = (LimeRFEController::HAMChannel) query.getTxHamChannel();
     settings.m_txCellularChannel = (LimeRFEController::CellularChannel) query.getTxCellularChannel();
     settings.m_txPort = (LimeRFEController::TxPort) query.getTxPort();
+    settings.m_txOn = query.getTxOn() != 0;
 
     controller.settingsToState(settings);
 
     rc = controller.configure();
-
-    response.init();
-    response = query;
 
     if (rc != 0)
     {
@@ -954,6 +954,8 @@ int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
         return 500;
     }
 
+    response.init();
+    *response.getMessage() = QString("LimeRFE device at %1 configuration updated successfully").arg(*query.getDevicePath());
     return 200;
 }
 
@@ -988,6 +990,7 @@ int WebAPIAdapterGUI::instanceLimeRFERunPut(
     }
 
     response.init();
+    *response.getMessage() = QString("LimeRFE device at %1 mode updated successfully").arg(*query.getDevicePath());
     return 200;
 }
 #endif
