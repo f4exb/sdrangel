@@ -81,6 +81,12 @@ public:
     qint32 getTxPort();
     void setTxPort(qint32 tx_port);
 
+    qint32 getSwrEnable();
+    void setSwrEnable(qint32 swr_enable);
+
+    qint32 getSwrSource();
+    void setSwrSource(qint32 swr_source);
+
     qint32 getRxOn();
     void setRxOn(qint32 rx_on);
 
@@ -129,6 +135,12 @@ private:
 
     qint32 tx_port;
     bool m_tx_port_isSet;
+
+    qint32 swr_enable;
+    bool m_swr_enable_isSet;
+
+    qint32 swr_source;
+    bool m_swr_source_isSet;
 
     qint32 rx_on;
     bool m_rx_on_isSet;

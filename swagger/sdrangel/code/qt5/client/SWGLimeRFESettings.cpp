@@ -54,6 +54,10 @@ SWGLimeRFESettings::SWGLimeRFESettings() {
     m_tx_cellular_channel_isSet = false;
     tx_port = 0;
     m_tx_port_isSet = false;
+    swr_enable = 0;
+    m_swr_enable_isSet = false;
+    swr_source = 0;
+    m_swr_source_isSet = false;
     rx_on = 0;
     m_rx_on_isSet = false;
     tx_on = 0;
@@ -92,6 +96,10 @@ SWGLimeRFESettings::init() {
     m_tx_cellular_channel_isSet = false;
     tx_port = 0;
     m_tx_port_isSet = false;
+    swr_enable = 0;
+    m_swr_enable_isSet = false;
+    swr_source = 0;
+    m_swr_source_isSet = false;
     rx_on = 0;
     m_rx_on_isSet = false;
     tx_on = 0;
@@ -103,6 +111,8 @@ SWGLimeRFESettings::cleanup() {
     if(device_path != nullptr) { 
         delete device_path;
     }
+
+
 
 
 
@@ -155,6 +165,10 @@ SWGLimeRFESettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tx_cellular_channel, pJson["txCellularChannel"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_port, pJson["txPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&swr_enable, pJson["swrEnable"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&swr_source, pJson["swrSource"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx_on, pJson["rxOn"], "qint32", "");
     
@@ -214,6 +228,12 @@ SWGLimeRFESettings::asJsonObject() {
     }
     if(m_tx_port_isSet){
         obj->insert("txPort", QJsonValue(tx_port));
+    }
+    if(m_swr_enable_isSet){
+        obj->insert("swrEnable", QJsonValue(swr_enable));
+    }
+    if(m_swr_source_isSet){
+        obj->insert("swrSource", QJsonValue(swr_source));
     }
     if(m_rx_on_isSet){
         obj->insert("rxOn", QJsonValue(rx_on));
@@ -356,6 +376,26 @@ SWGLimeRFESettings::setTxPort(qint32 tx_port) {
 }
 
 qint32
+SWGLimeRFESettings::getSwrEnable() {
+    return swr_enable;
+}
+void
+SWGLimeRFESettings::setSwrEnable(qint32 swr_enable) {
+    this->swr_enable = swr_enable;
+    this->m_swr_enable_isSet = true;
+}
+
+qint32
+SWGLimeRFESettings::getSwrSource() {
+    return swr_source;
+}
+void
+SWGLimeRFESettings::setSwrSource(qint32 swr_source) {
+    this->swr_source = swr_source;
+    this->m_swr_source_isSet = true;
+}
+
+qint32
 SWGLimeRFESettings::getRxOn() {
     return rx_on;
 }
@@ -417,6 +457,12 @@ SWGLimeRFESettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_swr_enable_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_swr_source_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rx_on_isSet){

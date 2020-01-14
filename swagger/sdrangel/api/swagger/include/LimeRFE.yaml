@@ -40,6 +40,12 @@ LimeRFESettings:
     txPort:
       description: Tx port selected (see LimeRFEController.TxPort enumeration)
       type: integer
+    swrEnable:
+      description: Boolean if SWR measurements are enabled else 0
+      type: integer
+    swrSource:
+      description: SWR measurement source (see LimeRFEController.SWRSource)
+      type: integer
     rxOn:
       description: Boolean 1 if Rx is active else 0
       type: integer
@@ -51,8 +57,8 @@ LimeRFEPower:
   description: report of forward and reflected power measurements
   properties:
     forward:
-      description: relative forward power in dB
+      description: relative forward power in centi-Bels
       type: integer
     reflected:
-      description: relative reflected power in dB
+      description: relative reflected power in centi-Bels
       type: integer

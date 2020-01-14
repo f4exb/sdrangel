@@ -2587,6 +2587,16 @@ bool WebAPIRequestMapper::validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings&
         limeRFESettings.setTxOn(jsonObject["txOn"].toInt());
         limeRFESettingsKeys.append("txOn");
     }
+    if (jsonObject.contains("swrEnable"))
+    {
+        limeRFESettings.setSwrEnable(jsonObject["swrEnable"].toInt());
+        limeRFESettingsKeys.append("swrEnable");
+    }
+    if (jsonObject.contains("swrSource"))
+    {
+        limeRFESettings.setSwrSource(jsonObject["swrSource"].toInt());
+        limeRFESettingsKeys.append("swrSource");
+    }
 
     return true;
 }

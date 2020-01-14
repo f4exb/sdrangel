@@ -97,11 +97,11 @@ int LimeRFEController::configure()
         << "attValue: " << (int) m_rfeBoardState.attValue
         << "channelIDRX: " << (int) m_rfeBoardState.channelIDRX
         << "channelIDTX: " << (int) m_rfeBoardState.channelIDTX
-        << "enableSWR: " << (int) m_rfeBoardState.enableSWR
         << "mode: " << (int) m_rfeBoardState.mode
         << "notchOnOff: " << (int) m_rfeBoardState.notchOnOff
         << "selPortRX: " << (int) m_rfeBoardState.selPortRX
         << "selPortTX: " << (int) m_rfeBoardState.selPortTX
+        << "enableSWR: " << (int) m_rfeBoardState.enableSWR
         << "sourceSWR: " << (int) m_rfeBoardState.sourceSWR;
 
     int rc = RFE_ConfigureState(m_rfeDevice, m_rfeBoardState);
@@ -127,11 +127,11 @@ int LimeRFEController::getState()
         << "attValue: " << (int) m_rfeBoardState.attValue
         << "channelIDRX: " << (int) m_rfeBoardState.channelIDRX
         << "channelIDTX: " << (int) m_rfeBoardState.channelIDTX
-        << "enableSWR: " << (int) m_rfeBoardState.enableSWR
         << "mode: " << (int) m_rfeBoardState.mode
         << "notchOnOff: " << (int) m_rfeBoardState.notchOnOff
         << "selPortRX: " << (int) m_rfeBoardState.selPortRX
         << "selPortTX: " << (int) m_rfeBoardState.selPortTX
+        << "enableSWR: " << (int) m_rfeBoardState.enableSWR
         << "sourceSWR: " << (int) m_rfeBoardState.sourceSWR;
 
     if (rc != 0) {
@@ -345,8 +345,13 @@ void LimeRFEController::settingsToState(const LimeRFESettings& settings)
 
     m_rfeBoardState.attValue = settings.m_attenuationFactor < 0 ? 0 : settings.m_attenuationFactor > 7 ? 7 : settings.m_attenuationFactor;
     m_rfeBoardState.notchOnOff = settings.m_amfmNotch;
-    m_rfeBoardState.enableSWR = 0; // TODO
-    m_rfeBoardState.sourceSWR = RFE_SWR_SRC_EXT; // TODO
+    m_rfeBoardState.enableSWR = settings.m_swrEnable ? RFE_SWR_ENABLE : RFE_SWR_DISABLE;
+
+    if (settings.m_swrSource == SWRExternal) {
+        m_rfeBoardState.sourceSWR = RFE_SWR_SRC_EXT;
+    } else if (settings.m_swrSource == SWRCellular) {
+        m_rfeBoardState.sourceSWR = RFE_SWR_SRC_CELL;
+    }
 }
 
 void LimeRFEController::stateToSettings(LimeRFESettings& settings)
@@ -540,4 +545,7 @@ void LimeRFEController::stateToSettings(LimeRFESettings& settings)
         settings.m_rxOn = true;
         settings.m_txOn = true;
     }
+
+    settings.m_swrEnable = m_rfeBoardState.enableSWR == RFE_SWR_ENABLE;
+    settings.m_swrSource = m_rfeBoardState.sourceSWR == RFE_SWR_SRC_CELL ? SWRCellular : SWRExternal;
 }
