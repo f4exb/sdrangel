@@ -45,6 +45,7 @@
 #include "SWGDeviceReport.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFESettings.h"
+#include "SWGLimeRFEPower.h"
 
 #include "maincore.h"
 #include "loggerwithfile.h"
@@ -973,6 +974,52 @@ int WebAPIAdapterSrv::instanceLimeRFERunPut(
 
     response.init();
     *response.getMessage() = QString("LimeRFE device at %1 mode updated successfully").arg(*query.getDevicePath());
+    return 200;
+}
+
+int WebAPIAdapterSrv::instanceLimeRFEPowerGet(
+        const QString& serial,
+        SWGSDRangel::SWGLimeRFEPower& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    LimeRFEController controller;
+    int rc = controller.openDevice(serial.toStdString());
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error opening LimeRFE device %1: %2")
+            .arg(serial).arg(controller.getError(rc).c_str());
+        return 400;
+    }
+
+    int fwdPower;
+    rc = controller.getFwdPower(fwdPower);
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error getting forward power from LimeRFE device %1: %2")
+            .arg(serial).arg(controller.getError(rc).c_str());
+        return 500;
+    }
+
+    int refPower;
+    rc = controller.getRefPower(refPower);
+
+    if (rc != 0)
+    {
+        error.init();
+        *error.getMessage() = QString("Error getting reflected power from LimeRFE device %1: %2")
+            .arg(serial).arg(controller.getError(rc).c_str());
+        return 500;
+    }
+
+    controller.closeDevice();
+
+    response.init();
+    response.setForward(fwdPower);
+    response.setReflected(refPower);
     return 200;
 }
 #endif

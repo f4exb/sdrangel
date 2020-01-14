@@ -46,3 +46,13 @@ LimeRFESettings:
     txOn:
       description: Boolean 1 if Tx is active else 0
       type: integer
+
+LimeRFEPower:
+  description: report of forward and reflected power measurements
+  properties:
+    forward:
+      description: relative forward power in dB
+      type: integer
+    reflected:
+      description: relative reflected power in dB
+      type: integer

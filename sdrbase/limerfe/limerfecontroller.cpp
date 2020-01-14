@@ -192,33 +192,33 @@ int LimeRFEController::setTx(LimeRFESettings& settings, bool txOn)
     return rc;
 }
 
-int LimeRFEController::driveTx(LimeRFESettings& settings, bool txOn)
+int LimeRFEController::getFwdPower(int& powerDB)
 {
-
-    if (!m_rfeDevice)
-    {
-        qDebug("LimeRFEController::driveTx: not open");
+    if (!m_rfeDevice) {
         return -1;
     }
 
-    if (settings.m_rxChannels == ChannelsCellular)
-    {
-        qDebug("LimeRFEController::driveTx: do nothing for cellular bands");
-        return 0; // cellular is TRX anyway
+    int power;
+    int rc = RFE_ReadADC(m_rfeDevice, RFE_ADC1, &power);
+
+    if (rc == 0) {
+        powerDB = power;
     }
 
-    int mode = txOn ? RFE_MODE_TX : RFE_MODE_RX;
-    int rc = RFE_Mode(m_rfeDevice, mode);
+    return rc;
+}
 
-    if (rc == 0)
-    {
-        settings.m_rxOn = !txOn;
-        settings.m_txOn = txOn;
-        qDebug("LimeRFEController::driveTx: done: Rx: %s Tx: %s", settings.m_rxOn ? "on" : "off", settings.m_txOn ? "on" : "off");
+int LimeRFEController::getRefPower(int& powerDB)
+{
+    if (!m_rfeDevice) {
+        return -1;
     }
-    else
-    {
-        qInfo("LimeRFEController::driveTx: %s error: %s", txOn ? "on" : "off", getError(rc).c_str());
+
+    int power;
+    int rc = RFE_ReadADC(m_rfeDevice, RFE_ADC2, &power);
+
+    if (rc == 0) {
+        powerDB = power;
     }
 
     return rc;

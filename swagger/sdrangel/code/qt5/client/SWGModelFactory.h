@@ -93,6 +93,7 @@
 #include "SWGKiwiSDRSettings.h"
 #include "SWGLimeRFEDevice.h"
 #include "SWGLimeRFEDevices.h"
+#include "SWGLimeRFEPower.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
@@ -408,6 +409,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLimeRFEDevices").compare(type) == 0) {
       return new SWGLimeRFEDevices();
+    }
+    if(QString("SWGLimeRFEPower").compare(type) == 0) {
+      return new SWGLimeRFEPower();
     }
     if(QString("SWGLimeRFESettings").compare(type) == 0) {
       return new SWGLimeRFESettings();

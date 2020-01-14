@@ -555,8 +555,6 @@ paths:
       operationId: instanceLimeRFEConfigGet
       tags:
         - Instance
-      consumes:
-        - application/json
       parameters:
         - name: serial
           in: query
@@ -619,6 +617,33 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/limerfe/power:
+    x-swagger-router-controller: instance
+    get:
+      description: get forward and reflected relative powers in dB
+      operationId: instanceLimeRFEPowerGet
+      tags:
+        - Instance
+      parameters:
+        - name: serial
+          in: query
+          description: device serial path
+          required: true
+          type: string
+      responses:
+        "200":
+          description: On success return forward and reflected powers
+          schema:
+            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFEPower"
         "400":
           description: Error
           schema:

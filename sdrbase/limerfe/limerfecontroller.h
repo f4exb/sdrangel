@@ -104,9 +104,10 @@ public:
     int configure();
     int getState();
     static std::string getError(int errorCode);
-    int setRx(LimeRFESettings& settings, bool rxOn);   //!< Used by USB driver
-    int setTx(LimeRFESettings& settings, bool txOn);   //!< USed by USB driver
-    int driveTx(LimeRFESettings& settings, bool txOn); //!< Used by the device set trigger
+    int setRx(LimeRFESettings& settings, bool rxOn);
+    int setTx(LimeRFESettings& settings, bool txOn);
+    int getFwdPower(int& powerDB);
+    int getRefPower(int& powerDB);
 
     void settingsToState(const LimeRFESettings& settings);
     void stateToSettings(LimeRFESettings& settings);

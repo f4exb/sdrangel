@@ -35,6 +35,7 @@
 #include "SWGAMBEDevices.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFESettings.h"
+#include "SWGLimeRFEPower.h"
 #include "SWGPresets.h"
 #include "SWGPresetTransfer.h"
 #include "SWGPresetIdentifier.h"
@@ -264,6 +265,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
             instanceLimeRFEConfigService(request, response);
         } else if (path == WebAPIAdapterInterface::instanceLimeRFERunURL) {
             instanceLimeRFERunService(request, response);
+        } else if (path == WebAPIAdapterInterface::instanceLimeRFEPowerURL) {
+            instanceLimeRFEPowerService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetsURL) {
             instancePresetsService(request, response);
         } else if (path == WebAPIAdapterInterface::instancePresetURL) {
@@ -1116,6 +1119,35 @@ void WebAPIRequestMapper::instanceLimeRFERunService(qtwebapp::HttpRequest& reque
             response.setStatus(400,"Invalid JSON format");
             errorResponse.init();
             *errorResponse.getMessage() = "Invalid JSON format";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::instanceLimeRFEPowerService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "GET")
+    {
+        QByteArray serialStr = request.getParameter("serial");
+        SWGSDRangel::SWGLimeRFEPower normalResponse;
+
+        int status = m_adapter->instanceLimeRFEPowerGet(serialStr, normalResponse, errorResponse);
+        response.setStatus(status);
+
+        if (status/100 == 2) {
+            response.write(normalResponse.asJson().toUtf8());
+        } else {
             response.write(errorResponse.asJson().toUtf8());
         }
     }

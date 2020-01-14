@@ -1172,6 +1172,66 @@ SWGInstanceApi::instanceLimeRFEConfigPutCallback(SWGHttpRequestWorker * worker) 
 }
 
 void
+SWGInstanceApi::instanceLimeRFEPowerGet(QString* serial) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/limerfe/power");
+
+
+    if (fullPath.indexOf("?") > 0)
+      fullPath.append("&");
+    else
+      fullPath.append("?");
+    fullPath.append(QUrl::toPercentEncoding("serial"))
+        .append("=")
+        .append(QUrl::toPercentEncoding(stringValue(serial)));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceLimeRFEPowerGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceLimeRFEPowerGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGLimeRFEPower* output = static_cast<SWGLimeRFEPower*>(create(json, QString("SWGLimeRFEPower")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceLimeRFEPowerGetSignal(output);
+    } else {
+        emit instanceLimeRFEPowerGetSignalE(output, error_type, error_str);
+        emit instanceLimeRFEPowerGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGInstanceApi::instanceLimeRFERunPut(SWGLimeRFESettings& body) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/limerfe/run");
