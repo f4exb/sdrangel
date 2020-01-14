@@ -93,10 +93,23 @@ int LimeRFEController::configure()
         return -1;
     }
 
+    qDebug() << "LimeRFEController::configure: "
+        << "attValue: " << (int) m_rfeBoardState.attValue
+        << "channelIDRX: " << (int) m_rfeBoardState.channelIDRX
+        << "channelIDTX: " << (int) m_rfeBoardState.channelIDTX
+        << "enableSWR: " << (int) m_rfeBoardState.enableSWR
+        << "mode: " << (int) m_rfeBoardState.mode
+        << "notchOnOff: " << (int) m_rfeBoardState.notchOnOff
+        << "selPortRX: " << (int) m_rfeBoardState.selPortRX
+        << "selPortTX: " << (int) m_rfeBoardState.selPortTX
+        << "sourceSWR: " << (int) m_rfeBoardState.sourceSWR;
+
     int rc = RFE_ConfigureState(m_rfeDevice, m_rfeBoardState);
 
     if (rc != 0) {
         qInfo("LimeRFEController::configure: %s", getError(rc).c_str());
+    } else {
+        qDebug() << "LimeRFEController::configure: done";
     }
 
     return rc;
@@ -241,6 +254,11 @@ void LimeRFEController::settingsToState(const LimeRFESettings& settings)
     }
     else
     {
+        m_rfeBoardState.mode = settings.m_rxOn && settings.m_txOn ?
+            RFE_MODE_TXRX : settings.m_rxOn ?
+                RFE_MODE_RX : settings.m_txOn ?
+                    RFE_MODE_TX :  RFE_MODE_NONE;
+
         if (settings.m_rxChannels == ChannelsWideband)
         {
             if (settings.m_rxWidebandChannel == WidebandLow) {
@@ -327,6 +345,8 @@ void LimeRFEController::settingsToState(const LimeRFESettings& settings)
 
     m_rfeBoardState.attValue = settings.m_attenuationFactor < 0 ? 0 : settings.m_attenuationFactor > 7 ? 7 : settings.m_attenuationFactor;
     m_rfeBoardState.notchOnOff = settings.m_amfmNotch;
+    m_rfeBoardState.enableSWR = 0; // TODO
+    m_rfeBoardState.sourceSWR = RFE_SWR_SRC_EXT; // TODO
 }
 
 void LimeRFEController::stateToSettings(LimeRFESettings& settings)

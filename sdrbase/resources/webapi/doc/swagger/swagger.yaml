@@ -595,10 +595,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-        "404":
-          description: LimeRFE device not found
-          schema:
-            $ref: "#/definitions/ErrorResponse"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -625,10 +621,6 @@ paths:
             $ref: "#/definitions/SuccessResponse"
         "400":
           description: Error
-          schema:
-            $ref: "#/definitions/ErrorResponse"
-        "404":
-          description: LimeRFE device not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
