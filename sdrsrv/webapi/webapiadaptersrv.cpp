@@ -889,6 +889,8 @@ int WebAPIAdapterSrv::instanceLimeRFEConfigGet(
     response.setTxCellularChannel((int) settings.m_txCellularChannel);
     response.setTxPort((int) settings.m_txPort);
     response.setTxOn(settings.m_txOn ? 1 : 0);
+    response.setSwrEnable(settings.m_swrEnable ? 1 : 0);
+    response.setSwrSource((int) settings.m_swrSource);
 
     return 200;
 }
@@ -924,6 +926,8 @@ int WebAPIAdapterSrv::instanceLimeRFEConfigPut(
     settings.m_txCellularChannel = (LimeRFEController::CellularChannel) query.getTxCellularChannel();
     settings.m_txPort = (LimeRFEController::TxPort) query.getTxPort();
     settings.m_txOn = query.getTxOn() != 0;
+    settings.m_swrEnable = query.getSwrEnable() != 0;
+    settings.m_swrSource = (LimeRFEController::SWRSource) query.getSwrSource();
 
     controller.settingsToState(settings);
 

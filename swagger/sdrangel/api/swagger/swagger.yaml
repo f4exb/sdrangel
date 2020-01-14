@@ -629,7 +629,7 @@ paths:
   /sdrangel/limerfe/power:
     x-swagger-router-controller: instance
     get:
-      description: get forward and reflected relative powers in dB
+      description: get forward and reflected relative powers in centi-Bels
       operationId: instanceLimeRFEPowerGet
       tags:
         - Instance
@@ -641,7 +641,7 @@ paths:
           type: string
       responses:
         "200":
-          description: On success return forward and reflected powers in dB
+          description: On success return forward and reflected powers in centi-Bels
           schema:
             $ref: "http://localhost:8081/api/swagger/include/LimeRFE.yaml#/LimeRFEPower"
         "400":

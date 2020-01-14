@@ -73,6 +73,12 @@ public:
         TxPortJ5  //!< Rx/Tx HF
     };
 
+    enum SWRSource
+    {
+        SWRExternal,
+        SWRCellular
+    };
+
     struct LimeRFESettings
     {
         LimeRFESettings();
@@ -90,6 +96,8 @@ public:
         LimeRFEController::HAMChannel m_txHAMChannel;
         LimeRFEController::CellularChannel m_txCellularChannel;
         LimeRFEController::TxPort m_txPort;
+        bool m_swrEnable;
+        LimeRFEController::SWRSource m_swrSource;
         // Rx/Tx
         bool m_txRxDriven; //!< Tx settings set according to Rx settings
         bool m_rxOn;
