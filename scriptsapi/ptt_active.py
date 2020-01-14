@@ -11,6 +11,9 @@
     - There is no assumption on the Rx or Tx nature you may as well switchover 2 Rx or 2 Tx
     - Both devices have not to belong to the same physical device necessarily. You could mix a RTL-SDR Rx and a
       HackRF Tx for example
+    - It can pilot a LimeRFE device via USB through SDRangel API (by giving TTY device with --limerfe-dev parameter)
+      and with the assumption that the first device set index given in the --link parameter is the Rx and the second
+      is the Tx
 '''
 import requests
 import time
@@ -26,6 +29,9 @@ RUNNING = set()
 DELAY = 1
 FREQ_SYNC = False
 FREQ_HAS_CHANGED = False
+LIMERFE_DEVICE = None
+LIMERFE_RX = False
+LIMERFE_TX = False
 
 app = Flask(__name__)
 
@@ -46,6 +52,8 @@ def start_device(device_index, sdrangel_ip, sdrangel_port):
                     print(f'start_device: Device {device_index} started')
                 else:
                     print(f'start_device: Error starting device {device_index}')
+                if LIMERFE_DEVICE:
+                    limerfe_switch(device_index, True, sdrangel_ip, sdrangel_port)
             else:
                 print(f'start_device: Device {device_index} not in idle state')
         else:
@@ -70,6 +78,8 @@ def stop_device(device_index, sdrangel_ip, sdrangel_port):
                     print(f'stop_device: Device {device_index} stopped')
                 else:
                     print(f'stop_device: Error stopping device {device_index}')
+                if LIMERFE_DEVICE:
+                    limerfe_switch(device_index, False, sdrangel_ip, sdrangel_port)
             else:
                 print(f'stop_device: Device {device_index} not in running state')
         else:
@@ -144,6 +154,34 @@ def set_center_frequency(new_frequency, device_index, sdrangel_ip, sdrangel_port
     else:
         print(f'set_center_frequency: error {r.status_code} getting settings for device {device_index}')
     return ""
+
+# ======================================================================
+def limerfe_switch(originator_index, start, sdrangel_ip, sdrangel_port):
+    """ Start or stop the LimeRFE device connected with first linked originator on Rx and second on Tx.
+        the start parameter is True to start and False to stop
+    """
+# ----------------------------------------------------------------------
+    endpoint_url = f'http://{sdrangel_ip}:{sdrangel_port}/sdrangel/limerfe/run'
+    try:
+        if OTHER_DICT.keys().index(originator_index) == 0: # Rx
+            global LIMERFE_RX
+            LIMERFE_RX = start
+        else:
+            global LIMERFE_TX
+            LIMERFE_TX = start
+    except ValueError:
+        print(f'Invalid device index {originator_index}')
+        return
+    payload = {
+        'devicePath': LIMERFE_DEVICE,
+        'rxOn': 1 if LIMERFE_RX else 0,
+        'txOn': 1 if LIMERFE_TX else 0,
+    }
+    r = requests.put(url=endpoint_url, json=payload)
+    if r.status_code / 100 == 2:
+        print(f'LimeRFE at {LIMERFE_DEVICE} switched with Rx: {LIMERFE_RX} Tx: {LIMERFE_TX}')
+    else:
+        print(f'failed to switch LimeRFE at {LIMERFE_DEVICE} with Rx: {LIMERFE_RX} Tx: {LIMERFE_TX}')
 
 # ======================================================================
 @app.route('/sdrangel')
@@ -240,6 +278,7 @@ def getInputOptions():
     parser.add_argument("-l", "--link", dest="linked_devices", help="pair of indexes of devices to link", metavar="LIST", type=int, nargs=2)
     parser.add_argument("-d", "--delay", dest="delay", help="switchover delay in seconds", metavar="SECONDS", type=int)
     parser.add_argument("-f", "--freq-sync", dest="freq_sync", help="synchronize linked devices frequencies", action="store_true")
+    parser.add_argument("-L", "--limerfe-dev", dest="limerfe_dev", help="LimeRFE USB serial device (optional)", metavar="DEVICE", type=str)
     options = parser.parse_args()
 
     if options.addr == None:
@@ -260,7 +299,7 @@ def getInputOptions():
         options.linked_devices[1]: options.linked_devices[0]
     }
 
-    return options.addr, options.port, options.sdrangel_port, options.delay, options.freq_sync, other_dict
+    return options.addr, options.port, options.sdrangel_port, options.delay, options.freq_sync, other_dict, options.limerfe_dev
 
 # ======================================================================
 def main():
@@ -270,8 +309,9 @@ def main():
     global OTHER_DICT
     global DELAY
     global FREQ_SYNC
-    addr, port, SDRANGEL_API_PORT, DELAY, FREQ_SYNC, OTHER_DICT = getInputOptions()
-    print(f'main: starting: SDRangel port: {SDRANGEL_API_PORT} links: {OTHER_DICT} freq sync: {FREQ_SYNC}')
+    global LIMERFE_DEVICE
+    addr, port, SDRANGEL_API_PORT, DELAY, FREQ_SYNC, OTHER_DICT, LIMERFE_DEVICE = getInputOptions()
+    print(f'main: starting: SDRangel port: {SDRANGEL_API_PORT} links: {OTHER_DICT} freq sync: {FREQ_SYNC} LimeRFE: {LIMERFE_DEVICE}')
     app.run(debug=True, host=addr, port=port)
 
 
