@@ -3,6 +3,7 @@
 
 #include <QString>
 #include "device/deviceuserargs.h"
+#include "limerfe/limerfeusbcalib.h"
 #include "preferences.h"
 #include "preset.h"
 #include "export.h"
@@ -69,6 +70,7 @@ public:
     bool getUseLogFile() const { return m_preferences.getUseLogFile(); }
     const QString& getLogFileName() const { return m_preferences.getLogFileName(); }
 	DeviceUserArgs& getDeviceUserArgs() { return m_hardwareDeviceUserArgs; }
+	LimeRFEUSBCalib& getLimeRFEUSBCalib() { return m_limeRFEUSBCalib; }
 
 	const AudioDeviceManager *getAudioDeviceManager() const { return m_audioDeviceManager; }
 	void setAudioDeviceManager(AudioDeviceManager *audioDeviceManager) { m_audioDeviceManager = audioDeviceManager; }
@@ -83,6 +85,7 @@ protected:
     typedef QList<Command*> Commands;
     Commands m_commands;
 	DeviceUserArgs m_hardwareDeviceUserArgs;
+	LimeRFEUSBCalib m_limeRFEUSBCalib;
     AMBEEngine *m_ambeEngine;
 };
 
