@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>411</width>
-    <height>436</height>
+    <height>499</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>390</y>
+     <y>460</y>
      <width>81</width>
      <height>32</height>
     </rect>
@@ -423,7 +423,7 @@
     </property>
    </item>
   </widget>
-  <widget class="Line" name="modeSeparaor">
+  <widget class="Line" name="powerSeparator">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -440,7 +440,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>280</y>
+     <y>350</y>
      <width>51</width>
      <height>27</height>
     </rect>
@@ -459,7 +459,7 @@
    <property name="geometry">
     <rect>
      <x>70</x>
-     <y>280</y>
+     <y>350</y>
      <width>51</width>
      <height>27</height>
     </rect>
@@ -477,8 +477,8 @@
   <widget class="QLabel" name="modeText">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>250</y>
+     <x>70</x>
+     <y>320</y>
      <width>111</width>
      <height>27</height>
     </rect>
@@ -494,8 +494,8 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>250</y>
-     <width>91</width>
+     <y>320</y>
+     <width>50</width>
      <height>27</height>
     </rect>
    </property>
@@ -507,7 +507,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>390</y>
+     <y>460</y>
      <width>71</width>
      <height>27</height>
     </rect>
@@ -523,7 +523,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>320</y>
+     <y>390</y>
      <width>391</width>
      <height>61</height>
     </rect>
@@ -536,7 +536,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>280</y>
+     <y>350</y>
      <width>71</width>
      <height>27</height>
     </rect>
@@ -548,7 +548,253 @@
     <string>Toggle</string>
    </property>
   </widget>
+  <widget class="QLabel" name="powerFwdLabel">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>250</y>
+     <width>31</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Fwd</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerRefLabel">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>250</y>
+     <width>31</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ref</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerRefText">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>270</y>
+     <width>35</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Relative reflected power in dB</string>
+   </property>
+   <property name="text">
+    <string>00.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerFwdText">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>270</y>
+     <width>35</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Relative forward power in dB</string>
+   </property>
+   <property name="text">
+    <string>00.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerUnits">
+   <property name="geometry">
+    <rect>
+     <x>260</x>
+     <y>270</y>
+     <width>25</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>dB</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="returnLossLabel">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>250</y>
+     <width>31</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>RL</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="returnLossText">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>270</y>
+     <width>35</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Return loss in dB</string>
+   </property>
+   <property name="text">
+    <string>00.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="powerEnable">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>250</y>
+     <width>50</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Enable power measurements</string>
+   </property>
+   <property name="text">
+    <string>Pwr</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="powerRefresh">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>250</y>
+     <width>24</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Refresh power</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/res.qrc">
+     <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+   </property>
+  </widget>
+  <widget class="QLabel" name="swrLabel">
+   <property name="geometry">
+    <rect>
+     <x>300</x>
+     <y>250</y>
+     <width>45</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>VSWR</string>
+   </property>
+  </widget>
+  <widget class="Line" name="modeSeparator">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>310</y>
+     <width>401</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="ButtonSwitch" name="powerAutoRefresh">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>280</y>
+     <width>24</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Auto refresh power</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/res.qrc">
+     <normaloff>:/play.png</normaloff>:/play.png</iconset>
+   </property>
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="swrText">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>270</y>
+     <width>50</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Voltage Standing Wave Ratio</string>
+   </property>
+   <property name="text">
+    <string>1.000</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="powerSource">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>280</y>
+     <width>60</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Power measurement source (EXTernal, CELlular)</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>EXT</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>CEL</string>
+    </property>
+   </item>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../resources/res.qrc"/>
  </resources>

@@ -18,6 +18,7 @@
 
 #include <vector>
 #include "util/serialutil.h"
+#include "util/db.h"
 #include "dsp/dspengine.h"
 
 #include "limerfeusbdialog.h"
@@ -37,6 +38,7 @@ LimeRFEUSBDialog::LimeRFEUSBDialog(QWidget* parent) :
     }
 
     displaySettings(); // default values
+    m_timer.setInterval(1000);
 }
 
 LimeRFEUSBDialog::~LimeRFEUSBDialog()
@@ -55,6 +57,7 @@ void LimeRFEUSBDialog::displaySettings()
     ui->txFollowsRx->setChecked(m_settings.m_txRxDriven);
     ui->rxTxToggle->setChecked(m_rxTxToggle);
     displayMode();
+    displayPower();
 }
 
 void LimeRFEUSBDialog::displayMode()
@@ -100,6 +103,57 @@ void LimeRFEUSBDialog::displayMode()
 
     ui->modeRx->blockSignals(false);
     ui->modeTx->blockSignals(false);
+}
+
+void LimeRFEUSBDialog::displayPower()
+{
+    ui->powerEnable->blockSignals(true);
+    ui->powerSource->blockSignals(true);
+    ui->powerEnable->setChecked(m_settings.m_swrEnable);
+    ui->powerSource->setCurrentIndex((int) m_settings.m_swrSource);
+    ui->powerEnable->blockSignals(false);
+    ui->powerSource->blockSignals(false);
+}
+
+void LimeRFEUSBDialog::refreshPower()
+{
+    int fwdPower, refPower;
+    int rc = m_controller.getFwdPower(fwdPower);
+
+    if (rc != 0)
+    {
+        ui->statusText->setText(m_controller.getError(rc).c_str());
+        return;
+    }
+
+    rc = m_controller.getRefPower(refPower);
+
+    if (rc != 0)
+    {
+        ui->statusText->setText(m_controller.getError(rc).c_str());
+        return;
+    }
+
+    double fwdPowerDB = fwdPower / 10.0;
+    double refPowerDB = refPower / 10.0;
+    double retLossDB = fwdPowerDB - refPowerDB;
+
+    ui->powerFwdText->setText(QString::number(fwdPowerDB, 'f', 1));
+    ui->powerRefText->setText(QString::number(refPowerDB, 'f', 1));
+    ui->returnLossText->setText(QString::number(retLossDB, 'f', 1));
+
+    double denom = CalcDb::powerFromdB(retLossDB/2.0) - 1.0;
+
+    if (denom == 0.0)
+    {
+        ui->swrText->setText("---");
+    }
+    else
+    {
+        double vswr = (CalcDb::powerFromdB(retLossDB/2.0) + 1.0) / denom;
+        vswr = vswr < 0.0 ? 0.0 : vswr > 99.999 ? 99.999 : vswr;
+        ui->swrText->setText(QString::number(vswr, 'f', 3));
+    }
 }
 
 void LimeRFEUSBDialog::setRxChannels()
@@ -272,7 +326,7 @@ void LimeRFEUSBDialog::on_closeDevice_clicked()
 {
     ui->statusText->clear();
     m_controller.closeDevice();
-    ui->statusText->setText("Cloed");
+    ui->statusText->setText("Closed");
 }
 
 void LimeRFEUSBDialog::on_deviceToGUI_clicked()
@@ -364,6 +418,35 @@ void LimeRFEUSBDialog::on_txPort_currentIndexChanged(int index)
     m_settings.m_txPort = (LimeRFEController::TxPort) index;
 }
 
+void LimeRFEUSBDialog::on_powerEnable_clicked()
+{
+    m_settings.m_swrEnable = ui->powerEnable->isChecked();
+}
+
+void LimeRFEUSBDialog::on_powerSource_currentIndexChanged(int index)
+{
+    m_settings.m_swrSource = (LimeRFEController::SWRSource) index;
+}
+
+void LimeRFEUSBDialog::on_powerRefresh_clicked()
+{
+    refreshPower();
+}
+
+void LimeRFEUSBDialog::on_powerAutoRefresh_toggled(bool checked)
+{
+    if (checked)
+    {
+        connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+        m_timer.start();
+    }
+    else
+    {
+        m_timer.stop();
+        disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    }
+}
+
 void LimeRFEUSBDialog::on_modeRx_toggled(bool checked)
 {
     int rc;
@@ -451,4 +534,9 @@ void LimeRFEUSBDialog::on_apply_clicked()
     m_controller.settingsToState(m_settings);
     int rc = m_controller.configure();
     ui->statusText->setText(m_controller.getError(rc).c_str());
+}
+
+void LimeRFEUSBDialog::tick()
+{
+    refreshPower();
 }
