@@ -93,6 +93,7 @@ void MainSettings::load()
 	}
 
     m_hardwareDeviceUserArgs.deserialize(qUncompress(QByteArray::fromBase64(s.value("hwDeviceUserArgs").toByteArray())));
+    m_limeRFEUSBCalib.deserialize(qUncompress(QByteArray::fromBase64(s.value("limeRFEUSBCalib").toByteArray())));
 }
 
 void MainSettings::save() const
@@ -137,6 +138,7 @@ void MainSettings::save() const
     }
 
     s.setValue("hwDeviceUserArgs", qCompress(m_hardwareDeviceUserArgs.serialize()).toBase64());
+    s.setValue("limeRFEUSBCalib", qCompress(m_limeRFEUSBCalib.serialize()).toBase64());
 }
 
 void MainSettings::initialize()
