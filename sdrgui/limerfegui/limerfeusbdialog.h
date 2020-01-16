@@ -20,6 +20,7 @@
 #define SDRGUI_LIMERFEGUI_LIMERFEUSBDIALOG_H_
 
 #include <QDialog>
+#include <QTimer>
 
 #include "limerfe/limerfecontroller.h"
 #include "export.h"
@@ -38,6 +39,8 @@ public:
 private:
     void displaySettings();
     void displayMode();
+    void displayPower();
+    void refreshPower();
     void setRxChannels();
     void setTxChannels();
 
@@ -45,6 +48,7 @@ private:
     LimeRFEController m_controller;
     LimeRFEController::LimeRFESettings m_settings;
     bool m_rxTxToggle;
+    QTimer m_timer;
 
 private slots:
     void on_openDevice_clicked();
@@ -57,10 +61,15 @@ private slots:
     void on_txChannelGroup_currentIndexChanged(int index);
     void on_txChannel_currentIndexChanged(int index);
     void on_txPort_currentIndexChanged(int index);
+    void on_powerEnable_clicked();
+    void on_powerSource_currentIndexChanged(int index);
+    void on_powerRefresh_clicked();
+    void on_powerAutoRefresh_toggled(bool checked);
     void on_modeRx_toggled(bool checked);
     void on_modeTx_toggled(bool checked);
     void on_rxTxToggle_clicked();
     void on_apply_clicked();
+    void tick();
 };
 
 #endif // SDRGUI_LIMERFEGUI_LIMERFEUSBDIALOG_H_
