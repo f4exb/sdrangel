@@ -551,7 +551,7 @@
   <widget class="QLabel" name="powerFwdLabel">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>180</x>
      <y>250</y>
      <width>31</width>
      <height>17</height>
@@ -564,7 +564,7 @@
   <widget class="QLabel" name="powerRefLabel">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>230</x>
      <y>250</y>
      <width>31</width>
      <height>17</height>
@@ -577,7 +577,7 @@
   <widget class="QLabel" name="powerRefText">
    <property name="geometry">
     <rect>
-     <x>170</x>
+     <x>230</x>
      <y>270</y>
      <width>35</width>
      <height>17</height>
@@ -596,7 +596,7 @@
   <widget class="QLabel" name="powerFwdText">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>180</x>
      <y>270</y>
      <width>35</width>
      <height>17</height>
@@ -615,7 +615,7 @@
   <widget class="QLabel" name="powerUnits">
    <property name="geometry">
     <rect>
-     <x>260</x>
+     <x>320</x>
      <y>270</y>
      <width>25</width>
      <height>17</height>
@@ -631,7 +631,7 @@
   <widget class="QLabel" name="returnLossLabel">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>280</x>
      <y>250</y>
      <width>31</width>
      <height>17</height>
@@ -644,7 +644,7 @@
   <widget class="QLabel" name="returnLossText">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>280</x>
      <y>270</y>
      <width>35</width>
      <height>17</height>
@@ -699,7 +699,7 @@
   <widget class="QLabel" name="swrLabel">
    <property name="geometry">
     <rect>
-     <x>300</x>
+     <x>360</x>
      <y>250</y>
      <width>45</width>
      <height>17</height>
@@ -748,7 +748,7 @@
   <widget class="QLabel" name="swrText">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>350</x>
      <y>270</y>
      <width>50</width>
      <height>17</height>
@@ -786,6 +786,95 @@
      <string>CEL</string>
     </property>
    </item>
+  </widget>
+  <widget class="QLabel" name="powerCorrLabel">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>260</y>
+     <width>31</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Corr</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerAbsDbText">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>290</y>
+     <width>45</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Corrected forward power in dB</string>
+   </property>
+   <property name="text">
+    <string>-00.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerAbsWText">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>290</y>
+     <width>45</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Corrected forward power in Watts</string>
+   </property>
+   <property name="text">
+    <string>0.000</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="powerAbsUnits">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>290</y>
+     <width>15</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>W</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="powerCorrValue">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>280</y>
+     <width>55</width>
+     <height>27</height>
+    </rect>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::ClickFocus</enum>
+   </property>
+   <property name="toolTip">
+    <string>Power correction in dBm</string>
+   </property>
+   <property name="text">
+    <string>-00.0</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
   </widget>
  </widget>
  <customwidgets>

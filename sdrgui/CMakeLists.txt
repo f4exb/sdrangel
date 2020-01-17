@@ -96,6 +96,7 @@ set(sdrgui_HEADERS
     gui/cwkeyergui.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
+    gui/doublevalidator.h
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h

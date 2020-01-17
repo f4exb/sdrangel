@@ -20,16 +20,19 @@
 #include "util/serialutil.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "gui/doublevalidator.h"
 
 #include "limerfeusbdialog.h"
 #include "ui_limerfeusbdialog.h"
 
-LimeRFEUSBDialog::LimeRFEUSBDialog(QWidget* parent) :
+LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* parent) :
+    m_limeRFEUSBCalib(limeRFEUSBCalib),
     QDialog(parent),
     ui(new Ui::LimeRFEUSBDialog),
     m_rxTxToggle(false)
 {
     ui->setupUi(this);
+    ui->powerCorrValue->setValidator(new DoubleValidator(-99.9, 99.9, 1, ui->powerCorrValue));
     std::vector<std::string> comPorts;
     SerialUtil::getComPorts(comPorts, "ttyUSB[0-9]+"); // regex is for Linux only
 
@@ -109,8 +112,10 @@ void LimeRFEUSBDialog::displayPower()
 {
     ui->powerEnable->blockSignals(true);
     ui->powerSource->blockSignals(true);
+
     ui->powerEnable->setChecked(m_settings.m_swrEnable);
     ui->powerSource->setCurrentIndex((int) m_settings.m_swrSource);
+
     ui->powerEnable->blockSignals(false);
     ui->powerSource->blockSignals(false);
 }
@@ -154,6 +159,8 @@ void LimeRFEUSBDialog::refreshPower()
         vswr = vswr < 0.0 ? 0.0 : vswr > 99.999 ? 99.999 : vswr;
         ui->swrText->setText(QString::number(vswr, 'f', 3));
     }
+
+    updateAbsPower(m_currentPowerCorrection);
 }
 
 void LimeRFEUSBDialog::setRxChannels()
@@ -238,6 +245,8 @@ void LimeRFEUSBDialog::setTxChannels()
 {
     ui->txChannel->blockSignals(true);
     ui->txPort->blockSignals(true);
+    ui->powerCorrValue->blockSignals(true);
+
     ui->txChannel->clear();
     ui->txPort->clear();
 
@@ -305,8 +314,126 @@ void LimeRFEUSBDialog::setTxChannels()
     }
 
     ui->txChannelGroup->setCurrentIndex((int) m_settings.m_txChannels);
+    m_currentPowerCorrection = getPowerCorrection();
+    ui->powerCorrValue->setText(QString::number(m_currentPowerCorrection, 'f', 1));
+    updateAbsPower(m_currentPowerCorrection);
+
+    ui->powerCorrValue->blockSignals(false);
     ui->txPort->blockSignals(false);
     ui->txChannel->blockSignals(false);
+}
+
+int LimeRFEUSBDialog::getPowerCorectionIndex()
+{
+    LimeRFEUSBCalib::ChannelRange range;
+
+    switch (m_settings.m_txChannels)
+    {
+        case LimeRFEController::ChannelsWideband:
+        {
+            switch (m_settings.m_txWidebandChannel)
+            {
+                case LimeRFEController::WidebandLow:
+                    range = LimeRFEUSBCalib::WidebandLow;
+                    break;
+                case LimeRFEController::WidebandHigh:
+                    range = LimeRFEUSBCalib::WidebandHigh;
+                    break;
+                default:
+                    return -1;
+                    break;
+            }
+            break;
+        }
+        case LimeRFEController::ChannelsHAM:
+        {
+            switch (m_settings.m_txHAMChannel)
+            {
+                case LimeRFEController::HAM_30M:
+                    range = LimeRFEUSBCalib::HAM_30MHz;
+                    break;
+                case LimeRFEController::HAM_50_70MHz:
+                    range = LimeRFEUSBCalib::HAM_50_70MHz;
+                    break;
+                case LimeRFEController::HAM_144_146MHz:
+                    range = LimeRFEUSBCalib::HAM_144_146MHz;
+                    break;
+                case LimeRFEController::HAM_220_225MHz:
+                    range = LimeRFEUSBCalib::HAM_220_225MHz;
+                    break;
+                case LimeRFEController::HAM_430_440MHz:
+                    range = LimeRFEUSBCalib::HAM_430_440MHz;
+                    break;
+                case LimeRFEController::HAM_902_928MHz:
+                    range = LimeRFEUSBCalib::HAM_902_928MHz;
+                    break;
+                case LimeRFEController::HAM_1240_1325MHz:
+                    range = LimeRFEUSBCalib::HAM_1240_1325MHz;
+                    break;
+                case LimeRFEController::HAM_2300_2450MHz:
+                    range = LimeRFEUSBCalib::HAM_2300_2450MHz;
+                    break;
+                case LimeRFEController::HAM_3300_3500MHz:
+                    range = LimeRFEUSBCalib::HAM_3300_3500MHz;
+                    break;
+                default:
+                    return -1;
+                    break;
+            }
+            break;
+        }
+        case LimeRFEController::ChannelsCellular:
+        {
+            switch (m_settings.m_txCellularChannel)
+            {
+                case LimeRFEController::CellularBand1:
+                    range = LimeRFEUSBCalib::CellularBand1;
+                    break;
+                case LimeRFEController::CellularBand2:
+                    range = LimeRFEUSBCalib::CellularBand2;
+                    break;
+                case LimeRFEController::CellularBand7:
+                    range = LimeRFEUSBCalib::CellularBand7;
+                    break;
+                case LimeRFEController::CellularBand38:
+                    range = LimeRFEUSBCalib::CellularBand38;
+                    break;
+                default:
+                    return -1;
+                    break;
+            }
+            break;
+        }
+        default:
+            return -1;
+            break;
+    }
+
+    return (int) range;
+}
+
+double LimeRFEUSBDialog::getPowerCorrection()
+{
+    int index = getPowerCorectionIndex();
+
+    QMap<int, double>::const_iterator it = m_limeRFEUSBCalib.m_calibrations.find(index);
+
+    if (it != m_limeRFEUSBCalib.m_calibrations.end()) {
+        return it.value();
+    } else {
+        return 0.0;
+    }
+}
+
+void LimeRFEUSBDialog::setPowerCorrection(double dbValue)
+{
+    int index = getPowerCorectionIndex();
+
+    if (index < 0) {
+        return;
+    }
+
+    m_limeRFEUSBCalib.m_calibrations[index] = dbValue;
 }
 
 void LimeRFEUSBDialog::on_openDevice_clicked()
@@ -444,6 +571,34 @@ void LimeRFEUSBDialog::on_powerAutoRefresh_toggled(bool checked)
     {
         m_timer.stop();
         disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    }
+}
+
+void LimeRFEUSBDialog::on_powerCorrValue_textEdited(const QString &text)
+{
+    bool ok;
+    double powerCorrection = text.toDouble(&ok);
+
+    if (ok)
+    {
+        setPowerCorrection(powerCorrection);
+        m_currentPowerCorrection = powerCorrection;
+        updateAbsPower(powerCorrection);
+    }
+}
+
+void LimeRFEUSBDialog::updateAbsPower(double powerCorrDB)
+{
+    bool ok;
+    double power = ui->powerFwdText->text().toDouble(&ok);
+
+    if (ok)
+    {
+        double powerCorrected = power + powerCorrDB;
+        ui->powerAbsDbText->setText(QString::number(powerCorrected, 'f', 1));
+        double powerMilliwatts = CalcDb::powerFromdB(powerCorrected);
+        powerMilliwatts = powerMilliwatts > 8000.0 ? 8000.0 : powerMilliwatts;
+        ui->powerAbsWText->setText(QString::number(powerMilliwatts/1000.0, 'f', 3));
     }
 }
 

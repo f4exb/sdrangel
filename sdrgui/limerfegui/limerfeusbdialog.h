@@ -23,6 +23,7 @@
 #include <QTimer>
 
 #include "limerfe/limerfecontroller.h"
+#include "limerfe/limerfeusbcalib.h"
 #include "export.h"
 
 namespace Ui {
@@ -33,7 +34,7 @@ class SDRGUI_API LimeRFEUSBDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit LimeRFEUSBDialog(QWidget* parent = nullptr);
+    explicit LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* parent = nullptr);
     ~LimeRFEUSBDialog();
 
 private:
@@ -43,12 +44,18 @@ private:
     void refreshPower();
     void setRxChannels();
     void setTxChannels();
+    int getPowerCorectionIndex();
+    double getPowerCorrection();
+    void setPowerCorrection(double dbValue);
+    void updateAbsPower(double powerCorrDB);
 
     Ui::LimeRFEUSBDialog* ui;
     LimeRFEController m_controller;
     LimeRFEController::LimeRFESettings m_settings;
+    LimeRFEUSBCalib& m_limeRFEUSBCalib;
     bool m_rxTxToggle;
     QTimer m_timer;
+    double m_currentPowerCorrection;
 
 private slots:
     void on_openDevice_clicked();
@@ -65,6 +72,7 @@ private slots:
     void on_powerSource_currentIndexChanged(int index);
     void on_powerRefresh_clicked();
     void on_powerAutoRefresh_toggled(bool checked);
+    void on_powerCorrValue_textEdited(const QString &text);
     void on_modeRx_toggled(bool checked);
     void on_modeTx_toggled(bool checked);
     void on_rxTxToggle_clicked();

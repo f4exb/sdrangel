@@ -1707,7 +1707,7 @@ void MainWindow::on_action_LimeRFE_triggered()
     qDebug("MainWindow::on_action_LimeRFE_triggered");
 #if defined(HAS_LIMERFE)
     qDebug("MainWindow::on_action_LimeRFE_triggered: activated");
-    LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(this);
+    LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(m_settings.getLimeRFEUSBCalib(), this);
     limeRFEUSBDialog->setModal(false);
     limeRFEUSBDialog->show();
 #endif
