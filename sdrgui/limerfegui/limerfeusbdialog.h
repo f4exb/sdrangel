@@ -19,12 +19,18 @@
 #ifndef SDRGUI_LIMERFEGUI_LIMERFEUSBDIALOG_H_
 #define SDRGUI_LIMERFEGUI_LIMERFEUSBDIALOG_H_
 
+#include <vector>
+
 #include <QDialog>
 #include <QTimer>
 
+#include "util/movingaverage.h"
 #include "limerfe/limerfecontroller.h"
 #include "limerfe/limerfeusbcalib.h"
 #include "export.h"
+
+class DSPDeviceSourceEngine;
+class DSPDeviceSinkEngine;
 
 namespace Ui {
     class LimeRFEUSBDialog;
@@ -48,6 +54,10 @@ private:
     double getPowerCorrection();
     void setPowerCorrection(double dbValue);
     void updateAbsPower(double powerCorrDB);
+    void updateDeviceSetList();
+    void stopStartRx(bool start);
+    void stopStartTx(bool start);
+    void syncRxTx();
 
     Ui::LimeRFEUSBDialog* ui;
     LimeRFEController m_controller;
@@ -56,6 +66,13 @@ private:
     bool m_rxTxToggle;
     QTimer m_timer;
     double m_currentPowerCorrection;
+    bool m_avgPower;
+    MovingAverageUtil<double, double, 10> m_powerMovingAverage;
+    bool m_deviceSetSync;
+    int m_rxDeviceSetSequence;
+    int m_txDeviceSetSequence;
+    std::vector<DSPDeviceSourceEngine*> m_sourceEngines;
+    std::vector<DSPDeviceSinkEngine*> m_sinkEngines;
 
 private slots:
     void on_openDevice_clicked();
@@ -72,10 +89,13 @@ private slots:
     void on_powerSource_currentIndexChanged(int index);
     void on_powerRefresh_clicked();
     void on_powerAutoRefresh_toggled(bool checked);
+    void on_powerAbsAvg_clicked();
     void on_powerCorrValue_textEdited(const QString &text);
     void on_modeRx_toggled(bool checked);
     void on_modeTx_toggled(bool checked);
     void on_rxTxToggle_clicked();
+    void on_deviceSetRefresh_clicked();
+    void on_deviceSetSync_clicked();
     void on_apply_clicked();
     void tick();
 };
