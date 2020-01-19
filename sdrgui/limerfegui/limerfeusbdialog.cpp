@@ -20,6 +20,8 @@
 #include "util/serialutil.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/dspdevicesinkengine.h"
 #include "gui/doublevalidator.h"
 
 #include "limerfeusbdialog.h"
@@ -29,7 +31,10 @@ LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* pa
     m_limeRFEUSBCalib(limeRFEUSBCalib),
     QDialog(parent),
     ui(new Ui::LimeRFEUSBDialog),
-    m_rxTxToggle(false)
+    m_rxTxToggle(false),
+    m_currentPowerCorrection(0.0),
+    m_avgPower(false),
+    m_deviceSetSync(false)
 {
     ui->setupUi(this);
     ui->powerCorrValue->setValidator(new DoubleValidator(-99.9, 99.9, 1, ui->powerCorrValue));
@@ -40,8 +45,9 @@ LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* pa
         ui->device->addItem(QString(it->c_str()));
     }
 
+    updateDeviceSetList();
     displaySettings(); // default values
-    m_timer.setInterval(1000);
+    m_timer.setInterval(500);
 }
 
 LimeRFEUSBDialog::~LimeRFEUSBDialog()
@@ -574,6 +580,11 @@ void LimeRFEUSBDialog::on_powerAutoRefresh_toggled(bool checked)
     }
 }
 
+void LimeRFEUSBDialog::on_powerAbsAvg_clicked()
+{
+    m_avgPower = ui->powerAbsAvg->isChecked();
+}
+
 void LimeRFEUSBDialog::on_powerCorrValue_textEdited(const QString &text)
 {
     bool ok;
@@ -587,6 +598,77 @@ void LimeRFEUSBDialog::on_powerCorrValue_textEdited(const QString &text)
     }
 }
 
+void LimeRFEUSBDialog::on_deviceSetRefresh_clicked()
+{
+    updateDeviceSetList();
+}
+
+void LimeRFEUSBDialog::on_deviceSetSync_clicked()
+{
+    m_deviceSetSync = ui->deviceSetSync->isChecked();
+
+    if (m_deviceSetSync) {
+        syncRxTx();
+    }
+}
+
+void LimeRFEUSBDialog::syncRxTx()
+{
+    if (!m_settings.m_txOn) {
+        stopStartTx(m_settings.m_txOn);
+    }
+
+    stopStartRx(m_settings.m_rxOn);
+
+    if (m_settings.m_txOn) {
+        stopStartTx(m_settings.m_txOn);
+    }
+}
+
+void LimeRFEUSBDialog::stopStartRx(bool start)
+{
+    int rxDeviceSetSequence = ui->deviceSetRx->currentIndex();
+
+    if ((rxDeviceSetSequence < 0) || (rxDeviceSetSequence >= m_sourceEngines.size())) {
+        return;
+    }
+
+    DSPDeviceSourceEngine *deviceSourceEngine = m_sourceEngines[rxDeviceSetSequence];
+
+    if (start)
+    {
+        if (deviceSourceEngine->initAcquisition()) {
+            deviceSourceEngine->startAcquisition();
+        }
+    }
+    else
+    {
+        deviceSourceEngine->stopAcquistion();
+    }
+}
+
+void LimeRFEUSBDialog::stopStartTx(bool start)
+{
+    int txDeviceSetSequence = ui->deviceSetTx->currentIndex();
+
+    if ((txDeviceSetSequence < 0) || (txDeviceSetSequence >= m_sinkEngines.size())) {
+        return;
+    }
+
+    DSPDeviceSinkEngine *deviceSinkEngine = m_sinkEngines[txDeviceSetSequence];
+
+    if (start)
+    {
+        if (deviceSinkEngine->initGeneration()) {
+            deviceSinkEngine->startGeneration();
+        }
+    }
+    else
+    {
+        deviceSinkEngine->stopGeneration();
+    }
+}
+
 void LimeRFEUSBDialog::updateAbsPower(double powerCorrDB)
 {
     bool ok;
@@ -595,10 +677,39 @@ void LimeRFEUSBDialog::updateAbsPower(double powerCorrDB)
     if (ok)
     {
         double powerCorrected = power + powerCorrDB;
-        ui->powerAbsDbText->setText(QString::number(powerCorrected, 'f', 1));
-        double powerMilliwatts = CalcDb::powerFromdB(powerCorrected);
-        powerMilliwatts = powerMilliwatts > 8000.0 ? 8000.0 : powerMilliwatts;
-        ui->powerAbsWText->setText(QString::number(powerMilliwatts/1000.0, 'f', 3));
+        double powerDisplayed = powerCorrected;
+
+        if (m_avgPower)
+        {
+            m_powerMovingAverage(powerCorrected);
+            powerDisplayed = m_powerMovingAverage.asDouble();
+        }
+
+        ui->powerAbsDbText->setText(tr("%1 dBm").arg(QString::number(powerDisplayed, 'f', 1)));
+        double powerWatts = CalcDb::powerFromdB(powerDisplayed - 30.0);
+        powerWatts = powerWatts > 8.0 ? 8.0 : powerWatts;
+        ui->powerAbsWText->setText(tr("%1 W").arg(QString::number(powerWatts, 'f', 3)));
+    }
+}
+
+void LimeRFEUSBDialog::updateDeviceSetList()
+{
+    DSPEngine *dspEngine = DSPEngine::instance();
+    m_sourceEngines.clear();
+    m_sinkEngines.clear();
+
+    for (uint32_t i = 0; i < dspEngine->getDeviceSourceEnginesNumber(); i++)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine = dspEngine->getDeviceSourceEngineByIndex(i);
+        m_sourceEngines.push_back(deviceSourceEngine);
+        ui->deviceSetRx->addItem(QString("%1").arg(i));
+    }
+
+    for (uint32_t i = 0; i < dspEngine->getDeviceSinkEnginesNumber(); i++)
+    {
+        DSPDeviceSinkEngine *deviceSinkEngine = dspEngine->getDeviceSinkEngineByIndex(i);
+        m_sinkEngines.push_back(deviceSinkEngine);
+        ui->deviceSetTx->addItem(QString("%1").arg(i));
     }
 }
 
@@ -633,6 +744,10 @@ void LimeRFEUSBDialog::on_modeRx_toggled(bool checked)
         ui->statusText->setText(m_controller.getError(rc).c_str());
     }
 
+    if (m_deviceSetSync) {
+        syncRxTx();
+    }
+
     displayMode();
 }
 
@@ -665,6 +780,10 @@ void LimeRFEUSBDialog::on_modeTx_toggled(bool checked)
     {
         rc = m_controller.setTx(m_settings, m_settings.m_txOn);
         ui->statusText->setText(m_controller.getError(rc).c_str());
+    }
+
+    if (m_deviceSetSync) {
+        syncRxTx();
     }
 
     displayMode();

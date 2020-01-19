@@ -441,8 +441,8 @@
     <rect>
      <x>10</x>
      <y>350</y>
-     <width>51</width>
-     <height>27</height>
+     <width>50</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -460,8 +460,8 @@
     <rect>
      <x>70</x>
      <y>350</y>
-     <width>51</width>
-     <height>27</height>
+     <width>50</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -537,8 +537,8 @@
     <rect>
      <x>130</x>
      <y>350</y>
-     <width>71</width>
-     <height>27</height>
+     <width>70</width>
+     <height>25</height>
     </rect>
    </property>
    <property name="toolTip">
@@ -805,15 +805,15 @@
     <rect>
      <x>170</x>
      <y>290</y>
-     <width>45</width>
+     <width>75</width>
      <height>17</height>
     </rect>
    </property>
    <property name="toolTip">
-    <string>Corrected forward power in dB</string>
+    <string>Corrected forward power in dBm</string>
    </property>
    <property name="text">
-    <string>-00.0</string>
+    <string>-00.0 dBm</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -822,9 +822,9 @@
   <widget class="QLabel" name="powerAbsWText">
    <property name="geometry">
     <rect>
-     <x>220</x>
+     <x>250</x>
      <y>290</y>
-     <width>45</width>
+     <width>65</width>
      <height>17</height>
     </rect>
    </property>
@@ -832,23 +832,7 @@
     <string>Corrected forward power in Watts</string>
    </property>
    <property name="text">
-    <string>0.000</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
-  <widget class="QLabel" name="powerAbsUnits">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>290</y>
-     <width>15</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>W</string>
+    <string>0.000 W</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -874,6 +858,110 @@
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="powerAbsAvg">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>290</y>
+     <width>50</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Corrected power averaging</string>
+   </property>
+   <property name="text">
+    <string>Avg</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="deviceSetRx">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>350</y>
+     <width>50</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Sequence of Rx DeviceSet </string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="deviceSetTx">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>350</y>
+     <width>50</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Sequence of Tx DeviceSet </string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="deviceSetRxLabel">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>350</y>
+     <width>25</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Rx</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="deviceSetTxLabel">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>350</y>
+     <width>25</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Tx</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="deviceSetSync">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>320</y>
+     <width>100</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>DeviceSet synchronization</string>
+   </property>
+   <property name="text">
+    <string>Rx/Tx Sync</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="deviceSetRefresh">
+   <property name="geometry">
+    <rect>
+     <x>370</x>
+     <y>350</y>
+     <width>24</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Refresh DeviceSet indexes</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources/res.qrc">
+     <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
    </property>
   </widget>
  </widget>
