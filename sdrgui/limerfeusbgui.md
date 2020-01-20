@@ -6,7 +6,7 @@ To open the LimeRFE USB dialog open the Preferences sub-menu from the top bar an
 
 The dialog is non-modal so that it can be left open and keep the control on LimeRFE while other functions can be used.
 
-&#9888; Disclaimer: please use this interface and the LimeRFE sensibly by making sure you are licenced to operate it on the selected frequencies. If you are a licenced amateur radio you should make sure you operate on the bands allocated in your region as some bands are exclusive to a specific region or country.
+&#9888; Disclaimer: please use this interface and the LimeRFE sensibly by making sure you are licensed to operate it on the selected frequencies. If you are a licensed amateur radio you should make sure you operate on the bands allocated in your region as some bands are exclusive to a specific region or country.
 
 ![LimeRFE USB dialog](../doc/img/LimeRFEUSB_dialog.png)
 
@@ -49,7 +49,7 @@ Depending on the channel group selected in (A.1) use this combo to select the ba
 
 <h4>HAM channels</h4>
 
-  - **<30MHz**: HF bands i.e. lowpass up to 30 MHz
+  - **<30MHz**: HF bands i.e. low-pass up to 30 MHz
   - **50-70MHz**: covers the 6m and 4m bands
   - **144-146MHz**: covers the 2m band
   - **220-225MHz**: covers the 1.25m band (region 2)
@@ -70,8 +70,8 @@ Depending on the channel group selected in (A.1) use this combo to select the ba
 
 Select which port to connect the Rx to:
 
-  - **Tx/Rx (J3)**: this is the J3 port combining Rx and Tx. When cellular bands are selected this is connected to a diplexer internally
-  - **Tx/Rx 30M (J5)**: HF port only available when wideband channels are selected
+  - **Tx/Rx (J3)**: this is the J3 port combining Rx and Tx. When cellular bands are selected this is connected to a duplexer internally
+  - **Tx/Rx 30M (J5)**: HF port only available when wide band channels are selected
 
 <h3>A.4 Attenuator</h3>
 
@@ -101,7 +101,7 @@ Use this combo to select the band. This is identical to the Rx side (A.2).
 
 Select which port to connect the Rx to:
 
-  - **Tx/Rx (J3)**: this is the J3 port combining Rx and Tx. When cellular bands are selected this is connected to a diplexer internally
+  - **Tx/Rx (J3)**: this is the J3 port combining Rx and Tx. When cellular bands are selected this is connected to a duplexer internally
   - **Tx (J4)**: Tx connected port only. Can be used to split Rx and Tx to drive a higher power P.A. for example
 
 <h2>C. Power and SWR</h2>
