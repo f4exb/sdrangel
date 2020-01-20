@@ -164,11 +164,15 @@ A brief text reports the result of the current action
 
 Use this button to dismiss the dialog
 
-<h4>1.4 Preferences - Devices - User arguments</h4>
+<h4>1.4 Prefernces - LimeRFE</h4>
+
+When enabled in compilation this opens a dialog to control a LimeRFE device via USB. The details are provided [here](limerfeusbgui.md).
+
+<h4>1.5 Preferences - Devices - User arguments</h4>
 
 See the devuces user arguments management documentation [here](deviceuserargs.md).
 
-<h4>1.5. Help - Loaded plugins display</h4>
+<h4>1.6. Help - Loaded plugins display</h4>
 
 When clicking on Help -> Loaded Plugins from the main menu bar a dialog box appears that shows information about the plugins loaded in SDRangel:
 
