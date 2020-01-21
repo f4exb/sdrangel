@@ -31,6 +31,7 @@
 
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
+class MainWindow;
 
 namespace Ui {
     class LimeRFEUSBDialog;
@@ -40,7 +41,7 @@ class SDRGUI_API LimeRFEUSBDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* parent = nullptr);
+    explicit LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, MainWindow* mainWindow);
     ~LimeRFEUSBDialog();
 
 private:
@@ -61,6 +62,7 @@ private:
     void highlightApplyButton(bool highlight);
 
     Ui::LimeRFEUSBDialog* ui;
+    MainWindow *m_mainWindow;
     LimeRFEController m_controller;
     LimeRFEController::LimeRFESettings m_settings;
     LimeRFEUSBCalib& m_limeRFEUSBCalib;
@@ -73,7 +75,9 @@ private:
     int m_rxDeviceSetSequence;
     int m_txDeviceSetSequence;
     std::vector<DSPDeviceSourceEngine*> m_sourceEngines;
+    std::vector<int> m_rxDeviceSetIndex;
     std::vector<DSPDeviceSinkEngine*> m_sinkEngines;
+    std::vector<int> m_txDeviceSetIndex;
 
 private slots:
     void on_openDevice_clicked();

@@ -47,6 +47,8 @@ LimeRFEController::LimeRFESettings::LimeRFESettings()
     m_txHAMChannel = HAM_144_146MHz;
     m_txCellularChannel = CellularBand38;
     m_txPort = TxPortJ3;
+    m_swrEnable = false;
+    m_swrSource = SWRExternal;
     m_txRxDriven = false;
     m_rxOn = false;
     m_txOn = false;

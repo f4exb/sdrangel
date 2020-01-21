@@ -22,14 +22,16 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
+#include "mainwindow.h"
+#include "device/deviceuiset.h"
 #include "gui/doublevalidator.h"
 
 #include "limerfeusbdialog.h"
 #include "ui_limerfeusbdialog.h"
 
-LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* parent) :
+LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, MainWindow* mainWindow) :
     m_limeRFEUSBCalib(limeRFEUSBCalib),
-    QDialog(parent),
+    QDialog(mainWindow),
     ui(new Ui::LimeRFEUSBDialog),
     m_rxTxToggle(false),
     m_currentPowerCorrection(0.0),
@@ -37,6 +39,7 @@ LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* pa
     m_deviceSetSync(false)
 {
     ui->setupUi(this);
+    m_mainWindow = mainWindow;
     ui->powerCorrValue->setValidator(new DoubleValidator(-99.9, 99.9, 1, ui->powerCorrValue));
     std::vector<std::string> comPorts;
     SerialUtil::getComPorts(comPorts, "ttyUSB[0-9]+"); // regex is for Linux only
@@ -656,6 +659,9 @@ void LimeRFEUSBDialog::stopStartRx(bool start)
         if (deviceSourceEngine->initAcquisition()) {
             deviceSourceEngine->startAcquisition();
         }
+
+        MainWindow::MsgDeviceSetFocus *msg = MainWindow::MsgDeviceSetFocus::create(m_rxDeviceSetIndex[rxDeviceSetSequence]);
+        m_mainWindow->getInputMessageQueue()->push(msg);
     }
     else
     {
@@ -678,6 +684,9 @@ void LimeRFEUSBDialog::stopStartTx(bool start)
         if (deviceSinkEngine->initGeneration()) {
             deviceSinkEngine->startGeneration();
         }
+
+        MainWindow::MsgDeviceSetFocus *msg = MainWindow::MsgDeviceSetFocus::create(m_txDeviceSetIndex[txDeviceSetSequence]);
+        m_mainWindow->getInputMessageQueue()->push(msg);
     }
     else
     {
@@ -710,22 +719,37 @@ void LimeRFEUSBDialog::updateAbsPower(double powerCorrDB)
 
 void LimeRFEUSBDialog::updateDeviceSetList()
 {
-    DSPEngine *dspEngine = DSPEngine::instance();
+    std::vector<DeviceUISet*>& deviceUISets = m_mainWindow->getDeviceUISets();
+    std::vector<DeviceUISet*>::const_iterator it = deviceUISets.begin();
     m_sourceEngines.clear();
+    m_rxDeviceSetIndex.clear();
     m_sinkEngines.clear();
+    m_txDeviceSetIndex.clear();
+    ui->deviceSetRx->clear();
+    ui->deviceSetTx->clear();
+    unsigned int deviceIndex = 0;
+    unsigned int rxIndex = 0;
+    unsigned int txIndex = 0;
 
-    for (uint32_t i = 0; i < dspEngine->getDeviceSourceEnginesNumber(); i++)
+    for (; it != deviceUISets.end(); ++it, deviceIndex++)
     {
-        DSPDeviceSourceEngine *deviceSourceEngine = dspEngine->getDeviceSourceEngineByIndex(i);
-        m_sourceEngines.push_back(deviceSourceEngine);
-        ui->deviceSetRx->addItem(QString("%1").arg(i));
-    }
+        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
+        DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
 
-    for (uint32_t i = 0; i < dspEngine->getDeviceSinkEnginesNumber(); i++)
-    {
-        DSPDeviceSinkEngine *deviceSinkEngine = dspEngine->getDeviceSinkEngineByIndex(i);
-        m_sinkEngines.push_back(deviceSinkEngine);
-        ui->deviceSetTx->addItem(QString("%1").arg(i));
+        if (deviceSourceEngine)
+        {
+            m_sourceEngines.push_back(deviceSourceEngine);
+            m_rxDeviceSetIndex.push_back(deviceIndex);
+            ui->deviceSetRx->addItem(QString("%1").arg(deviceIndex));
+            rxIndex++;
+        }
+        else if (deviceSinkEngine)
+        {
+            m_sinkEngines.push_back(deviceSinkEngine);
+            m_txDeviceSetIndex.push_back(deviceIndex);
+            ui->deviceSetTx->addItem(QString("%1").arg(deviceIndex));
+            txIndex++;
+        }
     }
 }
 
@@ -824,9 +848,11 @@ void LimeRFEUSBDialog::on_rxTxToggle_clicked()
         int rc = m_controller.setTx(m_settings, m_settings.m_txOn);
         ui->statusText->setText(m_controller.getError(rc).c_str());
         displayMode();
-    }
 
-    highlightApplyButton(true);
+        if (m_deviceSetSync) {
+            syncRxTx();
+        }
+    }
 }
 
 void LimeRFEUSBDialog::on_apply_clicked()
