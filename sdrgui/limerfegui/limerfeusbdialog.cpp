@@ -47,6 +47,7 @@ LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, QWidget* pa
 
     updateDeviceSetList();
     displaySettings(); // default values
+    highlightApplyButton(false);
     m_timer.setInterval(500);
 }
 
@@ -474,6 +475,7 @@ void LimeRFEUSBDialog::on_deviceToGUI_clicked()
 
     m_controller.stateToSettings(m_settings);
     displaySettings();
+    highlightApplyButton(false);
 }
 
 void LimeRFEUSBDialog::on_rxChannelGroup_currentIndexChanged(int index)
@@ -486,6 +488,8 @@ void LimeRFEUSBDialog::on_rxChannelGroup_currentIndexChanged(int index)
         m_settings.m_txChannels = m_settings.m_rxChannels;
         ui->txChannelGroup->setCurrentIndex((int) m_settings.m_txChannels);
     }
+
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_rxChannel_currentIndexChanged(int index)
@@ -507,11 +511,14 @@ void LimeRFEUSBDialog::on_rxChannel_currentIndexChanged(int index)
         m_settings.m_txCellularChannel = m_settings.m_rxCellularChannel;
         setTxChannels();
     }
+
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_rxPort_currentIndexChanged(int index)
 {
     m_settings.m_rxPort = (LimeRFEController::RxPort) index;
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_txFollowsRx_clicked()
@@ -525,12 +532,17 @@ void LimeRFEUSBDialog::on_txFollowsRx_clicked()
     m_settings.m_txHAMChannel = m_settings.m_rxHAMChannel;
     m_settings.m_txCellularChannel = m_settings.m_rxCellularChannel;
     ui->txChannelGroup->setCurrentIndex((int) m_settings.m_txChannels);
+
+    if (checked) {
+        highlightApplyButton(true);
+    }
 }
 
 void LimeRFEUSBDialog::on_txChannelGroup_currentIndexChanged(int index)
 {
     m_settings.m_txChannels = (LimeRFEController::ChannelGroups) index;
     setTxChannels();
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_txChannel_currentIndexChanged(int index)
@@ -544,21 +556,25 @@ void LimeRFEUSBDialog::on_txChannel_currentIndexChanged(int index)
     }
 
     setTxChannels();
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_txPort_currentIndexChanged(int index)
 {
     m_settings.m_txPort = (LimeRFEController::TxPort) index;
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_powerEnable_clicked()
 {
     m_settings.m_swrEnable = ui->powerEnable->isChecked();
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_powerSource_currentIndexChanged(int index)
 {
     m_settings.m_swrSource = (LimeRFEController::SWRSource) index;
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_powerRefresh_clicked()
@@ -713,6 +729,15 @@ void LimeRFEUSBDialog::updateDeviceSetList()
     }
 }
 
+void LimeRFEUSBDialog::highlightApplyButton(bool highlight)
+{
+    if (highlight) {
+        ui->apply->setStyleSheet("QPushButton { background-color : green; }");
+    } else {
+        ui->apply->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
+    }
+}
+
 void LimeRFEUSBDialog::on_modeRx_toggled(bool checked)
 {
     int rc;
@@ -800,6 +825,8 @@ void LimeRFEUSBDialog::on_rxTxToggle_clicked()
         ui->statusText->setText(m_controller.getError(rc).c_str());
         displayMode();
     }
+
+    highlightApplyButton(true);
 }
 
 void LimeRFEUSBDialog::on_apply_clicked()
@@ -808,6 +835,7 @@ void LimeRFEUSBDialog::on_apply_clicked()
     m_controller.settingsToState(m_settings);
     int rc = m_controller.configure();
     ui->statusText->setText(m_controller.getError(rc).c_str());
+    highlightApplyButton(false);
 }
 
 void LimeRFEUSBDialog::tick()
