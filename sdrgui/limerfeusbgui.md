@@ -181,21 +181,17 @@ Use this switch to activate Rx/Tx toggle. When Rx is switched on Tx is switched 
 
 When switched on this connects the Rx (D.1) and Tx (D.2) switches to a Rx and Tx device set selected by (D.5) and (D.6) respectively in order to start or stop devices accordingly.
 
-<h3>D.5 Rx device set sequence</h3>
+<h3>D.5 Rx device set index</h3>
 
-Select the Rx device set sequence with which you want to synchronize the Rx switch (D.1). Note that this is the sequence of Rx in increasing order of Rx tabs and not the tab number itself.
+Select the Rx device set index with which you want to synchronize the Rx switch (D.1).
 
-For example if you have a configuration with R0, T1 and R2 tabs the device set corresponding to R2 will be identified with sequence number 1.
+<h3>D.6 Tx device set index</h3>
 
-<h3>D.6 Tx device set sequence</h3>
+Select the Tx device set index with which you want to synchronize the Tx switch (D.2).
 
-Select the Tx device set sequence with which you want to synchronize the Tx switch (D.2). Note that this is the sequence of Tx in increasing order of Tx tabs and not the tab number itself.
+<h3>D.7 Refresh device sets indexes</h3>
 
-Using the same example as above T1 is identified with sequence number 0.
-
-<h3>D.7 Refresh device sets sequences</h3>
-
-When the configuration of device sets changes you can use this button to refresh the device set sequences in (D.5) and (D.6).
+When the configuration of device sets changes you can use this button to refresh the device set indexes in (D.5) and (D.6).
 
 <h2>5. Status window</h2>
 

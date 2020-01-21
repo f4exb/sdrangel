@@ -886,7 +886,7 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>Sequence of Rx DeviceSet </string>
+    <string>Index of Rx DeviceSet </string>
    </property>
   </widget>
   <widget class="QComboBox" name="deviceSetTx">
@@ -899,7 +899,7 @@
     </rect>
    </property>
    <property name="toolTip">
-    <string>Sequence of Tx DeviceSet </string>
+    <string>Index of Tx DeviceSet </string>
    </property>
   </widget>
   <widget class="QLabel" name="deviceSetRxLabel">

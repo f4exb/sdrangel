@@ -68,6 +68,26 @@ class SDRGUI_API MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
+	class MsgDeviceSetFocus : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+
+        static MsgDeviceSetFocus* create(int deviceSetIndex)
+        {
+            return new MsgDeviceSetFocus(deviceSetIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+
+        MsgDeviceSetFocus(int deviceSetIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex)
+        { }
+    };
+
 	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = 0);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
@@ -82,6 +102,7 @@ public:
 	const QTimer& getMasterTimer() const { return m_masterTimer; }
 	const MainSettings& getMainSettings() const { return m_settings; }
     const PluginManager *getPluginManager() const { return m_pluginManager; }
+    std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
 
@@ -278,26 +299,6 @@ private:
 	    QString displayName;
 	    QString tabName;
 	};
-
-	class MsgDeviceSetFocus : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-
-        static MsgDeviceSetFocus* create(int deviceSetIndex)
-        {
-            return new MsgDeviceSetFocus(deviceSetIndex);
-        }
-
-    private:
-        int m_deviceSetIndex;
-
-        MsgDeviceSetFocus(int deviceSetIndex) :
-            Message(),
-            m_deviceSetIndex(deviceSetIndex)
-        { }
-    };
 
     class MsgApplySettings : public Message {
         MESSAGE_CLASS_DECLARATION
