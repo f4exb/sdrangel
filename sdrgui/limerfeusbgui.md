@@ -6,6 +6,8 @@ To open the LimeRFE USB dialog open the Preferences sub-menu from the top bar an
 
 The dialog is non-modal so that it can be left open and keep the control on LimeRFE while other functions can be used.
 
+Whenever a change requires the LimeRFE configuration to be changed to become effective the "Apply" button (6) becomes green to suggest it should be activated.
+
 &#9888; Disclaimer: please use this interface and the LimeRFE sensibly by making sure you are licensed to operate it on the selected frequencies. If you are a licensed amateur radio you should make sure you operate on the bands allocated in your region as some bands are exclusive to a specific region or country.
 
 ![LimeRFE USB dialog](../doc/img/LimeRFEUSB_dialog.png)
@@ -201,7 +203,7 @@ This is where status messages are displayed.
 
 <h2>6. Apply changes</h2>
 
-Use this button to apply configuration changes. You must press this button to make any of your changes active.
+Use this button to apply configuration changes. You must press this button to make any of your changes active. Whenever a change requires the LimeRFE configuration to be changed to become effective this button becomes green to suggest it should be activated.
 
 <h2>7. Close dialog</h2>
 

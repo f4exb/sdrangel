@@ -58,6 +58,7 @@ private:
     void stopStartRx(bool start);
     void stopStartTx(bool start);
     void syncRxTx();
+    void highlightApplyButton(bool highlight);
 
     Ui::LimeRFEUSBDialog* ui;
     LimeRFEController m_controller;
