@@ -75,6 +75,13 @@ if(LINUX)
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
     endif()
   endmacro()
+  # macro that copy file
+  macro(makeCopyFile src dest target)
+    if(NOT EXISTS ${dest})
+      add_custom_command(TARGET ${target} PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dest} DEPENDS ${dest} COMMENT "copy ${src} -> ${dest}")
+    endif()
+  endmacro()
 else()
 # macro that create symbolic links
   macro(makeLink src dest target)
@@ -92,7 +99,7 @@ else()
     endif()
   endmacro()
 
-  # macro that copy folder
+  # macro that copy file
   macro(makeCopy src dest target)
     if(NOT EXISTS ${dest})
       add_custom_command(TARGET ${target} POST_BUILD
@@ -306,7 +313,9 @@ if (LINUX)
         INSTALL_COMMAND ""
         TEST_COMMAND ""
     )
+    ExternalProject_Get_Property(limesuite source_dir)
     set(LIMESUITE_FOUND ON CACHE INTERNAL "")
+    set(LIMERFE_FOUND ON CACHE INTERNAL "")
     set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
     set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
 
@@ -325,6 +334,7 @@ if (LINUX)
     set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
     set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
     set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libbladeRF.so" CACHE INTERNAL "")
+    makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
 
     # apt install libiio-dev
     # needs pkgconfig, libusb, libxml2, lzma, xz, libiconv
@@ -441,10 +451,12 @@ if(WIN32 OR APPLE)
     )
     ExternalProject_Get_Property(limesuite source_dir binary_dir)
     set(LIMESUITE_FOUND ON CACHE INTERNAL "")
+    set(LIMERFE_FOUND ON CACHE INTERNAL "")
     set(LIMESUITE_INCLUDE_DIR "${source_dir}/src" CACHE INTERNAL "")
     if(WIN32)
       set(LIMESUITE_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/LimeSuite.lib" CACHE INTERNAL "")
       install(FILES "${SDRANGEL_BINARY_BIN_DIR}/LimeSuite${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+      makeCopy("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
     elseif(APPLE)
       set(LIMESUITE_LIBRARY "${binary_dir}/src/libLimeSuite${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
       install(DIRECTORY "${binary_dir}/src/" DESTINATION "${INSTALL_LIB_DIR}"
