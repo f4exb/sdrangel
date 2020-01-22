@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.12.5"
+  version: "4.13.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"

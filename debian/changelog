@@ -1,3 +1,9 @@
+sdrangel (4.13.0-1) unstable; urgency=medium
+
+  * LimeRFE USB support
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 22 Jan 2020 12:14:22 +0100
+
 sdrangel (4.12.5-1) unstable; urgency=medium
 
   * Removed MIMO plugins and related code
