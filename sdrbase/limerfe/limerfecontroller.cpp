@@ -60,16 +60,12 @@ LimeRFEController::LimeRFEController() :
 
 LimeRFEController::~LimeRFEController()
 {
-    if (m_rfeDevice) {
-        closeDevice();
-    }
+    closeDevice();
 }
 
 int LimeRFEController::openDevice(const std::string& serialDeviceName)
 {
-    if (m_rfeDevice) {
-        closeDevice();
-    }
+    closeDevice();
 
     rfe_dev_t *rfeDevice = RFE_Open(serialDeviceName.c_str(), nullptr);
 
@@ -85,8 +81,11 @@ int LimeRFEController::openDevice(const std::string& serialDeviceName)
 
 void LimeRFEController::closeDevice()
 {
-    RFE_Close(m_rfeDevice);
-    m_rfeDevice = nullptr;
+    if (m_rfeDevice)
+    {
+        RFE_Close(m_rfeDevice);
+        m_rfeDevice = nullptr;
+    }
 }
 
 int LimeRFEController::configure()
