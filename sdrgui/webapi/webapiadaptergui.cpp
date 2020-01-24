@@ -68,7 +68,7 @@
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeRFEPower.h"
 
-#ifdef HAS_LIMERFE
+#ifdef HAS_LIMERFEUSB
 #include "limerfe/limerfecontroller.h"
 #endif
 
@@ -837,7 +837,7 @@ int WebAPIAdapterGUI::instanceAMBEDevicesPatch(
     return 200;
 }
 
-#ifdef HAS_LIMERFE
+#ifdef HAS_LIMERFEUSB
 int WebAPIAdapterGUI::instanceLimeRFESerialGet(
         SWGSDRangel::SWGLimeRFEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)

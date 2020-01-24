@@ -80,7 +80,7 @@
 #include <QDebug>
 #include <QSplashScreen>
 
-#if defined(HAS_LIMERFE)
+#if defined(HAS_LIMERFEUSB)
 #include "limerfegui/limerfeusbdialog.h"
 #endif
 
@@ -250,7 +250,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 #ifdef __APPLE__
     ui->menuPreferences->removeAction(ui->action_AMBE);
 #endif
-#if not defined(HAS_LIMERFE)
+#if not defined(HAS_LIMERFEUSB)
     ui->menuPreferences->removeAction(ui->action_LimeRFE);
 #endif
 
@@ -1705,7 +1705,7 @@ void MainWindow::on_action_AMBE_triggered()
 void MainWindow::on_action_LimeRFE_triggered()
 {
     qDebug("MainWindow::on_action_LimeRFE_triggered");
-#if defined(HAS_LIMERFE)
+#if defined(HAS_LIMERFEUSB)
     qDebug("MainWindow::on_action_LimeRFE_triggered: activated");
     LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(m_settings.getLimeRFEUSBCalib(), this);
     limeRFEUSBDialog->setModal(false);

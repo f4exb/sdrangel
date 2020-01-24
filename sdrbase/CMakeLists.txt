@@ -31,7 +31,7 @@ else(FFTW3F_FOUND)
     add_definitions(-DUSE_KISSFFT)
 endif(FFTW3F_FOUND)
 
-if (LIMERFE_FOUND)
+if (LIMESUITE_FOUND)
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
         limerfe/limerfecontroller.cpp
@@ -42,7 +42,7 @@ if (LIMERFE_FOUND)
     )
     include_directories(${LIMESUITE_INCLUDE_DIR})
     set(sdrbase_LIMERFE_LIB ${LIMESUITE_LIBRARY})
-endif (LIMERFE_FOUND)
+endif (LIMESUITE_FOUND)
 
 # serialdv now required
 add_definitions(-DDSD_USE_SERIALDV)

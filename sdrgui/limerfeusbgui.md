@@ -1,6 +1,6 @@
 <h1>LimeRFE USB control</h1>
 
-The LimeRFE or Lime RF Front End is a power amplifier and LNA board designed to augment the capabilities of the LimeSDR in order to build an operational radio solution. The usage is not limited to LimeSDR any Rx or Tx device can be connected to it. The LimeRFE can be controlled directly via its USB port independently of a LimeSDR device. This interface allows exactly that from the SDRangel GUI.
+The LimeRFE or Lime RF Front End is a power amplifier and LNA board designed to augment the capabilities of the LimeSDR in order to build an operational radio solution. The usage is not limited to LimeSDR any Rx or Tx device can be connected to it. The LimeRFE can be controlled directly via its USB port independently of a LimeSDR device. This interface allows exactly that from the SDRangel GUI. Note that this interface is available only in Linux.
 
 To open the LimeRFE USB dialog open the Preferences sub-menu from the top bar and click on the `LimeRFE` item. This item is available only when the code is compiled with the `LimeRFE` branch of LimeSuite.
 

@@ -177,7 +177,7 @@ set(sdrgui_FORMS
   soapygui/arginfogui.ui
   )
 
-if (LIMERFE_FOUND)
+if (LIMESUITE_FOUND)
   set(sdrgui_SOURCES
     ${sdrgui_SOURCES}
     limerfegui/limerfeusbdialog.cpp
@@ -192,7 +192,7 @@ if (LIMERFE_FOUND)
   )
   include_directories(${LIMESUITE_INCLUDE_DIR})
   set(sdrgui_LIMERFE_LIB ${LIMESUITE_LIBRARY})
-endif (LIMERFE_FOUND)
+endif (LIMESUITE_FOUND)
 
 qt5_wrap_ui(sdrgui_FORMS_HEADERS ${sdrgui_FORMS})
 

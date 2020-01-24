@@ -12,10 +12,10 @@ set(sdrsrv_HEADERS
     webapi/webapiadaptersrv.h
 )
 
-if (LIMERFE_FOUND)
+if (LIMESUITE_FOUND)
   include_directories(${LIMESUITE_INCLUDE_DIR})
   set(sdrgui_LIMERFE_LIB ${LIMESUITE_LIBRARY})
-endif (LIMERFE_FOUND)
+endif (LIMESUITE_FOUND)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/exports
