@@ -79,7 +79,7 @@ public:
         SWRCellular
     };
 
-    struct LimeRFESettings
+    struct SDRBASE_API LimeRFESettings
     {
         LimeRFESettings();
         // Rx
