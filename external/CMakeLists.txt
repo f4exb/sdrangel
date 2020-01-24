@@ -13,7 +13,7 @@ set(CM256CC_TAG f21e8bc1e9afdb0b28672743dcec111aec1d32d9)
 set(MBELIB_TAG 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f)
 set(SERIALDV_TAG "v1.1.4")
 set(DSDCC_TAG "v1.8.6")
-set(LIMESUITE_TAG 71a4122985f2f7c958113cd97383ccf2ae6ef2bd)
+set(LIMESUITE_TAG 6159754269a45e3d2c6b355285f501261ec5b34e)
 set(BLADERF_TAG "2019.07")
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1.1.5")
@@ -318,6 +318,7 @@ if (LINUX)
     set(LIMERFE_FOUND ON CACHE INTERNAL "")
     set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
     set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
+    makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
 
     # apt install libbladerf-dev
     # needs pkgconfig and libusb
@@ -334,7 +335,6 @@ if (LINUX)
     set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
     set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
     set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libbladeRF.so" CACHE INTERNAL "")
-    makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
 
     # apt install libiio-dev
     # needs pkgconfig, libusb, libxml2, lzma, xz, libiconv
