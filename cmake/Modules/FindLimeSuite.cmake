@@ -28,19 +28,8 @@ endif (LIMESUITE_INCLUDE_DIR AND LIMESUITE_LIBRARY)
 
 if (LIMESUITE_FOUND)
     message (STATUS "Found Lime Suite: ${LIMESUITE_INCLUDE_DIR}, ${LIMESUITE_LIBRARY}")
-    find_file(LIMERFE_INCLUDE_FILE
-        name lime/limeRFE.h
-        HINTS ${LIMESUITE_INCLUDE_DIR}
-    )
 else (LIMESUITE_FOUND)
     message (STATUS "Could not find Lime Suite")
 endif (LIMESUITE_FOUND)
-
-if (LIMERFE_INCLUDE_FILE)
-    set(LIMERFE_FOUND TRUE)
-    message (STATUS "Lime Suite has LimeRFE support: ${LIMERFE_INCLUDE_FILE}")
-else()
-    message (STATUS "Lime Suite has not LimeRFE support")
-endif()
 
 mark_as_advanced(LIMESUITE_INCLUDE_DIR LIMESUITE_LIBRARY)

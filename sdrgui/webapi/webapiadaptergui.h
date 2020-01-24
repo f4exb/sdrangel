@@ -140,7 +140,7 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
-#ifdef HAS_LIMERFE
+#ifdef HAS_LIMERFEUSB
     virtual int instanceLimeRFESerialGet(
             SWGSDRangel::SWGLimeRFEDevices& response,
             SWGSDRangel::SWGErrorResponse& error);
