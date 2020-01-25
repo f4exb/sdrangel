@@ -87,6 +87,9 @@ AudioDeviceManager::AudioDeviceManager()
     for (int i = 0; i < m_outputDevicesInfo.size(); i++) {
         qDebug("AudioDeviceManager::AudioDeviceManager: output device #%d: %s", i, qPrintable(m_outputDevicesInfo[i].deviceName()));
     }
+
+    m_defaultInputStarted = false;
+    m_defaultOutputStarted = false;
 }
 
 AudioDeviceManager::~AudioDeviceManager()
@@ -254,7 +257,9 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
         m_audioOutputs[outputDeviceIndex] = new AudioOutput();
     }
 
-    if (m_audioOutputs[outputDeviceIndex]->getNbFifos() == 0) {
+    if ((m_audioOutputs[outputDeviceIndex]->getNbFifos() == 0) &&
+       ((outputDeviceIndex != -1) || !m_defaultOutputStarted))
+    {
         startAudioOutput(outputDeviceIndex);
     }
 
@@ -293,7 +298,7 @@ void AudioDeviceManager::removeAudioSink(AudioFifo* audioFifo)
     int audioOutputDeviceIndex = m_audioSinkFifos[audioFifo];
     m_audioOutputs[audioOutputDeviceIndex]->removeFifo(audioFifo);
 
-    if (m_audioOutputs[audioOutputDeviceIndex]->getNbFifos() == 0) {
+    if ((audioOutputDeviceIndex != -1) && (m_audioOutputs[audioOutputDeviceIndex]->getNbFifos() == 0)) {
         stopAudioOutput(audioOutputDeviceIndex);
     }
 
@@ -310,7 +315,9 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
         m_audioInputs[inputDeviceIndex] = new AudioInput();
     }
 
-    if (m_audioInputs[inputDeviceIndex]->getNbFifos() == 0) {
+    if ((m_audioInputs[inputDeviceIndex]->getNbFifos() == 0) &&
+       ((inputDeviceIndex != -1) || !m_defaultInputStarted))
+    {
         startAudioInput(inputDeviceIndex);
     }
 
@@ -347,7 +354,7 @@ void AudioDeviceManager::removeAudioSource(AudioFifo* audioFifo)
     int audioInputDeviceIndex = m_audioSourceFifos[audioFifo];
     m_audioInputs[audioInputDeviceIndex]->removeFifo(audioFifo);
 
-    if (m_audioInputs[audioInputDeviceIndex]->getNbFifos() == 0) {
+    if ((audioInputDeviceIndex != -1) && (m_audioInputs[audioInputDeviceIndex]->getNbFifos() == 0)) {
         stopAudioInput(audioInputDeviceIndex);
     }
 
@@ -402,6 +409,7 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
         m_audioOutputInfos[deviceName].udpChannelMode = udpChannelMode;
         m_audioOutputInfos[deviceName].udpChannelCodec = udpChannelCodec;
         m_audioOutputInfos[deviceName].udpDecimationFactor = decimationFactor;
+        m_defaultOutputStarted = (outputDeviceIndex == -1);
     }
     else
     {
@@ -437,6 +445,7 @@ void AudioDeviceManager::startAudioInput(int inputDeviceIndex)
         m_audioInputs[inputDeviceIndex]->setVolume(volume);
         m_audioInputInfos[deviceName].sampleRate = m_audioInputs[inputDeviceIndex]->getRate();
         m_audioInputInfos[deviceName].volume = volume;
+        m_defaultInputStarted = (inputDeviceIndex == -1);
     }
     else
     {

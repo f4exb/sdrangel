@@ -136,6 +136,9 @@ private:
     QMap<int, AudioInput*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
     QMap<QString, InputDeviceInfo> m_audioInputInfos; //!< audio device name to audio input device info
 
+    bool m_defaultOutputStarted; //!< True if the default audio output (-1) has already been started
+    bool m_defaultInputStarted;  //!< True if the default audio input (-1) has already been started
+
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
