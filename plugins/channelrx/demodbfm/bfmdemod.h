@@ -70,7 +70,7 @@ public:
 	virtual ~BFMDemod();
     virtual void destroy() { delete this; }
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_basebandSink->setSpectrumSink(spectrumSink); }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_basebandSink->setMessageQueueToGUI(messageQueue); }
+    void setBasebandMessageQueueToGUI(MessageQueue *messageQueue) { m_basebandSink->setMessageQueueToGUI(messageQueue); }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
