@@ -388,6 +388,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_bfmDemod = (BFMDemod*) rxChannel; //new BFMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());
+    m_bfmDemod->setBasebandMessageQueueToGUI(getInputMessageQueue());
 	m_bfmDemod->setSpectrumSink(m_spectrumVis);
 
 	ui->glSpectrum->setCenterFrequency(m_rate / 4);
