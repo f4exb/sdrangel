@@ -19,7 +19,7 @@
 #include "audioselectdialog.h"
 #include "ui_audioselectdialog.h"
 
-AudioSelectDialog::AudioSelectDialog(AudioDeviceManager* audioDeviceManager, const QString& deviceName, bool input, QWidget* parent) :
+AudioSelectDialog::AudioSelectDialog(const AudioDeviceManager* audioDeviceManager, const QString& deviceName, bool input, QWidget* parent) :
     QDialog(parent),
     m_selected(false),
     ui(new Ui::AudioSelectDialog),
