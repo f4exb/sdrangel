@@ -7,8 +7,8 @@
 #include "settings/serializable.h"
 #include "lorademodsettings.h"
 
-const int LoRaDemodSettings::bandwidths[] = {7813,15625,20833,31250,62500};
-const int LoRaDemodSettings::nb_bandwidths = 5;
+const int LoRaDemodSettings::bandwidths[] = {7813, 15625, 31250, 62500, 125000, 250000, 50000};
+const int LoRaDemodSettings::nb_bandwidths = 7;
 
 LoRaDemodSettings::LoRaDemodSettings() :
     m_centerFrequency(0),
@@ -21,7 +21,7 @@ LoRaDemodSettings::LoRaDemodSettings() :
 void LoRaDemodSettings::resetToDefaults()
 {
     m_bandwidthIndex = 0;
-    m_spread = 0;
+    m_spreadFactor = 0;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "LoRa Demodulator";
 }
@@ -31,7 +31,7 @@ QByteArray LoRaDemodSettings::serialize() const
     SimpleSerializer s(1);
     s.writeS32(1, m_centerFrequency);
     s.writeS32(2, m_bandwidthIndex);
-    s.writeS32(3, m_spread);
+    s.writeS32(3, m_spreadFactor);
 
     if (m_spectrumGUI) {
         s.writeBlob(4, m_spectrumGUI->serialize());
@@ -62,7 +62,7 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_centerFrequency, 0);
         d.readS32(2, &m_bandwidthIndex, 0);
-        d.readS32(3, &m_spread, 0);
+        d.readS32(3, &m_spreadFactor, 0);
 
         if (m_spectrumGUI) {
             d.readBlob(4, &bytetmp);

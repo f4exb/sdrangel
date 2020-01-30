@@ -98,7 +98,13 @@ void LoRaDemodGUI::on_BW_valueChanged(int value)
 
 void LoRaDemodGUI::on_Spread_valueChanged(int value)
 {
-    (void) value;
+    m_settings.m_spreadFactor = value;
+    ui->SpreadText->setText(tr("%1").arg(value));
+	int spectrumRate = 1 << m_settings.m_spreadFactor;
+	ui->glSpectrum->setSampleRate(spectrumRate);
+	ui->glSpectrum->setCenterFrequency(spectrumRate/2);
+
+    applySettings();
 }
 
 void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -123,8 +129,9 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	m_LoRaDemod = (LoRaDemod*) rxChannel; //new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_LoRaDemod->setSpectrumSink(m_spectrumVis);
 
-	ui->glSpectrum->setCenterFrequency(16000);
-	ui->glSpectrum->setSampleRate(32000);
+	int spectrumRate = 1 << m_settings.m_spreadFactor;
+	ui->glSpectrum->setSampleRate(spectrumRate);
+	ui->glSpectrum->setCenterFrequency(spectrumRate/2);
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
@@ -183,5 +190,6 @@ void LoRaDemodGUI::displaySettings()
     blockApplySettings(true);
     ui->BWText->setText(QString("%1 Hz").arg(thisBW));
     ui->BW->setValue(m_settings.m_bandwidthIndex);
+    ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
     blockApplySettings(false);
 }

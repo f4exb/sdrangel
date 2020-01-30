@@ -138,7 +138,7 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
     qDebug() << "LoRaDemod::applySettings:"
             << " m_centerFrequency: " << settings.m_centerFrequency
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
-            << " m_spread: " << settings.m_spread
+            << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;

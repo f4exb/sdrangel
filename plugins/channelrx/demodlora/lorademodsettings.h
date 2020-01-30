@@ -13,7 +13,7 @@ struct LoRaDemodSettings
 {
     int m_centerFrequency;
     int m_bandwidthIndex;
-    int m_spread;
+    int m_spreadFactor;
     uint32_t m_rgbColor;
     QString m_title;
 

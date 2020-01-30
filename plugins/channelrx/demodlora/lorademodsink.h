@@ -55,11 +55,13 @@ private:
 	int m_time;
 	short m_tune;
 
-	sfft* loraFilter;
-	sfft* negaFilter;
-	float* mov;
-	short* history;
-	short* finetune;
+	sfft* m_loraFilter;
+	sfft* m_negaFilter;
+	float* m_mov;
+    float* m_mag;
+    float* m_rev;
+	short* m_history;
+	short* m_finetune;
 
 	NCO m_nco;
 	Interpolator m_interpolator;
@@ -68,10 +70,11 @@ private:
 	BasebandSampleSink* m_spectrumSink;
 	SampleVector m_sampleBuffer;
 
+    unsigned int m_nbSymbols;
+    unsigned int m_sfftLength;
+
     static const int DATA_BITS;
     static const int SAMPLEBITS;
-    static const int SPREADFACTOR;
-    static const int LORA_SFFT_LEN;
     static const int LORA_SQUELCH;
 
 	int  detect(Complex sample, Complex angle);

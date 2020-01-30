@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>410</height>
+    <width>350</width>
+    <height>550</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>350</width>
+    <height>550</height>
+   </size>
   </property>
   <property name="font">
    <font>
@@ -22,9 +28,9 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>35</x>
+     <x>10</x>
      <y>35</y>
-     <width>242</width>
+     <width>331</width>
      <height>96</height>
     </rect>
    </property>
@@ -50,24 +56,27 @@
     <item row="0" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Bandwidth</string>
+       <string>BW</string>
       </property>
      </widget>
     </item>
     <item row="1" column="0">
      <widget class="QLabel" name="mabel">
       <property name="text">
-       <string>Spreading</string>
+       <string>SF</string>
       </property>
      </widget>
     </item>
     <item row="0" column="1">
      <widget class="QSlider" name="BW">
+      <property name="toolTip">
+       <string>Bandwidth</string>
+      </property>
       <property name="minimum">
        <number>0</number>
       </property>
       <property name="maximum">
-       <number>4</number>
+       <number>6</number>
       </property>
       <property name="pageStep">
        <number>1</number>
@@ -82,20 +91,42 @@
     </item>
     <item row="1" column="1">
      <widget class="QSlider" name="Spread">
+      <property name="toolTip">
+       <string>Spreading factor</string>
+      </property>
       <property name="minimum">
-       <number>0</number>
+       <number>5</number>
       </property>
       <property name="maximum">
-       <number>2</number>
+       <number>12</number>
       </property>
       <property name="pageStep">
        <number>1</number>
       </property>
       <property name="value">
-       <number>0</number>
+       <number>7</number>
+      </property>
+      <property name="sliderPosition">
+       <number>7</number>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="2">
+     <widget class="QLabel" name="SpreadText">
+      <property name="minimumSize">
+       <size>
+        <width>50</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>5</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
      </widget>
     </item>
@@ -115,31 +146,15 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="SpreadText">
-      <property name="minimumSize">
-       <size>
-        <width>50</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>6:4 2^8</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>40</x>
+     <x>10</x>
      <y>140</y>
-     <width>218</width>
-     <height>184</height>
+     <width>331</width>
+     <height>391</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -165,15 +180,9 @@
      <widget class="GLSpectrum" name="glSpectrum" native="true">
       <property name="minimumSize">
        <size>
-        <width>200</width>
-        <height>150</height>
+        <width>0</width>
+        <height>350</height>
        </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Sans Serif</family>
-        <pointsize>9</pointsize>
-       </font>
       </property>
      </widget>
     </item>

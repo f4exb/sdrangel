@@ -26,12 +26,10 @@
 
 const int LoRaDemodSink::DATA_BITS = 6;
 const int LoRaDemodSink::SAMPLEBITS = LoRaDemodSink::DATA_BITS + 2;
-const int LoRaDemodSink::SPREADFACTOR = (1 << LoRaDemodSink::SAMPLEBITS);
-const int LoRaDemodSink::LORA_SFFT_LEN = (LoRaDemodSink::SPREADFACTOR / 2);
 const int LoRaDemodSink::LORA_SQUELCH = 3;
 
 LoRaDemodSink::LoRaDemodSink() :
-        m_spectrumSink(nullptr)
+    m_spectrumSink(nullptr)
 {
 	m_Bandwidth = LoRaDemodSettings::bandwidths[0];
 	m_channelSampleRate = 96000;
@@ -49,20 +47,25 @@ LoRaDemodSink::LoRaDemodSink() :
 	m_time = 0;
 	m_tune = 0;
 
-	loraFilter = new sfft(LORA_SFFT_LEN);
-	negaFilter = new sfft(LORA_SFFT_LEN);
-	mov = new float[4*LORA_SFFT_LEN];
-	history = new short[1024];
-	finetune = new short[16];
+    m_nbSymbols = 1 << m_settings.m_spreadFactor;
+    m_sfftLength = m_nbSymbols / 2;
+
+	m_loraFilter = new sfft(m_sfftLength);
+	m_negaFilter = new sfft(m_sfftLength);
+	m_mov = new float[4*m_sfftLength];
+	m_mag = new float[m_sfftLength];
+	m_rev = new float[m_sfftLength];
+	m_history = new short[1024];
+	m_finetune = new short[16];
 }
 
 LoRaDemodSink::~LoRaDemodSink()
 {
-    delete loraFilter;
-	delete negaFilter;
-	delete [] mov;
-	delete [] history;
-	delete [] finetune;
+    delete m_loraFilter;
+	delete m_negaFilter;
+	delete [] m_mov;
+	delete [] m_history;
+	delete [] m_finetune;
 }
 
 void LoRaDemodSink::dumpRaw()
@@ -78,7 +81,7 @@ void LoRaDemodSink::dumpRaw()
 
 	for ( j=0; j < max; j++)
 	{
-		bin = (history[(j + 1)  * 4] + m_tune ) & (LORA_SFFT_LEN - 1);
+		bin = (m_history[(j + 1)  * 4] + m_tune ) % m_sfftLength;
 		text[j] = toGray(bin >> 1);
 	}
 
@@ -120,26 +123,26 @@ short LoRaDemodSink::synch(short bin)
 		return -1;
 	}
 
-	history[m_time] = bin;
+	m_history[m_time] = bin;
 
 	if (m_time > 12)
 	{
-		if (bin == history[m_time - 6])
+		if (bin == m_history[m_time - 6])
 		{
-			if (bin == history[m_time - 12])
+			if (bin == m_history[m_time - 12])
 			{
-				m_tune = LORA_SFFT_LEN - bin;
+				m_tune = m_sfftLength - bin;
 				j = 0;
 
 				for (i=0; i<12; i++) {
-					j += finetune[15 & (m_time - i)];
+					j += m_finetune[15 & (m_time - i)];
 				}
 
 				if (j < 0) {
 					m_tune += 1;
 				}
 
-				m_tune &= (LORA_SFFT_LEN - 1);
+				m_tune %= m_sfftLength;
 				m_time = 0;
 				return -1;
 			}
@@ -153,7 +156,7 @@ short LoRaDemodSink::synch(short bin)
 		return -1;
 	}
 
-	return (bin + m_tune) & (LORA_SFFT_LEN - 1);
+	return (bin + m_tune) % m_sfftLength;
 }
 
 int LoRaDemodSink::detect(Complex c, Complex a)
@@ -161,11 +164,9 @@ int LoRaDemodSink::detect(Complex c, Complex a)
 	int p, q;
 	short i, result, negresult, movpoint;
 	float peak, negpeak, tfloat;
-	float mag[LORA_SFFT_LEN];
-	float rev[LORA_SFFT_LEN];
 
-	loraFilter->run(c * a);
-	negaFilter->run(c * conj(a));
+	m_loraFilter->run(c * a);
+	m_negaFilter->run(c * conj(a));
 
 	// process spectrum twice in FFTLEN
 	if (++m_count & ((1 << DATA_BITS) - 1)) {
@@ -174,21 +175,21 @@ int LoRaDemodSink::detect(Complex c, Complex a)
 
 	movpoint = 3 & (m_count >> DATA_BITS);
 
-	loraFilter->fetch(mag);
-	negaFilter->fetch(rev);
+	m_loraFilter->fetch(m_mag);
+	m_negaFilter->fetch(m_rev);
 	peak = negpeak = 0.0f;
 	result = negresult = 0;
 
-	for (i = 0; i < LORA_SFFT_LEN; i++)
+	for (i = 0; i < m_sfftLength; i++)
 	{
-		if (rev[i] > negpeak)
+		if (m_rev[i] > negpeak)
 		{
-			negpeak = rev[i];
+			negpeak = m_rev[i];
 			negresult = i;
 		}
 
-		tfloat = mov[i] + mov[LORA_SFFT_LEN + i] +mov[2 * LORA_SFFT_LEN + i]
-				+ mov[3 * LORA_SFFT_LEN + i] + mag[i];
+		tfloat = m_mov[i] + m_mov[m_sfftLength + i] +m_mov[2 * m_sfftLength + i]
+				+ m_mov[3 * m_sfftLength + i] + m_mag[i];
 
 		if (tfloat > peak)
 		{
@@ -196,15 +197,14 @@ int LoRaDemodSink::detect(Complex c, Complex a)
 			result = i;
 		}
 
-		mov[movpoint * LORA_SFFT_LEN + i] = mag[i];
+		m_mov[movpoint * m_sfftLength + i] = m_mag[i];
 	}
 
-	p = (result - 1 + LORA_SFFT_LEN) & (LORA_SFFT_LEN -1);
-	q = (result + 1) & (LORA_SFFT_LEN -1);
-	finetune[15 & m_time] = (mag[p] > mag[q]) ? -1 : 1;
+	p = (result - 1 + m_sfftLength) % m_sfftLength;
+	q = (result + 1) % m_sfftLength;
+	m_finetune[15 & m_time] = (m_mag[p] > m_mag[q]) ? -1 : 1;
 
-	if (peak < negpeak * LORA_SQUELCH)
-	{
+	if (peak < negpeak * LORA_SQUELCH) {
 		result = -1;
 	}
 
@@ -231,15 +231,25 @@ void LoRaDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
 		if (m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-			m_chirp = (m_chirp + 1) & (SPREADFACTOR - 1);
-                        m_angle = (m_angle + m_chirp) & (SPREADFACTOR - 1);
-			Complex cangle(cos(M_PI*2*m_angle/SPREADFACTOR),-sin(M_PI*2*m_angle/SPREADFACTOR));
-			newangle = detect(ci, cangle);
+            m_angle = (m_angle + m_chirp) % m_nbSymbols;
+			Complex upRamp(cos(M_PI*2*m_angle/m_nbSymbols), sin(M_PI*2*m_angle/m_nbSymbols));
+			Complex dechirpUp = ci * conj(upRamp); // de-chirp the up ramp to get peamble and data
+			Complex dechirpDown = ci * upRamp;     // de-chirp the down ramp to get sync
+			m_sampleBuffer.push_back(Sample(dechirpUp.real() * SDR_RX_SCALEF, dechirpUp.imag() * SDR_RX_SCALEF));
 
-			m_bin = (m_bin + newangle) & (LORA_SFFT_LEN - 1);
-			Complex nangle(cos(M_PI*2*m_bin/LORA_SFFT_LEN),sin(M_PI*2*m_bin/LORA_SFFT_LEN));
-			m_sampleBuffer.push_back(Sample(nangle.real() * 100, nangle.imag() * 100));
+			// Bullshit...
+			// Complex cangle(cos(M_PI*2*m_angle/m_nbSymbols),-sin(M_PI*2*m_angle/m_nbSymbols));
+			// newangle = detect(ci, cangle);
+			// m_bin = (m_bin + newangle) % m_sfftLength;
+			// Complex nangle(cos(M_PI*2*m_bin/m_sfftLength),sin(M_PI*2*m_bin/m_sfftLength));
+			// m_sampleBuffer.push_back(Sample(nangle.real() * 16384, nangle.imag() * 16384));
+
 			m_sampleDistanceRemain += (Real) m_channelSampleRate / m_Bandwidth;
+            m_chirp++;
+
+            if (m_chirp >= m_nbSymbols) {
+                m_chirp = 0;
+            }
 		}
 	}
 
@@ -252,9 +262,10 @@ void LoRaDemodSink::applyChannelSettings(int channelSampleRate, int bandwidth, i
 {
     qDebug() << "LoRaDemodSink::applyChannelSettings:"
             << " channelSampleRate: " << channelSampleRate
-            << " channelFrequencyOffset: " << channelFrequencyOffset;
+            << " channelFrequencyOffset: " << channelFrequencyOffset
+            << " bandwidth: " << bandwidth;
 
-    if((channelFrequencyOffset != m_channelFrequencyOffset) ||
+    if ((channelFrequencyOffset != m_channelFrequencyOffset) ||
         (channelSampleRate != m_channelSampleRate) || force)
     {
         m_nco.setFreq(-channelFrequencyOffset, channelSampleRate);
@@ -277,10 +288,26 @@ void LoRaDemodSink::applySettings(const LoRaDemodSettings& settings, bool force)
     qDebug() << "LoRaDemodSink::applySettings:"
             << " m_centerFrequency: " << settings.m_centerFrequency
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
-            << " m_spread: " << settings.m_spread
+            << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;
+
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor) || force)
+    {
+        m_nbSymbols = 1 << settings.m_spreadFactor;
+        m_sfftLength = m_nbSymbols / 2;
+        delete m_loraFilter;
+        delete m_negaFilter;
+        delete m_mov;
+        delete m_mag;
+        delete m_rev;
+        m_loraFilter = new sfft(m_sfftLength);
+        m_negaFilter = new sfft(m_sfftLength);
+        m_mov = new float[4*m_sfftLength];
+        m_mag = new float[m_sfftLength];
+        m_rev = new float[m_sfftLength];
+    }
 
     m_settings = settings;
 }
