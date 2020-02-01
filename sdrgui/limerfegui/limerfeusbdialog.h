@@ -86,6 +86,8 @@ private slots:
     void on_rxChannelGroup_currentIndexChanged(int index);
     void on_rxChannel_currentIndexChanged(int index);
     void on_rxPort_currentIndexChanged(int index);
+    void on_attenuation_currentIndexChanged(int index);
+    void on_amFmNotchFilter_clicked();
     void on_txFollowsRx_clicked();
     void on_txChannelGroup_currentIndexChanged(int index);
     void on_txChannel_currentIndexChanged(int index);

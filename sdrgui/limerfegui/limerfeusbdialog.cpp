@@ -855,6 +855,18 @@ void LimeRFEUSBDialog::on_rxTxToggle_clicked()
     }
 }
 
+void LimeRFEUSBDialog::on_attenuation_currentIndexChanged(int index)
+{
+    m_settings.m_attenuationFactor = index;
+    highlightApplyButton(true);
+}
+
+void LimeRFEUSBDialog::on_amFmNotchFilter_clicked()
+{
+    m_settings.m_amfmNotch = ui->amFmNotchFilter->isChecked();
+    highlightApplyButton(true);
+}
+
 void LimeRFEUSBDialog::on_apply_clicked()
 {
     ui->statusText->clear();
