@@ -364,6 +364,7 @@ Use this combo box to select which window is applied to the FFT:
   - **Ham**: Hamming
   - **Han**: Hanning (default)
   - **Rec**: Rectangular (no window)
+  - **Kai**: Kaiser with alpha = 2.15 (beta = 6.76) gives sidelobes &lt; -70dB
 
 <h4>4.2. FFT size</h4>
 
