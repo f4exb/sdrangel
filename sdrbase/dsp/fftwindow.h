@@ -36,8 +36,11 @@ public:
 		Flattop,
 		Hamming,
 		Hanning,
-		Rectangle
+		Rectangle,
+		Kaiser
 	};
+
+	FFTWindow();
 
 	void create(Function function, int n);
 	void apply(const std::vector<Real>& in, std::vector<Real>* out);
@@ -45,9 +48,13 @@ public:
     void apply(std::vector<Complex>& in);
 	void apply(const Complex* in, Complex* out);
     void apply(Complex* in);
+	void setKaiserAlpha(Real alpha); //!< set the Kaiser window alpha factor (default 2.15)
+	void setKaiserBeta(Real beta);   //!< set the Kaiser window beta factor = pi * alpha
 
 private:
 	std::vector<float> m_window;
+	Real m_kaiserAlpha;    //!< alpha factor for Kaiser window
+	Real m_kaiserI0Alpha;  //!< zeroethOrderBessel of alpha above
 
 	static inline Real flatTop(Real n, Real i)
 	{
@@ -82,6 +89,36 @@ private:
 	static inline Real rectangle(Real, Real)
 	{
 		return 1.0;
+	}
+
+	// https://raw.githubusercontent.com/johnglover/simpl/master/src/loris/KaiserWindow.C
+	inline Real kaiser(Real n, Real i)
+	{
+		Real K = ((2.0*i) / n) - 1.0;
+		Real arg = sqrt(1.0 - (K*K));
+		return zeroethOrderBessel(m_kaiserAlpha*arg) / m_kaiserI0Alpha;
+	}
+
+	static inline Real zeroethOrderBessel( Real x )
+	{
+		const Real eps = 0.000001;
+
+		//  initialize the series term for m=0 and the result
+		Real besselValue = 0;
+		Real term = 1;
+		Real m = 0;
+
+		//  accumulate terms as long as they are significant
+		while(term  > eps * besselValue)
+		{
+			besselValue += term;
+
+			//  update the term
+			++m;
+			term *= (x*x) / (4*m*m);
+		}
+
+		return besselValue;
 	}
 };
 

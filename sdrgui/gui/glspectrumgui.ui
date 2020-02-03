@@ -387,6 +387,11 @@
          <string>Rec</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Kai</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
