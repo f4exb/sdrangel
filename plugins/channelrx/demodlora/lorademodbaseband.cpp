@@ -134,11 +134,11 @@ bool LoRaDemodBaseband::handleMessage(const Message& cmd)
 void LoRaDemodBaseband::applySettings(const LoRaDemodSettings& settings, bool force)
 {
     if ((settings.m_bandwidthIndex != m_settings.m_bandwidthIndex)
-     || (settings.m_centerFrequency != m_settings.m_centerFrequency) || force)
+     || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer->setChannelization(
             LoRaDemodSettings::bandwidths[settings.m_bandwidthIndex],
-            settings.m_centerFrequency
+            settings.m_inputFrequencyOffset
         );
         m_sink.applyChannelSettings(
             m_channelizer->getChannelSampleRate(),

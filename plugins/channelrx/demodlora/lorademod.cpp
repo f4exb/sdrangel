@@ -1,7 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
-// (c) 2015 John Greb
+// (c) 2015 John Greb                                                            //
+// (c) 2020 Edouard Griffiths                                                    //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -100,8 +101,14 @@ bool LoRaDemod::handleMessage(const Message& cmd)
         m_basebandSampleRate = notif.getSampleRate();
         // Forward to the sink
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "LoRaDemod::handleMessage: DSPSignalNotification";
+        qDebug() << "LoRaDemod::handleMessage: DSPSignalNotification: m_basebandSampleRate: " << m_basebandSampleRate;
         m_basebandSink->getInputMessageQueue()->push(rep);
+
+        if (getMessageQueueToGUI())
+        {
+            DSPSignalNotification* repToGUI = new DSPSignalNotification(notif); // make a copy
+            getMessageQueueToGUI()->push(repToGUI);
+        }
 
         return true;
     }
@@ -136,7 +143,7 @@ bool LoRaDemod::deserialize(const QByteArray& data)
 void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
 {
     qDebug() << "LoRaDemod::applySettings:"
-            << " m_centerFrequency: " << settings.m_centerFrequency
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
             << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_rgbColor: " << settings.m_rgbColor

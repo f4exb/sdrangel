@@ -30,6 +30,7 @@ public:
 	~GLSpectrumGUI();
 
 	void setBuddies(MessageQueue* messageQueue, SpectrumVis* spectrumVis, GLSpectrum* glSpectrum);
+    void setFFTSize(int log2FFTSize);
 
 	void resetToDefaults();
 	virtual QByteArray serialize() const;

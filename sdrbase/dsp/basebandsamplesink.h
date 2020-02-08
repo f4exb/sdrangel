@@ -63,6 +63,12 @@ public:
     void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
+    virtual void feed(const Complex *begin, unsigned int length) //!< Special feed directly with complex array
+    {
+        (void) begin;
+        (void) length;
+    }
+
 protected:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI

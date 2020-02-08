@@ -81,6 +81,110 @@ void SpectrumVis::feedTriggered(const SampleVector::const_iterator& triggerPoint
 	}*/
 }
 
+void SpectrumVis::feed(const Complex *begin, unsigned int length)
+{
+	if (m_glSpectrum == 0) {
+		return;
+	}
+    if (!m_mutex.tryLock(0)) { // prevent conflicts with configuration process
+        return;
+    }
+
+    Complex c;
+    Real v;
+
+    if (m_avgMode == AvgModeNone)
+    {
+        for (unsigned int i = 0; i < m_fftSize; i++)
+        {
+            if (i < length) {
+                c = begin[i];
+            } else {
+                c = Complex{0,0};
+            }
+
+            v = c.real() * c.real() + c.imag() * c.imag();
+            v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+            m_powerSpectrum[i] = v;
+        }
+
+        // send new data to visualisation
+        m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize);
+    }
+    else if (m_avgMode == AvgModeMovingAvg)
+    {
+        for (unsigned int i = 0; i < m_fftSize; i++)
+        {
+            if (i < length) {
+                c = begin[i];
+            } else {
+                c = Complex{0,0};
+            }
+
+            v = c.real() * c.real() + c.imag() * c.imag();
+            v = m_movingAverage.storeAndGetAvg(v, i);
+            v = m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
+            m_powerSpectrum[i] = v;
+        }
+
+        // send new data to visualisation
+        m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize);
+        m_movingAverage.nextAverage();
+    }
+    else if (m_avgMode == AvgModeFixedAvg)
+    {
+        double avg;
+
+        for (unsigned int i = 0; i < m_fftSize; i++)
+        {
+            if (i < length) {
+                c = begin[i];
+            } else {
+                c = Complex{0,0};
+            }
+
+            v = c.real() * c.real() + c.imag() * c.imag();
+
+            if (m_fixedAverage.storeAndGetAvg(avg, v, i))
+            { // result available
+                avg = m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
+                m_powerSpectrum[i] = avg;
+            }
+        }
+
+        if (m_fixedAverage.nextAverage()) { // result available
+            m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize); // send new data to visualisation
+        }
+    }
+    else if (m_avgMode == AvgModeMax)
+    {
+        double max;
+
+        for (unsigned int i = 0; i < m_fftSize; i++)
+        {
+            if (i < length) {
+                c = begin[i];
+            } else {
+                c = Complex{0,0};
+            }
+
+            v = c.real() * c.real() + c.imag() * c.imag();
+
+            if (m_max.storeAndGetMax(max, v, i))
+            { // result available
+                max = m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
+                m_powerSpectrum[i] = max;
+            }
+        }
+
+        if (m_max.nextMax()) { // result available
+            m_glSpectrum->newSpectrum(m_powerSpectrum, m_fftSize); // send new data to visualisation
+        }
+    }
+
+    m_mutex.unlock();
+}
+
 void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
 	// if no visualisation is set, send the samples to /dev/null

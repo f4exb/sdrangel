@@ -90,6 +90,7 @@ public:
     void setScalef(MessageQueue* msgQueue, Real scalef);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();

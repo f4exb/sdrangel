@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>550</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>350</width>
-    <height>550</height>
+    <height>500</height>
    </size>
   </property>
   <property name="font">
@@ -29,124 +29,298 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>35</y>
+     <y>20</y>
      <width>331</width>
-     <height>96</height>
+     <height>112</height>
     </rect>
    </property>
-   <property name="windowTitle">
-    <string>Settings</string>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>112</height>
+    </size>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <property name="leftMargin">
+   <property name="windowTitle">
+    <string>RF/demod Settings</string>
+   </property>
+   <widget class="QLabel" name="bwLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>50</y>
+      <width>22</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BW</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="spreadLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>70</y>
+      <width>22</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>SF</string>
+    </property>
+   </widget>
+   <widget class="QSlider" name="BW">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>50</y>
+      <width>180</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Bandwidth</string>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <number>10</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>5</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="Spread">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>70</y>
+      <width>100</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Spreading factor</string>
+    </property>
+    <property name="minimum">
+     <number>7</number>
+    </property>
+    <property name="maximum">
+     <number>12</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>10</number>
+    </property>
+    <property name="sliderPosition">
+     <number>10</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="SpreadText">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>70</y>
+      <width>30</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>30</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>10</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="BWText">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>50</y>
+      <width>80</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>80</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>7813 Hz</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="deBitsLabel">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>70</y>
+      <width>22</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="deBitsText">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>70</y>
+      <width>30</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>30</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QSlider" name="deBits">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>70</y>
+      <width>60</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Low data rate optimize (DE) bits</string>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
      <number>2</number>
     </property>
-    <property name="topMargin">
-     <number>2</number>
+    <property name="pageStep">
+     <number>1</number>
     </property>
-    <property name="rightMargin">
-     <number>2</number>
+    <property name="value">
+     <number>0</number>
     </property>
-    <property name="bottomMargin">
-     <number>2</number>
+    <property name="sliderPosition">
+     <number>0</number>
     </property>
-    <property name="spacing">
-     <number>3</number>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
     </property>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>BW</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="mabel">
-      <property name="text">
-       <string>SF</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QSlider" name="BW">
-      <property name="toolTip">
-       <string>Bandwidth</string>
-      </property>
-      <property name="minimum">
-       <number>0</number>
-      </property>
-      <property name="maximum">
-       <number>6</number>
-      </property>
-      <property name="pageStep">
-       <number>1</number>
-      </property>
-      <property name="value">
-       <number>0</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QSlider" name="Spread">
-      <property name="toolTip">
-       <string>Spreading factor</string>
-      </property>
-      <property name="minimum">
-       <number>5</number>
-      </property>
-      <property name="maximum">
-       <number>12</number>
-      </property>
-      <property name="pageStep">
-       <number>1</number>
-      </property>
-      <property name="value">
-       <number>7</number>
-      </property>
-      <property name="sliderPosition">
-       <number>7</number>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
-     <widget class="QLabel" name="SpreadText">
-      <property name="minimumSize">
-       <size>
-        <width>50</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>5</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="BWText">
-      <property name="minimumSize">
-       <size>
-        <width>50</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>7813 Hz</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>311</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="deltaFrequencyLayout">
+     <item>
+      <widget class="QLabel" name="deltaFrequencyLabel">
+       <property name="minimumSize">
+        <size>
+         <width>16</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Df</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ValueDialZ" name="deltaFrequency" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Demod shift frequency from center in Hz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="deltaUnits">
+       <property name="text">
+        <string>Hz </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
@@ -154,11 +328,11 @@
      <x>10</x>
      <y>140</y>
      <width>331</width>
-     <height>391</height>
+     <height>341</height>
     </rect>
    </property>
    <property name="windowTitle">
-    <string>Channel Spectrum</string>
+    <string>De-chirped Spectrum</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">
@@ -181,7 +355,7 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>350</height>
+        <height>300</height>
        </size>
       </property>
      </widget>
@@ -211,7 +385,15 @@
    <header>gui/glspectrumgui.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
  <connections/>
 </ui>

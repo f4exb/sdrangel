@@ -24,17 +24,19 @@
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "util/message.h"
-#include "dsp/fftfilt.h"
+#include "dsp/fftwindow.h"
 
 #include "lorademodsettings.h"
 
 class BasebandSampleSink;
+class FFTEngine;
 
 class LoRaDemodSink : public ChannelSampleSink {
 public:
     LoRaDemodSink();
 	~LoRaDemodSink();
 
+    void initSF(unsigned int sf); //!< Init tables, FFTs, depending on spread factor
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
@@ -42,44 +44,69 @@ public:
     void applySettings(const LoRaDemodSettings& settings, bool force = false);
 
 private:
+    enum LoRaState
+    {
+        LoRaStateReset,          //!< Reset everything to start all over
+        LoRaStateDetectPreamble, //!< Look for preamble
+        LoRaStatePreamble,       //!< Preamble is found and look for SFD start
+        LoRaStateSkipSFD,        //!< Skip SFD
+        LoRaStateSlideSFD,       //!< Sliding FFTs while going through SFD (not the skip option)
+        LoRaStateReadPayload,
+        LoRaStateTest
+    };
+
     LoRaDemodSettings m_settings;
-	Real m_Bandwidth;
+    LoRaState m_state;
+	int m_bandwidth;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
 	int m_chirp;
-	int m_angle;
-	int m_bin;
-	int m_result;
-	int m_count;
-	int m_header;
-	int m_time;
-	short m_tune;
+	int m_chirp0;
 
-	sfft* m_loraFilter;
-	sfft* m_negaFilter;
-	float* m_mov;
-    float* m_mag;
-    float* m_rev;
-	short* m_history;
-	short* m_finetune;
+    static const unsigned int m_requiredPreambleChirps = 3; //!< Number of chirps required to estimate preamble
+    static const unsigned int m_maxSFDSearchChirps = 8;     //!< Maximum number of chirps when looking for SFD after preamble detection
+    static const unsigned int m_sfdFourths = 5;             //!< Number of SFD chip period fourths to skip until payload
+    static const unsigned int m_fftInterpolation = 1;       //!< FFT interpolation factor (usually a power of 2)
+
+    FFTEngine *m_fft;
+    FFTEngine *m_fftSFD;
+    FFTWindow m_fftWindow;
+    Complex *m_downChirps;
+    Complex *m_upChirps;
+    Complex *m_fftBuffer;
+    unsigned int m_fftCounter;
+    unsigned int m_argMaxHistory[m_requiredPreambleChirps];
+    unsigned int m_argMaxHistoryCounter;
+    unsigned int m_preambleHistory[m_maxSFDSearchChirps];
+    unsigned int m_syncWord;
+    double m_magsq;
+    unsigned int m_chirpCount; //!< Generic chirp counter
+    unsigned int m_sfdSkip;    //!< Number of samples in a SFD skip or slide (1/4) period
+    unsigned int m_sfdSkipCounter; //!< Counter of skip or slide periods
 
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_sampleDistanceRemain;
+    Real m_interpolatorDistance;
 
 	BasebandSampleSink* m_spectrumSink;
-	SampleVector m_sampleBuffer;
+	Complex *m_spectrumBuffer;
 
     unsigned int m_nbSymbols;
-    unsigned int m_sfftLength;
+    unsigned int m_fftLength;
 
-    static const int DATA_BITS;
-    static const int SAMPLEBITS;
-    static const int LORA_SQUELCH;
-
-	int  detect(Complex sample, Complex angle);
-	void dumpRaw(void);
-	short synch (short bin);
+    void processSample(const Complex& ci);
+    void reset();
+    unsigned int argmax(
+        const Complex *fftBins,
+        unsigned int fftMult,
+        unsigned int fftLength,
+        double& magsqMax,
+        Complex *specBuffer,
+        unsigned int specDecim
+        );
+    void decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation);
+    int toSigned(int u, int intSize);
 
     /*
     Interleaving is "easiest" if the same number of bits is used per symbol as for FEC

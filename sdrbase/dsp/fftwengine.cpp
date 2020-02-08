@@ -3,7 +3,7 @@
 
 FFTWEngine::FFTWEngine() :
 	m_plans(),
-	m_currentPlan(NULL)
+	m_currentPlan(nullptr)
 {
 }
 
@@ -14,8 +14,10 @@ FFTWEngine::~FFTWEngine()
 
 void FFTWEngine::configure(int n, bool inverse)
 {
-	for(Plans::const_iterator it = m_plans.begin(); it != m_plans.end(); ++it) {
-		if(((*it)->n == n) && ((*it)->inverse == inverse)) {
+	for (Plans::const_iterator it = m_plans.begin(); it != m_plans.end(); ++it)
+    {
+		if (((*it)->n == n) && ((*it)->inverse == inverse))
+        {
 			m_currentPlan = *it;
 			return;
 		}
@@ -37,33 +39,40 @@ void FFTWEngine::configure(int n, bool inverse)
 
 void FFTWEngine::transform()
 {
-	if(m_currentPlan != NULL)
+	if (m_currentPlan) {
 		fftwf_execute(m_currentPlan->plan);
+    }
 }
 
 Complex* FFTWEngine::in()
 {
-	if(m_currentPlan != NULL)
+	if (m_currentPlan) {
 		return reinterpret_cast<Complex*>(m_currentPlan->in);
-	else return NULL;
+    } else {
+        return nullptr;
+    }
 }
 
 Complex* FFTWEngine::out()
 {
-	if(m_currentPlan != NULL)
+	if (m_currentPlan) {
 		return reinterpret_cast<Complex*>(m_currentPlan->out);
-	else return NULL;
+    } else {
+        return nullptr;
+    }
 }
 
 QMutex FFTWEngine::m_globalPlanMutex;
 
 void FFTWEngine::freeAll()
 {
-	for(Plans::iterator it = m_plans.begin(); it != m_plans.end(); ++it) {
+	for (Plans::iterator it = m_plans.begin(); it != m_plans.end(); ++it)
+    {
 		fftwf_destroy_plan((*it)->plan);
 		fftwf_free((*it)->in);
 		fftwf_free((*it)->out);
 		delete *it;
 	}
+
 	m_plans.clear();
 }

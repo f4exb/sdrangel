@@ -21,208 +21,89 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/fftengine.h"
 
 #include "lorademodsink.h"
 
-const int LoRaDemodSink::DATA_BITS = 6;
-const int LoRaDemodSink::SAMPLEBITS = LoRaDemodSink::DATA_BITS + 2;
-const int LoRaDemodSink::LORA_SQUELCH = 3;
-
 LoRaDemodSink::LoRaDemodSink() :
-    m_spectrumSink(nullptr)
+    m_spectrumSink(nullptr),
+    m_spectrumBuffer(nullptr),
+    m_downChirps(nullptr),
+    m_upChirps(nullptr),
+    m_fftBuffer(nullptr)
 {
-	m_Bandwidth = LoRaDemodSettings::bandwidths[0];
+	m_bandwidth = LoRaDemodSettings::bandwidths[0];
 	m_channelSampleRate = 96000;
 	m_channelFrequencyOffset = 0;
 	m_nco.setFreq(m_channelFrequencyOffset, m_channelSampleRate);
-	m_interpolator.create(16, m_channelSampleRate, m_Bandwidth/1.9);
-	m_sampleDistanceRemain = (Real) m_channelSampleRate / m_Bandwidth;
+	m_interpolator.create(16, m_channelSampleRate, m_bandwidth / 1.9f);
+	m_interpolatorDistance = (Real) m_channelSampleRate / (Real) m_bandwidth;
+    m_sampleDistanceRemain = 0;
 
+    m_state = LoRaStateReset;
 	m_chirp = 0;
-	m_angle = 0;
-	m_bin = 0;
-	m_result = 0;
-	m_count = 0;
-	m_header = 0;
-	m_time = 0;
-	m_tune = 0;
+	m_chirp0 = 0;
 
-    m_nbSymbols = 1 << m_settings.m_spreadFactor;
-    m_sfftLength = m_nbSymbols / 2;
+    m_fft = FFTEngine::create();
+    m_fftSFD = FFTEngine::create();
 
-	m_loraFilter = new sfft(m_sfftLength);
-	m_negaFilter = new sfft(m_sfftLength);
-	m_mov = new float[4*m_sfftLength];
-	m_mag = new float[m_sfftLength];
-	m_rev = new float[m_sfftLength];
-	m_history = new short[1024];
-	m_finetune = new short[16];
+    initSF(m_settings.m_spreadFactor);
 }
 
 LoRaDemodSink::~LoRaDemodSink()
 {
-    delete m_loraFilter;
-	delete m_negaFilter;
-	delete [] m_mov;
-	delete [] m_history;
-	delete [] m_finetune;
+    delete m_fft;
+    delete m_fftSFD;
+    delete[] m_downChirps;
+    delete[] m_upChirps;
+    delete[] m_spectrumBuffer;
 }
 
-void LoRaDemodSink::dumpRaw()
+void LoRaDemodSink::initSF(unsigned int sf)
 {
-	short bin, j, max;
-	char text[256];
+    if (m_downChirps) {
+        delete[] m_downChirps;
+    }
+    if (m_upChirps) {
+        delete[] m_upChirps;
+    }
+    if (m_fftBuffer) {
+        delete[] m_fftBuffer;
+    }
+    if (m_spectrumBuffer) {
+        delete[] m_spectrumBuffer;
+    }
 
-	max = m_time / 4 - 3;
+    m_nbSymbols = 1 << sf;
+    m_fftLength = m_nbSymbols;
+    m_fft->configure(m_fftInterpolation*m_fftLength, false);
+    m_fftSFD->configure(m_fftInterpolation*m_fftLength, false);
+    m_state = LoRaStateReset;
+    m_sfdSkip = m_fftLength / 4;
+    m_fftWindow.create(FFTWindow::Function::Kaiser, m_fftLength);
+    m_fftWindow.setKaiserAlpha(M_PI);
+    m_downChirps = new Complex[2*m_nbSymbols]; // Each table is 2 chirps long to allow memcpying from arbitrary offsets.
+    m_upChirps = new Complex[2*m_nbSymbols];
+    m_fftBuffer = new Complex[m_fftInterpolation*m_fftLength];
+    m_spectrumBuffer = new Complex[m_nbSymbols];
 
-	if (max > 140) {
-		max = 140; // about 2 symbols to each char
-	}
+    float halfAngle = M_PI;
+    float phase = -halfAngle;
+    double accumulator = 0;
 
-	for ( j=0; j < max; j++)
-	{
-		bin = (m_history[(j + 1)  * 4] + m_tune ) % m_sfftLength;
-		text[j] = toGray(bin >> 1);
-	}
-
-	prng6(text, max);
-	// First block is always 8 symbols
-	interleave6(text, 6);
-	interleave6(&text[8], max);
-	hamming6(text, 6);
-	hamming6(&text[8], max);
-
-	for ( j=0; j < max / 2; j++)
-	{
-		text[j] = (text[j * 2 + 1] << 4) | (0xf & text[j * 2 + 0]);
-
-		if ((text[j] < 32 )||( text[j] > 126)) {
-			text[j] = 0x5f;
-		}
-	}
-
-	text[3] = text[2];
-	text[2] = text[1];
-	text[1] = text[0];
-	text[j] = 0;
-
-	qDebug("LoRaDemodSink::dumpRaw: %s", &text[1]);
-}
-
-short LoRaDemodSink::synch(short bin)
-{
-	short i, j;
-
-	if (bin < 0)
-	{
-		if (m_time > 70) {
-			dumpRaw();
-		}
-
-		m_time = 0;
-		return -1;
-	}
-
-	m_history[m_time] = bin;
-
-	if (m_time > 12)
-	{
-		if (bin == m_history[m_time - 6])
-		{
-			if (bin == m_history[m_time - 12])
-			{
-				m_tune = m_sfftLength - bin;
-				j = 0;
-
-				for (i=0; i<12; i++) {
-					j += m_finetune[15 & (m_time - i)];
-				}
-
-				if (j < 0) {
-					m_tune += 1;
-				}
-
-				m_tune %= m_sfftLength;
-				m_time = 0;
-				return -1;
-			}
-		}
-	}
-
-	m_time++;
-	m_time &= 1023;
-
-	if (m_time & 3) {
-		return -1;
-	}
-
-	return (bin + m_tune) % m_sfftLength;
-}
-
-int LoRaDemodSink::detect(Complex c, Complex a)
-{
-	int p, q;
-	short i, result, negresult, movpoint;
-	float peak, negpeak, tfloat;
-
-	m_loraFilter->run(c * a);
-	m_negaFilter->run(c * conj(a));
-
-	// process spectrum twice in FFTLEN
-	if (++m_count & ((1 << DATA_BITS) - 1)) {
-		return m_result;
-	}
-
-	movpoint = 3 & (m_count >> DATA_BITS);
-
-	m_loraFilter->fetch(m_mag);
-	m_negaFilter->fetch(m_rev);
-	peak = negpeak = 0.0f;
-	result = negresult = 0;
-
-	for (i = 0; i < m_sfftLength; i++)
-	{
-		if (m_rev[i] > negpeak)
-		{
-			negpeak = m_rev[i];
-			negresult = i;
-		}
-
-		tfloat = m_mov[i] + m_mov[m_sfftLength + i] +m_mov[2 * m_sfftLength + i]
-				+ m_mov[3 * m_sfftLength + i] + m_mag[i];
-
-		if (tfloat > peak)
-		{
-			peak = tfloat;
-			result = i;
-		}
-
-		m_mov[movpoint * m_sfftLength + i] = m_mag[i];
-	}
-
-	p = (result - 1 + m_sfftLength) % m_sfftLength;
-	q = (result + 1) % m_sfftLength;
-	m_finetune[15 & m_time] = (m_mag[p] > m_mag[q]) ? -1 : 1;
-
-	if (peak < negpeak * LORA_SQUELCH) {
-		result = -1;
-	}
-
-	result = synch(result);
-
-	if (result >= 0) {
-		m_result = result;
-	}
-
-	return m_result;
+    for (int i = 0; i < 2*m_nbSymbols; i++)
+    {
+        accumulator = fmod(accumulator + phase, 2*M_PI);
+        m_downChirps[i] = Complex(std::conj(std::polar(1.0, accumulator)));
+        m_upChirps[i] = Complex(std::polar(1.0, accumulator));
+        phase += (2*halfAngle) / m_nbSymbols;
+    }
 }
 
 void LoRaDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
 	int newangle;
 	Complex ci;
-
-	m_sampleBuffer.clear();
 
 	for (SampleVector::const_iterator it = begin; it < end; ++it)
 	{
@@ -231,31 +112,331 @@ void LoRaDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
 		if (m_interpolator.decimate(&m_sampleDistanceRemain, c, &ci))
 		{
-            m_angle = (m_angle + m_chirp) % m_nbSymbols;
-			Complex upRamp(cos(M_PI*2*m_angle/m_nbSymbols), sin(M_PI*2*m_angle/m_nbSymbols));
-			Complex dechirpUp = ci * conj(upRamp); // de-chirp the up ramp to get peamble and data
-			Complex dechirpDown = ci * upRamp;     // de-chirp the down ramp to get sync
-			m_sampleBuffer.push_back(Sample(dechirpUp.real() * SDR_RX_SCALEF, dechirpUp.imag() * SDR_RX_SCALEF));
-
-			// Bullshit...
-			// Complex cangle(cos(M_PI*2*m_angle/m_nbSymbols),-sin(M_PI*2*m_angle/m_nbSymbols));
-			// newangle = detect(ci, cangle);
-			// m_bin = (m_bin + newangle) % m_sfftLength;
-			// Complex nangle(cos(M_PI*2*m_bin/m_sfftLength),sin(M_PI*2*m_bin/m_sfftLength));
-			// m_sampleBuffer.push_back(Sample(nangle.real() * 16384, nangle.imag() * 16384));
-
-			m_sampleDistanceRemain += (Real) m_channelSampleRate / m_Bandwidth;
-            m_chirp++;
-
-            if (m_chirp >= m_nbSymbols) {
-                m_chirp = 0;
-            }
+            processSample(ci);
+			m_sampleDistanceRemain += m_interpolatorDistance;
 		}
 	}
+}
 
-	if (m_spectrumSink) {
-		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
-	}
+void LoRaDemodSink::processSample(const Complex& ci)
+{
+    if (m_state == LoRaStateReset) // start over
+    {
+        reset();
+        m_state = LoRaStateDetectPreamble;
+    }
+    else if (m_state == LoRaStateDetectPreamble) // look for preamble
+    {
+        m_fft->in()[m_fftCounter++] = ci * m_downChirps[m_chirp]; // de-chirp the up ramp
+
+        if (m_fftCounter == m_fftLength)
+        {
+            m_fftWindow.apply(m_fft->in());
+            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            m_fft->transform();
+            m_fftCounter = 0;
+
+            unsigned int imax = argmax(
+                m_fft->out(),
+                m_fftInterpolation,
+                m_fftLength,
+                m_magsq,
+                m_spectrumBuffer,
+                m_fftInterpolation
+            ) / m_fftInterpolation;
+
+            // Debug:
+            // if (m_spectrumSink) {
+            //     m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
+            // }
+
+            m_argMaxHistory[m_argMaxHistoryCounter++] = imax;
+
+            if (m_argMaxHistoryCounter == m_requiredPreambleChirps)
+            {
+                m_argMaxHistoryCounter = 0;
+                bool preambleFound = true;
+
+                for (int i = 1; i < m_requiredPreambleChirps; i++)
+                {
+                    if (m_argMaxHistory[0] != m_argMaxHistory[i])
+                    {
+                        preambleFound = false;
+                        break;
+                    }
+                }
+
+                if (preambleFound)
+                {
+                    if (m_spectrumSink) {
+                        m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
+                    }
+
+                    qDebug("LoRaDemodSink::processSample: preamble found: %u|%f", m_argMaxHistory[0], m_magsq);
+                    m_chirp0 = m_argMaxHistory[0];
+                    m_chirp = m_chirp0;
+                    m_fftCounter = 0;
+                    m_chirpCount = 0;
+                    m_state = LoRaStatePreamble;
+                }
+            }
+        }
+    }
+    else if (m_state == LoRaStatePreamble) // preamble found look for SFD start
+    {
+        m_fft->in()[m_fftCounter] = ci * m_downChirps[m_chirp];  // de-chirp the up ramp
+        m_fftSFD->in()[m_fftCounter] = ci * m_upChirps[m_chirp]; // de-chiro the down ramp
+        m_fftCounter++;
+
+        if (m_fftCounter == m_fftLength)
+        {
+            std::copy(m_fftSFD->in(), m_fftSFD->in() + m_fftLength, m_fftBuffer); // save for later
+
+            m_fftWindow.apply(m_fft->in());
+            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            m_fft->transform();
+
+            m_fftWindow.apply(m_fftSFD->in());
+            std::fill(m_fftSFD->in()+m_fftLength, m_fftSFD->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            m_fftSFD->transform();
+
+            m_fftCounter = 0;
+            double magsq, magsqSFD;
+
+            unsigned int imaxSFD = argmax(
+                m_fftSFD->out(),
+                m_fftInterpolation,
+                m_fftLength,
+                magsqSFD,
+                nullptr,
+                m_fftInterpolation
+            ) / m_fftInterpolation;
+
+            unsigned int imax = argmax(
+                m_fft->out(),
+                m_fftInterpolation,
+                m_fftLength,
+                magsq,
+                m_spectrumBuffer,
+                m_fftInterpolation
+            ) / m_fftInterpolation;
+
+            m_preambleHistory[m_chirpCount] = imax;
+            m_chirpCount++;
+
+            if (magsq <  magsqSFD) // preamble drop
+            {
+                if (m_chirpCount < 3) // too early
+                {
+                    m_state = LoRaStateReset;
+                }
+                else
+                {
+                    m_syncWord = round(m_preambleHistory[m_chirpCount-2] / 8.0);
+                    m_syncWord += 16 * round(m_preambleHistory[m_chirpCount-3] / 8.0);
+                    qDebug("LoRaDemodSink::processSample: SFD found:  up: %u|%f down: %u|%f sync: %x", imax, magsq, imaxSFD, magsqSFD, m_syncWord);
+                    m_sfdSkipCounter = 0;
+                    m_fftCounter = m_fftLength - m_sfdSkip;
+                    std::copy(m_fftBuffer+m_sfdSkip, m_fftBuffer+(m_fftLength-m_sfdSkip), m_fftBuffer); // prepare sliding fft
+                    m_state = LoRaStateSlideSFD;
+                    m_magsq = magsqSFD;
+                }
+            }
+            else if (m_chirpCount > m_maxSFDSearchChirps) // SFD missed start over
+            {
+                m_state = LoRaStateReset;
+            }
+            else
+            {
+                if (m_spectrumSink) {
+                    m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
+                }
+
+                qDebug("LoRaDemodSink::processSample: SFD search: up: %u|%f down: %u|%f", imax, magsq, imaxSFD, magsqSFD);
+                m_magsq = magsq;
+            }
+        }
+    }
+    else if (m_state == LoRaStateSkipSFD) // Just skip SFD
+    {
+        m_fftCounter++;
+
+        if (m_fftCounter == m_fftLength)
+        {
+            m_fftCounter = m_fftLength - m_sfdSkip;
+            m_sfdSkipCounter++;
+
+            if (m_sfdSkipCounter == m_sfdFourths) // 1.25 SFD chips left
+            {
+                m_chirp = m_chirp0;
+                m_fftCounter = 0;
+                m_chirpCount = 0;
+                int correction = 0;
+                qDebug("LoRaDemodSink::processSample: SFD skipped");
+                m_state = LoRaStateReadPayload; //LoRaStateReadPayload;
+            }
+        }
+    }
+    else if (m_state == LoRaStateSlideSFD) // perform sliding FFTs over the rest of the SFD period
+    {
+        m_fftBuffer[m_fftCounter] = ci * m_upChirps[m_chirp]; // de-chirp the down ramp
+        m_fftCounter++;
+
+        if (m_fftCounter == m_fftLength)
+        {
+            std::copy(m_fftBuffer, m_fftBuffer + m_fftLength, m_fftSFD->in());
+            std::fill(m_fftSFD->in()+m_fftLength, m_fftSFD->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            m_fftSFD->transform();
+            std::copy(m_fftBuffer+m_sfdSkip, m_fftBuffer+(m_fftLength-m_sfdSkip), m_fftBuffer); // prepare next sliding fft
+            m_fftCounter = m_fftLength - m_sfdSkip;
+            m_sfdSkipCounter++;
+
+            double magsqSFD;
+
+            unsigned int imaxSFD = argmax(
+                m_fftSFD->out(),
+                m_fftInterpolation,
+                m_fftLength,
+                magsqSFD,
+                m_spectrumBuffer,
+                m_fftInterpolation
+            ) / m_fftInterpolation;
+
+            qDebug("LoRaDemodSink::processSample: SFD slide %u %u|%f", m_sfdSkipCounter, imaxSFD, magsqSFD);
+
+            if (m_sfdSkipCounter == m_sfdFourths) // 1.25 SFD chips length
+            {
+                m_chirp = m_chirp0;
+                m_fftCounter = 0;
+                m_chirpCount = 0;
+                int correction = 0;
+                qDebug("LoRaDemodSink::processSample: SFD done");
+                m_state = LoRaStateReadPayload; //LoRaStateReadPayload;
+            }
+        }
+    }
+    else if (m_state == LoRaStateReadPayload)
+    {
+        m_fft->in()[m_fftCounter] = ci * m_downChirps[m_chirp]; // de-chirp the up ramp
+        m_fftCounter++;
+
+        if (m_fftCounter == m_fftLength)
+        {
+            m_fftWindow.apply(m_fft->in());
+            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            m_fft->transform();
+            m_fftCounter = 0;
+            double magsq;
+
+            unsigned int symbol = round(
+                argmax(
+                    m_fft->out(),
+                    m_fftInterpolation,
+                    m_fftLength,
+                    magsq,
+                    m_spectrumBuffer,
+                    m_fftInterpolation
+                ) / ((float) m_fftInterpolation * (1<<m_settings.m_deBits))
+            );
+
+            if (m_spectrumSink) {
+                m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
+            }
+
+            if ((m_chirpCount == 0) || (10.0*magsq > m_magsq))
+            {
+                qDebug("LoRaDemodSink::processSample: symbol %02u: %4u|%11.6f", m_chirpCount, symbol, magsq);
+                m_magsq = magsq;
+                m_chirpCount++;
+
+                if (m_chirpCount > 255)
+                {
+                    qDebug("LoRaDemodSink::processSample: message length exceeded");
+                    m_state = LoRaStateReset;
+                }
+            }
+            else
+            {
+                qDebug("LoRaDemodSink::processSample: end of message");
+                m_state = LoRaStateReset;
+            }
+        }
+    }
+    else
+    {
+        m_state = LoRaStateReset;
+    }
+
+    m_chirp++;
+
+    if (m_chirp >= m_chirp0 + m_nbSymbols) {
+        m_chirp = m_chirp0;
+    }
+}
+
+void LoRaDemodSink::reset()
+{
+    m_chirp = 0;
+    m_chirp0 = 0;
+    m_fftCounter = 0;
+    m_argMaxHistoryCounter = 0;
+    m_sfdSkipCounter = 0;
+}
+
+unsigned int LoRaDemodSink::argmax(
+    const Complex *fftBins,
+    unsigned int fftMult,
+    unsigned int fftLength,
+    double& magsqMax,
+    Complex *specBuffer,
+    unsigned int specDecim)
+{
+    magsqMax = 0.0;
+    unsigned int imax;
+    double magSum = 0.0;
+
+    for (unsigned int i = 0; i < fftMult*fftLength; i++)
+    {
+        double magsq = std::norm(fftBins[i]);
+
+        if (magsq > magsqMax)
+        {
+            imax = i;
+            magsqMax = magsq;
+        }
+
+        if (specBuffer)
+        {
+            magSum += magsq;
+
+            if (i % specDecim == specDecim - 1)
+            {
+                specBuffer[i/specDecim] = Complex(std::polar(magSum, 0.0));
+                magSum = 0.0;
+            }
+        }
+    }
+
+    return imax;
+}
+
+void LoRaDemodSink::decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation)
+{
+    for (unsigned int i = 0; i < size; i++)
+    {
+        if (i % decimation == 0) {
+            out[i/decimation] = in[i];
+        }
+    }
+}
+
+int LoRaDemodSink::toSigned(int u, int intSize)
+{
+    if (u > intSize/2) {
+        return u - intSize;
+    } else {
+        return u;
+    }
 }
 
 void LoRaDemodSink::applyChannelSettings(int channelSampleRate, int bandwidth, int channelFrequencyOffset, bool force)
@@ -271,42 +452,33 @@ void LoRaDemodSink::applyChannelSettings(int channelSampleRate, int bandwidth, i
         m_nco.setFreq(-channelFrequencyOffset, channelSampleRate);
     }
 
-    if ((channelSampleRate != m_channelSampleRate) || force)
+    if ((channelSampleRate != m_channelSampleRate) ||
+        (bandwidth != m_bandwidth) || force)
     {
-        qDebug() << "LoRaDemodSink::applyChannelSettings: m_interpolator.create";
         m_interpolator.create(16, channelSampleRate, bandwidth / 1.9f);
-        m_sampleDistanceRemain = (Real) channelSampleRate / bandwidth;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) bandwidth;
+        m_sampleDistanceRemain = 0;
+        qDebug() << "LoRaDemodSink::applyChannelSettings: m_interpolator.create:"
+            << " m_interpolatorDistance: " << m_interpolatorDistance;
     }
 
     m_channelSampleRate = channelSampleRate;
-    m_Bandwidth = bandwidth;
+    m_bandwidth = bandwidth;
     m_channelFrequencyOffset = channelFrequencyOffset;
 }
 
 void LoRaDemodSink::applySettings(const LoRaDemodSettings& settings, bool force)
 {
     qDebug() << "LoRaDemodSink::applySettings:"
-            << " m_centerFrequency: " << settings.m_centerFrequency
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
             << " m_spreadFactor: " << settings.m_spreadFactor
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;
 
-    if ((settings.m_spreadFactor != m_settings.m_spreadFactor) || force)
-    {
-        m_nbSymbols = 1 << settings.m_spreadFactor;
-        m_sfftLength = m_nbSymbols / 2;
-        delete m_loraFilter;
-        delete m_negaFilter;
-        delete m_mov;
-        delete m_mag;
-        delete m_rev;
-        m_loraFilter = new sfft(m_sfftLength);
-        m_negaFilter = new sfft(m_sfftLength);
-        m_mov = new float[4*m_sfftLength];
-        m_mag = new float[m_sfftLength];
-        m_rev = new float[m_sfftLength];
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor) || force) {
+        initSF(settings.m_spreadFactor);
     }
 
     m_settings = settings;
