@@ -19,7 +19,7 @@
 #include "dsp/fftwindow.h"
 
 FFTWindow::FFTWindow() :
-	m_kaiserAlpha(2.15) // beta = 6.76 first sidelobe at -70dB
+	m_kaiserAlpha(M_PI) // first sidelobe at < -70dB
 {
 	m_kaiserI0Alpha = zeroethOrderBessel(m_kaiserAlpha);
 }
