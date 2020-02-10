@@ -24,8 +24,8 @@
 #include "settings/serializable.h"
 #include "lorademodsettings.h"
 
-const int LoRaDemodSettings::bandwidths[] = {7813, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000};
-const int LoRaDemodSettings::nbBandwidths = 10;
+const int LoRaDemodSettings::bandwidths[] = {2500, 7813, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000};
+const int LoRaDemodSettings::nbBandwidths = 11;
 
 LoRaDemodSettings::LoRaDemodSettings() :
     m_inputFrequencyOffset(0),
