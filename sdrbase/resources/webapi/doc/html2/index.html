@@ -2184,6 +2184,9 @@ margin-bottom: 20px;
     "FreqTrackerReport" : {
       "$ref" : "#/definitions/FreqTrackerReport"
     },
+    "LoRaModReport" : {
+      "$ref" : "#/definitions/LoRaModReport"
+    },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
     },
@@ -2275,6 +2278,9 @@ margin-bottom: 20px;
     },
     "InterferometerSettings" : {
       "$ref" : "#/definitions/InterferometerSettings"
+    },
+    "LoRaModSettings" : {
+      "$ref" : "#/definitions/LoRaModSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -4373,6 +4379,70 @@ margin-bottom: 20px;
     }
   },
   "description" : "LimeSDR"
+};
+            defs.LoRaModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LoRaMod"
+};
+            defs.LoRaModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer"
+    },
+    "spreadFactor" : {
+      "type" : "integer"
+    },
+    "deBits" : {
+      "type" : "integer"
+    },
+    "message" : {
+      "type" : "string"
+    },
+    "channelMute" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LoRaMod"
 };
             defs.LocalInputReport = {
   "properties" : {
@@ -32252,7 +32322,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-01-23T00:38:38.303+01:00
+              Generated 2020-02-08T20:41:49.295+01:00
             </div>
           </div>
       </div>

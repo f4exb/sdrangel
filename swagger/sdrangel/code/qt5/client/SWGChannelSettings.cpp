@@ -64,6 +64,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_freq_tracker_settings_isSet = false;
     interferometer_settings = nullptr;
     m_interferometer_settings_isSet = false;
+    lo_ra_mod_settings = nullptr;
+    m_lo_ra_mod_settings_isSet = false;
     nfm_demod_settings = nullptr;
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
@@ -132,6 +134,8 @@ SWGChannelSettings::init() {
     m_freq_tracker_settings_isSet = false;
     interferometer_settings = new SWGInterferometerSettings();
     m_interferometer_settings_isSet = false;
+    lo_ra_mod_settings = new SWGLoRaModSettings();
+    m_lo_ra_mod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
@@ -207,6 +211,9 @@ SWGChannelSettings::cleanup() {
     }
     if(interferometer_settings != nullptr) { 
         delete interferometer_settings;
+    }
+    if(lo_ra_mod_settings != nullptr) { 
+        delete lo_ra_mod_settings;
     }
     if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
@@ -292,6 +299,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
     
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
+    
+    ::SWGSDRangel::setValue(&lo_ra_mod_settings, pJson["LoRaModSettings"], "SWGLoRaModSettings", "SWGLoRaModSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
@@ -386,6 +395,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((interferometer_settings != nullptr) && (interferometer_settings->isSet())){
         toJsonValue(QString("InterferometerSettings"), interferometer_settings, obj, QString("SWGInterferometerSettings"));
+    }
+    if((lo_ra_mod_settings != nullptr) && (lo_ra_mod_settings->isSet())){
+        toJsonValue(QString("LoRaModSettings"), lo_ra_mod_settings, obj, QString("SWGLoRaModSettings"));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
@@ -607,6 +619,16 @@ SWGChannelSettings::setInterferometerSettings(SWGInterferometerSettings* interfe
     this->m_interferometer_settings_isSet = true;
 }
 
+SWGLoRaModSettings*
+SWGChannelSettings::getLoRaModSettings() {
+    return lo_ra_mod_settings;
+}
+void
+SWGChannelSettings::setLoRaModSettings(SWGLoRaModSettings* lo_ra_mod_settings) {
+    this->lo_ra_mod_settings = lo_ra_mod_settings;
+    this->m_lo_ra_mod_settings_isSet = true;
+}
+
 SWGNFMDemodSettings*
 SWGChannelSettings::getNfmDemodSettings() {
     return nfm_demod_settings;
@@ -784,6 +806,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(interferometer_settings && interferometer_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lo_ra_mod_settings && lo_ra_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(nfm_demod_settings && nfm_demod_settings->isSet()){

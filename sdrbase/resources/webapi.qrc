@@ -33,6 +33,7 @@
         <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/LimeRFE.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
+        <file>webapi/doc/swagger/include/LoRaMod.yaml</file>
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LocalInput.yaml</file>
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>

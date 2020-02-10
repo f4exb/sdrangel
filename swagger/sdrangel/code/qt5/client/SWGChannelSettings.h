@@ -36,6 +36,7 @@
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGInterferometerSettings.h"
+#include "SWGLoRaModSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
@@ -121,6 +122,9 @@ public:
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
+
+    SWGLoRaModSettings* getLoRaModSettings();
+    void setLoRaModSettings(SWGLoRaModSettings* lo_ra_mod_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -215,6 +219,9 @@ private:
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;
+
+    SWGLoRaModSettings* lo_ra_mod_settings;
+    bool m_lo_ra_mod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

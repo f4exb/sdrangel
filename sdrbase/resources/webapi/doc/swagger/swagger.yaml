@@ -2272,6 +2272,8 @@ definitions:
         $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       FreqTrackerReport:
         $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+      LoRaModReport:
+        $ref: "/doc/swagger/include/LoRaMod.yaml#/LoRaModReport"
       NFMDemodReport:
         $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:

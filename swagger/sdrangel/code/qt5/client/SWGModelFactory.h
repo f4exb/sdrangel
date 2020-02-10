@@ -101,6 +101,8 @@
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLimeSdrOutputSettings.h"
+#include "SWGLoRaModReport.h"
+#include "SWGLoRaModSettings.h"
 #include "SWGLocalInputReport.h"
 #include "SWGLocalInputSettings.h"
 #include "SWGLocalOutputReport.h"
@@ -438,6 +440,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLimeSdrOutputSettings").compare(type) == 0) {
       return new SWGLimeSdrOutputSettings();
+    }
+    if(QString("SWGLoRaModReport").compare(type) == 0) {
+      return new SWGLoRaModReport();
+    }
+    if(QString("SWGLoRaModSettings").compare(type) == 0) {
+      return new SWGLoRaModSettings();
     }
     if(QString("SWGLocalInputReport").compare(type) == 0) {
       return new SWGLocalInputReport();
