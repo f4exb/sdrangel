@@ -107,10 +107,12 @@ private:
     static const int m_levelNbSamples;
 
     void initSF(unsigned int sf); //!< Init tables, FFTs, depending on spread factor
+    void initTest(unsigned int sf, unsigned int deBits);
     void reset();
     void processOneSample(Complex& ci);
     void calculateLevel(Real& sample);
     void modulateSample();
+    unsigned int encodeSymbol(unsigned int symbol); //!< Encodes symbol with possible DE bits spacing
 };
 
 #endif // INCLUDE_LORAMODSOURCE_H

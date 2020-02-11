@@ -35,6 +35,7 @@ LoRaModSource::LoRaModSource() :
 	m_magsq = 0.0;
 
     initSF(m_settings.m_spreadFactor);
+    initTest(m_settings.m_spreadFactor, m_settings.m_deBits);
     reset();
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -61,13 +62,6 @@ void LoRaModSource::initSF(unsigned int sf)
     m_quarterSamples = (m_fftLength/4)*LoRaModSettings::oversampling;
     m_downChirps = new Complex[2*m_fftLength*LoRaModSettings::oversampling]; // Each table is 2 chirps long to allow use from arbitrary offsets.
     m_upChirps = new Complex[2*m_fftLength*LoRaModSettings::oversampling];
-    m_symbols.clear();
-
-    for (unsigned int symbol = m_fftLength/4; symbol < m_fftLength; symbol += m_fftLength/4)
-    {
-        m_symbols.push_back(symbol);
-        m_symbols.push_back(symbol+1);
-    }
 
     float halfAngle = M_PI/LoRaModSettings::oversampling;
     float phase = -halfAngle;
@@ -89,11 +83,32 @@ void LoRaModSource::initSF(unsigned int sf)
     m_phaseIncrements = new double[2*m_fftLength*LoRaModSettings::oversampling];
     phase = -halfAngle;
 
-    for (int i = 0; i < 2*m_fftLength*LoRaModSettings::oversampling; i++)
+    for (int i = 0; i < m_fftLength*LoRaModSettings::oversampling; i++)
     {
         m_phaseIncrements[i] = phase;
         phase += (2*halfAngle) / (m_fftLength*LoRaModSettings::oversampling);
-        phase = phase > halfAngle ? -halfAngle : phase;
+    }
+
+    std::copy(
+        m_phaseIncrements,
+        m_phaseIncrements+m_fftLength*LoRaModSettings::oversampling,
+        m_phaseIncrements+m_fftLength*LoRaModSettings::oversampling
+    );
+}
+
+void LoRaModSource::initTest(unsigned int sf, unsigned int deBits)
+{
+    unsigned int fftLength = 1<<sf;
+    unsigned int symbolRange = fftLength/(1<<deBits);
+    m_symbols.clear();
+
+    for (unsigned int seq = 0; seq < 1; seq++)
+    {
+        for (unsigned int symbol = 0; symbol < symbolRange; symbol += symbolRange/4)
+        {
+            m_symbols.push_back(symbol);
+            m_symbols.push_back(symbol+1);
+        }
     }
 }
 
@@ -225,8 +240,9 @@ void LoRaModSource::modulateSample()
     else if (m_state == LoRaStateSFD)
     {
         // m_modSample = m_downChirps[m_chirp];
-        m_modSample = Complex(std::conj(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor)));
-        m_modPhasor += m_phaseIncrements[m_chirp];
+        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
+        int chirpIndex = m_fftLength*LoRaModSettings::oversampling - 1 - m_chirp;
+        m_modPhasor += m_phaseIncrements[chirpIndex];
         m_fftCounter++;
         m_sampleCounter++;
 
@@ -247,7 +263,7 @@ void LoRaModSource::modulateSample()
         {
             m_fftCounter = 0;
             m_chirpCount = 0;
-            m_chirp0 = m_symbols[m_chirpCount];
+            m_chirp0 = encodeSymbol(m_symbols[m_chirpCount]);
             m_chirp = (m_chirp0 + m_fftLength)*LoRaModSettings::oversampling - 1;
             m_state = LoRaStatePayload;
         }
@@ -270,7 +286,7 @@ void LoRaModSource::modulateSample()
             }
             else
             {
-                m_chirp0 = m_symbols[m_chirpCount];
+                m_chirp0 = encodeSymbol(m_symbols[m_chirpCount]);
                 m_chirp = (m_chirp0 + m_fftLength)*LoRaModSettings::oversampling - 1;
                 m_fftCounter = 0;
             }
@@ -287,6 +303,18 @@ void LoRaModSource::modulateSample()
     if (m_chirp >= (m_chirp0 + m_fftLength)*LoRaModSettings::oversampling) {
         m_chirp = m_chirp0*LoRaModSettings::oversampling;
     }
+}
+
+unsigned int LoRaModSource::encodeSymbol(unsigned int symbol)
+{
+    if (m_settings.m_deBits == 0) {
+        return symbol;
+    }
+
+    unsigned int deWidth = 1<<m_settings.m_deBits;
+    unsigned int baseSymbol = symbol % (m_fftLength/deWidth); // symbols range control
+    return deWidth*baseSymbol;
+    // return deWidth*baseSymbol + (deWidth/2) - 1;
 }
 
 void LoRaModSource::processOneSample(Complex& ci)
@@ -313,9 +341,12 @@ void LoRaModSource::calculateLevel(Real& sample)
 
 void LoRaModSource::applySettings(const LoRaModSettings& settings, bool force)
 {
-    if ((settings.m_spreadFactor != m_settings.m_spreadFactor) || force)
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
+     || (settings.m_deBits != m_settings.m_deBits)
+     || (settings.m_preambleChirps != m_settings.m_preambleChirps)|| force)
     {
         initSF(settings.m_spreadFactor);
+        initTest(settings.m_spreadFactor, settings.m_deBits);
         reset();
     }
 

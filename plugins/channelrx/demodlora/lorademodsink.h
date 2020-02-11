@@ -63,7 +63,7 @@ private:
 	int m_chirp;
 	int m_chirp0;
 
-    static const unsigned int m_requiredPreambleChirps = 3; //!< Number of chirps required to estimate preamble
+    static const unsigned int m_requiredPreambleChirps = 4; //!< Number of chirps required to estimate preamble
     static const unsigned int m_maxSFDSearchChirps = 8;     //!< Maximum number of chirps when looking for SFD after preamble detection
     static const unsigned int m_sfdFourths = 5;             //!< Number of SFD chip period fourths to skip until payload
     static const unsigned int m_fftInterpolation = 1;       //!< FFT interpolation factor (usually a power of 2)

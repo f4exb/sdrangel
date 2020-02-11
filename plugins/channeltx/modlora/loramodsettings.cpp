@@ -24,8 +24,8 @@
 #include "settings/serializable.h"
 #include "loramodsettings.h"
 
-const int LoRaModSettings::bandwidths[] = {7813, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000};
-const int LoRaModSettings::nbBandwidths = 10;
+const int LoRaModSettings::bandwidths[] = {2500, 7813, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000};
+const int LoRaModSettings::nbBandwidths = 11;
 const int LoRaModSettings::oversampling = 4;
 
 LoRaModSettings::LoRaModSettings() :
