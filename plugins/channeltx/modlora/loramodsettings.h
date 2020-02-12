@@ -27,6 +27,13 @@ class Serializable;
 
 struct LoRaModSettings
 {
+    enum CodingScheme
+    {
+        CodingTTY,   //!< plain TTY (5 bits)
+        CodingASCII, //!< plain ASCII (7 bits)
+        CodingLoRa   //!< Standard LoRa
+    };
+
     int m_inputFrequencyOffset;
     int m_bandwidthIndex;
     int m_spreadFactor;
@@ -35,7 +42,12 @@ struct LoRaModSettings
     int m_quietMillis;    //!< Number of milliseconds to pause between transmissions
     unsigned char m_syncWord;
     bool m_channelMute;
-    QString m_message;
+    CodingScheme m_codingScheme;
+    QString m_message;    //!< Freeflow message
+    QString m_myCall;     //!< QSO mode: my callsign
+    QString m_urCall;     //!< QSO mode: your callsign
+    QString m_myLoc;      //!< QSO mode: my locator
+    QString m_myRpt;      //!< QSO mode: my report
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;

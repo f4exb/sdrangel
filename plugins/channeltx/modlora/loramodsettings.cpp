@@ -42,7 +42,7 @@ void LoRaModSettings::resetToDefaults()
     m_deBits = 0;
     m_preambleChirps = 8;
     m_quietMillis = 1000;
-    m_message = "LoRa beacon";
+    m_message = "Hello LoRa";
     m_syncWord = 0x34;
     m_channelMute = false;
     m_rgbColor = QColor(255, 0, 255).rgb();
@@ -101,7 +101,7 @@ bool LoRaModSettings::deserialize(const QByteArray& data)
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidthIndex, 0);
         d.readS32(3, &m_spreadFactor, 0);
-        d.readString(4, &m_message, "LoRa beacon");
+        d.readString(4, &m_message, "Hello LoRa");
 
         if (m_channelMarker)
         {

@@ -7,6 +7,7 @@ set(lora_SOURCES
 	lorademodsink.cpp
 	lorademodbaseband.cpp
 	loraplugin.cpp
+	lorademoddecoder.cpp
 	lorademodgui.ui
 )
 
@@ -16,6 +17,7 @@ set(lora_HEADERS
 	lorademodsettings.h
 	lorademodsink.h
 	lorademodbaseband.h
+	lorademoddecoder.h
 	loraplugin.h
 )
 

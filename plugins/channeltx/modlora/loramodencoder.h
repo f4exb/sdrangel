@@ -1,6 +1,5 @@
-
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019-2020 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,48 +15,40 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_DEMODLORA_LORADEMODSETTINGS_H_
-#define PLUGINS_CHANNELRX_DEMODLORA_LORADEMODSETTINGS_H_
+#ifndef PLUGINS_CHANNELTX_MODLORA_LORAMODENCODER_H_
+#define PLUGINS_CHANNELTX_MODLORA_LORAMODENCODER_H_
 
-#include <QByteArray>
-#include <QString>
+#include <vector>
+#include "loramodsettings.h"
 
-#include <stdint.h>
-
-class Serializable;
-
-struct LoRaDemodSettings
+class LoRaModEncoder
 {
-    enum CodingScheme
+public:
+    LoRaModEncoder();
+    ~LoRaModEncoder();
+
+    void setCodingScheme(LoRaModSettings::CodingScheme codingScheme) { m_codingScheme = codingScheme; }
+    void setNbSymbolBits(unsigned int symbolBits) { m_nbSymbolBits = symbolBits; }
+    void encodeString(const QString& str, std::vector<unsigned int>& symbols);
+
+private:
+    enum TTYState
     {
-        CodingTTY,   //!< plain TTY (5 bits)
-        CodingASCII, //!< plain ASCII (7 bits)
-        CodingLoRa   //!< Standard LoRa
+        TTYLetters,
+        TTYFigures
     };
 
-    int m_inputFrequencyOffset;
-    int m_bandwidthIndex;
-    int m_spreadFactor;
-    int m_deBits;        //!< Low data rate optmize (DE) bits
-    CodingScheme m_codingScheme;
-    uint32_t m_rgbColor;
-    QString m_title;
+    void encodeStringASCII(const QString& str, std::vector<unsigned int>& symbols);
+    void encodeStringTTY(const QString& str, std::vector<unsigned int>& symbols);
 
-    Serializable *m_channelMarker;
-    Serializable *m_spectrumGUI;
+    LoRaModSettings::CodingScheme m_codingScheme;
+    unsigned int m_nbSymbolBits;
 
-    static const int bandwidths[];
-    static const int nbBandwidths;
-    static const int oversampling;
-
-    LoRaDemodSettings();
-    void resetToDefaults();
-    void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+    static const char asciiToTTYLetters[128];
+    static const char asciiToTTYFigures[128];
+    static const char ttyLetters = 0x1f;
+    static const char ttyFigures = 0x1b;
 };
 
+#endif // PLUGINS_CHANNELTX_MODLORA_LORAMODENCODER_H_
 
-
-#endif /* PLUGINS_CHANNELRX_DEMODLORA_LORADEMODSETTINGS_H_ */
