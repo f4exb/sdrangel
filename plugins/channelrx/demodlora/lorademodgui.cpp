@@ -282,7 +282,7 @@ void LoRaDemodGUI::displaySettings()
 
 void LoRaDemodGUI::setBandwidths()
 {
-    int maxBandwidth = m_basebandSampleRate;
+    int maxBandwidth = m_basebandSampleRate/LoRaDemodSettings::oversampling;
     int maxIndex = 0;
 
     for (; (maxIndex < LoRaDemodSettings::nbBandwidths) && (LoRaDemodSettings::bandwidths[maxIndex] <= maxBandwidth); maxIndex++)

@@ -40,6 +40,7 @@ struct LoRaDemodSettings
 
     static const int bandwidths[];
     static const int nbBandwidths;
+    static const int oversampling;
 
     LoRaDemodSettings();
     void resetToDefaults();

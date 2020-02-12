@@ -8,11 +8,11 @@
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
     LoRaDemod::m_channelId,
 	QString("LoRa Demodulator"),
-	QString("4.12.3"),
-	QString("(c) 2015 John Greb"),
-	QString("http://www.maintech.de"),
+	QString("5.2.0"),
+	QString("(c) Edouard Griffiths, F4EXB"),
+	QString("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("github.com/hexameron/rtl-sdrangelove")
+	QString("https://github.com/f4exb/sdrangel")
 };
 
 LoRaPlugin::LoRaPlugin(QObject* parent) :

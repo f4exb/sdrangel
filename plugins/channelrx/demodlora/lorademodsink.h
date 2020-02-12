@@ -36,7 +36,6 @@ public:
     LoRaDemodSink();
 	~LoRaDemodSink();
 
-    void initSF(unsigned int sf); //!< Init tables, FFTs, depending on spread factor
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
@@ -48,6 +47,7 @@ private:
     {
         LoRaStateReset,          //!< Reset everything to start all over
         LoRaStateDetectPreamble, //!< Look for preamble
+        LoRaStatePreambleResyc,  //!< Synchronize with what is left of preamble chirp
         LoRaStatePreamble,       //!< Preamble is found and look for SFD start
         LoRaStateSkipSFD,        //!< Skip SFD
         LoRaStateSlideSFD,       //!< Sliding FFTs while going through SFD (not the skip option)
@@ -66,7 +66,7 @@ private:
     static const unsigned int m_requiredPreambleChirps = 4; //!< Number of chirps required to estimate preamble
     static const unsigned int m_maxSFDSearchChirps = 8;     //!< Maximum number of chirps when looking for SFD after preamble detection
     static const unsigned int m_sfdFourths = 5;             //!< Number of SFD chip period fourths to skip until payload
-    static const unsigned int m_fftInterpolation = 1;       //!< FFT interpolation factor (usually a power of 2)
+    static const unsigned int m_fftInterpolation = 2;       //!< FFT interpolation factor (usually a power of 2)
 
     FFTEngine *m_fft;
     FFTEngine *m_fftSFD;
@@ -74,6 +74,7 @@ private:
     Complex *m_downChirps;
     Complex *m_upChirps;
     Complex *m_fftBuffer;
+    Complex *m_spectrumLine;
     unsigned int m_fftCounter;
     unsigned int m_argMaxHistory[m_requiredPreambleChirps];
     unsigned int m_argMaxHistoryCounter;
@@ -93,9 +94,11 @@ private:
 	Complex *m_spectrumBuffer;
 
     unsigned int m_nbSymbols;
+    unsigned int m_nbSymbolsEff; //!< effective symbols considering DE bits
     unsigned int m_fftLength;
 
     void processSample(const Complex& ci);
+    void initSF(unsigned int sf, unsigned int deBits); //!< Init tables, FFTs, depending on spread factor
     void reset();
     unsigned int argmax(
         const Complex *fftBins,
@@ -107,6 +110,7 @@ private:
         );
     void decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation);
     int toSigned(int u, int intSize);
+    unsigned int evalSymbol(unsigned int rawSymbol);
 
     /*
     Interleaving is "easiest" if the same number of bits is used per symbol as for FEC
