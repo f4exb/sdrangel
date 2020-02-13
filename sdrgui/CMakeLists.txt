@@ -22,6 +22,7 @@ set(sdrgui_SOURCES
     gui/commandoutputdialog.cpp
     gui/comboboxnoarrow.cpp
     gui/crightclickenabler.cpp
+    gui/customtextedit.cpp
     gui/cwkeyergui.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
@@ -93,6 +94,7 @@ set(sdrgui_HEADERS
     gui/commandoutputdialog.h
     gui/comboboxnoarrow.h
     gui/crightclickenabler.h
+    gui/customtextedit.h
     gui/cwkeyergui.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
