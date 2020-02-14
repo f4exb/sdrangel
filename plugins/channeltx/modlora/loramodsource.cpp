@@ -30,7 +30,9 @@ LoRaModSource::LoRaModSource() :
     m_modPhasor(0.0f),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f)
+	m_levelSum(0.0f),
+    m_repeatCount(0),
+    m_active(false)
 {
 	m_magsq = 0.0;
 
@@ -184,11 +186,36 @@ void LoRaModSource::modulateSample()
         m_modSample = Complex{0.0, 0.0};
         m_sampleCounter++;
 
-        if (m_sampleCounter == m_quietSamples*LoRaModSettings::oversampling)
+        if (m_sampleCounter == m_quietSamples*LoRaModSettings::oversampling) // done with quiet time
         {
             m_chirp0 = 0;
             m_chirp = m_fftLength*LoRaModSettings::oversampling - 1;
-            m_state = LoRaStatePreamble;
+
+            if (m_symbols.size() != 0) // some payload to transmit
+            {
+                if (m_settings.m_messageRepeat == 0) // infinite
+                {
+                    m_state = LoRaStatePreamble;
+                    m_active = true;
+                }
+                else
+                {
+                    if (m_repeatCount != 0)
+                    {
+                        m_repeatCount--;
+                        m_state = LoRaStatePreamble;
+                        m_active = true;
+                    }
+                    else
+                    {
+                        m_active = false;
+                    }
+                }
+            }
+            else
+            {
+                m_active = false;
+            }
         }
     }
     else if (m_state == LoRaStatePreamble)
@@ -356,6 +383,10 @@ void LoRaModSource::applySettings(const LoRaModSettings& settings, bool force)
         reset();
     }
 
+    if ((settings.m_messageRepeat != m_settings.m_messageRepeat) || force) {
+        m_repeatCount = settings.m_messageRepeat;
+    }
+
     m_settings = settings;
 }
 
@@ -388,4 +419,14 @@ void LoRaModSource::applyChannelSettings(int channelSampleRate, int bandwidth, i
     m_quietSamples = (bandwidth*m_settings.m_quietMillis) / 1000;
     m_state = LoRaStateIdle;
     reset();
+}
+
+void LoRaModSource::setSymbols(const std::vector<unsigned int>& symbols)
+{
+    m_symbols = symbols;
+    qDebug("LoRaModSource::setSymbols: m_symbols: %lu", m_symbols.size());
+    m_repeatCount = m_settings.m_messageRepeat;
+    m_state = LoRaStateIdle; // first reset to idle
+    reset();
+    m_sampleCounter = m_quietSamples*LoRaModSettings::oversampling - 1; // start immediately
 }

@@ -56,6 +56,30 @@ public:
         { }
     };
 
+    class MsgConfigureLoRaModPayload : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const std::vector<unsigned int>& getPayload() const { return m_payload; }
+
+        static MsgConfigureLoRaModPayload* create() {
+            return new MsgConfigureLoRaModPayload();
+        }
+        static MsgConfigureLoRaModPayload* create(const std::vector<unsigned int>& payload) {
+            return new MsgConfigureLoRaModPayload(payload);
+        }
+
+    private:
+        std::vector<unsigned int> m_payload;
+
+        MsgConfigureLoRaModPayload() : // This is empty payload notification
+            Message()
+        {}
+        MsgConfigureLoRaModPayload(const std::vector<unsigned int>& payload) :
+            Message()
+        { m_payload = payload; }
+    };
+
     LoRaModBaseband();
     ~LoRaModBaseband();
     void reset();
@@ -63,6 +87,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     double getMagSq() const { return m_source.getMagSq(); }
     int getChannelSampleRate() const;
+    bool getActive() const { return m_source.getActive(); }
 
 signals:
 	/**

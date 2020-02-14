@@ -78,6 +78,7 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void displayStreamIndex();
+    void displayCurrentPayloadMessage();
     void setBandwidths();
 
     void leaveEvent(QEvent*);
@@ -93,6 +94,18 @@ private slots:
     void on_idleTime_valueChanged(int value);
     void on_syncWord_editingFinished();
     void on_channelMute_toggled(bool checked);
+    void on_scheme_currentIndexChanged(int index);
+    void on_myCall_editingFinished();
+    void on_urCall_editingFinished();
+    void on_myLocator_editingFinished();
+    void on_report_editingFinished();
+    void on_msgType_currentIndexChanged(int index);
+    void on_resetMessages_clicked(bool checked);
+    void on_playMessage_clicked(bool checked);
+    void on_repeatMessage_valueChanged(int value);
+    void on_generateMessages_clicked(bool checked);
+    void on_messageText_editingFinished();
+    void on_hexText_editingFinished();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

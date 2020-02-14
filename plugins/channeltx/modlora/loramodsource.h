@@ -47,6 +47,8 @@ public:
     }
     void applySettings(const LoRaModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int bandwidth, int channelFrequencyOffset, bool force = false);
+    void setSymbols(const std::vector<unsigned int>& symbols);
+    bool getActive() const { return m_active; }
 
 private:
     enum LoRaMode
@@ -83,6 +85,8 @@ private:
     unsigned int m_chirpCount;     //!< chirp or quarter chirp counter
     unsigned int m_quietSamples;   //!< number of samples during quiet period
     unsigned int m_quarterSamples; //!< number of samples in a quarter chirp
+    unsigned int m_repeatCount;    //!< message repetition counter
+    bool m_active;                 //!< modulator is in a sending sequence (icluding periodic quiet times)
 
     NCO m_carrierNco;
     double m_modPhasor; //!< baseband modulator phasor

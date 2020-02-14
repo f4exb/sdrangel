@@ -105,9 +105,24 @@ void LoRaModEncoder::encodeString(const QString& str, std::vector<unsigned int>&
     case LoRaModSettings::CodingASCII:
         encodeStringASCII(str, symbols);
         break;
+    case LoRaModSettings::CodingLoRa:
+        // TODO
+        break;
     default:
         break;
     }
+}
+
+void LoRaModEncoder::encodeBytes(const QByteArray& bytes, std::vector<unsigned int>& symbols)
+{
+    switch (m_codingScheme)
+    {
+    case LoRaModSettings::CodingLoRa:
+        // TODO
+        break;
+    default:
+        break;
+    };
 }
 
 void LoRaModEncoder::encodeStringASCII(const QString& str, std::vector<unsigned int>& symbols)

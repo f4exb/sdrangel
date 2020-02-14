@@ -30,6 +30,7 @@
 #include "util/message.h"
 
 #include "loramodsettings.h"
+#include "loramodencoder.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -63,6 +64,25 @@ public:
             m_settings(settings),
             m_force(force)
         { }
+    };
+
+    class MsgReportPayloadTime : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        unsigned int getPayloadTimeMs() const { return m_timeMs; }
+        static MsgReportPayloadTime* create(unsigned int timeMs) {
+            return new MsgReportPayloadTime(timeMs);
+        }
+
+    private:
+        unsigned int m_timeMs; //!< time in milliseconds
+
+        MsgReportPayloadTime(unsigned int timeMs) :
+            Message(),
+            m_timeMs(timeMs)
+        {}
+
     };
 
     //=================================================================
@@ -120,6 +140,7 @@ public:
     CWKeyer *getCWKeyer();
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;
+    bool getModulatorActive() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -128,6 +149,7 @@ private:
     DeviceAPI* m_deviceAPI;
     QThread *m_thread;
     LoRaModBaseband* m_basebandSource;
+    LoRaModEncoder m_encoder; // TODO: check if it needs to be on its own thread
     LoRaModSettings m_settings;
 
     SampleVector m_sampleBuffer;

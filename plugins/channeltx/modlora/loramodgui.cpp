@@ -105,6 +105,12 @@ bool LoRaModGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (LoRaMod::MsgReportPayloadTime::match(message))
+    {
+        const LoRaMod::MsgReportPayloadTime& rpt = (LoRaMod::MsgReportPayloadTime&) message;
+        ui->msgTimeText->setText(tr("%1").arg(rpt.getPayloadTimeMs()));
+        return true;
+    }
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
@@ -214,6 +220,107 @@ void LoRaModGUI::on_syncWord_editingFinished()
         m_settings.m_syncWord = syncWord > 255 ? 0 : syncWord;
         applySettings();
     }
+}
+
+void LoRaModGUI::on_scheme_currentIndexChanged(int index)
+{
+    m_settings.m_codingScheme = (LoRaModSettings::CodingScheme) index;
+    applySettings();
+}
+
+void LoRaModGUI::on_myCall_editingFinished()
+{
+    m_settings.m_myCall = ui->myCall->text();
+    applySettings();
+}
+
+void LoRaModGUI::on_urCall_editingFinished()
+{
+    m_settings.m_urCall = ui->urCall->text();
+    applySettings();
+}
+
+void LoRaModGUI::on_myLocator_editingFinished()
+{
+    m_settings.m_myLoc = ui->myLocator->text();
+    applySettings();
+}
+
+void LoRaModGUI::on_report_editingFinished()
+{
+    m_settings.m_myRpt = ui->report->text();
+    applySettings();
+}
+
+void LoRaModGUI::on_msgType_currentIndexChanged(int index)
+{
+    m_settings.m_messageType = (LoRaModSettings::MessageType) index;
+    displayCurrentPayloadMessage();
+    applySettings();
+}
+
+void LoRaModGUI::on_resetMessages_clicked(bool checked)
+{
+    (void) checked;
+    m_settings.setDefaultTemplates();
+    displayCurrentPayloadMessage();
+    applySettings();
+}
+
+void LoRaModGUI::on_playMessage_clicked(bool checked)
+{
+    (void) checked;
+    // Switch to message None then back to current message type to trigger sending process
+    LoRaModSettings::MessageType msgType = m_settings.m_messageType;
+    m_settings.m_messageType = LoRaModSettings::MessageNone;
+    applySettings();
+    m_settings.m_messageType = msgType;
+    applySettings();
+}
+
+void LoRaModGUI::on_repeatMessage_valueChanged(int value)
+{
+    m_settings.m_messageRepeat = value;
+    ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
+    applySettings();
+}
+
+void LoRaModGUI::on_generateMessages_clicked(bool checked)
+{
+    (void) checked;
+    m_settings.generateMessages();
+    displayCurrentPayloadMessage();
+    applySettings();
+}
+
+void LoRaModGUI::on_messageText_editingFinished()
+{
+    if (m_settings.m_messageType == LoRaModSettings::MessageBeacon) {
+        m_settings.m_beaconMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageCQ) {
+        m_settings.m_cqMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageReply) {
+        m_settings.m_replyMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageReport) {
+        m_settings.m_reportMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageReplyReport) {
+        m_settings.m_replyReportMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageRRR) {
+        m_settings.m_rrrMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::Message73) {
+        m_settings.m_73Message = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageQSOText) {
+        m_settings.m_qsoTextMessage = ui->messageText->toPlainText();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageText) {
+        m_settings.m_textMessage = ui->messageText->toPlainText();
+    }
+
+    applySettings();
+}
+
+void LoRaModGUI::on_hexText_editingFinished()
+{
+
 }
 
 void LoRaModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -351,6 +458,7 @@ void LoRaModGUI::displaySettings()
 
     setWindowTitle(m_channelMarker.getTitle());
     displayStreamIndex();
+    displayCurrentPayloadMessage();
 
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
@@ -366,6 +474,14 @@ void LoRaModGUI::displaySettings()
     ui->idleTimeText->setText(tr("%1").arg(m_settings.m_quietMillis / 1000.0, 0, 'f', 1));
     ui->syncWord->setText((tr("%1").arg(m_settings.m_syncWord, 2, 16)));
     ui->channelMute->setChecked(m_settings.m_channelMute);
+    ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
+    ui->myCall->setText(m_settings.m_myCall);
+    ui->urCall->setText(m_settings.m_urCall);
+    ui->myLocator->setText(m_settings.m_myLoc);
+    ui->report->setText(m_settings.m_myRpt);
+    ui->repeatMessage->setValue(m_settings.m_messageRepeat);
+    ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
+    ui->msgType->setCurrentIndex((int) m_settings.m_messageType);
     blockApplySettings(false);
 }
 
@@ -376,6 +492,35 @@ void LoRaModGUI::displayStreamIndex()
     } else {
         setStreamIndicator("S"); // single channel indicator
     }
+}
+
+void LoRaModGUI::displayCurrentPayloadMessage()
+{
+    ui->messageText->blockSignals(true);
+
+    if (m_settings.m_messageType == LoRaModSettings::MessageNone) {
+        ui->messageText->clear();
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageBeacon) {
+        ui->messageText->setText(m_settings.m_beaconMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageCQ) {
+        ui->messageText->setText(m_settings.m_cqMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageReply) {
+        ui->messageText->setText(m_settings.m_replyMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageReport) {
+        ui->messageText->setText(m_settings.m_reportMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageReplyReport) {
+        ui->messageText->setText(m_settings.m_replyReportMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageRRR) {
+        ui->messageText->setText(m_settings.m_rrrMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::Message73) {
+        ui->messageText->setText(m_settings.m_73Message);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageQSOText) {
+        ui->messageText->setText(m_settings.m_qsoTextMessage);
+    } else if (m_settings.m_messageType == LoRaModSettings::MessageText) {
+        ui->messageText->setText(m_settings.m_textMessage);
+    }
+
+    ui->messageText->blockSignals(false);
 }
 
 void LoRaModGUI::setBandwidths()
@@ -407,7 +552,21 @@ void LoRaModGUI::enterEvent(QEvent*)
 
 void LoRaModGUI::tick()
 {
-    double powDb = CalcDb::dbPower(m_loRaMod->getMagSq());
-	m_channelPowerDbAvg(powDb);
-	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+    if (m_tickCount < 10)
+    {
+        m_tickCount++;
+    }
+    else
+    {
+        m_tickCount = 0;
+        double powDb = CalcDb::dbPower(m_loRaMod->getMagSq());
+        m_channelPowerDbAvg(powDb);
+        ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+
+        if (m_loRaMod->getModulatorActive()) {
+            ui->playMessage->setStyleSheet("QPushButton { background-color : green; }");
+        } else {
+            ui->playMessage->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
+        }
+    }
 }

@@ -42,9 +42,15 @@ void LoRaModSettings::resetToDefaults()
     m_deBits = 0;
     m_preambleChirps = 8;
     m_quietMillis = 1000;
-    m_message = "Hello LoRa";
+    m_codingScheme = CodingLoRa;
+    m_textMessage = "Hello LoRa";
+    m_myCall = "MYCALL";
+    m_urCall = "URCALL";
+    m_myLoc = "AA00AA";
+    m_myRpt = "59";
     m_syncWord = 0x34;
     m_channelMute = false;
+    m_messageRepeat = 1;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "LoRa Modulator";
     m_streamIndex = 0;
@@ -53,7 +59,40 @@ void LoRaModSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    setDefaultTemplates();
+}
 
+void LoRaModSettings::setDefaultTemplates()
+{
+    // %1: myCall %2: urCall %3: myLoc %4: report
+    m_beaconMessage = "VVV DE %1 %2";   // Beacon
+    m_cqMessage = "CQ DE %1 %2";        // caller calls CQ
+    m_replyMessage = "%1 %2 %3";        // Reply to CQ from caller
+    m_reportMessage = "%1 %2 %3";       // Report to caller
+    m_replyReportMessage = "%1 %2 R%3"; // Report to callee
+    m_rrrMessage = "%1 %2 RRR";         // RRR to callee
+    m_73Message = "%1 %2 73";           // 73 to caller
+    m_qsoTextMessage = "%1 %2 %3";      // Freeflow message to caller - %3 is m_textMessage
+}
+
+void LoRaModSettings::generateMessages()
+{
+    m_beaconMessage = m_beaconMessage
+        .arg(m_myCall).arg(m_myLoc);
+    m_cqMessage = m_cqMessage
+        .arg(m_myCall).arg(m_myLoc);
+    m_replyMessage = m_replyMessage
+        .arg(m_urCall).arg(m_myCall).arg(m_myLoc);
+    m_reportMessage = m_reportMessage
+        .arg(m_urCall).arg(m_myCall).arg(m_myRpt);
+    m_replyReportMessage = m_replyReportMessage
+        .arg(m_urCall).arg(m_myCall).arg(m_myRpt);
+    m_rrrMessage = m_rrrMessage
+        .arg(m_urCall).arg(m_myCall);
+    m_73Message = m_73Message
+        .arg(m_urCall).arg(m_myCall);
+    m_qsoTextMessage = m_qsoTextMessage
+        .arg(m_urCall).arg(m_myCall).arg(m_textMessage);
 }
 
 QByteArray LoRaModSettings::serialize() const
@@ -62,7 +101,7 @@ QByteArray LoRaModSettings::serialize() const
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_bandwidthIndex);
     s.writeS32(3, m_spreadFactor);
-    s.writeString(4, m_message);
+    s.writeS32(4, m_codingScheme);
 
     if (m_channelMarker) {
         s.writeBlob(5, m_channelMarker->serialize());
@@ -79,6 +118,22 @@ QByteArray LoRaModSettings::serialize() const
     s.writeU32(14, m_reverseAPIPort);
     s.writeU32(15, m_reverseAPIDeviceIndex);
     s.writeU32(16, m_reverseAPIChannelIndex);
+    s.writeString(20, m_beaconMessage);
+    s.writeString(21, m_cqMessage);
+    s.writeString(22, m_replyMessage);
+    s.writeString(23, m_reportMessage);
+    s.writeString(24, m_replyReportMessage);
+    s.writeString(25, m_rrrMessage);
+    s.writeString(26, m_73Message);
+    s.writeString(27, m_qsoTextMessage);
+    s.writeString(28, m_textMessage);
+    s.writeBlob(29, m_bytesMessage);
+    s.writeS32(30, (int) m_messageType);
+    s.writeString(40, m_myCall);
+    s.writeString(41, m_urCall);
+    s.writeString(42, m_myLoc);
+    s.writeString(43, m_myRpt);
+    s.writeS32(44, m_messageRepeat);
 
     return s.final();
 }
@@ -97,11 +152,13 @@ bool LoRaModSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         unsigned int utmp;
+        int tmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidthIndex, 0);
         d.readS32(3, &m_spreadFactor, 0);
-        d.readString(4, &m_message, "Hello LoRa");
+        d.readS32(4, &tmp, 0);
+        m_codingScheme = (CodingScheme) tmp;
 
         if (m_channelMarker)
         {
@@ -130,6 +187,23 @@ bool LoRaModSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(15, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readString(20, &m_beaconMessage, "VVV DE %1 %2");
+        d.readString(21, &m_cqMessage, "CQ DE %1 %2");
+        d.readString(22, &m_replyMessage, "%2 %1 %3");
+        d.readString(23, &m_reportMessage, "%2 %1 %3");
+        d.readString(24, &m_replyReportMessage, "%2 %1 R%3");
+        d.readString(25, &m_rrrMessage, "%2 %1 RRR");
+        d.readString(26, &m_73Message, "%2 %1 73");
+        d.readString(27, &m_qsoTextMessage, "%2 %1 Hello LoRa");
+        d.readString(28, &m_textMessage, "Hello LoRa");
+        d.readBlob(29, &m_bytesMessage);
+        d.readS32(30, &tmp, 0);
+        m_messageType = (MessageType) tmp;
+        d.readString(40, &m_myCall, "MYCALL");
+        d.readString(41, &m_urCall, "URCALL");
+        d.readString(42, &m_myLoc, "AA00AA");
+        d.readString(43, &m_myRpt, "59");
+        d.readS32(44, &m_messageRepeat, 1);
 
         return true;
     }

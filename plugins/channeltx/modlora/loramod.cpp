@@ -40,6 +40,7 @@
 #include "loramod.h"
 
 MESSAGE_CLASS_DEFINITION(LoRaMod::MsgConfigureLoRaMod, Message)
+MESSAGE_CLASS_DEFINITION(LoRaMod::MsgReportPayloadTime, Message)
 
 const QString LoRaMod::m_channelIdURI = "sdrangel.channeltx.modlora";
 const QString LoRaMod::m_channelId = "LoRaMod";
@@ -130,7 +131,7 @@ bool LoRaMod::handleMessage(const Message& cmd)
 
 void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
 {
-    qDebug() << "NFMMod::applySettings:"
+    qDebug() << "LoRaMod::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_bandwidthIndex
             << " bandwidth: " << LoRaModSettings::bandwidths[settings.m_bandwidthIndex]
@@ -152,6 +153,107 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
     }
     if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
         reverseAPIKeys.append("channelMute");
+    }
+
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
+     || (settings.m_deBits != m_settings.m_deBits) || force) {
+        m_encoder.setNbSymbolBits(settings.m_spreadFactor - settings.m_deBits);
+    }
+
+    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force) {
+        m_encoder.setCodingScheme(settings.m_codingScheme);
+    }
+
+    LoRaModBaseband::MsgConfigureLoRaModPayload *payloadMsg = nullptr;
+    std::vector<unsigned int> symbols;
+
+    if ((settings.m_messageType == LoRaModSettings::MessageNone)
+        && ((settings.m_messageType != m_settings.m_messageType) || force))
+    {
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create();
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageBeacon)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_beaconMessage != m_settings.m_beaconMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_beaconMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageCQ)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_cqMessage != m_settings.m_cqMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_cqMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageReply)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_replyMessage != m_settings.m_replyMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_replyMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageReport)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_reportMessage != m_settings.m_reportMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_reportMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageReplyReport)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_replyReportMessage != m_settings.m_replyReportMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_replyReportMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageRRR)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_rrrMessage != m_settings.m_rrrMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_rrrMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::Message73)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_73Message != m_settings.m_73Message) || force))
+    {
+        m_encoder.encodeString(m_settings.m_73Message, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageQSOText)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_qsoTextMessage != m_settings.m_qsoTextMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_qsoTextMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageText)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_textMessage != m_settings.m_textMessage) || force))
+    {
+        m_encoder.encodeString(m_settings.m_textMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+    else if ((settings.m_messageType == LoRaModSettings::MessageBytes)
+        && ((settings.m_messageType != m_settings.m_messageType)
+         || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force))
+    {
+        m_encoder.encodeBytes(m_settings.m_bytesMessage, symbols);
+        payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
+    }
+
+    if (payloadMsg)
+    {
+        m_basebandSource->getInputMessageQueue()->push(payloadMsg);
+
+        if (getMessageQueueToGUI())
+        {
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(
+                (symbols.size()*(1<<settings.m_spreadFactor)*1000) / LoRaModSettings::bandwidths[settings.m_bandwidthIndex]
+            );
+            getMessageQueueToGUI()->push(rpt);
+        }
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -405,4 +507,9 @@ void LoRaMod::setLevelMeter(QObject *levelMeter)
 uint32_t LoRaMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
+}
+
+bool LoRaMod::getModulatorActive() const
+{
+    return m_basebandSource->getActive();
 }

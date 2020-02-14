@@ -30,6 +30,7 @@ public:
     void setCodingScheme(LoRaModSettings::CodingScheme codingScheme) { m_codingScheme = codingScheme; }
     void setNbSymbolBits(unsigned int symbolBits) { m_nbSymbolBits = symbolBits; }
     void encodeString(const QString& str, std::vector<unsigned int>& symbols);
+    void encodeBytes(const QByteArray& bytes, std::vector<unsigned int>& symbols);
 
 private:
     enum TTYState

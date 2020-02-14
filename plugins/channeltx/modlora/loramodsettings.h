@@ -29,9 +29,25 @@ struct LoRaModSettings
 {
     enum CodingScheme
     {
-        CodingTTY,   //!< plain TTY (5 bits)
+        CodingLoRa,  //!< Standard LoRa
         CodingASCII, //!< plain ASCII (7 bits)
-        CodingLoRa   //!< Standard LoRa
+        CodingTTY    //!< plain TTY (5 bits)
+    };
+
+    enum MessageType
+    {
+        MessageNone,
+        MessageBeacon,
+        MessageCQ,
+        MessageReply,
+        MessageReport,
+        MessageReplyReport,
+        MessageRRR,
+        Message73,
+        MessageQSOText,
+        MessageText,
+        MessageBytes,
+        MessageTest
     };
 
     int m_inputFrequencyOffset;
@@ -43,11 +59,22 @@ struct LoRaModSettings
     unsigned char m_syncWord;
     bool m_channelMute;
     CodingScheme m_codingScheme;
-    QString m_message;    //!< Freeflow message
     QString m_myCall;     //!< QSO mode: my callsign
     QString m_urCall;     //!< QSO mode: your callsign
     QString m_myLoc;      //!< QSO mode: my locator
     QString m_myRpt;      //!< QSO mode: my report
+    MessageType m_messageType;
+    QString m_beaconMessage;
+    QString m_cqMessage;
+    QString m_replyMessage;
+    QString m_reportMessage;
+    QString m_replyReportMessage;
+    QString m_rrrMessage;
+    QString m_73Message;
+    QString m_qsoTextMessage;
+    QString m_textMessage;
+    QByteArray m_bytesMessage;
+    int m_messageRepeat;
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;
@@ -65,6 +92,8 @@ struct LoRaModSettings
 
     LoRaModSettings();
     void resetToDefaults();
+    void setDefaultTemplates();
+    void generateMessages();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

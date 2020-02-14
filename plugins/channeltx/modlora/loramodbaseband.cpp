@@ -24,6 +24,7 @@
 #include "loramodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(LoRaModBaseband::MsgConfigureLoRaModBaseband, Message)
+MESSAGE_CLASS_DEFINITION(LoRaModBaseband::MsgConfigureLoRaModPayload, Message)
 
 LoRaModBaseband::LoRaModBaseband() :
     m_mutex(QMutex::Recursive)
@@ -134,11 +135,20 @@ bool LoRaModBaseband::handleMessage(const Message& cmd)
 {
     if (MsgConfigureLoRaModBaseband::match(cmd))
     {
+        qDebug() << "LoRaModBaseband::handleMessage: MsgConfigureLoRaModBaseband";
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureLoRaModBaseband& cfg = (MsgConfigureLoRaModBaseband&) cmd;
-        qDebug() << "LoRaModBaseband::handleMessage: MsgConfigureLoRaModBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
+
+        return true;
+    }
+    else if (MsgConfigureLoRaModPayload::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        MsgConfigureLoRaModPayload& cfg = (MsgConfigureLoRaModPayload&) cmd;
+        qDebug() << "LoRaModBaseband::handleMessage: MsgConfigureLoRaModPayload:" << cfg.getPayload().size();
+        m_source.setSymbols(cfg.getPayload());
 
         return true;
     }
@@ -146,8 +156,8 @@ bool LoRaModBaseband::handleMessage(const Message& cmd)
     {
         QMutexLocker mutexLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        qDebug() << "LoRaModBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(notif.getSampleRate()));
+        qDebug() << "LoRaModBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_source.applyChannelSettings(
             m_channelizer->getChannelSampleRate(),

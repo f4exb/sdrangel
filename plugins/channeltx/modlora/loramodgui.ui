@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>220</height>
+    <width>380</width>
+    <height>411</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
+    <width>380</width>
     <height>180</height>
    </size>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>331</width>
+     <width>370</width>
      <height>150</height>
     </rect>
    </property>
@@ -74,7 +74,7 @@
      <rect>
       <x>40</x>
       <y>50</y>
-      <width>170</width>
+      <width>221</width>
       <height>16</height>
      </rect>
     </property>
@@ -102,7 +102,7 @@
      <rect>
       <x>40</x>
       <y>70</y>
-      <width>70</width>
+      <width>81</width>
       <height>16</height>
      </rect>
     </property>
@@ -131,7 +131,7 @@
    <widget class="QLabel" name="spreadText">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>130</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -153,7 +153,7 @@
    <widget class="QLabel" name="bwText">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>280</x>
       <y>50</y>
       <width>80</width>
       <height>16</height>
@@ -175,7 +175,7 @@
    <widget class="QLabel" name="deBitsLabel">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>180</x>
       <y>70</y>
       <width>32</width>
       <height>16</height>
@@ -188,7 +188,7 @@
    <widget class="QLabel" name="deBitsText">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>320</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -210,9 +210,9 @@
    <widget class="QSlider" name="deBits">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>220</x>
       <y>70</y>
-      <width>70</width>
+      <width>81</width>
       <height>16</height>
      </rect>
     </property>
@@ -243,7 +243,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>311</width>
+      <width>351</width>
       <height>26</height>
      </rect>
     </property>
@@ -366,7 +366,7 @@
      <rect>
       <x>40</x>
       <y>90</y>
-      <width>70</width>
+      <width>81</width>
       <height>16</height>
      </rect>
     </property>
@@ -408,7 +408,7 @@
    <widget class="QLabel" name="preambleChirpsText">
     <property name="geometry">
      <rect>
-      <x>120</x>
+      <x>130</x>
       <y>90</y>
       <width>30</width>
       <height>16</height>
@@ -430,7 +430,7 @@
    <widget class="QLabel" name="idleTimeLabel">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>180</x>
       <y>90</y>
       <width>32</width>
       <height>16</height>
@@ -443,9 +443,9 @@
    <widget class="QSlider" name="idleTime">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>220</x>
       <y>90</y>
-      <width>70</width>
+      <width>81</width>
       <height>16</height>
      </rect>
     </property>
@@ -456,7 +456,7 @@
      <number>1</number>
     </property>
     <property name="maximum">
-     <number>600</number>
+     <number>900</number>
     </property>
     <property name="pageStep">
      <number>1</number>
@@ -474,7 +474,7 @@
    <widget class="QLabel" name="idleTimeText">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>320</x>
       <y>90</y>
       <width>30</width>
       <height>16</height>
@@ -497,7 +497,7 @@
     <property name="geometry">
      <rect>
       <x>2</x>
-      <y>110</y>
+      <y>114</y>
       <width>32</width>
       <height>16</height>
      </rect>
@@ -510,9 +510,9 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>110</y>
+      <y>112</y>
       <width>30</width>
-      <height>16</height>
+      <height>20</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -526,6 +526,490 @@
     </property>
     <property name="text">
      <string>00</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="schemeLabel">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>114</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Scheme</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="scheme">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>112</y>
+      <width>86</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>LoRa</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>ASCII</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>TTY</string>
+     </property>
+    </item>
+   </widget>
+  </widget>
+  <widget class="QWidget" name="messageContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>180</y>
+     <width>370</width>
+     <height>210</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>210</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Payload</string>
+   </property>
+   <widget class="QLabel" name="qsoLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>10</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>QSO</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="myCallLabel">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>10</y>
+      <width>40</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MyCall</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="urCallLabel">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>10</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>YourCall</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="myCall">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>10</y>
+      <width>90</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Caller callsign</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="maxLength">
+     <number>10</number>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="urCall">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>10</y>
+      <width>90</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Callee callsign</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="maxLength">
+     <number>10</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="myLocatorLabel">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>30</y>
+      <width>40</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MyLoc</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="myLocator">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>30</y>
+      <width>90</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Caller QRA locator</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="maxLength">
+     <number>10</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="reportLabel">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>30</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Report</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="report">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>30</y>
+      <width>90</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Report to callee</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="maxLength">
+     <number>10</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="generateMessages">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>58</y>
+      <width>40</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Generate standard messages</string>
+    </property>
+    <property name="text">
+     <string>Gen</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="msgType">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>58</y>
+      <width>90</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Message type</string>
+    </property>
+    <item>
+     <property name="text">
+      <string>None</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Beacon</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>CQ</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Reply</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Report</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>R-Report</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>RRR</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>73</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>QSO Text</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Text</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Bytes</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Test</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="msgLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>60</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Msg</string>
+    </property>
+   </widget>
+   <widget class="CustomTextEdit" name="messageText">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>90</y>
+      <width>311</width>
+      <height>60</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hexLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>160</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Hex</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="hexText">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>160</y>
+      <width>311</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="resetMessages">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>58</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Restore default message templates</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../../sdrgui/resources/res.qrc">
+      <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="playMessage">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>58</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Play message</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../../sdrgui/resources/res.qrc">
+      <normaloff>:/play.png</normaloff>:/play.png</iconset>
+    </property>
+    <property name="checkable">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="repeatLabel">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>60</y>
+      <width>51</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Repeat</string>
+    </property>
+   </widget>
+   <widget class="QDial" name="repeatMessage">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>56</y>
+      <width>24</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Message repetition (0 for infinite)</string>
+    </property>
+    <property name="maximum">
+     <number>20</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="repeatText">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>60</y>
+      <width>22</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="msgTimeLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>190</y>
+      <width>40</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Time</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="msgTimeText">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>190</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Payload time in milliseconds</string>
+    </property>
+    <property name="text">
+     <string>00000</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="msgTimeUnits">
+    <property name="geometry">
+     <rect>
+      <x>95</x>
+      <y>190</y>
+      <width>20</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ms</string>
     </property>
    </widget>
   </widget>
@@ -542,6 +1026,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CustomTextEdit</class>
+   <extends>QTextEdit</extends>
+   <header>gui/customtextedit.h</header>
   </customwidget>
  </customwidgets>
  <resources>
