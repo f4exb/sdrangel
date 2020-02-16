@@ -59,9 +59,15 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_Spread_valueChanged(int value);
     void on_deBits_valueChanged(int value);
+	void on_scheme_currentIndexChanged(int index);
+	void on_mute_toggled(bool checked);
+	void on_clear_clicked(bool checked);
+    void on_eomSquelch_valueChanged(int value);
+    void on_messageLength_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void channelMarkerHighlightedByCursor();
 	void handleInputMessages();
+	void tick();
 
 private:
 	Ui::LoRaDemodGUI* ui;
@@ -75,6 +81,7 @@ private:
 	LoRaDemod* m_LoRaDemod;
 	SpectrumVis* m_spectrumVis;
 	MessageQueue m_inputMessageQueue;
+	unsigned int m_tickCount;
 
 	explicit LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
 	virtual ~LoRaDemodGUI();
@@ -82,7 +89,9 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
+    void displaySquelch();
     void setBandwidths();
+	void addText(const QString& text);
 };
 
 #endif // INCLUDE_LoRaDEMODGUI_H

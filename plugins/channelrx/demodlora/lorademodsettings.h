@@ -30,9 +30,9 @@ struct LoRaDemodSettings
 {
     enum CodingScheme
     {
-        CodingTTY,   //!< plain TTY (5 bits)
+        CodingLoRa,  //!< Standard LoRa
         CodingASCII, //!< plain ASCII (7 bits)
-        CodingLoRa   //!< Standard LoRa
+        CodingTTY    //!< plain TTY (5 bits)
     };
 
     int m_inputFrequencyOffset;
@@ -40,6 +40,9 @@ struct LoRaDemodSettings
     int m_spreadFactor;
     int m_deBits;        //!< Low data rate optmize (DE) bits
     CodingScheme m_codingScheme;
+    bool m_decodeActive;
+    int m_eomSquelchTenths; //!< Squelch factor to trigger end of message (/10)
+    int m_nbSymbolsMax;     //!< Maximum number of symbols in a payload
     uint32_t m_rgbColor;
     QString m_title;
 

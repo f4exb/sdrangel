@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // (C) 2015 John Greb                                                            //
+// (C) 2020 Edouard Griffiths, F4EXB                                             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -26,6 +27,7 @@
 #include "util/message.h"
 
 #include "lorademodbaseband.h"
+#include "lorademoddecoder.h"
 
 class DeviceAPI;
 class QThread;
@@ -52,6 +54,81 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
+        { }
+    };
+
+    class MsgReportDecodeBytes : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QByteArray& getBytes() const { return m_bytes; }
+        unsigned int getSyncWord() const { return m_syncWord; }
+        float getSingalDb() const { return m_signalDb; }
+        float getNoiseDb() const { return m_noiseDb; }
+
+        static MsgReportDecodeBytes* create(const QByteArray& bytes) {
+            return new MsgReportDecodeBytes(bytes);
+        }
+        void setSyncWord(unsigned int syncWord) {
+            m_syncWord = syncWord;
+        }
+        void setSignalDb(float db) {
+            m_signalDb = db;
+        }
+        void setNoiseDb(float db) {
+            m_noiseDb = db;
+        }
+
+    private:
+        QByteArray m_bytes;
+        unsigned int m_syncWord;
+        float m_signalDb;
+        float m_noiseDb;
+
+        MsgReportDecodeBytes(const QByteArray& bytes) :
+            Message(),
+            m_bytes(bytes),
+            m_syncWord(0),
+            m_signalDb(0.0),
+            m_noiseDb(0.0)
+        { }
+    };
+
+    class MsgReportDecodeString : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getString() const { return m_str; }
+        unsigned int getSyncWord() const { return m_syncWord; }
+        float getSingalDb() const { return m_signalDb; }
+        float getNoiseDb() const { return m_noiseDb; }
+
+        static MsgReportDecodeString* create(const QString& str)
+        {
+            return new MsgReportDecodeString(str);
+        }
+        void setSyncWord(unsigned int syncWord) {
+            m_syncWord = syncWord;
+        }
+        void setSignalDb(float db) {
+            m_signalDb = db;
+        }
+        void setNoiseDb(float db) {
+            m_noiseDb = db;
+        }
+
+    private:
+        QString m_str;
+        unsigned int m_syncWord;
+        float m_signalDb;
+        float m_noiseDb;
+
+        MsgReportDecodeString(const QString& str) :
+            Message(),
+            m_str(str),
+            m_syncWord(0),
+            m_signalDb(0.0),
+            m_noiseDb(0.0)
         { }
     };
 
@@ -82,6 +159,8 @@ public:
         return 0;
     }
 
+    bool getDemodActive() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 
@@ -89,8 +168,9 @@ private:
 	DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     LoRaDemodBaseband* m_basebandSink;
+    LoRaDemodDecoder m_decoder;
     LoRaDemodSettings m_settings;
-    int m_basebandSampleRate;
+    int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     void applySettings(const LoRaDemodSettings& settings, bool force = false);
 };

@@ -62,7 +62,9 @@ public:
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
+    bool getDemodActive() const { return m_sink.getDemodActive(); }
     void setBasebandSampleRate(int sampleRate);
+    void setDecoderMessageQueue(MessageQueue *messageQueue) { m_sink.setDecoderMessageQueue(messageQueue); }
     void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }
 
 private:

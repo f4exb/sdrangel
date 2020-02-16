@@ -22,10 +22,14 @@
 #include "dsp/dsptypes.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/fftengine.h"
+#include "util/db.h"
 
+#include "lorademodmsg.h"
 #include "lorademodsink.h"
 
 LoRaDemodSink::LoRaDemodSink() :
+    m_decodeMsg(nullptr),
+    m_decoderMsgQueue(nullptr),
     m_spectrumSink(nullptr),
     m_spectrumBuffer(nullptr),
     m_downChirps(nullptr),
@@ -33,6 +37,7 @@ LoRaDemodSink::LoRaDemodSink() :
     m_fftBuffer(nullptr),
     m_spectrumLine(nullptr)
 {
+    m_demodActive = false;
 	m_bandwidth = LoRaDemodSettings::bandwidths[0];
 	m_channelSampleRate = 96000;
 	m_channelFrequencyOffset = 0;
@@ -134,6 +139,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
 {
     if (m_state == LoRaStateReset) // start over
     {
+        m_demodActive = false;
         reset();
         m_state = LoRaStateDetectPreamble;
     }
@@ -147,21 +153,22 @@ void LoRaDemodSink::processSample(const Complex& ci)
             std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
             m_fft->transform();
             m_fftCounter = 0;
+            double magsq;
 
             unsigned int imax = argmax(
                 m_fft->out(),
                 m_fftInterpolation,
                 m_fftLength,
-                m_magsq,
+                magsq,
                 m_spectrumBuffer,
                 m_fftInterpolation
             ) / m_fftInterpolation;
 
-            // Debug:
-            // if (m_spectrumSink) {
-            //     m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
-            // }
+            if (m_magsqQueue.size() > m_requiredPreambleChirps + 1) {
+                m_magsqQueue.pop();
+            }
 
+            m_magsqQueue.push(magsq);
             m_argMaxHistory[m_argMaxHistoryCounter++] = imax;
 
             if (m_argMaxHistoryCounter == m_requiredPreambleChirps)
@@ -178,18 +185,22 @@ void LoRaDemodSink::processSample(const Complex& ci)
                     }
                 }
 
-                if ((preambleFound) && (m_magsq > 1e-9))
+                if ((preambleFound) && (magsq > 1e-9))
                 {
                     if (m_spectrumSink) {
                         m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
                     }
 
-                    qDebug("LoRaDemodSink::processSample: preamble found: %u|%f", m_argMaxHistory[0], m_magsq);
+                    qDebug("LoRaDemodSink::processSample: preamble found: %u|%f", m_argMaxHistory[0], magsq);
                     m_chirp = m_argMaxHistory[0];
                     m_fftCounter = m_chirp;
                     m_chirp0 = 0;
                     m_chirpCount = 0;
                     m_state = LoRaStatePreambleResyc;
+                }
+                else
+                {
+                    m_magsqOffAvg(m_magsqQueue.front());
                 }
             }
         }
@@ -205,6 +216,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
             }
 
             m_fftCounter = 0;
+            m_demodActive = true;
             m_state = LoRaStatePreamble;
         }
     }
@@ -281,7 +293,6 @@ void LoRaDemodSink::processSample(const Complex& ci)
                     m_fftCounter = m_fftLength - m_sfdSkip + zadj;
                     m_chirp += zadj;
                     //std::copy(m_fftBuffer+m_sfdSkip, m_fftBuffer+(m_fftLength-m_sfdSkip), m_fftBuffer); // prepare sliding fft
-                    m_magsq = magsqSFD;
                     m_state = LoRaStateSkipSFD; //LoRaStateSlideSFD;
                 }
             }
@@ -296,7 +307,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 }
 
                 qDebug("LoRaDemodSink::processSample: SFD search: up: %4u|%11.6f - down: %4u|%11.6f", imax, magsq, imaxSFD, magsqSFD);
-                m_magsq = magsq;
+                m_magsqOnAvg(magsq);
             }
         }
     }
@@ -311,12 +322,15 @@ void LoRaDemodSink::processSample(const Complex& ci)
 
             if (m_sfdSkipCounter == m_sfdFourths) // 1.25 SFD chips left
             {
+                qDebug("LoRaDemodSink::processSample: SFD skipped");
                 m_chirp = m_chirp0;
                 m_fftCounter = 0;
                 m_chirpCount = 0;
                 int correction = 0;
-                qDebug("LoRaDemodSink::processSample: SFD skipped");
-                m_state = LoRaStateReadPayload; //LoRaStateReadPayload;
+                m_magsqMax = 0.0;
+                m_decodeMsg = LoRaDemodMsg::MsgDecodeSymbols::create();
+                m_decodeMsg->setSyncWord(m_syncWord);
+                m_state = LoRaStateReadPayload;
             }
         }
     }
@@ -353,11 +367,14 @@ void LoRaDemodSink::processSample(const Complex& ci)
 
             if (m_sfdSkipCounter == m_sfdFourths) // 1.25 SFD chips length
             {
+                qDebug("LoRaDemodSink::processSample: SFD done");
                 m_chirp = m_chirp0;
                 m_fftCounter = 0;
                 m_chirpCount = 0;
                 int correction = 0;
-                qDebug("LoRaDemodSink::processSample: SFD done");
+                m_magsqMax = 0.0;
+                m_decodeMsg = LoRaDemodMsg::MsgDecodeSymbols::create();
+                m_decodeMsg->setSyncWord(m_syncWord);
                 m_state = LoRaStateReadPayload; //LoRaStateReadPayload;
             }
         }
@@ -390,22 +407,47 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
             }
 
-            if ((m_chirpCount == 0) || (10.0*magsq > m_magsq))
+            if (magsq > m_magsqMax) {
+                m_magsqMax = magsq;
+            }
+
+            m_decodeMsg->pushBackSymbol(symbol);
+
+            if ((m_chirpCount == 0)
+            ||  (m_settings.m_eomSquelchTenths == 121) // max - disable squelch
+            || ((m_settings.m_eomSquelchTenths*magsq)/10.0 > m_magsqMax))
             {
                 qDebug("LoRaDemodSink::processSample: symbol %02u: %4u|%11.6f", m_chirpCount, symbol, magsq);
-                m_magsq = magsq;
+                m_magsqOnAvg(magsq);
                 m_chirpCount++;
 
-                if (m_chirpCount > 255)
+                if (m_chirpCount > m_settings.m_nbSymbolsMax)
                 {
                     qDebug("LoRaDemodSink::processSample: message length exceeded");
                     m_state = LoRaStateReset;
+                    m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
+                    m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
+
+                    if (m_decoderMsgQueue && m_settings.m_decodeActive) {
+                        m_decoderMsgQueue->push(m_decodeMsg);
+                    } else {
+                        delete m_decodeMsg;
+                    }
                 }
             }
             else
             {
                 qDebug("LoRaDemodSink::processSample: end of message");
                 m_state = LoRaStateReset;
+                m_decodeMsg->popSymbol(); // last symbol is garbage
+                m_decodeMsg->setSignalDb(CalcDb::dbPower(m_magsqOnAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
+                m_decodeMsg->setNoiseDb(CalcDb::dbPower(m_magsqOffAvg.asDouble() / (1<<m_settings.m_spreadFactor)));
+
+                if (m_decoderMsgQueue && m_settings.m_decodeActive) {
+                    m_decoderMsgQueue->push(m_decodeMsg);
+                } else {
+                    delete m_decodeMsg;
+                }
             }
         }
     }

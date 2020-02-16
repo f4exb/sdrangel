@@ -16,8 +16,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "device/deviceuiset.h"
-#include <QDockWidget>
-#include <QMainWindow>
+#include <QScrollBar>
+#include <QDebug>
 
 #include "ui_lorademodgui.h"
 #include "dsp/spectrumvis.h"
@@ -27,6 +27,7 @@
 #include "gui/glspectrumgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "mainwindow.h"
 
 #include "lorademod.h"
 #include "lorademodgui.h"
@@ -105,6 +106,23 @@ bool LoRaDemodGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (LoRaDemod::MsgReportDecodeBytes::match(message))
+    {
+        const LoRaDemod::MsgReportDecodeBytes& msg = (LoRaDemod::MsgReportDecodeBytes&) message;
+        QByteArray bytes = msg.getBytes();
+        ui->hexText->setText(bytes.toHex());
+        ui->syncWord->setText((tr("%1").arg(msg.getSyncWord(), 2, 16)));
+        ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
+        ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
+    }
+    else if (LoRaDemod::MsgReportDecodeString::match(message))
+    {
+        const LoRaDemod::MsgReportDecodeString& msg = (LoRaDemod::MsgReportDecodeString&) message;
+        addText(msg.getString());
+        ui->syncWord->setText((tr("%1").arg(msg.getSyncWord(), 2, 16)));
+        ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
+        ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
+    }
     else
     {
     	return false;
@@ -177,6 +195,38 @@ void LoRaDemodGUI::on_deBits_valueChanged(int value)
     applySettings();
 }
 
+void LoRaDemodGUI::on_scheme_currentIndexChanged(int index)
+{
+    m_settings.m_codingScheme = (LoRaDemodSettings::CodingScheme) index;
+    applySettings();
+}
+
+void LoRaDemodGUI::on_mute_toggled(bool checked)
+{
+    m_settings.m_decodeActive = !checked;
+    applySettings();
+}
+
+void LoRaDemodGUI::on_clear_clicked(bool checked)
+{
+    (void) checked;
+    ui->messageText->clear();
+}
+
+void LoRaDemodGUI::on_eomSquelch_valueChanged(int value)
+{
+    m_settings.m_eomSquelchTenths = value;
+    displaySquelch();
+    applySettings();
+}
+
+void LoRaDemodGUI::on_messageLength_valueChanged(int value)
+{
+    m_settings.m_nbSymbolsMax = value;
+    ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
+    applySettings();
+}
+
 void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -190,7 +240,8 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
     m_basebandSampleRate(250000),
-	m_doApplySettings(true)
+	m_doApplySettings(true),
+    m_tickCount(0)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -201,12 +252,18 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	m_LoRaDemod->setSpectrumSink(m_spectrumVis);
     m_LoRaDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-	ui->glSpectrum->setDisplayWaterfall(true);
+    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+
+    ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
+
+    ui->messageText->setReadOnly(true);
+    ui->syncWord->setReadOnly(true);
+    ui->hexText->setReadOnly(true);
 
 	m_channelMarker.setMovable(true);
 	m_channelMarker.setVisible(true);
@@ -276,8 +333,23 @@ void LoRaDemodGUI::displaySettings()
     ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
     ui->deBits->setValue(m_settings.m_deBits);
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
+    ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
+    ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
+    ui->messageLength->setValue(m_settings.m_nbSymbolsMax);
     ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
+    displaySquelch();
     blockApplySettings(false);
+}
+
+void LoRaDemodGUI::displaySquelch()
+{
+    ui->eomSquelch->setValue(m_settings.m_eomSquelchTenths);
+
+    if (m_settings.m_eomSquelchTenths == ui->eomSquelch->maximum()) {
+        ui->eomSquelchText->setText("---");
+    } else {
+        ui->eomSquelchText->setText(tr("%1").arg(m_settings.m_eomSquelchTenths / 10.0, 0, 'f', 1));
+    }
 }
 
 void LoRaDemodGUI::setBandwidths()
@@ -294,5 +366,37 @@ void LoRaDemodGUI::setBandwidths()
         ui->BW->setMaximum(maxIndex - 1);
         int index = ui->BW->value();
         ui->BWText->setText(QString("%1 Hz").arg(LoRaDemodSettings::bandwidths[index]));
+    }
+}
+
+void LoRaDemodGUI::addText(const QString& text)
+{
+    QDateTime dt = QDateTime::currentDateTime();
+    QString dateStr = dt.toString("HH:mm:ss");
+    QTextCursor cursor = ui->messageText->textCursor();
+    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+    if (!ui->messageText->document()->isEmpty()) {
+        cursor.insertText("\n");
+    }
+    cursor.insertText(tr("%1 %2").arg(dateStr).arg(text));
+    ui->messageText->verticalScrollBar()->setValue(ui->messageText->verticalScrollBar()->maximum());
+}
+
+
+void LoRaDemodGUI::tick()
+{
+    if (m_tickCount < 10)
+    {
+        m_tickCount++;
+    }
+    else
+    {
+        m_tickCount = 0;
+
+        if (m_LoRaDemod->getDemodActive()) {
+            ui->mute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->mute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
     }
 }

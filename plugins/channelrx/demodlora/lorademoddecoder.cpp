@@ -99,7 +99,7 @@ void LoRaDemodDecoder::decodeSymbolsTTY(const std::vector<unsigned int>& symbols
 
             if (ttyState == TTYLetters) {
                 asciiChar = ttyLetters[ttyChar];
-            } else if (ttyState == TTYLetters) {
+            } else if (ttyState == TTYFigures) {
                 asciiChar = ttyFigures[ttyChar];
             }
 

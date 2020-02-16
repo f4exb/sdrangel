@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019-2020 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,34 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LoRaPLUGIN_H
-#define INCLUDE_LoRaPLUGIN_H
+#include "lorademodmsg.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
-
-class DeviceUISet;
-class BasebandSampleSink;
-
-class LoRaPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.channel.lorademod")
-
-public:
-	explicit LoRaPlugin(QObject* parent = nullptr);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual PluginInstanceGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
-	virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI) const;
-	virtual ChannelAPI* createRxChannelCS(DeviceAPI *deviceAPI) const;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_LoRaPLUGIN_H
+MESSAGE_CLASS_DEFINITION(LoRaDemodMsg::MsgDecodeSymbols, Message)

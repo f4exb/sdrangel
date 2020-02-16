@@ -19,17 +19,23 @@
 #define INCLUDE_LORADEMODSINK_H
 
 #include <vector>
+#include <queue>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "util/message.h"
 #include "dsp/fftwindow.h"
+#include "util/message.h"
+#include "util/movingaverage.h"
 
 #include "lorademodsettings.h"
 
 class BasebandSampleSink;
 class FFTEngine;
+namespace LoRaDemodMsg {
+    class MsgDecodeSymbols;
+}
+class MessageQueue;
 
 class LoRaDemodSink : public ChannelSampleSink {
 public:
@@ -38,6 +44,8 @@ public:
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
+    bool getDemodActive() const { return m_demodActive; }
+    void setDecoderMessageQueue(MessageQueue *messageQueue) { m_decoderMsgQueue = messageQueue; }
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
     void applyChannelSettings(int channelSampleRate, int bandwidth, int channelFrequencyOffset, bool force = false);
     void applySettings(const LoRaDemodSettings& settings, bool force = false);
@@ -57,6 +65,9 @@ private:
 
     LoRaDemodSettings m_settings;
     LoRaState m_state;
+    bool m_demodActive;
+    LoRaDemodMsg::MsgDecodeSymbols *m_decodeMsg;
+    MessageQueue *m_decoderMsgQueue;
 	int m_bandwidth;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
@@ -80,7 +91,10 @@ private:
     unsigned int m_argMaxHistoryCounter;
     unsigned int m_preambleHistory[m_maxSFDSearchChirps];
     unsigned int m_syncWord;
-    double m_magsq;
+    double m_magsqMax;
+    MovingAverageUtil<double, double, 10> m_magsqOnAvg;
+    MovingAverageUtil<double, double, 10> m_magsqOffAvg;
+    std::queue<double> m_magsqQueue;
     unsigned int m_chirpCount; //!< Generic chirp counter
     unsigned int m_sfdSkip;    //!< Number of samples in a SFD skip or slide (1/4) period
     unsigned int m_sfdSkipCounter; //!< Counter of skip or slide periods

@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>500</height>
+    <width>410</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
-    <height>500</height>
+    <width>380</width>
+    <height>620</height>
    </size>
   </property>
   <property name="font">
@@ -30,14 +30,14 @@
     <rect>
      <x>10</x>
      <y>20</y>
-     <width>331</width>
-     <height>112</height>
+     <width>390</width>
+     <height>102</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>112</height>
+     <height>102</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -74,7 +74,7 @@
      <rect>
       <x>30</x>
       <y>50</y>
-      <width>180</width>
+      <width>251</width>
       <height>16</height>
      </rect>
     </property>
@@ -102,7 +102,7 @@
      <rect>
       <x>30</x>
       <y>70</y>
-      <width>100</width>
+      <width>131</width>
       <height>16</height>
      </rect>
     </property>
@@ -131,7 +131,7 @@
    <widget class="QLabel" name="SpreadText">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>170</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -153,7 +153,7 @@
    <widget class="QLabel" name="BWText">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>300</x>
       <y>50</y>
       <width>80</width>
       <height>16</height>
@@ -175,7 +175,7 @@
    <widget class="QLabel" name="deBitsLabel">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>220</x>
       <y>70</y>
       <width>22</width>
       <height>16</height>
@@ -188,7 +188,7 @@
    <widget class="QLabel" name="deBitsText">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>350</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -210,14 +210,14 @@
    <widget class="QSlider" name="deBits">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>250</x>
       <y>70</y>
-      <width>60</width>
+      <width>91</width>
       <height>16</height>
      </rect>
     </property>
     <property name="toolTip">
-     <string>Low data rate optimize (DE) bits</string>
+     <string>Distance Enhancement bits i.e. log2 of number of FFT bins per effective sample</string>
     </property>
     <property name="minimum">
      <number>0</number>
@@ -243,7 +243,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>311</width>
+      <width>371</width>
       <height>26</height>
      </rect>
     </property>
@@ -319,17 +319,377 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="sLabel">
+       <property name="text">
+        <string>S</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sText">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>De-chirped signal level</string>
+       </property>
+       <property name="text">
+        <string>-50.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="snrLabel">
+       <property name="minimumSize">
+        <size>
+         <width>35</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>SNR</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="snrText">
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>De-chirped SNR level</string>
+       </property>
+       <property name="text">
+        <string>10.0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="sUnits">
+       <property name="text">
+        <string>dB</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </widget>
+  </widget>
+  <widget class="QWidget" name="payloadContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>130</y>
+     <width>390</width>
+     <height>160</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>160</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Payload</string>
+   </property>
+   <widget class="QLabel" name="messageLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>40</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Msg</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="hexText">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>120</y>
+      <width>351</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="hexLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>120</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Hex</string>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="messageText">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>40</y>
+      <width>351</width>
+      <height>75</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="schemeLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>10</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Scheme</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="scheme">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>8</y>
+      <width>86</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>LoRa</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>ASCII</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>TTY</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="clear">
+    <property name="geometry">
+     <rect>
+      <x>4</x>
+      <y>60</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>24</width>
+      <height>24</height>
+     </size>
+    </property>
+    <property name="toolTip">
+     <string>Clear text</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../../sdrgui/resources/res.qrc">
+      <normaloff>:/sweep.png</normaloff>:/sweep.png</iconset>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QToolButton" name="mute">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>8</y>
+      <width>20</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Run/Stop decoder</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="../../../sdrgui/resources/res.qrc">
+      <normaloff>:/stop.png</normaloff>
+      <normalon>:/play.png</normalon>:/stop.png</iconset>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="eomSquelchLabel">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>10</y>
+      <width>35</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>EOM</string>
+    </property>
+   </widget>
+   <widget class="QDial" name="eomSquelch">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>8</y>
+      <width>22</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>End Of Message squelch factor</string>
+    </property>
+    <property name="minimum">
+     <number>40</number>
+    </property>
+    <property name="maximum">
+     <number>121</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>60</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="eomSquelchText">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>10</y>
+      <width>28</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>10.0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="messageLengthLabel">
+    <property name="geometry">
+     <rect>
+      <x>272</x>
+      <y>10</y>
+      <width>20</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ML</string>
+    </property>
+   </widget>
+   <widget class="QDial" name="messageLength">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>8</y>
+      <width>22</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Message (payload) length in number of symbols</string>
+    </property>
+    <property name="minimum">
+     <number>20</number>
+    </property>
+    <property name="maximum">
+     <number>255</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>255</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="messageLengthText">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>10</y>
+      <width>25</width>
+      <height>19</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>255</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="syncWord">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>9</y>
+      <width>25</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Sync word (1 byte hex)</string>
+    </property>
+    <property name="inputMask">
+     <string>HH</string>
+    </property>
+    <property name="text">
+     <string>00</string>
+    </property>
    </widget>
   </widget>
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>140</y>
-     <width>331</width>
-     <height>341</height>
+     <y>300</y>
+     <width>390</width>
+     <height>310</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>373</width>
+     <height>0</height>
+    </size>
    </property>
    <property name="windowTitle">
     <string>De-chirped Spectrum</string>

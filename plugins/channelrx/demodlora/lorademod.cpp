@@ -2,7 +2,7 @@
 // Copyright (C) 2012 maintech GmbH, Otto-Hahn-Str. 15, 97204 Hoechberg, Germany //
 // written by Christian Daniel                                                   //
 // (c) 2015 John Greb                                                            //
-// (c) 2020 Edouard Griffiths                                                    //
+// (c) 2020 Edouard Griffiths, F4EXB                                             //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -27,21 +27,26 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 
+#include "lorademodmsg.h"
 #include "lorademod.h"
 
 MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgConfigureLoRaDemod, Message)
+MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgReportDecodeBytes, Message)
+MESSAGE_CLASS_DEFINITION(LoRaDemod::MsgReportDecodeString, Message)
 
 const QString LoRaDemod::m_channelIdURI = "sdrangel.channel.lorademod";
 const QString LoRaDemod::m_channelId = "LoRaDemod";
 
 LoRaDemod::LoRaDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
-        m_deviceAPI(deviceAPI)
+        m_deviceAPI(deviceAPI),
+        m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
     m_basebandSink = new LoRaDemodBaseband();
+    m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
     m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);
@@ -95,6 +100,42 @@ bool LoRaDemod::handleMessage(const Message& cmd)
 
 		return true;
 	}
+    else if (LoRaDemodMsg::MsgDecodeSymbols::match(cmd))
+    {
+        qDebug() << "LoRaDemod::handleMessage: MsgDecodeSymbols";
+        LoRaDemodMsg::MsgDecodeSymbols& msg = (LoRaDemodMsg::MsgDecodeSymbols&) cmd;
+
+        if (m_settings.m_codingScheme == LoRaDemodSettings::CodingLoRa)
+        {
+            QByteArray payload;
+            m_decoder.decodeSymbols(msg.getSymbols(), payload);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgReportDecodeBytes *msgToGUI = MsgReportDecodeBytes::create(payload);
+                msgToGUI->setSyncWord(msg.getSyncWord());
+                msgToGUI->setSignalDb(msg.getSingalDb());
+                msgToGUI->setNoiseDb(msg.getNoiseDb());
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+        else
+        {
+            QString payload;
+            m_decoder.decodeSymbols(msg.getSymbols(), payload);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgReportDecodeString *msgToGUI = MsgReportDecodeString::create(payload);
+                msgToGUI->setSyncWord(msg.getSyncWord());
+                msgToGUI->setSignalDb(msg.getSingalDb());
+                msgToGUI->setNoiseDb(msg.getNoiseDb());
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
@@ -150,8 +191,22 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
             << " m_title: " << settings.m_title
             << " force: " << force;
 
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
+     || (settings.m_deBits != m_settings.m_deBits) || force) {
+         m_decoder.setNbSymbolBits(settings.m_spreadFactor - settings.m_deBits);
+    }
+
+    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force) {
+        m_decoder.setCodingScheme(settings.m_codingScheme);
+    }
+
     LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband *msg = LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
     m_settings = settings;
+}
+
+bool LoRaDemod::getDemodActive() const
+{
+    return m_basebandSink->getDemodActive();
 }

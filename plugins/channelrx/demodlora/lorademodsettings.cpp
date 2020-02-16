@@ -41,6 +41,10 @@ void LoRaDemodSettings::resetToDefaults()
     m_bandwidthIndex = 5;
     m_spreadFactor = 7;
     m_deBits = 0;
+    m_codingScheme = CodingLoRa;
+    m_decodeActive = true;
+    m_eomSquelchTenths = 60;
+    m_nbSymbolsMax = 255;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "LoRa Demodulator";
 }
@@ -62,6 +66,10 @@ QByteArray LoRaDemodSettings::serialize() const
 
     s.writeString(6, m_title);
     s.writeS32(7, m_deBits);
+    s.writeS32(8, m_codingScheme);
+    s.writeBool(9, m_decodeActive);
+    s.writeS32(10, m_eomSquelchTenths);
+    s.writeS32(11, m_nbSymbolsMax);
 
     return s.final();
 }
@@ -79,6 +87,7 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         QByteArray bytetmp;
+        int tmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidthIndex, 0);
@@ -96,6 +105,11 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
 
         d.readString(6, &m_title, "LoRa Demodulator");
         d.readS32(7, &m_deBits, 0);
+        d.readS32(8, &tmp);
+        m_codingScheme = (CodingScheme) tmp;
+        d.readBool(9, &m_decodeActive, true);
+        d.readS32(10, &m_eomSquelchTenths, 60);
+        d.readS32(11, &m_nbSymbolsMax, 255);
 
         return true;
     }
