@@ -34,7 +34,6 @@ LoRaDemodSink::LoRaDemodSink() :
     m_spectrumBuffer(nullptr),
     m_downChirps(nullptr),
     m_upChirps(nullptr),
-    m_fftBuffer(nullptr),
     m_spectrumLine(nullptr)
 {
     m_demodActive = false;
@@ -74,9 +73,6 @@ void LoRaDemodSink::initSF(unsigned int sf, unsigned int deBits)
     if (m_upChirps) {
         delete[] m_upChirps;
     }
-    if (m_fftBuffer) {
-        delete[] m_fftBuffer;
-    }
     if (m_spectrumBuffer) {
         delete[] m_spectrumBuffer;
     }
@@ -95,7 +91,6 @@ void LoRaDemodSink::initSF(unsigned int sf, unsigned int deBits)
     m_fftWindow.setKaiserAlpha(M_PI);
     m_downChirps = new Complex[2*m_nbSymbols]; // Each table is 2 chirps long to allow processing from arbitrary offsets.
     m_upChirps = new Complex[2*m_nbSymbols];
-    m_fftBuffer = new Complex[m_fftInterpolation*m_fftLength];
     m_spectrumBuffer = new Complex[m_nbSymbols];
     m_spectrumLine = new Complex[m_nbSymbols];
     std::fill(m_spectrumLine, m_spectrumLine+m_nbSymbols, Complex(std::polar(1e-6*SDR_RX_SCALED, 0.0)));
@@ -228,8 +223,6 @@ void LoRaDemodSink::processSample(const Complex& ci)
 
         if (m_fftCounter == m_fftLength)
         {
-            std::copy(m_fftSFD->in(), m_fftSFD->in() + m_fftLength, m_fftBuffer); // save for later
-
             m_fftWindow.apply(m_fft->in());
             std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
             m_fft->transform();
@@ -292,7 +285,6 @@ void LoRaDemodSink::processSample(const Complex& ci)
                     m_sfdSkipCounter = 0;
                     m_fftCounter = m_fftLength - m_sfdSkip + zadj;
                     m_chirp += zadj;
-                    //std::copy(m_fftBuffer+m_sfdSkip, m_fftBuffer+(m_fftLength-m_sfdSkip), m_fftBuffer); // prepare sliding fft
                     m_state = LoRaStateSkipSFD; //LoRaStateSlideSFD;
                 }
             }
@@ -331,51 +323,6 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 m_decodeMsg = LoRaDemodMsg::MsgDecodeSymbols::create();
                 m_decodeMsg->setSyncWord(m_syncWord);
                 m_state = LoRaStateReadPayload;
-            }
-        }
-    }
-    else if (m_state == LoRaStateSlideSFD) // perform sliding FFTs over the rest of the SFD period
-    {
-        m_fftBuffer[m_fftCounter] = ci * m_upChirps[m_chirp]; // de-chirp the down ramp
-        m_fftCounter++;
-
-        if (m_fftCounter == m_fftLength)
-        {
-            std::copy(m_fftBuffer, m_fftBuffer + m_fftLength, m_fftSFD->in());
-            std::fill(m_fftSFD->in()+m_fftLength, m_fftSFD->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
-            m_fftSFD->transform();
-            std::copy(m_fftBuffer+m_sfdSkip, m_fftBuffer+(m_fftLength-m_sfdSkip), m_fftBuffer); // prepare next sliding fft
-            m_fftCounter = m_fftLength - m_sfdSkip;
-            m_sfdSkipCounter++;
-
-            double magsqSFD;
-
-            unsigned int imaxSFD = argmax(
-                m_fftSFD->out(),
-                m_fftInterpolation,
-                m_fftLength,
-                magsqSFD,
-                m_spectrumBuffer,
-                m_fftInterpolation
-            ) / m_fftInterpolation;
-
-            if (m_spectrumSink) {
-                m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
-            }
-
-            qDebug("LoRaDemodSink::processSample: SFD slide %u %4u|%11.6f", m_sfdSkipCounter, imaxSFD, magsqSFD);
-
-            if (m_sfdSkipCounter == m_sfdFourths) // 1.25 SFD chips length
-            {
-                qDebug("LoRaDemodSink::processSample: SFD done");
-                m_chirp = m_chirp0;
-                m_fftCounter = 0;
-                m_chirpCount = 0;
-                int correction = 0;
-                m_magsqMax = 0.0;
-                m_decodeMsg = LoRaDemodMsg::MsgDecodeSymbols::create();
-                m_decodeMsg->setSyncWord(m_syncWord);
-                m_state = LoRaStateReadPayload; //LoRaStateReadPayload;
             }
         }
     }

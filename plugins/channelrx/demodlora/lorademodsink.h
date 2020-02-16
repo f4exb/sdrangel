@@ -58,7 +58,6 @@ private:
         LoRaStatePreambleResyc,  //!< Synchronize with what is left of preamble chirp
         LoRaStatePreamble,       //!< Preamble is found and look for SFD start
         LoRaStateSkipSFD,        //!< Skip SFD
-        LoRaStateSlideSFD,       //!< Sliding FFTs while going through SFD (not the skip option)
         LoRaStateReadPayload,
         LoRaStateTest
     };
@@ -84,7 +83,6 @@ private:
     FFTWindow m_fftWindow;
     Complex *m_downChirps;
     Complex *m_upChirps;
-    Complex *m_fftBuffer;
     Complex *m_spectrumLine;
     unsigned int m_fftCounter;
     unsigned int m_argMaxHistory[m_requiredPreambleChirps];
