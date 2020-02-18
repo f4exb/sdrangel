@@ -332,7 +332,7 @@ void LoRaModSource::modulateSample()
     }
 }
 
-unsigned int LoRaModSource::encodeSymbol(unsigned int symbol)
+unsigned short LoRaModSource::encodeSymbol(unsigned short symbol)
 {
     if (m_settings.m_deBits == 0) {
         return symbol;
@@ -421,7 +421,7 @@ void LoRaModSource::applyChannelSettings(int channelSampleRate, int bandwidth, i
     reset();
 }
 
-void LoRaModSource::setSymbols(const std::vector<unsigned int>& symbols)
+void LoRaModSource::setSymbols(const std::vector<unsigned short>& symbols)
 {
     m_symbols = symbols;
     qDebug("LoRaModSource::setSymbols: m_symbols: %lu", m_symbols.size());

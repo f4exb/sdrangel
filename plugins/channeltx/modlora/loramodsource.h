@@ -47,7 +47,7 @@ public:
     }
     void applySettings(const LoRaModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int bandwidth, int channelFrequencyOffset, bool force = false);
-    void setSymbols(const std::vector<unsigned int>& symbols);
+    void setSymbols(const std::vector<unsigned short>& symbols);
     bool getActive() const { return m_active; }
 
 private:
@@ -76,7 +76,7 @@ private:
     Complex *m_downChirps;
     Complex *m_upChirps;
     double *m_phaseIncrements;
-    std::vector<unsigned int> m_symbols;
+    std::vector<unsigned short> m_symbols;
     unsigned int m_fftLength;      //!< chirp length in samples
     unsigned int m_chirp;          //!< actual chirp index in chirps table
     unsigned int m_chirp0;         //!< half index of chirp start in chirps table
@@ -116,7 +116,7 @@ private:
     void processOneSample(Complex& ci);
     void calculateLevel(Real& sample);
     void modulateSample();
-    unsigned int encodeSymbol(unsigned int symbol); //!< Encodes symbol with possible DE bits spacing
+    unsigned short encodeSymbol(unsigned short symbol); //!< Encodes symbol with possible DE bits spacing
 };
 
 #endif // INCLUDE_LORAMODSOURCE_H

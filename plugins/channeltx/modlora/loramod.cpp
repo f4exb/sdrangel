@@ -157,15 +157,27 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits) || force) {
-        m_encoder.setNbSymbolBits(settings.m_spreadFactor - settings.m_deBits);
+        m_encoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
     }
 
     if ((settings.m_codingScheme != m_settings.m_codingScheme) || force) {
         m_encoder.setCodingScheme(settings.m_codingScheme);
     }
 
+    if ((settings.m_nbParityBits != m_settings.m_nbParityBits || force)) {
+        m_encoder.setLoRaParityBits(settings.m_nbParityBits);
+    }
+
+    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force) {
+        m_encoder.setLoRaHasCRC(settings.m_hasCRC);
+    }
+
+    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force) {
+        m_encoder.setLoRaHasHeader(settings.m_hasHeader);
+    }
+
     LoRaModBaseband::MsgConfigureLoRaModPayload *payloadMsg = nullptr;
-    std::vector<unsigned int> symbols;
+    std::vector<unsigned short> symbols;
 
     if ((settings.m_messageType == LoRaModSettings::MessageNone)
         && ((settings.m_messageType != m_settings.m_messageType) || force))

@@ -108,7 +108,10 @@ bool LoRaModGUI::handleMessage(const Message& message)
     else if (LoRaMod::MsgReportPayloadTime::match(message))
     {
         const LoRaMod::MsgReportPayloadTime& rpt = (LoRaMod::MsgReportPayloadTime&) message;
-        ui->msgTimeText->setText(tr("%1").arg(rpt.getPayloadTimeMs()));
+        unsigned int fourthsMs = ((1<<m_settings.m_spreadFactor)*250) / LoRaModSettings::bandwidths[m_settings.m_bandwidthIndex];
+        unsigned int controlMs = (4*(m_settings.m_preambleChirps)+8+9)*fourthsMs; // preamble + sync word + SFD
+        ui->msgTimeText->setText(tr("%1 ms").arg(rpt.getPayloadTimeMs()));
+        ui->msgTotalTimeText->setText(tr("%1 ms").arg(rpt.getPayloadTimeMs()+controlMs));
         return true;
     }
     else if (DSPSignalNotification::match(message))
@@ -225,7 +228,29 @@ void LoRaModGUI::on_syncWord_editingFinished()
 void LoRaModGUI::on_scheme_currentIndexChanged(int index)
 {
     m_settings.m_codingScheme = (LoRaModSettings::CodingScheme) index;
+    ui->fecParity->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
+    ui->crc->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
+    ui->header->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
     applySettings();
+}
+
+void LoRaModGUI::on_fecParity_valueChanged(int value)
+{
+    m_settings.m_nbParityBits = value;
+    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+    applySettings();
+}
+
+void LoRaModGUI::on_crc_stateChanged(int state)
+{
+	m_settings.m_hasCRC = (state == Qt::Checked);
+	applySettings();
+}
+
+void LoRaModGUI::on_header_stateChanged(int state)
+{
+	m_settings.m_hasHeader = (state == Qt::Checked);
+	applySettings();
 }
 
 void LoRaModGUI::on_myCall_editingFinished()
@@ -460,6 +485,10 @@ void LoRaModGUI::displaySettings()
     displayStreamIndex();
     displayCurrentPayloadMessage();
 
+    ui->fecParity->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
+    ui->crc->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
+    ui->header->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
+
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->bwText->setText(QString("%1 Hz").arg(thisBW));
@@ -475,6 +504,10 @@ void LoRaModGUI::displaySettings()
     ui->syncWord->setText((tr("%1").arg(m_settings.m_syncWord, 2, 16)));
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
+    ui->fecParity->setValue(m_settings.m_nbParityBits);
+    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+    ui->crc->setChecked(m_settings.m_hasCRC);
+    ui->header->setChecked(m_settings.m_hasHeader);
     ui->myCall->setText(m_settings.m_myCall);
     ui->urCall->setText(m_settings.m_urCall);
     ui->myLocator->setText(m_settings.m_myLoc);

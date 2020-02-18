@@ -15,40 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_MODLORA_LORAMODENCODER_H_
-#define PLUGINS_CHANNELTX_MODLORA_LORAMODENCODER_H_
+#include "loramodencoderascii.h"
 
-#include <vector>
-#include "loramodsettings.h"
-
-class LoRaModEncoder
+void LoRaModEncoderASCII::encodeString(const QString& str, std::vector<unsigned short>& symbols)
 {
-public:
-    LoRaModEncoder();
-    ~LoRaModEncoder();
+    QByteArray asciiStr = str.toUtf8();
+    QByteArray::const_iterator it = asciiStr.begin();
 
-    void setCodingScheme(LoRaModSettings::CodingScheme codingScheme) { m_codingScheme = codingScheme; }
-    void setNbSymbolBits(unsigned int spreadFactor, unsigned int deBits);
-    void setLoRaParityBits(unsigned int parityBits) { m_nbParityBits = parityBits; }
-    void setLoRaHasHeader(bool hasHeader) { m_hasHeader = hasHeader; }
-    void setLoRaHasCRC(bool hasCRC) { m_hasCRC = hasCRC; }
-    void encodeString(const QString& str, std::vector<unsigned short>& symbols);
-    void encodeBytes(const QByteArray& bytes, std::vector<unsigned short>& symbols);
-
-private:
-    // LoRa functions
-    void encodeBytesLoRa(const QByteArray& bytes, std::vector<unsigned short>& symbols);
-
-    // General attributes
-    LoRaModSettings::CodingScheme m_codingScheme;
-    unsigned int m_spreadFactor;
-    unsigned int m_deBits;
-    unsigned int m_nbSymbolBits;
-    // LoRa attributes
-    unsigned int m_nbParityBits; //!< 1 to 4 Hamming FEC bits for 4 payload bits
-    bool m_hasCRC;
-    bool m_hasHeader;
-};
-
-#endif // PLUGINS_CHANNELTX_MODLORA_LORAMODENCODER_H_
-
+    for (; it != asciiStr.end(); ++it) {
+        symbols.push_back(*it & 0x7F);
+    }
+}

@@ -56,6 +56,9 @@ struct LoRaModSettings
     int m_deBits;         //!< Low data rate optmize (DE) bits
     int m_preambleChirps; //!< Number of preamble chirps
     int m_quietMillis;    //!< Number of milliseconds to pause between transmissions
+    int m_nbParityBits;   //!< Hamming parity bits (LoRa)
+    bool m_hasCRC;        //!< Payload has CRC (LoRa)
+    bool m_hasHeader;     //!< Header present before actual payload (LoRa)
     unsigned char m_syncWord;
     bool m_channelMute;
     CodingScheme m_codingScheme;

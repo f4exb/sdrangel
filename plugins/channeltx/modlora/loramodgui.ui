@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>380</width>
-    <height>411</height>
+    <height>376</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -31,17 +31,17 @@
      <x>10</x>
      <y>20</y>
      <width>370</width>
-     <height>150</height>
+     <height>125</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>150</height>
+     <height>125</height>
     </size>
    </property>
    <property name="windowTitle">
-    <string>RF/demod Settings</string>
+    <string>RF/mod/coder Settings</string>
    </property>
    <widget class="QLabel" name="bwLabel">
     <property name="geometry">
@@ -102,7 +102,7 @@
      <rect>
       <x>40</x>
       <y>70</y>
-      <width>81</width>
+      <width>61</width>
       <height>16</height>
      </rect>
     </property>
@@ -131,7 +131,7 @@
    <widget class="QLabel" name="spreadText">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>110</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -175,7 +175,7 @@
    <widget class="QLabel" name="deBitsLabel">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>160</x>
       <y>70</y>
       <width>32</width>
       <height>16</height>
@@ -188,15 +188,15 @@
    <widget class="QLabel" name="deBitsText">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>250</x>
       <y>70</y>
-      <width>30</width>
+      <width>10</width>
       <height>16</height>
      </rect>
     </property>
     <property name="minimumSize">
      <size>
-      <width>30</width>
+      <width>10</width>
       <height>0</height>
      </size>
     </property>
@@ -210,9 +210,9 @@
    <widget class="QSlider" name="deBits">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>200</x>
       <y>70</y>
-      <width>81</width>
+      <width>41</width>
       <height>16</height>
      </rect>
     </property>
@@ -496,8 +496,8 @@
    <widget class="QLabel" name="syncLabel">
     <property name="geometry">
      <rect>
-      <x>2</x>
-      <y>114</y>
+      <x>280</x>
+      <y>70</y>
       <width>32</width>
       <height>16</height>
      </rect>
@@ -509,8 +509,8 @@
    <widget class="QLineEdit" name="syncWord">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>112</y>
+      <x>320</x>
+      <y>68</y>
       <width>30</width>
       <height>20</height>
      </rect>
@@ -528,58 +528,20 @@
      <string>00</string>
     </property>
    </widget>
-   <widget class="QLabel" name="schemeLabel">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>114</y>
-      <width>50</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Scheme</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="scheme">
-    <property name="geometry">
-     <rect>
-      <x>140</x>
-      <y>112</y>
-      <width>86</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <item>
-     <property name="text">
-      <string>LoRa</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>ASCII</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>TTY</string>
-     </property>
-    </item>
-   </widget>
   </widget>
   <widget class="QWidget" name="messageContainer" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>180</y>
+     <y>150</y>
      <width>370</width>
-     <height>210</height>
+     <height>221</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>210</height>
+     <height>220</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -589,7 +551,7 @@
     <property name="geometry">
      <rect>
       <x>2</x>
-      <y>10</y>
+      <y>40</y>
       <width>32</width>
       <height>16</height>
      </rect>
@@ -602,7 +564,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>10</y>
+      <y>40</y>
       <width>40</width>
       <height>16</height>
      </rect>
@@ -615,7 +577,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>10</y>
+      <y>40</y>
       <width>50</width>
       <height>16</height>
      </rect>
@@ -628,7 +590,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>10</y>
+      <y>40</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -650,7 +612,7 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>10</y>
+      <y>40</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -672,7 +634,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>30</y>
+      <y>60</y>
       <width>40</width>
       <height>16</height>
      </rect>
@@ -685,7 +647,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>30</y>
+      <y>60</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -707,7 +669,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>30</y>
+      <y>60</y>
       <width>50</width>
       <height>16</height>
      </rect>
@@ -720,7 +682,7 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>30</y>
+      <y>60</y>
       <width>90</width>
       <height>16</height>
      </rect>
@@ -742,7 +704,7 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>58</y>
+      <y>80</y>
       <width>40</width>
       <height>20</height>
      </rect>
@@ -758,7 +720,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>58</y>
+      <y>80</y>
       <width>90</width>
       <height>20</height>
      </rect>
@@ -831,7 +793,7 @@
     <property name="geometry">
      <rect>
       <x>2</x>
-      <y>60</y>
+      <y>110</y>
       <width>32</width>
       <height>16</height>
      </rect>
@@ -844,7 +806,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>90</y>
+      <y>110</y>
       <width>311</width>
       <height>60</height>
      </rect>
@@ -854,7 +816,7 @@
     <property name="geometry">
      <rect>
       <x>2</x>
-      <y>160</y>
+      <y>175</y>
       <width>32</width>
       <height>16</height>
      </rect>
@@ -867,7 +829,7 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>160</y>
+      <y>175</y>
       <width>311</width>
       <height>20</height>
      </rect>
@@ -877,7 +839,7 @@
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>58</y>
+      <y>80</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -897,7 +859,7 @@
     <property name="geometry">
      <rect>
       <x>170</x>
-      <y>58</y>
+      <y>80</y>
       <width>20</width>
       <height>20</height>
      </rect>
@@ -920,7 +882,7 @@
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>60</y>
+      <y>82</y>
       <width>51</width>
       <height>16</height>
      </rect>
@@ -933,7 +895,7 @@
     <property name="geometry">
      <rect>
       <x>250</x>
-      <y>56</y>
+      <y>78</y>
       <width>24</width>
       <height>24</height>
      </rect>
@@ -955,7 +917,7 @@
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>60</y>
+      <y>82</y>
       <width>22</width>
       <height>16</height>
      </rect>
@@ -971,7 +933,7 @@
     <property name="geometry">
      <rect>
       <x>2</x>
-      <y>190</y>
+      <y>200</y>
       <width>40</width>
       <height>16</height>
      </rect>
@@ -984,8 +946,8 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>190</y>
-      <width>50</width>
+      <y>200</y>
+      <width>65</width>
       <height>16</height>
      </rect>
     </property>
@@ -993,23 +955,166 @@
      <string>Payload time in milliseconds</string>
     </property>
     <property name="text">
-     <string>00000</string>
+     <string>00000 ms</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="msgTimeUnits">
+   <widget class="QLabel" name="msgTotalTimeLabel">
     <property name="geometry">
      <rect>
-      <x>95</x>
-      <y>190</y>
-      <width>20</width>
+      <x>119</x>
+      <y>200</y>
+      <width>35</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>ms</string>
+     <string>Total</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="msgTotalTimeText">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>200</y>
+      <width>65</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Total transmission time in milliseconds</string>
+    </property>
+    <property name="text">
+     <string>00000 ms</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="schemeLabel">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>10</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Scheme</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="scheme">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>8</y>
+      <width>86</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>LoRa</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>ASCII</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>TTY</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QCheckBox" name="header">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>10</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Header (explicit)</string>
+    </property>
+    <property name="text">
+     <string>HDR</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="crc">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>10</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Append CRC to payload</string>
+    </property>
+    <property name="text">
+     <string>CRC</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="fecParityLabel">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>10</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>FEC</string>
+    </property>
+   </widget>
+   <widget class="QDial" name="fecParity">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>5</y>
+      <width>24</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Number of FEC parity bits (0 to 4) for Hamming code</string>
+    </property>
+    <property name="maximum">
+     <number>4</number>
+    </property>
+    <property name="pageStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="fecParityText">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>10</y>
+      <width>12</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>

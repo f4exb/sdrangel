@@ -7,6 +7,9 @@ set(modlora_SOURCES
 	loramodbaseband.cpp
     loramodplugin.cpp
     loramodencoder.cpp
+    loramodencodertty.cpp
+    loramodencoderascii.cpp
+    loramodencoderlora.cpp
     loramodwebapiadapter.cpp
 )
 
@@ -17,6 +20,9 @@ set(modlora_HEADERS
 	loramodbaseband.h
     loramodplugin.h
     loramodencoder.h
+    loramodencodertty.h
+    loramodencoderascii.h
+    loramodencoderlora.h
     loramodwebapiadapter.h
 )
 

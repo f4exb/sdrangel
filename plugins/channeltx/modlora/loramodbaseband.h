@@ -60,22 +60,22 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const std::vector<unsigned int>& getPayload() const { return m_payload; }
+        const std::vector<unsigned short>& getPayload() const { return m_payload; }
 
         static MsgConfigureLoRaModPayload* create() {
             return new MsgConfigureLoRaModPayload();
         }
-        static MsgConfigureLoRaModPayload* create(const std::vector<unsigned int>& payload) {
+        static MsgConfigureLoRaModPayload* create(const std::vector<unsigned short>& payload) {
             return new MsgConfigureLoRaModPayload(payload);
         }
 
     private:
-        std::vector<unsigned int> m_payload;
+        std::vector<unsigned short> m_payload;
 
         MsgConfigureLoRaModPayload() : // This is empty payload notification
             Message()
         {}
-        MsgConfigureLoRaModPayload(const std::vector<unsigned int>& payload) :
+        MsgConfigureLoRaModPayload(const std::vector<unsigned short>& payload) :
             Message()
         { m_payload = payload; }
     };

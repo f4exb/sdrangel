@@ -43,6 +43,9 @@ void LoRaModSettings::resetToDefaults()
     m_preambleChirps = 8;
     m_quietMillis = 1000;
     m_codingScheme = CodingLoRa;
+    m_nbParityBits = 1;
+    m_hasCRC = true;
+    m_hasHeader = true;
     m_textMessage = "Hello LoRa";
     m_myCall = "MYCALL";
     m_urCall = "URCALL";
@@ -129,6 +132,9 @@ QByteArray LoRaModSettings::serialize() const
     s.writeString(28, m_textMessage);
     s.writeBlob(29, m_bytesMessage);
     s.writeS32(30, (int) m_messageType);
+    s.writeS32(31, m_nbParityBits);
+    s.writeBool(32, m_hasCRC);
+    s.writeBool(33, m_hasHeader);
     s.writeString(40, m_myCall);
     s.writeString(41, m_urCall);
     s.writeString(42, m_myLoc);
@@ -199,6 +205,9 @@ bool LoRaModSettings::deserialize(const QByteArray& data)
         d.readBlob(29, &m_bytesMessage);
         d.readS32(30, &tmp, 0);
         m_messageType = (MessageType) tmp;
+        d.readS32(31, &m_nbParityBits, 1);
+        d.readBool(32, &m_hasCRC, true);
+        d.readBool(33, &m_hasHeader, true);
         d.readString(40, &m_myCall, "MYCALL");
         d.readString(41, &m_urCall, "URCALL");
         d.readString(42, &m_myLoc, "AA00AA");
