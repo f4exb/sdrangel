@@ -9,7 +9,7 @@ if(NOT SOAPYSDR_FOUND)
     set(${VERSION} "${CMAKE_MATCH_1}" PARENT_SCOPE)
   endfunction(_SOAPY_SDR_GET_ABI_VERSION)
 
-  pkg_check_modules (LIBSOAPYSDR_PKG soapysdr>=0.4.0)
+  pkg_check_modules (LIBSOAPYSDR_PKG soapysdr>=0.4.0 SoapySDR>=0.4.0)
 
   if(LIBSOAPYSDR_PKG_FOUND OR (DEFINED SOAPYSDR_DIR))
 
