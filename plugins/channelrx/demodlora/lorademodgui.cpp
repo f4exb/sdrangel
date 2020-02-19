@@ -77,6 +77,8 @@ QByteArray LoRaDemodGUI::serialize() const
 
 bool LoRaDemodGUI::deserialize(const QByteArray& data)
 {
+    resetLoRaStatus();
+
     if (m_settings.deserialize(data))
     {
         displaySettings();
@@ -110,10 +112,29 @@ bool LoRaDemodGUI::handleMessage(const Message& message)
     {
         const LoRaDemod::MsgReportDecodeBytes& msg = (LoRaDemod::MsgReportDecodeBytes&) message;
         QByteArray bytes = msg.getBytes();
-        ui->hexText->setText(bytes.toHex());
         ui->syncWord->setText((tr("%1").arg(msg.getSyncWord(), 2, 16)));
         ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
         ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
+
+        if (m_settings.m_hasHeader)
+        {
+            ui->fecParity->setValue(msg.getNbParityBits());
+            ui->fecParityText->setText(tr("%1").arg(msg.getNbParityBits()));
+            ui->crc->setChecked(msg.getHasCRC());
+            ui->packetLength->setValue(msg.getPacketSize());
+            ui->packetLengthText->setText(tr("%1").arg(msg.getPacketSize()));
+            displayBytes(bytes, msg.getPacketSize(), msg.getHasCRC());
+        }
+        else
+        {
+            displayBytes(bytes, m_settings.m_packetLength, m_settings.m_hasCRC);
+        }
+
+        if (m_settings.m_codingScheme == LoRaDemodSettings::CodingLoRa) {
+            displayLoRaStatus(msg.getHeaderParityStatus(), msg.getHeaderCRCStatus(), msg.getPayloadParityStatus(), msg.getPayloadCRCStatus());
+        }
+
+        return true;
     }
     else if (LoRaDemod::MsgReportDecodeString::match(message))
     {
@@ -122,6 +143,8 @@ bool LoRaDemodGUI::handleMessage(const Message& message)
         ui->syncWord->setText((tr("%1").arg(msg.getSyncWord(), 2, 16)));
         ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
         ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
+
+        return true;
     }
     else
     {
@@ -195,9 +218,21 @@ void LoRaDemodGUI::on_deBits_valueChanged(int value)
     applySettings();
 }
 
+void LoRaDemodGUI::on_preambleChirps_valueChanged(int value)
+{
+    m_settings.m_preambleChirps = value;
+    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
+    applySettings();
+}
+
 void LoRaDemodGUI::on_scheme_currentIndexChanged(int index)
 {
     m_settings.m_codingScheme = (LoRaDemodSettings::CodingScheme) index;
+
+    if (m_settings.m_codingScheme != LoRaDemodSettings::CodingLoRa) {
+        resetLoRaStatus();
+    }
+
     applySettings();
 }
 
@@ -224,6 +259,53 @@ void LoRaDemodGUI::on_messageLength_valueChanged(int value)
 {
     m_settings.m_nbSymbolsMax = value;
     ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
+    applySettings();
+}
+
+void LoRaDemodGUI::on_header_stateChanged(int state)
+{
+    m_settings.m_hasHeader = (state == Qt::Checked);
+
+    if (!m_settings.m_hasHeader) // put back values from settings
+    {
+        ui->fecParity->blockSignals(true);
+        ui->crc->blockSignals(true);
+        ui->fecParity->setValue(m_settings.m_nbParityBits);
+        ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+        ui->crc->setChecked(m_settings.m_hasCRC);
+        ui->fecParity->blockSignals(false);
+        ui->crc->blockSignals(false);
+    }
+
+    ui->fecParity->setEnabled(state != Qt::Checked);
+    ui->crc->setEnabled(state != Qt::Checked);
+
+    applySettings();
+}
+
+void LoRaDemodGUI::on_fecParity_valueChanged(int value)
+{
+    m_settings.m_nbParityBits = value;
+    ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+    applySettings();
+}
+
+void LoRaDemodGUI::on_crc_stateChanged(int state)
+{
+    m_settings.m_hasCRC = (state == Qt::Checked);
+    applySettings();
+}
+
+void LoRaDemodGUI::on_errorCheck_stateChanged(int state)
+{
+    m_settings.m_errorCheck = (state == Qt::Checked);
+    applySettings();
+}
+
+void LoRaDemodGUI::on_packetLength_valueChanged(int value)
+{
+    m_settings.m_packetLength = value;
+    ui->packetLengthText->setText(tr("%1").arg(m_settings.m_packetLength));
     applySettings();
 }
 
@@ -284,6 +366,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     setBandwidths();
 	displaySettings();
+    resetLoRaStatus();
 	applySettings(true);
 }
 
@@ -325,6 +408,10 @@ void LoRaDemodGUI::displaySettings()
 	ui->glSpectrum->setSampleRate(thisBW);
 	ui->glSpectrum->setCenterFrequency(thisBW/2);
 
+    ui->fecParity->setEnabled(!m_settings.m_hasHeader);
+    ui->crc->setEnabled(!m_settings.m_hasHeader);
+    ui->packetLength->setEnabled(!m_settings.m_hasHeader);
+
     blockApplySettings(true);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->BWText->setText(QString("%1 Hz").arg(thisBW));
@@ -333,11 +420,25 @@ void LoRaDemodGUI::displaySettings()
     ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
     ui->deBits->setValue(m_settings.m_deBits);
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
+    ui->preambleChirps->setValue(m_settings.m_preambleChirps);
+    ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));
     ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
     ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
     ui->messageLength->setValue(m_settings.m_nbSymbolsMax);
-    ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
+    ui->header->setChecked(m_settings.m_hasHeader);
+    ui->errorCheck->setChecked(m_settings.m_errorCheck);
+
+    if (!m_settings.m_hasHeader)
+    {
+        ui->fecParity->setValue(m_settings.m_nbParityBits);
+        ui->fecParityText->setText(tr("%1").arg(m_settings.m_nbParityBits));
+        ui->crc->setChecked(m_settings.m_hasCRC);
+        ui->packetLength->setValue(m_settings.m_packetLength);
+        ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
+    }
+
     displaySquelch();
+
     blockApplySettings(false);
 }
 
@@ -350,6 +451,45 @@ void LoRaDemodGUI::displaySquelch()
     } else {
         ui->eomSquelchText->setText(tr("%1").arg(m_settings.m_eomSquelchTenths / 10.0, 0, 'f', 1));
     }
+}
+
+void LoRaDemodGUI::displayLoRaStatus(bool headerParityStatus, bool headerCRCStatus, bool payloadParityStatus, bool payloadCRCStatus)
+{
+    if (m_settings.m_hasHeader && headerParityStatus) {
+        ui->headerHammingStatus->setStyleSheet("QLabel { background-color : green; }");
+    } else if (m_settings.m_hasHeader && !headerParityStatus) {
+        ui->headerHammingStatus->setStyleSheet("QLabel { background-color : red; }");
+    } else {
+        ui->headerHammingStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    }
+
+    if (m_settings.m_hasHeader && headerCRCStatus) {
+        ui->headerCRCStatus->setStyleSheet("QLabel { background-color : green; }");
+    } else if (m_settings.m_hasHeader && !headerCRCStatus) {
+        ui->headerCRCStatus->setStyleSheet("QLabel { background-color : red; }");
+    } else {
+        ui->headerCRCStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    }
+
+    if (payloadParityStatus) {
+        ui->payloadFECStatus->setStyleSheet("QLabel { background-color : green; }");
+    } else {
+        ui->payloadFECStatus->setStyleSheet("QLabel { background-color : red; }");
+    }
+
+    if (payloadCRCStatus) {
+        ui->payloadCRCStatus->setStyleSheet("QLabel { background-color : green; }");
+    } else {
+        ui->payloadCRCStatus->setStyleSheet("QLabel { background-color : red; }");
+    }
+}
+
+void LoRaDemodGUI::resetLoRaStatus()
+{
+    ui->headerHammingStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    ui->headerCRCStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    ui->payloadFECStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+    ui->payloadCRCStatus->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 }
 
 void LoRaDemodGUI::setBandwidths()
@@ -382,6 +522,49 @@ void LoRaDemodGUI::addText(const QString& text)
     ui->messageText->verticalScrollBar()->setValue(ui->messageText->verticalScrollBar()->maximum());
 }
 
+void LoRaDemodGUI::displayBytes(const QByteArray& bytes, unsigned int packetLength, bool hasCRC)
+{
+    QByteArray bytesCopy(bytes);
+    bytesCopy.truncate(packetLength);
+    bytesCopy.replace('\0', " ");
+    QString str = QString(bytesCopy.toStdString().c_str());
+    str.chop(hasCRC ? 2 : 0);
+    addText(str);
+
+    QDateTime dt = QDateTime::currentDateTime();
+    QString dateStr = dt.toString("=== HH:mm:ss ===");
+    QTextCursor cursor = ui->hexText->textCursor();
+    cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
+
+    if (!ui->hexText->document()->isEmpty()) {
+        cursor.insertText("\n");
+    }
+
+    cursor.insertText(tr("%1\n").arg(dateStr));
+    QByteArray::const_iterator it = bytes.begin();
+    unsigned int i = 0;
+
+    for (;it != bytes.end(); ++it, i++)
+    {
+        unsigned char b = *it;
+
+        if (i%16 == 0) {
+            cursor.insertText(tr("%1|").arg(i, 3, 10, QChar('0')));
+        }
+
+        cursor.insertText(tr("%1").arg(b, 2, 16));
+
+        if (i%16 == 15) {
+            cursor.insertText("\n");
+        } else if (i%4 == 3) {
+            cursor.insertText("|");
+        } else {
+            cursor.insertText(" ");
+        }
+    }
+
+    ui->hexText->verticalScrollBar()->setValue(ui->hexText->verticalScrollBar()->maximum());
+}
 
 void LoRaDemodGUI::tick()
 {
@@ -400,3 +583,4 @@ void LoRaDemodGUI::tick()
         }
     }
 }
+

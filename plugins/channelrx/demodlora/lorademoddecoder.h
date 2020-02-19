@@ -28,27 +28,37 @@ public:
     ~LoRaDemodDecoder();
 
     void setCodingScheme(LoRaDemodSettings::CodingScheme codingScheme) { m_codingScheme = codingScheme; }
-    void setNbSymbolBits(unsigned int symbolBits) { m_nbSymbolBits = symbolBits; }
-    void decodeSymbols(const std::vector<unsigned int>& symbols, QString& str);      //!< For ASCII and TTY
-    void decodeSymbols(const std::vector<unsigned int>& symbols, QByteArray& bytes); //!< For raw bytes (original LoRa)
+    void setNbSymbolBits(unsigned int spreadFactor, unsigned int deBits);
+    void setLoRaParityBits(unsigned int parityBits) { m_nbParityBits = parityBits; }
+    void setLoRaHasHeader(bool hasHeader) { m_hasHeader = hasHeader; }
+    void setLoRaHasCRC(bool hasCRC) { m_hasCRC = hasCRC; }
+    void setLoRaPacketLength(unsigned int packetLength) { m_packetLength = packetLength; }
+    void setErrorCheck(bool errorCheck) { m_errorCheck = errorCheck; }
+    void decodeSymbols(const std::vector<unsigned short>& symbols, QString& str);      //!< For ASCII and TTY
+    void decodeSymbols(const std::vector<unsigned short>& symbols, QByteArray& bytes); //!< For raw bytes (original LoRa)
+    unsigned int getNbParityBits() const { return m_nbParityBits; }
+    unsigned int getPacketLength() const { return m_packetLength; }
+    bool getHasCRC() const { return m_hasCRC; }
+    bool getHeaderParityStatus() const { return m_headerParityStatus; }
+    bool getHeaderCRCStatus() const { return m_headerCRCStatus; }
+    bool getPayloadParityStatus() const { return m_payloadParityStatus; }
+    bool getPayloadCRCStatus() const { return m_payloadCRCStatus; }
 
 private:
-    enum TTYState
-    {
-        TTYLetters,
-        TTYFigures
-    };
-
-    void decodeSymbolsASCII(const std::vector<unsigned int>& symbols, QString& str);
-    void decodeSymbolsTTY(const std::vector<unsigned int>& symbols, QString& str);
-
     LoRaDemodSettings::CodingScheme m_codingScheme;
+    unsigned int m_spreadFactor;
+    unsigned int m_deBits;
     unsigned int m_nbSymbolBits;
-
-    static const char ttyLetters[32];
-    static const char ttyFigures[32];
-    static const char lettersTag = 0x1f;
-    static const char figuresTag = 0x1b;
+    // LoRa attributes
+    unsigned int m_nbParityBits; //!< 1 to 4 Hamming FEC bits for 4 payload bits
+    bool m_hasCRC;
+    bool m_hasHeader;
+    unsigned int m_packetLength;
+    bool m_errorCheck;
+    bool m_headerParityStatus;
+    bool m_headerCRCStatus;
+    bool m_payloadParityStatus;
+    bool m_payloadCRCStatus;
 };
 
 #endif // INCLUDE_LORADEMODDECODER_H

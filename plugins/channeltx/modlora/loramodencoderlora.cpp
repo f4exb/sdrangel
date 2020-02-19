@@ -40,7 +40,7 @@ void LoRaModEncoderLoRa::encodeBytes(
     }
 
     unsigned int payloadSize = bytes.size();
-    const unsigned int numCodewords = roundUp(bytes.size()*2 + (hasHeader ? 5 : 0), nbSymbolBits);
+    const unsigned int numCodewords = roundUp(bytes.size()*2 + (hasHeader ? headerCodewords : 0), nbSymbolBits);
     unsigned int cOfs = 0;
 	unsigned int dOfs = 0;
 
@@ -65,7 +65,7 @@ void LoRaModEncoderLoRa::encodeBytes(
 
     // fill nbSymbolBits codewords with 8 bit codewords using payload data (ecode and whiten)
     encodeFec(codewords, 4, cOfs, dOfs, reinterpret_cast<const uint8_t*>(bytes.data()), nbSymbolBits - headerSize);
-    Sx1272ComputeWhitening(codewords.data() + headerSize, nbSymbolBits - headerSize, 0, 4);
+    Sx1272ComputeWhitening(codewords.data() + headerSize, nbSymbolBits - headerSize, 0, headerParityBits);
 
     // encode and whiten the rest of the payload with 4 + nbParityBits bits codewords
     if (numCodewords > nbSymbolBits)
@@ -75,15 +75,15 @@ void LoRaModEncoderLoRa::encodeBytes(
         Sx1272ComputeWhitening(codewords.data() + cOfs2, numCodewords - nbSymbolBits, nbSymbolBits - headerSize, nbParityBits);
     }
 
-    const unsigned int numSymbols = 8 + (numCodewords / nbSymbolBits - 1) * (4 + nbParityBits);	 // header is always coded with 8 bits
+    const unsigned int numSymbols = headerSymbols + (numCodewords / nbSymbolBits - 1) * (4 + nbParityBits);	 // header is always coded with 8 bits
 
     // interleave the codewords into symbols
     symbols.clear();
     symbols.resize(numSymbols);
-    diagonalInterleaveSx(codewords.data(), nbSymbolBits, symbols.data(), nbSymbolBits, 4);
+    diagonalInterleaveSx(codewords.data(), nbSymbolBits, symbols.data(), nbSymbolBits, headerParityBits);
 
     if (numCodewords > nbSymbolBits) {
-        diagonalInterleaveSx(codewords.data() + nbSymbolBits, numCodewords - nbSymbolBits, symbols.data() + 8, nbSymbolBits, nbParityBits);
+        diagonalInterleaveSx(codewords.data() + nbSymbolBits, numCodewords - nbSymbolBits, symbols.data() + headerSymbols, nbSymbolBits, nbParityBits);
     }
 
     // gray decode

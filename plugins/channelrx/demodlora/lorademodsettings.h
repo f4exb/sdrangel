@@ -43,6 +43,12 @@ struct LoRaDemodSettings
     bool m_decodeActive;
     int m_eomSquelchTenths; //!< Squelch factor to trigger end of message (/10)
     int m_nbSymbolsMax;     //!< Maximum number of symbols in a payload
+    int m_preambleChirps;   //!< Number of expected preamble chirps
+    int m_nbParityBits;     //!< Hamming parity bits (LoRa)
+    int m_packetLength;     //!< Payload packet length in bytes or characters (LoRa)
+    bool m_hasCRC;          //!< Payload has CRC (LoRa)
+    bool m_hasHeader;       //!< Header present before actual payload (LoRa)
+    bool m_errorCheck;      //!< Error check failure cancels decoding (LoRa)
     uint32_t m_rgbColor;
     QString m_title;
 

@@ -16,98 +16,75 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "lorademoddecoder.h"
-
-const char LoRaDemodDecoder::ttyLetters[32] = {
-    '\0',   'E',    '\n',   'A',    ' ',    'S',    'I',    'U',
-    '\r',   'D',    'R',    'J',    'N',    'F',    'C',    'K',
-    'T',    'Z',    'L',    'W',    'H',    'Y',    'P',    'Q',
-    'O',    'B',    'G',    ' ',    'M',    'X',    'V',    ' '
-};
-
-const char LoRaDemodDecoder::ttyFigures[32] = { // U.S. standard
-    '\0',   '3',    '\n',   '-',    ' ',    '\a',   '8',    '7',
-    '\r',   '$',    '4',    '\'',   ',',    '!',    ':',    '(',
-    '5',    '"',    ')',    '2',    '#',    '6',    '0',    '1',
-    '9',    '?',    '&',    ' ',    '.',    '/',    ';',    ' '
-};
-
+#include "lorademoddecodertty.h"
+#include "lorademoddecoderascii.h"
+#include "lorademoddecoderlora.h"
 
 LoRaDemodDecoder::LoRaDemodDecoder() :
     m_codingScheme(LoRaDemodSettings::CodingTTY),
-    m_nbSymbolBits(5)
+    m_nbSymbolBits(5),
+    m_nbParityBits(1),
+    m_hasCRC(true),
+    m_hasHeader(true)
 {}
 
 LoRaDemodDecoder::~LoRaDemodDecoder()
 {}
 
-void LoRaDemodDecoder::decodeSymbols(const std::vector<unsigned int>& symbols, QString& str)
+void LoRaDemodDecoder::setNbSymbolBits(unsigned int spreadFactor, unsigned int deBits)
+{
+    m_spreadFactor = spreadFactor;
+
+    if (deBits >= spreadFactor) {
+        m_deBits = m_spreadFactor - 1;
+    } else {
+        m_deBits = deBits;
+    }
+
+    m_nbSymbolBits = m_spreadFactor - m_deBits;
+}
+
+void LoRaDemodDecoder::decodeSymbols(const std::vector<unsigned short>& symbols, QString& str)
 {
     switch(m_codingScheme)
     {
     case LoRaDemodSettings::CodingTTY:
-        decodeSymbolsTTY(symbols, str);
+        if (m_nbSymbolBits == 5) {
+            LoRaDemodDecoderTTY::decodeSymbols(symbols, str);
+        }
         break;
     case LoRaDemodSettings::CodingASCII:
-        decodeSymbolsASCII(symbols, str);
+        if (m_nbSymbolBits == 5) {
+            LoRaDemodDecoderASCII::decodeSymbols(symbols, str);
+        }
+        break;
+    default:
         break;
     }
 }
 
-void LoRaDemodDecoder::decodeSymbols(const std::vector<unsigned int>& symbols, QByteArray& bytes)
+void LoRaDemodDecoder::decodeSymbols(const std::vector<unsigned short>& symbols, QByteArray& bytes)
 {
-
-}
-
-void LoRaDemodDecoder::decodeSymbolsASCII(const std::vector<unsigned int>& symbols, QString& str)
-{
-    if (m_nbSymbolBits != 7) {
-        return;
-    }
-
-    std::vector<unsigned int>::const_iterator it = symbols.begin();
-    QByteArray bytes;
-
-    for (; it != symbols.end(); ++it) {
-        bytes.push_back(*it & 0x7F);
-    }
-
-    str = QString(bytes.toStdString().c_str());
-}
-
-void LoRaDemodDecoder::decodeSymbolsTTY(const std::vector<unsigned int>& symbols, QString& str)
-{
-    if (m_nbSymbolBits != 5) {
-        return;
-    }
-
-    std::vector<unsigned int>::const_iterator it = symbols.begin();
-    QByteArray bytes;
-    TTYState ttyState = TTYLetters;
-
-    for (; it != symbols.end(); ++it)
+    switch(m_codingScheme)
     {
-        char ttyChar = *it & 0x1F;
-
-        if (ttyChar == lettersTag) {
-            ttyState = TTYLetters;
-        } else if (ttyChar == figuresTag) {
-            ttyState = TTYFigures;
-        }
-        else
+    case LoRaDemodSettings::CodingLoRa:
+        if (m_nbSymbolBits >= 5)
         {
-            char asciiChar = -1;
-
-            if (ttyState == TTYLetters) {
-                asciiChar = ttyLetters[ttyChar];
-            } else if (ttyState == TTYFigures) {
-                asciiChar = ttyFigures[ttyChar];
-            }
-
-            if (asciiChar >= 0) {
-                bytes.push_back(asciiChar);
-            }
+            LoRaDemodDecoderLoRa::decodeBytes(
+                bytes,
+                symbols,
+                m_nbSymbolBits,
+                m_hasHeader,
+                m_hasCRC,
+                m_nbParityBits,
+                m_packetLength,
+                m_errorCheck,
+                m_headerParityStatus,
+                m_headerCRCStatus,
+                m_payloadParityStatus,
+                m_payloadCRCStatus
+            );
         }
+        break;
     }
-
-    str = QString(bytes.toStdString().c_str());
 }

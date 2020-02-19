@@ -46,6 +46,10 @@ private:
         const unsigned int codewordCount
     );
 
+    static const unsigned int headerParityBits = 4;
+    static const unsigned int headerSymbols = 8;
+    static const unsigned int headerCodewords = 5;
+
     /***********************************************************************
      * Round functions
      **********************************************************************/

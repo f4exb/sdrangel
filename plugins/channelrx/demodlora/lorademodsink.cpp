@@ -159,7 +159,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 m_fftInterpolation
             ) / m_fftInterpolation;
 
-            if (m_magsqQueue.size() > m_requiredPreambleChirps + 1) {
+            if (m_magsqQueue.size() > m_settings.m_preambleChirps) {
                 m_magsqQueue.pop();
             }
 
@@ -260,6 +260,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 if (m_chirpCount < 3) // too early
                 {
                     m_state = LoRaStateReset;
+                    qDebug("LoRaDemodSink::processSample: SFD search: signal drop is too early");
                 }
                 else
                 {
@@ -288,8 +289,9 @@ void LoRaDemodSink::processSample(const Complex& ci)
                     m_state = LoRaStateSkipSFD; //LoRaStateSlideSFD;
                 }
             }
-            else if (m_chirpCount > m_maxSFDSearchChirps) // SFD missed start over
+            else if (m_chirpCount > (m_settings.m_preambleChirps - m_requiredPreambleChirps + 2)) // SFD missed start over
             {
+                qDebug("LoRaDemodSink::processSample: SFD search: number of possible chirps exceeded");
                 m_state = LoRaStateReset;
             }
             else
@@ -339,7 +341,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
             m_fftCounter = 0;
             double magsq;
 
-            unsigned int symbol = evalSymbol(
+            unsigned short symbol = evalSymbol(
                 argmax(
                     m_fft->out(),
                     m_fftInterpolation,

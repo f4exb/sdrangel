@@ -59,11 +59,17 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_Spread_valueChanged(int value);
     void on_deBits_valueChanged(int value);
+    void on_preambleChirps_valueChanged(int value);
 	void on_scheme_currentIndexChanged(int index);
 	void on_mute_toggled(bool checked);
 	void on_clear_clicked(bool checked);
     void on_eomSquelch_valueChanged(int value);
     void on_messageLength_valueChanged(int value);
+	void on_header_stateChanged(int state);
+	void on_fecParity_valueChanged(int value);
+	void on_crc_stateChanged(int state);
+	void on_errorCheck_stateChanged(int state);
+	void on_packetLength_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void channelMarkerHighlightedByCursor();
 	void handleInputMessages();
@@ -92,6 +98,9 @@ private:
     void displaySquelch();
     void setBandwidths();
 	void addText(const QString& text);
+	void displayBytes(const QByteArray& bytes, unsigned int packetLength, bool hasCRC);
+    void displayLoRaStatus(bool headerParityStatus, bool headerCRCStatus, bool payloadParityStatus, bool payloadCRCStatus);
+    void resetLoRaStatus();
 };
 
 #endif // INCLUDE_LoRaDEMODGUI_H

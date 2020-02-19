@@ -27,12 +27,12 @@ namespace LoRaDemodMsg
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const std::vector<unsigned int>& getSymbols() const { return m_symbols; }
+        const std::vector<unsigned short>& getSymbols() const { return m_symbols; }
         unsigned int getSyncWord() const { return m_syncWord; }
         float getSingalDb() const { return m_signalDb; }
         float getNoiseDb() const { return m_noiseDb; }
 
-        void pushBackSymbol(unsigned int symbol) {
+        void pushBackSymbol(unsigned short symbol) {
             m_symbols.push_back(symbol);
         }
         void popSymbol() {
@@ -51,12 +51,12 @@ namespace LoRaDemodMsg
         static MsgDecodeSymbols* create() {
             return new MsgDecodeSymbols();
         }
-        static MsgDecodeSymbols* create(const std::vector<unsigned int> symbols) {
+        static MsgDecodeSymbols* create(const std::vector<unsigned short> symbols) {
             return new MsgDecodeSymbols(symbols);
         }
 
     private:
-        std::vector<unsigned int> m_symbols;
+        std::vector<unsigned short> m_symbols;
         unsigned int m_syncWord;
         float m_signalDb;
         float m_noiseDb;
@@ -67,7 +67,7 @@ namespace LoRaDemodMsg
             m_signalDb(0.0),
             m_noiseDb(0.0)
         {}
-        MsgDecodeSymbols(const std::vector<unsigned int> symbols) : //!< create a message with symbols copy
+        MsgDecodeSymbols(const std::vector<unsigned short> symbols) : //!< create a message with symbols copy
             Message(),
             m_syncWord(0),
             m_signalDb(0.0),

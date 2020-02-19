@@ -65,6 +65,13 @@ public:
         unsigned int getSyncWord() const { return m_syncWord; }
         float getSingalDb() const { return m_signalDb; }
         float getNoiseDb() const { return m_noiseDb; }
+        unsigned int getPacketSize() const { return m_packetSize; }
+        unsigned int getNbParityBits() const { return m_nbParityBits; }
+        bool getHasCRC() const { return m_hasCRC; }
+        bool getHeaderParityStatus() const { return m_headerParityStatus; }
+        bool getHeaderCRCStatus() const { return m_headerCRCStatus; }
+        bool getPayloadParityStatus() const { return m_payloadParityStatus; }
+        bool getPayloadCRCStatus() const { return m_payloadCRCStatus; }
 
         static MsgReportDecodeBytes* create(const QByteArray& bytes) {
             return new MsgReportDecodeBytes(bytes);
@@ -78,19 +85,54 @@ public:
         void setNoiseDb(float db) {
             m_noiseDb = db;
         }
+        void setPacketSize(unsigned int packetSize) {
+            m_packetSize = packetSize;
+        }
+        void setNbParityBits(unsigned int nbParityBits) {
+            m_nbParityBits = nbParityBits;
+        }
+        void setHasCRC(bool hasCRC) {
+            m_hasCRC = hasCRC;
+        }
+        void setHeaderParityStatus(bool headerParityStatus) {
+            m_headerParityStatus = headerParityStatus;
+        }
+        void setHeaderCRCStatus(bool headerCRCStatus) {
+            m_headerCRCStatus = headerCRCStatus;
+        }
+        void setPayloadParityStatus(bool payloadParityStatus) {
+            m_payloadParityStatus = payloadParityStatus;
+        }
+        void setPayloadCRCStatus(bool payloadCRCStatus) {
+            m_payloadCRCStatus = payloadCRCStatus;
+        }
 
     private:
         QByteArray m_bytes;
         unsigned int m_syncWord;
         float m_signalDb;
         float m_noiseDb;
+        unsigned int m_packetSize;
+        unsigned int m_nbParityBits;
+        bool m_hasCRC;
+        bool m_headerParityStatus;
+        bool m_headerCRCStatus;
+        bool m_payloadParityStatus;
+        bool m_payloadCRCStatus;
 
         MsgReportDecodeBytes(const QByteArray& bytes) :
             Message(),
             m_bytes(bytes),
             m_syncWord(0),
             m_signalDb(0.0),
-            m_noiseDb(0.0)
+            m_noiseDb(0.0),
+            m_packetSize(0),
+            m_nbParityBits(0),
+            m_hasCRC(false),
+            m_headerParityStatus(false),
+            m_headerCRCStatus(false),
+            m_payloadParityStatus(false),
+            m_payloadCRCStatus(false)
         { }
     };
 

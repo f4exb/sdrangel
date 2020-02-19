@@ -116,6 +116,13 @@ bool LoRaDemod::handleMessage(const Message& cmd)
                 msgToGUI->setSyncWord(msg.getSyncWord());
                 msgToGUI->setSignalDb(msg.getSingalDb());
                 msgToGUI->setNoiseDb(msg.getNoiseDb());
+                msgToGUI->setPacketSize(m_decoder.getPacketLength());
+                msgToGUI->setNbParityBits(m_decoder.getNbParityBits());
+                msgToGUI->setHasCRC(m_decoder.getHasCRC());
+                msgToGUI->setHeaderParityStatus(m_decoder.getHeaderParityStatus());
+                msgToGUI->setHeaderCRCStatus(m_decoder.getHeaderCRCStatus());
+                msgToGUI->setPayloadParityStatus(m_decoder.getPayloadParityStatus());
+                msgToGUI->setPayloadCRCStatus(m_decoder.getPayloadCRCStatus());
                 getMessageQueueToGUI()->push(msgToGUI);
             }
         }
@@ -187,17 +194,44 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_bandwidthIndex: " << settings.m_bandwidthIndex
             << " m_spreadFactor: " << settings.m_spreadFactor
+            << " m_deBits: " << settings.m_deBits
+            << " m_codingScheme: " << settings.m_codingScheme
+            << " m_hasHeader: " << settings.m_hasHeader
+            << " m_hasCRC: " << settings.m_hasCRC
+            << " m_nbParityBits: " << settings.m_nbParityBits
+            << " m_packetLength: " << settings.m_packetLength
+            << " m_errorCheck: " << settings.m_errorCheck
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits) || force) {
-         m_decoder.setNbSymbolBits(settings.m_spreadFactor - settings.m_deBits);
+         m_decoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
     }
 
     if ((settings.m_codingScheme != m_settings.m_codingScheme) || force) {
         m_decoder.setCodingScheme(settings.m_codingScheme);
+    }
+
+    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force) {
+        m_decoder.setLoRaHasHeader(settings.m_hasHeader);
+    }
+
+    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force) {
+        m_decoder.setLoRaHasCRC(settings.m_hasCRC);
+    }
+
+    if ((settings.m_nbParityBits != m_settings.m_nbParityBits) || force) {
+        m_decoder.setLoRaParityBits(settings.m_nbParityBits);
+    }
+
+    if ((settings.m_packetLength != m_settings.m_packetLength) || force) {
+        m_decoder.setLoRaPacketLength(settings.m_packetLength);
+    }
+
+    if ((settings.m_errorCheck != m_settings.m_errorCheck) || force) {
+        m_decoder.setErrorCheck(settings.m_errorCheck);
     }
 
     LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband *msg = LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband::create(settings, force);
