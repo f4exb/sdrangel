@@ -458,6 +458,59 @@ unsigned int LoRaDemodSink::argmax(
     return imax;
 }
 
+unsigned int LoRaDemodSink::argmaxSpreaded(
+    const Complex *fftBins,
+    unsigned int fftMult,
+    unsigned int fftLength,
+    double& magsqMax,
+    double& magsqNoise,
+    Complex *specBuffer,
+    unsigned int specDecim)
+{
+    magsqMax = 0.0;
+    magsqNoise = 0.0;
+    unsigned int imax = 0;
+    double magSum = 0.0;
+    double magSymbol = 0.0;
+    unsigned int spread = fftMult * (1<<m_settings.m_deBits);
+    unsigned int istart = fftMult*fftLength - spread/2 + 1;
+
+    for (unsigned int i2 = istart; i2 < istart + fftMult*fftLength; i2++)
+    {
+        unsigned int i = i2 % (fftMult*fftLength);
+        double magsq = std::norm(fftBins[i]);
+        magSymbol += magsq;
+
+        if (i % spread == spread/2) // boundary (inclusive)
+        {
+            if (magSymbol > magsqMax)
+            {
+                magsqMax = magSymbol;
+                imax = i;
+            }
+
+            magsqNoise += magSymbol;
+            magSymbol = 0.0;
+        }
+
+        if (specBuffer)
+        {
+            magSum += magsq;
+
+            if (i % specDecim == specDecim - 1)
+            {
+                specBuffer[i/specDecim] = Complex(std::polar(magSum, 0.0));
+                magSum = 0.0;
+            }
+        }
+    }
+
+    magsqNoise -= magsqMax;
+    magsqNoise /= fftLength;
+
+    return imax / spread;
+}
+
 void LoRaDemodSink::decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation)
 {
     for (unsigned int i = 0; i < size; i++)

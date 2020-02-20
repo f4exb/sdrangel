@@ -120,6 +120,15 @@ private:
         Complex *specBuffer,
         unsigned int specDecim
         );
+    unsigned int argmaxSpreaded( //!< count energy in adjacent bins for same symbol (needs DE bits > 0)
+        const Complex *fftBins,
+        unsigned int fftMult,
+        unsigned int fftLength,
+        double& magsqMax,
+        double& magsqNoise,
+        Complex *specBuffer,
+        unsigned int specDecim
+        );
     void decimateSpectrum(Complex *in, Complex *out, unsigned int size, unsigned int decimation);
     int toSigned(int u, int intSize);
     unsigned int evalSymbol(unsigned int rawSymbol);
