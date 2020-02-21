@@ -108,7 +108,7 @@ bool SSBMod::handleMessage(const Message& cmd)
     if (MsgConfigureSSBMod::match(cmd))
     {
         MsgConfigureSSBMod& cfg = (MsgConfigureSSBMod&) cmd;
-        qDebug() << "NFMMod::handleMessage: MsgConfigureSSBMod";
+        qDebug() << "SSBMod::handleMessage: MsgConfigureSSBMod";
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
@@ -163,7 +163,7 @@ bool SSBMod::handleMessage(const Message& cmd)
         // Forward to the source
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
-        qDebug() << "NFMMod::handleMessage: DSPSignalNotification";
+        qDebug() << "SSBMod::handleMessage: DSPSignalNotification";
         m_basebandSource->getInputMessageQueue()->push(rep);
 
         return true;
