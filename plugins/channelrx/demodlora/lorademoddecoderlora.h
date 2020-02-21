@@ -26,6 +26,14 @@
 class LoRaDemodDecoderLoRa
 {
 public:
+    enum ParityStatus
+    {
+        ParityUndefined,
+        ParityError,
+        ParityCorrected,
+        ParityOK
+    };
+
     static void decodeBytes(
         QByteArray& bytes,
         const std::vector<unsigned short>& inSymbols,
@@ -34,14 +42,34 @@ public:
         bool& hasCRC,
         unsigned int& nbParityBits,
         unsigned int& packetLength,
-        bool errorCheck,
-        bool& headerParityStatus,
+        bool& earlyEOM,
+        int& headerParityStatus,
         bool& headerCRCStatus,
-        bool& payloadParityStatus,
+        int& payloadParityStatus,
         bool& payloadCRCStatus
     );
 
+    static void getCodingMetrics(
+        unsigned int nbSymbolBits,
+        unsigned int nbParityBits,
+        unsigned int packetLength,
+        bool hasHeader,
+        bool hasCRC,
+        unsigned int& numSymbols,
+        unsigned int& numCodewords
+    );
+
 private:
+    static void decodeHeader(
+        const std::vector<unsigned short>& inSymbols,
+        unsigned int nbSymbolBits,
+        bool& hasCRC,
+        unsigned int& nbParityBits,
+        unsigned int& packetLength,
+        int& headerParityStatus,
+        bool& headerCRCStatus
+    );
+
     static const unsigned int headerParityBits = 4;
     static const unsigned int headerSymbols = 8;
     static const unsigned int headerCodewords = 5;
@@ -240,6 +268,8 @@ private:
      * Decode 7 bits into a 4 bit word with single bit correction.
      * Non standard version used in sx1272.
      * Set error to true when a parity error was detected
+     * Non correctable errors are indistinguishable from single or no errors
+     * therefore no 'bad' variable is proposed
      **********************************************************************/
     static inline unsigned char decodeHamming74sx(const unsigned char b, bool &error)
     {
@@ -270,7 +300,7 @@ private:
             case 0x0:
             case 0x1:
             case 0x2:
-            case 0x4: return b & 0xF;
+            case 0x4: break;
         }
 
         return b & 0xf;

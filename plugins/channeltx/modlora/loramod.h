@@ -70,19 +70,18 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        unsigned int getPayloadTimeMs() const { return m_timeMs; }
-        static MsgReportPayloadTime* create(unsigned int timeMs) {
+        float getPayloadTimeMs() const { return m_timeMs; }
+        static MsgReportPayloadTime* create(float timeMs) {
             return new MsgReportPayloadTime(timeMs);
         }
 
     private:
-        unsigned int m_timeMs; //!< time in milliseconds
+        float m_timeMs; //!< time in milliseconds
 
-        MsgReportPayloadTime(unsigned int timeMs) :
+        MsgReportPayloadTime(float timeMs) :
             Message(),
             m_timeMs(timeMs)
         {}
-
     };
 
     //=================================================================

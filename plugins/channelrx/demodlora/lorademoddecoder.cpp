@@ -78,11 +78,20 @@ void LoRaDemodDecoder::decodeSymbols(const std::vector<unsigned short>& symbols,
                 m_hasCRC,
                 m_nbParityBits,
                 m_packetLength,
-                m_errorCheck,
+                m_earlyEOM,
                 m_headerParityStatus,
                 m_headerCRCStatus,
                 m_payloadParityStatus,
                 m_payloadCRCStatus
+            );
+            LoRaDemodDecoderLoRa::getCodingMetrics(
+                m_nbSymbolBits,
+                m_nbParityBits,
+                m_packetLength,
+                m_hasHeader,
+                m_hasCRC,
+                m_nbSymbols,
+                m_nbCodewords
             );
         }
         break;

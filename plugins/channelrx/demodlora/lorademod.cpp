@@ -119,6 +119,9 @@ bool LoRaDemod::handleMessage(const Message& cmd)
                 msgToGUI->setPacketSize(m_decoder.getPacketLength());
                 msgToGUI->setNbParityBits(m_decoder.getNbParityBits());
                 msgToGUI->setHasCRC(m_decoder.getHasCRC());
+                msgToGUI->setNbSymbols(m_decoder.getNbSymbols());
+                msgToGUI->setNbCodewords(m_decoder.getNbCodewords());
+                msgToGUI->setEarlyEOM(m_decoder.getEarlyEOM());
                 msgToGUI->setHeaderParityStatus(m_decoder.getHeaderParityStatus());
                 msgToGUI->setHeaderCRCStatus(m_decoder.getHeaderCRCStatus());
                 msgToGUI->setPayloadParityStatus(m_decoder.getPayloadParityStatus());
@@ -200,7 +203,6 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
             << " m_hasCRC: " << settings.m_hasCRC
             << " m_nbParityBits: " << settings.m_nbParityBits
             << " m_packetLength: " << settings.m_packetLength
-            << " m_errorCheck: " << settings.m_errorCheck
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;
@@ -228,10 +230,6 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
 
     if ((settings.m_packetLength != m_settings.m_packetLength) || force) {
         m_decoder.setLoRaPacketLength(settings.m_packetLength);
-    }
-
-    if ((settings.m_errorCheck != m_settings.m_errorCheck) || force) {
-        m_decoder.setErrorCheck(settings.m_errorCheck);
     }
 
     LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband *msg = LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband::create(settings, force);

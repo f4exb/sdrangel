@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>380</width>
-    <height>376</height>
+    <width>392</width>
+    <height>373</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>380</width>
+    <width>392</width>
     <height>180</height>
    </size>
   </property>
@@ -28,9 +28,9 @@
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>1</x>
      <y>20</y>
-     <width>370</width>
+     <width>390</width>
      <height>125</height>
     </rect>
    </property>
@@ -74,7 +74,7 @@
      <rect>
       <x>40</x>
       <y>50</y>
-      <width>221</width>
+      <width>251</width>
       <height>16</height>
      </rect>
     </property>
@@ -102,7 +102,7 @@
      <rect>
       <x>40</x>
       <y>70</y>
-      <width>61</width>
+      <width>81</width>
       <height>16</height>
      </rect>
     </property>
@@ -131,7 +131,7 @@
    <widget class="QLabel" name="spreadText">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>130</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -153,7 +153,7 @@
    <widget class="QLabel" name="bwText">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>300</x>
       <y>50</y>
       <width>80</width>
       <height>16</height>
@@ -175,7 +175,7 @@
    <widget class="QLabel" name="deBitsLabel">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>180</x>
       <y>70</y>
       <width>32</width>
       <height>16</height>
@@ -188,7 +188,7 @@
    <widget class="QLabel" name="deBitsText">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>280</x>
       <y>70</y>
       <width>10</width>
       <height>16</height>
@@ -210,9 +210,9 @@
    <widget class="QSlider" name="deBits">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>210</x>
       <y>70</y>
-      <width>41</width>
+      <width>61</width>
       <height>16</height>
      </rect>
     </property>
@@ -243,7 +243,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>351</width>
+      <width>371</width>
       <height>26</height>
      </rect>
     </property>
@@ -496,7 +496,7 @@
    <widget class="QLabel" name="syncLabel">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>310</x>
       <y>70</y>
       <width>32</width>
       <height>16</height>
@@ -509,7 +509,7 @@
    <widget class="QLineEdit" name="syncWord">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>350</x>
       <y>68</y>
       <width>30</width>
       <height>20</height>
@@ -532,9 +532,9 @@
   <widget class="QWidget" name="messageContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>1</x>
      <y>150</y>
-     <width>370</width>
+     <width>390</width>
      <height>221</height>
     </rect>
    </property>
@@ -576,7 +576,7 @@
    <widget class="QLabel" name="urCallLabel">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>210</x>
       <y>40</y>
       <width>50</width>
       <height>16</height>
@@ -591,7 +591,7 @@
      <rect>
       <x>90</x>
       <y>40</y>
-      <width>90</width>
+      <width>110</width>
       <height>16</height>
      </rect>
     </property>
@@ -611,9 +611,9 @@
    <widget class="QLineEdit" name="urCall">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>269</x>
       <y>40</y>
-      <width>90</width>
+      <width>110</width>
       <height>16</height>
      </rect>
     </property>
@@ -648,7 +648,7 @@
      <rect>
       <x>90</x>
       <y>60</y>
-      <width>90</width>
+      <width>110</width>
       <height>16</height>
      </rect>
     </property>
@@ -668,7 +668,7 @@
    <widget class="QLabel" name="reportLabel">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>210</x>
       <y>60</y>
       <width>50</width>
       <height>16</height>
@@ -681,9 +681,9 @@
    <widget class="QLineEdit" name="report">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>270</x>
       <y>60</y>
-      <width>90</width>
+      <width>110</width>
       <height>16</height>
      </rect>
     </property>
@@ -703,7 +703,7 @@
    <widget class="QPushButton" name="generateMessages">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>340</x>
       <y>80</y>
       <width>40</width>
       <height>20</height>
@@ -807,7 +807,7 @@
      <rect>
       <x>40</x>
       <y>110</y>
-      <width>311</width>
+      <width>341</width>
       <height>60</height>
      </rect>
     </property>
@@ -830,7 +830,7 @@
      <rect>
       <x>40</x>
       <y>175</y>
-      <width>311</width>
+      <width>341</width>
       <height>20</height>
      </rect>
     </property>
@@ -881,7 +881,7 @@
    <widget class="QLabel" name="repeatLabel">
     <property name="geometry">
      <rect>
-      <x>200</x>
+      <x>210</x>
       <y>82</y>
       <width>51</width>
       <height>16</height>
@@ -894,7 +894,7 @@
    <widget class="QDial" name="repeatMessage">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>260</x>
       <y>78</y>
       <width>24</width>
       <height>24</height>
@@ -916,7 +916,7 @@
    <widget class="QLabel" name="repeatText">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>290</x>
       <y>82</y>
       <width>22</width>
       <height>16</height>
@@ -929,7 +929,7 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="msgTimeLabel">
+   <widget class="QLabel" name="timesLabel">
     <property name="geometry">
      <rect>
       <x>2</x>
@@ -942,12 +942,12 @@
      <string>Time</string>
     </property>
    </widget>
-   <widget class="QLabel" name="msgTimeText">
+   <widget class="QLabel" name="timePayloadText">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>200</x>
       <y>200</y>
-      <width>65</width>
+      <width>60</width>
       <height>16</height>
      </rect>
     </property>
@@ -961,28 +961,28 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="msgTotalTimeLabel">
+   <widget class="QLabel" name="timeTotalLabel">
     <property name="geometry">
      <rect>
-      <x>119</x>
+      <x>290</x>
       <y>200</y>
-      <width>35</width>
+      <width>25</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Total</string>
+     <string>Ttot</string>
     </property>
     <property name="alignment">
-     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="msgTotalTimeText">
+   <widget class="QLabel" name="timeTotalText">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>320</x>
       <y>200</y>
-      <width>65</width>
+      <width>60</width>
       <height>16</height>
      </rect>
     </property>
@@ -1037,7 +1037,7 @@
    <widget class="QCheckBox" name="header">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>290</x>
       <y>10</y>
       <width>50</width>
       <height>16</height>
@@ -1053,7 +1053,7 @@
    <widget class="QCheckBox" name="crc">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>230</x>
       <y>10</y>
       <width>50</width>
       <height>16</height>
@@ -1069,7 +1069,7 @@
    <widget class="QLabel" name="fecParityLabel">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>150</x>
       <y>10</y>
       <width>32</width>
       <height>16</height>
@@ -1082,7 +1082,7 @@
    <widget class="QDial" name="fecParity">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>180</x>
       <y>5</y>
       <width>24</width>
       <height>24</height>
@@ -1104,7 +1104,7 @@
    <widget class="QLabel" name="fecParityText">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>205</x>
       <y>10</y>
       <width>12</width>
       <height>16</height>
@@ -1112,6 +1112,57 @@
     </property>
     <property name="text">
      <string>0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="timePayloadLabel">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>200</y>
+      <width>35</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tpay</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="timeSymbolText">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>200</y>
+      <width>70</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Payload time in milliseconds</string>
+    </property>
+    <property name="text">
+     <string>0000.0 ms</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="timeSymbolLabel">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>200</y>
+      <width>30</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tsym</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

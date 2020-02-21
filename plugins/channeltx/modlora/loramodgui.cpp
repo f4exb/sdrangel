@@ -108,10 +108,11 @@ bool LoRaModGUI::handleMessage(const Message& message)
     else if (LoRaMod::MsgReportPayloadTime::match(message))
     {
         const LoRaMod::MsgReportPayloadTime& rpt = (LoRaMod::MsgReportPayloadTime&) message;
-        unsigned int fourthsMs = ((1<<m_settings.m_spreadFactor)*250) / LoRaModSettings::bandwidths[m_settings.m_bandwidthIndex];
-        unsigned int controlMs = (4*(m_settings.m_preambleChirps)+8+9)*fourthsMs; // preamble + sync word + SFD
-        ui->msgTimeText->setText(tr("%1 ms").arg(rpt.getPayloadTimeMs()));
-        ui->msgTotalTimeText->setText(tr("%1 ms").arg(rpt.getPayloadTimeMs()+controlMs));
+        float fourthsMs = ((1<<m_settings.m_spreadFactor) * 250.0) / LoRaModSettings::bandwidths[m_settings.m_bandwidthIndex];
+        float controlMs = (4*m_settings.m_preambleChirps + 8 + 9) * fourthsMs; // preamble + sync word + SFD
+        ui->timePayloadText->setText(tr("%1 ms").arg(QString::number(rpt.getPayloadTimeMs(), 'f', 0)));
+        ui->timeTotalText->setText(tr("%1 ms").arg(QString::number(rpt.getPayloadTimeMs() + controlMs, 'f', 0)));
+        ui->timeSymbolText->setText(tr("%1 ms").arg(QString::number(4.0*fourthsMs, 'f', 1)));
         return true;
     }
     else if (DSPSignalNotification::match(message))

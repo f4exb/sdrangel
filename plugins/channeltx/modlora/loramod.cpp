@@ -262,7 +262,7 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
         if (getMessageQueueToGUI())
         {
             MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(
-                (symbols.size()*(1<<settings.m_spreadFactor)*1000) / LoRaModSettings::bandwidths[settings.m_bandwidthIndex]
+                (symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / LoRaModSettings::bandwidths[settings.m_bandwidthIndex]
             );
             getMessageQueueToGUI()->push(rpt);
         }

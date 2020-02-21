@@ -48,7 +48,6 @@ struct LoRaDemodSettings
     int m_packetLength;     //!< Payload packet length in bytes or characters (LoRa)
     bool m_hasCRC;          //!< Payload has CRC (LoRa)
     bool m_hasHeader;       //!< Header present before actual payload (LoRa)
-    bool m_errorCheck;      //!< Error check failure cancels decoding (LoRa)
     uint32_t m_rgbColor;
     QString m_title;
 

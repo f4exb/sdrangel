@@ -19,6 +19,83 @@
 
 #include "lorademoddecoderlora.h"
 
+void LoRaDemodDecoderLoRa::decodeHeader(
+        const std::vector<unsigned short>& inSymbols,
+        unsigned int nbSymbolBits,
+        bool& hasCRC,
+        unsigned int& nbParityBits,
+        unsigned int& packetLength,
+        int& headerParityStatus,
+        bool& headerCRCStatus
+)
+{
+    // with header (H: header 8-bit codeword P: payload-8 bit codeword):
+    // nbSymbolBits = 5 |H|H|H|H|H|      codewords => 8 symbols (always) : static headerSymbols = 8
+    // nbSymbolBits = 7 |H|H|H|H|H|P|P|
+    // without header (P: payload 8-bit codeword):
+    // nbSymbolBits = 5 |P|P|P|P|P|      codewords => 8 symbols (always)
+    // nbSymbolBits = 7 |P|P|P|P|P|P|P|
+    // Actual header is always represented with 5 8-bit codewords : static headerCodewords = 5
+    // These 8-bit codewords are encoded with Hamming(4,8) FEC : static headerParityBits = 4
+
+    const unsigned int numSymbols = roundUp(inSymbols.size(), 4 + nbParityBits);
+    const unsigned int numCodewords = (numSymbols / (4 + nbParityBits))*nbSymbolBits;
+
+    std::vector<uint16_t> symbols(headerSymbols);
+    std::copy(inSymbols.begin(), inSymbols.begin() + headerSymbols, symbols.begin());
+
+    //gray encode
+    for (auto &sym : symbols) {
+        sym = binaryToGray16(sym);
+    }
+
+    std::vector<uint8_t> codewords(nbSymbolBits);
+
+    // Header symbols de-interleave thus headerSymbols (8) symbols into nbSymbolBits (5..12) codewords using header FEC (4/8)
+    diagonalDeinterleaveSx(symbols.data(), headerSymbols, codewords.data(), nbSymbolBits, headerParityBits);
+
+    // whitening does not apply to the header codewords
+    Sx1272ComputeWhiteningLfsr(codewords.data() + headerCodewords, nbSymbolBits - headerCodewords, 0, headerParityBits);
+
+    bool error = false;
+    bool bad = false;
+    uint8_t bytes[3];
+
+    // decode actual header inside 8-bit codewords header with 4/8 FEC (5 first codewords)
+    bytes[0] = decodeHamming84sx(codewords[1], error, bad) & 0xf;
+    bytes[0] |= decodeHamming84sx(codewords[0], error, bad) << 4;	// length
+
+    bytes[1] = decodeHamming84sx(codewords[2], error, bad) & 0xf;	// coding rate and crc enable
+
+    bytes[2] = decodeHamming84sx(codewords[4], error, bad) & 0xf;
+    bytes[2] |= decodeHamming84sx(codewords[3], error, bad) << 4;	// checksum
+
+    bytes[2] ^= headerChecksum(bytes);
+
+    if (bad)
+    {
+        headerParityStatus = (int) ParityError;
+    }
+    else
+    {
+        if (error) {
+            headerParityStatus = (int) ParityCorrected;
+        } else {
+            headerParityStatus = (int) ParityOK;
+        }
+
+        if (bytes[2] != 0) {
+            headerCRCStatus = false;
+        } else {
+            headerCRCStatus = true;
+        }
+    }
+
+    hasCRC = (bytes[1] & 1) != 0;
+    nbParityBits = (bytes[1] >> 1) & 0x7;
+    packetLength = bytes[0];
+}
+
 void LoRaDemodDecoderLoRa::decodeBytes(
         QByteArray& inBytes,
         const std::vector<unsigned short>& inSymbols,
@@ -27,14 +104,44 @@ void LoRaDemodDecoderLoRa::decodeBytes(
         bool& hasCRC,
         unsigned int& nbParityBits,
         unsigned int& packetLength,
-        bool errorCheck,
-        bool& headerParityStatus,
+        bool& earlyEOM,
+        int& headerParityStatus,
         bool& headerCRCStatus,
-        bool& payloadParityStatus,
+        int& payloadParityStatus,
         bool& payloadCRCStatus
 )
 {
-    if (inSymbols.size() < 8) { // need at least a header
+    // need at least a header (8 symbols of 8 bit codewords) whether an actual header is sent or not
+    if (inSymbols.size() < headerSymbols)
+    {
+        qDebug("LoRaDemodDecoderLoRa::decodeBytes: need at least %u symbols for header", headerSymbols);
+        earlyEOM = true;
+        return;
+    }
+    else
+    {
+        earlyEOM = false;
+    }
+
+    if (hasHeader)
+    {
+        decodeHeader(
+            inSymbols,
+            nbSymbolBits,
+            hasCRC,
+            nbParityBits,
+            packetLength,
+            headerParityStatus,
+            headerCRCStatus
+        );
+    }
+
+    qDebug("LoRaDemodDecoderLoRa::decodeBytes: crc: %s nbParityBits: %u packetLength: %u",
+        hasCRC ? "on": "off", nbParityBits, packetLength);
+
+    if (nbParityBits > 4)
+    {
+        qDebug("LoRaDemodDecoderLoRa::decodeBytes: invalid parity bits in header: %u", nbParityBits);
         return;
     }
 
@@ -54,20 +161,24 @@ void LoRaDemodDecoderLoRa::decodeBytes(
     unsigned int sOfs = 0;
     unsigned int cOfs = 0;
 
-    if (nbParityBits != 4)
-    {
-        diagonalDeinterleaveSx(symbols.data(), 8, codewords.data(), nbSymbolBits, 4);
+    // the first headerSymbols (8 symbols) are coded with 4/8 FEC (thus 8 bit codewords) whether an actual header is present or not
+    // this corresponds to nbSymbolBits codewords (therefore LoRa imposes nbSymbolBits >= headerCodewords (5 codewords) this is controlled externally)
 
-        if (hasHeader) {
+    if (nbParityBits != 4) // different FEC between header symbols and the rest of the packet
+    {
+        // Header symbols de-interleave thus headerSymbols (8) symbols into nbSymbolBits (5..12) codewords using header FEC (4/8)
+        diagonalDeinterleaveSx(symbols.data(), headerSymbols, codewords.data(), nbSymbolBits, headerParityBits);
+
+        if (hasHeader) { // whitening does not apply to the header codewords
             Sx1272ComputeWhiteningLfsr(codewords.data() + headerCodewords, nbSymbolBits - headerCodewords, 0, headerParityBits);
         } else {
             Sx1272ComputeWhiteningLfsr(codewords.data(), nbSymbolBits, 0, headerParityBits);
         }
 
-        cOfs += nbSymbolBits;
-        sOfs += headerSymbols;
+        cOfs += nbSymbolBits;   // nbSymbolBits codewords in header
+        sOfs += headerSymbols;  // headerSymbols symbols in header
 
-        if (numSymbols - sOfs > 0)
+        if (numSymbols - sOfs > 0) // remaining payload symbols after header symbols using their own FEC (4/5..4/7)
         {
             diagonalDeinterleaveSx(symbols.data() + sOfs, numSymbols - sOfs, codewords.data() + cOfs, nbSymbolBits, nbParityBits);
 
@@ -78,100 +189,47 @@ void LoRaDemodDecoderLoRa::decodeBytes(
             }
         }
     }
-    else
+    else // uniform 4/8 FEC for all the packet
     {
+        // De-interleave the whole packet thus numSymbols into nbSymbolBits (5..12) codewords using packet FEC (4/8)
         diagonalDeinterleaveSx(symbols.data(), numSymbols, codewords.data(), nbSymbolBits, nbParityBits);
 
-        if (hasHeader) {
+        if (hasHeader) { // whitening does not apply to the header codewords
             Sx1272ComputeWhiteningLfsr(codewords.data() + headerCodewords, numCodewords - headerCodewords, 0, nbParityBits);
         } else {
             Sx1272ComputeWhiteningLfsr(codewords.data(), numCodewords, 0, nbParityBits);
         }
     }
 
-    bool error = false;
-    bool bad = false;
+    // Now we have nbSymbolBits 8-bit codewords (4/8 FEC) possibly containing the actual header followed by the rest of payload codewords with their own FEC (4/5..4/8)
+
     std::vector<uint8_t> bytes((codewords.size()+1) / 2);
     unsigned int dOfs = 0;
     cOfs = 0;
 
-    unsigned int dataLength = 0;
-    bool hasCRCInt;                 // payload has CRC indicator internal (explicit or implicit)
-    unsigned int nbParityBitsInt;   // number of parity bits internal (explicit or implicit)
-    unsigned int packetLengthInt;   // packet length internal (explicit or implicit)
+    unsigned int dataLength = packetLength + 3 + (hasCRC ? 2 : 0);  // include  header and CRC
 
     if (hasHeader)
     {
-        bytes[0] = decodeHamming84sx(codewords[1], error, bad) & 0xf;
-        bytes[0] |= decodeHamming84sx(codewords[0], error, bad) << 4;	// length
-
-        bytes[1] = decodeHamming84sx(codewords[2], error, bad) & 0xf;	// coding rate and crc enable
-
-        bytes[2] = decodeHamming84sx(codewords[4], error, bad) & 0xf;
-        bytes[2] |= decodeHamming84sx(codewords[3], error, bad) << 4;	// checksum
-
-        bytes[2] ^= headerChecksum(bytes.data());
-
-        if (error)
-        {
-            qDebug("LoRaDemodDecoderLoRa::decodeBytes: header Hamming error");
-            headerParityStatus = false;
-
-            if (errorCheck) {
-                return;
-            }
-        }
-        else
-        {
-            headerParityStatus = true;
-
-            if (bytes[2] != 0)
-            {
-                headerCRCStatus = false;
-                qDebug("LoRaDemodDecoderLoRa::decodeBytes: header CRC error");
-
-                if (errorCheck) {
-                    return;
-                }
-            }
-            else
-            {
-                headerCRCStatus = true;
-            }
-        }
-
-        hasCRCInt = (bytes[1] & 1) != 0;
-        nbParityBitsInt = (bytes[1] >> 1) & 0x7;
-
-        if (nbParityBitsInt > 4) {
-            return;
-        }
-
-        packetLengthInt = bytes[0];
-        //dataLength = packetLengthInt + 3 + (hasCRCInt ? 2 : 0);  // include  header and crc
-        dataLength = packetLengthInt + 5;
-
         cOfs = headerCodewords;
         dOfs = 6;
     }
     else
     {
-        hasCRCInt = hasCRC;
-        nbParityBitsInt = nbParityBits;
-        packetLengthInt = packetLength;
         cOfs = 0;
         dOfs = 0;
-
-        if (hasCRCInt) {
-            dataLength = packetLengthInt + 2;
-        } else {
-            dataLength = packetLengthInt;
-        }
     }
 
-    if (dataLength > bytes.size()) {
+    if (dataLength > bytes.size())
+    {
+        qDebug("LoRaDemodDecoderLoRa::decodeBytes: not enough data %lu vs %u", bytes.size(), dataLength);
+        earlyEOM = true;
         return;
     }
+
+    // decode the rest of the payload inside 8-bit codewords header with 4/8 FEC
+    bool error = false;
+    bool bad = false;
 
     for (; cOfs < nbSymbolBits; cOfs++, dOfs++)
     {
@@ -182,15 +240,15 @@ void LoRaDemodDecoderLoRa::decodeBytes(
         }
     }
 
-    if (dOfs % 2 == 1)
+    if (dOfs % 2 == 1) // decode the start of the payload codewords with their own FEC when not on an even boundary
     {
-        if (nbParityBitsInt == 1) {
+        if (nbParityBits == 1) {
             bytes[dOfs/2] |= checkParity54(codewords[cOfs++], error) << 4;
-        } else if (nbParityBitsInt == 2) {
+        } else if (nbParityBits == 2) {
             bytes[dOfs/2] |= checkParity64(codewords[cOfs++], error) << 4;
-        } else if (nbParityBitsInt == 3){
+        } else if (nbParityBits == 3){
             bytes[dOfs/2] |= decodeHamming74sx(codewords[cOfs++], error) << 4;
-        } else if (nbParityBitsInt == 4){
+        } else if (nbParityBits == 4){
             bytes[dOfs/2] |= decodeHamming84sx(codewords[cOfs++], error, bad) << 4;
         } else {
             bytes[dOfs/2] |= codewords[cOfs++] << 4;
@@ -201,23 +259,9 @@ void LoRaDemodDecoderLoRa::decodeBytes(
 
     dOfs /= 2;
 
-    if (error)
-    {
-        qDebug("LoRaDemodDecoderLoRa::decodeBytes: Hamming decode (1) error");
-        payloadParityStatus = false;
+    // decode the rest of the payload codewords with their own FEC
 
-        if (errorCheck) {
-            return;
-        }
-    }
-    else
-    {
-        payloadParityStatus = true;
-    }
-
-    //decode each codeword as 2 bytes with correction
-
-    if (nbParityBitsInt == 1)
+    if (nbParityBits == 1)
     {
         for (unsigned int i = dOfs; i < dataLength; i++)
         {
@@ -225,7 +269,7 @@ void LoRaDemodDecoderLoRa::decodeBytes(
             bytes[i] |= checkParity54(codewords[cOfs++], error) << 4;
         }
     }
-    else if (nbParityBitsInt == 2)
+    else if (nbParityBits == 2)
     {
         for (unsigned int i = dOfs; i < dataLength; i++)
         {
@@ -233,7 +277,7 @@ void LoRaDemodDecoderLoRa::decodeBytes(
             bytes[i] |= checkParity64(codewords[cOfs++],error) << 4;
         }
     }
-    else if (nbParityBitsInt == 3)
+    else if (nbParityBits == 3)
     {
         for (unsigned int i = dOfs; i < dataLength; i++)
         {
@@ -241,7 +285,7 @@ void LoRaDemodDecoderLoRa::decodeBytes(
             bytes[i] |= decodeHamming74sx(codewords[cOfs++], error) << 4;
         }
     }
-    else if (nbParityBitsInt == 4)
+    else if (nbParityBits == 4)
     {
         for (unsigned int i = dOfs; i < dataLength; i++)
         {
@@ -258,73 +302,66 @@ void LoRaDemodDecoderLoRa::decodeBytes(
         }
     }
 
-    if (error)
-    {
-        qDebug("LoRaDemodDecoderLoRa::decodeBytes: Hamming decode (2) error");
-        payloadParityStatus = false;
-
-        if (errorCheck) {
-            return;
-        }
+    if (bad) {
+        payloadParityStatus = (int) ParityError;
+    } else if (error) {
+        payloadParityStatus = (int) ParityCorrected;
+    } else {
+        payloadParityStatus = (int) ParityOK;
     }
+
+    // finalization:
+    //   adjust offsets dpending on header and CRC presence
+    //   compute and verify payload CRC if present
 
     if (hasHeader)
     {
-        dOfs = 3;
-        dataLength -= 5;
+        dOfs = 3;        // skip header
+        dataLength -= 3; // remove header
 
-        if (hasCRCInt) // always compute crc if present
+        if (hasCRC) // always compute crc if present skipping the header
         {
-            uint16_t crc = sx1272DataChecksum(bytes.data() + dOfs, packetLengthInt - 2);
-            uint16_t packetCRC = bytes[dOfs + packetLengthInt - 2] | (bytes[dOfs + packetLengthInt - 1] << 8);
+            uint16_t crc = sx1272DataChecksum(bytes.data() + dOfs, packetLength);
+            uint16_t packetCRC = bytes[dOfs + packetLength] | (bytes[dOfs + packetLength + 1] << 8);
 
-            if (crc != packetCRC)
-            {
-                qDebug("LoRaDemodDecoderLoRa::decodeBytes: packet CRC error: calc: %x found: %x", crc, packetCRC);
+            if (crc != packetCRC) {
                 payloadCRCStatus = false;
-
-                if (errorCheck) {
-                    return;
-                }
-            }
-            else
-            {
+            } else {
                 payloadCRCStatus = true;
             }
-
         }
-
-        hasCRC = hasCRCInt;
-        nbParityBits = nbParityBitsInt;
-        packetLength = packetLengthInt;
     }
     else
     {
-        dOfs = 0;
+        dOfs = 0;  // no header to skip
 
-        if (hasCRCInt)
+        if (hasCRC)
         {
-            uint16_t crc = sx1272DataChecksum(bytes.data(), packetLengthInt - 2);
-            uint16_t packetCRC = bytes[packetLengthInt - 2] | (bytes[packetLengthInt - 1] << 8);
+            uint16_t crc = sx1272DataChecksum(bytes.data(), packetLength);
+            uint16_t packetCRC = bytes[packetLength] | (bytes[packetLength + 1] << 8);
 
-            if (crc != packetCRC)
-            {
-                qDebug("LoRaDemodDecoderLoRa::decodeBytes: packet CRC error: calc: %x found: %x", crc, packetCRC);
+            if (crc != packetCRC) {
                 payloadCRCStatus = false;
-
-                if (errorCheck) {
-                    return;
-                }
-            }
-            else
-            {
+            } else {
                 payloadCRCStatus = true;
             }
-
         }
     }
 
-    qDebug("LoRaDemodDecoderLoRa::decodeBytes: dataLength: %u packetLengthInt: %u", dataLength, packetLengthInt);
     inBytes.resize(dataLength);
     std::copy(bytes.data() + dOfs, bytes.data() + dOfs + dataLength, inBytes.data());
+}
+
+void LoRaDemodDecoderLoRa::getCodingMetrics(
+    unsigned int nbSymbolBits,
+    unsigned int nbParityBits,
+    unsigned int packetLength,
+    bool hasHeader,
+    bool hasCRC,
+    unsigned int& numSymbols,
+    unsigned int& numCodewords
+)
+{
+    numCodewords = roundUp((packetLength + (hasCRC ? 2 : 0))*2 + (hasHeader ? headerCodewords : 0), nbSymbolBits); // uses payload + CRC for encoding size
+    numSymbols = headerSymbols + (numCodewords / nbSymbolBits - 1) * (4 + nbParityBits); // header is always coded with 8 bits and yields exactly 8 symbols (headerSymbols)
 }

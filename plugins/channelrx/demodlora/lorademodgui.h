@@ -68,7 +68,6 @@ private slots:
 	void on_header_stateChanged(int state);
 	void on_fecParity_valueChanged(int value);
 	void on_crc_stateChanged(int state);
-	void on_errorCheck_stateChanged(int state);
 	void on_packetLength_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void channelMarkerHighlightedByCursor();
@@ -76,6 +75,14 @@ private slots:
 	void tick();
 
 private:
+	enum ParityStatus // matches LoRa decoder status
+	{
+		ParityUndefined,
+		ParityError,
+		ParityCorrected,
+		ParityOK
+	};
+
 	Ui::LoRaDemodGUI* ui;
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
@@ -97,9 +104,13 @@ private:
 	void displaySettings();
     void displaySquelch();
     void setBandwidths();
-	void addText(const QString& text);
-	void displayBytes(const QByteArray& bytes, unsigned int packetLength, bool hasCRC);
-    void displayLoRaStatus(bool headerParityStatus, bool headerCRCStatus, bool payloadParityStatus, bool payloadCRCStatus);
+    void showLoRaMessage(const Message& message);
+    void showTextMessage(const Message& message); //!< For TTY and ASCII
+	void displayText(const QString& header, const QString& text);
+	void displayBytes(const QString& header, const QByteArray& bytes);
+	void displayStatus(const QString& status);
+    void displayLoRaStatus(int headerParityStatus, bool headerCRCStatus, int payloadParityStatus, bool payloadCRCStatus);
+	QString getParityStr(int parityStatus);
     void resetLoRaStatus();
 };
 

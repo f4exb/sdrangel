@@ -39,8 +39,7 @@ void LoRaModEncoderLoRa::encodeBytes(
         return;
     }
 
-    unsigned int payloadSize = bytes.size();
-    const unsigned int numCodewords = roundUp(bytes.size()*2 + (hasHeader ? headerCodewords : 0), nbSymbolBits);
+    const unsigned int numCodewords = roundUp(bytes.size()*2 + (hasHeader ? headerCodewords : 0), nbSymbolBits); // uses payload + CRC for encoding size
     unsigned int cOfs = 0;
 	unsigned int dOfs = 0;
 
@@ -49,6 +48,7 @@ void LoRaModEncoderLoRa::encodeBytes(
     if (hasHeader)
     {
         std::vector<uint8_t> hdr(3);
+        unsigned int payloadSize = bytes.size() - (hasCRC ? 2 : 0); // actual payload size is without CRC
         hdr[0] = payloadSize % 256;
         hdr[1] = (hasCRC ? 1 : 0) | (nbParityBits << 1);
         hdr[2] = headerChecksum(hdr.data());
@@ -75,7 +75,8 @@ void LoRaModEncoderLoRa::encodeBytes(
         Sx1272ComputeWhitening(codewords.data() + cOfs2, numCodewords - nbSymbolBits, nbSymbolBits - headerSize, nbParityBits);
     }
 
-    const unsigned int numSymbols = headerSymbols + (numCodewords / nbSymbolBits - 1) * (4 + nbParityBits);	 // header is always coded with 8 bits
+    // header is always coded with 8 bits and yields exactly 8 symbols (headerSymbols)
+    const unsigned int numSymbols = headerSymbols + (numCodewords / nbSymbolBits - 1) * (4 + nbParityBits);
 
     // interleave the codewords into symbols
     symbols.clear();

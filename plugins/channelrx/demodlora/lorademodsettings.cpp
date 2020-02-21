@@ -50,7 +50,6 @@ void LoRaDemodSettings::resetToDefaults()
     m_nbParityBits = 1;
     m_hasCRC = true;
     m_hasHeader = true;
-    m_errorCheck = false;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "LoRa Demodulator";
 }
@@ -80,7 +79,6 @@ QByteArray LoRaDemodSettings::serialize() const
     s.writeS32(13, m_nbParityBits);
     s.writeBool(14, m_hasCRC);
     s.writeBool(15, m_hasHeader);
-    s.writeBool(16, m_errorCheck);
     s.writeS32(17, m_preambleChirps);
 
     return s.final();
@@ -126,7 +124,6 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
         d.readS32(13, &m_nbParityBits, 1);
         d.readBool(14, &m_hasCRC, true);
         d.readBool(15, &m_hasHeader, true);
-        d.readBool(16, &m_errorCheck, false);
         d.readS32(17, &m_preambleChirps, 8);
 
         return true;
