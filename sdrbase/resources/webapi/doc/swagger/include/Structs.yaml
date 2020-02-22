@@ -53,7 +53,7 @@ RangeFloat:
       format: float
     step:
       type: number
-      format: float  
+      format: float
 
 FrequencyRange:
   description: An frequency range with 64 bit support for min and max
@@ -74,7 +74,7 @@ NamedEnum:
       type: string
     value:
       type: integer
-      
+
 Complex:
   description: A complex number
   properties:
@@ -84,4 +84,3 @@ Complex:
     imag:
       type: number
       format: float
-      

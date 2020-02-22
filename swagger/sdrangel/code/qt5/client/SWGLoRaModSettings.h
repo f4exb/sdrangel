@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -54,11 +55,77 @@ public:
     qint32 getDeBits();
     void setDeBits(qint32 de_bits);
 
-    QString* getMessage();
-    void setMessage(QString* message);
+    qint32 getPreambleChirps();
+    void setPreambleChirps(qint32 preamble_chirps);
+
+    qint32 getQuietMillis();
+    void setQuietMillis(qint32 quiet_millis);
+
+    qint32 getSyncWord();
+    void setSyncWord(qint32 sync_word);
 
     qint32 getChannelMute();
     void setChannelMute(qint32 channel_mute);
+
+    qint32 getCodingScheme();
+    void setCodingScheme(qint32 coding_scheme);
+
+    qint32 getNbParityBits();
+    void setNbParityBits(qint32 nb_parity_bits);
+
+    qint32 getHasCrc();
+    void setHasCrc(qint32 has_crc);
+
+    qint32 getHasHeader();
+    void setHasHeader(qint32 has_header);
+
+    QString* getMyCall();
+    void setMyCall(QString* my_call);
+
+    QString* getUrCall();
+    void setUrCall(QString* ur_call);
+
+    QString* getMyLoc();
+    void setMyLoc(QString* my_loc);
+
+    QString* getMyRpt();
+    void setMyRpt(QString* my_rpt);
+
+    qint32 getMessageType();
+    void setMessageType(qint32 message_type);
+
+    QString* getBeaconMessage();
+    void setBeaconMessage(QString* beacon_message);
+
+    QString* getCqMessage();
+    void setCqMessage(QString* cq_message);
+
+    QString* getReplyMessage();
+    void setReplyMessage(QString* reply_message);
+
+    QString* getReportMessage();
+    void setReportMessage(QString* report_message);
+
+    QString* getReplyReportMessage();
+    void setReplyReportMessage(QString* reply_report_message);
+
+    QString* getRrrMessage();
+    void setRrrMessage(QString* rrr_message);
+
+    QString* getMessage73();
+    void setMessage73(QString* message73);
+
+    QString* getQsoTextMessage();
+    void setQsoTextMessage(QString* qso_text_message);
+
+    QString* getTextMessage();
+    void setTextMessage(QString* text_message);
+
+    QList<QString*>* getBytesMessage();
+    void setBytesMessage(QList<QString*>* bytes_message);
+
+    qint32 getMessageRepeat();
+    void setMessageRepeat(qint32 message_repeat);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -100,11 +167,77 @@ private:
     qint32 de_bits;
     bool m_de_bits_isSet;
 
-    QString* message;
-    bool m_message_isSet;
+    qint32 preamble_chirps;
+    bool m_preamble_chirps_isSet;
+
+    qint32 quiet_millis;
+    bool m_quiet_millis_isSet;
+
+    qint32 sync_word;
+    bool m_sync_word_isSet;
 
     qint32 channel_mute;
     bool m_channel_mute_isSet;
+
+    qint32 coding_scheme;
+    bool m_coding_scheme_isSet;
+
+    qint32 nb_parity_bits;
+    bool m_nb_parity_bits_isSet;
+
+    qint32 has_crc;
+    bool m_has_crc_isSet;
+
+    qint32 has_header;
+    bool m_has_header_isSet;
+
+    QString* my_call;
+    bool m_my_call_isSet;
+
+    QString* ur_call;
+    bool m_ur_call_isSet;
+
+    QString* my_loc;
+    bool m_my_loc_isSet;
+
+    QString* my_rpt;
+    bool m_my_rpt_isSet;
+
+    qint32 message_type;
+    bool m_message_type_isSet;
+
+    QString* beacon_message;
+    bool m_beacon_message_isSet;
+
+    QString* cq_message;
+    bool m_cq_message_isSet;
+
+    QString* reply_message;
+    bool m_reply_message_isSet;
+
+    QString* report_message;
+    bool m_report_message_isSet;
+
+    QString* reply_report_message;
+    bool m_reply_report_message_isSet;
+
+    QString* rrr_message;
+    bool m_rrr_message_isSet;
+
+    QString* message73;
+    bool m_message73_isSet;
+
+    QString* qso_text_message;
+    bool m_qso_text_message_isSet;
+
+    QString* text_message;
+    bool m_text_message_isSet;
+
+    QList<QString*>* bytes_message;
+    bool m_bytes_message_isSet;
+
+    qint32 message_repeat;
+    bool m_message_repeat_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

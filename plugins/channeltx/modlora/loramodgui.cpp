@@ -346,7 +346,8 @@ void LoRaModGUI::on_messageText_editingFinished()
 
 void LoRaModGUI::on_hexText_editingFinished()
 {
-
+    m_settings.m_bytesMessage = QByteArray::fromHex(ui->hexText->text().toLatin1());
+    applySettings();
 }
 
 void LoRaModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -485,6 +486,7 @@ void LoRaModGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
     displayStreamIndex();
     displayCurrentPayloadMessage();
+    displayBinaryMessage();
 
     ui->fecParity->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
     ui->crc->setEnabled(m_settings.m_codingScheme == LoRaModSettings::CodingLoRa);
@@ -555,6 +557,11 @@ void LoRaModGUI::displayCurrentPayloadMessage()
     }
 
     ui->messageText->blockSignals(false);
+}
+
+void LoRaModGUI::displayBinaryMessage()
+{
+    ui->hexText->setText(m_settings.m_bytesMessage.toHex());
 }
 
 void LoRaModGUI::setBandwidths()

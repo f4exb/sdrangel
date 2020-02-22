@@ -47,6 +47,15 @@ public:
     qint32 getChannelSampleRate();
     void setChannelSampleRate(qint32 channel_sample_rate);
 
+    float getSymbolTimeMs();
+    void setSymbolTimeMs(float symbol_time_ms);
+
+    float getPayloadTimeMs();
+    void setPayloadTimeMs(float payload_time_ms);
+
+    float getTotalTimeMs();
+    void setTotalTimeMs(float total_time_ms);
+
 
     virtual bool isSet() override;
 
@@ -56,6 +65,15 @@ private:
 
     qint32 channel_sample_rate;
     bool m_channel_sample_rate_isSet;
+
+    float symbol_time_ms;
+    bool m_symbol_time_ms_isSet;
+
+    float payload_time_ms;
+    bool m_payload_time_ms_isSet;
+
+    float total_time_ms;
+    bool m_total_time_ms_isSet;
 
 };
 

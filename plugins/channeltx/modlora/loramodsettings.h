@@ -46,8 +46,7 @@ struct LoRaModSettings
         Message73,
         MessageQSOText,
         MessageText,
-        MessageBytes,
-        MessageTest
+        MessageBytes
     };
 
     int m_inputFrequencyOffset;

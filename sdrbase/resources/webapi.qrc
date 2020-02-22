@@ -33,10 +33,10 @@
         <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/LimeRFE.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
-        <file>webapi/doc/swagger/include/LoRaMod.yaml</file>
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LocalInput.yaml</file>
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
+        <file>webapi/doc/swagger/include/LoRaMod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>

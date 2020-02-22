@@ -150,6 +150,7 @@ private:
     LoRaModBaseband* m_basebandSource;
     LoRaModEncoder m_encoder; // TODO: check if it needs to be on its own thread
     LoRaModSettings m_settings;
+    float m_currentPayloadTime;
 
     SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;

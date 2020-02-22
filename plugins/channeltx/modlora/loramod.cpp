@@ -48,6 +48,7 @@ const QString LoRaMod::m_channelId = "LoRaMod";
 LoRaMod::LoRaMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
 	m_deviceAPI(deviceAPI),
+    m_currentPayloadTime(0.0),
 	m_settingsMutex(QMutex::Recursive),
 	m_sampleRate(48000)
 {
@@ -154,26 +155,74 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
     if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
         reverseAPIKeys.append("channelMute");
     }
+    if ((settings.m_spreadFactor != m_settings.m_spreadFactor) || force) {
+        reverseAPIKeys.append("spreadFactor");
+    }
+    if ((settings.m_deBits != m_settings.m_deBits) || force) {
+        reverseAPIKeys.append("deBits");
+    }
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits) || force) {
         m_encoder.setNbSymbolBits(settings.m_spreadFactor, settings.m_deBits);
     }
 
-    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force) {
+    if ((settings.m_codingScheme != m_settings.m_codingScheme) || force)
+    {
+        reverseAPIKeys.append("codingScheme");
         m_encoder.setCodingScheme(settings.m_codingScheme);
     }
 
-    if ((settings.m_nbParityBits != m_settings.m_nbParityBits || force)) {
+    if ((settings.m_nbParityBits != m_settings.m_nbParityBits || force))
+    {
+        reverseAPIKeys.append("nbParityBits");
         m_encoder.setLoRaParityBits(settings.m_nbParityBits);
     }
 
-    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force) {
+    if ((settings.m_hasCRC != m_settings.m_hasCRC) || force)
+    {
+        reverseAPIKeys.append("hasCRC");
         m_encoder.setLoRaHasCRC(settings.m_hasCRC);
     }
 
-    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force) {
+    if ((settings.m_hasHeader != m_settings.m_hasHeader) || force)
+    {
+        reverseAPIKeys.append("hasHeader");
         m_encoder.setLoRaHasHeader(settings.m_hasHeader);
+    }
+
+    if ((settings.m_messageType != m_settings.m_messageType) || force) {
+        reverseAPIKeys.append("messageType");
+    }
+    if ((settings.m_beaconMessage != m_settings.m_beaconMessage) || force) {
+        reverseAPIKeys.append("beaconMessage");
+    }
+    if ((settings.m_cqMessage != m_settings.m_cqMessage) || force) {
+        reverseAPIKeys.append("cqMessage");
+    }
+    if ((settings.m_replyMessage != m_settings.m_replyMessage) || force) {
+        reverseAPIKeys.append("replyMessage");
+    }
+    if ((settings.m_reportMessage != m_settings.m_reportMessage) || force) {
+        reverseAPIKeys.append("reportMessage");
+    }
+    if ((settings.m_replyReportMessage != m_settings.m_replyReportMessage) || force) {
+        reverseAPIKeys.append("replyReportMessage");
+    }
+    if ((settings.m_rrrMessage != m_settings.m_rrrMessage) || force) {
+        reverseAPIKeys.append("rrrMessage");
+    }
+    if ((settings.m_73Message != m_settings.m_73Message) || force) {
+        reverseAPIKeys.append("73Message");
+    }
+    if ((settings.m_qsoTextMessage != m_settings.m_qsoTextMessage) || force) {
+        reverseAPIKeys.append("qsoTextMessage");
+    }
+    if ((settings.m_textMessage != m_settings.m_textMessage) || force) {
+        reverseAPIKeys.append("textMessage");
+    }
+    if ((settings.m_bytesMessage != m_settings.m_bytesMessage) || force) {
+        reverseAPIKeys.append("bytesMessage");
     }
 
     LoRaModBaseband::MsgConfigureLoRaModPayload *payloadMsg = nullptr;
@@ -258,12 +307,11 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
     if (payloadMsg)
     {
         m_basebandSource->getInputMessageQueue()->push(payloadMsg);
+        m_currentPayloadTime = (symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / LoRaModSettings::bandwidths[settings.m_bandwidthIndex];
 
         if (getMessageQueueToGUI())
         {
-            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(
-                (symbols.size()*(1<<settings.m_spreadFactor)*1000.0) / LoRaModSettings::bandwidths[settings.m_bandwidthIndex]
-            );
+            MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime);
             getMessageQueueToGUI()->push(rpt);
         }
     }
@@ -359,14 +407,104 @@ void LoRaMod::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("channelMute")) {
-        settings.m_channelMute = response.getLoRaModSettings()->getChannelMute() != 0;
-    }
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getLoRaModSettings()->getInputFrequencyOffset();
     }
     if (channelSettingsKeys.contains("bandwidthIndex")) {
         settings.m_bandwidthIndex = response.getLoRaModSettings()->getBandwidthIndex();
+    }
+    if (channelSettingsKeys.contains("spreadFactor")) {
+        settings.m_spreadFactor = response.getLoRaModSettings()->getSpreadFactor();
+    }
+    if (channelSettingsKeys.contains("deBits")) {
+        settings.m_deBits = response.getLoRaModSettings()->getDeBits();
+    }
+    if (channelSettingsKeys.contains("preambleChirps")) {
+        settings.m_preambleChirps = response.getLoRaModSettings()->getPreambleChirps();
+    }
+    if (channelSettingsKeys.contains("quietMillis")) {
+        settings.m_quietMillis = response.getLoRaModSettings()->getQuietMillis();
+    }
+    if (channelSettingsKeys.contains("syncWord")) {
+        settings.m_syncWord = response.getLoRaModSettings()->getSyncWord();
+    }
+    if (channelSettingsKeys.contains("syncWord")) {
+        settings.m_syncWord = response.getLoRaModSettings()->getSyncWord();
+    }
+    if (channelSettingsKeys.contains("channelMute")) {
+        settings.m_channelMute = response.getLoRaModSettings()->getChannelMute() != 0;
+    }
+    if (channelSettingsKeys.contains("codingScheme")) {
+        settings.m_codingScheme = (LoRaModSettings::CodingScheme) response.getLoRaModSettings()->getCodingScheme();
+    }
+    if (channelSettingsKeys.contains("nbParityBits")) {
+        settings.m_nbParityBits = response.getLoRaModSettings()->getNbParityBits();
+    }
+    if (channelSettingsKeys.contains("hasCRC")) {
+        settings.m_hasCRC = response.getLoRaModSettings()->getHasCrc() != 0;
+    }
+    if (channelSettingsKeys.contains("hasHeader")) {
+        settings.m_hasHeader = response.getLoRaModSettings()->getHasHeader() != 0;
+    }
+    if (channelSettingsKeys.contains("myCall")) {
+        settings.m_myCall = *response.getLoRaModSettings()->getMyCall();
+    }
+    if (channelSettingsKeys.contains("urCall")) {
+        settings.m_urCall = *response.getLoRaModSettings()->getUrCall();
+    }
+    if (channelSettingsKeys.contains("myLoc")) {
+        settings.m_myLoc = *response.getLoRaModSettings()->getMyLoc();
+    }
+    if (channelSettingsKeys.contains("myRpt")) {
+        settings.m_myRpt = *response.getLoRaModSettings()->getMyRpt();
+    }
+    if (channelSettingsKeys.contains("messageType")) {
+        settings.m_messageType = (LoRaModSettings::MessageType) response.getLoRaModSettings()->getMessageType();
+    }
+    if (channelSettingsKeys.contains("beaconMessage")) {
+        settings.m_beaconMessage = *response.getLoRaModSettings()->getBeaconMessage();
+    }
+    if (channelSettingsKeys.contains("cqMessage")) {
+        settings.m_cqMessage = *response.getLoRaModSettings()->getCqMessage();
+    }
+    if (channelSettingsKeys.contains("replyMessage")) {
+        settings.m_replyMessage = *response.getLoRaModSettings()->getReplyMessage();
+    }
+    if (channelSettingsKeys.contains("reportMessage")) {
+        settings.m_reportMessage = *response.getLoRaModSettings()->getReportMessage();
+    }
+    if (channelSettingsKeys.contains("replyReportMessage")) {
+        settings.m_replyReportMessage = *response.getLoRaModSettings()->getReplyReportMessage();
+    }
+    if (channelSettingsKeys.contains("rrrMessage")) {
+        settings.m_rrrMessage = *response.getLoRaModSettings()->getRrrMessage();
+    }
+    if (channelSettingsKeys.contains("message73")) {
+        settings.m_73Message = *response.getLoRaModSettings()->getMessage73();
+    }
+    if (channelSettingsKeys.contains("qsoTextMessage")) {
+        settings.m_qsoTextMessage = *response.getLoRaModSettings()->getQsoTextMessage();
+    }
+    if (channelSettingsKeys.contains("textMessage")) {
+        settings.m_textMessage = *response.getLoRaModSettings()->getTextMessage();
+    }
+    if (channelSettingsKeys.contains("bytesMessage"))
+    {
+        const QList<QString *> *bytesStr = response.getLoRaModSettings()->getBytesMessage();
+        settings.m_bytesMessage.clear();
+
+        for (QList<QString *>::const_iterator it = bytesStr->begin(); it != bytesStr->end(); ++it)
+        {
+            bool bStatus = false;
+            unsigned int byteInt = (**it).toUInt(&bStatus, 16);
+
+            if (bStatus) {
+                settings.m_bytesMessage.append((char) (byteInt % 256));
+            }
+        }
+    }
+    if (channelSettingsKeys.contains("messageRepeat")) {
+        settings.m_messageRepeat = response.getLoRaModSettings()->getMessageRepeat();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getLoRaModSettings()->getRgbColor();
@@ -407,9 +545,108 @@ int LoRaMod::webapiReportGet(
 
 void LoRaMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const LoRaModSettings& settings)
 {
-    response.getLoRaModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
     response.getLoRaModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getLoRaModSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
+    response.getLoRaModSettings()->setSpreadFactor(settings.m_spreadFactor);
+    response.getLoRaModSettings()->setDeBits(settings.m_deBits);
+    response.getLoRaModSettings()->setPreambleChirps(settings.m_preambleChirps);
+    response.getLoRaModSettings()->setQuietMillis(settings.m_quietMillis);
+    response.getLoRaModSettings()->setSyncWord(settings.m_syncWord);
+    response.getLoRaModSettings()->setChannelMute(settings.m_channelMute ? 1 : 0);
+    response.getLoRaModSettings()->setCodingScheme((int) settings.m_codingScheme);
+    response.getLoRaModSettings()->setNbParityBits(settings.m_nbParityBits);
+    response.getLoRaModSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
+    response.getLoRaModSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
+
+    if (response.getLoRaModSettings()->getMyCall()) {
+        *response.getLoRaModSettings()->getMyCall() = settings.m_myCall;
+    } else {
+        response.getLoRaModSettings()->setMyCall(new QString(settings.m_myCall));
+    }
+
+    if (response.getLoRaModSettings()->getUrCall()) {
+        *response.getLoRaModSettings()->getUrCall() = settings.m_urCall;
+    } else {
+        response.getLoRaModSettings()->setUrCall(new QString(settings.m_urCall));
+    }
+
+    if (response.getLoRaModSettings()->getMyLoc()) {
+        *response.getLoRaModSettings()->getMyLoc() = settings.m_myLoc;
+    } else {
+        response.getLoRaModSettings()->setMyLoc(new QString(settings.m_myLoc));
+    }
+
+    if (response.getLoRaModSettings()->getMyRpt()) {
+        *response.getLoRaModSettings()->getMyRpt() = settings.m_myRpt;
+    } else {
+        response.getLoRaModSettings()->setMyRpt(new QString(settings.m_myRpt));
+    }
+
+    response.getLoRaModSettings()->setMessageType((int) settings.m_messageType);
+
+    if (response.getLoRaModSettings()->getBeaconMessage()) {
+        *response.getLoRaModSettings()->getBeaconMessage() = settings.m_beaconMessage;
+    } else {
+        response.getLoRaModSettings()->setBeaconMessage(new QString(settings.m_beaconMessage));
+    }
+
+    if (response.getLoRaModSettings()->getCqMessage()) {
+        *response.getLoRaModSettings()->getCqMessage() = settings.m_cqMessage;
+    } else {
+        response.getLoRaModSettings()->setCqMessage(new QString(settings.m_cqMessage));
+    }
+
+    if (response.getLoRaModSettings()->getReplyMessage()) {
+        *response.getLoRaModSettings()->getReplyMessage() = settings.m_replyMessage;
+    } else {
+        response.getLoRaModSettings()->setReplyMessage(new QString(settings.m_replyMessage));
+    }
+
+    if (response.getLoRaModSettings()->getReportMessage()) {
+        *response.getLoRaModSettings()->getReportMessage() = settings.m_reportMessage;
+    } else {
+        response.getLoRaModSettings()->setReportMessage(new QString(settings.m_reportMessage));
+    }
+
+    if (response.getLoRaModSettings()->getReplyReportMessage()) {
+        *response.getLoRaModSettings()->getReplyReportMessage() = settings.m_replyReportMessage;
+    } else {
+        response.getLoRaModSettings()->setReplyReportMessage(new QString(settings.m_replyReportMessage));
+    }
+
+    if (response.getLoRaModSettings()->getRrrMessage()) {
+        *response.getLoRaModSettings()->getRrrMessage() = settings.m_rrrMessage;
+    } else {
+        response.getLoRaModSettings()->setRrrMessage(new QString(settings.m_rrrMessage));
+    }
+
+    if (response.getLoRaModSettings()->getMessage73()) {
+        *response.getLoRaModSettings()->getMessage73() = settings.m_73Message;
+    } else {
+        response.getLoRaModSettings()->setMessage73(new QString(settings.m_73Message));
+    }
+
+    if (response.getLoRaModSettings()->getQsoTextMessage()) {
+        *response.getLoRaModSettings()->getQsoTextMessage() = settings.m_qsoTextMessage;
+    } else {
+        response.getLoRaModSettings()->setQsoTextMessage(new QString(settings.m_qsoTextMessage));
+    }
+
+    if (response.getLoRaModSettings()->getTextMessage()) {
+        *response.getLoRaModSettings()->getTextMessage() = settings.m_textMessage;
+    } else {
+        response.getLoRaModSettings()->setTextMessage(new QString(settings.m_textMessage));
+    }
+
+    response.getLoRaModSettings()->setBytesMessage(new QList<QString *>);
+    QList<QString *> *bytesStr = response.getLoRaModSettings()->getBytesMessage();
+
+    for (QByteArray::const_iterator it = settings.m_bytesMessage.begin(); it != settings.m_bytesMessage.end(); ++it)
+    {
+        unsigned char b = *it;
+        bytesStr->push_back(new QString(tr("%1").arg(b, 2, 16, QChar('0'))));
+    }
+
     response.getLoRaModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getLoRaModSettings()->getTitle()) {
@@ -435,6 +672,11 @@ void LoRaMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 {
     response.getLoRaModReport()->setChannelPowerDb(CalcDb::dbPower(getMagSq()));
     response.getLoRaModReport()->setChannelSampleRate(m_basebandSource->getChannelSampleRate());
+    float fourthsMs = ((1<<m_settings.m_spreadFactor) * 250.0) / LoRaModSettings::bandwidths[m_settings.m_bandwidthIndex];
+    float controlMs = (4*m_settings.m_preambleChirps + 8 + 9) * fourthsMs; // preamble + sync word + SFD
+    response.getLoRaModReport()->setPayloadTimeMs(m_currentPayloadTime);
+    response.getLoRaModReport()->setTotalTimeMs(m_currentPayloadTime + controlMs);
+    response.getLoRaModReport()->setSymbolTimeMs(4.0 * fourthsMs);
 }
 
 void LoRaMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LoRaModSettings& settings, bool force)
@@ -443,21 +685,107 @@ void LoRaMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, con
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("NFMMod"));
+    swgChannelSettings->setChannelType(new QString("LoRaMod"));
     swgChannelSettings->setLoRaModSettings(new SWGSDRangel::SWGLoRaModSettings());
     SWGSDRangel::SWGLoRaModSettings *swgLoRaModSettings = swgChannelSettings->getLoRaModSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (channelSettingsKeys.contains("channelMute") || force) {
-        swgLoRaModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
-    }
     if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
         swgLoRaModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     }
     if (channelSettingsKeys.contains("bandwidthIndex") || force) {
         swgLoRaModSettings->setBandwidthIndex(settings.m_bandwidthIndex);
     }
+    if (channelSettingsKeys.contains("spreadFactor") || force) {
+        swgLoRaModSettings->setSpreadFactor(settings.m_spreadFactor);
+    }
+    if (channelSettingsKeys.contains("deBits") || force) {
+        swgLoRaModSettings->setDeBits(settings.m_deBits);
+    }
+    if (channelSettingsKeys.contains("preambleChirps") || force) {
+        swgLoRaModSettings->setPreambleChirps(settings.m_preambleChirps);
+    }
+    if (channelSettingsKeys.contains("quietMillis") || force) {
+        swgLoRaModSettings->setQuietMillis(settings.m_quietMillis);
+    }
+    if (channelSettingsKeys.contains("syncWord") || force) {
+        swgLoRaModSettings->setSyncWord(settings.m_syncWord);
+    }
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgLoRaModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("codingScheme") || force) {
+        swgLoRaModSettings->setCodingScheme((int) settings.m_codingScheme);
+    }
+    if (channelSettingsKeys.contains("nbParityBits") || force) {
+        swgLoRaModSettings->setNbParityBits(settings.m_nbParityBits);
+    }
+    if (channelSettingsKeys.contains("hasCRC") || force) {
+        swgLoRaModSettings->setHasCrc(settings.m_hasCRC ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("hasHeader") || force) {
+        swgLoRaModSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("myCall") || force) {
+        swgLoRaModSettings->setMyCall(new QString(settings.m_myCall));
+    }
+    if (channelSettingsKeys.contains("urCall") || force) {
+        swgLoRaModSettings->setUrCall(new QString(settings.m_urCall));
+    }
+    if (channelSettingsKeys.contains("myLoc") || force) {
+        swgLoRaModSettings->setMyLoc(new QString(settings.m_myLoc));
+    }
+    if (channelSettingsKeys.contains("myRpt") || force) {
+        swgLoRaModSettings->setMyRpt(new QString(settings.m_myRpt));
+    }
+    if (channelSettingsKeys.contains("messageType") || force) {
+        swgLoRaModSettings->setMessageType((int) settings.m_messageType);
+    }
+    if (channelSettingsKeys.contains("beaconMessage") || force) {
+        swgLoRaModSettings->setBeaconMessage(new QString(settings.m_beaconMessage));
+    }
+    if (channelSettingsKeys.contains("cqMessage") || force) {
+        swgLoRaModSettings->setCqMessage(new QString(settings.m_cqMessage));
+    }
+    if (channelSettingsKeys.contains("replyMessage") || force) {
+        swgLoRaModSettings->setReplyMessage(new QString(settings.m_replyMessage));
+    }
+    if (channelSettingsKeys.contains("reportMessage") || force) {
+        swgLoRaModSettings->setReportMessage(new QString(settings.m_reportMessage));
+    }
+    if (channelSettingsKeys.contains("replyReportMessage") || force) {
+        swgLoRaModSettings->setReplyReportMessage(new QString(settings.m_replyReportMessage));
+    }
+    if (channelSettingsKeys.contains("rrrMessage") || force) {
+        swgLoRaModSettings->setRrrMessage(new QString(settings.m_rrrMessage));
+    }
+    if (channelSettingsKeys.contains("message73") || force) {
+        swgLoRaModSettings->setMessage73(new QString(settings.m_73Message));
+    }
+    if (channelSettingsKeys.contains("qsoTextMessage") || force) {
+        swgLoRaModSettings->setQsoTextMessage(new QString(settings.m_qsoTextMessage));
+    }
+    if (channelSettingsKeys.contains("textMessage") || force) {
+        swgLoRaModSettings->setTextMessage(new QString(settings.m_textMessage));
+    }
+
+    if (channelSettingsKeys.contains("bytesMessage") || force)
+    {
+        swgLoRaModSettings->setBytesMessage(new QList<QString *>);
+        QList<QString *> *bytesStr = swgLoRaModSettings-> getBytesMessage();
+
+        for (QByteArray::const_iterator it = settings.m_bytesMessage.begin(); it != settings.m_bytesMessage.end(); ++it)
+        {
+            unsigned char b = *it;
+            bytesStr->push_back(new QString(tr("%1").arg(b, 2, 16, QChar('0'))));
+        }
+    }
+
+    if (channelSettingsKeys.contains("messageRepeat") || force) {
+        swgLoRaModSettings->setMessageRepeat(settings.m_messageRepeat);
+    }
+
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgLoRaModSettings->setRgbColor(settings.m_rgbColor);
     }

@@ -32,6 +32,12 @@ SWGLoRaModReport::SWGLoRaModReport() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    symbol_time_ms = 0.0f;
+    m_symbol_time_ms_isSet = false;
+    payload_time_ms = 0.0f;
+    m_payload_time_ms_isSet = false;
+    total_time_ms = 0.0f;
+    m_total_time_ms_isSet = false;
 }
 
 SWGLoRaModReport::~SWGLoRaModReport() {
@@ -44,10 +50,19 @@ SWGLoRaModReport::init() {
     m_channel_power_db_isSet = false;
     channel_sample_rate = 0;
     m_channel_sample_rate_isSet = false;
+    symbol_time_ms = 0.0f;
+    m_symbol_time_ms_isSet = false;
+    payload_time_ms = 0.0f;
+    m_payload_time_ms_isSet = false;
+    total_time_ms = 0.0f;
+    m_total_time_ms_isSet = false;
 }
 
 void
 SWGLoRaModReport::cleanup() {
+
+
+
 
 
 }
@@ -66,6 +81,12 @@ SWGLoRaModReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
     
     ::SWGSDRangel::setValue(&channel_sample_rate, pJson["channelSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&symbol_time_ms, pJson["symbolTimeMs"], "float", "");
+    
+    ::SWGSDRangel::setValue(&payload_time_ms, pJson["payloadTimeMs"], "float", "");
+    
+    ::SWGSDRangel::setValue(&total_time_ms, pJson["totalTimeMs"], "float", "");
     
 }
 
@@ -88,6 +109,15 @@ SWGLoRaModReport::asJsonObject() {
     }
     if(m_channel_sample_rate_isSet){
         obj->insert("channelSampleRate", QJsonValue(channel_sample_rate));
+    }
+    if(m_symbol_time_ms_isSet){
+        obj->insert("symbolTimeMs", QJsonValue(symbol_time_ms));
+    }
+    if(m_payload_time_ms_isSet){
+        obj->insert("payloadTimeMs", QJsonValue(payload_time_ms));
+    }
+    if(m_total_time_ms_isSet){
+        obj->insert("totalTimeMs", QJsonValue(total_time_ms));
     }
 
     return obj;
@@ -113,6 +143,36 @@ SWGLoRaModReport::setChannelSampleRate(qint32 channel_sample_rate) {
     this->m_channel_sample_rate_isSet = true;
 }
 
+float
+SWGLoRaModReport::getSymbolTimeMs() {
+    return symbol_time_ms;
+}
+void
+SWGLoRaModReport::setSymbolTimeMs(float symbol_time_ms) {
+    this->symbol_time_ms = symbol_time_ms;
+    this->m_symbol_time_ms_isSet = true;
+}
+
+float
+SWGLoRaModReport::getPayloadTimeMs() {
+    return payload_time_ms;
+}
+void
+SWGLoRaModReport::setPayloadTimeMs(float payload_time_ms) {
+    this->payload_time_ms = payload_time_ms;
+    this->m_payload_time_ms_isSet = true;
+}
+
+float
+SWGLoRaModReport::getTotalTimeMs() {
+    return total_time_ms;
+}
+void
+SWGLoRaModReport::setTotalTimeMs(float total_time_ms) {
+    this->total_time_ms = total_time_ms;
+    this->m_total_time_ms_isSet = true;
+}
+
 
 bool
 SWGLoRaModReport::isSet(){
@@ -122,6 +182,15 @@ SWGLoRaModReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_channel_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_symbol_time_ms_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_payload_time_ms_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_total_time_ms_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

@@ -79,6 +79,7 @@ private:
     void displaySettings();
     void displayStreamIndex();
     void displayCurrentPayloadMessage();
+    void displayBinaryMessage();
     void setBandwidths();
 
     void leaveEvent(QEvent*);

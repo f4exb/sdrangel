@@ -9,11 +9,97 @@ LoRaModSettings:
     spreadFactor:
       type: integer
     deBits:
+      description: Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol
       type: integer
-    message:
-      type: string
+    preambleChirps:
+      description: Number of preamble chirps
+      type: integer
+    quietMillis:
+      description: Number of milliseconds to pause between transmissions
+      type: integer
+    syncWord:
+      description: 2 byte (0..65535) synchronization syncWord
+      type: integer
     channelMute:
       description: boolean
+      type: integer
+    codingScheme:
+      type: integer
+      description: >
+        message encoding scheme (LoRaModSettings::CodingScheme):
+          * 0 - LoRa
+          * 1 - Plain ASCII (7 bit)
+          * 2 - Teletype (5 bit Baudot) a.k.a TTY
+    nbParityBits:
+      description: Hamming FEC parity bits (LoRa)
+      type: integer
+    hasCRC:
+      description: Payload has CRC (LoRa)
+      type: integer
+    hasHeader:
+      description: Header present before actual payload (LoRa)
+      type: integer
+    myCall:
+      description: own callsign placeholder (QSO mode)
+      type: string
+    urCall:
+      description: other party callsign placeholder (QSO mode)
+      type: string
+    myLoc:
+      description: own QRA locator (QSO mode)
+      type: string
+    myRpt:
+      description: report sent to other party (QSO mode)
+      type: string
+    messageType:
+      type: integer
+      description: >
+        type of message to send (LoRaModSettings::MessageType):
+          * 0 - No message i.e no output. Use this as a transition to resend the same message.
+          * 1 - Beacon. Sends message specified in beaconMessage
+          * 2 - CQ call. Sends message specified in cqMessage
+          * 3 - Reply to CQ call. Sends message specified in replyMessage
+          * 4 - Report to callee. Sends message specified in reportMessage
+          * 5 - Report to caller. Sends message specified in replyReportMessage
+          * 6 - RRR to callee. Sends message specified in rrrMessage
+          * 7 - 73 to caller. Sends message specified in message73
+          * 8 - Random message with callsigns. Sends message specified in qsoTextMessage
+          * 9 - Plain text. Sends message specified in textMessage
+          * 10 - Binary payload. Sends bytes specified in bytesMessage
+    beaconMessage:
+      description: text message to be sent (repeatedly) as a beaconMessage
+      type: string
+    cqMessage:
+      description: general call message (QSO mode)
+      type: string
+    replyMessage:
+      description: reply to caller message (QSO mode)
+      type: string
+    reportMessage:
+      description: report to callee message (QSO mode)
+      type: string
+    replyReportMessage:
+      description: report back to caller message (QSO mode)
+      type: string
+    rrrMessage:
+      description: caller RRR message (QSO mode)
+      type: string
+    message73:
+      description: 73 message back to caller to close QSO (QSO mode)
+      type: string
+    qsoTextMessage:
+      description: QSO random message exchange (QSO mode)
+      type: string
+    textMessage:
+      description: freeform text message
+      type: string
+    bytesMessage:
+      type: array
+      items:
+        type: string
+      description: message to send as an array of hex string represented bytes (00..FF)
+    messageRepeat:
+      description: number of repetitions of the same message (0 for infinite)
       type: integer
     rgbColor:
       type: integer
@@ -43,3 +129,15 @@ LoRaModReport:
       format: float
     channelSampleRate:
       type: integer
+    symbolTimeMs:
+      description: symbol duration (ms)
+      type: number
+      format: float
+    payloadTimeMs:
+      description: payload duration (ms)
+      type: number
+      format: float
+    totalTimeMs:
+      description: total message duration inc. preamble and SFD (ms)
+      type: number
+      format: float
