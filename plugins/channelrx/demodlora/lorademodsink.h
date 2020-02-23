@@ -49,6 +49,8 @@ public:
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
     void applyChannelSettings(int channelSampleRate, int bandwidth, int channelFrequencyOffset, bool force = false);
     void applySettings(const LoRaDemodSettings& settings, bool force = false);
+    double getCurrentNoiseLevel() const { return m_magsqOffAvg.instantAverage() / (1<<m_settings.m_spreadFactor); }
+    double getTotalPower() const { return m_magsqTotalAvg.instantAverage() / (1<<m_settings.m_spreadFactor); }
 
 private:
     enum LoRaState
@@ -92,6 +94,7 @@ private:
     double m_magsqMax;
     MovingAverageUtil<double, double, 10> m_magsqOnAvg;
     MovingAverageUtil<double, double, 10> m_magsqOffAvg;
+    MovingAverageUtil<double, double, 10> m_magsqTotalAvg;
     std::queue<double> m_magsqQueue;
     unsigned int m_chirpCount; //!< Generic chirp counter
     unsigned int m_sfdSkip;    //!< Number of samples in a SFD skip or slide (1/4) period
@@ -117,6 +120,7 @@ private:
         unsigned int fftMult,
         unsigned int fftLength,
         double& magsqMax,
+        double& magSqTotal,
         Complex *specBuffer,
         unsigned int specDecim
         );
@@ -126,6 +130,7 @@ private:
         unsigned int fftLength,
         double& magsqMax,
         double& magsqNoise,
+        double& magSqTotal,
         Complex *specBuffer,
         unsigned int specDecim
         );

@@ -36,6 +36,7 @@
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LocalInput.yaml</file>
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
+        <file>webapi/doc/swagger/include/LoRaDemod.yaml</file>
         <file>webapi/doc/swagger/include/LoRaMod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>

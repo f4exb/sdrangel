@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include <QNetworkRequest>
+
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
@@ -29,6 +31,8 @@
 #include "lorademodbaseband.h"
 #include "lorademoddecoder.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class DeviceAPI;
 class QThread;
 
@@ -219,7 +223,32 @@ public:
         return 0;
     }
 
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& channelSettingsKeys,
+                SWGSDRangel::SWGChannelSettings& response,
+                QString& errorMessage);
+
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGChannelReport& response,
+                QString& errorMessage);
+
+    static void webapiFormatChannelSettings(
+        SWGSDRangel::SWGChannelSettings& response,
+        const LoRaDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            LoRaDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
+
     bool getDemodActive() const;
+    double getCurrentNoiseLevel() const;
+    double getTotalPower() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;
@@ -231,8 +260,32 @@ private:
     LoRaDemodDecoder m_decoder;
     LoRaDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
+    float m_lastMsgSignalDb;
+    float m_lastMsgNoiseDb;
+    int m_lastMsgSyncWord;
+    int m_lastMsgPacketLength;
+    int m_lastMsgNbParityBits;
+    bool m_lastMsgHasCRC;
+    int m_lastMsgNbSymbols;
+    int m_lastMsgNbCodewords;
+    bool m_lastMsgEarlyEOM;
+    bool m_lastMsgHeaderCRC;
+    int m_lastMsgHeaderParityStatus;
+    bool m_lastMsgPayloadCRC;
+    int m_lastMsgPayloadParityStatus;
+    QString m_lastMsgTimestamp;
+    QString m_lastMsgString;
+    QByteArray m_lastMsgBytes;
+
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     void applySettings(const LoRaDemodSettings& settings, bool force = false);
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LoRaDemodSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_LORADEMOD_H

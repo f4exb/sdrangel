@@ -45,6 +45,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     InterferometerSettings:
       $ref: "/doc/swagger/include/Interferometer.yaml#/InterferometerSettings"
+    LoRaDemodSettings:
+      $ref: "/doc/swagger/include/LoRaDemod.yaml#/LoRaDemodSettings"
     LoRaModSettings:
       $ref: "/doc/swagger/include/LoRaMod.yaml#/LoRaModSettings"
     NFMDemodSettings:

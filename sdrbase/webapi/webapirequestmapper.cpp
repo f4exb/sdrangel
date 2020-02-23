@@ -72,6 +72,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
+    {"sdrangel.channel.lorademod", "LoRaDemodSettings"},
     {"sdrangel.channel.modlora", "LoRaModSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
@@ -2913,6 +2914,11 @@ bool WebAPIRequestMapper::getChannel(
         {
             channelSettings->setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
             channelSettings->getLocalSourceSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "LoRaDemodSettings")
+        {
+            channelSettings->setLoRaDemodSettings(new SWGSDRangel::SWGLoRaDemodSettings());
+            channelSettings->getLoRaDemodSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "LoRaModSettings")
         {

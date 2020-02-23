@@ -2272,6 +2272,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       FreqTrackerReport:
         $ref: "http://localhost:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+      LoRaDemodReport:
+        $ref: "http://localhost:8081/api/swagger/include/LoRaDemod.yaml#/LoRaDemodReport"
       LoRaModReport:
         $ref: "http://localhost:8081/api/swagger/include/LoRaMod.yaml#/LoRaModReport"
       NFMDemodReport:

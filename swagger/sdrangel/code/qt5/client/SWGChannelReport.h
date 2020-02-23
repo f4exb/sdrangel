@@ -31,6 +31,7 @@
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreqTrackerReport.h"
+#include "SWGLoRaDemodReport.h"
 #include "SWGLoRaModReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
@@ -93,6 +94,9 @@ public:
 
     SWGFreqTrackerReport* getFreqTrackerReport();
     void setFreqTrackerReport(SWGFreqTrackerReport* freq_tracker_report);
+
+    SWGLoRaDemodReport* getLoRaDemodReport();
+    void setLoRaDemodReport(SWGLoRaDemodReport* lo_ra_demod_report);
 
     SWGLoRaModReport* getLoRaModReport();
     void setLoRaModReport(SWGLoRaModReport* lo_ra_mod_report);
@@ -160,6 +164,9 @@ private:
 
     SWGFreqTrackerReport* freq_tracker_report;
     bool m_freq_tracker_report_isSet;
+
+    SWGLoRaDemodReport* lo_ra_demod_report;
+    bool m_lo_ra_demod_report_isSet;
 
     SWGLoRaModReport* lo_ra_mod_report;
     bool m_lo_ra_mod_report_isSet;

@@ -50,6 +50,12 @@ struct LoRaDemodSettings
     bool m_hasHeader;       //!< Header present before actual payload (LoRa)
     uint32_t m_rgbColor;
     QString m_title;
+    int m_streamIndex;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;

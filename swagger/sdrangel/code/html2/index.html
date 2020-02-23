@@ -2184,6 +2184,9 @@ margin-bottom: 20px;
     "FreqTrackerReport" : {
       "$ref" : "#/definitions/FreqTrackerReport"
     },
+    "LoRaDemodReport" : {
+      "$ref" : "#/definitions/LoRaDemodReport"
+    },
     "LoRaModReport" : {
       "$ref" : "#/definitions/LoRaModReport"
     },
@@ -2278,6 +2281,9 @@ margin-bottom: 20px;
     },
     "InterferometerSettings" : {
       "$ref" : "#/definitions/InterferometerSettings"
+    },
+    "LoRaDemodSettings" : {
+      "$ref" : "#/definitions/LoRaDemodSettings"
     },
     "LoRaModSettings" : {
       "$ref" : "#/definitions/LoRaModSettings"
@@ -4380,6 +4386,171 @@ margin-bottom: 20px;
   },
   "description" : "LimeSDR"
 };
+            defs.LoRaDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current de-chirped total channel power (dB)"
+    },
+    "noisePowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current de-chirped noise argmax power (dB)"
+    },
+    "signalPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "last message de-chirped signal argmax power (dB)"
+    },
+    "snrPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "last message de-chirped signal to noise ratio power (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "syncWord" : {
+      "type" : "integer",
+      "description" : "2 bytes sync word (0..65535)"
+    },
+    "hasCRC" : {
+      "type" : "integer",
+      "description" : "boolean 1 if payload CRC is present else 0 (LoRa)"
+    },
+    "nbParityBits" : {
+      "type" : "integer",
+      "description" : "Hamming FEC parity bits (LoRa)"
+    },
+    "packetLength" : {
+      "type" : "integer",
+      "description" : "Packet length in number of bytes (LoRa)"
+    },
+    "nbSymbols" : {
+      "type" : "integer",
+      "description" : "Number of symbols in the payload with header and CRC (LoRa)"
+    },
+    "nbCodewords" : {
+      "type" : "integer",
+      "description" : "Number of codewords in the payload with header and CRC (LoRa)"
+    },
+    "headerParityStatus" : {
+      "type" : "integer",
+      "description" : "Header FEC parity status:\n  * 0 - Undefined\n  * 1 - Uncorrectable error\n  * 2 - Corrected error\n  * 3 - OK\n"
+    },
+    "headerCRCStatus" : {
+      "type" : "integer",
+      "description" : "header CRC check status. Boolean 1 if OK else 0"
+    },
+    "payloadParityStatus" : {
+      "type" : "integer",
+      "description" : "Payload FEC parity status:\n  * 0 - Undefined\n  * 1 - Uncorrectable error\n  * 2 - Corrected error\n  * 3 - OK\n"
+    },
+    "payloadCRCStatus" : {
+      "type" : "integer",
+      "description" : "payload CRC check status. Boolean 1 if OK else 0"
+    },
+    "messageTimestamp" : {
+      "type" : "string",
+      "description" : "timestamp of the last decoded message"
+    },
+    "messageString" : {
+      "type" : "string",
+      "description" : "string representation of the last decoded message"
+    },
+    "messageBytes" : {
+      "type" : "array",
+      "description" : "bytes of the last decoded message as an array of hex string represented bytes (00..FF)",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  },
+  "description" : "LoRaDemod"
+};
+            defs.LoRaDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer",
+      "description" : "standard bandwidths index:\n  *  0 -   2604 Hz (333333 / 128)\n  *  1 -   3125 Hz (400000 / 128)\n  *  2 -   3906 Hz (500000 / 128)\n  *  3 -   5208 Hz (333333 / 64)\n  *  4 -   6250 Hz (400000 / 64)\n  *  5 -   7813 Hz (500000 / 64)\n  *  6 -  10417 Hz (333333 / 32)\n  *  7 -  12500 Hz (400000 / 32)\n  *  8 -  15625 Hz (500000 / 32)\n  *  9 -  20833 Hz (333333 / 16)\n  * 10 -  25000 Hz (400000 / 16)\n  * 11 -  31250 Hz (500000 / 16)\n  * 12 -  41667 Hz (333333 / 8)\n  * 13 -  50000 Hz (400000 / 8)\n  * 14 -  62500 Hz (500000 / 8)\n  * 15 -  83333 Hz (333333 / 4)\n  * 16 - 100000 Hz (400000 / 4)\n  * 17 - 125000 Hz (500000 / 4)\n  * 18 - 166667 Hz (333333 / 2)\n  * 19 - 200000 Hz (400000 / 2)\n  * 20 - 250000 Hz (500000 / 2)\n  * 21 - 333333 Hz (333333 / 1)\n  * 22 - 400000 Hz (400000 / 1)\n  * 23 - 500000 Hz (500000 / 1)\n"
+    },
+    "spreadFactor" : {
+      "type" : "integer"
+    },
+    "deBits" : {
+      "type" : "integer",
+      "description" : "Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol"
+    },
+    "codingScheme" : {
+      "type" : "integer",
+      "description" : "message encoding scheme (LoRaModSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
+    },
+    "decodeActive" : {
+      "type" : "integer",
+      "description" : "boolean 1 to activate 0 to de-activate decoder"
+    },
+    "eomSquelchTenths" : {
+      "type" : "integer",
+      "description" : "argmax squared magnitude is compared between current multiplied by this factor and maximum during decoding. This value is divided by 10"
+    },
+    "nbSymbolsMax" : {
+      "type" : "integer",
+      "description" : "expected maximum number of symbols in a payload"
+    },
+    "preambleChirps" : {
+      "type" : "integer",
+      "description" : "Number of expected preamble chirps"
+    },
+    "nbParityBits" : {
+      "type" : "integer",
+      "description" : "Hamming FEC parity bits (LoRa)"
+    },
+    "packetLength" : {
+      "type" : "integer",
+      "description" : "expected packet length in number of bytes (LoRa)"
+    },
+    "hasCRC" : {
+      "type" : "integer",
+      "description" : "Payload has CRC (LoRa)"
+    },
+    "hasHeader" : {
+      "type" : "integer",
+      "description" : "Header present before actual payload (LoRa)"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LoRaDemod"
+};
             defs.LoRaModReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -4415,7 +4586,8 @@ margin-bottom: 20px;
       "format" : "int64"
     },
     "bandwidthIndex" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "standard bandwidths index:\n  *  0 -   2604 Hz (333333 / 128)\n  *  1 -   3125 Hz (400000 / 128)\n  *  2 -   3906 Hz (500000 / 128)\n  *  3 -   5208 Hz (333333 / 64)\n  *  4 -   6250 Hz (400000 / 64)\n  *  5 -   7813 Hz (500000 / 64)\n  *  6 -  10417 Hz (333333 / 32)\n  *  7 -  12500 Hz (400000 / 32)\n  *  8 -  15625 Hz (500000 / 32)\n  *  9 -  20833 Hz (333333 / 16)\n  * 10 -  25000 Hz (400000 / 16)\n  * 11 -  31250 Hz (500000 / 16)\n  * 12 -  41667 Hz (333333 / 8)\n  * 13 -  50000 Hz (400000 / 8)\n  * 14 -  62500 Hz (500000 / 8)\n  * 15 -  83333 Hz (333333 / 4)\n  * 16 - 100000 Hz (400000 / 4)\n  * 17 - 125000 Hz (500000 / 4)\n  * 18 - 166667 Hz (333333 / 2)\n  * 19 - 200000 Hz (400000 / 2)\n  * 20 - 250000 Hz (500000 / 2)\n  * 21 - 333333 Hz (333333 / 1)\n  * 22 - 400000 Hz (400000 / 1)\n  * 23 - 500000 Hz (500000 / 1)\n"
     },
     "spreadFactor" : {
       "type" : "integer"
@@ -4474,7 +4646,7 @@ margin-bottom: 20px;
     },
     "messageType" : {
       "type" : "integer",
-      "description" : "type of message to send (LoRaModSettings::MessageType):\n  * 0 - No message i.e no output. Use this as a transition to resend the same message.\n  * 1 - Beacon. Sends message specified in beaconMessage\n  * 2 - CQ call. Sends message specified in cqMessage\n  * 3 - Reply to CQ call. Sends message specified in replyMessage\n  * 4 - Report to callee. Sends message specified in reportMessage\n  * 5 - Report to caller. Sends message specified in replyReportMessage\n  * 6 - RRR to callee. Sends message specified in rrrMessage\n  * 7 - 73 to caller. Sends message specified in message73\n  * 8 - Random message with callsigns. Sends message specified in qsoTextMessage\n  * 9 - Plain text. Sends message specified in textMessage\n  * 10 - Binary payload. Sends bytes specified in bytesMessage\n"
+      "description" : "type of message to send (LoRaModSettings::MessageType):\n  *  0 - No message i.e no output. Use this as a transition to resend the same message.\n  *  1 - Beacon. Sends message specified in beaconMessage\n  *  2 - CQ call. Sends message specified in cqMessage\n  *  3 - Reply to CQ call. Sends message specified in replyMessage\n  *  4 - Report to callee. Sends message specified in reportMessage\n  *  5 - Report to caller. Sends message specified in replyReportMessage\n  *  6 - RRR to callee. Sends message specified in rrrMessage\n  *  7 - 73 to caller. Sends message specified in message73\n  *  8 - Random message with callsigns. Sends message specified in qsoTextMessage\n  *  9 - Plain text. Sends message specified in textMessage\n  * 10 - Binary payload. Sends bytes specified in bytesMessage\n"
     },
     "beaconMessage" : {
       "type" : "string",
@@ -32430,7 +32602,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-02-22T07:44:51.167+01:00
+              Generated 2020-02-23T10:05:51.852+01:00
             </div>
           </div>
       </div>

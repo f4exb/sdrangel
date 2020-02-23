@@ -24,8 +24,33 @@
 #include "settings/serializable.h"
 #include "loramodsettings.h"
 
-const int LoRaModSettings::bandwidths[] = {2500, 7813, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000};
-const int LoRaModSettings::nbBandwidths = 11;
+const int LoRaModSettings::bandwidths[] = {
+    2604,   // 333k / 128
+    3125,   // 400k / 128
+    3906,   // 500k / 128
+    5208,   // 333k / 64
+    6250,   // 400k / 64
+    7813,   // 500k / 64
+    10417,  // 333k / 32
+    12500,  // 400k / 32
+    15625,  // 500k / 32
+    20833,  // 333k / 16
+    25000,  // 400k / 16
+    31250,  // 500k / 16
+    41667,  // 333k / 8
+    50000,  // 400k / 8
+    62500,  // 500k / 8
+    83333,  // 333k / 4
+    100000, // 400k / 4
+    125000, // 500k / 4
+    166667, // 333k / 2
+    200000, // 400k / 2
+    250000, // 500k / 2
+    333333, // 333k / 1
+    400000, // 400k / 1
+    500000  // 500k / 1
+};
+const int LoRaModSettings::nbBandwidths = 3*8;
 const int LoRaModSettings::oversampling = 4;
 
 LoRaModSettings::LoRaModSettings() :
@@ -140,6 +165,12 @@ QByteArray LoRaModSettings::serialize() const
     s.writeString(42, m_myLoc);
     s.writeString(43, m_myRpt);
     s.writeS32(44, m_messageRepeat);
+    s.writeBool(50, m_useReverseAPI);
+    s.writeString(51, m_reverseAPIAddress);
+    s.writeU32(52, m_reverseAPIPort);
+    s.writeU32(53, m_reverseAPIDeviceIndex);
+    s.writeU32(54, m_reverseAPIChannelIndex);
+    s.writeS32(55, m_streamIndex);
 
     return s.final();
 }
@@ -213,6 +244,22 @@ bool LoRaModSettings::deserialize(const QByteArray& data)
         d.readString(42, &m_myLoc, "AA00AA");
         d.readString(43, &m_myRpt, "59");
         d.readS32(44, &m_messageRepeat, 1);
+
+        d.readBool(50, &m_useReverseAPI, false);
+        d.readString(51, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(52, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(53, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(54, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(55, &m_streamIndex, 0);
 
         return true;
     }

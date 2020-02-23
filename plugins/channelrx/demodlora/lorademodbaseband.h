@@ -63,6 +63,8 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     bool getDemodActive() const { return m_sink.getDemodActive(); }
+    double getCurrentNoiseLevel() const { return m_sink.getCurrentNoiseLevel(); }
+    double getTotalPower() const { return m_sink.getTotalPower(); }
     void setBasebandSampleRate(int sampleRate);
     void setDecoderMessageQueue(MessageQueue *messageQueue) { m_sink.setDecoderMessageQueue(messageQueue); }
     void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }

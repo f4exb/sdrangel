@@ -24,8 +24,33 @@
 #include "settings/serializable.h"
 #include "lorademodsettings.h"
 
-const int LoRaDemodSettings::bandwidths[] = {2500, 7813, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000};
-const int LoRaDemodSettings::nbBandwidths = 11;
+const int LoRaDemodSettings::bandwidths[] = {
+    2604,   // 333k / 128
+    3125,   // 400k / 128
+    3906,   // 500k / 128
+    5208,   // 333k / 64
+    6250,   // 400k / 64
+    7813,   // 500k / 64
+    10417,  // 333k / 32
+    12500,  // 400k / 32
+    15625,  // 500k / 32
+    20833,  // 333k / 16
+    25000,  // 400k / 16
+    31250,  // 500k / 16
+    41667,  // 333k / 8
+    50000,  // 400k / 8
+    62500,  // 500k / 8
+    83333,  // 333k / 4
+    100000, // 400k / 4
+    125000, // 500k / 4
+    166667, // 333k / 2
+    200000, // 400k / 2
+    250000, // 500k / 2
+    333333, // 333k / 1
+    400000, // 400k / 1
+    500000  // 500k / 1
+};
+const int LoRaDemodSettings::nbBandwidths = 3*8;
 const int LoRaDemodSettings::oversampling = 2;
 
 LoRaDemodSettings::LoRaDemodSettings() :
@@ -52,6 +77,12 @@ void LoRaDemodSettings::resetToDefaults()
     m_hasHeader = true;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "LoRa Demodulator";
+    m_streamIndex = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray LoRaDemodSettings::serialize() const
@@ -80,6 +111,12 @@ QByteArray LoRaDemodSettings::serialize() const
     s.writeBool(14, m_hasCRC);
     s.writeBool(15, m_hasHeader);
     s.writeS32(17, m_preambleChirps);
+    s.writeBool(20, m_useReverseAPI);
+    s.writeString(21, m_reverseAPIAddress);
+    s.writeU32(22, m_reverseAPIPort);
+    s.writeU32(23, m_reverseAPIDeviceIndex);
+    s.writeU32(24, m_reverseAPIChannelIndex);
+    s.writeS32(25, m_streamIndex);
 
     return s.final();
 }
@@ -98,6 +135,7 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
     {
         QByteArray bytetmp;
         int tmp;
+        unsigned int utmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readS32(2, &m_bandwidthIndex, 0);
@@ -125,6 +163,22 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
         d.readBool(14, &m_hasCRC, true);
         d.readBool(15, &m_hasHeader, true);
         d.readS32(17, &m_preambleChirps, 8);
+
+        d.readBool(20, &m_useReverseAPI, false);
+        d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(22, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(23, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(24, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(25, &m_streamIndex, 0);
 
         return true;
     }

@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>512</width>
+    <width>532</width>
     <height>660</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>512</width>
+    <width>532</width>
     <height>660</height>
    </size>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>1</x>
      <y>20</y>
-     <width>510</width>
+     <width>530</width>
      <height>90</height>
     </rect>
    </property>
@@ -74,7 +74,7 @@
      <rect>
       <x>30</x>
       <y>50</y>
-      <width>381</width>
+      <width>231</width>
       <height>16</height>
      </rect>
     </property>
@@ -153,20 +153,14 @@
    <widget class="QLabel" name="BWText">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>269</x>
       <y>50</y>
-      <width>80</width>
+      <width>70</width>
       <height>16</height>
      </rect>
     </property>
-    <property name="minimumSize">
-     <size>
-      <width>80</width>
-      <height>0</height>
-     </size>
-    </property>
     <property name="text">
-     <string>7813 Hz</string>
+     <string>500000 Hz</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -243,7 +237,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>491</width>
+      <width>511</width>
       <height>26</height>
      </rect>
     </property>
@@ -320,70 +314,24 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="sLabel">
-       <property name="text">
-        <string>S</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="sText">
+      <widget class="QLabel" name="channelPower">
        <property name="minimumSize">
         <size>
-         <width>30</width>
+         <width>60</width>
          <height>0</height>
         </size>
        </property>
        <property name="toolTip">
-        <string>De-chirped signal level</string>
+        <string>De-chirped channel power</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
        </property>
        <property name="text">
-        <string>-50.0</string>
+        <string>-100.0 dB</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="snrLabel">
-       <property name="minimumSize">
-        <size>
-         <width>35</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>SNR</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="snrText">
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>De-chirped SNR level</string>
-       </property>
-       <property name="text">
-        <string>10.0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="sUnits">
-       <property name="text">
-        <string>dB</string>
        </property>
       </widget>
      </item>
@@ -455,13 +403,140 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
+   <widget class="QLabel" name="sUnits">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>50</y>
+      <width>20</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>dB</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="snrText">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>50</y>
+      <width>28</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>25</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="toolTip">
+     <string>De-chirped Signal to Noise Ratio</string>
+    </property>
+    <property name="text">
+     <string>-10.0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="snrLabel">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>50</y>
+      <width>5</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>/</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="sText">
+    <property name="geometry">
+     <rect>
+      <x>425</x>
+      <y>50</y>
+      <width>30</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>30</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="toolTip">
+     <string>De-chirped signal power</string>
+    </property>
+    <property name="text">
+     <string>-50.0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="sLabel">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>50</y>
+      <width>9</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>S</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="nText">
+    <property name="geometry">
+     <rect>
+      <x>375</x>
+      <y>50</y>
+      <width>30</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>De-chirped noise power</string>
+    </property>
+    <property name="text">
+     <string>-50.0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="nLabel">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>50</y>
+      <width>10</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>N</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QWidget" name="payloadContainer" native="true">
    <property name="geometry">
     <rect>
      <x>1</x>
      <y>120</y>
-     <width>510</width>
+     <width>530</width>
      <height>230</height>
     </rect>
    </property>
@@ -505,7 +580,7 @@
      <rect>
       <x>30</x>
       <y>60</y>
-      <width>471</width>
+      <width>490</width>
       <height>80</height>
      </rect>
     </property>
@@ -712,7 +787,7 @@
    <widget class="QLineEdit" name="syncWord">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>492</x>
       <y>10</y>
       <width>25</width>
       <height>20</height>
@@ -832,7 +907,7 @@
      <rect>
       <x>30</x>
       <y>145</y>
-      <width>471</width>
+      <width>490</width>
       <height>75</height>
      </rect>
     </property>
@@ -897,7 +972,7 @@
    <widget class="QLabel" name="syncWordLabel">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>456</x>
       <y>10</y>
       <width>30</width>
       <height>19</height>
@@ -910,7 +985,7 @@
    <widget class="QLabel" name="headerHammingStatus">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>395</x>
       <y>35</y>
       <width>20</width>
       <height>16</height>
@@ -926,7 +1001,7 @@
    <widget class="QLabel" name="headerCRCStatus">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>425</x>
       <y>35</y>
       <width>20</width>
       <height>16</height>
@@ -942,7 +1017,7 @@
    <widget class="QLabel" name="payloadFECStatus">
     <property name="geometry">
      <rect>
-      <x>440</x>
+      <x>455</x>
       <y>35</y>
       <width>25</width>
       <height>16</height>
@@ -958,7 +1033,7 @@
    <widget class="QLabel" name="payloadCRCStatus">
     <property name="geometry">
      <rect>
-      <x>475</x>
+      <x>490</x>
       <y>35</y>
       <width>28</width>
       <height>16</height>
@@ -1031,7 +1106,7 @@
     <rect>
      <x>1</x>
      <y>360</y>
-     <width>510</width>
+     <width>530</width>
      <height>260</height>
     </rect>
    </property>

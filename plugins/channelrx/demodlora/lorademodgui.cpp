@@ -27,6 +27,7 @@
 #include "gui/glspectrumgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "mainwindow.h"
 
 #include "lorademod.h"
@@ -494,8 +495,9 @@ void LoRaDemodGUI::showLoRaMessage(const Message& message)
 {
     const LoRaDemod::MsgReportDecodeBytes& msg = (LoRaDemod::MsgReportDecodeBytes&) message;
     QByteArray bytes = msg.getBytes();
+    QString syncWordStr((tr("%1").arg(msg.getSyncWord(), 2, 16, QChar('0'))));
 
-    ui->syncWord->setText((tr("%1").arg(msg.getSyncWord(), 2, 16)));
+    ui->syncWord->setText(tr("%1").arg(syncWordStr));
     ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
     ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
     unsigned int packetLength;
@@ -521,7 +523,7 @@ void LoRaDemodGUI::showLoRaMessage(const Message& message)
     {
         QString loRaStatus = tr("%1 %2 S:%3 SN:%4 HF:%5 HC:%6 EOM:too early")
             .arg(dateStr)
-            .arg(msg.getSyncWord(), 2, 16)
+            .arg(syncWordStr)
             .arg(msg.getSingalDb(), 0, 'f', 1)
             .arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1)
             .arg(getParityStr(msg.getHeaderParityStatus()))
@@ -535,7 +537,7 @@ void LoRaDemodGUI::showLoRaMessage(const Message& message)
     {
         QString loRaHeader = tr("%1 %2 S:%3 SN:%4 HF:%5 HC:%6 FEC:%7 CRC:%8")
             .arg(dateStr)
-            .arg(msg.getSyncWord(), 2, 16)
+            .arg(syncWordStr)
             .arg(msg.getSingalDb(), 0, 'f', 1)
             .arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1)
             .arg(getParityStr(msg.getHeaderParityStatus()))
@@ -549,8 +551,9 @@ void LoRaDemodGUI::showLoRaMessage(const Message& message)
         bytesCopy.truncate(packetLength);
         bytesCopy.replace('\0', " ");
         QString str = QString(bytesCopy.toStdString().c_str());
-        displayText(dateStr, str);
+        QString textHeader(tr("%1 (%2)").arg(dateStr).arg(syncWordStr));
 
+        displayText(textHeader, str);
         displayLoRaStatus(msg.getHeaderParityStatus(), msg.getHeaderCRCStatus(), msg.getPayloadParityStatus(), msg.getPayloadCRCStatus());
     }
 
@@ -564,8 +567,10 @@ void LoRaDemodGUI::showTextMessage(const Message& message)
 
     QDateTime dt = QDateTime::currentDateTime();
     QString dateStr = dt.toString("HH:mm:ss");
-    displayText(dateStr, msg.getString());
-    ui->syncWord->setText((tr("%1").arg(msg.getSyncWord(), 2, 16)));
+    QString syncWordStr((tr("%1").arg(msg.getSyncWord(), 2, 16, QChar('0'))));
+    QString textHeader(tr("%1 (%2)").arg(dateStr).arg(syncWordStr));
+    displayText(textHeader, msg.getString());
+    ui->syncWord->setText(syncWordStr);
     ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
     ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
 
@@ -608,7 +613,7 @@ void LoRaDemodGUI::displayBytes(const QString& header, const QByteArray& bytes)
             cursor.insertText(tr("%1|").arg(i, 3, 10, QChar('0')));
         }
 
-        cursor.insertText(tr("%1").arg(b, 2, 16));
+        cursor.insertText(tr("%1").arg(b, 2, 16, QChar('0')));
 
         if (i%16 == 15) {
             cursor.insertText("\n");
@@ -657,6 +662,9 @@ void LoRaDemodGUI::tick()
     else
     {
         m_tickCount = 0;
+
+        ui->nText->setText(tr("%1").arg(CalcDb::dbPower(m_LoRaDemod->getCurrentNoiseLevel()), 0, 'f', 1));
+        ui->channelPower->setText(tr("%1 dB").arg(CalcDb::dbPower(m_LoRaDemod->getTotalPower()), 0, 'f', 1));
 
         if (m_LoRaDemod->getDemodActive()) {
             ui->mute->setStyleSheet("QToolButton { background-color : green; }");

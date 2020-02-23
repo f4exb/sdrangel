@@ -30,6 +30,7 @@ set(lora_HEADERS
 )
 
 include_directories(
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
 add_library(demodlora SHARED
@@ -40,7 +41,8 @@ target_link_libraries(demodlora
     Qt5::Core
     Qt5::Widgets
 	sdrbase
-	sdrgui
+    sdrgui
+    swagger
 )
 
 install(TARGETS demodlora DESTINATION ${INSTALL_PLUGINS_DIR})

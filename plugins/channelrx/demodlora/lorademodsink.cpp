@@ -136,6 +136,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
     {
         m_demodActive = false;
         reset();
+        std::queue<double>().swap(m_magsqQueue); // this clears the queue
         m_state = LoRaStateDetectPreamble;
     }
     else if (m_state == LoRaStateDetectPreamble) // look for preamble
@@ -148,13 +149,14 @@ void LoRaDemodSink::processSample(const Complex& ci)
             std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
             m_fft->transform();
             m_fftCounter = 0;
-            double magsq;
+            double magsq, magsqTotal;
 
             unsigned int imax = argmax(
                 m_fft->out(),
                 m_fftInterpolation,
                 m_fftLength,
                 magsq,
+                magsqTotal,
                 m_spectrumBuffer,
                 m_fftInterpolation
             ) / m_fftInterpolation;
@@ -163,6 +165,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 m_magsqQueue.pop();
             }
 
+            m_magsqTotalAvg(magsqTotal);
             m_magsqQueue.push(magsq);
             m_argMaxHistory[m_argMaxHistoryCounter++] = imax;
 
@@ -233,12 +236,14 @@ void LoRaDemodSink::processSample(const Complex& ci)
 
             m_fftCounter = 0;
             double magsq, magsqSFD;
+            double magsqTotal, magsqSFDTotal;
 
             unsigned int imaxSFD = argmax(
                 m_fftSFD->out(),
                 m_fftInterpolation,
                 m_fftLength,
                 magsqSFD,
+                magsqTotal,
                 nullptr,
                 m_fftInterpolation
             ) / m_fftInterpolation;
@@ -248,6 +253,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 m_fftInterpolation,
                 m_fftLength,
                 magsq,
+                magsqSFDTotal,
                 m_spectrumBuffer,
                 m_fftInterpolation
             ) / m_fftInterpolation;
@@ -257,6 +263,8 @@ void LoRaDemodSink::processSample(const Complex& ci)
 
             if (magsq <  magsqSFD) // preamble drop
             {
+                m_magsqTotalAvg(magsqSFDTotal);
+
                 if (m_chirpCount < 3) // too early
                 {
                     m_state = LoRaStateReset;
@@ -292,6 +300,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
             else if (m_chirpCount > (m_settings.m_preambleChirps - m_requiredPreambleChirps + 2)) // SFD missed start over
             {
                 qDebug("LoRaDemodSink::processSample: SFD search: number of possible chirps exceeded");
+                m_magsqTotalAvg(magsqTotal);
                 m_state = LoRaStateReset;
             }
             else
@@ -301,6 +310,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                 }
 
                 qDebug("LoRaDemodSink::processSample: SFD search: up: %4u|%11.6f - down: %4u|%11.6f", imax, magsq, imaxSFD, magsqSFD);
+                m_magsqTotalAvg(magsqTotal);
                 m_magsqOnAvg(magsq);
             }
         }
@@ -339,7 +349,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
             std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
             m_fft->transform();
             m_fftCounter = 0;
-            double magsq;
+            double magsq, magsqTotal;
 
             unsigned short symbol = evalSymbol(
                 argmax(
@@ -347,6 +357,7 @@ void LoRaDemodSink::processSample(const Complex& ci)
                     m_fftInterpolation,
                     m_fftLength,
                     magsq,
+                    magsqTotal,
                     m_spectrumBuffer,
                     m_fftInterpolation
                 )
@@ -359,6 +370,8 @@ void LoRaDemodSink::processSample(const Complex& ci)
             if (magsq > m_magsqMax) {
                 m_magsqMax = magsq;
             }
+
+            m_magsqTotalAvg(magsq);
 
             m_decodeMsg->pushBackSymbol(symbol);
 
@@ -426,16 +439,19 @@ unsigned int LoRaDemodSink::argmax(
     unsigned int fftMult,
     unsigned int fftLength,
     double& magsqMax,
+    double& magsqTotal,
     Complex *specBuffer,
     unsigned int specDecim)
 {
     magsqMax = 0.0;
+    magsqTotal = 0.0;
     unsigned int imax;
     double magSum = 0.0;
 
     for (unsigned int i = 0; i < fftMult*fftLength; i++)
     {
         double magsq = std::norm(fftBins[i]);
+        magsqTotal += magsq;
 
         if (magsq > magsqMax)
         {
@@ -455,6 +471,8 @@ unsigned int LoRaDemodSink::argmax(
         }
     }
 
+    magsqTotal /= fftMult*fftLength;
+
     return imax;
 }
 
@@ -464,11 +482,13 @@ unsigned int LoRaDemodSink::argmaxSpreaded(
     unsigned int fftLength,
     double& magsqMax,
     double& magsqNoise,
+    double& magSqTotal,
     Complex *specBuffer,
     unsigned int specDecim)
 {
     magsqMax = 0.0;
     magsqNoise = 0.0;
+    magSqTotal = 0.0;
     unsigned int imax = 0;
     double magSum = 0.0;
     double magSymbol = 0.0;
@@ -480,6 +500,7 @@ unsigned int LoRaDemodSink::argmaxSpreaded(
         unsigned int i = i2 % (fftMult*fftLength);
         double magsq = std::norm(fftBins[i]);
         magSymbol += magsq;
+        magSqTotal += magsq;
 
         if (i % spread == spread/2) // boundary (inclusive)
         {
@@ -507,6 +528,7 @@ unsigned int LoRaDemodSink::argmaxSpreaded(
 
     magsqNoise -= magsqMax;
     magsqNoise /= fftLength;
+    magSqTotal /= fftMult*fftLength;
 
     return imax / spread;
 }
