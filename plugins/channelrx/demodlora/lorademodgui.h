@@ -69,6 +69,9 @@ private slots:
 	void on_fecParity_valueChanged(int value);
 	void on_crc_stateChanged(int state);
 	void on_packetLength_valueChanged(int value);
+	void on_udpSend_stateChanged(int state);
+	void on_udpAddress_editingFinished();
+	void on_udpPort_editingFinished();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void channelMarkerHighlightedByCursor();
 	void handleInputMessages();

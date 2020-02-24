@@ -75,6 +75,9 @@ void LoRaDemodSettings::resetToDefaults()
     m_nbParityBits = 1;
     m_hasCRC = true;
     m_hasHeader = true;
+    m_sendViaUDP = false;
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9999;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "LoRa Demodulator";
     m_streamIndex = 0;
@@ -117,6 +120,9 @@ QByteArray LoRaDemodSettings::serialize() const
     s.writeU32(23, m_reverseAPIDeviceIndex);
     s.writeU32(24, m_reverseAPIChannelIndex);
     s.writeS32(25, m_streamIndex);
+    s.writeBool(26, m_sendViaUDP);
+    s.writeString(27, m_udpAddress);
+    s.writeU32(28, m_udpPort);
 
     return s.final();
 }
@@ -179,6 +185,15 @@ bool LoRaDemodSettings::deserialize(const QByteArray& data)
         d.readU32(24, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(25, &m_streamIndex, 0);
+        d.readBool(26, &m_sendViaUDP, false);
+        d.readString(27, &m_udpAddress, "127.0.0.1");
+        d.readU32(28, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_udpPort = utmp;
+        } else {
+            m_udpPort = 9999;
+        }
 
         return true;
     }

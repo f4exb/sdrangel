@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>532</width>
-    <height>660</height>
+    <width>552</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>532</width>
-    <height>660</height>
+    <height>680</height>
    </size>
   </property>
   <property name="font">
@@ -537,13 +537,13 @@
      <x>1</x>
      <y>120</y>
      <width>530</width>
-     <height>230</height>
+     <height>250</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>230</height>
+     <height>250</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -1100,12 +1100,109 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
+   <widget class="QCheckBox" name="udpSend">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>225</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Send message via UDP</string>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::RightToLeft</enum>
+    </property>
+    <property name="text">
+     <string>UDP</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="udpAddress">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>225</y>
+      <width>120</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>120</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Destination UDP address</string>
+    </property>
+    <property name="inputMask">
+     <string>000.000.000.000</string>
+    </property>
+    <property name="text">
+     <string>127.0.0.1</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="udpSeparator">
+    <property name="geometry">
+     <rect>
+      <x>184</x>
+      <y>225</y>
+      <width>10</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="udpPort">
+    <property name="geometry">
+     <rect>
+      <x>199</x>
+      <y>225</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>50</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>50</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Destination UDP port</string>
+    </property>
+    <property name="inputMask">
+     <string>00000</string>
+    </property>
+    <property name="text">
+     <string>9998</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QWidget" name="spectrumContainer" native="true">
    <property name="geometry">
     <rect>
      <x>1</x>
-     <y>360</y>
+     <y>380</y>
      <width>530</width>
      <height>260</height>
     </rect>

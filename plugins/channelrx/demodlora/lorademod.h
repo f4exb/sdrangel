@@ -27,6 +27,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
+#include "util/udpsinkutil.h"
 
 #include "lorademodbaseband.h"
 #include "lorademoddecoder.h"
@@ -276,6 +277,7 @@ private:
     QString m_lastMsgTimestamp;
     QString m_lastMsgString;
     QByteArray m_lastMsgBytes;
+    UDPSinkUtil<uint8_t> m_udpSink;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

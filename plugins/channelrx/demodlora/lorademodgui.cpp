@@ -284,6 +284,32 @@ void LoRaDemodGUI::on_packetLength_valueChanged(int value)
     applySettings();
 }
 
+void LoRaDemodGUI::on_udpSend_stateChanged(int state)
+{
+    m_settings.m_sendViaUDP = (state == Qt::Checked);
+    applySettings();
+}
+
+void LoRaDemodGUI::on_udpAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->udpAddress->text();
+    applySettings();
+}
+
+void LoRaDemodGUI::on_udpPort_editingFinished()
+{
+    bool ok;
+    quint16 udpPort = ui->udpPort->text().toInt(&ok);
+
+    if((!ok) || (udpPort < 1024)) {
+        udpPort = 9998;
+    }
+
+    ui->udpPort->setText(tr("%1").arg(m_settings.m_udpPort));
+    m_settings.m_udpPort = udpPort;
+    applySettings();
+}
+
 void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -400,6 +426,9 @@ void LoRaDemodGUI::displaySettings()
     ui->scheme->setCurrentIndex((int) m_settings.m_codingScheme);
     ui->messageLengthText->setText(tr("%1").arg(m_settings.m_nbSymbolsMax));
     ui->messageLength->setValue(m_settings.m_nbSymbolsMax);
+    ui->udpSend->setChecked(m_settings.m_sendViaUDP);
+    ui->udpAddress->setText(m_settings.m_udpAddress);
+    ui->udpPort->setText(tr("%1").arg(m_settings.m_udpPort));
     ui->header->setChecked(m_settings.m_hasHeader);
 
     if (!m_settings.m_hasHeader)

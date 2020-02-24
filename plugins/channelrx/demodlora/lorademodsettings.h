@@ -48,6 +48,9 @@ struct LoRaDemodSettings
     int m_packetLength;     //!< Payload packet length in bytes or characters (LoRa)
     bool m_hasCRC;          //!< Payload has CRC (LoRa)
     bool m_hasHeader;       //!< Header present before actual payload (LoRa)
+    bool m_sendViaUDP;      //!< Send decoded message via UDP
+    QString m_udpAddress;   //!< UDP address where to send message
+    uint16_t m_udpPort;     //!< UDP port where to send message
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;

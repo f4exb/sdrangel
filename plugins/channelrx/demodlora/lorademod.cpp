@@ -61,7 +61,8 @@ LoRaDemod::LoRaDemod(DeviceAPI* deviceAPI) :
         m_lastMsgHeaderCRC(false),
         m_lastMsgHeaderParityStatus(0),
         m_lastMsgPayloadCRC(false),
-        m_lastMsgPayloadParityStatus(0)
+        m_lastMsgPayloadParityStatus(0),
+        m_udpSink(this, 256)
 {
 	setObjectName(m_channelId);
 
@@ -150,6 +151,12 @@ bool LoRaDemod::handleMessage(const Message& cmd)
             bytesCopy.replace('\0', " ");
             m_lastMsgString = QString(bytesCopy.toStdString().c_str());
 
+            if (m_settings.m_sendViaUDP)
+            {
+                uint8_t *bytes = reinterpret_cast<uint8_t*>(m_lastMsgBytes.data());
+                m_udpSink.writeUnbuffered(bytes, m_lastMsgPacketLength);
+            }
+
             if (getMessageQueueToGUI())
             {
                 MsgReportDecodeBytes *msgToGUI = MsgReportDecodeBytes::create(m_lastMsgBytes);
@@ -174,6 +181,13 @@ bool LoRaDemod::handleMessage(const Message& cmd)
             m_decoder.decodeSymbols(msg.getSymbols(), m_lastMsgString);
             QDateTime dt = QDateTime::currentDateTime();
             m_lastMsgTimestamp = dt.toString(Qt::ISODateWithMs);
+
+            if (m_settings.m_sendViaUDP)
+            {
+                const QByteArray& byteArray = m_lastMsgString.toUtf8();
+                const uint8_t *bytes = reinterpret_cast<const uint8_t*>(byteArray.data());
+                m_udpSink.writeUnbuffered(bytes, byteArray.size());
+            }
 
             if (getMessageQueueToGUI())
             {
@@ -244,6 +258,9 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
             << " m_hasCRC: " << settings.m_hasCRC
             << " m_nbParityBits: " << settings.m_nbParityBits
             << " m_packetLength: " << settings.m_packetLength
+            << " m_sendViaUDP: " << settings.m_sendViaUDP
+            << " m_udpAddress: " << settings.m_udpAddress
+            << " m_udpPort: " << settings.m_udpPort
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_title: " << settings.m_title
             << " force: " << force;
@@ -315,6 +332,21 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
     }
     if ((settings.m_title != m_settings.m_title) || force) {
         reverseAPIKeys.append("title");
+    }
+    if ((settings.m_sendViaUDP != m_settings.m_sendViaUDP) || force) {
+        reverseAPIKeys.append("sendViaUDP");
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force)
+    {
+        reverseAPIKeys.append("udpAddress");
+        m_udpSink.setAddress(settings.m_udpAddress);
+    }
+
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force)
+    {
+        reverseAPIKeys.append("udpPort");
+        m_udpSink.setPort(settings.m_udpPort);
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
