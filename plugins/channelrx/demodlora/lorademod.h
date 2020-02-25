@@ -251,6 +251,8 @@ public:
     double getCurrentNoiseLevel() const;
     double getTotalPower() const;
 
+    uint32_t getNumberOfDeviceStreams() const;
+
     static const QString m_channelIdURI;
     static const QString m_channelId;
 

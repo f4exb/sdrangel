@@ -65,6 +65,7 @@ private slots:
 	void on_clear_clicked(bool checked);
     void on_eomSquelch_valueChanged(int value);
     void on_messageLength_valueChanged(int value);
+	void on_messageLengthAuto_stateChanged(int state);
 	void on_header_stateChanged(int state);
 	void on_fecParity_valueChanged(int value);
 	void on_crc_stateChanged(int state);
@@ -73,6 +74,7 @@ private slots:
 	void on_udpAddress_editingFinished();
 	void on_udpPort_editingFinished();
 	void onWidgetRolled(QWidget* widget, bool rollDown);
+	void onMenuDialogCalled(const QPoint& p);
     void channelMarkerHighlightedByCursor();
 	void handleInputMessages();
 	void tick();
@@ -105,6 +107,7 @@ private:
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
 	void displaySettings();
+    void displayStreamIndex();
     void displaySquelch();
     void setBandwidths();
     void showLoRaMessage(const Message& message);

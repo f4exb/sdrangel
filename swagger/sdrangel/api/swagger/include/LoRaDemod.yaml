@@ -53,6 +53,9 @@ LoRaDemodSettings:
     nbSymbolsMax:
       description: expected maximum number of symbols in a payload
       type: integer
+    autoNbSymbolsMax:
+      description: adjust maximum number of symbols in a payload to the value just received (LoRa)
+      type: integer
     preambleChirps:
       description: Number of expected preamble chirps
       type: integer
@@ -67,6 +70,15 @@ LoRaDemodSettings:
       type: integer
     hasHeader:
       description: Header present before actual payload (LoRa)
+      type: integer
+    sendViaUDP:
+      description: boolean 1 to send decoded message via UDP else 0
+      type: integer
+    udpAddress:
+      description: UDP destination udpAddress
+      type: string
+    udpPort:
+      description: UDP destination properties
       type: integer
     rgbColor:
       type: integer

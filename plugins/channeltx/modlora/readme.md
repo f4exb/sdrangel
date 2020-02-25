@@ -11,6 +11,8 @@ This plugin has been designed to work in conjunction with the LoRa demodulator p
 
 The standard LoRa specification has been extended to support plain ASCII and TTY encoded message using the same chirp based modulation. Distance Enhancement factor values have also been extended to cover the full 0 to 4 range.
 
+This plugin is designed to experiment with chirp modulation and LoRa technique. It does not replace dedicated hardware for production grade links.
+
 Note: this plugin is available in version 5 only (since 5.2.0).
 
 <h2>Interface</h2>

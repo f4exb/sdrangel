@@ -66,6 +66,9 @@ public:
     qint32 getNbSymbolsMax();
     void setNbSymbolsMax(qint32 nb_symbols_max);
 
+    qint32 getAutoNbSymbolsMax();
+    void setAutoNbSymbolsMax(qint32 auto_nb_symbols_max);
+
     qint32 getPreambleChirps();
     void setPreambleChirps(qint32 preamble_chirps);
 
@@ -80,6 +83,15 @@ public:
 
     qint32 getHasHeader();
     void setHasHeader(qint32 has_header);
+
+    qint32 getSendViaUdp();
+    void setSendViaUdp(qint32 send_via_udp);
+
+    QString* getUdpAddress();
+    void setUdpAddress(QString* udp_address);
+
+    qint32 getUdpPort();
+    void setUdpPort(qint32 udp_port);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -133,6 +145,9 @@ private:
     qint32 nb_symbols_max;
     bool m_nb_symbols_max_isSet;
 
+    qint32 auto_nb_symbols_max;
+    bool m_auto_nb_symbols_max_isSet;
+
     qint32 preamble_chirps;
     bool m_preamble_chirps_isSet;
 
@@ -147,6 +162,15 @@ private:
 
     qint32 has_header;
     bool m_has_header_isSet;
+
+    qint32 send_via_udp;
+    bool m_send_via_udp_isSet;
+
+    QString* udp_address;
+    bool m_udp_address_isSet;
+
+    qint32 udp_port;
+    bool m_udp_port_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

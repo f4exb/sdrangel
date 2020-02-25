@@ -25,6 +25,8 @@
 #include "dsp/dspcommands.h"
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
+#include "gui/basicchannelsettingsdialog.h"
+#include "gui/devicestreamselectiondialog.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
@@ -123,6 +125,17 @@ bool LoRaDemodGUI::handleMessage(const Message& message)
          || (m_settings.m_codingScheme == LoRaDemodSettings::CodingTTY)) {
              showTextMessage(message);
         }
+
+        return true;
+    }
+    else if (LoRaDemod::MsgConfigureLoRaDemod::match(message))
+    {
+        qDebug("LoRaDemod::handleMessage: NFMDemod::MsgConfigureLoRaDemod");
+        const LoRaDemod::MsgConfigureLoRaDemod& cfg = (LoRaDemod::MsgConfigureLoRaDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
 
         return true;
     }
@@ -243,6 +256,12 @@ void LoRaDemodGUI::on_messageLength_valueChanged(int value)
     applySettings();
 }
 
+void LoRaDemodGUI::on_messageLengthAuto_stateChanged(int state)
+{
+    m_settings.m_autoNbSymbolsMax = (state == Qt::Checked);
+    applySettings();
+}
+
 void LoRaDemodGUI::on_header_stateChanged(int state)
 {
     m_settings.m_hasHeader = (state == Qt::Checked);
@@ -316,6 +335,51 @@ void LoRaDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
     (void) rollDown;
 }
 
+void LoRaDemodGUI::onMenuDialogCalled(const QPoint &p)
+{
+    if (m_contextMenuType == ContextMenuChannelSettings)
+    {
+        BasicChannelSettingsDialog dialog(&m_channelMarker, this);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+        m_settings.m_rgbColor = m_channelMarker.getColor().rgb();
+        m_settings.m_title = m_channelMarker.getTitle();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
+
+        setWindowTitle(m_settings.m_title);
+        setTitleColor(m_settings.m_rgbColor);
+
+        applySettings();
+    }
+    else if ((m_contextMenuType == ContextMenuStreamSettings) && (m_deviceUISet->m_deviceMIMOEngine))
+    {
+        DeviceStreamSelectionDialog dialog(this);
+        dialog.setNumberOfStreams(m_LoRaDemod->getNumberOfDeviceStreams());
+        dialog.setStreamIndex(m_settings.m_streamIndex);
+        dialog.move(p);
+        dialog.exec();
+
+        m_settings.m_streamIndex = dialog.getSelectedStreamIndex();
+        m_channelMarker.clearStreamIndexes();
+        m_channelMarker.addStreamIndex(m_settings.m_streamIndex);
+        displayStreamIndex();
+        applySettings();
+    }
+
+    resetContextMenuType();
+}
+
 LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
 	RollupWidget(parent),
 	ui(new Ui::LoRaDemodGUI),
@@ -329,6 +393,7 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
+    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_LoRaDemod = (LoRaDemod*) rxChannel; //new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
@@ -440,9 +505,20 @@ void LoRaDemodGUI::displaySettings()
         ui->spectrumGUI->setFFTSize(m_settings.m_spreadFactor);
     }
 
+    ui->messageLengthAuto->setChecked(m_settings.m_autoNbSymbolsMax);
+
     displaySquelch();
 
     blockApplySettings(false);
+}
+
+void LoRaDemodGUI::displayStreamIndex()
+{
+    if (m_deviceUISet->m_deviceMIMOEngine) {
+        setStreamIndicator(tr("%1").arg(m_settings.m_streamIndex));
+    } else {
+        setStreamIndicator("S"); // single channel indicator
+    }
 }
 
 void LoRaDemodGUI::displaySquelch()

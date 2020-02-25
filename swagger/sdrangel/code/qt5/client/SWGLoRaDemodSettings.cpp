@@ -44,6 +44,8 @@ SWGLoRaDemodSettings::SWGLoRaDemodSettings() {
     m_eom_squelch_tenths_isSet = false;
     nb_symbols_max = 0;
     m_nb_symbols_max_isSet = false;
+    auto_nb_symbols_max = 0;
+    m_auto_nb_symbols_max_isSet = false;
     preamble_chirps = 0;
     m_preamble_chirps_isSet = false;
     nb_parity_bits = 0;
@@ -54,6 +56,12 @@ SWGLoRaDemodSettings::SWGLoRaDemodSettings() {
     m_has_crc_isSet = false;
     has_header = 0;
     m_has_header_isSet = false;
+    send_via_udp = 0;
+    m_send_via_udp_isSet = false;
+    udp_address = nullptr;
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -94,6 +102,8 @@ SWGLoRaDemodSettings::init() {
     m_eom_squelch_tenths_isSet = false;
     nb_symbols_max = 0;
     m_nb_symbols_max_isSet = false;
+    auto_nb_symbols_max = 0;
+    m_auto_nb_symbols_max_isSet = false;
     preamble_chirps = 0;
     m_preamble_chirps_isSet = false;
     nb_parity_bits = 0;
@@ -104,6 +114,12 @@ SWGLoRaDemodSettings::init() {
     m_has_crc_isSet = false;
     has_header = 0;
     m_has_header_isSet = false;
+    send_via_udp = 0;
+    m_send_via_udp_isSet = false;
+    udp_address = new QString("");
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -136,6 +152,12 @@ SWGLoRaDemodSettings::cleanup() {
 
 
 
+
+
+
+    if(udp_address != nullptr) { 
+        delete udp_address;
+    }
 
 
     if(title != nullptr) { 
@@ -178,6 +200,8 @@ SWGLoRaDemodSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&nb_symbols_max, pJson["nbSymbolsMax"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&auto_nb_symbols_max, pJson["autoNbSymbolsMax"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&preamble_chirps, pJson["preambleChirps"], "qint32", "");
     
     ::SWGSDRangel::setValue(&nb_parity_bits, pJson["nbParityBits"], "qint32", "");
@@ -187,6 +211,12 @@ SWGLoRaDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&has_crc, pJson["hasCRC"], "qint32", "");
     
     ::SWGSDRangel::setValue(&has_header, pJson["hasHeader"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&send_via_udp, pJson["sendViaUDP"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -244,6 +274,9 @@ SWGLoRaDemodSettings::asJsonObject() {
     if(m_nb_symbols_max_isSet){
         obj->insert("nbSymbolsMax", QJsonValue(nb_symbols_max));
     }
+    if(m_auto_nb_symbols_max_isSet){
+        obj->insert("autoNbSymbolsMax", QJsonValue(auto_nb_symbols_max));
+    }
     if(m_preamble_chirps_isSet){
         obj->insert("preambleChirps", QJsonValue(preamble_chirps));
     }
@@ -258,6 +291,15 @@ SWGLoRaDemodSettings::asJsonObject() {
     }
     if(m_has_header_isSet){
         obj->insert("hasHeader", QJsonValue(has_header));
+    }
+    if(m_send_via_udp_isSet){
+        obj->insert("sendViaUDP", QJsonValue(send_via_udp));
+    }
+    if(udp_address != nullptr && *udp_address != QString("")){
+        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
+    }
+    if(m_udp_port_isSet){
+        obj->insert("udpPort", QJsonValue(udp_port));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -368,6 +410,16 @@ SWGLoRaDemodSettings::setNbSymbolsMax(qint32 nb_symbols_max) {
 }
 
 qint32
+SWGLoRaDemodSettings::getAutoNbSymbolsMax() {
+    return auto_nb_symbols_max;
+}
+void
+SWGLoRaDemodSettings::setAutoNbSymbolsMax(qint32 auto_nb_symbols_max) {
+    this->auto_nb_symbols_max = auto_nb_symbols_max;
+    this->m_auto_nb_symbols_max_isSet = true;
+}
+
+qint32
 SWGLoRaDemodSettings::getPreambleChirps() {
     return preamble_chirps;
 }
@@ -415,6 +467,36 @@ void
 SWGLoRaDemodSettings::setHasHeader(qint32 has_header) {
     this->has_header = has_header;
     this->m_has_header_isSet = true;
+}
+
+qint32
+SWGLoRaDemodSettings::getSendViaUdp() {
+    return send_via_udp;
+}
+void
+SWGLoRaDemodSettings::setSendViaUdp(qint32 send_via_udp) {
+    this->send_via_udp = send_via_udp;
+    this->m_send_via_udp_isSet = true;
+}
+
+QString*
+SWGLoRaDemodSettings::getUdpAddress() {
+    return udp_address;
+}
+void
+SWGLoRaDemodSettings::setUdpAddress(QString* udp_address) {
+    this->udp_address = udp_address;
+    this->m_udp_address_isSet = true;
+}
+
+qint32
+SWGLoRaDemodSettings::getUdpPort() {
+    return udp_port;
+}
+void
+SWGLoRaDemodSettings::setUdpPort(qint32 udp_port) {
+    this->udp_port = udp_port;
+    this->m_udp_port_isSet = true;
 }
 
 qint32
@@ -526,6 +608,9 @@ SWGLoRaDemodSettings::isSet(){
         if(m_nb_symbols_max_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_auto_nb_symbols_max_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_preamble_chirps_isSet){
             isObjectUpdated = true; break;
         }
@@ -539,6 +624,15 @@ SWGLoRaDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_has_header_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_send_via_udp_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

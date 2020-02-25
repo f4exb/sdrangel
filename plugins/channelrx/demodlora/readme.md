@@ -9,6 +9,8 @@ This plugin can be used to demodulate and decode LoRa transmissions.
 
 This plugin has been designed to work in conjunction with the LoRa modulator plugin. However it can receive transmissions from the RN2483 module when the Distance Enhancement is engaged (4 FFT bins per symbol) which happens with spread factors 11 and 12. Il is very difficult in general to get good decodes when only one FFT bin is used by symbol. It has not been tested with Semtech SX127x hardware.
 
+This plugin is designed to experiment with chirp modulation and LoRa technique. It does not replace dedicated hardware for production grade links.
+
 Note: this plugin is available in version 5 only (since 5.2.0).
 
 <h2>Interface</h2>
@@ -58,17 +60,17 @@ Thus available bandwidths are:
 
 The LoRa signal is oversampled by two therefore it needs a baseband of at least twice the bandwidth. This drives the maximum value on the slider automatically.
 
-<h3>4: De-chirped noise power</h3>
+<h3>4: De-chirped noise maximum power</h3>
 
 This is the maximum power received in one FFT bin (the argmax bin) in dB when no signal is detected. It is averaged over 10 values.
 
-<h3>5. De-chirped signal power</h3>
+<h3>5. De-chirped signal maximum power</h3>
 
 This is the maximum power received in one FFT bin (the argmax bin) in dB when a signal is detected. It is averaged over 10 values.
 
 <h3>6: De-chirped signal over noise ratio</h3>
 
-The noise level reference is the one just before the detected signal starts and the signal level the one just before the detected signal stops. To get a significant reading you have to adjust correctly the number of preamble chirps (9) and the End Of Message squelch level (A.3) and/or the message length (A.4) so that signal boundaries are determined correctly.
+The noise level reference is the noise maximum power just before the detected signal starts and the signal level the signal maximum power just before the detected signal stops. To get a significant reading you have to adjust correctly the number of preamble chirps (9) and the End Of Message squelch level (A.3) and/or the message length (A.4) so that signal boundaries are determined correctly.
 
 Decode errors are very likely to happen when this value falls below 4 dB.
 
@@ -110,17 +112,21 @@ During paylaod detection the maximum power value in the FFT (at argmax) P<sub>ma
 
 This is the expected number of symbols in a message. When a header is present in the payload it should match the size given in the header (A.11).
 
-<h4>A.5: Sync word</h4>
+<h4>A.5: Auto mesasge length</h4>
+
+LoRa mode only. Set message length (A.4) equal to the number of symbols specified in the message just received. When messages are sent repeatedly this helps adjusting in possible message length changes automatically.
+
+<h4>A.6: Sync word</h4>
 
 This is the message 1 byte sync word displayed in hexadecimal.
 
 <h4>A.7: Expect header in message</h4>
 
-LoRa standard only. Use this checkbox to tell if you expect or not a header in the message.
+LoRa mode only. Use this checkbox to tell if you expect or not a header in the message.
 
 <h4>A.8: Number of FEC parity bits</h4>
 
-LoRa standard only. This is the number of parity bits in the Hamming code used in the FEC. The standard values are 1 to 4 for H(4,5) to H(4,8) encoding. 0 is a non-standard value to specify no FEC.
+LoRa mode only. This is the number of parity bits in the Hamming code used in the FEC. The standard values are 1 to 4 for H(4,5) to H(4,8) encoding. 0 is a non-standard value to specify no FEC.
 
 When a header is expected this control is disabled because the value used is the one found in the header.
 
@@ -248,6 +254,14 @@ Corresponds to (A.15) indicator in the current message
 <h4>11.10: Bytes group</h4>
 
 This is a group of 4 bytes displayed as hexadecimal values. The payload is displayed with its possible CRC and without the header.
+
+<h3>12: Send message via UDP</h3>
+
+Select to send the decoded message via UDP.
+
+<h3>13: UDP address and port</h3>
+
+This is the UDP address and port to where the decoded message is sent when (12) is selected.
 
 <h3>B: De-chirped spectrum</h3>
 

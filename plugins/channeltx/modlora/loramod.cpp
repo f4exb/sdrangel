@@ -137,6 +137,15 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
             << " m_rfBandwidth: " << settings.m_bandwidthIndex
             << " bandwidth: " << LoRaModSettings::bandwidths[settings.m_bandwidthIndex]
             << " m_channelMute: " << settings.m_channelMute
+            << " m_beaconMessage: " << settings.m_beaconMessage
+            << " m_cqMessage: " << settings.m_cqMessage
+            << " m_replyMessage: " << settings.m_replyMessage
+            << " m_reportMessage:" << settings.m_reportMessage
+            << " m_replyReportMessage: " << settings.m_replyReportMessage
+            << " m_rrrMessage: " << settings.m_rrrMessage
+            << " m_73message: " << settings.m_73Message
+            << " m_qsoTextMessage: " << settings.m_qsoTextMessage
+            << " m_textMessage: " << settings.m_textMessage
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
@@ -237,70 +246,70 @@ void LoRaMod::applySettings(const LoRaModSettings& settings, bool force)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_beaconMessage != m_settings.m_beaconMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_beaconMessage, symbols);
+        m_encoder.encodeString(settings.m_beaconMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageCQ)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_cqMessage != m_settings.m_cqMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_cqMessage, symbols);
+        m_encoder.encodeString(settings.m_cqMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageReply)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_replyMessage != m_settings.m_replyMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_replyMessage, symbols);
+        m_encoder.encodeString(settings.m_replyMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageReport)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_reportMessage != m_settings.m_reportMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_reportMessage, symbols);
+        m_encoder.encodeString(settings.m_reportMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageReplyReport)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_replyReportMessage != m_settings.m_replyReportMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_replyReportMessage, symbols);
+        m_encoder.encodeString(settings.m_replyReportMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageRRR)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_rrrMessage != m_settings.m_rrrMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_rrrMessage, symbols);
+        m_encoder.encodeString(settings.m_rrrMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::Message73)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_73Message != m_settings.m_73Message) || force))
     {
-        m_encoder.encodeString(m_settings.m_73Message, symbols);
+        m_encoder.encodeString(settings.m_73Message, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageQSOText)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_qsoTextMessage != m_settings.m_qsoTextMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_qsoTextMessage, symbols);
+        m_encoder.encodeString(settings.m_qsoTextMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageText)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_textMessage != m_settings.m_textMessage) || force))
     {
-        m_encoder.encodeString(m_settings.m_textMessage, symbols);
+        m_encoder.encodeString(settings.m_textMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
     else if ((settings.m_messageType == LoRaModSettings::MessageBytes)
         && ((settings.m_messageType != m_settings.m_messageType)
          || (settings.m_bytesMessage != m_settings.m_bytesMessage) || force))
     {
-        m_encoder.encodeBytes(m_settings.m_bytesMessage, symbols);
+        m_encoder.encodeBytes(settings.m_bytesMessage, symbols);
         payloadMsg = LoRaModBaseband::MsgConfigureLoRaModPayload::create(symbols);
     }
 

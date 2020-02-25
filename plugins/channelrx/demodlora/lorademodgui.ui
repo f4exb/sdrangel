@@ -476,7 +476,7 @@
      </size>
     </property>
     <property name="toolTip">
-     <string>De-chirped signal power</string>
+     <string>De-chirped signal maximum power</string>
     </property>
     <property name="text">
      <string>-50.0</string>
@@ -508,7 +508,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>De-chirped noise power</string>
+     <string>De-chirped noise maximum power</string>
     </property>
     <property name="text">
      <string>-50.0</string>
@@ -1084,7 +1084,7 @@
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="fecParityText_2">
+   <widget class="QLabel" name="symbolsCodewordsSeparator">
     <property name="geometry">
      <rect>
       <x>328</x>
@@ -1195,6 +1195,22 @@
     </property>
     <property name="text">
      <string>9998</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="messageLengthAuto">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>10</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Set message length in symbols automatically to provided message length (LoRa only)</string>
+    </property>
+    <property name="text">
+     <string>Auto</string>
     </property>
    </widget>
   </widget>

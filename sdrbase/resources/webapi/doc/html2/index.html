@@ -4502,6 +4502,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "expected maximum number of symbols in a payload"
     },
+    "autoNbSymbolsMax" : {
+      "type" : "integer",
+      "description" : "adjust maximum number of symbols in a payload to the value just received (LoRa)"
+    },
     "preambleChirps" : {
       "type" : "integer",
       "description" : "Number of expected preamble chirps"
@@ -4521,6 +4525,18 @@ margin-bottom: 20px;
     "hasHeader" : {
       "type" : "integer",
       "description" : "Header present before actual payload (LoRa)"
+    },
+    "sendViaUDP" : {
+      "type" : "integer",
+      "description" : "boolean 1 to send decoded message via UDP else 0"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP destination udpAddress"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP destination properties"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -32602,7 +32618,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-02-23T10:05:51.852+01:00
+              Generated 2020-02-25T14:33:44.826+01:00
             </div>
           </div>
       </div>

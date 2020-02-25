@@ -85,6 +85,10 @@ LoRaDemod::~LoRaDemod()
     delete m_thread;
 }
 
+uint32_t LoRaDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
 
 void LoRaDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO)
 {
@@ -175,6 +179,19 @@ bool LoRaDemod::handleMessage(const Message& cmd)
                 msgToGUI->setPayloadCRCStatus(m_lastMsgPayloadCRC);
                 getMessageQueueToGUI()->push(msgToGUI);
             }
+
+            if (m_settings.m_autoNbSymbolsMax)
+            {
+                LoRaDemodSettings settings = m_settings;
+                settings.m_nbSymbolsMax = m_lastMsgNbSymbols;
+                applySettings(settings);
+
+                if (getMessageQueueToGUI()) // forward to GUI if any
+                {
+                    MsgConfigureLoRaDemod *msgToGUI = MsgConfigureLoRaDemod::create(settings, false);
+                    getMessageQueueToGUI()->push(msgToGUI);
+                }
+            }
         }
         else
         {
@@ -258,6 +275,7 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
             << " m_hasCRC: " << settings.m_hasCRC
             << " m_nbParityBits: " << settings.m_nbParityBits
             << " m_packetLength: " << settings.m_packetLength
+            << " m_autoNbSymbolsMax: " << settings.m_autoNbSymbolsMax
             << " m_sendViaUDP: " << settings.m_sendViaUDP
             << " m_udpAddress: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
@@ -335,6 +353,9 @@ void LoRaDemod::applySettings(const LoRaDemodSettings& settings, bool force)
     }
     if ((settings.m_sendViaUDP != m_settings.m_sendViaUDP) || force) {
         reverseAPIKeys.append("sendViaUDP");
+    }
+    if ((settings.m_autoNbSymbolsMax != m_settings.m_autoNbSymbolsMax) || force) {
+        reverseAPIKeys.append("autoNbSymbolsMax");
     }
 
     if ((settings.m_udpAddress != m_settings.m_udpAddress) || force)
@@ -443,6 +464,9 @@ void LoRaDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("nbSymbolsMax")) {
         settings.m_nbSymbolsMax = response.getLoRaDemodSettings()->getNbSymbolsMax();
     }
+    if (channelSettingsKeys.contains("autoNbSymbolsMax")) {
+        settings.m_autoNbSymbolsMax = response.getLoRaDemodSettings()->getAutoNbSymbolsMax() != 0;
+    }
     if (channelSettingsKeys.contains("preambleChirps")) {
         settings.m_preambleChirps = response.getLoRaDemodSettings()->getPreambleChirps();
     }
@@ -457,6 +481,17 @@ void LoRaDemod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("hasHeader")) {
         settings.m_hasHeader = response.getLoRaDemodSettings()->getHasHeader() != 0;
+    }
+    if (channelSettingsKeys.contains("sendViaUDP")) {
+        settings.m_sendViaUDP = response.getLoRaDemodSettings()->getSendViaUdp() != 0;
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getLoRaDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort"))
+    {
+        uint16_t port = response.getLoRaDemodSettings()->getUdpPort();
+        settings.m_udpPort = port < 1024 ? 1024 : port > 65535 ? 65535 : port;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getLoRaDemodSettings()->getRgbColor();
@@ -505,11 +540,20 @@ void LoRaDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getLoRaDemodSettings()->setDecodeActive(settings.m_decodeActive ? 1 : 0);
     response.getLoRaDemodSettings()->setEomSquelchTenths(settings.m_eomSquelchTenths);
     response.getLoRaDemodSettings()->setNbSymbolsMax(settings.m_nbSymbolsMax);
+    response.getLoRaDemodSettings()->setAutoNbSymbolsMax(settings.m_autoNbSymbolsMax ? 1 : 0);
     response.getLoRaDemodSettings()->setPreambleChirps(settings.m_preambleChirps);
     response.getLoRaDemodSettings()->setNbParityBits(settings.m_nbParityBits);
     response.getLoRaDemodSettings()->setHasCrc(settings.m_hasCRC ? 1 : 0);
     response.getLoRaDemodSettings()->setHasHeader(settings.m_hasHeader ? 1 : 0);
+    response.getLoRaDemodSettings()->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
 
+    if (response.getLoRaDemodSettings()->getUdpAddress()) {
+        *response.getLoRaDemodSettings()->getUdpAddress() = settings.m_udpAddress;
+    } else {
+        response.getLoRaDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+
+    response.getLoRaDemodSettings()->setUdpPort(settings.m_udpPort);
     response.getLoRaDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getLoRaDemodSettings()->getTitle()) {
@@ -590,11 +634,14 @@ void LoRaDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("decodeActive") || force) {
         swgLoRaDemodSettings->setDecodeActive(settings.m_decodeActive ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("decodeActive") || force) {
-        swgLoRaDemodSettings->setEomSquelchTenths(settings.m_eomSquelchTenths ? 1 : 0);
+    if (channelSettingsKeys.contains("eomSquelchTenths") || force) {
+        swgLoRaDemodSettings->setEomSquelchTenths(settings.m_eomSquelchTenths);
     }
-    if (channelSettingsKeys.contains("decodeActive") || force) {
-        swgLoRaDemodSettings->setNbSymbolsMax(settings.m_nbSymbolsMax ? 1 : 0);
+    if (channelSettingsKeys.contains("nbSymbolsMax") || force) {
+        swgLoRaDemodSettings->setNbSymbolsMax(settings.m_nbSymbolsMax);
+    }
+    if (channelSettingsKeys.contains("autoNbSymbolsMax") || force) {
+        swgLoRaDemodSettings->setAutoNbSymbolsMax(settings.m_nbSymbolsMax ? 1 : 0);
     }
     if (channelSettingsKeys.contains("preambleChirps") || force) {
         swgLoRaDemodSettings->setPreambleChirps(settings.m_preambleChirps);
@@ -607,6 +654,15 @@ void LoRaDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("hasHeader") || force) {
         swgLoRaDemodSettings->setHasHeader(settings.m_hasHeader ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("sendViaUDP") || force) {
+        swgLoRaDemodSettings->setSendViaUdp(settings.m_sendViaUDP ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgLoRaDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("updPort") || force) {
+        swgLoRaDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgLoRaDemodSettings->setRgbColor(settings.m_rgbColor);
