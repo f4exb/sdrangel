@@ -279,5 +279,10 @@ void FileSourceSource::applySettings(const FileSourceSettings& settings, bool fo
         << "m_filterChainHash:" << settings.m_filterChainHash
         << " force: " << force;
 
+
+    if ((m_settings.m_gainDB != settings.m_gainDB) || force) {
+        m_linearGain = CalcDb::powerFromdB(settings.m_gainDB/2.0); // Divide by two for power gain to voltage gain conversion
+    }
+
     m_settings = settings;
 }

@@ -38,7 +38,6 @@
 
 MESSAGE_CLASS_DEFINITION(FileSource::MsgSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSource, Message)
-MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceName, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceWork, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceSeek, Message)
@@ -134,15 +133,6 @@ bool FileSource::handleMessage(const Message& cmd)
         applySettings(cfg.getSettings(), cfg.getForce());
         return true;
     }
-    else if (MsgConfigureFileSourceName::match(cmd))
-	{
-		MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) cmd;
-        qDebug() << "FileSource::handleMessage: MsgConfigureFileSourceName:" << conf.getFileName();
-        FileSourceBaseband::MsgConfigureFileSourceName *msg = FileSourceBaseband::MsgConfigureFileSourceName::create(conf.getFileName());
-        m_basebandSource->getInputMessageQueue()->push(msg);
-
-		return true;
-	}
 	else if (MsgConfigureFileSourceWork::match(cmd))
 	{
 		MsgConfigureFileSourceWork& conf = (MsgConfigureFileSourceWork&) cmd;
@@ -218,16 +208,30 @@ void FileSource::applySettings(const FileSourceSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
 
+    if ((m_settings.m_fileName != settings.m_fileName) || force)
+    {
+        reverseAPIKeys.append("fileName");
+        FileSourceBaseband::MsgConfigureFileSourceName *msg = FileSourceBaseband::MsgConfigureFileSourceName::create(settings.m_fileName);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
+
     if ((m_settings.m_loop != settings.m_loop) || force) {
         reverseAPIKeys.append("loop");
     }
-    if ((m_settings.m_fileName != settings.m_fileName) || force) {
-        reverseAPIKeys.append("fileName");
+    if ((m_settings.m_log2Interp != settings.m_log2Interp) || force) {
+        reverseAPIKeys.append("log2Interp");
     }
-    if ((m_settings.m_gainDB != settings.m_gainDB) || force)
-    {
-        m_linearGain = CalcDb::powerFromdB(settings.m_gainDB);
+    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
+        reverseAPIKeys.append("filterChainHash");
+    }
+    if ((m_settings.m_gainDB != settings.m_gainDB) || force) {
         reverseAPIKeys.append("gainDB");
+    }
+    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((m_settings.m_title != settings.m_title) || force) {
+        reverseAPIKeys.append("title");
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -317,6 +321,12 @@ void FileSource::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
+    if (channelSettingsKeys.contains("fileName")) {
+        settings.m_fileName = *response.getFileSourceSettings()->getFileName();
+    }
+    if (channelSettingsKeys.contains("loop")) {
+        settings.m_loop = response.getFileSourceSettings()->getLoop() != 0;
+    }
     if (channelSettingsKeys.contains("log2Interp")) {
         settings.m_log2Interp = response.getFileSourceSettings()->getLog2Interp();
     }
@@ -327,14 +337,14 @@ void FileSource::webapiUpdateChannelSettings(
         validateFilterChainHash(settings);
     }
 
+    if (channelSettingsKeys.contains("gainDB")) {
+        settings.m_gainDB = response.getFileSourceSettings()->getGainDb();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getFileSourceSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getFileSourceSettings()->getTitle();
-    }
-    if (channelSettingsKeys.contains("gainDB")) {
-        settings.m_gainDB = response.getFileSourceSettings()->getGainDb();
     }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getFileSourceSettings()->getStreamIndex();
@@ -369,6 +379,13 @@ int FileSource::webapiReportGet(
 
 void FileSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FileSourceSettings& settings)
 {
+    if (response.getFileSourceSettings()->getFileName()) {
+        *response.getFileSourceSettings()->getFileName() = settings.m_fileName;
+    } else {
+        response.getFileSourceSettings()->setFileName(new QString(settings.m_fileName));
+    }
+
+    response.getFileSourceSettings()->setLoop(settings.m_loop ? 1 : 0);
     response.getFileSourceSettings()->setLog2Interp(settings.m_log2Interp);
     response.getFileSourceSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getFileSourceSettings()->setGainDb(settings.m_gainDB);

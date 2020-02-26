@@ -88,26 +88,6 @@ public:
         int m_sampleRate;
     };
 
-	class MsgConfigureFileSourceName : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		const QString& getFileName() const { return m_fileName; }
-
-		static MsgConfigureFileSourceName* create(const QString& fileName)
-		{
-			return new MsgConfigureFileSourceName(fileName);
-		}
-
-	private:
-		QString m_fileName;
-
-		MsgConfigureFileSourceName(const QString& fileName) :
-			Message(),
-			m_fileName(fileName)
-		{ }
-	};
-
 	class MsgConfigureFileSourceWork : public Message {
 		MESSAGE_CLASS_DECLARATION
 
