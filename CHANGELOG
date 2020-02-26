@@ -1,3 +1,13 @@
+sdrangel (5.2.0-1) unstable; urgency=medium
+
+  * LoRa demodulator complete refactoring
+  * LoRa modulator
+  * Removed librtlsdr in the list of dependencies in Debian install
+  * LimeRFE USB: fixed attenuator and AM/FM notch settings
+  * Added FFT Kaiser window with alpha = pi
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 26 Feb 2020 06:14:22 +0100
+
 sdrangel (5.1.0-1) unstable; urgency=medium
 
   * LimeRFE USB support
