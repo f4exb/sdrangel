@@ -1,3 +1,14 @@
+sdrangel (4.13.1-1) unstable; urgency=medium
+
+  * LimeRFE USB support: fixed attenuator and AM/FM notch settings
+  * FileSource: fixed various issues with settings with GUI and REST API. Fixes issue #481
+  * FFT: added Kaiser window with alpha factor at pi
+  * Removed librtlsdr in the list of dependencies in Debian install
+  * SoapySDR: fixed FindSoapySDR.cmake
+  * SoapySDR: Fix case-sensitive package check
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 26 Feb 2020 22:14:22 +0100
+
 sdrangel (4.13.0-1) unstable; urgency=medium
 
   * LimeRFE USB support
