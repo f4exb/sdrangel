@@ -15,14 +15,15 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       # RelWithDebInfo
       configuration: Release
-      CMAKE_CUSTOM_OPTIONS: "-DENABLE_EXTERNAL_LIBRARIES=OFF"
+      # CMAKE_CUSTOM_OPTIONS: "-DENABLE_EXTERNAL_LIBRARIES=OFF"
+      CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON -DQT_MISSING=OFF -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DENABLE_SERVER=OFF"
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
-    - TARGET: ubuntu1804sse41
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-      CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON"
-    - TARGET: ubuntu1804server
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-      CMAKE_CUSTOM_OPTIONS: "-DBUILD_GUI=OFF"
+    # - TARGET: ubuntu1804sse41
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    #   CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON"
+    # - TARGET: ubuntu1804server
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
+    #   CMAKE_CUSTOM_OPTIONS: "-DBUILD_GUI=OFF"
     - TARGET: ubuntu1804external
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
       CMAKE_CUSTOM_OPTIONS: "-DENABLE_EXTERNAL_LIBRARIES=ON"
@@ -40,7 +41,7 @@ for:
       #- C:\Tools\vcpkg\installed
     install:
       # the clone doesn't get submodules
-      - ps: git submodule update --init --recursive
+      - cmd: git submodule update --init --recursive
     before_build:
       - ps: cmake . -G $(CMAKE_GENERATOR) $(CMAKE_CUSTOM_OPTIONS)
     build:
@@ -60,10 +61,10 @@ for:
           sudo apt-get -y install build-essential cmake git \
             devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libqt5opengl5-dev \
             qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
-            libusb-1.0-0-dev libboost-all-dev librtlsdr-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
+            libusb-1.0-0-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
             libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
             libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
-            librtlsdr-dev liblimesuite-dev libbladerf-dev libsoapysdr-dev libiio-dev \
+            libbladerf-dev libsoapysdr-dev libiio-dev \
             autoconf automake libtool
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_cm256cc.sh; fi
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_mbelib.sh; fi
@@ -72,6 +73,8 @@ for:
       - sh: bash cmake/ci/build_perseus-sdr.sh
       - sh: bash cmake/ci/build_xtrx-sdr.sh
       - sh: bash cmake/ci/build_airspyhf.sh
+      - sh: bash cmake/ci/build_rtlsdr.sh
+      - sh: bash cmake/ci/build_limesuite.sh
     before_build:
       - sh: bash -c export
       - sh: bash -c pwd
