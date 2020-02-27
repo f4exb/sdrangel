@@ -4,18 +4,20 @@ set(xtrxoutput_SOURCES
 	xtrxoutput.cpp
 	xtrxoutputplugin.cpp
 	xtrxoutputsettings.cpp
-	xtrxoutputthread.cpp
+    xtrxoutputthread.cpp
+    xtrxoutputwebapiadapter.cpp
 )
 
 set(xtrxoutput_HEADERS
 	xtrxoutput.h
 	xtrxoutputplugin.h
 	xtrxoutputsettings.h
-	xtrxoutputthread.h
+    xtrxoutputthread.h
+    xtrxoutputwebapiadapter.h
 )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${LIBXTRX_INCLUDE_DIRS}
 )
@@ -24,7 +26,6 @@ if(NOT SERVER_MODE)
     set(xtrxoutput_SOURCES
         ${xtrxoutput_SOURCES}
         xtrxoutputgui.cpp
-
         xtrxoutputgui.ui
     )
     set(xtrxoutput_HEADERS
@@ -48,13 +49,13 @@ add_library(${TARGET_NAME} SHARED
 )
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
-        ${LIBXTRX_LIBRARY}
-        xtrxdevice
+    swagger
+    ${LIBXTRX_LIBRARY}
+    xtrxdevice
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
