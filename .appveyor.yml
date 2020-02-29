@@ -2,7 +2,6 @@
 version: "{build}-{branch}"
 clone_depth: 1
 
-# maybe we can add arm
 platform:
   - x64
 
@@ -10,6 +9,8 @@ matrix:
   fast_finish: false
 
 environment:
+#   my_variable:
+#     secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
   matrix:
     - TARGET: vs2017gui
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
@@ -18,15 +19,9 @@ environment:
       # CMAKE_CUSTOM_OPTIONS: "-DENABLE_EXTERNAL_LIBRARIES=OFF"
       CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON -DQT_MISSING=OFF -DDEBUG_OUTPUT=ON -DENABLE_MIRISDR=OFF -DENABLE_SERVER=OFF"
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
-    # - TARGET: ubuntu1804sse41
-    #   APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-    #   CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON"
-    # - TARGET: ubuntu1804server
-    #   APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-    #   CMAKE_CUSTOM_OPTIONS: "-DBUILD_GUI=OFF"
-    - TARGET: ubuntu1804external
+    - TARGET: ubuntu1804prod
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
-      CMAKE_CUSTOM_OPTIONS: "-DENABLE_EXTERNAL_LIBRARIES=ON"
+      CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON -DDEBUG_OUTPUT=ON -DENABLE_EXTERNAL_LIBRARIES=ON"
 
 # image:
 #  - &linux   Ubuntu1804
@@ -39,16 +34,27 @@ for:
       - C:\ProgramData\chocolatey\bin
       - C:\ProgramData\chocolatey\lib
       #- C:\Tools\vcpkg\installed
-    install:
-      # the clone doesn't get submodules
-      - cmd: git submodule update --init --recursive
-    before_build:
-      - ps: cmake . -G $(CMAKE_GENERATOR) $(CMAKE_CUSTOM_OPTIONS)
-    build:
-      parallel: true
-      project: $(APPVEYOR_BUILD_FOLDER)\$(APPVEYOR_PROJECT_NAME).sln
-    #test_script:
-      #- ps: '%APPVEYOR_BUILD_FOLDER%\%CONFIGURATION%\tests.exe'
+    build_script:
+      - git submodule update --init --recursive
+      - mkdir build && cd build
+      - cmake ..\ -G "%CMAKE_GENERATOR%" %CMAKE_CUSTOM_OPTIONS%
+      - cmake --build . --config Release --target PACKAGE
+    artifacts: # push installer executable
+      path: build\*.exe
+      name: installer
+    deploy:
+      release: sdrangel-v$(appveyor_build_version)
+      description: 'SDRangel Windows'
+      provider: GitHub
+      auth_token:
+        secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
+      artifact: installer, portable
+      draft: false
+      prerelease: false
+      tag: $(APPVEYOR_REPO_TAG_NAME) # will not work until tag is pushed
+      on:
+        APPVEYOR_REPO_TAG: true   # deploy on tag push only
+        branch: master            # release from master branch only
   - matrix:
       only:
         - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
@@ -70,11 +76,11 @@ for:
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_mbelib.sh; fi
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_serialdv.sh; fi
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_dsdcc.sh; fi
-      - sh: bash cmake/ci/build_perseus-sdr.sh
-      - sh: bash cmake/ci/build_xtrx-sdr.sh
-      - sh: bash cmake/ci/build_airspyhf.sh
-      - sh: bash cmake/ci/build_rtlsdr.sh
-      - sh: bash cmake/ci/build_limesuite.sh
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_perseus-sdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_xtrx-sdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_airspyhf.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_rtlsdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_limesuite.sh; fi
     before_build:
       - sh: bash -c export
       - sh: bash -c pwd
@@ -83,5 +89,20 @@ for:
     test_script:
       # debian build path
       - sh: ./obj-x86_64-linux-gnu/sdrangelbench
-
-deploy: off
+    after_build:
+      - sh: mkdir sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: cp ../*.deb ../*.build ../*.buildinfo ../*.changes sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: tar -czf sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: appveyor PushArtifact sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz -DeploymentName archive
+    deploy:
+      release: sdrangel-v$(appveyor_build_version)
+      description: 'SDRangel Ubuntu 18.04'
+      provider: GitHub
+      auth_token:
+        secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
+      artifact: archive
+      draft: false
+      prerelease: false
+      on:
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only
+        branch: master                 # release from master branch only
