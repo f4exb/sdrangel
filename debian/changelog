@@ -1,3 +1,10 @@
+sdrangel (5.2.1-1) unstable; urgency=medium
+
+  * LoRa demodulator: GUI and server flavors handling
+  * LoRa modulator: use signed char for armv8 compatibility
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 01 Mar 2020 08:14:22 +0100
+
 sdrangel (5.2.0-1) unstable; urgency=medium
 
   * LoRa demodulator complete refactoring
