@@ -33,8 +33,8 @@ private:
         TTYFigures
     };
 
-    static const char asciiToTTYLetters[128];
-    static const char asciiToTTYFigures[128];
+    static const signed char asciiToTTYLetters[128];
+    static const signed char asciiToTTYFigures[128];
     static const char ttyLetters = 0x1f;
     static const char ttyFigures = 0x1b;
 };

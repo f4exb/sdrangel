@@ -17,7 +17,7 @@
 
 #include "loramodencodertty.h"
 
-const char LoRaModEncoderTTY::asciiToTTYLetters[128] = {
+const signed char LoRaModEncoderTTY::asciiToTTYLetters[128] = {
 //    '\x00'   '\x01'   '\x02'   '\x03'   '\x04'   '\x05'   '\x06'   '\x07'
       0x00,    -1  ,    -1  ,    -1  ,    -1  ,    -1  ,    -1  ,    -1  ,
 //    '\x08'   '\t'     '\n'     '\x0b'   '\x0c'   '\r'     '\x0e'   '\x0f'
@@ -52,7 +52,7 @@ const char LoRaModEncoderTTY::asciiToTTYLetters[128] = {
       0x1d,    0x15,    0x11,    -1  ,    -1  ,    -1  ,    -1  ,    -1
     };
 
-const char LoRaModEncoderTTY::asciiToTTYFigures[128] = {
+const signed char LoRaModEncoderTTY::asciiToTTYFigures[128] = {
 //   '\x00'   '\x01'   '\x02'   '\x03'   '\x04'   '\x05'   '\x06'   '\x07'
      0x00,    -1  ,    -1  ,    -1  ,    -1  ,    -1  ,    -1  ,    0x05,
 //   '\x08'   '\t'     '\n'     '\x0b'   '\x0c'   '\r'     '\x0e'   '\x0f'
