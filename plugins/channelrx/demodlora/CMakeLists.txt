@@ -2,7 +2,6 @@ project(lora)
 
 set(lora_SOURCES
 	lorademod.cpp
-	lorademodgui.cpp
 	lorademodsettings.cpp
 	lorademodsink.cpp
 	lorademodbaseband.cpp
@@ -12,12 +11,10 @@ set(lora_SOURCES
     lorademoddecoderascii.cpp
     lorademoddecoderlora.cpp
 	lorademodmsg.cpp
-	lorademodgui.ui
 )
 
 set(lora_HEADERS
 	lorademod.h
-	lorademodgui.h
 	lorademodsettings.h
 	lorademodsink.h
 	lorademodbaseband.h
@@ -33,16 +30,37 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-add_library(demodlora SHARED
+if(NOT SERVER_MODE)
+    set(lora_SOURCES
+        ${lora_SOURCES}
+        lorademodgui.cpp
+        lorademodgui.ui
+    )
+    set(lora_HEADERS
+        ${lora_HEADERS}
+        lorademodgui.h
+    )
+    set(TARGET_NAME demodlora)
+    set(TARGET_LIB "Qt5::Widgets")
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME demodlorasrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
 	${lora_SOURCES}
 )
 
-target_link_libraries(demodlora
+target_link_libraries(${TARGET_NAME}
     Qt5::Core
-    Qt5::Widgets
+    ${TARGET_LIB}
 	sdrbase
-    sdrgui
+	${TARGET_LIB_GUI}
     swagger
 )
 
-install(TARGETS demodlora DESTINATION ${INSTALL_PLUGINS_DIR})
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

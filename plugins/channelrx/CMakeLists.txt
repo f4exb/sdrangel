@@ -8,6 +8,7 @@ add_subdirectory(udpsink)
 add_subdirectory(demodwfm)
 add_subdirectory(localsink)
 add_subdirectory(freqtracker)
+add_subdirectory(demodlora)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
@@ -22,7 +23,6 @@ if (CODEC2_FOUND)
 endif(CODEC2_FOUND)
 
 if(NOT SERVER_MODE)
-    add_subdirectory(demodlora)
     add_subdirectory(chanalyzer)
     add_subdirectory(demodatv)
 

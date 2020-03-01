@@ -19,7 +19,9 @@
 #include "plugin/pluginapi.h"
 
 #include "loraplugin.h"
+#ifndef SERVER_MODE
 #include "lorademodgui.h"
+#endif
 #include "lorademod.h"
 
 const PluginDescriptor LoRaPlugin::m_pluginDescriptor = {
@@ -51,10 +53,19 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(LoRaDemod::m_channelIdURI, LoRaDemod::m_channelId, this);
 }
 
+#ifdef SERVER_MODE
+PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(
+        DeviceUISet *deviceUISet,
+        BasebandSampleSink *rxChannel) const
+{
+    return 0;
+}
+#else
 PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return LoRaDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
+#endif
 
 BasebandSampleSink* LoRaPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
 {
