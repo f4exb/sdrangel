@@ -8,7 +8,7 @@ add_subdirectory(udpsink)
 add_subdirectory(demodwfm)
 add_subdirectory(localsink)
 add_subdirectory(freqtracker)
-add_subdirectory(demodlora)
+add_subdirectory(demodchirpchat)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)

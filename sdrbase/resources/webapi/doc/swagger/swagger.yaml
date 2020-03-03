@@ -2262,6 +2262,8 @@ definitions:
         $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
       BFMDemodReport:
         $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+      ChirpChatDemodReport:
+        $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
       DSDDemodReport:
         $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
       FileSourceReport:
@@ -2272,8 +2274,6 @@ definitions:
         $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       FreqTrackerReport:
         $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
-      LoRaDemodReport:
-        $ref: "/doc/swagger/include/LoRaDemod.yaml#/LoRaDemodReport"
       LoRaModReport:
         $ref: "/doc/swagger/include/LoRaMod.yaml#/LoRaModReport"
       NFMDemodReport:

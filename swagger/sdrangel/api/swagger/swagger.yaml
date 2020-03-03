@@ -2262,6 +2262,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
       BFMDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+      ChirpChatDemodReport:
+        $ref: "http://localhost:8081/api/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
       DSDDemodReport:
         $ref: "http://localhost:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
       FileSourceReport:
@@ -2272,8 +2274,6 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       FreqTrackerReport:
         $ref: "http://localhost:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
-      LoRaDemodReport:
-        $ref: "http://localhost:8081/api/swagger/include/LoRaDemod.yaml#/LoRaDemodReport"
       LoRaModReport:
         $ref: "http://localhost:8081/api/swagger/include/LoRaMod.yaml#/LoRaModReport"
       NFMDemodReport:

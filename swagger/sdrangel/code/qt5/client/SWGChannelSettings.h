@@ -29,6 +29,7 @@
 #include "SWGBFMDemodSettings.h"
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
+#include "SWGChirpChatDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -36,7 +37,6 @@
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGInterferometerSettings.h"
-#include "SWGLoRaDemodSettings.h"
 #include "SWGLoRaModSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
@@ -103,6 +103,9 @@ public:
     SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
     void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
 
+    SWGChirpChatDemodSettings* getChirpChatDemodSettings();
+    void setChirpChatDemodSettings(SWGChirpChatDemodSettings* chirp_chat_demod_settings);
+
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
 
@@ -123,9 +126,6 @@ public:
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
-
-    SWGLoRaDemodSettings* getLoRaDemodSettings();
-    void setLoRaDemodSettings(SWGLoRaDemodSettings* lo_ra_demod_settings);
 
     SWGLoRaModSettings* getLoRaModSettings();
     void setLoRaModSettings(SWGLoRaModSettings* lo_ra_mod_settings);
@@ -203,6 +203,9 @@ private:
     SWGChannelAnalyzerSettings* channel_analyzer_settings;
     bool m_channel_analyzer_settings_isSet;
 
+    SWGChirpChatDemodSettings* chirp_chat_demod_settings;
+    bool m_chirp_chat_demod_settings_isSet;
+
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;
 
@@ -223,9 +226,6 @@ private:
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;
-
-    SWGLoRaDemodSettings* lo_ra_demod_settings;
-    bool m_lo_ra_demod_settings_isSet;
 
     SWGLoRaModSettings* lo_ra_mod_settings;
     bool m_lo_ra_mod_settings_isSet;

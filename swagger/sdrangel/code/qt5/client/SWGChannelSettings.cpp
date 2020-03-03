@@ -50,6 +50,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = nullptr;
     m_channel_analyzer_settings_isSet = false;
+    chirp_chat_demod_settings = nullptr;
+    m_chirp_chat_demod_settings_isSet = false;
     datv_demod_settings = nullptr;
     m_datv_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
@@ -64,8 +66,6 @@ SWGChannelSettings::SWGChannelSettings() {
     m_freq_tracker_settings_isSet = false;
     interferometer_settings = nullptr;
     m_interferometer_settings_isSet = false;
-    lo_ra_demod_settings = nullptr;
-    m_lo_ra_demod_settings_isSet = false;
     lo_ra_mod_settings = nullptr;
     m_lo_ra_mod_settings_isSet = false;
     nfm_demod_settings = nullptr;
@@ -122,6 +122,8 @@ SWGChannelSettings::init() {
     m_bfm_demod_settings_isSet = false;
     channel_analyzer_settings = new SWGChannelAnalyzerSettings();
     m_channel_analyzer_settings_isSet = false;
+    chirp_chat_demod_settings = new SWGChirpChatDemodSettings();
+    m_chirp_chat_demod_settings_isSet = false;
     datv_demod_settings = new SWGDATVDemodSettings();
     m_datv_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
@@ -136,8 +138,6 @@ SWGChannelSettings::init() {
     m_freq_tracker_settings_isSet = false;
     interferometer_settings = new SWGInterferometerSettings();
     m_interferometer_settings_isSet = false;
-    lo_ra_demod_settings = new SWGLoRaDemodSettings();
-    m_lo_ra_demod_settings_isSet = false;
     lo_ra_mod_settings = new SWGLoRaModSettings();
     m_lo_ra_mod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
@@ -195,6 +195,9 @@ SWGChannelSettings::cleanup() {
     if(channel_analyzer_settings != nullptr) { 
         delete channel_analyzer_settings;
     }
+    if(chirp_chat_demod_settings != nullptr) { 
+        delete chirp_chat_demod_settings;
+    }
     if(datv_demod_settings != nullptr) { 
         delete datv_demod_settings;
     }
@@ -215,9 +218,6 @@ SWGChannelSettings::cleanup() {
     }
     if(interferometer_settings != nullptr) { 
         delete interferometer_settings;
-    }
-    if(lo_ra_demod_settings != nullptr) { 
-        delete lo_ra_demod_settings;
     }
     if(lo_ra_mod_settings != nullptr) { 
         delete lo_ra_mod_settings;
@@ -293,6 +293,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&channel_analyzer_settings, pJson["ChannelAnalyzerSettings"], "SWGChannelAnalyzerSettings", "SWGChannelAnalyzerSettings");
     
+    ::SWGSDRangel::setValue(&chirp_chat_demod_settings, pJson["ChirpChatDemodSettings"], "SWGChirpChatDemodSettings", "SWGChirpChatDemodSettings");
+    
     ::SWGSDRangel::setValue(&datv_demod_settings, pJson["DATVDemodSettings"], "SWGDATVDemodSettings", "SWGDATVDemodSettings");
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
@@ -306,8 +308,6 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
     
     ::SWGSDRangel::setValue(&interferometer_settings, pJson["InterferometerSettings"], "SWGInterferometerSettings", "SWGInterferometerSettings");
-    
-    ::SWGSDRangel::setValue(&lo_ra_demod_settings, pJson["LoRaDemodSettings"], "SWGLoRaDemodSettings", "SWGLoRaDemodSettings");
     
     ::SWGSDRangel::setValue(&lo_ra_mod_settings, pJson["LoRaModSettings"], "SWGLoRaModSettings", "SWGLoRaModSettings");
     
@@ -384,6 +384,9 @@ SWGChannelSettings::asJsonObject() {
     if((channel_analyzer_settings != nullptr) && (channel_analyzer_settings->isSet())){
         toJsonValue(QString("ChannelAnalyzerSettings"), channel_analyzer_settings, obj, QString("SWGChannelAnalyzerSettings"));
     }
+    if((chirp_chat_demod_settings != nullptr) && (chirp_chat_demod_settings->isSet())){
+        toJsonValue(QString("ChirpChatDemodSettings"), chirp_chat_demod_settings, obj, QString("SWGChirpChatDemodSettings"));
+    }
     if((datv_demod_settings != nullptr) && (datv_demod_settings->isSet())){
         toJsonValue(QString("DATVDemodSettings"), datv_demod_settings, obj, QString("SWGDATVDemodSettings"));
     }
@@ -404,9 +407,6 @@ SWGChannelSettings::asJsonObject() {
     }
     if((interferometer_settings != nullptr) && (interferometer_settings->isSet())){
         toJsonValue(QString("InterferometerSettings"), interferometer_settings, obj, QString("SWGInterferometerSettings"));
-    }
-    if((lo_ra_demod_settings != nullptr) && (lo_ra_demod_settings->isSet())){
-        toJsonValue(QString("LoRaDemodSettings"), lo_ra_demod_settings, obj, QString("SWGLoRaDemodSettings"));
     }
     if((lo_ra_mod_settings != nullptr) && (lo_ra_mod_settings->isSet())){
         toJsonValue(QString("LoRaModSettings"), lo_ra_mod_settings, obj, QString("SWGLoRaModSettings"));
@@ -561,6 +561,16 @@ SWGChannelSettings::setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* chann
     this->m_channel_analyzer_settings_isSet = true;
 }
 
+SWGChirpChatDemodSettings*
+SWGChannelSettings::getChirpChatDemodSettings() {
+    return chirp_chat_demod_settings;
+}
+void
+SWGChannelSettings::setChirpChatDemodSettings(SWGChirpChatDemodSettings* chirp_chat_demod_settings) {
+    this->chirp_chat_demod_settings = chirp_chat_demod_settings;
+    this->m_chirp_chat_demod_settings_isSet = true;
+}
+
 SWGDATVDemodSettings*
 SWGChannelSettings::getDatvDemodSettings() {
     return datv_demod_settings;
@@ -629,16 +639,6 @@ void
 SWGChannelSettings::setInterferometerSettings(SWGInterferometerSettings* interferometer_settings) {
     this->interferometer_settings = interferometer_settings;
     this->m_interferometer_settings_isSet = true;
-}
-
-SWGLoRaDemodSettings*
-SWGChannelSettings::getLoRaDemodSettings() {
-    return lo_ra_demod_settings;
-}
-void
-SWGChannelSettings::setLoRaDemodSettings(SWGLoRaDemodSettings* lo_ra_demod_settings) {
-    this->lo_ra_demod_settings = lo_ra_demod_settings;
-    this->m_lo_ra_demod_settings_isSet = true;
 }
 
 SWGLoRaModSettings*
@@ -809,6 +809,9 @@ SWGChannelSettings::isSet(){
         if(channel_analyzer_settings && channel_analyzer_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(chirp_chat_demod_settings && chirp_chat_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(datv_demod_settings && datv_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
@@ -828,9 +831,6 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(interferometer_settings && interferometer_settings->isSet()){
-            isObjectUpdated = true; break;
-        }
-        if(lo_ra_demod_settings && lo_ra_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(lo_ra_mod_settings && lo_ra_mod_settings->isSet()){
