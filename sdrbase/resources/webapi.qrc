@@ -16,6 +16,7 @@
         <file>webapi/doc/swagger/include/ChannelAnalyzer.yaml</file>
         <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatDemod.yaml</file>
+        <file>webapi/doc/swagger/include/ChirpChatMod.yaml</file>
         <file>webapi/doc/swagger/include/Command.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
@@ -37,7 +38,6 @@
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
         <file>webapi/doc/swagger/include/LocalInput.yaml</file>
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
-        <file>webapi/doc/swagger/include/LoRaMod.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>

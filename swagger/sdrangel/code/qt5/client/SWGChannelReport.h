@@ -27,12 +27,12 @@
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGChirpChatDemodReport.h"
+#include "SWGChirpChatModReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGFileSourceReport.h"
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreqTrackerReport.h"
-#include "SWGLoRaModReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGRemoteSourceReport.h"
@@ -83,6 +83,9 @@ public:
     SWGChirpChatDemodReport* getChirpChatDemodReport();
     void setChirpChatDemodReport(SWGChirpChatDemodReport* chirp_chat_demod_report);
 
+    SWGChirpChatModReport* getChirpChatModReport();
+    void setChirpChatModReport(SWGChirpChatModReport* chirp_chat_mod_report);
+
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
 
@@ -97,9 +100,6 @@ public:
 
     SWGFreqTrackerReport* getFreqTrackerReport();
     void setFreqTrackerReport(SWGFreqTrackerReport* freq_tracker_report);
-
-    SWGLoRaModReport* getLoRaModReport();
-    void setLoRaModReport(SWGLoRaModReport* lo_ra_mod_report);
 
     SWGNFMDemodReport* getNfmDemodReport();
     void setNfmDemodReport(SWGNFMDemodReport* nfm_demod_report);
@@ -153,6 +153,9 @@ private:
     SWGChirpChatDemodReport* chirp_chat_demod_report;
     bool m_chirp_chat_demod_report_isSet;
 
+    SWGChirpChatModReport* chirp_chat_mod_report;
+    bool m_chirp_chat_mod_report_isSet;
+
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
 
@@ -167,9 +170,6 @@ private:
 
     SWGFreqTrackerReport* freq_tracker_report;
     bool m_freq_tracker_report_isSet;
-
-    SWGLoRaModReport* lo_ra_mod_report;
-    bool m_lo_ra_mod_report_isSet;
 
     SWGNFMDemodReport* nfm_demod_report;
     bool m_nfm_demod_report_isSet;

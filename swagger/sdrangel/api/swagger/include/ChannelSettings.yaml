@@ -33,6 +33,8 @@ ChannelSettings:
       $ref: "http://localhost:8081/api/swagger/include/ChannelAnalyzer.yaml#/ChannelAnalyzerSettings"
     ChirpChatDemodSettings:
       $ref: "http://localhost:8081/api/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodSettings"
+    ChirpChatModSettings:
+      $ref: "http://localhost:8081/api/swagger/include/ChirpChatMod.yaml#/ChirpChatModSettings"
     DATVDemodSettings:
       $ref: "http://localhost:8081/api/swagger/include/DATVDemod.yaml#/DATVDemodSettings"
     DSDDemodSettings:
@@ -47,8 +49,6 @@ ChannelSettings:
       $ref: "http://localhost:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
     InterferometerSettings:
       $ref: "http://localhost:8081/api/swagger/include/Interferometer.yaml#/InterferometerSettings"
-    LoRaModSettings:
-      $ref: "http://localhost:8081/api/swagger/include/LoRaMod.yaml#/LoRaModSettings"
     NFMDemodSettings:
       $ref: "http://localhost:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:

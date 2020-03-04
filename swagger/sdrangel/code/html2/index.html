@@ -2172,6 +2172,9 @@ margin-bottom: 20px;
     "ChirpChatDemodReport" : {
       "$ref" : "#/definitions/ChirpChatDemodReport"
     },
+    "ChirpChatModReport" : {
+      "$ref" : "#/definitions/ChirpChatModReport"
+    },
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
@@ -2186,9 +2189,6 @@ margin-bottom: 20px;
     },
     "FreqTrackerReport" : {
       "$ref" : "#/definitions/FreqTrackerReport"
-    },
-    "LoRaModReport" : {
-      "$ref" : "#/definitions/LoRaModReport"
     },
     "NFMDemodReport" : {
       "$ref" : "#/definitions/NFMDemodReport"
@@ -2264,6 +2264,9 @@ margin-bottom: 20px;
     "ChirpChatDemodSettings" : {
       "$ref" : "#/definitions/ChirpChatDemodSettings"
     },
+    "ChirpChatModSettings" : {
+      "$ref" : "#/definitions/ChirpChatModSettings"
+    },
     "DATVDemodSettings" : {
       "$ref" : "#/definitions/DATVDemodSettings"
     },
@@ -2284,9 +2287,6 @@ margin-bottom: 20px;
     },
     "InterferometerSettings" : {
       "$ref" : "#/definitions/InterferometerSettings"
-    },
-    "LoRaModSettings" : {
-      "$ref" : "#/definitions/LoRaModSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -2524,6 +2524,179 @@ margin-bottom: 20px;
     }
   },
   "description" : "ChirpChatDemod"
+};
+            defs.ChirpChatModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "symbolTimeMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "symbol duration (ms)"
+    },
+    "payloadTimeMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "payload duration (ms)"
+    },
+    "totalTimeMs" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "total message duration inc. preamble and SFD (ms)"
+    }
+  },
+  "description" : "ChirpChatMod"
+};
+            defs.ChirpChatModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer",
+      "description" : "standard bandwidths index:\n  *  0 -   2604 Hz (333333 / 128)\n  *  1 -   3125 Hz (400000 / 128)\n  *  2 -   3906 Hz (500000 / 128)\n  *  3 -   5208 Hz (333333 / 64)\n  *  4 -   6250 Hz (400000 / 64)\n  *  5 -   7813 Hz (500000 / 64)\n  *  6 -  10417 Hz (333333 / 32)\n  *  7 -  12500 Hz (400000 / 32)\n  *  8 -  15625 Hz (500000 / 32)\n  *  9 -  20833 Hz (333333 / 16)\n  * 10 -  25000 Hz (400000 / 16)\n  * 11 -  31250 Hz (500000 / 16)\n  * 12 -  41667 Hz (333333 / 8)\n  * 13 -  50000 Hz (400000 / 8)\n  * 14 -  62500 Hz (500000 / 8)\n  * 15 -  83333 Hz (333333 / 4)\n  * 16 - 100000 Hz (400000 / 4)\n  * 17 - 125000 Hz (500000 / 4)\n  * 18 - 166667 Hz (333333 / 2)\n  * 19 - 200000 Hz (400000 / 2)\n  * 20 - 250000 Hz (500000 / 2)\n  * 21 - 333333 Hz (333333 / 1)\n  * 22 - 400000 Hz (400000 / 1)\n  * 23 - 500000 Hz (500000 / 1)\n"
+    },
+    "spreadFactor" : {
+      "type" : "integer"
+    },
+    "deBits" : {
+      "type" : "integer",
+      "description" : "Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol"
+    },
+    "preambleChirps" : {
+      "type" : "integer",
+      "description" : "Number of preamble chirps"
+    },
+    "quietMillis" : {
+      "type" : "integer",
+      "description" : "Number of milliseconds to pause between transmissions"
+    },
+    "syncWord" : {
+      "type" : "integer",
+      "description" : "2 byte (0..65535) synchronization syncWord"
+    },
+    "channelMute" : {
+      "type" : "integer",
+      "description" : "boolean"
+    },
+    "codingScheme" : {
+      "type" : "integer",
+      "description" : "message encoding scheme (LoRaModSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
+    },
+    "nbParityBits" : {
+      "type" : "integer",
+      "description" : "Hamming FEC parity bits (LoRa)"
+    },
+    "hasCRC" : {
+      "type" : "integer",
+      "description" : "Payload has CRC (LoRa)"
+    },
+    "hasHeader" : {
+      "type" : "integer",
+      "description" : "Header present before actual payload (LoRa)"
+    },
+    "myCall" : {
+      "type" : "string",
+      "description" : "own callsign placeholder (QSO mode)"
+    },
+    "urCall" : {
+      "type" : "string",
+      "description" : "other party callsign placeholder (QSO mode)"
+    },
+    "myLoc" : {
+      "type" : "string",
+      "description" : "own QRA locator (QSO mode)"
+    },
+    "myRpt" : {
+      "type" : "string",
+      "description" : "report sent to other party (QSO mode)"
+    },
+    "messageType" : {
+      "type" : "integer",
+      "description" : "type of message to send (LoRaModSettings::MessageType):\n  *  0 - No message i.e no output. Use this as a transition to resend the same message.\n  *  1 - Beacon. Sends message specified in beaconMessage\n  *  2 - CQ call. Sends message specified in cqMessage\n  *  3 - Reply to CQ call. Sends message specified in replyMessage\n  *  4 - Report to callee. Sends message specified in reportMessage\n  *  5 - Report to caller. Sends message specified in replyReportMessage\n  *  6 - RRR to callee. Sends message specified in rrrMessage\n  *  7 - 73 to caller. Sends message specified in message73\n  *  8 - Random message with callsigns. Sends message specified in qsoTextMessage\n  *  9 - Plain text. Sends message specified in textMessage\n  * 10 - Binary payload. Sends bytes specified in bytesMessage\n"
+    },
+    "beaconMessage" : {
+      "type" : "string",
+      "description" : "text message to be sent (repeatedly) as a beaconMessage"
+    },
+    "cqMessage" : {
+      "type" : "string",
+      "description" : "general call message (QSO mode)"
+    },
+    "replyMessage" : {
+      "type" : "string",
+      "description" : "reply to caller message (QSO mode)"
+    },
+    "reportMessage" : {
+      "type" : "string",
+      "description" : "report to callee message (QSO mode)"
+    },
+    "replyReportMessage" : {
+      "type" : "string",
+      "description" : "report back to caller message (QSO mode)"
+    },
+    "rrrMessage" : {
+      "type" : "string",
+      "description" : "caller RRR message (QSO mode)"
+    },
+    "message73" : {
+      "type" : "string",
+      "description" : "73 message back to caller to close QSO (QSO mode)"
+    },
+    "qsoTextMessage" : {
+      "type" : "string",
+      "description" : "QSO random message exchange (QSO mode)"
+    },
+    "textMessage" : {
+      "type" : "string",
+      "description" : "freeform text message"
+    },
+    "bytesMessage" : {
+      "type" : "array",
+      "description" : "message to send as an array of hex string represented bytes (00..FF)",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "messageRepeat" : {
+      "type" : "integer",
+      "description" : "number of repetitions of the same message (0 for infinite)"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ChirpChatMod"
 };
             defs.Command = {
   "properties" : {
@@ -4566,179 +4739,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "LimeSDR"
-};
-            defs.LoRaModReport = {
-  "properties" : {
-    "channelPowerDB" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "power transmitted in channel (dB)"
-    },
-    "channelSampleRate" : {
-      "type" : "integer"
-    },
-    "symbolTimeMs" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "symbol duration (ms)"
-    },
-    "payloadTimeMs" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "payload duration (ms)"
-    },
-    "totalTimeMs" : {
-      "type" : "number",
-      "format" : "float",
-      "description" : "total message duration inc. preamble and SFD (ms)"
-    }
-  },
-  "description" : "LoRaMod"
-};
-            defs.LoRaModSettings = {
-  "properties" : {
-    "inputFrequencyOffset" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
-    "bandwidthIndex" : {
-      "type" : "integer",
-      "description" : "standard bandwidths index:\n  *  0 -   2604 Hz (333333 / 128)\n  *  1 -   3125 Hz (400000 / 128)\n  *  2 -   3906 Hz (500000 / 128)\n  *  3 -   5208 Hz (333333 / 64)\n  *  4 -   6250 Hz (400000 / 64)\n  *  5 -   7813 Hz (500000 / 64)\n  *  6 -  10417 Hz (333333 / 32)\n  *  7 -  12500 Hz (400000 / 32)\n  *  8 -  15625 Hz (500000 / 32)\n  *  9 -  20833 Hz (333333 / 16)\n  * 10 -  25000 Hz (400000 / 16)\n  * 11 -  31250 Hz (500000 / 16)\n  * 12 -  41667 Hz (333333 / 8)\n  * 13 -  50000 Hz (400000 / 8)\n  * 14 -  62500 Hz (500000 / 8)\n  * 15 -  83333 Hz (333333 / 4)\n  * 16 - 100000 Hz (400000 / 4)\n  * 17 - 125000 Hz (500000 / 4)\n  * 18 - 166667 Hz (333333 / 2)\n  * 19 - 200000 Hz (400000 / 2)\n  * 20 - 250000 Hz (500000 / 2)\n  * 21 - 333333 Hz (333333 / 1)\n  * 22 - 400000 Hz (400000 / 1)\n  * 23 - 500000 Hz (500000 / 1)\n"
-    },
-    "spreadFactor" : {
-      "type" : "integer"
-    },
-    "deBits" : {
-      "type" : "integer",
-      "description" : "Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol"
-    },
-    "preambleChirps" : {
-      "type" : "integer",
-      "description" : "Number of preamble chirps"
-    },
-    "quietMillis" : {
-      "type" : "integer",
-      "description" : "Number of milliseconds to pause between transmissions"
-    },
-    "syncWord" : {
-      "type" : "integer",
-      "description" : "2 byte (0..65535) synchronization syncWord"
-    },
-    "channelMute" : {
-      "type" : "integer",
-      "description" : "boolean"
-    },
-    "codingScheme" : {
-      "type" : "integer",
-      "description" : "message encoding scheme (LoRaModSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
-    },
-    "nbParityBits" : {
-      "type" : "integer",
-      "description" : "Hamming FEC parity bits (LoRa)"
-    },
-    "hasCRC" : {
-      "type" : "integer",
-      "description" : "Payload has CRC (LoRa)"
-    },
-    "hasHeader" : {
-      "type" : "integer",
-      "description" : "Header present before actual payload (LoRa)"
-    },
-    "myCall" : {
-      "type" : "string",
-      "description" : "own callsign placeholder (QSO mode)"
-    },
-    "urCall" : {
-      "type" : "string",
-      "description" : "other party callsign placeholder (QSO mode)"
-    },
-    "myLoc" : {
-      "type" : "string",
-      "description" : "own QRA locator (QSO mode)"
-    },
-    "myRpt" : {
-      "type" : "string",
-      "description" : "report sent to other party (QSO mode)"
-    },
-    "messageType" : {
-      "type" : "integer",
-      "description" : "type of message to send (LoRaModSettings::MessageType):\n  *  0 - No message i.e no output. Use this as a transition to resend the same message.\n  *  1 - Beacon. Sends message specified in beaconMessage\n  *  2 - CQ call. Sends message specified in cqMessage\n  *  3 - Reply to CQ call. Sends message specified in replyMessage\n  *  4 - Report to callee. Sends message specified in reportMessage\n  *  5 - Report to caller. Sends message specified in replyReportMessage\n  *  6 - RRR to callee. Sends message specified in rrrMessage\n  *  7 - 73 to caller. Sends message specified in message73\n  *  8 - Random message with callsigns. Sends message specified in qsoTextMessage\n  *  9 - Plain text. Sends message specified in textMessage\n  * 10 - Binary payload. Sends bytes specified in bytesMessage\n"
-    },
-    "beaconMessage" : {
-      "type" : "string",
-      "description" : "text message to be sent (repeatedly) as a beaconMessage"
-    },
-    "cqMessage" : {
-      "type" : "string",
-      "description" : "general call message (QSO mode)"
-    },
-    "replyMessage" : {
-      "type" : "string",
-      "description" : "reply to caller message (QSO mode)"
-    },
-    "reportMessage" : {
-      "type" : "string",
-      "description" : "report to callee message (QSO mode)"
-    },
-    "replyReportMessage" : {
-      "type" : "string",
-      "description" : "report back to caller message (QSO mode)"
-    },
-    "rrrMessage" : {
-      "type" : "string",
-      "description" : "caller RRR message (QSO mode)"
-    },
-    "message73" : {
-      "type" : "string",
-      "description" : "73 message back to caller to close QSO (QSO mode)"
-    },
-    "qsoTextMessage" : {
-      "type" : "string",
-      "description" : "QSO random message exchange (QSO mode)"
-    },
-    "textMessage" : {
-      "type" : "string",
-      "description" : "freeform text message"
-    },
-    "bytesMessage" : {
-      "type" : "array",
-      "description" : "message to send as an array of hex string represented bytes (00..FF)",
-      "items" : {
-        "type" : "string"
-      }
-    },
-    "messageRepeat" : {
-      "type" : "integer",
-      "description" : "number of repetitions of the same message (0 for infinite)"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "LoRaMod"
 };
             defs.LocalInputReport = {
   "properties" : {
@@ -32618,7 +32618,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-03-03T20:19:50.511+01:00
+              Generated 2020-03-03T23:14:21.625+01:00
             </div>
           </div>
       </div>

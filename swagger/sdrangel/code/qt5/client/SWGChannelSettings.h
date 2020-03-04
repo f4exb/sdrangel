@@ -30,6 +30,7 @@
 #include "SWGBeamSteeringCWModSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
 #include "SWGChirpChatDemodSettings.h"
+#include "SWGChirpChatModSettings.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -37,7 +38,6 @@
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
 #include "SWGInterferometerSettings.h"
-#include "SWGLoRaModSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
@@ -106,6 +106,9 @@ public:
     SWGChirpChatDemodSettings* getChirpChatDemodSettings();
     void setChirpChatDemodSettings(SWGChirpChatDemodSettings* chirp_chat_demod_settings);
 
+    SWGChirpChatModSettings* getChirpChatModSettings();
+    void setChirpChatModSettings(SWGChirpChatModSettings* chirp_chat_mod_settings);
+
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
 
@@ -126,9 +129,6 @@ public:
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
-
-    SWGLoRaModSettings* getLoRaModSettings();
-    void setLoRaModSettings(SWGLoRaModSettings* lo_ra_mod_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -206,6 +206,9 @@ private:
     SWGChirpChatDemodSettings* chirp_chat_demod_settings;
     bool m_chirp_chat_demod_settings_isSet;
 
+    SWGChirpChatModSettings* chirp_chat_mod_settings;
+    bool m_chirp_chat_mod_settings_isSet;
+
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;
 
@@ -226,9 +229,6 @@ private:
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;
-
-    SWGLoRaModSettings* lo_ra_mod_settings;
-    bool m_lo_ra_mod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

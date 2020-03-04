@@ -1,0 +1,169 @@
+ChirpChatModSettings:
+  description: ChirpChatMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    bandwidthIndex:
+      type: integer
+      description: >
+        standard bandwidths index:
+          *  0 -   2604 Hz (333333 / 128)
+          *  1 -   3125 Hz (400000 / 128)
+          *  2 -   3906 Hz (500000 / 128)
+          *  3 -   5208 Hz (333333 / 64)
+          *  4 -   6250 Hz (400000 / 64)
+          *  5 -   7813 Hz (500000 / 64)
+          *  6 -  10417 Hz (333333 / 32)
+          *  7 -  12500 Hz (400000 / 32)
+          *  8 -  15625 Hz (500000 / 32)
+          *  9 -  20833 Hz (333333 / 16)
+          * 10 -  25000 Hz (400000 / 16)
+          * 11 -  31250 Hz (500000 / 16)
+          * 12 -  41667 Hz (333333 / 8)
+          * 13 -  50000 Hz (400000 / 8)
+          * 14 -  62500 Hz (500000 / 8)
+          * 15 -  83333 Hz (333333 / 4)
+          * 16 - 100000 Hz (400000 / 4)
+          * 17 - 125000 Hz (500000 / 4)
+          * 18 - 166667 Hz (333333 / 2)
+          * 19 - 200000 Hz (400000 / 2)
+          * 20 - 250000 Hz (500000 / 2)
+          * 21 - 333333 Hz (333333 / 1)
+          * 22 - 400000 Hz (400000 / 1)
+          * 23 - 500000 Hz (500000 / 1)
+    spreadFactor:
+      type: integer
+    deBits:
+      description: Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol
+      type: integer
+    preambleChirps:
+      description: Number of preamble chirps
+      type: integer
+    quietMillis:
+      description: Number of milliseconds to pause between transmissions
+      type: integer
+    syncWord:
+      description: 2 byte (0..65535) synchronization syncWord
+      type: integer
+    channelMute:
+      description: boolean
+      type: integer
+    codingScheme:
+      type: integer
+      description: >
+        message encoding scheme (ChirpChatModSettings::CodingScheme):
+          * 0 - LoRa
+          * 1 - Plain ASCII (7 bit)
+          * 2 - Teletype (5 bit Baudot) a.k.a TTY
+    nbParityBits:
+      description: Hamming FEC parity bits (LoRa)
+      type: integer
+    hasCRC:
+      description: Payload has CRC (LoRa)
+      type: integer
+    hasHeader:
+      description: Header present before actual payload (LoRa)
+      type: integer
+    myCall:
+      description: own callsign placeholder (QSO mode)
+      type: string
+    urCall:
+      description: other party callsign placeholder (QSO mode)
+      type: string
+    myLoc:
+      description: own QRA locator (QSO mode)
+      type: string
+    myRpt:
+      description: report sent to other party (QSO mode)
+      type: string
+    messageType:
+      type: integer
+      description: >
+        type of message to send (ChirpChatModSettings::MessageType):
+          *  0 - No message i.e no output. Use this as a transition to resend the same message.
+          *  1 - Beacon. Sends message specified in beaconMessage
+          *  2 - CQ call. Sends message specified in cqMessage
+          *  3 - Reply to CQ call. Sends message specified in replyMessage
+          *  4 - Report to callee. Sends message specified in reportMessage
+          *  5 - Report to caller. Sends message specified in replyReportMessage
+          *  6 - RRR to callee. Sends message specified in rrrMessage
+          *  7 - 73 to caller. Sends message specified in message73
+          *  8 - Random message with callsigns. Sends message specified in qsoTextMessage
+          *  9 - Plain text. Sends message specified in textMessage
+          * 10 - Binary payload. Sends bytes specified in bytesMessage
+    beaconMessage:
+      description: text message to be sent (repeatedly) as a beaconMessage
+      type: string
+    cqMessage:
+      description: general call message (QSO mode)
+      type: string
+    replyMessage:
+      description: reply to caller message (QSO mode)
+      type: string
+    reportMessage:
+      description: report to callee message (QSO mode)
+      type: string
+    replyReportMessage:
+      description: report back to caller message (QSO mode)
+      type: string
+    rrrMessage:
+      description: caller RRR message (QSO mode)
+      type: string
+    message73:
+      description: 73 message back to caller to close QSO (QSO mode)
+      type: string
+    qsoTextMessage:
+      description: QSO random message exchange (QSO mode)
+      type: string
+    textMessage:
+      description: freeform text message
+      type: string
+    bytesMessage:
+      description: message to send as an array of hex string represented bytes (00..FF)
+      type: array
+      items:
+        type: string
+    messageRepeat:
+      description: number of repetitions of the same message (0 for infinite)
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+ChirpChatModReport:
+  description: ChirpChatMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+    symbolTimeMs:
+      description: symbol duration (ms)
+      type: number
+      format: float
+    payloadTimeMs:
+      description: payload duration (ms)
+      type: number
+      format: float
+    totalTimeMs:
+      description: total message duration inc. preamble and SFD (ms)
+      type: number
+      format: float

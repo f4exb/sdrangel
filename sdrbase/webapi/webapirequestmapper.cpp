@@ -60,6 +60,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
     {"org.f4exb.sdrangelove.channel.chanalyzer", "ChannelAnalyzerSettings"}, // remap
     {"sdrangel.channel.chirpchatdemod", "ChirpChatDemodSettings"},
+    {"sdrangel.channel.modchirpchat", "ChirpChatModSettings"},
     {"sdrangel.channel.demodatv", "ATVDemodSettings"},
     {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
     {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
@@ -73,7 +74,6 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
-    {"sdrangel.channel.modlora", "LoRaModSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
@@ -139,6 +139,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"BFMDemod", "BFMDemodSettings"},
     {"ChannelAnalyzer", "ChannelAnalyzerSettings"},
     {"ChirpChatDemod", "ChirpChatDemodSettings"},
+    {"ChirpChatMod", "ChirpChatModSettings"},
     {"DATVDemod", "DATVDemodSettings"},
     {"DSDDemod", "DSDDemodSettings"},
     {"FileSource", "FileSourceSettings"},
@@ -149,7 +150,6 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"NFMMod", "NFMModSettings"},
     {"LocalSink", "LocalSinkSettings"},
     {"LocalSource", "LocalSourceSettings"},
-    {"LoRaMod", "LoRaModSettings"},
     {"RemoteSink", "RemoteSinkSettings"},
     {"RemoteSource", "RemoteSourceSettings"},
     {"SSBMod", "SSBModSettings"},
@@ -2920,11 +2920,11 @@ bool WebAPIRequestMapper::getChannel(
             channelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
             channelSettings->getChirpChatDemodSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (channelSettingsKey == "LoRaModSettings")
+        else if (channelSettingsKey == "ChirpChatModSettings")
         {
-            channelSettings->setLoRaModSettings(new SWGSDRangel::SWGLoRaModSettings());
-            channelSettings->getLoRaModSettings()->init(); // contains a list of strings
-            channelSettings->getLoRaModSettings()->fromJsonObject(settingsJsonObject);
+            channelSettings->setChirpChatModSettings(new SWGSDRangel::SWGChirpChatModSettings());
+            channelSettings->getChirpChatModSettings()->init(); // contains a list of strings
+            channelSettings->getChirpChatModSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (channelSettingsKey == "RemoteSinkSettings")
         {

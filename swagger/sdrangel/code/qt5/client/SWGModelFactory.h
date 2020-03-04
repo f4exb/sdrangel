@@ -53,6 +53,8 @@
 #include "SWGChannelsDetail.h"
 #include "SWGChirpChatDemodReport.h"
 #include "SWGChirpChatDemodSettings.h"
+#include "SWGChirpChatModReport.h"
+#include "SWGChirpChatModSettings.h"
 #include "SWGCommand.h"
 #include "SWGComplex.h"
 #include "SWGDATVDemodSettings.h"
@@ -103,8 +105,6 @@
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLimeSdrOutputSettings.h"
-#include "SWGLoRaModReport.h"
-#include "SWGLoRaModSettings.h"
 #include "SWGLocalInputReport.h"
 #include "SWGLocalInputSettings.h"
 #include "SWGLocalOutputReport.h"
@@ -299,6 +299,12 @@ namespace SWGSDRangel {
     if(QString("SWGChirpChatDemodSettings").compare(type) == 0) {
       return new SWGChirpChatDemodSettings();
     }
+    if(QString("SWGChirpChatModReport").compare(type) == 0) {
+      return new SWGChirpChatModReport();
+    }
+    if(QString("SWGChirpChatModSettings").compare(type) == 0) {
+      return new SWGChirpChatModSettings();
+    }
     if(QString("SWGCommand").compare(type) == 0) {
       return new SWGCommand();
     }
@@ -448,12 +454,6 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLimeSdrOutputSettings").compare(type) == 0) {
       return new SWGLimeSdrOutputSettings();
-    }
-    if(QString("SWGLoRaModReport").compare(type) == 0) {
-      return new SWGLoRaModReport();
-    }
-    if(QString("SWGLoRaModSettings").compare(type) == 0) {
-      return new SWGLoRaModSettings();
     }
     if(QString("SWGLocalInputReport").compare(type) == 0) {
       return new SWGLocalInputReport();

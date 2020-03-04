@@ -40,7 +40,7 @@ ChirpChatDemodSettings:
     codingScheme:
       type: integer
       description: >
-        message encoding scheme (LoRaModSettings::CodingScheme):
+        message encoding scheme (ChirpChatDemodSettings::CodingScheme):
           * 0 - LoRa
           * 1 - Plain ASCII (7 bit)
           * 2 - Teletype (5 bit Baudot) a.k.a TTY
