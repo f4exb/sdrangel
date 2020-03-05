@@ -77,7 +77,6 @@ private:
 
     static const unsigned int m_requiredPreambleChirps = 4; //!< Number of chirps required to estimate preamble
     static const unsigned int m_maxSFDSearchChirps = 8;     //!< Maximum number of chirps when looking for SFD after preamble detection
-    static const unsigned int m_sfdFourths = 5;             //!< Number of SFD chip period fourths to skip until payload
     static const unsigned int m_fftInterpolation = 2;       //!< FFT interpolation factor (usually a power of 2)
 
     FFTEngine *m_fft;
@@ -87,7 +86,7 @@ private:
     Complex *m_upChirps;
     Complex *m_spectrumLine;
     unsigned int m_fftCounter;
-    unsigned int m_argMaxHistory[m_requiredPreambleChirps];
+    int m_argMaxHistory[m_requiredPreambleChirps];
     unsigned int m_argMaxHistoryCounter;
     unsigned int m_preambleHistory[m_maxSFDSearchChirps];
     unsigned int m_syncWord;
@@ -108,9 +107,12 @@ private:
 	BasebandSampleSink* m_spectrumSink;
 	Complex *m_spectrumBuffer;
 
-    unsigned int m_nbSymbols;
-    unsigned int m_nbSymbolsEff; //!< effective symbols considering DE bits
-    unsigned int m_fftLength;
+    unsigned int m_nbSymbols;              //!< Number of symbols = length of base FFT
+    unsigned int m_nbSymbolsEff;           //!< effective symbols considering DE bits
+    unsigned int m_fftLength;              //!< Length of base FFT
+    unsigned int m_interpolatedFFTLength;  //!< Length of interpolated FFT
+    int m_deLength;                        //!< Number of FFT bins collated to represent one symbol
+    int m_preambleTolerance;               //!< Number of FFT bins to collate when looking for preamble
 
     void processSample(const Complex& ci);
     void initSF(unsigned int sf, unsigned int deBits); //!< Init tables, FFTs, depending on spread factor

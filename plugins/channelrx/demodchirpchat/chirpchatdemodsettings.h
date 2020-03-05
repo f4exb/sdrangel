@@ -72,6 +72,8 @@ struct ChirpChatDemodSettings
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
+    unsigned int getNbSFDFourths() const; //!< Get the number of SFD period fourths (depends on coding scheme)
+    bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

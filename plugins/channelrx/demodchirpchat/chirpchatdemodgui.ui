@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
+    <width>532</width>
     <height>680</height>
    </rect>
   </property>
@@ -562,27 +562,19 @@
      <string>Msg</string>
     </property>
    </widget>
-   <widget class="QLabel" name="hexLabel">
-    <property name="geometry">
-     <rect>
-      <x>2</x>
-      <y>145</y>
-      <width>32</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Hex</string>
-    </property>
-   </widget>
    <widget class="QPlainTextEdit" name="messageText">
     <property name="geometry">
      <rect>
       <x>30</x>
       <y>60</y>
       <width>490</width>
-      <height>80</height>
+      <height>161</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Liberation Mono</family>
+     </font>
     </property>
    </widget>
    <widget class="QLabel" name="schemeLabel">
@@ -784,28 +776,6 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLineEdit" name="syncWord">
-    <property name="geometry">
-     <rect>
-      <x>492</x>
-      <y>10</y>
-      <width>25</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::ClickFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Sync word (1 byte hex)</string>
-    </property>
-    <property name="inputMask">
-     <string>HH</string>
-    </property>
-    <property name="text">
-     <string>00</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="loraLabel">
     <property name="geometry">
      <rect>
@@ -902,22 +872,6 @@
      <string>FEC</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="hexText">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>145</y>
-      <width>490</width>
-      <height>75</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Liberation Mono</family>
-      <pointsize>9</pointsize>
-     </font>
-    </property>
-   </widget>
    <widget class="QLabel" name="packetLengthLabel">
     <property name="geometry">
      <rect>
@@ -967,19 +921,6 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="syncWordLabel">
-    <property name="geometry">
-     <rect>
-      <x>456</x>
-      <y>10</y>
-      <width>30</width>
-      <height>19</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Sync</string>
     </property>
    </widget>
    <widget class="QLabel" name="headerHammingStatus">

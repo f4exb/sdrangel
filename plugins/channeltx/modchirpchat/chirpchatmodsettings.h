@@ -96,6 +96,8 @@ struct ChirpChatModSettings
     void resetToDefaults();
     void setDefaultTemplates();
     void generateMessages();
+    unsigned int getNbSFDFourths() const; //!< Get the number of SFD period fourths (depends on coding scheme)
+    bool hasSyncWord() const;             //!< Only LoRa has a syncword (for the moment)
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

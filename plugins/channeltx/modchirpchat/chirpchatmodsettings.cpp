@@ -122,6 +122,22 @@ void ChirpChatModSettings::generateMessages()
         .arg(m_urCall).arg(m_myCall).arg(m_textMessage);
 }
 
+unsigned int ChirpChatModSettings::getNbSFDFourths() const
+{
+    switch (m_codingScheme)
+    {
+    case CodingLoRa:
+        return 9;
+    default:
+        return 8;
+    }
+}
+
+bool ChirpChatModSettings::hasSyncWord() const
+{
+    return m_codingScheme == CodingLoRa;
+}
+
 QByteArray ChirpChatModSettings::serialize() const
 {
     SimpleSerializer s(1);

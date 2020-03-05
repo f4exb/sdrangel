@@ -112,8 +112,8 @@ private:
     void setBandwidths();
     void showLoRaMessage(const Message& message);
     void showTextMessage(const Message& message); //!< For TTY and ASCII
-	void displayText(const QString& header, const QString& text);
-	void displayBytes(const QString& header, const QByteArray& bytes);
+	void displayText(const QString& text);
+	void displayBytes(const QByteArray& bytes);
 	void displayStatus(const QString& status);
     void displayLoRaStatus(int headerParityStatus, bool headerCRCStatus, int payloadParityStatus, bool payloadCRCStatus);
 	QString getParityStr(int parityStatus);

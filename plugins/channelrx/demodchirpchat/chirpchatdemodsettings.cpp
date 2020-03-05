@@ -202,3 +202,19 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         return false;
     }
 }
+
+unsigned int ChirpChatDemodSettings::getNbSFDFourths() const
+{
+    switch (m_codingScheme)
+    {
+    case CodingLoRa:
+        return 9;
+    default:
+        return 8;
+    }
+}
+
+bool ChirpChatDemodSettings::hasSyncWord() const
+{
+    return m_codingScheme == CodingLoRa;
+}

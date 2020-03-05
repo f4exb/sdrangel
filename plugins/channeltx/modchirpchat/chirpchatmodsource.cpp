@@ -233,10 +233,20 @@ void ChirpChatModSource::modulateSample()
             if (m_chirpCount == m_settings.m_preambleChirps)
             {
                 m_chirpCount = 0;
-                m_chirp0 = ((m_settings.m_syncWord >> ((1-m_chirpCount)*4)) & 0xf)*8;
-                m_chirp = (m_chirp0 + m_fftLength)*ChirpChatModSettings::oversampling - 1;
-                m_fftCounter = 0;
-                m_state = ChirpChatStateSyncWord;
+
+                if (m_settings.hasSyncWord())
+                {
+                    m_chirp0 = ((m_settings.m_syncWord >> ((1-m_chirpCount)*4)) & 0xf)*8;
+                    m_chirp = (m_chirp0 + m_fftLength)*ChirpChatModSettings::oversampling - 1;
+                    m_state = ChirpChatStateSyncWord;
+                }
+                else
+                {
+                    m_sampleCounter = 0;
+                    m_chirp0 = 0;
+                    m_chirp = m_fftLength*ChirpChatModSettings::oversampling - 1;
+                    m_state = ChirpChatStateSFD;
+                }
             }
         }
     }
@@ -286,7 +296,7 @@ void ChirpChatModSource::modulateSample()
             m_sampleCounter = 0;
         }
 
-        if (m_chirpCount == 9)
+        if (m_chirpCount == m_settings.getNbSFDFourths())
         {
             m_fftCounter = 0;
             m_chirpCount = 0;

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>392</width>
+    <width>402</width>
     <height>373</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
     <rect>
      <x>1</x>
      <y>20</y>
-     <width>390</width>
+     <width>400</width>
      <height>125</height>
     </rect>
    </property>
@@ -74,7 +74,7 @@
      <rect>
       <x>40</x>
       <y>50</y>
-      <width>251</width>
+      <width>261</width>
       <height>16</height>
      </rect>
     </property>
@@ -102,7 +102,7 @@
      <rect>
       <x>40</x>
       <y>70</y>
-      <width>81</width>
+      <width>101</width>
       <height>16</height>
      </rect>
     </property>
@@ -131,7 +131,7 @@
    <widget class="QLabel" name="spreadText">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>150</x>
       <y>70</y>
       <width>30</width>
       <height>16</height>
@@ -153,7 +153,7 @@
    <widget class="QLabel" name="bwText">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>310</x>
       <y>50</y>
       <width>80</width>
       <height>16</height>
@@ -175,7 +175,7 @@
    <widget class="QLabel" name="deBitsLabel">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>200</x>
       <y>70</y>
       <width>32</width>
       <height>16</height>
@@ -188,7 +188,7 @@
    <widget class="QLabel" name="deBitsText">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>370</x>
       <y>70</y>
       <width>10</width>
       <height>16</height>
@@ -210,9 +210,9 @@
    <widget class="QSlider" name="deBits">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>240</x>
       <y>70</y>
-      <width>61</width>
+      <width>91</width>
       <height>16</height>
      </rect>
     </property>
@@ -243,7 +243,7 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>371</width>
+      <width>381</width>
       <height>26</height>
      </rect>
     </property>
@@ -366,7 +366,7 @@
      <rect>
       <x>40</x>
       <y>90</y>
-      <width>81</width>
+      <width>101</width>
       <height>16</height>
      </rect>
     </property>
@@ -408,7 +408,7 @@
    <widget class="QLabel" name="preambleChirpsText">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>150</x>
       <y>90</y>
       <width>30</width>
       <height>16</height>
@@ -430,7 +430,7 @@
    <widget class="QLabel" name="idleTimeLabel">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>200</x>
       <y>90</y>
       <width>32</width>
       <height>16</height>
@@ -443,9 +443,9 @@
    <widget class="QSlider" name="idleTime">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>240</x>
       <y>90</y>
-      <width>81</width>
+      <width>91</width>
       <height>16</height>
      </rect>
     </property>
@@ -474,7 +474,7 @@
    <widget class="QLabel" name="idleTimeText">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>350</x>
       <y>90</y>
       <width>30</width>
       <height>16</height>
@@ -493,48 +493,13 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="syncLabel">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>70</y>
-      <width>32</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Sync</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="syncWord">
-    <property name="geometry">
-     <rect>
-      <x>350</x>
-      <y>68</y>
-      <width>30</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::ClickFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Sync word (1 byte hex)</string>
-    </property>
-    <property name="inputMask">
-     <string>HH</string>
-    </property>
-    <property name="text">
-     <string>00</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QWidget" name="messageContainer" native="true">
    <property name="geometry">
     <rect>
      <x>1</x>
      <y>150</y>
-     <width>390</width>
+     <width>400</width>
      <height>221</height>
     </rect>
    </property>
@@ -807,7 +772,7 @@
      <rect>
       <x>40</x>
       <y>110</y>
-      <width>341</width>
+      <width>355</width>
       <height>60</height>
      </rect>
     </property>
@@ -830,7 +795,7 @@
      <rect>
       <x>40</x>
       <y>175</y>
-      <width>341</width>
+      <width>355</width>
       <height>20</height>
      </rect>
     </property>
@@ -964,7 +929,7 @@
    <widget class="QLabel" name="timeTotalLabel">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>300</x>
       <y>200</y>
       <width>25</width>
       <height>16</height>
@@ -980,7 +945,7 @@
    <widget class="QLabel" name="timeTotalText">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>330</x>
       <y>200</y>
       <width>60</width>
       <height>16</height>
@@ -1037,7 +1002,7 @@
    <widget class="QCheckBox" name="header">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>285</x>
       <y>10</y>
       <width>50</width>
       <height>16</height>
@@ -1053,7 +1018,7 @@
    <widget class="QCheckBox" name="crc">
     <property name="geometry">
      <rect>
-      <x>230</x>
+      <x>226</x>
       <y>10</y>
       <width>50</width>
       <height>16</height>
@@ -1166,6 +1131,41 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="syncWord">
+    <property name="geometry">
+     <rect>
+      <x>377</x>
+      <y>8</y>
+      <width>22</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Sync word (1 byte hex)</string>
+    </property>
+    <property name="inputMask">
+     <string>HH</string>
+    </property>
+    <property name="text">
+     <string>00</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="syncLabel">
+    <property name="geometry">
+     <rect>
+      <x>342</x>
+      <y>10</y>
+      <width>32</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sync</string>
     </property>
    </widget>
   </widget>

@@ -82,9 +82,12 @@ void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits)
 
     m_nbSymbols = 1 << sf;
     m_nbSymbolsEff = 1 << (sf - deBits);
+    m_deLength = 1 << deBits;
     m_fftLength = m_nbSymbols;
-    m_fft->configure(m_fftInterpolation*m_fftLength, false);
-    m_fftSFD->configure(m_fftInterpolation*m_fftLength, false);
+    m_interpolatedFFTLength = m_fftInterpolation*m_fftLength;
+    m_preambleTolerance = (m_deLength*m_fftInterpolation)/2;
+    m_fft->configure(m_interpolatedFFTLength, false);
+    m_fftSFD->configure(m_interpolatedFFTLength, false);
     m_state = ChirpChatStateReset;
     m_sfdSkip = m_fftLength / 4;
     m_fftWindow.create(FFTWindow::Function::Kaiser, m_fftLength);
@@ -146,7 +149,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
         if (m_fftCounter == m_fftLength)
         {
             m_fftWindow.apply(m_fft->in());
-            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
             m_fft->transform();
             m_fftCounter = 0;
             double magsq, magsqTotal;
@@ -176,11 +179,20 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
 
                 for (int i = 1; i < m_requiredPreambleChirps; i++)
                 {
-                    if (m_argMaxHistory[0] != m_argMaxHistory[i])
+                    int delta = m_argMaxHistory[i] - m_argMaxHistory[i-1];
+                    // qDebug("ChirpChatDemodSink::processSample: search: delta: %d / %d", delta, m_deLength);
+
+                    if ((delta < -m_preambleTolerance) || (delta > m_preambleTolerance))
                     {
                         preambleFound = false;
                         break;
                     }
+
+                    // if (m_argMaxHistory[0] != m_argMaxHistory[i])
+                    // {
+                    //     preambleFound = false;
+                    //     break;
+                    // }
                 }
 
                 if ((preambleFound) && (magsq > 1e-9))
@@ -227,11 +239,11 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
         if (m_fftCounter == m_fftLength)
         {
             m_fftWindow.apply(m_fft->in());
-            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
             m_fft->transform();
 
             m_fftWindow.apply(m_fftSFD->in());
-            std::fill(m_fftSFD->in()+m_fftLength, m_fftSFD->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            std::fill(m_fftSFD->in()+m_fftLength, m_fftSFD->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
             m_fftSFD->transform();
 
             m_fftCounter = 0;
@@ -265,23 +277,30 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             {
                 m_magsqTotalAvg(magsqSFDTotal);
 
-                if (m_chirpCount < 3) // too early
+                if (m_chirpCount < 1 + (m_settings.hasSyncWord() ? 2 : 0)) // too early
                 {
                     m_state = ChirpChatStateReset;
                     qDebug("ChirpChatDemodSink::processSample: SFD search: signal drop is too early");
                 }
                 else
                 {
-                    m_syncWord = round(m_preambleHistory[m_chirpCount-2] / 8.0);
-                    m_syncWord += 16 * round(m_preambleHistory[m_chirpCount-3] / 8.0);
-                    qDebug("ChirpChatDemodSink::processSample: SFD found:  up: %4u|%11.6f - down: %4u|%11.6f sync: %x", imax, magsq, imaxSFD, magsqSFD, m_syncWord);
+                    if (m_settings.hasSyncWord())
+                    {
+                        m_syncWord = round(m_preambleHistory[m_chirpCount-2] / 8.0);
+                        m_syncWord += 16 * round(m_preambleHistory[m_chirpCount-3] / 8.0);
+                        qDebug("ChirpChatDemodSink::processSample: SFD found:  up: %4u|%11.6f - down: %4u|%11.6f sync: %x", imax, magsq, imaxSFD, magsqSFD, m_syncWord);
+                    }
+                    else
+                    {
+                        qDebug("ChirpChatDemodSink::processSample: SFD found:  up: %4u|%11.6f - down: %4u|%11.6f", imax, magsq, imaxSFD, magsqSFD);
+                    }
 
                     int sadj = 0;
                     int nadj = 0;
                     int zadj;
                     int sfdSkip = m_sfdSkip;
 
-                    for (int i = 0; i < m_chirpCount-3; i++)
+                    for (int i = 0; i < m_chirpCount - 1 - (m_settings.hasSyncWord() ? 2 : 0); i++)
                     {
                         sadj += m_preambleHistory[i] > m_nbSymbols/2 ? m_preambleHistory[i] - m_nbSymbols : m_preambleHistory[i];
                         nadj++;
@@ -315,7 +334,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             }
         }
     }
-    else if (m_state == ChirpChatStateSkipSFD) // Just skip SFD
+    else if (m_state == ChirpChatStateSkipSFD) // Just skip the rest of SFD
     {
         m_fftCounter++;
 
@@ -324,13 +343,12 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             m_fftCounter = m_fftLength - m_sfdSkip;
             m_sfdSkipCounter++;
 
-            if (m_sfdSkipCounter == m_sfdFourths) // 1.25 SFD chips left
+            if (m_sfdSkipCounter == m_settings.getNbSFDFourths() - 4U) // SFD chips fourths less one full period
             {
                 qDebug("ChirpChatDemodSink::processSample: SFD skipped");
                 m_chirp = m_chirp0;
                 m_fftCounter = 0;
                 m_chirpCount = 0;
-                int correction = 0;
                 m_magsqMax = 0.0;
                 m_decodeMsg = ChirpChatDemodMsg::MsgDecodeSymbols::create();
                 m_decodeMsg->setSyncWord(m_syncWord);
@@ -346,7 +364,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
         if (m_fftCounter == m_fftLength)
         {
             m_fftWindow.apply(m_fft->in());
-            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_fftInterpolation*m_fftLength, Complex{0.0, 0.0});
+            std::fill(m_fft->in()+m_fftLength, m_fft->in()+m_interpolatedFFTLength, Complex{0.0, 0.0});
             m_fft->transform();
             m_fftCounter = 0;
             double magsq, magsqTotal;

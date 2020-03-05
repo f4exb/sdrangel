@@ -82,7 +82,7 @@ In practice it is difficult on the Rx side to make correct decodes if only one F
 
 <h3>7: Sync word</h3>
 
-This is the sync word (byte) to transmit entered as a 2 nibble hexadecimal number.
+This is a LoRa specific feature and is the sync word (byte) to transmit entered as a 2 nibble hexadecimal number.
 
 <h3>8: Number of preamble chirps</h3>
 

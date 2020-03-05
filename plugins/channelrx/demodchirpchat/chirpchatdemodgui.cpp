@@ -239,7 +239,7 @@ void ChirpChatDemodGUI::on_clear_clicked(bool checked)
 {
     (void) checked;
     ui->messageText->clear();
-    ui->hexText->clear();
+    ui->messageText->clear();
 }
 
 void ChirpChatDemodGUI::on_eomSquelch_valueChanged(int value)
@@ -410,8 +410,7 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
 
     ui->messageText->setReadOnly(true);
-    ui->syncWord->setReadOnly(true);
-    ui->hexText->setReadOnly(true);
+    ui->messageText->setReadOnly(true);
 
 	m_channelMarker.setMovable(true);
 	m_channelMarker.setVisible(true);
@@ -602,7 +601,6 @@ void ChirpChatDemodGUI::showLoRaMessage(const Message& message)
     QByteArray bytes = msg.getBytes();
     QString syncWordStr((tr("%1").arg(msg.getSyncWord(), 2, 16, QChar('0'))));
 
-    ui->syncWord->setText(tr("%1").arg(syncWordStr));
     ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
     ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
     unsigned int packetLength;
@@ -650,7 +648,8 @@ void ChirpChatDemodGUI::showLoRaMessage(const Message& message)
             .arg(getParityStr(msg.getPayloadParityStatus()))
             .arg(msg.getPayloadCRCStatus() ? "ok" : "err");
 
-        displayBytes(loRaHeader, bytes);
+        displayStatus(loRaHeader);
+        displayBytes(bytes);
 
         QByteArray bytesCopy(bytes);
         bytesCopy.truncate(packetLength);
@@ -658,7 +657,7 @@ void ChirpChatDemodGUI::showLoRaMessage(const Message& message)
         QString str = QString(bytesCopy.toStdString().c_str());
         QString textHeader(tr("%1 (%2)").arg(dateStr).arg(syncWordStr));
 
-        displayText(textHeader, str);
+        displayText(str);
         displayLoRaStatus(msg.getHeaderParityStatus(), msg.getHeaderCRCStatus(), msg.getPayloadParityStatus(), msg.getPayloadCRCStatus());
     }
 
@@ -672,10 +671,6 @@ void ChirpChatDemodGUI::showTextMessage(const Message& message)
 
     QDateTime dt = QDateTime::currentDateTime();
     QString dateStr = dt.toString("HH:mm:ss");
-    QString syncWordStr((tr("%1").arg(msg.getSyncWord(), 2, 16, QChar('0'))));
-    QString textHeader(tr("%1 (%2)").arg(dateStr).arg(syncWordStr));
-    displayText(textHeader, msg.getString());
-    ui->syncWord->setText(syncWordStr);
     ui->sText->setText(tr("%1").arg(msg.getSingalDb(), 0, 'f', 1));
     ui->snrText->setText(tr("%1").arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1));
 
@@ -683,30 +678,31 @@ void ChirpChatDemodGUI::showTextMessage(const Message& message)
         .arg(dateStr)
         .arg(msg.getSingalDb(), 0, 'f', 1)
         .arg(msg.getSingalDb() - msg.getNoiseDb(), 0, 'f', 1);
+
     displayStatus(status);
+    displayText(msg.getString());
 }
 
-void ChirpChatDemodGUI::displayText(const QString& header, const QString& text)
+void ChirpChatDemodGUI::displayText(const QString& text)
 {
     QTextCursor cursor = ui->messageText->textCursor();
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     if (!ui->messageText->document()->isEmpty()) {
         cursor.insertText("\n");
     }
-    cursor.insertText(tr("%1 %2").arg(header).arg(text));
+    cursor.insertText(tr("TXT|%1").arg(text));
     ui->messageText->verticalScrollBar()->setValue(ui->messageText->verticalScrollBar()->maximum());
 }
 
-void ChirpChatDemodGUI::displayBytes(const QString& header, const QByteArray& bytes)
+void ChirpChatDemodGUI::displayBytes(const QByteArray& bytes)
 {
-    QTextCursor cursor = ui->hexText->textCursor();
+    QTextCursor cursor = ui->messageText->textCursor();
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
 
-    if (!ui->hexText->document()->isEmpty()) {
+    if (!ui->messageText->document()->isEmpty()) {
         cursor.insertText("\n");
     }
 
-    cursor.insertText(tr(">%1\n").arg(header));
     QByteArray::const_iterator it = bytes.begin();
     unsigned int i = 0;
 
@@ -729,20 +725,20 @@ void ChirpChatDemodGUI::displayBytes(const QString& header, const QByteArray& by
         }
     }
 
-    ui->hexText->verticalScrollBar()->setValue(ui->hexText->verticalScrollBar()->maximum());
+    ui->messageText->verticalScrollBar()->setValue(ui->messageText->verticalScrollBar()->maximum());
 }
 
 void ChirpChatDemodGUI::displayStatus(const QString& status)
 {
-    QTextCursor cursor = ui->hexText->textCursor();
+    QTextCursor cursor = ui->messageText->textCursor();
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
 
-    if (!ui->hexText->document()->isEmpty()) {
+    if (!ui->messageText->document()->isEmpty()) {
         cursor.insertText("\n");
     }
 
     cursor.insertText(tr(">%1").arg(status));
-    ui->hexText->verticalScrollBar()->setValue(ui->hexText->verticalScrollBar()->maximum());
+    ui->messageText->verticalScrollBar()->setValue(ui->messageText->verticalScrollBar()->maximum());
 }
 
 QString ChirpChatDemodGUI::getParityStr(int parityStatus)
