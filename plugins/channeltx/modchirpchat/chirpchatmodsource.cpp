@@ -198,9 +198,8 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStatePreamble)
     {
-        // m_modSample = m_upChirps[m_chirp];
-        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_modPhasor += m_phaseIncrements[m_chirp];
+        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
 
         if (m_fftCounter == m_fftLength*ChirpChatModSettings::oversampling)
@@ -230,9 +229,8 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStateSyncWord)
     {
-        // m_modSample = m_upChirps[m_chirp];
-        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_modPhasor += m_phaseIncrements[m_chirp];
+        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
 
         if (m_fftCounter == m_fftLength*ChirpChatModSettings::oversampling)
@@ -254,10 +252,9 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStateSFD)
     {
-        // m_modSample = m_downChirps[m_chirp];
-        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         int chirpIndex = m_fftLength*ChirpChatModSettings::oversampling - 1 - m_chirp;
         m_modPhasor += m_phaseIncrements[chirpIndex];
+        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
         m_sampleCounter++;
 
@@ -285,9 +282,8 @@ void ChirpChatModSource::modulateSample()
     }
     else if (m_state == ChirpChatStatePayload)
     {
-        // m_modSample = m_upChirps[m_chirp];
-        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_modPhasor += m_phaseIncrements[m_chirp];
+        m_modSample = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, m_modPhasor));
         m_fftCounter++;
 
         if (m_fftCounter == m_fftLength*ChirpChatModSettings::oversampling)
