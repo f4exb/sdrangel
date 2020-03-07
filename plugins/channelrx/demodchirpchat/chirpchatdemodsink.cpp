@@ -52,7 +52,7 @@ ChirpChatDemodSink::ChirpChatDemodSink() :
     m_fft = FFTEngine::create();
     m_fftSFD = FFTEngine::create();
 
-    initSF(m_settings.m_spreadFactor, m_settings.m_deBits);
+    initSF(m_settings.m_spreadFactor, m_settings.m_deBits, m_settings.m_fftWindow);
 }
 
 ChirpChatDemodSink::~ChirpChatDemodSink()
@@ -65,7 +65,7 @@ ChirpChatDemodSink::~ChirpChatDemodSink()
     delete[] m_spectrumLine;
 }
 
-void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits)
+void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow::Function fftWindow)
 {
     if (m_downChirps) {
         delete[] m_downChirps;
@@ -84,14 +84,14 @@ void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits)
     m_nbSymbolsEff = 1 << (sf - deBits);
     m_deLength = 1 << deBits;
     m_fftLength = m_nbSymbols;
+    m_fftWindow.create(fftWindow, m_fftLength);
+    m_fftWindow.setKaiserAlpha(M_PI);
     m_interpolatedFFTLength = m_fftInterpolation*m_fftLength;
     m_preambleTolerance = (m_deLength*m_fftInterpolation)/2;
     m_fft->configure(m_interpolatedFFTLength, false);
     m_fftSFD->configure(m_interpolatedFFTLength, false);
     m_state = ChirpChatStateReset;
     m_sfdSkip = m_fftLength / 4;
-    m_fftWindow.create(FFTWindow::Function::Kaiser, m_fftLength);
-    m_fftWindow.setKaiserAlpha(M_PI);
     m_downChirps = new Complex[2*m_nbSymbols]; // Each table is 2 chirps long to allow processing from arbitrary offsets.
     m_upChirps = new Complex[2*m_nbSymbols];
     m_spectrumBuffer = new Complex[m_nbSymbols];
@@ -233,7 +233,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
     else if (m_state == ChirpChatStatePreamble) // preamble found look for SFD start
     {
         m_fft->in()[m_fftCounter] = ci * m_downChirps[m_chirp];  // de-chirp the up ramp
-        m_fftSFD->in()[m_fftCounter] = ci * m_upChirps[m_chirp]; // de-chiro the down ramp
+        m_fftSFD->in()[m_fftCounter] = ci * m_upChirps[m_chirp]; // de-chirp the down ramp
         m_fftCounter++;
 
         if (m_fftCounter == m_fftLength)
@@ -620,8 +620,9 @@ void ChirpChatDemodSink::applySettings(const ChirpChatDemodSettings& settings, b
             << " force: " << force;
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
-     || (settings.m_deBits != m_settings.m_deBits) || force) {
-        initSF(settings.m_spreadFactor, settings.m_deBits);
+     || (settings.m_deBits != m_settings.m_deBits)
+     || (settings.m_fftWindow != m_settings.m_fftWindow) || force) {
+        initSF(settings.m_spreadFactor, settings.m_deBits, settings.m_fftWindow);
     }
 
     m_settings = settings;

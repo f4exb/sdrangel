@@ -115,7 +115,7 @@ private:
     int m_preambleTolerance;               //!< Number of FFT bins to collate when looking for preamble
 
     void processSample(const Complex& ci);
-    void initSF(unsigned int sf, unsigned int deBits); //!< Init tables, FFTs, depending on spread factor
+    void initSF(unsigned int sf, unsigned int deBits, FFTWindow::Function fftWindow); //!< Init tables, FFTs, depending on spread factor
     void reset();
     unsigned int argmax(
         const Complex *fftBins,

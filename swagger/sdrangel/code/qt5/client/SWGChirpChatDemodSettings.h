@@ -54,6 +54,9 @@ public:
     qint32 getDeBits();
     void setDeBits(qint32 de_bits);
 
+    qint32 getFftWindow();
+    void setFftWindow(qint32 fft_window);
+
     qint32 getCodingScheme();
     void setCodingScheme(qint32 coding_scheme);
 
@@ -132,6 +135,9 @@ private:
 
     qint32 de_bits;
     bool m_de_bits_isSet;
+
+    qint32 fft_window;
+    bool m_fft_window_isSet;
 
     qint32 coding_scheme;
     bool m_coding_scheme_isSet;

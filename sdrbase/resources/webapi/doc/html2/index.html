@@ -2435,7 +2435,7 @@ margin-bottom: 20px;
     },
     "bandwidthIndex" : {
       "type" : "integer",
-      "description" : "standard bandwidths index:\n  *  0 -   2604 Hz (333333 / 128)\n  *  1 -   3125 Hz (400000 / 128)\n  *  2 -   3906 Hz (500000 / 128)\n  *  3 -   5208 Hz (333333 / 64)\n  *  4 -   6250 Hz (400000 / 64)\n  *  5 -   7813 Hz (500000 / 64)\n  *  6 -  10417 Hz (333333 / 32)\n  *  7 -  12500 Hz (400000 / 32)\n  *  8 -  15625 Hz (500000 / 32)\n  *  9 -  20833 Hz (333333 / 16)\n  * 10 -  25000 Hz (400000 / 16)\n  * 11 -  31250 Hz (500000 / 16)\n  * 12 -  41667 Hz (333333 / 8)\n  * 13 -  50000 Hz (400000 / 8)\n  * 14 -  62500 Hz (500000 / 8)\n  * 15 -  83333 Hz (333333 / 4)\n  * 16 - 100000 Hz (400000 / 4)\n  * 17 - 125000 Hz (500000 / 4)\n  * 18 - 166667 Hz (333333 / 2)\n  * 19 - 200000 Hz (400000 / 2)\n  * 20 - 250000 Hz (500000 / 2)\n  * 21 - 333333 Hz (333333 / 1)\n  * 22 - 400000 Hz (400000 / 1)\n  * 23 - 500000 Hz (500000 / 1)\n"
+      "description" : "standard bandwidths index:\n  *  0 -    375 Hz (384000 / 1024)\n  *  1 -    750 Hz (384000 / 512)\n  *  2 -   1500 Hz (384000 / 256)\n  *  3 -   2604 Hz (333333 / 128)\n  *  4 -   3125 Hz (400000 / 128)\n  *  5 -   3906 Hz (500000 / 128)\n  *  6 -   5208 Hz (333333 / 64)\n  *  7 -   6250 Hz (400000 / 64)\n  *  8 -   7813 Hz (500000 / 64)\n  *  9 -  10417 Hz (333333 / 32)\n  * 10 -  12500 Hz (400000 / 32)\n  * 11 -  15625 Hz (500000 / 32)\n  * 12 -  20833 Hz (333333 / 16)\n  * 13 -  25000 Hz (400000 / 16)\n  * 14 -  31250 Hz (500000 / 16)\n  * 15 -  41667 Hz (333333 / 8)\n  * 16 -  50000 Hz (400000 / 8)\n  * 17 -  62500 Hz (500000 / 8)\n  * 18 -  83333 Hz (333333 / 4)\n  * 19 - 100000 Hz (400000 / 4)\n  * 20 - 125000 Hz (500000 / 4)\n  * 21 - 166667 Hz (333333 / 2)\n  * 22 - 200000 Hz (400000 / 2)\n  * 23 - 250000 Hz (500000 / 2)\n  * 24 - 333333 Hz (333333 / 1)\n  * 25 - 400000 Hz (400000 / 1)\n  * 26 - 500000 Hz (500000 / 1)\n"
     },
     "spreadFactor" : {
       "type" : "integer"
@@ -2444,9 +2444,13 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Low data rate optmize (DE) bits i.e. nb of FFT bins per effective symbol"
     },
+    "fftWindow" : {
+      "type" : "integer",
+      "description" : "FFT Window index (FFTWindow::Function):\n  * 0 - Bartlett\n  * 1 - BlackmanHarris\n  * 2 - Flattop\n  * 3 - Hamming\n  * 4 - Hanning\n  * 5 - Rectangle\n  * 6 - Kaiser\n"
+    },
     "codingScheme" : {
       "type" : "integer",
-      "description" : "message encoding scheme (LoRaModSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
+      "description" : "message encoding scheme (ChirpChatDemodSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
     },
     "decodeActive" : {
       "type" : "integer",
@@ -2561,7 +2565,7 @@ margin-bottom: 20px;
     },
     "bandwidthIndex" : {
       "type" : "integer",
-      "description" : "standard bandwidths index:\n  *  0 -   2604 Hz (333333 / 128)\n  *  1 -   3125 Hz (400000 / 128)\n  *  2 -   3906 Hz (500000 / 128)\n  *  3 -   5208 Hz (333333 / 64)\n  *  4 -   6250 Hz (400000 / 64)\n  *  5 -   7813 Hz (500000 / 64)\n  *  6 -  10417 Hz (333333 / 32)\n  *  7 -  12500 Hz (400000 / 32)\n  *  8 -  15625 Hz (500000 / 32)\n  *  9 -  20833 Hz (333333 / 16)\n  * 10 -  25000 Hz (400000 / 16)\n  * 11 -  31250 Hz (500000 / 16)\n  * 12 -  41667 Hz (333333 / 8)\n  * 13 -  50000 Hz (400000 / 8)\n  * 14 -  62500 Hz (500000 / 8)\n  * 15 -  83333 Hz (333333 / 4)\n  * 16 - 100000 Hz (400000 / 4)\n  * 17 - 125000 Hz (500000 / 4)\n  * 18 - 166667 Hz (333333 / 2)\n  * 19 - 200000 Hz (400000 / 2)\n  * 20 - 250000 Hz (500000 / 2)\n  * 21 - 333333 Hz (333333 / 1)\n  * 22 - 400000 Hz (400000 / 1)\n  * 23 - 500000 Hz (500000 / 1)\n"
+      "description" : "standard bandwidths index:\n  *  0 -    375 Hz (384000 / 1024)\n  *  1 -    750 Hz (384000 / 512)\n  *  2 -   1500 Hz (384000 / 256)\n  *  3 -   2604 Hz (333333 / 128)\n  *  4 -   3125 Hz (400000 / 128)\n  *  5 -   3906 Hz (500000 / 128)\n  *  6 -   5208 Hz (333333 / 64)\n  *  7 -   6250 Hz (400000 / 64)\n  *  8 -   7813 Hz (500000 / 64)\n  *  9 -  10417 Hz (333333 / 32)\n  * 10 -  12500 Hz (400000 / 32)\n  * 11 -  15625 Hz (500000 / 32)\n  * 12 -  20833 Hz (333333 / 16)\n  * 13 -  25000 Hz (400000 / 16)\n  * 14 -  31250 Hz (500000 / 16)\n  * 15 -  41667 Hz (333333 / 8)\n  * 16 -  50000 Hz (400000 / 8)\n  * 17 -  62500 Hz (500000 / 8)\n  * 18 -  83333 Hz (333333 / 4)\n  * 19 - 100000 Hz (400000 / 4)\n  * 20 - 125000 Hz (500000 / 4)\n  * 21 - 166667 Hz (333333 / 2)\n  * 22 - 200000 Hz (400000 / 2)\n  * 23 - 250000 Hz (500000 / 2)\n  * 24 - 333333 Hz (333333 / 1)\n  * 25 - 400000 Hz (400000 / 1)\n  * 26 - 500000 Hz (500000 / 1)\n"
     },
     "spreadFactor" : {
       "type" : "integer"
@@ -2588,7 +2592,7 @@ margin-bottom: 20px;
     },
     "codingScheme" : {
       "type" : "integer",
-      "description" : "message encoding scheme (LoRaModSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
+      "description" : "message encoding scheme (ChirpChatModSettings::CodingScheme):\n  * 0 - LoRa\n  * 1 - Plain ASCII (7 bit)\n  * 2 - Teletype (5 bit Baudot) a.k.a TTY\n"
     },
     "nbParityBits" : {
       "type" : "integer",
@@ -2620,7 +2624,7 @@ margin-bottom: 20px;
     },
     "messageType" : {
       "type" : "integer",
-      "description" : "type of message to send (LoRaModSettings::MessageType):\n  *  0 - No message i.e no output. Use this as a transition to resend the same message.\n  *  1 - Beacon. Sends message specified in beaconMessage\n  *  2 - CQ call. Sends message specified in cqMessage\n  *  3 - Reply to CQ call. Sends message specified in replyMessage\n  *  4 - Report to callee. Sends message specified in reportMessage\n  *  5 - Report to caller. Sends message specified in replyReportMessage\n  *  6 - RRR to callee. Sends message specified in rrrMessage\n  *  7 - 73 to caller. Sends message specified in message73\n  *  8 - Random message with callsigns. Sends message specified in qsoTextMessage\n  *  9 - Plain text. Sends message specified in textMessage\n  * 10 - Binary payload. Sends bytes specified in bytesMessage\n"
+      "description" : "type of message to send (ChirpChatModSettings::MessageType):\n  *  0 - No message i.e no output. Use this as a transition to resend the same message.\n  *  1 - Beacon. Sends message specified in beaconMessage\n  *  2 - CQ call. Sends message specified in cqMessage\n  *  3 - Reply to CQ call. Sends message specified in replyMessage\n  *  4 - Report to callee. Sends message specified in reportMessage\n  *  5 - Report to caller. Sends message specified in replyReportMessage\n  *  6 - RRR to callee. Sends message specified in rrrMessage\n  *  7 - 73 to caller. Sends message specified in message73\n  *  8 - Random message with callsigns. Sends message specified in qsoTextMessage\n  *  9 - Plain text. Sends message specified in textMessage\n  * 10 - Binary payload. Sends bytes specified in bytesMessage\n"
     },
     "beaconMessage" : {
       "type" : "string",
@@ -32618,7 +32622,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-03-03T23:14:21.625+01:00
+              Generated 2020-03-07T09:49:57.763+01:00
             </div>
           </div>
       </div>

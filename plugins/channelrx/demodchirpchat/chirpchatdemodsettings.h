@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include "dsp/fftwindow.h"
+
 class Serializable;
 
 struct ChirpChatDemodSettings
@@ -38,7 +40,8 @@ struct ChirpChatDemodSettings
     int m_inputFrequencyOffset;
     int m_bandwidthIndex;
     int m_spreadFactor;
-    int m_deBits;        //!< Low data rate optmize (DE) bits
+    int m_deBits;            //!< Low data rate optmize (DE) bits
+    FFTWindow::Function m_fftWindow;
     CodingScheme m_codingScheme;
     bool m_decodeActive;
     int m_eomSquelchTenths;  //!< Squelch factor to trigger end of message (/10)

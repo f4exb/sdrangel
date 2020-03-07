@@ -297,6 +297,9 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
     if ((settings.m_deBits != m_settings.m_deBits) || force) {
         reverseAPIKeys.append("deBits");
     }
+    if ((settings.m_fftWindow != m_settings.m_fftWindow) || force) {
+        reverseAPIKeys.append("fftWindow");
+    }
 
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor)
      || (settings.m_deBits != m_settings.m_deBits) || force) {
@@ -453,6 +456,9 @@ void ChirpChatDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("deBits")) {
         settings.m_deBits = response.getChirpChatDemodSettings()->getDeBits();
     }
+    if (channelSettingsKeys.contains("fftWindow")) {
+        settings.m_fftWindow = (FFTWindow::Function) response.getChirpChatDemodSettings()->getFftWindow();
+    }
     if (channelSettingsKeys.contains("codingScheme")) {
         settings.m_codingScheme = (ChirpChatDemodSettings::CodingScheme) response.getChirpChatDemodSettings()->getCodingScheme();
     }
@@ -537,6 +543,7 @@ void ChirpChatDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
     response.getChirpChatDemodSettings()->setBandwidthIndex(settings.m_bandwidthIndex);
     response.getChirpChatDemodSettings()->setSpreadFactor(settings.m_spreadFactor);
     response.getChirpChatDemodSettings()->setDeBits(settings.m_deBits);
+    response.getChirpChatDemodSettings()->setFftWindow((int) settings.m_fftWindow);
     response.getChirpChatDemodSettings()->setCodingScheme((int) settings.m_codingScheme);
     response.getChirpChatDemodSettings()->setDecodeActive(settings.m_decodeActive ? 1 : 0);
     response.getChirpChatDemodSettings()->setEomSquelchTenths(settings.m_eomSquelchTenths);
@@ -628,6 +635,9 @@ void ChirpChatDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKe
     }
     if (channelSettingsKeys.contains("deBits") || force) {
         swgChirpChatDemodSettings->setDeBits(settings.m_deBits);
+    }
+    if (channelSettingsKeys.contains("fftWindow") || force) {
+        swgChirpChatDemodSettings->setFftWindow((int) settings.m_fftWindow);
     }
     if (channelSettingsKeys.contains("codingScheme") || force) {
         swgChirpChatDemodSettings->setCodingScheme((int) settings.m_codingScheme);

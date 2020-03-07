@@ -24,6 +24,9 @@
 #include "chirpchatdemodsettings.h"
 
 const int ChirpChatDemodSettings::bandwidths[] = {
+    325,    // 384k / 1024
+    750,    // 384k / 512
+    1500,   // 384k / 256
     2604,   // 333k / 128
     3125,   // 400k / 128
     3906,   // 500k / 128
@@ -49,7 +52,7 @@ const int ChirpChatDemodSettings::bandwidths[] = {
     400000, // 400k / 1
     500000  // 500k / 1
 };
-const int ChirpChatDemodSettings::nbBandwidths = 3*8;
+const int ChirpChatDemodSettings::nbBandwidths = 3*8 + 3;
 const int ChirpChatDemodSettings::oversampling = 2;
 
 ChirpChatDemodSettings::ChirpChatDemodSettings() :
@@ -67,6 +70,7 @@ void ChirpChatDemodSettings::resetToDefaults()
     m_deBits = 0;
     m_codingScheme = CodingLoRa;
     m_decodeActive = true;
+    m_fftWindow = FFTWindow::Rectangle;
     m_eomSquelchTenths = 60;
     m_nbSymbolsMax = 255;
     m_preambleChirps = 8;
@@ -113,6 +117,7 @@ QByteArray ChirpChatDemodSettings::serialize() const
     s.writeBool(14, m_hasCRC);
     s.writeBool(15, m_hasHeader);
     s.writeS32(17, m_preambleChirps);
+    s.writeS32(18, (int) m_fftWindow);
     s.writeBool(20, m_useReverseAPI);
     s.writeString(21, m_reverseAPIAddress);
     s.writeU32(22, m_reverseAPIPort);
@@ -168,7 +173,8 @@ bool ChirpChatDemodSettings::deserialize(const QByteArray& data)
         d.readBool(14, &m_hasCRC, true);
         d.readBool(15, &m_hasHeader, true);
         d.readS32(17, &m_preambleChirps, 8);
-
+        d.readS32(18, &tmp, (int) FFTWindow::Rectangle);
+        m_fftWindow = (FFTWindow::Function) tmp;
         d.readBool(20, &m_useReverseAPI, false);
         d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(22, &utmp, 0);

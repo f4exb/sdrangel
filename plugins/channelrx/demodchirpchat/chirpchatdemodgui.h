@@ -59,6 +59,7 @@ private slots:
 	void on_BW_valueChanged(int value);
 	void on_Spread_valueChanged(int value);
     void on_deBits_valueChanged(int value);
+    void on_fftWindow_currentIndexChanged(int index);
     void on_preambleChirps_valueChanged(int value);
 	void on_scheme_currentIndexChanged(int index);
 	void on_mute_toggled(bool checked);

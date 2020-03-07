@@ -24,6 +24,9 @@
 #include "chirpchatmodsettings.h"
 
 const int ChirpChatModSettings::bandwidths[] = {
+    325,    // 384k / 1024
+    750,    // 384k / 512
+    1500,   // 384k / 256
     2604,   // 333k / 128
     3125,   // 400k / 128
     3906,   // 500k / 128
@@ -49,7 +52,7 @@ const int ChirpChatModSettings::bandwidths[] = {
     400000, // 400k / 1
     500000  // 500k / 1
 };
-const int ChirpChatModSettings::nbBandwidths = 3*8;
+const int ChirpChatModSettings::nbBandwidths = 3*8 + 3;
 const int ChirpChatModSettings::oversampling = 4;
 
 ChirpChatModSettings::ChirpChatModSettings() :

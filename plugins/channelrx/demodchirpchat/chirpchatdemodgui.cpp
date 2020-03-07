@@ -211,6 +211,12 @@ void ChirpChatDemodGUI::on_deBits_valueChanged(int value)
     applySettings();
 }
 
+void ChirpChatDemodGUI::on_fftWindow_currentIndexChanged(int index)
+{
+    m_settings.m_fftWindow = (FFTWindow::Function) index;
+    applySettings();
+}
+
 void ChirpChatDemodGUI::on_preambleChirps_valueChanged(int value)
 {
     m_settings.m_preambleChirps = value;
@@ -484,6 +490,7 @@ void ChirpChatDemodGUI::displaySettings()
     ui->Spread->setValue(m_settings.m_spreadFactor);
     ui->SpreadText->setText(tr("%1").arg(m_settings.m_spreadFactor));
     ui->deBits->setValue(m_settings.m_deBits);
+    ui->fftWindow->setCurrentIndex((int) m_settings.m_fftWindow);
     ui->deBitsText->setText(tr("%1").arg(m_settings.m_deBits));
     ui->preambleChirps->setValue(m_settings.m_preambleChirps);
     ui->preambleChirpsText->setText(tr("%1").arg(m_settings.m_preambleChirps));

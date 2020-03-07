@@ -36,6 +36,8 @@ SWGChirpChatDemodSettings::SWGChirpChatDemodSettings() {
     m_spread_factor_isSet = false;
     de_bits = 0;
     m_de_bits_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
     coding_scheme = 0;
     m_coding_scheme_isSet = false;
     decode_active = 0;
@@ -94,6 +96,8 @@ SWGChirpChatDemodSettings::init() {
     m_spread_factor_isSet = false;
     de_bits = 0;
     m_de_bits_isSet = false;
+    fft_window = 0;
+    m_fft_window_isSet = false;
     coding_scheme = 0;
     m_coding_scheme_isSet = false;
     decode_active = 0;
@@ -155,6 +159,7 @@ SWGChirpChatDemodSettings::cleanup() {
 
 
 
+
     if(udp_address != nullptr) { 
         delete udp_address;
     }
@@ -191,6 +196,8 @@ SWGChirpChatDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&spread_factor, pJson["spreadFactor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&de_bits, pJson["deBits"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&fft_window, pJson["fftWindow"], "qint32", "");
     
     ::SWGSDRangel::setValue(&coding_scheme, pJson["codingScheme"], "qint32", "");
     
@@ -261,6 +268,9 @@ SWGChirpChatDemodSettings::asJsonObject() {
     }
     if(m_de_bits_isSet){
         obj->insert("deBits", QJsonValue(de_bits));
+    }
+    if(m_fft_window_isSet){
+        obj->insert("fftWindow", QJsonValue(fft_window));
     }
     if(m_coding_scheme_isSet){
         obj->insert("codingScheme", QJsonValue(coding_scheme));
@@ -367,6 +377,16 @@ void
 SWGChirpChatDemodSettings::setDeBits(qint32 de_bits) {
     this->de_bits = de_bits;
     this->m_de_bits_isSet = true;
+}
+
+qint32
+SWGChirpChatDemodSettings::getFftWindow() {
+    return fft_window;
+}
+void
+SWGChirpChatDemodSettings::setFftWindow(qint32 fft_window) {
+    this->fft_window = fft_window;
+    this->m_fft_window_isSet = true;
 }
 
 qint32
@@ -594,6 +614,9 @@ SWGChirpChatDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_de_bits_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fft_window_isSet){
             isObjectUpdated = true; break;
         }
         if(m_coding_scheme_isSet){
