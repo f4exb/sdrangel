@@ -24,8 +24,6 @@ const int ChirpChatModSource::m_levelNbSamples = 480; // every 10ms
 ChirpChatModSource::ChirpChatModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
-    m_downChirps(nullptr),
-    m_upChirps(nullptr),
     m_phaseIncrements(nullptr),
     m_modPhasor(0.0f),
 	m_levelCalcCount(0),
@@ -45,38 +43,18 @@ ChirpChatModSource::ChirpChatModSource() :
 
 ChirpChatModSource::~ChirpChatModSource()
 {
-    delete[] m_downChirps;
-    delete[] m_upChirps;
     delete[] m_phaseIncrements;
 }
 
 void ChirpChatModSource::initSF(unsigned int sf)
 {
-    if (m_downChirps) {
-        delete[] m_downChirps;
-    }
-    if (m_upChirps) {
-        delete[] m_upChirps;
-    }
-
     m_fftLength = 1 << sf;
     m_state = ChirpChatStateIdle;
     m_quarterSamples = (m_fftLength/4)*ChirpChatModSettings::oversampling;
-    m_downChirps = new Complex[2*m_fftLength*ChirpChatModSettings::oversampling]; // Each table is 2 chirps long to allow use from arbitrary offsets.
-    m_upChirps = new Complex[2*m_fftLength*ChirpChatModSettings::oversampling];
 
     float halfAngle = M_PI/ChirpChatModSettings::oversampling;
     float phase = -halfAngle;
     double accumulator = 0;
-
-    for (int i = 0; i < 2*m_fftLength*ChirpChatModSettings::oversampling; i++)
-    {
-        accumulator = fmod(accumulator + phase, 2*M_PI);
-        m_downChirps[i] = Complex(std::conj(std::polar(0.891235351562 * SDR_TX_SCALED, accumulator))); // -1 dB
-        m_upChirps[i] = Complex(std::polar(0.891235351562 * SDR_TX_SCALED, accumulator));
-        phase += (2*halfAngle) / (m_fftLength*ChirpChatModSettings::oversampling);
-        phase = phase > halfAngle ? phase - 2.0*halfAngle : phase;
-    }
 
     if (m_phaseIncrements) {
         delete[] m_phaseIncrements;

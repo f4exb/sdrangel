@@ -66,8 +66,6 @@ private:
     ChirpChatModSettings m_settings;
 
     ChirpChatState m_state;
-    Complex *m_downChirps;
-    Complex *m_upChirps;
     double *m_phaseIncrements;
     std::vector<unsigned short> m_symbols;
     unsigned int m_fftLength;      //!< chirp length in samples
