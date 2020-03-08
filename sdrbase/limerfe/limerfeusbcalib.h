@@ -44,6 +44,7 @@ public:
         HAM_3300_3500MHz,
         CellularBand1,
         CellularBand2,
+        CellularBand3,
         CellularBand7,
         CellularBand38
     };
