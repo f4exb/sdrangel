@@ -37,7 +37,7 @@ Use this button to mute/unmute transmission.
 
 This is the bandwidth of the ChirpChat signal. Similarly to LoRa the signal sweeps between the lower and the upper frequency of this bandwidth. The sample rate of the ChirpChat signal in seconds is exactly one over this bandwidth in Hertz.
 
-In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64. An extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel.
+In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64.  Extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel. Finally special divisors from a 384 kHz base are provided to allow even more narrow bandwidths.
 
 Thus available bandwidths are:
 
@@ -65,6 +65,9 @@ Thus available bandwidths are:
   - **3906** (500000 / 128) Hz not in LoRa standard
   - **3125** (400000 / 128) Hz not in LoRa standard
   - **2604** (333333 / 128) Hz not in LoRa standard
+  - **1500** (384000 / 256) Hz not in LoRa standard
+  - **750** (384000 / 512) Hz not in LoRa standard
+  - **375** (384000 / 1024) Hz not in LoRa standard
 
 The ChirpChat signal is oversampled by four therefore it needs a baseband of at least four times the bandwidth. This drives the maximum value on the slider automatically.
 

@@ -33,7 +33,7 @@ This is the total power in the FFT of the de-chirped signal in dB. When no Chirp
 
 This is the bandwidth of the ChirpChat signal. Similarly to LoRa the signal sweeps between the lower and the upper frequency of this bandwidth. The sample rate of the ChirpChat signal in seconds is exactly one over this bandwidth in Hertz.
 
-In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64. An extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel.
+In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64. Extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel. Finally special divisors from a 384 kHz base are provided to allow even more narrow bandwidths
 
 Thus available bandwidths are:
 
@@ -61,6 +61,9 @@ Thus available bandwidths are:
   - **3906** (500000 / 128) Hz not in LoRa standard
   - **3125** (400000 / 128) Hz not in LoRa standard
   - **2604** (333333 / 128) Hz not in LoRa standard
+  - **1500** (384000 / 256) Hz not in LoRa standard
+  - **750** (384000 / 512) Hz not in LoRa standard
+  - **375** (384000 / 1024) Hz not in LoRa standard
 
 The ChirpChat signal is oversampled by two therefore it needs a baseband of at least twice the bandwidth. This drives the maximum value on the slider automatically.
 
@@ -78,17 +81,33 @@ The noise level reference is the noise maximum power just before the detected si
 
 Decode errors are very likely to happen when this value falls below 4 dB.
 
-<h3>7: Spread Factor</h3>
+<h3>7: FFT Window</h3>
+
+A choice of FFT Windows to apply to the FFT performed on the de-chirped signal is provided. These are the same windows as those used in the spectrum display. The effect of windowing is to reduce the spill over in adjacent bins at the expense of a flatter top and fatter main lobe. When the purpose is frequency detection this is not what is desired necessarily and thus the "Rectangular" window (i.e. no window) should be chosen. However a variety of windows is provided to experiment with. Experimentally the best alternative to "Rectangular" is "Kaiser" then "Bartlett" and "Hanning". The complete list is:
+
+  - **Bart**: Bartlett
+  - **B-H**:
+  - **FT**: Flat Top
+  - **Ham**: Hamming
+  - **Han**: Hanning
+  - **Rec**: Rectangular (no window)
+  - **Kai**: Kaiser with &alpha; = &pi;
+
+<h3>8: Spread Factor</h3>
 
 This is the Spread Factor parameter of the ChirpChat signal. This is the log2 of the FFT size used over the bandwidth (3). The number of symbols is 2<sup>SF-DE</sup> where SF is the spread factor and DE the  Distance Enhancement factor (8)
 
-<h3>8: Distance Enhancement factor</h3>
+<h3>9: Distance Enhancement factor</h3>
 
 The LoRa standard specifies 0 (no DE) or 2 (DE active). The ChirpChat DE range is extended to all values between 0 and 4 bits.
 
 This is the log2 of the number of FFT bins used for one symbol. Extending the numbe of FFT bins per symbol decreases the probabilty to detect the wrong symbol as an adjacent bin. It can also overcome frequency drift on long messages.
 
 In practice it is difficult to make correct decodes if only one FFT bin is used to code one symbol (DE=0) therefore it is recommended to use a DE factor of 2 or more. With medium SNR DE=1 can still achieve good results.
+
+<h3>10: Number of expected preamble chirps</h3>
+
+This is the number of chirps expected in the preamble and has to be agreed between the transmitter and receiver.
 
 <h3>A: Payload controls and indicators</h3>
 
@@ -175,7 +194,7 @@ The color of the indicator gives the status of payload parity checks:
   - **Blue**: recovered error
   - **Green**: no errors
 
-<h4>A.13: Payload CRC indicator</h4>
+<h4>A.15: Payload CRC indicator</h4>
 
 The payload can have a two byte CRC. The color of this indicator gives the CRC status:
 
@@ -183,87 +202,61 @@ The payload can have a two byte CRC. The color of this indicator gives the CRC s
   - **Green**: CRC OK
   - **Red**: CRC error
 
-<h3>10: Message text window</h3>
+<h3>11: Clear message window</h3>
 
-This is where the messages formatted as strings are displayed. Use the sweep icon to clear both message text (10) and message binary (11) windows.
+Use this push button to clear the message window (12)
+
+<h3>12: Message window</h3>
+
+This is where the message and status data are displayed. The display varies if the coding scheme is purely text based (TTY, ASCII) or text/binary mixed based (LoRa). The text vs binary consideration concerns the content of the message not the way it is transmitted on air that is by itself binary.
+
+<h4>12.a: Text messages</h4>
 
 The format of a message line is the following:
 
 ![ChirpChat Demodulator message string window](../../../doc/img/ChirpChatDemod_message_string.png)
 
   - 1: Timestamp in HH:MM:SS format
-  - 2: Sync word
-  - 3: Message
+  - 2: Signal level. Same as (5) for the current message
+  - 3: Signal Over Noise. Same as (6) for the current message
+  - 4: Start of text indicator
+  - 5: Text
 
-<h3>11: Binary payload window</h3>
-
-This is to display the message payload as hex formatted bytes with mesasge status.
+<h4>12.b: Binary messages</h4>
 
 ![ChirpChat Demodulator message bytes window](../../../doc/img/ChirpChatDemod_message_binary.png)
 
-<h4>11.1: Timestamp in HH:NN:SS format</h4>
+  - 1: Timestamp in HH:NN:SS format
+  - 2: Sync word. This is the sync word (byte) displayed in hex. Corrsponds to (A.5) in the current message.
+  - 3: De-chirped signal level. This is the de-chirped signal level in dB. Corrsponds to (5) in the current message.
+  - 4: De-chirped signal to noise ratio. This is the de-chirped signal to noise ratio in dB. Corrsponds to (6) in the current message.
+  - 5: Header FEC status. Corresponds to (A.12) indicator in the current message:
+    - **n/a**: unknown or not applicable
+    - **err**: unrecoverable error
+    - **fix**: corrected error
+    - **ok**: OK
+  - 6: Header CRC status. Corresponds to (A.13) indicator in the current message
+    - **ok**: CRC OK
+    - **err**: CRC error
+    - **n/a**: not applicable
+  - 7: Payload FEC status. Corresponds to (A.14) indicator in the current message. If the end of message is reached before expectation then `ERR: too early` is displayed instead and no payload CRC status (next) is displayed.
+    - **n/a**: unknown or not applicable
+    - **err**: unrecoverable error
+    - **fix**: corrected error
+    - **ok**: OK
+  - 8: Payload CRC status. Corresponds to (A.15) indicator in the current message:
+    - **ok**: CRC OK
+    - **err**: CRC error
+    - **n/a**: not applicable
+  - 9: Displacement at start of line. 16 bytes in 4 groups of 4 bytes are displayed per line starting with the displacement in decimal.
+  - 10: Bytes group. This is a group of 4 bytes displayed as hexadecimal values. The payload is displayed with its possible CRC and without the header.
+  - 11: Message as text with "TXT" as prefix indicating it is the translation of the message to character representation
 
-<h4>11.2: Sync word</h4>
-
-This is the sync word (byte) displayed in hex. Corrsponds to (A.5) in the current message.
-
-<h4>11.3: De-chirped signal level</h4>
-
-This is the de-chirped signal level in dB. Corrsponds to (5) in the current message.
-
-<h4>11.4: De-chirped signal to noise ratio</h4>
-
-This is the de-chirped signal to noise ratio in dB. Corrsponds to (6) in the current message.
-
-<h4>11.5: Header FEC status</h4>
-
-  - **n/a**: unknown or not applicable
-  - **err**: unrecoverable error
-  - **fix**: corrected error
-  - **ok**: OK
-
-Corresponds to (A.12) indicator in the current message
-
-<h4>11.6: Header CRC status</h4>
-
-  - **ok**: CRC OK
-  - **err**: CRC error
-  - **n/a**: not applicable
-
-Corresponds to (A.13) indicator in the current message
-
-<h4>11.7: Payload FEC status</h4>
-
-  - **n/a**: unknown or not applicable
-  - **err**: unrecoverable error
-  - **fix**: corrected error
-  - **ok**: OK
-
-Corresponds to (A.14) indicator in the current message
-
-If the end of message is reached before expectation then `ERR: too early` is displayed instead and no payload CRC status (next) is displayed
-
-<h4>11.8: Payload CRC status</h4>
-
-  - **ok**: CRC OK
-  - **err**: CRC error
-  - **n/a**: not applicable
-
-Corresponds to (A.15) indicator in the current message
-
-<h4>11.9: Displacement at start of line</h4>
-
-16 bytes in 4 groups of 4 bytes are displayed per line starting with the displacement in decimal.
-
-<h4>11.10: Bytes group</h4>
-
-This is a group of 4 bytes displayed as hexadecimal values. The payload is displayed with its possible CRC and without the header.
-
-<h3>12: Send message via UDP</h3>
+<h3>13: Send message via UDP</h3>
 
 Select to send the decoded message via UDP.
 
-<h3>13: UDP address and port</h3>
+<h3>14: UDP address and port</h3>
 
 This is the UDP address and port to where the decoded message is sent when (12) is selected.
 
@@ -277,5 +270,5 @@ Sequences of successful ChirpChat signal demodulation are separated by blank lin
 
 Controls are the usual controls of spectrum displays with the following restrictions:
 
-  - The window type is non operating because the FFT analysis of the ChirpChat signal is always done with a Kaiser window
+  - The window type is non operating because the FFT window is chosen by (7)
   - The FFT size can be changed however it is set to 2<sup>SF</sup> where SF is the spread factor and thus displays correctly
