@@ -239,6 +239,11 @@ void LimeRFEController::settingsToState(const LimeRFESettings& settings)
             m_rfeBoardState.channelIDRX = RFE_CID_CELL_BAND02;
             m_rfeBoardState.mode = RFE_MODE_TXRX;
         }
+        else if (settings.m_rxCellularChannel == CellularBand3)
+        {
+            m_rfeBoardState.channelIDRX = RFE_CID_CELL_BAND03;
+            m_rfeBoardState.mode = RFE_MODE_TXRX;
+        }
         else if (settings.m_rxCellularChannel == CellularBand38)
         {
             m_rfeBoardState.channelIDRX = RFE_CID_CELL_BAND38;
@@ -367,6 +372,11 @@ void LimeRFEController::stateToSettings(LimeRFESettings& settings)
         settings.m_rxChannels = ChannelsCellular;
         settings.m_rxCellularChannel = CellularBand2;
     }
+    else if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND03)
+    {
+        settings.m_rxChannels = ChannelsCellular;
+        settings.m_rxCellularChannel = CellularBand3;
+    }
     else if (m_rfeBoardState.channelIDRX == RFE_CID_CELL_BAND07)
     {
         settings.m_rxChannels = ChannelsCellular;
@@ -448,6 +458,11 @@ void LimeRFEController::stateToSettings(LimeRFESettings& settings)
     {
         settings.m_txChannels = ChannelsCellular;
         settings.m_txCellularChannel = CellularBand2;
+    }
+    else if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND03)
+    {
+        settings.m_txChannels = ChannelsCellular;
+        settings.m_txCellularChannel = CellularBand3;
     }
     else if (m_rfeBoardState.channelIDTX == RFE_CID_CELL_BAND07)
     {

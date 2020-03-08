@@ -234,6 +234,7 @@ void LimeRFEUSBDialog::setRxChannels()
     {
         ui->rxChannel->addItem("Band1");
         ui->rxChannel->addItem("Band2");
+        ui->rxChannel->addItem("Band3");
         ui->rxChannel->addItem("Band7");
         ui->rxChannel->addItem("Band38");
         ui->rxChannel->setCurrentIndex((int) m_settings.m_rxCellularChannel);
@@ -314,6 +315,7 @@ void LimeRFEUSBDialog::setTxChannels()
     {
         ui->txChannel->addItem("Band1");
         ui->txChannel->addItem("Band2");
+        ui->txChannel->addItem("Band3");
         ui->txChannel->addItem("Band7");
         ui->txChannel->addItem("Band38");
         ui->txChannel->setCurrentIndex((int) m_settings.m_txCellularChannel);
@@ -401,6 +403,9 @@ int LimeRFEUSBDialog::getPowerCorectionIndex()
                     break;
                 case LimeRFEController::CellularBand2:
                     range = LimeRFEUSBCalib::CellularBand2;
+                    break;
+                case LimeRFEController::CellularBand3:
+                    range = LimeRFEUSBCalib::CellularBand3;
                     break;
                 case LimeRFEController::CellularBand7:
                     range = LimeRFEUSBCalib::CellularBand7;
