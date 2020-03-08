@@ -33,7 +33,7 @@ This is the total power in the FFT of the de-chirped signal in dB. When no Chirp
 
 This is the bandwidth of the ChirpChat signal. Similarly to LoRa the signal sweeps between the lower and the upper frequency of this bandwidth. The sample rate of the ChirpChat signal in seconds is exactly one over this bandwidth in Hertz.
 
-In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64. Extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel. Finally special divisors from a 384 kHz base are provided to allow even more narrow bandwidths
+In the LoRa standard there are 2 base bandwidths: 500 and 333.333 kHz. A 400 kHz base has been added. Possible bandwidths are obtained by a division of these base bandwidths by a power of two from 1 to 64. Extra divisor of 128 is provided to achieve smaller bandwidths that can fit in a SSB channel. Finally special divisors from a 384 kHz base are provided to allow even more narrow bandwidths.
 
 Thus available bandwidths are:
 

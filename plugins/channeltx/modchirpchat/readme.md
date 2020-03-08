@@ -83,10 +83,6 @@ This is the log2 of the number of frequency shifts separating two consecutive sh
 
 In practice it is difficult on the Rx side to make correct decodes if only one FFT bin is used to code one symbol (DE=0). It is therefore recommended to use a factor of 1 or more.
 
-<h3>7: Sync word</h3>
-
-This is a LoRa specific feature and is the sync word (byte) to transmit entered as a 2 nibble hexadecimal number.
-
 <h3>8: Number of preamble chirps</h3>
 
 This is the number of preamble chirps to transmit that are used for the Rx to synchronize. The LoRa standard specifies it can be between 2 and 65535. Here it is limited to the 4 to 20 range that corresponds to realistic values. The RN2483 uses 6 preamble chirps. You may use 12 preamble chirps or more to facilitate signal acquisition with poor SNR on the Rx side.
@@ -192,6 +188,10 @@ This applies the QSO elements (10.5 to 10.8) to the placeholders in messages to 
   - **RRR**: `%1 %2 RRR`: `%1` is your call (10.6) and `%2` is my call (10.5)
   - **73**: `%1 %2 73`: `%1` is your call (10.6) and `%2` is my call (10.5)
   - **QSO text**: `%1 %2 %3`: `%1` is your call (10.6), `%2` is my call (10.5) and `%3` is the text specified as the free form text message
+
+<h4>10.14: Sync word</h4>
+
+This is a LoRa specific feature and is the sync word (byte) to transmit entered as a 2 nibble hexadecimal number.
 
 <h3>11: Message text</h3>
 

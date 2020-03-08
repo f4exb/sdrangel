@@ -247,7 +247,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             m_fftSFD->transform();
 
             m_fftCounter = 0;
-            double magsq, magsqSFD;
+            double magsqPre, magsqSFD;
             double magsqTotal, magsqSFDTotal;
 
             unsigned int imaxSFD = argmax(
@@ -264,7 +264,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                 m_fft->out(),
                 m_fftInterpolation,
                 m_fftLength,
-                magsq,
+                magsqPre,
                 magsqSFDTotal,
                 m_spectrumBuffer,
                 m_fftInterpolation
@@ -273,7 +273,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
             m_preambleHistory[m_chirpCount] = imax;
             m_chirpCount++;
 
-            if (magsq <  magsqSFD) // preamble drop
+            if (magsqPre <  magsqSFD) // preamble drop
             {
                 m_magsqTotalAvg(magsqSFDTotal);
 
@@ -288,11 +288,11 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                     {
                         m_syncWord = round(m_preambleHistory[m_chirpCount-2] / 8.0);
                         m_syncWord += 16 * round(m_preambleHistory[m_chirpCount-3] / 8.0);
-                        qDebug("ChirpChatDemodSink::processSample: SFD found:  up: %4u|%11.6f - down: %4u|%11.6f sync: %x", imax, magsq, imaxSFD, magsqSFD, m_syncWord);
+                        qDebug("ChirpChatDemodSink::processSample: SFD found:  pre: %4u|%11.6f - sfd: %4u|%11.6f sync: %x", imax, magsqPre, imaxSFD, magsqSFD, m_syncWord);
                     }
                     else
                     {
-                        qDebug("ChirpChatDemodSink::processSample: SFD found:  up: %4u|%11.6f - down: %4u|%11.6f", imax, magsq, imaxSFD, magsqSFD);
+                        qDebug("ChirpChatDemodSink::processSample: SFD found:  pre: %4u|%11.6f - sfd: %4u|%11.6f", imax, magsqPre, imaxSFD, magsqSFD);
                     }
 
                     int sadj = 0;
@@ -328,9 +328,9 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                     m_spectrumSink->feed(m_spectrumBuffer, m_nbSymbols);
                 }
 
-                qDebug("ChirpChatDemodSink::processSample: SFD search: up: %4u|%11.6f - down: %4u|%11.6f", imax, magsq, imaxSFD, magsqSFD);
+                qDebug("ChirpChatDemodSink::processSample: SFD search: pre: %4u|%11.6f - sfd: %4u|%11.6f", imax, magsqPre, imaxSFD, magsqSFD);
                 m_magsqTotalAvg(magsqTotal);
-                m_magsqOnAvg(magsq);
+                m_magsqOnAvg(magsqPre);
             }
         }
     }

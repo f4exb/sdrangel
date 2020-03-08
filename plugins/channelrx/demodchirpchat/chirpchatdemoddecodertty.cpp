@@ -18,14 +18,14 @@
 #include "chirpchatdemoddecodertty.h"
 
 const char ChirpChatDemodDecoderTTY::ttyLetters[32] = {
-    '\0',   'E',    '\n',   'A',    ' ',    'S',    'I',    'U',
+    '_',    'E',    '\n',   'A',    ' ',    'S',    'I',    'U',
     '\r',   'D',    'R',    'J',    'N',    'F',    'C',    'K',
     'T',    'Z',    'L',    'W',    'H',    'Y',    'P',    'Q',
     'O',    'B',    'G',    ' ',    'M',    'X',    'V',    ' '
 };
 
 const char ChirpChatDemodDecoderTTY::ttyFigures[32] = { // U.S. standard
-    '\0',   '3',    '\n',   '-',    ' ',    '\a',   '8',    '7',
+    '_',    '3',    '\n',   '-',    ' ',    '\a',   '8',    '7',
     '\r',   '$',    '4',    '\'',   ',',    '!',    ':',    '(',
     '5',    '"',    ')',    '2',    '#',    '6',    '0',    '1',
     '9',    '?',    '&',    ' ',    '.',    '/',    ';',    ' '
