@@ -4417,22 +4417,23 @@ margin-bottom: 20px;
     },
     "rxChannels" : {
       "type" : "integer",
-      "description" : "Rx channels group (see LimeRFEController.ChannelGroups enumeration)"
+      "description" : "Rx channels group (LimeRFEController::ChannelGroups):\n  * 0 - Wideband\n  * 1 - HAM\n  * 2 - cellular\n"
     },
     "rxWidebandChannel" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Rx wideband channel selection (LimeRFEController::WidebandChannel)\n  * 0 - Low: 1 - 1000 MHz\n  * 1 - High: 1 - 4 GHz\n"
     },
     "rxHAMChannel" : {
       "type" : "integer",
-      "description" : "Rx HAM channel selection (see LimeRFEController.HAMChannel enumeration)"
+      "description" : "Rx HAM channel selection (LimeRFEController::HAMChannel)\n  * 0 - 30 MHz and lower\n  * 1 - 50 - 70 MHz\n  * 2 - 144 - 146 MHz\n  * 3 - 220 - 225 MHz\n  * 4 - 430 - 440 MHz\n  * 5 - 902 - 928 MHz\n  * 6 - 1240 - 1325 MHz\n  * 7 - 2300 - 2450 MHz\n  * 8 - 3300 - 3500 MHz\n"
     },
     "rxCellularChannel" : {
       "type" : "integer",
-      "description" : "Rx cellular channel selection (see LimeRFEController.HAMChannel enumeration)"
+      "description" : "Rx cellular channel selection (LimeRFEController::CellularChannel)\n  * 0 - Band 1: 1.92 - 1.98 GHz\n  * 1 - Band 2: 1.84 - 1.92 GHz\n  * 2 - Band 3: 1.71 - 1.79 GHz\n  * 3 - Band 7: 2.48 - 2.58 GHz\n  * 4 - Band 38: 2.56 - 2.63 GHz\n"
     },
     "rxPort" : {
       "type" : "integer",
-      "description" : "Rx port selected (see LimeRFEController.RxPort enumeration)"
+      "description" : "Rx port selected (LimeRFEController::RxPort)\n  * 0 - J3\n  * 1 - J5\n"
     },
     "attenuationFactor" : {
       "type" : "integer",
@@ -4443,22 +4444,23 @@ margin-bottom: 20px;
     },
     "txChannels" : {
       "type" : "integer",
-      "description" : "Tx channels group (see LimeRFEController.ChannelGroups enumeration)"
+      "description" : "Tx channels group (LimeRFEController::ChannelGroups)\n  * 0 - Wideband\n  * 1 - HAM\n  * 2 - cellular\n"
     },
     "txWidebandChannel" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Tx wideband channel selection (LimeRFEController::WidebandChannel)\n  * 0 - Low: 1 - 1000 MHz\n  * 1 - High: 1 - 4 GHz\n"
     },
     "txHAMChannel" : {
       "type" : "integer",
-      "description" : "Tx HAM channel selection (see LimeRFEController.HAMChannel enumeration)"
+      "description" : "Tx HAM channel selection (LimeRFEController::HAMChannel)\n  * 0 - 30 MHz and lower\n  * 1 - 50 - 70 MHz\n  * 2 - 144 - 146 MHz\n  * 3 - 220 - 225 MHz\n  * 4 - 430 - 440 MHz\n  * 5 - 902 - 928 MHz\n  * 6 - 1240 - 1325 MHz\n  * 7 - 2300 - 2450 MHz\n  * 8 - 3300 - 3500 MHz\n"
     },
     "txCellularChannel" : {
       "type" : "integer",
-      "description" : "Tx cellular channel selection (see LimeRFEController.HAMChannel enumeration)"
+      "description" : "Tx cellular channel selection (LimeRFEController::CellularChannel)\n  * 0 - Band 1: 1.92 - 1.98 GHz\n  * 1 - Band 2: 1.84 - 1.92 GHz\n  * 2 - Band 3: 1.71 - 1.79 GHz\n  * 3 - Band 7: 2.48 - 2.58 GHz\n  * 4 - Band 38: 2.56 - 2.63 GHz\n"
     },
     "txPort" : {
       "type" : "integer",
-      "description" : "Tx port selected (see LimeRFEController.TxPort enumeration)"
+      "description" : "Tx port selected (LimeRFEController::TxPort)\n  * 0 - J3\n  * 1 - J4\n  * 2 - J5\n"
     },
     "swrEnable" : {
       "type" : "integer",
@@ -4466,7 +4468,7 @@ margin-bottom: 20px;
     },
     "swrSource" : {
       "type" : "integer",
-      "description" : "SWR measurement source (see LimeRFEController.SWRSource)"
+      "description" : "SWR measurement source (LimeRFEController::SWRSource)\n  * 0 - External\n  * 1 - Cellular\n"
     },
     "rxOn" : {
       "type" : "integer",
@@ -32622,7 +32624,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-03-07T09:49:57.763+01:00
+              Generated 2020-03-08T20:37:07.112+01:00
             </div>
           </div>
       </div>
