@@ -1,0 +1,18 @@
+DeviceActions:
+  description: Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present.
+  discriminator: deviceHwType
+  required:
+    - deviceHwType
+    - direction
+  properties:
+    deviceHwType:
+      description: Device hardware type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    originatorIndex:
+      description: Optional for reverse API. This is the device set index from where the message comes from.
+      type: integer
+    rtlSdrActions:
+      $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrActions"
