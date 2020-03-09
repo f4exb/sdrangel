@@ -1388,7 +1388,7 @@ paths:
       description: post an action on a device
       operationId: devicesetDeviceActionsPost
       tags:
-        - Deviceset
+        - DeviceSet
       parameters:
         - in: path
           name: deviceSetIndex
@@ -1647,7 +1647,7 @@ paths:
       description: post an action or actions on a channel
       operationId: devicesetChannelActionsPost
       tags:
-        - Deviceset
+        - DeviceSet
       parameters:
         - in: path
           name: deviceSetIndex
