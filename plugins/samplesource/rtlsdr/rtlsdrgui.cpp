@@ -165,6 +165,23 @@ bool RTLSDRGui::handleMessage(const Message& message)
 
         return true;
     }
+    else if (RTLSDRInput::MsgFileRecord::match(message)) // API action "record" feedback
+    {
+        const RTLSDRInput::MsgFileRecord& notif = (const RTLSDRInput::MsgFileRecord&) message;
+        bool record = notif.getStartStop();
+
+        ui->record->blockSignals(true);
+        ui->record->setChecked(record);
+
+        if (record) {
+            ui->record->setStyleSheet("QToolButton { background-color : red; }");
+        } else {
+            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+
+        ui->record->blockSignals(false);
+        return true;
+    }
 	else
 	{
 		return false;

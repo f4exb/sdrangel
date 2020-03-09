@@ -164,6 +164,10 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"Interferometer", "InterferometerSettings"}
 };
 
+const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
+    {"FileSource", "FileSourceActions"}
+};
+
 const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
     {"Airspy", "airspySettings"},
     {"AirspyHF", "airspyHFSettings"},
@@ -186,6 +190,10 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKe
     {"XTRX", "xtrxInputSettings"}
 };
 
+const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToActionsKey = {
+    {"RTLSDR", "rtlSdrActions"}
+};
+
 const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey = {
     {"BladeRF1", "bladeRF1OutputSettings"},
     {"BladeRF2", "bladeRF2OutputSettings"},
@@ -198,10 +206,16 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
     {"XTRX", "xtrxOutputSettings"}
 };
 
+const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToActionsKey = {
+};
+
 const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
     {"BladeRF2", "bladeRF2MIMOSettings"},
     {"TestMI", "testMISettings"},
     {"TestMOSync", "testMOSyncSettings"}
+};
+
+const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToActionsKey= {
 };
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
@@ -328,6 +342,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetChannelSettingsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelReportURLRe)) {
                 devicesetChannelReportService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelActionsURLRe)) {
+                devicesetChannelActionsService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             }
             else // serve static documentation pages
             {
@@ -1939,9 +1955,11 @@ void WebAPIRequestMapper::devicesetDeviceActionsService(const std::string& index
     response.setHeader("Content-Type", "application/json");
     response.setHeader("Access-Control-Allow-Origin", "*");
 
-    if (request.getMethod() == "POST")
+    try
     {
-        try
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "POST")
         {
             QString jsonStr = request.getBody();
             QJsonObject jsonObject;
@@ -1950,19 +1968,17 @@ void WebAPIRequestMapper::devicesetDeviceActionsService(const std::string& index
             {
                 SWGSDRangel::SWGDeviceActions query;
                 SWGSDRangel::SWGSuccessResponse normalResponse;
-                int deviceSetIndex = boost::lexical_cast<int>(indexStr);
                 resetDeviceActions(query);
+                QStringList deviceActionsKeys;
 
-                if (jsonObject.contains("direction")) {
-                    query.setDirection(jsonObject["direction"].toInt());
-                } else {
-                    query.setDirection(0); // assume Rx
-                }
-
-                if (jsonObject.contains("deviceHwType") && jsonObject["deviceHwType"].isString())
+                if (validateDeviceActions(query, jsonObject, deviceActionsKeys))
                 {
-                    query.setDeviceHwType(new QString(jsonObject["deviceHwType"].toString()));
-                    int status = m_adapter->devicesetDeviceActionsPost(deviceSetIndex, query, normalResponse, errorResponse);
+                    int status = m_adapter->devicesetDeviceActionsPost(
+                        deviceSetIndex,
+                        deviceActionsKeys,
+                        query,
+                        normalResponse,
+                        errorResponse);
                     response.setStatus(status);
 
                     if (status/100 == 2) {
@@ -1987,19 +2003,19 @@ void WebAPIRequestMapper::devicesetDeviceActionsService(const std::string& index
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
-        catch (const boost::bad_lexical_cast &e)
+        else
         {
+            response.setStatus(405,"Invalid HTTP method");
             errorResponse.init();
-            *errorResponse.getMessage() = "Wrong integer conversion on device set index";
-            response.setStatus(400,"Invalid data");
+            *errorResponse.getMessage() = "Invalid HTTP method";
             response.write(errorResponse.asJson().toUtf8());
         }
     }
-    else
+    catch(const boost::bad_lexical_cast &e)
     {
-        response.setStatus(405,"Invalid HTTP method");
         errorResponse.init();
-        *errorResponse.getMessage() = "Invalid HTTP method";
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
         response.write(errorResponse.asJson().toUtf8());
     }
 }
@@ -2298,7 +2314,7 @@ void WebAPIRequestMapper::devicesetChannelReportService(
     }
 }
 
-void WebAPIRequestMapper::devicesetChannelActtionsService(
+void WebAPIRequestMapper::devicesetChannelActionsService(
         const std::string& deviceSetIndexStr,
         const std::string& channelIndexStr,
         qtwebapp::HttpRequest& request,
@@ -2323,17 +2339,17 @@ void WebAPIRequestMapper::devicesetChannelActtionsService(
                 SWGSDRangel::SWGChannelActions query;
                 SWGSDRangel::SWGSuccessResponse normalResponse;
                 resetChannelActions(query);
+                QStringList channelActionsKeys;
 
-                if (jsonObject.contains("direction")) {
-                    query.setDirection(jsonObject["direction"].toInt());
-                } else {
-                    query.setDirection(0); // assume Rx
-                }
-
-                if (jsonObject.contains("channelType") && jsonObject["channelType"].isString())
+                if (validateChannelActions(query, jsonObject, channelActionsKeys))
                 {
-                    query.setChannelType(new QString(jsonObject["channelType"].toString()));
-                    int status = m_adapter->devicesetChannelActionsPost(deviceSetIndex, channelIndex, query, normalResponse, errorResponse);
+                    int status = m_adapter->devicesetChannelActionsPost(
+                        deviceSetIndex,
+                        channelIndex,
+                        channelActionsKeys,
+                        query,
+                        normalResponse,
+                        errorResponse);
                     response.setStatus(status);
 
                     if (status/100 == 2) {
@@ -2548,7 +2564,59 @@ bool WebAPIRequestMapper::validateDeviceSettings(
         return false;
     }
 
-    return getDevice(deviceSettingsKey, &deviceSettings, jsonObject, deviceSettingsKeys);
+    return getDeviceSettings(deviceSettingsKey, &deviceSettings, jsonObject, deviceSettingsKeys);
+}
+
+bool WebAPIRequestMapper::validateDeviceActions(
+        SWGSDRangel::SWGDeviceActions& deviceActions,
+        QJsonObject& jsonObject,
+        QStringList& deviceActionsKeys)
+{
+    if (jsonObject.contains("direction")) {
+        deviceActions.setDirection(jsonObject["direction"].toInt());
+    } else {
+        deviceActions.setDirection(0); // assume single Rx
+    }
+
+    if (jsonObject.contains("deviceHwType") && jsonObject["deviceHwType"].isString()) {
+        deviceActions.setDeviceHwType(new QString(jsonObject["deviceHwType"].toString()));
+    } else {
+        return false;
+    }
+
+    QString *deviceHwType = deviceActions.getDeviceHwType();
+    QString deviceActionsKey;
+
+    if (deviceActions.getDirection() == 0) // source
+    {
+        if (m_sourceDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceActionsKey = m_sourceDeviceHwIdToActionsKey[*deviceHwType];
+        } else {
+            return false;
+        }
+    }
+    else if (deviceActions.getDirection() == 1) // sink
+    {
+        if (m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceActionsKey = m_sinkDeviceHwIdToActionsKey[*deviceHwType];
+        } else {
+            return false;
+        }
+    }
+    else if (deviceActions.getDirection() == 2) // MIMO
+    {
+        if (m_mimoDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceActionsKey = m_mimoDeviceHwIdToActionsKey[*deviceHwType];
+        } else {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
+
+    return getDeviceActions(deviceActionsKey, &deviceActions, jsonObject, deviceActionsKeys);
 }
 
 bool WebAPIRequestMapper::validateChannelSettings(
@@ -2571,7 +2639,33 @@ bool WebAPIRequestMapper::validateChannelSettings(
     QString *channelType = channelSettings.getChannelType();
 
     if (m_channelTypeToSettingsKey.contains(*channelType)) {
-        return getChannel(m_channelTypeToSettingsKey[*channelType], &channelSettings, jsonObject, channelSettingsKeys);
+        return getChannelSettings(m_channelTypeToSettingsKey[*channelType], &channelSettings, jsonObject, channelSettingsKeys);
+    } else {
+        return false;
+    }
+}
+
+bool WebAPIRequestMapper::validateChannelActions(
+    SWGSDRangel::SWGChannelActions& channelActions,
+    QJsonObject& jsonObject,
+    QStringList& channelActionsKeys)
+{
+    if (jsonObject.contains("direction")) {
+        channelActions.setDirection(jsonObject["direction"].toInt());
+    } else {
+        channelActions.setDirection(0); // assume single Rx
+    }
+
+    if (jsonObject.contains("channelType") && jsonObject["channelType"].isString()) {
+        channelActions.setChannelType(new QString(jsonObject["channelType"].toString()));
+    } else {
+        return false;
+    }
+
+    QString *channelType = channelActions.getChannelType();
+
+    if (m_channelTypeToActionsKey.contains(*channelType)) {
+        return getChannelActions(m_channelTypeToActionsKey[*channelType], &channelActions, jsonObject, channelActionsKeys);
     } else {
         return false;
     }
@@ -2961,7 +3055,7 @@ bool WebAPIRequestMapper::appendPresetChannelKeys(
         {
             SWGSDRangel::SWGChannelSettings *channelSettings = new SWGSDRangel::SWGChannelSettings();
             channel->setConfig(channelSettings);
-            return getChannel(m_channelURIToSettingsKey[*channelURI], channelSettings, channelSettingsJson["config"].toObject(), channelKeys.m_channelKeys);
+            return getChannelSettings(m_channelURIToSettingsKey[*channelURI], channelSettings, channelSettingsJson["config"].toObject(), channelKeys.m_channelKeys);
         }
         else
         {
@@ -2974,7 +3068,7 @@ bool WebAPIRequestMapper::appendPresetChannelKeys(
     }
 }
 
-bool WebAPIRequestMapper::getChannel(
+bool WebAPIRequestMapper::getChannelSettings(
     const QString& channelSettingsKey,
     SWGSDRangel::SWGChannelSettings *channelSettings,
     const QJsonObject& channelSettingsJson,
@@ -3148,6 +3242,38 @@ bool WebAPIRequestMapper::getChannel(
     }
 }
 
+bool WebAPIRequestMapper::getChannelActions(
+    const QString& channelActionsKey,
+    SWGSDRangel::SWGChannelActions *channelActions,
+    const QJsonObject& channelActionsJson,
+    QStringList& channelActionsKeys
+)
+{
+    QStringList channelKeys = channelActionsJson.keys();
+
+    if (channelKeys.contains(channelActionsKey) && channelActionsJson[channelActionsKey].isObject())
+    {
+        QJsonObject actionsJsonObject = channelActionsJson[channelActionsKey].toObject();
+        channelActionsKeys = actionsJsonObject.keys();
+
+        if (channelActionsKey == "FileSourceActions")
+        {
+            channelActions->setFileSourceActions(new SWGSDRangel::SWGFileSourceActions());
+            channelActions->getFileSourceActions()->fromJsonObject(actionsJsonObject);
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool WebAPIRequestMapper::appendPresetDeviceKeys(
         SWGSDRangel::SWGDeviceConfig *device,
         const QJsonObject& deviceSettngsJson,
@@ -3176,7 +3302,7 @@ bool WebAPIRequestMapper::appendPresetDeviceKeys(
         {
             SWGSDRangel::SWGDeviceSettings *deviceSettings = new SWGSDRangel::SWGDeviceSettings();
             device->setConfig(deviceSettings);
-            return getDevice(m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
+            return getDeviceSettings(m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
         }
         else
         {
@@ -3189,7 +3315,7 @@ bool WebAPIRequestMapper::appendPresetDeviceKeys(
     }
 }
 
-bool WebAPIRequestMapper::getDevice(
+bool WebAPIRequestMapper::getDeviceSettings(
         const QString& deviceSettingsKey,
         SWGSDRangel::SWGDeviceSettings *deviceSettings,
         const QJsonObject& deviceSettingsJson,
@@ -3373,6 +3499,39 @@ bool WebAPIRequestMapper::getDevice(
         {
             deviceSettings->setLocalOutputSettings(new SWGSDRangel::SWGLocalOutputSettings());
             deviceSettings->getLocalOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+}
+
+bool WebAPIRequestMapper::getDeviceActions(
+        const QString& deviceActionsKey,
+        SWGSDRangel::SWGDeviceActions *deviceActions,
+        const QJsonObject& deviceActionsJson,
+        QStringList& deviceActionsKeys
+)
+{
+    QStringList deviceKeys = deviceActionsJson.keys();
+
+    if (deviceKeys.contains(deviceActionsKey) && deviceActionsJson[deviceActionsKey].isObject())
+    {
+        QJsonObject actionsJsonObject = deviceActionsJson[deviceActionsKey].toObject();
+        deviceActionsKeys = actionsJsonObject.keys();
+
+        if (deviceActionsKey == "rtlSdrActions")
+        {
+            deviceActions->setRtlSdrActions(new SWGSDRangel::SWGRtlSdrActions());
+            deviceActions->getRtlSdrActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {

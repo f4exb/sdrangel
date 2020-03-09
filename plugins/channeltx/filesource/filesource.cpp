@@ -379,6 +379,7 @@ int FileSource::webapiReportGet(
 }
 
 int FileSource::webapiActionsPost(
+        const QStringList& channelActionsKeys,
         SWGSDRangel::SWGChannelActions& query,
         QString& errorMessage)
 {
@@ -386,14 +387,24 @@ int FileSource::webapiActionsPost(
 
     if (swgFileSourceActions)
     {
-        bool play = swgFileSourceActions->getPlay() != 0;
-        FileSourceBaseband::MsgConfigureFileSourceWork *msg = FileSourceBaseband::MsgConfigureFileSourceWork::create(play);
-        m_basebandSource->getInputMessageQueue()->push(msg);
+        if (channelActionsKeys.contains("play"))
+        {
+            bool play = swgFileSourceActions->getPlay() != 0;
+            FileSourceBaseband::MsgConfigureFileSourceWork *msg = FileSourceBaseband::MsgConfigureFileSourceWork::create(play);
+            m_basebandSource->getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureFileSourceWork *msgToGUI = MsgConfigureFileSourceWork::create(play);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
         return 202;
     }
     else
     {
-        errorMessage = "Missing FileSourceActions key in JSON body";
+        errorMessage = "Missing FileSourceActions in query";
         return 400;
     }
 }

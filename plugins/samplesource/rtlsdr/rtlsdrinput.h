@@ -132,6 +132,7 @@ public:
             QString& errorMessage);
 
     virtual int webapiActionsPost(
+            const QStringList& deviceActionsKeys,
             SWGSDRangel::SWGDeviceActions& actions,
             QString& errorMessage);
 

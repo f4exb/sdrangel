@@ -206,6 +206,7 @@ public:
             QString& errorMessage);
 
     virtual int webapiActionsPost(
+            const QStringList& channelActionsKeys,
             SWGSDRangel::SWGChannelActions& query,
             QString& errorMessage);
 

@@ -88,14 +88,16 @@ private:
     void devicesetChannelIndexService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelSettingsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelReportService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
-    void devicesetChannelActtionsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetChannelActionsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
     bool validatePresetExport(SWGSDRangel::SWGPresetExport& presetExport);
     bool validateDeviceListItem(SWGSDRangel::SWGDeviceListItem& deviceListItem, QJsonObject& jsonObject);
     bool validateDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings, QJsonObject& jsonObject, QStringList& deviceSettingsKeys);
-    bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
+    bool validateDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions, QJsonObject& jsonObject, QStringList& deviceActionsKeys);
+    bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
+    bool validateChannelActions(SWGSDRangel::SWGChannelActions& channelActions, QJsonObject& jsonObject, QStringList& channelActionsKeys);
     bool validateAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice, QJsonObject& jsonObject, QStringList& audioInputDeviceKeys);
     bool validateAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice, QJsonObject& jsonObject, QStringList& audioOutputDeviceKeys);
     bool validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject);
@@ -113,10 +115,17 @@ private:
             WebAPIAdapterInterface::ChannelKeys& channelKeys
     );
 
-    bool getChannel(
+    bool getChannelSettings(
         const QString& channelSettingsKey,
         SWGSDRangel::SWGChannelSettings *channelSettings,
         const QJsonObject& channelSettingsJson,
+        QStringList& channelSettingsKeys
+    );
+
+    bool getChannelActions(
+        const QString& channelActionsKey,
+        SWGSDRangel::SWGChannelActions *channelActions,
+        const QJsonObject& channelActionsJson,
         QStringList& channelSettingsKeys
     );
 
@@ -126,11 +135,18 @@ private:
             WebAPIAdapterInterface::DeviceKeys& devicelKeys
     );
 
-    bool getDevice(
+    bool getDeviceSettings(
         const QString& deviceSettingsKey,
         SWGSDRangel::SWGDeviceSettings *deviceSettings,
         const QJsonObject& deviceSettingsJson,
-        QStringList& deviceSettingsKeys
+        QStringList& deviceActionsKeys
+    );
+
+    bool getDeviceActions(
+        const QString& deviceActionsKey,
+        SWGSDRangel::SWGDeviceActions *deviceActions,
+        const QJsonObject& deviceActionsJson,
+        QStringList& deviceActionsKeys
     );
 
     void appendSettingsSubKeys(
@@ -174,6 +190,10 @@ private:
     static const QMap<QString, QString> m_sourceDeviceHwIdToSettingsKey;
     static const QMap<QString, QString> m_sinkDeviceHwIdToSettingsKey;
     static const QMap<QString, QString> m_mimoDeviceHwIdToSettingsKey;
+    static const QMap<QString, QString> m_channelTypeToActionsKey;
+    static const QMap<QString, QString> m_sourceDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_sinkDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_mimoDeviceHwIdToActionsKey;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */
