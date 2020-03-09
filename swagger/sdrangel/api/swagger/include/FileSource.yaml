@@ -59,3 +59,13 @@ FileSourceReport:
       description: power transmitted in channel (dB)
       type: number
       format: float
+
+FileSourceActions:
+  description: FileSource
+  properties:
+    play:
+      type: integer
+      description: >
+        Play or Pause stream
+          * 0 - Pause
+          * 1 - Play

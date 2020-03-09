@@ -1382,6 +1382,42 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/deviceset/{deviceSetIndex}/device/actions:
+    x-swagger-router-controller: deviceset
+    post:
+      description: post an action on a device
+      operationId: devicesetDeviceActionsPost
+      tags:
+        - Deviceset
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Action(s) to apply to the device
+          required: true
+          schema:
+            $ref: "http://localhost:8081/api/swagger/include/DeviceActions.yaml#/DeviceActions"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
 
   /sdrangel/deviceset/{deviceSetIndex}/channel:
     x-swagger-router-controller: deviceset
@@ -1592,6 +1628,48 @@ paths:
           description: On success return channel report
           schema:
             $ref: "#/definitions/ChannelReport"
+        "400":
+          description: Invalid device set or channel index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/actions:
+    x-swagger-router-controller: deviceset
+    post:
+      description: post an action or actions on a channel
+      operationId: devicesetChannelActionsPost
+      tags:
+        - Deviceset
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - in: path
+          name: channelIndex
+          type: integer
+          required: true
+          description: Index of the channel in the channels list for this device set
+        - name: body
+          in: body
+          description: Action(s) to apply to the channel
+          required: true
+          schema:
+            $ref: "http://localhost:8081/api/swagger/include/ChannelActions.yaml#/ChannelActions"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
         "400":
           description: Invalid device set or channel index
           schema:
