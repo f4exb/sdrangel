@@ -163,6 +163,16 @@ bool FileSourceGUI::handleMessage(const Message& message)
 
         return true;
     }
+    else if (FileSource::MsgConfigureFileSourceSeek::match(message)) // API action "seekms" feedback
+    {
+        const FileSource::MsgConfigureFileSourceSeek& notif = (FileSource::MsgConfigureFileSourceSeek&) message;
+        int seekMillis = notif.getMillis();
+        ui->navTime->blockSignals(true);
+        ui->navTime->setValue(seekMillis);
+        ui->navTime->blockSignals(false);
+
+        return true;
+    }
     else
     {
         return false;
