@@ -29,6 +29,65 @@ SWGDeviceSetApi::SWGDeviceSetApi(QString host, QString basePath) {
 }
 
 void
+SWGDeviceSetApi::devicesetChannelActionsPost(qint32 device_set_index, qint32 channel_index, SWGChannelActions& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/actions");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+    QString channel_indexPathParam("{"); channel_indexPathParam.append("channelIndex").append("}");
+    fullPath.replace(channel_indexPathParam, stringValue(channel_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetChannelActionsPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetChannelActionsPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetChannelActionsPostSignal(output);
+    } else {
+        emit devicesetChannelActionsPostSignalE(output, error_type, error_str);
+        emit devicesetChannelActionsPostSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGDeviceSetApi::devicesetChannelDelete(qint32 device_set_index, qint32 channel_index) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}");
@@ -422,6 +481,63 @@ SWGDeviceSetApi::devicesetChannelsReportGetCallback(SWGHttpRequestWorker * worke
     } else {
         emit devicesetChannelsReportGetSignalE(output, error_type, error_str);
         emit devicesetChannelsReportGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceActionsPost(qint32 device_set_index, SWGDeviceActions& body) {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/deviceset/{deviceSetIndex}/device/actions");
+
+    QString device_set_indexPathParam("{"); device_set_indexPathParam.append("deviceSetIndex").append("}");
+    fullPath.replace(device_set_indexPathParam, stringValue(device_set_index));
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "POST");
+
+
+    
+    QString output = body.asJson();
+    input.request_body.append(output);
+    
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGDeviceSetApi::devicesetDeviceActionsPostCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGDeviceSetApi::devicesetDeviceActionsPostCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGSuccessResponse* output = static_cast<SWGSuccessResponse*>(create(json, QString("SWGSuccessResponse")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit devicesetDeviceActionsPostSignal(output);
+    } else {
+        emit devicesetDeviceActionsPostSignalE(output, error_type, error_str);
+        emit devicesetDeviceActionsPostSignalEFull(worker, error_type, error_str);
     }
 }
 
