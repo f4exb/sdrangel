@@ -98,10 +98,12 @@ public:
      * API adapter for the channel actions POST requests
      */
     virtual int webapiActionsPost(
+            const QStringList& channelActionsKeys,
             SWGSDRangel::SWGChannelActions& query,
             QString& errorMessage)
     {
         (void) query;
+        (void) channelActionsKeys;
         errorMessage = "Not implemented"; return 501;
     }
 

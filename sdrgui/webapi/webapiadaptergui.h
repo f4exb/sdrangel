@@ -225,6 +225,7 @@ public:
 
     virtual int devicesetDeviceActionsPost(
             int deviceSetIndex,
+            const QStringList& deviceActionsKeys,
             SWGSDRangel::SWGDeviceActions& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
@@ -300,6 +301,7 @@ public:
     virtual int devicesetChannelActionsPost(
             int deviceSetIndex,
             int channelIndex,
+            const QStringList& channelActionsKeys,
             SWGSDRangel::SWGChannelActions& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);

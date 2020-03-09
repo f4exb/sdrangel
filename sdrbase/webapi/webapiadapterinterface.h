@@ -884,12 +884,14 @@ public:
      */
     virtual int devicesetDeviceActionsPost(
             int deviceSetIndex,
+            const QStringList& deviceActionsKeys,
             SWGSDRangel::SWGDeviceActions& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error
     )
     {
         (void) deviceSetIndex;
+        (void) deviceActionsKeys;
         (void) query;
         (void) response;
         error.init();
@@ -1000,12 +1002,14 @@ public:
     virtual int devicesetChannelActionsPost(
             int deviceSetIndex,
             int channelIndex,
+            const QStringList& channelActionsKeys,
             SWGSDRangel::SWGChannelActions& query,
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
     {
         (void) deviceSetIndex;
         (void) channelIndex;
+        (void) channelActionsKeys;
         (void) query;
         (void) response;
         error.init();

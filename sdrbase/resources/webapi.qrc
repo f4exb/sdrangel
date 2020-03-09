@@ -18,6 +18,7 @@
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/DSDDemod.yaml</file>
+        <file>webapi/doc/swagger/include/DeviceActions.yaml</file>
         <file>webapi/doc/swagger/include/DeviceSettings.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>

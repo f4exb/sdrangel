@@ -119,9 +119,11 @@ public:
     }
 
     virtual int webapiActionsPost(
+            const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceActions& actions,
             QString& errorMessage)
     {
+        (void) deviceSettingsKeys;
         (void) actions;
         errorMessage = "Not implemented";
         return 501;

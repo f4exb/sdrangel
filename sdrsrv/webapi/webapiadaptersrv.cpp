@@ -1666,6 +1666,7 @@ int WebAPIAdapterSrv::devicesetDeviceSettingsGet(
 
 int WebAPIAdapterSrv::devicesetDeviceActionsPost(
         int deviceSetIndex,
+        const QStringList& deviceActionsKeys,
         SWGSDRangel::SWGDeviceActions& query,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1691,7 +1692,7 @@ int WebAPIAdapterSrv::devicesetDeviceActionsPost(
             else
             {
                 DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-                int res = source->webapiActionsPost(query, *error.getMessage());
+                int res = source->webapiActionsPost(deviceActionsKeys, query, *error.getMessage());
 
                 if (res/100 == 2)
                 {
@@ -1717,7 +1718,7 @@ int WebAPIAdapterSrv::devicesetDeviceActionsPost(
             else
             {
                 DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
-                int res = sink->webapiActionsPost(query, *error.getMessage());
+                int res = sink->webapiActionsPost(deviceActionsKeys, query, *error.getMessage());
 
                 if (res/100 == 2)
                 {
@@ -1743,7 +1744,7 @@ int WebAPIAdapterSrv::devicesetDeviceActionsPost(
             else
             {
                 DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
-                int res = mimo->webapiActionsPost(query, *error.getMessage());
+                int res = mimo->webapiActionsPost(deviceActionsKeys, query, *error.getMessage());
 
                 if (res/100 == 2)
                 {
@@ -2485,6 +2486,7 @@ int WebAPIAdapterSrv::devicesetChannelReportGet(
 int WebAPIAdapterSrv::devicesetChannelActionsPost(
         int deviceSetIndex,
         int channelIndex,
+        const QStringList& channelActionsKeys,
         SWGSDRangel::SWGChannelActions& query,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -2511,7 +2513,7 @@ int WebAPIAdapterSrv::devicesetChannelActionsPost(
 
                 if (channelType == *query.getChannelType())
                 {
-                    int res = channelAPI->webapiActionsPost(query, *error.getMessage());
+                    int res = channelAPI->webapiActionsPost(channelActionsKeys, query, *error.getMessage());
 
                     if (res/100 == 2)
                     {
@@ -2547,7 +2549,7 @@ int WebAPIAdapterSrv::devicesetChannelActionsPost(
 
                 if (channelType == *query.getChannelType())
                 {
-                    int res = channelAPI->webapiActionsPost(query, *error.getMessage());
+                    int res = channelAPI->webapiActionsPost(channelActionsKeys, query, *error.getMessage());
 
                     if (res/100 == 2)
                     {
@@ -2599,7 +2601,7 @@ int WebAPIAdapterSrv::devicesetChannelActionsPost(
 
                 if (channelType == *query.getChannelType())
                 {
-                    int res = channelAPI->webapiActionsPost(query, *error.getMessage());
+                    int res = channelAPI->webapiActionsPost(channelActionsKeys, query, *error.getMessage());
                     if (res/100 == 2)
                     {
                         response.init();

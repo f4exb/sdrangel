@@ -96,7 +96,7 @@ bool FileSourceGUI::handleMessage(const Message& message)
         displayRateAndShift();
         return true;
     }
-    else if (FileSource::MsgConfigureFileSource::match(message))
+    else if (FileSource::MsgConfigureFileSource::match(message)) // API settings feedback
     {
         const FileSource::MsgConfigureFileSource& cfg = (FileSource::MsgConfigureFileSource&) message;
         m_settings = cfg.getSettings();
@@ -149,6 +149,20 @@ bool FileSourceGUI::handleMessage(const Message& message)
 
 		return true;
 	}
+    else if (FileSource::MsgConfigureFileSourceWork::match(message)) // API action "play" feedback
+    {
+        const FileSource::MsgConfigureFileSourceWork& notif = (const FileSource::MsgConfigureFileSourceWork&) message;
+        bool play = notif.isWorking();
+        ui->play->blockSignals(true);
+        ui->navTime->blockSignals(true);
+        ui->play->setChecked(play);
+        ui->navTime->setEnabled(!play);
+        m_enableNavTime = !play;
+        ui->play->blockSignals(false);
+        ui->navTime->blockSignals(false);
+
+        return true;
+    }
     else
     {
         return false;

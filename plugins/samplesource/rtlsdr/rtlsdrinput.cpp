@@ -757,6 +757,7 @@ int RTLSDRInput::webapiReportGet(
 }
 
 int RTLSDRInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
         SWGSDRangel::SWGDeviceActions& query,
         QString& errorMessage)
 {
@@ -764,14 +765,24 @@ int RTLSDRInput::webapiActionsPost(
 
     if (swgRtlSdrActions)
     {
-        bool record = swgRtlSdrActions->getRecord() != 0;
-        MsgFileRecord *msg = MsgFileRecord::create(record);
-        getInputMessageQueue()->push(msg);
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgRtlSdrActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
         return 202;
     }
     else
     {
-        errorMessage = "Missing RtlSdrActions key in JSON body";
+        errorMessage = "Missing RtlSdrActions in query";
         return 400;
     }
 }
