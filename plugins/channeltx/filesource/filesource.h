@@ -205,6 +205,10 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            SWGSDRangel::SWGChannelActions& query,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const FileSourceSettings& settings);

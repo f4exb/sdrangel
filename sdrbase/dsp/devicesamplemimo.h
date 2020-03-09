@@ -33,6 +33,7 @@ namespace SWGSDRangel
     class SWGDeviceSettings;
     class SWGDeviceState;
     class SWGDeviceReport;
+    class SWGDeviceActions;
 }
 
 class SDRBASE_API DeviceSampleMIMO : public QObject {
@@ -131,6 +132,15 @@ public:
             QString& errorMessage)
     {
         (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
+
+    virtual int webapiActionsPost(
+            SWGSDRangel::SWGDeviceActions& actions,
+            QString& errorMessage)
+    {
+        (void) actions;
         errorMessage = "Not implemented";
         return 501;
     }

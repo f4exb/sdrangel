@@ -44,9 +44,11 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGChannelsDetail.h"
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
+#include "SWGChannelActions.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
 
@@ -297,6 +299,8 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceSubsystemRunService(std::string(desc_match[1]), std::string(desc_match[2]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceReportURLRe)) {
                 devicesetDeviceReportService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceActionsURLRe)) {
+                devicesetDeviceActionsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelsReportURLRe)) {
                 devicesetChannelsReportService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetChannelURLRe)) {
@@ -1912,6 +1916,77 @@ void WebAPIRequestMapper::devicesetDeviceReportService(const std::string& indexS
     }
 }
 
+void WebAPIRequestMapper::devicesetDeviceActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    if (request.getMethod() == "POST")
+    {
+        try
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGDeviceActions query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+                int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+                resetDeviceActions(query);
+
+                if (jsonObject.contains("direction")) {
+                    query.setDirection(jsonObject["direction"].toInt());
+                } else {
+                    query.setDirection(0); // assume Rx
+                }
+
+                if (jsonObject.contains("deviceHwType") && jsonObject["deviceHwType"].isString())
+                {
+                    query.setDeviceHwType(new QString(jsonObject["deviceHwType"].toString()));
+                    int status = m_adapter->devicesetDeviceActionsPost(deviceSetIndex, query, normalResponse, errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        catch (const boost::bad_lexical_cast &e)
+        {
+            errorResponse.init();
+            *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+            response.setStatus(400,"Invalid data");
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    else
+    {
+        response.setStatus(405,"Invalid HTTP method");
+        errorResponse.init();
+        *errorResponse.getMessage() = "Invalid HTTP method";
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
 void WebAPIRequestMapper::devicesetChannelsReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
 {
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -2189,8 +2264,92 @@ void WebAPIRequestMapper::devicesetChannelReportService(
                 response.write(errorResponse.asJson().toUtf8());
             }
         }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
     }
     catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetChannelActtionsService(
+        const std::string& deviceSetIndexStr,
+        const std::string& channelIndexStr,
+        qtwebapp::HttpRequest& request,
+        qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(deviceSetIndexStr);
+        int channelIndex = boost::lexical_cast<int>(channelIndexStr);
+
+        if (request.getMethod() == "POST")
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGChannelActions query;
+                SWGSDRangel::SWGSuccessResponse normalResponse;
+                resetChannelActions(query);
+
+                if (jsonObject.contains("direction")) {
+                    query.setDirection(jsonObject["direction"].toInt());
+                } else {
+                    query.setDirection(0); // assume Rx
+                }
+
+                if (jsonObject.contains("channelType") && jsonObject["channelType"].isString())
+                {
+                    query.setChannelType(new QString(jsonObject["channelType"].toString()));
+                    int status = m_adapter->devicesetChannelActionsPost(deviceSetIndex, channelIndex, query, normalResponse, errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch(const boost::bad_lexical_cast &e)
     {
         errorResponse.init();
         *errorResponse.getMessage() = "Wrong integer conversion on index";
@@ -3237,6 +3396,13 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setSdrPlayReport(nullptr);
 }
 
+void WebAPIRequestMapper::resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions)
+{
+    deviceActions.cleanup();
+    deviceActions.setDeviceHwType(nullptr);
+    deviceActions.setRtlSdrActions(nullptr);
+}
+
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
 {
     channelSettings.cleanup();
@@ -3276,6 +3442,13 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setUdpSinkReport(nullptr);
     channelReport.setWfmDemodReport(nullptr);
     channelReport.setWfmModReport(nullptr);
+}
+
+void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& channelActions)
+{
+    channelActions.cleanup();
+    channelActions.setChannelType(nullptr);
+    channelActions.setFileSourceActions(nullptr);
 }
 
 void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)

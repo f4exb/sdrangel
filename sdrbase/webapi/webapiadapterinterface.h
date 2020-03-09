@@ -56,9 +56,11 @@ namespace SWGSDRangel
     class SWGDeviceSettings;
     class SWGDeviceState;
     class SWGDeviceReport;
+    class SWGDeviceActions;
     class SWGChannelsDetail;
     class SWGChannelSettings;
     class SWGChannelReport;
+    class SWGChannelActions;
     class SWGSuccessResponse;
 }
 
@@ -877,6 +879,25 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/device/actions (POST)
+     * post action(s) on device
+     */
+    virtual int devicesetDeviceActionsPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error
+    )
+    {
+        (void) deviceSetIndex;
+        (void) query;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel (POST) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -972,6 +993,26 @@ public:
         return 501;
     }
 
+    /**
+     * Handler of /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}/actions (POST)
+     * posts an action on the channel (default 501: not implemented)
+     */
+    virtual int devicesetChannelActionsPost(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) channelIndex;
+        (void) query;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
     static QString instanceSummaryURL;
     static QString instanceConfigURL;
     static QString instanceDevicesURL;
@@ -1001,10 +1042,12 @@ public:
     static std::regex devicesetDeviceRunURLRe;
     static std::regex devicesetDeviceSubsystemRunURLRe;
     static std::regex devicesetDeviceReportURLRe;
+    static std::regex devicesetDeviceActionsURLRe;
     static std::regex devicesetChannelURLRe;
     static std::regex devicesetChannelIndexURLRe;
     static std::regex devicesetChannelSettingsURLRe;
     static std::regex devicesetChannelReportURLRe;
+    static std::regex devicesetChannelActionsURLRe;
     static std::regex devicesetChannelsReportURLRe;
 };
 

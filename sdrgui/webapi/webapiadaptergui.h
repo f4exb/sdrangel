@@ -223,6 +223,12 @@ public:
             SWGSDRangel::SWGDeviceSettings& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetDeviceActionsPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGDeviceActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDeviceSettingsPutPatch(
             int deviceSetIndex,
             bool force,
@@ -289,6 +295,13 @@ public:
             int deviceSetIndex,
             int channelIndex,
             SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetChannelActionsPost(
+            int deviceSetIndex,
+            int channelIndex,
+            SWGSDRangel::SWGChannelActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
     virtual int devicesetChannelSettingsPutPatch(

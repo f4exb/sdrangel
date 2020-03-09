@@ -32,6 +32,7 @@ namespace SWGSDRangel
 {
     class SWGChannelSettings;
     class SWGChannelReport;
+    class SWGChannelActions;
 }
 
 class SDRBASE_API ChannelAPI {
@@ -90,6 +91,17 @@ public:
             QString& errorMessage)
     {
         (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
+
+    /**
+     * API adapter for the channel actions POST requests
+     */
+    virtual int webapiActionsPost(
+            SWGSDRangel::SWGChannelActions& query,
+            QString& errorMessage)
+    {
+        (void) query;
         errorMessage = "Not implemented"; return 501;
     }
 
