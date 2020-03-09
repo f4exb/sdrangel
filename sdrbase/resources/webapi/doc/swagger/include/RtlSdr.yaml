@@ -43,7 +43,7 @@ RtlSdrSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer      
+      type: integer
 
 RtlSdrReport:
   description: RTLSDR
@@ -52,3 +52,13 @@ RtlSdrReport:
       type: array
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/Gain"
+
+RtlSdrActions:
+  description: RTLSDR
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording

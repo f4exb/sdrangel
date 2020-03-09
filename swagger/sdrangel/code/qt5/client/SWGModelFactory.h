@@ -45,6 +45,7 @@
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
+#include "SWGChannelActions.h"
 #include "SWGChannelAnalyzerSettings.h"
 #include "SWGChannelConfig.h"
 #include "SWGChannelListItem.h"
@@ -62,6 +63,7 @@
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSerialDevice.h"
 #include "SWGDVSerialDevices.h"
+#include "SWGDeviceActions.h"
 #include "SWGDeviceConfig.h"
 #include "SWGDeviceListItem.h"
 #include "SWGDeviceReport.h"
@@ -74,6 +76,7 @@
 #include "SWGFCDProSettings.h"
 #include "SWGFileInputReport.h"
 #include "SWGFileInputSettings.h"
+#include "SWGFileSourceActions.h"
 #include "SWGFileSourceReport.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGFreeDVDemodReport.h"
@@ -144,6 +147,7 @@
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGRemoteSourceSettings.h"
+#include "SWGRtlSdrActions.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
@@ -275,6 +279,9 @@ namespace SWGSDRangel {
     if(QString("SWGChannel").compare(type) == 0) {
       return new SWGChannel();
     }
+    if(QString("SWGChannelActions").compare(type) == 0) {
+      return new SWGChannelActions();
+    }
     if(QString("SWGChannelAnalyzerSettings").compare(type) == 0) {
       return new SWGChannelAnalyzerSettings();
     }
@@ -326,6 +333,9 @@ namespace SWGSDRangel {
     if(QString("SWGDVSerialDevices").compare(type) == 0) {
       return new SWGDVSerialDevices();
     }
+    if(QString("SWGDeviceActions").compare(type) == 0) {
+      return new SWGDeviceActions();
+    }
     if(QString("SWGDeviceConfig").compare(type) == 0) {
       return new SWGDeviceConfig();
     }
@@ -361,6 +371,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileInputSettings").compare(type) == 0) {
       return new SWGFileInputSettings();
+    }
+    if(QString("SWGFileSourceActions").compare(type) == 0) {
+      return new SWGFileSourceActions();
     }
     if(QString("SWGFileSourceReport").compare(type) == 0) {
       return new SWGFileSourceReport();
@@ -571,6 +584,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRemoteSourceSettings").compare(type) == 0) {
       return new SWGRemoteSourceSettings();
+    }
+    if(QString("SWGRtlSdrActions").compare(type) == 0) {
+      return new SWGRtlSdrActions();
     }
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
       return new SWGRtlSdrReport();
