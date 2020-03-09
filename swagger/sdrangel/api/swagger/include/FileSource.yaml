@@ -69,3 +69,6 @@ FileSourceActions:
         Play or Pause stream
           * 0 - Pause
           * 1 - Play
+    seekMillis:
+      description: Move play cursor to this thousands of total time from the start
+      type: integer

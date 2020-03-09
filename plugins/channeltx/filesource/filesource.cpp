@@ -400,6 +400,21 @@ int FileSource::webapiActionsPost(
             }
         }
 
+        if (channelActionsKeys.contains("seekMillis"))
+        {
+            int seekMillis = swgFileSourceActions->getSeekMillis();
+            seekMillis = seekMillis < 0 ? 0 : seekMillis > 1000 ? 1000 : seekMillis;
+            FileSourceBaseband::MsgConfigureFileSourceSeek *msg
+                = FileSourceBaseband::MsgConfigureFileSourceSeek::create(seekMillis);
+            m_basebandSource->getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+        		MsgConfigureFileSourceSeek *msgToGUI = MsgConfigureFileSourceSeek::create(seekMillis);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
         return 202;
     }
     else
