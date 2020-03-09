@@ -44,12 +44,18 @@ public:
     qint32 getPlay();
     void setPlay(qint32 play);
 
+    qint32 getSeekMillis();
+    void setSeekMillis(qint32 seek_millis);
+
 
     virtual bool isSet() override;
 
 private:
     qint32 play;
     bool m_play_isSet;
+
+    qint32 seek_millis;
+    bool m_seek_millis_isSet;
 
 };
 

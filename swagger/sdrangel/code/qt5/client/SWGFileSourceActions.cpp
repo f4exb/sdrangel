@@ -30,6 +30,8 @@ SWGFileSourceActions::SWGFileSourceActions(QString* json) {
 SWGFileSourceActions::SWGFileSourceActions() {
     play = 0;
     m_play_isSet = false;
+    seek_millis = 0;
+    m_seek_millis_isSet = false;
 }
 
 SWGFileSourceActions::~SWGFileSourceActions() {
@@ -40,10 +42,13 @@ void
 SWGFileSourceActions::init() {
     play = 0;
     m_play_isSet = false;
+    seek_millis = 0;
+    m_seek_millis_isSet = false;
 }
 
 void
 SWGFileSourceActions::cleanup() {
+
 
 }
 
@@ -59,6 +64,8 @@ SWGFileSourceActions::fromJson(QString &json) {
 void
 SWGFileSourceActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&play, pJson["play"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&seek_millis, pJson["seekMillis"], "qint32", "");
     
 }
 
@@ -79,6 +86,9 @@ SWGFileSourceActions::asJsonObject() {
     if(m_play_isSet){
         obj->insert("play", QJsonValue(play));
     }
+    if(m_seek_millis_isSet){
+        obj->insert("seekMillis", QJsonValue(seek_millis));
+    }
 
     return obj;
 }
@@ -93,12 +103,25 @@ SWGFileSourceActions::setPlay(qint32 play) {
     this->m_play_isSet = true;
 }
 
+qint32
+SWGFileSourceActions::getSeekMillis() {
+    return seek_millis;
+}
+void
+SWGFileSourceActions::setSeekMillis(qint32 seek_millis) {
+    this->seek_millis = seek_millis;
+    this->m_seek_millis_isSet = true;
+}
+
 
 bool
 SWGFileSourceActions::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_play_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_seek_millis_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);
