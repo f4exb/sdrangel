@@ -82,11 +82,13 @@ private:
     void devicesetDeviceRunService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceSubsystemRunService(const std::string& indexStr, const std::string& subsystemIndexStr,qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetDeviceReportService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetDeviceActionsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelsReportService(const std::string& deviceSetIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelService(const std::string& deviceSetIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelIndexService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelSettingsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelReportService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void devicesetChannelActtionsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
@@ -146,8 +148,10 @@ private:
 
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
     void resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport);
+    void resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions);
     void resetChannelSettings(SWGSDRangel::SWGChannelSettings& deviceSettings);
-    void resetChannelReport(SWGSDRangel::SWGChannelReport& deviceSettings);
+    void resetChannelReport(SWGSDRangel::SWGChannelReport& channelReport);
+    void resetChannelActions(SWGSDRangel::SWGChannelActions& channelActions);
     void resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice);
     void resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice);
 

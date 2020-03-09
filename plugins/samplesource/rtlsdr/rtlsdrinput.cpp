@@ -27,6 +27,7 @@
 #include "SWGRtlSdrSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGRtlSdrReport.h"
 
 #include "rtlsdrinput.h"
@@ -753,6 +754,26 @@ int RTLSDRInput::webapiReportGet(
     response.getRtlSdrReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
+}
+
+int RTLSDRInput::webapiActionsPost(
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGRtlSdrActions *swgRtlSdrActions = query.getRtlSdrActions();
+
+    if (swgRtlSdrActions)
+    {
+        bool record = swgRtlSdrActions->getRecord() != 0;
+        MsgFileRecord *msg = MsgFileRecord::create(record);
+        getInputMessageQueue()->push(msg);
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing RtlSdrActions key in JSON body";
+        return 400;
+    }
 }
 
 void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)

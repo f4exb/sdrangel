@@ -25,6 +25,7 @@
 
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
+#include "SWGChannelActions.h"
 #include "SWGFileSourceReport.h"
 
 #include "device/deviceapi.h"
@@ -375,6 +376,26 @@ int FileSource::webapiReportGet(
     response.getFileSourceReport()->init();
     webapiFormatChannelReport(response);
     return 200;
+}
+
+int FileSource::webapiActionsPost(
+        SWGSDRangel::SWGChannelActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGFileSourceActions *swgFileSourceActions = query.getFileSourceActions();
+
+    if (swgFileSourceActions)
+    {
+        bool play = swgFileSourceActions->getPlay() != 0;
+        FileSourceBaseband::MsgConfigureFileSourceWork *msg = FileSourceBaseband::MsgConfigureFileSourceWork::create(play);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing FileSourceActions key in JSON body";
+        return 400;
+    }
 }
 
 void FileSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const FileSourceSettings& settings)
