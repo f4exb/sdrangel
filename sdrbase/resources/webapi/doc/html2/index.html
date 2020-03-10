@@ -1135,6 +1135,24 @@ margin-bottom: 20px;
   },
   "description" : "ATVMod"
 };
+            defs.AirspyActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "Airspy"
+};
+            defs.AirspyHFActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "AirspyHF"
+};
             defs.AirspyHFReport = {
   "properties" : {
     "sampleRates" : {
@@ -1567,6 +1585,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "A bandwidth expressed in Hertz (Hz)"
+};
+            defs.BladeRF1InputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "BladeRF1"
 };
             defs.BladeRF1InputSettings = {
   "properties" : {
@@ -2645,8 +2672,56 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the device set index from where the message comes from."
     },
+    "airspyActions" : {
+      "$ref" : "#/definitions/AirspyActions"
+    },
+    "airspyHFActions" : {
+      "$ref" : "#/definitions/AirspyHFActions"
+    },
+    "bladeRF1InputActions" : {
+      "$ref" : "#/definitions/BladeRF1InputActions"
+    },
+    "fcdProActions" : {
+      "$ref" : "#/definitions/FCDProActions"
+    },
+    "fcdProPlusActions" : {
+      "$ref" : "#/definitions/FCDProPlusActions"
+    },
+    "hackRFInputActions" : {
+      "$ref" : "#/definitions/HackRFInputActions"
+    },
+    "kiwiSDRActions" : {
+      "$ref" : "#/definitions/KiwiSDRActions"
+    },
+    "limeSdrInputActions" : {
+      "$ref" : "#/definitions/LimeSdrInputActions"
+    },
+    "localInputActions" : {
+      "$ref" : "#/definitions/LocalInputActions"
+    },
+    "perseusActions" : {
+      "$ref" : "#/definitions/PerseusActions"
+    },
+    "plutoSdrInputActions" : {
+      "$ref" : "#/definitions/PlutoSdrInputActions"
+    },
+    "remoteInputActions" : {
+      "$ref" : "#/definitions/RemoteInputActions"
+    },
     "rtlSdrActions" : {
       "$ref" : "#/definitions/RtlSdrActions"
+    },
+    "sdrPlayActions" : {
+      "$ref" : "#/definitions/SDRPlayActions"
+    },
+    "soapySDRInputActions" : {
+      "$ref" : "#/definitions/SoapySDRInputActions"
+    },
+    "testSourceActions" : {
+      "$ref" : "#/definitions/TestSourceActions"
+    },
+    "xtrxInputActions" : {
+      "$ref" : "#/definitions/XtrxInputActions"
     }
   },
   "description" : "Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present."
@@ -2950,6 +3025,24 @@ margin-bottom: 20px;
       "example" : "KO"
     }
   }
+};
+            defs.FCDProActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "FCDPro"
+};
+            defs.FCDProPlusActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "FCDProPlus"
 };
             defs.FCDProPlusSettings = {
   "properties" : {
@@ -3703,6 +3796,15 @@ margin-bottom: 20px;
   },
   "description" : "A gain expressed in centi-Bels (tenths of dB)"
 };
+            defs.HackRFInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "HackRF"
+};
             defs.HackRFInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -3922,6 +4024,15 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about this SDRangel instance"
 };
+            defs.KiwiSDRActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "KiwiSDR"
+};
             defs.KiwiSDRReport = {
   "properties" : {
     "status" : {
@@ -4080,6 +4191,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "LimeRFE"
+};
+            defs.LimeSdrInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "LimeSDR"
 };
             defs.LimeSdrInputReport = {
   "properties" : {
@@ -4345,6 +4465,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "LimeSDR"
+};
+            defs.LocalInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "LocalInput"
 };
             defs.LocalInputReport = {
   "properties" : {
@@ -4750,6 +4879,15 @@ margin-bottom: 20px;
   },
   "description" : "Enumeration with name for values"
 };
+            defs.PerseusActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "Perseus"
+};
             defs.PerseusReport = {
   "properties" : {
     "sampleRates" : {
@@ -4817,6 +4955,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "Perseus"
+};
+            defs.PlutoSdrInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "PlutoSDR"
 };
             defs.PlutoSdrInputReport = {
   "properties" : {
@@ -5315,6 +5462,15 @@ margin-bottom: 20px;
   },
   "description" : "An arbitrary range of floating point values"
 };
+            defs.RemoteInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "RemoteInput"
+};
             defs.RemoteInputReport = {
   "properties" : {
     "centerFrequency" : {
@@ -5683,6 +5839,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "RTLSDR"
+};
+            defs.SDRPlayActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "SDRplay1"
 };
             defs.SDRPlayReport = {
   "properties" : {
@@ -6078,6 +6243,15 @@ margin-bottom: 20px;
   },
   "description" : "A named gain setting specified by its range"
 };
+            defs.SoapySDRInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "SoapySDR"
+};
             defs.SoapySDRInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -6355,6 +6529,15 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.TestSourceActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
+    }
+  },
+  "description" : "TestSource"
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -6988,6 +7171,15 @@ margin-bottom: 20px;
     }
   },
   "description" : "WFMMod"
+};
+            defs.XtrxInputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "XTRX"
 };
             defs.XtrxInputReport = {
   "properties" : {
@@ -33188,7 +33380,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-03-10T15:52:04.190+01:00
+              Generated 2020-03-10T19:38:19.250+01:00
             </div>
           </div>
       </div>

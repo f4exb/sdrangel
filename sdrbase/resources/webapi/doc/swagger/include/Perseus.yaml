@@ -46,3 +46,13 @@ PerseusReport:
       type: array
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
+
+PerseusActions:
+  description: Perseus
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording
