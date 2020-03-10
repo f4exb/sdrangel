@@ -142,6 +142,11 @@ public:
             SWGSDRangel::SWGDeviceReport& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            const QStringList& deviceActionsKeys,
+            SWGSDRangel::SWGDeviceActions& actions,
+            QString& errorMessage);
+
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const PlutoSDRInputSettings& settings);

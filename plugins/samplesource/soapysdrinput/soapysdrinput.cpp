@@ -25,7 +25,9 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSoapySDRInputActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
@@ -1628,6 +1630,37 @@ int SoapySDRInput::webapiRun(
     }
 
     return 200;
+}
+
+int SoapySDRInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGSoapySDRInputActions *swgSoapySDRInputActions = query.getSoapySdrInputActions();
+
+    if (swgSoapySDRInputActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgSoapySDRInputActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing SoapySDRInputActions in query";
+        return 400;
+    }
 }
 
 void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDRInputSettings& settings)

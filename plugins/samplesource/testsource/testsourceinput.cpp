@@ -25,6 +25,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceActions.h"
+#include "SWGTestSourceActions.h"
 
 #include "testsourceinput.h"
 #include "device/deviceapi.h"
@@ -510,6 +512,37 @@ int TestSourceInput::webapiSettingsPutPatch(
 
     webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+int TestSourceInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGTestSourceActions *swgTestSourceActions = query.getTestSourceActions();
+
+    if (swgTestSourceActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgTestSourceActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing TestSourceActions in query";
+        return 400;
+    }
 }
 
 void TestSourceInput::webapiUpdateDeviceSettings(

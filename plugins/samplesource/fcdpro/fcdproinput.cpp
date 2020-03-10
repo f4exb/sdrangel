@@ -24,6 +24,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceActions.h"
+#include "SWGFCDProActions.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -852,6 +854,37 @@ int FCDProInput::webapiRun(
     }
 
     return 200;
+}
+
+int FCDProInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGFCDProActions *swgFCDProActions = query.getFcdProActions();
+
+    if (swgFCDProActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgFCDProActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing AirspyActions in query";
+        return 400;
+    }
 }
 
 int FCDProInput::webapiSettingsGet(

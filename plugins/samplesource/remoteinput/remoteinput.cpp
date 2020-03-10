@@ -25,7 +25,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGRemoteInputReport.h"
+#include "SWGRemoteInputActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -346,6 +348,37 @@ int RemoteInput::webapiSettingsPutPatch(
 
     webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+int RemoteInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGRemoteInputActions *swgRemoteInputActions = query.getRemoteInputActions();
+
+    if (swgRemoteInputActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgRemoteInputActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing RemoteInputActions in query";
+        return 400;
+    }
 }
 
 void RemoteInput::webapiUpdateDeviceSettings(

@@ -25,7 +25,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGLocalInputReport.h"
+#include "SWGLocalInputActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -332,6 +334,37 @@ int LocalInput::webapiSettingsPutPatch(
 
     webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+int LocalInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGLocalInputActions *swgLocalInputActions = query.getLocalInputActions();
+
+    if (swgLocalInputActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgLocalInputActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing LocalInputActions in query";
+        return 400;
+    }
 }
 
 void LocalInput::webapiUpdateDeviceSettings(
