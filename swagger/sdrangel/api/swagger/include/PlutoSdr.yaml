@@ -132,3 +132,13 @@ PlutoSdrOutputReport:
     temperature:
       type: number
       format: float
+
+PlutoSdrInputActions:
+  description: PlutoSDR
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording

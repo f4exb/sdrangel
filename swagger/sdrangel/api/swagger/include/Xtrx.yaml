@@ -1,6 +1,6 @@
 XtrxInputSettings:
   description: XTRX
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -24,16 +24,16 @@ XtrxInputSettings:
       type: integer
     ncoEnable:
       description: Enable TSP NCO and mixing (1 for yes, 0 for no)
-      type: integer     
+      type: integer
     ncoFrequency:
       description: Frequency shift from LO
       type: integer
     antennaPath:
       description: Antenna selected (enum value from xtrx_antenna_t)
-      type: integer   
+      type: integer
     gainMode:
       description: Gain mode auto or manual (enum value from GainMode)
-      type: integer   
+      type: integer
     lnaGain:
       description: Manual LNA gain
       type: integer
@@ -42,16 +42,16 @@ XtrxInputSettings:
       type: integer
     pgaGain:
       description: Manual PGA gain
-      type: integer  
+      type: integer
     extClock:
       description: Use external clock source (1 for yes, 0 for no)
-      type: integer    
+      type: integer
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
     pwrmode:
       description: LMS power mode (0 save max to 7 perf max)
-      type: integer   
+      type: integer
     fileRecordName:
       type: string
     useReverseAPI:
@@ -62,11 +62,11 @@ XtrxInputSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer    
+      type: integer
 
 XtrxInputReport:
   description: XTRX
-  properties:  
+  properties:
     success:
       description: 1 if info was successfully retrieved else 0
       type: integer
@@ -80,10 +80,20 @@ XtrxInputReport:
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
-      
+
+XtrxInputActions:
+  description: XTRX
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording
+
 XtrxOutputSettings:
   description: XTRX
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -101,22 +111,22 @@ XtrxOutputSettings:
       type: integer
     ncoEnable:
       description: Enable TSP NCO and mixing (1 for yes, 0 for no)
-      type: integer     
+      type: integer
     ncoFrequency:
       description: Frequency shift from LO
       type: integer
     antennaPath:
       description: Antenna selected (enum value from xtrx_antenna_t)
-      type: integer   
+      type: integer
     extClock:
       description: Use external clock source (1 for yes, 0 for no)
-      type: integer    
+      type: integer
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
     pwrmode:
       description: LMS power mode (0 save max to 7 perf max)
-      type: integer   
+      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -125,11 +135,11 @@ XtrxOutputSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer    
+      type: integer
 
 XtrxOutputReport:
   description: XTRX
-  properties:  
+  properties:
     success:
       description: 1 if info was successfully retrieved else 0
       type: integer
@@ -142,4 +152,4 @@ XtrxOutputReport:
       format: float
     gpsLock:
       description: 1 if GPSDO is locked else 0
-      type: integer      
+      type: integer
