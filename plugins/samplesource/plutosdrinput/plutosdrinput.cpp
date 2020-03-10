@@ -22,7 +22,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGPlutoSdrInputReport.h"
+#include "SWGPlutoSdrInputActions.h"
 
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
@@ -927,6 +929,37 @@ int PlutoSDRInput::webapiReportGet(
     response.getPlutoSdrInputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
+}
+
+int PlutoSDRInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGPlutoSdrInputActions *swgPlutoSdrInputActions = query.getPlutoSdrInputActions();
+
+    if (swgPlutoSdrInputActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgPlutoSdrInputActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing PlutoSdrInputActions in query";
+        return 400;
+    }
 }
 
 void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDRInputSettings& settings)

@@ -24,6 +24,8 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
+#include "SWGDeviceActions.h"
+#include "SWGFCDProPlusActions.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -613,6 +615,37 @@ int FCDProPlusInput::webapiSettingsPutPatch(
 
     webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+int FCDProPlusInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGFCDProPlusActions *swgFCDProPlusActions = query.getFcdProPlusActions();
+
+    if (swgFCDProPlusActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgFCDProPlusActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing FCDProPlusActions in query";
+        return 400;
+    }
 }
 
 void FCDProPlusInput::webapiUpdateDeviceSettings(

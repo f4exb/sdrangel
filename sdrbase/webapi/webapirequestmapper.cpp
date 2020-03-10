@@ -160,7 +160,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
 const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
     {"Airspy", "airspySettings"},
     {"AirspyHF", "airspyHFSettings"},
-    {"BladeRFI", "bladeRF1InputSettings"},
+    {"BladeRF1", "bladeRF1InputSettings"},
     {"BladeRF2", "bladeRF2InputSettings"},
     {"FCDPro", "fcdProSettings"},
     {"FCDPro+", "fcdProPlusSettings"},
@@ -180,7 +180,23 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKe
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToActionsKey = {
-    {"RTLSDR", "rtlSdrActions"}
+    {"Airspy", "airspyActions"},
+    {"AirspyHF", "airspyHFActions"},
+    {"BladeRF1", "bladeRF1InputActions"},
+    {"FCDPro", "fcdProActions"},
+    {"FCDPro+", "fcdProPlusActions"},
+    {"HackRF", "hackRFInputActions"},
+    {"KiwiSDR", "kiwiSDRActions"},
+    {"LimeSDR", "limeSdrInputActions"},
+    {"LocalInput", "localInputActions"},
+    {"Perseus", "perseusActions"},
+    {"PlutoSDR", "plutoSdrInputActions"},
+    {"RemoteInput", "remoteInputActions"},
+    {"RTLSDR", "rtlSdrActions"},
+    {"SDRplay1", "sdrPlayActions"},
+    {"SoapySDR", "soapySDRInputActions"},
+    {"TestSource", "testSourceActions"},
+    {"XTRX", "xtrxInputActions"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey = {
@@ -3461,10 +3477,90 @@ bool WebAPIRequestMapper::getDeviceActions(
         QJsonObject actionsJsonObject = deviceActionsJson[deviceActionsKey].toObject();
         deviceActionsKeys = actionsJsonObject.keys();
 
-        if (deviceActionsKey == "rtlSdrActions")
+        if (deviceActionsKey == "airspyActions")
+        {
+            deviceActions->setAirspyActions(new SWGSDRangel::SWGAirspyActions());
+            deviceActions->getAirspyActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "airspyHFActions")
+        {
+            deviceActions->setAirspyHfActions(new SWGSDRangel::SWGAirspyHFActions());
+            deviceActions->getAirspyHfActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "bladeRF1InputActions")
+        {
+            deviceActions->setBladeRf1InputActions(new SWGSDRangel::SWGBladeRF1InputActions());
+            deviceActions->getBladeRf1InputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "fcdProActions")
+        {
+            deviceActions->setFcdProActions(new SWGSDRangel::SWGFCDProActions());
+            deviceActions->getFcdProActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "fcdProPlusActions")
+        {
+            deviceActions->setFcdProPlusActions(new SWGSDRangel::SWGFCDProPlusActions());
+            deviceActions->getFcdProPlusActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "hackRFInputActions")
+        {
+            deviceActions->setHackRfInputActions(new SWGSDRangel::SWGHackRFInputActions());
+            deviceActions->getHackRfInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "kiwiSDRActions")
+        {
+            deviceActions->setKiwiSdrActions(new SWGSDRangel::SWGKiwiSDRActions());
+            deviceActions->getKiwiSdrActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "limeSdrInputActions")
+        {
+            deviceActions->setLimeSdrInputActions(new SWGSDRangel::SWGLimeSdrInputActions());
+            deviceActions->getLimeSdrInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "localInputActions")
+        {
+            deviceActions->setLocalInputActions(new SWGSDRangel::SWGLocalInputActions());
+            deviceActions->getLocalInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "perseusActions")
+        {
+            deviceActions->setPerseusActions(new SWGSDRangel::SWGPerseusActions());
+            deviceActions->getPerseusActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "plutoSdrInputActions")
+        {
+            deviceActions->setPlutoSdrInputActions(new SWGSDRangel::SWGPlutoSdrInputActions());
+            deviceActions->getPlutoSdrInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "remoteInputActions")
+        {
+            deviceActions->setRemoteInputActions(new SWGSDRangel::SWGRemoteInputActions());
+            deviceActions->getRemoteInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "rtlSdrActions")
         {
             deviceActions->setRtlSdrActions(new SWGSDRangel::SWGRtlSdrActions());
             deviceActions->getRtlSdrActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "sdrPlayActions")
+        {
+            deviceActions->setSdrPlayActions(new SWGSDRangel::SWGSDRPlayActions());
+            deviceActions->getSdrPlayActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "soapySDRInputActions")
+        {
+            deviceActions->setSoapySdrInputActions(new SWGSDRangel::SWGSoapySDRInputActions());
+            deviceActions->getSoapySdrInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "testSourceActions")
+        {
+            deviceActions->setTestSourceActions(new SWGSDRangel::SWGTestSourceActions());
+            deviceActions->getTestSourceActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (deviceActionsKey == "xtrxInputActions")
+        {
+            deviceActions->setXtrxInputActions(new SWGSDRangel::SWGXtrxInputActions());
+            deviceActions->getXtrxInputActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {
@@ -3565,7 +3661,23 @@ void WebAPIRequestMapper::resetDeviceActions(SWGSDRangel::SWGDeviceActions& devi
 {
     deviceActions.cleanup();
     deviceActions.setDeviceHwType(nullptr);
+    deviceActions.setAirspyActions(nullptr);
+    deviceActions.setAirspyHfActions(nullptr);
+    deviceActions.setBladeRf1InputActions(nullptr);
+    deviceActions.setFcdProActions(nullptr);
+    deviceActions.setFcdProPlusActions(nullptr);
+    deviceActions.setHackRfInputActions(nullptr);
+    deviceActions.setKiwiSdrActions(nullptr);
+    deviceActions.setLimeSdrInputActions(nullptr);
+    deviceActions.setLocalInputActions(nullptr);
+    deviceActions.setPerseusActions(nullptr);
+    deviceActions.setPlutoSdrInputActions(nullptr);
+    deviceActions.setRemoteInputActions(nullptr);
     deviceActions.setRtlSdrActions(nullptr);
+    deviceActions.setSdrPlayActions(nullptr);
+    deviceActions.setSoapySdrInputActions(nullptr);
+    deviceActions.setTestSourceActions(nullptr);
+    deviceActions.setXtrxInputActions(nullptr);
 }
 
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)

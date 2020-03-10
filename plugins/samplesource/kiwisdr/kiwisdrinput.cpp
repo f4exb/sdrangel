@@ -27,7 +27,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGKiwiSDRReport.h"
+#include "SWGKiwiSDRActions.h"
 
 #include "kiwisdrinput.h"
 #include "device/deviceapi.h"
@@ -442,6 +444,37 @@ int KiwiSDRInput::webapiReportGet(
     response.getKiwiSdrReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
+}
+
+int KiwiSDRInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGKiwiSDRActions *swgKiwiSDRActions = query.getKiwiSdrActions();
+
+    if (swgKiwiSDRActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgKiwiSDRActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing KiwiSDRInputActions in query";
+        return 400;
+    }
 }
 
 void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const KiwiSDRSettings& settings)

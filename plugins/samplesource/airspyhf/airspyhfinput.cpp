@@ -25,7 +25,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGAirspyHFReport.h"
+#include "SWGAirspyHFActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/filerecord.h"
@@ -795,6 +797,37 @@ int AirspyHFInput::webapiReportGet(
     response.getAirspyHfReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
+}
+
+int AirspyHFInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGAirspyHFActions *swgAirspyHFActions = query.getAirspyHfActions();
+
+    if (swgAirspyHFActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgAirspyHFActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing AirspyHFActions in query";
+        return 400;
+    }
 }
 
 int AirspyHFInput::webapiRunGet(

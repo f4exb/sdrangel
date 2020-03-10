@@ -22,7 +22,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 #include "SWGPerseusReport.h"
+#include "SWGPerseusActions.h"
 
 #include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
@@ -509,6 +511,37 @@ int PerseusInput::webapiSettingsPutPatch(
 
     webapiFormatDeviceSettings(response, settings);
     return 200;
+}
+
+int PerseusInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGPerseusActions *swgPerseusActions = query.getPerseusActions();
+
+    if (swgPerseusActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgPerseusActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing PerseusActions in query";
+        return 400;
+    }
 }
 
 void PerseusInput::webapiUpdateDeviceSettings(
