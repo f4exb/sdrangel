@@ -1,6 +1,6 @@
 LimeSdrInputSettings:
   description: LimeSDR
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -14,37 +14,37 @@ LimeSdrInputSettings:
       type: integer
     log2SoftDecim:
       type: integer
-    lpfBW:        
+    lpfBW:
       type: integer
-    lpfFIREnable: 
+    lpfFIREnable:
       type: integer
-    lpfFIRBW:     
+    lpfFIRBW:
       type: integer
-    gain:         
+    gain:
       type: integer
-    ncoEnable:    
+    ncoEnable:
       type: integer
-    ncoFrequency: 
+    ncoFrequency:
       type: integer
     antennaPath:
       type: integer
-    gainMode:     
+    gainMode:
       type: integer
-    lnaGain:      
+    lnaGain:
       type: integer
-    tiaGain:      
+    tiaGain:
       type: integer
-    pgaGain:      
+    pgaGain:
       type: integer
-    extClock:     
+    extClock:
       type: integer
-    extClockFreq: 
+    extClockFreq:
       type: integer
     transverterMode:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     fileRecordName:
       type: string
     gpioDir:
@@ -61,11 +61,11 @@ LimeSdrInputSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer  
-            
+      type: integer
+
 LimeSdrOutputSettings:
   description: LimeSDR
-  properties:  
+  properties:
     centerFrequency:
       type: integer
       format: int64
@@ -75,29 +75,29 @@ LimeSdrOutputSettings:
       type: integer
     log2SoftInterp:
       type: integer
-    lpfBW:        
+    lpfBW:
       type: integer
-    lpfFIREnable: 
+    lpfFIREnable:
       type: integer
-    lpfFIRBW:     
+    lpfFIRBW:
       type: integer
-    gain:         
+    gain:
       type: integer
-    ncoEnable:    
+    ncoEnable:
       type: integer
-    ncoFrequency: 
+    ncoFrequency:
       type: integer
     antennaPath:
       type: integer
-    extClock:     
+    extClock:
       type: integer
-    extClockFreq: 
+    extClockFreq:
       type: integer
     transverterMode:
       type: integer
     transverterDeltaFrequency:
       type: integer
-      format: int64      
+      format: int64
     gpioDir:
       type: integer
       format: int8
@@ -112,11 +112,11 @@ LimeSdrOutputSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer  
+      type: integer
 
 LimeSdrInputReport:
   description: LimeSDR
-  properties:  
+  properties:
     success:
       description: 1 if info was successfullt retrieved else 0
       type: integer
@@ -127,11 +127,11 @@ LimeSdrInputReport:
       type: integer
     fifoFill:
       type: integer
-    underrunCount:  
+    underrunCount:
       type: integer
-    overrunCount:  
+    overrunCount:
       type: integer
-    droppedPacketsCount:  
+    droppedPacketsCount:
       type: integer
     linkRate:
       type: number
@@ -145,14 +145,24 @@ LimeSdrInputReport:
       format: float
     gpioDir:
       type: integer
-      format: int8                              
+      format: int8
     gpioPins:
       type: integer
       format: int8
 
+LimeSdrInputActions:
+  description: LimeSDR
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording
+
 LimeSdrOutputReport:
   description: LimeSDR
-  properties:  
+  properties:
     success:
       description: 1 if info was successfullt retrieved else 0
       type: integer
@@ -163,11 +173,11 @@ LimeSdrOutputReport:
       type: integer
     fifoFill:
       type: integer
-    underrunCount:  
+    underrunCount:
       type: integer
-    overrunCount:  
+    overrunCount:
       type: integer
-    droppedPacketsCount:  
+    droppedPacketsCount:
       type: integer
     linkRate:
       type: number
@@ -178,11 +188,10 @@ LimeSdrOutputReport:
       format: uint64
     temperature:
       type: number
-      format: float   
+      format: float
     gpioDir:
       type: integer
-      format: int8                           
+      format: int8
     gpioPins:
       type: integer
       format: int8
-      

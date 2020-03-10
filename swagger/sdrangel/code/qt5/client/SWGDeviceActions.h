@@ -22,7 +22,23 @@
 #include <QJsonObject>
 
 
+#include "SWGAirspyActions.h"
+#include "SWGAirspyHFActions.h"
+#include "SWGBladeRF1InputActions.h"
+#include "SWGFCDProActions.h"
+#include "SWGFCDProPlusActions.h"
+#include "SWGHackRFInputActions.h"
+#include "SWGKiwiSDRActions.h"
+#include "SWGLimeSdrInputActions.h"
+#include "SWGLocalInputActions.h"
+#include "SWGPerseusActions.h"
+#include "SWGPlutoSdrInputActions.h"
+#include "SWGRemoteInputActions.h"
 #include "SWGRtlSdrActions.h"
+#include "SWGSDRPlayActions.h"
+#include "SWGSoapySDRInputActions.h"
+#include "SWGTestSourceActions.h"
+#include "SWGXtrxInputActions.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -52,8 +68,56 @@ public:
     qint32 getOriginatorIndex();
     void setOriginatorIndex(qint32 originator_index);
 
+    SWGAirspyActions* getAirspyActions();
+    void setAirspyActions(SWGAirspyActions* airspy_actions);
+
+    SWGAirspyHFActions* getAirspyHfActions();
+    void setAirspyHfActions(SWGAirspyHFActions* airspy_hf_actions);
+
+    SWGBladeRF1InputActions* getBladeRf1InputActions();
+    void setBladeRf1InputActions(SWGBladeRF1InputActions* blade_rf1_input_actions);
+
+    SWGFCDProActions* getFcdProActions();
+    void setFcdProActions(SWGFCDProActions* fcd_pro_actions);
+
+    SWGFCDProPlusActions* getFcdProPlusActions();
+    void setFcdProPlusActions(SWGFCDProPlusActions* fcd_pro_plus_actions);
+
+    SWGHackRFInputActions* getHackRfInputActions();
+    void setHackRfInputActions(SWGHackRFInputActions* hack_rf_input_actions);
+
+    SWGKiwiSDRActions* getKiwiSdrActions();
+    void setKiwiSdrActions(SWGKiwiSDRActions* kiwi_sdr_actions);
+
+    SWGLimeSdrInputActions* getLimeSdrInputActions();
+    void setLimeSdrInputActions(SWGLimeSdrInputActions* lime_sdr_input_actions);
+
+    SWGLocalInputActions* getLocalInputActions();
+    void setLocalInputActions(SWGLocalInputActions* local_input_actions);
+
+    SWGPerseusActions* getPerseusActions();
+    void setPerseusActions(SWGPerseusActions* perseus_actions);
+
+    SWGPlutoSdrInputActions* getPlutoSdrInputActions();
+    void setPlutoSdrInputActions(SWGPlutoSdrInputActions* pluto_sdr_input_actions);
+
+    SWGRemoteInputActions* getRemoteInputActions();
+    void setRemoteInputActions(SWGRemoteInputActions* remote_input_actions);
+
     SWGRtlSdrActions* getRtlSdrActions();
     void setRtlSdrActions(SWGRtlSdrActions* rtl_sdr_actions);
+
+    SWGSDRPlayActions* getSdrPlayActions();
+    void setSdrPlayActions(SWGSDRPlayActions* sdr_play_actions);
+
+    SWGSoapySDRInputActions* getSoapySdrInputActions();
+    void setSoapySdrInputActions(SWGSoapySDRInputActions* soapy_sdr_input_actions);
+
+    SWGTestSourceActions* getTestSourceActions();
+    void setTestSourceActions(SWGTestSourceActions* test_source_actions);
+
+    SWGXtrxInputActions* getXtrxInputActions();
+    void setXtrxInputActions(SWGXtrxInputActions* xtrx_input_actions);
 
 
     virtual bool isSet() override;
@@ -68,8 +132,56 @@ private:
     qint32 originator_index;
     bool m_originator_index_isSet;
 
+    SWGAirspyActions* airspy_actions;
+    bool m_airspy_actions_isSet;
+
+    SWGAirspyHFActions* airspy_hf_actions;
+    bool m_airspy_hf_actions_isSet;
+
+    SWGBladeRF1InputActions* blade_rf1_input_actions;
+    bool m_blade_rf1_input_actions_isSet;
+
+    SWGFCDProActions* fcd_pro_actions;
+    bool m_fcd_pro_actions_isSet;
+
+    SWGFCDProPlusActions* fcd_pro_plus_actions;
+    bool m_fcd_pro_plus_actions_isSet;
+
+    SWGHackRFInputActions* hack_rf_input_actions;
+    bool m_hack_rf_input_actions_isSet;
+
+    SWGKiwiSDRActions* kiwi_sdr_actions;
+    bool m_kiwi_sdr_actions_isSet;
+
+    SWGLimeSdrInputActions* lime_sdr_input_actions;
+    bool m_lime_sdr_input_actions_isSet;
+
+    SWGLocalInputActions* local_input_actions;
+    bool m_local_input_actions_isSet;
+
+    SWGPerseusActions* perseus_actions;
+    bool m_perseus_actions_isSet;
+
+    SWGPlutoSdrInputActions* pluto_sdr_input_actions;
+    bool m_pluto_sdr_input_actions_isSet;
+
+    SWGRemoteInputActions* remote_input_actions;
+    bool m_remote_input_actions_isSet;
+
     SWGRtlSdrActions* rtl_sdr_actions;
     bool m_rtl_sdr_actions_isSet;
+
+    SWGSDRPlayActions* sdr_play_actions;
+    bool m_sdr_play_actions_isSet;
+
+    SWGSoapySDRInputActions* soapy_sdr_input_actions;
+    bool m_soapy_sdr_input_actions_isSet;
+
+    SWGTestSourceActions* test_source_actions;
+    bool m_test_source_actions_isSet;
+
+    SWGXtrxInputActions* xtrx_input_actions;
+    bool m_xtrx_input_actions_isSet;
 
 };
 
