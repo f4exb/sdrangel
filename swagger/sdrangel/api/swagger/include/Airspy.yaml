@@ -56,3 +56,13 @@ AirspyReport:
       type: array
       items:
         $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/SampleRate"
+
+AirspyActions:
+  description: Airspy
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording

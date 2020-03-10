@@ -45,3 +45,13 @@ RemoteInputReport:
     maxNbRecovery:
       description: Maximum number of recovery blocks used per frame
       type: integer
+
+RemoteInputActions:
+  description: RemoteInput
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording

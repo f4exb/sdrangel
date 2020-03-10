@@ -28,7 +28,7 @@ TestSourceSettings:
       type: integer
     dcFactor:
       type: number
-      format: float  
+      format: float
     iFactor:
       type: number
       format: float
@@ -48,5 +48,14 @@ TestSourceSettings:
     reverseAPIPort:
       type: integer
     reverseAPIDeviceIndex:
-      type: integer      
-              
+      type: integer
+
+TestSourceActions:
+  description: TestSource
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording
