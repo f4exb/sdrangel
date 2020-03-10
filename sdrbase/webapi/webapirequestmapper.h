@@ -189,14 +189,11 @@ private:
     static const QMap<QString, QString> m_channelTypeToSettingsKey;
     static const QMap<QString, QString> m_sourceDeviceHwIdToSettingsKey;
     static const QMap<QString, QString> m_sinkDeviceHwIdToSettingsKey;
-<<<<<<< ours
-=======
     static const QMap<QString, QString> m_mimoDeviceHwIdToSettingsKey;
     static const QMap<QString, QString> m_channelTypeToActionsKey;
     static const QMap<QString, QString> m_sourceDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_sinkDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_mimoDeviceHwIdToActionsKey;
->>>>>>> theirs
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

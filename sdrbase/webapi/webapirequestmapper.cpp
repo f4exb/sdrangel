@@ -192,9 +192,6 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
     {"PlutoSDR", "plutoSdrOutputSettings"},
     {"RemoteOutput", "remoteOutputSettings"},
     {"SoapySDR", "soapySDROutputSettings"},
-<<<<<<< ours
-    {"XTRX", "XtrxOutputSettings"}
-=======
     {"XTRX", "xtrxOutputSettings"}
 };
 
@@ -205,7 +202,6 @@ const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey=
     {"BladeRF2", "bladeRF2MIMOSettings"},
     {"TestMI", "testMISettings"},
     {"TestMOSync", "testMOSyncSettings"}
->>>>>>> theirs
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToActionsKey= {
