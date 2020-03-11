@@ -1,3 +1,10 @@
+sdrangel (4.14.0-1) unstable; urgency=medium
+
+  * REST API device and channel actions. Implements #485.
+  * LimeRFE USB: added cellular band 3 and improved API documentation
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 11 Mar 2020 15:14:22 +0100
+
 sdrangel (4.13.2-1) unstable; urgency=medium
 
   * CI/CD implmentation with Appveyor
