@@ -30,11 +30,16 @@ MainParser::MainParser() :
     m_serverPortOption(QStringList() << "p" << "api-port",
         "Web API server port.",
         "port",
-        "8091")
+        "8091"),
+    m_fftwfWisdomOption(QStringList() << "w" << "fftwf-wisdom",
+        "FFTW Wisdom file.",
+        "file",
+        "")
 {
     m_serverAddress = "127.0.0.1";
     m_serverPort = 8091;
     m_mimoSupport = false;
+    m_fftwfWindowFileName = "";
 
     m_parser.setApplicationDescription("Software Defined Radio application");
     m_parser.addHelpOption();
@@ -42,6 +47,7 @@ MainParser::MainParser() :
 
     m_parser.addOption(m_serverAddressOption);
     m_parser.addOption(m_serverPortOption);
+    m_parser.addOption(m_fftwfWisdomOption);
 }
 
 MainParser::~MainParser()
