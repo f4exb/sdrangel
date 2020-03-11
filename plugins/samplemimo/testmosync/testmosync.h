@@ -85,7 +85,7 @@ public:
 	virtual void destroy();
 
 	virtual void init();
-	virtual bool startRx() {}
+	virtual bool startRx() { return false; }
 	virtual void stopRx() {}
 	virtual bool startTx();
 	virtual void stopTx();
