@@ -44,6 +44,9 @@ private:
     FFTEngine *fftA;
     FFTEngine *fftB;
     FFTEngine *fftInvA;
+    unsigned int fftASequence;
+    unsigned int fftBSequence;
+    unsigned int fftInvASequence;
     FFTWindow m_window;
     cmplx *dataA;  // from A input
     cmplx *dataB;  // from B input

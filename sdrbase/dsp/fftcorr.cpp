@@ -20,14 +20,18 @@
 
 #include <algorithm>
 
+#include "dsp/dspengine.h"
+#include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
 #include "fftcorr.h"
 
 void fftcorr::init_fft()
 {
-    fftA->configure(flen, false);
-    fftB->configure(flen, false);
-    fftInvA->configure(flen, true);
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+    fftASequence = fftFactory->getEngine(flen, false, &fftA);
+    fftBSequence = fftFactory->getEngine(flen, false, &fftB);
+    fftInvASequence = fftFactory->getEngine(flen, true, &fftInvA);
+
     m_window.create(FFTWindow::Hanning, flen);
 
     dataA    = new cmplx[flen];
@@ -46,17 +50,22 @@ void fftcorr::init_fft()
 fftcorr::fftcorr(int len) :
     flen(len),
     flen2(len>>1),
-    fftA(FFTEngine::create(QString(""))),   // TODO: use factory
-    fftB(FFTEngine::create(QString(""))),   // TODO: use factory
-    fftInvA(FFTEngine::create(QString(""))) // TODO: use factory
+    fftA(nullptr),
+    fftB(nullptr),
+    fftInvA(nullptr),
+    fftASequence(0),
+    fftBSequence(0),
+    fftInvASequence(0)
 {
     init_fft();
 }
 
 fftcorr::~fftcorr()
 {
-    delete fftA;
-    delete fftB;
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+    fftFactory->releaseEngine(flen, false, fftASequence);
+    fftFactory->releaseEngine(flen, false, fftBSequence);
+    fftFactory->releaseEngine(flen, true, fftInvASequence);
     delete[] dataA;
     delete[] dataB;
     delete[] dataBj;
