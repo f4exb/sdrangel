@@ -67,6 +67,7 @@ private:
 	bool m_linear; //!< linear else logarithmic scale
 
 	void applySettings();
+	void applySettingsVis();
 	int getAveragingIndex(int averaging) const;
 	int getAveragingValue(int averagingIndex) const;
 	void setAveragingCombo();
