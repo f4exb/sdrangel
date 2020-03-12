@@ -2,6 +2,8 @@
 #define INCLUDE_FFTWENGINE_H
 
 #include <QMutex>
+#include <QString>
+
 #include <fftw3.h>
 #include <list>
 #include "dsp/fftengine.h"
@@ -9,7 +11,7 @@
 
 class SDRBASE_API FFTWEngine : public FFTEngine {
 public:
-	FFTWEngine();
+	FFTWEngine(const QString& fftWisdomFileName);
 	~FFTWEngine();
 
 	void configure(int n, bool inverse);
@@ -20,6 +22,7 @@ public:
 
 protected:
 	static QMutex m_globalPlanMutex;
+    QString m_fftWisdomFileName;
 
 	struct Plan {
 		int n;

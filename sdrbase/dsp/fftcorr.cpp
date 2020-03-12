@@ -46,9 +46,9 @@ void fftcorr::init_fft()
 fftcorr::fftcorr(int len) :
     flen(len),
     flen2(len>>1),
-    fftA(FFTEngine::create()),
-    fftB(FFTEngine::create()),
-    fftInvA(FFTEngine::create())
+    fftA(FFTEngine::create(QString(""))),   // TODO: use factory
+    fftB(FFTEngine::create(QString(""))),   // TODO: use factory
+    fftInvA(FFTEngine::create(QString(""))) // TODO: use factory
 {
     init_fft();
 }

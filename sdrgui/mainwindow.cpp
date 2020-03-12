@@ -187,6 +187,11 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	m_masterTimer.setTimerType(Qt::PreciseTimer);
 	m_masterTimer.start(50);
 
+    splash->showStatusMessage("allocate FFTs...", Qt::white);
+    splash->showStatusMessage("allocate FFTs...", Qt::white);
+    m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
+    m_dspEngine->preAllocateFFTs();
+
     splash->showStatusMessage("load settings...", Qt::white);
     qDebug() << "MainWindow::MainWindow: load settings...";
 

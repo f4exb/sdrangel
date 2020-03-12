@@ -1,6 +1,8 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "dsp/dspcommands.h"
+#include "dsp/dspengine.h"
+#include "dsp/fftfactory.h"
 #include "util/messagequeue.h"
 
 #define MAX_FFT_SIZE 4096
@@ -19,7 +21,8 @@ const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
 
 SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 	BasebandSampleSink(),
-	m_fft(FFTEngine::create()),
+	m_fft(nullptr),
+    m_fftEngineSequence(0),
 	m_fftBuffer(MAX_FFT_SIZE),
 	m_powerSpectrum(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
@@ -39,7 +42,8 @@ SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
 
 SpectrumVis::~SpectrumVis()
 {
-	delete m_fft;
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+    fftFactory->releaseEngine(m_fftSize, false, m_fftEngineSequence);
 }
 
 void SpectrumVis::configure(MessageQueue* msgQueue,
@@ -478,8 +482,10 @@ void SpectrumVis::handleConfigure(int fftSize,
         m_overlapPercent = overlapPercent;
 	}
 
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+    fftFactory->releaseEngine(m_fftSize, false, m_fftEngineSequence);
+    m_fftEngineSequence = fftFactory->getEngine(fftSize, false, &m_fft);
 	m_fftSize = fftSize;
-	m_fft->configure(m_fftSize, false);
 	m_window.create(window, m_fftSize);
 	m_overlapSize = (m_fftSize * m_overlapPercent) / 100;
 	m_refillSize = m_fftSize - m_overlapSize;

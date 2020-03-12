@@ -1,6 +1,8 @@
 #ifndef INCLUDE_FFTENGINE_H
 #define INCLUDE_FFTENGINE_H
 
+#include <QString>
+
 #include "dsp/dsptypes.h"
 #include "export.h"
 
@@ -14,7 +16,7 @@ public:
 	virtual Complex* in() = 0;
 	virtual Complex* out() = 0;
 
-	static FFTEngine* create();
+	static FFTEngine* create(const QString& fftWisdomFileName);
 };
 
 #endif // INCLUDE_FFTENGINE_H

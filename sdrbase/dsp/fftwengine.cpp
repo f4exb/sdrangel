@@ -1,7 +1,8 @@
 #include <QTime>
 #include "dsp/fftwengine.h"
 
-FFTWEngine::FFTWEngine() :
+FFTWEngine::FFTWEngine(const QString& fftWisdomFileName) :
+    m_fftWisdomFileName(fftWisdomFileName),
 	m_plans(),
 	m_currentPlan(nullptr)
 {
