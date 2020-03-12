@@ -98,6 +98,7 @@ public:
 private:
 	FFTEngine* m_fft;
 	FFTWindow m_window;
+    unsigned int m_fftEngineSequence;
 
 	std::vector<Complex> m_fftBuffer;
 	std::vector<Real> m_powerSpectrum;

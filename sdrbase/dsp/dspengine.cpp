@@ -23,13 +23,15 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspdevicemimoengine.h"
+#include "dsp/fftfactory.h"
 
 DSPEngine::DSPEngine() :
     m_deviceSourceEnginesUIDSequence(0),
     m_deviceSinkEnginesUIDSequence(0),
     m_deviceMIMOEnginesUIDSequence(0),
     m_audioInputDeviceIndex(-1),    // default device
-    m_audioOutputDeviceIndex(-1)    // default device
+    m_audioOutputDeviceIndex(-1),   // default device
+    m_fftFactory(nullptr)
 {
 	m_dvSerialSupport = false;
     m_mimoSupport = false;
@@ -44,6 +46,10 @@ DSPEngine::~DSPEngine()
     {
         delete *it;
         ++it;
+    }
+
+    if (m_fftFactory) {
+        delete m_fftFactory;
     }
 }
 
@@ -184,4 +190,14 @@ void DSPEngine::pushMbeFrame(
         AudioFifo *audioFifo)
 {
     m_ambeEngine.pushMbeFrame(mbeFrame, mbeRateIndex, mbeVolumeIndex, channels, useHP, upsampling, audioFifo);
+}
+
+void DSPEngine::createFFTFactory(const QString& fftWisdomFileName)
+{
+    m_fftFactory = new FFTFactory(fftWisdomFileName);
+}
+
+void DSPEngine::preAllocateFFTs()
+{
+    m_fftFactory->preallocate(7, 12, 1, 0); // pre-acllocate forward FFT only 1 per size from 128 to 4096
 }

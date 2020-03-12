@@ -63,14 +63,20 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
     m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
+    qDebug() << "MainCore::MainCore: create FFT factory...";
+    m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
+
+    qDebug() << "MainCore::MainCore: load plugins...";
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("pluginssrv"));
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
     m_masterTimer.start(50);
 
+    qDebug() << "MainCore::MainCore: load setings...";
 	loadSettings();
 
+    qDebug() << "MainCore::MainCore: finishing...";
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 
     m_apiAdapter = new WebAPIAdapterSrv(*this);

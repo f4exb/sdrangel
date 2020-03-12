@@ -32,6 +32,7 @@
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class DSPDeviceMIMOEngine;
+class FFTFactory;
 
 class SDRBASE_API DSPEngine : public QObject {
 	Q_OBJECT
@@ -84,6 +85,9 @@ public:
     const QTimer& getMasterTimer() const { return m_masterTimer; }
     void setMIMOSupport(bool mimoSupport) { m_mimoSupport = mimoSupport; }
     bool getMIMOSupport() const { return m_mimoSupport; }
+    void createFFTFactory(const QString& fftWisdomFileName);
+    void preAllocateFFTs();
+    FFTFactory *getFFTFactory() { return m_fftFactory; }
 
 private:
 	std::vector<DSPDeviceSourceEngine*> m_deviceSourceEngines;
@@ -99,6 +103,7 @@ private:
 	bool m_dvSerialSupport;
     bool m_mimoSupport;
 	AMBEEngine m_ambeEngine;
+    FFTFactory *m_fftFactory;
 };
 
 #endif // INCLUDE_DSPENGINE_H
