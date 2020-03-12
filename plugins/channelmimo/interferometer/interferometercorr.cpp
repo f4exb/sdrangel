@@ -123,15 +123,15 @@ InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
 
     for (int i = 0; i < 2; i++)
     {
-        m_fft[i] = FFTEngine::create();
+        m_fft[i] = FFTEngine::create(QString(""));  // TODO: use factory
         m_fft[i]->configure(2*fftSize, false); // internally twice the data FFT size
-        m_fft2[i] = FFTEngine::create();
+        m_fft2[i] = FFTEngine::create(QString("")); // TODO: use factory
         m_fft2[i]->configure(fftSize, false);
     }
 
-    m_invFFT = FFTEngine::create();
+    m_invFFT = FFTEngine::create(QString(""));  // TODO: use factory
     m_invFFT->configure(2*fftSize, true);
-    m_invFFT2 = FFTEngine::create();
+    m_invFFT2 = FFTEngine::create(QString("")); // TODO: use factory
     m_invFFT2->configure(fftSize, true);
 
     m_dataj = new std::complex<float>[2*fftSize]; // receives actual FFT result hence twice the data FFT size

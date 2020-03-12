@@ -49,8 +49,8 @@ ChirpChatDemodSink::ChirpChatDemodSink() :
 	m_chirp = 0;
 	m_chirp0 = 0;
 
-    m_fft = FFTEngine::create();
-    m_fftSFD = FFTEngine::create();
+    m_fft = FFTEngine::create(QString(""));    // TODO: use factory
+    m_fftSFD = FFTEngine::create(QString("")); // TODO: use factory
 
     initSF(m_settings.m_spreadFactor, m_settings.m_deBits, m_settings.m_fftWindow);
 }
