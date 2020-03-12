@@ -73,6 +73,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
 
     if (enginesBySize.find(fftSize) == enginesBySize.end())
     {
+        qDebug("FFTFactory::getEngine: new FFT %s size: %u", (inverse ? "inv" : "fwd"), fftSize);
         enginesBySize.insert(std::pair<unsigned int, std::vector<AllocatedEngine>>(fftSize, std::vector<AllocatedEngine>()));
         std::vector<AllocatedEngine>& engines = enginesBySize[fftSize];
         engines.push_back(AllocatedEngine());
@@ -95,6 +96,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
 
         if (i < enginesBySize[fftSize].size())
         {
+            qDebug("FFTFactory::getEngine: reuse engine: %u FFT %s size: %u", i, (inverse ? "inv" : "fwd"), fftSize);
             enginesBySize[fftSize][i].m_inUse = true;
             *engine = enginesBySize[fftSize][i].m_engine;
             return i;
@@ -102,6 +104,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
         else
         {
             std::vector<AllocatedEngine>& engines = enginesBySize[fftSize];
+            qDebug("FFTFactory::getEngine: create engine: %lu FFT %s size: %u", engines.size(), (inverse ? "inv" : "fwd"), fftSize);
             engines.push_back(AllocatedEngine());
             engines.back().m_inUse = true;
             engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName);
@@ -112,7 +115,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
     }
 }
 
-void FFTFactory::releaseEngine(unsigned int fftSize, bool inverse, int engineSequence)
+void FFTFactory::releaseEngine(unsigned int fftSize, bool inverse, unsigned int engineSequence)
 {
     std::map<unsigned int, std::vector<AllocatedEngine>>& enginesBySize = inverse ?
         m_invFFTEngineBySize : m_fftEngineBySize;
@@ -121,7 +124,10 @@ void FFTFactory::releaseEngine(unsigned int fftSize, bool inverse, int engineSeq
     {
         std::vector<AllocatedEngine>& engines = enginesBySize[fftSize];
 
-        if (engineSequence < engines.size()) {
+        if (engineSequence < engines.size())
+        {
+            qDebug("FFTFactory::releaseEngine: engineSequence: %u FFT %s size: %u",
+                engineSequence, (inverse ? "inv" : "fwd"), fftSize);
             engines[engineSequence].m_inUse = false;
         }
     }
