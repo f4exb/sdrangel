@@ -34,7 +34,7 @@ public:
 
     void preallocate(unsigned int minLog2Size, unsigned int maxLog2Size, unsigned int numberFFT, unsigned int numberInvFFT);
     unsigned int getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine); //!< returns an engine sequence
-    void releaseEngine(unsigned int fftSize, bool inverse, int engineSequence);
+    void releaseEngine(unsigned int fftSize, bool inverse, unsigned int engineSequence);
 
 private:
     struct AllocatedEngine
