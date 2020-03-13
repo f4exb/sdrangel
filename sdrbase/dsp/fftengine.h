@@ -16,6 +16,8 @@ public:
 	virtual Complex* in() = 0;
 	virtual Complex* out() = 0;
 
+    virtual void setReuse(bool reuse) = 0;
+
 	static FFTEngine* create(const QString& fftWisdomFileName);
 };
 

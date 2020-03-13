@@ -23,3 +23,8 @@ Complex* KissEngine::out()
 {
 	return &m_out[0];
 }
+
+void KissEngine::setReuse(bool reuse)
+{
+    (void) reuse;
+}

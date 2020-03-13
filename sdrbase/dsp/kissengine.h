@@ -7,11 +7,13 @@
 
 class SDRBASE_API KissEngine : public FFTEngine {
 public:
-	void configure(int n, bool inverse);
-	void transform();
+	virtual void configure(int n, bool inverse);
+	virtual void transform();
 
-	Complex* in();
-	Complex* out();
+	virtual Complex* in();
+	virtual Complex* out();
+
+    virtual void setReuse(bool reuse);
 
 protected:
 	typedef kissfft<Real, Complex> KissFFT;

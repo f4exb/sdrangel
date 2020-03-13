@@ -4,7 +4,8 @@
 FFTWEngine::FFTWEngine(const QString& fftWisdomFileName) :
     m_fftWisdomFileName(fftWisdomFileName),
 	m_plans(),
-	m_currentPlan(nullptr)
+	m_currentPlan(nullptr),
+    m_reuse(true)
 {
 }
 
@@ -15,14 +16,17 @@ FFTWEngine::~FFTWEngine()
 
 void FFTWEngine::configure(int n, bool inverse)
 {
-	for (Plans::const_iterator it = m_plans.begin(); it != m_plans.end(); ++it)
+    if (m_reuse)
     {
-		if (((*it)->n == n) && ((*it)->inverse == inverse))
+        for (Plans::const_iterator it = m_plans.begin(); it != m_plans.end(); ++it)
         {
-			m_currentPlan = *it;
-			return;
-		}
-	}
+            if (((*it)->n == n) && ((*it)->inverse == inverse))
+            {
+                m_currentPlan = *it;
+                return;
+            }
+        }
+    }
 
 	m_currentPlan = new Plan;
 	m_currentPlan->n = n;
