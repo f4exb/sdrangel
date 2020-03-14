@@ -81,6 +81,8 @@ private:
 
     FFTEngine *m_fft;
     FFTEngine *m_fftSFD;
+    int m_fftSequence;
+    int m_fftSFDSequence;
     FFTWindow m_fftWindow;
     Complex *m_downChirps;
     Complex *m_upChirps;

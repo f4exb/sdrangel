@@ -21,6 +21,8 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/dspengine.h"
+#include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
 #include "util/db.h"
 
@@ -34,7 +36,9 @@ ChirpChatDemodSink::ChirpChatDemodSink() :
     m_spectrumBuffer(nullptr),
     m_downChirps(nullptr),
     m_upChirps(nullptr),
-    m_spectrumLine(nullptr)
+    m_spectrumLine(nullptr),
+    m_fftSequence(-1),
+    m_fftSFDSequence(-1)
 {
     m_demodActive = false;
 	m_bandwidth = ChirpChatDemodSettings::bandwidths[0];
@@ -49,16 +53,19 @@ ChirpChatDemodSink::ChirpChatDemodSink() :
 	m_chirp = 0;
 	m_chirp0 = 0;
 
-    m_fft = FFTEngine::create(QString(""));    // TODO: use factory
-    m_fftSFD = FFTEngine::create(QString("")); // TODO: use factory
-
     initSF(m_settings.m_spreadFactor, m_settings.m_deBits, m_settings.m_fftWindow);
 }
 
 ChirpChatDemodSink::~ChirpChatDemodSink()
 {
-    delete m_fft;
-    delete m_fftSFD;
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+
+    if (m_fftSequence >= 0)
+    {
+        fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSequence);
+        fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSFDSequence);
+    }
+
     delete[] m_downChirps;
     delete[] m_upChirps;
     delete[] m_spectrumBuffer;
@@ -80,6 +87,14 @@ void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow:
         delete[] m_spectrumLine;
     }
 
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+
+    if (m_fftSequence >= 0)
+    {
+        fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSequence);
+        fftFactory->releaseEngine(m_interpolatedFFTLength, false, m_fftSFDSequence);
+    }
+
     m_nbSymbols = 1 << sf;
     m_nbSymbolsEff = 1 << (sf - deBits);
     m_deLength = 1 << deBits;
@@ -88,8 +103,8 @@ void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow:
     m_fftWindow.setKaiserAlpha(M_PI);
     m_interpolatedFFTLength = m_fftInterpolation*m_fftLength;
     m_preambleTolerance = (m_deLength*m_fftInterpolation)/2;
-    m_fft->configure(m_interpolatedFFTLength, false);
-    m_fftSFD->configure(m_interpolatedFFTLength, false);
+    m_fftSequence = fftFactory->getEngine(m_interpolatedFFTLength, false, &m_fft);
+    m_fftSFDSequence = fftFactory->getEngine(m_interpolatedFFTLength, false, &m_fftSFD);
     m_state = ChirpChatStateReset;
     m_sfdSkip = m_fftLength / 4;
     m_downChirps = new Complex[2*m_nbSymbols]; // Each table is 2 chirps long to allow processing from arbitrary offsets.
