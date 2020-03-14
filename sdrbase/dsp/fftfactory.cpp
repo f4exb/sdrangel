@@ -82,7 +82,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
         engines.back().m_inUse = true;
         engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName);
         engines.back().m_engine->setReuse(false);
-        engines.back().m_engine->configure(fftSize, true);
+        engines.back().m_engine->configure(fftSize, inverse);
         *engine = engines.back().m_engine;
         return 0;
     }
@@ -112,7 +112,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
             engines.back().m_inUse = true;
             engines.back().m_engine = FFTEngine::create(m_fftwWisdomFileName);
             engines.back().m_engine->setReuse(false);
-            engines.back().m_engine->configure(fftSize, true);
+            engines.back().m_engine->configure(fftSize, inverse);
             *engine = engines.back().m_engine;
             return engines.size() - 1;
         }

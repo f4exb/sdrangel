@@ -88,6 +88,10 @@ void MainParser::parse(const QCoreApplication& app)
         qWarning() << "MainParser::parse: server port invalid. Defaulting to " << m_serverPort;
     }
 
+    // FFTWF wisdom file
+
+    m_fftwfWindowFileName = m_parser.value(m_fftwfWisdomOption);
+
     // MIMO - from version
 
     QStringList versionParts = app.applicationVersion().split(".");
