@@ -89,7 +89,11 @@ private:
     FFTEngine *m_fft[2];             //!< FFT engines (double FFT)
     FFTEngine *m_invFFT;             //!< Inverse FFT engine (double FFT)
     FFTEngine *m_fft2[2];            //!< FFT engines
-    FFTEngine *m_invFFT2;            //!< Inverse FFT enginw
+    FFTEngine *m_invFFT2;            //!< Inverse FFT engine
+    unsigned int m_fftSequences[2];  //!< FFT factory engine sequences
+    unsigned int m_invFFTSequence;   //!< Inverse FFT engine sequence
+    unsigned int m_fft2Sequences[2]; //!< FFT engines sequences
+    unsigned int m_invFFT2Sequence;  //!< Inverse FFT engine sequence
     FFTWindow m_window;              //!< FFT window
     std::complex<float> *m_dataj;    //!< conjuate of FFT transform
     SampleVector m_data0w;           //!< windowed data 0

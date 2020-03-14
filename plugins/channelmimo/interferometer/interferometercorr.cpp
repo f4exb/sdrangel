@@ -18,7 +18,10 @@
 #include <algorithm>
 #include <functional>
 
+#include "dsp/dspengine.h"
+#include "dsp/fftfactory.h"
 #include "dsp/fftengine.h"
+
 #include "interferometercorr.h"
 
 std::complex<float> s2c(const Sample& s)
@@ -117,22 +120,19 @@ InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
     m_fftSize(fftSize)
 {
     setPhase(0);
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
     m_window.create(FFTWindow::Function::Hanning, fftSize);
     m_data0w.resize(m_fftSize);
     m_data1w.resize(m_fftSize);
 
     for (int i = 0; i < 2; i++)
     {
-        m_fft[i] = FFTEngine::create(QString(""));  // TODO: use factory
-        m_fft[i]->configure(2*fftSize, false); // internally twice the data FFT size
-        m_fft2[i] = FFTEngine::create(QString("")); // TODO: use factory
-        m_fft2[i]->configure(fftSize, false);
+        m_fftSequences[i] = fftFactory->getEngine(2*fftSize, false, &m_fft[i]); // internally twice the data FFT size
+        m_fft2Sequences[i] = fftFactory->getEngine(fftSize, false, &m_fft2[i]);
     }
 
-    m_invFFT = FFTEngine::create(QString(""));  // TODO: use factory
-    m_invFFT->configure(2*fftSize, true);
-    m_invFFT2 = FFTEngine::create(QString("")); // TODO: use factory
-    m_invFFT2->configure(fftSize, true);
+    m_invFFTSequence = fftFactory->getEngine(2*fftSize, true, &m_invFFT);
+    m_invFFT2Sequence = fftFactory->getEngine(fftSize, true, &m_invFFT2);
 
     m_dataj = new std::complex<float>[2*fftSize]; // receives actual FFT result hence twice the data FFT size
     m_scorr.resize(fftSize);
@@ -143,14 +143,15 @@ InterferometerCorrelator::InterferometerCorrelator(int fftSize) :
 
 InterferometerCorrelator::~InterferometerCorrelator()
 {
+    FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
+    fftFactory->releaseEngine(2*m_fftSize, true, m_invFFTSequence);
+    fftFactory->releaseEngine(m_fftSize, true, m_invFFT2Sequence);
     delete[] m_dataj;
-    delete m_invFFT;
-    delete m_invFFT2;
 
     for (int i = 0; i < 2; i++)
     {
-        delete m_fft[i];
-        delete m_fft2[i];
+        fftFactory->releaseEngine(2*m_fftSize, false, m_fftSequences[i]);
+        fftFactory->releaseEngine(m_fftSize, false, m_fft2Sequences[i]);
     }
 }
 
