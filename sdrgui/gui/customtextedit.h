@@ -20,7 +20,9 @@
 
 #include <QTextEdit>
 
-class CustomTextEdit : public QTextEdit
+#include "export.h"
+
+class SDRGUI_API CustomTextEdit : public QTextEdit
 {
     Q_OBJECT
 public:

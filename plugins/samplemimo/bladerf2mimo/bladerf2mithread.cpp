@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "bladerf2/devicebladerf2shared.h"
 #include "dsp/samplemififo.h"
 
@@ -144,7 +146,7 @@ void BladeRF2MIThread::callback(const qint16* buf, qint32 samplesPerChannel)
     else
     {
         qWarning("BladeRF2MIThread::callback: unequal channel lengths: [0]=%d [1]=%d", lengths[0], lengths[1]);
-        m_sampleFifo->writeSync(vbegin, std::min(lengths[0], lengths[1]));
+        m_sampleFifo->writeSync(vbegin, (std::min)(lengths[0], lengths[1]));
     }
 }
 

@@ -176,7 +176,7 @@ public:
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
-    bool isRecording(unsigned int istream) const;
+    bool isRecording(unsigned int istream) const { (void) istream; return false; }
 
     void getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step);
     void getRxSampleRateRange(int& min, int& max, int& step);

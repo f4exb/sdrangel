@@ -53,10 +53,6 @@ public:
     virtual MessageQueue* getInputMessageQueue();
     virtual bool handleMessage(const Message& message);
 
-public slots:
-	void channelMarkerChangedByCursor();
-	void channelMarkerHighlightedByCursor();
-
 private:
 	Ui::InterferometerGUI* ui;
 	PluginAPI* m_pluginAPI;
@@ -95,7 +91,6 @@ private slots:
     void on_correlationType_currentIndexChanged(int index);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
-    void handleInputMessages();
 	void tick();
 };
 

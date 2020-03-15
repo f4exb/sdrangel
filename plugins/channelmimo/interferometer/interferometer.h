@@ -171,7 +171,6 @@ private:
 private slots:
     void handleInputMessages();
     void networkManagerFinished(QNetworkReply *reply);
-    void handleData(int start, int stop);
 };
 
 #endif // INCLUDE_INTERFEROMETER_H

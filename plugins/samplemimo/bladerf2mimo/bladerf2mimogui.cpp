@@ -94,7 +94,6 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
-    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
     sendSettings();
 }

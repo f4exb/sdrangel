@@ -18,7 +18,9 @@
 
 #include <stdint.h>
 
-class DeviceSampleStatic
+#include "export.h"
+
+class SDRBASE_API DeviceSampleStatic
 {
 public:
     typedef enum {

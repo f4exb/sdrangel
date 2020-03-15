@@ -98,7 +98,6 @@ private slots:
     void handleInputMessages();
 	void updateHardware();
     void updateStatus();
-    void openDeviceSettingsDialog(const QPoint& p);
 	void on_streamSide_currentIndexChanged(int index);
 	void on_streamIndex_currentIndexChanged(int index);
 	void on_spectrumSide_currentIndexChanged(int index);
