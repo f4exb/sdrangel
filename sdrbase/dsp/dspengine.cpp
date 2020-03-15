@@ -199,5 +199,5 @@ void DSPEngine::createFFTFactory(const QString& fftWisdomFileName)
 
 void DSPEngine::preAllocateFFTs()
 {
-    m_fftFactory->preallocate(7, 12, 1, 0); // pre-acllocate forward FFT only 1 per size from 128 to 4096
+    m_fftFactory->preallocate(7, 10, 1, 0); // pre-acllocate forward FFT only 1 per size from 128 to 1024
 }
