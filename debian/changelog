@@ -1,3 +1,9 @@
+sdrangel (4.14.1-1) unstable; urgency=medium
+
+  * FFT factory with option to use fftwf wisdom file. Impements issue #482.
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 16 Mar 2020 21:01:22 +0100
+
 sdrangel (4.14.0-1) unstable; urgency=medium
 
   * REST API device and channel actions. Implements #485.
