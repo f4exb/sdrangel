@@ -1,3 +1,10 @@
+sdrangel (5.3.1-1) unstable; urgency=medium
+
+  * FFT factory with option to use fftwf wisdom file. Impements issue #482.
+  * MSVC compatibility. Fixes issue #486.
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 Mar 2020 19:05:22 +0100
+
 sdrangel (5.3.0-1) unstable; urgency=medium
 
   * Name change from LoRa plugins to ChirpChat plugins
