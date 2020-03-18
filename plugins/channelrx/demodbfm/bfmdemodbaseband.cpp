@@ -27,7 +27,8 @@
 MESSAGE_CLASS_DEFINITION(BFMDemodBaseband::MsgConfigureBFMDemodBaseband, Message)
 
 BFMDemodBaseband::BFMDemodBaseband() :
-    m_mutex(QMutex::Recursive)
+    m_mutex(QMutex::Recursive),
+    m_messageQueueToGUI(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
