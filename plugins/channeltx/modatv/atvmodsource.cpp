@@ -316,7 +316,7 @@ void ATVModSource::pullVideo(Real& sample)
             		        mixImageAndText(colorFrame);
             		    }
 
-            		    cv::cvtColor(colorFrame, m_videoframeOriginal, CV_BGR2GRAY);
+            		    cv::cvtColor(colorFrame, m_videoframeOriginal, cv::COLOR_BGR2GRAY);
             		    resizeVideo();
             		}
             	}
@@ -443,7 +443,7 @@ void ATVModSource::pullVideo(Real& sample)
                         mixImageAndText(colorFrame);
                     }
 
-                    cv::cvtColor(colorFrame, camera.m_videoframeOriginal, CV_BGR2GRAY);
+                    cv::cvtColor(colorFrame, camera.m_videoframeOriginal, cv::COLOR_BGR2GRAY);
                     resizeCamera();
                 }
 
@@ -648,7 +648,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
 
 void ATVModSource::openImage(const QString& fileName)
 {
-    m_imageFromFile = cv::imread(qPrintable(fileName), CV_LOAD_IMAGE_GRAYSCALE);
+    m_imageFromFile = cv::imread(qPrintable(fileName), cv::IMREAD_GRAYSCALE);
 	m_imageOK = m_imageFromFile.data != 0;
 
 	if (m_imageOK)
@@ -678,11 +678,11 @@ void ATVModSource::openVideo(const QString& fileName)
     if (m_videoOK)
     {
         m_settings.m_videoFileName = fileName;
-        m_videoFPS = m_video.get(CV_CAP_PROP_FPS);
-        m_videoWidth = (int) m_video.get(CV_CAP_PROP_FRAME_WIDTH);
-        m_videoHeight = (int) m_video.get(CV_CAP_PROP_FRAME_HEIGHT);
-        m_videoLength = (int) m_video.get(CV_CAP_PROP_FRAME_COUNT);
-        int ex = static_cast<int>(m_video.get(CV_CAP_PROP_FOURCC));
+        m_videoFPS = m_video.get(cv::CAP_PROP_FPS);
+        m_videoWidth = (int) m_video.get(cv::CAP_PROP_FRAME_WIDTH);
+        m_videoHeight = (int) m_video.get(cv::CAP_PROP_FRAME_HEIGHT);
+        m_videoLength = (int) m_video.get(cv::CAP_PROP_FRAME_COUNT);
+        int ex = static_cast<int>(m_video.get(cv::CAP_PROP_FOURCC));
         char ext[] = {(char)(ex & 0XFF),(char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24),0};
 
         qDebug("ATVModSource::openVideo: %s FPS: %f size: %d x %d #frames: %d codec: %s",
@@ -774,7 +774,7 @@ void ATVModSource::seekVideoFileStream(int seekPercentage)
     if ((m_videoOK) && m_video.isOpened())
     {
         int seekPoint = ((m_videoLength * seekPercentage) / 100);
-        m_video.set(CV_CAP_PROP_POS_FRAMES, seekPoint);
+        m_video.set(cv::CAP_PROP_POS_FRAMES, seekPoint);
         m_videoFPSCount = m_videoFPSq;
         m_videoPrevFPSCount = 0;
         m_videoEOF = false;
@@ -792,9 +792,9 @@ void ATVModSource::scanCameras()
 
 		if (m_cameras.back().m_camera.isOpened())
 		{
-			m_cameras.back().m_videoFPS = m_cameras.back().m_camera.get(CV_CAP_PROP_FPS);
-			m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_WIDTH);
-			m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(CV_CAP_PROP_FRAME_HEIGHT);
+			m_cameras.back().m_videoFPS = m_cameras.back().m_camera.get(cv::CAP_PROP_FPS);
+			m_cameras.back().m_videoWidth = (int) m_cameras.back().m_camera.get(cv::CAP_PROP_FRAME_WIDTH);
+			m_cameras.back().m_videoHeight = (int) m_cameras.back().m_camera.get(cv::CAP_PROP_FRAME_HEIGHT);
 
 			//m_cameras.back().m_videoFPS = m_cameras.back().m_videoFPS < 0 ? 16.3f : m_cameras.back().m_videoFPS;
 
@@ -865,7 +865,7 @@ void ATVModSource::mixImageAndText(cv::Mat& image)
     // position the text in the top left corner
     cv::Point textOrg(6, textSize.height+10);
     // then put the text itself
-    cv::putText(image, m_settings.m_overlayText.toStdString(), textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, CV_AA);
+    cv::putText(image, m_settings.m_overlayText.toStdString(), textOrg, fontFace, fontScale, cv::Scalar::all(255*m_settings.m_uniformLevel), thickness, cv::LINE_AA);
 }
 
 void ATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -1019,7 +1019,7 @@ void ATVModSource::reportVideoFileSourceStreamTiming()
 
     if (m_videoOK && m_video.isOpened())
     {
-        framesCount = m_video.get(CV_CAP_PROP_POS_FRAMES);;
+        framesCount = m_video.get(cv::CAP_PROP_POS_FRAMES);;
     } else {
         framesCount = 0;
     }
