@@ -161,34 +161,36 @@ if(NOT WIN32)
 endif()
 
 # needs boost
-ExternalProject_Add(cm256cc
-    GIT_REPOSITORY https://github.com/f4exb/cm256cc.git
-    GIT_TAG ${CM256CC_TAG}
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/cm256cc"
-    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
-      -DBUILD_TOOLS=OFF
-      -DBOOST_ROOT="${BOOST_ROOT}"
-      -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIRS}
-      -DBoost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}
-      -DENABLE_DISTRIBUTION=ON
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)
-ExternalProject_Get_Property(cm256cc source_dir binary_dir)
-set(CM256CC_FOUND ON CACHE INTERNAL "")
-# we need cm256cc/library.h
-set(CM256CC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src" CACHE INTERNAL "")
-if(WIN32)
-  set(CM256CC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cm256cc.lib" CACHE INTERNAL "")
-  install(FILES "${SDRANGEL_BINARY_BIN_DIR}/cm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-elseif(LINUX)
-  set(CM256CC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-elseif(APPLE)
-  set(CM256CC_LIBRARIES "${binary_dir}/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-  install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-  FILES_MATCHING PATTERN "libcm256cc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
-endif()
+if(NOT APPLE)
+    ExternalProject_Add(cm256cc
+        GIT_REPOSITORY https://github.com/f4exb/cm256cc.git
+        GIT_TAG ${CM256CC_TAG}
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/cm256cc"
+        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+        -DBUILD_TOOLS=OFF
+        -DBOOST_ROOT="${BOOST_ROOT}"
+        -DBoost_INCLUDE_DIR=${Boost_INCLUDE_DIRS}
+        -DBoost_INCLUDE_DIRS=${Boost_INCLUDE_DIRS}
+        -DENABLE_DISTRIBUTION=ON
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+    )
+    ExternalProject_Get_Property(cm256cc source_dir binary_dir)
+    set(CM256CC_FOUND ON CACHE INTERNAL "")
+    # we need cm256cc/library.h
+    set(CM256CC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src" CACHE INTERNAL "")
+    if(WIN32)
+        set(CM256CC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/cm256cc.lib" CACHE INTERNAL "")
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/cm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif(LINUX)
+        set(CM256CC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    elseif(APPLE) # kept in case of relaxation of APPLE exclusion
+        set(CM256CC_LIBRARIES "${binary_dir}/libcm256cc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+        FILES_MATCHING PATTERN "libcm256cc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
+    endif()
+endif() # NOT APPLE
 
 set(USE_MBELIB OFF)
 ExternalProject_Add(mbelib
