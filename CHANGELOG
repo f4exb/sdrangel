@@ -1,3 +1,11 @@
+sdrangel (4.14.2-1) unstable; urgency=medium
+
+  * Removed cm256cc dependency and therefore remote plugins for Mac OS. Fixes #492
+  * REST API: removed useless SWGDevicesetApi files. Fixes #491
+  * BFM demod: added initialization of message to GUI address. Fixes #488
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 28 Mar 2020 19:05:22 +0100
+
 sdrangel (4.14.1-1) unstable; urgency=medium
 
   * FFT factory with option to use fftwf wisdom file. Impements issue #482.
