@@ -25,6 +25,7 @@
 #include "SWGAirspyActions.h"
 #include "SWGAirspyHFActions.h"
 #include "SWGBladeRF1InputActions.h"
+#include "SWGBladeRF2InputActions.h"
 #include "SWGFCDProActions.h"
 #include "SWGFCDProPlusActions.h"
 #include "SWGHackRFInputActions.h"
@@ -76,6 +77,9 @@ public:
 
     SWGBladeRF1InputActions* getBladeRf1InputActions();
     void setBladeRf1InputActions(SWGBladeRF1InputActions* blade_rf1_input_actions);
+
+    SWGBladeRF2InputActions* getBladeRf2InputActions();
+    void setBladeRf2InputActions(SWGBladeRF2InputActions* blade_rf2_input_actions);
 
     SWGFCDProActions* getFcdProActions();
     void setFcdProActions(SWGFCDProActions* fcd_pro_actions);
@@ -140,6 +144,9 @@ private:
 
     SWGBladeRF1InputActions* blade_rf1_input_actions;
     bool m_blade_rf1_input_actions_isSet;
+
+    SWGBladeRF2InputActions* blade_rf2_input_actions;
+    bool m_blade_rf2_input_actions_isSet;
 
     SWGFCDProActions* fcd_pro_actions;
     bool m_fcd_pro_actions_isSet;

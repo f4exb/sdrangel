@@ -40,6 +40,8 @@ SWGDeviceActions::SWGDeviceActions() {
     m_airspy_hf_actions_isSet = false;
     blade_rf1_input_actions = nullptr;
     m_blade_rf1_input_actions_isSet = false;
+    blade_rf2_input_actions = nullptr;
+    m_blade_rf2_input_actions_isSet = false;
     fcd_pro_actions = nullptr;
     m_fcd_pro_actions_isSet = false;
     fcd_pro_plus_actions = nullptr;
@@ -88,6 +90,8 @@ SWGDeviceActions::init() {
     m_airspy_hf_actions_isSet = false;
     blade_rf1_input_actions = new SWGBladeRF1InputActions();
     m_blade_rf1_input_actions_isSet = false;
+    blade_rf2_input_actions = new SWGBladeRF2InputActions();
+    m_blade_rf2_input_actions_isSet = false;
     fcd_pro_actions = new SWGFCDProActions();
     m_fcd_pro_actions_isSet = false;
     fcd_pro_plus_actions = new SWGFCDProPlusActions();
@@ -133,6 +137,9 @@ SWGDeviceActions::cleanup() {
     }
     if(blade_rf1_input_actions != nullptr) { 
         delete blade_rf1_input_actions;
+    }
+    if(blade_rf2_input_actions != nullptr) { 
+        delete blade_rf2_input_actions;
     }
     if(fcd_pro_actions != nullptr) { 
         delete fcd_pro_actions;
@@ -201,6 +208,8 @@ SWGDeviceActions::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&blade_rf1_input_actions, pJson["bladeRF1InputActions"], "SWGBladeRF1InputActions", "SWGBladeRF1InputActions");
     
+    ::SWGSDRangel::setValue(&blade_rf2_input_actions, pJson["bladeRF2InputActions"], "SWGBladeRF2InputActions", "SWGBladeRF2InputActions");
+    
     ::SWGSDRangel::setValue(&fcd_pro_actions, pJson["fcdProActions"], "SWGFCDProActions", "SWGFCDProActions");
     
     ::SWGSDRangel::setValue(&fcd_pro_plus_actions, pJson["fcdProPlusActions"], "SWGFCDProPlusActions", "SWGFCDProPlusActions");
@@ -262,6 +271,9 @@ SWGDeviceActions::asJsonObject() {
     }
     if((blade_rf1_input_actions != nullptr) && (blade_rf1_input_actions->isSet())){
         toJsonValue(QString("bladeRF1InputActions"), blade_rf1_input_actions, obj, QString("SWGBladeRF1InputActions"));
+    }
+    if((blade_rf2_input_actions != nullptr) && (blade_rf2_input_actions->isSet())){
+        toJsonValue(QString("bladeRF2InputActions"), blade_rf2_input_actions, obj, QString("SWGBladeRF2InputActions"));
     }
     if((fcd_pro_actions != nullptr) && (fcd_pro_actions->isSet())){
         toJsonValue(QString("fcdProActions"), fcd_pro_actions, obj, QString("SWGFCDProActions"));
@@ -367,6 +379,16 @@ void
 SWGDeviceActions::setBladeRf1InputActions(SWGBladeRF1InputActions* blade_rf1_input_actions) {
     this->blade_rf1_input_actions = blade_rf1_input_actions;
     this->m_blade_rf1_input_actions_isSet = true;
+}
+
+SWGBladeRF2InputActions*
+SWGDeviceActions::getBladeRf2InputActions() {
+    return blade_rf2_input_actions;
+}
+void
+SWGDeviceActions::setBladeRf2InputActions(SWGBladeRF2InputActions* blade_rf2_input_actions) {
+    this->blade_rf2_input_actions = blade_rf2_input_actions;
+    this->m_blade_rf2_input_actions_isSet = true;
 }
 
 SWGFCDProActions*
@@ -530,6 +552,9 @@ SWGDeviceActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(blade_rf1_input_actions && blade_rf1_input_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf2_input_actions && blade_rf2_input_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(fcd_pro_actions && fcd_pro_actions->isSet()){
