@@ -26,6 +26,8 @@
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGBladeRF2InputReport.h"
+#include "SWGDeviceActions.h"
+#include "SWGBladeRF2InputActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
@@ -1246,6 +1248,37 @@ int BladeRF2Input::webapiRun(
     }
 
     return 200;
+}
+
+int BladeRF2Input::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGBladeRF2InputActions *swgBladeRF2InputActions = query.getBladeRf2InputActions();
+
+    if (swgBladeRF2InputActions)
+    {
+        if (deviceActionsKeys.contains("record"))
+        {
+            bool record = swgBladeRF2InputActions->getRecord() != 0;
+            MsgFileRecord *msg = MsgFileRecord::create(record);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing BladeRF2InputActions in query";
+        return 400;
+    }
 }
 
 void BladeRF2Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2InputSettings& settings, bool force)
