@@ -20,6 +20,8 @@ DeviceActions:
       $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFActions"
     bladeRF1InputActions:
       $ref: "http://localhost:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputActions"
+    bladeRF2InputActions:
+      $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputActions"
     fcdProActions:
       $ref: "http://localhost:8081/api/swagger/include/FCDPro.yaml#/FCDProActions"
     fcdProPlusActions:

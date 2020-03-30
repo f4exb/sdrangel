@@ -57,6 +57,16 @@ BladeRF2InputReport:
       items:
         $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/NamedEnum"
 
+BladeRF2InputActions:
+  description: BladeRF2
+  properties:
+    record:
+      type: integer
+      description: >
+        Record IQ stream action
+          * 0 - stop recording
+          * 1 - start recording
+
 BladeRF2OutputSettings:
   description: BladeRF2
   properties:
