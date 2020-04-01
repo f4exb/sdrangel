@@ -49,7 +49,8 @@ This button controls the start/stop of the Tx subsystem.
 
 <h3>7. Record button</h3>
 
-At this moment this control is inactive (waiting for synchronous streams recording).
+  - Left click: record baseband I/Q stream toggle button (inactive: waiting for synchronous streams recording)
+  - Right click: choose record file
 
 <h3>8. Center frequency</h3>
 

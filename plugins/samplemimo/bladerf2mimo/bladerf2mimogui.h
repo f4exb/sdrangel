@@ -118,6 +118,8 @@ private slots:
 	void on_gain_valueChanged(int value);
 	void on_biasTee_toggled(bool checked);
 	void on_transverter_clicked();
+    void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // _BLADERF2MIMO_BLADERF2MIMOGUI_H_

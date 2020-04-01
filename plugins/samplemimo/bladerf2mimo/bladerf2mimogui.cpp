@@ -22,6 +22,7 @@
 #include <QDateTime>
 #include <QString>
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "plugin/pluginapi.h"
 #include "device/deviceapi.h"
@@ -94,6 +95,10 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleMIMO->setMessageQueueToGUI(&m_inputMessageQueue);
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
+    connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+
+    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
+    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
 
     sendSettings();
 }
@@ -787,5 +792,50 @@ void BladeRF2MIMOGui::updateStatus()
         }
 
         m_lastTxEngineState = stateTx;
+    }
+}
+
+void BladeRF2MIMOGui::openDeviceSettingsDialog(const QPoint& p)
+{
+    BasicDeviceSettingsDialog dialog(this);
+    dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+    dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+    dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+    dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+
+    dialog.move(p);
+    dialog.exec();
+
+    m_settings.m_useReverseAPI = dialog.useReverseAPI();
+    m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+    m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+    m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+
+    sendSettings();
+}
+
+void BladeRF2MIMOGui::openFileRecordDialog(const QPoint& p)
+{
+    QFileDialog fileDialog(
+        this,
+        tr("Save I/Q record file"),
+        m_settings.m_fileRecordName,
+        tr("SDR I/Q Files (*.sdriq)")
+    );
+
+    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    fileDialog.move(p);
+    QStringList fileNames;
+
+    if (fileDialog.exec())
+    {
+        fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_fileRecordName = fileNames.at(0);
+            sendSettings();
+        }
     }
 }
