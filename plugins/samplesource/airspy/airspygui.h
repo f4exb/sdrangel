@@ -97,6 +97,7 @@ private slots:
     void updateStatus();
 	void handleInputMessages();
     void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_AIRSPYGUI_H

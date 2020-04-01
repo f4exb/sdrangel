@@ -87,6 +87,7 @@ private slots:
 	void on_serverAddressApplyButton_clicked();
   	void on_dcBlock_toggled(bool checked);
 	void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();
 };

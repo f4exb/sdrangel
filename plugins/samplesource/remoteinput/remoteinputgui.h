@@ -135,6 +135,7 @@ private slots:
 	void updateStatus();
 	void networkManagerFinished(QNetworkReply *reply);
     void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_REMOTEINPUTGUI_H

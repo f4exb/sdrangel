@@ -122,6 +122,7 @@ private slots:
     void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_LOCALINPUTGUI_H

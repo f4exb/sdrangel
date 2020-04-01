@@ -93,6 +93,7 @@ private slots:
     void updateStatus();
 	void handleInputMessages();
     void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSGUI_H_ */
