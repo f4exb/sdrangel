@@ -17,7 +17,8 @@ This button is used to start the "device" i.e connect to the remote and start st
 
 <h3>2: Record</h3>
 
-Record baseband I/Q stream toggle button
+  - Left click: record baseband I/Q stream toggle button
+  - Right click: choose record file
 
 <h3>3: Frequency</h3>
 

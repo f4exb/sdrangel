@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-This input sample source plugin gets its samples from a [Perseus device](http://microtelecom.it/perseus/). 
+This input sample source plugin gets its samples from a [Perseus device](http://microtelecom.it/perseus/).
 
 <h2>Build</h2>
 
@@ -35,15 +35,16 @@ This is the center frequency of reception in kHz.
 
 <h4>1.2: Start/Stop</h4>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
-  
+
 <h4>1.3: Record</h4>
 
-Record baseband I/Q stream toggle button
+  - Left click: record baseband I/Q stream toggle button
+  - Right click: choose record file
 
 <h4>1.4: Stream sample rate</h4>
 
@@ -81,7 +82,7 @@ Note that if you mouse over the button a tooltip appears that displays the trans
 
 You can set the translating frequency in Hz with this dial. Use the wheels to adjust the sample rate. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters. 
+The frequency set in the device is the frequency on the main dial (1) minus this frequency. Thus it is positive for down converters and negative for up converters.
 
 For example with the DX Patrol that has a mixer at 120 MHz for HF operation you would set the value to -120,000,000 Hz so that if the main dial frequency is set at 7,130 kHz the RTLSDR of the DX Patrol will be set to 127.130 MHz.
 
@@ -97,7 +98,7 @@ Use this toggle button to activate or deactivate the frequency translation
 
 <h4>7a.3: Confirmation buttons</h4>
 
-Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes. 
+Use these buttons to confirm ("OK") or dismiss ("Cancel") your changes.
 
 <h3>8: Attenuators control</h3>
 
@@ -107,14 +108,14 @@ Use this combo box to control the attenuators inside the Perseus:
   - 10 dB: 10 dB attenuator engaged
   - 20 dB: 20 dB attenuator engaged
   - 30 dB: 10 and 20 dB attenuators engaged
-  
+
 The LEDs on the Perseus front panel corresponding to each attenuator are lit accordingly.
 
 <h3>9: ADC dither</h3>
 
-Use this button to turn on or off the Perseus ADC dithering 
+Use this button to turn on or off the Perseus ADC dithering
 
 <h3>10: ADC preamplifier</h3>
 
-Use this button to turn on or off the Perseus ADC preamplifier 
-  
+Use this button to turn on or off the Perseus ADC preamplifier
+
