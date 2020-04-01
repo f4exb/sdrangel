@@ -31,7 +31,8 @@ Device start / stop button.
 
 <h3>2: Record</h3>
 
-Record I/Q stream toggle button
+  - Left click: record baseband I/Q stream toggle button
+  - Right click: choose record file
 
 <h3>3: Frequency</h3>
 

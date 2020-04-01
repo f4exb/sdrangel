@@ -39,7 +39,8 @@ Device start / stop button.
 
 <h4>1.3: Record</h4>
 
-Record baseband I/Q stream toggle button
+  - Left click: record baseband I/Q stream toggle button
+  - Right click: choose record file
 
 <h4>1.4: Stream sample rate</h4>
 
