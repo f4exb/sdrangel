@@ -105,6 +105,7 @@ private slots:
     void on_transverter_clicked();
     void on_sampleRateMode_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
+    void openFileRecordDialog(const QPoint& p);
 
     void updateHardware();
     void updateStatus();

@@ -77,7 +77,7 @@
          <item>
           <widget class="ButtonSwitch" name="record">
            <property name="toolTip">
-            <string>Toggle record I/Q samples from device</string>
+            <string>Left: toggle record I/Q samples from device - Right: select output file</string>
            </property>
            <property name="text">
             <string/>

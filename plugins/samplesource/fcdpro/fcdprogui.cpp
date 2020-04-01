@@ -16,6 +16,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "ui_fcdprogui.h"
 #include "gui/colormapper.h"
@@ -148,6 +149,9 @@ FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
+
+    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
+    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
 
 	displaySettings();
 
@@ -597,4 +601,30 @@ void FCDProGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+void FCDProGui::openFileRecordDialog(const QPoint& p)
+{
+    QFileDialog fileDialog(
+        this,
+        tr("Save I/Q record file"),
+        m_settings.m_fileRecordName,
+        tr("SDR I/Q Files (*.sdriq)")
+    );
+
+    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    fileDialog.move(p);
+    QStringList fileNames;
+
+    if (fileDialog.exec())
+    {
+        fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_fileRecordName = fileNames.at(0);
+            sendSettings();
+        }
+    }
 }
