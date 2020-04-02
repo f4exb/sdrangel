@@ -1702,6 +1702,15 @@ margin-bottom: 20px;
   },
   "description" : "BladeRF1"
 };
+            defs.BladeRF2InputActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "BladeRF2"
+};
             defs.BladeRF2InputReport = {
   "properties" : {
     "frequencyRange" : {
@@ -2680,6 +2689,9 @@ margin-bottom: 20px;
     },
     "bladeRF1InputActions" : {
       "$ref" : "#/definitions/BladeRF1InputActions"
+    },
+    "bladeRF2InputActions" : {
+      "$ref" : "#/definitions/BladeRF2InputActions"
     },
     "fcdProActions" : {
       "$ref" : "#/definitions/FCDProActions"
@@ -33380,7 +33392,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-03-29T00:14:31.725+01:00
+              Generated 2020-04-02T04:52:29.862+02:00
             </div>
           </div>
       </div>
