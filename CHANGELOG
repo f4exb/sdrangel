@@ -1,3 +1,10 @@
+sdrangel (4.14.3-1) unstable; urgency=medium
+
+  * Sample sources GUI file record: right click to choose file. Implements #483.
+  * BladeRF2: REST API: implemented actions (was missing)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 01 Apr 2020 19:05:22 +0200
+
 sdrangel (4.14.2-1) unstable; urgency=medium
 
   * Removed cm256cc dependency and therefore remote plugins for Mac OS. Fixes #492
