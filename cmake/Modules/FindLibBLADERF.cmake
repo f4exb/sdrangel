@@ -1,6 +1,6 @@
 if(NOT LIBBLADERF_FOUND)
 
-  pkg_check_modules (LIBBLADERF_PKG libbladerf>=2.0)
+  pkg_check_modules (LIBBLADERF_PKG libbladeRF>=2.0)
 
   if(LIBBLADERF_PKG_FOUND OR (DEFINED BLADERF_DIR))
     find_path(LIBBLADERF_INCLUDE_DIRS
@@ -16,7 +16,9 @@ if(NOT LIBBLADERF_FOUND)
       HINTS ${BLADERF_DIR}/lib
             ${LIBBLADERF_PKG_LIBRARY_DIRS}
       PATHS /usr/lib
+            /usr/lib64
             /usr/local/lib
+            /usr/local/lib64
       )
 
     if(LIBBLADERF_INCLUDE_DIRS AND LIBBLADERF_LIBRARIES)
