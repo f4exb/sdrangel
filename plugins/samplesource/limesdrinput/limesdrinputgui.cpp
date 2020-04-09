@@ -620,7 +620,8 @@ void LimeSDRInputGUI::on_sampleRate_changed(quint64 value)
 
     updateADCRate();
     setNCODisplay();
-    sendSettings();}
+    sendSettings();
+}
 
 void LimeSDRInputGUI::on_hwDecim_currentIndexChanged(int index)
 {

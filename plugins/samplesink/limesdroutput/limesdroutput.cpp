@@ -401,7 +401,7 @@ void LimeSDROutput::stop()
 {
     qDebug("LimeSDROutput::stop");
 
-    if (m_limeSDROutputThread != 0)
+    if (m_limeSDROutputThread)
     {
         m_limeSDROutputThread->stopWork();
         delete m_limeSDROutputThread;
@@ -769,7 +769,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     {
         reverseAPIKeys.append("gain");
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (LMS_SetGaindB(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
@@ -793,7 +793,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         reverseAPIKeys.append("log2HardInterp");
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0)
+        if (m_deviceShared.m_deviceParams->getDevice())
         {
             if (LMS_SetSampleRateDir(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
@@ -839,7 +839,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     {
         reverseAPIKeys.append("lpfBW");
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             doLPCalibration = true;
         }
@@ -851,7 +851,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         reverseAPIKeys.append("lpfFIRBW");
         reverseAPIKeys.append("lpfFIREnable");
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
@@ -880,7 +880,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         reverseAPIKeys.append("ncoEnable");
         forwardChangeOwnDSP = true;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (DeviceLimeSDR::setNCOFrequency(m_deviceShared.m_deviceParams->getDevice(),
                     LMS_CH_TX,
@@ -909,10 +909,10 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         forwardChangeOwnDSP = true;
         m_deviceShared.m_log2Soft = settings.m_log2SoftInterp; // for buddies
 
-        if (m_limeSDROutputThread != 0)
+        if (m_limeSDROutputThread)
         {
             m_limeSDROutputThread->setLog2Interpolation(settings.m_log2SoftInterp);
-            qDebug() << "LimeSDROutput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftInterp);
+            qDebug() << "LimeSDROutput::applySettings: set soft interpolation to " << (1<<settings.m_log2SoftInterp);
         }
     }
 
@@ -920,7 +920,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
     {
         reverseAPIKeys.append("antennaPath");
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (DeviceLimeSDR::setTxAntennaPath(m_deviceShared.m_deviceParams->getDevice(),
                     m_deviceShared.m_channel,
@@ -948,7 +948,7 @@ bool LimeSDROutput::applySettings(const LimeSDROutputSettings& settings, bool fo
         reverseAPIKeys.append("transverterDeltaFrequency");
         forwardChangeTxDSP = true;
 
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (LMS_SetClockFreq(m_deviceShared.m_deviceParams->getDevice(), LMS_CLOCK_SXT, deviceCenterFrequency) < 0)
             {
