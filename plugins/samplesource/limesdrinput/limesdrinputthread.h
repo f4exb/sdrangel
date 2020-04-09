@@ -27,8 +27,7 @@
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
 #include "limesdr/devicelimesdrshared.h"
-
-#define LIMESDR_BLOCKSIZE (1<<15) //complex samples per buffer
+#include "limesdr/devicelimesdr.h"
 
 class LimeSDRInputThread : public QThread, public DeviceLimeSDRShared::ThreadInterface
 {
@@ -50,7 +49,7 @@ private:
     bool m_running;
 
     lms_stream_t* m_stream;
-    qint16 m_buf[2*LIMESDR_BLOCKSIZE]; //must hold I+Q values of each sample hence 2xcomplex size
+    qint16 m_buf[2*DeviceLimeSDR::blockSize]; //must hold I+Q values of each sample hence 2xcomplex size
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
 

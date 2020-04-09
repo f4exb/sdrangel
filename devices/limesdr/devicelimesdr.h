@@ -62,6 +62,8 @@ public:
     /** Set clock source and external clock frequency if required */
     static bool setClockSource(lms_device_t *device, bool extClock, uint32_t extClockFrequency);
 
+    static const unsigned int blockSize = (1<<15);
+
 private:
     static bool findSerial(const char *lmsInfoStr, std::string& serial);
 };

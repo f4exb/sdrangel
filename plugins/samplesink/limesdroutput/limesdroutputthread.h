@@ -26,8 +26,7 @@
 
 #include "dsp/interpolators.h"
 #include "limesdr/devicelimesdrshared.h"
-
-#define LIMESDROUTPUT_BLOCKSIZE (1<<15) //complex samples per buffer ~10k (16k)
+#include "limesdr/devicelimesdr.h"
 
 class SampleSourceFifo;
 
@@ -51,7 +50,7 @@ private:
     bool m_running;
 
     lms_stream_t* m_stream;
-    qint16 m_buf[2*LIMESDROUTPUT_BLOCKSIZE]; //must hold I+Q values of each sample hence 2xcomplex size
+    qint16 m_buf[2*DeviceLimeSDR::blockSize]; //must hold I+Q values of each sample hence 2xcomplex size
     SampleSourceFifo* m_sampleFifo;
 
     unsigned int m_log2Interp; // soft decimation

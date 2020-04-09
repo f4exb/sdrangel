@@ -25,11 +25,11 @@ LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sam
     QThread(parent),
     m_running(false),
     m_stream(stream),
-    m_convertBuffer(LIMESDR_BLOCKSIZE),
+    m_convertBuffer(DeviceLimeSDR::blockSize),
     m_sampleFifo(sampleFifo),
     m_log2Decim(0)
 {
-    std::fill(m_buf, m_buf + 2*LIMESDR_BLOCKSIZE, 0);
+    std::fill(m_buf, m_buf + 2*DeviceLimeSDR::blockSize, 0);
 }
 
 LimeSDRInputThread::~LimeSDRInputThread()
@@ -88,7 +88,7 @@ void LimeSDRInputThread::run()
 
     while (m_running)
     {
-        if ((res = LMS_RecvStream(m_stream, (void *) m_buf, LIMESDR_BLOCKSIZE, &metadata, 1000)) < 0)
+        if ((res = LMS_RecvStream(m_stream, (void *) m_buf, DeviceLimeSDR::blockSize, &metadata, 1000)) < 0)
         {
             qCritical("LimeSDRInputThread::run read error: %s", strerror(errno));
             break;

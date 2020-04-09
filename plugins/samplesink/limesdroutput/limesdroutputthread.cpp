@@ -30,7 +30,7 @@ LimeSDROutputThread::LimeSDROutputThread(lms_stream_t* stream, SampleSourceFifo*
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
-    std::fill(m_buf, m_buf + 2*LIMESDROUTPUT_BLOCKSIZE, 0);
+    std::fill(m_buf, m_buf + 2*DeviceLimeSDR::blockSize, 0);
 }
 
 LimeSDROutputThread::~LimeSDROutputThread()
@@ -89,18 +89,18 @@ void LimeSDROutputThread::run()
 
     while (m_running)
     {
-        callback(m_buf, LIMESDROUTPUT_BLOCKSIZE);
+        callback(m_buf, DeviceLimeSDR::blockSize);
 
-        res = LMS_SendStream(m_stream, (void *) m_buf, LIMESDROUTPUT_BLOCKSIZE, &metadata, 1000000);
+        res = LMS_SendStream(m_stream, (void *) m_buf, DeviceLimeSDR::blockSize, &metadata, 1000000);
 
         if (res < 0)
         {
             qCritical("LimeSDROutputThread::run write error: %s", strerror(errno));
             break;
         }
-        else if (res != LIMESDROUTPUT_BLOCKSIZE)
+        else if (res != DeviceLimeSDR::blockSize)
         {
-            qDebug("LimeSDROutputThread::run written %d/%d samples", res, LIMESDROUTPUT_BLOCKSIZE);
+            qDebug("LimeSDROutputThread::run written %d/%d samples", res, DeviceLimeSDR::blockSize);
         }
     }
 
