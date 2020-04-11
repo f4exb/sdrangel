@@ -9,7 +9,7 @@
 
 # which version/tag/checkout to use
 set(CODEC2_TAG "v0.9.2")
-set(CM256CC_TAG f21e8bc1e9afdb0b28672743dcec111aec1d32d9)
+set(CM256CC_TAG c0e92b92aca3d1d36c990b642b937c64d363c559)
 set(MBELIB_TAG 9a04ed5c78176a9965f3d43f7aa1b1f5330e771f)
 set(SERIALDV_TAG "v1.1.4")
 set(DSDCC_TAG "v1.8.6")
