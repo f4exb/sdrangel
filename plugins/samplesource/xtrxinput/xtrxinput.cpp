@@ -869,21 +869,21 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     // apply settings
 
-    qDebug() << "XTRXInput::applySettings: center freq: " << m_settings.m_centerFrequency << " Hz"
+    qDebug() << "XTRXInput::applySettings: center freq: " << settings.m_centerFrequency << " Hz"
              << " device stream sample rate: " << getDevSampleRate() << "S/s"
              << " sample rate with soft decimation: " << getSampleRate() << "S/s"
-             << " m_devSampleRate: " << m_settings.m_devSampleRate
-             << " m_dcBlock: " << m_settings.m_dcBlock
-             << " m_iqCorrection: " << m_settings.m_iqCorrection
-             << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
-             << " m_gain: " << m_settings.m_gain
-             << " m_lpfBW: " << m_settings.m_lpfBW
-             << " m_pwrmode: " << m_settings.m_pwrmode
-             << " m_ncoEnable: " << m_settings.m_ncoEnable
-             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
-             << " m_antennaPath: " << m_settings.m_antennaPath
-             << " m_extClock: " << m_settings.m_extClock
-             << " m_extClockFreq: " << m_settings.m_extClockFreq
+             << " m_devSampleRate: " << settings.m_devSampleRate
+             << " m_dcBlock: " << settings.m_dcBlock
+             << " m_iqCorrection: " << settings.m_iqCorrection
+             << " m_log2SoftDecim: " << settings.m_log2SoftDecim
+             << " m_gain: " << settings.m_gain
+             << " m_lpfBW: " << settings.m_lpfBW
+             << " m_pwrmode: " << settings.m_pwrmode
+             << " m_ncoEnable: " << settings.m_ncoEnable
+             << " m_ncoFrequency: " << settings.m_ncoFrequency
+             << " m_antennaPath: " << settings.m_antennaPath
+             << " m_extClock: " << settings.m_extClock
+             << " m_extClockFreq: " << settings.m_extClockFreq
              << " force: " << force
              << " forceNCOFrequency: " << forceNCOFrequency
              << " doLPCalibration: " << doLPCalibration;
@@ -904,7 +904,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         reverseAPIKeys.append("pwrmode");
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
                     XTRX_TRX,
@@ -926,7 +926,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     if ((m_settings.m_extClock != settings.m_extClock)
        || (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
     {
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             xtrx_set_ref_clk(m_deviceShared.m_dev->getDevice(),
                              (settings.m_extClock) ? settings.m_extClockFreq : 0,
@@ -954,7 +954,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
-        if (m_deviceShared.m_dev->getDevice() != 0) {
+        if (m_deviceShared.m_dev->getDevice()) {
             doChangeSampleRate = true;
         }
     }
@@ -975,7 +975,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         reverseAPIKeys.append("pgaGain");
     }
 
-    if (m_deviceShared.m_dev->getDevice() != 0)
+    if (m_deviceShared.m_dev->getDevice())
     {
         if ((m_settings.m_gainMode != settings.m_gainMode) || force)
         {
@@ -1014,7 +1014,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         reverseAPIKeys.append("lpfBW");
 
-        if (m_deviceShared.m_dev->getDevice() != 0) {
+        if (m_deviceShared.m_dev->getDevice()) {
             doLPCalibration = true;
         }
     }
@@ -1023,7 +1023,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     if ((m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
             (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
     {
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
                                LMS_CH_RX,
@@ -1051,7 +1051,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         reverseAPIKeys.append("log2SoftDecim");
         forwardChangeOwnDSP = true;
 
-        if (inputThread != 0)
+        if (inputThread)
         {
             inputThread->setLog2Decimation(requestedChannel, settings.m_log2SoftDecim);
             qDebug() << "XTRXInput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftDecim);
@@ -1062,7 +1062,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         reverseAPIKeys.append("antennaPath");
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), settings.m_antennaPath) < 0) {
                 qCritical("XTRXInput::applySettings: could not set antenna path to %d", (int) settings.m_antennaPath);
@@ -1102,7 +1102,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     m_settings = settings;
 
-    if (doChangeSampleRate)
+    if (doChangeSampleRate && (settings.m_devSampleRate != 0))
     {
         XTRXInputThread *rxThread = findThread();
 
@@ -1175,7 +1175,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     {
         forwardChangeRxDSP = true;
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_RX_FDD,
@@ -1191,7 +1191,7 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     if (forceNCOFrequency)
     {
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_BB_RX,
