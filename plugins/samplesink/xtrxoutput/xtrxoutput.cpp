@@ -771,24 +771,24 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
 
     // apply settings
 
-    qDebug() << "XTRXOutput::applySettings: m_centerFrequency: " << m_settings.m_centerFrequency
-             << " m_devSampleRate: " << m_settings.m_devSampleRate
-             << " m_log2SoftInterp: " << m_settings.m_log2SoftInterp
-             << " m_gain: " << m_settings.m_gain
-             << " m_lpfBW: " << m_settings.m_lpfBW
-             << " m_pwrmode: " << m_settings.m_pwrmode
-             << " m_ncoEnable: " << m_settings.m_ncoEnable
-             << " m_ncoFrequency: " << m_settings.m_ncoFrequency
-             << " m_antennaPath: " << m_settings.m_antennaPath
-             << " m_extClock: " << m_settings.m_extClock
-             << " m_extClockFreq: " << m_settings.m_extClockFreq
+    qDebug() << "XTRXOutput::applySettings: m_centerFrequency: " << settings.m_centerFrequency
+             << " m_devSampleRate: " << settings.m_devSampleRate
+             << " m_log2SoftInterp: " << settings.m_log2SoftInterp
+             << " m_gain: " << settings.m_gain
+             << " m_lpfBW: " << settings.m_lpfBW
+             << " m_pwrmode: " << settings.m_pwrmode
+             << " m_ncoEnable: " << settings.m_ncoEnable
+             << " m_ncoFrequency: " << settings.m_ncoFrequency
+             << " m_antennaPath: " << settings.m_antennaPath
+             << " m_extClock: " << settings.m_extClock
+             << " m_extClockFreq: " << settings.m_extClockFreq
              << " force: " << force;
 
     if ((m_settings.m_pwrmode != settings.m_pwrmode))
     {
         reverseAPIKeys.append("pwrmode");
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_val_set(m_deviceShared.m_dev->getDevice(),
                     XTRX_TRX,
@@ -810,7 +810,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     if ((m_settings.m_extClock != settings.m_extClock)
        || (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
     {
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             xtrx_set_ref_clk(m_deviceShared.m_dev->getDevice(),
                              (settings.m_extClock) ? settings.m_extClockFreq : 0,
@@ -838,7 +838,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         forwardChangeAllDSP = true; //m_settings.m_devSampleRate != settings.m_devSampleRate;
 
-        if (m_deviceShared.m_dev->getDevice() != 0) {
+        if (m_deviceShared.m_dev->getDevice()) {
             doChangeSampleRate = true;
         }
     }
@@ -847,7 +847,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         reverseAPIKeys.append("gain");
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_gain(m_deviceShared.m_dev->getDevice(),
                     m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
@@ -865,7 +865,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         reverseAPIKeys.append("lpfBW");
 
-        if (m_deviceShared.m_dev->getDevice() != 0) {
+        if (m_deviceShared.m_dev->getDevice()) {
             doLPCalibration = true;
         }
     }
@@ -874,7 +874,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     if ((m_settings.m_lpfFIRBW != settings.m_lpfFIRBW) ||
             (m_settings.m_lpfFIREnable != settings.m_lpfFIREnable) || force)
     {
-        if (m_deviceShared.m_deviceParams->getDevice() != 0 && m_channelAcquired)
+        if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
         {
             if (LMS_SetGFIRLPF(m_deviceShared.m_deviceParams->getDevice(),
                                LMS_CH_RX,
@@ -902,7 +902,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
         reverseAPIKeys.append("log2SoftInterp");
         forwardChangeOwnDSP = true;
 
-        if (outputThread != 0)
+        if (outputThread)
         {
             outputThread->setLog2Interpolation(requestedChannel, settings.m_log2SoftInterp);
             qDebug() << "XTRXOutput::applySettings: set soft interpolation to " << (1<<settings.m_log2SoftInterp);
@@ -922,7 +922,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         reverseAPIKeys.append("antennaPath");
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_set_antenna(m_deviceShared.m_dev->getDevice(), settings.m_antennaPath) < 0) {
                 qCritical("XTRXOutput::applySettings: could not set antenna path to %d", (int) settings.m_antennaPath);
@@ -962,7 +962,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
 
     m_settings = settings;
 
-    if (doChangeSampleRate)
+    if (doChangeSampleRate && (settings.m_devSampleRate != 0))
     {
         XTRXOutputThread *txThread = findThread();
 
@@ -1018,7 +1018,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     {
         forwardChangeTxDSP = true;
 
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_TX_FDD,
@@ -1034,7 +1034,7 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
 
     if (forceNCOFrequency)
     {
-        if (m_deviceShared.m_dev->getDevice() != 0)
+        if (m_deviceShared.m_dev->getDevice())
         {
             if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_BB_TX,

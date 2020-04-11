@@ -255,7 +255,7 @@ void XTRXInputGUI::handleInputMessages()
 {
     Message* message;
 
-    while ((message = m_inputMessageQueue.pop()) != 0)
+    while ((message = m_inputMessageQueue.pop()))
     {
         if (DSPSignalNotification::match(*message))
         {
@@ -566,20 +566,16 @@ void XTRXInputGUI::on_sampleRate_changed(quint64 value)
 
     updateADCRate();
     setNCODisplay();
-    sendSettings();}
+    sendSettings();
+}
 
 void XTRXInputGUI::on_hwDecim_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 5))
+    if ((index <0) || (index > 5)) {
         return;
-    m_settings.m_log2HardDecim = index;
-    displaySampleRate();
-
-    if (m_sampleRateMode) {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
-    } else {
-        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
     }
+
+    m_settings.m_log2HardDecim = index;
 
     updateADCRate();
     setNCODisplay();
@@ -593,6 +589,14 @@ void XTRXInputGUI::on_swDecim_currentIndexChanged(int index)
     }
 
     m_settings.m_log2SoftDecim = index;
+    displaySampleRate();
+
+    if (m_sampleRateMode) {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+    } else {
+        m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
+    }
+
     sendSettings();
 }
 
