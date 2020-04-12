@@ -44,7 +44,7 @@ public:
     static void getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& tiaGain, uint32_t& pgaGain);
 
     static const uint32_t m_nbGains = 74;
-    static const unsigned int blockSize = (1<<13);
+    static const unsigned int blockSize = (1<<12);
 
 private:
     struct xtrx_dev *m_dev; //!< device handle
