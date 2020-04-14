@@ -117,21 +117,12 @@ void DeviceXTRX::getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& ti
 
 double DeviceXTRX::set_samplerate(double rate, double master, bool output)
 {
-    if (output)
-    {
+    m_masterRate = master;
+
+    if (output) {
         m_outputRate = rate;
-
-        if (master != 0.0) {
-            m_masterRate = master;
-        }
-    }
-    else
-    {
+    } else {
         m_inputRate = rate;
-
-        if (master != 0.0) {
-            m_masterRate = master;
-        }
     }
 
     int res = xtrx_set_samplerate(m_dev,
@@ -145,7 +136,7 @@ double DeviceXTRX::set_samplerate(double rate, double master, bool output)
 
     if (res)
     {
-        qCritical("DeviceXTRX::set_samplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d\n",
+        qCritical("DeviceXTRX::set_samplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d",
                 output ? "output" : "input", m_masterRate, m_inputRate, m_outputRate, res);
         return 0;
     }
