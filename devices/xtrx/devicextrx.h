@@ -36,7 +36,8 @@ public:
     void close();
     static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
     struct xtrx_dev *getDevice() { return m_dev; }
-    double set_samplerate(double rate, double master, bool output);
+    double setSamplerate(double rate, double master, bool output);
+    bool setSamplerate(double rate, uint32_t log2Decim, uint32_t log2Interp, bool output);
     double getMasterRate() const { return m_masterRate; }
     double getClockGen() const { return m_clockGen; }
     double getActualInputRate() const { return m_actualInputRate; }

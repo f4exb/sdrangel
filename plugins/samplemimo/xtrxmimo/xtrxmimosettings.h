@@ -42,7 +42,6 @@ struct XTRXMIMOSettings
     } TxAntenna;
 
     // common
-    double   m_devSampleRate;
     bool     m_extClock;     //!< True if external clock source
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
     QString  m_fileRecordName;
@@ -53,9 +52,10 @@ struct XTRXMIMOSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     // Rx
-    uint64_t m_rxCenterFrequency;
+    double   m_rxDevSampleRate;
     uint32_t m_log2HardDecim;
     uint32_t m_log2SoftDecim;
+    uint64_t m_rxCenterFrequency;
     bool     m_dcBlock;
     bool     m_iqCorrection;
     bool     m_ncoEnableRx;     //!< Enable TSP NCO and mixing
@@ -78,9 +78,10 @@ struct XTRXMIMOSettings
     uint32_t m_pgaGainRx1;      //!< Manual PGA gain
     uint32_t m_pwrmodeRx1;
     // Tx
-    uint64_t m_txCenterFrequency;
+    double   m_txDevSampleRate;
     uint32_t m_log2HardInterp;
     uint32_t m_log2SoftInterp;
+    uint64_t m_txCenterFrequency;
     bool     m_ncoEnableTx;     //!< Enable TSP NCO and mixing
     int      m_ncoFrequencyTx;  //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
     TxAntenna m_antennaPathTx;

@@ -217,7 +217,10 @@ bool XTRXMIMOGUI::handleMessage(const Message& message)
     }
     else if (XTRXMIMO::MsgReportClockGenChange::match(message))
     {
-        m_settings.m_devSampleRate = m_xtrxMIMO->getDevSampleRate();
+        m_settings.m_rxDevSampleRate = m_xtrxMIMO->getRxDevSampleRate();
+        m_settings.m_txDevSampleRate = m_xtrxMIMO->getTxDevSampleRate();
+        m_settings.m_log2HardDecim   = m_xtrxMIMO->getLog2HardDecim();
+        m_settings.m_log2HardInterp  = m_xtrxMIMO->getLog2HardInterp();
 
         blockApplySettings(true);
         displaySettings();
@@ -284,6 +287,7 @@ void XTRXMIMOGUI::displaySettings()
     if (m_rxElseTx)
     {
         setRxCenterFrequencyDisplay();
+        updateADCRate();
 
         ui->dcOffset->setChecked(m_settings.m_dcBlock);
         ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
@@ -291,9 +295,6 @@ void XTRXMIMOGUI::displaySettings()
         ui->hwDecim->setCurrentIndex(m_settings.m_log2HardDecim);
         ui->antenna->setCurrentIndex((int) m_settings.m_antennaPathRx);
         ui->ncoEnable->setChecked(m_settings.m_ncoEnableRx);
-
-        setNCODisplay();
-        updateADCRate();
 
         if (m_streamIndex == 0)
         {
@@ -351,14 +352,12 @@ void XTRXMIMOGUI::displaySettings()
     else
     {
         setTxCenterFrequencyDisplay();
+        updateDACRate();
 
         ui->swDecim->setCurrentIndex(m_settings.m_log2SoftInterp);
         ui->hwDecim->setCurrentIndex(m_settings.m_log2HardInterp);
         ui->antenna->setCurrentIndex((int) m_settings.m_antennaPathTx);
         ui->ncoEnable->setChecked(m_settings.m_ncoEnableTx);
-
-        updateDACRate();
-        setNCODisplay();
 
         if (m_streamIndex == 0)
         {
@@ -375,12 +374,16 @@ void XTRXMIMOGUI::displaySettings()
             ui->gainText->setText(tr("%1").arg(m_settings.m_gainTx1));
         }
     }
+
+    setNCODisplay();
 }
 
 void XTRXMIMOGUI::displaySampleRate()
 {
     float minF, maxF, stepF;
     m_xtrxMIMO->getSRRange(minF, maxF, stepF);
+    uint32_t devSampleRate = m_rxElseTx ? m_settings.m_rxDevSampleRate : m_settings.m_txDevSampleRate;
+    uint32_t log2Soft = m_rxElseTx ? m_settings.m_log2SoftDecim : m_settings.m_log2SoftInterp;
 
     ui->sampleRate->blockSignals(true);
 
@@ -389,21 +392,21 @@ void XTRXMIMOGUI::displaySampleRate()
         ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(60,60,60); }");
         ui->sampleRateMode->setText("SR");
         ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
-        ui->sampleRate->setValue(m_settings.m_devSampleRate);
+        ui->sampleRate->setValue(devSampleRate);
         ui->sampleRate->setToolTip("Device to host sample rate (S/s)");
         ui->deviceRateText->setToolTip("Baseband sample rate (S/s)");
-        uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
+        uint32_t basebandSampleRate = devSampleRate/(1<<log2Soft);
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
     }
     else
     {
         ui->sampleRateMode->setStyleSheet("QToolButton { background:rgb(50,50,50); }");
         ui->sampleRateMode->setText("BB");
-        ui->sampleRate->setValueRange(8, (uint32_t) minF/(1<<m_settings.m_log2SoftDecim), (uint32_t) maxF/(1<<m_settings.m_log2SoftDecim));
-        ui->sampleRate->setValue(m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim));
+        ui->sampleRate->setValueRange(8, (uint32_t) minF/(1<<log2Soft), (uint32_t) maxF/(1<<log2Soft));
+        ui->sampleRate->setValue(devSampleRate/(1<<log2Soft));
         ui->sampleRate->setToolTip("Baseband sample rate (S/s)");
         ui->deviceRateText->setToolTip("Device to host sample rate (S/s)");
-        ui->deviceRateText->setText(tr("%1k").arg(QString::number(m_settings.m_devSampleRate / 1000.0f, 'g', 5)));
+        ui->deviceRateText->setText(tr("%1k").arg(QString::number(devSampleRate / 1000.0f, 'g', 5)));
     }
 
     ui->sampleRate->blockSignals(false);
@@ -415,7 +418,7 @@ void XTRXMIMOGUI::setNCODisplay()
 
     if (m_rxElseTx)
     {
-        int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardDecim)))/2;
+        int ncoHalfRange = (m_settings.m_rxDevSampleRate * (1<<(m_settings.m_log2HardDecim)))/2;
         ui->ncoFrequency->setValueRange(
                 false,
                 8,
@@ -427,7 +430,7 @@ void XTRXMIMOGUI::setNCODisplay()
     }
     else
     {
-        int ncoHalfRange = (m_settings.m_devSampleRate * (1<<(m_settings.m_log2HardInterp)))/2;
+        int ncoHalfRange = (m_settings.m_txDevSampleRate * (1<<(m_settings.m_log2HardInterp)))/2;
         ui->ncoFrequency->setValueRange(
                 false,
                 8,
@@ -784,23 +787,16 @@ void XTRXMIMOGUI::on_extClock_clicked()
 
 void XTRXMIMOGUI::on_hwDecim_currentIndexChanged(int index)
 {
-    if ((index <0) || (index > 5)) {
+    if ((index <0) || (index > 6)) {
         return;
     }
 
-
-    if (m_rxElseTx)
-    {
+    if (m_rxElseTx) {
         m_settings.m_log2HardDecim = index;
-        updateADCRate();
-    }
-    else
-    {
+    } else {
         m_settings.m_log2HardInterp = index;
-        updateDACRate();
     }
 
-    setNCODisplay();
     sendSettings();
 }
 
@@ -817,9 +813,9 @@ void XTRXMIMOGUI::on_swDecim_currentIndexChanged(int index)
         m_settings.m_log2SoftDecim = index;
 
         if (m_sampleRateMode) {
-            m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+            m_settings.m_rxDevSampleRate = ui->sampleRate->getValueNew();
         } else {
-            m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
+            m_settings.m_rxDevSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftDecim);
         }
     }
     else
@@ -827,9 +823,9 @@ void XTRXMIMOGUI::on_swDecim_currentIndexChanged(int index)
         m_settings.m_log2SoftInterp = index;
 
         if (m_sampleRateMode) {
-            m_settings.m_devSampleRate = ui->sampleRate->getValueNew();
+            m_settings.m_txDevSampleRate = ui->sampleRate->getValueNew();
         } else {
-            m_settings.m_devSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftInterp);
+            m_settings.m_txDevSampleRate = ui->sampleRate->getValueNew() * (1 << m_settings.m_log2SoftInterp);
         }
     }
 
@@ -847,25 +843,20 @@ void XTRXMIMOGUI::on_sampleRate_changed(quint64 value)
     if (m_rxElseTx)
     {
         if (m_sampleRateMode) {
-            m_settings.m_devSampleRate = value;
+            m_settings.m_rxDevSampleRate = value;
         } else {
-            m_settings.m_devSampleRate = value * (1 << m_settings.m_log2SoftDecim);
+            m_settings.m_rxDevSampleRate = value * (1 << m_settings.m_log2SoftDecim);
         }
-
-        updateADCRate();
     }
     else
     {
         if (m_sampleRateMode) {
-            m_settings.m_devSampleRate = value;
+            m_settings.m_txDevSampleRate = value;
         } else {
-            m_settings.m_devSampleRate = value * (1 << m_settings.m_log2SoftInterp);
+            m_settings.m_txDevSampleRate = value * (1 << m_settings.m_log2SoftInterp);
         }
-
-        updateDACRate();
     }
 
-    setNCODisplay();
     sendSettings();
 }
 

@@ -235,7 +235,8 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
-    uint32_t getDevSampleRate() const;
+    uint32_t getRxDevSampleRate() const;
+    uint32_t getTxDevSampleRate() const;
     uint32_t getLog2HardDecim() const;
     uint32_t getLog2HardInterp() const;
     double getClockGen() const;

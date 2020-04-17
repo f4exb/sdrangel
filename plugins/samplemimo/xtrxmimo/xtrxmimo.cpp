@@ -231,14 +231,14 @@ const QString& XTRXMIMO::getDeviceDescription() const
 int XTRXMIMO::getSourceSampleRate(int index) const
 {
     (void) index;
-    int rate = m_settings.m_devSampleRate;
+    uint32_t rate = getRxDevSampleRate();
     return (rate / (1<<m_settings.m_log2SoftDecim));
 }
 
 int XTRXMIMO::getSinkSampleRate(int index) const
 {
     (void) index;
-    int rate = m_settings.m_devSampleRate;
+    uint32_t rate = getTxDevSampleRate();
     return (rate / (1<<m_settings.m_log2SoftInterp));
 }
 
@@ -286,12 +286,21 @@ void XTRXMIMO::setSinkCenterFrequency(qint64 centerFrequency, int index)
     }
 }
 
-uint32_t XTRXMIMO::getDevSampleRate() const
+uint32_t XTRXMIMO::getRxDevSampleRate() const
 {
     if (m_deviceShared.m_dev) {
         return m_deviceShared.m_dev->getActualInputRate();
     } else {
-        return m_settings.m_devSampleRate;
+        return m_settings.m_rxDevSampleRate;
+    }
+}
+
+uint32_t XTRXMIMO::getTxDevSampleRate() const
+{
+    if (m_deviceShared.m_dev) {
+        return m_deviceShared.m_dev->getActualOutputRate();
+    } else {
+        return m_settings.m_txDevSampleRate;
     }
 }
 
@@ -459,12 +468,12 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
     qint64 txXlatedDeviceCenterFrequency = settings.m_txCenterFrequency;
 
     qDebug() << "XTRXMIMO::applySettings: common:"
-        << " m_devSampleRate: " << settings.m_devSampleRate
         << " m_extClock: " << settings.m_extClock
         << " m_extClockFreq: " << settings.m_extClockFreq
         << " force: " << force;
     qDebug() << "XTRXMIMO::applySettings: Rx:"
-        << " m_rxCenterFrequency: " << settings.m_txCenterFrequency
+        << " m_rxDevSampleRate: " << settings.m_rxDevSampleRate
+        << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
         << " m_log2HardDecim: " << settings.m_log2HardDecim
         << " m_log2SoftDecim: " << settings.m_log2SoftDecim
         << " m_dcBlock: " << settings.m_dcBlock
@@ -481,6 +490,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         << " m_lpfBWRx1: " << settings.m_lpfBWRx1
         << " m_pwrmodeRx1: " << settings.m_pwrmodeRx1;
     qDebug() << "XTRXMIMO::applySettings: Tx:"
+        << " m_txDevSampleRate: " << settings.m_txDevSampleRate
         << " m_txCenterFrequency: " << settings.m_txCenterFrequency
         << " m_log2HardInterp: " << settings.m_log2HardInterp
         << " m_log2SoftInterp: " << settings.m_log2SoftInterp
@@ -525,10 +535,6 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
-        reverseAPIKeys.append("devSampleRate");
-    }
-
     // Rx
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
@@ -543,17 +549,20 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection);
     }
 
+    if ((m_settings.m_rxDevSampleRate != settings.m_rxDevSampleRate) || force) {
+        reverseAPIKeys.append("rxDevSampleRate");
+    }
     if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force) {
         reverseAPIKeys.append("log2HardDecim");
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
+    if ((m_settings.m_rxDevSampleRate != settings.m_rxDevSampleRate)
      || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
     {
         forwardChangeRxDSP = true;
 
         if (m_deviceShared.m_dev->getDevice()) {
-            doTxChangeSampleRate = true;
+            doRxChangeSampleRate = true;
         }
     }
 
@@ -791,11 +800,14 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
 
     // Tx
 
+    if ((m_settings.m_txDevSampleRate != settings.m_txDevSampleRate) || force) {
+        reverseAPIKeys.append("txDevSampleRate");
+    }
     if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force) {
         reverseAPIKeys.append("log2HardInterp");
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
+    if ((m_settings.m_txDevSampleRate != settings.m_txDevSampleRate)
      || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
     {
         forwardChangeTxDSP = true;
@@ -815,15 +827,6 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
             m_sinkThread->setLog2Interpolation(settings.m_log2SoftInterp);
             qDebug("XTRXMIMO::applySettings: set soft interpolation to %u", (1<<settings.m_log2SoftInterp));
         }
-    }
-
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-     || (m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
-    {
-        unsigned int fifoRate = std::max(
-            (unsigned int) settings.m_devSampleRate / (1<<settings.m_log2SoftInterp),
-            DeviceXTRXShared::m_sampleFifoMinRate);
-        m_sampleMOFifo.resize(SampleMOFifo::getSizePolicy(fifoRate));
     }
 
     if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx) || force) {
@@ -915,9 +918,11 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
+    m_settings = settings;
+
     // Post Rx
 
-    if (doRxChangeSampleRate && (settings.m_devSampleRate != 0))
+    if (doRxChangeSampleRate && (m_settings.m_rxDevSampleRate != 0))
     {
         // if (m_sourceThread && m_sourceThread->isRunning())
         // {
@@ -925,26 +930,27 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         //     rxThreadWasRunning = true;
         // }
 
-        double master = (settings.m_log2HardDecim == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardDecim));
+        bool success = m_deviceShared.m_dev->setSamplerate(
+            m_settings.m_rxDevSampleRate,
+            m_settings.m_log2HardDecim,
+            m_settings.m_log2HardInterp,
+            false
+        );
 
-        if (m_deviceShared.m_dev->setSamplerate(settings.m_devSampleRate,
-                master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
-                false) < 0)
-        {
-            qCritical("XTRXMIMO::applySettings: could not set sample rate to %f with oversampling of %d",
-                      settings.m_devSampleRate,
-                      1<<settings.m_log2HardDecim);
-        }
-        else
-        {
-            doRxChangeFreq = true;
-            forceNCOFrequencyRx = true;
-            forwardChangeRxDSP = true;
+        doRxChangeFreq = true;
+        forceNCOFrequencyRx = true;
+        forwardChangeRxDSP = true;
+        m_settings.m_rxDevSampleRate = m_deviceShared.m_dev->getActualInputRate();
+        m_settings.m_txDevSampleRate = m_deviceShared.m_dev->getActualOutputRate();
+        m_settings.m_log2HardDecim = getLog2HardDecim();
+        m_settings.m_log2HardInterp = getLog2HardInterp();
 
-            qDebug("XTRXMIMO::applySettings: sample rate set to %f with oversampling of %d",
-                   m_deviceShared.m_dev->getActualInputRate(),
-                   1 << getLog2HardDecim());
-        }
+        qDebug("XTRXMIMO::applySettings: sample rate set %s to Rx:%f Tx:%f with decimation of %d and interpolation of %d",
+            success ? "unchanged" : "changed",
+            m_settings.m_rxDevSampleRate,
+            m_settings.m_txDevSampleRate,
+            1 << m_settings.m_log2HardDecim,
+            1 << m_settings.m_log2HardInterp);
 
         // if (rxThreadWasRunning) {
         //     m_sourceThread->startWork();
@@ -955,20 +961,20 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
     {
         if (xtrx_tune_rx_bandwidth(m_deviceShared.m_dev->getDevice(),
                 XTRX_CH_A,
-                settings.m_lpfBWRx0,
+                m_settings.m_lpfBWRx0,
                 0) < 0) {
-            qCritical("XTRXMIMO::applySettings: could not set Rx0 LPF to %f Hz", settings.m_lpfBWRx0);
+            qCritical("XTRXMIMO::applySettings: could not set Rx0 LPF to %f Hz", m_settings.m_lpfBWRx0);
         } else {
-            qDebug("XTRXMIMO::applySettings: Rx0 LPF set to %f Hz", settings.m_lpfBWRx0);
+            qDebug("XTRXMIMO::applySettings: Rx0 LPF set to %f Hz", m_settings.m_lpfBWRx0);
         }
 
         if (xtrx_tune_rx_bandwidth(m_deviceShared.m_dev->getDevice(),
                 XTRX_CH_B,
-                settings.m_lpfBWRx1,
+                m_settings.m_lpfBWRx1,
                 0) < 0) {
-            qCritical("XTRXMIMO::applySettings: could not set Rx1 LPF to %f Hz", settings.m_lpfBWRx1);
+            qCritical("XTRXMIMO::applySettings: could not set Rx1 LPF to %f Hz", m_settings.m_lpfBWRx1);
         } else {
-            qDebug("XTRXMIMO::applySettings: Rx1 LPF set to %f Hz", settings.m_lpfBWRx1);
+            qDebug("XTRXMIMO::applySettings: Rx1 LPF set to %f Hz", m_settings.m_lpfBWRx1);
         }
     }
 
@@ -981,9 +987,9 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
             qint64 deviceCenterFrequency = DeviceSampleSource::calculateDeviceCenterFrequency(
                     rxXlatedDeviceCenterFrequency,
                     0,
-                    settings.m_log2SoftDecim,
+                    m_settings.m_log2SoftDecim,
                     DeviceSampleSource::FC_POS_CENTER,
-                    settings.m_devSampleRate,
+                    m_settings.m_rxDevSampleRate,
                     DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
                     false);
             setRxDeviceCenterFrequency(m_deviceShared.m_dev->getDevice(), deviceCenterFrequency, 0);
@@ -999,25 +1005,25 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
             if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_BB_RX,
                     XTRX_CH_AB,
-                    (settings.m_ncoEnableRx) ? settings.m_ncoFrequencyRx : 0,
+                    (m_settings.m_ncoEnableRx) ? m_settings.m_ncoFrequencyRx : 0,
                     nullptr) < 0)
             {
                 qCritical("XTRXMIMO::applySettings: could not %s and set Rx NCO to %d Hz",
-                          settings.m_ncoEnableRx ? "enable" : "disable",
-                          settings.m_ncoFrequencyRx);
+                          m_settings.m_ncoEnableRx ? "enable" : "disable",
+                          m_settings.m_ncoFrequencyRx);
             }
             else
             {
                 qDebug("XTRXMIMO::applySettings: %sd and set NCO Rx to %d Hz",
-                       settings.m_ncoEnableRx ? "enable" : "disable",
-                       settings.m_ncoFrequencyRx);
+                       m_settings.m_ncoEnableRx ? "enable" : "disable",
+                       m_settings.m_ncoFrequencyRx);
             }
         }
     }
 
     // Post Tx
 
-    if (doTxChangeSampleRate && (settings.m_devSampleRate != 0))
+    if (doTxChangeSampleRate && !doRxChangeSampleRate && (m_settings.m_txDevSampleRate != 0))
     {
         // if (m_sinkThread && m_sinkThread->isRunning())
         // {
@@ -1025,26 +1031,27 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         //     txThreadWasRunning = true;
         // }
 
-        double master = (settings.m_log2HardInterp == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardInterp));
+        bool success = m_deviceShared.m_dev->setSamplerate(
+            m_settings.m_txDevSampleRate,
+            m_settings.m_log2HardDecim,
+            m_settings.m_log2HardInterp,
+            true
+        );
 
-        if (m_deviceShared.m_dev->setSamplerate(settings.m_devSampleRate,
-                master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
-                true) < 0)
-        {
-            qCritical("XTRXMIMO::applySettings: could not set sample rate to %f with oversampling of %d",
-                      settings.m_devSampleRate,
-                      1<<settings.m_log2HardInterp);
-        }
-        else
-        {
-            doTxChangeFreq = true;
-            forceNCOFrequencyTx = true;
-            forwardChangeTxDSP = true;
+        doTxChangeFreq = true;
+        forceNCOFrequencyTx = true;
+        forwardChangeTxDSP = true;
+        m_settings.m_rxDevSampleRate = m_deviceShared.m_dev->getActualInputRate();
+        m_settings.m_txDevSampleRate = m_deviceShared.m_dev->getActualOutputRate();
+        m_settings.m_log2HardDecim = getLog2HardDecim();
+        m_settings.m_log2HardInterp = getLog2HardInterp();
 
-            qDebug("XTRXMIMO::applySettings: sample rate set to %f with oversampling of %d",
-                   m_deviceShared.m_dev->getActualOutputRate(),
-                   1 << getLog2HardInterp());
-        }
+        qDebug("XTRXMIMO::applySettings: sample rate set %s to Rx:%f Tx:%f with decimation of %d and interpolation of %d",
+            success ? "unchanged" : "changed",
+            m_settings.m_rxDevSampleRate,
+            m_settings.m_txDevSampleRate,
+            1 << m_settings.m_log2HardDecim,
+            1 << m_settings.m_log2HardInterp);
 
         // if (txThreadWasRunning) {
         //     m_sinkThread->startWork();
@@ -1055,20 +1062,20 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
     {
         if (xtrx_tune_tx_bandwidth(m_deviceShared.m_dev->getDevice(),
                 XTRX_CH_A,
-                settings.m_lpfBWTx0,
+                m_settings.m_lpfBWTx0,
                 0) < 0) {
-            qCritical("XTRXMIMO::applySettings: could not set Tx0 LPF to %f Hz", settings.m_lpfBWTx0);
+            qCritical("XTRXMIMO::applySettings: could not set Tx0 LPF to %f Hz", m_settings.m_lpfBWTx0);
         } else {
-            qDebug("XTRXMIMO::applySettings: Tx0 LPF set to %f Hz", settings.m_lpfBWTx0);
+            qDebug("XTRXMIMO::applySettings: Tx0 LPF set to %f Hz", m_settings.m_lpfBWTx0);
         }
 
         if (xtrx_tune_tx_bandwidth(m_deviceShared.m_dev->getDevice(),
                 XTRX_CH_B,
-                settings.m_lpfBWTx1,
+                m_settings.m_lpfBWTx1,
                 0) < 0) {
-            qCritical("XTRXMIMO::applySettings: could not set Tx1 LPF to %f Hz", settings.m_lpfBWTx1);
+            qCritical("XTRXMIMO::applySettings: could not set Tx1 LPF to %f Hz", m_settings.m_lpfBWTx1);
         } else {
-            qDebug("XTRXMIMO::applySettings: Tx1 LPF set to %f Hz", settings.m_lpfBWTx1);
+            qDebug("XTRXMIMO::applySettings: Tx1 LPF set to %f Hz", m_settings.m_lpfBWTx1);
         }
     }
 
@@ -1083,7 +1090,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
                 0,
                 settings.m_log2SoftInterp,
                 DeviceSampleSink::FC_POS_CENTER,
-                settings.m_devSampleRate,
+                m_settings.m_txDevSampleRate,
                 false);
             setTxDeviceCenterFrequency(m_deviceShared.m_dev->getDevice(), deviceCenterFrequency, 0);
         }
@@ -1098,21 +1105,26 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
             if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_BB_TX,
                     XTRX_CH_AB,
-                    (settings.m_ncoEnableTx) ? settings.m_ncoFrequencyTx : 0,
+                    (m_settings.m_ncoEnableTx) ? m_settings.m_ncoFrequencyTx : 0,
                     nullptr) < 0)
             {
                 qCritical("XTRXMIMO::applySettings: could not %s and set Tx NCO to %d Hz",
-                          settings.m_ncoEnableTx ? "enable" : "disable",
-                          settings.m_ncoFrequencyTx);
+                          m_settings.m_ncoEnableTx ? "enable" : "disable",
+                          m_settings.m_ncoFrequencyTx);
             }
             else
             {
                 qDebug("XTRXMIMO::applySettings: %sd and set Tx NCO to %d Hz",
-                       settings.m_ncoEnableTx ? "enable" : "disable",
-                       settings.m_ncoFrequencyTx);
+                       m_settings.m_ncoEnableTx ? "enable" : "disable",
+                       m_settings.m_ncoFrequencyTx);
             }
         }
     }
+
+    unsigned int fifoRate = std::max(
+        (unsigned int) m_settings.m_txDevSampleRate / (1<<m_settings.m_log2SoftInterp),
+        DeviceXTRXShared::m_sampleFifoMinRate);
+    m_sampleMOFifo.resize(SampleMOFifo::getSizePolicy(fifoRate));
 
     // forward changes
 
@@ -1123,29 +1135,42 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
             MsgReportClockGenChange *report = MsgReportClockGenChange::create();
             getMessageQueueToGUI()->push(report);
         }
+
+        int sampleRate = m_settings.m_rxDevSampleRate/(1<<m_settings.m_log2SoftDecim);
+        int ncoShift = m_settings.m_ncoEnableRx ? m_settings.m_ncoFrequencyRx : 0;
+        DSPMIMOSignalNotification *notifRx0 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_rxCenterFrequency + ncoShift, true, 0);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notifRx0);
+        DSPMIMOSignalNotification *notifRx1 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_rxCenterFrequency + ncoShift, true, 1);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notifRx1);
+
+        sampleRate = m_settings.m_txDevSampleRate/(1<<m_settings.m_log2SoftInterp);
+        ncoShift = m_settings.m_ncoEnableTx ? m_settings.m_ncoFrequencyTx : 0;
+        DSPMIMOSignalNotification *notifTx0 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_txCenterFrequency + ncoShift, false, 0);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notifTx0);
+        DSPMIMOSignalNotification *notifTx1 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_txCenterFrequency + ncoShift, false, 1);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notifTx1);
     }
 
-    if (forwardChangeRxDSP)
-    {
-        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2SoftDecim);
-        int ncoShift = settings.m_ncoEnableRx ? settings.m_ncoFrequencyRx : 0;
-        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency + ncoShift, true, 0);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
-        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency + ncoShift, true, 1);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
-    }
+    // if (forwardChangeRxDSP)
+    // {
+    //     int sampleRate = m_settings.m_rxDevSampleRate/(1<<m_settings.m_log2SoftDecim);
+    //     int ncoShift = m_settings.m_ncoEnableRx ? m_settings.m_ncoFrequencyRx : 0;
+    //     DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_rxCenterFrequency + ncoShift, true, 0);
+    //     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
+    //     DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_rxCenterFrequency + ncoShift, true, 1);
+    //     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
+    // }
 
-    if (forwardChangeTxDSP)
-    {
-        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2SoftInterp);
-        int ncoShift = settings.m_ncoEnableTx ? settings.m_ncoFrequencyTx : 0;
-        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency + ncoShift, false, 0);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
-        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency + ncoShift, false, 1);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
-    }
+    // if (forwardChangeTxDSP)
+    // {
+    //     int sampleRate = m_settings.m_txDevSampleRate/(1<<m_settings.m_log2SoftInterp);
+    //     int ncoShift = m_settings.m_ncoEnableTx ? m_settings.m_ncoFrequencyTx : 0;
+    //     DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_txCenterFrequency + ncoShift, false, 0);
+    //     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
+    //     DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, m_settings.m_txCenterFrequency + ncoShift, false, 1);
+    //     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
+    // }
 
-    m_settings = settings;
     return true;
 }
 

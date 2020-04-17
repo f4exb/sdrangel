@@ -26,7 +26,6 @@ XTRXMIMOSettings::XTRXMIMOSettings()
 void XTRXMIMOSettings::resetToDefaults()
 {
     // common
-    m_devSampleRate = 5e6;
     m_extClock = false;
     m_extClockFreq = 0; // Auto
     m_fileRecordName = "";
@@ -35,6 +34,7 @@ void XTRXMIMOSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     // Rx
+    m_rxDevSampleRate = 5e6;
     m_rxCenterFrequency = 435000*1000;
     m_log2HardDecim = 2;
     m_dcBlock = false;
@@ -60,6 +60,7 @@ void XTRXMIMOSettings::resetToDefaults()
     m_pgaGainRx1 = 16;
     m_pwrmodeRx1 = 4;
     // Tx
+    m_txDevSampleRate = 5e6;
     m_txCenterFrequency = 435000*1000;
     m_log2HardInterp = 2;
     m_log2SoftInterp = 4;
@@ -81,7 +82,6 @@ QByteArray XTRXMIMOSettings::serialize() const
     SimpleSerializer s(1);
 
     // common
-    s.writeDouble(1, m_devSampleRate);
     s.writeBool(2, m_extClock);
     s.writeU32(3, m_extClockFreq);
     s.writeString(4, m_fileRecordName);
@@ -97,6 +97,7 @@ QByteArray XTRXMIMOSettings::serialize() const
     s.writeBool(24, m_ncoEnableRx);
     s.writeS32(25, m_ncoFrequencyRx);
     s.writeS32(26, (int) m_antennaPathRx);
+    s.writeDouble(27, m_rxDevSampleRate);
     // Rx0
     s.writeFloat(30, m_lpfBWRx0);
     s.writeU32(31, m_gainRx0);
@@ -119,6 +120,7 @@ QByteArray XTRXMIMOSettings::serialize() const
     s.writeBool(72, m_ncoEnableTx);
     s.writeS32(73, m_ncoFrequencyTx);
     s.writeS32(74, (int) m_antennaPathTx);
+    s.writeDouble(75, m_txDevSampleRate);
     // Tx0
     s.writeFloat(80, m_lpfBWTx0);
     s.writeU32(81, m_gainTx0);
@@ -147,7 +149,6 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
         uint32_t uintval;
 
         // common
-        d.readDouble(1, &m_devSampleRate, 5e6);
         d.readBool(2, &m_extClock, false);
         d.readU32(3, &m_extClockFreq, 0);
         d.readString(4, &m_fileRecordName, "");
@@ -166,10 +167,11 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
         d.readU32(21, &m_log2SoftDecim, 0);
         d.readBool(22, &m_dcBlock, false);
         d.readBool(23, &m_iqCorrection, false);
-        d.readBool(32, &m_ncoEnableRx, false);
-        d.readS32(33, &m_ncoFrequencyRx, 0);
-        d.readS32(24, &intval, 0);
+        d.readBool(24, &m_ncoEnableRx, false);
+        d.readS32(25, &m_ncoFrequencyRx, 0);
+        d.readS32(26, &intval, 0);
         m_antennaPathRx = (RxAntenna) intval;
+        d.readDouble(27, &m_rxDevSampleRate, 5e6);
         // Rx0
         d.readFloat(30, &m_lpfBWRx0, 1.5e6);
         d.readU32(31, &m_gainRx0, 50);
@@ -189,20 +191,21 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
         d.readU32(57, &m_pgaGainRx1, 16);
         d.readU32(58, &m_pwrmodeRx1, 4);
         // Tx
-        d.readU32(20, &m_log2HardInterp, 2);
+        d.readU32(70, &m_log2HardInterp, 2);
         d.readU32(71, &m_log2SoftInterp, 0);
         d.readS32(72, &intval, 0);
-        d.readBool(82, &m_ncoEnableTx, true);
-        d.readS32(83, &m_ncoFrequencyTx, 500000);
+        d.readBool(73, &m_ncoEnableTx, true);
+        d.readS32(74, &m_ncoFrequencyTx, 500000);
         m_antennaPathTx = (TxAntenna) intval;
+        d.readDouble(75, &m_txDevSampleRate, 5e6);
         // Tx0
         d.readFloat(80, &m_lpfBWTx0, 1.5e6);
         d.readU32(81, &m_gainTx0, 20);
-        d.readU32(84, &m_pwrmodeTx0, 4);
+        d.readU32(82, &m_pwrmodeTx0, 4);
         // Tx1
         d.readFloat(90, &m_lpfBWTx1, 1.5e6);
         d.readU32(91, &m_gainTx1, 20);
-        d.readU32(94, &m_pwrmodeTx1, 4);
+        d.readU32(92, &m_pwrmodeTx1, 4);
 
         return true;
     }

@@ -115,7 +115,7 @@ void DeviceXTRX::getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& ti
     pgaGain = m_pgaTbl[value];
 }
 
-double DeviceXTRX::set_samplerate(double rate, double master, bool output)
+double DeviceXTRX::setSamplerate(double rate, double master, bool output)
 {
     m_masterRate = master;
 
@@ -125,24 +125,26 @@ double DeviceXTRX::set_samplerate(double rate, double master, bool output)
         m_inputRate = rate;
     }
 
-    int res = xtrx_set_samplerate(m_dev,
-          m_masterRate,
-          m_inputRate,
-          m_outputRate,
-          0,
-          &m_clockGen,
-          &m_actualInputRate,
-          &m_actualOutputRate);
+    int res = xtrx_set_samplerate(
+        m_dev,
+        m_masterRate,
+        m_inputRate,
+        m_outputRate,
+        0,
+        &m_clockGen,
+        &m_actualInputRate,
+        &m_actualOutputRate
+    );
 
     if (res)
     {
-        qCritical("DeviceXTRX::set_samplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d",
+        qCritical("DeviceXTRX::setSamplerate: Unable to set %s samplerate, m_masterRate: %f, m_inputRate: %f, m_outputRate: %f, error=%d",
                 output ? "output" : "input", m_masterRate, m_inputRate, m_outputRate, res);
         return 0;
     }
     else
     {
-        qDebug() << "DeviceXTRX::set_samplerate: sample rate set: "
+        qDebug() << "DeviceXTRX::setSamplerate: sample rate set: "
                 << "output: "<< output
                 << "m_masterRate: " << m_masterRate
                 << "m_inputRate: " << m_inputRate
@@ -157,4 +159,52 @@ double DeviceXTRX::set_samplerate(double rate, double master, bool output)
     }
 
     return m_inputRate;
+}
+
+bool DeviceXTRX::setSamplerate(double rate, uint32_t log2Decim, uint32_t log2Interp, bool output)
+{
+    double master, rxRate, txRate;
+
+    if (output)
+    {
+        master = (log2Interp == 0) ? 0 : (rate * 4 * (1 << log2Interp));
+        rxRate = (rate * 4 * (1 << log2Interp)) /  (4 * (1 << log2Decim));
+        txRate = rate;
+    }
+    else
+    {
+        master = (log2Decim == 0) ? 0 : (rate * 4 * (1 << log2Decim));
+        rxRate = rate;
+        txRate = (rate * 4 * (1 << log2Decim)) /  (4 * (1 << log2Interp));
+    }
+
+    m_masterRate = master;
+    m_inputRate = rxRate;
+    m_outputRate = txRate;
+
+    int res = xtrx_set_samplerate(
+        m_dev,
+        master,
+        rxRate,
+        txRate,
+        XTRX_SAMPLERATE_FORCE_UPDATE,
+        &m_clockGen,
+        &m_actualInputRate,
+        &m_actualOutputRate
+    );
+
+    qDebug() << "DeviceXTRX::setSamplerate: sample rate set: "
+        << "rate: " << rate
+        << "log2Decim: " << log2Decim
+        << "log2Interp: " << log2Interp
+        << "output: " << output
+        << "res: "<< res
+        << "m_masterRate: " << m_masterRate
+        << "m_inputRate: " << m_inputRate
+        << "m_outputRate: " << m_outputRate
+        << "m_clockGen: " << m_clockGen
+        << "m_actualInputRate: " << m_actualInputRate
+        << "m_actualOutputRate: " << m_actualOutputRate;
+
+    return !(res < 0);
 }
