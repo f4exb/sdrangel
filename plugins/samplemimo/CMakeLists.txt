@@ -4,5 +4,9 @@ if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf2mimo)
 endif()
 
+if(ENABLE_XTRX AND LIBXTRX_FOUND)
+    add_subdirectory(xtrxmimo)
+endif()
+
 add_subdirectory(testmi)
 add_subdirectory(testmosync)
