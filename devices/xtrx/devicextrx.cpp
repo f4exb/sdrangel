@@ -115,7 +115,7 @@ void DeviceXTRX::getAutoGains(uint32_t autoGain, uint32_t& lnaGain, uint32_t& ti
     pgaGain = m_pgaTbl[value];
 }
 
-double DeviceXTRX::set_samplerate(double rate, double master, bool output)
+double DeviceXTRX::setSamplerate(double rate, double master, bool output)
 {
     m_masterRate = master;
 
