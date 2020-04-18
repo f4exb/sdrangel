@@ -130,7 +130,7 @@ double DeviceXTRX::setSamplerate(double rate, double master, bool output)
         m_masterRate,
         m_inputRate,
         m_outputRate,
-        0,
+        XTRX_SAMPLERATE_FORCE_UPDATE,
         &m_clockGen,
         &m_actualInputRate,
         &m_actualOutputRate

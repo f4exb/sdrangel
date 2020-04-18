@@ -173,6 +173,7 @@ bool XTRXOutputGUI::handleMessage(const Message& message)
     else if (XTRXOutput::MsgReportClockGenChange::match(message))
     {
         m_settings.m_devSampleRate = m_XTRXOutput->getDevSampleRate();
+        m_settings.m_log2HardInterp = m_XTRXOutput->getLog2HardInterp();
 
         blockApplySettings(true);
         displaySettings();

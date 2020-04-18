@@ -400,12 +400,6 @@ void XTRXInput::stop()
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
-
-        for (; it != sourceBuddies.end(); ++it)
-        {
-            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
-            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
-        }
     }
     else if (nbOriginalChannels == 2) // Reduce from MI to SI by deleting and re-creating the thread
     {
@@ -422,13 +416,6 @@ void XTRXInput::stop()
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
-
-        for (; it != sourceBuddies.end(); ++it)
-        {
-            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(0);
-            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_thread = 0;
-        }
-
         applySettings(m_settings, true);
         xtrxInputThread->startWork();
     }
@@ -521,24 +508,20 @@ int XTRXInput::getSampleRate() const
 
 uint32_t XTRXInput::getDevSampleRate() const
 {
-    uint32_t devSampleRate = m_settings.m_devSampleRate;
-
     if (m_deviceShared.m_dev) {
-        devSampleRate = m_deviceShared.m_dev->getActualInputRate();
+        return m_deviceShared.m_dev->getActualInputRate();
+    } else {
+        return m_settings.m_devSampleRate;
     }
-
-    return devSampleRate;
 }
 
 uint32_t XTRXInput::getLog2HardDecim() const
 {
-    uint32_t log2HardDecim = m_settings.m_log2HardDecim;
-
     if (m_deviceShared.m_dev && (m_deviceShared.m_dev->getActualInputRate() != 0.0)) {
-        log2HardDecim = log2(m_deviceShared.m_dev->getClockGen() / m_deviceShared.m_dev->getActualInputRate() / 4);
+        return log2(m_deviceShared.m_dev->getClockGen() / m_deviceShared.m_dev->getActualInputRate() / 4);
+    } else {
+        return m_settings.m_log2HardDecim;
     }
-
-    return log2HardDecim;
 }
 
 double XTRXInput::getClockGen() const
@@ -630,15 +613,14 @@ bool XTRXInput::handleMessage(const Message& message)
         {
             m_settings.m_devSampleRate = m_deviceShared.m_dev->getActualInputRate();
             m_settings.m_log2HardDecim = getLog2HardDecim();
-
-            qDebug() << "XTRXInput::handleMessage: MsgReportBuddyChange:"
-                     << " host_Hz: " << m_deviceShared.m_dev->getActualInputRate()
-                     << " adc_Hz: " << m_deviceShared.m_dev->getClockGen() / 4
-                     << " m_log2HardDecim: " << m_settings.m_log2HardDecim;
         }
 
-        if (m_settings.m_ncoEnable) // need to reset NCO after sample rate change
-        {
+        qDebug() << "XTRXInput::handleMessage: MsgReportBuddyChange:"
+                    << " host_Hz: " << m_deviceShared.m_dev->getActualInputRate()
+                    << " adc_Hz: " << m_deviceShared.m_dev->getClockGen() / 4
+                    << " m_log2HardDecim: " << m_settings.m_log2HardDecim;
+
+        if (m_settings.m_ncoEnable) { // need to reset NCO after sample rate change
             applySettings(m_settings, false, true);
         }
 
@@ -1102,44 +1084,42 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
 
     m_settings = settings;
 
-    if (doChangeSampleRate && (settings.m_devSampleRate != 0))
+    if (doChangeSampleRate && (m_settings.m_devSampleRate != 0))
     {
-        XTRXInputThread *rxThread = findThread();
+        // XTRXInputThread *rxThread = findThread();
 
-        if (rxThread && rxThread->isRunning())
-        {
-            rxThread->stopWork();
-            rxThreadWasRunning = true;
-        }
+        // if (rxThread && rxThread->isRunning())
+        // {
+        //     rxThread->stopWork();
+        //     rxThreadWasRunning = true;
+        // }
 
-        suspendTxThread();
+        // suspendTxThread();
 
-        double master = (settings.m_log2HardDecim == 0) ? 0 : (settings.m_devSampleRate * 4 * (1 << settings.m_log2HardDecim));
+        double master = (m_settings.m_log2HardDecim == 0) ? 0 : (m_settings.m_devSampleRate * 4 * (1 << m_settings.m_log2HardDecim));
 
-        if (m_deviceShared.m_dev->set_samplerate(settings.m_devSampleRate,
-                master, //(settings.m_devSampleRate<<settings.m_log2HardDecim)*4,
-                false) < 0)
-        {
-            qCritical("XTRXInput::applySettings: could not set sample rate to %f with oversampling of %d",
-                      settings.m_devSampleRate,
-                      1<<settings.m_log2HardDecim);
-        }
-        else
-        {
-            doChangeFreq = true;
-            forceNCOFrequency = true;
-            forwardChangeAllDSP = true;
+        int res = m_deviceShared.m_dev->setSamplerate(
+            m_settings.m_devSampleRate,
+            master,
+            false
+        );
 
-            qDebug("XTRXInput::applySettings: sample rate set to %f with oversampling of %d",
-                   m_deviceShared.m_dev->getActualInputRate(),
-                   1 << getLog2HardDecim());
-        }
+        doChangeFreq = true;
+        forceNCOFrequency = true;
+        forwardChangeAllDSP = true;
+        m_settings.m_devSampleRate = m_deviceShared.m_dev->getActualInputRate();
+        m_settings.m_log2HardDecim = getLog2HardDecim();
 
-        resumeTxThread();
+        qDebug("XTRXInput::applySettings: sample rate set %s to %f with hard decimation of %d",
+            (res < 0) ? "changed" : "unchanged",
+            m_settings.m_devSampleRate,
+            m_settings.m_log2HardDecim);
 
-        if (rxThreadWasRunning) {
-            rxThread->startWork();
-        }
+        // resumeTxThread();
+
+        // if (rxThreadWasRunning) {
+        //     rxThread->startWork();
+        // }
     }
 
     if (doLPCalibration)
@@ -1179,12 +1159,12 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         {
             if (xtrx_tune(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_RX_FDD,
-                    settings.m_centerFrequency,
+                    m_settings.m_centerFrequency,
                     0) < 0) {
-                qCritical("XTRXInput::applySettings: could not set frequency to %lu", settings.m_centerFrequency);
+                qCritical("XTRXInput::applySettings: could not set frequency to %lu", m_settings.m_centerFrequency);
             } else {
                 //doCalibration = true;
-                qDebug("XTRXInput::applySettings: frequency set to %lu", settings.m_centerFrequency);
+                qDebug("XTRXInput::applySettings: frequency set to %lu", m_settings.m_centerFrequency);
             }
         }
     }
@@ -1196,19 +1176,19 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
             if (xtrx_tune_ex(m_deviceShared.m_dev->getDevice(),
                     XTRX_TUNE_BB_RX,
                     m_deviceShared.m_channel == 0 ? XTRX_CH_A : XTRX_CH_B,
-                    (settings.m_ncoEnable) ? settings.m_ncoFrequency : 0,
+                    (m_settings.m_ncoEnable) ? m_settings.m_ncoFrequency : 0,
                     NULL) < 0)
             {
                 qCritical("XTRXInput::applySettings: could not %s and set NCO to %d Hz",
-                          settings.m_ncoEnable ? "enable" : "disable",
-                          settings.m_ncoFrequency);
+                          m_settings.m_ncoEnable ? "enable" : "disable",
+                          m_settings.m_ncoFrequency);
             }
             else
             {
                 forwardChangeOwnDSP = true;
                 qDebug("XTRXInput::applySettings: %sd and set NCO to %d Hz",
-                       settings.m_ncoEnable ? "enable" : "disable",
-                       settings.m_ncoFrequency);
+                       m_settings.m_ncoEnable ? "enable" : "disable",
+                       m_settings.m_ncoFrequency);
             }
         }
     }
