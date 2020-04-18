@@ -105,14 +105,13 @@ void XTRXMOThread::run()
         qDebug("XTRXMOThread::run: stream started");
     }
 
-    const unsigned int elemSize = 4; // XTRX uses 4 byte I+Q samples
-    std::vector<std::vector<char>> buffMem(2, std::vector<char>(elemSize*DeviceXTRX::blockSize));
+    qint16 buf0[2*DeviceXTRX::blockSize]; // I+Q = 2x16 bit samples
+    qint16 buf1[2*DeviceXTRX::blockSize];
     std::vector<void *> buffs(2);
     master_ts ts = 4096*1024;
 
-    for (std::size_t i = 0; i < 2; i++) {
-        buffs[i] = buffMem[i].data();
-    }
+    buffs[0] = &buf0;
+    buffs[1] = &buf1;
 
     xtrx_send_ex_info_t nfo;
     nfo.samples = DeviceXTRX::blockSize;
@@ -125,7 +124,7 @@ void XTRXMOThread::run()
 
     while (m_running)
     {
-        callback((qint16*) buffs[0], (qint16*) buffs[1], nfo.samples);
+        callback(buf0, buf1, nfo.samples);
         res = xtrx_send_sync_ex(m_dev, &nfo);
 
         if (res < 0)
@@ -189,7 +188,7 @@ void XTRXMOThread::callbackPart(qint16* buf0, qint16* buf1, qint32 nSamples, int
         {
             m_interpolators[channel].interpolate1(
                 &begin,
-                channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                channel == 0 ? buf0 : buf1,
                 2*nSamples);
         }
         else
@@ -199,37 +198,37 @@ void XTRXMOThread::callbackPart(qint16* buf0, qint16* buf1, qint32 nSamples, int
             case 1:
                 m_interpolators[channel].interpolate2_cen(
                     &begin,
-                    channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                    channel == 0 ? buf0 : buf1,
                     2*nSamples);
                 break;
             case 2:
                 m_interpolators[channel].interpolate4_cen(
                     &begin,
-                    channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                    channel == 0 ? buf0 : buf1,
                     2*nSamples);
                 break;
             case 3:
                 m_interpolators[channel].interpolate8_cen(
                     &begin,
-                    channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                    channel == 0 ? buf0 : buf1,
                     2*nSamples);
                 break;
             case 4:
                 m_interpolators[channel].interpolate16_cen(
                     &begin,
-                    channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                    channel == 0 ? buf0 : buf1,
                     2*nSamples);
                 break;
             case 5:
                 m_interpolators[channel].interpolate32_cen(
                     &begin,
-                    channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                    channel == 0 ? buf0 : buf1,
                     2*nSamples);
                 break;
             case 6:
                 m_interpolators[channel].interpolate64_cen(
                     &begin,
-                    channel == 0 ? &buf0[2*nSamples] : &buf1[2*nSamples],
+                    channel == 0 ? buf0 : buf1,
                     2*nSamples);
                 break;
             default:
