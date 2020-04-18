@@ -179,6 +179,7 @@ bool XTRXInputGUI::handleMessage(const Message& message)
     else if (XTRXInput::MsgReportClockGenChange::match(message))
     {
         m_settings.m_devSampleRate = m_XTRXInput->getDevSampleRate();
+        m_settings.m_log2HardDecim = m_XTRXInput->getLog2HardDecim();
 
         blockApplySettings(true);
         displaySettings();

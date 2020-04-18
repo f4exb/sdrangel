@@ -125,14 +125,16 @@ double DeviceXTRX::set_samplerate(double rate, double master, bool output)
         m_inputRate = rate;
     }
 
-    int res = xtrx_set_samplerate(m_dev,
-          m_masterRate,
-          m_inputRate,
-          m_outputRate,
-          0,
-          &m_clockGen,
-          &m_actualInputRate,
-          &m_actualOutputRate);
+    int res = xtrx_set_samplerate(
+        m_dev,
+        m_masterRate,
+        m_inputRate,
+        m_outputRate,
+        XTRX_SAMPLERATE_FORCE_UPDATE,
+        &m_clockGen,
+        &m_actualInputRate,
+        &m_actualOutputRate
+    );
 
     if (res)
     {
