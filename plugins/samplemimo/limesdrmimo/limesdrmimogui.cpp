@@ -445,12 +445,8 @@ void LimeSDRMIMOGUI::setRxCenterFrequencyDisplay()
     int64_t centerFrequency = m_settings.m_rxCenterFrequency;
     ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
 
-    if ((m_streamIndex == 0) && (m_settings.m_ncoEnableRx0)) {
-        centerFrequency += m_settings.m_ncoFrequencyRx0;
-    }
-
-    if ((m_streamIndex == 1) && (m_settings.m_ncoEnableRx1)) {
-        centerFrequency += m_settings.m_ncoFrequencyRx1;
+    if (m_settings.m_ncoEnableRx) {
+        centerFrequency += m_settings.m_ncoFrequencyRx;
     }
 
     ui->centerFrequency->blockSignals(true);
@@ -462,10 +458,8 @@ void LimeSDRMIMOGUI::setRxCenterFrequencySetting(uint64_t kHzValue)
 {
     int64_t centerFrequency = kHzValue*1000;
 
-    if (m_streamIndex == 0 && m_settings.m_ncoEnableRx0) {
-        centerFrequency -= m_settings.m_ncoFrequencyRx0;
-    } else if (m_streamIndex == 1 && m_settings.m_ncoEnableRx1) {
-        centerFrequency -= m_settings.m_ncoFrequencyRx1;
+    if (m_settings.m_ncoEnableRx) {
+        centerFrequency -= m_settings.m_ncoFrequencyRx;
     }
 
     m_settings.m_rxCenterFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
@@ -488,12 +482,8 @@ void LimeSDRMIMOGUI::setTxCenterFrequencyDisplay()
     int64_t centerFrequency = m_settings.m_txCenterFrequency;
     ui->centerFrequency->setToolTip(QString("Main center frequency in kHz (LO: %1 kHz)").arg(centerFrequency/1000));
 
-    if ((m_streamIndex == 0) && (m_settings.m_ncoEnableTx0)) {
-        centerFrequency += m_settings.m_ncoFrequencyTx0;
-    }
-
-    if ((m_streamIndex == 1) && (m_settings.m_ncoEnableTx1)) {
-        centerFrequency += m_settings.m_ncoFrequencyTx1;
+    if (m_settings.m_ncoEnableTx) {
+        centerFrequency += m_settings.m_ncoFrequencyTx;
     }
 
     ui->centerFrequency->blockSignals(true);
@@ -505,10 +495,8 @@ void LimeSDRMIMOGUI::setTxCenterFrequencySetting(uint64_t kHzValue)
 {
     int64_t centerFrequency = kHzValue*1000;
 
-    if (m_streamIndex == 0 && m_settings.m_ncoEnableTx0) {
-        centerFrequency -= m_settings.m_ncoFrequencyTx0;
-    } else if (m_streamIndex == 1 && m_settings.m_ncoEnableTx1) {
-        centerFrequency -= m_settings.m_ncoFrequencyTx1;
+    if (m_settings.m_ncoEnableTx) {
+        centerFrequency -= m_settings.m_ncoFrequencyTx;
     }
 
     m_settings.m_txCenterFrequency = centerFrequency < 0 ? 0 : (uint64_t) centerFrequency;
@@ -571,18 +559,8 @@ void LimeSDRMIMOGUI::setNCODisplay()
 
         ui->ncoFrequency->blockSignals(true);
         ui->ncoFrequency->setToolTip(QString("NCO frequency shift in Hz (Range: +/- %1 kHz)").arg(ncoHalfRange/1000));
-
-        if (m_streamIndex == 0)
-        {
-            ui->ncoFrequency->setValue(m_settings.m_ncoFrequencyRx0);
-            ui->ncoEnable->setChecked(m_settings.m_ncoEnableRx0);
-        }
-        else
-        {
-            ui->ncoFrequency->setValue(m_settings.m_ncoFrequencyRx1);
-            ui->ncoEnable->setChecked(m_settings.m_ncoEnableRx1);
-        }
-
+        ui->ncoFrequency->setValue(m_settings.m_ncoFrequencyRx);
+        ui->ncoEnable->setChecked(m_settings.m_ncoEnableRx);
         ui->ncoFrequency->blockSignals(false);
     }
     else
@@ -596,18 +574,8 @@ void LimeSDRMIMOGUI::setNCODisplay()
 
         ui->ncoFrequency->blockSignals(true);
         ui->ncoFrequency->setToolTip(QString("NCO frequency shift in Hz (Range: +/- %1 kHz)").arg(ncoHalfRange/1000));
-
-        if (m_streamIndex == 0)
-        {
-            ui->ncoFrequency->setValue(m_settings.m_ncoFrequencyTx0);
-            ui->ncoEnable->setChecked(m_settings.m_ncoEnableTx0);
-        }
-        else
-        {
-            ui->ncoFrequency->setValue(m_settings.m_ncoFrequencyTx1);
-            ui->ncoEnable->setChecked(m_settings.m_ncoEnableTx1);
-        }
-
+        ui->ncoFrequency->setValue(m_settings.m_ncoFrequencyTx);
+        ui->ncoEnable->setChecked(m_settings.m_ncoEnableTx);
         ui->ncoFrequency->blockSignals(false);
     }
 }
@@ -848,22 +816,12 @@ void LimeSDRMIMOGUI::on_ncoEnable_toggled(bool checked)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
-            m_settings.m_ncoEnableRx0 = checked;
-        } else if (m_streamIndex == 1) {
-            m_settings.m_ncoEnableRx1 = checked;
-        }
-
+        m_settings.m_ncoEnableRx = checked;
         setRxCenterFrequencyDisplay();
     }
     else
     {
-        if (m_streamIndex == 0) {
-            m_settings.m_ncoEnableTx0 = checked;
-        } else if (m_streamIndex == 1) {
-            m_settings.m_ncoEnableTx1 = checked;
-        }
-
+        m_settings.m_ncoEnableTx = checked;
         setTxCenterFrequencyDisplay();
     }
 
@@ -874,22 +832,12 @@ void LimeSDRMIMOGUI::on_ncoFrequency_changed(qint64 value)
 {
     if (m_rxElseTx)
     {
-        if (m_streamIndex == 0) {
-            m_settings.m_ncoFrequencyRx0 = value;
-        } else if (m_streamIndex == 1) {
-            m_settings.m_ncoFrequencyRx1 = value;
-        }
-
+        m_settings.m_ncoFrequencyRx = value;
         setRxCenterFrequencyDisplay();
     }
     else
     {
-        if (m_streamIndex == 0) {
-            m_settings.m_ncoFrequencyTx0 = value;
-        } else if (m_streamIndex == 1) {
-            m_settings.m_ncoFrequencyTx1 = value;
-        }
-
+        m_settings.m_ncoFrequencyTx = value;
         setTxCenterFrequencyDisplay();
     }
 

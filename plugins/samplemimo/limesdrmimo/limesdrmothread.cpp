@@ -53,6 +53,7 @@ void LimeSDRMOThread::startWork()
         if (LMS_StartStream(m_stream0) < 0)
         {
             qCritical("LimeSDROutputThread::startWork: could not start stream 0");
+            return;
         }
         else
         {
@@ -66,6 +67,8 @@ void LimeSDRMOThread::startWork()
         if (LMS_StartStream(m_stream1) < 0)
         {
             qCritical("LimeSDROutputThread::startWork: could not start stream 1");
+            LMS_StopStream(m_stream0);
+            return;
         }
         else
         {

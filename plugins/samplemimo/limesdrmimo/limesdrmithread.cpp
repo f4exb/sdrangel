@@ -31,6 +31,9 @@ LimeSDRMIThread::LimeSDRMIThread(lms_stream_t* stream0, lms_stream_t* stream1, Q
     for (unsigned int i = 0; i < 2; i++) {
         m_convertBuffer[i].resize(DeviceLimeSDR::blockSize, Sample{0,0});
     }
+
+    m_vBegin.push_back(m_convertBuffer[0].begin());
+    m_vBegin.push_back(m_convertBuffer[1].begin());
 }
 
 LimeSDRMIThread::~LimeSDRMIThread()
@@ -53,6 +56,7 @@ void LimeSDRMIThread::startWork()
         if (LMS_StartStream(m_stream0) < 0)
         {
             qCritical("LimeSDRMIThread::startWork: could not start stream 0");
+            return;
         }
         else
         {
@@ -66,6 +70,8 @@ void LimeSDRMIThread::startWork()
         if (LMS_StartStream(m_stream1) < 0)
         {
             qCritical("LimeSDRMIThread::startWork: could not start stream 1");
+            LMS_StopStream(m_stream0);
+            return;
         }
         else
         {
@@ -137,7 +143,6 @@ void LimeSDRMIThread::run()
     lms_stream_meta_t metadata;          //Use metadata for additional control over sample receive function behaviour
     metadata.flushPartialPacket = false; //Do not discard data remainder when read size differs from packet size
     metadata.waitForTimestamp = false;   //Do not wait for specific timestamps
-    std::vector<SampleVector::const_iterator> vbegin;
     int lengths[2];
 
     m_running = true;
@@ -160,10 +165,8 @@ void LimeSDRMIThread::run()
         else
         {
             std::fill(m_convertBuffer[0].begin(), m_convertBuffer[0].end(), Sample{0,0});
-            lengths[0] = m_convertBuffer[0].size();
+            lengths[0] = m_convertBuffer[0].size() / (1<<m_log2Decim);
         }
-
-        vbegin.push_back(m_convertBuffer[0].begin());
 
         if (m_stream1)
         {
@@ -180,19 +183,18 @@ void LimeSDRMIThread::run()
         else
         {
             std::fill(m_convertBuffer[1].begin(), m_convertBuffer[1].end(), Sample{0,0});
-            lengths[1] = m_convertBuffer[1].size();
+            lengths[1] = m_convertBuffer[1].size() / (1<<m_log2Decim);
         }
-
-        vbegin.push_back(m_convertBuffer[1].begin());
 
         if (lengths[0] == lengths[1])
         {
-            m_sampleFifo->writeSync(vbegin, lengths[0]);
+            qDebug("LimeSDRMIThread::run: writeSync %d samples", lengths[0]);
+            m_sampleFifo->writeSync(m_vBegin, lengths[0]);
         }
         else
         {
             qWarning("LimeSDRMIThread::run: unequal channel lengths: [0]=%d [1]=%d", lengths[0], lengths[1]);
-            m_sampleFifo->writeSync(vbegin, (std::min)(lengths[0], lengths[1]));
+            m_sampleFifo->writeSync(m_vBegin, (std::min)(lengths[0], lengths[1]));
         }
     }
 

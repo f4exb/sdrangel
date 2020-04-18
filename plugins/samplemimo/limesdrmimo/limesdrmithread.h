@@ -56,6 +56,7 @@ private:
     lms_stream_t* m_stream1;
     qint16 m_buf[2][2*DeviceLimeSDR::blockSize];
 	SampleVector m_convertBuffer[2];
+    std::vector<SampleVector::const_iterator> m_vBegin;
     SampleMIFifo* m_sampleFifo;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators[2];
     unsigned int m_log2Decim;

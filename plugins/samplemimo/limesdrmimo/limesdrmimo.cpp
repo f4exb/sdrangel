@@ -569,7 +569,7 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
     bool forceRxNCOFrequency = false;
     bool forceTxNCOFrequency = false;
 
-    qDebug() << "LimeSDRMIMO::applySettings: "
+    qDebug() << "LimeSDRMIMO::applySettings: common:"
         << " m_devSampleRate: " << settings.m_devSampleRate
         << " m_LOppmTenths: " << settings.m_LOppmTenths
         << " m_gpioDir: " << settings.m_gpioDir
@@ -581,7 +581,8 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
         << " m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
-        // Rx general
+        << " force: " << force;
+    qDebug() << "LimeSDRMIMO::applySettings: Rx general:"
         << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
         << " m_log2HardDecim: " << settings.m_log2HardDecim
         << " m_log2SoftDecim: " << settings.m_log2SoftDecim
@@ -589,54 +590,48 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         << " m_iqCorrection: " << settings.m_iqCorrection
         << " m_rxTransverterMode: " << settings.m_rxTransverterMode
         << " m_rxTransverterDeltaFrequency: " << settings.m_rxTransverterDeltaFrequency
-        // Rx0
+        << " m_ncoEnableRx: " << settings.m_ncoEnableRx
+        << " m_ncoFrequencyRx: " << settings.m_ncoFrequencyRx;
+    qDebug() << "LimeSDRMIMO::applySettings: Rx0:"
         << " m_lpfBWRx0: " << settings.m_lpfBWRx0
         << " m_lpfFIREnableRx0: " << settings.m_lpfFIREnableRx0
         << " m_lpfFIRBWRx0: " << settings.m_lpfFIRBWRx0
         << " m_gainRx0: " << settings.m_gainRx0
-        << " m_ncoEnableRx0: " << settings.m_ncoEnableRx0
-        << " m_ncoFrequencyRx0: " << settings.m_ncoFrequencyRx0
         << " m_antennaPathRx0: " << settings.m_antennaPathRx0
         << " m_gainModeRx0: " << settings.m_gainModeRx0
         << " m_lnaGainRx0: " << settings.m_lnaGainRx0
         << " m_tiaGainRx0: " << settings.m_tiaGainRx0
-        << " m_pgaGainRx0: " << settings.m_pgaGainRx0
-        // Rx1
+        << " m_pgaGainRx0: " << settings.m_pgaGainRx0;
+    qDebug() << "LimeSDRMIMO::applySettings: Rx1:"
         << " m_lpfBWRx1: " << settings.m_lpfBWRx1
         << " m_lpfFIREnableRx1: " << settings.m_lpfFIREnableRx1
         << " m_lpfFIRBWRx1: " << settings.m_lpfFIRBWRx1
         << " m_gainRx1: " << settings.m_gainRx1
-        << " m_ncoEnableRx1: " << settings.m_ncoEnableRx1
-        << " m_ncoFrequencyRx1: " << settings.m_ncoFrequencyRx1
         << " m_antennaPathRx1: " << settings.m_antennaPathRx1
         << " m_gainModeRx1: " << settings.m_gainModeRx1
         << " m_lnaGainRx1: " << settings.m_lnaGainRx1
         << " m_tiaGainRx1: " << settings.m_tiaGainRx1
-        << " m_pgaGainRx1: " << settings.m_pgaGainRx1
-        // Tx general
+        << " m_pgaGainRx1: " << settings.m_pgaGainRx1;
+    qDebug() << "LimeSDRMIMO::applySettings: Tx general:"
         << " m_txCenterFrequency: " << settings.m_txCenterFrequency
         << " m_log2HardInterp: " << settings.m_log2HardInterp
         << " m_log2SoftInterp: " << settings.m_log2SoftInterp
         << " m_txTransverterMode: " << settings.m_txTransverterMode
         << " m_txTransverterDeltaFrequency: " << settings.m_txTransverterDeltaFrequency
-        // Tx0
+        << " m_ncoEnableTx: " << settings.m_ncoEnableTx
+        << " m_ncoFrequencyTx: " << settings.m_ncoFrequencyTx;
+    qDebug() << "LimeSDRMIMO::applySettings: Tx0:"
         << " m_lpfBWTx0: " << settings.m_lpfBWTx0
         << " m_lpfFIREnableTx0: " << settings.m_lpfFIREnableTx0
         << " m_lpfFIRBWTx0: " << settings.m_lpfFIRBWTx0
         << " m_gainTx0: " << settings.m_gainTx0
-        << " m_ncoEnableTx0: " << settings.m_ncoEnableTx0
-        << " m_ncoFrequencyTx0: " << settings.m_ncoFrequencyTx0
-        << " m_antennaPathTx0: " << settings.m_antennaPathTx0
-        // Tx1
+        << " m_antennaPathTx0: " << settings.m_antennaPathTx0;
+    qDebug() << "LimeSDRMIMO::applySettings: Tx1:"
         << " m_lpfBWTx1: " << settings.m_lpfBWTx1
         << " m_lpfFIREnableTx1: " << settings.m_lpfFIREnableTx1
         << " m_lpfFIRBWTx1: " << settings.m_lpfFIRBWTx1
         << " m_gainTx1: " << settings.m_gainTx1
-        << " m_ncoEnableTx1: " << settings.m_ncoEnableTx1
-        << " m_ncoFrequencyTx1: " << settings.m_ncoFrequencyTx1
-        << " m_antennaPathTx1: " << settings.m_antennaPathTx1
-        // force
-        << " force: " << force;
+        << " m_antennaPathTx1: " << settings.m_antennaPathTx1;
 
     qint64 rxDeviceCenterFrequency = settings.m_rxCenterFrequency;
     rxDeviceCenterFrequency -= settings.m_rxTransverterMode ? settings.m_rxTransverterDeltaFrequency : 0;
@@ -646,6 +641,8 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
     txDeviceCenterFrequency -= settings.m_txTransverterMode ? settings.m_txTransverterDeltaFrequency : 0;
     txDeviceCenterFrequency = txDeviceCenterFrequency < 0 ? 0 : txDeviceCenterFrequency;
 
+    // Common
+
     if (LMS_GetClockFreq(m_deviceParams->getDevice(), LMS_CLOCK_CGEN, &clockGenFreq) != 0) {
         qCritical("LimeSDRMIMO::applySettings: could not get clock gen frequency");
     } else {
@@ -654,6 +651,24 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
 
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate) || force) {
         reverseAPIKeys.append("devSampleRate");
+    }
+    if ((m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force) {
+        reverseAPIKeys.append("log2HardDecim");
+    }
+    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency) || force) {
+        reverseAPIKeys.append("rxCenterFrequency");
+    }
+    if ((m_settings.m_rxTransverterMode != settings.m_rxTransverterMode) || force) {
+        reverseAPIKeys.append("rxTransverterMode");
+    }
+    if ((m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency) || force) {
+        reverseAPIKeys.append("rxTransverterDeltaFrequency");
+    }
+    if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx) || force) {
+        reverseAPIKeys.append("ncoFrequencyRx");
+    }
+    if ((m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force) {
+        reverseAPIKeys.append("ncoEnableRx");
     }
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
         reverseAPIKeys.append("dcBlock");
@@ -670,6 +685,67 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 0);
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 1);
     }
+
+    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
+       || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
+    {
+        forwardChangeRxDSP = true;
+
+        if (m_deviceParams->getDevice())
+        {
+            if (LMS_SetSampleRateDir(
+                m_deviceParams->getDevice(),
+                LMS_CH_RX,
+                settings.m_devSampleRate,
+                1<<settings.m_log2HardDecim) < 0)
+            {
+                qCritical("LimeSDRMIMO::applySettings: could not set sample rate to %d with Rx oversampling of %d",
+                        settings.m_devSampleRate,
+                        1<<settings.m_log2HardDecim);
+            }
+            else
+            {
+                m_deviceParams->m_log2OvSRRx = settings.m_log2HardDecim;
+                m_deviceParams->m_sampleRate = settings.m_devSampleRate;
+                forceRxNCOFrequency = true;
+                qDebug("LimeSDRMIMO::applySettings: set sample rate set to %d with Rx oversampling of %d",
+                        settings.m_devSampleRate,
+                        1<<settings.m_log2HardDecim);
+            }
+        }
+    }
+
+    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency)
+        || (m_settings.m_rxTransverterMode != settings.m_rxTransverterMode)
+        || (m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency)
+        || force)
+    {
+        forwardChangeRxDSP = true;
+
+        if (m_deviceParams->getDevice())
+        {
+            if (LMS_SetClockFreq(m_deviceParams->getDevice(), LMS_CLOCK_SXR, rxDeviceCenterFrequency) < 0)
+            {
+                qCritical("LimeSDRMIMO::applySettings: could not set Rx frequency to %lld", rxDeviceCenterFrequency);
+            }
+            else
+            {
+                doCalibrationRx0 = true;
+                doCalibrationRx1 = true;
+                qDebug("LimeSDRMIMO::applySettings: Rx frequency set to %lld", rxDeviceCenterFrequency);
+            }
+        }
+    }
+
+    if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx) ||
+        (m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force)
+    {
+        forwardChangeRxDSP = true;
+        applyRxNCOFrequency(0, settings.m_ncoEnableRx, settings.m_ncoFrequencyRx);
+        applyRxNCOFrequency(1, settings.m_ncoEnableRx, settings.m_ncoFrequencyRx);
+    }
+
+    // Rx0/1
 
     if ((m_settings.m_gainModeRx0 != settings.m_gainModeRx0) || force)
     {
@@ -747,36 +823,6 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         applyRxLNAGain(1, doCalibrationRx1, settings.m_pgaGainRx1);
     }
 
-    if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
-       || (m_settings.m_log2HardDecim != settings.m_log2HardDecim) || force)
-    {
-        reverseAPIKeys.append("log2HardDecim");
-
-        if (m_deviceParams->getDevice())
-        {
-            if (LMS_SetSampleRateDir(
-                m_deviceParams->getDevice(),
-                LMS_CH_RX,
-                settings.m_devSampleRate,
-                1<<settings.m_log2HardDecim) < 0)
-            {
-                qCritical("LimeSDRMIMO::applySettings: could not set sample rate to %d with Rx oversampling of %d",
-                        settings.m_devSampleRate,
-                        1<<settings.m_log2HardDecim);
-            }
-            else
-            {
-                m_deviceParams->m_log2OvSRRx = settings.m_log2HardDecim;
-                m_deviceParams->m_sampleRate = settings.m_devSampleRate;
-                //doCalibration = true;
-                forceRxNCOFrequency = true;
-                qDebug("LimeSDRMIMO::applySettings: set sample rate set to %d with Rx oversampling of %d",
-                        settings.m_devSampleRate,
-                        1<<settings.m_log2HardDecim);
-            }
-        }
-    }
-
     if ((m_settings.m_lpfBWRx0 != settings.m_lpfBWRx0) || force)
     {
         reverseAPIKeys.append("lpfBWRx0");
@@ -805,22 +851,6 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         applyRxLPFIRBW(1, settings.m_lpfFIREnableRx1, settings.m_lpfFIRBWRx1);
     }
 
-    if ((m_settings.m_ncoFrequencyRx0 != settings.m_ncoFrequencyRx0) ||
-        (m_settings.m_ncoEnableRx0 != settings.m_ncoEnableRx0) || force)
-    {
-        reverseAPIKeys.append("ncoFrequencyRx0");
-        reverseAPIKeys.append("ncoEnableRx0");
-        applyRxNCOFrequency(0, settings.m_ncoEnableRx0, settings.m_ncoFrequencyRx0);
-    }
-
-    if ((m_settings.m_ncoFrequencyRx1 != settings.m_ncoFrequencyRx1) ||
-        (m_settings.m_ncoEnableRx1 != settings.m_ncoEnableRx1) || force)
-    {
-        reverseAPIKeys.append("ncoFrequencyRx1");
-        reverseAPIKeys.append("ncoEnableRx1");
-        applyRxNCOFrequency(1, settings.m_ncoEnableRx1, settings.m_ncoFrequencyRx1);
-    }
-
     if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
     {
         reverseAPIKeys.append("log2SoftDecim");
@@ -844,31 +874,26 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         applyRxAntennaPath(1, doCalibrationRx1, settings.m_antennaPathRx1);
     }
 
-    if ((m_settings.m_rxCenterFrequency != settings.m_rxCenterFrequency)
-        || (m_settings.m_rxTransverterMode != settings.m_rxTransverterMode)
-        || (m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency)
-        || force)
-    {
-        reverseAPIKeys.append("rxCenterFrequency");
-        reverseAPIKeys.append("rxTransverterMode");
-        reverseAPIKeys.append("rxTransverterDeltaFrequency");
-
-        if (m_deviceParams->getDevice())
-        {
-            if (LMS_SetClockFreq(m_deviceParams->getDevice(), LMS_CLOCK_SXR, rxDeviceCenterFrequency) < 0)
-            {
-                qCritical("LimeSDRMIMO::applySettings: could not set Rx frequency to %lld", rxDeviceCenterFrequency);
-            }
-            else
-            {
-                doCalibrationRx0 = true;
-                doCalibrationRx1 = true;
-                qDebug("LimeSDRMIMO::applySettings: Rx frequency set to %lld", rxDeviceCenterFrequency);
-            }
-        }
-    }
-
     // Tx
+
+    if ((m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force) {
+        reverseAPIKeys.append("log2HardInterp");
+    }
+    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force) {
+        reverseAPIKeys.append("txCenterFrequency");
+    }
+    if ((m_settings.m_txTransverterMode != settings.m_txTransverterMode) || force) {
+        reverseAPIKeys.append("txTransverterMode");
+    }
+    if ((m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency) || force) {
+        reverseAPIKeys.append("txTransverterDeltaFrequency");
+    }
+    if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx) || force) {
+        reverseAPIKeys.append("ncoFrequencyTx");
+    }
+    if ((m_settings.m_ncoEnableTx != settings.m_ncoEnableTx) || force) {
+        reverseAPIKeys.append("ncoEnableTx");
+    }
 
     if ((m_settings.m_gainTx0 != settings.m_gainTx0) || force)
     {
@@ -885,7 +910,7 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
     if ((m_settings.m_devSampleRate != settings.m_devSampleRate)
        || (m_settings.m_log2HardInterp != settings.m_log2HardInterp) || force)
     {
-        reverseAPIKeys.append("log2HardInterp");
+        forwardChangeTxDSP = true;
 
         if (m_deviceParams->getDevice())
         {
@@ -928,6 +953,38 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         qDebug("LimeSDRMIMO::applySettings: resize MO FIFO: rate %u", fifoRate);
     }
 
+    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency)
+        || (m_settings.m_txTransverterMode != settings.m_txTransverterMode)
+        || (m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency)
+        || force)
+    {
+        forwardChangeTxDSP = true;
+
+        if (m_deviceParams->getDevice())
+        {
+            if (LMS_SetClockFreq(m_deviceParams->getDevice(), LMS_CLOCK_SXT, txDeviceCenterFrequency) < 0)
+            {
+                qCritical("LimeSDRMIMO::applySettings: could not set Tx frequency to %lld", txDeviceCenterFrequency);
+            }
+            else
+            {
+                doCalibrationTx0 = true;
+                doCalibrationTx1 = true;
+                qDebug("LimeSDRMIMO::applySettings: Tx frequency set to %lld", txDeviceCenterFrequency);
+            }
+        }
+    }
+
+    if ((m_settings.m_ncoFrequencyTx != settings.m_ncoFrequencyTx) ||
+        (m_settings.m_ncoEnableTx != settings.m_ncoEnableTx) || force || forceTxNCOFrequency)
+    {
+        forwardChangeTxDSP = true;
+        applyTxNCOFrequency(0, settings.m_ncoEnableTx, settings.m_ncoFrequencyTx);
+        applyTxNCOFrequency(1, settings.m_ncoEnableTx, settings.m_ncoFrequencyTx);
+    }
+
+    // Tx 0/1
+
     if ((m_settings.m_lpfBWTx0 != settings.m_lpfBWTx0) || force)
     {
         reverseAPIKeys.append("lpfBWTx0");
@@ -956,22 +1013,6 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         applyTxLPFIRBW(1, settings.m_lpfFIREnableTx1, settings.m_lpfFIRBWTx1);
     }
 
-    if ((m_settings.m_ncoFrequencyTx0 != settings.m_ncoFrequencyTx0) ||
-        (m_settings.m_ncoEnableTx0 != settings.m_ncoEnableTx0) || force || forceTxNCOFrequency)
-    {
-        reverseAPIKeys.append("ncoFrequencyTx0");
-        reverseAPIKeys.append("ncoEnableTx0");
-        applyTxNCOFrequency(0, settings.m_ncoEnableTx0, settings.m_ncoFrequencyTx0);
-    }
-
-    if ((m_settings.m_ncoFrequencyTx1 != settings.m_ncoFrequencyTx1) ||
-        (m_settings.m_ncoEnableTx1 != settings.m_ncoEnableTx1) || force || forceTxNCOFrequency)
-    {
-        reverseAPIKeys.append("ncoFrequencyTx1");
-        reverseAPIKeys.append("ncoEnableTx1");
-        applyTxNCOFrequency(1, settings.m_ncoEnableTx1, settings.m_ncoFrequencyTx1);
-    }
-
     if ((m_settings.m_log2SoftInterp != settings.m_log2SoftInterp) || force)
     {
         reverseAPIKeys.append("log2SoftInterp");
@@ -995,32 +1036,7 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         applyTxAntennaPath(1, doCalibrationTx1, settings.m_antennaPathTx1);
     }
 
-    if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency)
-        || (m_settings.m_txTransverterMode != settings.m_txTransverterMode)
-        || (m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency)
-        || force)
-    {
-        reverseAPIKeys.append("txCenterFrequency");
-        reverseAPIKeys.append("txTransverterMode");
-        reverseAPIKeys.append("txTransverterDeltaFrequency");
-        forwardChangeTxDSP = true;
-
-        if (m_deviceParams->getDevice())
-        {
-            if (LMS_SetClockFreq(m_deviceParams->getDevice(), LMS_CLOCK_SXT, txDeviceCenterFrequency) < 0)
-            {
-                qCritical("LimeSDRMIMO::applySettings: could not set Tx frequency to %lld", txDeviceCenterFrequency);
-            }
-            else
-            {
-                doCalibrationTx0 = true;
-                doCalibrationTx1 = true;
-                qDebug("LimeSDRMIMO::applySettings: Tx frequency set to %lld", txDeviceCenterFrequency);
-            }
-        }
-    }
-
-    // common
+    // Post common
 
     if ((m_settings.m_extClock != settings.m_extClock) ||
         (settings.m_extClock && (m_settings.m_extClockFreq != settings.m_extClockFreq)) || force)
@@ -1152,6 +1168,30 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
             m_sinkThread->startWork();
         }
     }
+
+    // forward changes
+
+    if (forwardChangeRxDSP)
+    {
+        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2SoftDecim);
+        int ncoShift = m_settings.m_ncoEnableRx ? m_settings.m_ncoFrequencyRx : 0;
+        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency + ncoShift, true, 0);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
+        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency + ncoShift, true, 1);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
+    }
+
+    if (forwardChangeTxDSP)
+    {
+        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2SoftInterp);
+        int ncoShift = m_settings.m_ncoEnableTx ? m_settings.m_ncoFrequencyTx : 0;
+        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency + ncoShift, false, 0);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
+        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency + ncoShift, false, 1);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
+    }
+
+    return true;
 }
 
 void LimeSDRMIMO::applyRxGainMode(

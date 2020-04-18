@@ -72,14 +72,14 @@ struct LimeSDRMIMOSettings
     bool      m_iqCorrection;
     bool      m_rxTransverterMode;
     qint64    m_rxTransverterDeltaFrequency;
+    bool       m_ncoEnableRx;     //!< Rx Enable TSP NCO and mixing
+    int        m_ncoFrequencyRx;  //!< Rx Actual NCO frequency (the resulting frequency with mixing is displayed)
 
     // Rx channel 0
     float      m_lpfBWRx0;        //!< Rx[0] LMS analog lowpass filter bandwidth (Hz)
     bool       m_lpfFIREnableRx0; //!< Rx[0] Enable LMS digital lowpass FIR filters
     float      m_lpfFIRBWRx0;     //!< Rx[0] LMS digital lowpass FIR filters bandwidth (Hz)
     uint32_t   m_gainRx0;         //!< Rx[0] Optimally distributed gain (dB)
-    bool       m_ncoEnableRx0;    //!< Rx[0] Enable TSP NCO and mixing
-    int        m_ncoFrequencyRx0; //!< Rx[0] Actual NCO frequency (the resulting frequency with mixing is displayed)
     PathRxRFE  m_antennaPathRx0;  //!< Rx[0] Antenna connection
     RxGainMode m_gainModeRx0;     //!< Rx[0] Gain mode: auto or manual
     uint32_t   m_lnaGainRx0;      //!< Rx[0] Manual LAN gain
@@ -91,8 +91,6 @@ struct LimeSDRMIMOSettings
     bool       m_lpfFIREnableRx1; //!< Rx[1] Enable LMS digital lowpass FIR filters
     float      m_lpfFIRBWRx1;     //!< Rx[1] LMS digital lowpass FIR filters bandwidth (Hz)
     uint32_t   m_gainRx1;         //!< Rx[1] Optimally distributed gain (dB)
-    bool       m_ncoEnableRx1;    //!< Rx[1] Enable TSP NCO and mixing
-    int        m_ncoFrequencyRx1; //!< Rx[1] Actual NCO frequency (the resulting frequency with mixing is displayed)
     PathRxRFE  m_antennaPathRx1;  //!< Rx[1] Antenna connection
     RxGainMode m_gainModeRx1;     //!< Rx[1] Gain mode: auto or manual
     uint32_t   m_lnaGainRx1;      //!< Rx[1] Manual LAN gain
@@ -105,14 +103,14 @@ struct LimeSDRMIMOSettings
     uint32_t  m_log2SoftInterp;
     bool      m_txTransverterMode;
     qint64    m_txTransverterDeltaFrequency;
+    bool      m_ncoEnableTx;     //!< Tx Enable TSP NCO and mixing
+    int       m_ncoFrequencyTx;  //!< Tx Actual NCO frequency (the resulting frequency with mixing is displayed)
 
     // Tx channel 0
     float     m_lpfBWTx0;        //!< Tx[0] LMS amalog lowpass filter bandwidth (Hz)
     bool      m_lpfFIREnableTx0; //!< Tx[0] Enable LMS digital lowpass FIR filters
     float     m_lpfFIRBWTx0;     //!< Tx[0] LMS digital lowpass FIR filters bandwidth (Hz)
     uint32_t  m_gainTx0;         //!< Tx[0] Optimally distributed gain (dB)
-    bool      m_ncoEnableTx0;    //!< Tx[0] Enable TSP NCO and mixing
-    int       m_ncoFrequencyTx0; //!< Tx[0] Actual NCO frequency (the resulting frequency with mixing is displayed)
     PathTxRFE m_antennaPathTx0;  //!< Tx[0] Antenna connection
 
     // Tx channel 1
@@ -120,8 +118,6 @@ struct LimeSDRMIMOSettings
     bool      m_lpfFIREnableTx1; //!< Tx[1] Enable LMS digital lowpass FIR filters
     float     m_lpfFIRBWTx1;     //!< Tx[1] LMS digital lowpass FIR filters bandwidth (Hz)
     uint32_t  m_gainTx1;         //!< Tx[1] Optimally distributed gain (dB)
-    bool      m_ncoEnableTx1;    //!< Tx[1] Enable TSP NCO and mixing
-    int       m_ncoFrequencyTx1; //!< Tx[1] Actual NCO frequency (the resulting frequency with mixing is displayed)
     PathTxRFE m_antennaPathTx1;  //!< Tx[1] Antenna connection
 
     LimeSDRMIMOSettings();
