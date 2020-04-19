@@ -323,7 +323,7 @@ find_package(PkgConfig REQUIRED)
 find_package(Boost REQUIRED)
 find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
-find_package(OpenCV REQUIRED core highgui imgproc imgcodecs videoio) # channeltx/modatv
+find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
 
 # macOS compatibility
 if(APPLE)
