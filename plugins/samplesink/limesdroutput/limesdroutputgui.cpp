@@ -71,15 +71,14 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     {
         ui->antenna->setItemText(1, "Hi");
         ui->antenna->setItemText(2, "Lo");
+        ui->antenna->setToolTip("Hi: 2 - 3.5 GHz, Lo: 10 MHz - 2 GHz");
     }
     else
     {
         ui->antenna->setItemText(1, "Lo");
         ui->antenna->setItemText(2, "Hi");
+        ui->antenna->setToolTip("Lo: L port, Hi: H port. All ports are full band");
     }
-
-    ui->hwInterpLabel->setText(QString::fromUtf8("H\u2191"));
-    ui->swInterpLabel->setText(QString::fromUtf8("S\u2191"));
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
