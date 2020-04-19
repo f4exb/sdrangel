@@ -1,3 +1,15 @@
+sdrangel (5.4.0-1) unstable; urgency=medium
+
+  * XTRX MIMO support. Fixes issue #507
+  * LimeSDR cosmetic changes. Fixes issue #506
+  * XTRX: effectively allow auto hardware decimation/interpolation
+  * XTRX: reduce block size to 4096 bytes
+  * XTRX: fixed sample rate setting
+  * Compile with c++11 comaptible version of CM256cc
+  * AM demod: fixed initialization of squelch counter. Fixes issue #502
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 19 Apr 2020 17:01:15 +0200
+
 sdrangel (5.3.3-1) unstable; urgency=medium
 
   * Sample sources GUI file record: right click to choose file. Implements #483.
