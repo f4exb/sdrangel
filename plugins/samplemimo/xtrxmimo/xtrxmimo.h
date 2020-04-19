@@ -241,27 +241,31 @@ public:
     uint32_t getLog2HardInterp() const;
     double getClockGen() const;
 
-    // TODO
-    // virtual int webapiSettingsGet(
-    //             SWGSDRangel::SWGDeviceSettings& response,
-    //             QString& errorMessage);
+    virtual int webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage);
 
-    // virtual int webapiSettingsPutPatch(
-    //             bool force,
-    //             const QStringList& deviceSettingsKeys,
-    //             SWGSDRangel::SWGDeviceSettings& response, // query + response
-    //             QString& errorMessage);
+    virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
 
-    // virtual int webapiRunGet(
-    //         int subsystemIndex,
-    //         SWGSDRangel::SWGDeviceState& response,
-    //         QString& errorMessage);
+    virtual int webapiReportGet(
+                SWGSDRangel::SWGDeviceReport& response,
+                QString& errorMessage);
 
-    // virtual int webapiRun(
-    //         bool run,
-    //         int subsystemIndex,
-    //         SWGSDRangel::SWGDeviceState& response,
-    //         QString& errorMessage);
+
+    virtual int webapiRunGet(
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiRun(
+            bool run,
+            int subsystemIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
 
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
@@ -271,6 +275,8 @@ public:
             XTRXMIMOSettings& settings,
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
+
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
     bool isRecording(unsigned int istream) const { (void) istream; return false; }
 

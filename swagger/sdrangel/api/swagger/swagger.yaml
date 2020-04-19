@@ -2321,6 +2321,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
       xtrxOutputReport:
         $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+      xtrxMIMOReport:
+        $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
 
   ChannelReport:
     description: Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present.

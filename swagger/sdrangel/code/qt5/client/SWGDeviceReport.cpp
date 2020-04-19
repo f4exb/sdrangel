@@ -74,6 +74,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_xtrx_input_report_isSet = false;
     xtrx_output_report = nullptr;
     m_xtrx_output_report_isSet = false;
+    xtrx_mimo_report = nullptr;
+    m_xtrx_mimo_report_isSet = false;
 }
 
 SWGDeviceReport::~SWGDeviceReport() {
@@ -128,6 +130,8 @@ SWGDeviceReport::init() {
     m_xtrx_input_report_isSet = false;
     xtrx_output_report = new SWGXtrxOutputReport();
     m_xtrx_output_report_isSet = false;
+    xtrx_mimo_report = new SWGXtrxMIMOReport();
+    m_xtrx_mimo_report_isSet = false;
 }
 
 void
@@ -199,6 +203,9 @@ SWGDeviceReport::cleanup() {
     if(xtrx_output_report != nullptr) { 
         delete xtrx_output_report;
     }
+    if(xtrx_mimo_report != nullptr) { 
+        delete xtrx_mimo_report;
+    }
 }
 
 SWGDeviceReport*
@@ -257,6 +264,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&xtrx_input_report, pJson["xtrxInputReport"], "SWGXtrxInputReport", "SWGXtrxInputReport");
     
     ::SWGSDRangel::setValue(&xtrx_output_report, pJson["xtrxOutputReport"], "SWGXtrxOutputReport", "SWGXtrxOutputReport");
+    
+    ::SWGSDRangel::setValue(&xtrx_mimo_report, pJson["xtrxMIMOReport"], "SWGXtrxMIMOReport", "SWGXtrxMIMOReport");
     
 }
 
@@ -342,6 +351,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((xtrx_output_report != nullptr) && (xtrx_output_report->isSet())){
         toJsonValue(QString("xtrxOutputReport"), xtrx_output_report, obj, QString("SWGXtrxOutputReport"));
+    }
+    if((xtrx_mimo_report != nullptr) && (xtrx_mimo_report->isSet())){
+        toJsonValue(QString("xtrxMIMOReport"), xtrx_mimo_report, obj, QString("SWGXtrxMIMOReport"));
     }
 
     return obj;
@@ -577,6 +589,16 @@ SWGDeviceReport::setXtrxOutputReport(SWGXtrxOutputReport* xtrx_output_report) {
     this->m_xtrx_output_report_isSet = true;
 }
 
+SWGXtrxMIMOReport*
+SWGDeviceReport::getXtrxMimoReport() {
+    return xtrx_mimo_report;
+}
+void
+SWGDeviceReport::setXtrxMimoReport(SWGXtrxMIMOReport* xtrx_mimo_report) {
+    this->xtrx_mimo_report = xtrx_mimo_report;
+    this->m_xtrx_mimo_report_isSet = true;
+}
+
 
 bool
 SWGDeviceReport::isSet(){
@@ -649,6 +671,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(xtrx_output_report && xtrx_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(xtrx_mimo_report && xtrx_mimo_report->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

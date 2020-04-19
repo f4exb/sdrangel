@@ -197,6 +197,8 @@
 #include "SWGXtrxInputActions.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxInputSettings.h"
+#include "SWGXtrxMIMOReport.h"
+#include "SWGXtrxMIMOSettings.h"
 #include "SWGXtrxOutputReport.h"
 #include "SWGXtrxOutputSettings.h"
 
@@ -751,6 +753,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGXtrxInputSettings").compare(type) == 0) {
       return new SWGXtrxInputSettings();
+    }
+    if(QString("SWGXtrxMIMOReport").compare(type) == 0) {
+      return new SWGXtrxMIMOReport();
+    }
+    if(QString("SWGXtrxMIMOSettings").compare(type) == 0) {
+      return new SWGXtrxMIMOSettings();
     }
     if(QString("SWGXtrxOutputReport").compare(type) == 0) {
       return new SWGXtrxOutputReport();

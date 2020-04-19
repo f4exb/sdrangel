@@ -52,6 +52,7 @@
 #include "SWGTestMOSyncSettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGXtrxInputSettings.h"
+#include "SWGXtrxMIMOSettings.h"
 #include "SWGXtrxOutputSettings.h"
 #include <QString>
 
@@ -175,6 +176,9 @@ public:
     SWGXtrxOutputSettings* getXtrxOutputSettings();
     void setXtrxOutputSettings(SWGXtrxOutputSettings* xtrx_output_settings);
 
+    SWGXtrxMIMOSettings* getXtrxMimoSettings();
+    void setXtrxMimoSettings(SWGXtrxMIMOSettings* xtrx_mimo_settings);
+
 
     virtual bool isSet() override;
 
@@ -280,6 +284,9 @@ private:
 
     SWGXtrxOutputSettings* xtrx_output_settings;
     bool m_xtrx_output_settings_isSet;
+
+    SWGXtrxMIMOSettings* xtrx_mimo_settings;
+    bool m_xtrx_mimo_settings_isSet;
 
 };
 

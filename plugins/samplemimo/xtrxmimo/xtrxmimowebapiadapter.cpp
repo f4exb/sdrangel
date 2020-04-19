@@ -19,6 +19,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "SWGDeviceSettings.h"
+#include "xtrxmimo.h"
 #include "xtrxmimowebapiadapter.h"
 
 XTRXMIMOWebAPIAdapter::XTRXMIMOWebAPIAdapter()
@@ -32,8 +33,10 @@ int XTRXMIMOWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    (void) response;
-    return 501;
+    response.setXtrxMimoSettings(new SWGSDRangel::SWGXtrxMIMOSettings());
+    response.getXtrxMimoSettings()->init();
+    XTRXMIMO::webapiFormatDeviceSettings(response, m_settings);
+    return 200;
 }
 
 int XTRXMIMOWebAPIAdapter::webapiSettingsPutPatch(
@@ -42,9 +45,8 @@ int XTRXMIMOWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
-    (void) errorMessage;
     (void) force;
-    (void) deviceSettingsKeys;
-    (void) response;
-    return 501;
+    (void) errorMessage;
+    XTRXMIMO::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
+    return 200;
 }

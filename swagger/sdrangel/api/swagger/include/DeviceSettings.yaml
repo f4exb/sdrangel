@@ -76,3 +76,5 @@ DeviceSettings:
       $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
     xtrxOutputSettings:
       $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
+    xtrxMIMOSettings:
+      $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"

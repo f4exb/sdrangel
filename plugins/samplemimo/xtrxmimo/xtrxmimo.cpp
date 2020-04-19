@@ -20,6 +20,13 @@
 #include <QNetworkAccessManager>
 #include <QBuffer>
 
+#include "SWGDeviceSettings.h"
+#include "SWGXtrxMIMOSettings.h"
+#include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
+#include "SWGXtrxMIMOReport.h"
+
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -1310,13 +1317,38 @@ void XTRXMIMO::setTxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz, int lo
     }
 }
 
-void XTRXMIMO::webapiFormatDeviceSettings(
+int XTRXMIMO::webapiSettingsGet(
     SWGSDRangel::SWGDeviceSettings& response,
-    const XTRXMIMOSettings& settings)
+    QString& errorMessage)
 {
-    // TODO
-    (void) response;
-    (void) settings;
+    (void) errorMessage;
+    response.setXtrxMimoSettings(new SWGSDRangel::SWGXtrxMIMOSettings());
+    response.getXtrxMimoSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int XTRXMIMO::webapiSettingsPutPatch(
+    bool force,
+    const QStringList& deviceSettingsKeys,
+    SWGSDRangel::SWGDeviceSettings& response, // query + response
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    XTRXMIMOSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
+
+    MsgConfigureXTRXMIMO *msg = MsgConfigureXTRXMIMO::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureXTRXMIMO *msgToGUI = MsgConfigureXTRXMIMO::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
 }
 
 void XTRXMIMO::webapiUpdateDeviceSettings(
@@ -1324,8 +1356,526 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
-    // TODO
-    (void) settings;
-    (void) deviceSettingsKeys;
-    (void) response;
+    // common
+    if (deviceSettingsKeys.contains("extClock")) {
+        settings.m_extClock = response.getXtrxMimoSettings()->getExtClock() != 0;
+    }
+    if (deviceSettingsKeys.contains("extClockFreq")) {
+        settings.m_extClockFreq = response.getXtrxMimoSettings()->getExtClockFreq();
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getXtrxMimoSettings()->getFileRecordName();
+    }
+    if (deviceSettingsKeys.contains("gpioDir")) {
+        settings.m_gpioDir = response.getXtrxMimoSettings()->getGpioDir();
+    }
+    if (deviceSettingsKeys.contains("gpioPins")) {
+        settings.m_gpioPins = response.getXtrxMimoSettings()->getGpioPins();
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getXtrxInputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getXtrxInputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getXtrxInputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getXtrxInputSettings()->getReverseApiDeviceIndex();
+    }
+    // Rx
+    if (deviceSettingsKeys.contains("rxDevSampleRate")) {
+        settings.m_rxDevSampleRate = response.getXtrxMimoSettings()->getRxDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2HardDecim")) {
+        settings.m_log2HardDecim = response.getXtrxMimoSettings()->getLog2HardDecim();
+    }
+    if (deviceSettingsKeys.contains("log2SoftDecim")) {
+        settings.m_log2SoftDecim = response.getXtrxMimoSettings()->getLog2SoftDecim();
+    }
+    if (deviceSettingsKeys.contains("rxCenterFrequency")) {
+        settings.m_rxCenterFrequency = response.getXtrxMimoSettings()->getRxCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getXtrxMimoSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getXtrxMimoSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("ncoEnableRx")) {
+        settings.m_ncoEnableRx = response.getXtrxMimoSettings()->getNcoEnableRx() != 0;
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyRx")) {
+        settings.m_ncoFrequencyRx = response.getXtrxMimoSettings()->getNcoFrequencyRx();
+    }
+    if (deviceSettingsKeys.contains("antennaPathRx")) {
+        settings.m_antennaPathRx = (XTRXMIMOSettings::RxAntenna) response.getXtrxMimoSettings()->getAntennaPathRx();
+    }
+    // Rx0
+    if (deviceSettingsKeys.contains("lpfBWRx0")) {
+        settings.m_lpfBWRx0 = response.getXtrxMimoSettings()->getLpfBwRx0();
+    }
+    if (deviceSettingsKeys.contains("gainRx0")) {
+        settings.m_gainRx0 = response.getXtrxMimoSettings()->getGainRx0();
+    }
+    if (deviceSettingsKeys.contains("gainModeRx0")) {
+        settings.m_gainModeRx0 = (XTRXMIMOSettings::GainMode) response.getXtrxMimoSettings()->getGainModeRx0();
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx0")) {
+        settings.m_lnaGainRx0 = response.getXtrxMimoSettings()->getLnaGainRx0();
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx0")) {
+        settings.m_tiaGainRx0 = response.getXtrxMimoSettings()->getTiaGainRx0();
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx0")) {
+        settings.m_pgaGainRx0 = response.getXtrxMimoSettings()->getPgaGainRx0();
+    }
+    if (deviceSettingsKeys.contains("pwrmodeRx0")) {
+        settings.m_pwrmodeRx0 = response.getXtrxMimoSettings()->getPwrmodeRx0();
+    }
+    // Rx1
+    if (deviceSettingsKeys.contains("lpfBWRx1")) {
+        settings.m_lpfBWRx1 = response.getXtrxMimoSettings()->getLpfBwRx1();
+    }
+    if (deviceSettingsKeys.contains("gainRx1")) {
+        settings.m_gainRx1 = response.getXtrxMimoSettings()->getGainRx1();
+    }
+    if (deviceSettingsKeys.contains("gainModeRx1")) {
+        settings.m_gainModeRx1 = (XTRXMIMOSettings::GainMode) response.getXtrxMimoSettings()->getGainModeRx1();
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx1")) {
+        settings.m_lnaGainRx1 = response.getXtrxMimoSettings()->getLnaGainRx1();
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx1")) {
+        settings.m_tiaGainRx1 = response.getXtrxMimoSettings()->getTiaGainRx1();
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx1")) {
+        settings.m_pgaGainRx1 = response.getXtrxMimoSettings()->getPgaGainRx1();
+    }
+    if (deviceSettingsKeys.contains("pwrmodeRx1")) {
+        settings.m_pwrmodeRx1 = response.getXtrxMimoSettings()->getPwrmodeRx1();
+    }
+    // Tx
+    if (deviceSettingsKeys.contains("txDevSampleRate")) {
+        settings.m_txDevSampleRate = response.getXtrxMimoSettings()->getTxDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2HardInterp")) {
+        settings.m_log2HardInterp = response.getXtrxMimoSettings()->getLog2HardInterp();
+    }
+    if (deviceSettingsKeys.contains("log2SoftInterp")) {
+        settings.m_log2SoftInterp = response.getXtrxMimoSettings()->getLog2SoftInterp();
+    }
+    if (deviceSettingsKeys.contains("txCenterFrequency")) {
+        settings.m_txCenterFrequency = response.getXtrxMimoSettings()->getTxCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("ncoEnableTx")) {
+        settings.m_ncoEnableTx = response.getXtrxMimoSettings()->getNcoEnableTx() != 0;
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyTx")) {
+        settings.m_ncoFrequencyTx = response.getXtrxMimoSettings()->getNcoFrequencyTx();
+    }
+    if (deviceSettingsKeys.contains("antennaPathTx")) {
+        settings.m_antennaPathTx = (XTRXMIMOSettings::TxAntenna) response.getXtrxMimoSettings()->getAntennaPathTx();
+    }
+    // Tx0
+    if (deviceSettingsKeys.contains("lpfBWTx0")) {
+        settings.m_lpfBWTx0 = response.getXtrxMimoSettings()->getLpfBwTx0();
+    }
+    if (deviceSettingsKeys.contains("gainTx0")) {
+        settings.m_gainTx0 = response.getXtrxMimoSettings()->getGainTx0();
+    }
+    if (deviceSettingsKeys.contains("pwrmodeTx0")) {
+        settings.m_pwrmodeRx0 = response.getXtrxMimoSettings()->getPwrmodeTx0();
+    }
+    // Tx1
+    if (deviceSettingsKeys.contains("lpfBWTx1")) {
+        settings.m_lpfBWTx1 = response.getXtrxMimoSettings()->getLpfBwTx1();
+    }
+    if (deviceSettingsKeys.contains("gainTx1")) {
+        settings.m_gainTx1 = response.getXtrxMimoSettings()->getGainTx1();
+    }
+    if (deviceSettingsKeys.contains("pwrmodeTx1")) {
+        settings.m_pwrmodeRx1 = response.getXtrxMimoSettings()->getPwrmodeTx1();
+    }
+}
+
+void XTRXMIMO::webapiFormatDeviceSettings(
+    SWGSDRangel::SWGDeviceSettings& response,
+    const XTRXMIMOSettings& settings)
+{
+    // common
+    response.getXtrxMimoSettings()->setExtClock(settings.m_extClock ? 1 : 0);
+    response.getXtrxMimoSettings()->setExtClockFreq(settings.m_extClockFreq);
+
+    if (response.getXtrxMimoSettings()->getFileRecordName()) {
+        *response.getXtrxMimoSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getXtrxMimoSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    response.getXtrxMimoSettings()->setGpioDir(settings.m_gpioDir & 0xFF);
+    response.getXtrxMimoSettings()->setGpioPins(settings.m_gpioPins & 0xFF);
+    response.getXtrxMimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getXtrxMimoSettings()->getReverseApiAddress()) {
+        *response.getXtrxMimoSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getXtrxMimoSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getXtrxMimoSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getXtrxMimoSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    // Rx
+    response.getXtrxMimoSettings()->setRxDevSampleRate(settings.m_rxDevSampleRate);
+    response.getXtrxMimoSettings()->setLog2HardDecim(settings.m_log2HardDecim);
+    response.getXtrxMimoSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getXtrxMimoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
+    response.getXtrxMimoSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getXtrxMimoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getXtrxMimoSettings()->setNcoEnableRx(settings.m_ncoEnableRx ? 1 : 0);
+    response.getXtrxMimoSettings()->setNcoFrequencyRx(settings.m_ncoFrequencyRx);
+    response.getXtrxMimoSettings()->setAntennaPathRx((int) settings.m_antennaPathRx);
+    // Rx0
+    response.getXtrxMimoSettings()->setLpfBwRx0(settings.m_lpfBWRx0);
+    response.getXtrxMimoSettings()->setGainRx0(settings.m_gainRx0);
+    response.getXtrxMimoSettings()->setGainModeRx0((int) settings.m_gainModeRx0);
+    response.getXtrxMimoSettings()->setLnaGainRx0(settings.m_lnaGainRx0);
+    response.getXtrxMimoSettings()->setTiaGainRx0(settings.m_tiaGainRx0);
+    response.getXtrxMimoSettings()->setPgaGainRx0(settings.m_pgaGainRx0);
+    response.getXtrxMimoSettings()->setPwrmodeRx0(settings.m_pwrmodeRx0);
+    // Rx1
+    response.getXtrxMimoSettings()->setLpfBwRx1(settings.m_lpfBWRx1);
+    response.getXtrxMimoSettings()->setGainRx1(settings.m_gainRx1);
+    response.getXtrxMimoSettings()->setGainModeRx1((int) settings.m_gainModeRx1);
+    response.getXtrxMimoSettings()->setLnaGainRx1(settings.m_lnaGainRx1);
+    response.getXtrxMimoSettings()->setTiaGainRx1(settings.m_tiaGainRx1);
+    response.getXtrxMimoSettings()->setPgaGainRx1(settings.m_pgaGainRx1);
+    response.getXtrxMimoSettings()->setPwrmodeRx1(settings.m_pwrmodeRx1);
+    // Tx
+    response.getXtrxMimoSettings()->setTxDevSampleRate(settings.m_txDevSampleRate);
+    response.getXtrxMimoSettings()->setLog2HardInterp(settings.m_log2HardInterp);
+    response.getXtrxMimoSettings()->setLog2SoftInterp(settings.m_log2SoftInterp);
+    response.getXtrxMimoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
+    response.getXtrxMimoSettings()->setNcoEnableTx(settings.m_ncoEnableTx ? 1 : 0);
+    response.getXtrxMimoSettings()->setNcoFrequencyTx(settings.m_ncoFrequencyTx);
+    response.getXtrxMimoSettings()->setAntennaPathTx((int) settings.m_antennaPathTx);
+    // Tx0
+    response.getXtrxMimoSettings()->setLpfBwTx0(settings.m_lpfBWTx0);
+    response.getXtrxMimoSettings()->setGainTx0(settings.m_gainTx0);
+    response.getXtrxMimoSettings()->setPwrmodeTx0(settings.m_pwrmodeTx0);
+    // Tx1
+    response.getXtrxMimoSettings()->setLpfBwTx1(settings.m_lpfBWTx1);
+    response.getXtrxMimoSettings()->setGainTx1(settings.m_gainTx1);
+    response.getXtrxMimoSettings()->setPwrmodeTx1(settings.m_pwrmodeTx1);
+}
+
+int XTRXMIMO::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setXtrxInputReport(new SWGSDRangel::SWGXtrxInputReport());
+    response.getXtrxInputReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+int XTRXMIMO::webapiRunGet(
+        int subsystemIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage)
+{
+    if ((subsystemIndex == 0) || (subsystemIndex == 1))
+    {
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState(), subsystemIndex);
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem invalid: must be 0 (Rx) or 1 (Tx)");
+        return 404;
+    }
+
+}
+
+int XTRXMIMO::webapiRun(
+        bool run,
+        int subsystemIndex,
+        SWGSDRangel::SWGDeviceState& response,
+        QString& errorMessage)
+{
+    if ((subsystemIndex == 0) || (subsystemIndex == 1))
+    {
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState(), subsystemIndex);
+        MsgStartStop *message = MsgStartStop::create(run, subsystemIndex == 0);
+        m_inputMessageQueue.push(message);
+
+        if (m_guiMessageQueue) // forward to GUI if any
+        {
+            MsgStartStop *msgToGUI = MsgStartStop::create(run, subsystemIndex == 0);
+            m_guiMessageQueue->push(msgToGUI);
+        }
+
+        return 200;
+    }
+    else
+    {
+        errorMessage = QString("Subsystem invalid: must be 0 (Rx) or 1 (Tx)");
+        return 404;
+    }
+}
+
+void XTRXMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    bool success = false;
+    double temp = 0.0;
+    bool gpsStatus = false;
+    uint64_t fifolevelRx = 0;
+    uint64_t fifolevelTx = 0;
+    uint32_t fifosize = 1<<16;
+
+    if (m_deviceShared.m_dev->getDevice())
+    {
+        int ret = xtrx_val_get(m_deviceShared.m_dev->getDevice(),
+            XTRX_RX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevelRx);
+
+        success = (ret >= 0);
+
+        ret = xtrx_val_get(m_deviceShared.m_dev->getDevice(),
+            XTRX_TX, XTRX_CH_AB, XTRX_PERF_LLFIFO, &fifolevelTx);
+
+        success = success & (ret >= 0);
+        temp = m_deviceShared.get_board_temperature() / 256.0;
+        gpsStatus = m_deviceShared.get_gps_status();
+    }
+
+    response.getXtrxMimoReport()->setSuccess(success ? 1 : 0);
+    response.getXtrxMimoReport()->setFifoSize(fifosize);
+    response.getXtrxMimoReport()->setFifoFillRx(fifolevelRx);
+    response.getXtrxMimoReport()->setFifoFillTx(fifolevelTx);
+    response.getXtrxMimoReport()->setTemperature(temp);
+    response.getXtrxMimoReport()->setGpsLock(gpsStatus ? 1 : 0);
+}
+
+void XTRXMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXMIMOSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(2); // MIMO
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("XTRX"));
+    swgDeviceSettings->setXtrxMimoSettings(new SWGSDRangel::SWGXtrxMIMOSettings());
+    SWGSDRangel::SWGXtrxMIMOSettings *swgXTRXMIMOSettings = swgDeviceSettings->getXtrxMimoSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    // common
+    if (deviceSettingsKeys.contains("extClock") || force) {
+        swgXTRXMIMOSettings->setExtClock(settings.m_extClock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("extClock") || force) {
+        swgXTRXMIMOSettings->setExtClockFreq(settings.m_extClockFreq);
+    }
+    if (deviceSettingsKeys.contains("extClock") || force) {
+        swgXTRXMIMOSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+    if (deviceSettingsKeys.contains("gpioDir") || force) {
+        swgXTRXMIMOSettings->setGpioDir(settings.m_gpioDir & 0xFF);
+    }
+    if (deviceSettingsKeys.contains("gpioPins") || force) {
+        swgXTRXMIMOSettings->setGpioPins(settings.m_gpioPins & 0xFF);
+    }
+    // Rx
+    if (deviceSettingsKeys.contains("rxDevSampleRate") || force) {
+        swgXTRXMIMOSettings->setRxDevSampleRate(settings.m_rxDevSampleRate);
+    }
+    if (deviceSettingsKeys.contains("log2HardDecim") || force) {
+        swgXTRXMIMOSettings->setLog2HardDecim(settings.m_log2HardDecim);
+    }
+    if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
+        swgXTRXMIMOSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("rxCenterFrequency") || force) {
+        swgXTRXMIMOSettings->setRxCenterFrequency(settings.m_rxCenterFrequency);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgXTRXMIMOSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqCorrection") || force) {
+        swgXTRXMIMOSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("ncoEnableRx") || force) {
+        swgXTRXMIMOSettings->setNcoEnableRx(settings.m_ncoEnableRx ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyRx") || force) {
+        swgXTRXMIMOSettings->setNcoFrequencyRx(settings.m_ncoFrequencyRx);
+    }
+    if (deviceSettingsKeys.contains("antennaPathRx") || force) {
+        swgXTRXMIMOSettings->setAntennaPathRx((int) settings.m_antennaPathRx);
+    }
+    // Rx0
+    if (deviceSettingsKeys.contains("lpfBWRx0") || force) {
+        swgXTRXMIMOSettings->setLpfBwRx0(settings.m_lpfBWRx0);
+    }
+    if (deviceSettingsKeys.contains("gainRx0") || force) {
+        swgXTRXMIMOSettings->setGainRx0(settings.m_gainRx0);
+    }
+    if (deviceSettingsKeys.contains("gainModeRx0") || force) {
+        swgXTRXMIMOSettings->setGainModeRx0((int) settings.m_gainModeRx0);
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx0") || force) {
+        swgXTRXMIMOSettings->setLnaGainRx0(settings.m_lnaGainRx0);
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx0") || force) {
+        swgXTRXMIMOSettings->setTiaGainRx0(settings.m_tiaGainRx0);
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx0") || force) {
+        swgXTRXMIMOSettings->setPgaGainRx0(settings.m_pgaGainRx0);
+    }
+    if (deviceSettingsKeys.contains("pwrmodeRx0") || force) {
+        swgXTRXMIMOSettings->setPwrmodeRx0(settings.m_pwrmodeRx0);
+    }
+    // Rx1
+    if (deviceSettingsKeys.contains("lpfBWRx1") || force) {
+        swgXTRXMIMOSettings->setLpfBwRx1(settings.m_lpfBWRx1);
+    }
+    if (deviceSettingsKeys.contains("gainRx1") || force) {
+        swgXTRXMIMOSettings->setGainRx1(settings.m_gainRx1);
+    }
+    if (deviceSettingsKeys.contains("gainModeRx1") || force) {
+        swgXTRXMIMOSettings->setGainModeRx1((int) settings.m_gainModeRx1);
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx1") || force) {
+        swgXTRXMIMOSettings->setLnaGainRx1(settings.m_lnaGainRx1);
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx1") || force) {
+        swgXTRXMIMOSettings->setTiaGainRx1(settings.m_tiaGainRx1);
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx1") || force) {
+        swgXTRXMIMOSettings->setPgaGainRx1(settings.m_pgaGainRx1);
+    }
+    if (deviceSettingsKeys.contains("pwrmodeRx1") || force) {
+        swgXTRXMIMOSettings->setPwrmodeRx1(settings.m_pwrmodeRx1);
+    }
+    // Tx
+    if (deviceSettingsKeys.contains("txDevSampleRate") || force) {
+        swgXTRXMIMOSettings->setTxDevSampleRate(settings.m_txDevSampleRate);
+    }
+    if (deviceSettingsKeys.contains("log2HardInterp") || force) {
+        swgXTRXMIMOSettings->setLog2HardInterp(settings.m_log2HardInterp);
+    }
+    if (deviceSettingsKeys.contains("log2SoftInterp") || force) {
+        swgXTRXMIMOSettings->setLog2SoftInterp(settings.m_log2SoftInterp);
+    }
+    if (deviceSettingsKeys.contains("txCenterFrequency") || force) {
+        swgXTRXMIMOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
+    }
+    if (deviceSettingsKeys.contains("ncoEnableTx") || force) {
+        swgXTRXMIMOSettings->setNcoEnableTx(settings.m_ncoEnableTx ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyTx") || force) {
+        swgXTRXMIMOSettings->setNcoFrequencyTx(settings.m_ncoFrequencyTx);
+    }
+    if (deviceSettingsKeys.contains("antennaPathTx") || force) {
+        swgXTRXMIMOSettings->setAntennaPathTx((int) settings.m_antennaPathTx);
+    }
+    // Tx0
+    if (deviceSettingsKeys.contains("lpfBWTx0") || force) {
+        swgXTRXMIMOSettings->setLpfBwTx0(settings.m_lpfBWTx0);
+    }
+    if (deviceSettingsKeys.contains("gainTx0") || force) {
+        swgXTRXMIMOSettings->setGainTx0(settings.m_gainTx0);
+    }
+    if (deviceSettingsKeys.contains("pwrmodeTx0") || force) {
+        swgXTRXMIMOSettings->setPwrmodeTx0(settings.m_pwrmodeTx0);
+    }
+    // Tx0
+    if (deviceSettingsKeys.contains("lpfBWTx0") || force) {
+        swgXTRXMIMOSettings->setLpfBwTx0(settings.m_lpfBWTx0);
+    }
+    if (deviceSettingsKeys.contains("gainTx0") || force) {
+        swgXTRXMIMOSettings->setGainTx0(settings.m_gainTx0);
+    }
+    if (deviceSettingsKeys.contains("pwrmodeTx0") || force) {
+        swgXTRXMIMOSettings->setPwrmodeTx0(settings.m_pwrmodeTx0);
+    }
+    // Tx1
+    if (deviceSettingsKeys.contains("lpfBWTx1") || force) {
+        swgXTRXMIMOSettings->setLpfBwTx1(settings.m_lpfBWTx1);
+    }
+    if (deviceSettingsKeys.contains("gainTx1") || force) {
+        swgXTRXMIMOSettings->setGainTx1(settings.m_gainTx1);
+    }
+    if (deviceSettingsKeys.contains("pwrmodeTx1") || force) {
+        swgXTRXMIMOSettings->setPwrmodeTx1(settings.m_pwrmodeTx1);
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
+
+    delete swgDeviceSettings;
+}
+
+void XTRXMIMO::webapiReverseSendStartStop(bool start)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(2); // MIMO
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("XTRX"));
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+    QNetworkReply *reply;
+
+    if (start) {
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+    } else {
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+    }
+
+    buffer->setParent(reply);
+    delete swgDeviceSettings;
+}
+
+void XTRXMIMO::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "XTRXMIMO::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("XTRXMIMO::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    }
+
+    reply->deleteLater();
 }
