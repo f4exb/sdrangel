@@ -231,7 +231,7 @@ struct gf2n
             lut_exp[((1 << N) - 1) + i] = alpha_i; // Wrap to avoid modulo 2^N-1
             lut_log[alpha_i] = i;
             bool overflow = alpha_i & (1 << (N - 1));
-            alpha_i <<= 1;               // Multiply by alpha=[X] i.e. increase degrees
+            alpha_i *= 2;                // Multiply by alpha=[X] i.e. increase degrees
             alpha_i &= ~((~(Te)0) << N); // In case Te is wider than N bits
             if (overflow)
                 alpha_i ^= TRUNCP; // Modulo P iteratively

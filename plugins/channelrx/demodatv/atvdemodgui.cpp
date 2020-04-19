@@ -153,11 +153,11 @@ void ATVDemodGUI::displayStreamIndex()
 void ATVDemodGUI::displayRFBandwidths()
 {
     int sliderPosition = m_settings.m_fftBandwidth / m_rfSliderDivisor;
-    sliderPosition < 1 ? 1 : sliderPosition > 100 ? 100 : sliderPosition;
+    sliderPosition = sliderPosition < 1 ? 1 : sliderPosition > 100 ? 100 : sliderPosition;
     ui->rfBW->setValue(sliderPosition);
     ui->rfBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
     sliderPosition = m_settings.m_fftOppBandwidth / m_rfSliderDivisor;
-    sliderPosition < 0 ? 0 : sliderPosition > 100 ? 100 : sliderPosition;
+    sliderPosition = sliderPosition < 0 ? 0 : sliderPosition > 100 ? 100 : sliderPosition;
     ui->rfOppBW->setValue(sliderPosition);
     ui->rfOppBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }

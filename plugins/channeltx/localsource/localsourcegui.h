@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 #include <QObject>
-#include <QTime>
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
@@ -70,7 +69,6 @@ private:
     LocalSource* m_localSource;
     MessageQueue m_inputMessageQueue;
 
-    QTime m_time;
     uint32_t m_tickCount;
 
     explicit LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel, QWidget* parent = 0);

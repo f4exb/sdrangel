@@ -179,6 +179,8 @@ bool ATVModBaseband::handleMessage(const Message& cmd)
         MsgConfigureImageFileName& cfg = (MsgConfigureImageFileName&) cmd;
         qDebug() << "ATVModBaseband::handleMessage: MsgConfigureImageFileName: fileNaem: " << cfg.getFileName();
         m_source.openImage(cfg.getFileName());
+
+		return true;
     }
     else if (MsgConfigureVideoFileName::match(cmd))
     {
@@ -186,6 +188,8 @@ bool ATVModBaseband::handleMessage(const Message& cmd)
         MsgConfigureVideoFileName& cfg = (MsgConfigureVideoFileName&) cmd;
         qDebug() << "ATVModBaseband::handleMessage: MsgConfigureVideoFileName: fileName: " << cfg.getFileName();
         m_source.openVideo( cfg.getFileName());
+
+		return true;
     }
     else if (MsgConfigureVideoFileSourceSeek::match(cmd))
     {
@@ -193,10 +197,13 @@ bool ATVModBaseband::handleMessage(const Message& cmd)
         MsgConfigureVideoFileSourceSeek& cfg = (MsgConfigureVideoFileSourceSeek&) cmd;
         qDebug() << "ATVModBaseband::handleMessage: MsgConfigureVideoFileName: precnetage: " << cfg.getPercentage();
         m_source.seekVideoFileStream(cfg.getPercentage());
+
+		return true;
     }
     else if (MsgConfigureVideoFileSourceStreamTiming::match(cmd))
     {
         m_source.reportVideoFileSourceStreamTiming();
+		return true;
     }
     else if (MsgConfigureCameraIndex::match(cmd))
     {
@@ -204,12 +211,16 @@ bool ATVModBaseband::handleMessage(const Message& cmd)
     	MsgConfigureCameraIndex& cfg = (MsgConfigureCameraIndex&) cmd;
     	uint32_t index = cfg.getIndex() & 0x7FFFFFF;
         m_source.configureCameraIndex(index);
+
+		return true;
     }
     else if (MsgConfigureCameraData::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
         MsgConfigureCameraData& cfg = (MsgConfigureCameraData&) cmd;
         m_source.configureCameraData(cfg.getIndex(), cfg.getManualFPS(), cfg.getManualFPSEnable());
+
+		return true;
     }
     else
     {

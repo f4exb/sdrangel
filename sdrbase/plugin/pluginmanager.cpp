@@ -20,6 +20,7 @@
 #include <QDebug>
 
 #include <cstdio>
+#include <algorithm>
 
 #include <plugin/plugininstancegui.h>
 #include "device/deviceenumerator.h"
@@ -105,7 +106,7 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
 
 void PluginManager::loadPluginsFinal()
 {
-    qSort(m_plugins);
+    std::sort(m_plugins.begin(), m_plugins.end());
 
     for (Plugins::const_iterator it = m_plugins.begin(); it != m_plugins.end(); ++it)
     {

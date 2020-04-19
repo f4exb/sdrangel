@@ -15,6 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "plugin/pluginapi.h"
@@ -233,7 +235,7 @@ void DeviceSet::saveRxChannelSettings(Preset *preset)
 {
     if (preset->isSourcePreset())
     {
-        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
@@ -326,7 +328,7 @@ void DeviceSet::saveTxChannelSettings(Preset *preset)
 {
     if (preset->isSinkPreset())
     {
-        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
@@ -422,7 +424,7 @@ void DeviceSet::saveMIMOChannelSettings(Preset *preset)
 {
     if (preset->isMIMOPreset())
     {
-        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {

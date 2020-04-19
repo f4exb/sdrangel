@@ -1,6 +1,8 @@
 #include <QSettings>
 #include <QStringList>
 
+#include <algorithm>
+
 #include "settings/mainsettings.h"
 #include "commands/command.h"
 #include "audio/audiodevicemanager.h"
@@ -190,7 +192,7 @@ void MainSettings::deletePresetGroup(const QString& groupName)
 
 void MainSettings::sortPresets()
 {
-    qSort(m_presets.begin(), m_presets.end(), Preset::presetCompare);
+    std::sort(m_presets.begin(), m_presets.end(), Preset::presetCompare);
 }
 
 void MainSettings::renamePresetGroup(const QString& oldGroupName, const QString& newGroupName)
@@ -266,7 +268,7 @@ void MainSettings::deleteCommandGroup(const QString& groupName)
 
 void MainSettings::sortCommands()
 {
-    qSort(m_commands.begin(), m_commands.end(), Command::commandCompare);
+    std::sort(m_commands.begin(), m_commands.end(), Command::commandCompare);
 }
 
 void MainSettings::renameCommandGroup(const QString& oldGroupName, const QString& newGroupName)

@@ -64,7 +64,7 @@ void TestSinkPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& 
     originDevices.append(OriginDevice(
         "TestSink",
         m_hardwareID,
-        QString::null,
+        QString(),
         0, // Sequence
         0, // nb Rx
         1  // nb Tx

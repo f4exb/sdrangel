@@ -31,7 +31,7 @@
 #include "ssbdemodsink.h"
 
 const int SSBDemodSink::m_ssbFftLen = 1024;
-const int SSBDemodSink::m_agcTarget = 3276.8; // -10 dB amplitude => -20 dB power: center of normal signal
+const int SSBDemodSink::m_agcTarget = 3276; // 32768/10 -10 dB amplitude => -20 dB power: center of normal signal
 
 SSBDemodSink::SSBDemodSink() :
         m_audioBinaual(false),

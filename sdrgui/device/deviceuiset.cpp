@@ -17,6 +17,8 @@
 
 #include <QFont>
 
+#include <algorithm>
+
 #include "gui/glspectrum.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrumgui.h"
@@ -230,7 +232,7 @@ void DeviceUISet::saveRxChannelSettings(Preset *preset)
 {
     if (preset->isSourcePreset())
     {
-        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
@@ -308,7 +310,7 @@ void DeviceUISet::saveTxChannelSettings(Preset *preset)
 {
     if (preset->isSinkPreset())
     {
-        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
@@ -386,7 +388,7 @@ void DeviceUISet::saveMIMOChannelSettings(Preset *preset)
 {
     if (preset->isMIMOPreset())
     {
-        qSort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
+        std::sort(m_channelInstanceRegistrations.begin(), m_channelInstanceRegistrations.end()); // sort by increasing delta frequency and type
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
