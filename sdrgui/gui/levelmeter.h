@@ -48,6 +48,7 @@
 #define SDRBASE_GUI_LEVELMETER_H_
 
 #include <QTime>
+#include <QElapsedTimer>
 #include <QWidget>
 
 #include "dsp/dsptypes.h"
@@ -102,7 +103,7 @@ protected:
     /**
      * Time at which m_peakLevel was last changed.
      */
-    QTime m_peakLevelChanged;
+    QElapsedTimer m_peakLevelChanged;
 
     /**
      * Rate at which peak level bar decays.
@@ -119,7 +120,7 @@ protected:
     /**
      * Time at which m_peakHoldLevel was last changed.
      */
-    QTime m_peakHoldLevelChanged;
+    QElapsedTimer m_peakHoldLevelChanged;
 
     /**
      * Average smoothing factor (between 1: fast and 256: slow)

@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 #include <QObject>
-#include <QTime>
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
@@ -70,7 +69,6 @@ private:
     RemoteSink* m_remoteSink;
     MessageQueue m_inputMessageQueue;
 
-    QTime m_time;
     uint32_t m_tickCount;
 
     explicit RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);

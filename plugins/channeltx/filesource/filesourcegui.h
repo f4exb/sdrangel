@@ -18,8 +18,6 @@
 #ifndef PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEGUI_H_
 #define PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEGUI_H_
 
-#include <QTime>
-
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "gui/rollupwidget.h"
@@ -78,7 +76,6 @@ private:
     FileSource* m_fileSource;
     MessageQueue m_inputMessageQueue;
 
-    QTime m_time;
     uint32_t m_tickCount;
 
     explicit FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = nullptr);

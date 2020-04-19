@@ -151,11 +151,11 @@ struct bch_engine : bch_interface
                 if (2 * L <= n)
                 {
                     TGF *tmp = new TGF[NN]; // replaced crap code
-                    memcpy(tmp, C, sizeof(tmp));
+                    std::copy(C, C+NN, tmp);   //memcpy(tmp, C, sizeof(tmp));
                     for (int i = 0; i < NN - m; ++i)
                         C[m + i] = GF.sub(C[m + i], GF.mul(d_div_b, B[i]));
                     L = n + 1 - L;
-                    memcpy(B, tmp, sizeof(B));
+                    std::copy(tmp, tmp+NN, B); //memcpy(B, tmp, sizeof(B));
                     b = d;
                     m = 1;
                     delete[] tmp;

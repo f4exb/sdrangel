@@ -433,19 +433,19 @@ void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex)
     {
         switch(m_deviceMIMOEngine->state(subsystemIndex))
         {
-        case DSPDeviceSinkEngine::StNotStarted:
+        case DSPDeviceMIMOEngine::StNotStarted:
             state = "notStarted";
             break;
-        case DSPDeviceSinkEngine::StIdle:
+        case DSPDeviceMIMOEngine::StIdle:
             state = "idle";
             break;
-        case DSPDeviceSinkEngine::StReady:
+        case DSPDeviceMIMOEngine::StReady:
             state = "ready";
             break;
-        case DSPDeviceSinkEngine::StRunning:
+        case DSPDeviceMIMOEngine::StRunning:
             state = "running";
             break;
-        case DSPDeviceSinkEngine::StError:
+        case DSPDeviceMIMOEngine::StError:
             state = "error";
             break;
         default:

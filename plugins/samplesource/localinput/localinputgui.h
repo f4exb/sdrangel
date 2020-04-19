@@ -95,7 +95,6 @@ private:
 
     uint32_t m_countUnrecoverable;
     uint32_t m_countRecovered;
-    QTime m_eventsTime;
 
 	bool m_doApplySettings;
     bool m_forceSettings;

@@ -21,7 +21,6 @@
 #include <stdint.h>
 
 #include <QObject>
-#include <QTime>
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
@@ -69,7 +68,6 @@ private:
     LocalSink* m_localSink;
     MessageQueue m_inputMessageQueue;
 
-    QTime m_time;
     uint32_t m_tickCount;
 
     explicit LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);

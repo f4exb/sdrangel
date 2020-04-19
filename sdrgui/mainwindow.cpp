@@ -807,7 +807,7 @@ QTreeWidgetItem* MainWindow::addPresetToTree(const Preset* preset)
 	sl.append(preset->getDescription());                                          // description column
 	PresetItem* item = new PresetItem(group, sl, preset->getCenterFrequency(), PItem);
 	item->setTextAlignment(0, Qt::AlignRight);
-	item->setData(0, Qt::UserRole, qVariantFromValue(preset));
+	item->setData(0, Qt::UserRole, QVariant::fromValue(preset));
 	ui->presetTree->resizeColumnToContents(0); // Resize frequency column to minimum
     ui->presetTree->resizeColumnToContents(1); // Resize mode column to minimum
 
@@ -843,7 +843,7 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
     sl.append(QString("%1").arg(command->getAssociateKey() ? command->getRelease() ? "R" : "P" : "-")); // key press/release column
     sl.append(QString("%1").arg(command->getKeyLabel()));   // key column
     CommandItem* item = new CommandItem(group, sl, command->getDescription(), PItem);
-    item->setData(0, Qt::UserRole, qVariantFromValue(command));
+    item->setData(0, Qt::UserRole, QVariant::fromValue(command));
     item->setTextAlignment(0, Qt::AlignLeft);
     ui->commandTree->resizeColumnToContents(0); // Resize description column to minimum
     ui->commandTree->resizeColumnToContents(1); // Resize key column to minimum

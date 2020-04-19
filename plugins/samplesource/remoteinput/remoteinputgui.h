@@ -19,6 +19,7 @@
 #define INCLUDE_REMOTEINPUTGUI_H
 
 #include <QTimer>
+#include <QElapsedTimer>
 #include <QWidget>
 #include <QNetworkRequest>
 
@@ -95,7 +96,7 @@ private:
 
     uint32_t m_countUnrecoverable;
     uint32_t m_countRecovered;
-    QTime m_eventsTime;
+    QElapsedTimer m_eventsTime;
 
 	bool m_doApplySettings;
     bool m_forceSettings;

@@ -21,7 +21,7 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QTime>
+#include <QElapsedTimer>
 #include "dsp/dsptypes.h"
 #include "export.h"
 
@@ -30,7 +30,7 @@ class SDRBASE_API SampleSinkFifo : public QObject {
 
 private:
 	QMutex m_mutex;
-	QTime m_msgRateTimer;
+	QElapsedTimer m_msgRateTimer;
 	int m_suppressed;
 
 	SampleVector m_data;
