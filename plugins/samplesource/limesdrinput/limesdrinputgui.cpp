@@ -75,15 +75,18 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     {
         ui->antenna->setItemText(2, "NC");
         ui->antenna->setItemText(3, "Lo");
+        ui->antenna->setItemText(4, "NC");
+        ui->antenna->setItemText(5, "NC");
+        ui->antenna->setToolTip("Antenna select: No: none, NC: not connected, Hi: 2 - 3.5 GHz, Lo: 10 MHz - 2 GHz");
     }
     else
     {
         ui->antenna->setItemText(2, "Lo");
         ui->antenna->setItemText(3, "Wi");
+        ui->antenna->setItemText(4, "T1");
+        ui->antenna->setItemText(4, "T2");
+        ui->antenna->setToolTip("Antenna select: No: none, NC: not connected, Hi: >1.5 GHz, Lo: <1.5 GHz Wi: full band, T1: Tx1 LB, T2: Tx2 LB");
     }
-
-    ui->hwDecimLabel->setText(QString::fromUtf8("H\u2193"));
-    ui->swDecimLabel->setText(QString::fromUtf8("S\u2193"));
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
