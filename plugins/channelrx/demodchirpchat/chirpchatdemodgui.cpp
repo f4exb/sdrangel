@@ -18,6 +18,7 @@
 #include "device/deviceuiset.h"
 #include <QScrollBar>
 #include <QDebug>
+#include <QDateTime>
 
 #include "ui_chirpchatdemodgui.h"
 #include "dsp/spectrumvis.h"
