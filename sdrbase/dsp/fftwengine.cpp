@@ -72,7 +72,7 @@ void FFTWEngine::configure(int n, bool inverse)
 	m_currentPlan->plan = fftwf_plan_dft_1d(n, m_currentPlan->in, m_currentPlan->out, inverse ? FFTW_BACKWARD : FFTW_FORWARD, FFTW_PATIENT);
     m_globalPlanMutex.unlock();
 
-    qDebug("FFT: creating FFTW plan (n=%d,%s) took %dms", n, inverse ? "inverse" : "forward", t.elapsed());
+    qDebug("FFT: creating FFTW plan (n=%d,%s) took %lld ms", n, inverse ? "inverse" : "forward", t.elapsed());
 	m_plans.push_back(m_currentPlan);
 }
 
