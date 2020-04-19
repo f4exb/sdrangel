@@ -33,8 +33,8 @@ int XTRXOutputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
+    response.getXtrxOutputSettings()->init();
     XTRXOutput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
@@ -45,6 +45,7 @@ int XTRXOutputWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force;
     (void) errorMessage;
     XTRXOutput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;
