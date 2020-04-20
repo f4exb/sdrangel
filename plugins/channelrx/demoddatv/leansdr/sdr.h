@@ -664,15 +664,15 @@ struct cstln_lut : cstln_base
         }
         case QAM16:
             amp_max = 0;
-            make_qam(16);
+            make_qam(16, mer);
             break;
         case QAM64:
             amp_max = 1;
-            make_qam(64);
+            make_qam(64, mer);
             break;
         case QAM256:
             amp_max = 1;
-            make_qam(256);
+            make_qam(256, mer);
             break;
         default:
             fail("Constellation not implemented");
@@ -733,7 +733,7 @@ struct cstln_lut : cstln_base
         }
     }
 
-    void make_qam(int n)
+    void make_qam(int n, float mer)
     {
         nrotations = 4;
         nsymbols = n;
@@ -762,7 +762,7 @@ struct cstln_lut : cstln_base
             }
         }
 
-        make_lut_from_symbols(20); // TBD
+        make_lut_from_symbols(mer);
     }
 
     result lut[R][R];
