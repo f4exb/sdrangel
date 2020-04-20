@@ -164,6 +164,38 @@ struct trig16
     }
 };
 
+// Modulo with signed result in [-m/2..m/2[
+
+inline float fmodfs(float v, float m) {
+    v = fmodf(v, m);
+    return (v>=m/2) ? v-m : (v<-m/2) ? v+m : v;
+}
+
+// Simple statistics
+
+template<typename T>
+struct statistics {
+    statistics() { reset(); }
+    void reset() { vm1=vm2=0; count=0; vmin=vmax=99;/*comp warning*/ }
+    void add(const T &v) {
+        vm1 += v;
+        vm2 += v*v;
+        if ( count == 0 ) { vmin = vmax = v; }
+        else if ( v < vmin ) { vmin = v; }
+        else if ( v > vmax ) { vmax = v; }
+        ++count;
+    }
+    T average() { return vm1 / count; }
+    T variance() { return vm2/count - (vm1/count)*(vm1/count); }
+    T stddev() { return gen_sqrt(variance()); }
+    T min() { return vmin; }
+    T max() { return vmax; }
+private:
+    T vm1, vm2;    // Moments
+    T vmin, vmax;  // Range
+    int count;     // Number of samples in vm1, vm2
+};  // statistics
+
 } // namespace leansdr
 
 #endif // LEANSDR_MATH_H
