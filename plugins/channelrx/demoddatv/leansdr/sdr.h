@@ -891,10 +891,11 @@ struct sampler_interface
     {
     }
     virtual complex<T> interp(const complex<T> *pin, float mu, float phase) = 0;
-    virtual void update_freq(float freqw, int period = 1)
+
+    virtual void update_freq(float freqw, int weight = 0)
     {
         (void) freqw;
-        (void) period;
+        (void) weight;
     } // 65536 = 1 Hz
     virtual int readahead() = 0;
 };
@@ -940,9 +941,9 @@ struct linear_sampler : sampler_interface<T>
         return s0 * (1 - mu) + s1 * mu;
     }
 
-    void update_freq(float _freqw, int period = 1)
+    void update_freq(float _freqw, int weight = 0)
     {
-        (void) period;
+        (void) weight;
         freqw = _freqw;
     }
 
@@ -998,11 +999,14 @@ struct fir_sampler : sampler_interface<T>
         return trig.expi(-phase) * acc;
     }
 
-    void update_freq(float freqw, int period)
+    void update_freq(float freqw, int weight = 0)
     {
+        if (!weight) {
+            update_freq_phase = 0;  // Force refresh.
+        }
         // Throttling: Update one coeff per 16 processed samples,
         // to keep the overhead of freq tracking below about 10%.
-        update_freq_phase -= period;
+        update_freq_phase -= weight;
 
         if (update_freq_phase <= 0)
         {
