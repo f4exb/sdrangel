@@ -1,3 +1,17 @@
+sdrangel (4.14.4-1) unstable; urgency=medium
+
+  * XTRX: REST API: fixed wrong setting object
+  * XTRX: fixed sample rate setting
+  * XTRX: reduce block size to 4096 bytes
+  * LimeSDR: revised labels and tooltips for antenna select. Fixes issue #506
+  * LimeSDR: GUI: flip SR and Hw/Sw decimation or interpolation displays
+  * AM demod: fixed initialization of squelch counter. Fixes issue #502
+  * Make OpenCV optional in main cmake file. Fixes #503
+  * Fixed some warnings from Mac ports compilation
+  * Compile with c++11 comaptible version of CM256cc
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 20 Apr 2020 05:35:17 +0200
+
 sdrangel (4.14.3-1) unstable; urgency=medium
 
   * Sample sources GUI file record: right click to choose file. Implements #483.
