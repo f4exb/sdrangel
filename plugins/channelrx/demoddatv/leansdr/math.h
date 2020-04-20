@@ -45,6 +45,11 @@ struct complex
         im = re * c.im + im * c.re;
         re = tre;
     }
+    inline void operator-=(const complex<T> &x)
+    {
+        re-=x.re;
+        im-=x.im;
+    }
     inline void operator*=(const T &k)
     {
         re *= k;
@@ -56,6 +61,11 @@ template <typename T>
 complex<T> operator+(const complex<T> &a, const complex<T> &b)
 {
     return complex<T>(a.re + b.re, a.im + b.im);
+}
+
+template<typename T>
+complex<T> operator -(const complex<T> &a, const complex<T> &b) {
+    return complex<T>(a.re - b.re, a.im - b.im);
 }
 
 template <typename T>
