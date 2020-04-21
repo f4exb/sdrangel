@@ -1038,7 +1038,7 @@ void DATVDemodSink::InitDATVS2Framework()
     objDemodulatorDVBS2 = (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
 
 
-    objDemodulatorDVBS2->omega = m_objCfg.Fs/m_objCfg.Fm;
+    objDemodulatorDVBS2->omega0 = m_objCfg.Fs/m_objCfg.Fm;
 //objDemodulatorDVBS2->mu=1;
 
 
@@ -1049,7 +1049,7 @@ void DATVDemodSink::InitDATVS2Framework()
   demod.strongpls = cfg.strongpls;
 */
 
-    objDemodulatorDVBS2->Fm = m_objCfg.Fm;
+    //objDemodulatorDVBS2->Fm = m_objCfg.Fm; deprecated
     objDemodulatorDVBS2->meas_decimation = decimation(m_objCfg.Fs, m_objCfg.Finfo);
 
     objDemodulatorDVBS2->strongpls = false;

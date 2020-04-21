@@ -505,7 +505,7 @@ struct s2_frame_receiver : runnable
     float phase16; // Estimated phase of carrier at next symbol
 
     float mu;    // Time to next symbol, in samples
-    float omega; // Samples per symbol
+    float omega0; // Samples per symbol
 
     void run()
     {
@@ -513,7 +513,7 @@ struct s2_frame_receiver : runnable
         // TBD margin ?
         int min_samples = (1 + MAX_SYMBOLS_PER_FRAME +
                            plslot<SOFTSYMB>::LENGTH) *
-                          omega * 2;
+                          omega0 * 2;
         while (in.readable() >= min_samples + sampler->readahead() &&
                out.writable() >= 1 + modcod_info::MAX_SLOTS_PER_FRAME &&
                opt_writable(freq_out, 1) &&
@@ -567,7 +567,7 @@ struct s2_frame_receiver : runnable
 
         complex<T> *pin = in.rd();
         complex<T> p = *pin++;
-        int nsamples = MAX_SYMBOLS_PER_FRAME * omega;
+        int nsamples = MAX_SYMBOLS_PER_FRAME * omega0;
         for (int s = nsamples; s--; ++pin)
         {
             complex<T> n = *pin;
@@ -579,7 +579,7 @@ struct s2_frame_receiver : runnable
         ++coarse_count;
         if (coarse_count == 50)
         {
-            float freqw = atan2f(diffcorr.im, diffcorr.re) * omega;
+            float freqw = atan2f(diffcorr.im, diffcorr.re) * omega0;
             fprintf(stderr, "COARSE(%d): %f rad/symb (%.0f Hz at %.0f baud)\n",
                     coarse_count, freqw, freqw * Fm / (2 * M_PI), Fm);
 #if 0
@@ -616,7 +616,7 @@ struct s2_frame_receiver : runnable
         int nsymbols = MAX_SYMBOLS_PER_FRAME; // TBD Adjust after PLS decoding
 
         sampler_state ss = {in.rd(), mu, phase16, freqw16};
-        sampler->update_freq(ss.fw16 / omega);
+        sampler->update_freq(ss.fw16 / omega0);
 
         if (!in_power)
             init_agc(ss.p, 64);
@@ -687,9 +687,9 @@ struct s2_frame_receiver : runnable
         float ph16;    // Carrier phase at next symbol, cycles*65536
         float fw16;    // Carrier frequency, cycles per symbol * 65536
         uint8_t *scr;  // Position in scrambling sequeence
-        void skip_symbols(int ns, float omega)
+        void skip_symbols(int ns, float omega0)
         {
-            mu += omega * ns;
+            mu += omega0 * ns;
             ph16 += fw16 * ns;
             scr += ns;
         }
@@ -726,7 +726,7 @@ struct s2_frame_receiver : runnable
                  freqw16, freqw16 * Fm / 65536, mu);
 
         sampler_state ss = {in.rd(), mu, phase16, freqw16, scrambling.Rn};
-        sampler->update_freq(ss.fw16 / omega);
+        sampler->update_freq(ss.fw16 / omega0);
 
         update_agc();
 
@@ -959,7 +959,7 @@ struct s2_frame_receiver : runnable
 #endif
         if (meas_count >= meas_decimation)
         {
-            opt_write(freq_out, freqw16 / 65536 / omega);
+            opt_write(freq_out, freqw16 / 65536 / omega0);
             opt_write(ss_out, in_power);
             // TBD Adjust if cfg.strongpls
             float mer = ev_power ? (float)cstln_amp * cstln_amp / ev_power : 1;
@@ -1056,7 +1056,7 @@ struct s2_frame_receiver : runnable
       float cmu = 1.0f - ss->mu;
       complex<float> s(ss->p[0].re*cmu + ss->p[1].re*ss->mu,
 		       ss->p[0].im*cmu + ss->p[1].im*ss->mu);
-      ss->mu += omega;
+      ss->mu += omega0;
       // Derotate
       const complex<float> &rot = trig.expi(-ss->ph16);
       ss->ph16 += ss->fw16;
@@ -1064,7 +1064,7 @@ struct s2_frame_receiver : runnable
 #else
         // Use generic interpolator
         complex<float> s = sampler->interp(ss->p, ss->mu, ss->ph16);
-        ss->mu += omega;
+        ss->mu += omega0;
         ss->ph16 += ss->fw16;
         return s;
 #endif
