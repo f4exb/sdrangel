@@ -331,19 +331,20 @@ void BladeRF2InputGui::displaySettings()
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
 
+    updateFrequencyLimits();
+
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
     ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-    displaySampleRate();
-    ui->bandwidth->setValue(m_settings.m_bandwidth / 1000);
 
+    displaySampleRate();
+
+    ui->bandwidth->setValue(m_settings.m_bandwidth / 1000);
     ui->dcOffset->setChecked(m_settings.m_dcBlock);
     ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
     ui->biasTee->setChecked(m_settings.m_biasTee);
-
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
-
     ui->gainMode->setCurrentIndex(m_settings.m_gainMode);
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
     ui->gain->setValue(m_settings.m_globalGain);

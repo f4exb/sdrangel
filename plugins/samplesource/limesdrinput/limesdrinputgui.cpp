@@ -395,6 +395,7 @@ void LimeSDRInputGUI::displaySettings()
     ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
     ui->extClock->setExternalClockActive(m_settings.m_extClock);
 
+    updateFrequencyLimits();
     setCenterFrequencyDisplay();
     displaySampleRate();
 

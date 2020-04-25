@@ -747,6 +747,11 @@ void SoapySDRInputGui::displaySettings()
 {
     blockApplySettings(true);
 
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+
+    updateFrequencyLimits();
+
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
     if (m_antennas) {

@@ -256,8 +256,13 @@ void HackRFOutputGui::displayFcTooltip()
 void HackRFOutputGui::displaySettings()
 {
     blockApplySettings(true);
-	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 
+    ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
+    ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+
+    updateFrequencyLimits();
+
+	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 
@@ -267,14 +272,14 @@ void HackRFOutputGui::displaySettings()
 
 	ui->interp->setCurrentIndex(m_settings.m_log2Interp);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
-
 	ui->lnaExt->setChecked(m_settings.m_lnaExt);
 	ui->txvgaGainText->setText(tr("%1dB").arg(m_settings.m_vgaGain));
 	ui->txvga->setValue(m_settings.m_vgaGain);
 
     unsigned int bandwidthIndex = HackRFBandwidths::getBandwidthIndex(m_settings.m_bandwidth/1000);
 	ui->bbFilter->setCurrentIndex(bandwidthIndex);
-	blockApplySettings(false);
+
+    blockApplySettings(false);
 }
 
 void HackRFOutputGui::displayBandwidths()
