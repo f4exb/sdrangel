@@ -277,24 +277,22 @@ void HackRFInputGui::displaySettings()
 {
     blockApplySettings(true);
 
-	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
 
+    updateFrequencyLimits();
+
+	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
-
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
 
     displaySampleRate();
 
 	ui->biasT->setChecked(m_settings.m_biasT);
-
 	ui->decim->setCurrentIndex(m_settings.m_log2Decim);
-
 	ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
-
 	ui->lnaExt->setChecked(m_settings.m_lnaExt);
 	ui->lnaGainText->setText(tr("%1dB").arg(m_settings.m_lnaGain));
 	ui->lna->setValue(m_settings.m_lnaGain);
