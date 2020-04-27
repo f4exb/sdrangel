@@ -114,7 +114,6 @@ private slots:
 	void on_startStopTx_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
-    void on_LOppm_valueChanged(int value);
     void on_ncoEnable_toggled(bool checked);
     void on_ncoFrequency_changed(qint64 value);
     void on_dcOffset_toggled(bool checked);

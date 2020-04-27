@@ -26,8 +26,7 @@ LimeSDRMIMOSettings::LimeSDRMIMOSettings()
 
 void LimeSDRMIMOSettings::resetToDefaults()
 {
-    m_devSampleRate = 5000000;
-    m_LOppmTenths = 0;
+    m_devSampleRate = 3200000;
     m_gpioDir = 0;
     m_gpioPins = 0;
     m_extClock = false;
@@ -94,7 +93,6 @@ QByteArray LimeSDRMIMOSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeS32(1, m_devSampleRate);
-    s.writeS32(2, m_LOppmTenths);
     s.writeU32(3, m_gpioDir);
     s.writeU32(4, m_gpioPins);
     s.writeBool(5, m_extClock);
@@ -174,7 +172,6 @@ bool LimeSDRMIMOSettings::deserialize(const QByteArray& data)
         uint32_t uintval;
 
         d.readS32(1, &m_devSampleRate, 5000000);
-        d.readS32(2, &m_LOppmTenths, 0);
         d.readU32(3, &uintval, 0);
         m_gpioDir = uintval & 0xFF;
         d.readU32(4, &uintval, 0);

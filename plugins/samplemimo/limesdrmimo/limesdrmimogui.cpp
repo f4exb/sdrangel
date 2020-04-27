@@ -276,6 +276,9 @@ bool LimeSDRMIMOGUI::handleMessage(const Message& message)
 
 void LimeSDRMIMOGUI::displaySettings()
 {
+    updateFrequencyLimits();
+    updateLPFLimits();
+
     if (m_rxElseTx)
     {
         ui->antenna->blockSignals(true);
@@ -391,7 +394,7 @@ void LimeSDRMIMOGUI::displaySettings()
             ui->lpFIREnable->setChecked(m_settings.m_lpfFIREnableTx0);
             ui->lpFIR->setValue(m_settings.m_lpfFIRBWTx0 / 1000);
             ui->gain->setValue(m_settings.m_gainTx0);
-            ui->gainText->setText(tr("%1dB").arg(m_settings.m_gainTx0));
+            ui->gainText->setText(tr("%1").arg(m_settings.m_gainTx0));
             ui->antenna->setCurrentIndex((int) m_settings.m_antennaPathTx0);
         }
         else if (m_streamIndex == 1)
@@ -400,7 +403,7 @@ void LimeSDRMIMOGUI::displaySettings()
             ui->lpFIREnable->setChecked(m_settings.m_lpfFIREnableTx1);
             ui->lpFIR->setValue(m_settings.m_lpfFIRBWTx1 / 1000);
             ui->gain->setValue(m_settings.m_gainTx1);
-            ui->gainText->setText(tr("%1dB").arg(m_settings.m_gainTx1));
+            ui->gainText->setText(tr("%1").arg(m_settings.m_gainTx1));
             ui->antenna->setCurrentIndex((int) m_settings.m_antennaPathTx1);
         }
     }
@@ -713,7 +716,7 @@ void LimeSDRMIMOGUI::updateStatus()
     }
     else
     {
-        LimeSDRMIMO::MsgGetStreamInfo* message = LimeSDRMIMO::MsgGetStreamInfo::create();
+        LimeSDRMIMO::MsgGetStreamInfo* message = LimeSDRMIMO::MsgGetStreamInfo::create(m_rxElseTx, m_streamIndex);
         m_limeSDRMIMO->getInputMessageQueue()->push(message);
         m_statusCounter = 0;
     }
@@ -724,12 +727,8 @@ void LimeSDRMIMOGUI::updateStatus()
     }
     else
     {
-        if (m_deviceUISet->m_deviceAPI->isBuddyLeader())
-        {
-            LimeSDRMIMO::MsgGetDeviceInfo* message = LimeSDRMIMO::MsgGetDeviceInfo::create();
-            m_limeSDRMIMO->getInputMessageQueue()->push(message);
-        }
-
+        LimeSDRMIMO::MsgGetDeviceInfo* message = LimeSDRMIMO::MsgGetDeviceInfo::create();
+        m_limeSDRMIMO->getInputMessageQueue()->push(message);
         m_deviceStatusCounter = 0;
     }
 }
@@ -754,6 +753,7 @@ void LimeSDRMIMOGUI::on_spectrumSide_currentIndexChanged(int index)
     m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(m_spectrumRxElseTx, m_spectrumStreamIndex);
     m_deviceUISet->setSpectrumScalingFactor(m_spectrumRxElseTx ? SDR_RX_SCALEF : SDR_TX_SCALEF);
     updateSampleRateAndFrequency();
+    updateLPFLimits();
 }
 
 void LimeSDRMIMOGUI::on_spectrumIndex_currentIndexChanged(int index)
@@ -797,18 +797,11 @@ void LimeSDRMIMOGUI::on_record_toggled(bool checked)
 void LimeSDRMIMOGUI::on_centerFrequency_changed(quint64 value)
 {
     if (m_rxElseTx) {
-        m_settings.m_rxCenterFrequency = value * 1000;
+        setRxCenterFrequencySetting(value);
     } else {
-        m_settings.m_txCenterFrequency = value * 1000;
+        setTxCenterFrequencySetting(value);
     }
 
-    sendSettings();
-}
-
-void LimeSDRMIMOGUI::on_LOppm_valueChanged(int value)
-{
-    ui->LOppmText->setText(QString("%1").arg(QString::number(value/10.0, 'f', 1)));
-    m_settings.m_LOppmTenths = value;
     sendSettings();
 }
 

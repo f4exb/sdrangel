@@ -48,23 +48,24 @@ void LimeSDRMOThread::startWork()
         return; // return if running already
     }
 
-    if (m_stream0)
+    int ret[2];
+
+    ret[0] = LMS_StartStream(m_stream0);
+    ret[1] = LMS_StartStream(m_stream1);
+
+    if (ret[0] < 0)
     {
-        if (LMS_StartStream(m_stream0) < 0)
-        {
-            qCritical("LimeSDROutputThread::startWork: could not start stream 0");
-            return;
-        }
-        else
-        {
-            usleep(50000);
-            qDebug("LimeSDROutputThread::startWork: stream 0 started");
-        }
+        qCritical("LimeSDROutputThread::startWork: could not start stream 0");
+        return;
+    }
+    else
+    {
+        qDebug("LimeSDROutputThread::startWork: stream 0 started");
     }
 
     if (m_stream1)
     {
-        if (LMS_StartStream(m_stream1) < 0)
+        if (ret[1] < 0)
         {
             qCritical("LimeSDROutputThread::startWork: could not start stream 1");
             LMS_StopStream(m_stream0);
@@ -72,11 +73,11 @@ void LimeSDRMOThread::startWork()
         }
         else
         {
-            usleep(50000);
             qDebug("LimeSDROutputThread::startWork: stream 1 started");
         }
     }
 
+    usleep(50000);
     m_startWaitMutex.lock();
     start();
 
@@ -95,32 +96,29 @@ void LimeSDRMOThread::stopWork()
 
     m_running = false;
     wait();
+    int ret[2];
 
-    if (m_stream0)
+    ret[0] = LMS_StopStream(m_stream0);
+    ret[1] = LMS_StopStream(m_stream1);
+
+    if (ret[0] < 0)
     {
-        if (LMS_StopStream(m_stream0) < 0)
-        {
-            qCritical("LimeSDROutputThread::stopWork: could not stop stream 0");
-        }
-        else
-        {
-            usleep(50000);
-            qDebug("LimeSDROutputThread::stopWork: stream 0 stopped");
-        }
+        qCritical("LimeSDROutputThread::stopWork: could not stop stream 0");
+    } else {
+        qDebug("LimeSDROutputThread::stopWork: stream 0 stopped");
     }
 
     if (m_stream1)
     {
-        if (LMS_StopStream(m_stream1) < 0)
+        if (ret[1] < 0)
         {
             qCritical("LimeSDROutputThread::stopWork: could not stop stream 1");
-        }
-        else
-        {
-            usleep(50000);
+        } else {
             qDebug("LimeSDROutputThread::stopWork: stream 1 stopped");
         }
     }
+
+    usleep(50000);
 }
 
 void LimeSDRMOThread::setLog2Interpolation(unsigned int log2Interp)
@@ -136,47 +134,42 @@ unsigned int LimeSDRMOThread::getLog2Interpolation() const
 
 void LimeSDRMOThread::run()
 {
-    int res;
-
     lms_stream_meta_t metadata;          //Use metadata for additional control over sample receive function behaviour
     metadata.flushPartialPacket = false; //Do not discard data remainder when read size differs from packet size
     metadata.waitForTimestamp = false;   //Do not wait for specific timestamps
 
     m_running = true;
     m_startWaiter.wakeAll();
+    int res[2];
 
     while (m_running)
     {
         callback(m_buf, DeviceLimeSDR::blockSize);
 
+        res[0] = LMS_SendStream(m_stream0, (void *) &m_buf[0], DeviceLimeSDR::blockSize, &metadata, 1000000);
 
-        if (m_stream0)
+        if (res[0] < 0)
         {
-            res = LMS_SendStream(m_stream0, (void *) &m_buf[0], DeviceLimeSDR::blockSize, &metadata, 1000000);
-
-            if (res < 0)
-            {
-                qCritical("LimeSDROutputThread::run stream 0 write error: %s", strerror(errno));
-                break;
-            }
-            else if (res != DeviceLimeSDR::blockSize)
-            {
-                qDebug("LimeSDROutputThread::run stream 0 written %d/%d samples", res, DeviceLimeSDR::blockSize);
-            }
+            qCritical("LimeSDROutputThread::run stream 0 write error: %s", strerror(errno));
+            break;
+        }
+        else if (res[0] != DeviceLimeSDR::blockSize)
+        {
+            qDebug("LimeSDROutputThread::run stream 0 written %d/%u samples", res[0], DeviceLimeSDR::blockSize);
         }
 
         if (m_stream1)
         {
-            res = LMS_SendStream(m_stream1, (void *) &m_buf[2*DeviceLimeSDR::blockSize], DeviceLimeSDR::blockSize, &metadata, 1000000);
+            res[1] = LMS_SendStream(m_stream1, (void *) &m_buf[2*DeviceLimeSDR::blockSize], DeviceLimeSDR::blockSize, &metadata, 1000000);
 
-            if (res < 0)
+            if (res[1] < 0)
             {
                 qCritical("LimeSDROutputThread::run stream 1 write error: %s", strerror(errno));
                 break;
             }
-            else if (res != DeviceLimeSDR::blockSize)
+            else if (res[1] != DeviceLimeSDR::blockSize)
             {
-                qDebug("LimeSDROutputThread::run stream 1 written %d/%d samples", res, DeviceLimeSDR::blockSize);
+                qDebug("LimeSDROutputThread::run stream 1 written %d/%u samples", res[1], DeviceLimeSDR::blockSize);
             }
         }
     }

@@ -395,52 +395,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="LOppm_layout">
-     <item>
-      <widget class="QLabel" name="LOppmLabel">
-       <property name="text">
-        <string>LO ppm</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSlider" name="LOppm">
-       <property name="toolTip">
-        <string>Local Oscillator ppm correction</string>
-       </property>
-       <property name="minimum">
-        <number>-20</number>
-       </property>
-       <property name="maximum">
-        <number>20</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="LOppmText">
-       <property name="minimumSize">
-        <size>
-         <width>26</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>-0.0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="topMargin">
       <number>2</number>
@@ -925,7 +879,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Automatic global gain (dB)</string>
+        <string>Automatic global gain</string>
        </property>
        <property name="maximum">
         <number>70</number>
@@ -953,7 +907,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Automatic global gain</string>
+        <string>Automatic global gain (dB)</string>
        </property>
        <property name="text">
         <string>20</string>

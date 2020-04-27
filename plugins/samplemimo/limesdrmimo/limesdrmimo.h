@@ -67,14 +67,22 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgGetStreamInfo* create()
+        bool getRxElseTx() const { return m_rxElseTx; }
+        uint32_t getChannel() const { return m_channel; }
+
+        static MsgGetStreamInfo* create(bool rxElseTx, uint32_t channel)
         {
-            return new MsgGetStreamInfo();
+            return new MsgGetStreamInfo(rxElseTx, channel);
         }
 
     private:
-        MsgGetStreamInfo() :
-            Message()
+        bool     m_rxElseTx;
+        uint32_t m_channel;
+
+        MsgGetStreamInfo(bool rxElseTx, uint32_t channel) :
+            Message(),
+            m_rxElseTx(rxElseTx),
+            m_channel(channel)
         { }
     };
 

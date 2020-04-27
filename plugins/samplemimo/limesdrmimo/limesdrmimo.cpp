@@ -58,6 +58,8 @@ LimeSDRMIMO::LimeSDRMIMO(DeviceAPI *deviceAPI) :
         m_txChannelEnabled[channel] = false;
         m_rxStreamStarted[channel] = false;
         m_txStreamStarted[channel] = false;
+        m_rxStreams[channel].handle = 0;
+        m_txStreams[channel].handle = 0;
     }
 
     m_open = openDevice();
@@ -163,8 +165,8 @@ bool LimeSDRMIMO::setupRxStream(unsigned int channel)
     }
 
     // set up the stream
-    m_rxStreams[channel].channel =  channel; // channel number
-    m_rxStreams[channel].fifoSize = 1024 * 1024;              // fifo size in samples (SR / 10 take ~5MS/s)
+    m_rxStreams[channel].channel =  channel | LMS_ALIGN_CH_PHASE; // channel number
+    m_rxStreams[channel].fifoSize = 10 * 1024 * 1024;             // fifo size in samples (SR / 10 take ~5MS/s)
     m_rxStreams[channel].throughputVsLatency = 0.5;           // optimize for min latency
     m_rxStreams[channel].isTx = false;                        // RX channel
     m_rxStreams[channel].dataFmt = lms_stream_t::LMS_FMT_I12; // 12-bit integers
@@ -202,7 +204,7 @@ bool LimeSDRMIMO::setupTxStream(unsigned int channel)
     }
 
     // set up the stream
-    m_txStreams[channel].channel = channel; // channel number
+    m_txStreams[channel].channel = channel | LMS_ALIGN_CH_PHASE; // channel number
     m_txStreams[channel].fifoSize = 1024 * 1024;              // fifo size in samples (SR / 10 take ~5MS/s)
     m_txStreams[channel].throughputVsLatency = 0.5;           // optimize for min latency
     m_txStreams[channel].isTx = true;                         // TX channel
@@ -546,6 +548,87 @@ bool LimeSDRMIMO::handleMessage(const Message& message)
 
         return true;
     }
+    else if (MsgGetStreamInfo::match(message))
+    {
+        MsgGetStreamInfo& cmd = (MsgGetStreamInfo&) message;
+        lms_stream_status_t status;
+        lms_stream_t *stream;
+
+        if (cmd.getRxElseTx() && (cmd.getChannel() == 0) && m_rxStreams[0].handle) {
+            stream = &m_rxStreams[0];
+        } else if (cmd.getRxElseTx() && (cmd.getChannel() == 1) && m_rxStreams[1].handle) {
+            stream = &m_rxStreams[1];
+        } else if (!cmd.getRxElseTx() && (cmd.getChannel() == 0) && m_txStreams[0].handle) {
+            stream = &m_txStreams[0];
+        } else if (!cmd.getRxElseTx() && (cmd.getChannel() == 1) && m_txStreams[1].handle) {
+            stream = &m_txStreams[1];
+        } else {
+            stream = nullptr;
+        }
+
+        if (stream && (LMS_GetStreamStatus(stream, &status) == 0))
+        {
+            if (getMessageQueueToGUI())
+            {
+                MsgReportStreamInfo *report = MsgReportStreamInfo::create(
+                        true, // Success
+                        status.active,
+                        status.fifoFilledCount,
+                        status.fifoSize,
+                        status.underrun,
+                        status.overrun,
+                        status.droppedPackets,
+                        status.linkRate,
+                        status.timestamp);
+                getMessageQueueToGUI()->push(report);
+            }
+        }
+        else
+        {
+            if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
+            {
+                MsgReportStreamInfo *report = MsgReportStreamInfo::create(
+                        false, // Success
+                        false, // status.active,
+                        0,     // status.fifoFilledCount,
+                        16384, // status.fifoSize,
+                        0,     // status.underrun,
+                        0,     // status.overrun,
+                        0,     // status.droppedPackets,
+                        0,     // status.linkRate,
+                        0);    // status.timestamp);
+                m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
+            }
+        }
+
+        return true;
+    }
+    else if (MsgGetDeviceInfo::match(message))
+    {
+        double temp = 0.0;
+        uint8_t gpioPins = 0;
+
+        if (m_deviceParams->getDevice() && (LMS_GetChipTemperature(m_deviceParams->getDevice(), 0, &temp) != 0)) {
+            qDebug("LimeSDRMIMO::handleMessage: MsgGetDeviceInfo: cannot get temperature");
+        }
+
+        if ((m_deviceParams->m_type != DeviceLimeSDRParams::LimeMini)
+            && (m_deviceParams->m_type != DeviceLimeSDRParams::LimeUndefined))
+        {
+            if (m_deviceParams->getDevice() && (LMS_GPIORead(m_deviceParams->getDevice(), &gpioPins, 1) != 0)) {
+                qDebug("LimeSDRMIMO::handleMessage: MsgGetDeviceInfo: cannot get GPIO pins values");
+            }
+        }
+
+        // send to oneself
+        if (getMessageQueueToGUI())
+        {
+            DeviceLimeSDRShared::MsgReportDeviceInfo *report = DeviceLimeSDRShared::MsgReportDeviceInfo::create(temp, gpioPins);
+            getMessageQueueToGUI()->push(report);
+        }
+
+        return true;
+    }
     else
     {
         return false;
@@ -571,7 +654,6 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
 
     qDebug() << "LimeSDRMIMO::applySettings: common:"
         << " m_devSampleRate: " << settings.m_devSampleRate
-        << " m_LOppmTenths: " << settings.m_LOppmTenths
         << " m_gpioDir: " << settings.m_gpioDir
         << " m_gpioPins: " << settings.m_gpioPins
         << " m_extClock: " << settings.m_extClock

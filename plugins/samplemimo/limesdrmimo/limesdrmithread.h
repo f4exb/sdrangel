@@ -54,7 +54,8 @@ private:
 
     lms_stream_t* m_stream0;
     lms_stream_t* m_stream1;
-    qint16 m_buf[2][2*DeviceLimeSDR::blockSize];
+    qint16 m_buf0[2*DeviceLimeSDR::blockSize];
+    qint16 m_buf1[2*DeviceLimeSDR::blockSize];
 	SampleVector m_convertBuffer[2];
     std::vector<SampleVector::const_iterator> m_vBegin;
     SampleMIFifo* m_sampleFifo;
