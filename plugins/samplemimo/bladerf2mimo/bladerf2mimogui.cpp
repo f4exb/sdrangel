@@ -165,6 +165,8 @@ bool BladeRF2MIMOGui::deserialize(const QByteArray& data)
 
 void BladeRF2MIMOGui::displaySettings()
 {
+    updateFrequencyLimits();
+
     if (m_rxElseTx)
     {
         ui->transverter->setDeltaFrequency(m_settings.m_rxTransverterDeltaFrequency);
