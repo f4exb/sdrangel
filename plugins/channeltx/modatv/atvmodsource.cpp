@@ -316,7 +316,7 @@ void ATVModSource::pullVideo(Real& sample)
             		        mixImageAndText(colorFrame);
             		    }
 
-            		    cv::cvtColor(colorFrame, m_videoframeOriginal, cv::COLOR_BGR2GRAY);
+            		    cv::cvtColor(colorFrame, m_videoframeOriginal, cv::COLOR_RGB2GRAY);
             		    resizeVideo();
             		}
             	}
@@ -443,7 +443,7 @@ void ATVModSource::pullVideo(Real& sample)
                         mixImageAndText(colorFrame);
                     }
 
-                    cv::cvtColor(colorFrame, camera.m_videoframeOriginal, cv::COLOR_BGR2GRAY);
+                    cv::cvtColor(colorFrame, camera.m_videoframeOriginal, cv::COLOR_RGB2GRAY);
                     resizeCamera();
                 }
 
@@ -648,7 +648,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
 
 void ATVModSource::openImage(const QString& fileName)
 {
-    m_imageFromFile = cv::imread(qPrintable(fileName), cv::IMREAD_GRAYSCALE);
+    m_imageFromFile = cv::imread(qPrintable(fileName), cv::ImreadModes::IMREAD_GRAYSCALE);
 	m_imageOK = m_imageFromFile.data != 0;
 
 	if (m_imageOK)
