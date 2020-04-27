@@ -17,7 +17,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # configure version
 set(sdrangel_VERSION_MAJOR "5")
-set(sdrangel_VERSION_MINOR "4")
+set(sdrangel_VERSION_MINOR "5")
 set(sdrangel_VERSION_PATCH "0")
 set(sdrangel_VERSION_SUFFIX "")
 

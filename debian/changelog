@@ -1,3 +1,12 @@
+sdrangel (5.5.0-1) unstable; urgency=medium
+
+   * LimeSDR MIMO support. Implements issue #462
+   * DATV demod: applied some recent changes in leansdr
+   * Fixed incorrect frequency display when transverter is engaged. Fixes issue #509
+   * ATV mod: Ubuntu 20.04 OpenCV code compatibility. Fixes issue #511
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 27 Apr 2020 10:01:15 +0200
+
 sdrangel (5.4.0-1) unstable; urgency=medium
 
   * XTRX MIMO support. Fixes issue #507
