@@ -4,7 +4,7 @@
 
 This input sample source plugin gets its samples from a [LimeSDR device](https://myriadrf.org/projects/limesdr/).
 
-&#9758; LimeSuite 19.01.0 is used in the binary builds and the Docker image. You have to make sure the corresponding gateware version is loaded in the LimeSDR. Check LimeSDR documentation for information about gateware.
+&#9758; LimeSuite 20.01.0 is used in the binary builds and the Docker image. You have to make sure the corresponding gateware version is loaded in the LimeSDR. Check LimeSDR documentation for information about gateware.
 
 <p>&#9888; LimeSDR-Mini seems to have problems with Zadig driver therefore this plugin will work in Linux only.</p>
 
@@ -202,12 +202,19 @@ Use this button to adjust the gain of tha PGA when manual gain mode is set (8.1)
 
 <h3>9: Antenna select</h3>
 
-Use this combo box to select the antenna input:
+Use this combo box to select the reception path:
 
   - **No**: None
-  - **Lo**: Selects the low frequency input (700 to 900 MHz nominally)
-  - **Hi**: Selects the high frequency input (2 to 2.6 GHz)
-  - **Wo**: Selects the wideband input
+  - **NC**: Not connected
+  - **Lo**: Selects the low frequency input
+    - **LimeMini**: lower than 2 GHz
+    - **other**: lower than 1.5 GHz
+  - **Hi**: Selects the high frequency input
+    - **LimeUSB**: higher than 2 GHz
+    - **other**: higher than 1.5 GHz
+  - **Wi**: Selects the wideband input
+    - **LimeUSB**: not connected
+    - **other**: full band
   - **T1**: Selects loopback from TX #1 (experimental)
   - **T1**: Selects loopback from TX #2 (experimental)
 
