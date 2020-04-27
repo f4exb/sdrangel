@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QWidget>
 #include <QNetworkRequest>
 
@@ -113,7 +113,7 @@ private:
 	uint32_t m_lastSampleCount;
 	uint64_t m_lastTimestampUs;
     bool m_resetCounts;
-    QTime m_time;
+    QElapsedTimer m_time;
 
     QPalette m_paletteGreenText;
     QPalette m_paletteRedText;
