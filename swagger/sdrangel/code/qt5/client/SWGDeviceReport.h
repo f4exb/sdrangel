@@ -29,6 +29,7 @@
 #include "SWGFileInputReport.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGLimeSdrInputReport.h"
+#include "SWGLimeSdrMIMOReport.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLocalInputReport.h"
 #include "SWGLocalOutputReport.h"
@@ -92,6 +93,9 @@ public:
 
     SWGLimeSdrOutputReport* getLimeSdrOutputReport();
     void setLimeSdrOutputReport(SWGLimeSdrOutputReport* lime_sdr_output_report);
+
+    SWGLimeSdrMIMOReport* getLimeSdrMimoReport();
+    void setLimeSdrMimoReport(SWGLimeSdrMIMOReport* lime_sdr_mimo_report);
 
     SWGLocalInputReport* getLocalInputReport();
     void setLocalInputReport(SWGLocalInputReport* local_input_report);
@@ -168,6 +172,9 @@ private:
 
     SWGLimeSdrOutputReport* lime_sdr_output_report;
     bool m_lime_sdr_output_report_isSet;
+
+    SWGLimeSdrMIMOReport* lime_sdr_mimo_report;
+    bool m_lime_sdr_mimo_report_isSet;
 
     SWGLocalInputReport* local_input_report;
     bool m_local_input_report_isSet;

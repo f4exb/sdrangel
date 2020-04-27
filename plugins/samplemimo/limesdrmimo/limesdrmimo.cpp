@@ -20,6 +20,13 @@
 #include <QNetworkAccessManager>
 #include <QBuffer>
 
+#include "SWGDeviceSettings.h"
+#include "SWGLimeSdrMIMOSettings.h"
+#include "SWGDeviceState.h"
+#include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
+#include "SWGLimeSdrMIMOReport.h"
+
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
@@ -1712,13 +1719,159 @@ void LimeSDRMIMO::getTxLPFRange(int& min, int& max, int& step)
     step = m_deviceParams->m_lpfRangeTx.step;
 }
 
+int LimeSDRMIMO::webapiSettingsGet(
+    SWGSDRangel::SWGDeviceSettings& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setLimeSdrMimoSettings(new SWGSDRangel::SWGLimeSdrMIMOSettings());
+    response.getLimeSdrMimoSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int LimeSDRMIMO::webapiSettingsPutPatch(
+    bool force,
+    const QStringList& deviceSettingsKeys,
+    SWGSDRangel::SWGDeviceSettings& response, // query + response
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    LimeSDRMIMOSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
+
+    MsgConfigureLimeSDRMIMO *msg = MsgConfigureLimeSDRMIMO::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureLimeSDRMIMO *msgToGUI = MsgConfigureLimeSDRMIMO::create(settings, force);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
+}
+
+int LimeSDRMIMO::webapiReportGet(
+        SWGSDRangel::SWGDeviceReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setLimeSdrMimoReport(new SWGSDRangel::SWGLimeSdrMIMOReport());
+    response.getLimeSdrMimoReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+int LimeSDRMIMO::webapiRunGet(
+    int subsystemIndex,
+    SWGSDRangel::SWGDeviceState& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    return 200;
+}
+
+int LimeSDRMIMO::webapiRun(
+    bool run,
+    int subsystemIndex,
+    SWGSDRangel::SWGDeviceState& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    m_deviceAPI->getDeviceEngineStateStr(*response.getState());
+    MsgStartStop *message = MsgStartStop::create(run, subsystemIndex == 0);
+    m_inputMessageQueue.push(message);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgStartStop *msgToGUI = MsgStartStop::create(run, subsystemIndex == 0);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
+
+    return 200;
+}
+
 void LimeSDRMIMO::webapiFormatDeviceSettings(
     SWGSDRangel::SWGDeviceSettings& response,
     const LimeSDRMIMOSettings& settings)
 {
-    // TODO
-    (void) response;
-    (void) settings;
+    // Common
+    response.getLimeSdrMimoSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getLimeSdrMimoSettings()->setExtClock(settings.m_extClock ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setExtClockFreq(settings.m_extClockFreq);
+
+    if (response.getLimeSdrMimoSettings()->getFileRecordName()) {
+        *response.getLimeSdrMimoSettings()->getFileRecordName() = settings.m_fileRecordName;
+    } else {
+        response.getLimeSdrMimoSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+
+    response.getLimeSdrMimoSettings()->setGpioDir(settings.m_gpioDir);
+    response.getLimeSdrMimoSettings()->setGpioPins(settings.m_gpioPins);
+    response.getLimeSdrMimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getLimeSdrMimoSettings()->getReverseApiAddress()) {
+        *response.getLimeSdrMimoSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getLimeSdrMimoSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getLimeSdrMimoSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getLimeSdrMimoSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+
+    // Rx
+    response.getLimeSdrMimoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
+    response.getLimeSdrMimoSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setLog2HardDecim(settings.m_log2HardDecim);
+    response.getLimeSdrMimoSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getLimeSdrMimoSettings()->setNcoEnableRx(settings.m_ncoEnableRx ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setNcoFrequencyRx(settings.m_ncoFrequencyRx);
+    response.getLimeSdrMimoSettings()->setRxTransverterDeltaFrequency(settings.m_rxTransverterDeltaFrequency);
+    response.getLimeSdrMimoSettings()->setRxTransverterMode(settings.m_rxTransverterMode ? 1 : 0);
+    // Rx0
+    response.getLimeSdrMimoSettings()->setAntennaPathRx0((int) settings.m_antennaPathRx0);
+    response.getLimeSdrMimoSettings()->setGainRx0(settings.m_gainRx0);
+    response.getLimeSdrMimoSettings()->setGainModeRx0((int) settings.m_gainModeRx0);
+    response.getLimeSdrMimoSettings()->setLnaGainRx0(settings.m_lnaGainRx0);
+    response.getLimeSdrMimoSettings()->setTiaGainRx0(settings.m_tiaGainRx0);
+    response.getLimeSdrMimoSettings()->setPgaGainRx0(settings.m_pgaGainRx0);
+    response.getLimeSdrMimoSettings()->setLpfBwRx0(settings.m_lpfBWRx0);
+    response.getLimeSdrMimoSettings()->setLpfFirEnableRx0(settings.m_lpfFIREnableRx0 ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setLpfFirbwRx0(settings.m_lpfFIRBWRx0);
+    // Rx1
+    response.getLimeSdrMimoSettings()->setAntennaPathRx1((int) settings.m_antennaPathRx1);
+    response.getLimeSdrMimoSettings()->setGainRx1(settings.m_gainRx1);
+    response.getLimeSdrMimoSettings()->setGainModeRx1((int) settings.m_gainModeRx1);
+    response.getLimeSdrMimoSettings()->setLnaGainRx1(settings.m_lnaGainRx1);
+    response.getLimeSdrMimoSettings()->setTiaGainRx1(settings.m_tiaGainRx1);
+    response.getLimeSdrMimoSettings()->setPgaGainRx1(settings.m_pgaGainRx1);
+    response.getLimeSdrMimoSettings()->setLpfBwRx1(settings.m_lpfBWRx1);
+    response.getLimeSdrMimoSettings()->setLpfFirEnableRx1(settings.m_lpfFIREnableRx1 ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setLpfFirbwRx1(settings.m_lpfFIRBWRx1);
+    // Tx
+    response.getLimeSdrMimoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
+    response.getLimeSdrMimoSettings()->setLog2HardInterp(settings.m_log2HardInterp);
+    response.getLimeSdrMimoSettings()->setLog2SoftInterp(settings.m_log2SoftInterp);
+    response.getLimeSdrMimoSettings()->setNcoEnableTx(settings.m_ncoEnableTx ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setNcoFrequencyTx(settings.m_ncoFrequencyTx);
+    response.getLimeSdrMimoSettings()->setTxTransverterDeltaFrequency(settings.m_txTransverterDeltaFrequency);
+    response.getLimeSdrMimoSettings()->setTxTransverterMode(settings.m_txTransverterMode ? 1 : 0);
+    // Tx0
+    response.getLimeSdrMimoSettings()->setAntennaPathTx0((int) settings.m_antennaPathTx0);
+    response.getLimeSdrMimoSettings()->setGainTx0(settings.m_gainTx0);
+    response.getLimeSdrMimoSettings()->setLpfBwTx0(settings.m_lpfBWTx0);
+    response.getLimeSdrMimoSettings()->setLpfFirEnableTx0(settings.m_lpfFIREnableTx0 ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setLpfFirbwTx0(settings.m_lpfFIRBWTx0);
+    // Tx1
+    response.getLimeSdrMimoSettings()->setAntennaPathTx1((int) settings.m_antennaPathTx1);
+    response.getLimeSdrMimoSettings()->setGainTx1(settings.m_gainTx1);
+    response.getLimeSdrMimoSettings()->setLpfBwTx1(settings.m_lpfBWTx1);
+    response.getLimeSdrMimoSettings()->setLpfFirEnableTx1(settings.m_lpfFIREnableTx1 ? 1 : 0);
+    response.getLimeSdrMimoSettings()->setLpfFirbwTx1(settings.m_lpfFIRBWTx1);
 }
 
 void LimeSDRMIMO::webapiUpdateDeviceSettings(
@@ -1726,8 +1879,480 @@ void LimeSDRMIMO::webapiUpdateDeviceSettings(
     const QStringList& deviceSettingsKeys,
     SWGSDRangel::SWGDeviceSettings& response)
 {
-    // TODO
-    (void) settings;
-    (void) deviceSettingsKeys;
-    (void) response;
+    // Common
+    if (deviceSettingsKeys.contains("devSampleRate")) {
+        settings.m_devSampleRate = response.getLimeSdrMimoSettings()->getDevSampleRate();
+    }
+    if (deviceSettingsKeys.contains("extClock")) {
+        settings.m_extClock = response.getLimeSdrMimoSettings()->getExtClock() != 0;
+    }
+    if (deviceSettingsKeys.contains("extClockFreq")) {
+        settings.m_extClockFreq = response.getLimeSdrMimoSettings()->getExtClockFreq();
+    }
+    if (deviceSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getLimeSdrMimoSettings()->getFileRecordName();
+    }
+    if (deviceSettingsKeys.contains("gpioDir")) {
+        settings.m_gpioDir = response.getLimeSdrMimoSettings()->getGpioDir() & 0xFF;
+    }
+    if (deviceSettingsKeys.contains("gpioPins")) {
+        settings.m_gpioPins = response.getLimeSdrMimoSettings()->getGpioPins() & 0xFF;
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getLimeSdrMimoSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getLimeSdrMimoSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getLimeSdrMimoSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getLimeSdrMimoSettings()->getReverseApiDeviceIndex();
+    }
+
+    // Rx
+    if (deviceSettingsKeys.contains("rxCenterFrequency")) {
+        settings.m_rxCenterFrequency = response.getLimeSdrMimoSettings()->getRxCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("dcBlock")) {
+        settings.m_dcBlock = response.getLimeSdrMimoSettings()->getDcBlock() != 0;
+    }
+    if (deviceSettingsKeys.contains("iqCorrection")) {
+        settings.m_iqCorrection = response.getLimeSdrMimoSettings()->getIqCorrection() != 0;
+    }
+    if (deviceSettingsKeys.contains("log2HardDecim")) {
+        settings.m_log2HardDecim = response.getLimeSdrMimoSettings()->getLog2HardDecim();
+    }
+    if (deviceSettingsKeys.contains("log2SoftDecim")) {
+        settings.m_log2SoftDecim = response.getLimeSdrMimoSettings()->getLog2SoftDecim();
+    }
+    if (deviceSettingsKeys.contains("ncoEnableRx")) {
+        settings.m_ncoEnableRx = response.getLimeSdrMimoSettings()->getNcoEnableRx() != 0;
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyRx")) {
+        settings.m_ncoFrequencyRx = response.getLimeSdrMimoSettings()->getNcoFrequencyRx();
+    }
+    if (deviceSettingsKeys.contains("rxTransverterDeltaFrequency")) {
+        settings.m_rxTransverterDeltaFrequency = response.getLimeSdrMimoSettings()->getRxTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("rxTransverterMode")) {
+        settings.m_rxTransverterMode = response.getLimeSdrMimoSettings()->getRxTransverterMode() != 0;
+    }
+
+    // Rx0
+    if (deviceSettingsKeys.contains("antennaPathRx0")) {
+        settings.m_antennaPathRx0 = (LimeSDRMIMOSettings::PathRxRFE) response.getLimeSdrMimoSettings()->getAntennaPathRx0();
+    }
+    if (deviceSettingsKeys.contains("gainModeRx0")) {
+        settings.m_gainModeRx0 = (LimeSDRMIMOSettings::RxGainMode) response.getLimeSdrMimoSettings()->getGainModeRx0();
+    }
+    if (deviceSettingsKeys.contains("gainRx0")) {
+        settings.m_gainRx0 = response.getLimeSdrMimoSettings()->getGainRx0();
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx0")) {
+        settings.m_lnaGainRx0 = response.getLimeSdrMimoSettings()->getLnaGainRx0();
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx0")) {
+        settings.m_tiaGainRx0 = response.getLimeSdrMimoSettings()->getTiaGainRx0();
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx0")) {
+        settings.m_pgaGainRx0 = response.getLimeSdrMimoSettings()->getPgaGainRx0();
+    }
+    if (deviceSettingsKeys.contains("lpfBWRx0")) {
+        settings.m_lpfBWRx0 = response.getLimeSdrMimoSettings()->getLpfBwRx0();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableRx0")) {
+        settings.m_lpfFIREnableRx0 = response.getLimeSdrMimoSettings()->getLpfFirEnableRx0() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWRx0")) {
+        settings.m_lpfFIRBWRx0 = response.getLimeSdrMimoSettings()->getLpfFirbwRx0();
+    }
+
+    // Rx1
+    if (deviceSettingsKeys.contains("antennaPathRx1")) {
+        settings.m_antennaPathRx1 = (LimeSDRMIMOSettings::PathRxRFE) response.getLimeSdrMimoSettings()->getAntennaPathRx1();
+    }
+    if (deviceSettingsKeys.contains("gainModeRx1")) {
+        settings.m_gainModeRx1 = (LimeSDRMIMOSettings::RxGainMode) response.getLimeSdrMimoSettings()->getGainModeRx1();
+    }
+    if (deviceSettingsKeys.contains("gainRx1")) {
+        settings.m_gainRx1 = response.getLimeSdrMimoSettings()->getGainRx1();
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx1")) {
+        settings.m_lnaGainRx1 = response.getLimeSdrMimoSettings()->getLnaGainRx1();
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx1")) {
+        settings.m_tiaGainRx1 = response.getLimeSdrMimoSettings()->getTiaGainRx1();
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx1")) {
+        settings.m_pgaGainRx1 = response.getLimeSdrMimoSettings()->getPgaGainRx1();
+    }
+    if (deviceSettingsKeys.contains("lpfBWRx1")) {
+        settings.m_lpfBWRx1 = response.getLimeSdrMimoSettings()->getLpfBwRx1();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableRx1")) {
+        settings.m_lpfFIREnableRx1 = response.getLimeSdrMimoSettings()->getLpfFirEnableRx1() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWRx1")) {
+        settings.m_lpfFIRBWRx1 = response.getLimeSdrMimoSettings()->getLpfFirbwRx1();
+    }
+
+    // Tx
+    if (deviceSettingsKeys.contains("txCenterFrequency")) {
+        settings.m_txCenterFrequency = response.getLimeSdrMimoSettings()->getTxCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("log2HardInterp")) {
+        settings.m_log2HardInterp = response.getLimeSdrMimoSettings()->getLog2HardInterp();
+    }
+    if (deviceSettingsKeys.contains("log2SoftInterp")) {
+        settings.m_log2SoftInterp = response.getLimeSdrMimoSettings()->getLog2SoftInterp();
+    }
+    if (deviceSettingsKeys.contains("ncoEnableTx")) {
+        settings.m_ncoEnableTx = response.getLimeSdrMimoSettings()->getNcoEnableTx() != 0;
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyTx")) {
+        settings.m_ncoFrequencyTx = response.getLimeSdrMimoSettings()->getNcoFrequencyTx();
+    }
+    if (deviceSettingsKeys.contains("txTransverterDeltaFrequency")) {
+        settings.m_txTransverterDeltaFrequency = response.getLimeSdrMimoSettings()->getTxTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("txTransverterMode")) {
+        settings.m_txTransverterMode = response.getLimeSdrMimoSettings()->getTxTransverterMode() != 0;
+    }
+
+    // Tx0
+    if (deviceSettingsKeys.contains("antennaPathTx0")) {
+        settings.m_antennaPathTx0 = (LimeSDRMIMOSettings::PathTxRFE) response.getLimeSdrMimoSettings()->getAntennaPathTx0();
+    }
+    if (deviceSettingsKeys.contains("gainTx0")) {
+        settings.m_gainTx0 = response.getLimeSdrMimoSettings()->getGainTx0();
+    }
+    if (deviceSettingsKeys.contains("lpfBWTx0")) {
+        settings.m_lpfBWTx0 = response.getLimeSdrMimoSettings()->getLpfBwTx0();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableTx0")) {
+        settings.m_lpfFIREnableTx0 = response.getLimeSdrMimoSettings()->getLpfFirEnableTx0() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWTx0")) {
+        settings.m_lpfFIRBWTx0 = response.getLimeSdrMimoSettings()->getLpfFirbwTx0();
+    }
+
+    // Tx1
+    if (deviceSettingsKeys.contains("antennaPathTx1")) {
+        settings.m_antennaPathTx1 = (LimeSDRMIMOSettings::PathTxRFE) response.getLimeSdrMimoSettings()->getAntennaPathTx0();
+    }
+    if (deviceSettingsKeys.contains("gainTx1")) {
+        settings.m_gainTx1 = response.getLimeSdrMimoSettings()->getGainTx1();
+    }
+    if (deviceSettingsKeys.contains("lpfBWTx1")) {
+        settings.m_lpfBWTx1 = response.getLimeSdrMimoSettings()->getLpfBwTx1();
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableTx1")) {
+        settings.m_lpfFIREnableTx1 = response.getLimeSdrMimoSettings()->getLpfFirEnableTx1() != 0;
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWTx1")) {
+        settings.m_lpfFIRBWTx1 = response.getLimeSdrMimoSettings()->getLpfFirbwTx1();
+    }
+}
+
+void LimeSDRMIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    bool success = false;
+    double temp = 0.0;
+    uint8_t gpioDir = 0;
+    uint8_t gpioPins = 0;
+    lms_stream_status_t status;
+    status.active = false;
+    status.fifoFilledCount = 0;
+    status.fifoSize = 1;
+    status.underrun = 0;
+    status.overrun = 0;
+    status.droppedPackets = 0;
+    status.linkRate = 0.0;
+    status.timestamp = 0;
+
+    if (m_rxStreams[0].handle) {
+        success = (m_rxStreams[0].handle && (LMS_GetStreamStatus(&m_rxStreams[0], &status) == 0));
+    }
+
+    response.getLimeSdrMimoReport()->setSuccessRx(success ? 1 : 0);
+    response.getLimeSdrMimoReport()->setStreamActiveRx(status.active ? 1 : 0);
+    response.getLimeSdrMimoReport()->setFifoSizeRx(status.fifoSize);
+    response.getLimeSdrMimoReport()->setFifoFillRx(status.fifoFilledCount);
+    response.getLimeSdrMimoReport()->setUnderrunCountRx(status.underrun);
+    response.getLimeSdrMimoReport()->setOverrunCountRx(status.overrun);
+    response.getLimeSdrMimoReport()->setDroppedPacketsCountRx(status.droppedPackets);
+    response.getLimeSdrMimoReport()->setLinkRateRx(status.linkRate);
+    response.getLimeSdrMimoReport()->setHwTimestamp(status.timestamp);
+
+    if (m_deviceParams->getDevice())
+    {
+        LMS_GetChipTemperature(m_deviceParams->getDevice(), 0, &temp);
+        LMS_GPIODirRead(m_deviceParams->getDevice(), &gpioDir, 1);
+        LMS_GPIORead(m_deviceParams->getDevice(), &gpioPins, 1);
+    }
+
+    response.getLimeSdrMimoReport()->setTemperature(temp);
+    response.getLimeSdrMimoReport()->setGpioDir(gpioDir);
+    response.getLimeSdrMimoReport()->setGpioPins(gpioPins);
+
+    success = false;
+    status.active = false;
+    status.fifoFilledCount = 0;
+    status.fifoSize = 1;
+    status.underrun = 0;
+    status.overrun = 0;
+    status.droppedPackets = 0;
+    status.linkRate = 0.0;
+
+    if (m_txStreams[0].handle) {
+        success = (m_txStreams[0].handle && (LMS_GetStreamStatus(&m_txStreams[0], &status) == 0));
+    }
+
+    response.getLimeSdrMimoReport()->setSuccessTx(success ? 1 : 0);
+    response.getLimeSdrMimoReport()->setStreamActiveTx(status.active ? 1 : 0);
+    response.getLimeSdrMimoReport()->setFifoSizeTx(status.fifoSize);
+    response.getLimeSdrMimoReport()->setFifoFillTx(status.fifoFilledCount);
+    response.getLimeSdrMimoReport()->setUnderrunCountTx(status.underrun);
+    response.getLimeSdrMimoReport()->setOverrunCountTx(status.overrun);
+    response.getLimeSdrMimoReport()->setDroppedPacketsCountTx(status.droppedPackets);
+    response.getLimeSdrMimoReport()->setLinkRateTx(status.linkRate);
+}
+
+void LimeSDRMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const LimeSDRMIMOSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(2); // MIMO
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("LimeSDR"));
+    swgDeviceSettings->setLimeSdrMimoSettings(new SWGSDRangel::SWGLimeSdrMIMOSettings());
+    SWGSDRangel::SWGLimeSdrMIMOSettings *swgLimeSdrMIMOSettings = swgDeviceSettings->getLimeSdrMimoSettings();
+
+    // Common
+    if (deviceSettingsKeys.contains("devSampleRate") || force) {
+        swgLimeSdrMIMOSettings->setDevSampleRate(settings.m_devSampleRate);
+    }
+    if (deviceSettingsKeys.contains("extClock") || force) {
+        swgLimeSdrMIMOSettings->setExtClock(settings.m_extClock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("extClockFreq") || force) {
+        swgLimeSdrMIMOSettings->setExtClockFreq(settings.m_extClockFreq);
+    }
+    if (deviceSettingsKeys.contains("fileRecordName") || force) {
+        swgLimeSdrMIMOSettings->setFileRecordName(new QString(settings.m_fileRecordName));
+    }
+    if (deviceSettingsKeys.contains("gpioDir") || force) {
+        swgLimeSdrMIMOSettings->setGpioDir(settings.m_gpioDir & 0xFF);
+    }
+    if (deviceSettingsKeys.contains("gpioPins") || force) {
+        swgLimeSdrMIMOSettings->setGpioPins(settings.m_gpioPins & 0xFF);
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI") || force) {
+        swgLimeSdrMIMOSettings->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress") || force) {
+        swgLimeSdrMIMOSettings->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort") || force) {
+        swgLimeSdrMIMOSettings->setReverseApiPort(settings.m_reverseAPIPort);
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex") || force) {
+        swgLimeSdrMIMOSettings->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    }
+
+    // Rx
+    if (deviceSettingsKeys.contains("rxCenterFrequency") || force) {
+        swgLimeSdrMIMOSettings->setRxCenterFrequency(settings.m_rxCenterFrequency);
+    }
+    if (deviceSettingsKeys.contains("dcBlock") || force) {
+        swgLimeSdrMIMOSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("iqCorrection") || force) {
+        swgLimeSdrMIMOSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("log2HardDecim") || force) {
+        swgLimeSdrMIMOSettings->setLog2HardDecim(settings.m_log2HardDecim);
+    }
+    if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
+        swgLimeSdrMIMOSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("ncoEnableRx") || force) {
+        swgLimeSdrMIMOSettings->setNcoEnableRx(settings.m_ncoEnableRx ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyRx") || force) {
+        swgLimeSdrMIMOSettings->setNcoFrequencyRx(settings.m_ncoFrequencyRx);
+    }
+    if (deviceSettingsKeys.contains("rxTransverterDeltaFrequency") || force) {
+        swgLimeSdrMIMOSettings->setRxTransverterDeltaFrequency(settings.m_rxTransverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("rxTransverterMode") || force) {
+        swgLimeSdrMIMOSettings->setRxTransverterMode(settings.m_rxTransverterMode ? 1 : 0);
+    }
+
+    // Rx0
+    if (deviceSettingsKeys.contains("antennaPathRx0") || force) {
+        swgLimeSdrMIMOSettings->setAntennaPathRx0((int) settings.m_antennaPathRx0);
+    }
+    if (deviceSettingsKeys.contains("gainModeRx0") || force) {
+        swgLimeSdrMIMOSettings->setGainModeRx0((int) settings.m_gainModeRx0);
+    }
+    if (deviceSettingsKeys.contains("gainRx0") || force) {
+        swgLimeSdrMIMOSettings->setGainRx0(settings.m_gainRx0);
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx0") || force) {
+        swgLimeSdrMIMOSettings->setLnaGainRx0(settings.m_lnaGainRx0);
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx0") || force) {
+        swgLimeSdrMIMOSettings->setTiaGainRx0(settings.m_tiaGainRx0);
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx0") || force) {
+        swgLimeSdrMIMOSettings->setPgaGainRx0(settings.m_pgaGainRx0);
+    }
+    if (deviceSettingsKeys.contains("lpfBWRx0") || force) {
+        swgLimeSdrMIMOSettings->setLpfBwRx0(settings.m_lpfBWRx0);
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableRx0") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirEnableRx0(settings.m_lpfFIREnableRx0 ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWRx0") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirbwRx0(settings.m_lpfFIRBWRx0);
+    }
+
+    // Rx1
+    if (deviceSettingsKeys.contains("antennaPathRx1") || force) {
+        swgLimeSdrMIMOSettings->setAntennaPathRx1((int) settings.m_antennaPathRx1);
+    }
+    if (deviceSettingsKeys.contains("gainModeRx1") || force) {
+        swgLimeSdrMIMOSettings->setGainModeRx1((int) settings.m_gainModeRx1);
+    }
+    if (deviceSettingsKeys.contains("gainRx1") || force) {
+        swgLimeSdrMIMOSettings->setGainRx1(settings.m_gainRx1);
+    }
+    if (deviceSettingsKeys.contains("lnaGainRx1") || force) {
+        swgLimeSdrMIMOSettings->setLnaGainRx1(settings.m_lnaGainRx1);
+    }
+    if (deviceSettingsKeys.contains("tiaGainRx1") || force) {
+        swgLimeSdrMIMOSettings->setTiaGainRx1(settings.m_tiaGainRx1);
+    }
+    if (deviceSettingsKeys.contains("pgaGainRx1") || force) {
+        swgLimeSdrMIMOSettings->setPgaGainRx1(settings.m_pgaGainRx1);
+    }
+    if (deviceSettingsKeys.contains("lpfBWRx1") || force) {
+        swgLimeSdrMIMOSettings->setLpfBwRx1(settings.m_lpfBWRx1);
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableRx1") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirEnableRx1(settings.m_lpfFIREnableRx1 ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWRx1") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirbwRx1(settings.m_lpfFIRBWRx1);
+    }
+
+    // Tx
+    if (deviceSettingsKeys.contains("txCenterFrequency") || force) {
+        swgLimeSdrMIMOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
+    }
+    if (deviceSettingsKeys.contains("log2HardInterp") || force) {
+        swgLimeSdrMIMOSettings->setLog2HardInterp(settings.m_log2HardInterp);
+    }
+    if (deviceSettingsKeys.contains("log2SoftInterp") || force) {
+        swgLimeSdrMIMOSettings->setLog2SoftInterp(settings.m_log2SoftInterp);
+    }
+    if (deviceSettingsKeys.contains("ncoEnableTx") || force) {
+        swgLimeSdrMIMOSettings->setNcoEnableTx(settings.m_ncoEnableTx ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("ncoFrequencyTx") || force) {
+        swgLimeSdrMIMOSettings->setNcoFrequencyTx(settings.m_ncoFrequencyTx);
+    }
+    if (deviceSettingsKeys.contains("txTransverterDeltaFrequency") || force) {
+        swgLimeSdrMIMOSettings->setTxTransverterDeltaFrequency(settings.m_txTransverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("txTransverterMode") || force) {
+        swgLimeSdrMIMOSettings->setTxTransverterMode(settings.m_txTransverterMode ? 1 : 0);
+    }
+
+    // Tx0
+    if (deviceSettingsKeys.contains("antennaPathTx0") || force) {
+        swgLimeSdrMIMOSettings->setAntennaPathTx0((int) settings.m_antennaPathTx0);
+    }
+    if (deviceSettingsKeys.contains("gainTx0") || force) {
+        swgLimeSdrMIMOSettings->setGainTx0(settings.m_gainTx0);
+    }
+    if (deviceSettingsKeys.contains("lpfBWTx0") || force) {
+        swgLimeSdrMIMOSettings->setLpfBwTx0(settings.m_lpfBWTx0);
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableTx0") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirEnableTx0(settings.m_lpfFIREnableTx0 ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWTx0") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirbwTx0(settings.m_lpfFIRBWTx0);
+    }
+
+    // Tx1
+    if (deviceSettingsKeys.contains("antennaPathTx1") || force) {
+        swgLimeSdrMIMOSettings->setAntennaPathTx1((int) settings.m_antennaPathTx1);
+    }
+    if (deviceSettingsKeys.contains("gainTx1") || force) {
+        swgLimeSdrMIMOSettings->setGainTx1(settings.m_gainTx1);
+    }
+    if (deviceSettingsKeys.contains("lpfBWTx1") || force) {
+        swgLimeSdrMIMOSettings->setLpfBwTx1(settings.m_lpfBWTx1);
+    }
+    if (deviceSettingsKeys.contains("lpfFIREnableTx1") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirEnableTx1(settings.m_lpfFIREnableTx1 ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("lpfFIRBWTx1") || force) {
+        swgLimeSdrMIMOSettings->setLpfFirbwTx1(settings.m_lpfFIRBWTx1);
+    }
+}
+
+void LimeSDRMIMO::webapiReverseSendStartStop(bool start)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(2); // MIMO
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("LimeSDR"));
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+    QNetworkReply *reply;
+
+    if (start) {
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+    } else {
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+    }
+
+    buffer->setParent(reply);
+    delete swgDeviceSettings;
+}
+
+void LimeSDRMIMO::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "LimeSDRMIMO::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("LimeSDRMIMO::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    }
+
+    reply->deleteLater();
 }

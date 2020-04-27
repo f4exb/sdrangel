@@ -114,6 +114,209 @@ LimeSdrOutputSettings:
     reverseAPIDeviceIndex:
       type: integer
 
+LimeSdrMIMOSettings:
+  description: LimeSDR
+  properties:
+    # General
+    devSampleRate:
+      type: integer
+    gpioDir:
+      description: GPIO pin direction LSB first; 0 input, 1 output
+      type: integer
+      format: int8
+    gpioPins:
+      description: GPIO pins to write; LSB first
+      type: integer
+      format: int8
+    extClock:
+      description: Boolean 1 if external clock source else 0
+      type: integer
+    extClockFreq:
+      description: Frequency (Hz) of external clock source
+      type: integer
+    fileRecordName:
+      type: string
+    useReverseAPI:
+      description: Boolean
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    # Rx general
+    rxCenterFrequency:
+      type: integer
+      format: int64
+    log2HardDecim:
+      type: integer
+    log2SoftDecim:
+      type: integer
+    dcBlock:
+      description: Boolean
+      type: integer
+    iqCorrection:
+      description: Boolean
+      type: integer
+    rxTransverterMode:
+      description: Boolean
+      type: integer
+    rxTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    ncoEnableRx:
+      description: Boolean 1 to enable TSP NCO and mixing else 0
+      type: integer
+    ncoFrequencyRx:
+      description: Rx Actual NCO frequency (the resulting frequency with mixing is displayed)
+      type: integer
+    # Rx channel 0
+    lpfBWRx0:
+      description: Rx[0] LMS analog lowpass filter bandwidth (Hz)
+      type: number
+      format: float
+    lpfFIREnableRx0:
+      description: Boolean 1 to enable Rx[0] LMS digital lowpass FIR filters else 0
+      type: integer
+    lpfFIRBWRx0:
+      description: Rx[0] LMS digital lowpass FIR filters bandwidth (Hz)
+      type: number
+      format: float
+
+    gainRx0:
+      description: Rx[0] Optimally distributed gain (dB)
+      type: integer
+    antennaPathRx0:
+      description: >
+        Rx[0] Antenna connection (PathRxRFE):
+          * 0 - None
+          * 1 - LNA High
+          * 2 - LNA low
+          * 3 - LNA Wide
+          * 4 - LB TX1
+          * 5 - LB TX2
+      type: integer
+    gainModeRx0:
+      description: >
+        Rx[0] Gain mode:
+          * 0 - auto
+          * 1 - manual
+      type: integer
+    lnaGainRx0:
+      description: Rx[0] Manual LNA gain
+      type: integer
+    tiaGainRx0:
+      description: Rx[0] Manual TIA gain
+      type: integer
+    pgaGainRx0:
+      description: Rx[0] Manual PGA gain
+      type: integer
+    # Rx channel 1
+    lpfBWRx1:
+      description: Rx[1] LMS analog lowpass filter bandwidth (Hz)
+      type: number
+      format: float
+    lpfFIREnableRx1:
+      description: Boolean 1 to enable Rx[1] LMS digital lowpass FIR filters else 0
+      type: integer
+    lpfFIRBWRx1:
+      description: Rx[1] LMS digital lowpass FIR filters bandwidth (Hz)
+      type: number
+      format: float
+    gainRx1:
+      description: Rx[1] Optimally distributed gain (dB)
+      type: integer
+    antennaPathRx1:
+      description: >
+        Rx[1] Antenna connection (PathRxRFE):
+          * 0 - None
+          * 1 - LNA High
+          * 2 - LNA low
+          * 3 - LNA Wide
+          * 4 - LB TX1
+          * 5 - LB TX2
+      type: integer
+    gainModeRx1:
+      description: >
+        Rx[1] Gain mode:
+          * 0 - auto
+          * 1 - manual
+      type: integer
+    lnaGainRx1:
+      description: Rx[1] Manual LNA gain
+      type: integer
+    tiaGainRx1:
+      description: Rx[1] Manual TIA gain
+      type: integer
+    pgaGainRx1:
+      description: Rx[1] Manual PGA gain
+      type: integer
+    # Tx general
+    txCenterFrequency:
+      type: integer
+      format: int64
+    log2HardInterp:
+      type: integer
+    log2SoftInterp:
+      type: integer
+    txTransverterMode:
+      description: Boolean
+      type: integer
+    txTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    ncoEnableTx:
+      description: Boolean 1 to enable TSP NCO and mixing else 0
+      type: integer
+    ncoFrequencyTx:
+      description: Tx Actual NCO frequency (the resulting frequency with mixing is displayed)
+      type: integer
+    # Tx channel 0
+    lpfBWTx0:
+      description: Tx[0] LMS analog lowpass filter bandwidth (Hz)
+      type: number
+      format: float
+    lpfFIREnableTx0:
+      description: Boolean 1 to enable Tx[0] LMS digital lowpass FIR filters else 0
+      type: integer
+    lpfFIRBWTx0:
+      description: Tx[0] LMS digital lowpass FIR filters bandwidth (Hz)
+      type: number
+      format: float
+    gainTx0:
+      description: Tx[0] Optimally distributed gain (dB)
+      type: integer
+    antennaPathTx0:
+      description: >
+        Tx[0] Antenna connection (PathTxRFE):
+          * 0 - None
+          * 1 - RF connector 1
+          * 2 - RF connector 2
+      type: integer
+    # Tx channel 1
+    lpfBWTx1:
+      description: Tx[1] LMS analog lowpass filter bandwidth (Hz)
+      type: number
+      format: float
+    lpfFIREnableTx1:
+      description: Boolean 1 to enable Tx[1] LMS digital lowpass FIR filters else 0
+      type: integer
+    lpfFIRBWTx1:
+      description: Tx[1] LMS digital lowpass FIR filters bandwidth (Hz)
+      type: number
+      format: float
+    gainTx1:
+      description: Tx[1] Optimally distributed gain (dB)
+      type: integer
+    antennaPathTx1:
+      description: >
+        Tx[1] Antenna connection (PathTxRFE):
+          * 0 - None
+          * 1 - RF connector 1
+          * 2 - RF connector 2
+      type: integer
+
 LimeSdrInputReport:
   description: LimeSDR
   properties:
@@ -195,3 +398,58 @@ LimeSdrOutputReport:
     gpioPins:
       type: integer
       format: int8
+
+LimeSdrMIMOReport:
+  description: LimeSDR
+  properties:
+    hwTimestamp:
+      description: Hardware timestamp
+      type: integer
+      format: uint64
+    temperature:
+      type: number
+      format: float
+    gpioDir:
+      type: integer
+      format: int8
+    gpioPins:
+      type: integer
+      format: int8
+    successRx:
+      description: 1 if Rx info was successfullt retrieved else 0
+      type: integer
+    streamActiveRx:
+      description: 1 if active else 0
+      type: integer
+    fifoSizeRx:
+      type: integer
+    fifoFillRx:
+      type: integer
+    underrunCountRx:
+      type: integer
+    overrunCountRx:
+      type: integer
+    droppedPacketsCountRx:
+      type: integer
+    linkRateRx:
+      type: number
+      format: float
+    successTx:
+      description: 1 if Tx info was successfullt retrieved else 0
+      type: integer
+    streamActiveTx:
+      description: 1 if active else 0
+      type: integer
+    fifoSizeTx:
+      type: integer
+    fifoFillTx:
+      type: integer
+    underrunCountTx:
+      type: integer
+    overrunCountTx:
+      type: integer
+    droppedPacketsCountTx:
+      type: integer
+    linkRateTx:
+      type: number
+      format: float

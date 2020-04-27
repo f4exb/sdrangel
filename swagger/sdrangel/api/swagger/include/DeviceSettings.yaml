@@ -44,6 +44,8 @@ DeviceSettings:
       $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
     limeSdrOutputSettings:
       $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+    limeSdrMIMOSettings:
+      $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
     localInputSettings:
       $ref: "http://localhost:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
     localOutputSettings:

@@ -2295,6 +2295,8 @@ definitions:
         $ref: "http://localhost:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
       limeSdrOutputReport:
         $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      limeSdrMIMOReport:
+        $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
       localInputReport:
         $ref: "http://localhost:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
       localOutputReport:

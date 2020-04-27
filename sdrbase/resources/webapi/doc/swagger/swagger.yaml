@@ -2295,6 +2295,8 @@ definitions:
         $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
       limeSdrOutputReport:
         $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      limeSdrMIMOReport:
+        $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
       localInputReport:
         $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputReport"
       localOutputReport:
