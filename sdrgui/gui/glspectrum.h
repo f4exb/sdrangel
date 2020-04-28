@@ -28,7 +28,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QMatrix4x4>
 #include <QGLWidget>
-#include "dsp/dsptypes.h"
+#include "dsp/glspectruminterface.h"
 #include "gui/scaleengine.h"
 #include "gui/glshadersimple.h"
 #include "gui/glshadertextured.h"
@@ -40,7 +40,7 @@
 class QOpenGLShaderProgram;
 class MessageQueue;
 
-class SDRGUI_API GLSpectrum : public QGLWidget {
+class SDRGUI_API GLSpectrum : public QGLWidget, public GLSpectrumInterface {
 	Q_OBJECT
 
 public:
@@ -61,8 +61,8 @@ public:
         quint32 m_sampleRate;
     };
 
-	GLSpectrum(QWidget* parent = NULL);
-	~GLSpectrum();
+	GLSpectrum(QWidget* parent = nullptr);
+	virtual ~GLSpectrum();
 
 	void setCenterFrequency(qint64 frequency);
 	void setSampleRate(qint32 sampleRate);
@@ -89,7 +89,7 @@ public:
 	void removeChannelMarker(ChannelMarker* channelMarker);
 	void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
-	void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
+	virtual void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
 	void clearSpectrumHistogram();
 
 	Real getWaterfallShare() const { return m_waterfallShare; }
