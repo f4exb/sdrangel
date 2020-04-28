@@ -41,7 +41,7 @@ Preset::Preset(const Preset& other) :
 
 void Preset::resetToDefaults()
 {
-    m_presetType == PresetSource; // Rx
+    m_presetType = PresetSource; // Rx
 	m_group = "default";
 	m_description = "no name";
 	m_centerFrequency = 0;

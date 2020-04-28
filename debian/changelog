@@ -1,3 +1,12 @@
+sdrangel (4.14.5-1) unstable; urgency=medium
+
+   * DATV demod: applied some recent changes in leansdr
+   * Fixed incorrect frequency display when transverter is engaged. Fixes issue #509
+   * ATV mod: Ubuntu 20.04 OpenCV code compatibility. Fixes issue #511
+   * Fixed some warnings from Mac ports compilation (2)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 28 Apr 2020 03:35:17 +0200
+
 sdrangel (4.14.4-1) unstable; urgency=medium
 
   * XTRX: REST API: fixed wrong setting object
