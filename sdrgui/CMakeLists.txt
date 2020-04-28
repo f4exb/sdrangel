@@ -56,7 +56,6 @@ set(sdrgui_SOURCES
 
     dsp/scopevis.cpp
     dsp/scopevisxy.cpp
-    dsp/spectrumvis.cpp
     dsp/spectrumscopecombovis.cpp
 
     device/deviceuiset.cpp
@@ -129,7 +128,6 @@ set(sdrgui_HEADERS
 
     dsp/scopevis.h
     dsp/scopevisxy.h
-    dsp/spectrumvis.h
     dsp/spectrumscopecombovis.h
 
     device/deviceuiset.h

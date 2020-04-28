@@ -156,17 +156,22 @@ GLSpectrum::~GLSpectrum()
 
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_waterfallBuffer != NULL) {
+	if (m_waterfallBuffer)
+    {
 		delete m_waterfallBuffer;
-		m_waterfallBuffer = NULL;
+		m_waterfallBuffer = nullptr;
 	}
-	if(m_histogramBuffer != NULL) {
+
+	if (m_histogramBuffer)
+    {
 		delete m_histogramBuffer;
-		m_histogramBuffer = NULL;
+		m_histogramBuffer = nullptr;
 	}
-	if(m_histogram != NULL) {
+
+	if (m_histogram)
+    {
 		delete[] m_histogram;
-		m_histogram = NULL;
+		m_histogram = nullptr;
 	}
 }
 
@@ -304,23 +309,27 @@ void GLSpectrum::setDisplayGrid(bool display)
 void GLSpectrum::setDisplayGridIntensity(int intensity)
 {
 	m_displayGridIntensity = intensity;
+
 	if (m_displayGridIntensity > 100) {
 		m_displayGridIntensity = 100;
 	} else if (m_displayGridIntensity < 0) {
 		m_displayGridIntensity = 0;
 	}
-	update();
+
+    update();
 }
 
 void GLSpectrum::setDisplayTraceIntensity(int intensity)
 {
 	m_displayTraceIntensity = intensity;
+
 	if (m_displayTraceIntensity > 100) {
 		m_displayTraceIntensity = 100;
 	} else if (m_displayTraceIntensity < 0) {
 		m_displayTraceIntensity = 0;
 	}
-	update();
+
+    update();
 }
 
 void GLSpectrum::setLinear(bool linear)
@@ -371,12 +380,14 @@ void GLSpectrum::newSpectrum(const std::vector<Real>& spectrum, int fftSize)
 
 	m_displayChanged = true;
 
-	if(m_changesPending) {
+	if (m_changesPending)
+    {
 		m_fftSize = fftSize;
 		return;
 	}
 
-	if(fftSize != m_fftSize) {
+	if (fftSize != m_fftSize)
+    {
 		m_fftSize = fftSize;
 		m_changesPending = true;
 		return;
@@ -388,15 +399,19 @@ void GLSpectrum::newSpectrum(const std::vector<Real>& spectrum, int fftSize)
 
 void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
 {
-	if(m_waterfallBufferPos < m_waterfallBuffer->height()) {
+	if (m_waterfallBufferPos < m_waterfallBuffer->height())
+    {
 		quint32* pix = (quint32*)m_waterfallBuffer->scanLine(m_waterfallBufferPos);
 
-		for(int i = 0; i < m_fftSize; i++) {
+		for (int i = 0; i < m_fftSize; i++)
+        {
 			int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
-			if(v > 239)
+
+            if (v > 239) {
 				v = 239;
-			else if(v < 0)
+            } else if (v < 0) {
 				v = 0;
+            }
 
 			*pix++ = m_waterfallPalette[(int)v];
 		}
@@ -522,7 +537,8 @@ void GLSpectrum::initializeGL()
 {
 	QOpenGLContext *glCurrentContext =  QOpenGLContext::currentContext();
 
-	if (glCurrentContext) {
+	if (glCurrentContext)
+    {
 		if (QOpenGLContext::currentContext()->isValid()) {
 			qDebug() << "GLSpectrum::initializeGL: context:"
 				<< " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
@@ -532,7 +548,9 @@ void GLSpectrum::initializeGL()
 		else {
 			qDebug() << "GLSpectrum::initializeGL: current context is invalid";
 		}
-	} else {
+	}
+    else
+    {
 		qCritical() << "GLSpectrum::initializeGL: no current context";
 		return;
 	}
@@ -1593,7 +1611,7 @@ void GLSpectrum::applyChanges()
 
 	bool fftSizeChanged = true;
 
-	if(m_waterfallBuffer != NULL) {
+	if (m_waterfallBuffer) {
 		fftSizeChanged = m_waterfallBuffer->width() != m_fftSize;
 	}
 
@@ -1601,7 +1619,7 @@ void GLSpectrum::applyChanges()
 
 	if (fftSizeChanged || windowSizeChanged)
 	{
-		if(m_waterfallBuffer != 0) {
+		if (m_waterfallBuffer) {
 			delete m_waterfallBuffer;
 		}
 
@@ -1614,13 +1632,15 @@ void GLSpectrum::applyChanges()
 
 	if(fftSizeChanged)
 	{
-		if(m_histogramBuffer != NULL) {
+		if (m_histogramBuffer)
+        {
 			delete m_histogramBuffer;
-			m_histogramBuffer = NULL;
+			m_histogramBuffer = nullptr;
 		}
-		if(m_histogram != NULL) {
+
+		if (m_histogram) {
 			delete[] m_histogram;
-			m_histogram = NULL;
+			m_histogram = nullptr;
 		}
 
 		m_histogramBuffer = new QImage(m_fftSize, 100, QImage::Format_RGB32);

@@ -1,9 +1,30 @@
-#include "dsp/spectrumvis.h"
-#include "gui/glspectrum.h"
-#include "dsp/dspcommands.h"
-#include "dsp/dspengine.h"
-#include "dsp/fftfactory.h"
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// Symbol synchronizer or symbol clock recovery mostly encapsulating             //
+// liquid-dsp's symsync "object"                                                 //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#include "glspectruminterface.h"
+#include "dspcommands.h"
+#include "dspengine.h"
+#include "fftfactory.h"
 #include "util/messagequeue.h"
+
+#include "spectrumvis.h"
 
 #define MAX_FFT_SIZE 4096
 
@@ -19,7 +40,7 @@ MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 
 const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
 
-SpectrumVis::SpectrumVis(Real scalef, GLSpectrum* glSpectrum) :
+SpectrumVis::SpectrumVis(Real scalef, GLSpectrumInterface* glSpectrum) :
 	BasebandSampleSink(),
 	m_fft(nullptr),
     m_fftEngineSequence(0),

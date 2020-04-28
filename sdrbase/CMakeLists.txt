@@ -126,6 +126,7 @@ set(sdrbase_SOURCES
     dsp/devicesamplesink.cpp
     dsp/devicesamplemimo.cpp
     dsp/devicesamplestatic.cpp
+    dsp/spectrumvis.cpp
 
     device/deviceapi.cpp
     device/deviceenumerator.cpp
@@ -268,6 +269,7 @@ set(sdrbase_HEADERS
     dsp/devicesamplesink.h
     dsp/devicesamplemimo.h
     dsp/devicesamplestatic.h
+    dsp/spectrumvis.h
 
     device/deviceapi.h
     device/deviceenumerator.h
