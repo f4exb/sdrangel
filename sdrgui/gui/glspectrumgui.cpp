@@ -231,6 +231,8 @@ void GLSpectrumGUI::applySettingsVis()
 	{
 	    m_spectrumVis->configure(m_messageQueueToVis,
 	            m_fftSize,
+                m_refLevel,
+                m_powerRange,
 	            m_fftOverlap,
 	            m_averagingNb,
 	            (SpectrumVis::AvgMode) m_averagingMode,
@@ -338,6 +340,8 @@ void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)
 	    m_glSpectrum->setReferenceLevel(refLevel);
         m_glSpectrum->setPowerRange(powerRange);
 	}
+
+    applySettingsVis();
 }
 
 void GLSpectrumGUI::on_levelRange_currentIndexChanged(int index)
@@ -352,6 +356,8 @@ void GLSpectrumGUI::on_levelRange_currentIndexChanged(int index)
         m_glSpectrum->setReferenceLevel(refLevel);
 	    m_glSpectrum->setPowerRange(powerRange);
 	}
+
+    applySettingsVis();
 }
 
 void GLSpectrumGUI::on_decay_valueChanged(int index)

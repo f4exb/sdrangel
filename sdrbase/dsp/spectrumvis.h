@@ -21,8 +21,9 @@
 #ifndef INCLUDE_SPECTRUMVIS_H
 #define INCLUDE_SPECTRUMVIS_H
 
-#include <dsp/basebandsamplesink.h>
 #include <QMutex>
+
+#include "dsp/basebandsamplesink.h"
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
 #include "export.h"
@@ -30,6 +31,7 @@
 #include "util/movingaverage2d.h"
 #include "util/fixedaverage2d.h"
 #include "util/max2d.h"
+#include "websockets/wsspectrum.h"
 
 class GLSpectrumInterface;
 class MessageQueue;
@@ -51,6 +53,8 @@ public:
 	public:
 		MsgConfigureSpectrumVis(
 		        int fftSize,
+                float refLevel,
+                float powerRange,
 		        int overlapPercent,
 		        unsigned int averageNb,
 		        AvgMode avgMode,
@@ -59,6 +63,8 @@ public:
 			Message(),
 			m_fftSize(fftSize),
 			m_overlapPercent(overlapPercent),
+            m_refLevel(refLevel),
+            m_powerRange(powerRange),
 			m_averageNb(averageNb),
             m_avgMode(avgMode),
 			m_window(window),
@@ -66,6 +72,8 @@ public:
 		{}
 
 		int getFFTSize() const { return m_fftSize; }
+        float getRefLevel() const { return m_refLevel; }
+        float getPowerRange() const { return m_powerRange; }
 		int getOverlapPercent() const { return m_overlapPercent; }
 		unsigned int getAverageNb() const { return m_averageNb; }
 		SpectrumVis::AvgMode getAvgMode() const { return m_avgMode; }
@@ -75,11 +83,32 @@ public:
 	private:
 		int m_fftSize;
 		int m_overlapPercent;
+        float m_refLevel;
+        float m_powerRange;
 		unsigned int m_averageNb;
 		SpectrumVis::AvgMode m_avgMode;
 		FFTWindow::Function m_window;
 		bool m_linear;
 	};
+
+    class MsgConfigureDSP : public Message
+    {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgConfigureDSP(uint64_t centerFrequency, int sampleRate) :
+            Message(),
+            m_centerFrequency(centerFrequency),
+            m_sampleRate(sampleRate)
+        {}
+
+        uint64_t getCenterFrequency() const { return m_centerFrequency; }
+        int getSampleRate() const { return m_sampleRate; }
+
+    private:
+        uint64_t m_centerFrequency;
+        int m_sampleRate;
+    };
 
     class MsgConfigureScalingFactor : public Message
     {
@@ -102,12 +131,15 @@ public:
 
 	void configure(MessageQueue* msgQueue,
 	        int fftSize,
+            float refLevel,
+            float powerRange,
 	        int overlapPercent,
 	        unsigned int averagingNb,
 	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool m_linear);
-    void setScalef(MessageQueue* msgQueue, Real scalef);
+    void configureDSP(uint64_t centerFrequency, int sampleRate);
+    void setScalef(Real scalef);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
@@ -124,6 +156,8 @@ private:
 	std::vector<Real> m_powerSpectrum;
 
 	std::size_t m_fftSize;
+    float m_refLevel;
+    float m_powerRange;
 	std::size_t m_overlapPercent;
 	std::size_t m_overlapSize;
 	std::size_t m_refillSize;
@@ -132,12 +166,16 @@ private:
 
 	Real m_scalef;
 	GLSpectrumInterface* m_glSpectrum;
+    WSSpectrum m_wsSpectrum;
 	MovingAverage2D<double> m_movingAverage;
 	FixedAverage2D<double> m_fixedAverage;
 	Max2D<double> m_max;
 	unsigned int m_averageNb;
 	AvgMode m_avgMode;
 	bool m_linear;
+
+    uint64_t m_centerFrequency;
+    int m_sampleRate;
 
 	Real m_ofs;
 	Real m_powFFTDiv;
@@ -146,11 +184,15 @@ private:
 	QMutex m_mutex;
 
 	void handleConfigure(int fftSize,
+            float refLevel,
+            float powerRange,
 	        int overlapPercent,
 	        unsigned int averageNb,
 	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool linear);
+    void handleConfigureDSP(uint64_t centerFrequency,
+            int sampleRate);
     void handleScalef(Real scalef);
 };
 

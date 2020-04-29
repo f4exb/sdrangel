@@ -163,6 +163,8 @@ set(sdrbase_SOURCES
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
 
+    websockets/wsspectrum.cpp
+
     mainparser.cpp
 
     resources/webapi.qrc
@@ -310,7 +312,9 @@ set(sdrbase_HEADERS
     webapi/webapiadapterbase.h
     webapi/webapiadapterinterface.h
     webapi/webapirequestmapper.h
-    webapi/webapiserver
+    webapi/webapiserver.h
+
+    websockets/wsspectrum.h
 
     mainparser.h
 )
@@ -343,6 +347,7 @@ target_link_libraries(sdrbase
     ${sdrbase_LIMERFE_LIB}
     Qt5::Core
     Qt5::Multimedia
+    Qt5::WebSockets
     httpserver
     qrtplib
     swagger
