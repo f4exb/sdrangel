@@ -74,7 +74,7 @@ DeviceUISet::~DeviceUISet()
 
 void DeviceUISet::setSpectrumScalingFactor(float scalef)
 {
-    m_spectrumVis->setScalef(m_spectrumVis->getInputMessageQueue(), scalef);
+    m_spectrumVis->setScalef(scalef);
 }
 
 void DeviceUISet::addChannelMarker(ChannelMarker* channelMarker)

@@ -37,8 +37,6 @@ class DSPEngine;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class Indicator;
-class SpectrumVis;
-class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
 class PluginAPI;

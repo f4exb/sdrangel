@@ -399,6 +399,8 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_spectrumVis->configure(
 	        m_spectrumVis->getInputMessageQueue(),
             64, // FFT size
+            0, // Ref level (dB)
+            100, // Power range (dB)
             10, // overlapping %
             0,  // number of averaging samples
             SpectrumVis::AvgModeNone,  // no averaging
