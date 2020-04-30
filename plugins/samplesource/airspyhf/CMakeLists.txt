@@ -48,7 +48,7 @@ add_library(${TARGET_NAME} SHARED
 	${airspyhf_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBAIRSPYHF_EXTERNAL)
     add_dependencies(${TARGET_NAME} airspyhf)
 endif()
 

@@ -57,7 +57,7 @@ add_library(${TARGET_NAME} SHARED
 	${dsddemod_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBDSDCC_EXTERNAL)
     add_dependencies(${TARGET_NAME} dsdcc)
 endif()
 
@@ -67,7 +67,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
     ${LIBDSDCC_LIBRARIES}
-    ${LIBMBE_LIBRARY}
+    ${LIBMBE_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

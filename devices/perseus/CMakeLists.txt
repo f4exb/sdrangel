@@ -19,7 +19,7 @@ add_library(perseusdevice SHARED
     ${perseusdevice_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBPERSEUS_EXTERNAL)
     add_dependencies(perseusdevice perseus)
 endif()
 

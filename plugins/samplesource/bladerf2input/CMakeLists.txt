@@ -49,7 +49,7 @@ add_library(${TARGET_NAME} SHARED
 	${bladerf2input_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBBLADERF_EXTERNAL)
     add_dependencies(${TARGET_NAME} bladerf)
 endif()
 

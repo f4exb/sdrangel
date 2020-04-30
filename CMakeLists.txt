@@ -108,6 +108,10 @@ if(NOT DEBUG_OUTPUT)
   add_definitions("-DQT_NO_DEBUG_OUTPUT")
 endif()
 
+if(ENABLE_EXTERNAL_LIBRARIES STREQUAL "AUTO")
+  set(AUTO_EXTERNAL_LIBRARIES ON CACHE INTERNAL "")
+endif(ENABLE_EXTERNAL_LIBRARIES)
+
 # declare build structures
 # !! change sdrbase/plugins/pluginmanager.cpp too !!
 set(SDRANGEL_BINARY_BIN_DIR "${CMAKE_BINARY_DIR}/bin")
