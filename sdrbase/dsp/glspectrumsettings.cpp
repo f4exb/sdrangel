@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "fftwindow.h"
 #include "util/simpleserializer.h"
 #include "glspectrumsettings.h"
 
@@ -56,7 +55,7 @@ QByteArray GLSpectrumSettings::serialize() const
 
 	s.writeS32(1, m_fftSize);
 	s.writeS32(2, m_fftOverlap);
-	s.writeS32(3, m_fftWindow);
+	s.writeS32(3, (int) m_fftWindow);
 	s.writeReal(4, m_refLevel);
 	s.writeReal(5, m_powerRange);
 	s.writeBool(6, m_displayWaterfall);
@@ -94,7 +93,8 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
     {
 		d.readS32(1, &m_fftSize, 1024);
 		d.readS32(2, &m_fftOverlap, 0);
-		d.readS32(3, &m_fftWindow, FFTWindow::Hanning);
+        d.readS32(3, &tmp, (int) FFTWindow::Hanning);
+		m_fftWindow = (FFTWindow::Function) tmp;
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
 		d.readBool(6, &m_displayWaterfall, true);

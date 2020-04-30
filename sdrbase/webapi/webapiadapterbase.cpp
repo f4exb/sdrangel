@@ -259,7 +259,7 @@ void WebAPIAdapterBase::webapiUpdatePreset(
             spectrumSettings.m_fftSize = apiPreset->getSpectrumConfig()->getFftSize();
         }
         if (spectrumIt->contains("fftWindow")) {
-            spectrumSettings.m_fftWindow = apiPreset->getSpectrumConfig()->getFftWindow();
+            spectrumSettings.m_fftWindow = (FFTWindow::Function) apiPreset->getSpectrumConfig()->getFftWindow();
         }
         if (spectrumIt->contains("histogramStroke")) {
             spectrumSettings.m_histogramStroke = apiPreset->getSpectrumConfig()->getHistogramStroke();

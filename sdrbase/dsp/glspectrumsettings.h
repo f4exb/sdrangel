@@ -15,10 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef SDRBASE_DSP_GLSPECTRUMSETTNGS_H
+#define SDRBASE_DSP_GLSPECTRUMSETTNGS_H
+
 #include <QByteArray>
 
 #include "export.h"
 #include "dsp/dsptypes.h"
+#include "dsp/fftwindow.h"
 #include "settings/serializable.h"
 
 class SDRBASE_API GLSpectrumSettings : public Serializable
@@ -34,7 +38,7 @@ public:
 
 	int m_fftSize;
 	int m_fftOverlap;
-	int m_fftWindow;
+	FFTWindow::Function m_fftWindow;
 	Real m_refLevel;
 	Real m_powerRange;
 	int m_decay;
@@ -67,3 +71,5 @@ public:
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);
     static int getAveragingIndex(int averagingValue, AveragingMode averagingMode);
 };
+
+#endif // SDRBASE_DSP_GLSPECTRUMSETTNGS_H
