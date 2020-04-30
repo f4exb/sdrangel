@@ -26,6 +26,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "util/message.h"
@@ -222,11 +223,11 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     double getMagSq() const;
     CWKeyer *getCWKeyer();
     void setLevelMeter(QObject *levelMeter);
     unsigned int getAudioSampleRate() const;
-    void setSpectrumSink(BasebandSampleSink *sampleSink);
     uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;
@@ -242,6 +243,7 @@ private:
     QThread *m_thread;
     SSBModBaseband* m_basebandSource;
     SSBModSettings m_settings;
+    SpectrumVis m_spectrumVis;
 
 	SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;

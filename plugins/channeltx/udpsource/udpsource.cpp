@@ -41,12 +41,14 @@ const QString UDPSource::m_channelId = "UDPSource";
 UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
+    m_spectrumVis(SDR_TX_SCALEF),
     m_settingsMutex(QMutex::Recursive)
 {
     setObjectName(m_channelId);
 
     m_thread = new QThread(this);
     m_basebandSource = new UDPSourceBaseband();
+    m_basebandSource->setSpectrumSink(&m_spectrumVis);
     m_basebandSource->moveToThread(m_thread);
 
     applySettings(m_settings, true);
@@ -127,11 +129,6 @@ bool UDPSource::handleMessage(const Message& cmd)
     }
 }
 
-void UDPSource::setSpectrumSink(BasebandSampleSink* spectrum)
-{
-    m_basebandSource->setSpectrumSink(spectrum);
-}
-
 void UDPSource::setSpectrum(bool enabled)
 {
     Message* cmd = UDPSourceBaseband::MsgUDPSourceSpectrum::create(enabled);
@@ -174,8 +171,10 @@ void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
     if ((settings.m_sampleFormat != m_settings.m_sampleFormat) || force) {
         reverseAPIKeys.append("sampleFormat");
     }
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force) {
+    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    {
         reverseAPIKeys.append("inputSampleRate");
+        m_spectrumVis.configureDSP(0, settings.m_inputSampleRate);
     }
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");

@@ -23,6 +23,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -64,7 +65,7 @@ public:
 	virtual ~UDPSink();
 	virtual void destroy() { delete this; }
 
-    void setSpectrum(BasebandSampleSink* spectrum) { m_basebandSink->setSpectrum(spectrum); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     void enableSpectrum(bool enable);
     void setSpectrumPositiveOnly(bool positiveOnly) { m_basebandSink->setSpectrumPositiveOnly(positiveOnly); }
 	double getMagSq() const { return m_basebandSink->getMagSq(); }
@@ -130,6 +131,7 @@ protected:
     QThread *m_thread;
     UDPSinkBaseband* m_basebandSink;
     UDPSinkSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     int m_channelSampleRate;

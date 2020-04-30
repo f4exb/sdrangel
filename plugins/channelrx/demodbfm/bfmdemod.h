@@ -25,6 +25,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -69,7 +70,7 @@ public:
 	BFMDemod(DeviceAPI *deviceAPI);
 	virtual ~BFMDemod();
     virtual void destroy() { delete this; }
-	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_basebandSink->setSpectrumSink(spectrumSink); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     void setBasebandMessageQueueToGUI(MessageQueue *messageQueue) { m_basebandSink->setMessageQueueToGUI(messageQueue); }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
@@ -142,6 +143,7 @@ private:
     QThread *m_thread;
     BFMDemodBaseband* m_basebandSink;
 	BFMDemodSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     static const int m_udpBlockSize;

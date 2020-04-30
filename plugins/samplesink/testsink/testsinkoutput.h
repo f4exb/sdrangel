@@ -25,6 +25,7 @@
 #include <fstream>
 
 #include "dsp/devicesamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "testsinksettings.h"
 
 class TestSinkThread;
@@ -104,17 +105,17 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
-    void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
 private:
     DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	TestSinkSettings m_settings;
+    SpectrumVis m_spectrumVis;
 	std::ofstream m_ofstream;
 	TestSinkThread* m_testSinkThread;
 	QString m_deviceDescription;
 	const QTimer& m_masterTimer;
-    BasebandSampleSink* m_spectrumSink;
 
 	void applySettings(const TestSinkSettings& settings, bool force = false);
 };

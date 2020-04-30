@@ -47,6 +47,34 @@ public:
         AvgModeMax
     };
 
+	SpectrumVis(Real scalef);
+	virtual ~SpectrumVis();
+
+    void setGLSpectrum(GLSpectrumInterface* glSpectrum) { m_glSpectrum = glSpectrum; }
+    void openWSSpectrum();
+    void closeWSSpectrum();
+
+	void configure(MessageQueue* msgQueue,
+	        int fftSize,
+            float refLevel,
+            float powerRange,
+	        int overlapPercent,
+	        unsigned int averagingNb,
+	        AvgMode averagingMode,
+	        FFTWindow::Function window,
+	        bool m_linear);
+    void configureDSP(uint64_t centerFrequency, int sampleRate);
+    void setScalef(Real scalef);
+    void configureWSSpectrum(const QString& address, uint16_t port);
+
+	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
+	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& message);
+
+private:
 	class MsgConfigureSpectrumVis : public Message {
 		MESSAGE_CLASS_DECLARATION
 
@@ -126,29 +154,41 @@ public:
         Real m_scalef;
     };
 
-	SpectrumVis(Real scalef, GLSpectrumInterface* glSpectrum = nullptr);
-	virtual ~SpectrumVis();
+    class MsgConfigureWSpectrumOpenClose : public Message
+    {
+		MESSAGE_CLASS_DECLARATION
 
-	void configure(MessageQueue* msgQueue,
-	        int fftSize,
-            float refLevel,
-            float powerRange,
-	        int overlapPercent,
-	        unsigned int averagingNb,
-	        AvgMode averagingMode,
-	        FFTWindow::Function window,
-	        bool m_linear);
-    void configureDSP(uint64_t centerFrequency, int sampleRate);
-    void setScalef(Real scalef);
+	public:
+        MsgConfigureWSpectrumOpenClose(bool openClose) :
+            Message(),
+            m_openClose(openClose)
+        {}
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-    virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
-	void feedTriggered(const SampleVector::const_iterator& triggerPoint, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual void start();
-	virtual void stop();
-	virtual bool handleMessage(const Message& message);
+        Real getOpenClose() const { return m_openClose; }
 
-private:
+    private:
+        bool m_openClose;
+    };
+
+    class MsgConfigureWSpectrum : public Message
+    {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+        MsgConfigureWSpectrum(const QString& address, uint16_t port) :
+            Message(),
+            m_address(address),
+            m_port(port)
+        {}
+
+        const QString& getAddress() const { return m_address; }
+        uint16_t getPort() const { return m_port; }
+
+    private:
+        QString m_address;
+        uint16_t m_port;
+    };
+
 	FFTEngine* m_fft;
 	FFTWindow m_window;
     unsigned int m_fftEngineSequence;
@@ -192,9 +232,11 @@ private:
 	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool linear);
+    void handleWSOpenClose(bool openClose);
     void handleConfigureDSP(uint64_t centerFrequency,
             int sampleRate);
     void handleScalef(Real scalef);
+    void handleConfigureWSSpectrum(const QString& address, uint16_t port);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

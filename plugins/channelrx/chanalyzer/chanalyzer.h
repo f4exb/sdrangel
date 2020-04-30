@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 #include "util/movingaverage.h"
@@ -58,7 +59,7 @@ public:
     ChannelAnalyzer(DeviceAPI *deviceAPI);
 	virtual ~ChannelAnalyzer();
 	virtual void destroy() { delete this; }
-	void setSampleSink(BasebandSampleSink* sampleSink) { m_basebandSink->setSampleSink(sampleSink); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
     int getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
     int getDecimation() const { return 1<<m_settings.m_log2Decim; }
@@ -99,6 +100,7 @@ private:
     QThread *m_thread;
     ChannelAnalyzerBaseband *m_basebandSink;
     ChannelAnalyzerSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
 	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);

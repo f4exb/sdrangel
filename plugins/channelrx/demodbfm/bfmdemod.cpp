@@ -48,12 +48,14 @@ const int BFMDemod::m_udpBlockSize = 512;
 BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
+    m_spectrumVis(SDR_RX_SCALEF),
     m_basebandSampleRate(0)
 {
 	setObjectName(m_channelId);
 
     m_thread = new QThread(this);
     m_basebandSink = new BFMDemodBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);

@@ -275,9 +275,9 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_freeDVDemod = (FreeDVDemod*) rxChannel;
-	m_freeDVDemod->setSampleSink(m_spectrumVis);
+    m_spectrumVis = m_freeDVDemod->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_freeDVDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_freeDVDemod->propagateMessageQueueToGUI();
 
@@ -332,7 +332,6 @@ FreeDVDemodGUI::~FreeDVDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_freeDVDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
-	delete m_spectrumVis;
 	delete ui;
 }
 

@@ -34,6 +34,7 @@ const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0)
 {
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
@@ -41,6 +42,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new ChannelAnalyzerBaseband();
+    m_basebandSink->setSampleSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);
