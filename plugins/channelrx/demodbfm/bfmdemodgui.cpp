@@ -117,7 +117,6 @@ bool BFMDemodGUI::handleMessage(const Message& message)
         qDebug("BFMDemodGUI::handleMessage: BFMDemodReport::MsgReportChannelSampleRateChanged: %d S/s", m_rate);
         ui->glSpectrum->setCenterFrequency(m_rate / 4);
         ui->glSpectrum->setSampleRate(m_rate / 2);
-        m_spectrumVis->configureDSP(m_rate / 4, m_rate / 2);
         return true;
     }
     else if (BFMDemod::MsgConfigureBFMDemod::match(message))
@@ -407,7 +406,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
             SpectrumVis::AvgModeNone,  // no averaging
 	        FFTWindow::BlackmanHarris,
 	        false); // logarithmic scale
-    m_spectrumVis->configureDSP(m_rate / 4, m_rate / 2);
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
