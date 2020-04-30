@@ -25,6 +25,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 #include "util/udpsinkutil.h"
@@ -200,7 +201,7 @@ public:
 	ChirpChatDemod(DeviceAPI* deviceAPI);
 	virtual ~ChirpChatDemod();
 	virtual void destroy() { delete this; }
-	void setSpectrumSink(BasebandSampleSink* sampleSink) { m_basebandSink->setSpectrumSink(sampleSink); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO);
 	virtual void start();
@@ -262,6 +263,7 @@ private:
     ChirpChatDemodBaseband* m_basebandSink;
     ChirpChatDemodDecoder m_decoder;
     ChirpChatDemodSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     float m_lastMsgSignalDb;
     float m_lastMsgNoiseDb;

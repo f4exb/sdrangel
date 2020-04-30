@@ -402,9 +402,9 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_chirpChatDemod = (ChirpChatDemod*) rxChannel;
-	m_chirpChatDemod->setSpectrumSink(m_spectrumVis);
+    m_spectrumVis = m_chirpChatDemod->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_chirpChatDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
@@ -446,7 +446,6 @@ ChirpChatDemodGUI::~ChirpChatDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_chirpChatDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
-	delete m_spectrumVis;
 	delete ui;
 }
 

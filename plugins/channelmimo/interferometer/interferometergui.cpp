@@ -129,18 +129,18 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_scopeVis = new ScopeVis(ui->glScope);
 
     m_interferometer = (Interferometer*) channelMIMO;
+    m_spectrumVis = m_interferometer->getSpectrumVis();
     m_interferometer->setScopeSink(m_scopeVis);
-    m_interferometer->setSpectrumSink(m_spectrumVis);
     m_interferometer->setMessageQueueToGUI(getInputMessageQueue());
     m_sampleRate = m_interferometer->getDeviceSampleRate();
 
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
     ui->glSpectrum->setCenterFrequency(0);
+    ui->glSpectrum->setSampleRate(m_sampleRate);
 	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
     ui->glScope->setTraceModulo(Interferometer::m_fftSize);
@@ -183,7 +183,6 @@ InterferometerGUI::~InterferometerGUI()
 {
     m_deviceUISet->removeChannelInstance(this);
     delete m_interferometer; // TODO: check this: when the GUI closes it has to delete the demodulator
-	delete m_spectrumVis;
 	delete m_scopeVis;
     delete ui;
 }

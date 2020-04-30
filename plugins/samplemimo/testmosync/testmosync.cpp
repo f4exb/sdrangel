@@ -39,12 +39,12 @@ MESSAGE_CLASS_DEFINITION(TestMOSync::MsgStartStop, Message)
 
 TestMOSync::TestMOSync(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_spectrumVis(SDR_TX_SCALEF),
 	m_settings(),
     m_sinkThread(nullptr),
 	m_deviceDescription("TestMOSync"),
     m_runningTx(false),
     m_masterTimer(deviceAPI->getMasterTimer()),
-    m_spectrumSink(nullptr),
     m_feedSpectrumIndex(0)
 {
     m_mimoType = MIMOHalfSynchronous;
@@ -81,7 +81,7 @@ bool TestMOSync::startTx()
     m_sinkThread->setFcPos(m_settings.m_fcPosTx);
     m_sinkThread->setSamplerate(m_settings.m_sampleRate);
     m_sinkThread->setLog2Interpolation(m_settings.m_log2Interp);
-    m_sinkThread->setSpectrumSink(m_spectrumSink);
+    m_sinkThread->setSpectrumSink(&m_spectrumVis);
     m_sinkThread->setFeedSpectrumIndex(m_feedSpectrumIndex);
     m_sinkThread->connectTimer(m_masterTimer);
 	m_sinkThread->startWork();

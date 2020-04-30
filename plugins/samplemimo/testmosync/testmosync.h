@@ -25,6 +25,7 @@
 #include <QTimer>
 
 #include "dsp/devicesamplemimo.h"
+#include "dsp/spectrumvis.h"
 #include "testmosyncsettings.h"
 
 class DeviceAPI;
@@ -141,20 +142,20 @@ public:
             const QStringList& deviceSettingsKeys,
             SWGSDRangel::SWGDeviceSettings& response);
 
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     bool getRxRunning() const { return false; }
     bool getTxRunning() const { return m_runningTx; }
-    void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
     void setFeedSpectrumIndex(unsigned int  feedSpectrumIndex);
 
 private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
+    SpectrumVis m_spectrumVis;
 	TestMOSyncSettings m_settings;
     TestMOSyncThread* m_sinkThread;
 	QString m_deviceDescription;
 	bool m_runningTx;
     const QTimer& m_masterTimer;
-    BasebandSampleSink* m_spectrumSink;
     unsigned int m_feedSpectrumIndex;
 
 	bool applySettings(const TestMOSyncSettings& settings, bool force);

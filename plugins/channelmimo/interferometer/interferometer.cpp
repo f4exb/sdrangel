@@ -40,7 +40,7 @@ const int Interferometer::m_fftSize = 4096;
 Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),
     m_deviceAPI(deviceAPI),
-    m_spectrumSink(nullptr),
+    m_spectrumVis(SDR_RX_SCALEF),
     m_scopeSink(nullptr),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
@@ -50,6 +50,7 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new InterferometerBaseband(m_fftSize);
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
     m_deviceAPI->addMIMOChannel(this);
     m_deviceAPI->addMIMOChannelAPI(this);
@@ -68,12 +69,6 @@ Interferometer::~Interferometer()
     m_deviceAPI->removeMIMOChannel(this);
     delete m_basebandSink;
     delete m_thread;
-}
-
-void Interferometer::setSpectrumSink(BasebandSampleSink *spectrumSink)
-{
-    m_spectrumSink = spectrumSink;
-    m_basebandSink->setSpectrumSink(spectrumSink);
 }
 
 void Interferometer::setScopeSink(BasebandSampleSink *scopeSink)

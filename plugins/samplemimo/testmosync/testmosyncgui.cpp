@@ -58,8 +58,8 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(7, 32000U, 9000000U);
 
-    m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
-    m_sampleMIMO->setSpectrumSink(m_spectrumVis);
+    m_spectrumVis = m_sampleMIMO->getSpectrumVis();
+    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
     ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
@@ -82,7 +82,6 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 TestMOSyncGui::~TestMOSyncGui()
 {
-    delete m_spectrumVis;
 	delete ui;
 }
 

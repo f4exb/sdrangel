@@ -48,6 +48,7 @@ const QString ChirpChatDemod::m_channelId = "ChirpChatDemod";
 ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(0),
         m_lastMsgSignalDb(0.0),
         m_lastMsgNoiseDb(0.0),
@@ -68,6 +69,7 @@ ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new ChirpChatDemodBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->setDecoderMessageQueue(getInputMessageQueue()); // Decoder held on the main thread
     m_basebandSink->moveToThread(m_thread);
 
