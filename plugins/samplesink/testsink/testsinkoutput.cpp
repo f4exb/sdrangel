@@ -38,10 +38,10 @@ MESSAGE_CLASS_DEFINITION(TestSinkOutput::MsgStartStop, Message)
 TestSinkOutput::TestSinkOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
+    m_spectrumVis(SDR_TX_SCALEF),
 	m_testSinkThread(nullptr),
 	m_deviceDescription("TestSink"),
-	m_masterTimer(deviceAPI->getMasterTimer()),
-    m_spectrumSink(nullptr)
+	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_deviceAPI->setNbSinkStreams(1);
 }
@@ -67,7 +67,7 @@ bool TestSinkOutput::start()
 	qDebug() << "TestSinkOutput::start";
 
 	m_testSinkThread = new TestSinkThread(&m_sampleSourceFifo);
-    m_testSinkThread->setSpectrumSink(m_spectrumSink);
+    m_testSinkThread->setSpectrumSink(&m_spectrumVis);
 	m_testSinkThread->setSamplerate(m_settings.m_sampleRate);
 	m_testSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
 	m_testSinkThread->connectTimer(m_masterTimer);

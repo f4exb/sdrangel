@@ -44,6 +44,7 @@ const QString UDPSink::m_channelId = "UDPSink";
 UDPSink::UDPSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_spectrumVis(SDR_RX_SCALEF),
         m_channelSampleRate(48000),
         m_channelFrequencyOffset(0)
 {
@@ -51,6 +52,7 @@ UDPSink::UDPSink(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new UDPSinkBaseband();
+    m_basebandSink->setSpectrum(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);

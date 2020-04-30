@@ -419,9 +419,9 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
 	m_ssbMod = (SSBMod*) channelTx; //new SSBMod(m_deviceUISet->m_deviceSinkAPI);
-	m_ssbMod->setSpectrumSink(m_spectrumVis);
+    m_spectrumVis = m_ssbMod->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());
 
     resetToDefaults();
@@ -486,7 +486,6 @@ SSBModGUI::~SSBModGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
 	delete m_ssbMod; // TODO: check this: when the GUI closes it has to delete the modulator
-	delete m_spectrumVis;
 	delete ui;
 }
 

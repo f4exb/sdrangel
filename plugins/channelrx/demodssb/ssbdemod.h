@@ -25,6 +25,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -65,7 +66,7 @@ public:
 	SSBDemod(DeviceAPI *deviceAPI);
 	virtual ~SSBDemod();
 	virtual void destroy() { delete this; }
-	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_basebandSink->setSpectrumSink(spectrumSink); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -130,6 +131,7 @@ private:
     QThread *m_thread;
     SSBDemodBaseband* m_basebandSink;
     SSBDemodSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     QNetworkAccessManager *m_networkManager;

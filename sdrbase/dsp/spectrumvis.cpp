@@ -38,10 +38,12 @@ inline double log2f(double n)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureDSP, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
+MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
+MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrum, Message)
 
 const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
 
-SpectrumVis::SpectrumVis(Real scalef, GLSpectrumInterface* glSpectrum) :
+SpectrumVis::SpectrumVis(Real scalef) :
 	BasebandSampleSink(),
 	m_fft(nullptr),
     m_fftEngineSequence(0),
@@ -50,7 +52,7 @@ SpectrumVis::SpectrumVis(Real scalef, GLSpectrumInterface* glSpectrum) :
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
 	m_scalef(scalef),
-	m_glSpectrum(glSpectrum),
+	m_glSpectrum(nullptr),
 	m_averageNb(0),
 	m_avgMode(AvgModeNone),
 	m_linear(false),
@@ -62,13 +64,25 @@ SpectrumVis::SpectrumVis(Real scalef, GLSpectrumInterface* glSpectrum) :
 {
 	setObjectName("SpectrumVis");
 	handleConfigure(1024, 0, 100, 0, 0, AvgModeNone, FFTWindow::BlackmanHarris, false);
-    m_wsSpectrum.openSocket(); // FIXME: conditional
+    //m_wsSpectrum.openSocket(); // FIXME: conditional
 }
 
 SpectrumVis::~SpectrumVis()
 {
     FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
     fftFactory->releaseEngine(m_fftSize, false, m_fftEngineSequence);
+}
+
+void SpectrumVis::openWSSpectrum()
+{
+    MsgConfigureWSpectrumOpenClose *cmd = new MsgConfigureWSpectrumOpenClose(true);
+    getInputMessageQueue()->push(cmd);
+}
+
+void SpectrumVis::closeWSSpectrum()
+{
+    MsgConfigureWSpectrumOpenClose *cmd = new MsgConfigureWSpectrumOpenClose(false);
+    getInputMessageQueue()->push(cmd);
 }
 
 void SpectrumVis::configure(MessageQueue* msgQueue,
@@ -103,6 +117,12 @@ void SpectrumVis::configureDSP(uint64_t centerFrequency, int sampleRate)
 void SpectrumVis::setScalef(Real scalef)
 {
     MsgConfigureScalingFactor* cmd = new MsgConfigureScalingFactor(scalef);
+    getInputMessageQueue()->push(cmd);
+}
+
+void SpectrumVis::configureWSSpectrum(const QString& address, uint16_t port)
+{
+    MsgConfigureWSpectrum* cmd = new MsgConfigureWSpectrum(address, port);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -617,7 +637,17 @@ void SpectrumVis::stop()
 
 bool SpectrumVis::handleMessage(const Message& message)
 {
-	if (MsgConfigureSpectrumVis::match(message))
+    if (DSPSignalNotification::match(message))
+    {
+        // This is coming from device engine and will apply to main spectrum
+        DSPSignalNotification& notif = (DSPSignalNotification&) message;
+        qDebug() << "SpectrumVis::handleMessage: DSPSignalNotification:"
+            << " centerFrequency: " << notif.getCenterFrequency()
+            << " sampleRate: " << notif.getSampleRate();
+        handleConfigureDSP(notif.getCenterFrequency(), notif.getSampleRate());
+        return true;
+    }
+	else if (MsgConfigureSpectrumVis::match(message))
 	{
 		MsgConfigureSpectrumVis& conf = (MsgConfigureSpectrumVis&) message;
 		handleConfigure(conf.getFFTSize(),
@@ -632,6 +662,7 @@ bool SpectrumVis::handleMessage(const Message& message)
 	}
     else if (MsgConfigureDSP::match(message))
     {
+        // This is coming from plugins GUI via configureDSP for auxiliary spectra
         MsgConfigureDSP& conf = (MsgConfigureDSP&) message;
         handleConfigureDSP(conf.getCenterFrequency(), conf.getSampleRate());
         return true;
@@ -641,6 +672,15 @@ bool SpectrumVis::handleMessage(const Message& message)
         MsgConfigureScalingFactor& conf = (MsgConfigureScalingFactor&) message;
         handleScalef(conf.getScalef());
         return true;
+    }
+    else if (MsgConfigureWSpectrumOpenClose::match(message))
+    {
+        MsgConfigureWSpectrumOpenClose& conf = (MsgConfigureWSpectrumOpenClose&) message;
+        handleWSOpenClose(conf.getOpenClose());
+    }
+    else if (MsgConfigureWSpectrum::match(message)) {
+        MsgConfigureWSpectrum& conf = (MsgConfigureWSpectrum&) message;
+        handleConfigureWSSpectrum(conf.getAddress(), conf.getPort());
     }
 	else
 	{
@@ -707,4 +747,34 @@ void SpectrumVis::handleScalef(Real scalef)
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_scalef = scalef;
+}
+
+void SpectrumVis::handleWSOpenClose(bool openClose)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+
+    if (openClose) {
+        m_wsSpectrum.openSocket();
+    } else {
+        m_wsSpectrum.closeSocket();
+    }
+}
+
+void SpectrumVis::handleConfigureWSSpectrum(const QString& address, uint16_t port)
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    bool wsSpectrumWasOpen = false;
+
+    if (m_wsSpectrum.socketOpened())
+    {
+        m_wsSpectrum.closeSocket();
+        wsSpectrumWasOpen = true;
+    }
+
+    m_wsSpectrum.setListeningAddress(address);
+    m_wsSpectrum.setPort(port);
+
+    if (wsSpectrumWasOpen) {
+        m_wsSpectrum.openSocket();
+    }
 }

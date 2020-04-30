@@ -369,9 +369,9 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
 	m_freeDVMod = (FreeDVMod*) channelTx;
-	m_freeDVMod->setSpectrumSampleSink(m_spectrumVis);
+    m_spectrumVis = m_freeDVMod->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_freeDVMod->setMessageQueueToGUI(getInputMessageQueue());
 
     resetToDefaults();
@@ -419,7 +419,6 @@ FreeDVModGUI::~FreeDVModGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
 	delete m_freeDVMod; // TODO: check this: when the GUI closes it has to delete the modulator
-	delete m_spectrumVis;
 	delete ui;
 }
 

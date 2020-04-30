@@ -130,9 +130,9 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     setAttribute(Qt::WA_DeleteOnClose, true);
 
-    m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF, ui->glSpectrum);
     m_udpSource = (UDPSource*) channelTx;
-    m_udpSource->setSpectrumSink(m_spectrumVis);
+    m_spectrumVis = m_udpSource->getSpectrumVis();
+    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_udpSource->setMessageQueueToGUI(getInputMessageQueue());
 
     ui->fmDeviation->setEnabled(false);
@@ -185,7 +185,6 @@ UDPSourceGUI::~UDPSourceGUI()
 {
     m_deviceUISet->removeTxChannelInstance(this);
     delete m_udpSource; // TODO: check this: when the GUI closes it has to delete the modulator
-    delete m_spectrumVis;
     delete ui;
 }
 

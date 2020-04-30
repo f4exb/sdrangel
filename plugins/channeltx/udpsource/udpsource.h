@@ -22,6 +22,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesource.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "util/message.h"
@@ -141,11 +142,11 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     double getMagSq() const;
     double getInMagSq() const;
     int32_t getBufferGauge() const;
     bool getSquelchOpen() const;
-    void setSpectrumSink(BasebandSampleSink* spectrum);
     void setSpectrum(bool enabled);
     void resetReadIndex();
     void setLevelMeter(QObject *levelMeter);
@@ -162,6 +163,7 @@ private:
     QThread *m_thread;
     UDPSourceBaseband* m_basebandSource;
     UDPSourceSettings m_settings;
+    SpectrumVis m_spectrumVis;
 
     SampleVector m_sampleBuffer;
     QMutex m_settingsMutex;

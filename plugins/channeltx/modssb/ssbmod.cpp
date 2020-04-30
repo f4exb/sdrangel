@@ -53,6 +53,7 @@ const QString SSBMod::m_channelId = "SSBMod";
 SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
+    m_spectrumVis(SDR_TX_SCALEF),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -62,6 +63,7 @@ SSBMod::SSBMod(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSource = new SSBModBaseband();
+    m_basebandSource->setSpectrumSink(&m_spectrumVis);
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->moveToThread(m_thread);
 
@@ -695,11 +697,6 @@ void SSBMod::setLevelMeter(QObject *levelMeter)
 unsigned int SSBMod::getAudioSampleRate() const
 {
     return m_basebandSource->getAudioSampleRate();
-}
-
-void SSBMod::setSpectrumSink(BasebandSampleSink *sampleSink)
-{
-    m_basebandSource->setSpectrumSink(sampleSink);
 }
 
 uint32_t SSBMod::getNumberOfDeviceStreams() const

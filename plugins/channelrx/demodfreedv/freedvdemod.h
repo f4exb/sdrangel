@@ -23,6 +23,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 #include "util/doublebufferfifo.h"
@@ -76,7 +77,7 @@ public:
     FreeDVDemod(DeviceAPI *deviceAPI);
 	virtual ~FreeDVDemod();
 	virtual void destroy() { delete this; }
-	void setSampleSink(BasebandSampleSink* spectrumSink) { m_basebandSink->setSpectrumSink(spectrumSink); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
@@ -145,6 +146,7 @@ private:
     QThread *m_thread;
     FreeDVDemodBaseband *m_basebandSink;
     FreeDVDemodSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     QNetworkAccessManager *m_networkManager;

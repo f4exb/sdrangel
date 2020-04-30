@@ -52,6 +52,7 @@ const QString FreeDVMod::m_channelId = "FreeDVMod";
 FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
+    m_spectrumVis(SDR_TX_SCALEF),
 	m_settingsMutex(QMutex::Recursive),
 	m_fileSize(0),
 	m_recordLength(0),
@@ -61,6 +62,7 @@ FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSource = new FreeDVModBaseband();
+    m_basebandSource->setSpectrumSampleSink(&m_spectrumVis);
     m_basebandSource->setInputFileStream(&m_ifstream);
     m_basebandSource->moveToThread(m_thread);
 
@@ -620,11 +622,6 @@ void FreeDVMod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void FreeDVMod::setSpectrumSampleSink(BasebandSampleSink* sampleSink)
-{
-    m_basebandSource->setSpectrumSampleSink(sampleSink);
 }
 
 uint32_t FreeDVMod::getAudioSampleRate() const
