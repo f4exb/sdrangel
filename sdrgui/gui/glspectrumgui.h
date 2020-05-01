@@ -29,7 +29,8 @@ public:
 	explicit GLSpectrumGUI(QWidget* parent = NULL);
 	~GLSpectrumGUI();
 
-	void setBuddies(MessageQueue* messageQueue, SpectrumVis* spectrumVis, GLSpectrum* glSpectrum);
+	void setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum);
+    void setFFTSize(int log2FFTSize);
 
 	void resetToDefaults();
 	virtual QByteArray serialize() const;
@@ -38,7 +39,6 @@ public:
 private:
 	Ui::GLSpectrumGUI* ui;
 
-	MessageQueue* m_messageQueueToVis;
 	SpectrumVis* m_spectrumVis;
 	GLSpectrum* m_glSpectrum;
 	MessageQueue m_messageQueue;

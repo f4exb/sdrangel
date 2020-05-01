@@ -8,7 +8,6 @@
 GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	QWidget(parent),
 	ui(new Ui::GLSpectrumGUI),
-	m_messageQueueToVis(nullptr),
 	m_spectrumVis(nullptr),
 	m_glSpectrum(nullptr),
 	m_fftSize(1024),
@@ -50,9 +49,8 @@ GLSpectrumGUI::~GLSpectrumGUI()
 	delete ui;
 }
 
-void GLSpectrumGUI::setBuddies(MessageQueue* messageQueue, SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
+void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
-	m_messageQueueToVis = messageQueue;
 	m_spectrumVis = spectrumVis;
 	m_glSpectrum = glSpectrum;
 	m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
