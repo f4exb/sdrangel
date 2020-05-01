@@ -63,6 +63,7 @@ set(sdrgui_SOURCES
     gui/tvscreenanalog.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
+    gui/wsspectrumsettingsdialog.cpp
 
     dsp/scopevis.cpp
     dsp/scopevisxy.cpp
@@ -148,6 +149,7 @@ set(sdrgui_HEADERS
     gui/tvscreenanalog.h
     gui/valuedial.h
     gui/valuedialz.h
+    gui/wsspectrumsettingsdialog.h
 
     dsp/scopevis.h
     dsp/scopevisxy.h
@@ -196,10 +198,12 @@ set(sdrgui_FORMS
     gui/pluginsdialog.ui
     gui/audiodialog.ui
     gui/audioselectdialog.ui
+    gui/samplingdevicecontrol.ui
     gui/samplingdevicedialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui
     gui/loggingdialog.ui
+    gui/wsspectrumsettingsdialog.ui
     soapygui/discreterangegui.ui
     soapygui/intervalrangegui.ui
     soapygui/intervalslidergui.ui

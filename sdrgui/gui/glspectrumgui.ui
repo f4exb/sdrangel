@@ -695,6 +695,18 @@
       </widget>
      </item>
      <item>
+      <widget class="ButtonSwitch" name="wsSpectrum">
+       <property name="toolTip">
+        <string>Left: toggle websocket spectrum - Right: websocket spectrum parameters</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normalon>:/stream.png</normalon>
+        </iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
