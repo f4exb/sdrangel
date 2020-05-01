@@ -229,15 +229,15 @@ void GLSpectrumGUI::applySettingsVis()
 
 	if (m_spectrumVis)
 	{
-	    m_spectrumVis->configure(m_messageQueueToVis,
-	            m_fftSize,
-                m_refLevel,
-                m_powerRange,
-	            m_fftOverlap,
-	            m_averagingNb,
-	            (SpectrumVis::AvgMode) m_averagingMode,
-	            (FFTWindow::Function) m_fftWindow,
-	            m_linear
+	    m_spectrumVis->configure(
+            m_fftSize,
+            m_refLevel,
+            m_powerRange,
+            m_fftOverlap,
+            m_averagingNb,
+            (SpectrumVis::AvgMode) m_averagingMode,
+            (FFTWindow::Function) m_fftWindow,
+            m_linear
 		);
 	}
 
