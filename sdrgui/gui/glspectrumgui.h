@@ -71,8 +71,9 @@ private:
     void blockApplySettings(bool block);
 	void applySettings();
     void displaySettings();
-	int getAveragingIndex(int averaging) const;
-	int getAveragingValue(int averagingIndex) const;
+    static int getAveragingMaxScale(GLSpectrumSettings::AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
+	static int getAveragingIndex(int averaging, GLSpectrumSettings::AveragingMode averagingMode);
+	static int getAveragingValue(int averagingIndex, GLSpectrumSettings::AveragingMode averagingMode);
 	void setAveragingCombo();
 	void setNumberStr(int n, QString& s);
 	void setNumberStr(float v, int decimalPlaces, QString& s);
