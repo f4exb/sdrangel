@@ -15,10 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QMutexLocker>
 #include "fftfactory.h"
 
 FFTFactory::FFTFactory(const QString& fftwWisdomFileName) :
-    m_fftwWisdomFileName(fftwWisdomFileName)
+    m_fftwWisdomFileName(fftwWisdomFileName),
+    m_mutex(QMutex::Recursive)
 {}
 
 FFTFactory::~FFTFactory()
@@ -70,6 +72,7 @@ void FFTFactory::preallocate(
 
 unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine **engine)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     std::map<unsigned int, std::vector<AllocatedEngine>>& enginesBySize = inverse ?
         m_invFFTEngineBySize : m_fftEngineBySize;
 
@@ -121,6 +124,7 @@ unsigned int FFTFactory::getEngine(unsigned int fftSize, bool inverse, FFTEngine
 
 void FFTFactory::releaseEngine(unsigned int fftSize, bool inverse, unsigned int engineSequence)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     std::map<unsigned int, std::vector<AllocatedEngine>>& enginesBySize = inverse ?
         m_invFFTEngineBySize : m_fftEngineBySize;
 
