@@ -58,6 +58,8 @@ public:
 	int m_averagingIndex;
 	unsigned int m_averagingNb;
 	bool m_linear; //!< linear else logarithmic scale
+    QString m_wsSpectrumAddress;
+    uint16_t m_wsSpectrumPort;
 
     GLSpectrumSettings();
 	virtual ~GLSpectrumSettings();

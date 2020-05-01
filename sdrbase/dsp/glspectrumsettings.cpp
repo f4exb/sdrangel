@@ -47,6 +47,8 @@ void GLSpectrumSettings::resetToDefaults()
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
 	m_linear = false;
+    m_wsSpectrumAddress = "127.0.0.1";
+    m_wsSpectrumPort = 8887;
 }
 
 QByteArray GLSpectrumSettings::serialize() const
@@ -74,6 +76,8 @@ QByteArray GLSpectrumSettings::serialize() const
 	s.writeS32(19, (int) m_averagingMode);
 	s.writeS32(20, (qint32) getAveragingValue(m_averagingIndex, m_averagingMode));
 	s.writeBool(21, m_linear);
+    s.writeString(22, m_wsSpectrumAddress);
+    s.writeU32(23, m_wsSpectrumPort);
 
 	return s.final();
 }
@@ -88,6 +92,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 	}
 
 	int tmp;
+    uint32_t utmp;
 
 	if (d.getVersion() == 1)
     {
@@ -116,6 +121,9 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		m_averagingIndex = getAveragingIndex(tmp, m_averagingMode);
 	    m_averagingNb = getAveragingValue(m_averagingIndex, m_averagingMode);
 	    d.readBool(21, &m_linear, false);
+        d.readString(22, &m_wsSpectrumAddress, "127.0.0.1");
+        d.readU32(23, &utmp, 8887);
+        m_wsSpectrumPort = utmp < 1024 ? 1024 : utmp > 65535 ? 65535 : utmp;
 
 		return true;
 	}

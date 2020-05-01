@@ -23,6 +23,8 @@
 #include "dsp/fftwindow.h"
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
+#include "gui/crightclickenabler.h"
+#include "gui/wsspectrumsettingsdialog.h"
 #include "util/simpleserializer.h"
 #include "ui_glspectrumgui.h"
 
@@ -47,6 +49,10 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     }
 
 	connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
+    CRightClickEnabler *wsSpectrumRightClickEnabler = new CRightClickEnabler(ui->wsSpectrum);
+    connect(wsSpectrumRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openWebsocketSpectrumSettingsDialog(const QPoint &)));
+
     displaySettings();
 	setAveragingCombo();
     applySettings();
@@ -186,16 +192,18 @@ void GLSpectrumGUI::applySettings()
 
     if (m_spectrumVis)
     {
-	    m_spectrumVis->configure(
-            m_settings.m_fftSize,
-            m_settings.m_refLevel,
-            m_settings.m_powerRange,
-            m_settings.m_fftOverlap,
-            getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode),
-            (SpectrumVis::AvgMode) m_settings.m_averagingMode,
-            (FFTWindow::Function) m_settings.m_fftWindow,
-            m_settings.m_linear
-		);
+        SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(m_settings, false);
+        m_spectrumVis->getInputMessageQueue()->push(msg);
+	    // m_spectrumVis->configure(
+        //     m_settings.m_fftSize,
+        //     m_settings.m_refLevel,
+        //     m_settings.m_powerRange,
+        //     m_settings.m_fftOverlap,
+        //     getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode),
+        //     (SpectrumVis::AvgMode) m_settings.m_averagingMode,
+        //     (FFTWindow::Function) m_settings.m_fftWindow,
+        //     m_settings.m_linear
+		// );
     }
 }
 
@@ -501,5 +509,23 @@ void GLSpectrumGUI::handleInputMessages()
         {
             delete message;
         }
+    }
+}
+
+void GLSpectrumGUI::openWebsocketSpectrumSettingsDialog(const QPoint& p)
+{
+    WebsocketSpectrumSettingsDialog dialog(this);
+    dialog.setAddress(m_settings.m_wsSpectrumAddress);
+    dialog.setPort(m_settings.m_wsSpectrumPort);
+
+    dialog.move(p);
+    dialog.exec();
+
+    if (dialog.hasChanged())
+    {
+        m_settings.m_wsSpectrumAddress = dialog.getAddress();
+        m_settings.m_wsSpectrumPort = dialog.getPort();
+
+        applySettings();
     }
 }

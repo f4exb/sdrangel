@@ -694,6 +694,8 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
         << " m_refLevel: " << settings.m_refLevel
         << " m_powerRange: " << settings.m_powerRange
         << " m_linear: " << settings.m_linear
+        << " m_wsSpectrumAddress: " << settings.m_wsSpectrumAddress
+        << " m_wsSpectrumPort: " << settings.m_wsSpectrumPort
         << " force: " << force;
 
     if ((fftSize != m_settings.m_fftSize) || force)
@@ -734,6 +736,11 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
         m_max.resize(fftSize, averagingValue);
     }
 
+    if ((settings.m_wsSpectrumAddress != m_settings.m_wsSpectrumAddress)
+     || (settings.m_wsSpectrumPort != m_settings.m_wsSpectrumPort) || force) {
+         handleConfigureWSSpectrum(settings.m_wsSpectrumAddress, settings.m_wsSpectrumPort);
+    }
+
     m_settings = settings;
     m_settings.m_fftSize = fftSize;
     m_settings.m_fftOverlap = overlapPercent;
@@ -765,19 +772,11 @@ void SpectrumVis::handleWSOpenClose(bool openClose)
 
 void SpectrumVis::handleConfigureWSSpectrum(const QString& address, uint16_t port)
 {
-    QMutexLocker mutexLocker(&m_mutex);
-    bool wsSpectrumWasOpen = false;
-
     if (m_wsSpectrum.socketOpened())
     {
         m_wsSpectrum.closeSocket();
-        wsSpectrumWasOpen = true;
-    }
-
-    m_wsSpectrum.setListeningAddress(address);
-    m_wsSpectrum.setPort(port);
-
-    if (wsSpectrumWasOpen) {
+        m_wsSpectrum.setListeningAddress(address);
+        m_wsSpectrum.setPort(port);
         m_wsSpectrum.openSocket();
     }
 }

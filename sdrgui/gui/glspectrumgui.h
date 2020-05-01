@@ -103,6 +103,7 @@ private slots:
 	void on_clearSpectrum_clicked(bool checked);
 
 	void handleInputMessages();
+    void openWebsocketSpectrumSettingsDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_GLSPECTRUMGUI_H

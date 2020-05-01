@@ -54,6 +54,7 @@ set(sdrgui_SOURCES
     gui/tvscreen.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
+    gui/wsspectrumsettingsdialog.cpp
 
     dsp/scopevis.cpp
     dsp/scopevisxy.cpp
@@ -127,6 +128,7 @@ set(sdrgui_HEADERS
     gui/tvscreen.h
     gui/valuedial.h
     gui/valuedialz.h
+    gui/wsspectrumsettingsdialog.h
 
     dsp/scopevis.h
     dsp/scopevisxy.h
@@ -148,34 +150,35 @@ set(sdrgui_HEADERS
 )
 
 set(sdrgui_FORMS
-  mainwindow.ui
-  gui/aboutdialog.ui
-  gui/addpresetdialog.ui
-  gui/ambedevicesdialog.ui
-  gui/basicchannelsettingsdialog.ui
-  gui/basicdevicesettingsdialog.ui
-  gui/commandoutputdialog.ui
-  gui/cwkeyergui.ui
-  gui/devicestreamselectiondialog.ui
-  gui/deviceuserargsdialog.ui
-  gui/editcommanddialog.ui
-  gui/externalclockdialog.ui
-  gui/glscopegui.ui
-  gui/glspectrumgui.ui
-  gui/pluginsdialog.ui
-  gui/audiodialog.ui
-  gui/audioselectdialog.ui
-  gui/samplingdevicecontrol.ui
-  gui/samplingdevicedialog.ui
-  gui/myposdialog.ui
-  gui/transverterdialog.ui
-  gui/loggingdialog.ui
-  soapygui/discreterangegui.ui
-  soapygui/intervalrangegui.ui
-  soapygui/intervalslidergui.ui
-  soapygui/complexfactorgui.ui
-  soapygui/arginfogui.ui
-  )
+    mainwindow.ui
+    gui/aboutdialog.ui
+    gui/addpresetdialog.ui
+    gui/ambedevicesdialog.ui
+    gui/basicchannelsettingsdialog.ui
+    gui/basicdevicesettingsdialog.ui
+    gui/commandoutputdialog.ui
+    gui/cwkeyergui.ui
+    gui/devicestreamselectiondialog.ui
+    gui/deviceuserargsdialog.ui
+    gui/editcommanddialog.ui
+    gui/externalclockdialog.ui
+    gui/glscopegui.ui
+    gui/glspectrumgui.ui
+    gui/pluginsdialog.ui
+    gui/audiodialog.ui
+    gui/audioselectdialog.ui
+    gui/samplingdevicecontrol.ui
+    gui/samplingdevicedialog.ui
+    gui/myposdialog.ui
+    gui/transverterdialog.ui
+    gui/loggingdialog.ui
+    gui/wsspectrumsettingsdialog.ui
+    soapygui/discreterangegui.ui
+    soapygui/intervalrangegui.ui
+    soapygui/intervalslidergui.ui
+    soapygui/complexfactorgui.ui
+    soapygui/arginfogui.ui
+)
 
 if (LIMESUITE_FOUND)
   set(sdrgui_SOURCES
