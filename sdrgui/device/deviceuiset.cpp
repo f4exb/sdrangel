@@ -51,7 +51,7 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
 
     m_spectrum->connectTimer(timer);
     m_spectrumGUI = new GLSpectrumGUI;
-    m_spectrumGUI->setBuddies(m_spectrumVis->getInputMessageQueue(), m_spectrumVis, m_spectrum);
+    m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
     m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, deviceType);
     m_deviceAPI = nullptr;
