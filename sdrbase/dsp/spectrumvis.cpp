@@ -699,7 +699,12 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
     if ((fftSize != m_settings.m_fftSize) || force)
     {
         FFTFactory *fftFactory = DSPEngine::instance()->getFFTFactory();
-        fftFactory->releaseEngine(m_settings.m_fftSize, false, m_fftEngineSequence);
+
+        // release previous engine allocation if any
+        if (m_fft) {
+            fftFactory->releaseEngine(m_settings.m_fftSize, false, m_fftEngineSequence);
+        }
+
         m_fftEngineSequence = fftFactory->getEngine(fftSize, false, &m_fft);
         m_ofs = 20.0f * log10f(1.0f / fftSize);
         m_powFFTDiv = fftSize * fftSize;
