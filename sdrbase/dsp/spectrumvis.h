@@ -87,7 +87,6 @@ public:
 	        AvgMode averagingMode,
 	        FFTWindow::Function window,
 	        bool m_linear);
-    void configureDSP(uint64_t centerFrequency, int sampleRate);
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
 
@@ -99,25 +98,6 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-    class MsgConfigureDSP : public Message
-    {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        MsgConfigureDSP(uint64_t centerFrequency, int sampleRate) :
-            Message(),
-            m_centerFrequency(centerFrequency),
-            m_sampleRate(sampleRate)
-        {}
-
-        uint64_t getCenterFrequency() const { return m_centerFrequency; }
-        int getSampleRate() const { return m_sampleRate; }
-
-    private:
-        uint64_t m_centerFrequency;
-        int m_sampleRate;
-    };
-
     class MsgConfigureScalingFactor : public Message
     {
 		MESSAGE_CLASS_DECLARATION
@@ -199,10 +179,9 @@ private:
 	QMutex m_mutex;
 
     void applySettings(const GLSpectrumSettings& settings, bool force = false);
-    void handleWSOpenClose(bool openClose);
-    void handleConfigureDSP(uint64_t centerFrequency,
-            int sampleRate);
+    void handleConfigureDSP(uint64_t centerFrequency, int sampleRate);
     void handleScalef(Real scalef);
+    void handleWSOpenClose(bool openClose);
     void handleConfigureWSSpectrum(const QString& address, uint16_t port);
 };
 

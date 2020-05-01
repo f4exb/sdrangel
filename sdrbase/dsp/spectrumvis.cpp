@@ -36,7 +36,6 @@ inline double log2f(double n)
 #endif
 
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
-MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureDSP, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrum, Message)
@@ -105,12 +104,6 @@ void SpectrumVis::configure(MessageQueue* msgQueue,
     MsgConfigureSpectrumVis* cmd = MsgConfigureSpectrumVis::create(settings, false);
 
 	msgQueue->push(cmd);
-}
-
-void SpectrumVis::configureDSP(uint64_t centerFrequency, int sampleRate)
-{
-    MsgConfigureDSP* cmd = new MsgConfigureDSP(centerFrequency, sampleRate);
-    getInputMessageQueue()->push(cmd);
 }
 
 void SpectrumVis::setScalef(Real scalef)
@@ -653,13 +646,6 @@ bool SpectrumVis::handleMessage(const Message& message)
         applySettings(cfg.getSettings(), cfg.getForce());
 		return true;
 	}
-    else if (MsgConfigureDSP::match(message))
-    {
-        // This is coming from plugins GUI via configureDSP for auxiliary spectra
-        MsgConfigureDSP& conf = (MsgConfigureDSP&) message;
-        handleConfigureDSP(conf.getCenterFrequency(), conf.getSampleRate());
-        return true;
-    }
     else if (MsgConfigureScalingFactor::match(message))
     {
         MsgConfigureScalingFactor& conf = (MsgConfigureScalingFactor&) message;
