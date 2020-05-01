@@ -81,15 +81,15 @@ void SpectrumVis::closeWSSpectrum()
     getInputMessageQueue()->push(cmd);
 }
 
-void SpectrumVis::configure(MessageQueue* msgQueue,
-        int fftSize,
-        float refLevel,
-        float powerRange,
-        int overlapPercent,
-        unsigned int averagingNb,
-        AvgMode averagingMode,
-        FFTWindow::Function window,
-        bool linear)
+void SpectrumVis::configure(
+    int fftSize,
+    float refLevel,
+    float powerRange,
+    int overlapPercent,
+    unsigned int averagingNb,
+    AvgMode averagingMode,
+    FFTWindow::Function window,
+    bool linear)
 {
     GLSpectrumSettings settings = m_settings;
     settings.m_fftSize = fftSize;
@@ -103,7 +103,7 @@ void SpectrumVis::configure(MessageQueue* msgQueue,
 
     MsgConfigureSpectrumVis* cmd = MsgConfigureSpectrumVis::create(settings, false);
 
-	msgQueue->push(cmd);
+	getInputMessageQueue()->push(cmd);
 }
 
 void SpectrumVis::setScalef(Real scalef)

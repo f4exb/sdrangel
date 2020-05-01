@@ -397,15 +397,15 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->glSpectrum->setDisplayMaxHold(false);
 	ui->glSpectrum->setSsbSpectrum(true);
 	m_spectrumVis->configure(
-	        m_spectrumVis->getInputMessageQueue(),
-            64, // FFT size
-            0, // Ref level (dB)
-            100, // Power range (dB)
-            10, // overlapping %
-            0,  // number of averaging samples
-            SpectrumVis::AvgModeNone,  // no averaging
-	        FFTWindow::BlackmanHarris,
-	        false); // logarithmic scale
+        64, // FFT size
+        0, // Ref level (dB)
+        100, // Power range (dB)
+        10, // overlapping %
+        0,  // number of averaging samples
+        SpectrumVis::AvgModeNone,  // no averaging
+        FFTWindow::BlackmanHarris,
+        false // logarithmic scale
+    );
 	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);

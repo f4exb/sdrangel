@@ -78,15 +78,16 @@ public:
     void openWSSpectrum();
     void closeWSSpectrum();
 
-	void configure(MessageQueue* msgQueue,
-	        int fftSize,
-            float refLevel,
-            float powerRange,
-	        int overlapPercent,
-	        unsigned int averagingNb,
-	        AvgMode averagingMode,
-	        FFTWindow::Function window,
-	        bool m_linear);
+	void configure(
+        int fftSize,
+        float refLevel,
+        float powerRange,
+        int overlapPercent,
+        unsigned int averagingNb,
+        AvgMode averagingMode,
+        FFTWindow::Function window,
+        bool m_linear
+    );
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
 
