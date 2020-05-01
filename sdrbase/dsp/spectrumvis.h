@@ -26,6 +26,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
+#include "dsp/glspectrumsettings.h"
 #include "export.h"
 #include "util/message.h"
 #include "util/movingaverage2d.h"
@@ -39,6 +40,29 @@ class MessageQueue;
 class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 
 public:
+    class MsgConfigureSpectrumVis : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const GLSpectrumSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureSpectrumVis* create(const GLSpectrumSettings& settings, bool force)
+        {
+            return new MsgConfigureSpectrumVis(settings, force);
+        }
+
+    private:
+        GLSpectrumSettings m_settings;
+        bool m_force;
+
+        MsgConfigureSpectrumVis(const GLSpectrumSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
+    };
+
     enum AvgMode
     {
         AvgModeNone,
@@ -75,50 +99,6 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	class MsgConfigureSpectrumVis : public Message {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-		MsgConfigureSpectrumVis(
-		        int fftSize,
-                float refLevel,
-                float powerRange,
-		        int overlapPercent,
-		        unsigned int averageNb,
-		        AvgMode avgMode,
-		        FFTWindow::Function window,
-		        bool linear) :
-			Message(),
-			m_fftSize(fftSize),
-			m_overlapPercent(overlapPercent),
-            m_refLevel(refLevel),
-            m_powerRange(powerRange),
-			m_averageNb(averageNb),
-            m_avgMode(avgMode),
-			m_window(window),
-			m_linear(linear)
-		{}
-
-		int getFFTSize() const { return m_fftSize; }
-        float getRefLevel() const { return m_refLevel; }
-        float getPowerRange() const { return m_powerRange; }
-		int getOverlapPercent() const { return m_overlapPercent; }
-		unsigned int getAverageNb() const { return m_averageNb; }
-		SpectrumVis::AvgMode getAvgMode() const { return m_avgMode; }
-		FFTWindow::Function getWindow() const { return m_window; }
-		bool getLinear() const { return m_linear; }
-
-	private:
-		int m_fftSize;
-		int m_overlapPercent;
-        float m_refLevel;
-        float m_powerRange;
-		unsigned int m_averageNb;
-		SpectrumVis::AvgMode m_avgMode;
-		FFTWindow::Function m_window;
-		bool m_linear;
-	};
-
     class MsgConfigureDSP : public Message
     {
         MESSAGE_CLASS_DECLARATION
@@ -196,10 +176,7 @@ private:
 	std::vector<Complex> m_fftBuffer;
 	std::vector<Real> m_powerSpectrum;
 
-	std::size_t m_fftSize;
-    float m_refLevel;
-    float m_powerRange;
-	std::size_t m_overlapPercent;
+    GLSpectrumSettings m_settings;
 	std::size_t m_overlapSize;
 	std::size_t m_refillSize;
 	std::size_t m_fftBufferFill;
@@ -211,9 +188,6 @@ private:
 	MovingAverage2D<double> m_movingAverage;
 	FixedAverage2D<double> m_fixedAverage;
 	Max2D<double> m_max;
-	unsigned int m_averageNb;
-	AvgMode m_avgMode;
-	bool m_linear;
 
     uint64_t m_centerFrequency;
     int m_sampleRate;
@@ -224,14 +198,7 @@ private:
 
 	QMutex m_mutex;
 
-	void handleConfigure(int fftSize,
-            float refLevel,
-            float powerRange,
-	        int overlapPercent,
-	        unsigned int averageNb,
-	        AvgMode averagingMode,
-	        FFTWindow::Function window,
-	        bool linear);
+    void applySettings(const GLSpectrumSettings& settings, bool force = false);
     void handleWSOpenClose(bool openClose);
     void handleConfigureDSP(uint64_t centerFrequency,
             int sampleRate);
