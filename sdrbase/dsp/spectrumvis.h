@@ -47,8 +47,7 @@ public:
         const GLSpectrumSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSpectrumVis* create(const GLSpectrumSettings& settings, bool force)
-        {
+        static MsgConfigureSpectrumVis* create(const GLSpectrumSettings& settings, bool force) {
             return new MsgConfigureSpectrumVis(settings, force);
         }
 
@@ -82,6 +81,26 @@ public:
         { }
     };
 
+    class MsgConfigureWSpectrumOpenClose : public Message
+    {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+        Real getOpenClose() const { return m_openClose; }
+
+        static MsgConfigureWSpectrumOpenClose* create(bool openClose) {
+            return new MsgConfigureWSpectrumOpenClose(openClose);
+        }
+
+    private:
+        bool m_openClose;
+
+        MsgConfigureWSpectrumOpenClose(bool openClose) :
+            Message(),
+            m_openClose(openClose)
+        {}
+    };
+
     enum AvgMode
     {
         AvgModeNone,
@@ -94,8 +113,6 @@ public:
 	virtual ~SpectrumVis();
 
     void setGLSpectrum(GLSpectrumInterface* glSpectrum) { m_glSpectrum = glSpectrum; }
-    void openWSSpectrum();
-    void closeWSSpectrum();
 
 	void configure(
         int fftSize,
@@ -134,22 +151,6 @@ private:
 
     private:
         Real m_scalef;
-    };
-
-    class MsgConfigureWSpectrumOpenClose : public Message
-    {
-		MESSAGE_CLASS_DECLARATION
-
-	public:
-        MsgConfigureWSpectrumOpenClose(bool openClose) :
-            Message(),
-            m_openClose(openClose)
-        {}
-
-        Real getOpenClose() const { return m_openClose; }
-
-    private:
-        bool m_openClose;
     };
 
     class MsgConfigureWSpectrum : public Message

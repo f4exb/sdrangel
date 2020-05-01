@@ -57,6 +57,7 @@ void WSSpectrum::closeSocket()
 {
     if (m_webSocketServer)
     {
+        qDebug() << "WSSpectrum::closeSocket: stopping spectrum server listening at " << m_listeningAddress.toString() << " on port " << m_port;
         delete m_webSocketServer;
         m_webSocketServer = nullptr;
     }

@@ -93,6 +93,7 @@ private slots:
 	void on_averagingMode_currentIndexChanged(int index);
     void on_averaging_currentIndexChanged(int index);
     void on_linscale_toggled(bool checked);
+    void on_wsSpectrum_toggled(bool checked);
 
 	void on_waterfall_toggled(bool checked);
 	void on_histogram_toggled(bool checked);
