@@ -69,18 +69,6 @@ SpectrumVis::~SpectrumVis()
     fftFactory->releaseEngine(m_settings.m_fftSize, false, m_fftEngineSequence);
 }
 
-void SpectrumVis::openWSSpectrum()
-{
-    MsgConfigureWSpectrumOpenClose *cmd = new MsgConfigureWSpectrumOpenClose(true);
-    getInputMessageQueue()->push(cmd);
-}
-
-void SpectrumVis::closeWSSpectrum()
-{
-    MsgConfigureWSpectrumOpenClose *cmd = new MsgConfigureWSpectrumOpenClose(false);
-    getInputMessageQueue()->push(cmd);
-}
-
 void SpectrumVis::configure(
     int fftSize,
     float refLevel,

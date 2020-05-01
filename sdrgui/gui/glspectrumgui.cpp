@@ -194,16 +194,6 @@ void GLSpectrumGUI::applySettings()
     {
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(m_settings, false);
         m_spectrumVis->getInputMessageQueue()->push(msg);
-	    // m_spectrumVis->configure(
-        //     m_settings.m_fftSize,
-        //     m_settings.m_refLevel,
-        //     m_settings.m_powerRange,
-        //     m_settings.m_fftOverlap,
-        //     getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode),
-        //     (SpectrumVis::AvgMode) m_settings.m_averagingMode,
-        //     (FFTWindow::Function) m_settings.m_fftWindow,
-        //     m_settings.m_linear
-		// );
     }
 }
 
@@ -248,6 +238,15 @@ void GLSpectrumGUI::on_linscale_toggled(bool checked)
 	qDebug("GLSpectrumGUI::on_averaging_currentIndexChanged: %s", checked ? "lin" : "log");
     m_settings.m_linear = checked;
 	applySettings();
+}
+
+void GLSpectrumGUI::on_wsSpectrum_toggled(bool checked)
+{
+    if (m_spectrumVis)
+    {
+        SpectrumVis::MsgConfigureWSpectrumOpenClose *msg = SpectrumVis::MsgConfigureWSpectrumOpenClose::create(checked);
+        m_spectrumVis->getInputMessageQueue()->push(msg);
+    }
 }
 
 void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)
