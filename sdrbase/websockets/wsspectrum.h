@@ -54,10 +54,14 @@ public:
         bool linear
     );
 
+signals:
+    void payloadToSend(const QByteArray& payload);
+
 private slots:
     void onNewConnection();
     void processClientMessage(const QString &message);
     void socketDisconnected();
+    void sendPayload(const QByteArray& payload);
 
 private:
     QHostAddress m_listeningAddress;

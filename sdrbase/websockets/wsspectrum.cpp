@@ -27,11 +27,20 @@ WSSpectrum::WSSpectrum(QObject *parent) :
     m_port(8887),
     m_webSocketServer(nullptr)
 {
+    connect(this,
+            SIGNAL(payloadToSend(const QByteArray&)),
+            this,
+            SLOT(sendPayload(const QByteArray&)),
+            Qt::QueuedConnection);
     m_timer.start();
 }
 
 WSSpectrum::~WSSpectrum()
 {
+    disconnect(this,
+            SIGNAL(payloadToSend(const QByteArray&)),
+            this,
+            SLOT(sendPayload(const QByteArray&)));
     closeSocket();
 }
 
@@ -76,7 +85,7 @@ QString WSSpectrum::getWebSocketIdentifier(QWebSocket *peer)
 void WSSpectrum::onNewConnection()
 {
     auto pSocket = m_webSocketServer->nextPendingConnection();
-    qDebug() << " WSSpectrum::onNewConnection: " << getWebSocketIdentifier(pSocket) << " connected";
+    qDebug() << "WSSpectrum::onNewConnection: " << getWebSocketIdentifier(pSocket) << " connected";
     pSocket->setParent(this);
 
     connect(pSocket, &QWebSocket::textMessageReceived, this, &WSSpectrum::processClientMessage);
@@ -132,7 +141,12 @@ void WSSpectrum::newSpectrum(
         linear
     );
     //qDebug() << "WSSpectrum::newSpectrum: " << payload.size() << " bytes in " << elapsed << " ms";
+    emit payloadToSend(payload);
+}
 
+void WSSpectrum::sendPayload(const QByteArray& payload)
+{
+    //qDebug() << "WSSpectrum::sendPayload: " << payload.size() << " bytes";
     for (QWebSocket *pClient : qAsConst(m_clients)) {
         pClient->sendBinaryMessage(payload);
     }
@@ -152,14 +166,14 @@ void WSSpectrum::buildPayload(
 {
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
-    buffer.write((char*) &fftSize, sizeof(int));
-    buffer.write((char*) &fftTimeMs, sizeof(int64_t));
-    buffer.write((char*) &refLevel, sizeof(float));
-    buffer.write((char*) &powerRange, sizeof(float));
-    buffer.write((char*) &centerFrequency, sizeof(uint64_t));
-    buffer.write((char*) &bandwidth, sizeof(int));
+    buffer.write((char*) &centerFrequency, sizeof(uint64_t));    // 0
+    buffer.write((char*) &fftTimeMs, sizeof(int64_t));           // 8
+    buffer.write((char*) &fftSize, sizeof(int));                 // 16
+    buffer.write((char*) &refLevel, sizeof(float));              // 20
+    buffer.write((char*) &powerRange, sizeof(float));            // 24
+    buffer.write((char*) &bandwidth, sizeof(int));               // 28
     int linearInt = linear ? 1 : 0;
-    buffer.write((char*) &linearInt, sizeof(int));
-    buffer.write((char*) spectrum.data(), fftSize*sizeof(Real));
+    buffer.write((char*) &linearInt, sizeof(int));               // 32
+    buffer.write((char*) spectrum.data(), fftSize*sizeof(Real)); // 36
     buffer.close();
 }
