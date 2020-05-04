@@ -114,8 +114,6 @@ void WSSpectrum::socketDisconnected()
 void WSSpectrum::newSpectrum(
     const std::vector<Real>& spectrum,
     int fftSize,
-    float refLevel,
-    float powerRange,
     uint64_t centerFrequency,
     int bandwidth,
     bool linear
@@ -134,8 +132,6 @@ void WSSpectrum::newSpectrum(
         spectrum,
         fftSize,
         elapsed,
-        refLevel,
-        powerRange,
         centerFrequency,
         bandwidth,
         linear
@@ -157,13 +153,13 @@ void WSSpectrum::buildPayload(
     const std::vector<Real>& spectrum,
     int fftSize,
     int64_t fftTimeMs,
-    float refLevel,
-    float powerRange,
     uint64_t centerFrequency,
     int bandwidth,
     bool linear
 )
 {
+    float refLevel = -30.0;
+    float powerRange = 70.0;
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
     buffer.write((char*) &centerFrequency, sizeof(uint64_t));    // 0

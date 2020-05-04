@@ -144,8 +144,6 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             m_wsSpectrum.newSpectrum(
                 m_powerSpectrum,
                 m_settings.m_fftSize,
-                m_settings.m_refLevel,
-                m_settings.m_powerRange,
                 m_centerFrequency,
                 m_sampleRate,
                 m_settings.m_linear
@@ -179,8 +177,6 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             m_wsSpectrum.newSpectrum(
                 m_powerSpectrum,
                 m_settings.m_fftSize,
-                m_settings.m_refLevel,
-                m_settings.m_powerRange,
                 m_centerFrequency,
                 m_sampleRate,
                 m_settings.m_linear
@@ -225,8 +221,6 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
                 m_wsSpectrum.newSpectrum(
                     m_powerSpectrum,
                     m_settings.m_fftSize,
-                    m_settings.m_refLevel,
-                    m_settings.m_powerRange,
                     m_centerFrequency,
                     m_sampleRate,
                     m_settings.m_linear
@@ -270,8 +264,6 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
                 m_wsSpectrum.newSpectrum(
                     m_powerSpectrum,
                     m_settings.m_fftSize,
-                    m_settings.m_refLevel,
-                    m_settings.m_powerRange,
                     m_centerFrequency,
                     m_sampleRate,
                     m_settings.m_linear
@@ -372,8 +364,6 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     m_wsSpectrum.newSpectrum(
                         m_powerSpectrum,
                         m_settings.m_fftSize,
-                        m_settings.m_refLevel,
-                        m_settings.m_powerRange,
                         m_centerFrequency,
                         m_sampleRate,
                         m_settings.m_linear
@@ -428,8 +418,6 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     m_wsSpectrum.newSpectrum(
                         m_powerSpectrum,
                         m_settings.m_fftSize,
-                        m_settings.m_refLevel,
-                        m_settings.m_powerRange,
                         m_centerFrequency,
                         m_sampleRate,
                         m_settings.m_linear
@@ -504,8 +492,6 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         m_wsSpectrum.newSpectrum(
                             m_powerSpectrum,
                             m_settings.m_fftSize,
-                            m_settings.m_refLevel,
-                            m_settings.m_powerRange,
                             m_centerFrequency,
                             m_sampleRate,
                             m_settings.m_linear
@@ -579,8 +565,6 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         m_wsSpectrum.newSpectrum(
                             m_powerSpectrum,
                             m_settings.m_fftSize,
-                            m_settings.m_refLevel,
-                            m_settings.m_powerRange,
                             m_centerFrequency,
                             m_sampleRate,
                             m_settings.m_linear
