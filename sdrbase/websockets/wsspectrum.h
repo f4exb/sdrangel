@@ -47,8 +47,6 @@ public:
     void newSpectrum(
         const std::vector<Real>& spectrum,
         int fftSize,
-        float refLevel,
-        float powerRange,
         uint64_t centerFrequency,
         int bandwidth,
         bool linear
@@ -76,8 +74,6 @@ private:
         const std::vector<Real>& spectrum,
         int fftSize,
         int64_t fftTimeMs,
-        float refLevel,
-        float powerRange,
         uint64_t centerFrequency,
         int bandwidth,
         bool linear
