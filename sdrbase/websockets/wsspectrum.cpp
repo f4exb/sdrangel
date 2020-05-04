@@ -19,6 +19,7 @@
 #include <QHostAddress>
 #include <QDebug>
 
+#include "util/timeutil.h"
 #include "wsspectrum.h"
 
 WSSpectrum::WSSpectrum(QObject *parent) :
@@ -124,6 +125,7 @@ void WSSpectrum::newSpectrum(
     }
 
     qint64 elapsed = m_timer.restart();
+    uint64_t nowMs = TimeUtil::nowms();
     QWebSocket *pSender = qobject_cast<QWebSocket *>(sender());
     QByteArray payload;
 
@@ -132,6 +134,7 @@ void WSSpectrum::newSpectrum(
         spectrum,
         fftSize,
         elapsed,
+        nowMs,
         centerFrequency,
         bandwidth,
         linear
@@ -153,20 +156,18 @@ void WSSpectrum::buildPayload(
     const std::vector<Real>& spectrum,
     int fftSize,
     int64_t fftTimeMs,
+    uint64_t timestampMs,
     uint64_t centerFrequency,
     int bandwidth,
     bool linear
 )
 {
-    float refLevel = -30.0;
-    float powerRange = 70.0;
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
     buffer.write((char*) &centerFrequency, sizeof(uint64_t));    // 0
     buffer.write((char*) &fftTimeMs, sizeof(int64_t));           // 8
-    buffer.write((char*) &fftSize, sizeof(int));                 // 16
-    buffer.write((char*) &refLevel, sizeof(float));              // 20
-    buffer.write((char*) &powerRange, sizeof(float));            // 24
+    buffer.write((char*) &timestampMs, sizeof(uint64_t));        // 16
+    buffer.write((char*) &fftSize, sizeof(int));                 // 24
     buffer.write((char*) &bandwidth, sizeof(int));               // 28
     int linearInt = linear ? 1 : 0;
     buffer.write((char*) &linearInt, sizeof(int));               // 32
