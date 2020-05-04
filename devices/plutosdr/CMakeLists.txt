@@ -35,7 +35,7 @@ target_link_libraries(plutosdrdevice
     ${ICONV_LIBRARY}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBIIO_EXTERNAL)
     add_dependencies(plutosdrdevice libiio)
 endif()
 

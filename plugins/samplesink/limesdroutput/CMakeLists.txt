@@ -49,7 +49,7 @@ add_library(${TARGET_NAME} SHARED
 	${limesdroutput_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIMESUITE_EXTERNAL)
     add_dependencies(${TARGET_NAME} limesuite)
 endif()
 

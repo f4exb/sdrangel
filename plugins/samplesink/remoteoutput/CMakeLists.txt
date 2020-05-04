@@ -63,7 +63,7 @@ add_library(${TARGET_NAME} SHARED
 	${remoteoutput_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(CM256CC_EXTERNAL)
     add_dependencies(${TARGET_NAME} cm256cc)
 endif()
 

@@ -48,6 +48,10 @@ add_library(${TARGET_NAME} SHARED
 	${sdrplay_SOURCES}
 )
 
+if(LIBMIRISDR_EXTERNAL)
+    add_dependencies(${TARGET_NAME} libmirisdr)
+endif(LIBMIRISDR_EXTERNAL)
+
 target_link_libraries(${TARGET_NAME}
         Qt5::Core
         ${TARGET_LIB}
