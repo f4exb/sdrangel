@@ -74,6 +74,7 @@ private:
         const std::vector<Real>& spectrum,
         int fftSize,
         int64_t fftTimeMs,
+        uint64_t timestampMs,
         uint64_t centerFrequency,
         int bandwidth,
         bool linear
