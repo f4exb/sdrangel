@@ -120,7 +120,6 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgSpectrumConfig->setDisplayHistogram(m_spectrumSettings.m_displayHistogram ? 1 : 0);
         swgSpectrumConfig->setDecay(m_spectrumSettings.m_decay);
         swgSpectrumConfig->setDisplayGrid(m_spectrumSettings.m_displayGrid ? 1 : 0);
-        swgSpectrumConfig->setInvert(m_spectrumSettings.m_invert ? 1 : 0);
         swgSpectrumConfig->setDisplayGridIntensity(m_spectrumSettings.m_displayGridIntensity);
         swgSpectrumConfig->setDecayDivisor(m_spectrumSettings.m_decayDivisor);
         swgSpectrumConfig->setHistogramStroke(m_spectrumSettings.m_histogramStroke);
@@ -263,9 +262,6 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         }
         if (spectrumIt->contains("histogramStroke")) {
             spectrumSettings.m_histogramStroke = apiPreset->getSpectrumConfig()->getHistogramStroke();
-        }
-        if (spectrumIt->contains("invert")) {
-            spectrumSettings.m_invert = apiPreset->getSpectrumConfig()->getInvert() != 0;
         }
         if (spectrumIt->contains("invertedWaterfall")) {
             spectrumSettings.m_invertedWaterfall = apiPreset->getSpectrumConfig()->getInvertedWaterfall() != 0;

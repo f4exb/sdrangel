@@ -215,7 +215,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="invert">
+      <widget class="ButtonSwitch" name="invertWaterfall">
        <property name="toolTip">
         <string>Exchange waterfall and histogram</string>
        </property>
@@ -748,7 +748,7 @@
  <tabstops>
   <tabstop>histogram</tabstop>
   <tabstop>maxHold</tabstop>
-  <tabstop>invert</tabstop>
+  <tabstop>invertWaterfall</tabstop>
   <tabstop>grid</tabstop>
  </tabstops>
  <resources>

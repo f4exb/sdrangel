@@ -53,11 +53,12 @@ public:
 	bool m_displayCurrent;
 	bool m_displayHistogram;
 	bool m_displayGrid;
-	bool m_invert;
 	AveragingMode m_averagingMode;
 	int m_averagingIndex;
 	unsigned int m_averagingNb;
 	bool m_linear; //!< linear else logarithmic scale
+    bool m_ssb;    //!< SSB display with spectrum center at start of array or display - else spectrum center is on center
+    bool m_usb;    //!< USB display with increasing frequencies towads the right - else decreasing frequencies
     QString m_wsSpectrumAddress;
     uint16_t m_wsSpectrumPort;
 

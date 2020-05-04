@@ -39,16 +39,17 @@ void GLSpectrumSettings::resetToDefaults()
 	m_histogramStroke = 30;
 	m_displayGridIntensity = 5,
 	m_displayWaterfall = true;
-	m_invertedWaterfall = false;
+	m_invertedWaterfall = true;
 	m_displayMaxHold = false;
 	m_displayHistogram = false;
 	m_displayGrid = false;
-	m_invert = true;
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
 	m_linear = false;
     m_wsSpectrumAddress = "127.0.0.1";
     m_wsSpectrumPort = 8887;
+    m_ssb = false;
+    m_usb = true;
 }
 
 QByteArray GLSpectrumSettings::serialize() const
@@ -66,7 +67,6 @@ QByteArray GLSpectrumSettings::serialize() const
 	s.writeBool(9, m_displayHistogram);
 	s.writeS32(10, m_decay);
 	s.writeBool(11, m_displayGrid);
-	s.writeBool(12, m_invert);
 	s.writeS32(13, m_displayGridIntensity);
 	s.writeS32(14, m_decayDivisor);
 	s.writeS32(15, m_histogramStroke);
@@ -78,6 +78,8 @@ QByteArray GLSpectrumSettings::serialize() const
 	s.writeBool(21, m_linear);
     s.writeString(22, m_wsSpectrumAddress);
     s.writeU32(23, m_wsSpectrumPort);
+    s.writeBool(24, m_ssb);
+    s.writeBool(25, m_usb);
 
 	return s.final();
 }
@@ -108,7 +110,6 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 1);
 		d.readBool(11, &m_displayGrid, false);
-		d.readBool(12, &m_invert, true);
 		d.readS32(13, &m_displayGridIntensity, 5);
 		d.readS32(14, &m_decayDivisor, 1);
 		d.readS32(15, &m_histogramStroke, 30);
@@ -124,6 +125,8 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
         d.readString(22, &m_wsSpectrumAddress, "127.0.0.1");
         d.readU32(23, &utmp, 8887);
         m_wsSpectrumPort = utmp < 1024 ? 1024 : utmp > 65535 ? 65535 : utmp;
+        d.readBool(24, &m_ssb, false);
+        d.readBool(25, &m_usb, true);
 
 		return true;
 	}
