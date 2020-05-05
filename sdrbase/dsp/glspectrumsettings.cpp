@@ -45,6 +45,7 @@ void GLSpectrumSettings::resetToDefaults()
 	m_displayGrid = false;
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
+    m_averagingValue = 1;
 	m_linear = false;
     m_wsSpectrumAddress = "127.0.0.1";
     m_wsSpectrumPort = 8887;
@@ -120,7 +121,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		m_averagingMode = tmp < 0 ? AvgModeNone : tmp > 3 ? AvgModeMax : (AveragingMode) tmp;
 		d.readS32(20, &tmp, 0);
 		m_averagingIndex = getAveragingIndex(tmp, m_averagingMode);
-	    m_averagingNb = getAveragingValue(m_averagingIndex, m_averagingMode);
+	    m_averagingValue = getAveragingValue(m_averagingIndex, m_averagingMode);
 	    d.readBool(21, &m_linear, false);
         d.readString(22, &m_wsSpectrumAddress, "127.0.0.1");
         d.readU32(23, &utmp, 8887);

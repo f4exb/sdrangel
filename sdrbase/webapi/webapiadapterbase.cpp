@@ -221,8 +221,8 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         }
         if (spectrumIt->contains("averagingValue"))
         {
-            spectrumSettings.m_averagingNb = apiPreset->getSpectrumConfig()->getAveragingValue();
-            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingNb, spectrumSettings.m_averagingMode);
+            spectrumSettings.m_averagingValue = apiPreset->getSpectrumConfig()->getAveragingValue();
+            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
         }
         if (spectrumIt->contains("decay")) {
             spectrumSettings.m_decay = apiPreset->getSpectrumConfig()->getDecay();

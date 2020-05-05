@@ -2744,9 +2744,11 @@ bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& s
     }
     if (jsonObject.contains("wsSpectrumPort"))
     {
-        spectrumSettings.setUsb(jsonObject["wsSpectrumPort"].toInt(8887));
+        spectrumSettings.setWsSpectrumPort(jsonObject["wsSpectrumPort"].toInt(8887));
         spectrumSettingsKeys.append("wsSpectrumPort");
     }
+
+    return true;
 }
 
 bool WebAPIRequestMapper::validateDeviceListItem(SWGSDRangel::SWGDeviceListItem& deviceListItem, QJsonObject& jsonObject)
