@@ -212,6 +212,16 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumSettingsGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSpectrumServer& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDevicePut(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceListItem& query,

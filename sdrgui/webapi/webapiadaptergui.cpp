@@ -1415,6 +1415,46 @@ int WebAPIAdapterGUI::devicesetFocusPatch(
     }
 }
 
+int WebAPIAdapterGUI::devicesetSpectrumSettingsGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGGLSpectrum& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        return deviceSet->webapiSpectrumSettingsGet(response, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::devicesetSpectrumServerGet(
+        int deviceSetIndex,
+        SWGSDRangel::SWGSpectrumServer& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        deviceSet->webapiSpectrumServerGet(response, *error.getMessage());
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetDevicePut(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceListItem& query,

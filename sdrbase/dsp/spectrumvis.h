@@ -37,6 +37,11 @@
 class GLSpectrumInterface;
 class MessageQueue;
 
+namespace SWGSDRangel {
+    class SWGGLSpectrum;
+    class SWGSpectrumServer;
+};
+
 class SDRGUI_API SpectrumVis : public BasebandSampleSink {
 
 public:
@@ -104,6 +109,9 @@ public:
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);
+
+    int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const;
 
 private:
     class MsgConfigureScalingFactor : public Message
@@ -175,6 +183,8 @@ private:
     void handleScalef(Real scalef);
     void handleWSOpenClose(bool openClose);
     void handleConfigureWSSpectrum(const QString& address, uint16_t port);
+
+    static void webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const GLSpectrumSettings& settings);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

@@ -18,6 +18,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "SWGGLSpectrum.h"
+#include "SWGSpectrumServer.h"
+
 #include "glspectruminterface.h"
 #include "dspcommands.h"
 #include "dspengine.h"
@@ -742,5 +745,68 @@ void SpectrumVis::handleConfigureWSSpectrum(const QString& address, uint16_t por
         m_wsSpectrum.setListeningAddress(address);
         m_wsSpectrum.setPort(port);
         m_wsSpectrum.openSocket();
+    }
+}
+
+int SpectrumVis::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const
+{
+    (void) errorMessage;
+    response.init();
+    webapiFormatSpectrumSettings(response, m_settings);
+    return 200;
+}
+
+int SpectrumVis::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const
+{
+    bool serverRunning = m_wsSpectrum.socketOpened();
+    QList<QHostAddress> peerHosts;
+    QList<quint16> peerPorts;
+    m_wsSpectrum.getPeers(peerHosts, peerPorts);
+    response.init();
+    response.setRun(serverRunning ? 1 : 0);
+
+    if (peerHosts.size() > 0)
+    {
+        response.setClients(new QList<SWGSDRangel::SWGSpectrumServer_clients*>);
+
+        for (int i = 0; i < peerHosts.size(); i++)
+        {
+            response.getClients()->push_back(new SWGSDRangel::SWGSpectrumServer_clients);
+            response.getClients()->back()->setAddress(new QString(peerHosts.at(i).toString()));
+            response.getClients()->back()->setPort(peerPorts.at(i));
+        }
+    }
+}
+
+void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const GLSpectrumSettings& settings)
+{
+    response.setFftSize(settings.m_fftSize);
+    response.setFftOverlap(settings.m_fftOverlap);
+    response.setFftWindow((int) settings.m_fftWindow);
+    response.setRefLevel(settings.m_refLevel);
+    response.setPowerRange(settings.m_powerRange);
+    response.setDecay(settings.m_decay);
+    response.setDecayDivisor(settings.m_decayDivisor);
+    response.setHistogramStroke(settings.m_histogramStroke);
+    response.setDisplayGridIntensity(settings.m_displayGridIntensity);
+    response.setDisplayTraceIntensity(settings.m_displayTraceIntensity);
+    response.setDisplayWaterfall(settings.m_displayWaterfall ? 1 : 0);
+    response.setInvertedWaterfall(settings.m_invertedWaterfall ? 1 : 0);
+    response.setWaterfallShare(settings.m_waterfallShare);
+    response.setDisplayMaxHold(settings.m_displayMaxHold ? 1 : 0);
+    response.setDisplayCurrent(settings.m_displayCurrent ? 1 : 0);
+    response.setDisplayHistogram(settings.m_displayHistogram ? 1 : 0);
+    response.setDisplayGrid(settings.m_displayGrid ? 1 : 0);
+    response.setAveragingMode((int) settings.m_averagingMode);
+    response.setAveragingValue(settings.m_averagingNb);
+    response.setLinear(settings.m_linear ? 1 : 0);
+    response.setSsb(settings.m_ssb ? 1 : 0);
+    response.setUsb(settings.m_usb ? 1 : 0);
+    response.setWsSpectrumPort(settings.m_wsSpectrumPort);
+
+    if (response.getWsSpectrumAddress()) {
+        *response.getWsSpectrumAddress() = settings.m_wsSpectrumAddress;
+    } else {
+        response.setWsSpectrumAddress(new QString(settings.m_wsSpectrumAddress));
     }
 }

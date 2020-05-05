@@ -62,6 +62,8 @@ namespace SWGSDRangel
     class SWGChannelReport;
     class SWGChannelActions;
     class SWGSuccessResponse;
+    class SWGGLSpectrum;
+    class SWGSpectrumServer;
 }
 
 class SDRBASE_API WebAPIAdapterInterface
@@ -691,6 +693,90 @@ public:
     }
 
     /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/settings (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumSettingsGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/settings (PUT, PATCH)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumSettingsPutPatch(
+            int deviceSetIndex,
+            bool force, //!< true to force settings = put else patch
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) force;
+        (void) spectrumSettingsKeys;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/server (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumServerGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSpectrumServer& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/server (POST)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumServerPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/deviceset/{devicesetIndex}/spectrum/server (DELETE)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int devicesetSpectrumServerDelete(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
      * Handler of /sdrangel/deviceset/{devicesetIndex}/device (PUT) swagger/sdrangel/code/html2/index.html#api-Default-instanceChannels
      * returns the Http status code (default 501: not implemented)
      */
@@ -1041,6 +1127,8 @@ public:
     static QString instanceDeviceSetURL;
     static std::regex devicesetURLRe;
     static std::regex devicesetFocusURLRe;
+    static std::regex devicesetSpectrumSettingsURLRe;
+    static std::regex devicesetSpectrumServerURLRe;
     static std::regex devicesetDeviceURLRe;
     static std::regex devicesetDeviceSettingsURLRe;
     static std::regex devicesetDeviceRunURLRe;
