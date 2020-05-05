@@ -159,34 +159,8 @@ void GLSpectrumGUI::applySettings()
         return;
     }
 
-    if (m_glSpectrum)
-    {
-        m_glSpectrum->setDisplayWaterfall(m_settings.m_displayWaterfall);
-        m_glSpectrum->setInvertedWaterfall(m_settings.m_invertedWaterfall);
-        m_glSpectrum->setDisplayMaxHold(m_settings.m_displayMaxHold);
-        m_glSpectrum->setDisplayCurrent(m_settings.m_displayCurrent);
-        m_glSpectrum->setDisplayHistogram(m_settings.m_displayHistogram);
-        m_glSpectrum->setDecay(m_settings.m_decay);
-        m_glSpectrum->setDecayDivisor(m_settings.m_decayDivisor);
-        m_glSpectrum->setHistoStroke(m_settings.m_histogramStroke);
-        m_glSpectrum->setDisplayGrid(m_settings.m_displayGrid);
-        m_glSpectrum->setDisplayGridIntensity(m_settings.m_displayGridIntensity);
-        m_glSpectrum->setDisplayTraceIntensity(m_settings.m_displayTraceIntensity);
-
-        if ((m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)) {
-            m_glSpectrum->setTimingRate(getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
-                1 :
-                getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode));
-        } else {
-            m_glSpectrum->setTimingRate(1);
-        }
-
-        Real refLevel = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) : m_settings.m_refLevel;
-        Real powerRange = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) :  m_settings.m_powerRange;
-        qDebug("GLSpectrumGUI::applySettings: refLevel: %e powerRange: %e", refLevel, powerRange);
-        m_glSpectrum->setReferenceLevel(refLevel);
-        m_glSpectrum->setPowerRange(powerRange);
-        m_glSpectrum->setLinear(m_settings.m_linear);
+    if (m_glSpectrum) {
+        applyGLSpectrumSettings();
     }
 
     if (m_spectrumVis)
@@ -194,6 +168,36 @@ void GLSpectrumGUI::applySettings()
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(m_settings, false);
         m_spectrumVis->getInputMessageQueue()->push(msg);
     }
+}
+
+void GLSpectrumGUI::applyGLSpectrumSettings()
+{
+    m_glSpectrum->setDisplayWaterfall(m_settings.m_displayWaterfall);
+    m_glSpectrum->setInvertedWaterfall(m_settings.m_invertedWaterfall);
+    m_glSpectrum->setDisplayMaxHold(m_settings.m_displayMaxHold);
+    m_glSpectrum->setDisplayCurrent(m_settings.m_displayCurrent);
+    m_glSpectrum->setDisplayHistogram(m_settings.m_displayHistogram);
+    m_glSpectrum->setDecay(m_settings.m_decay);
+    m_glSpectrum->setDecayDivisor(m_settings.m_decayDivisor);
+    m_glSpectrum->setHistoStroke(m_settings.m_histogramStroke);
+    m_glSpectrum->setDisplayGrid(m_settings.m_displayGrid);
+    m_glSpectrum->setDisplayGridIntensity(m_settings.m_displayGridIntensity);
+    m_glSpectrum->setDisplayTraceIntensity(m_settings.m_displayTraceIntensity);
+
+    if ((m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)) {
+        m_glSpectrum->setTimingRate(getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
+            1 :
+            getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode));
+    } else {
+        m_glSpectrum->setTimingRate(1);
+    }
+
+    Real refLevel = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) : m_settings.m_refLevel;
+    Real powerRange = m_settings.m_linear ? pow(10.0, m_settings.m_refLevel/10.0) :  m_settings.m_powerRange;
+    qDebug("GLSpectrumGUI::applySettings: refLevel: %e powerRange: %e", refLevel, powerRange);
+    m_glSpectrum->setReferenceLevel(refLevel);
+    m_glSpectrum->setPowerRange(powerRange);
+    m_glSpectrum->setLinear(m_settings.m_linear);
 }
 
 void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
@@ -489,6 +493,26 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
     if (GLSpectrum::MsgReportSampleRate::match(message))
     {
         setAveragingToolitp();
+        return true;
+    }
+    else if (SpectrumVis::MsgConfigureSpectrumVis::match(message))
+    {
+        SpectrumVis::MsgConfigureSpectrumVis& cfg = (SpectrumVis::MsgConfigureSpectrumVis&) message;
+        m_settings = cfg.getSettings();
+        displaySettings();
+
+        if (m_glSpectrum) {
+            applyGLSpectrumSettings();
+        }
+
+        return true;
+    }
+    else if (SpectrumVis::MsgConfigureWSpectrumOpenClose::match(message))
+    {
+        SpectrumVis::MsgConfigureWSpectrumOpenClose& notif = (SpectrumVis::MsgConfigureWSpectrumOpenClose&) message;
+        ui->wsSpectrum->blockSignals(true);
+        ui->wsSpectrum->doToggle(notif.getOpenClose());
+        ui->wsSpectrum->blockSignals(false);
         return true;
     }
 

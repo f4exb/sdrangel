@@ -1434,6 +1434,27 @@ int WebAPIAdapterGUI::devicesetSpectrumSettingsGet(
     }
 }
 
+int WebAPIAdapterGUI::devicesetSpectrumSettingsPutPatch(
+        int deviceSetIndex,
+        bool force, //!< true to force settings = put else patch
+        const QStringList& spectrumSettingsKeys,
+        SWGSDRangel::SWGGLSpectrum& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        return deviceSet->webapiSpectrumSettingsPutPatch(force, spectrumSettingsKeys, response, *error.getMessage());
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
 int WebAPIAdapterGUI::devicesetSpectrumServerGet(
         int deviceSetIndex,
         SWGSDRangel::SWGSpectrumServer& response,
@@ -1443,6 +1464,48 @@ int WebAPIAdapterGUI::devicesetSpectrumServerGet(
     {
         const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
         deviceSet->webapiSpectrumServerGet(response, *error.getMessage());
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::devicesetSpectrumServerPost(
+        int deviceSetIndex,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        deviceSet->webapiSpectrumServerPost(response, *error.getMessage());
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(deviceSetIndex);
+
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::devicesetSpectrumServerDelete(
+        int deviceSetIndex,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        deviceSet->webapiSpectrumServerDelete(response, *error.getMessage());
 
         return 200;
     }

@@ -441,7 +441,26 @@ int DeviceUISet::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response,
     return m_spectrumVis->webapiSpectrumSettingsGet(response, errorMessage);
 }
 
+int DeviceUISet::webapiSpectrumSettingsPutPatch(
+    bool force,
+    const QStringList& spectrumSettingsKeys,
+    SWGSDRangel::SWGGLSpectrum& response, // query + response
+    QString& errorMessage)
+{
+    return m_spectrumVis->webapiSpectrumSettingsPutPatch(force, spectrumSettingsKeys, response, errorMessage);
+}
+
 int DeviceUISet::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const
 {
     return m_spectrumVis->webapiSpectrumServerGet(response, errorMessage);
+}
+
+int DeviceUISet::webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
+{
+    return m_spectrumVis->webapiSpectrumServerPost(response, errorMessage);
+}
+
+int DeviceUISet::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
+{
+    return m_spectrumVis->webapiSpectrumServerDelete(response, errorMessage);
 }

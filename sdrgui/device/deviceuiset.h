@@ -40,6 +40,7 @@ class Preset;
 namespace SWGSDRangel {
     class SWGGLSpectrum;
     class SWGSpectrumServer;
+    class SWGSuccessResponse;
 };
 
 class SDRGUI_API DeviceUISet
@@ -90,7 +91,14 @@ public:
 
     // REST API
     int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumSettingsPutPatch(
+            bool force,
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response, // query + response
+            QString& errorMessage);
     int webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const;
+    int webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
+    int webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
 
 private:
     struct ChannelInstanceRegistration
