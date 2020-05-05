@@ -48,7 +48,11 @@ void GLSpectrumSettings::resetToDefaults()
 	m_displayGrid = false;
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
+<<<<<<< ours
 	m_averagingValue = 1;
+=======
+    m_averagingValue = 1;
+>>>>>>> theirs
 	m_linear = false;
     m_ssb = false;
     m_usb = true;
