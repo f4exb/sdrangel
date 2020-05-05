@@ -31,9 +31,6 @@ GLSpectrum:
     displayGrid:
       description: boolean
       type: integer
-    invert:
-      description: boolean
-      type: integer
     displayGridIntensity:
       type: integer
     decayDivisor:
