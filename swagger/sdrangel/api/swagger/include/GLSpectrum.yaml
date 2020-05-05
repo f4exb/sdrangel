@@ -53,3 +53,15 @@ GLSpectrum:
     linear:
       description: boolean
       type: integer
+    ssb:
+      description: boolean
+      type: integer
+    usb:
+      description: boolean
+      type: integer
+    wsSpectrumAddress:
+      description: IPv4 address of interface the websocket server is listening to
+      type: string
+    wsSpectrumPort:
+      description: port on which the websocket server is listening
+      type: integer
