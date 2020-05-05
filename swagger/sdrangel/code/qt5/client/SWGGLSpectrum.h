@@ -74,9 +74,6 @@ public:
     qint32 getDisplayGrid();
     void setDisplayGrid(qint32 display_grid);
 
-    qint32 getInvert();
-    void setInvert(qint32 invert);
-
     qint32 getDisplayGridIntensity();
     void setDisplayGridIntensity(qint32 display_grid_intensity);
 
@@ -140,9 +137,6 @@ private:
 
     qint32 display_grid;
     bool m_display_grid_isSet;
-
-    qint32 invert;
-    bool m_invert_isSet;
 
     qint32 display_grid_intensity;
     bool m_display_grid_intensity_isSet;

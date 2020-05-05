@@ -180,6 +180,8 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGSpectrumServer.h"
+#include "SWGSpectrumServer_clients.h"
 #include "SWGSuccessResponse.h"
 #include "SWGTestMISettings.h"
 #include "SWGTestMOSyncSettings.h"
@@ -704,6 +706,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSoapySDRReport").compare(type) == 0) {
       return new SWGSoapySDRReport();
+    }
+    if(QString("SWGSpectrumServer").compare(type) == 0) {
+      return new SWGSpectrumServer();
+    }
+    if(QString("SWGSpectrumServer_clients").compare(type) == 0) {
+      return new SWGSpectrumServer_clients();
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();

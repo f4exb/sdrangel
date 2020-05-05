@@ -50,8 +50,6 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_decay_isSet = false;
     display_grid = 0;
     m_display_grid_isSet = false;
-    invert = 0;
-    m_invert_isSet = false;
     display_grid_intensity = 0;
     m_display_grid_intensity_isSet = false;
     decay_divisor = 0;
@@ -100,8 +98,6 @@ SWGGLSpectrum::init() {
     m_decay_isSet = false;
     display_grid = 0;
     m_display_grid_isSet = false;
-    invert = 0;
-    m_invert_isSet = false;
     display_grid_intensity = 0;
     m_display_grid_intensity_isSet = false;
     decay_divisor = 0;
@@ -124,7 +120,6 @@ SWGGLSpectrum::init() {
 
 void
 SWGGLSpectrum::cleanup() {
-
 
 
 
@@ -179,8 +174,6 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&decay, pJson["decay"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_grid, pJson["displayGrid"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&invert, pJson["invert"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_grid_intensity, pJson["displayGridIntensity"], "qint32", "");
     
@@ -248,9 +241,6 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_display_grid_isSet){
         obj->insert("displayGrid", QJsonValue(display_grid));
-    }
-    if(m_invert_isSet){
-        obj->insert("invert", QJsonValue(invert));
     }
     if(m_display_grid_intensity_isSet){
         obj->insert("displayGridIntensity", QJsonValue(display_grid_intensity));
@@ -394,16 +384,6 @@ SWGGLSpectrum::setDisplayGrid(qint32 display_grid) {
 }
 
 qint32
-SWGGLSpectrum::getInvert() {
-    return invert;
-}
-void
-SWGGLSpectrum::setInvert(qint32 invert) {
-    this->invert = invert;
-    this->m_invert_isSet = true;
-}
-
-qint32
 SWGGLSpectrum::getDisplayGridIntensity() {
     return display_grid_intensity;
 }
@@ -529,9 +509,6 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_display_grid_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_invert_isSet){
             isObjectUpdated = true; break;
         }
         if(m_display_grid_intensity_isSet){
