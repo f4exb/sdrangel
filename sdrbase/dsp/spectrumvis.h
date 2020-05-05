@@ -40,6 +40,7 @@ class MessageQueue;
 namespace SWGSDRangel {
     class SWGGLSpectrum;
     class SWGSpectrumServer;
+    class SWGSuccessResponse;
 };
 
 class SDRGUI_API SpectrumVis : public BasebandSampleSink {
@@ -132,7 +133,14 @@ public:
 	virtual bool handleMessage(const Message& message);
 
     int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumSettingsPutPatch(
+            bool force,
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response, // query + response
+            QString& errorMessage);
     int webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const;
+    int webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
+    int webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
 
 private:
     class MsgConfigureScalingFactor : public Message
@@ -209,6 +217,10 @@ private:
     void handleConfigureWSSpectrum(const QString& address, uint16_t port);
 
     static void webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const GLSpectrumSettings& settings);
+    static void webapiUpdateSpectrumSettings(
+            GLSpectrumSettings& settings,
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response);
 };
 
 #endif // INCLUDE_SPECTRUMVIS_H

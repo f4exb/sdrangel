@@ -704,6 +704,9 @@
          <normalon>:/stream.png</normalon>
         </iconset>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>

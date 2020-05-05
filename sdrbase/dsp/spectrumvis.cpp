@@ -790,8 +790,32 @@ int SpectrumVis::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response,
     return 200;
 }
 
+int SpectrumVis::webapiSpectrumSettingsPutPatch(
+    bool force,
+    const QStringList& spectrumSettingsKeys,
+    SWGSDRangel::SWGGLSpectrum& response, // query + response
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    GLSpectrumSettings settings = m_settings;
+    webapiUpdateSpectrumSettings(settings, spectrumSettingsKeys, response);
+
+    MsgConfigureSpectrumVis *msg = MsgConfigureSpectrumVis::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureSpectrumVis *msgToGUI = MsgConfigureSpectrumVis::create(settings, force);
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
+
+    webapiFormatSpectrumSettings(response, settings);
+    return 200;
+}
+
 int SpectrumVis::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const
 {
+    (void) errorMessage;
     bool serverRunning = m_wsSpectrum.socketOpened();
     QList<QHostAddress> peerHosts;
     QList<quint16> peerPorts;
@@ -810,6 +834,38 @@ int SpectrumVis::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& respons
             response.getClients()->back()->setPort(peerPorts.at(i));
         }
     }
+
+    return 200;
+}
+
+int SpectrumVis::webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
+{
+    (void) errorMessage;
+    MsgConfigureWSpectrumOpenClose *msg = MsgConfigureWSpectrumOpenClose::create(true);
+    m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureWSpectrumOpenClose *msgToGui = MsgConfigureWSpectrumOpenClose::create(true);
+        getMessageQueueToGUI()->push(msgToGui);
+    }
+
+    return 200;
+}
+
+int SpectrumVis::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
+{
+    (void) errorMessage;
+    MsgConfigureWSpectrumOpenClose *msg = MsgConfigureWSpectrumOpenClose::create(false);
+    m_inputMessageQueue.push(msg);
+
+    if (getMessageQueueToGUI()) // forward to GUI if any
+    {
+        MsgConfigureWSpectrumOpenClose *msgToGui = MsgConfigureWSpectrumOpenClose::create(false);
+        getMessageQueueToGUI()->push(msgToGui);
+    }
+
+    return 200;
 }
 
 void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const GLSpectrumSettings& settings)
@@ -832,7 +888,7 @@ void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& respo
     response.setDisplayHistogram(settings.m_displayHistogram ? 1 : 0);
     response.setDisplayGrid(settings.m_displayGrid ? 1 : 0);
     response.setAveragingMode((int) settings.m_averagingMode);
-    response.setAveragingValue(settings.m_averagingValue);
+    response.setAveragingValue(GLSpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode));
     response.setLinear(settings.m_linear ? 1 : 0);
     response.setSsb(settings.m_ssb ? 1 : 0);
     response.setUsb(settings.m_usb ? 1 : 0);
@@ -842,5 +898,87 @@ void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& respo
         *response.getWsSpectrumAddress() = settings.m_wsSpectrumAddress;
     } else {
         response.setWsSpectrumAddress(new QString(settings.m_wsSpectrumAddress));
+    }
+}
+
+void SpectrumVis::webapiUpdateSpectrumSettings(
+    GLSpectrumSettings& settings,
+    const QStringList& spectrumSettingsKeys,
+    SWGSDRangel::SWGGLSpectrum& response)
+{
+    if (spectrumSettingsKeys.contains("fftSize")) {
+        settings.m_fftSize = response.getFftSize();
+    }
+    if (spectrumSettingsKeys.contains("fftOverlap")) {
+        settings.m_fftOverlap = response.getFftOverlap();
+    }
+    if (spectrumSettingsKeys.contains("fftWindow")) {
+        settings.m_fftWindow = (FFTWindow::Function) response.getFftWindow();
+    }
+    if (spectrumSettingsKeys.contains("refLevel")) {
+        settings.m_refLevel = response.getRefLevel();
+    }
+    if (spectrumSettingsKeys.contains("powerRange")) {
+        settings.m_powerRange = response.getPowerRange();
+    }
+    if (spectrumSettingsKeys.contains("decay")) {
+        settings.m_decay = response.getDecay();
+    }
+    if (spectrumSettingsKeys.contains("decayDivisor")) {
+        settings.m_decayDivisor = response.getDecayDivisor();
+    }
+    if (spectrumSettingsKeys.contains("histogramStroke")) {
+        settings.m_histogramStroke = response.getHistogramStroke();
+    }
+    if (spectrumSettingsKeys.contains("displayGridIntensity")) {
+        settings.m_displayGridIntensity = response.getDisplayGridIntensity();
+    }
+    if (spectrumSettingsKeys.contains("displayTraceIntensity")) {
+        settings.m_displayTraceIntensity = response.getDisplayTraceIntensity();
+    }
+    if (spectrumSettingsKeys.contains("displayWaterfall")) {
+        settings.m_displayWaterfall = response.getDisplayWaterfall() != 0;
+    }
+    if (spectrumSettingsKeys.contains("invertedWaterfall")) {
+        settings.m_invertedWaterfall = response.getInvertedWaterfall() != 0;
+    }
+    if (spectrumSettingsKeys.contains("waterfallShare")) {
+        settings.m_waterfallShare = response.getWaterfallShare();
+    }
+    if (spectrumSettingsKeys.contains("displayMaxHold")) {
+        settings.m_displayMaxHold = response.getDisplayMaxHold() != 0;
+    }
+    if (spectrumSettingsKeys.contains("displayCurrent")) {
+        settings.m_displayCurrent = response.getDisplayCurrent() != 0;
+    }
+    if (spectrumSettingsKeys.contains("displayHistogram")) {
+        settings.m_displayHistogram = response.getDisplayHistogram() != 0;
+    }
+    if (spectrumSettingsKeys.contains("displayGrid")) {
+        settings.m_displayGrid = response.getDisplayGrid() != 0;
+    }
+    if (spectrumSettingsKeys.contains("averagingMode")) {
+        settings.m_averagingMode = (GLSpectrumSettings::AveragingMode) response.getAveragingMode();
+    }
+    if (spectrumSettingsKeys.contains("averagingValue"))
+    {
+        qint32 tmp = response.getAveragingValue();
+        settings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(tmp, settings.m_averagingMode);
+        settings.m_averagingValue = GLSpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
+    }
+    if (spectrumSettingsKeys.contains("linear")) {
+        settings.m_linear = response.getLinear() != 0;
+    }
+    if (spectrumSettingsKeys.contains("ssb")) {
+        settings.m_ssb = response.getSsb() != 0;
+    }
+    if (spectrumSettingsKeys.contains("usb")) {
+        settings.m_usb = response.getUsb() != 0;
+    }
+    if (spectrumSettingsKeys.contains("wsSpectrumAddress")) {
+        settings.m_wsSpectrumAddress = *response.getWsSpectrumAddress();
+    }
+    if (spectrumSettingsKeys.contains("wsSpectrumPort")) {
+        settings.m_wsSpectrumPort = response.getWsSpectrumPort();
     }
 }
