@@ -56,6 +56,8 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
+#include "SWGGLSpectrum.h"
+#include "SWGSpectrumServer.h"
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     HttpRequestHandler(parent),
@@ -161,6 +163,10 @@ void WebAPIRequestMapper::service(qtwebapp::HttpRequest& request, qtwebapp::Http
                 devicesetDeviceService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetFocusURLRe)) {
                 devicesetFocusService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumSettingsURLRe)) {
+                devicesetSpectrumSettingsService(std::string(desc_match[1]), request, response);
+            } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetSpectrumServerURLRe)) {
+                devicesetSpectrumServerService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceSettingsURLRe)) {
                 devicesetDeviceSettingsService(std::string(desc_match[1]), request, response);
             } else if (std::regex_match(pathStr, desc_match, WebAPIAdapterInterface::devicesetDeviceRunURLRe)) {
@@ -1457,6 +1463,155 @@ void WebAPIRequestMapper::devicesetFocusService(const std::string& indexStr, qtw
         {
             SWGSDRangel::SWGSuccessResponse normalResponse;
             int status = m_adapter->devicesetFocusPatch(deviceSetIndex, normalResponse, errorResponse);
+
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetSpectrumSettingsService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if ((request.getMethod() == "PUT") || (request.getMethod() == "PATCH"))
+        {
+            QString jsonStr = request.getBody();
+            QJsonObject jsonObject;
+
+            if (parseJsonBody(jsonStr, jsonObject, response))
+            {
+                SWGSDRangel::SWGGLSpectrum normalResponse;
+                resetSpectrumSettings(normalResponse);
+                QStringList spectrumSettingsKeys;
+
+                if (validateSpectrumSettings(normalResponse, jsonObject, spectrumSettingsKeys))
+                {
+                    int status = m_adapter->devicesetSpectrumSettingsPutPatch(
+                            deviceSetIndex,
+                            (request.getMethod() == "PUT"), // force settings on PUT
+                            spectrumSettingsKeys,
+                            normalResponse,
+                            errorResponse);
+                    response.setStatus(status);
+
+                    if (status/100 == 2) {
+                        response.write(normalResponse.asJson().toUtf8());
+                    } else {
+                        response.write(errorResponse.asJson().toUtf8());
+                    }
+                }
+                else
+                {
+                    response.setStatus(400,"Invalid JSON request");
+                    errorResponse.init();
+                    *errorResponse.getMessage() = "Invalid JSON request";
+                    response.write(errorResponse.asJson().toUtf8());
+                }
+            }
+            else
+            {
+                response.setStatus(400,"Invalid JSON format");
+                errorResponse.init();
+                *errorResponse.getMessage() = "Invalid JSON format";
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGGLSpectrum normalResponse;
+            resetSpectrumSettings(normalResponse);
+            int status = m_adapter->devicesetSpectrumSettingsGet(deviceSetIndex, normalResponse, errorResponse);
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else
+        {
+            response.setStatus(405,"Invalid HTTP method");
+            errorResponse.init();
+            *errorResponse.getMessage() = "Invalid HTTP method";
+            response.write(errorResponse.asJson().toUtf8());
+        }
+    }
+    catch (const boost::bad_lexical_cast &e)
+    {
+        errorResponse.init();
+        *errorResponse.getMessage() = "Wrong integer conversion on device set index";
+        response.setStatus(400,"Invalid data");
+        response.write(errorResponse.asJson().toUtf8());
+    }
+}
+
+void WebAPIRequestMapper::devicesetSpectrumServerService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response)
+{
+    SWGSDRangel::SWGErrorResponse errorResponse;
+    response.setHeader("Content-Type", "application/json");
+    response.setHeader("Access-Control-Allow-Origin", "*");
+
+    try
+    {
+        int deviceSetIndex = boost::lexical_cast<int>(indexStr);
+
+        if (request.getMethod() == "GET")
+        {
+            SWGSDRangel::SWGSpectrumServer normalResponse;
+            int status = m_adapter->devicesetSpectrumServerGet(deviceSetIndex, normalResponse, errorResponse);
+
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "POST")
+        {
+            SWGSDRangel::SWGSuccessResponse normalResponse;
+            int status = m_adapter->devicesetSpectrumServerPost(deviceSetIndex, normalResponse, errorResponse);
+
+            response.setStatus(status);
+
+            if (status/100 == 2) {
+                response.write(normalResponse.asJson().toUtf8());
+            } else {
+                response.write(errorResponse.asJson().toUtf8());
+            }
+        }
+        else if (request.getMethod() == "DELETE")
+        {
+            SWGSDRangel::SWGSuccessResponse normalResponse;
+            int status = m_adapter->devicesetSpectrumServerDelete(deviceSetIndex, normalResponse, errorResponse);
 
             response.setStatus(status);
 
@@ -3209,6 +3364,125 @@ bool WebAPIRequestMapper::validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings&
     return true;
 }
 
+bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings, QJsonObject& jsonObject, QStringList& spectrumSettingsKeys)
+{
+    if (jsonObject.contains("fftSize"))
+    {
+        spectrumSettings.setFftSize(jsonObject["fftSize"].toInt(1024));
+        spectrumSettingsKeys.append("fftSize");
+    }
+    if (jsonObject.contains("fftOverlap"))
+    {
+        spectrumSettings.setFftOverlap(jsonObject["fftOverlap"].toInt(0));
+        spectrumSettingsKeys.append("fftOverlap");
+    }
+    if (jsonObject.contains("fftWindow"))
+    {
+        spectrumSettings.setFftWindow(jsonObject["fftWindow"].toInt(0));
+        spectrumSettingsKeys.append("fftWindow");
+    }
+    if (jsonObject.contains("refLevel"))
+    {
+        spectrumSettings.setRefLevel(jsonObject["refLevel"].toDouble(0.0));
+        spectrumSettingsKeys.append("refLevel");
+    }
+    if (jsonObject.contains("powerRange"))
+    {
+        spectrumSettings.setPowerRange(jsonObject["powerRange"].toDouble(100.0));
+        spectrumSettingsKeys.append("powerRange");
+    }
+    if (jsonObject.contains("displayWaterfall"))
+    {
+        spectrumSettings.setDisplayWaterfall(jsonObject["displayWaterfall"].toInt(0));
+        spectrumSettingsKeys.append("displayWaterfall");
+    }
+    if (jsonObject.contains("invertedWaterfall"))
+    {
+        spectrumSettings.setInvertedWaterfall(jsonObject["invertedWaterfall"].toInt(0));
+        spectrumSettingsKeys.append("invertedWaterfall");
+    }
+    if (jsonObject.contains("displayHistogram"))
+    {
+        spectrumSettings.setDisplayHistogram(jsonObject["displayHistogram"].toInt(0));
+        spectrumSettingsKeys.append("displayHistogram");
+    }
+    if (jsonObject.contains("decay"))
+    {
+        spectrumSettings.setDecay(jsonObject["decay"].toInt(1));
+        spectrumSettingsKeys.append("decay");
+    }
+    if (jsonObject.contains("displayGrid"))
+    {
+        spectrumSettings.setDisplayGrid(jsonObject["displayGrid"].toInt(0));
+        spectrumSettingsKeys.append("displayGrid");
+    }
+    if (jsonObject.contains("displayGridIntensity"))
+    {
+        spectrumSettings.setDisplayGridIntensity(jsonObject["displayGridIntensity"].toInt(30));
+        spectrumSettingsKeys.append("displayGridIntensity");
+    }
+    if (jsonObject.contains("decayDivisor"))
+    {
+        spectrumSettings.setDecayDivisor(jsonObject["decayDivisor"].toInt(1));
+        spectrumSettingsKeys.append("decayDivisor");
+    }
+    if (jsonObject.contains("histogramStroke"))
+    {
+        spectrumSettings.setHistogramStroke(jsonObject["histogramStroke"].toInt(10));
+        spectrumSettingsKeys.append("histogramStroke");
+    }
+    if (jsonObject.contains("displayCurrent"))
+    {
+        spectrumSettings.setDisplayCurrent(jsonObject["displayCurrent"].toInt(1));
+        spectrumSettingsKeys.append("displayCurrent");
+    }
+    if (jsonObject.contains("displayTraceIntensity"))
+    {
+        spectrumSettings.setDisplayTraceIntensity(jsonObject["displayTraceIntensity"].toInt(50));
+        spectrumSettingsKeys.append("displayTraceIntensity");
+    }
+    if (jsonObject.contains("waterfallShare"))
+    {
+        spectrumSettings.setWaterfallShare(jsonObject["waterfallShare"].toDouble(0.5));
+        spectrumSettingsKeys.append("waterfallShare");
+    }
+    if (jsonObject.contains("averagingMode"))
+    {
+        spectrumSettings.setAveragingMode(jsonObject["averagingMode"].toInt(0));
+        spectrumSettingsKeys.append("averagingMode");
+    }
+    if (jsonObject.contains("averagingValue"))
+    {
+        spectrumSettings.setAveragingValue(jsonObject["averagingValue"].toInt(0));
+        spectrumSettingsKeys.append("averagingValue");
+    }
+    if (jsonObject.contains("linear"))
+    {
+        spectrumSettings.setLinear(jsonObject["linear"].toInt(0));
+        spectrumSettingsKeys.append("linear");
+    }
+    if (jsonObject.contains("ssb"))
+    {
+        spectrumSettings.setSsb(jsonObject["ssb"].toInt(0));
+        spectrumSettingsKeys.append("ssb");
+    }
+    if (jsonObject.contains("usb"))
+    {
+        spectrumSettings.setUsb(jsonObject["usb"].toInt(1));
+        spectrumSettingsKeys.append("usb");
+    }
+    if (jsonObject.contains("wsSpectrumAddress") && jsonObject["wsSpectrumAddress"].isString())
+    {
+        spectrumSettings.setWsSpectrumAddress(new QString(jsonObject["wsSpectrumAddress"].toString()));
+        spectrumSettingsKeys.append("wsSpectrumAddress");
+    }
+    if (jsonObject.contains("wsSpectrumPort"))
+    {
+        spectrumSettings.setUsb(jsonObject["wsSpectrumPort"].toInt(8887));
+        spectrumSettingsKeys.append("wsSpectrumPort");
+    }
+}
+
 bool WebAPIRequestMapper::validateConfig(
     SWGSDRangel::SWGInstanceConfigResponse& config,
     QJsonObject& jsonObject,
@@ -4180,6 +4454,11 @@ void WebAPIRequestMapper::appendSettingsArrayKeys(
             }
         }
     }
+}
+
+void WebAPIRequestMapper::resetSpectrumSettings(SWGSDRangel::SWGGLSpectrum& spectrumSettings)
+{
+    spectrumSettings.cleanup();
 }
 
 void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings)

@@ -111,6 +111,9 @@ public:
     QString* getWsSpectrumAddress();
     void setWsSpectrumAddress(QString* ws_spectrum_address);
 
+    qint32 getWsSpectrumPort();
+    void setWsSpectrumPort(qint32 ws_spectrum_port);
+
 
     virtual bool isSet() override;
 
@@ -183,6 +186,9 @@ private:
 
     QString* ws_spectrum_address;
     bool m_ws_spectrum_address_isSet;
+
+    qint32 ws_spectrum_port;
+    bool m_ws_spectrum_port_isSet;
 
 };
 

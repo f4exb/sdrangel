@@ -450,3 +450,13 @@ void DeviceUISet::handleChannelGUIClosing(ChannelGUI* channelGUI)
         }
     }
 }
+
+int DeviceUISet::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const
+{
+    return m_spectrumVis->webapiSpectrumSettingsGet(response, errorMessage);
+}
+
+int DeviceUISet::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const
+{
+    return m_spectrumVis->webapiSpectrumServerGet(response, errorMessage);
+}

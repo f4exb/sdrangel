@@ -41,7 +41,8 @@ public:
 
     void openSocket();
     void closeSocket();
-    bool socketOpened();
+    bool socketOpened() const;
+    void getPeers(QList<QHostAddress>& hosts, QList<quint16>& ports) const;
     void setListeningAddress(const QString& address) { m_listeningAddress.setAddress(address); }
     void setPort(quint16 port) { m_port = port; }
     void newSpectrum(

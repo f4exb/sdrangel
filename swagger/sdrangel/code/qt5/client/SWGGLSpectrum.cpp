@@ -74,6 +74,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_usb_isSet = false;
     ws_spectrum_address = nullptr;
     m_ws_spectrum_address_isSet = false;
+    ws_spectrum_port = 0;
+    m_ws_spectrum_port_isSet = false;
 }
 
 SWGGLSpectrum::~SWGGLSpectrum() {
@@ -128,6 +130,8 @@ SWGGLSpectrum::init() {
     m_usb_isSet = false;
     ws_spectrum_address = new QString("");
     m_ws_spectrum_address_isSet = false;
+    ws_spectrum_port = 0;
+    m_ws_spectrum_port_isSet = false;
 }
 
 void
@@ -157,6 +161,7 @@ SWGGLSpectrum::cleanup() {
     if(ws_spectrum_address != nullptr) { 
         delete ws_spectrum_address;
     }
+
 }
 
 SWGGLSpectrum*
@@ -215,6 +220,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&usb, pJson["usb"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ws_spectrum_address, pJson["wsSpectrumAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&ws_spectrum_port, pJson["wsSpectrumPort"], "qint32", "");
     
 }
 
@@ -300,6 +307,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(ws_spectrum_address != nullptr && *ws_spectrum_address != QString("")){
         toJsonValue(QString("wsSpectrumAddress"), ws_spectrum_address, obj, QString("QString"));
+    }
+    if(m_ws_spectrum_port_isSet){
+        obj->insert("wsSpectrumPort", QJsonValue(ws_spectrum_port));
     }
 
     return obj;
@@ -535,6 +545,16 @@ SWGGLSpectrum::setWsSpectrumAddress(QString* ws_spectrum_address) {
     this->m_ws_spectrum_address_isSet = true;
 }
 
+qint32
+SWGGLSpectrum::getWsSpectrumPort() {
+    return ws_spectrum_port;
+}
+void
+SWGGLSpectrum::setWsSpectrumPort(qint32 ws_spectrum_port) {
+    this->ws_spectrum_port = ws_spectrum_port;
+    this->m_ws_spectrum_port_isSet = true;
+}
+
 
 bool
 SWGGLSpectrum::isSet(){
@@ -607,6 +627,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(ws_spectrum_address && *ws_spectrum_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_ws_spectrum_port_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

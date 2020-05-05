@@ -73,9 +73,21 @@ void WSSpectrum::closeSocket()
     }
 }
 
-bool WSSpectrum::socketOpened()
+bool WSSpectrum::socketOpened() const
 {
     return m_webSocketServer && m_webSocketServer->isListening();
+}
+
+void WSSpectrum::getPeers(QList<QHostAddress>& hosts, QList<quint16>& ports) const
+{
+    hosts.clear();
+    ports.clear();
+
+    for (auto pSocket : m_clients)
+    {
+        hosts.push_back(pSocket->peerAddress());
+        ports.push_back(pSocket->peerPort());
+    }
 }
 
 QString WSSpectrum::getWebSocketIdentifier(QWebSocket *peer)

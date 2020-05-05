@@ -40,6 +40,11 @@ class ChannelAPI;
 class ChannelGUI;
 class Preset;
 
+namespace SWGSDRangel {
+    class SWGGLSpectrum;
+    class SWGSpectrumServer;
+};
+
 class SDRGUI_API DeviceUISet : public QObject
 {
     Q_OBJECT
@@ -83,6 +88,10 @@ public:
     int getNumberOfAvailableRxChannels() const { return m_nbAvailableRxChannels; }
     int getNumberOfAvailableTxChannels() const { return m_nbAvailableTxChannels; }
     int getNumberOfAvailableMIMOChannels() const { return m_nbAvailableMIMOChannels; }
+
+    // REST API
+    int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const;
 
 private:
     struct ChannelInstanceRegistration

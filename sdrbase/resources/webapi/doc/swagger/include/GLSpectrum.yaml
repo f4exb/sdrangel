@@ -64,4 +64,4 @@ GLSpectrum:
       type: string
     wsSpectrumPort:
       description: port on which the websocket server is listening
-      type: integer\ No newline at end of file
+      type: integer
