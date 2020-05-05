@@ -48,7 +48,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayGrid(true),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
-	m_invertedWaterfall(false),
+	m_invertedWaterfall(true),
 	m_displayMaxHold(false),
 	m_currentSpectrum(0),
 	m_displayCurrent(false),

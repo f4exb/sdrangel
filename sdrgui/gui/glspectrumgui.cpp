@@ -169,7 +169,6 @@ void GLSpectrumGUI::applySettings()
         m_glSpectrum->setDecay(m_settings.m_decay);
         m_glSpectrum->setDecayDivisor(m_settings.m_decayDivisor);
         m_glSpectrum->setHistoStroke(m_settings.m_histogramStroke);
-        m_glSpectrum->setInvertedWaterfall(m_settings.m_invertedWaterfall);
         m_glSpectrum->setDisplayGrid(m_settings.m_displayGrid);
         m_glSpectrum->setDisplayGridIntensity(m_settings.m_displayGridIntensity);
         m_glSpectrum->setDisplayTraceIntensity(m_settings.m_displayTraceIntensity);
