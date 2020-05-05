@@ -222,6 +222,17 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
+    if ((settings.m_dsb != m_settings.m_dsb)
+     || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
+     || (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
+    {
+        GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+        spectrumSettings.m_ssb = !settings.m_dsb;
+        spectrumSettings.m_usb = (settings.m_lowCutoff < settings.m_rfBandwidth);
+        SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+        m_spectrumVis.getInputMessageQueue()->push(msg);
+    }
+
     SSBDemodBaseband::MsgConfigureSSBDemodBaseband *msg = SSBDemodBaseband::MsgConfigureSSBDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 

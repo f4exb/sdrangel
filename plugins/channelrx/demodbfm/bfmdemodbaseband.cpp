@@ -20,6 +20,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
+#include "dsp/spectrumvis.h"
 
 #include "bfmdemodreport.h"
 #include "bfmdemodbaseband.h"
@@ -28,7 +29,8 @@ MESSAGE_CLASS_DEFINITION(BFMDemodBaseband::MsgConfigureBFMDemodBaseband, Message
 
 BFMDemodBaseband::BFMDemodBaseband() :
     m_mutex(QMutex::Recursive),
-    m_messageQueueToGUI(nullptr)
+    m_messageQueueToGUI(nullptr),
+    m_spectrumVis(nullptr)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
@@ -131,6 +133,12 @@ bool BFMDemodBaseband::handleMessage(const Message& cmd)
             getMessageQueueToGUI()->push(msg);
         }
 
+        if (m_spectrumVis)
+        {
+            DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer->getChannelSampleRate(), 0);
+            m_spectrumVis->getInputMessageQueue()->push(msg);
+        }
+
 		return true;
     }
     else
@@ -151,6 +159,12 @@ void BFMDemodBaseband::applySettings(const BFMDemodSettings& settings, bool forc
         {
             BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer->getChannelSampleRate());
             getMessageQueueToGUI()->push(msg);
+        }
+
+        if (m_spectrumVis)
+        {
+            DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer->getChannelSampleRate(), 0);
+            m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
 
@@ -187,5 +201,11 @@ void BFMDemodBaseband::setBasebandSampleRate(int sampleRate)
     {
         BFMDemodReport::MsgReportChannelSampleRateChanged *msg = BFMDemodReport::MsgReportChannelSampleRateChanged::create(m_channelizer->getChannelSampleRate());
         getMessageQueueToGUI()->push(msg);
+    }
+
+    if (m_spectrumVis)
+    {
+        DSPSignalNotification *msg = new DSPSignalNotification(m_channelizer->getChannelSampleRate(), 0);
+        m_spectrumVis->getInputMessageQueue()->push(msg);
     }
 }

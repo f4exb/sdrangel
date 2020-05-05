@@ -92,6 +92,11 @@ void FreeDVDemod::start()
 
     m_basebandSink->reset();
     m_thread->start();
+
+    GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+    spectrumSettings.m_ssb = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis.getInputMessageQueue()->push(msg);
 }
 
 void FreeDVDemod::stop()
@@ -191,6 +196,15 @@ void FreeDVDemod::applySettings(const FreeDVDemodSettings& settings, bool force)
         }
 
         reverseAPIKeys.append("streamIndex");
+    }
+
+    if ((settings.m_freeDVMode != m_settings.m_freeDVMode)
+     || (settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    {
+        DSPSignalNotification *msg = new DSPSignalNotification(
+            FreeDVDemodSettings::getModSampleRate(settings.m_freeDVMode)/(1<<settings.m_spanLog2),
+            0);
+        m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
     FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband *msg = FreeDVDemodBaseband::MsgConfigureFreeDVDemodBaseband::create(settings, force);

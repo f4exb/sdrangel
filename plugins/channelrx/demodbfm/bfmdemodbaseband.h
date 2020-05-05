@@ -28,6 +28,7 @@
 #include "bfmdemodsink.h"
 
 class DownChannelizer;
+class SpectrumVis;
 
 class BFMDemodBaseband : public QObject
 {
@@ -63,7 +64,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
-    void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }
+    void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink((BasebandSampleSink*) spectrumSink); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
 
     unsigned int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
@@ -87,6 +88,7 @@ private:
     BFMDemodSettings m_settings;
     QMutex m_mutex;
     MessageQueue *m_messageQueueToGUI;
+    SpectrumVis *m_spectrumVis;
 
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 

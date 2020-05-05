@@ -171,9 +171,14 @@ void UDPSource::applySettings(const UDPSourceSettings& settings, bool force)
     if ((settings.m_sampleFormat != m_settings.m_sampleFormat) || force) {
         reverseAPIKeys.append("sampleFormat");
     }
-    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force) {
+
+    if ((settings.m_inputSampleRate != m_settings.m_inputSampleRate) || force)
+    {
         reverseAPIKeys.append("inputSampleRate");
+        DSPSignalNotification *msg = new DSPSignalNotification(settings.m_inputSampleRate, 0);
+        m_spectrumVis.getInputMessageQueue()->push(msg);
     }
+
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
     }

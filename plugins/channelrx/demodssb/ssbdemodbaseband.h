@@ -62,7 +62,7 @@ public:
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
-	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }
+	void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink(spectrumSink); }
     double getMagSq() const { return m_sink.getMagSq(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
@@ -78,6 +78,7 @@ private:
     SSBDemodSettings m_settings;
     unsigned int m_audioSampleRate;
     MessageQueue *m_messageQueueToGUI;
+    SpectrumVis *m_spectrumVis;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

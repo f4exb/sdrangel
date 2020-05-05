@@ -90,6 +90,11 @@ void FreeDVMod::start()
 	qDebug("FreeDVMod::start");
     m_basebandSource->reset();
     m_thread->start();
+
+    GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+    spectrumSettings.m_ssb = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis.getInputMessageQueue()->push(msg);
 }
 
 void FreeDVMod::stop()
@@ -273,6 +278,15 @@ void FreeDVMod::applySettings(const FreeDVModSettings& settings, bool force)
         }
 
         reverseAPIKeys.append("streamIndex");
+    }
+
+    if ((settings.m_freeDVMode != m_settings.m_freeDVMode)
+     || (settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    {
+        DSPSignalNotification *msg = new DSPSignalNotification(
+            FreeDVModSettings::getModSampleRate(settings.m_freeDVMode)/(1<<settings.m_spanLog2),
+            0);
+        m_spectrumVis.getInputMessageQueue()->push(msg);
     }
 
     FreeDVModBaseband::MsgConfigureFreeDVModBaseband *msg = FreeDVModBaseband::MsgConfigureFreeDVModBaseband::create(settings, force);

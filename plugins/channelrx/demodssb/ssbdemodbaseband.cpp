@@ -20,6 +20,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
+#include "dsp/spectrumvis.h"
 
 #include "ssbdemodbaseband.h"
 
@@ -27,6 +28,7 @@ MESSAGE_CLASS_DEFINITION(SSBDemodBaseband::MsgConfigureSSBDemodBaseband, Message
 
 SSBDemodBaseband::SSBDemodBaseband() :
     m_messageQueueToGUI(nullptr),
+    m_spectrumVis(nullptr),
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
@@ -142,6 +144,15 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
+    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    {
+        if (m_spectrumVis)
+        {
+            DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<settings.m_spanLog2), 0);
+            m_spectrumVis->getInputMessageQueue()->push(msg);
+        }
+    }
+
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
@@ -160,6 +171,12 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
             {
                 DSPConfigureAudio *msg = new DSPConfigureAudio((int) audioSampleRate, DSPConfigureAudio::AudioOutput);
                 getMessageQueueToGUI()->push(msg);
+            }
+
+            if (m_spectrumVis)
+            {
+                DSPSignalNotification *msg = new DSPSignalNotification(m_audioSampleRate/(1<<m_settings.m_spanLog2), 0);
+                m_spectrumVis->getInputMessageQueue()->push(msg);
             }
         }
     }

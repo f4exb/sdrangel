@@ -292,6 +292,16 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
+    if ((settings.m_dsb != m_settings.m_dsb)
+     || (settings.m_usb != m_settings.m_usb) || force)
+    {
+        GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+        spectrumSettings.m_ssb = !settings.m_dsb;
+        spectrumSettings.m_usb = settings.m_usb;
+        SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+        m_spectrumVis.getInputMessageQueue()->push(msg);
+    }
+
     SSBModBaseband::MsgConfigureSSBModBaseband *msg = SSBModBaseband::MsgConfigureSSBModBaseband::create(settings, force);
     m_basebandSource->getInputMessageQueue()->push(msg);
 

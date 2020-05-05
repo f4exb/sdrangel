@@ -96,6 +96,7 @@ public:
     void setGLSpectrum(GLSpectrumInterface* glSpectrum) { m_glSpectrum = glSpectrum; }
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
+    const GLSpectrumSettings& getSettings() const { return m_settings; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed

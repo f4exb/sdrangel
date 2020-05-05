@@ -29,6 +29,7 @@
 
 class UpChannelizer;
 class BasebandSampleSink;
+class SpectrumVis;
 
 class SSBModBaseband : public QObject
 {
@@ -70,7 +71,7 @@ public:
     void setInputFileStream(std::ifstream *ifstream) { m_source.setInputFileStream(ifstream); }
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
     AudioFifo *getFeedbackAudioFifo() { return m_source.getFeedbackAudioFifo(); }
-    void setSpectrumSink(BasebandSampleSink *sampleSink) { m_source.setSpectrumSink(sampleSink); }
+    void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumVis = sampleSink; m_source.setSpectrumSink((BasebandSampleSink *) sampleSink); }
 
 signals:
 	/**
@@ -87,6 +88,7 @@ private:
     SSBModSource m_source;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     SSBModSettings m_settings;
+    SpectrumVis *m_spectrumVis;
     QMutex m_mutex;
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);

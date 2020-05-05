@@ -20,6 +20,7 @@
 #include "dsp/upchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/spectrumvis.h"
 
 #include "ssbmodbaseband.h"
 
@@ -186,6 +187,12 @@ void SSBModBaseband::applySettings(const SSBModSettings& settings, bool force)
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
+    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    {
+        DSPSignalNotification *msg = new DSPSignalNotification(getAudioSampleRate()/(1<<settings.m_spanLog2), 0);
+        m_spectrumVis->getInputMessageQueue()->push(msg);
+    }
+
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
@@ -198,6 +205,8 @@ void SSBModBaseband::applySettings(const SSBModSettings& settings, bool force)
             m_source.applyAudioSampleRate(audioSampleRate);
             m_channelizer->setChannelization(audioSampleRate, m_settings.m_inputFrequencyOffset);
             m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+            DSPSignalNotification *msg = new DSPSignalNotification(getAudioSampleRate()/(1<<m_settings.m_spanLog2), 0);
+            m_spectrumVis->getInputMessageQueue()->push(msg);
         }
     }
 
