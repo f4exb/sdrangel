@@ -108,7 +108,11 @@ void ChirpChatDemod::start()
 
     m_basebandSink->reset();
     m_thread->start();
-}
+
+    GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+    spectrumSettings.m_ssb = true;
+    SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
+    m_spectrumVis.getInputMessageQueue()->push(msg);}
 
 void ChirpChatDemod::stop()
 {
@@ -290,9 +294,16 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
-    if ((settings.m_bandwidthIndex != m_settings.m_bandwidthIndex) || force) {
+
+    if ((settings.m_bandwidthIndex != m_settings.m_bandwidthIndex) || force)
+    {
         reverseAPIKeys.append("bandwidthIndex");
+        DSPSignalNotification *msg = new DSPSignalNotification(
+            ChirpChatDemodSettings::bandwidths[settings.m_bandwidthIndex],
+            0);
+        m_spectrumVis.getInputMessageQueue()->push(msg);
     }
+
     if ((settings.m_spreadFactor != m_settings.m_spreadFactor) || force) {
         reverseAPIKeys.append("spreadFactor");
     }
