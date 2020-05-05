@@ -68,6 +68,14 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_averaging_value_isSet = false;
     linear = 0;
     m_linear_isSet = false;
+    ssb = 0;
+    m_ssb_isSet = false;
+    usb = 0;
+    m_usb_isSet = false;
+    ws_spectrum_address = nullptr;
+    m_ws_spectrum_address_isSet = false;
+    ws_spectrum_port = 0;
+    m_ws_spectrum_port_isSet = false;
 }
 
 SWGGLSpectrum::~SWGGLSpectrum() {
@@ -116,6 +124,14 @@ SWGGLSpectrum::init() {
     m_averaging_value_isSet = false;
     linear = 0;
     m_linear_isSet = false;
+    ssb = 0;
+    m_ssb_isSet = false;
+    usb = 0;
+    m_usb_isSet = false;
+    ws_spectrum_address = new QString("");
+    m_ws_spectrum_address_isSet = false;
+    ws_spectrum_port = 0;
+    m_ws_spectrum_port_isSet = false;
 }
 
 void
@@ -139,6 +155,12 @@ SWGGLSpectrum::cleanup() {
 
 
 
+
+
+
+    if(ws_spectrum_address != nullptr) { 
+        delete ws_spectrum_address;
+    }
 
 }
 
@@ -192,6 +214,14 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&averaging_value, pJson["averagingValue"], "qint32", "");
     
     ::SWGSDRangel::setValue(&linear, pJson["linear"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ssb, pJson["ssb"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&usb, pJson["usb"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ws_spectrum_address, pJson["wsSpectrumAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&ws_spectrum_port, pJson["wsSpectrumPort"], "qint32", "");
     
 }
 
@@ -268,6 +298,18 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_linear_isSet){
         obj->insert("linear", QJsonValue(linear));
+    }
+    if(m_ssb_isSet){
+        obj->insert("ssb", QJsonValue(ssb));
+    }
+    if(m_usb_isSet){
+        obj->insert("usb", QJsonValue(usb));
+    }
+    if(ws_spectrum_address != nullptr && *ws_spectrum_address != QString("")){
+        toJsonValue(QString("wsSpectrumAddress"), ws_spectrum_address, obj, QString("QString"));
+    }
+    if(m_ws_spectrum_port_isSet){
+        obj->insert("wsSpectrumPort", QJsonValue(ws_spectrum_port));
     }
 
     return obj;
@@ -473,6 +515,46 @@ SWGGLSpectrum::setLinear(qint32 linear) {
     this->m_linear_isSet = true;
 }
 
+qint32
+SWGGLSpectrum::getSsb() {
+    return ssb;
+}
+void
+SWGGLSpectrum::setSsb(qint32 ssb) {
+    this->ssb = ssb;
+    this->m_ssb_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getUsb() {
+    return usb;
+}
+void
+SWGGLSpectrum::setUsb(qint32 usb) {
+    this->usb = usb;
+    this->m_usb_isSet = true;
+}
+
+QString*
+SWGGLSpectrum::getWsSpectrumAddress() {
+    return ws_spectrum_address;
+}
+void
+SWGGLSpectrum::setWsSpectrumAddress(QString* ws_spectrum_address) {
+    this->ws_spectrum_address = ws_spectrum_address;
+    this->m_ws_spectrum_address_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getWsSpectrumPort() {
+    return ws_spectrum_port;
+}
+void
+SWGGLSpectrum::setWsSpectrumPort(qint32 ws_spectrum_port) {
+    this->ws_spectrum_port = ws_spectrum_port;
+    this->m_ws_spectrum_port_isSet = true;
+}
+
 
 bool
 SWGGLSpectrum::isSet(){
@@ -536,6 +618,18 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_linear_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_ssb_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_usb_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(ws_spectrum_address && *ws_spectrum_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_ws_spectrum_port_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

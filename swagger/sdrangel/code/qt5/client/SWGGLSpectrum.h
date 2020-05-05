@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -101,6 +102,18 @@ public:
     qint32 getLinear();
     void setLinear(qint32 linear);
 
+    qint32 getSsb();
+    void setSsb(qint32 ssb);
+
+    qint32 getUsb();
+    void setUsb(qint32 usb);
+
+    QString* getWsSpectrumAddress();
+    void setWsSpectrumAddress(QString* ws_spectrum_address);
+
+    qint32 getWsSpectrumPort();
+    void setWsSpectrumPort(qint32 ws_spectrum_port);
+
 
     virtual bool isSet() override;
 
@@ -164,6 +177,18 @@ private:
 
     qint32 linear;
     bool m_linear_isSet;
+
+    qint32 ssb;
+    bool m_ssb_isSet;
+
+    qint32 usb;
+    bool m_usb_isSet;
+
+    QString* ws_spectrum_address;
+    bool m_ws_spectrum_address_isSet;
+
+    qint32 ws_spectrum_port;
+    bool m_ws_spectrum_port_isSet;
 
 };
 
