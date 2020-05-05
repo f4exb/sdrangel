@@ -982,6 +982,178 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/deviceset/{deviceSetIndex}/spectrum/settings:
+    x-swagger-router-controller: deviceset
+    get:
+      description: Get main spectrum settings
+      operationId: devicesetSpectrumSettingsGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return details on the main spectrum
+          schema:
+            $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+        "404":
+          description: Invalid index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: Apply main spectrun settings unconditionnaly (force)
+      operationId: devicesetSpectrumSettingsPut
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Spectrum settings to apply
+          required: true
+          schema:
+            $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    patch:
+      description: Apply main spectrun settings differentially (no force)
+      operationId: devicesetSpectrumSettingsPatch
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+        - name: body
+          in: body
+          description: Spectrum settings to apply
+          required: true
+          schema:
+            $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      responses:
+        "200":
+          description: On success returns new settings values
+          schema:
+            $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+        "404":
+          description: Invalid device set index or device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/deviceset/{deviceSetIndex}/spectrum/server:
+    x-swagger-router-controller: deviceset
+    get:
+      description: Get main spectrum websocket server status
+      operationId: devicesetSpectrumServerGet
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: On success return main spectrum server status
+          schema:
+            $ref: "#/definitions/SpectrumServer"
+        "404":
+          description: Invalid index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+    post:
+      description: Start main spectrum websocket server
+      operationId: devicesetSpectrumServerPost
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: Server successfully started
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+    delete:
+      description: Stop main spectrum websocket server
+      operationId: devicesetSpectrumServerDelete
+      tags:
+        - DeviceSet
+      parameters:
+        - in: path
+          name: deviceSetIndex
+          type: integer
+          required: true
+          description: Index of device set in the device set list
+      responses:
+        "200":
+          description: Server successfully stopped
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/deviceset/{deviceSetIndex}/device:
     x-swagger-router-controller: deviceset
     put:
@@ -1890,6 +2062,23 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/DeviceSet"
+
+  SpectrumServer:
+    description: "Spectrum server state"
+    properties:
+      run:
+        description: "Boolean: 1: websocket spectrum server running 0: not running"
+        type: integer
+      clients:
+        description: "List of clients"
+        type: array
+        items:
+          type: object
+          properties:
+            address:
+              type: string
+            port:
+              type: integer
 
   DeviceState:
     description: "Device running state"
