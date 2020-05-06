@@ -45,6 +45,8 @@ public:
     void getPeers(QList<QHostAddress>& hosts, QList<quint16>& ports) const;
     void setListeningAddress(const QString& address) { m_listeningAddress.setAddress(address); }
     void setPort(quint16 port) { m_port = port; }
+    QHostAddress getListeningAddress() const;
+    uint16_t getListeningPort() const;
     void newSpectrum(
         const std::vector<Real>& spectrum,
         int fftSize,

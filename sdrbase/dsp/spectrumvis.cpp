@@ -740,11 +740,12 @@ void SpectrumVis::handleWSOpenClose(bool openClose)
 
 void SpectrumVis::handleConfigureWSSpectrum(const QString& address, uint16_t port)
 {
+    m_wsSpectrum.setListeningAddress(address);
+    m_wsSpectrum.setPort(port);
+
     if (m_wsSpectrum.socketOpened())
     {
         m_wsSpectrum.closeSocket();
-        m_wsSpectrum.setListeningAddress(address);
-        m_wsSpectrum.setPort(port);
         m_wsSpectrum.openSocket();
     }
 }
@@ -789,6 +790,18 @@ int SpectrumVis::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& respons
     m_wsSpectrum.getPeers(peerHosts, peerPorts);
     response.init();
     response.setRun(serverRunning ? 1 : 0);
+
+    QHostAddress serverAddress = m_wsSpectrum.getListeningAddress();
+
+    if (serverAddress != QHostAddress::Null) {
+        response.setListeningAddress(new QString(serverAddress.toString()));
+    }
+
+    uint16_t serverPort = m_wsSpectrum.getListeningPort();
+
+    if (serverPort != 0) {
+        response.setListeningPort(serverPort);
+    }
 
     if (peerHosts.size() > 0)
     {

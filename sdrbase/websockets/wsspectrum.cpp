@@ -124,6 +124,24 @@ void WSSpectrum::socketDisconnected()
     }
 }
 
+QHostAddress WSSpectrum::getListeningAddress() const
+{
+    if (m_webSocketServer) {
+        return m_webSocketServer->serverAddress();
+    } else {
+        return QHostAddress::Null;
+    }
+}
+
+uint16_t WSSpectrum::getListeningPort() const
+{
+    if (m_webSocketServer) {
+        return m_webSocketServer->serverPort();
+    } else {
+        return 0;
+    }
+}
+
 void WSSpectrum::newSpectrum(
     const std::vector<Real>& spectrum,
     int fftSize,
