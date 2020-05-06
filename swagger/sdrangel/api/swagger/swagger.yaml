@@ -2069,6 +2069,10 @@ definitions:
       run:
         description: "Boolean: 1: websocket spectrum server running 0: not running"
         type: integer
+      listeningAddress:
+        type: string
+      listeningPort:
+        type: integer
       clients:
         description: "List of clients"
         type: array
