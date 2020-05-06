@@ -27,6 +27,13 @@ class DSPDeviceMIMOEngine;
 class PluginAPI;
 class ChannelAPI;
 class Preset;
+class SpectrumVis;
+
+namespace SWGSDRangel {
+    class SWGGLSpectrum;
+    class SWGSpectrumServer;
+    class SWGSuccessResponse;
+};
 
 class DeviceSet
 {
@@ -35,8 +42,9 @@ public:
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
+    SpectrumVis *m_spectrumVis;
 
-    DeviceSet(int tabIndex);
+    DeviceSet(int tabIndex, int deviceType);
     ~DeviceSet();
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
@@ -57,6 +65,17 @@ public:
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
+
+    // REST API
+    int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumSettingsPutPatch(
+            bool force,
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response, // query + response
+            QString& errorMessage);
+    int webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const;
+    int webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
+    int webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
 
 private:
     struct ChannelInstanceRegistration

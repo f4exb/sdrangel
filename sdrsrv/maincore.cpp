@@ -25,6 +25,7 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspdevicemimoengine.h"
+#include "dsp/spectrumvis.h"
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
 #include "device/deviceenumerator.h"
@@ -287,10 +288,11 @@ void MainCore::addSinkDevice()
     sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
 
     int deviceTabIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 1));
     m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
     m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
+    dspDeviceSinkEngine->addSpectrumSink(m_deviceSets.back()->m_spectrumVis);
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
@@ -333,10 +335,11 @@ void MainCore::addSourceDevice()
     sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
 
     int deviceTabIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 0));
     m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
+    dspDeviceSourceEngine->addSink(m_deviceSets.back()->m_spectrumVis);
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
@@ -378,10 +381,11 @@ void MainCore::addMIMODevice()
     sprintf(uidCStr, "UID:%d", dspDeviceMIMOEngineUID);
 
     int deviceTabIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 2));
     m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
+    dspDeviceMIMOEngine->addSpectrumSink(m_deviceSets.back()->m_spectrumVis);
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "M%d", deviceTabIndex);

@@ -228,6 +228,33 @@ public:
             SWGSDRangel::SWGDeviceListItem& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumSettingsGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumSettingsPutPatch(
+            int deviceSetIndex,
+            bool force, //!< true to force settings = put else patch
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSpectrumServer& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerDelete(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDeviceSettingsGet(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceSettings& response,
