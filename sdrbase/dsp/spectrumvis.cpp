@@ -20,6 +20,7 @@
 
 #include "SWGGLSpectrum.h"
 #include "SWGSpectrumServer.h"
+#include "SWGSuccessResponse.h"
 
 #include "glspectruminterface.h"
 #include "dspcommands.h"
@@ -850,6 +851,7 @@ int SpectrumVis::webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& respo
         getMessageQueueToGUI()->push(msgToGui);
     }
 
+    response.setMessage(new QString("Websocket spectrum server started"));
     return 200;
 }
 
@@ -865,6 +867,7 @@ int SpectrumVis::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& res
         getMessageQueueToGUI()->push(msgToGui);
     }
 
+    response.setMessage(new QString("Websocket spectrum server stopped"));
     return 200;
 }
 
