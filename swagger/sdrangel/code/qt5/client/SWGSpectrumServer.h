@@ -24,6 +24,7 @@
 
 #include "SWGSpectrumServer_clients.h"
 #include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -46,6 +47,12 @@ public:
     qint32 getRun();
     void setRun(qint32 run);
 
+    QString* getListeningAddress();
+    void setListeningAddress(QString* listening_address);
+
+    qint32 getListeningPort();
+    void setListeningPort(qint32 listening_port);
+
     QList<SWGSpectrumServer_clients*>* getClients();
     void setClients(QList<SWGSpectrumServer_clients*>* clients);
 
@@ -55,6 +62,12 @@ public:
 private:
     qint32 run;
     bool m_run_isSet;
+
+    QString* listening_address;
+    bool m_listening_address_isSet;
+
+    qint32 listening_port;
+    bool m_listening_port_isSet;
 
     QList<SWGSpectrumServer_clients*>* clients;
     bool m_clients_isSet;
