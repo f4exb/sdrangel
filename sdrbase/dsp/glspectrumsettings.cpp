@@ -37,7 +37,10 @@ void GLSpectrumSettings::resetToDefaults()
 	m_decay = 1;
 	m_decayDivisor = 1;
 	m_histogramStroke = 30;
-	m_displayGridIntensity = 5,
+	m_displayGridIntensity = 5;
+    m_displayTraceIntensity = 50;
+    m_waterfallShare = 0.66;
+    m_displayCurrent = true;
 	m_displayWaterfall = true;
 	m_invertedWaterfall = true;
 	m_displayMaxHold = false;
