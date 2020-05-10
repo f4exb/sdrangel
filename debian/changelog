@@ -1,3 +1,11 @@
+sdrangel (5.6.0-1) unstable; urgency=medium
+
+   * Websocket spectrum server. Implements issue #224
+   * FFTFactory: add mutex for thread safety. Implements issue #514
+   * SpectrumVis: release previous FFT engine allocation from FFT factory only if allocated once. Fixes issue #515
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 10 May 2020 23:01:15 +0200
+
 sdrangel (5.5.0-1) unstable; urgency=medium
 
    * LimeSDR MIMO support. Implements issue #462
