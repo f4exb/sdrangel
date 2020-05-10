@@ -453,6 +453,66 @@ Use this toggle button to switch between spectrum logarithmic and linear scale d
 
 When in linear mode the range control (4.4) has no effect because the actual range is between 0 and the reference level. The reference level in dB (4.3) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 
+<h4>4.K. Spectrum server control</h4>
+
+A websockets based server can be used to send spectrum data to clients. An example of such client can be found in the [SDRangelSpectrum](https://github.com/f4exb/sdrangelspectrum) project.
+
+  - Left button: toggles server on/off
+  - Right button: opens a secondary dialog that lets you choose the server listening (local) address and port.
+
+The server only sends data. Control including FFT details is done via the REST API. FFT frames are formatted as follows (in bytes):
+
+<table>
+    <tr>
+        <th>Offset</th>
+        <th>Length</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>8</td>
+        <td>Center frequency in Hz as 64 bit integer</td>
+    </tr>
+    <tr>
+        <td>8</td>
+        <td>8</td>
+        <td>Effective FFT time in milliseconds as 64 bit integer</td>
+    </tr>
+    <tr>
+        <td>16</td>
+        <td>8</td>
+        <td>Unix timestamp in milliseconds as 64 bit integer</td>
+    </tr>
+    <tr>
+        <td>24</td>
+        <td>4</td>
+        <td>FFT size as 32 bit integer</td>
+    </tr>
+    <tr>
+        <td>28</td>
+        <td>4</td>
+        <td>FFT bandwidth in Hz as 32 bit integer</td>
+    </tr>
+    <tr>
+        <td>32</td>
+        <td>4</td>
+        <td>
+            Indicators as 32 bit integer LSB to MSB:
+            <ul>
+                <li>bit 0: Linear (1) / log (0) spectrum indicator</li>
+                <li>bit 1: SSB (1) / DSB (0) spectrum indicator</li>
+                <li>bit 2: USB (1) / LSB (0) spectrum indicator</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td>36</td>
+        <td>N*4</td>
+        <td>Vector of N = FFT size 32 bit floating point spectrum power values either log (dB) or linear</td>
+    </tr>
+
+</table>
+
 <h3>5. Presets and commands</h3>
 
 The presets and commands tree view are by default stacked in tabs. The following sections describe the presets section 5A) and commands (section 5B) views successively
