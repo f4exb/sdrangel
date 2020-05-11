@@ -90,6 +90,17 @@ void WSSpectrum::getPeers(QList<QHostAddress>& hosts, QList<quint16>& ports) con
     }
 }
 
+void WSSpectrum::setListeningAddress(const QString& address)
+{
+    if (address == "127.0.0.1") {
+        m_listeningAddress.setAddress(QHostAddress::LocalHost);
+    } else if (address == "0.0.0.0") {
+        m_listeningAddress.setAddress(QHostAddress::Any);
+    } else {
+        m_listeningAddress.setAddress(address);
+    }
+}
+
 QString WSSpectrum::getWebSocketIdentifier(QWebSocket *peer)
 {
     return QStringLiteral("%1:%2").arg(peer->peerAddress().toString(), QString::number(peer->peerPort()));
