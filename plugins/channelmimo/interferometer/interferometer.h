@@ -120,7 +120,7 @@ public:
     virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
-    SpectrumVis *getSpectrumVis();
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     void setScopeSink(BasebandSampleSink *scopeSink);
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
 
