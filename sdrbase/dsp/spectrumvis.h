@@ -37,10 +37,10 @@
 class GLSpectrumInterface;
 class MessageQueue;
 
-class SDRGUI_API SpectrumVis : public BasebandSampleSink {
+class SDRBASE_API SpectrumVis : public BasebandSampleSink {
 
 public:
-    class MsgConfigureSpectrumVis : public Message {
+    class SDRBASE_API MsgConfigureSpectrumVis : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
