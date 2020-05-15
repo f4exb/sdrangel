@@ -119,9 +119,9 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
-	m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF, ui->glSpectrum);
 	m_LoRaDemod = (LoRaDemod*) rxChannel; //new LoRaDemod(m_deviceUISet->m_deviceSourceAPI);
-	m_LoRaDemod->setSpectrumSink(m_spectrumVis);
+    m_spectrumVis = m_LoRaDemod->getSpectrumVis();
+    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 
 	ui->glSpectrum->setCenterFrequency(16000);
 	ui->glSpectrum->setSampleRate(32000);
@@ -150,7 +150,6 @@ LoRaDemodGUI::~LoRaDemodGUI()
 {
     m_deviceUISet->removeRxChannelInstance(this);
 	delete m_LoRaDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
-	delete m_spectrumVis;
 	delete ui;
 }
 

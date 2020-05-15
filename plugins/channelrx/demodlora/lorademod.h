@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -58,7 +59,7 @@ public:
 	LoRaDemod(DeviceAPI* deviceAPI);
 	virtual ~LoRaDemod();
 	virtual void destroy() { delete this; }
-	void setSpectrumSink(BasebandSampleSink* sampleSink) { m_basebandSink->setSpectrumSink(sampleSink); }
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool pO);
 	virtual void start();
@@ -90,6 +91,7 @@ private:
     QThread *m_thread;
     LoRaDemodBaseband* m_basebandSink;
     LoRaDemodSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate;
 
     void applySettings(const LoRaDemodSettings& settings, bool force = false);
