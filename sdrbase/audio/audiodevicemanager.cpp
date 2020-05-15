@@ -503,7 +503,15 @@ int AudioDeviceManager::getInputSampleRate(int inputDeviceIndex)
     }
     else
     {
-        return deviceInfo.sampleRate;
+        if (deviceInfo.sampleRate > 0)
+        {
+            return deviceInfo.sampleRate;
+        }
+        else
+        {
+            qDebug("AudioDeviceManager::getInputSampleRate: device %s has invalid sample rate", qPrintable(deviceName));
+            return m_defaultAudioSampleRate;
+        }
     }
 }
 
@@ -526,7 +534,15 @@ int AudioDeviceManager::getOutputSampleRate(int outputDeviceIndex)
     }
     else
     {
-        return deviceInfo.sampleRate;
+        if (deviceInfo.sampleRate > 0)
+        {
+            return deviceInfo.sampleRate;
+        }
+        else
+        {
+            qDebug("AudioDeviceManager::getOutputSampleRate: device %s has invalid sample rate", qPrintable(deviceName));
+            return m_defaultAudioSampleRate;
+        }
     }
 }
 

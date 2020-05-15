@@ -45,7 +45,7 @@ public:
             sampleRate = m_defaultAudioSampleRate;
             volume = m_defaultAudioInputVolume;
         }
-        unsigned int sampleRate;
+        int sampleRate;
         float volume;
         friend QDataStream& operator<<(QDataStream& ds, const InputDeviceInfo& info);
         friend QDataStream& operator>>(QDataStream& ds, InputDeviceInfo& info);
@@ -74,7 +74,7 @@ public:
             udpChannelCodec = AudioOutput::UDPCodecL16;
             udpDecimationFactor = 1;
         }
-        unsigned int sampleRate;
+        int sampleRate;
         QString udpAddress;
         quint16 udpPort;
         bool copyToUDP;
@@ -114,7 +114,7 @@ public:
     void inputInfosCleanup();  //!< Remove input info from map for input devices not present
     void outputInfosCleanup(); //!< Remove output info from map for output devices not present
 
-    static const unsigned int m_defaultAudioSampleRate = 48000;
+    static const int m_defaultAudioSampleRate = 48000;
     static const float m_defaultAudioInputVolume;
     static const QString m_defaultUDPAddress;
     static const quint16 m_defaultUDPPort = 9998;
