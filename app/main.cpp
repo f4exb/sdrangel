@@ -29,7 +29,6 @@
 
 static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *logger)
 {
-	QApplication a(argc, argv);
 /*
 	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 	QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
@@ -43,8 +42,10 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
 #endif
 
+	QApplication a(argc, argv);
+
 #if 1
-	qApp->setStyle(QStyleFactory::create("fusion"));
+    qApp->setStyle(QStyleFactory::create("fusion"));
 
 	QPalette palette;
 	palette.setColor(QPalette::Window, QColor(53,53,53));
