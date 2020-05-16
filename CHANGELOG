@@ -1,3 +1,11 @@
+sdrangel (4.14.6-1) unstable; urgency=medium
+
+   * Spectrum analyzer code reorganization
+   * FFTFactory: add mutex for thread safety. Implements issue #514
+   * SpectrumVis: release previous FFT engine allocation from FFT factory only if allocated once. Fixes issue #515
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 16 May 2020 06:35:17 +0200
+
 sdrangel (4.14.5-1) unstable; urgency=medium
 
    * DATV demod: applied some recent changes in leansdr
