@@ -22,6 +22,9 @@ environment:
     - TARGET: ubuntu1804prod
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu1804
       CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON -DDEBUG_OUTPUT=ON -DENABLE_EXTERNAL_LIBRARIES=ON"
+    - TARGET: ubuntu2004prod
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+      CMAKE_CUSTOM_OPTIONS: "-DFORCE_SSE41=ON -DDEBUG_OUTPUT=ON -DENABLE_EXTERNAL_LIBRARIES=ON"
 
 # image:
 #  - &linux   Ubuntu1804
@@ -97,6 +100,57 @@ for:
     deploy:
       release: sdrangel-v$(appveyor_build_version)
       description: 'SDRangel Ubuntu 18.04'
+      provider: GitHub
+      auth_token:
+        secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
+      artifact: archive
+      draft: false
+      prerelease: false
+      on:
+        APPVEYOR_REPO_TAG: true        # deploy on tag push only
+        branch: master                 # release from master branch only
+  - matrix:
+      only:
+        - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+    cache:
+      - $HOME/external/
+    install:
+      - sh: sudo apt-get update
+      # not sdrplay with soapysdr; libairspyhf-dev is too old (no lna)
+      - sh: |
+          sudo apt-get -y install build-essential cmake git \
+            devscripts fakeroot debhelper libfftw3-dev qtbase5-dev libqt5opengl5-dev \
+            qttools5-dev qttools5-dev-tools qtmultimedia5-dev libqt5multimedia5-plugins libqt5websockets5-dev \
+            libusb-1.0-0-dev libboost-all-dev libasound2-dev libopencv-dev libopencv-imgcodecs-dev \
+            libxml2-dev bison flex ffmpeg  libpostproc-dev libavcodec-dev libavformat-dev \
+            libopus-dev libcodec2-dev libairspy-dev libhackrf-dev \
+            libbladerf-dev libsoapysdr-dev libiio-dev \
+            autoconf automake libtool
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_cm256cc.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_mbelib.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_serialdv.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_dsdcc.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_perseus-sdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_xtrx-sdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_airspyhf.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_rtlsdr.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_limesuite.sh; fi
+    before_build:
+      - sh: bash -c export
+      - sh: bash -c pwd
+    build_script:
+      - sh: bash cmake/ci/build_sdrangel.sh
+    test_script:
+      # debian build path
+      - sh: ./obj-x86_64-linux-gnu/sdrangelbench
+    after_build:
+      - sh: mkdir sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: cp ../*.deb ../*.build ../*.buildinfo ../*.changes sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: tar -czf sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz sdrangel-${APPVEYOR_BUILD_VERSION}
+      - sh: appveyor PushArtifact sdrangel-${APPVEYOR_BUILD_VERSION}.tar.gz -DeploymentName archive
+    deploy:
+      release: sdrangel-v$(appveyor_build_version)
+      description: 'SDRangel Ubuntu 20.04'
       provider: GitHub
       auth_token:
         secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
