@@ -55,7 +55,12 @@ PlutoSDROutput::PlutoSDROutput(DeviceAPI *deviceAPI) :
     m_deviceSampleRates.m_hb3Rate = 0;
 
     suspendBuddies();
-    openDevice();
+    m_open = openDevice();
+
+    if (!m_open) {
+        qCritical("PlutoSDRInput::PlutoSDRInput: cannot open device");
+    }
+
     resumeBuddies();
 
     m_networkManager = new QNetworkAccessManager();
@@ -84,11 +89,15 @@ void PlutoSDROutput::init()
 
 bool PlutoSDROutput::start()
 {
-    if (!m_deviceShared.m_deviceParams->getBox()) {
+    if (!m_deviceShared.m_deviceParams->getBox())
+    {
+        qCritical("PlutoSDROutput::start: device not open");
         return false;
     }
 
-    if (m_running) stop();
+    if (m_running) {
+         stop();
+    }
 
     // start / stop streaming is done in the thread.
 
@@ -267,14 +276,23 @@ bool PlutoSDROutput::openDevice()
 
             if (kv.size() > 1)
             {
-                if (kv.at(0) == "uri") {
-                     m_deviceShared.m_deviceParams->openURI(kv.at(1).toStdString());
-                } else {
+                if (kv.at(0) == "uri")
+                {
+                    if (!m_deviceShared.m_deviceParams->openURI(kv.at(1).toStdString()))
+                    {
+                        qCritical("PlutoSDROutput::openDevice: open network device uri=%s failed", qPrintable(kv.at(1)));
+                        return false;
+                    }
+                }
+                else
+                {
+                    qCritical("PlutoSDROutput::openDevice: unexpected user parameter key %s", qPrintable(kv.at(0)));
                     return false;
                 }
             }
             else
             {
+                qCritical("PlutoSDROutput::openDevice: unexpected user arguments %s", qPrintable(m_deviceAPI->getHardwareUserArguments()));
                 return false;
             }
         }
@@ -282,7 +300,12 @@ bool PlutoSDROutput::openDevice()
         {
             char serial[256];
             strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
-            m_deviceShared.m_deviceParams->open(serial);
+
+            if (!m_deviceShared.m_deviceParams->open(serial))
+            {
+                qCritical("PlutoSDROutput::openDevice: open serial %s failed", serial);
+                return false;
+            }
         }
     }
 
@@ -290,7 +313,13 @@ bool PlutoSDROutput::openDevice()
 
     // acquire the channel
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
-    plutoBox->openTx();
+
+    if (!plutoBox->openTx())
+    {
+        qCritical("PlutoSDROutput::openDevice: cannot open Tx channel");
+        return false;
+    }
+
     m_plutoTxBuffer = plutoBox->createTxBuffer(PLUTOSDR_BLOCKSIZE_SAMPLES, false); // PlutoSDR buffer size is counted in number of (I,Q) samples
 
     return true;
@@ -298,7 +327,7 @@ bool PlutoSDROutput::openDevice()
 
 void PlutoSDROutput::closeDevice()
 {
-    if (m_deviceShared.m_deviceParams->getBox() == 0) { // was never open
+    if (!m_open) { // was never open
         return;
     }
 
@@ -342,6 +371,12 @@ void PlutoSDROutput::resumeBuddies()
 
 bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool force)
 {
+    if (!m_open)
+    {
+        qCritical("PlutoSDROutput::applySettings: device not open");
+        return false;
+    }
+
     bool forwardChangeOwnDSP    = false;
     bool forwardChangeOtherDSP  = false;
     bool ownThreadWasRunning    = false;
@@ -611,6 +646,12 @@ bool PlutoSDROutput::applySettings(const PlutoSDROutputSettings& settings, bool 
 
 void PlutoSDROutput::getRSSI(std::string& rssiStr)
 {
+    if (!m_open)
+    {
+        qDebug("PlutoSDROutput::getRSSI: device not open");
+        return;
+    }
+
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
     if (!plutoBox->getTxRSSI(rssiStr, 0)) {
@@ -620,6 +661,12 @@ void PlutoSDROutput::getRSSI(std::string& rssiStr)
 
 void PlutoSDROutput::getLORange(qint64& minLimit, qint64& maxLimit)
 {
+    if (!m_open)
+    {
+        qDebug("PlutoSDROutput::getLORange: device not open");
+        return;
+    }
+
     uint64_t min, max;
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
@@ -630,6 +677,12 @@ void PlutoSDROutput::getLORange(qint64& minLimit, qint64& maxLimit)
 
 void PlutoSDROutput::getbbLPRange(quint32& minLimit, quint32& maxLimit)
 {
+    if (!m_open)
+    {
+        qDebug("PlutoSDROutput::getbbLPRange: device not open");
+        return;
+    }
+
     uint32_t min, max;
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
 
@@ -640,12 +693,24 @@ void PlutoSDROutput::getbbLPRange(quint32& minLimit, quint32& maxLimit)
 
 bool PlutoSDROutput::fetchTemperature()
 {
+    if (!m_open)
+    {
+        qDebug("PlutoSDRInput::fetchTemperature: device not open");
+        return false;
+    }
+
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     return plutoBox->fetchTemp();
 }
 
 float PlutoSDROutput::getTemperature()
 {
+    if (!m_open)
+    {
+        qDebug("PlutoSDRInput::getTemperature: device not open");
+        return 0.0;
+    }
+
     DevicePlutoSDRBox *plutoBox =  m_deviceShared.m_deviceParams->getBox();
     return plutoBox->getTemp();
 }

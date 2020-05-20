@@ -20,7 +20,7 @@
 #include "deviceplutosdr.h"
 
 DevicePlutoSDRParams::DevicePlutoSDRParams() :
-    m_box(0)
+    m_box(nullptr)
 {
 }
 
