@@ -437,6 +437,21 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(selectedDeviceIndex));
 
+        if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
+        {
+            qDebug("MainCore::changeSampleSource: non existent device replaced by File Input");
+            int  deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
+            samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
+            deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+            deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+            deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+            deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+            deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+            deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+            deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+            deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
+        }
+
         // add to buddies list
         std::vector<DeviceSet*>::iterator it = m_deviceSets.begin();
         int nbOfBuddies = 0;
@@ -505,6 +520,21 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(selectedDeviceIndex));
 
+        if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
+        {
+            qDebug("MainCore::changeSampleSink: non existent device replaced by File Sink");
+            int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
+            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
+            deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+            deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+            deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+            deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+            deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+            deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+            deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+            deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
+        }
+
         // add to buddies list
         std::vector<DeviceSet*>::iterator it = m_deviceSets.begin();
         int nbOfBuddies = 0;
@@ -571,6 +601,21 @@ void MainCore::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
         deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(selectedDeviceIndex));
+
+        if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
+        {
+            qDebug("MainCore::changeSampleMIMO: non existent device replaced by Test MIMO");
+            int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
+            deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+            deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+            deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+            deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+            deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+            deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+            deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+            deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
+        }
 
         QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
