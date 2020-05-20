@@ -1,8 +1,17 @@
+sdrangel (5.6.1-1) unstable; urgency=medium
+
+   * PlutoSDR: fixed handling of open device status. Fixes issue #510
+   * Prevent use of not existent devices. Fixes issue #510 partially
+   * Main GUI app: moved app creation after setting attributes. Fixes #522
+   * AudioDeviceManager: make sure a negative or null sample rate is never returned
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 20 May 2020 05:01:15 +0200
+
 sdrangel (5.6.0-1) unstable; urgency=medium
 
    * Websocket spectrum server. Implements issue #224
    * FFTFactory: add mutex for thread safety. Implements issue #514
-   * SpectrumVis: release previous FFT engine allocation from FFT factory only if allocated once. Fixes issue #515
+   * SpectrumVis: release previous FFT engine allocation. Fixes issue #515
 
  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 10 May 2020 23:01:15 +0200
 
