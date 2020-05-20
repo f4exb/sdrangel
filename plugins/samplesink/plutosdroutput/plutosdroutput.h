@@ -140,6 +140,7 @@ public:
 
  private:
     DeviceAPI *m_deviceAPI;
+    bool m_open;
     QString m_deviceDescription;
     PlutoSDROutputSettings m_settings;
     bool m_running;

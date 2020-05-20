@@ -167,6 +167,7 @@ public:
 
  private:
     DeviceAPI *m_deviceAPI;
+    bool m_open;
     FileRecord *m_fileSink;
     QString m_deviceDescription;
     PlutoSDRInputSettings m_settings;
