@@ -602,21 +602,6 @@ void MainCore::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(selectedDeviceIndex));
 
-        if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
-        {
-            qDebug("MainCore::changeSampleMIMO: non existent device replaced by Test MIMO");
-            int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
-            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
-            deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-            deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-            deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-            deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-            deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-            deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-            deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-            deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
-        }
-
         QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
         if (userArgs.size() > 0) {
