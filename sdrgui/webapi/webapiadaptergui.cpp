@@ -523,7 +523,7 @@ int WebAPIAdapterGUI::instanceAudioOutputPatch(
     if (audioOutputKeys.contains("udpChannelCodec")) {
         outputDeviceInfo.udpChannelCodec = static_cast<AudioOutput::UDPChannelCodec>(response.getUdpChannelCodec());
     }
-    if (audioOutputKeys.contains("udpDecimatiobFactor")) {
+    if (audioOutputKeys.contains("udpDecimationFactor")) {
         outputDeviceInfo.udpDecimationFactor = response.getUdpDecimationFactor();
     }
     if (audioOutputKeys.contains("udpAddress")) {
