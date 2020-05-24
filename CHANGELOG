@@ -1,3 +1,9 @@
+sdrangel (4.14.8-1) unstable; urgency=medium
+
+   * RTP audio: fixed codec setting when usinf REST API. Fixes #526
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 23 May 2020 23:01:15 +0200
+
 sdrangel (4.14.7-1) unstable; urgency=medium
 
    * PlutoSDR: fixed handling of open device status. Fixes issue #510
