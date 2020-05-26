@@ -189,3 +189,59 @@ If you have presets defined you may also use presets instead of having to set up
     }
 ]
 ```
+
+<h2>superscanner.py</h2>
+
+Connects to spectrum server to monitor PSD and detect local PSD hotspots to pilot channel(s). Thus channels can follow band activity. This effectively implements a "scanner" feature with parallel tracking of any number of channels. It is FFT based so can effectively track spectrum hotspots simultaneously. Therefore the "super" superlative.
+
+It requires SDRangel version 5.6 or above. On SDRangel instance baseband spectrum should be set in log mode and the spectrum server activated with an accessible address and a port that matches the port given to `superscanner.py`. Please refer to SDRangel documentation for details.
+
+The script runs in daemon mode and is stopped using `Ctl-C`.
+
+<h3>Options</h3>
+
+  - `-a` or `--address` SDRangel web base address. Default: `127.0.0.1`
+  - `-p` or `--api-port` SDRangel API port. Default: `8091`
+  - `-w` or `--ws-port` SDRangel websocket spectrum server port. Default: `8887`
+  - `-c` or `--config-file` JSON configuration file. Mandatory. See next for format details
+  - `-j` or `--psd-in` JSON file containing PSD floor information previously saved with the `-J` option
+  - `-J` or `--psd-out` Write PSD floor information to JSON file
+  - `-n` or `--nb-passes` Number of passes for PSD floor estimation. Default: `10`
+  - `-f` or `--psd-level` Use a fixed PSD floor value therefore do not perform PSD floor estimaton
+  - `-X` or `--psd-exclude-higher` Level above which to exclude bin scan during PSD floor estimation
+  - `-x` or `--psd-exclude-lower` Level below which to exclude bin scan during PSD floor estimation
+  - `-G` or `--psd-graph` Show PSD floor graphs. Requires `matplotlib`
+  - `-m` or `--margin` Margin in dB above PSD floor to detect acivity. Default: `3`
+  - `-g` or `--group-tolerance` Radius (1D) tolerance in points (bins) for hotspot aggregation. Default `1`
+  - `-r` or `--freq-round` Frequency rounding value in Hz. Default: `1` (no rounding)
+  - `-o` or `--freq-offset` Frequency rounding offset in Hz. Default: `0` (no offset)
+
+<h3>Configuration file</h3>
+
+This file drives how channels in the connected SDRangel instance are managed.
+
+```json
+{
+    "deviceset_index": 0,           // SDRangel instance deviceset index addressed - required
+    "freqrange_exclusions": [       // List of frequency ranges in Hz to exclude from processing - optional
+        [145000000, 145170000],
+        [145290000, 145335000],
+        [145800000, 146000000]
+    ],
+    "channel_info": [               // List of controlled channels - required
+        {                           // Channel information - at least one required
+            "index": 0              // Index of channel in deviceset - required
+        },
+        {
+            "index": 2
+        },
+        {
+            "index": 3
+        }
+    ]
+}
+```
+
+<h2>sdrangel.py</h2>
+
+Holds constants related to SDRangel software required by other scripts

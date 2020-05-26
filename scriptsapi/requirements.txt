@@ -1,2 +1,5 @@
 requests
 Flask
+numpy
+websocket
+websocket-client
