@@ -266,29 +266,44 @@ def freq_in_ranges_check(freq, freq_ranges):
     return False
 
 # ======================================================================
-def process_hotspots(hotspots):
+def process_hotspots(scanned_hotspots):
     global CONFIG
-    if len(hotspots) > 8: # burst noise TODO: parametrize
+    if len(scanned_hotspots) > 8: # burst noise TODO: parametrize
         return
-    # calculate channels distances for each hotspot
-    for hotspot in hotspots:
+    # calculate frequency for each hotspot and create list of valid hotspots
+    hotspots = []
+    for hotspot in scanned_hotspots:
         width = hotspot['end'] - hotspot['begin']
         fc = hotspot['begin'] + width/2
         fc = freq_rounding(fc, OPTIONS.freq_round, OPTIONS.freq_offset)
         if freq_in_ranges_check(fc, CONFIG['freqrange_exclusions']):
             continue
-        channel = nearest_used_channel(fc) # used but not reused on this pass
-        if channel is None:
-            channel = allocate_channel()
-        if channel is None:
-            print(f'All channels allocated. Cannot process signal at {fc} Hz')
-        else:
-            if channel['usage'] == 0:
-                channel_index = channel['index']
-                print(f'Channel {channel_index} allocated on frequency {fc} Hz')
-            channel['usage'] = 2 # (re)use channel on this pass
+        hotspot['fc'] = fc
+        hotspots.append(hotspot)
+    # calculate hotspot distances for each used channel and reuse the channel for the closest hotspot
+    channels = CONFIG['channel_info']
+    used_channels = [channel for channel in channels if channel['usage'] == 1]
+    for channel in used_channels: # loop on used channels
+        distances = [[abs(channel['frequency'] - hotspot['fc']), hotspot] for hotspot in hotspots]
+        sorted(distances, key=operator.itemgetter(0))
+        if distances:
+            hotspot = distances[0][1]
+            channel['usage'] = 2 # mark channel used on this pass
+            channel['frequency'] = hotspot['fc']
+            set_channel_frequency(channel)
+            hotspots.remove(hotspot) # done with this hotspot
+    # for remaining hotspots we need to allocate new channels
+    for hotspot in hotspots:
+        channel = allocate_channel()
+        if channel:
+            channel_index = channel['index']
+            fc = hotspot['fc']
+            print(f'Channel {channel_index} allocated on frequency {fc} Hz')
+            channel['usage'] = 2 # mark channel used on this pass
             channel['frequency'] = fc
             set_channel_frequency(channel)
+        else:
+            print(f'All channels allocated. Cannot process signal at {fc} Hz')
     # cleanup
     for channel in CONFIG['channel_info']:
         if channel['usage'] == 1:   # channel unused on this pass
