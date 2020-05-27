@@ -252,3 +252,9 @@ This file drives how channels in the connected SDRangel instance are managed.
 <h2>sdrangel.py</h2>
 
 Holds constants related to SDRangel software required by other scripts
+
+<h2>Unit tests</h2>
+
+Run as `python <file>` in the virtual environment
+
+  - `test_superscanner.py` is testing `superscanner.py`

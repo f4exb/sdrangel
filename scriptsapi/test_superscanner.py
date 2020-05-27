@@ -2,9 +2,11 @@ import unittest
 import mock
 import superscanner
 
+# ======================================================================
 def print_hex(bytestring):
     print('\\x' + '\\x'.join('{:02x}'.format(x) for x in bytestring))
 
+# ======================================================================
 def get_deviceset_info(deviceset_index):
     return {
         "channelcount": 4,
@@ -56,12 +58,15 @@ def get_deviceset_info(deviceset_index):
         }
     }
 
+# ======================================================================
 def set_channel_frequency(channel):
     pass
 
+# ======================================================================
 def set_channel_mute(channel):
     pass
 
+# ======================================================================
 class TestStringMethods(unittest.TestCase):
 
     def test_upper(self):
@@ -78,12 +83,14 @@ class TestStringMethods(unittest.TestCase):
         with self.assertRaises(TypeError):
             s.split(2)
 
+# ======================================================================
 class TestSuperScannerOptions(unittest.TestCase):
 
     def test_options_minimal(self):
         options = superscanner.get_input_options(["-ctoto"])
         self.assertEqual(options.config_file, 'toto')
 
+# ======================================================================
 class TestSuperScannerDecode(unittest.TestCase):
 
     def test_decode_bytes(self):
@@ -98,6 +105,7 @@ class TestSuperScannerDecode(unittest.TestCase):
         msg_struct = superscanner.decode_message(msg_bytes)
         self.assertEqual(msg_struct['fft_size'], 1024)
 
+# ======================================================================
 class TestSuperScannerProcessHotspots(unittest.TestCase):
 
     @mock.patch('superscanner.get_deviceset_info', side_effect=get_deviceset_info)
@@ -159,7 +167,6 @@ class TestSuperScannerProcessHotspots(unittest.TestCase):
         ]
         superscanner.process_hotspots(hotspots1)
         channel_info = superscanner.CONFIG['channel_info']
-        print(channel_info)
         self.assertEqual(channel_info[0]['usage'], 1)
         self.assertEqual(channel_info[1]['usage'], 0)
         self.assertEqual(channel_info[2]['usage'], 0)
@@ -178,7 +185,6 @@ class TestSuperScannerProcessHotspots(unittest.TestCase):
         ]
         superscanner.process_hotspots(hotspots2)
         channel_info = superscanner.CONFIG['channel_info']
-        print(channel_info)
         self.assertEqual(channel_info[0]['usage'], 1)
         self.assertEqual(channel_info[1]['usage'], 1)
         self.assertEqual(channel_info[2]['usage'], 0)
@@ -193,13 +199,13 @@ class TestSuperScannerProcessHotspots(unittest.TestCase):
         ]
         superscanner.process_hotspots(hotspots3)
         channel_info = superscanner.CONFIG['channel_info']
-        print(channel_info)
         self.assertEqual(channel_info[0]['usage'], 0)
         self.assertEqual(channel_info[1]['usage'], 1)
         self.assertEqual(channel_info[2]['usage'], 0)
         self.assertEqual(channel_info[1]['frequency'], 145200000)
 
 
+# ======================================================================
 if __name__ == '__main__':
     unittest.main()
 

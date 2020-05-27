@@ -293,12 +293,18 @@ def process_hotspots(scanned_hotspots):
     # calculate hotspot distances for each used channel and reuse the channel for the closest hotspot
     channels = CONFIG['channel_info']
     used_channels = [channel for channel in channels if channel['usage'] == 1]
+    consolidated_distances = []
     for channel in used_channels: # loop on used channels
         distances = [[abs(channel['frequency'] - get_hotspot_frequency(channel, hotspot)), hotspot] for hotspot in hotspots]
         distances = sorted(distances, key=operator.itemgetter(0))
-        print(f'channel {channel["index"]} distances: {distances}')
         if distances:
-            hotspot = distances[0][1]
+            consolidated_distances.append([distances[0][0], channel, distances[0][1]]) # [distance, channel, hotspot]
+    consolidated_distances = sorted(consolidated_distances, key=operator.itemgetter(0)) # get (channel, hotspot) pair with shortest distance first
+    # reallocate used channels on their closest hotspot
+    for distance in consolidated_distances:
+        channel = distance[1]
+        hotspot = distance[2]
+        if hotspot in hotspots: # hotspot is not processed yet
             channel['usage'] = 2 # mark channel used on this pass
             channel['frequency'] = get_hotspot_frequency(channel, hotspot)
             set_channel_frequency(channel)
