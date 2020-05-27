@@ -241,16 +241,6 @@ def scan(struct_message):
     process_hotspots(hotspots)
 
 # ======================================================================
-def nearest_used_channel(freq):
-    channels = CONFIG['channel_info']
-    distances = [[abs(channel['frequency'] - freq), channel] for channel in channels if channel['usage'] == 1]
-    sorted(distances, key=operator.itemgetter(0))
-    if distances:
-        return distances[0][1]
-    else:
-        return None
-
-# ======================================================================
 def allocate_channel():
     channels = CONFIG['channel_info']
     for channel in channels:
@@ -259,11 +249,27 @@ def allocate_channel():
     return None
 
 # ======================================================================
-def freq_in_ranges_check(freq, freq_ranges):
-    for freqrange in freq_ranges:
+def freq_in_ranges_check(freq):
+    freqrange_inclusions = CONFIG.get('freqrange_inclusions', [])
+    freqrange_exclusions = CONFIG.get('freqrange_exclusions', [])
+    for freqrange in freqrange_inclusions:
+        if not freqrange[0] <= freq <= freqrange[1]:
+            return False
+    for freqrange in freqrange_exclusions:
         if freqrange[0] <= freq <= freqrange[1]:
-            return True
-    return False
+            return False
+    return True
+
+# ======================================================================
+def get_hotspot_frequency(channel, hotspot):
+    fc_pos = channel.get('fc_pos', 'center')
+    if fc_pos == 'lsb':
+        channel_frequency = hotspot['end']
+    elif fc_pos == 'usb':
+        channel_frequency = hotspot['begin']
+    else:
+        channel_frequency = hotspot['fc']
+    return channel_frequency
 
 # ======================================================================
 def process_hotspots(scanned_hotspots):
@@ -276,20 +282,22 @@ def process_hotspots(scanned_hotspots):
         width = hotspot['end'] - hotspot['begin']
         fc = hotspot['begin'] + width/2
         fc = freq_rounding(fc, OPTIONS.freq_round, OPTIONS.freq_offset)
-        if freq_in_ranges_check(fc, CONFIG['freqrange_exclusions']):
+        if not freq_in_ranges_check(fc):
             continue
         hotspot['fc'] = fc
+        hotspot['begin'] = fc - (width/2) # re-center around fc
+        hotspot['end'] = fc + (width/2)
         hotspots.append(hotspot)
     # calculate hotspot distances for each used channel and reuse the channel for the closest hotspot
     channels = CONFIG['channel_info']
     used_channels = [channel for channel in channels if channel['usage'] == 1]
     for channel in used_channels: # loop on used channels
-        distances = [[abs(channel['frequency'] - hotspot['fc']), hotspot] for hotspot in hotspots]
+        distances = [[abs(channel['frequency'] - get_hotspot_frequency(channel, hotspot)), hotspot] for hotspot in hotspots]
         sorted(distances, key=operator.itemgetter(0))
         if distances:
             hotspot = distances[0][1]
             channel['usage'] = 2 # mark channel used on this pass
-            channel['frequency'] = hotspot['fc']
+            channel['frequency'] = get_hotspot_frequency(channel, hotspot)
             set_channel_frequency(channel)
             hotspots.remove(hotspot) # done with this hotspot
     # for remaining hotspots we need to allocate new channels
@@ -297,12 +305,13 @@ def process_hotspots(scanned_hotspots):
         channel = allocate_channel()
         if channel:
             channel_index = channel['index']
-            fc = hotspot['fc']
-            print(f'Channel {channel_index} allocated on frequency {fc} Hz')
+            channel_frequency = get_hotspot_frequency(channel, hotspot)
             channel['usage'] = 2 # mark channel used on this pass
-            channel['frequency'] = fc
+            channel['frequency'] = channel_frequency
             set_channel_frequency(channel)
+            print(f'Channel {channel_index} allocated on frequency {channel_frequency} Hz')
         else:
+            fc = hotspot['fc']
             print(f'All channels allocated. Cannot process signal at {fc} Hz')
     # cleanup
     for channel in CONFIG['channel_info']:
@@ -320,7 +329,6 @@ def set_channel_frequency(channel):
     deviceset_index = CONFIG['deviceset_index']
     channel_index = channel['index']
     channel_id = channel['id']
-    channel_frequency = channel['frequency']
     df = channel['frequency'] - CONFIG['device_frequency']
     url = f'{API_URI}/sdrangel/deviceset/{deviceset_index}/channel/{channel_index}/settings'
     payload = {

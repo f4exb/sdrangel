@@ -228,9 +228,16 @@ This file drives how channels in the connected SDRangel instance are managed.
         [145290000, 145335000],
         [145800000, 146000000]
     ],
+    "freqrange_inclusions": [
+        [145170000, 145900000]      // List of frequency ranges in Hz to include in processing - optional
+    ]
     "channel_info": [               // List of controlled channels - required
         {                           // Channel information - at least one required
-            "index": 0              // Index of channel in deviceset - required
+            "index": 0,             // Index of channel in deviceset - required
+            "fc_pos": "usb"         // Center frequency position in hotspot - optional: default center
+                                    // lsb: center frequency at end of hotspot (higer frequency)
+                                    // usb: center frequency at beginning of hotspot (lower frequency)
+                                    // canter: center frequency at mid-point of hotspot (center frequency)
         },
         {
             "index": 2
