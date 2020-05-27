@@ -47,7 +47,9 @@ class SuperScannerAPIError(SuperScannerError):
     pass
 
 # ======================================================================
-def get_input_options():
+def get_input_options(args=None):
+    if args is None:
+        args = sys.argv[1:]
 
     parser = OptionParser(usage="usage: %%prog [-t]\n")
     parser.add_option("-a", "--address", dest="address", help="SDRangel web base address. Default: 127.0.0.1", metavar="ADDRESS", type="string")
@@ -66,7 +68,7 @@ def get_input_options():
     parser.add_option("-r", "--freq-round", dest="freq_round", help="Frequency rounding value in Hz. Default: 1 (no rounding)", metavar="NUM", type="int")
     parser.add_option("-o", "--freq-offset", dest="freq_offset", help="Frequency rounding offset in Hz. Default: 0 (no offset)", metavar="NUM", type="int")
 
-    (options, args) = parser.parse_args()
+    (options, args) = parser.parse_args(args)
 
     if (options.config_file == None):
         raise SuperScannerOptionsError('A configuration file is required. Option -c or --config-file')
@@ -293,7 +295,8 @@ def process_hotspots(scanned_hotspots):
     used_channels = [channel for channel in channels if channel['usage'] == 1]
     for channel in used_channels: # loop on used channels
         distances = [[abs(channel['frequency'] - get_hotspot_frequency(channel, hotspot)), hotspot] for hotspot in hotspots]
-        sorted(distances, key=operator.itemgetter(0))
+        distances = sorted(distances, key=operator.itemgetter(0))
+        print(f'channel {channel["index"]} distances: {distances}')
         if distances:
             hotspot = distances[0][1]
             channel['usage'] = 2 # mark channel used on this pass
@@ -371,8 +374,6 @@ def get_deviceset_info(deviceset_index):
 # ======================================================================
 def make_config():
     global CONFIG
-    with open(OPTIONS.config_file) as json_file: # get base config
-        CONFIG = json.load(json_file)
     deviceset_index = CONFIG['deviceset_index']
     deviceset_info = get_deviceset_info(deviceset_index)
     device_frequency = deviceset_info["samplingDevice"]["centerFrequency"]
@@ -392,15 +393,19 @@ def make_config():
 def main():
     try:
         global OPTIONS
+        global CONFIG
         global API_URI
         global WS_URI
 
         OPTIONS = get_input_options()
 
+        with open(OPTIONS.config_file) as json_file: # get base config
+            CONFIG = json.load(json_file)
+
         API_URI = f'http://{OPTIONS.address}:{OPTIONS.api_port}'
         WS_URI = f'ws://{OPTIONS.address}:{OPTIONS.ws_port}'
 
-        make_config()
+        make_config() # complete config with device set information from SDRangel
 
         ws = websocket.WebSocketApp(WS_URI,
                                   on_message = on_ws_message,
