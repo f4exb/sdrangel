@@ -211,10 +211,15 @@ The script runs in daemon mode and is stopped using `Ctl-C`.
   - `-X` or `--psd-exclude-higher` Level above which to exclude bin scan during PSD floor estimation
   - `-x` or `--psd-exclude-lower` Level below which to exclude bin scan during PSD floor estimation
   - `-G` or `--psd-graph` Show PSD floor graphs. Requires `matplotlib`
+  - `-N` or `--hotspots-noise` Number of hotspots above which detection is considered as noise. Default `8`
   - `-m` or `--margin` Margin in dB above PSD floor to detect acivity. Default: `3`
   - `-g` or `--group-tolerance` Radius (1D) tolerance in points (bins) for hotspot aggregation. Default `1`
   - `-r` or `--freq-round` Frequency rounding value in Hz. Default: `1` (no rounding)
   - `-o` or `--freq-offset` Frequency rounding offset in Hz. Default: `0` (no offset)
+
+Command examples:
+  - `python ./superscanner.py -a 127.0.0.1 -p 8889 -w 8886 -c 446M.json -g 10 -r 12500 -o 6250 -J psd_pmr.json`
+  - `python ./superscanner.py -a 192.168.0.3 -j psd.json -c 145M.json -g 10 -r 2500`
 
 <h3>Configuration file</h3>
 

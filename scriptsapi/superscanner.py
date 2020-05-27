@@ -60,11 +60,12 @@ def get_input_options(args=None):
     parser.add_option("-J", "--psd-out", dest="psd_output_file", help="Write PSD floor information to JSON file.", metavar="FILE", type="string")
     parser.add_option("-n", "--nb-passes", dest="passes", help="Number of passes for PSD floor estimation. Default: 10", metavar="NUM", type="int")
     parser.add_option("-m", "--margin", dest="margin", help="Margin in dB above PSD floor to detect acivity. Default: 3", metavar="DB", type="int")
-    parser.add_option("-f", "--psd-level", dest="psd_fixed", help="Use a fixed PSD floor value.", metavar="FILE", type="float")
-    parser.add_option("-X", "--psd-exclude-higher", dest="psd_exclude_higher", help="Level above which to exclude bin scan.", metavar="FILE", type="float")
-    parser.add_option("-x", "--psd-exclude-lower", dest="psd_exclude_lower", help="Level below which to exclude bin scan.", metavar="FILE", type="float")
+    parser.add_option("-f", "--psd-level", dest="psd_fixed", help="Use a fixed PSD floor value.", metavar="DB", type="float")
+    parser.add_option("-X", "--psd-exclude-higher", dest="psd_exclude_higher", help="Level above which to exclude bin scan.", metavar="DB", type="float")
+    parser.add_option("-x", "--psd-exclude-lower", dest="psd_exclude_lower", help="Level below which to exclude bin scan.", metavar="DB", type="float")
+    parser.add_option("-N", "--hotspots-noise", dest="hotspots_noise", help="Number of hotspots above which detection is considered as noise. Default 8", metavar="NUM", type="int")
     parser.add_option("-G", "--psd-graph", dest="psd_graph", help="Show PSD floor graphs. Requires matplotlib", action="store_true")
-    parser.add_option("-g", "--group-tolerance", dest="group_tolerance", help="Radius (1D) tolerance in points (bins) for hotspots grouping. Default 1.", metavar="FILE", type="int")
+    parser.add_option("-g", "--group-tolerance", dest="group_tolerance", help="Radius (1D) tolerance in points (bins) for hotspots grouping. Default 1.", metavar="NUM", type="int")
     parser.add_option("-r", "--freq-round", dest="freq_round", help="Frequency rounding value in Hz. Default: 1 (no rounding)", metavar="NUM", type="int")
     parser.add_option("-o", "--freq-offset", dest="freq_offset", help="Frequency rounding offset in Hz. Default: 0 (no offset)", metavar="NUM", type="int")
 
@@ -85,6 +86,8 @@ def get_input_options(args=None):
         options.passes = 1
     if (options.margin == None):
         options.margin = 3
+    if (options.hotspots_noise == None):
+        options.hotspots_noise = 8
     if (options.group_tolerance == None):
         options.group_tolerance = 1
     if (options.freq_round == None):
@@ -276,7 +279,7 @@ def get_hotspot_frequency(channel, hotspot):
 # ======================================================================
 def process_hotspots(scanned_hotspots):
     global CONFIG
-    if len(scanned_hotspots) > 8: # burst noise TODO: parametrize
+    if len(scanned_hotspots) > OPTIONS.hotspots_noise
         return
     # calculate frequency for each hotspot and create list of valid hotspots
     hotspots = []
