@@ -279,7 +279,7 @@ def get_hotspot_frequency(channel, hotspot):
 # ======================================================================
 def process_hotspots(scanned_hotspots):
     global CONFIG
-    if len(scanned_hotspots) > OPTIONS.hotspots_noise
+    if len(scanned_hotspots) > OPTIONS.hotspots_noise:
         return
     # calculate frequency for each hotspot and create list of valid hotspots
     hotspots = []
