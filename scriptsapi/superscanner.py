@@ -274,7 +274,8 @@ def get_hotspot_frequency(channel, hotspot):
         channel_frequency = hotspot['begin']
     else:
         channel_frequency = hotspot['fc']
-    return channel_frequency
+    fc_shift = channel.get('fc_shift', 0)
+    return channel_frequency + fc_shift
 
 # ======================================================================
 def process_hotspots(scanned_hotspots):
