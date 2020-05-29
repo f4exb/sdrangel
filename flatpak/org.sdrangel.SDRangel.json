@@ -354,9 +354,9 @@
       ],
       "sources": [
         {
-          "type": "git",
-          "url": "https://github.com/myriadrf/LimeSuite.git",
-          "commit": "025ffa1a"
+          "type": "archive",
+          "url": "https://github.com/myriadrf/LimeSuite/archive/v20.01.0.tar.gz",
+          "sha256": "3c1d898185419074ada669b6cb93f409f4c97a29df8778284f30f93b7879754d"
         }
       ]
     },
@@ -498,7 +498,7 @@
       "config-opts": [
         "-Wno-dev",
         "-DDEBUG_OUTPUT=ON",
-        "-DBUILD_TYPE=RELEASE",
+        "-DCMAKE_BUILD_TYPE=RELEASE",
         "-DRX_SAMPLE_24BIT=ON"
       ],
       "sources": [
@@ -507,8 +507,8 @@
           "path": ".."
         },
         {
-          "type": "patch",
-          "path": "sdrangel-set-serialdv-path.patch"
+          "type": "shell",
+          "commands": ["sed -e 's|/usr/|/app/|g' -i cmake/Modules/FindSerialDV.cmake"]
         },
         {
           "type": "file",
