@@ -145,7 +145,7 @@ def on_ws_close(ws):
 
 # ======================================================================
 def on_ws_open(ws):
-    log_with_timestamp('Starting...')
+    log_with_timestamp('Web socket opened starting...')
     def run(*args):
         pass
     thread.start_new_thread(run, ())
@@ -224,8 +224,8 @@ def scan(struct_message):
         freq_start = struct_message['cf']
         freq_stop = struct_message['cf'] + struct_message['fft_bw']
     else:
-        freq_start = struct_message['cf'] - (struct_message['fft_bw'] / 2);
-        freq_stop = struct_message['cf'] + (struct_message['fft_bw'] / 2);
+        freq_start = struct_message['cf'] - (struct_message['fft_bw'] / 2)
+        freq_stop = struct_message['cf'] + (struct_message['fft_bw'] / 2)
     psd_samples = struct_message['samples']
     psd_sum = 0
     psd_count = 1
@@ -419,9 +419,11 @@ def main():
         global WS_URI
 
         OPTIONS = get_input_options()
+        log_with_timestamp(f'Start with options: {OPTIONS}')
 
         with open(OPTIONS.config_file) as json_file: # get base config
             CONFIG = json.load(json_file)
+        log_with_timestamp(f'Initial configuration: {CONFIG}')
 
         API_URI = f'http://{OPTIONS.address}:{OPTIONS.api_port}'
         WS_URI = f'ws://{OPTIONS.address}:{OPTIONS.ws_port}'

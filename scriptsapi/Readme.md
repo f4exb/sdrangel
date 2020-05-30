@@ -256,6 +256,31 @@ This file drives how channels in the connected SDRangel instance are managed.
 }
 ```
 
+<h3>Run with supervisord</h3>
+
+Refer to supervisord documentation.
+
+Esample of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[incude]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
+
+```
+[program:superscanner]
+command = /opt/build/sdrangel/scriptsapi/venv/bin/python /opt/build/sdrangel/scriptsapi/superscanner.py -a 192.168.0.24 -c /home/f4exb/145M_scan.config.json -g 4 -r 3125 -f -65
+process_name = superscanner
+user = f4exb
+stopsignal = INT
+autostart = false
+autorestart = false
+environment =
+    USER=f4exb,
+    PATH="/home/f4exb/bin:/home/f4exb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games",
+    HOME="/home/f4exb",
+    PYTHONUNBUFFERED=1
+stdout_logfile = /home/f4exb/log/superscanner.log
+stdout_logfile_maxbytes = 10MB
+stdout_logfile_backups = 3
+redirect_stderr=true
+```
+
 <h2>sdrangel.py</h2>
 
 Holds constants related to SDRangel software required by other scripts
