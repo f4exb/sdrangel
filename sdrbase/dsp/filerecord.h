@@ -50,15 +50,16 @@ public:
 
     quint64 getByteCount() const { return m_byteCount; }
 
-    virtual void setFileName(const QString& filename);
-
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);
+
+    virtual void setFileName(const QString& filename);
     virtual void startRecording();
     virtual void stopRecording();
-    bool isRecording() const { return m_recordOn; }
+    virtual bool isRecording() const { return m_recordOn; }
+
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
     static void writeHeader(std::ofstream& samplefile, Header& header);
 

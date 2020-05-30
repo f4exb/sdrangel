@@ -29,6 +29,7 @@ public:
     virtual void setFileName(const QString &filename) = 0;
     virtual void startRecording() = 0;
     virtual void stopRecording() = 0;
+    virtual bool isRecording() const = 0;
     static QString genUniqueFileName(unsigned int deviceUID, int istream = -1);
 };
 
