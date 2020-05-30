@@ -46,6 +46,7 @@ MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgSetStatus, Message)
 
 KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
 	m_settings(),
 	m_kiwiSDRWorker(nullptr),
 	m_deviceDescription(),
@@ -54,9 +55,7 @@ KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
 {
 	m_kiwiSDRWorkerThread.start();
 
-    m_fileSink = new FileRecord();
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     if (!m_sampleFifo.setSize(getSampleRate() * 2)) {
         qCritical("KiwiSDRInput::KiwiSDRInput: Could not allocate SampleFifo");
@@ -78,8 +77,11 @@ KiwiSDRInput::~KiwiSDRInput()
 	m_kiwiSDRWorkerThread.quit();
 	m_kiwiSDRWorkerThread.wait();
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
 }
 
 void KiwiSDRInput::destroy()
@@ -216,17 +218,27 @@ bool KiwiSDRInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;
@@ -318,7 +330,11 @@ bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
 
 		DSPSignalNotification *notif = new DSPSignalNotification(
 			getSampleRate(), settings.m_centerFrequency);
-		m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+    		m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
 		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 

@@ -45,6 +45,7 @@ MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStop, Message)
 
 HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
 	m_hackRFThread(0),
@@ -53,10 +54,7 @@ HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
 {
     openDevice();
 
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
-
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
     m_networkManager = new QNetworkAccessManager();
@@ -72,8 +70,12 @@ HackRFInput::~HackRFInput()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
+
     closeDevice();
 	m_deviceAPI->setBuddySharedPtr(0);
 }
@@ -276,17 +278,27 @@ bool HackRFInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;
@@ -337,7 +349,11 @@ bool HackRFInput::handleMessage(const Message& message)
         m_settings.m_centerFrequency = settings.m_centerFrequency;
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+            m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         return true;
@@ -562,7 +578,11 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	{
 		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+            m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 

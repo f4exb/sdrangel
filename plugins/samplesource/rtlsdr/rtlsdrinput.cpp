@@ -52,6 +52,7 @@ const int RTLSDRInput::sampleRateHighRangeMax = 2400000U;
 
 RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
 	m_rtlSDRThread(0),
@@ -59,11 +60,7 @@ RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
-
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
-
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -77,8 +74,11 @@ RTLSDRInput::~RTLSDRInput()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
 
     closeDevice();
 }
@@ -324,17 +324,27 @@ bool RTLSDRInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;
@@ -568,7 +578,11 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     {
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+            m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 

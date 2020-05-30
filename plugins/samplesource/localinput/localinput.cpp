@@ -44,15 +44,14 @@ MESSAGE_CLASS_DEFINITION(LocalInput::MsgReportSampleRateAndFrequency, Message)
 
 LocalInput::LocalInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
     m_settings(),
     m_centerFrequency(0),
 	m_deviceDescription("LocalInput")
 {
 	m_sampleFifo.setSize(96000 * 4);
 
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -63,8 +62,12 @@ LocalInput::~LocalInput()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
 }
 
 void LocalInput::destroy()
@@ -168,7 +171,12 @@ bool LocalInput::handleMessage(const Message& message)
     if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
-        return m_fileSink->handleMessage(notif); // forward to file sink
+
+        if (m_fileSink) {
+            return m_fileSink->handleMessage(notif); // forward to file sink
+        } else {
+            return false;
+        }
     }
     else if (MsgFileRecord::match(message))
     {
@@ -177,17 +185,27 @@ bool LocalInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;

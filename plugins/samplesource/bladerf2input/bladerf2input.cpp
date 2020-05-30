@@ -47,6 +47,7 @@ MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgReportGainRange, Message)
 
 BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
     m_settings(),
     m_deviceDescription("BladeRF2Input"),
     m_running(false),
@@ -67,9 +68,7 @@ BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
         }
     }
 
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -83,8 +82,12 @@ BladeRF2Input::~BladeRF2Input()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
+
     closeDevice();
 }
 
@@ -700,7 +703,11 @@ bool BladeRF2Input::handleMessage(const Message& message)
             {
                 int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
                 DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-                m_fileSink->handleMessage(*notif); // forward to file sink
+
+                if (m_fileSink) {
+                    m_fileSink->handleMessage(*notif); // forward to file sink
+                }
+
                 m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
             }
 
@@ -723,17 +730,27 @@ bool BladeRF2Input::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;
@@ -964,7 +981,11 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+            m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 

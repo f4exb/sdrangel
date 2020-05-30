@@ -46,6 +46,7 @@ MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgStartStop, Message)
 
 SDRPlayInput::SDRPlayInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
     m_variant(SDRPlayUndef),
     m_settings(),
 	m_dev(0),
@@ -55,9 +56,7 @@ SDRPlayInput::SDRPlayInput(DeviceAPI *deviceAPI) :
     m_running(false)
 {
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -72,8 +71,12 @@ SDRPlayInput::~SDRPlayInput()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
+
     closeDevice();
 }
 
@@ -318,17 +321,27 @@ bool SDRPlayInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;
@@ -614,7 +627,11 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
     {
         int sampleRate = getSampleRate();
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+            m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 

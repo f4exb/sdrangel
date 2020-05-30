@@ -52,6 +52,7 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgStartStop, Message)
 
 LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_fileSink(nullptr),
     m_settings(),
     m_limeSDRInputThread(0),
     m_deviceDescription("LimeSDRInput"),
@@ -65,9 +66,7 @@ LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     resumeTxBuddies();
     resumeRxBuddies();
 
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -82,8 +81,12 @@ LimeSDRInput::~LimeSDRInput()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
+    if (m_fileSink)
+    {
+        m_deviceAPI->removeAncillarySink(m_fileSink);
+        delete m_fileSink;
+    }
+
     suspendRxBuddies();
     suspendTxBuddies();
     closeDevice();
@@ -752,17 +755,27 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+            } else {
+                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSink);
             m_fileSink->startRecording();
         }
         else
         {
             m_fileSink->stopRecording();
+            m_deviceAPI->removeAncillarySink(m_fileSink);
+            delete m_fileSink;
+            m_fileSink = nullptr;
         }
 
         return true;
@@ -1339,7 +1352,11 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
-        m_fileSink->handleMessage(*notif); // forward to file sink
+
+        if (m_fileSink) {
+            m_fileSink->handleMessage(*notif); // forward to file sink
+        }
+
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
