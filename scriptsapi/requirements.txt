@@ -1,6 +1,6 @@
 requests
 Flask
 numpy
-websocket
+websockets
 websocket-client
 mock

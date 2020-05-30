@@ -257,13 +257,13 @@ def allocate_channel():
 def freq_in_ranges_check(freq):
     freqrange_inclusions = CONFIG.get('freqrange_inclusions', [])
     freqrange_exclusions = CONFIG.get('freqrange_exclusions', [])
-    for freqrange in freqrange_inclusions:
-        if not freqrange[0] <= freq <= freqrange[1]:
-            return False
     for freqrange in freqrange_exclusions:
         if freqrange[0] <= freq <= freqrange[1]:
             return False
-    return True
+    for freqrange in freqrange_inclusions:
+        if freqrange[0] <= freq <= freqrange[1]:
+            return True
+    return False
 
 # ======================================================================
 def get_hotspot_frequency(channel, hotspot):
