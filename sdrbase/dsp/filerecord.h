@@ -18,17 +18,18 @@
 #ifndef INCLUDE_FILERECORD_H
 #define INCLUDE_FILERECORD_H
 
-#include <dsp/basebandsamplesink.h>
 #include <string>
 #include <iostream>
 #include <fstream>
-
 #include <ctime>
+
+#include "dsp/basebandsamplesink.h"
+#include "dsp/filerecordinterface.h"
 #include "export.h"
 
 class Message;
 
-class SDRBASE_API FileRecord : public BasebandSampleSink {
+class SDRBASE_API FileRecord : public BasebandSampleSink, public FileRecordInterface {
 public:
 
 #pragma pack(push, 1)
@@ -49,15 +50,14 @@ public:
 
     quint64 getByteCount() const { return m_byteCount; }
 
-    void setFileName(const QString& filename);
-    void genUniqueFileName(uint deviceUID, int istream = -1);
+    virtual void setFileName(const QString& filename);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);
-    void startRecording();
-    void stopRecording();
+    virtual void startRecording();
+    virtual void stopRecording();
     bool isRecording() const { return m_recordOn; }
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
     static void writeHeader(std::ofstream& samplefile, Header& header);

@@ -19,7 +19,6 @@
 #include <boost/cstdint.hpp>
 
 #include <QDebug>
-#include <QDateTime>
 
 #include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
@@ -61,15 +60,6 @@ void FileRecord::setFileName(const QString& filename)
     if (!m_recordOn)
     {
         m_fileName = filename;
-    }
-}
-
-void FileRecord::genUniqueFileName(uint deviceUID, int istream)
-{
-    if (istream < 0) {
-        setFileName(QString("rec%1_%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz")));
-    } else {
-        setFileName(QString("rec%1_%2_%3.sdriq").arg(deviceUID).arg(istream).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz")));
     }
 }
 

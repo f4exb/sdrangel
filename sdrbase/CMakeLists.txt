@@ -4,7 +4,9 @@ if(WIN32)
     set(OPUS_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/external/windows/libopus/include")
     set(OPUS_LIBRARIES "${CMAKE_SOURCE_DIR}/external/windows/libopus/lib/x64/libopus.lib")
 endif()
+
 find_package(Opus REQUIRED)
+find_package(LibSigMF)
 
 if(FFTW3F_FOUND)
     set(sdrbase_SOURCES
@@ -99,6 +101,7 @@ set(sdrbase_SOURCES
     dsp/filterrc.cpp
     dsp/filtermbe.cpp
     dsp/filerecord.cpp
+    dsp/filerecordinterface.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
     dsp/glscopesettings.cpp
@@ -227,6 +230,7 @@ set(sdrbase_HEADERS
     dsp/filterrc.h
     dsp/filtermbe.h
     dsp/filerecord.h
+    dsp/filerecordinterface.h
     dsp/freqlockcomplex.h
     dsp/gfft.h
     dsp/glscopesettings.h
@@ -341,6 +345,7 @@ target_link_libraries(sdrbase
     ${sdrbase_FFTW3F_LIB}
     ${sdrbase_SERIALDV_LIB}
     ${sdrbase_LIMERFE_LIB}
+    ${sdrbase_LIBSIGMF_LIB}
     Qt5::Core
     Qt5::Multimedia
     Qt5::WebSockets

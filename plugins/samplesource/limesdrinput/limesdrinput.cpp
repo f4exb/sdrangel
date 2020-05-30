@@ -755,7 +755,7 @@ bool LimeSDRInput::handleMessage(const Message& message)
             if (m_settings.m_fileRecordName.size() != 0) {
                 m_fileSink->setFileName(m_settings.m_fileRecordName);
             } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
+                m_fileSink->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
             }
 
             m_fileSink->startRecording();
