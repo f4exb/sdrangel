@@ -70,6 +70,12 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
         }
     }
 
+    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
+
+    for (; it != m_fileSinks.end(); ++it) {
+        *it = nullptr;
+    }
+
     m_mimoType = MIMOHalfSynchronous;
     m_sampleMIFifo.init(2, 4096 * 64);
     m_sampleMOFifo.init(2, 4096 * 64);
@@ -91,8 +97,10 @@ BladeRF2MIMO::~BladeRF2MIMO()
 
     for (; it != m_fileSinks.end(); ++it, istream++)
     {
-        m_deviceAPI->removeAncillarySink(*it, istream);
-        delete *it;
+        if (*it) {
+            m_deviceAPI->removeAncillarySink(*it, istream);
+            delete *it;
+        }
     }
 }
 
@@ -141,10 +149,6 @@ void BladeRF2MIMO::closeDevice()
 
 void BladeRF2MIMO::init()
 {
-    m_fileSinks.push_back(new FileRecord(QString("test_0_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
-    m_fileSinks.push_back(new FileRecord(QString("test_1_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
-    m_deviceAPI->addAncillarySink(m_fileSinks[0], 0);
-    m_deviceAPI->addAncillarySink(m_fileSinks[1], 1);
     applySettings(m_settings, true);
 }
 
@@ -373,17 +377,26 @@ bool BladeRF2MIMO::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSinks[istream]->setFileName(m_settings.m_fileRecordName + "_0.sdriq");
-            } else {
-                m_fileSinks[istream]->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream));
+            if (m_fileSinks[istream])
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSinks[istream], istream);
+                delete m_fileSinks[istream];
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSinks[istream] = new FileRecord(QString("%1_%2.sdriq"). arg(m_settings.m_fileRecordName).arg(istream));
+            } else {
+                m_fileSinks[istream] = new FileRecord(QString("%1.sdriq").arg(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream)));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSinks[istream], istream);
             m_fileSinks[istream]->startRecording();
         }
         else
         {
             m_fileSinks[istream]->stopRecording();
+            delete m_fileSinks[istream];
+            m_fileSinks[istream] = nullptr;
         }
 
         return true;
@@ -821,9 +834,17 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notifFileSink0 = new DSPSignalNotification(sampleRate, settings.m_rxCenterFrequency);
-        m_fileSinks[0]->handleMessage(*notifFileSink0); // forward to file sinks
+
+        if (m_fileSinks[0]) {
+            m_fileSinks[0]->handleMessage(*notifFileSink0); // forward to file sinks
+        }
+
         DSPSignalNotification *notifFileSink1 = new DSPSignalNotification(sampleRate, settings.m_rxCenterFrequency);
-        m_fileSinks[1]->handleMessage(*notifFileSink0); // forward to file sinks
+
+        if (m_fileSinks[1]) {
+            m_fileSinks[1]->handleMessage(*notifFileSink0); // forward to file sinks
+        }
+
         DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, true, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
         DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, true, 1);

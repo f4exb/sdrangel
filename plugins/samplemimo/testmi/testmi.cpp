@@ -51,7 +51,13 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 {
     m_mimoType = MIMOAsynchronous;
     m_sampleMIFifo.init(2, 96000 * 4);
-    //m_sampleSinkVectors.resize(2);
+
+    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
+
+    for (; it != m_fileSinks.end(); ++it) {
+        *it = nullptr;
+    }
+
     m_deviceAPI->setNbSourceStreams(2);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -71,8 +77,11 @@ TestMI::~TestMI()
 
     for (; it != m_fileSinks.end(); ++it, istream++)
     {
-        m_deviceAPI->removeAncillarySink(*it, istream);
-        delete *it;
+        if (*it)
+        {
+            m_deviceAPI->removeAncillarySink(*it, istream);
+            delete *it;
+        }
     }
 }
 
@@ -83,11 +92,6 @@ void TestMI::destroy()
 
 void TestMI::init()
 {
-    m_fileSinks.push_back(new FileRecord(QString("test_0_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
-    m_fileSinks.push_back(new FileRecord(QString("test_1_%1.sdriq").arg(m_deviceAPI->getDeviceUID())));
-    m_deviceAPI->addAncillarySink(m_fileSinks[0], 0);
-    m_deviceAPI->addAncillarySink(m_fileSinks[1], 1);
-
     applySettings(m_settings, true);
 }
 
@@ -237,17 +241,26 @@ bool TestMI::handleMessage(const Message& message)
 
         if (conf.getStartStop())
         {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSinks[istream]->setFileName(m_settings.m_fileRecordName + "_0.sdriq");
-            } else {
-                m_fileSinks[istream]->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream));
+            if (m_fileSinks[istream])
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSinks[istream], istream);
+                delete m_fileSinks[istream];
             }
 
+            if (m_settings.m_fileRecordName.size() != 0) {
+                m_fileSinks[istream] = new FileRecord(QString("%1_%2.sdriq"). arg(m_settings.m_fileRecordName).arg(istream));
+            } else {
+                m_fileSinks[istream] = new FileRecord(QString("%1.sdriq").arg(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream)));
+            }
+
+            m_deviceAPI->addAncillarySink(m_fileSinks[istream], istream);
             m_fileSinks[istream]->startRecording();
         }
         else
         {
             m_fileSinks[istream]->stopRecording();
+            delete m_fileSinks[istream];
+            m_fileSinks[istream] = nullptr;
         }
 
         return true;
@@ -464,7 +477,11 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             int sampleRate = settings.m_streams[istream].m_sampleRate/(1<<settings.m_streams[istream].m_log2Decim);
             DSPSignalNotification notif(sampleRate, settings.m_streams[istream].m_centerFrequency);
-            m_fileSinks[istream]->handleMessage(notif); // forward to file sink
+
+            if (m_fileSinks[istream]) {
+                m_fileSinks[istream]->handleMessage(notif); // forward to file sink
+            }
+
             DSPMIMOSignalNotification *engineNotif = new DSPMIMOSignalNotification(
                 sampleRate, settings.m_streams[istream].m_centerFrequency, true, istream);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
