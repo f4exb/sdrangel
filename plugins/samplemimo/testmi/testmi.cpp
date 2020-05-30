@@ -240,7 +240,7 @@ bool TestMI::handleMessage(const Message& message)
             if (m_settings.m_fileRecordName.size() != 0) {
                 m_fileSinks[istream]->setFileName(m_settings.m_fileRecordName + "_0.sdriq");
             } else {
-                m_fileSinks[istream]->genUniqueFileName(m_deviceAPI->getDeviceUID(), istream);
+                m_fileSinks[istream]->setFileName(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream));
             }
 
             m_fileSinks[istream]->startRecording();
