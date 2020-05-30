@@ -24,6 +24,7 @@ WS_URI = None
 PASS_INDEX = 0
 PSD_FLOOR = []
 CONFIG = {}
+UNSERVED_FREQUENCIES = []
 
 # ======================================================================
 class SuperScannerError(Exception):
@@ -280,6 +281,7 @@ def get_hotspot_frequency(channel, hotspot):
 # ======================================================================
 def process_hotspots(scanned_hotspots):
     global CONFIG
+    global UNSERVED_FREQUENCIES
     if len(scanned_hotspots) > OPTIONS.hotspots_noise:
         return
     # calculate frequency for each hotspot and create list of valid hotspots
@@ -325,7 +327,9 @@ def process_hotspots(scanned_hotspots):
             print(f'Channel {channel_index} allocated on frequency {channel_frequency} Hz')
         else:
             fc = hotspot['fc']
-            print(f'All channels allocated. Cannot process signal at {fc} Hz')
+            if fc not in UNSERVED_FREQUENCIES:
+                UNSERVED_FREQUENCIES.append(fc)
+                print(f'All channels allocated. Cannot process signal at {fc} Hz')
     # cleanup
     for channel in CONFIG['channel_info']:
         if channel['usage'] == 1:   # channel unused on this pass
@@ -333,6 +337,7 @@ def process_hotspots(scanned_hotspots):
             channel_index = channel['index']
             fc = channel['frequency']
             set_channel_mute(channel)
+            UNSERVED_FREQUENCIES.clear() # at least one channel is able to serve next time
             print(f'Released channel {channel_index} on frequency {fc} Hz')
         elif channel['usage'] == 2:  # channel used on this pass
             channel['usage'] = 1     # reset usage for next pass
