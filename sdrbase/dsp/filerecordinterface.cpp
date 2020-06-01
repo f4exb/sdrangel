@@ -21,11 +21,50 @@
 
 #include "filerecordinterface.h"
 
+FileRecordInterface::FileRecordInterface() :
+    BasebandSampleSink()
+{}
+
+FileRecordInterface::~FileRecordInterface()
+{}
+
 QString FileRecordInterface::genUniqueFileName(unsigned int deviceUID, int istream)
 {
     if (istream < 0) {
         return QString("rec%1_%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
     } else {
         return QString("rec%1_%2_%3.sdriq").arg(deviceUID).arg(istream).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+    }
+}
+
+FileRecordInterface::RecordType FileRecordInterface::guessTypeFromFileName(const QString& fileName, QString& fileBase)
+{
+    QStringList dotBreakout = fileName.split(QLatin1Char('.'));
+
+    if (dotBreakout.length() > 1)
+    {
+        QString extension = dotBreakout.last();
+        dotBreakout.removeLast();
+
+        if (extension == "sdriq")
+        {
+            fileBase = dotBreakout.join(QLatin1Char('.'));
+            return RecordTypeSdrIQ;
+        }
+        else if (extension == "sigmf-meta")
+        {
+            fileBase = dotBreakout.join(QLatin1Char('.'));
+            return RecordTypeSigMF;
+        }
+        else
+        {
+            fileBase = fileName;
+            return RecordTypeUndefined;
+        }
+    }
+    else
+    {
+        fileBase = fileName;
+        return RecordTypeUndefined;
     }
 }

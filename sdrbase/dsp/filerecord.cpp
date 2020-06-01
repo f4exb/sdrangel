@@ -27,7 +27,7 @@
 #include "filerecord.h"
 
 FileRecord::FileRecord() :
-	BasebandSampleSink(),
+	FileRecordInterface(),
     m_fileName("test.sdriq"),
     m_sampleRate(0),
     m_centerFrequency(0),
@@ -39,7 +39,7 @@ FileRecord::FileRecord() :
 }
 
 FileRecord::FileRecord(const QString& filename) :
-    BasebandSampleSink(),
+    FileRecordInterface(),
     m_fileName(filename),
     m_sampleRate(0),
     m_centerFrequency(0),

@@ -583,11 +583,15 @@ void RTLSDRGui::openDeviceSettingsDialog(const QPoint& p)
 
 void RTLSDRGui::openFileRecordDialog(const QPoint& p)
 {
+    if (ui->record->isChecked()) { // do not fire up dialog if recording is on-going
+        return;
+    }
+
     QFileDialog fileDialog(
         this,
         tr("Save I/Q record file"),
         m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
+        tr("SDR I/Q Files (*.sdriq);;SigMF Files (*.sigmf-meta);;All files (*.*)")
     );
 
     fileDialog.setOptions(QFileDialog::DontUseNativeDialog);

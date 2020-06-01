@@ -23,9 +23,11 @@
 #include <QByteArray>
 #include <QNetworkRequest>
 
-#include <dsp/devicesamplesource.h>
-#include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
+
+#include "dsp/devicesamplesource.h"
+#include "dsp/filerecordinterface.h"
+#include "rtlsdrsettings.h"
 
 class DeviceAPI;
 class RTLSDRThread;
@@ -168,7 +170,7 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
+    FileRecordInterface *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	RTLSDRSettings m_settings;
 	rtlsdr_dev_t* m_dev;

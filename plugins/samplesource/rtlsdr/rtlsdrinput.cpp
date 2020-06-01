@@ -36,6 +36,9 @@
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
+#ifdef HAS_LIBSIGMF
+#include "dsp/sigmffilerecord.h"
+#endif
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
@@ -322,31 +325,57 @@ bool RTLSDRInput::handleMessage(const Message& message)
         MsgFileRecord& conf = (MsgFileRecord&) message;
         qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
 
-        if (conf.getStartStop())
+        QString fileBase;
+        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(m_settings.m_fileRecordName, fileBase);
+
+#ifdef HAS_LIBSIGMF
+        if (recordType == FileRecordInterface::RecordTypeSigMF)
         {
-            if (m_fileSink)
+            if (conf.getStartStop())
+            {
+                if (!m_fileSink) {
+                    m_fileSink = new SigMFFileRecord(fileBase, m_deviceAPI->getHardwareId());
+                }
+
+                m_deviceAPI->addAncillarySink(m_fileSink);
+                m_fileSink->startRecording();
+            }
+            else
             {
                 m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
+                m_fileSink->stopRecording();
             }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
         }
         else
         {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
-        }
+#endif
+            if (conf.getStartStop())
+            {
+                if (m_fileSink)
+                {
+                    m_deviceAPI->removeAncillarySink(m_fileSink);
+                    delete m_fileSink;
+                }
 
+                if (m_settings.m_fileRecordName.size() != 0) {
+                    m_fileSink = new FileRecord(m_settings.m_fileRecordName);
+                } else {
+                    m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
+                }
+
+                m_deviceAPI->addAncillarySink(m_fileSink);
+                m_fileSink->startRecording();
+            }
+            else
+            {
+                m_fileSink->stopRecording();
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
+                m_fileSink = nullptr;
+            }
+#ifdef HAS_LIBSIGMF
+        }
+#endif
         return true;
     }
     else if (MsgStartStop::match(message))
@@ -561,6 +590,30 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
                 qDebug("RTLSDRInput::applySettings: rtlsdr_set_tuner_gain() to %d", settings.m_gain);
             }
         }
+    }
+
+    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force)
+    {
+        reverseAPIKeys.append("fileRecordName");
+        QString fileBase;
+        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(settings.m_fileRecordName, fileBase);
+#ifdef HAS_LIBSIGMF
+        if (recordType == FileRecordInterface::RecordTypeSigMF)
+        {
+            if (m_fileSink) {
+                m_fileSink->setFileName(fileBase);
+            }
+        }
+        else
+        {
+            if (m_fileSink)
+            {
+                m_deviceAPI->removeAncillarySink(m_fileSink);
+                delete m_fileSink;
+                m_fileSink = nullptr;
+            }
+        }
+#endif
     }
 
     if (settings.m_useReverseAPI)

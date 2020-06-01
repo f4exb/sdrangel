@@ -17,39 +17,57 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILERECORD_INTERFACE_H
-#define INCLUDE_FILERECORD_INTERFACE_H
+#ifndef INCLUDE_SIGMF_FILERECORD_H
+#define INCLUDE_SIGMF_FILERECORD_H
 
-#include <QString>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <ctime>
 
-#include "dsp/basebandsamplesink.h"
+#include "dsp/sigmf_forward.h"
+#include "dsp/filerecordinterface.h"
 #include "export.h"
 
-class SDRBASE_API FileRecordInterface : public BasebandSampleSink {
+class Message;
+
+class SDRBASE_API SigMFFileRecord : public FileRecordInterface {
 public:
-    enum RecordType
-    {
-        RecordTypeUndefined = 0,
-        RecordTypeSdrIQ,
-        RecordTypeSigMF
-    };
+    SigMFFileRecord();
+    SigMFFileRecord(const QString& filename, const QString& hardwareId);
+    virtual ~SigMFFileRecord();
 
-    FileRecordInterface();
-    virtual ~FileRecordInterface();
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+	virtual void start();
+	virtual void stop();
+	virtual bool handleMessage(const Message& message);
 
-	virtual void start() = 0;
-	virtual void stop() = 0;
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) = 0;
-	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
+    virtual void setFileName(const QString& filename);
+    virtual void startRecording();
+    virtual void stopRecording();
+    virtual bool isRecording() const { return m_recordOn; }
 
-    virtual void setFileName(const QString &filename) = 0;
-    virtual void startRecording() = 0;
-    virtual void stopRecording() = 0;
-    virtual bool isRecording() const = 0;
+    void setHardwareId(const QString& hardwareId) { m_hardwareId = hardwareId; }
 
-    static QString genUniqueFileName(unsigned int deviceUID, int istream = -1);
-    static RecordType guessTypeFromFileName(const QString& fileName, QString& fileBase);
+private:
+    QString m_hardwareId;
+	QString m_fileName;
+    QString m_sampleFileName;
+    QString m_metaFileName;
+    quint32 m_sampleRate;
+    quint64 m_centerFrequency;
+    bool m_recordOn;
+    bool m_recordStart;
+    std::ofstream m_metaFile;
+    std::ofstream m_sampleFile;
+    quint64 m_sampleStart;
+    quint64 m_sampleCount;
+    sigmf::SigMF<sigmf::Global<core::DescrT, sdrangel::DescrT>,
+            sigmf::Capture<core::DescrT, sdrangel::DescrT>,
+            sigmf::Annotation<core::DescrT> > *m_metaRecord;
+    void makeHeader();
+    void makeCapture();
+    void clearMeta();
 };
 
-
-#endif // INCLUDE_FILERECORD_INTERFACE_H
+#endif // INCLUDE_SIGMF_FILERECORD_H

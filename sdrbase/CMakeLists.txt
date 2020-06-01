@@ -6,7 +6,6 @@ if(WIN32)
 endif()
 
 find_package(Opus REQUIRED)
-find_package(LibSigMF)
 
 if(FFTW3F_FOUND)
     set(sdrbase_SOURCES
@@ -45,6 +44,19 @@ if (LIMESUITE_FOUND)
     include_directories(${LIMESUITE_INCLUDE_DIR})
     set(sdrbase_LIMERFE_LIB ${LIMESUITE_LIBRARY})
 endif (LIMESUITE_FOUND)
+
+if (LIBSIGMF_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        dsp/sigmffilerecord.cpp
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        dsp/sigmffilerecord.h
+    )
+    include_directories(${LIBSIGMF_INCLUDE_DIR})
+    set(sdrbase_LIBSIGMF_LIB ${LIBSIGMF_LIBRARIES})
+endif (LIBSIGMF_FOUND)
 
 # serialdv now required
 add_definitions(-DDSD_USE_SERIALDV)

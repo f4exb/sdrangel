@@ -23,13 +23,12 @@
 #include <fstream>
 #include <ctime>
 
-#include "dsp/basebandsamplesink.h"
 #include "dsp/filerecordinterface.h"
 #include "export.h"
 
 class Message;
 
-class SDRBASE_API FileRecord : public BasebandSampleSink, public FileRecordInterface {
+class SDRBASE_API FileRecord : public FileRecordInterface {
 public:
 
 #pragma pack(push, 1)
