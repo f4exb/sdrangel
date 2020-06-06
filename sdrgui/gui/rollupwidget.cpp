@@ -1,5 +1,6 @@
 #include <QEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QMouseEvent>
 #include "gui/rollupwidget.h"
 #include "ui_glspectrumgui.h"
