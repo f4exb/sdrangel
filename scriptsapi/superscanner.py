@@ -276,11 +276,11 @@ def freq_in_ranges_check(freq):
 def get_hotspot_frequency(channel, hotspot):
     fc_pos = channel.get('fc_pos', 'center')
     if fc_pos == 'lsb':
-        channel_frequency = hotspot['end']
+        channel_frequency = freq_rounding(hotspot['end'], OPTIONS.freq_round, OPTIONS.freq_offset)
     elif fc_pos == 'usb':
-        channel_frequency = hotspot['begin']
+        channel_frequency = freq_rounding(hotspot['begin'], OPTIONS.freq_round, OPTIONS.freq_offset)
     else:
-        channel_frequency = hotspot['fc']
+        channel_frequency = freq_rounding(hotspot['fc'], OPTIONS.freq_round, OPTIONS.freq_offset)
     fc_shift = channel.get('fc_shift', 0)
     return channel_frequency + fc_shift
 
@@ -295,7 +295,6 @@ def process_hotspots(scanned_hotspots):
     for hotspot in scanned_hotspots:
         width = hotspot['end'] - hotspot['begin']
         fc = hotspot['begin'] + width/2
-        fc = freq_rounding(fc, OPTIONS.freq_round, OPTIONS.freq_offset)
         if not freq_in_ranges_check(fc):
             continue
         hotspot['fc'] = fc
