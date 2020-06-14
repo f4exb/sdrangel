@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>info.png</file>
     <file>gridpolar.png</file>
     <file>gridrect.png</file>
     <file>double_arrow_up.png</file>

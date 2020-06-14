@@ -58,4 +58,8 @@ if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdrinput)
 endif()
 
+if(LIBSIGMF_FOUND)
+    add_subdirectory(sigmffileinput)
+endif()
+
 add_subdirectory(kiwisdr)
