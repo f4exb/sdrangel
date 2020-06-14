@@ -25,6 +25,8 @@
 #include <fstream>
 #include <ctime>
 
+#include <QDateTime>
+
 #include "dsp/sigmf_forward.h"
 #include "dsp/filerecordinterface.h"
 #include "export.h"
@@ -58,6 +60,7 @@ private:
     quint64 m_centerFrequency;
     bool m_recordOn;
     bool m_recordStart;
+    QDateTime m_captureStartDT;
     std::ofstream m_metaFile;
     std::ofstream m_sampleFile;
     quint64 m_sampleStart;

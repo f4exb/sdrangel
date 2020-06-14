@@ -19,7 +19,6 @@
 
 #include <QCoreApplication>
 #include <QSysInfo>
-#include <QDateTime>
 #include <QDebug>
 
 #include "libsigmf/sigmf_core_generated.h"
@@ -27,7 +26,7 @@
 #include "libsigmf/sigmf.h"
 
 #include "dsp/dspcommands.h"
-#include "util/sha512.h"
+//#include "util/sha512.h" - SHA512 is skipped because it takes too long
 
 #include "sigmffilerecord.h"
 
@@ -121,6 +120,7 @@ void SigMFFileRecord::startRecording()
         qDebug("SigMFFileRecord::startRecording: start new capture");
     }
 
+    m_captureStartDT = QDateTime::currentDateTimeUtc();
     m_recordOn = true;
     m_sampleCount = 0;
 }
@@ -161,16 +161,15 @@ void SigMFFileRecord::makeCapture()
         // Flush samples to disk
         m_sampleFile.flush();
         // calculate SHA512 and write it to header
-        m_metaRecord->global.access<core::GlobalT>().sha512 = sw::sha512::file(m_sampleFileName.toStdString());
+        // m_metaRecord->global.access<core::GlobalT>().sha512 = sw::sha512::file(m_sampleFileName.toStdString()); // skip takes too long
         // Add new capture
         auto recording_capture = sigmf::Capture<core::DescrT, sdrangel::DescrT>();
         recording_capture.get<core::DescrT>().frequency = m_centerFrequency;
         recording_capture.get<core::DescrT>().sample_start = m_sampleStart;
         recording_capture.get<core::DescrT>().length = m_sampleCount;
-        QDateTime utcnow = QDateTime::currentDateTimeUtc();
-        recording_capture.get<core::DescrT>().datetime = utcnow.toString("yyyy-MM-ddTHH:mm:ss.zzzZ").toStdString();
+        recording_capture.get<core::DescrT>().datetime = m_captureStartDT.toString("yyyy-MM-ddTHH:mm:ss.zzzZ").toStdString();
         recording_capture.get<sdrangel::DescrT>().sample_rate = m_sampleRate;
-        recording_capture.get<sdrangel::DescrT>().tsms = utcnow.toMSecsSinceEpoch();
+        recording_capture.get<sdrangel::DescrT>().tsms = m_captureStartDT.toMSecsSinceEpoch();
         m_metaRecord->captures.emplace_back(recording_capture);
         m_sampleStart += m_sampleCount;
         // Flush meta to disk
@@ -219,6 +218,7 @@ bool SigMFFileRecord::handleMessage(const Message& message)
 	{
         if (m_recordOn) {
             makeCapture();
+            m_captureStartDT = QDateTime::currentDateTimeUtc();
             m_sampleCount = 0;
         }
 
