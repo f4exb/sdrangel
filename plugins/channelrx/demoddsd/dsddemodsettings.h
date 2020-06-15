@@ -39,6 +39,7 @@ struct DSDDemodSettings
     bool m_slot2On;
     bool m_tdmaStereo;
     bool m_pllLock;
+    uint8_t m_dmrBPKey; //!< Basic Privacy key index - 0: no encryption
     quint32 m_rgbColor;
     QString m_title;
     bool m_highPassFilter;

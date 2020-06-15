@@ -263,6 +263,12 @@ void DSDDemodGUI::on_symbolPLLLock_toggled(bool checked)
     applySettings();
 }
 
+void DSDDemodGUI::on_dmrBPKey_valueChanged(int value)
+{
+    m_settings.m_dmrBPKey = value < 0 ? 0 : value > 255 ? 255 : value;
+    applySettings();
+}
+
 void DSDDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;

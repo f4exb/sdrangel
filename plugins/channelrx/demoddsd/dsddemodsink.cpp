@@ -334,6 +334,7 @@ void DSDDemodSink::applySettings(const DSDDemodSettings& settings, bool force)
             << " m_slot2On: " << settings.m_slot2On
             << " m_tdmaStereo: " << settings.m_tdmaStereo
             << " m_pllLock: " << settings.m_pllLock
+            << " m_dmrBPKey: " << settings.m_dmrBPKey
             << " m_highPassFilter: "<< settings.m_highPassFilter
             << " m_audioDeviceName: " << settings.m_audioDeviceName
             << " m_traceLengthMutliplier: " << settings.m_traceLengthMutliplier
@@ -390,6 +391,11 @@ void DSDDemodSink::applySettings(const DSDDemodSettings& settings, bool force)
     if ((settings.m_pllLock != m_settings.m_pllLock) || force)
     {
         m_dsdDecoder.setSymbolPLLLock(settings.m_pllLock);
+    }
+
+    if ((settings.m_dmrBPKey != m_settings.m_dmrBPKey) || force)
+    {
+        m_dsdDecoder.setDMRBasicPrivacyKey(settings.m_dmrBPKey);
     }
 
     if ((settings.m_highPassFilter != m_settings.m_highPassFilter) || force)
