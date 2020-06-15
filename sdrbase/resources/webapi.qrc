@@ -54,6 +54,7 @@
         <file>webapi/doc/swagger/include/RemoteInput.yaml</file>
         <file>webapi/doc/swagger/include/RemoteOutput.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
+        <file>webapi/doc/swagger/include/SigMFFileInput.yaml</file>
         <file>webapi/doc/swagger/include/SoapySDR.yaml</file>
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>

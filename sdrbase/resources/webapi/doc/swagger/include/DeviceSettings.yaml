@@ -64,6 +64,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
     sdrPlaySettings:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+    sigMFFileInputSettings:
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
     soapySDRInputSettings:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
     soapySDROutputSettings:

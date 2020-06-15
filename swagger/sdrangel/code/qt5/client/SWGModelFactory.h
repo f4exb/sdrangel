@@ -174,6 +174,9 @@
 #include "SWGSSBModSettings.h"
 #include "SWGSampleRate.h"
 #include "SWGSamplingDevice.h"
+#include "SWGSigMFFileInputActions.h"
+#include "SWGSigMFFileInputReport.h"
+#include "SWGSigMFFileInputSettings.h"
 #include "SWGSoapySDRFrequencySetting.h"
 #include "SWGSoapySDRGainSetting.h"
 #include "SWGSoapySDRInputActions.h"
@@ -688,6 +691,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();
+    }
+    if(QString("SWGSigMFFileInputActions").compare(type) == 0) {
+      return new SWGSigMFFileInputActions();
+    }
+    if(QString("SWGSigMFFileInputReport").compare(type) == 0) {
+      return new SWGSigMFFileInputReport();
+    }
+    if(QString("SWGSigMFFileInputSettings").compare(type) == 0) {
+      return new SWGSigMFFileInputSettings();
     }
     if(QString("SWGSoapySDRFrequencySetting").compare(type) == 0) {
       return new SWGSoapySDRFrequencySetting();

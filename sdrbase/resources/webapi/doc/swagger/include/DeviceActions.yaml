@@ -44,6 +44,8 @@ DeviceActions:
       $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrActions"
     sdrPlayActions:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayActions"
+    sigMFFileInputActions:
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputActions"
     soapySDRInputActions:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRInputActions"
     testSourceActions:

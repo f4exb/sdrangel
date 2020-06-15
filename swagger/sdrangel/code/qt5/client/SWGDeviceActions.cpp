@@ -64,6 +64,8 @@ SWGDeviceActions::SWGDeviceActions() {
     m_rtl_sdr_actions_isSet = false;
     sdr_play_actions = nullptr;
     m_sdr_play_actions_isSet = false;
+    sig_mf_file_input_actions = nullptr;
+    m_sig_mf_file_input_actions_isSet = false;
     soapy_sdr_input_actions = nullptr;
     m_soapy_sdr_input_actions_isSet = false;
     test_source_actions = nullptr;
@@ -114,6 +116,8 @@ SWGDeviceActions::init() {
     m_rtl_sdr_actions_isSet = false;
     sdr_play_actions = new SWGSDRPlayActions();
     m_sdr_play_actions_isSet = false;
+    sig_mf_file_input_actions = new SWGSigMFFileInputActions();
+    m_sig_mf_file_input_actions_isSet = false;
     soapy_sdr_input_actions = new SWGSoapySDRInputActions();
     m_soapy_sdr_input_actions_isSet = false;
     test_source_actions = new SWGTestSourceActions();
@@ -174,6 +178,9 @@ SWGDeviceActions::cleanup() {
     if(sdr_play_actions != nullptr) { 
         delete sdr_play_actions;
     }
+    if(sig_mf_file_input_actions != nullptr) { 
+        delete sig_mf_file_input_actions;
+    }
     if(soapy_sdr_input_actions != nullptr) { 
         delete soapy_sdr_input_actions;
     }
@@ -231,6 +238,8 @@ SWGDeviceActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rtl_sdr_actions, pJson["rtlSdrActions"], "SWGRtlSdrActions", "SWGRtlSdrActions");
     
     ::SWGSDRangel::setValue(&sdr_play_actions, pJson["sdrPlayActions"], "SWGSDRPlayActions", "SWGSDRPlayActions");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_input_actions, pJson["sigMFFileInputActions"], "SWGSigMFFileInputActions", "SWGSigMFFileInputActions");
     
     ::SWGSDRangel::setValue(&soapy_sdr_input_actions, pJson["soapySDRInputActions"], "SWGSoapySDRInputActions", "SWGSoapySDRInputActions");
     
@@ -307,6 +316,9 @@ SWGDeviceActions::asJsonObject() {
     }
     if((sdr_play_actions != nullptr) && (sdr_play_actions->isSet())){
         toJsonValue(QString("sdrPlayActions"), sdr_play_actions, obj, QString("SWGSDRPlayActions"));
+    }
+    if((sig_mf_file_input_actions != nullptr) && (sig_mf_file_input_actions->isSet())){
+        toJsonValue(QString("sigMFFileInputActions"), sig_mf_file_input_actions, obj, QString("SWGSigMFFileInputActions"));
     }
     if((soapy_sdr_input_actions != nullptr) && (soapy_sdr_input_actions->isSet())){
         toJsonValue(QString("soapySDRInputActions"), soapy_sdr_input_actions, obj, QString("SWGSoapySDRInputActions"));
@@ -501,6 +513,16 @@ SWGDeviceActions::setSdrPlayActions(SWGSDRPlayActions* sdr_play_actions) {
     this->m_sdr_play_actions_isSet = true;
 }
 
+SWGSigMFFileInputActions*
+SWGDeviceActions::getSigMfFileInputActions() {
+    return sig_mf_file_input_actions;
+}
+void
+SWGDeviceActions::setSigMfFileInputActions(SWGSigMFFileInputActions* sig_mf_file_input_actions) {
+    this->sig_mf_file_input_actions = sig_mf_file_input_actions;
+    this->m_sig_mf_file_input_actions_isSet = true;
+}
+
 SWGSoapySDRInputActions*
 SWGDeviceActions::getSoapySdrInputActions() {
     return soapy_sdr_input_actions;
@@ -588,6 +610,9 @@ SWGDeviceActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(sdr_play_actions && sdr_play_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_input_actions && sig_mf_file_input_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(soapy_sdr_input_actions && soapy_sdr_input_actions->isSet()){

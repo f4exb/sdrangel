@@ -68,6 +68,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_remote_input_report_isSet = false;
     sdr_play_report = nullptr;
     m_sdr_play_report_isSet = false;
+    sig_mf_file_input_report = nullptr;
+    m_sig_mf_file_input_report_isSet = false;
     soapy_sdr_input_report = nullptr;
     m_soapy_sdr_input_report_isSet = false;
     soapy_sdr_output_report = nullptr;
@@ -126,6 +128,8 @@ SWGDeviceReport::init() {
     m_remote_input_report_isSet = false;
     sdr_play_report = new SWGSDRPlayReport();
     m_sdr_play_report_isSet = false;
+    sig_mf_file_input_report = new SWGSigMFFileInputReport();
+    m_sig_mf_file_input_report_isSet = false;
     soapy_sdr_input_report = new SWGSoapySDRReport();
     m_soapy_sdr_input_report_isSet = false;
     soapy_sdr_output_report = new SWGSoapySDRReport();
@@ -198,6 +202,9 @@ SWGDeviceReport::cleanup() {
     if(sdr_play_report != nullptr) { 
         delete sdr_play_report;
     }
+    if(sig_mf_file_input_report != nullptr) { 
+        delete sig_mf_file_input_report;
+    }
     if(soapy_sdr_input_report != nullptr) { 
         delete soapy_sdr_input_report;
     }
@@ -265,6 +272,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_input_report, pJson["remoteInputReport"], "SWGRemoteInputReport", "SWGRemoteInputReport");
     
     ::SWGSDRangel::setValue(&sdr_play_report, pJson["sdrPlayReport"], "SWGSDRPlayReport", "SWGSDRPlayReport");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_input_report, pJson["sigMFFileInputReport"], "SWGSigMFFileInputReport", "SWGSigMFFileInputReport");
     
     ::SWGSDRangel::setValue(&soapy_sdr_input_report, pJson["soapySDRInputReport"], "SWGSoapySDRReport", "SWGSoapySDRReport");
     
@@ -351,6 +360,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((sdr_play_report != nullptr) && (sdr_play_report->isSet())){
         toJsonValue(QString("sdrPlayReport"), sdr_play_report, obj, QString("SWGSDRPlayReport"));
+    }
+    if((sig_mf_file_input_report != nullptr) && (sig_mf_file_input_report->isSet())){
+        toJsonValue(QString("sigMFFileInputReport"), sig_mf_file_input_report, obj, QString("SWGSigMFFileInputReport"));
     }
     if((soapy_sdr_input_report != nullptr) && (soapy_sdr_input_report->isSet())){
         toJsonValue(QString("soapySDRInputReport"), soapy_sdr_input_report, obj, QString("SWGSoapySDRReport"));
@@ -571,6 +583,16 @@ SWGDeviceReport::setSdrPlayReport(SWGSDRPlayReport* sdr_play_report) {
     this->m_sdr_play_report_isSet = true;
 }
 
+SWGSigMFFileInputReport*
+SWGDeviceReport::getSigMfFileInputReport() {
+    return sig_mf_file_input_report;
+}
+void
+SWGDeviceReport::setSigMfFileInputReport(SWGSigMFFileInputReport* sig_mf_file_input_report) {
+    this->sig_mf_file_input_report = sig_mf_file_input_report;
+    this->m_sig_mf_file_input_report_isSet = true;
+}
+
 SWGSoapySDRReport*
 SWGDeviceReport::getSoapySdrInputReport() {
     return soapy_sdr_input_report;
@@ -684,6 +706,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(sdr_play_report && sdr_play_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_input_report && sig_mf_file_input_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(soapy_sdr_input_report && soapy_sdr_input_report->isSet()){

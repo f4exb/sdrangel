@@ -1,0 +1,61 @@
+DeviceReport:
+  description: Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present.
+  discriminator: deviceHwType
+  required:
+    - deviceHwType
+    - direction
+  properties:
+    deviceHwType:
+      description: Device hardware type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    airspyReport:
+      $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
+    airspyHFReport:
+      $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+    bladeRF2InputReport:
+      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+    bladeRF2OutputReport:
+      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
+    fileInputReport:
+      $ref: "/doc/swagger/include/FileInput.yaml#/FileInputReport"
+    limeSdrInputReport:
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+    kiwiSDRReport:
+      $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+    limeSdrOutputReport:
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+    limeSdrMIMOReport:
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
+    localInputReport:
+      $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputReport"
+    localOutputReport:
+      $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputReport"
+    perseusReport:
+      $ref: "/doc/swagger/include/Perseus.yaml#/PerseusReport"
+    plutoSdrInputReport:
+      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+    plutoSdrOutputReport:
+      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+    rtlSdrReport:
+      $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+    remoteOutputReport:
+      $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
+    remoteInputReport:
+      $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
+    sdrPlayReport:
+      $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+    sigMFFileInputReport:
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
+    soapySDRInputReport:
+      $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+    soapySDROutputReport:
+      $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+    xtrxInputReport:
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
+    xtrxOutputReport:
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+    xtrxMIMOReport:
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOReport"

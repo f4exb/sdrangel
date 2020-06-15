@@ -37,6 +37,7 @@
 #include "SWGRemoteInputActions.h"
 #include "SWGRtlSdrActions.h"
 #include "SWGSDRPlayActions.h"
+#include "SWGSigMFFileInputActions.h"
 #include "SWGSoapySDRInputActions.h"
 #include "SWGTestSourceActions.h"
 #include "SWGXtrxInputActions.h"
@@ -114,6 +115,9 @@ public:
     SWGSDRPlayActions* getSdrPlayActions();
     void setSdrPlayActions(SWGSDRPlayActions* sdr_play_actions);
 
+    SWGSigMFFileInputActions* getSigMfFileInputActions();
+    void setSigMfFileInputActions(SWGSigMFFileInputActions* sig_mf_file_input_actions);
+
     SWGSoapySDRInputActions* getSoapySdrInputActions();
     void setSoapySdrInputActions(SWGSoapySDRInputActions* soapy_sdr_input_actions);
 
@@ -180,6 +184,9 @@ private:
 
     SWGSDRPlayActions* sdr_play_actions;
     bool m_sdr_play_actions_isSet;
+
+    SWGSigMFFileInputActions* sig_mf_file_input_actions;
+    bool m_sig_mf_file_input_actions_isSet;
 
     SWGSoapySDRInputActions* soapy_sdr_input_actions;
     bool m_soapy_sdr_input_actions_isSet;

@@ -47,6 +47,7 @@
 #include "SWGRemoteOutputSettings.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlaySettings.h"
+#include "SWGSigMFFileInputSettings.h"
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGTestMISettings.h"
@@ -159,6 +160,9 @@ public:
     SWGSDRPlaySettings* getSdrPlaySettings();
     void setSdrPlaySettings(SWGSDRPlaySettings* sdr_play_settings);
 
+    SWGSigMFFileInputSettings* getSigMfFileInputSettings();
+    void setSigMfFileInputSettings(SWGSigMFFileInputSettings* sig_mf_file_input_settings);
+
     SWGSoapySDRInputSettings* getSoapySdrInputSettings();
     void setSoapySdrInputSettings(SWGSoapySDRInputSettings* soapy_sdr_input_settings);
 
@@ -270,6 +274,9 @@ private:
 
     SWGSDRPlaySettings* sdr_play_settings;
     bool m_sdr_play_settings_isSet;
+
+    SWGSigMFFileInputSettings* sig_mf_file_input_settings;
+    bool m_sig_mf_file_input_settings_isSet;
 
     SWGSoapySDRInputSettings* soapy_sdr_input_settings;
     bool m_soapy_sdr_input_settings_isSet;

@@ -3138,6 +3138,9 @@ margin-bottom: 20px;
     "sdrPlayActions" : {
       "$ref" : "#/definitions/SDRPlayActions"
     },
+    "sigMFFileInputActions" : {
+      "$ref" : "#/definitions/SigMFFileInputActions"
+    },
     "soapySDRInputActions" : {
       "$ref" : "#/definitions/SoapySDRInputActions"
     },
@@ -3273,6 +3276,9 @@ margin-bottom: 20px;
     },
     "sdrPlayReport" : {
       "$ref" : "#/definitions/SDRPlayReport"
+    },
+    "sigMFFileInputReport" : {
+      "$ref" : "#/definitions/SigMFFileInputReport"
     },
     "soapySDRInputReport" : {
       "$ref" : "#/definitions/SoapySDRReport"
@@ -3422,6 +3428,9 @@ margin-bottom: 20px;
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
+    },
+    "sigMFFileInputSettings" : {
+      "$ref" : "#/definitions/SigMFFileInputSettings"
     },
     "soapySDRInputSettings" : {
       "$ref" : "#/definitions/SoapySDRInputSettings"
@@ -7012,6 +7021,118 @@ margin-bottom: 20px;
     }
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
+};
+            defs.SigMFFileInputActions = {
+  "properties" : {
+    "playTrack" : {
+      "type" : "integer",
+      "description" : "Play IQ stream action\n  * 0 - stop playing\n  * 1 - start playing current track\n"
+    },
+    "playRecord" : {
+      "type" : "integer",
+      "description" : "Play IQ stream action\n  * 0 - stop playing\n  * 1 - start playing\n"
+    },
+    "seekTrack" : {
+      "type" : "integer",
+      "description" : "Move to beginning of track given its number. Must stop first."
+    },
+    "seekTrackMillis" : {
+      "type" : "integer",
+      "description" : "Move to this number / 1000 raio in track. Must stop first."
+    },
+    "seekRecordMillis" : {
+      "type" : "integer",
+      "description" : "Move to this number / 1000 raio in full record. Must stop first."
+    }
+  },
+  "description" : "SigMFFileInput"
+};
+            defs.SigMFFileInputReport = {
+  "properties" : {
+    "sampleSize" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bits"
+    },
+    "sampleBytes" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bytes"
+    },
+    "crcStatus" : {
+      "type" : "integer",
+      "description" : "CRC status\n  * 0 - no CRC available\n  * 1 - CRC (SHA512) OK\n  * 2 - CRC (SHA512) KO\n"
+    },
+    "totalBytesStatus" : {
+      "type" : "integer",
+      "description" : "Total number of bytes in data file vs meta data\n  * 0 - mismatch\n  * 1 - match\n"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "description" : "Current track center frequency in Hz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Current track sample rate in S/s"
+    },
+    "trackNunber" : {
+      "type" : "integer",
+      "description" : "Current track number"
+    },
+    "absoluteTime" : {
+      "type" : "string",
+      "description" : "Absolute record time string representation"
+    },
+    "elapsedRecordTime" : {
+      "type" : "string",
+      "description" : "Elapsed record time since beginning string representation"
+    },
+    "elapsedTrackime" : {
+      "type" : "string",
+      "description" : "Elapsed track time since beginning string representation"
+    },
+    "recordDuration" : {
+      "type" : "string",
+      "description" : "Record duration time string representation"
+    },
+    "trackDuration" : {
+      "type" : "string",
+      "description" : "Track duration time string representation"
+    }
+  },
+  "description" : "SigMFFileInput"
+};
+            defs.SigMFFileInputSettings = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string",
+      "description" : "The name (path) of the file being read without extension"
+    },
+    "accelerationFactor" : {
+      "type" : "integer",
+      "description" : "Playback acceleration (1 if normal speed)"
+    },
+    "trackLoop" : {
+      "type" : "integer",
+      "description" : "1 if playing track in a loop else 0"
+    },
+    "fullLoop" : {
+      "type" : "integer",
+      "description" : "1 if playing full file in a loop else 0"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "SigMFFileInput"
 };
             defs.SoapySDRFrequencySetting = {
   "properties" : {
@@ -37245,7 +37366,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-05-10T09:28:39.270+02:00
+              Generated 2020-06-16T01:37:19.538+02:00
             </div>
           </div>
       </div>
