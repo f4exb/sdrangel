@@ -1,3 +1,9 @@
+sdrangel (4.14.9-1) unstable; urgency=medium
+
+   * DSD demod: implemented DMR basic privacy (dsdcc 1.8.7)
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 15 Jun 2020 19:03:39 +0200
+
 sdrangel (4.14.8-1) unstable; urgency=medium
 
    * RTP audio: fixed codec setting when usinf REST API. Fixes #526
