@@ -212,9 +212,13 @@ bool SigMFFileInputGUI::handleMessage(const Message& message)
             if (m_metaInfo.m_sigMFVersion.size() > 0) {
                 m_recordInfo += QString("Version....: %1\n").arg(m_metaInfo.m_sigMFVersion);
             }
+            if (m_metaInfo.m_hw.size() > 0) {
+                m_recordInfo += QString("Hardware...: %1\n").arg(m_metaInfo.m_hw);
+            }
 
             m_recordInfo += QString("Data type..: %1\n").arg(m_metaInfo.m_dataTypeStr);
-            m_recordInfo += QString("Nb samples.: %1\n").arg(m_metaInfo.m_totalSamples);
+            m_recordInfo += QString("Swap I/Q...: %1\n").arg(m_metaInfo.m_dataType.m_swapIQ ? "yes" : "no");
+            m_recordInfo += QString("Nb samples.: %1 (%2S)\n").arg(m_metaInfo.m_totalSamples).arg(displayScaled(m_metaInfo.m_totalSamples, 3));
             m_recordInfo += QString("Nb captures: %1\n").arg(m_metaInfo.m_nbCaptures);
             m_recordInfo += QString("Nb annot...: %1\n").arg(m_metaInfo.m_nbAnnotations);
 
@@ -226,7 +230,7 @@ bool SigMFFileInputGUI::handleMessage(const Message& message)
             m_recordInfo += QString("Hardware...: %1\n").arg(m_metaInfo.m_hw);
             m_recordInfo += QString("Data type..: %1\n").arg(m_metaInfo.m_dataTypeStr);
             m_recordInfo += QString("Core SRate.: %1 S/s\n").arg(m_metaInfo.m_coreSampleRate);
-            m_recordInfo += QString("Nb samples.: %1\n").arg(m_metaInfo.m_totalSamples);
+            m_recordInfo += QString("Nb samples.: %1 (%2S)\n").arg(m_metaInfo.m_totalSamples).arg(displayScaled(m_metaInfo.m_totalSamples, 3));
             m_recordInfo += QString("Nb captures: %1\n").arg(m_metaInfo.m_nbCaptures);
             m_recordInfo += QString("SDRangel application info:\n");
             m_recordInfo += QString("Version....: v%1\n").arg(m_metaInfo.m_sdrAngelVersion);

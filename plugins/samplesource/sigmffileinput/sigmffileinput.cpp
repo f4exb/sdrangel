@@ -262,9 +262,10 @@ void SigMFFileInput::extractCaptures(
         m_captureStarts.push_back(m_captures.back().m_sampleStart);
         m_captures.back().m_cumulativeTime = cumulativeTime;
         int sdrangelSampleRate = it->get<sdrangel::DescrT>().sample_rate;
+        double globalSampleRate = metaRecord->global.access<core::GlobalT>().sample_rate;
 
         if (sdrangelSampleRate == 0) {
-            m_captures.back().m_sampleRate = metaRecord->global.access<core::GlobalT>().sample_rate;
+            m_captures.back().m_sampleRate = globalSampleRate < 0 ? -globalSampleRate : globalSampleRate;
         } else {
             m_captures.back().m_sampleRate = sdrangelSampleRate;
         }
