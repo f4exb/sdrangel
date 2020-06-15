@@ -37,6 +37,8 @@ DSDDemodSettings:
       type: integer
     pllLock:
       type: integer
+    dmrBPKey:
+      type: integer
     rgbColor:
       type: integer
     title:
