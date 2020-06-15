@@ -87,6 +87,9 @@ public:
     qint32 getPllLock();
     void setPllLock(qint32 pll_lock);
 
+    qint32 getDmrBpKey();
+    void setDmrBpKey(qint32 dmr_bp_key);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -174,6 +177,9 @@ private:
 
     qint32 pll_lock;
     bool m_pll_lock_isSet;
+
+    qint32 dmr_bp_key;
+    bool m_dmr_bp_key_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
