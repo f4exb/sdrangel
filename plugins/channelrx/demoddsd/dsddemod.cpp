@@ -365,6 +365,9 @@ void DSDDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("pllLock")) {
         settings.m_pllLock = response.getDsdDemodSettings()->getPllLock() != 0;
     }
+    if (channelSettingsKeys.contains("dmrBPKey")) {
+        settings.m_dmrBPKey = response.getDsdDemodSettings()->getDmrBpKey();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getDsdDemodSettings()->getRgbColor();
     }
@@ -434,6 +437,7 @@ void DSDDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& resp
     response.getDsdDemodSettings()->setSlot2On(settings.m_slot2On ? 1 : 0);
     response.getDsdDemodSettings()->setTdmaStereo(settings.m_tdmaStereo ? 1 : 0);
     response.getDsdDemodSettings()->setPllLock(settings.m_pllLock ? 1 : 0);
+    response.getDsdDemodSettings()->setDmrBpKey(settings.m_dmrBPKey);
     response.getDsdDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getDsdDemodSettings()->getTitle()) {
@@ -544,6 +548,9 @@ void DSDDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, co
     }
     if (channelSettingsKeys.contains("pllLock") || force) {
         swgDSDDemodSettings->setPllLock(settings.m_pllLock ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("dmrBPKey") || force) {
+        swgDSDDemodSettings->setDmrBpKey(settings.m_dmrBPKey);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgDSDDemodSettings->setRgbColor(settings.m_rgbColor);
