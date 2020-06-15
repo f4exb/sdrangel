@@ -44,6 +44,8 @@ DeviceActions:
       $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrActions"
     sdrPlayActions:
       $ref: "http://localhost:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayActions"
+    sigMFFileInputActions:
+      $ref: "http://localhost:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputActions"
     soapySDRInputActions:
       $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputActions"
     testSourceActions:

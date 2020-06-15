@@ -1,0 +1,96 @@
+SigMFFileInputSettings:
+  description: SigMFFileInput
+  properties:
+    fileName:
+      description: The name (path) of the file being read without extension
+      type: string
+    accelerationFactor:
+      description: Playback acceleration (1 if normal speed)
+      type: integer
+    trackLoop:
+      description: 1 if playing track in a loop else 0
+      type: integer
+    fullLoop:
+      description: 1 if playing full file in a loop else 0
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+SigMFFileInputReport:
+  description: SigMFFileInput
+  properties:
+    sampleSize:
+      description: Record sample size in number of bits
+      type: integer
+    sampleBytes:
+      description: Record sample size in number of bytes
+      type: integer
+    crcStatus:
+      type: integer
+      description: >
+        CRC status
+          * 0 - no CRC available
+          * 1 - CRC (SHA512) OK
+          * 2 - CRC (SHA512) KO
+    totalBytesStatus:
+      type: integer
+      description: >
+        Total number of bytes in data file vs meta data
+          * 0 - mismatch
+          * 1 - match
+    centerFrequency:
+      description: Current track center frequency in Hz
+      type: integer
+    sampleRate:
+      description: Current track sample rate in S/s
+      type: integer
+    trackNunber:
+      description: Current track number
+      type: integer
+    absoluteTime:
+      description: Absolute record time string representation
+      type: string
+    elapsedRecordTime:
+      description: Elapsed record time since beginning string representation
+      type: string
+    elapsedTrackime:
+      description: Elapsed track time since beginning string representation
+      type: string
+    recordDuration:
+      description: Record duration time string representation
+      type: string
+    trackDuration:
+      description: Track duration time string representation
+      type: string
+
+SigMFFileInputActions:
+  description: SigMFFileInput
+  properties:
+    playTrack:
+      type: integer
+      description: >
+        Play IQ stream action
+          * 0 - stop playing
+          * 1 - start playing current track
+    playRecord:
+      type: integer
+      description: >
+        Play IQ stream action
+          * 0 - stop playing
+          * 1 - start playing
+    seekTrack:
+      type: integer
+      description: Move to beginning of track given its number. Must stop first.
+    seekTrackMillis:
+      type: integer
+      description: Move to this number / 1000 raio in track. Must stop first.
+    seekRecordMillis:
+      type: integer
+      description: Move to this number / 1000 raio in full record. Must stop first.
