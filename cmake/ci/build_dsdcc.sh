@@ -7,7 +7,7 @@ mkdir -p f4exb && cd f4exb
 git clone https://github.com/f4exb/dsdcc.git
 
 cd dsdcc
-git reset --hard  "v1.8.6"
+git reset --hard  "v1.8.7"
 mkdir -p build && cd build
 cmake ..
 sudo make install
