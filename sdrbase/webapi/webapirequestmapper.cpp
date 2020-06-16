@@ -126,6 +126,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.remoteinput", "remoteInputSettings"},
     {"sdrangel.samplesink.remoteoutput", "remoteOutputSettings"},
     {"sdrangel.samplesource.sdrplay", "sdrPlaySettings"},
+    {"sdrangel.samplesource.sigmffileinput", "sigMFFileInputSettings"},
     {"sdrangel.samplesource.soapysdrinput", "soapySDRInputSettings"},
     {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
     {"sdrangel.samplesource.testsource", "testSourceSettings"},
@@ -187,6 +188,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKe
     {"RTLSDR", "rtlSdrSettings"},
     {"RemoteInput", "remoteInputSettings"},
     {"SDRplay1", "sdrPlaySettings"},
+    {"SigMFFileInput", "sigMFFileInputSettings"},
     {"SoapySDR", "soapySDRInputSettings"},
     {"TestSource", "testSourceSettings"},
     {"XTRX", "xtrxInputSettings"}
@@ -207,6 +209,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToActionsKey
     {"RemoteInput", "remoteInputActions"},
     {"RTLSDR", "rtlSdrActions"},
     {"SDRplay1", "sdrPlayActions"},
+    {"SigMFFileInput", "sigMFFileActions"},
     {"SoapySDR", "soapySDRInputActions"},
     {"TestSource", "testSourceActions"},
     {"XTRX", "xtrxInputActions"}
