@@ -1,5 +1,6 @@
 CMakeLists.txt.user*
 build*/
+debug/
 qtbuild/*
 sdriq/*
 presets/*
