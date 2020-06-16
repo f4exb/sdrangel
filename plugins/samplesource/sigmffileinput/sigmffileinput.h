@@ -417,6 +417,11 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    virtual int webapiActionsPost(
+            const QStringList& deviceActionsKeys,
+            SWGSDRangel::SWGDeviceActions& query,
+            QString& errorMessage);
+
     virtual int webapiRun(
             bool run,
             SWGSDRangel::SWGDeviceState& response,
@@ -447,6 +452,9 @@ private:
     bool m_trackMode;
     int m_currentTrackIndex;
     bool m_recordOpen;
+    bool m_crcAvailable;
+    bool m_crcOK;
+    bool m_recordLengthOK;
     QString m_recordSummary;
 	SigMFFileInputThread* m_fileInputThread;
 	QString m_deviceDescription;

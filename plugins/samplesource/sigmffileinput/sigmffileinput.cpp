@@ -30,9 +30,10 @@
 #include "libsigmf/sigmf.h"
 
 #include "SWGDeviceSettings.h"
-#include "SWGFileInputSettings.h"
+#include "SWGSigMFFileInputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
+#include "SWGDeviceActions.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesourceengine.h"
@@ -65,6 +66,9 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     m_trackMode(false),
     m_currentTrackIndex(0),
     m_recordOpen(false),
+    m_crcAvailable(false),
+    m_crcOK(false),
+    m_recordLengthOK(false),
 	m_fileInputThread(nullptr),
 	m_deviceDescription(),
 	m_sampleRate(48000),
@@ -154,10 +158,11 @@ bool SigMFFileInput::openFileStreams(const QString& fileName)
     if (m_metaInfo.m_sha512.size() != 0)
     {
         qDebug("SigMFFileInput::openFileStreams: compute SHA512");
+        m_crcAvailable = true;
         std::string sha512 = sw::sha512::file(dataFileName.toStdString());
-        bool crcOK = m_metaInfo.m_sha512 == QString::fromStdString(sha512);
+        m_crcOK = m_metaInfo.m_sha512 == QString::fromStdString(sha512);
 
-        if (crcOK) {
+        if (m_crcOK) {
             qDebug("SigMFFileInput::openFileStreams: SHA512 OK: %s", sha512.c_str());
         } else {
             qCritical("SigMFFileInput::openFileStreams: bad SHA512: %s expected: %s", sha512.c_str(), qPrintable(m_metaInfo.m_sha512));
@@ -165,18 +170,23 @@ bool SigMFFileInput::openFileStreams(const QString& fileName)
 
         if (getMessageQueueToGUI())
         {
-            MsgReportCRC *report = MsgReportCRC::create(crcOK);
+            MsgReportCRC *report = MsgReportCRC::create(m_crcOK);
             getMessageQueueToGUI()->push(report);
         }
 
-        if (!crcOK) {
+        if (!m_crcOK) {
             return false;
         }
     }
+    else
+    {
+        m_crcAvailable = false;
+    }
 
-    bool totalSamplesCheck = (m_metaInfo.m_totalSamples == m_captures.back().m_sampleStart + m_captures.back().m_length);
 
-    if (totalSamplesCheck) {
+    m_recordLengthOK = (m_metaInfo.m_totalSamples == m_captures.back().m_sampleStart + m_captures.back().m_length);
+
+    if (m_recordLengthOK) {
         qDebug("SigMFFileInput::openFileStreams: total samples OK");
     } else {
         qCritical("SigMFFileInput::openFileStreams: invalid total samples: meta: %lu data: %lu",
@@ -185,7 +195,7 @@ bool SigMFFileInput::openFileStreams(const QString& fileName)
 
     if (getMessageQueueToGUI())
     {
-        MsgReportTotalSamplesCheck *report = MsgReportTotalSamplesCheck::create(totalSamplesCheck);
+        MsgReportTotalSamplesCheck *report = MsgReportTotalSamplesCheck::create(m_recordLengthOK);
         getMessageQueueToGUI()->push(report);
     }
 
@@ -798,6 +808,9 @@ bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, bool 
     if ((m_settings.m_trackLoop != settings.m_trackLoop)) {
         reverseAPIKeys.append("trackLoop");
     }
+    if ((m_settings.m_trackLoop != settings.m_fullLoop)) {
+        reverseAPIKeys.append("fullLoop");
+    }
 
     if ((m_settings.m_fileName != settings.m_fileName))
     {
@@ -823,8 +836,8 @@ int SigMFFileInput::webapiSettingsGet(
                 QString& errorMessage)
 {
     (void) errorMessage;
-    response.setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
-    response.getFileInputSettings()->init();
+    response.setSigMfFileInputSettings(new SWGSDRangel::SWGSigMFFileInputSettings());
+    response.getSigMfFileInputSettings()->init();
     webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
@@ -858,25 +871,28 @@ void SigMFFileInput::webapiUpdateDeviceSettings(
         SWGSDRangel::SWGDeviceSettings& response)
 {
     if (deviceSettingsKeys.contains("fileName")) {
-        settings.m_fileName = *response.getFileInputSettings()->getFileName();
+        settings.m_fileName = *response.getSigMfFileInputSettings()->getFileName();
     }
     if (deviceSettingsKeys.contains("accelerationFactor")) {
-        settings.m_accelerationFactor = response.getFileInputSettings()->getAccelerationFactor();
+        settings.m_accelerationFactor = response.getSigMfFileInputSettings()->getAccelerationFactor();
     }
     if (deviceSettingsKeys.contains("trackLoop")) {
-        settings.m_trackLoop = response.getFileInputSettings()->getLoop() != 0;
+        settings.m_trackLoop = response.getSigMfFileInputSettings()->getTrackLoop() != 0;
+    }
+    if (deviceSettingsKeys.contains("fullLoop")) {
+        settings.m_trackLoop = response.getSigMfFileInputSettings()->getFullLoop() != 0;
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getFileInputSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getSigMfFileInputSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getFileInputSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getSigMfFileInputSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getFileInputSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getSigMfFileInputSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getFileInputSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getSigMfFileInputSettings()->getReverseApiDeviceIndex();
     }
 }
 
@@ -913,63 +929,175 @@ int SigMFFileInput::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setFileInputReport(new SWGSDRangel::SWGFileInputReport());
-    response.getFileInputReport()->init();
+    response.setSigMfFileInputReport(new SWGSDRangel::SWGSigMFFileInputReport());
+    response.getSigMfFileInputReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
 }
 
+int SigMFFileInput::webapiActionsPost(
+        const QStringList& deviceActionsKeys,
+        SWGSDRangel::SWGDeviceActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGSigMFFileInputActions *swgSigMFFileInputActions = query.getSigMfFileInputActions();
+
+    if (swgSigMFFileInputActions)
+    {
+        if (deviceActionsKeys.contains("playTrack"))
+        {
+            bool play = swgSigMFFileInputActions->getPlayTrack() != 0;
+            MsgConfigureTrackWork * msg = MsgConfigureTrackWork::create(play);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureTrackWork *msgToGUI = MsgConfigureTrackWork::create(play);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+        else if (deviceActionsKeys.contains("playRecord"))
+        {
+            bool play = swgSigMFFileInputActions->getPlayRecord() != 0;
+            MsgConfigureFileWork * msg = MsgConfigureFileWork::create(play);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureFileWork *msgToGUI = MsgConfigureFileWork::create(play);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+        else if (deviceActionsKeys.contains("seekTrack"))
+        {
+            int trackIndex = swgSigMFFileInputActions->getSeekTrack();
+            MsgConfigureTrackIndex *msg = MsgConfigureTrackIndex::create(trackIndex);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureTrackIndex *msgToGUI = MsgConfigureTrackIndex::create(trackIndex);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+        else if (deviceActionsKeys.contains("seekTrackMillis"))
+        {
+            int trackMillis = swgSigMFFileInputActions->getSeekTrackMillis();
+            MsgConfigureTrackSeek *msg = MsgConfigureTrackSeek::create(trackMillis);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureTrackSeek *msgToGUI = MsgConfigureTrackSeek::create(trackMillis);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+        else if (deviceActionsKeys.contains("seekRecordMillis"))
+        {
+            int recordMillis = swgSigMFFileInputActions->getSeekRecordMillis();
+            MsgConfigureFileSeek *msg = MsgConfigureFileSeek::create(recordMillis);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgConfigureFileSeek *msgToGUI = MsgConfigureFileSeek::create(recordMillis);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing AirspyActions in query";
+        return 400;
+    }
+}
+
 void SigMFFileInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SigMFFileInputSettings& settings)
 {
-    response.getFileInputSettings()->setFileName(new QString(settings.m_fileName));
-    response.getFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
-    response.getFileInputSettings()->setLoop(settings.m_trackLoop ? 1 : 0);
+    response.getSigMfFileInputSettings()->setFileName(new QString(settings.m_fileName));
+    response.getSigMfFileInputSettings()->setAccelerationFactor(settings.m_accelerationFactor);
+    response.getSigMfFileInputSettings()->setTrackLoop(settings.m_trackLoop ? 1 : 0);
+    response.getSigMfFileInputSettings()->setFullLoop(settings.m_fullLoop ? 1 : 0);
 
-    response.getFileInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getSigMfFileInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getFileInputSettings()->getReverseApiAddress()) {
-        *response.getFileInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getSigMfFileInputSettings()->getReverseApiAddress()) {
+        *response.getSigMfFileInputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getFileInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getSigMfFileInputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getFileInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getFileInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getSigMfFileInputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSigMfFileInputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
-    qint64 t_sec = 0;
-    qint64 t_msec = 0;
-    quint64 samplesCount = 0;
+    if (!m_metaStream.is_open()) {
+        return;
+    }
+
+    response.getSigMfFileInputReport()->setSampleSize(m_metaInfo.m_dataType.m_sampleBits);
+    response.getSigMfFileInputReport()->setSampleBytes(m_sampleBytes);
+    response.getSigMfFileInputReport()->setSampleFormat(m_metaInfo.m_dataType.m_floatingPoint ? 1 : 0);
+    response.getSigMfFileInputReport()->setSampleSigned(m_metaInfo.m_dataType.m_signed ? 1 : 0);
+    response.getSigMfFileInputReport()->setSampleSwapIq(m_metaInfo.m_dataType.m_swapIQ ? 1 : 0);
+    response.getSigMfFileInputReport()->setCrcStatus(!m_crcAvailable ? 0 : m_crcOK ? 1 : 2);
+    response.getSigMfFileInputReport()->setTotalBytesStatus(m_recordLengthOK);
+    response.getSigMfFileInputReport()->setTrackNumber(m_currentTrackIndex);
+    QList<SigMFFileCapture>::const_iterator it = m_captures.begin();
+
+    if (response.getSigMfFileInputReport()->getCaptures()) {
+        response.getSigMfFileInputReport()->getCaptures()->clear();
+    } else {
+        response.getSigMfFileInputReport()->setCaptures(new QList<SWGSDRangel::SWGCapture*>);
+    }
+
+    for (; it != m_captures.end(); ++it)
+    {
+        response.getSigMfFileInputReport()->getCaptures()->append(new SWGSDRangel::SWGCapture);
+        response.getSigMfFileInputReport()->getCaptures()->back()->setTsms(it->m_tsms);
+        response.getSigMfFileInputReport()->getCaptures()->back()->setCenterFrequency(it->m_centerFrequency);
+        response.getSigMfFileInputReport()->getCaptures()->back()->setSampleRate(it->m_sampleRate);
+        response.getSigMfFileInputReport()->getCaptures()->back()->setSampleStart(it->m_sampleStart);
+        response.getSigMfFileInputReport()->getCaptures()->back()->setLength(it->m_length);
+        response.getSigMfFileInputReport()->getCaptures()->back()->setCumulativeTime(it->m_cumulativeTime);
+    }
+
+    uint64_t totalSamplesCount = 0;
 
     if (m_fileInputThread) {
-        samplesCount = m_fileInputThread->getSamplesCount();
+        totalSamplesCount = m_fileInputThread->getSamplesCount();
     }
 
-    if (m_sampleRate > 0)
+    unsigned int sampleRate =  m_captures[m_currentTrackIndex].m_sampleRate;
+    uint64_t trackSamplesCount = totalSamplesCount - m_captures[m_currentTrackIndex].m_sampleStart;
+    uint64_t trackCumulativeTime = m_captures[m_currentTrackIndex].m_cumulativeTime;
+    uint64_t startingTimeStampMs = m_captures[m_currentTrackIndex].m_tsms;
+
+    uint64_t t = (trackSamplesCount*1000)/sampleRate;
+    response.getSigMfFileInputReport()->setElapsedTrackimeMs(t);
+    t += m_captures[m_currentTrackIndex].m_cumulativeTime;
+    response.getSigMfFileInputReport()->setElapsedRecordTimeMs(t);
+    response.getSigMfFileInputReport()->setAbsoluteTimeMs(startingTimeStampMs + ((trackSamplesCount*1000)/sampleRate));
+
+	float posRatio = (float) trackSamplesCount / (float) m_captures[m_currentTrackIndex].m_length;
+    response.getSigMfFileInputReport()->setTrackSamplesRatio(posRatio);
+
+    posRatio = (float) totalSamplesCount / (float) m_metaInfo.m_totalSamples;
+    response.getSigMfFileInputReport()->setRecordSamplesRatio(posRatio);
+
+    if (m_captures.size() > 0 )
     {
-        t_sec = samplesCount / m_sampleRate;
-        t_msec = (samplesCount - (t_sec * m_sampleRate)) * 1000 / m_sampleRate;
+        uint64_t totalTimeMs = m_captures.back().m_cumulativeTime + ((m_captures.back().m_length * 1000) / m_captures.back().m_sampleRate);
+        response.getSigMfFileInputReport()->setRecordDurationMs(totalTimeMs);
     }
-
-    QTime t(0, 0, 0, 0);
-    t = t.addSecs(t_sec);
-    t = t.addMSecs(t_msec);
-    response.getFileInputReport()->setElapsedTime(new QString(t.toString("HH:mm:ss.zzz")));
-
-    qint64 startingTimeStampMsec = m_startingTimeStamp * 1000LL;
-    QDateTime dt = QDateTime::fromMSecsSinceEpoch(startingTimeStampMsec);
-    dt = dt.addSecs(t_sec);
-    dt = dt.addMSecs(t_msec);
-    response.getFileInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
-
-    QTime recordLength(0, 0, 0, 0);
-    recordLength = recordLength.addSecs(m_recordLength);
-    response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
-
-    response.getFileInputReport()->setSampleRate(m_sampleRate);
-    response.getFileInputReport()->setSampleSize(m_sampleBytes);
+    else
+    {
+        response.getSigMfFileInputReport()->setRecordDurationMs(0);
+    }
 }
 
 void SigMFFileInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const SigMFFileInputSettings& settings, bool force)
@@ -978,19 +1106,22 @@ void SigMFFileInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKey
     swgDeviceSettings->setDirection(0); // single Rx
     swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
     swgDeviceSettings->setDeviceHwType(new QString("SigMFFileInput"));
-    swgDeviceSettings->setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
-    SWGSDRangel::SWGFileInputSettings *swgFileInputSettings = swgDeviceSettings->getFileInputSettings();
+    swgDeviceSettings->setSigMfFileInputSettings(new SWGSDRangel::SWGSigMFFileInputSettings());
+    SWGSDRangel::SWGSigMFFileInputSettings *swgSigMFFileInputSettings = swgDeviceSettings->getSigMfFileInputSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("accelerationFactor") || force) {
-        swgFileInputSettings->setAccelerationFactor(settings.m_accelerationFactor);
+        swgSigMFFileInputSettings->setAccelerationFactor(settings.m_accelerationFactor);
     }
-    if (deviceSettingsKeys.contains("loop") || force) {
-        swgFileInputSettings->setLoop(settings.m_trackLoop);
+    if (deviceSettingsKeys.contains("trackLoop") || force) {
+        swgSigMFFileInputSettings->setTrackLoop(settings.m_trackLoop);
+    }
+    if (deviceSettingsKeys.contains("fullLoop") || force) {
+        swgSigMFFileInputSettings->setFullLoop(settings.m_fullLoop);
     }
     if (deviceSettingsKeys.contains("fileName") || force) {
-        swgFileInputSettings->setFileName(new QString(settings.m_fileName));
+        swgSigMFFileInputSettings->setFileName(new QString(settings.m_fileName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
