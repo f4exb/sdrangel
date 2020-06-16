@@ -32,6 +32,24 @@ SigMFFileInputReport:
     sampleBytes:
       description: Record sample size in number of bytes
       type: integer
+    sampleFormat:
+      type: integer
+      description: >
+        Sample format
+        * 0 - integer
+        * 1 - float
+    sampleSigned:
+      type: integer
+      description: >
+        Sample signed status
+          * 0 - unsigned
+          * 1 - signed
+    sampleSwapIQ:
+      type: integer
+      description: >
+        Sample I/Q swap
+          * 0 - I/Q
+          * 1 - Q/I
     crcStatus:
       type: integer
       description: >
@@ -45,30 +63,37 @@ SigMFFileInputReport:
         Total number of bytes in data file vs meta data
           * 0 - mismatch
           * 1 - match
-    centerFrequency:
-      description: Current track center frequency in Hz
-      type: integer
-    sampleRate:
-      description: Current track sample rate in S/s
-      type: integer
-    trackNunber:
+    captures:
+      type: array
+      items:
+        $ref: "#/definitions/Capture"
+    trackNumber:
       description: Current track number
       type: integer
-    absoluteTime:
-      description: Absolute record time string representation
-      type: string
-    elapsedRecordTime:
-      description: Elapsed record time since beginning string representation
-      type: string
-    elapsedTrackime:
-      description: Elapsed track time since beginning string representation
-      type: string
-    recordDuration:
-      description: Record duration time string representation
-      type: string
-    trackDuration:
-      description: Track duration time string representation
-      type: string
+    absoluteTimeMs:
+      description: Absolute current time in milliseconds since epoch
+      type: integer
+      format: int64
+    elapsedRecordTimeMs:
+      description: Elapsed record time in milliseconds
+      type: integer
+      format: int64
+    recordSamplesRatio:
+      description: Elapsed samples ratio to total samples
+      type: number
+      format: float
+    elapsedTrackimeMs:
+      description: Elapsed track time in milliseconds
+      type: integer
+      format: int64
+    trackSamplesRatio:
+      description: Elapsed samples ratio to track samples
+      type: number
+      format: float
+    recordDurationMs:
+      description: Record duration time in milliseconds
+      type: integer
+      format: int64
 
 SigMFFileInputActions:
   description: SigMFFileInput
@@ -94,3 +119,32 @@ SigMFFileInputActions:
     seekRecordMillis:
       type: integer
       description: Move to this number / 1000 raio in full record. Must stop first.
+
+definitions:
+
+  Capture:
+    descripion: Capture (track) information
+    properties:
+      tsms:
+        description: Timestamp in milliseconds since epoch of capture start
+        type: integer
+        format: int64
+      centerFrequency:
+        description: Track center frequency in Hz
+        type: integer
+        format: int64
+      sampleRate:
+        description: Track sample rate in S/s
+        type: integer
+      sampleStart:
+        description: Start of track in nymber of samples
+        type: integer
+        format: int64
+      length:
+        description: Track length in number of samples
+        type: integer
+        format: int64
+      cumulativeTime:
+        description: Time in milliseconds of track start since beginning of record
+        type: integer
+        format: int64

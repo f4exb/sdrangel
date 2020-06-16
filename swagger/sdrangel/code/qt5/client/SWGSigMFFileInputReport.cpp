@@ -32,26 +32,32 @@ SWGSigMFFileInputReport::SWGSigMFFileInputReport() {
     m_sample_size_isSet = false;
     sample_bytes = 0;
     m_sample_bytes_isSet = false;
+    sample_format = 0;
+    m_sample_format_isSet = false;
+    sample_signed = 0;
+    m_sample_signed_isSet = false;
+    sample_swap_iq = 0;
+    m_sample_swap_iq_isSet = false;
     crc_status = 0;
     m_crc_status_isSet = false;
     total_bytes_status = 0;
     m_total_bytes_status_isSet = false;
-    center_frequency = 0;
-    m_center_frequency_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
-    track_nunber = 0;
-    m_track_nunber_isSet = false;
-    absolute_time = nullptr;
-    m_absolute_time_isSet = false;
-    elapsed_record_time = nullptr;
-    m_elapsed_record_time_isSet = false;
-    elapsed_trackime = nullptr;
-    m_elapsed_trackime_isSet = false;
-    record_duration = nullptr;
-    m_record_duration_isSet = false;
-    track_duration = nullptr;
-    m_track_duration_isSet = false;
+    captures = nullptr;
+    m_captures_isSet = false;
+    track_number = 0;
+    m_track_number_isSet = false;
+    absolute_time_ms = 0L;
+    m_absolute_time_ms_isSet = false;
+    elapsed_record_time_ms = 0L;
+    m_elapsed_record_time_ms_isSet = false;
+    record_samples_ratio = 0.0f;
+    m_record_samples_ratio_isSet = false;
+    elapsed_trackime_ms = 0L;
+    m_elapsed_trackime_ms_isSet = false;
+    track_samples_ratio = 0.0f;
+    m_track_samples_ratio_isSet = false;
+    record_duration_ms = 0L;
+    m_record_duration_ms_isSet = false;
 }
 
 SWGSigMFFileInputReport::~SWGSigMFFileInputReport() {
@@ -64,26 +70,32 @@ SWGSigMFFileInputReport::init() {
     m_sample_size_isSet = false;
     sample_bytes = 0;
     m_sample_bytes_isSet = false;
+    sample_format = 0;
+    m_sample_format_isSet = false;
+    sample_signed = 0;
+    m_sample_signed_isSet = false;
+    sample_swap_iq = 0;
+    m_sample_swap_iq_isSet = false;
     crc_status = 0;
     m_crc_status_isSet = false;
     total_bytes_status = 0;
     m_total_bytes_status_isSet = false;
-    center_frequency = 0;
-    m_center_frequency_isSet = false;
-    sample_rate = 0;
-    m_sample_rate_isSet = false;
-    track_nunber = 0;
-    m_track_nunber_isSet = false;
-    absolute_time = new QString("");
-    m_absolute_time_isSet = false;
-    elapsed_record_time = new QString("");
-    m_elapsed_record_time_isSet = false;
-    elapsed_trackime = new QString("");
-    m_elapsed_trackime_isSet = false;
-    record_duration = new QString("");
-    m_record_duration_isSet = false;
-    track_duration = new QString("");
-    m_track_duration_isSet = false;
+    captures = new QList<SWGCapture*>();
+    m_captures_isSet = false;
+    track_number = 0;
+    m_track_number_isSet = false;
+    absolute_time_ms = 0L;
+    m_absolute_time_ms_isSet = false;
+    elapsed_record_time_ms = 0L;
+    m_elapsed_record_time_ms_isSet = false;
+    record_samples_ratio = 0.0f;
+    m_record_samples_ratio_isSet = false;
+    elapsed_trackime_ms = 0L;
+    m_elapsed_trackime_ms_isSet = false;
+    track_samples_ratio = 0.0f;
+    m_track_samples_ratio_isSet = false;
+    record_duration_ms = 0L;
+    m_record_duration_ms_isSet = false;
 }
 
 void
@@ -95,21 +107,20 @@ SWGSigMFFileInputReport::cleanup() {
 
 
 
-    if(absolute_time != nullptr) { 
-        delete absolute_time;
+    if(captures != nullptr) { 
+        auto arr = captures;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete captures;
     }
-    if(elapsed_record_time != nullptr) { 
-        delete elapsed_record_time;
-    }
-    if(elapsed_trackime != nullptr) { 
-        delete elapsed_trackime;
-    }
-    if(record_duration != nullptr) { 
-        delete record_duration;
-    }
-    if(track_duration != nullptr) { 
-        delete track_duration;
-    }
+
+
+
+
+
+
+
 }
 
 SWGSigMFFileInputReport*
@@ -127,25 +138,31 @@ SWGSigMFFileInputReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&sample_bytes, pJson["sampleBytes"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&sample_format, pJson["sampleFormat"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sample_signed, pJson["sampleSigned"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sample_swap_iq, pJson["sampleSwapIQ"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&crc_status, pJson["crcStatus"], "qint32", "");
     
     ::SWGSDRangel::setValue(&total_bytes_status, pJson["totalBytesStatus"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&captures, pJson["captures"], "QList", "SWGCapture");
+    ::SWGSDRangel::setValue(&track_number, pJson["trackNumber"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&track_nunber, pJson["trackNunber"], "qint32", "");
+    ::SWGSDRangel::setValue(&absolute_time_ms, pJson["absoluteTimeMs"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&absolute_time, pJson["absoluteTime"], "QString", "QString");
+    ::SWGSDRangel::setValue(&elapsed_record_time_ms, pJson["elapsedRecordTimeMs"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&elapsed_record_time, pJson["elapsedRecordTime"], "QString", "QString");
+    ::SWGSDRangel::setValue(&record_samples_ratio, pJson["recordSamplesRatio"], "float", "");
     
-    ::SWGSDRangel::setValue(&elapsed_trackime, pJson["elapsedTrackime"], "QString", "QString");
+    ::SWGSDRangel::setValue(&elapsed_trackime_ms, pJson["elapsedTrackimeMs"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&record_duration, pJson["recordDuration"], "QString", "QString");
+    ::SWGSDRangel::setValue(&track_samples_ratio, pJson["trackSamplesRatio"], "float", "");
     
-    ::SWGSDRangel::setValue(&track_duration, pJson["trackDuration"], "QString", "QString");
+    ::SWGSDRangel::setValue(&record_duration_ms, pJson["recordDurationMs"], "qint64", "");
     
 }
 
@@ -169,35 +186,44 @@ SWGSigMFFileInputReport::asJsonObject() {
     if(m_sample_bytes_isSet){
         obj->insert("sampleBytes", QJsonValue(sample_bytes));
     }
+    if(m_sample_format_isSet){
+        obj->insert("sampleFormat", QJsonValue(sample_format));
+    }
+    if(m_sample_signed_isSet){
+        obj->insert("sampleSigned", QJsonValue(sample_signed));
+    }
+    if(m_sample_swap_iq_isSet){
+        obj->insert("sampleSwapIQ", QJsonValue(sample_swap_iq));
+    }
     if(m_crc_status_isSet){
         obj->insert("crcStatus", QJsonValue(crc_status));
     }
     if(m_total_bytes_status_isSet){
         obj->insert("totalBytesStatus", QJsonValue(total_bytes_status));
     }
-    if(m_center_frequency_isSet){
-        obj->insert("centerFrequency", QJsonValue(center_frequency));
+    if(captures && captures->size() > 0){
+        toJsonArray((QList<void*>*)captures, obj, "captures", "SWGCapture");
     }
-    if(m_sample_rate_isSet){
-        obj->insert("sampleRate", QJsonValue(sample_rate));
+    if(m_track_number_isSet){
+        obj->insert("trackNumber", QJsonValue(track_number));
     }
-    if(m_track_nunber_isSet){
-        obj->insert("trackNunber", QJsonValue(track_nunber));
+    if(m_absolute_time_ms_isSet){
+        obj->insert("absoluteTimeMs", QJsonValue(absolute_time_ms));
     }
-    if(absolute_time != nullptr && *absolute_time != QString("")){
-        toJsonValue(QString("absoluteTime"), absolute_time, obj, QString("QString"));
+    if(m_elapsed_record_time_ms_isSet){
+        obj->insert("elapsedRecordTimeMs", QJsonValue(elapsed_record_time_ms));
     }
-    if(elapsed_record_time != nullptr && *elapsed_record_time != QString("")){
-        toJsonValue(QString("elapsedRecordTime"), elapsed_record_time, obj, QString("QString"));
+    if(m_record_samples_ratio_isSet){
+        obj->insert("recordSamplesRatio", QJsonValue(record_samples_ratio));
     }
-    if(elapsed_trackime != nullptr && *elapsed_trackime != QString("")){
-        toJsonValue(QString("elapsedTrackime"), elapsed_trackime, obj, QString("QString"));
+    if(m_elapsed_trackime_ms_isSet){
+        obj->insert("elapsedTrackimeMs", QJsonValue(elapsed_trackime_ms));
     }
-    if(record_duration != nullptr && *record_duration != QString("")){
-        toJsonValue(QString("recordDuration"), record_duration, obj, QString("QString"));
+    if(m_track_samples_ratio_isSet){
+        obj->insert("trackSamplesRatio", QJsonValue(track_samples_ratio));
     }
-    if(track_duration != nullptr && *track_duration != QString("")){
-        toJsonValue(QString("trackDuration"), track_duration, obj, QString("QString"));
+    if(m_record_duration_ms_isSet){
+        obj->insert("recordDurationMs", QJsonValue(record_duration_ms));
     }
 
     return obj;
@@ -224,6 +250,36 @@ SWGSigMFFileInputReport::setSampleBytes(qint32 sample_bytes) {
 }
 
 qint32
+SWGSigMFFileInputReport::getSampleFormat() {
+    return sample_format;
+}
+void
+SWGSigMFFileInputReport::setSampleFormat(qint32 sample_format) {
+    this->sample_format = sample_format;
+    this->m_sample_format_isSet = true;
+}
+
+qint32
+SWGSigMFFileInputReport::getSampleSigned() {
+    return sample_signed;
+}
+void
+SWGSigMFFileInputReport::setSampleSigned(qint32 sample_signed) {
+    this->sample_signed = sample_signed;
+    this->m_sample_signed_isSet = true;
+}
+
+qint32
+SWGSigMFFileInputReport::getSampleSwapIq() {
+    return sample_swap_iq;
+}
+void
+SWGSigMFFileInputReport::setSampleSwapIq(qint32 sample_swap_iq) {
+    this->sample_swap_iq = sample_swap_iq;
+    this->m_sample_swap_iq_isSet = true;
+}
+
+qint32
 SWGSigMFFileInputReport::getCrcStatus() {
     return crc_status;
 }
@@ -243,84 +299,84 @@ SWGSigMFFileInputReport::setTotalBytesStatus(qint32 total_bytes_status) {
     this->m_total_bytes_status_isSet = true;
 }
 
-qint32
-SWGSigMFFileInputReport::getCenterFrequency() {
-    return center_frequency;
+QList<SWGCapture*>*
+SWGSigMFFileInputReport::getCaptures() {
+    return captures;
 }
 void
-SWGSigMFFileInputReport::setCenterFrequency(qint32 center_frequency) {
-    this->center_frequency = center_frequency;
-    this->m_center_frequency_isSet = true;
+SWGSigMFFileInputReport::setCaptures(QList<SWGCapture*>* captures) {
+    this->captures = captures;
+    this->m_captures_isSet = true;
 }
 
 qint32
-SWGSigMFFileInputReport::getSampleRate() {
-    return sample_rate;
+SWGSigMFFileInputReport::getTrackNumber() {
+    return track_number;
 }
 void
-SWGSigMFFileInputReport::setSampleRate(qint32 sample_rate) {
-    this->sample_rate = sample_rate;
-    this->m_sample_rate_isSet = true;
+SWGSigMFFileInputReport::setTrackNumber(qint32 track_number) {
+    this->track_number = track_number;
+    this->m_track_number_isSet = true;
 }
 
-qint32
-SWGSigMFFileInputReport::getTrackNunber() {
-    return track_nunber;
+qint64
+SWGSigMFFileInputReport::getAbsoluteTimeMs() {
+    return absolute_time_ms;
 }
 void
-SWGSigMFFileInputReport::setTrackNunber(qint32 track_nunber) {
-    this->track_nunber = track_nunber;
-    this->m_track_nunber_isSet = true;
+SWGSigMFFileInputReport::setAbsoluteTimeMs(qint64 absolute_time_ms) {
+    this->absolute_time_ms = absolute_time_ms;
+    this->m_absolute_time_ms_isSet = true;
 }
 
-QString*
-SWGSigMFFileInputReport::getAbsoluteTime() {
-    return absolute_time;
+qint64
+SWGSigMFFileInputReport::getElapsedRecordTimeMs() {
+    return elapsed_record_time_ms;
 }
 void
-SWGSigMFFileInputReport::setAbsoluteTime(QString* absolute_time) {
-    this->absolute_time = absolute_time;
-    this->m_absolute_time_isSet = true;
+SWGSigMFFileInputReport::setElapsedRecordTimeMs(qint64 elapsed_record_time_ms) {
+    this->elapsed_record_time_ms = elapsed_record_time_ms;
+    this->m_elapsed_record_time_ms_isSet = true;
 }
 
-QString*
-SWGSigMFFileInputReport::getElapsedRecordTime() {
-    return elapsed_record_time;
+float
+SWGSigMFFileInputReport::getRecordSamplesRatio() {
+    return record_samples_ratio;
 }
 void
-SWGSigMFFileInputReport::setElapsedRecordTime(QString* elapsed_record_time) {
-    this->elapsed_record_time = elapsed_record_time;
-    this->m_elapsed_record_time_isSet = true;
+SWGSigMFFileInputReport::setRecordSamplesRatio(float record_samples_ratio) {
+    this->record_samples_ratio = record_samples_ratio;
+    this->m_record_samples_ratio_isSet = true;
 }
 
-QString*
-SWGSigMFFileInputReport::getElapsedTrackime() {
-    return elapsed_trackime;
+qint64
+SWGSigMFFileInputReport::getElapsedTrackimeMs() {
+    return elapsed_trackime_ms;
 }
 void
-SWGSigMFFileInputReport::setElapsedTrackime(QString* elapsed_trackime) {
-    this->elapsed_trackime = elapsed_trackime;
-    this->m_elapsed_trackime_isSet = true;
+SWGSigMFFileInputReport::setElapsedTrackimeMs(qint64 elapsed_trackime_ms) {
+    this->elapsed_trackime_ms = elapsed_trackime_ms;
+    this->m_elapsed_trackime_ms_isSet = true;
 }
 
-QString*
-SWGSigMFFileInputReport::getRecordDuration() {
-    return record_duration;
+float
+SWGSigMFFileInputReport::getTrackSamplesRatio() {
+    return track_samples_ratio;
 }
 void
-SWGSigMFFileInputReport::setRecordDuration(QString* record_duration) {
-    this->record_duration = record_duration;
-    this->m_record_duration_isSet = true;
+SWGSigMFFileInputReport::setTrackSamplesRatio(float track_samples_ratio) {
+    this->track_samples_ratio = track_samples_ratio;
+    this->m_track_samples_ratio_isSet = true;
 }
 
-QString*
-SWGSigMFFileInputReport::getTrackDuration() {
-    return track_duration;
+qint64
+SWGSigMFFileInputReport::getRecordDurationMs() {
+    return record_duration_ms;
 }
 void
-SWGSigMFFileInputReport::setTrackDuration(QString* track_duration) {
-    this->track_duration = track_duration;
-    this->m_track_duration_isSet = true;
+SWGSigMFFileInputReport::setRecordDurationMs(qint64 record_duration_ms) {
+    this->record_duration_ms = record_duration_ms;
+    this->m_record_duration_ms_isSet = true;
 }
 
 
@@ -334,34 +390,43 @@ SWGSigMFFileInputReport::isSet(){
         if(m_sample_bytes_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_sample_format_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_signed_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_sample_swap_iq_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_crc_status_isSet){
             isObjectUpdated = true; break;
         }
         if(m_total_bytes_status_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_center_frequency_isSet){
+        if(captures && (captures->size() > 0)){
             isObjectUpdated = true; break;
         }
-        if(m_sample_rate_isSet){
+        if(m_track_number_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_track_nunber_isSet){
+        if(m_absolute_time_ms_isSet){
             isObjectUpdated = true; break;
         }
-        if(absolute_time && *absolute_time != QString("")){
+        if(m_elapsed_record_time_ms_isSet){
             isObjectUpdated = true; break;
         }
-        if(elapsed_record_time && *elapsed_record_time != QString("")){
+        if(m_record_samples_ratio_isSet){
             isObjectUpdated = true; break;
         }
-        if(elapsed_trackime && *elapsed_trackime != QString("")){
+        if(m_elapsed_trackime_ms_isSet){
             isObjectUpdated = true; break;
         }
-        if(record_duration && *record_duration != QString("")){
+        if(m_track_samples_ratio_isSet){
             isObjectUpdated = true; break;
         }
-        if(track_duration && *track_duration != QString("")){
+        if(m_record_duration_ms_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

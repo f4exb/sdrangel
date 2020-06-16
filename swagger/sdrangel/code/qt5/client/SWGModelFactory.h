@@ -48,6 +48,7 @@
 #include "SWGBladeRF2OutputReport.h"
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGCWKeyerSettings.h"
+#include "SWGCapture.h"
 #include "SWGChannel.h"
 #include "SWGChannelActions.h"
 #include "SWGChannelAnalyzerSettings.h"
@@ -313,6 +314,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGCWKeyerSettings").compare(type) == 0) {
       return new SWGCWKeyerSettings();
+    }
+    if(QString("SWGCapture").compare(type) == 0) {
+      return new SWGCapture();
     }
     if(QString("SWGChannel").compare(type) == 0) {
       return new SWGChannel();

@@ -22,7 +22,8 @@
 #include <QJsonObject>
 
 
-#include <QString>
+#include "SWGCapture.h"
+#include <QList>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -48,35 +49,44 @@ public:
     qint32 getSampleBytes();
     void setSampleBytes(qint32 sample_bytes);
 
+    qint32 getSampleFormat();
+    void setSampleFormat(qint32 sample_format);
+
+    qint32 getSampleSigned();
+    void setSampleSigned(qint32 sample_signed);
+
+    qint32 getSampleSwapIq();
+    void setSampleSwapIq(qint32 sample_swap_iq);
+
     qint32 getCrcStatus();
     void setCrcStatus(qint32 crc_status);
 
     qint32 getTotalBytesStatus();
     void setTotalBytesStatus(qint32 total_bytes_status);
 
-    qint32 getCenterFrequency();
-    void setCenterFrequency(qint32 center_frequency);
+    QList<SWGCapture*>* getCaptures();
+    void setCaptures(QList<SWGCapture*>* captures);
 
-    qint32 getSampleRate();
-    void setSampleRate(qint32 sample_rate);
+    qint32 getTrackNumber();
+    void setTrackNumber(qint32 track_number);
 
-    qint32 getTrackNunber();
-    void setTrackNunber(qint32 track_nunber);
+    qint64 getAbsoluteTimeMs();
+    void setAbsoluteTimeMs(qint64 absolute_time_ms);
 
-    QString* getAbsoluteTime();
-    void setAbsoluteTime(QString* absolute_time);
+    qint64 getElapsedRecordTimeMs();
+    void setElapsedRecordTimeMs(qint64 elapsed_record_time_ms);
 
-    QString* getElapsedRecordTime();
-    void setElapsedRecordTime(QString* elapsed_record_time);
+    float getRecordSamplesRatio();
+    void setRecordSamplesRatio(float record_samples_ratio);
 
-    QString* getElapsedTrackime();
-    void setElapsedTrackime(QString* elapsed_trackime);
+    qint64 getElapsedTrackimeMs();
+    void setElapsedTrackimeMs(qint64 elapsed_trackime_ms);
 
-    QString* getRecordDuration();
-    void setRecordDuration(QString* record_duration);
+    float getTrackSamplesRatio();
+    void setTrackSamplesRatio(float track_samples_ratio);
 
-    QString* getTrackDuration();
-    void setTrackDuration(QString* track_duration);
+    qint64 getRecordDurationMs();
+    void setRecordDurationMs(qint64 record_duration_ms);
 
 
     virtual bool isSet() override;
@@ -88,35 +98,44 @@ private:
     qint32 sample_bytes;
     bool m_sample_bytes_isSet;
 
+    qint32 sample_format;
+    bool m_sample_format_isSet;
+
+    qint32 sample_signed;
+    bool m_sample_signed_isSet;
+
+    qint32 sample_swap_iq;
+    bool m_sample_swap_iq_isSet;
+
     qint32 crc_status;
     bool m_crc_status_isSet;
 
     qint32 total_bytes_status;
     bool m_total_bytes_status_isSet;
 
-    qint32 center_frequency;
-    bool m_center_frequency_isSet;
+    QList<SWGCapture*>* captures;
+    bool m_captures_isSet;
 
-    qint32 sample_rate;
-    bool m_sample_rate_isSet;
+    qint32 track_number;
+    bool m_track_number_isSet;
 
-    qint32 track_nunber;
-    bool m_track_nunber_isSet;
+    qint64 absolute_time_ms;
+    bool m_absolute_time_ms_isSet;
 
-    QString* absolute_time;
-    bool m_absolute_time_isSet;
+    qint64 elapsed_record_time_ms;
+    bool m_elapsed_record_time_ms_isSet;
 
-    QString* elapsed_record_time;
-    bool m_elapsed_record_time_isSet;
+    float record_samples_ratio;
+    bool m_record_samples_ratio_isSet;
 
-    QString* elapsed_trackime;
-    bool m_elapsed_trackime_isSet;
+    qint64 elapsed_trackime_ms;
+    bool m_elapsed_trackime_ms_isSet;
 
-    QString* record_duration;
-    bool m_record_duration_isSet;
+    float track_samples_ratio;
+    bool m_track_samples_ratio_isSet;
 
-    QString* track_duration;
-    bool m_track_duration_isSet;
+    qint64 record_duration_ms;
+    bool m_record_duration_ms_isSet;
 
 };
 

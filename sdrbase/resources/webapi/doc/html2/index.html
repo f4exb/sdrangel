@@ -2043,6 +2043,39 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.Capture = {
+  "properties" : {
+    "tsms" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Timestamp in milliseconds since epoch of capture start"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Track center frequency in Hz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Track sample rate in S/s"
+    },
+    "sampleStart" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Start of track in nymber of samples"
+    },
+    "length" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Track length in number of samples"
+    },
+    "cumulativeTime" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Time in milliseconds of track start since beginning of record"
+    }
+  }
+};
             defs.Channel = {
   "required" : [ "deltaFrequency", "id", "index", "title", "uid" ],
   "properties" : {
@@ -7057,6 +7090,18 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Record sample size in number of bytes"
     },
+    "sampleFormat" : {
+      "type" : "integer",
+      "description" : "Sample format * 0 - integer * 1 - float\n"
+    },
+    "sampleSigned" : {
+      "type" : "integer",
+      "description" : "Sample signed status\n  * 0 - unsigned\n  * 1 - signed\n"
+    },
+    "sampleSwapIQ" : {
+      "type" : "integer",
+      "description" : "Sample I/Q swap\n  * 0 - I/Q\n  * 1 - Q/I\n"
+    },
     "crcStatus" : {
       "type" : "integer",
       "description" : "CRC status\n  * 0 - no CRC available\n  * 1 - CRC (SHA512) OK\n  * 2 - CRC (SHA512) KO\n"
@@ -7065,37 +7110,45 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Total number of bytes in data file vs meta data\n  * 0 - mismatch\n  * 1 - match\n"
     },
-    "centerFrequency" : {
-      "type" : "integer",
-      "description" : "Current track center frequency in Hz"
+    "captures" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Capture"
+      }
     },
-    "sampleRate" : {
-      "type" : "integer",
-      "description" : "Current track sample rate in S/s"
-    },
-    "trackNunber" : {
+    "trackNumber" : {
       "type" : "integer",
       "description" : "Current track number"
     },
-    "absoluteTime" : {
-      "type" : "string",
-      "description" : "Absolute record time string representation"
+    "absoluteTimeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Absolute current time in milliseconds since epoch"
     },
-    "elapsedRecordTime" : {
-      "type" : "string",
-      "description" : "Elapsed record time since beginning string representation"
+    "elapsedRecordTimeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Elapsed record time in milliseconds"
     },
-    "elapsedTrackime" : {
-      "type" : "string",
-      "description" : "Elapsed track time since beginning string representation"
+    "recordSamplesRatio" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Elapsed samples ratio to total samples"
     },
-    "recordDuration" : {
-      "type" : "string",
-      "description" : "Record duration time string representation"
+    "elapsedTrackimeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Elapsed track time in milliseconds"
     },
-    "trackDuration" : {
-      "type" : "string",
-      "description" : "Track duration time string representation"
+    "trackSamplesRatio" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Elapsed samples ratio to track samples"
+    },
+    "recordDurationMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Record duration time in milliseconds"
     }
   },
   "description" : "SigMFFileInput"
@@ -37366,7 +37419,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-06-16T01:37:19.538+02:00
+              Generated 2020-06-17T01:13:04.761+02:00
             </div>
           </div>
       </div>
