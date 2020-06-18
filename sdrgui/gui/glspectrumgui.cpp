@@ -19,6 +19,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QLineEdit>
+#include <QToolTip>
+
 #include "gui/glspectrumgui.h"
 #include "dsp/fftwindow.h"
 #include "dsp/spectrumvis.h"
@@ -38,15 +41,18 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	ui->setupUi(this);
 	on_linscale_toggled(false);
 
-    ui->refLevel->clear();
-	for(int ref = 0; ref >= -110; ref -= 5) {
-		ui->refLevel->addItem(QString("%1").arg(ref));
-    }
+    QString levelStyle = QString(
+        "QSpinBox {background-color: rgb(79, 79, 79);}"
+        "QLineEdit {color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px;}"
+        "QTooltip {color: white; background-color: balck;}"
+    );
+    ui->refLevel->setStyleSheet(levelStyle);
+    ui->levelRange->setStyleSheet(levelStyle);
+    // ui->refLevel->findChild<QLineEdit*>()->setStyleSheet("color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px; ");
+    // ui->refLevel->setStyleSheet("background-color: rgb(79, 79, 79);");
 
-	ui->levelRange->clear();
-	for(int range = 100; range >= 5; range -= 5) {
-		ui->levelRange->addItem(QString("%1").arg(range));
-    }
+    // ui->levelRange->findChild<QLineEdit*>()->setStyleSheet("color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px;");
+    // ui->levelRange->setStyleSheet("background-color: rgb(79, 79, 79);");
 
 	connect(&m_messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
@@ -101,8 +107,8 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 void GLSpectrumGUI::displaySettings()
 {
     blockApplySettings(true);
-	ui->refLevel->setCurrentIndex(-m_settings.m_refLevel / 5);
-	ui->levelRange->setCurrentIndex((100 - m_settings.m_powerRange) / 5);
+	ui->refLevel->setValue(m_settings.m_refLevel);
+	ui->levelRange->setValue(m_settings.m_powerRange);
 	ui->decay->setSliderPosition(m_settings.m_decay);
 	ui->decayDivisor->setSliderPosition(m_settings.m_decayDivisor);
 	ui->stroke->setSliderPosition(m_settings.m_histogramStroke);
@@ -252,15 +258,15 @@ void GLSpectrumGUI::on_wsSpectrum_toggled(bool checked)
     }
 }
 
-void GLSpectrumGUI::on_refLevel_currentIndexChanged(int index)
+void GLSpectrumGUI::on_refLevel_valueChanged(int value)
 {
-	m_settings.m_refLevel = 0 - index * 5;
+	m_settings.m_refLevel = value;
     applySettings();
 }
 
-void GLSpectrumGUI::on_levelRange_currentIndexChanged(int index)
+void GLSpectrumGUI::on_levelRange_valueChanged(int value)
 {
-	m_settings.m_powerRange = 100 - index * 5;
+	m_settings.m_powerRange = value;
     applySettings();
 }
 

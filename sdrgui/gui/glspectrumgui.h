@@ -84,8 +84,8 @@ private:
 private slots:
 	void on_fftWindow_currentIndexChanged(int index);
 	void on_fftSize_currentIndexChanged(int index);
-	void on_refLevel_currentIndexChanged(int index);
-	void on_levelRange_currentIndexChanged(int index);
+	void on_refLevel_valueChanged(int value);
+	void on_levelRange_valueChanged(int value);
 	void on_decay_valueChanged(int index);
 	void on_decayDivisor_valueChanged(int index);
 	void on_stroke_valueChanged(int index);
