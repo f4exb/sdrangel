@@ -1,3 +1,9 @@
+sdrangel (5.7.0-1) unstable; urgency=medium
+
+   * SigMF file input plugin. Implements #380
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 18 Jun 2020 08:03:45 +0200
+
 sdrangel (5.6.2-1) unstable; urgency=medium
 
    * RTP audio: fixed codec setting when usinf REST API. Fixes #526
