@@ -213,7 +213,8 @@ void SigMFFileInput::extractMeta(
     m_metaInfo.m_dataTypeStr = QString::fromStdString(metaRecord->global.access<core::GlobalT>().datatype);
     analyzeDataType(m_metaInfo.m_dataTypeStr.toStdString(), m_metaInfo.m_dataType);
     m_sampleBytes = SigMFFileInputSettings::bitsToBytes(m_metaInfo.m_dataType.m_sampleBits);
-    m_metaInfo.m_totalSamples = dataFileSize / (SigMFFileInputSettings::bitsToBytes(m_metaInfo.m_dataType.m_sampleBits)*2);
+    m_metaInfo.m_totalSamples = dataFileSize /
+        (SigMFFileInputSettings::bitsToBytes(m_metaInfo.m_dataType.m_sampleBits)*(m_metaInfo.m_dataType.m_complex ? 2 : 1));
     m_metaInfo.m_coreSampleRate = metaRecord->global.access<core::GlobalT>().sample_rate;
     m_metaInfo.m_sigMFVersion = QString::fromStdString(metaRecord->global.access<core::GlobalT>().version);
     m_metaInfo.m_sha512 = QString::fromStdString(metaRecord->global.access<core::GlobalT>().sha512);
