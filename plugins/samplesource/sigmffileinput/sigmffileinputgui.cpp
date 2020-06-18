@@ -62,9 +62,14 @@ SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 	m_lastEngineState(DeviceAPI::StNotStarted)
 {
 	ui->setupUi(this);
+
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
-	ui->fileNameText->setText(m_metaFileName);
+	ui->centerFrequency->setValueRange(8, 0, pow(10,8));
+
+	ui->centerFrequencyHz->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+	ui->centerFrequencyHz->setValueRange(3, 0, 999U);
+
+    ui->fileNameText->setText(m_metaFileName);
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
     ui->captureTable->setSelectionMode(QAbstractItemView::NoSelection);
 
@@ -587,6 +592,7 @@ void SigMFFileInputGUI::updateWithStreamData()
 
     ui->trackNumberText->setText(tr("%1").arg(m_currentTrackIndex + 1, 3, 10, QChar('0')));
 	ui->centerFrequency->setValue(m_centerFrequency/1000);
+    ui->centerFrequencyHz->setValue(m_centerFrequency % 1000);
 	ui->sampleRateText->setText(tr("%1k").arg((float)m_sampleRate / 1000));
 	QTime recordLength(0, 0, 0, 0);
 	recordLength = recordLength.addSecs(m_recordLength / m_sampleRate);

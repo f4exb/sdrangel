@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>303</width>
-    <height>447</height>
+    <width>360</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Maximum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
-    <width>250</width>
-    <height>360</height>
+    <width>360</width>
+    <height>420</height>
    </size>
   </property>
   <property name="font">
@@ -82,7 +82,7 @@
           <widget class="QLabel" name="deviceRateText">
            <property name="minimumSize">
             <size>
-             <width>50</width>
+             <width>56</width>
              <height>0</height>
             </size>
            </property>
@@ -149,11 +149,55 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="freqUnits">
-       <property name="text">
-        <string> kHz</string>
+      <layout class="QVBoxLayout" name="HzLayout">
+       <property name="leftMargin">
+        <number>6</number>
        </property>
-      </widget>
+       <property name="rightMargin">
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="ValueDial" name="centerFrequencyHz" native="true">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>32</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Liberation Mono</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::StrongFocus</enum>
+         </property>
+         <property name="toolTip">
+          <string>Record center frequency in kHz</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="freqUnits">
+         <property name="text">
+          <string>Hz</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="freqRightlSpacer">
