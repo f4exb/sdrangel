@@ -108,6 +108,7 @@ void SigMFFileRecord::startRecording()
     {
       	qDebug("SigMFFileRecord::startRecording: new record %s", qPrintable(m_fileName));
         clearMeta();
+        m_sampleStart = 0;
         m_sampleFileName = m_fileName + ".sigmf-data";
         m_metaFileName = m_fileName + ".sigmf-meta";
         m_sampleFile.open(m_sampleFileName.toStdString().c_str(), std::ios::binary);
