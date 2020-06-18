@@ -378,11 +378,11 @@ Select the size of the FFT window among these values:
 
 <h4>4.3. Reference level</h4>
 
-This is the level in dB at the top of the display range. You can select values between 0 and -110 in 5 dB steps
+This is the level in dB at the top of the display range. You can select values between 0 and -110 in 1 dB steps
 
 <h4>4.4. Range</h4>
 
-This is the range of display in dB. You can select values between 5 and 100 in 5 dB steps
+This is the range of display in dB. You can select values between 1 and 100 in 1 dB steps
 
 <h4>4.5. Averaging mode</h4>
 

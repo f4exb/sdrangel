@@ -453,17 +453,11 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="refLevel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QSpinBox" name="refLevel">
        <property name="minimumSize">
         <size>
          <width>50</width>
-         <height>0</height>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -475,38 +469,23 @@
        <property name="toolTip">
         <string>Reference level (dB)</string>
        </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContents</enum>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
-       <item>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-10</string>
-        </property>
-       </item>
+       <property name="minimum">
+        <number>-110</number>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="levelRange">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QSpinBox" name="levelRange">
        <property name="minimumSize">
         <size>
          <width>45</width>
-         <height>0</height>
+         <height>24</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -518,24 +497,15 @@
        <property name="toolTip">
         <string>Range (dB)</string>
        </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContents</enum>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
-       <item>
-        <property name="text">
-         <string>100</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>50</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>5</string>
-        </property>
-       </item>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
       </widget>
      </item>
      <item>
