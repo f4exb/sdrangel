@@ -1,3 +1,12 @@
+sdrangel (4.14.10-1) unstable; urgency=medium
+
+   * Fixed Soapy SDR find module. Implements issue #519
+   * Added SWSCALE to the list of required FFMpeg modules. Implements issue #437
+   * Channel analyzer: fixed scope vis feed regression. Fixes issue #547
+   * Sepectrum GUI: use spin boxes for spectrum range. Implements issue #546
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Jun 2020 04:12:35 +0200
+
 sdrangel (4.14.9-1) unstable; urgency=medium
 
    * DSD demod: implemented DMR basic privacy (dsdcc 1.8.7)
