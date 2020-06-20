@@ -42,7 +42,6 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new ChannelAnalyzerBaseband();
-    m_basebandSink->setSampleSink(&m_spectrumVis);
     m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);

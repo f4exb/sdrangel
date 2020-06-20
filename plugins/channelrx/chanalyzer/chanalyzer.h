@@ -60,6 +60,7 @@ public:
 	virtual ~ChannelAnalyzer();
 	virtual void destroy() { delete this; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
+    void setSampleSink(BasebandSampleSink *sink) { m_basebandSink->setSampleSink(sink); }
 
     int getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
     int getDecimation() const { return 1<<m_settings.m_log2Decim; }
