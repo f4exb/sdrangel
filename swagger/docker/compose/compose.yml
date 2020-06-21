@@ -1,0 +1,29 @@
+version: '3'
+services:
+  swgcodegen:
+    image: "sdrangel/swagger/codegen:${IMAGE_CODEGEN_VERSION}"
+    container_name: "sdrangel_swgcodegen"
+    volumes:
+      - "${SDRANGEL_BASE}:/opt/build/sdrangel:rw"
+    networks:
+      default:
+        ipv4_address: 172.20.0.2
+    stdin_open: true
+    tty: true
+  swgserver:
+    image: "sdrangel/swagger/server:${IMAGE_SERVER_VERSION}"
+    container_name: "sdrangel_swgserver"
+    volumes:
+      - "${SDRANGEL_BASE}:/opt/build/sdrangel:rw"
+    expose:
+      - "8081"
+    networks:
+      default:
+        ipv4_address: 172.20.0.3
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet:  172.20.0.0/16
