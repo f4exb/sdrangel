@@ -52,6 +52,12 @@ XtrxInputSettings:
     pwrmode:
       description: LMS power mode (0 save max to 7 perf max)
       type: integer
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     fileRecordName:
       type: string
     useReverseAPI:
@@ -212,6 +218,12 @@ XtrxMIMOSettings:
             * 0 - RXANT_LO low range
             * 1 - RXANT_WI wide range
             * 2 - RXANT_HI high range
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     lpfBWRx0:
       description: LMS analog lowpass filter bandwidth (Hz) for Rx channel 0
       type: integer
