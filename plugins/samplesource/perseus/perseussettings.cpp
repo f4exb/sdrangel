@@ -32,6 +32,7 @@ void PerseusSettings::resetToDefaults()
     m_log2Decim = 0;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_adcDither = false;
     m_adcPreamp = false;
     m_wideBand = false;
@@ -60,6 +61,7 @@ QByteArray PerseusSettings::serialize() const
     s.writeString(11, m_reverseAPIAddress);
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIDeviceIndex);
+    s.writeBool(14, m_iqOrder);
 
     return s.final();
 }
@@ -107,6 +109,7 @@ bool PerseusSettings::deserialize(const QByteArray& data)
 
         d.readU32(13, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(14, &m_iqOrder, true);
 
         return true;
     }

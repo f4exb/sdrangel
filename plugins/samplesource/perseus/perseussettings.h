@@ -38,6 +38,7 @@ struct PerseusSettings
     quint32 m_log2Decim;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
+    bool m_iqOrder;
     bool m_adcDither;
     bool m_adcPreamp;
     bool m_wideBand;

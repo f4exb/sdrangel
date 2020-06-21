@@ -48,7 +48,7 @@ PlutoSDRInput::PlutoSDRInput(DeviceAPI *deviceAPI) :
     m_deviceDescription("PlutoSDRInput"),
     m_running(false),
     m_plutoRxBuffer(0),
-    m_plutoSDRInputThread(0)
+    m_plutoSDRInputThread(nullptr)
 {
     m_deviceSampleRates.m_addaConnvRate = 0;
     m_deviceSampleRates.m_bbRateHz = 0;
@@ -115,6 +115,7 @@ bool PlutoSDRInput::start()
     applySettings(m_settings, true);
 
     m_plutoSDRInputThread->setLog2Decimation(m_settings.m_log2Decim);
+    m_plutoSDRInputThread->setIQOrder(m_settings.m_iqOrder);
     m_plutoSDRInputThread->startWork();
 
     m_deviceShared.m_thread = m_plutoSDRInputThread;
@@ -125,14 +126,14 @@ bool PlutoSDRInput::start()
 
 void PlutoSDRInput::stop()
 {
-    if (m_plutoSDRInputThread != 0)
+    if (m_plutoSDRInputThread)
     {
         m_plutoSDRInputThread->stopWork();
         delete m_plutoSDRInputThread;
-        m_plutoSDRInputThread = 0;
+        m_plutoSDRInputThread = nullptr;
     }
 
-    m_deviceShared.m_thread = 0;
+    m_deviceShared.m_thread = nullptr;
     m_running = false;
 }
 
@@ -585,13 +586,20 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        if (m_plutoSDRInputThread != 0)
+        if (m_plutoSDRInputThread)
         {
             m_plutoSDRInputThread->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "PlutoSDRInput::applySettings: set soft decimation to " << (1<<settings.m_log2Decim);
         }
 
         forwardChangeOwnDSP = true;
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        if (m_plutoSDRInputThread) {
+            m_plutoSDRInputThread->setIQOrder(settings.m_iqOrder);
+        }
     }
 
     if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
@@ -625,7 +633,7 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
         if ((m_settings.m_fcPos != settings.m_fcPos) || force)
         {
-            if (m_plutoSDRInputThread != 0)
+            if (m_plutoSDRInputThread)
             {
                 m_plutoSDRInputThread->setFcPos(settings.m_fcPos);
                 qDebug() << "PlutoSDRInput::applySettings: set fcPos to " << settings.m_fcPos;

@@ -48,6 +48,7 @@ void PlutoSDRInputSettings::resetToDefaults()
 	m_gainMode = GAIN_MANUAL;
 	m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
 	m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -82,6 +83,7 @@ QByteArray PlutoSDRInputSettings::serialize() const
     s.writeBool(22, m_hwBBDCBlock);
     s.writeBool(23, m_hwRFDCBlock);
     s.writeBool(24, m_hwIQCorrection);
+    s.writeBool(25, m_iqOrder);
 
 	return s.final();
 }
@@ -153,6 +155,7 @@ bool PlutoSDRInputSettings::deserialize(const QByteArray& data)
         d.readBool(22, &m_hwBBDCBlock, true);
         d.readBool(23, &m_hwRFDCBlock, true);
         d.readBool(24, &m_hwIQCorrection, true);
+        d.readBool(25, &m_iqOrder, true);
 
 		return true;
 	}

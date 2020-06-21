@@ -39,6 +39,7 @@ public:
 	void startWork();
 	void stopWork();
 	void setLog2Decimation(unsigned int log2_decim);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
 	QMutex m_startWaitMutex;
@@ -51,13 +52,17 @@ private:
 	SampleSinkFifo* m_sampleFifo;
 
 	unsigned int m_log2Decim;
+    bool m_iqOrder;
 	static PerseusThread *m_this;
 
-	Decimators<qint32, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24> m_decimators32; // for no decimation (accumulator is int32)
-    Decimators<qint32, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24> m_decimators64; // for actual decimation (accumulator is int64)
+	Decimators<qint32, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24, true> m_decimators32IQ; // for no decimation (accumulator is int32)
+    Decimators<qint32, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24, true> m_decimators64IQ; // for actual decimation (accumulator is int64)
+	Decimators<qint32, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24, false> m_decimators32QI; // for no decimation (accumulator is int32)
+    Decimators<qint32, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24, false> m_decimators64QI; // for actual decimation (accumulator is int64)
 
 	void run();
-	void callback(const uint8_t* buf, qint32 len); // inner call back
+	void callbackIQ(const uint8_t* buf, qint32 len); // inner call back
+    void callbackQI(const uint8_t* buf, qint32 len);
 	static int rx_callback(void *buf, int buf_size, void *extra); // call back from Perseus
 };
 

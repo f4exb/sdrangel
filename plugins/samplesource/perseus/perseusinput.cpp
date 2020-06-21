@@ -44,7 +44,7 @@ PerseusInput::PerseusInput(DeviceAPI *deviceAPI) :
     m_fileSink(0),
     m_deviceDescription("PerseusInput"),
     m_running(false),
-    m_perseusThread(0),
+    m_perseusThread(nullptr),
     m_perseusDescriptor(0)
 {
     openDevice();
@@ -86,6 +86,7 @@ bool PerseusInput::start()
 
     applySettings(m_settings, true);
 
+    m_perseusThread->setIQOrder(m_settings.m_iqOrder);
     m_perseusThread->setLog2Decimation(m_settings.m_log2Decim);
     m_perseusThread->startWork();
 
@@ -96,11 +97,11 @@ bool PerseusInput::start()
 
 void PerseusInput::stop()
 {
-    if (m_perseusThread != 0)
+    if (m_perseusThread)
     {
         m_perseusThread->stopWork();
         delete m_perseusThread;
-        m_perseusThread = 0;
+        m_perseusThread = nullptr;
     }
 
     m_running = false;
@@ -341,10 +342,19 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
-        if (m_perseusThread != 0)
+        if (m_perseusThread)
         {
             m_perseusThread->setLog2Decimation(settings.m_log2Decim);
             qDebug("PerseusInput: set decimation to %d", (1<<settings.m_log2Decim));
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_perseusThread) {
+            m_perseusThread->setIQOrder(settings.m_iqOrder);
         }
     }
 

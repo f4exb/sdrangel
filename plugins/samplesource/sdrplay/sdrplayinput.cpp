@@ -49,7 +49,7 @@ SDRPlayInput::SDRPlayInput(DeviceAPI *deviceAPI) :
     m_variant(SDRPlayUndef),
     m_settings(),
 	m_dev(0),
-    m_sdrPlayThread(0),
+    m_sdrPlayThread(nullptr),
     m_deviceDescription("SDRPlay"),
     m_devNumber(0),
     m_running(false)
@@ -185,7 +185,7 @@ bool SDRPlayInput::start()
 	m_sdrPlayThread = new SDRPlayThread(m_dev, &m_sampleFifo);
     m_sdrPlayThread->setLog2Decimation(m_settings.m_log2Decim);
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
-
+    m_sdrPlayThread->setIQOrder(m_settings.m_iqOrder);
     m_sdrPlayThread->startWork();
 
 //	mutexLocker.unlock();
@@ -216,11 +216,11 @@ void SDRPlayInput::stop()
 {
 //    QMutexLocker mutexLocker(&m_mutex);
 
-    if(m_sdrPlayThread != 0)
+    if(m_sdrPlayThread)
     {
         m_sdrPlayThread->stopWork();
         delete m_sdrPlayThread;
-        m_sdrPlayThread = 0;
+        m_sdrPlayThread = nullptr;
     }
 
     m_running = false;
@@ -524,7 +524,7 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
     {
         reverseAPIKeys.append("log2Decim");
 
-        if (m_sdrPlayThread != 0)
+        if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "SDRPlayInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
@@ -535,10 +535,21 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
     {
         reverseAPIKeys.append("fcPos");
 
-        if (m_sdrPlayThread != 0)
+        if (m_sdrPlayThread)
         {
             m_sdrPlayThread->setFcPos((int) settings.m_fcPos);
             qDebug() << "SDRPlayInput: set fc pos (enum) to " << (int) settings.m_fcPos;
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_sdrPlayThread)
+        {
+            m_sdrPlayThread->setIQOrder((int) settings.m_iqOrder);
+            qDebug() << "SDRPlayInput: set IQ order to " << (settings.m_iqOrder ? "IQ" : "QI");
         }
     }
 

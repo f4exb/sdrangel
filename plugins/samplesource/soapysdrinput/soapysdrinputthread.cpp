@@ -32,7 +32,8 @@ SoapySDRInputThread::SoapySDRInputThread(SoapySDR::Device* dev, unsigned int nbR
     m_dev(dev),
     m_sampleRate(0),
     m_nbChannels(nbRxChannels),
-    m_decimatorType(DecimatorFloat)
+    m_decimatorType(DecimatorFloat),
+    m_iqOrder(true)
 {
     qDebug("SoapySDRInputThread::SoapySDRInputThread");
     m_channels = new Channel[nbRxChannels];
@@ -155,28 +156,57 @@ void SoapySDRInputThread::run()
                 break;
             }
 
-            if (m_nbChannels > 1)
+            if (m_iqOrder)
             {
-                callbackMI(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
+                if (m_nbChannels > 1)
+                {
+                    callbackMIIQ(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
+                }
+                else
+                {
+                    switch (m_decimatorType)
+                    {
+                    case Decimator8:
+                        callbackSI8IQ((const qint8*) buffs[0], numElems*2);
+                        break;
+                    case Decimator12:
+                        callbackSI12IQ((const qint16*) buffs[0], numElems*2);
+                        break;
+                    case Decimator16:
+                        callbackSI16IQ((const qint16*) buffs[0], numElems*2);
+                        break;
+                    case DecimatorFloat:
+                    default:
+                        callbackSIFIQ((const float*) buffs[0], numElems*2);
+                    }
+                }
             }
             else
             {
-                switch (m_decimatorType)
+                if (m_nbChannels > 1)
                 {
-                case Decimator8:
-                    callbackSI8((const qint8*) buffs[0], numElems*2);
-                    break;
-                case Decimator12:
-                    callbackSI12((const qint16*) buffs[0], numElems*2);
-                    break;
-                case Decimator16:
-                    callbackSI16((const qint16*) buffs[0], numElems*2);
-                    break;
-                case DecimatorFloat:
-                default:
-                    callbackSIF((const float*) buffs[0], numElems*2);
+                    callbackMIQI(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
+                }
+                else
+                {
+                    switch (m_decimatorType)
+                    {
+                    case Decimator8:
+                        callbackSI8QI((const qint8*) buffs[0], numElems*2);
+                        break;
+                    case Decimator12:
+                        callbackSI12QI((const qint16*) buffs[0], numElems*2);
+                        break;
+                    case Decimator16:
+                        callbackSI16QI((const qint16*) buffs[0], numElems*2);
+                        break;
+                    case DecimatorFloat:
+                    default:
+                        callbackSIFQI((const float*) buffs[0], numElems*2);
+                    }
                 }
             }
+
         }
 
         qDebug("SoapySDRInputThread::run: stop running loop");
@@ -253,35 +283,57 @@ SampleSinkFifo *SoapySDRInputThread::getFifo(unsigned int channel)
     }
 }
 
-void SoapySDRInputThread::callbackMI(std::vector<void *>& buffs, qint32 samplesPerChannel)
+void SoapySDRInputThread::callbackMIIQ(std::vector<void *>& buffs, qint32 samplesPerChannel)
 {
     for(unsigned int ichan = 0; ichan < m_nbChannels; ichan++)
     {
         switch (m_decimatorType)
         {
         case Decimator8:
-            callbackSI8((const qint8*) buffs[ichan], samplesPerChannel, ichan);
+            callbackSI8IQ((const qint8*) buffs[ichan], samplesPerChannel, ichan);
             break;
         case Decimator12:
-            callbackSI12((const qint16*) buffs[ichan], samplesPerChannel, ichan);
+            callbackSI12IQ((const qint16*) buffs[ichan], samplesPerChannel, ichan);
             break;
         case Decimator16:
-            callbackSI16((const qint16*) buffs[ichan], samplesPerChannel, ichan);
+            callbackSI16IQ((const qint16*) buffs[ichan], samplesPerChannel, ichan);
             break;
         case DecimatorFloat:
         default:
-            callbackSIF((const float*) buffs[ichan], samplesPerChannel, ichan);
+            callbackSIFIQ((const float*) buffs[ichan], samplesPerChannel, ichan);
         }
     }
 }
 
-void SoapySDRInputThread::callbackSI8(const qint8* buf, qint32 len, unsigned int channel)
+void SoapySDRInputThread::callbackMIQI(std::vector<void *>& buffs, qint32 samplesPerChannel)
+{
+    for(unsigned int ichan = 0; ichan < m_nbChannels; ichan++)
+    {
+        switch (m_decimatorType)
+        {
+        case Decimator8:
+            callbackSI8QI((const qint8*) buffs[ichan], samplesPerChannel, ichan);
+            break;
+        case Decimator12:
+            callbackSI12QI((const qint16*) buffs[ichan], samplesPerChannel, ichan);
+            break;
+        case Decimator16:
+            callbackSI16QI((const qint16*) buffs[ichan], samplesPerChannel, ichan);
+            break;
+        case DecimatorFloat:
+        default:
+            callbackSIFQI((const float*) buffs[ichan], samplesPerChannel, ichan);
+        }
+    }
+}
+
+void SoapySDRInputThread::callbackSI8IQ(const qint8* buf, qint32 len, unsigned int channel)
 {
     SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
 
     if (m_channels[channel].m_log2Decim == 0)
     {
-        m_channels[channel].m_decimators8.decimate1(&it, buf, len);
+        m_channels[channel].m_decimators8IQ.decimate1(&it, buf, len);
     }
     else
     {
@@ -290,22 +342,22 @@ void SoapySDRInputThread::callbackSI8(const qint8* buf, qint32 len, unsigned int
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators8.decimate2_inf(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators8.decimate4_inf(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators8.decimate8_inf(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators8.decimate16_inf(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators8.decimate32_inf(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators8.decimate64_inf(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
@@ -316,22 +368,22 @@ void SoapySDRInputThread::callbackSI8(const qint8* buf, qint32 len, unsigned int
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators8.decimate2_sup(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators8.decimate4_sup(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators8.decimate8_sup(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators8.decimate16_sup(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators8.decimate32_sup(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators8.decimate64_sup(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
@@ -342,22 +394,22 @@ void SoapySDRInputThread::callbackSI8(const qint8* buf, qint32 len, unsigned int
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators8.decimate2_cen(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators8.decimate4_cen(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators8.decimate8_cen(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators8.decimate16_cen(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators8.decimate32_cen(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators8.decimate64_cen(&it, buf, len);
+                m_channels[channel].m_decimators8IQ.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
@@ -368,13 +420,13 @@ void SoapySDRInputThread::callbackSI8(const qint8* buf, qint32 len, unsigned int
     m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
 }
 
-void SoapySDRInputThread::callbackSI12(const qint16* buf, qint32 len, unsigned int channel)
+void SoapySDRInputThread::callbackSI8QI(const qint8* buf, qint32 len, unsigned int channel)
 {
     SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
 
     if (m_channels[channel].m_log2Decim == 0)
     {
-        m_channels[channel].m_decimators12.decimate1(&it, buf, len);
+        m_channels[channel].m_decimators8QI.decimate1(&it, buf, len);
     }
     else
     {
@@ -383,22 +435,22 @@ void SoapySDRInputThread::callbackSI12(const qint16* buf, qint32 len, unsigned i
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators12.decimate2_inf(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators12.decimate4_inf(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators12.decimate8_inf(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators12.decimate16_inf(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators12.decimate32_inf(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators12.decimate64_inf(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
@@ -409,22 +461,22 @@ void SoapySDRInputThread::callbackSI12(const qint16* buf, qint32 len, unsigned i
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators12.decimate2_sup(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators12.decimate4_sup(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators12.decimate8_sup(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators12.decimate16_sup(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators12.decimate32_sup(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators12.decimate64_sup(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
@@ -435,22 +487,22 @@ void SoapySDRInputThread::callbackSI12(const qint16* buf, qint32 len, unsigned i
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators12.decimate2_cen(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators12.decimate4_cen(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators12.decimate8_cen(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators12.decimate16_cen(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators12.decimate32_cen(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators12.decimate64_cen(&it, buf, len);
+                m_channels[channel].m_decimators8QI.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
@@ -461,13 +513,13 @@ void SoapySDRInputThread::callbackSI12(const qint16* buf, qint32 len, unsigned i
     m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
 }
 
-void SoapySDRInputThread::callbackSI16(const qint16* buf, qint32 len, unsigned int channel)
+void SoapySDRInputThread::callbackSI12IQ(const qint16* buf, qint32 len, unsigned int channel)
 {
     SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
 
     if (m_channels[channel].m_log2Decim == 0)
     {
-        m_channels[channel].m_decimators16.decimate1(&it, buf, len);
+        m_channels[channel].m_decimators12IQ.decimate1(&it, buf, len);
     }
     else
     {
@@ -476,22 +528,22 @@ void SoapySDRInputThread::callbackSI16(const qint16* buf, qint32 len, unsigned i
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators16.decimate2_inf(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators16.decimate4_inf(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators16.decimate8_inf(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators16.decimate16_inf(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators16.decimate32_inf(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators16.decimate64_inf(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
@@ -502,22 +554,22 @@ void SoapySDRInputThread::callbackSI16(const qint16* buf, qint32 len, unsigned i
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators16.decimate2_sup(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators16.decimate4_sup(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators16.decimate8_sup(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators16.decimate16_sup(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators16.decimate32_sup(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators16.decimate64_sup(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
@@ -528,22 +580,22 @@ void SoapySDRInputThread::callbackSI16(const qint16* buf, qint32 len, unsigned i
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimators16.decimate2_cen(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimators16.decimate4_cen(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimators16.decimate8_cen(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimators16.decimate16_cen(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimators16.decimate32_cen(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimators16.decimate64_cen(&it, buf, len);
+                m_channels[channel].m_decimators12IQ.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
@@ -554,13 +606,13 @@ void SoapySDRInputThread::callbackSI16(const qint16* buf, qint32 len, unsigned i
     m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
 }
 
-void SoapySDRInputThread::callbackSIF(const float* buf, qint32 len, unsigned int channel)
+void SoapySDRInputThread::callbackSI12QI(const qint16* buf, qint32 len, unsigned int channel)
 {
     SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
 
     if (m_channels[channel].m_log2Decim == 0)
     {
-        m_channels[channel].m_decimatorsFloat.decimate1(&it, buf, len);
+        m_channels[channel].m_decimators12QI.decimate1(&it, buf, len);
     }
     else
     {
@@ -569,22 +621,22 @@ void SoapySDRInputThread::callbackSIF(const float* buf, qint32 len, unsigned int
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimatorsFloat.decimate2_inf(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimatorsFloat.decimate4_inf(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimatorsFloat.decimate8_inf(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimatorsFloat.decimate16_inf(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimatorsFloat.decimate32_inf(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimatorsFloat.decimate64_inf(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
@@ -595,22 +647,22 @@ void SoapySDRInputThread::callbackSIF(const float* buf, qint32 len, unsigned int
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimatorsFloat.decimate2_sup(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimatorsFloat.decimate4_sup(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimatorsFloat.decimate8_sup(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimatorsFloat.decimate16_sup(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimatorsFloat.decimate32_sup(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimatorsFloat.decimate64_sup(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
@@ -621,22 +673,394 @@ void SoapySDRInputThread::callbackSIF(const float* buf, qint32 len, unsigned int
             switch (m_channels[channel].m_log2Decim)
             {
             case 1:
-                m_channels[channel].m_decimatorsFloat.decimate2_cen(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_channels[channel].m_decimatorsFloat.decimate4_cen(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_channels[channel].m_decimatorsFloat.decimate8_cen(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_channels[channel].m_decimatorsFloat.decimate16_cen(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_channels[channel].m_decimatorsFloat.decimate32_cen(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_channels[channel].m_decimatorsFloat.decimate64_cen(&it, buf, len);
+                m_channels[channel].m_decimators12QI.decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
+}
+
+void SoapySDRInputThread::callbackSI16IQ(const qint16* buf, qint32 len, unsigned int channel)
+{
+    SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
+
+    if (m_channels[channel].m_log2Decim == 0)
+    {
+        m_channels[channel].m_decimators16IQ.decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_channels[channel].m_fcPos == 0) // Infra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimators16IQ.decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimators16IQ.decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimators16IQ.decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimators16IQ.decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimators16IQ.decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimators16IQ.decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 1) // Supra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimators16IQ.decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimators16IQ.decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimators16IQ.decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimators16IQ.decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimators16IQ.decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimators16IQ.decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 2) // Center
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimators16IQ.decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimators16IQ.decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimators16IQ.decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimators16IQ.decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimators16IQ.decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimators16IQ.decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
+}
+
+void SoapySDRInputThread::callbackSI16QI(const qint16* buf, qint32 len, unsigned int channel)
+{
+    SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
+
+    if (m_channels[channel].m_log2Decim == 0)
+    {
+        m_channels[channel].m_decimators16QI.decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_channels[channel].m_fcPos == 0) // Infra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimators16QI.decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimators16QI.decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimators16QI.decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimators16QI.decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimators16QI.decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimators16QI.decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 1) // Supra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimators16QI.decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimators16QI.decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimators16QI.decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimators16QI.decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimators16QI.decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimators16QI.decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 2) // Center
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimators16QI.decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimators16QI.decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimators16QI.decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimators16QI.decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimators16QI.decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimators16QI.decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
+}
+
+void SoapySDRInputThread::callbackSIFIQ(const float* buf, qint32 len, unsigned int channel)
+{
+    SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
+
+    if (m_channels[channel].m_log2Decim == 0)
+    {
+        m_channels[channel].m_decimatorsFloatIQ.decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_channels[channel].m_fcPos == 0) // Infra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimatorsFloatIQ.decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimatorsFloatIQ.decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimatorsFloatIQ.decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimatorsFloatIQ.decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimatorsFloatIQ.decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimatorsFloatIQ.decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 1) // Supra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimatorsFloatIQ.decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimatorsFloatIQ.decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimatorsFloatIQ.decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimatorsFloatIQ.decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimatorsFloatIQ.decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimatorsFloatIQ.decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 2) // Center
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimatorsFloatIQ.decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimatorsFloatIQ.decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimatorsFloatIQ.decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimatorsFloatIQ.decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimatorsFloatIQ.decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimatorsFloatIQ.decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    m_channels[channel].m_sampleFifo->write(m_channels[channel].m_convertBuffer.begin(), it);
+}
+
+void SoapySDRInputThread::callbackSIFQI(const float* buf, qint32 len, unsigned int channel)
+{
+    SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
+
+    if (m_channels[channel].m_log2Decim == 0)
+    {
+        m_channels[channel].m_decimatorsFloatQI.decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_channels[channel].m_fcPos == 0) // Infra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimatorsFloatQI.decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimatorsFloatQI.decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimatorsFloatQI.decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimatorsFloatQI.decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimatorsFloatQI.decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimatorsFloatQI.decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 1) // Supra
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimatorsFloatQI.decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimatorsFloatQI.decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimatorsFloatQI.decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimatorsFloatQI.decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimatorsFloatQI.decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimatorsFloatQI.decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_channels[channel].m_fcPos == 2) // Center
+        {
+            switch (m_channels[channel].m_log2Decim)
+            {
+            case 1:
+                m_channels[channel].m_decimatorsFloatQI.decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_channels[channel].m_decimatorsFloatQI.decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_channels[channel].m_decimatorsFloatQI.decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_channels[channel].m_decimatorsFloatQI.decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_channels[channel].m_decimatorsFloatQI.decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_channels[channel].m_decimatorsFloatQI.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;

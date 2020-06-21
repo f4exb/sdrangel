@@ -50,8 +50,8 @@ const qint64 AirspyInput::loHighLimitFreq = 1900000000L;
 AirspyInput::AirspyInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_dev(0),
-	m_airspyThread(0),
+	m_dev(nullptr),
+	m_airspyThread(nullptr),
 	m_deviceDescription("Airspy"),
 	m_running(false)
 {
@@ -181,6 +181,7 @@ bool AirspyInput::start()
 	m_airspyThread = new AirspyThread(m_dev, &m_sampleFifo);
 	m_airspyThread->setSamplerate(m_sampleRates[m_settings.m_devSampleRateIndex]);
 	m_airspyThread->setLog2Decimation(m_settings.m_log2Decim);
+    m_airspyThread->setIQOrder(m_settings.m_iqOrder);
 	m_airspyThread->setFcPos((int) m_settings.m_fcPos);
 
 	m_airspyThread->startWork();
@@ -213,11 +214,11 @@ void AirspyInput::stop()
 	qDebug("AirspyInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_airspyThread != 0)
+	if (m_airspyThread)
 	{
 		m_airspyThread->stopWork();
 		delete m_airspyThread;
-		m_airspyThread = 0;
+		m_airspyThread = nullptr;
 	}
 
 	m_running = false;
@@ -401,7 +402,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 			{
 				qCritical("AirspyInput::applySettings: could not set sample rate index %u (%d S/s): %s", settings.m_devSampleRateIndex, m_sampleRates[settings.m_devSampleRateIndex], airspy_error_name(rc));
 			}
-			else if (m_airspyThread != 0)
+			else if (m_airspyThread)
 			{
 				qDebug("AirspyInput::applySettings: sample rate set to index: %u (%d S/s)", settings.m_devSampleRateIndex, m_sampleRates[settings.m_devSampleRateIndex]);
 				m_airspyThread->setSamplerate(m_sampleRates[settings.m_devSampleRateIndex]);
@@ -414,10 +415,19 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
-		if (m_airspyThread != 0)
+		if (m_airspyThread)
 		{
 			m_airspyThread->setLog2Decimation(settings.m_log2Decim);
 			qDebug() << "AirspyInput: set decimation to " << (1<<settings.m_log2Decim);
+		}
+	}
+
+	if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+	{
+        reverseAPIKeys.append("iqOrder");
+
+		if (m_airspyThread) {
+			m_airspyThread->setIQOrder(settings.m_iqOrder);
 		}
 	}
 
@@ -462,7 +472,7 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 
 	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
-		if (m_airspyThread != 0)
+		if (m_airspyThread)
 		{
 			m_airspyThread->setFcPos((int) settings.m_fcPos);
 			qDebug() << "AirspyInput: set fc pos (enum) to " << (int) settings.m_fcPos;

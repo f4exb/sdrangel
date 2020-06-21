@@ -39,6 +39,7 @@ public:
 	void setSamplerate(int samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
 	void setFcPos(int fcPos);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
 	QMutex m_startWaitMutex;
@@ -52,11 +53,14 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
 	int m_fcPos;
+    bool m_iqOrder;
 
-	DecimatorsU<qint32, quint8, SDR_RX_SAMP_SZ, 8, 127> m_decimators;
+	DecimatorsU<qint32, quint8, SDR_RX_SAMP_SZ, 8, 127, true> m_decimatorsIQ;
+	DecimatorsU<qint32, quint8, SDR_RX_SAMP_SZ, 8, 127, false> m_decimatorsQI;
 
 	void run();
-	void callback(const quint8* buf, qint32 len);
+	void callbackIQ(const quint8* buf, qint32 len);
+	void callbackQI(const quint8* buf, qint32 len);
 
 	static void callbackHelper(unsigned char* buf, uint32_t len, void* ctx);
 };

@@ -68,10 +68,10 @@ private:
     std::uniform_real_distribution<float> m_uniform_distribution_f;
     std::uniform_int_distribution<qint16> m_uniform_distribution_s16;
 
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimatorsII;
-	DecimatorsIF<qint16, 12> m_decimatorsIF;
-	DecimatorsFI m_decimatorsFI;
-    DecimatorsFF m_decimatorsFF;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsII;
+	DecimatorsIF<qint16, 12, true> m_decimatorsIF;
+	DecimatorsFI<true> m_decimatorsFI;
+    DecimatorsFF<true> m_decimatorsFF;
 
     SampleVector m_convertBuffer;
     FSampleVector m_convertBufferF;

@@ -43,6 +43,7 @@ void HackRFInputSettings::resetToDefaults()
 	m_fileRecordName = "";
     m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -70,6 +71,7 @@ QByteArray HackRFInputSettings::serialize() const
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeBool(18, m_transverterMode);
     s.writeS64(19, m_transverterDeltaFrequency);
+    s.writeBool(20, m_iqOrder);
 
 	return s.final();
 }
@@ -115,6 +117,7 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
         d.readBool(18, &m_transverterMode, false);
         d.readS64(19, &m_transverterDeltaFrequency, 0);
+        d.readBool(20, &m_iqOrder, true);
 
 		return true;
 	}

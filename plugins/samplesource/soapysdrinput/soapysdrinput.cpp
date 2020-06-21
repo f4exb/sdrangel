@@ -48,7 +48,7 @@ SoapySDRInput::SoapySDRInput(DeviceAPI *deviceAPI) :
     m_settings(),
     m_deviceDescription("SoapySDRInput"),
     m_running(false),
-    m_thread(0)
+    m_thread(nullptr)
 {
     openDevice();
     initGainSettings(m_settings);
@@ -395,7 +395,7 @@ void SoapySDRInput::init()
 
 SoapySDRInputThread *SoapySDRInput::findThread()
 {
-    if (m_thread == 0) // this does not own the thread
+    if (!m_thread) // this does not own the thread
     {
         SoapySDRInputThread *soapySDRInputThread = 0;
 
@@ -437,7 +437,7 @@ void SoapySDRInput::moveThreadToBuddy()
         if (buddySource)
         {
             buddySource->setThread(m_thread);
-            m_thread = 0;  // zero for others
+            m_thread = nullptr;  // zero for others
         }
     }
 }
@@ -604,7 +604,7 @@ void SoapySDRInput::stop()
         qDebug("SoapySDRInput::stop: SI mode. Just stop and delete the thread");
         soapySDRInputThread->stopWork();
         delete soapySDRInputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -636,7 +636,7 @@ void SoapySDRInput::stop()
         }
 
         delete soapySDRInputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         if (highestActiveChannelIndex >= 0) // there is at least one channel still active
         {
@@ -975,7 +975,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     {
         reverseAPIKeys.append("fcPos");
 
-        if (inputThread != 0)
+        if (inputThread)
         {
             inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
             qDebug() << "SoapySDRInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
@@ -988,10 +988,22 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
         forwardChangeOwnDSP = true;
         SoapySDRInputThread *inputThread = findThread();
 
-        if (inputThread != 0)
+        if (inputThread)
         {
             inputThread->setLog2Decimation(requestedChannel, settings.m_log2Decim);
             qDebug() << "SoapySDRInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+        SoapySDRInputThread *inputThread = findThread();
+
+        if (inputThread)
+        {
+            inputThread->setIQOrder(settings.m_iqOrder);
+            qDebug() << "SoapySDRInput::applySettings: set IQ order to " << (settings.m_iqOrder ? "IQ" : "QI");
         }
     }
 

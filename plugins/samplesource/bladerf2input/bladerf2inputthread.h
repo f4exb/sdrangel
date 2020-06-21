@@ -51,6 +51,7 @@ public:
     int getFcPos(unsigned int channel) const;
     void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
     SampleSinkFifo *getFifo(unsigned int channel);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
     struct Channel
@@ -59,7 +60,8 @@ private:
         SampleSinkFifo* m_sampleFifo;
         unsigned int m_log2Decim;
         int m_fcPos;
-        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
 
         Channel() :
             m_sampleFifo(0),
@@ -79,10 +81,12 @@ private:
     Channel *m_channels; //!< Array of channels dynamically allocated for the given number of Rx channels
     qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
     unsigned int m_nbChannels;
+    bool m_iqOrder;
 
     void run();
     unsigned int getNbFifos();
-    void callbackSI(const qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSIIQ(const qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSIQI(const qint16* buf, qint32 len, unsigned int channel = 0);
     void callbackMI(const qint16* buf, qint32 samplesPerChannel);
 };
 

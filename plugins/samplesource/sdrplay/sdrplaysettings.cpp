@@ -42,6 +42,7 @@ void SDRPlaySettings::resetToDefaults()
     m_lnaOn = false;
     m_mixerAmpOn = false;
     m_basebandGain = 29;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -71,6 +72,7 @@ QByteArray SDRPlaySettings::serialize() const
     s.writeString(16, m_reverseAPIAddress);
     s.writeU32(17, m_reverseAPIPort);
     s.writeU32(18, m_reverseAPIDeviceIndex);
+    s.writeBool(19, m_iqOrder);
 
 	return s.final();
 }
@@ -117,6 +119,7 @@ bool SDRPlaySettings::deserialize(const QByteArray& data)
 
         d.readU32(18, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(19, &m_iqOrder, true);
 
 		return true;
 	}

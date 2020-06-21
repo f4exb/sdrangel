@@ -29,7 +29,8 @@ XTRXInputThread::XTRXInputThread(struct xtrx_dev *dev, unsigned int nbChannels, 
     m_running(false),
     m_dev(dev),
     m_nbChannels(nbChannels),
-    m_uniqueChannelIndex(uniqueChannelIndex)
+    m_uniqueChannelIndex(uniqueChannelIndex),
+    m_iqOrder(true)
 {
     qDebug("XTRXInputThread::XTRXInputThread: nbChannels: %u uniqueChannelIndex: %u", nbChannels, uniqueChannelIndex);
     m_channels = new Channel[2];
@@ -150,10 +151,17 @@ void XTRXInputThread::run()
                 qDebug("XTRXInputThread::run: overflow");
             }
 
-            if (m_nbChannels > 1) {
+            if (m_nbChannels > 1)
+            {
                 callbackMI((const qint16*) buffs[0], (const qint16*) buffs[1], 2 * nfo.out_samples);
-            } else {
-                callbackSI((const qint16*) buffs[0], 2 * nfo.out_samples);
+            }
+            else
+            {
+                if (m_iqOrder) {
+                    callbackSIIQ((const qint16*) buffs[0], 2 * nfo.out_samples);
+                } else {
+                    callbackSIQI((const qint16*) buffs[0], 2 * nfo.out_samples);
+                }
             }
         }
 
@@ -223,35 +231,73 @@ SampleSinkFifo *XTRXInputThread::getFifo(unsigned int channel)
     }
 }
 
-void XTRXInputThread::callbackSI(const qint16* buf, qint32 len)
+void XTRXInputThread::callbackSIIQ(const qint16* buf, qint32 len)
 {
     SampleVector::iterator it = m_channels[m_uniqueChannelIndex].m_convertBuffer.begin();
 
     if (m_channels[m_uniqueChannelIndex].m_log2Decim == 0)
     {
-        m_channels[m_uniqueChannelIndex].m_decimators.decimate1(&it, buf, len);
+        m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate1(&it, buf, len);
     }
     else
     {
         switch (m_channels[m_uniqueChannelIndex].m_log2Decim)
         {
         case 1:
-            m_channels[m_uniqueChannelIndex].m_decimators.decimate2_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate2_cen(&it, buf, len);
             break;
         case 2:
-            m_channels[m_uniqueChannelIndex].m_decimators.decimate4_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate4_cen(&it, buf, len);
             break;
         case 3:
-            m_channels[m_uniqueChannelIndex].m_decimators.decimate8_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate8_cen(&it, buf, len);
             break;
         case 4:
-            m_channels[m_uniqueChannelIndex].m_decimators.decimate16_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate16_cen(&it, buf, len);
             break;
         case 5:
-            m_channels[m_uniqueChannelIndex].m_decimators.decimate32_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate32_cen(&it, buf, len);
             break;
         case 6:
-            m_channels[m_uniqueChannelIndex].m_decimators.decimate64_cen(&it, buf, len);
+            m_channels[m_uniqueChannelIndex].m_decimatorsIQ.decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
+    }
+
+    m_channels[m_uniqueChannelIndex].m_sampleFifo->write(m_channels[m_uniqueChannelIndex].m_convertBuffer.begin(), it);
+}
+
+void XTRXInputThread::callbackSIQI(const qint16* buf, qint32 len)
+{
+    SampleVector::iterator it = m_channels[m_uniqueChannelIndex].m_convertBuffer.begin();
+
+    if (m_channels[m_uniqueChannelIndex].m_log2Decim == 0)
+    {
+        m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate1(&it, buf, len);
+    }
+    else
+    {
+        switch (m_channels[m_uniqueChannelIndex].m_log2Decim)
+        {
+        case 1:
+            m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_channels[m_uniqueChannelIndex].m_decimatorsQI.decimate64_cen(&it, buf, len);
             break;
         default:
             break;
@@ -267,10 +313,21 @@ void XTRXInputThread::callbackMI(const qint16* buf0, const qint16* buf1, qint32 
 
     // channel 0
     m_uniqueChannelIndex = 0;
-    callbackSI(buf0, len);
+
+    if (m_iqOrder) {
+        callbackSIIQ(buf0, len);
+    } else {
+        callbackSIQI(buf0, len);
+    }
+
     // channel 1
     m_uniqueChannelIndex = 1;
-    callbackSI(buf1, len);
+
+    if (m_iqOrder) {
+        callbackSIIQ(buf1, len);
+    } else {
+        callbackSIQI(buf1, len);
+    }
 
     m_uniqueChannelIndex = uniqueChannelIndex;
 }

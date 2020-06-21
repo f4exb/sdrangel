@@ -43,6 +43,7 @@ void XTRXInputSettings::resetToDefaults()
     m_extClock = false;
     m_extClockFreq = 0; // Auto
     m_pwrmode = 1;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -76,6 +77,7 @@ QByteArray XTRXInputSettings::serialize() const
     s.writeString(23, m_reverseAPIAddress);
     s.writeU32(24, m_reverseAPIPort);
     s.writeU32(25, m_reverseAPIDeviceIndex);
+    s.writeBool(26, m_iqOrder);
 
     return s.final();
 }
@@ -127,6 +129,7 @@ bool XTRXInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(25, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(26, &m_iqOrder, true);
 
         return true;
     }

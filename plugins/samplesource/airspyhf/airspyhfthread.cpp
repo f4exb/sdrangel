@@ -31,7 +31,8 @@ AirspyHFThread::AirspyHFThread(airspyhf_device_t* dev, SampleSinkFifo* sampleFif
 	m_convertBuffer(AIRSPYHF_BLOCKSIZE),
 	m_sampleFifo(sampleFifo),
 	m_samplerate(10),
-	m_log2Decim(0)
+	m_log2Decim(0),
+    m_iqOrder(true)
 {
     memset((char*) m_buf, 0, 2*AIRSPYHF_BLOCKSIZE*sizeof(qint16));
 	m_this = this;
@@ -102,32 +103,32 @@ void AirspyHFThread::run()
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void AirspyHFThread::callback(const float* buf, qint32 len)
+void AirspyHFThread::callbackIQ(const float* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
     switch (m_log2Decim)
     {
     case 0:
-        m_decimators.decimate1(&it, buf, len);
+        m_decimatorsIQ.decimate1(&it, buf, len);
         break;
     case 1:
-        m_decimators.decimate2_cen(&it, buf, len);
+        m_decimatorsIQ.decimate2_cen(&it, buf, len);
         break;
     case 2:
-        m_decimators.decimate4_cen(&it, buf, len);
+        m_decimatorsIQ.decimate4_cen(&it, buf, len);
         break;
     case 3:
-        m_decimators.decimate8_cen(&it, buf, len);
+        m_decimatorsIQ.decimate8_cen(&it, buf, len);
         break;
     case 4:
-        m_decimators.decimate16_cen(&it, buf, len);
+        m_decimatorsIQ.decimate16_cen(&it, buf, len);
         break;
     case 5:
-        m_decimators.decimate32_cen(&it, buf, len);
+        m_decimatorsIQ.decimate32_cen(&it, buf, len);
         break;
     case 6:
-        m_decimators.decimate64_cen(&it, buf, len);
+        m_decimatorsIQ.decimate64_cen(&it, buf, len);
         break;
     default:
         break;
@@ -136,10 +137,49 @@ void AirspyHFThread::callback(const float* buf, qint32 len)
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
+void AirspyHFThread::callbackQI(const float* buf, qint32 len)
+{
+	SampleVector::iterator it = m_convertBuffer.begin();
+
+    switch (m_log2Decim)
+    {
+    case 0:
+        m_decimatorsQI.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimatorsQI.decimate2_cen(&it, buf, len);
+        break;
+    case 2:
+        m_decimatorsQI.decimate4_cen(&it, buf, len);
+        break;
+    case 3:
+        m_decimatorsQI.decimate8_cen(&it, buf, len);
+        break;
+    case 4:
+        m_decimatorsQI.decimate16_cen(&it, buf, len);
+        break;
+    case 5:
+        m_decimatorsQI.decimate32_cen(&it, buf, len);
+        break;
+    case 6:
+        m_decimatorsQI.decimate64_cen(&it, buf, len);
+        break;
+    default:
+        break;
+    }
+
+	m_sampleFifo->write(m_convertBuffer.begin(), it);
+}
 
 int AirspyHFThread::rx_callback(airspyhf_transfer_t* transfer)
 {
 	qint32 nbIAndQ = transfer->sample_count * 2;
-	m_this->callback((float *) transfer->samples, nbIAndQ);
-	return 0;
+
+    if (m_this->m_iqOrder) {
+    	m_this->callbackIQ((float *) transfer->samples, nbIAndQ);
+    } else {
+        m_this->callbackQI((float *) transfer->samples, nbIAndQ);
+    }
+
+    return 0;
 }

@@ -41,6 +41,7 @@ void FCDProPlusSettings::resetToDefaults()
 	m_iqImbalance = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -69,6 +70,7 @@ QByteArray FCDProPlusSettings::serialize() const
     s.writeString(15, m_reverseAPIAddress);
     s.writeU32(16, m_reverseAPIPort);
     s.writeU32(17, m_reverseAPIDeviceIndex);
+    s.writeBool(18, m_iqOrder);
 
 	return s.final();
 }
@@ -114,6 +116,8 @@ bool FCDProPlusSettings::deserialize(const QByteArray& data)
 
         d.readU32(17, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(18, &m_iqOrder, true);
+
 		return true;
 	}
 	else
