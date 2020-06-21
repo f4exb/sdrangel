@@ -87,6 +87,9 @@ public:
     qint64 getTransverterDeltaFrequency();
     void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -147,6 +150,9 @@ private:
 
     qint64 transverter_delta_frequency;
     bool m_transverter_delta_frequency_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

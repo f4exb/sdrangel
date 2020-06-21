@@ -58,6 +58,8 @@ SWGSDRPlaySettings::SWGSDRPlaySettings() {
     m_mixer_amp_on_isSet = false;
     baseband_gain = 0;
     m_baseband_gain_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -106,6 +108,8 @@ SWGSDRPlaySettings::init() {
     m_mixer_amp_on_isSet = false;
     baseband_gain = 0;
     m_baseband_gain_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -120,6 +124,7 @@ SWGSDRPlaySettings::init() {
 
 void
 SWGSDRPlaySettings::cleanup() {
+
 
 
 
@@ -186,6 +191,8 @@ SWGSDRPlaySettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&mixer_amp_on, pJson["mixerAmpOn"], "qint32", "");
     
     ::SWGSDRangel::setValue(&baseband_gain, pJson["basebandGain"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
@@ -257,6 +264,9 @@ SWGSDRPlaySettings::asJsonObject() {
     }
     if(m_baseband_gain_isSet){
         obj->insert("basebandGain", QJsonValue(baseband_gain));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
@@ -427,6 +437,16 @@ SWGSDRPlaySettings::setBasebandGain(qint32 baseband_gain) {
     this->m_baseband_gain_isSet = true;
 }
 
+qint32
+SWGSDRPlaySettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGSDRPlaySettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
+}
+
 QString*
 SWGSDRPlaySettings::getFileRecordName() {
     return file_record_name;
@@ -525,6 +545,9 @@ SWGSDRPlaySettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_baseband_gain_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(file_record_name && *file_record_name != QString("")){

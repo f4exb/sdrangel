@@ -62,6 +62,8 @@ SWGLimeSdrMIMOSettings::SWGLimeSdrMIMOSettings() {
     m_rx_transverter_mode_isSet = false;
     rx_transverter_delta_frequency = 0L;
     m_rx_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     nco_enable_rx = 0;
     m_nco_enable_rx_isSet = false;
     nco_frequency_rx = 0;
@@ -178,6 +180,8 @@ SWGLimeSdrMIMOSettings::init() {
     m_rx_transverter_mode_isSet = false;
     rx_transverter_delta_frequency = 0L;
     m_rx_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     nco_enable_rx = 0;
     m_nco_enable_rx_isSet = false;
     nco_frequency_rx = 0;
@@ -314,6 +318,7 @@ SWGLimeSdrMIMOSettings::cleanup() {
 
 
 
+
 }
 
 SWGLimeSdrMIMOSettings*
@@ -360,6 +365,8 @@ SWGLimeSdrMIMOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rx_transverter_mode, pJson["rxTransverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx_transverter_delta_frequency, pJson["rxTransverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&nco_enable_rx, pJson["ncoEnableRx"], "qint32", "");
     
@@ -501,6 +508,9 @@ SWGLimeSdrMIMOSettings::asJsonObject() {
     }
     if(m_rx_transverter_delta_frequency_isSet){
         obj->insert("rxTransverterDeltaFrequency", QJsonValue(rx_transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(m_nco_enable_rx_isSet){
         obj->insert("ncoEnableRx", QJsonValue(nco_enable_rx));
@@ -785,6 +795,16 @@ void
 SWGLimeSdrMIMOSettings::setRxTransverterDeltaFrequency(qint64 rx_transverter_delta_frequency) {
     this->rx_transverter_delta_frequency = rx_transverter_delta_frequency;
     this->m_rx_transverter_delta_frequency_isSet = true;
+}
+
+qint32
+SWGLimeSdrMIMOSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGLimeSdrMIMOSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
 }
 
 qint32
@@ -1211,6 +1231,9 @@ SWGLimeSdrMIMOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_rx_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_nco_enable_rx_isSet){

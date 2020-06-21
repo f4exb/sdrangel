@@ -58,6 +58,8 @@ SWGBladeRF2MIMOSettings::SWGBladeRF2MIMOSettings() {
     m_rx_transverter_mode_isSet = false;
     rx_transverter_delta_frequency = 0L;
     m_rx_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
     log2_interp = 0;
@@ -124,6 +126,8 @@ SWGBladeRF2MIMOSettings::init() {
     m_rx_transverter_mode_isSet = false;
     rx_transverter_delta_frequency = 0L;
     m_rx_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
     log2_interp = 0;
@@ -156,6 +160,7 @@ SWGBladeRF2MIMOSettings::init() {
 
 void
 SWGBladeRF2MIMOSettings::cleanup() {
+
 
 
 
@@ -231,6 +236,8 @@ SWGBladeRF2MIMOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rx_transverter_mode, pJson["rxTransverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx_transverter_delta_frequency, pJson["rxTransverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint64", "");
     
@@ -320,6 +327,9 @@ SWGBladeRF2MIMOSettings::asJsonObject() {
     }
     if(m_rx_transverter_delta_frequency_isSet){
         obj->insert("rxTransverterDeltaFrequency", QJsonValue(rx_transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(m_tx_center_frequency_isSet){
         obj->insert("txCenterFrequency", QJsonValue(tx_center_frequency));
@@ -517,6 +527,16 @@ SWGBladeRF2MIMOSettings::setRxTransverterDeltaFrequency(qint64 rx_transverter_de
     this->m_rx_transverter_delta_frequency_isSet = true;
 }
 
+qint32
+SWGBladeRF2MIMOSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGBladeRF2MIMOSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
+}
+
 qint64
 SWGBladeRF2MIMOSettings::getTxCenterFrequency() {
     return tx_center_frequency;
@@ -705,6 +725,9 @@ SWGBladeRF2MIMOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_rx_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_tx_center_frequency_isSet){

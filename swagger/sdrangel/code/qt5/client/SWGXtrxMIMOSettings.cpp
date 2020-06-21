@@ -64,6 +64,8 @@ SWGXtrxMIMOSettings::SWGXtrxMIMOSettings() {
     m_nco_frequency_rx_isSet = false;
     antenna_path_rx = 0;
     m_antenna_path_rx_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     lpf_bw_rx0 = 0;
     m_lpf_bw_rx0_isSet = false;
     gain_rx0 = 0;
@@ -162,6 +164,8 @@ SWGXtrxMIMOSettings::init() {
     m_nco_frequency_rx_isSet = false;
     antenna_path_rx = 0;
     m_antenna_path_rx_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     lpf_bw_rx0 = 0;
     m_lpf_bw_rx0_isSet = false;
     gain_rx0 = 0;
@@ -269,6 +273,7 @@ SWGXtrxMIMOSettings::cleanup() {
 
 
 
+
 }
 
 SWGXtrxMIMOSettings*
@@ -317,6 +322,8 @@ SWGXtrxMIMOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nco_frequency_rx, pJson["ncoFrequencyRx"], "qint32", "");
     
     ::SWGSDRangel::setValue(&antenna_path_rx, pJson["antennaPathRx"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&lpf_bw_rx0, pJson["lpfBWRx0"], "qint32", "");
     
@@ -441,6 +448,9 @@ SWGXtrxMIMOSettings::asJsonObject() {
     }
     if(m_antenna_path_rx_isSet){
         obj->insert("antennaPathRx", QJsonValue(antenna_path_rx));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(m_lpf_bw_rx0_isSet){
         obj->insert("lpfBWRx0", QJsonValue(lpf_bw_rx0));
@@ -705,6 +715,16 @@ void
 SWGXtrxMIMOSettings::setAntennaPathRx(qint32 antenna_path_rx) {
     this->antenna_path_rx = antenna_path_rx;
     this->m_antenna_path_rx_isSet = true;
+}
+
+qint32
+SWGXtrxMIMOSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGXtrxMIMOSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
 }
 
 qint32
@@ -1034,6 +1054,9 @@ SWGXtrxMIMOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_antenna_path_rx_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_lpf_bw_rx0_isSet){

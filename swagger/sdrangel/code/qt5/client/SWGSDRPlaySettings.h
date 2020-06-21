@@ -87,6 +87,9 @@ public:
     qint32 getBasebandGain();
     void setBasebandGain(qint32 baseband_gain);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -150,6 +153,9 @@ private:
 
     qint32 baseband_gain;
     bool m_baseband_gain_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;

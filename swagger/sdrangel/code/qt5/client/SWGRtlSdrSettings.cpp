@@ -56,6 +56,8 @@ SWGRtlSdrSettings::SWGRtlSdrSettings() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     rf_bandwidth = 0;
     m_rf_bandwidth_isSet = false;
     file_record_name = nullptr;
@@ -104,6 +106,8 @@ SWGRtlSdrSettings::init() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     rf_bandwidth = 0;
     m_rf_bandwidth_isSet = false;
     file_record_name = new QString("");
@@ -120,6 +124,7 @@ SWGRtlSdrSettings::init() {
 
 void
 SWGRtlSdrSettings::cleanup() {
+
 
 
 
@@ -184,6 +189,8 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "qint32", "");
     
@@ -254,6 +261,9 @@ SWGRtlSdrSettings::asJsonObject() {
     }
     if(m_transverter_delta_frequency_isSet){
         obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -418,6 +428,16 @@ SWGRtlSdrSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequen
 }
 
 qint32
+SWGRtlSdrSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGRtlSdrSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
+}
+
+qint32
 SWGRtlSdrSettings::getRfBandwidth() {
     return rf_bandwidth;
 }
@@ -522,6 +542,9 @@ SWGRtlSdrSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rf_bandwidth_isSet){

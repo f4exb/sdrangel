@@ -87,6 +87,9 @@ public:
     qint64 getRxTransverterDeltaFrequency();
     void setRxTransverterDeltaFrequency(qint64 rx_transverter_delta_frequency);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     qint64 getTxCenterFrequency();
     void setTxCenterFrequency(qint64 tx_center_frequency);
 
@@ -177,6 +180,9 @@ private:
 
     qint64 rx_transverter_delta_frequency;
     bool m_rx_transverter_delta_frequency_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     qint64 tx_center_frequency;
     bool m_tx_center_frequency_isSet;

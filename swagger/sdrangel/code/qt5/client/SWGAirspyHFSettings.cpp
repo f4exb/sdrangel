@@ -40,6 +40,8 @@ SWGAirspyHFSettings::SWGAirspyHFSettings() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     band_index = 0;
     m_band_index_isSet = false;
     file_record_name = nullptr;
@@ -86,6 +88,8 @@ SWGAirspyHFSettings::init() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     band_index = 0;
     m_band_index_isSet = false;
     file_record_name = new QString("");
@@ -116,6 +120,7 @@ SWGAirspyHFSettings::init() {
 
 void
 SWGAirspyHFSettings::cleanup() {
+
 
 
 
@@ -163,6 +168,8 @@ SWGAirspyHFSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&band_index, pJson["bandIndex"], "qint32", "");
     
@@ -223,6 +230,9 @@ SWGAirspyHFSettings::asJsonObject() {
     }
     if(m_transverter_delta_frequency_isSet){
         obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(m_band_index_isSet){
         obj->insert("bandIndex", QJsonValue(band_index));
@@ -325,6 +335,16 @@ void
 SWGAirspyHFSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequency) {
     this->transverter_delta_frequency = transverter_delta_frequency;
     this->m_transverter_delta_frequency_isSet = true;
+}
+
+qint32
+SWGAirspyHFSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGAirspyHFSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
 }
 
 qint32
@@ -478,6 +498,9 @@ SWGAirspyHFSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_band_index_isSet){

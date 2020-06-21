@@ -96,6 +96,9 @@ public:
     qint32 getAntennaPathRx();
     void setAntennaPathRx(qint32 antenna_path_rx);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     qint32 getLpfBwRx0();
     void setLpfBwRx0(qint32 lpf_bw_rx0);
 
@@ -234,6 +237,9 @@ private:
 
     qint32 antenna_path_rx;
     bool m_antenna_path_rx_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     qint32 lpf_bw_rx0;
     bool m_lpf_bw_rx0_isSet;

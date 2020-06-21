@@ -76,6 +76,8 @@ SWGFCDProSettings::SWGFCDProSettings() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -142,6 +144,8 @@ SWGFCDProSettings::init() {
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
     m_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -156,6 +160,7 @@ SWGFCDProSettings::init() {
 
 void
 SWGFCDProSettings::cleanup() {
+
 
 
 
@@ -249,6 +254,8 @@ SWGFCDProSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
@@ -347,6 +354,9 @@ SWGFCDProSettings::asJsonObject() {
     }
     if(m_transverter_delta_frequency_isSet){
         obj->insert("transverterDeltaFrequency", QJsonValue(transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
@@ -607,6 +617,16 @@ SWGFCDProSettings::setTransverterDeltaFrequency(qint64 transverter_delta_frequen
     this->m_transverter_delta_frequency_isSet = true;
 }
 
+qint32
+SWGFCDProSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGFCDProSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
+}
+
 QString*
 SWGFCDProSettings::getFileRecordName() {
     return file_record_name;
@@ -732,6 +752,9 @@ SWGFCDProSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(file_record_name && *file_record_name != QString("")){

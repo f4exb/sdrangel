@@ -93,6 +93,9 @@ public:
     qint64 getRxTransverterDeltaFrequency();
     void setRxTransverterDeltaFrequency(qint64 rx_transverter_delta_frequency);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     qint32 getNcoEnableRx();
     void setNcoEnableRx(qint32 nco_enable_rx);
 
@@ -258,6 +261,9 @@ private:
 
     qint64 rx_transverter_delta_frequency;
     bool m_rx_transverter_delta_frequency_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     qint32 nco_enable_rx;
     bool m_nco_enable_rx_isSet;
