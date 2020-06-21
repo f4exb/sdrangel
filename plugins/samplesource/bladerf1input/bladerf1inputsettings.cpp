@@ -41,6 +41,7 @@ void BladeRF1InputSettings::resetToDefaults()
 	m_xb200Filter = BLADERF_XB200_AUTO_1DB;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+    m_iqOrder = true;
 	m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -68,6 +69,7 @@ QByteArray BladeRF1InputSettings::serialize() const
     s.writeString(14, m_reverseAPIAddress);
     s.writeU32(15, m_reverseAPIPort);
     s.writeU32(16, m_reverseAPIDeviceIndex);
+    s.writeBool(17, m_iqOrder);
 
 	return s.final();
 }
@@ -114,6 +116,7 @@ bool BladeRF1InputSettings::deserialize(const QByteArray& data)
 
         d.readU32(16, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(17, &m_iqOrder);
 
 		return true;
 	}

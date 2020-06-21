@@ -46,6 +46,7 @@ void LimeSDRInputSettings::resetToDefaults()
     m_extClockFreq = 10000000; // 10 MHz
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_gpioDir = 0;
     m_gpioPins = 0;
@@ -85,6 +86,7 @@ QByteArray LimeSDRInputSettings::serialize() const
     s.writeString(25, m_reverseAPIAddress);
     s.writeU32(26, m_reverseAPIPort);
     s.writeU32(27, m_reverseAPIDeviceIndex);
+    s.writeBool(28, m_iqOrder);
     return s.final();
 }
 
@@ -141,6 +143,7 @@ bool LimeSDRInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(27, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(28, &m_iqOrder, true);
 
         return true;
     }

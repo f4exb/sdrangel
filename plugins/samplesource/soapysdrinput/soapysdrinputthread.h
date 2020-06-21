@@ -53,6 +53,7 @@ public:
     int getFcPos(unsigned int channel) const;
     void setFifo(unsigned int channel, SampleSinkFifo *sampleFifo);
     SampleSinkFifo *getFifo(unsigned int channel);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
     struct Channel
@@ -61,10 +62,14 @@ private:
         SampleSinkFifo* m_sampleFifo;
         unsigned int m_log2Decim;
         int m_fcPos;
-        Decimators<qint32, qint8, SDR_RX_SAMP_SZ, 8> m_decimators8;
-        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators12;
-        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators16;
-        DecimatorsFI m_decimatorsFloat;
+        Decimators<qint32, qint8, SDR_RX_SAMP_SZ, 8, true> m_decimators8IQ;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimators12IQ;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimators16IQ;
+        Decimators<qint32, qint8, SDR_RX_SAMP_SZ, 8, false> m_decimators8QI;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimators12QI;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, false> m_decimators16QI;
+        DecimatorsFI<true> m_decimatorsFloatIQ;
+        DecimatorsFI<false> m_decimatorsFloatQI;
 
         Channel() :
             m_sampleFifo(0),
@@ -93,14 +98,23 @@ private:
     unsigned int m_sampleRate;
     unsigned int m_nbChannels;
     DecimatorType m_decimatorType;
+    bool m_iqOrder;
 
     void run();
     unsigned int getNbFifos();
-    void callbackSI8(const qint8* buf, qint32 len, unsigned int channel = 0);
-    void callbackSI12(const qint16* buf, qint32 len, unsigned int channel = 0);
-    void callbackSI16(const qint16* buf, qint32 len, unsigned int channel = 0);
-    void callbackSIF(const float* buf, qint32 len, unsigned int channel = 0);
-    void callbackMI(std::vector<void *>& buffs, qint32 samplesPerChannel);
+
+    void callbackSI8IQ(const qint8* buf, qint32 len, unsigned int channel = 0);
+    void callbackSI12IQ(const qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSI16IQ(const qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSIFIQ(const float* buf, qint32 len, unsigned int channel = 0);
+
+    void callbackSI8QI(const qint8* buf, qint32 len, unsigned int channel = 0);
+    void callbackSI12QI(const qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSI16QI(const qint16* buf, qint32 len, unsigned int channel = 0);
+    void callbackSIFQI(const float* buf, qint32 len, unsigned int channel = 0);
+
+    void callbackMIIQ(std::vector<void *>& buffs, qint32 samplesPerChannel);
+    void callbackMIQI(std::vector<void *>& buffs, qint32 samplesPerChannel);
 };
 
 

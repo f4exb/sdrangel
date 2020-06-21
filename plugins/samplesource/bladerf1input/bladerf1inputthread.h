@@ -38,6 +38,7 @@ public:
 	void stopWork();
 	void setLog2Decimation(unsigned int log2_decim);
 	void setFcPos(int fcPos);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
 	QMutex m_startWaitMutex;
@@ -51,11 +52,14 @@ private:
 
 	unsigned int m_log2Decim;
 	int m_fcPos;
+    bool m_iqOrder;
 
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
 
 	void run();
-	void callback(const qint16* buf, qint32 len);
+	void callbackIQ(const qint16* buf, qint32 len);
+	void callbackQI(const qint16* buf, qint32 len);
 };
 
 #endif // INCLUDE_BLADERFINPUTTHREAD_H

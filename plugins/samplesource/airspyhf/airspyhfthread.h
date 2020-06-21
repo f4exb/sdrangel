@@ -39,6 +39,7 @@ public:
 	void stopWork();
 	void setSamplerate(uint32_t samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
 	QMutex m_startWaitMutex;
@@ -52,12 +53,15 @@ private:
 
 	int m_samplerate;
 	unsigned int m_log2Decim;
+    bool m_iqOrder;
 	static AirspyHFThread *m_this;
 
-	DecimatorsFI m_decimators;
+	DecimatorsFI<true> m_decimatorsIQ;
+	DecimatorsFI<false> m_decimatorsQI;
 
 	void run();
-	void callback(const float* buf, qint32 len);
+	void callbackIQ(const float* buf, qint32 len);
+	void callbackQI(const float* buf, qint32 len);
 	static int rx_callback(airspyhf_transfer_t* transfer);
 };
 

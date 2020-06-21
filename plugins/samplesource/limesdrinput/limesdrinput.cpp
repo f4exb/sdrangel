@@ -54,7 +54,7 @@ LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_fileSink(nullptr),
     m_settings(),
-    m_limeSDRInputThread(0),
+    m_limeSDRInputThread(nullptr),
     m_deviceDescription("LimeSDRInput"),
     m_running(false),
     m_channelAcquired(false)
@@ -425,7 +425,7 @@ bool LimeSDRInput::start()
     applySettings(m_settings, true);
 
     m_limeSDRInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
-
+    m_limeSDRInputThread->setIQOrder(m_settings.m_iqOrder);
     m_limeSDRInputThread->startWork();
 
     m_deviceShared.m_thread = m_limeSDRInputThread;
@@ -442,7 +442,7 @@ void LimeSDRInput::stop()
     {
         m_limeSDRInputThread->stopWork();
         delete m_limeSDRInputThread;
-        m_limeSDRInputThread = 0;
+        m_limeSDRInputThread = nullptr;
     }
 
     m_deviceShared.m_thread = 0;
@@ -1106,6 +1106,15 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         {
             m_limeSDRInputThread->setLog2Decimation(settings.m_log2SoftDecim);
             qDebug() << "LimeSDRInput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftDecim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_limeSDRInputThread) {
+            m_limeSDRInputThread->setIQOrder(settings.m_iqOrder);
         }
     }
 

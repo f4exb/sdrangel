@@ -38,6 +38,7 @@ void RTLSDRSettings::resetToDefaults()
 	m_agc = false;
 	m_noModMode = false;
     m_transverterMode = false;
+    m_iqOrder = true;
 	m_transverterDeltaFrequency = 0;
 	m_rfBandwidth = 2500 * 1000; // Hz
 	m_fileRecordName = "";
@@ -70,6 +71,7 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeString(17, m_reverseAPIAddress);
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
+    s.writeBool(20, m_iqOrder);
 
 	return s.final();
 }
@@ -116,6 +118,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
 
         d.readU32(19, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readBool(20, &m_iqOrder, true);
 
 		return true;
 	}

@@ -58,7 +58,7 @@ RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
     m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
-	m_rtlSDRThread(0),
+	m_rtlSDRThread(nullptr),
 	m_deviceDescription(),
 	m_running(false)
 {
@@ -210,7 +210,7 @@ bool RTLSDRInput::start()
 	m_rtlSDRThread->setSamplerate(m_settings.m_devSampleRate);
 	m_rtlSDRThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_rtlSDRThread->setFcPos((int) m_settings.m_fcPos);
-
+    m_rtlSDRThread->setIQOrder(m_settings.m_iqOrder);
 	m_rtlSDRThread->startWork();
 
 	mutexLocker.unlock();
@@ -236,11 +236,11 @@ void RTLSDRInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_rtlSDRThread != 0)
+	if (m_rtlSDRThread)
 	{
 		m_rtlSDRThread->stopWork();
 		delete m_rtlSDRThread;
-		m_rtlSDRThread = 0;
+		m_rtlSDRThread = nullptr;
 	}
 
 	m_running = false;
@@ -473,7 +473,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
-        if (m_rtlSDRThread != 0) {
+        if (m_rtlSDRThread) {
             m_rtlSDRThread->setLog2Decimation(settings.m_log2Decim);
         }
 
@@ -484,7 +484,7 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     {
         reverseAPIKeys.append("fcPos");
 
-        if (m_rtlSDRThread != 0) {
+        if (m_rtlSDRThread) {
             m_rtlSDRThread->setFcPos((int) settings.m_fcPos);
         }
 
@@ -502,6 +502,15 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     }
     if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
         reverseAPIKeys.append("transverterDeltaFrequency");
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_rtlSDRThread) {
+            m_rtlSDRThread->setIQOrder(settings.m_iqOrder);
+        }
     }
 
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency)

@@ -28,7 +28,7 @@
 #include "dsp/dsptypes.h"
 #include "dsp/hbfiltertraits.h"
 
-template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder>
+template<typename EOStorageType, typename AccuType, uint32_t HBFilterOrder, bool IQorder>
 class IntHalfbandFilterEO {
 public:
     IntHalfbandFilterEO()
@@ -800,17 +800,17 @@ protected:
     {
         if ((m_ptr % 2) == 0)
         {
-            m_even[0][m_ptr/2] = sampleI;
-            m_even[1][m_ptr/2] = sampleQ;
-            m_even[0][m_ptr/2 + m_size] = sampleI;
-            m_even[1][m_ptr/2 + m_size] = sampleQ;
+            m_even[0][m_ptr/2] = IQorder ? sampleI : sampleQ;
+            m_even[1][m_ptr/2] = IQorder ? sampleQ : sampleI;
+            m_even[0][m_ptr/2 + m_size] = IQorder ? sampleI : sampleQ;
+            m_even[1][m_ptr/2 + m_size] = IQorder ? sampleQ : sampleI;
         }
         else
         {
-            m_odd[0][m_ptr/2] = sampleI;
-            m_odd[1][m_ptr/2] = sampleQ;
-            m_odd[0][m_ptr/2 + m_size] = sampleI;
-            m_odd[1][m_ptr/2 + m_size] = sampleQ;
+            m_odd[0][m_ptr/2] = IQorder ? sampleI : sampleQ;
+            m_odd[1][m_ptr/2] = IQorder ? sampleQ : sampleI;
+            m_odd[0][m_ptr/2 + m_size] = IQorder ? sampleI : sampleQ;
+            m_odd[1][m_ptr/2 + m_size] = IQorder ? sampleQ : sampleI;
         }
     }
 
@@ -818,17 +818,17 @@ protected:
     {
         if ((m_ptr % 2) == 0)
         {
-            m_even[0][m_ptr/2] = x;
-            m_even[1][m_ptr/2] = y;
-            m_even[0][m_ptr/2 + m_size] = x;
-            m_even[1][m_ptr/2 + m_size] = y;
+            m_even[0][m_ptr/2] = IQorder ? x : y;
+            m_even[1][m_ptr/2] = IQorder ? y : x;
+            m_even[0][m_ptr/2 + m_size] = IQorder ? x : y;
+            m_even[1][m_ptr/2 + m_size] = IQorder ? y : x;
         }
         else
         {
-            m_odd[0][m_ptr/2] = x;
-            m_odd[1][m_ptr/2] = y;
-            m_odd[0][m_ptr/2 + m_size] = x;
-            m_odd[1][m_ptr/2 + m_size] = y;
+            m_odd[0][m_ptr/2] = IQorder ? x : y;
+            m_odd[1][m_ptr/2] = IQorder ? y : x;
+            m_odd[0][m_ptr/2 + m_size] = IQorder ? x : y;
+            m_odd[1][m_ptr/2 + m_size] = IQorder ? y : x;
         }
     }
 

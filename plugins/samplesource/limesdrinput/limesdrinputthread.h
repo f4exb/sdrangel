@@ -42,6 +42,7 @@ public:
     virtual void setDeviceSampleRate(int sampleRate) { (void) sampleRate; }
     virtual bool isRunning() { return m_running; }
     void setLog2Decimation(unsigned int log2_decim);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
     QMutex m_startWaitMutex;
@@ -54,11 +55,14 @@ private:
     SampleSinkFifo* m_sampleFifo;
 
     unsigned int m_log2Decim; // soft decimation
+    bool m_iqOrder;
 
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
 
     void run();
-    void callback(const qint16* buf, qint32 len);
+    void callbackIQ(const qint16* buf, qint32 len);
+    void callbackQI(const qint16* buf, qint32 len);
 };
 
 

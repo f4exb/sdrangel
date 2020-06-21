@@ -47,8 +47,8 @@ HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_fileSink(nullptr),
 	m_settings(),
-	m_dev(0),
-	m_hackRFThread(0),
+	m_dev(nullptr),
+	m_hackRFThread(nullptr),
 	m_deviceDescription("HackRF"),
 	m_running(false)
 {
@@ -157,7 +157,7 @@ bool HackRFInput::start()
 	m_hackRFThread->setSamplerate(m_settings.m_devSampleRate);
 	m_hackRFThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_hackRFThread->setFcPos((int) m_settings.m_fcPos);
-
+    m_hackRFThread->setIQOrder(m_settings.m_iqOrder);
 	m_hackRFThread->startWork();
 
 	qDebug("HackRFInput::startInput: started");
@@ -188,11 +188,11 @@ void HackRFInput::stop()
 	qDebug("HackRFInput::stop");
 //	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_hackRFThread != 0)
+	if (m_hackRFThread)
 	{
 		m_hackRFThread->stopWork();
 		delete m_hackRFThread;
-		m_hackRFThread = 0;
+		m_hackRFThread = nullptr;
 	}
 
 	m_running = false;
@@ -418,7 +418,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 			}
 			else
 			{
-			    if (m_hackRFThread != 0)
+			    if (m_hackRFThread)
 			    {
 	                qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", settings.m_devSampleRate);
 	                m_hackRFThread->setSamplerate(settings.m_devSampleRate);
@@ -432,10 +432,19 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
-		if (m_hackRFThread != 0)
+		if (m_hackRFThread)
 		{
 			m_hackRFThread->setLog2Decimation(settings.m_log2Decim);
 			qDebug() << "HackRFInput: set decimation to " << (1<<settings.m_log2Decim);
+		}
+	}
+
+	if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+	{
+        reverseAPIKeys.append("iqOrder");
+
+		if (m_hackRFThread) {
+			m_hackRFThread->setIQOrder(settings.m_iqOrder);
 		}
 	}
 
@@ -486,7 +495,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 
 	if ((m_settings.m_fcPos != settings.m_fcPos) || force)
 	{
-		if (m_hackRFThread != 0)
+		if (m_hackRFThread)
 		{
 			m_hackRFThread->setFcPos((int) settings.m_fcPos);
 			qDebug() << "HackRFInput: set fc pos (enum) to " << (int) settings.m_fcPos;

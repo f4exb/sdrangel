@@ -41,6 +41,7 @@ void AirspySettings::resetToDefaults()
 	m_iqCorrection = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -70,6 +71,7 @@ QByteArray AirspySettings::serialize() const
     s.writeString(16, m_reverseAPIAddress);
     s.writeU32(17, m_reverseAPIPort);
     s.writeU32(18, m_reverseAPIDeviceIndex);
+    s.writeBool(19, m_iqOrder);
 
 	return s.final();
 }
@@ -116,6 +118,7 @@ bool AirspySettings::deserialize(const QByteArray& data)
 
         d.readU32(18, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(19, &m_iqOrder, true);
 
 		return true;
 	}

@@ -27,7 +27,8 @@ LimeSDRInputThread::LimeSDRInputThread(lms_stream_t* stream, SampleSinkFifo* sam
     m_stream(stream),
     m_convertBuffer(DeviceLimeSDR::blockSize),
     m_sampleFifo(sampleFifo),
-    m_log2Decim(0)
+    m_log2Decim(0),
+    m_iqOrder(true)
 {
     std::fill(m_buf, m_buf + 2*DeviceLimeSDR::blockSize, 0);
 }
@@ -94,39 +95,43 @@ void LimeSDRInputThread::run()
             break;
         }
 
-        callback(m_buf, 2 * res);
+        if (m_iqOrder) {
+            callbackIQ(m_buf, 2 * res);
+        } else {
+            callbackQI(m_buf, 2 * res);
+        }
     }
 
     m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void LimeSDRInputThread::callback(const qint16* buf, qint32 len)
+void LimeSDRInputThread::callbackIQ(const qint16* buf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
     switch (m_log2Decim)
     {
     case 0:
-        m_decimators.decimate1(&it, buf, len);
+        m_decimatorsIQ.decimate1(&it, buf, len);
         break;
     case 1:
-        m_decimators.decimate2_cen(&it, buf, len);
+        m_decimatorsIQ.decimate2_cen(&it, buf, len);
         break;
     case 2:
-        m_decimators.decimate4_cen(&it, buf, len);
+        m_decimatorsIQ.decimate4_cen(&it, buf, len);
         break;
     case 3:
-        m_decimators.decimate8_cen(&it, buf, len);
+        m_decimatorsIQ.decimate8_cen(&it, buf, len);
         break;
     case 4:
-        m_decimators.decimate16_cen(&it, buf, len);
+        m_decimatorsIQ.decimate16_cen(&it, buf, len);
         break;
     case 5:
-        m_decimators.decimate32_cen(&it, buf, len);
+        m_decimatorsIQ.decimate32_cen(&it, buf, len);
         break;
     case 6:
-        m_decimators.decimate64_cen(&it, buf, len);
+        m_decimatorsIQ.decimate64_cen(&it, buf, len);
         break;
     default:
         break;
@@ -135,3 +140,36 @@ void LimeSDRInputThread::callback(const qint16* buf, qint32 len)
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
+void LimeSDRInputThread::callbackQI(const qint16* buf, qint32 len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    switch (m_log2Decim)
+    {
+    case 0:
+        m_decimatorsQI.decimate1(&it, buf, len);
+        break;
+    case 1:
+        m_decimatorsQI.decimate2_cen(&it, buf, len);
+        break;
+    case 2:
+        m_decimatorsQI.decimate4_cen(&it, buf, len);
+        break;
+    case 3:
+        m_decimatorsQI.decimate8_cen(&it, buf, len);
+        break;
+    case 4:
+        m_decimatorsQI.decimate16_cen(&it, buf, len);
+        break;
+    case 5:
+        m_decimatorsQI.decimate32_cen(&it, buf, len);
+        break;
+    case 6:
+        m_decimatorsQI.decimate64_cen(&it, buf, len);
+        break;
+    default:
+        break;
+    }
+
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
+}

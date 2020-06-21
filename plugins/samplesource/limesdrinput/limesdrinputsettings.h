@@ -66,6 +66,7 @@ struct LimeSDRInputSettings
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
     bool     m_transverterMode;
     qint64   m_transverterDeltaFrequency;
+    bool     m_iqOrder;
     QString  m_fileRecordName;
     uint8_t  m_gpioDir;      //!< GPIO pin direction LSB first; 0 input, 1 output
     uint8_t  m_gpioPins;     //!< GPIO pins to write; LSB first

@@ -46,7 +46,7 @@ FCDProInput::FCDProInput(DeviceAPI *deviceAPI) :
     m_fileSink(nullptr),
 	m_dev(0),
 	m_settings(),
-	m_FCDThread(0),
+	m_FCDThread(nullptr),
 	m_deviceDescription(fcd_traits<Pro>::displayedName),
 	m_running(false)
 {
@@ -140,6 +140,9 @@ bool FCDProInput::start()
 	}
 
 	m_FCDThread = new FCDProThread(&m_sampleFifo, &m_fcdFIFO);
+    m_FCDThread->setLog2Decimation(m_settings.m_log2Decim);
+    m_FCDThread->setFcPos(m_settings.m_fcPos);
+    m_FCDThread->setIQOrder(m_settings.m_iqOrder);
 	m_FCDThread->startWork();
 
 //	mutexLocker.unlock();
@@ -386,7 +389,7 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
-		if (m_FCDThread != 0)
+		if (m_FCDThread)
 		{
 		    m_FCDThread->setLog2Decimation(settings.m_log2Decim);
 			qDebug() << "FCDProInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
@@ -397,11 +400,22 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
     {
         reverseAPIKeys.append("fcPos");
 
-        if (m_FCDThread != 0) {
+        if (m_FCDThread) {
             m_FCDThread->setFcPos((int) settings.m_fcPos);
         }
 
         qDebug() << "FCDProInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_FCDThread) {
+            m_FCDThread->setIQOrder((int) settings.m_iqOrder);
+        }
+
+        qDebug() << "FCDProInput::applySettings: set IQ order to %s" << (settings.m_iqOrder ? "IQ" : "QI");
     }
 
 	if ((m_settings.m_lnaGainIndex != settings.m_lnaGainIndex) || force)

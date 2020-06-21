@@ -39,6 +39,7 @@ public:
 	void stopWork();
 	void setLog2Decimation(unsigned int log2_decim);
 	void setFcPos(int fcPos);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
 	AudioFifo* m_fcdFIFO;
@@ -48,14 +49,18 @@ private:
 	bool m_running;
 	unsigned int m_log2Decim;
 	int m_fcPos;
+    bool m_iqOrder;
 
     qint16 m_buf[fcd_traits<Pro>::convBufSize*2]; // stereo (I, Q)
 	SampleVector m_convertBuffer;
 	SampleSinkFifo* m_sampleFifo;
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, false> m_decimatorsQI;
+
 
 	void run();
-	void work(unsigned int n_items);
+	void workIQ(unsigned int n_items);
+	void workQI(unsigned int n_items);
 };
 
 #endif // INCLUDE_FCDPROTHREAD_H

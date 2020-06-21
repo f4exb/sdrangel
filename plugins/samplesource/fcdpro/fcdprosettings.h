@@ -51,6 +51,7 @@ struct FCDProSettings {
 	bool m_iqCorrection;
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
+    bool m_iqOrder;
     QString m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

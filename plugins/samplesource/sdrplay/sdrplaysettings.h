@@ -45,6 +45,7 @@ struct SDRPlaySettings {
 	bool m_lnaOn;
 	bool m_mixerAmpOn;
 	int  m_basebandGain;
+    bool m_iqOrder;
     QString m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

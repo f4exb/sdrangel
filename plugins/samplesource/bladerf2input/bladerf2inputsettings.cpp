@@ -39,6 +39,7 @@ void BladeRF2InputSettings::resetToDefaults()
     m_iqCorrection = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -66,6 +67,7 @@ QByteArray BladeRF2InputSettings::serialize() const
     s.writeString(14, m_reverseAPIAddress);
     s.writeU32(15, m_reverseAPIPort);
     s.writeU32(16, m_reverseAPIDeviceIndex);
+    s.writeBool(17, m_iqOrder);
 
     return s.final();
 }
@@ -110,6 +112,7 @@ bool BladeRF2InputSettings::deserialize(const QByteArray& data)
 
         d.readU32(16, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(17, &m_iqOrder, true);
 
         return true;
     }

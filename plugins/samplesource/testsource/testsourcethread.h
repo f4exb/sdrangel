@@ -131,9 +131,9 @@ private:
 
     MessageQueue m_inputMessageQueue;
 
-	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 8> m_decimators_8;
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators_12;
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16> m_decimators_16;
+	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 8, true> m_decimators_8;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimators_12;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimators_16;
 
     std::map<int, int> m_timerHistogram;
     uint32_t m_histoCounter;

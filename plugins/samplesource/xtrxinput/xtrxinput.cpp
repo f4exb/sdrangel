@@ -52,7 +52,7 @@ MESSAGE_CLASS_DEFINITION(XTRXInput::MsgStartStop, Message)
 XTRXInput::XTRXInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
-    m_XTRXInputThread(0),
+    m_XTRXInputThread(nullptr),
     m_deviceDescription("XTRXInput"),
     m_running(false)
 {
@@ -201,9 +201,9 @@ void XTRXInput::init()
 
 XTRXInputThread *XTRXInput::findThread()
 {
-    if (m_XTRXInputThread == 0) // this does not own the thread
+    if (!m_XTRXInputThread) // this does not own the thread
     {
-        XTRXInputThread *xtrxInputThread = 0;
+        XTRXInputThread *xtrxInputThread = nullptr;
 
         // find a buddy that has allocated the thread
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -243,7 +243,7 @@ void XTRXInput::moveThreadToBuddy()
         if (buddySource)
         {
             buddySource->setThread(m_XTRXInputThread);
-            m_XTRXInputThread = 0;  // zero for others
+            m_XTRXInputThread = nullptr;  // zero for others
         }
     }
 }
@@ -308,8 +308,9 @@ bool XTRXInput::start()
             xtrxInputThread->stopWork();
             delete xtrxInputThread;
             xtrxInputThread = new XTRXInputThread(m_deviceShared.m_dev->getDevice(), 2); // MI mode (2 channels)
-            m_XTRXInputThread = xtrxInputThread; // take ownership
+            xtrxInputThread->setIQOrder(m_settings.m_iqOrder);
             m_deviceShared.m_thread = xtrxInputThread;
+            m_XTRXInputThread = xtrxInputThread; // take ownership
 
             for (int i = 0; i < 2; i++) // restore original FIFO references
             {
@@ -394,8 +395,8 @@ void XTRXInput::stop()
         qDebug("XTRXInput::stop: SI mode. Just stop and delete the thread");
         xtrxInputThread->stopWork();
         delete xtrxInputThread;
-        m_XTRXInputThread = 0;
-        m_deviceShared.m_thread = 0;
+        m_XTRXInputThread = nullptr;
+        m_deviceShared.m_thread = nullptr;
 
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -410,6 +411,7 @@ void XTRXInput::stop()
         m_XTRXInputThread = xtrxInputThread; // take ownership
         m_deviceShared.m_thread = xtrxInputThread;
 
+        xtrxInputThread->setIQOrder(m_settings.m_iqOrder);
         xtrxInputThread->setFifo(requestedChannel, &m_sampleFifo);
         xtrxInputThread->setLog2Decimation(requestedChannel, m_settings.m_log2SoftDecim);
 
@@ -1037,6 +1039,17 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         {
             inputThread->setLog2Decimation(requestedChannel, settings.m_log2SoftDecim);
             qDebug() << "XTRXInput::applySettings: set soft decimation to " << (1<<settings.m_log2SoftDecim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (inputThread)
+        {
+            inputThread->setIQOrder(settings.m_iqOrder);
+            qDebug() << "XTRXInput::applySettings: set IQ order to " << (settings.m_iqOrder ? "IQ" : "QI");
         }
     }
 

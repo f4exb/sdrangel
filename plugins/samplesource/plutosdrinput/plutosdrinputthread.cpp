@@ -31,7 +31,8 @@ PlutoSDRInputThread::PlutoSDRInputThread(uint32_t blocksizeSamples, DevicePlutoS
     m_sampleFifo(sampleFifo),
     m_log2Decim(0),
     m_fcPos(PlutoSDRInputSettings::FC_POS_CENTER),
-    m_phasor(0)
+    m_phasor(0),
+    m_iqOrder(true)
 {
     m_buf     = new qint16[blocksizeSamples*2]; // (I,Q) -> 2 * int16_t
     m_bufConv = new qint16[blocksizeSamples*2]; // (I,Q) -> 2 * int16_t
@@ -139,21 +140,24 @@ void PlutoSDRInputThread::run()
             ihs++;
         }
 
-        //m_sampleFifo->write((unsigned char *) m_buf, ihs*sizeof(int16_t));
-        convert(m_buf, 2*m_blockSizeSamples); // size given in number of int16_t (I and Q interleaved)
+        if (m_iqOrder) {
+            convertIQ(m_buf, 2*m_blockSizeSamples); // size given in number of int16_t (I and Q interleaved)
+        } else {
+            convertQI(m_buf, 2*m_blockSizeSamples);
+        }
     }
 
     m_running = false;
 }
 
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
+void PlutoSDRInputThread::convertIQ(const qint16* buf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
     if (m_log2Decim == 0)
     {
-        m_decimators.decimate1(&it, buf, len);
+        m_decimatorsIQ.decimate1(&it, buf, len);
     }
     else
     {
@@ -162,22 +166,22 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_inf(&it, buf, len);
+                m_decimatorsIQ.decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_decimators.decimate4_inf(&it, buf, len);
+                m_decimatorsIQ.decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_decimators.decimate8_inf(&it, buf, len);
+                m_decimatorsIQ.decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_decimators.decimate16_inf(&it, buf, len);
+                m_decimatorsIQ.decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_decimators.decimate32_inf(&it, buf, len);
+                m_decimatorsIQ.decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_decimators.decimate64_inf(&it, buf, len);
+                m_decimatorsIQ.decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
@@ -188,22 +192,22 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_sup(&it, buf, len);
+                m_decimatorsIQ.decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_decimators.decimate4_sup(&it, buf, len);
+                m_decimatorsIQ.decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_decimators.decimate8_sup(&it, buf, len);
+                m_decimatorsIQ.decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_decimators.decimate16_sup(&it, buf, len);
+                m_decimatorsIQ.decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_decimators.decimate32_sup(&it, buf, len);
+                m_decimatorsIQ.decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_decimators.decimate64_sup(&it, buf, len);
+                m_decimatorsIQ.decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
@@ -214,22 +218,22 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators.decimate2_cen(&it, buf, len);
+                m_decimatorsIQ.decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_decimators.decimate4_cen(&it, buf, len);
+                m_decimatorsIQ.decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_decimators.decimate8_cen(&it, buf, len);
+                m_decimatorsIQ.decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_decimators.decimate16_cen(&it, buf, len);
+                m_decimatorsIQ.decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_decimators.decimate32_cen(&it, buf, len);
+                m_decimatorsIQ.decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_decimators.decimate64_cen(&it, buf, len);
+                m_decimatorsIQ.decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
@@ -240,3 +244,95 @@ void PlutoSDRInputThread::convert(const qint16* buf, qint32 len)
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
+void PlutoSDRInputThread::convertQI(const qint16* buf, qint32 len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    if (m_log2Decim == 0)
+    {
+        m_decimatorsQI.decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_fcPos == 0) // Infra
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI.decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI.decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI.decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI.decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI.decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 1) // Supra
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI.decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI.decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI.decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI.decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI.decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 2) // Center
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI.decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI.decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI.decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI.decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI.decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
+}

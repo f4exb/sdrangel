@@ -27,7 +27,8 @@ PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QOb
     m_dev(dev),
     m_convertBuffer(PERSEUS_NBSAMPLES),
     m_sampleFifo(sampleFifo),
-    m_log2Decim(0)
+    m_log2Decim(0),
+    m_iqOrder(true)
 {
     m_this = this;
     std::fill(m_buf, m_buf + 2*PERSEUS_NBSAMPLES, 0);
@@ -90,20 +91,42 @@ void PerseusThread::run()
 	m_running = false;
 }
 
-void PerseusThread::callback(const uint8_t* buf, qint32 len)
+void PerseusThread::callbackIQ(const uint8_t* buf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
     switch (m_log2Decim)
     {
     case 0:
-        m_decimators32.decimate1(&it, (TripleByteLE<qint32>*) buf, len);
+        m_decimators32IQ.decimate1(&it, (TripleByteLE<qint32>*) buf, len);
         break;
     case 1:
-        m_decimators64.decimate2_cen(&it, (TripleByteLE<qint64>*) buf, len);
+        m_decimators64IQ.decimate2_cen(&it, (TripleByteLE<qint64>*) buf, len);
         break;
     case 2:
-        m_decimators64.decimate4_cen(&it, (TripleByteLE<qint64>*) buf, len);
+        m_decimators64IQ.decimate4_cen(&it, (TripleByteLE<qint64>*) buf, len);
+        break;
+    default:
+        break;
+    }
+
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
+}
+
+void PerseusThread::callbackQI(const uint8_t* buf, qint32 len)
+{
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+    switch (m_log2Decim)
+    {
+    case 0:
+        m_decimators32QI.decimate1(&it, (TripleByteLE<qint32>*) buf, len);
+        break;
+    case 1:
+        m_decimators64QI.decimate2_cen(&it, (TripleByteLE<qint64>*) buf, len);
+        break;
+    case 2:
+        m_decimators64QI.decimate4_cen(&it, (TripleByteLE<qint64>*) buf, len);
         break;
     default:
         break;
@@ -116,7 +139,13 @@ int PerseusThread::rx_callback(void *buf, int buf_size, void *extra)
 {
     (void) extra;
 	qint32 nbIAndQ = buf_size / 3; // 3 bytes per I or Q
-	m_this->callback((uint8_t*) buf, nbIAndQ);
-	return 0;
+
+    if (m_this->m_iqOrder) {
+    	m_this->callbackIQ((uint8_t*) buf, nbIAndQ);
+    } else {
+        m_this->callbackQI((uint8_t*) buf, nbIAndQ);
+    }
+
+    return 0;
 }
 

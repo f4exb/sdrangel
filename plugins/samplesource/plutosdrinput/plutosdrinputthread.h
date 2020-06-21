@@ -42,6 +42,7 @@ public:
     virtual bool isRunning() { return m_running; }
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
     QMutex m_startWaitMutex;
@@ -59,12 +60,14 @@ private:
     unsigned int m_log2Decim; // soft decimation
     int m_fcPos;
     float m_phasor;
+    bool m_iqOrder;
 
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
 
     void run();
-    void convert(const qint16* buf, qint32 len);
-
+    void convertIQ(const qint16* buf, qint32 len);
+    void convertQI(const qint16* buf, qint32 len);
 };
 
 

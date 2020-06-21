@@ -33,6 +33,7 @@ void AirspyHFSettings::resetToDefaults()
 	m_log2Decim = 0;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_bandIndex = 0;
     m_fileRecordName = "";
     m_useReverseAPI = false;
@@ -69,6 +70,7 @@ QByteArray AirspyHFSettings::serialize() const
     s.writeU32(18, m_attenuatorSteps);
 	s.writeBool(19, m_dcBlock);
 	s.writeBool(20, m_iqCorrection);
+    s.writeBool(21, m_iqOrder);
 
 	return s.final();
 }
@@ -115,6 +117,7 @@ bool AirspyHFSettings::deserialize(const QByteArray& data)
         d.readU32(18, &m_attenuatorSteps, 0);
 		d.readBool(19, &m_dcBlock, false);
 		d.readBool(20, &m_iqCorrection, false);
+        d.readBool(21, &m_iqOrder, true);
 
 		return true;
 	}

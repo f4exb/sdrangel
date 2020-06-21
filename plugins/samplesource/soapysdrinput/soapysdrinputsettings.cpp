@@ -37,6 +37,7 @@ void SoapySDRInputSettings::resetToDefaults()
     m_softIQCorrection = false;
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_fileRecordName = "";
     m_antenna = "NONE";
     m_bandwidth = 1000000;
@@ -82,6 +83,7 @@ QByteArray SoapySDRInputSettings::serialize() const
     s.writeString(24, m_reverseAPIAddress);
     s.writeU32(25, m_reverseAPIPort);
     s.writeU32(26, m_reverseAPIDeviceIndex);
+    s.writeBool(27, m_iqOrder);
 
     return s.final();
 }
@@ -144,6 +146,7 @@ bool SoapySDRInputSettings::deserialize(const QByteArray& data)
 
         d.readU32(26, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readBool(27, &m_iqOrder, true);
 
         return true;
     }

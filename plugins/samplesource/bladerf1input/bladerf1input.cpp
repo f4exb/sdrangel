@@ -47,7 +47,7 @@ Bladerf1Input::Bladerf1Input(DeviceAPI *deviceAPI) :
     m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
-	m_bladerfThread(0),
+	m_bladerfThread(nullptr),
 	m_deviceDescription("BladeRFInput"),
 	m_running(false)
 {
@@ -168,6 +168,7 @@ bool Bladerf1Input::start()
 	m_bladerfThread = new Bladerf1InputThread(m_dev, &m_sampleFifo);
 	m_bladerfThread->setLog2Decimation(m_settings.m_log2Decim);
 	m_bladerfThread->setFcPos((int) m_settings.m_fcPos);
+    m_bladerfThread->setIQOrder(m_settings.m_iqOrder);
 
 	m_bladerfThread->startWork();
 
@@ -211,11 +212,11 @@ void Bladerf1Input::stop()
 {
 //	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_bladerfThread != 0)
+	if(m_bladerfThread)
 	{
 		m_bladerfThread->stopWork();
 		delete m_bladerfThread;
-		m_bladerfThread = 0;
+		m_bladerfThread = nullptr;
 	}
 
 	m_running = false;
@@ -529,7 +530,7 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool fo
 	{
         reverseAPIKeys.append("fcPos");
 
-		if (m_bladerfThread != 0)
+		if (m_bladerfThread)
 		{
 			m_bladerfThread->setFcPos((int) settings.m_fcPos);
 			qDebug() << "BladerfInput::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
@@ -541,10 +542,19 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool fo
         reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
-        if (m_bladerfThread != 0)
+        if (m_bladerfThread)
         {
             m_bladerfThread->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "BladerfInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_bladerfThread) {
+            m_bladerfThread->setIQOrder(settings.m_iqOrder);
         }
     }
 

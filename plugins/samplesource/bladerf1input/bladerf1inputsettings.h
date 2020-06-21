@@ -42,6 +42,7 @@ struct BladeRF1InputSettings {
 	bladerf_xb200_filter m_xb200Filter;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+    bool m_iqOrder;
 	QString m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;

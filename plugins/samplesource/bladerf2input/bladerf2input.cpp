@@ -51,7 +51,7 @@ BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
     m_settings(),
     m_deviceDescription("BladeRF2Input"),
     m_running(false),
-    m_thread(0)
+    m_thread(nullptr)
 {
     openDevice();
 
@@ -212,7 +212,7 @@ void BladeRF2Input::init()
 
 BladeRF2InputThread *BladeRF2Input::findThread()
 {
-    if (m_thread == 0) // this does not own the thread
+    if (!m_thread) // this does not own the thread
     {
         BladeRF2InputThread *bladerf2InputThread = 0;
 
@@ -254,7 +254,7 @@ void BladeRF2Input::moveThreadToBuddy()
         if (buddySource)
         {
             buddySource->setThread(m_thread);
-            m_thread = 0;  // zero for others
+            m_thread = nullptr;  // zero for others
         }
     }
 }
@@ -326,6 +326,7 @@ bool BladeRF2Input::start()
             delete bladerf2InputThread;
             bladerf2InputThread = new BladeRF2InputThread(m_deviceShared.m_dev->getDev(), requestedChannel+1);
             m_thread = bladerf2InputThread; // take ownership
+            bladerf2InputThread->setIQOrder(m_settings.m_iqOrder);
 
             for (int i = 0; i < nbOriginalChannels; i++) // restore original FIFO references
             {
@@ -426,7 +427,7 @@ void BladeRF2Input::stop()
         qDebug("BladeRF2Input::stop: SI mode. Just stop and delete the thread");
         bladerf2InputThread->stopWork();
         delete bladerf2InputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
@@ -456,7 +457,7 @@ void BladeRF2Input::stop()
         }
 
         delete bladerf2InputThread;
-        m_thread = 0;
+        m_thread = nullptr;
 
         if (stillActiveFIFO)
         {
@@ -861,7 +862,7 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         reverseAPIKeys.append("fcPos");
         BladeRF2InputThread *inputThread = findThread();
 
-        if (inputThread != 0)
+        if (inputThread)
         {
             inputThread->setFcPos(requestedChannel, (int) settings.m_fcPos);
             qDebug() << "BladeRF2Input::applySettings: set fc pos (enum) to " << (int) settings.m_fcPos;
@@ -874,10 +875,20 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
         forwardChangeOwnDSP = true;
         BladeRF2InputThread *inputThread = findThread();
 
-        if (inputThread != 0)
+        if (inputThread)
         {
             inputThread->setLog2Decimation(requestedChannel, settings.m_log2Decim);
             qDebug() << "BladeRF2Input::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+        BladeRF2InputThread *inputThread = findThread();
+
+        if (inputThread) {
+            inputThread->setIQOrder(settings.m_iqOrder);
         }
     }
 

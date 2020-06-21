@@ -33,7 +33,8 @@ FCDProPlusThread::FCDProPlusThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIF
 	m_log2Decim(0),
 	m_fcPos(2),
 	m_convertBuffer(fcd_traits<ProPlus>::convBufSize), // nb samples
-	m_sampleFifo(sampleFifo)
+	m_sampleFifo(sampleFifo),
+    m_iqOrder(true)
 {
 	start();
 }
@@ -79,7 +80,12 @@ void FCDProPlusThread::run()
 
 	while (m_running)
 	{
-	    work(fcd_traits<ProPlus>::convBufSize);
+        if (m_iqOrder) {
+    	    workIQ(fcd_traits<ProPlus>::convBufSize);
+        } else {
+            workQI(fcd_traits<ProPlus>::convBufSize);
+        }
+
 	    std::this_thread::sleep_for(std::chrono::microseconds(100));
 	}
 
@@ -87,14 +93,14 @@ void FCDProPlusThread::run()
 	m_running = false;
 }
 
-void FCDProPlusThread::work(unsigned int n_items)
+void FCDProPlusThread::workIQ(unsigned int n_items)
 {
     uint32_t nbRead = m_fcdFIFO->read((unsigned char *) m_buf, n_items); // number of samples
     SampleVector::iterator it = m_convertBuffer.begin();
 
 	if (m_log2Decim == 0)
 	{
-		m_decimators.decimate1(&it, m_buf, 2*nbRead);
+		m_decimatorsIQ.decimate1(&it, m_buf, 2*nbRead);
 	}
 	else
 	{
@@ -103,22 +109,22 @@ void FCDProPlusThread::work(unsigned int n_items)
 			switch (m_log2Decim)
 			{
 			case 1:
-				m_decimators.decimate2_inf(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate2_inf(&it, m_buf, 2*nbRead);
 				break;
 			case 2:
-				m_decimators.decimate4_inf(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate4_inf(&it, m_buf, 2*nbRead);
 				break;
 			case 3:
-				m_decimators.decimate8_inf(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate8_inf(&it, m_buf, 2*nbRead);
 				break;
 			case 4:
-				m_decimators.decimate16_inf(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate16_inf(&it, m_buf, 2*nbRead);
 				break;
             case 5:
-                m_decimators.decimate32_inf(&it, m_buf, 2*nbRead);
+                m_decimatorsIQ.decimate32_inf(&it, m_buf, 2*nbRead);
                 break;
             case 6:
-                m_decimators.decimate64_inf(&it, m_buf, 2*nbRead);
+                m_decimatorsIQ.decimate64_inf(&it, m_buf, 2*nbRead);
                 break;
 			default:
 				break;
@@ -129,22 +135,22 @@ void FCDProPlusThread::work(unsigned int n_items)
 			switch (m_log2Decim)
 			{
 			case 1:
-				m_decimators.decimate2_sup(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate2_sup(&it, m_buf, 2*nbRead);
 				break;
 			case 2:
-				m_decimators.decimate4_sup(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate4_sup(&it, m_buf, 2*nbRead);
 				break;
 			case 3:
-				m_decimators.decimate8_sup(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate8_sup(&it, m_buf, 2*nbRead);
 				break;
 			case 4:
-				m_decimators.decimate16_sup(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate16_sup(&it, m_buf, 2*nbRead);
 				break;
             case 5:
-                m_decimators.decimate32_sup(&it, m_buf, 2*nbRead);
+                m_decimatorsIQ.decimate32_sup(&it, m_buf, 2*nbRead);
                 break;
             case 6:
-                m_decimators.decimate64_sup(&it, m_buf, 2*nbRead);
+                m_decimatorsIQ.decimate64_sup(&it, m_buf, 2*nbRead);
                 break;
 			default:
 				break;
@@ -155,22 +161,116 @@ void FCDProPlusThread::work(unsigned int n_items)
 			switch (m_log2Decim)
 			{
 			case 1:
-				m_decimators.decimate2_cen(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate2_cen(&it, m_buf, 2*nbRead);
 				break;
 			case 2:
-				m_decimators.decimate4_cen(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate4_cen(&it, m_buf, 2*nbRead);
 				break;
 			case 3:
-				m_decimators.decimate8_cen(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate8_cen(&it, m_buf, 2*nbRead);
 				break;
 			case 4:
-				m_decimators.decimate16_cen(&it, m_buf, 2*nbRead);
+				m_decimatorsIQ.decimate16_cen(&it, m_buf, 2*nbRead);
 				break;
             case 5:
-                m_decimators.decimate32_cen(&it, m_buf, 2*nbRead);
+                m_decimatorsIQ.decimate32_cen(&it, m_buf, 2*nbRead);
                 break;
             case 6:
-                m_decimators.decimate64_cen(&it, m_buf, 2*nbRead);
+                m_decimatorsIQ.decimate64_cen(&it, m_buf, 2*nbRead);
+                break;
+			default:
+				break;
+			}
+		}
+	}
+
+    m_sampleFifo->write(m_convertBuffer.begin(), it);
+}
+
+void FCDProPlusThread::workQI(unsigned int n_items)
+{
+    uint32_t nbRead = m_fcdFIFO->read((unsigned char *) m_buf, n_items); // number of samples
+    SampleVector::iterator it = m_convertBuffer.begin();
+
+	if (m_log2Decim == 0)
+	{
+		m_decimatorsQI.decimate1(&it, m_buf, 2*nbRead);
+	}
+	else
+	{
+		if (m_fcPos == 0) // Infradyne
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				m_decimatorsQI.decimate2_inf(&it, m_buf, 2*nbRead);
+				break;
+			case 2:
+				m_decimatorsQI.decimate4_inf(&it, m_buf, 2*nbRead);
+				break;
+			case 3:
+				m_decimatorsQI.decimate8_inf(&it, m_buf, 2*nbRead);
+				break;
+			case 4:
+				m_decimatorsQI.decimate16_inf(&it, m_buf, 2*nbRead);
+				break;
+            case 5:
+                m_decimatorsQI.decimate32_inf(&it, m_buf, 2*nbRead);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_inf(&it, m_buf, 2*nbRead);
+                break;
+			default:
+				break;
+			}
+		}
+		else if (m_fcPos == 1) // Supradyne
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				m_decimatorsQI.decimate2_sup(&it, m_buf, 2*nbRead);
+				break;
+			case 2:
+				m_decimatorsQI.decimate4_sup(&it, m_buf, 2*nbRead);
+				break;
+			case 3:
+				m_decimatorsQI.decimate8_sup(&it, m_buf, 2*nbRead);
+				break;
+			case 4:
+				m_decimatorsQI.decimate16_sup(&it, m_buf, 2*nbRead);
+				break;
+            case 5:
+                m_decimatorsQI.decimate32_sup(&it, m_buf, 2*nbRead);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_sup(&it, m_buf, 2*nbRead);
+                break;
+			default:
+				break;
+			}
+		}
+		else // Centered
+		{
+			switch (m_log2Decim)
+			{
+			case 1:
+				m_decimatorsQI.decimate2_cen(&it, m_buf, 2*nbRead);
+				break;
+			case 2:
+				m_decimatorsQI.decimate4_cen(&it, m_buf, 2*nbRead);
+				break;
+			case 3:
+				m_decimatorsQI.decimate8_cen(&it, m_buf, 2*nbRead);
+				break;
+			case 4:
+				m_decimatorsQI.decimate16_cen(&it, m_buf, 2*nbRead);
+				break;
+            case 5:
+                m_decimatorsQI.decimate32_cen(&it, m_buf, 2*nbRead);
+                break;
+            case 6:
+                m_decimatorsQI.decimate64_cen(&it, m_buf, 2*nbRead);
                 break;
 			default:
 				break;
