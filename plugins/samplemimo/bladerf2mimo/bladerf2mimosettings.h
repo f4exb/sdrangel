@@ -44,6 +44,7 @@ struct BladeRF2MIMOSettings {
     bool     m_iqCorrection;
     bool     m_rxTransverterMode;
     qint64   m_rxTransverterDeltaFrequency;
+    bool     m_iqOrder; //!< true: IQ - false: QI
 
     quint64  m_txCenterFrequency;
     quint32  m_log2Interp;

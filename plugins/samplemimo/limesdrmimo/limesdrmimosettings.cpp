@@ -44,6 +44,7 @@ void LimeSDRMIMOSettings::resetToDefaults()
     m_iqCorrection = false;
     m_rxTransverterMode = false;
     m_rxTransverterDeltaFrequency = 0;
+    m_iqOrder = true;
     m_ncoEnableRx = false;
     m_ncoFrequencyRx = 0;
 
@@ -112,6 +113,7 @@ QByteArray LimeSDRMIMOSettings::serialize() const
     s.writeS64(26, m_rxTransverterDeltaFrequency);
     s.writeBool(27, m_ncoEnableRx);
     s.writeS32(28, m_ncoFrequencyRx);
+    s.writeBool(29, m_iqOrder);
 
     s.writeFloat(30, m_lpfBWRx0);
     s.writeBool(31, m_lpfFIREnableRx0);
@@ -201,6 +203,7 @@ bool LimeSDRMIMOSettings::deserialize(const QByteArray& data)
         d.readS64(26, &m_rxTransverterDeltaFrequency, 0);
         d.readBool(27, &m_ncoEnableRx, false);
         d.readS32(28, &m_ncoFrequencyRx, 0);
+        d.readBool(29, &m_iqOrder, true);
 
         d.readFloat(30, &m_lpfBWRx0, 1.5e6);
         d.readBool(31, &m_lpfFIREnableRx0, false);

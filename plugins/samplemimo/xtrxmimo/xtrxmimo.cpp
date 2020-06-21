@@ -137,6 +137,7 @@ bool XTRXMIMO::startRx()
     m_sampleMIFifo.reset();
     m_sourceThread->setFifo(&m_sampleMIFifo);
     m_sourceThread->setLog2Decimation(m_settings.m_log2SoftDecim);
+    m_sourceThread->setIQOrder(m_settings.m_iqOrder);
 	m_sourceThread->startWork();
 	mutexLocker.unlock();
 	m_runningRx = true;
@@ -582,6 +583,15 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         {
             m_sourceThread->setLog2Decimation(settings.m_log2SoftDecim);
             qDebug() << "XTRXMIMO::applySettings: set soft decimation to " << (1<<settings.m_log2SoftDecim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_sourceThread) {
+            m_sourceThread->setIQOrder(settings.m_iqOrder);
         }
     }
 

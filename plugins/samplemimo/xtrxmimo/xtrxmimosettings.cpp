@@ -43,6 +43,7 @@ void XTRXMIMOSettings::resetToDefaults()
     m_ncoEnableRx = false;
     m_ncoFrequencyRx = 0;
     m_antennaPathRx = RXANT_LO;
+    m_iqOrder = true;
     // Rx0
     m_lpfBWRx0 = 4.5e6f;
     m_gainRx0 = 50;
@@ -98,6 +99,7 @@ QByteArray XTRXMIMOSettings::serialize() const
     s.writeS32(25, m_ncoFrequencyRx);
     s.writeS32(26, (int) m_antennaPathRx);
     s.writeDouble(27, m_rxDevSampleRate);
+    s.writeBool(28, m_iqOrder);
     // Rx0
     s.writeFloat(30, m_lpfBWRx0);
     s.writeU32(31, m_gainRx0);
@@ -172,6 +174,7 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
         d.readS32(26, &intval, 0);
         m_antennaPathRx = (RxAntenna) intval;
         d.readDouble(27, &m_rxDevSampleRate, 5e6);
+        d.readBool(28, &m_iqOrder, true);
         // Rx0
         d.readFloat(30, &m_lpfBWRx0, 1.5e6);
         d.readU32(31, &m_gainRx0, 50);

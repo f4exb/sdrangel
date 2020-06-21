@@ -24,7 +24,8 @@ LimeSDRMIThread::LimeSDRMIThread(lms_stream_t* stream0, lms_stream_t* stream1, Q
     m_running(false),
     m_stream0(stream0),
     m_stream1(stream1),
-    m_sampleFifo(nullptr)
+    m_sampleFifo(nullptr),
+    m_iqOrder(true)
 {
     qDebug("LimeSDRMIThread::LimeSDRMIThread");
 
@@ -168,8 +169,17 @@ void LimeSDRMIThread::run()
             res[1] = DeviceLimeSDR::blockSize;
         }
 
-        lengths[0] = channelCallback(m_buf0, 2*res[0], 0);
-        lengths[1] = channelCallback(m_buf1, 2*res[1], 1);
+        if (m_iqOrder)
+        {
+            lengths[0] = channelCallbackIQ(m_buf0, 2*res[0], 0);
+            lengths[1] = channelCallbackIQ(m_buf1, 2*res[1], 1);
+        }
+        else
+        {
+            lengths[0] = channelCallbackQI(m_buf0, 2*res[0], 0);
+            lengths[1] = channelCallbackQI(m_buf1, 2*res[1], 1);
+        }
+
 
         if (lengths[0] == lengths[1])
         {
@@ -186,35 +196,73 @@ void LimeSDRMIThread::run()
     m_running = false;
 }
 
-int LimeSDRMIThread::channelCallback(const qint16* buf, qint32 len, int channel)
+int LimeSDRMIThread::channelCallbackIQ(const qint16* buf, qint32 len, int channel)
 {
     SampleVector::iterator it = m_convertBuffer[channel].begin();
 
     if (m_log2Decim == 0)
     {
-        m_decimators[channel].decimate1(&it, buf, len);
+        m_decimatorsIQ[channel].decimate1(&it, buf, len);
     }
     else
     {
         switch (m_log2Decim)
         {
         case 1:
-            m_decimators[channel].decimate2_cen(&it, buf, len);
+            m_decimatorsIQ[channel].decimate2_cen(&it, buf, len);
             break;
         case 2:
-            m_decimators[channel].decimate4_cen(&it, buf, len);
+            m_decimatorsIQ[channel].decimate4_cen(&it, buf, len);
             break;
         case 3:
-            m_decimators[channel].decimate8_cen(&it, buf, len);
+            m_decimatorsIQ[channel].decimate8_cen(&it, buf, len);
             break;
         case 4:
-            m_decimators[channel].decimate16_cen(&it, buf, len);
+            m_decimatorsIQ[channel].decimate16_cen(&it, buf, len);
             break;
         case 5:
-            m_decimators[channel].decimate32_cen(&it, buf, len);
+            m_decimatorsIQ[channel].decimate32_cen(&it, buf, len);
             break;
         case 6:
-            m_decimators[channel].decimate64_cen(&it, buf, len);
+            m_decimatorsIQ[channel].decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return it - m_convertBuffer[channel].begin();
+}
+
+int LimeSDRMIThread::channelCallbackQI(const qint16* buf, qint32 len, int channel)
+{
+    SampleVector::iterator it = m_convertBuffer[channel].begin();
+
+    if (m_log2Decim == 0)
+    {
+        m_decimatorsQI[channel].decimate1(&it, buf, len);
+    }
+    else
+    {
+        switch (m_log2Decim)
+        {
+        case 1:
+            m_decimatorsQI[channel].decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_decimatorsQI[channel].decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_decimatorsQI[channel].decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_decimatorsQI[channel].decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_decimatorsQI[channel].decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_decimatorsQI[channel].decimate64_cen(&it, buf, len);
             break;
         default:
             break;

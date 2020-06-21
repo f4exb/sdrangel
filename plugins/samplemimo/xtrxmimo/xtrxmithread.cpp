@@ -27,7 +27,8 @@ XTRXMIThread::XTRXMIThread(struct xtrx_dev *dev, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dev(dev),
-    m_sampleFifo(nullptr)
+    m_sampleFifo(nullptr),
+    m_iqOrder(true)
 {
     qDebug("XTRXMIThread::XTRXMIThread");
 
@@ -134,8 +135,17 @@ void XTRXMIThread::run()
             qDebug("XTRXInputThread::run: overflow");
         }
 
-        lengths[0] = callbackSI(0, (const qint16*) buffs[0], 2*nfo.out_samples);
-        lengths[1] = callbackSI(1, (const qint16*) buffs[1], 2*nfo.out_samples);
+        if (m_iqOrder)
+        {
+            lengths[0] = callbackSIIQ(0, (const qint16*) buffs[0], 2*nfo.out_samples);
+            lengths[1] = callbackSIIQ(1, (const qint16*) buffs[1], 2*nfo.out_samples);
+        }
+        else
+        {
+            lengths[0] = callbackSIQI(0, (const qint16*) buffs[0], 2*nfo.out_samples);
+            lengths[1] = callbackSIQI(1, (const qint16*) buffs[1], 2*nfo.out_samples);
+        }
+
 
         if (lengths[0] == lengths[1])
         {
@@ -173,35 +183,73 @@ unsigned int XTRXMIThread::getLog2Decimation() const
     return m_log2Decim;
 }
 
-int XTRXMIThread::callbackSI(unsigned int channel, const qint16* buf, qint32 len)
+int XTRXMIThread::callbackSIIQ(unsigned int channel, const qint16* buf, qint32 len)
 {
     SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
 
     if (m_log2Decim == 0)
     {
-        m_channels[channel].m_decimators.decimate1(&it, buf, len);
+        m_channels[channel].m_decimatorsIQ.decimate1(&it, buf, len);
     }
     else
     {
         switch (m_log2Decim)
         {
         case 1:
-            m_channels[channel].m_decimators.decimate2_cen(&it, buf, len);
+            m_channels[channel].m_decimatorsIQ.decimate2_cen(&it, buf, len);
             break;
         case 2:
-            m_channels[channel].m_decimators.decimate4_cen(&it, buf, len);
+            m_channels[channel].m_decimatorsIQ.decimate4_cen(&it, buf, len);
             break;
         case 3:
-            m_channels[channel].m_decimators.decimate8_cen(&it, buf, len);
+            m_channels[channel].m_decimatorsIQ.decimate8_cen(&it, buf, len);
             break;
         case 4:
-            m_channels[channel].m_decimators.decimate16_cen(&it, buf, len);
+            m_channels[channel].m_decimatorsIQ.decimate16_cen(&it, buf, len);
             break;
         case 5:
-            m_channels[channel].m_decimators.decimate32_cen(&it, buf, len);
+            m_channels[channel].m_decimatorsIQ.decimate32_cen(&it, buf, len);
             break;
         case 6:
-            m_channels[channel].m_decimators.decimate64_cen(&it, buf, len);
+            m_channels[channel].m_decimatorsIQ.decimate64_cen(&it, buf, len);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return it - m_channels[channel].m_convertBuffer.begin();
+}
+
+int XTRXMIThread::callbackSIQI(unsigned int channel, const qint16* buf, qint32 len)
+{
+    SampleVector::iterator it = m_channels[channel].m_convertBuffer.begin();
+
+    if (m_log2Decim == 0)
+    {
+        m_channels[channel].m_decimatorsQI.decimate1(&it, buf, len);
+    }
+    else
+    {
+        switch (m_log2Decim)
+        {
+        case 1:
+            m_channels[channel].m_decimatorsQI.decimate2_cen(&it, buf, len);
+            break;
+        case 2:
+            m_channels[channel].m_decimatorsQI.decimate4_cen(&it, buf, len);
+            break;
+        case 3:
+            m_channels[channel].m_decimatorsQI.decimate8_cen(&it, buf, len);
+            break;
+        case 4:
+            m_channels[channel].m_decimatorsQI.decimate16_cen(&it, buf, len);
+            break;
+        case 5:
+            m_channels[channel].m_decimatorsQI.decimate32_cen(&it, buf, len);
+            break;
+        case 6:
+            m_channels[channel].m_decimatorsQI.decimate64_cen(&it, buf, len);
             break;
         default:
             break;

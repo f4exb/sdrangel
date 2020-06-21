@@ -71,6 +71,7 @@ struct LimeSDRMIMOSettings
     bool      m_iqCorrection;
     bool      m_rxTransverterMode;
     qint64    m_rxTransverterDeltaFrequency;
+    bool      m_iqOrder;
     bool       m_ncoEnableRx;     //!< Rx Enable TSP NCO and mixing
     int        m_ncoFrequencyRx;  //!< Rx Actual NCO frequency (the resulting frequency with mixing is displayed)
 

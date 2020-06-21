@@ -43,12 +43,14 @@ public:
     unsigned int getLog2Decimation() const;
     void setFifo(SampleMIFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
     SampleMIFifo *getFifo() { return m_sampleFifo; }
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
     struct Channel
     {
         SampleVector m_convertBuffer;
-        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12> m_decimators;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+        Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
     };
 
     QMutex m_startWaitMutex;
@@ -61,9 +63,11 @@ private:
     std::vector<SampleVector::const_iterator> m_vBegin;
     SampleMIFifo* m_sampleFifo;
     unsigned int m_log2Decim;
+    bool m_iqOrder;
 
     void run();
-    int callbackSI(unsigned int channel, const qint16* buf, qint32 len);
+    int callbackSIIQ(unsigned int channel, const qint16* buf, qint32 len);
+    int callbackSIQI(unsigned int channel, const qint16* buf, qint32 len);
 };
 
 #endif // PLUGINS_SAMPLEMIMO_XTRXMIMO_XTRXMITHREAD_H_

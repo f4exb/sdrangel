@@ -61,6 +61,7 @@ struct XTRXMIMOSettings
     bool     m_ncoEnableRx;     //!< Enable TSP NCO and mixing
     int      m_ncoFrequencyRx;  //!< Actual NCO frequency (the resulting frequency with mixing is displayed)
     RxAntenna m_antennaPathRx;
+    bool     m_iqOrder;
     // Rx0
     float    m_lpfBWRx0;        //!< LMS analog lowpass filter bandwidth (Hz)
     uint32_t m_gainRx0;         //!< Optimally distributed gain (dB)

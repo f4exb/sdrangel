@@ -42,6 +42,7 @@ void BladeRF2MIMOSettings::resetToDefaults()
     m_iqCorrection = false;
     m_rxTransverterMode = false;
     m_rxTransverterDeltaFrequency = 0;
+    m_iqOrder = true;
 
     m_txCenterFrequency = 435000*1000;
     m_log2Interp = 0;
@@ -80,6 +81,7 @@ QByteArray BladeRF2MIMOSettings::serialize() const
     s.writeBool(20, m_iqCorrection);
     s.writeBool(21, m_rxTransverterMode);
     s.writeS64(22, m_rxTransverterDeltaFrequency);
+    s.writeBool(23, m_iqOrder);
 
     s.writeU64(30, m_txCenterFrequency);
     s.writeU32(31, m_log2Interp);
@@ -132,6 +134,7 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
         d.readBool(20, &m_iqCorrection);
         d.readBool(21, &m_rxTransverterMode, false);
         d.readS64(22, &m_rxTransverterDeltaFrequency, 0);
+        d.readBool(23, &m_iqOrder, true);
 
         d.readU64(30, &m_txCenterFrequency, 435000*1000);
         d.readU32(31, &m_log2Interp);

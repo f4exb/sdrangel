@@ -26,7 +26,8 @@ BladeRF2MIThread::BladeRF2MIThread(struct bladerf* dev, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_dev(dev),
-    m_sampleFifo(nullptr)
+    m_sampleFifo(nullptr),
+    m_iqOrder(true)
 {
     qDebug("BladeRF2MIThread::BladeRF2MIThread");
     m_buf = new qint16[2*DeviceBladeRF2::blockSize*2];
@@ -135,7 +136,12 @@ void BladeRF2MIThread::callback(const qint16* buf, qint32 samplesPerChannel)
 
     for (unsigned int channel = 0; channel < 2; channel++)
     {
-        lengths[channel] = channelCallback(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
+        if (m_iqOrder) {
+            lengths[channel] = channelCallbackIQ(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
+        } else {
+            lengths[channel] = channelCallbackQI(&buf[2*samplesPerChannel*channel], 2*samplesPerChannel, channel);
+        }
+
         vbegin.push_back(m_convertBuffer[channel].begin());
     }
 
@@ -150,13 +156,13 @@ void BladeRF2MIThread::callback(const qint16* buf, qint32 samplesPerChannel)
     }
 }
 
-int BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel)
+int BladeRF2MIThread::channelCallbackIQ(const qint16* buf, qint32 len, int channel)
 {
     SampleVector::iterator it = m_convertBuffer[channel].begin();
 
     if (m_log2Decim == 0)
     {
-        m_decimators[channel].decimate1(&it, buf, len);
+        m_decimatorsIQ[channel].decimate1(&it, buf, len);
     }
     else
     {
@@ -165,22 +171,22 @@ int BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators[channel].decimate2_inf(&it, buf, len);
+                m_decimatorsIQ[channel].decimate2_inf(&it, buf, len);
                 break;
             case 2:
-                m_decimators[channel].decimate4_inf(&it, buf, len);
+                m_decimatorsIQ[channel].decimate4_inf(&it, buf, len);
                 break;
             case 3:
-                m_decimators[channel].decimate8_inf(&it, buf, len);
+                m_decimatorsIQ[channel].decimate8_inf(&it, buf, len);
                 break;
             case 4:
-                m_decimators[channel].decimate16_inf(&it, buf, len);
+                m_decimatorsIQ[channel].decimate16_inf(&it, buf, len);
                 break;
             case 5:
-                m_decimators[channel].decimate32_inf(&it, buf, len);
+                m_decimatorsIQ[channel].decimate32_inf(&it, buf, len);
                 break;
             case 6:
-                m_decimators[channel].decimate64_inf(&it, buf, len);
+                m_decimatorsIQ[channel].decimate64_inf(&it, buf, len);
                 break;
             default:
                 break;
@@ -191,22 +197,22 @@ int BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators[channel].decimate2_sup(&it, buf, len);
+                m_decimatorsIQ[channel].decimate2_sup(&it, buf, len);
                 break;
             case 2:
-                m_decimators[channel].decimate4_sup(&it, buf, len);
+                m_decimatorsIQ[channel].decimate4_sup(&it, buf, len);
                 break;
             case 3:
-                m_decimators[channel].decimate8_sup(&it, buf, len);
+                m_decimatorsIQ[channel].decimate8_sup(&it, buf, len);
                 break;
             case 4:
-                m_decimators[channel].decimate16_sup(&it, buf, len);
+                m_decimatorsIQ[channel].decimate16_sup(&it, buf, len);
                 break;
             case 5:
-                m_decimators[channel].decimate32_sup(&it, buf, len);
+                m_decimatorsIQ[channel].decimate32_sup(&it, buf, len);
                 break;
             case 6:
-                m_decimators[channel].decimate64_sup(&it, buf, len);
+                m_decimatorsIQ[channel].decimate64_sup(&it, buf, len);
                 break;
             default:
                 break;
@@ -217,22 +223,115 @@ int BladeRF2MIThread::channelCallback(const qint16* buf, qint32 len, int channel
             switch (m_log2Decim)
             {
             case 1:
-                m_decimators[channel].decimate2_cen(&it, buf, len);
+                m_decimatorsIQ[channel].decimate2_cen(&it, buf, len);
                 break;
             case 2:
-                m_decimators[channel].decimate4_cen(&it, buf, len);
+                m_decimatorsIQ[channel].decimate4_cen(&it, buf, len);
                 break;
             case 3:
-                m_decimators[channel].decimate8_cen(&it, buf, len);
+                m_decimatorsIQ[channel].decimate8_cen(&it, buf, len);
                 break;
             case 4:
-                m_decimators[channel].decimate16_cen(&it, buf, len);
+                m_decimatorsIQ[channel].decimate16_cen(&it, buf, len);
                 break;
             case 5:
-                m_decimators[channel].decimate32_cen(&it, buf, len);
+                m_decimatorsIQ[channel].decimate32_cen(&it, buf, len);
                 break;
             case 6:
-                m_decimators[channel].decimate64_cen(&it, buf, len);
+                m_decimatorsIQ[channel].decimate64_cen(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    return it - m_convertBuffer[channel].begin();
+}
+
+int BladeRF2MIThread::channelCallbackQI(const qint16* buf, qint32 len, int channel)
+{
+    SampleVector::iterator it = m_convertBuffer[channel].begin();
+
+    if (m_log2Decim == 0)
+    {
+        m_decimatorsQI[channel].decimate1(&it, buf, len);
+    }
+    else
+    {
+        if (m_fcPos == 0) // Infra
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI[channel].decimate2_inf(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI[channel].decimate4_inf(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI[channel].decimate8_inf(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI[channel].decimate16_inf(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI[channel].decimate32_inf(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI[channel].decimate64_inf(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 1) // Supra
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI[channel].decimate2_sup(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI[channel].decimate4_sup(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI[channel].decimate8_sup(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI[channel].decimate16_sup(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI[channel].decimate32_sup(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI[channel].decimate64_sup(&it, buf, len);
+                break;
+            default:
+                break;
+            }
+        }
+        else if (m_fcPos == 2) // Center
+        {
+            switch (m_log2Decim)
+            {
+            case 1:
+                m_decimatorsQI[channel].decimate2_cen(&it, buf, len);
+                break;
+            case 2:
+                m_decimatorsQI[channel].decimate4_cen(&it, buf, len);
+                break;
+            case 3:
+                m_decimatorsQI[channel].decimate8_cen(&it, buf, len);
+                break;
+            case 4:
+                m_decimatorsQI[channel].decimate16_cen(&it, buf, len);
+                break;
+            case 5:
+                m_decimatorsQI[channel].decimate32_cen(&it, buf, len);
+                break;
+            case 6:
+                m_decimatorsQI[channel].decimate64_cen(&it, buf, len);
                 break;
             default:
                 break;
