@@ -60,7 +60,7 @@ AirspyHFReport:
     sampleRates:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/SampleRate"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/SampleRate"
 
 AirspyHFActions:
   description: AirspyHF

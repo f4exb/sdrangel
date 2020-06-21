@@ -45,6 +45,12 @@ LimeSdrInputSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     fileRecordName:
       type: string
     gpioDir:
@@ -165,6 +171,12 @@ LimeSdrMIMOSettings:
     rxTransverterDeltaFrequency:
       type: integer
       format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     ncoEnableRx:
       description: Boolean 1 to enable TSP NCO and mixing else 0
       type: integer

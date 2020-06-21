@@ -15,70 +15,70 @@ DeviceSettings:
       description: Optional for reverse API. This is the device set index from where the message comes from.
       type: integer
     airspySettings:
-      $ref: "/doc/swagger/include/Airspy.yaml#/AirspySettings"
+      $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspySettings"
     airspyHFSettings:
-      $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
     bladeRF1InputSettings:
-      $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
     bladeRF2InputSettings:
-      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputSettings"
     bladeRF1OutputSettings:
-      $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1OutputSettings"
     bladeRF2OutputSettings:
-      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputSettings"
     bladeRF2MIMOSettings:
-      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2MIMOSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2MIMOSettings"
     fcdProSettings:
-      $ref: "/doc/swagger/include/FCDPro.yaml#/FCDProSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/FCDPro.yaml#/FCDProSettings"
     fcdProPlusSettings:
-      $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
     fileInputSettings:
-      $ref: "/doc/swagger/include/FileInput.yaml#/FileInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputSettings"
     hackRFInputSettings:
-      $ref: "/doc/swagger/include/HackRF.yaml#/HackRFInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
     hackRFOutputSettings:
-      $ref: "/doc/swagger/include/HackRF.yaml#/HackRFOutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/HackRF.yaml#/HackRFOutputSettings"
     kiwiSDRSettings:
-      $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRSettings"
     limeSdrInputSettings:
-      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
     limeSdrOutputSettings:
-      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
     limeSdrMIMOSettings:
-      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
     localInputSettings:
-      $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
     localOutputSettings:
-      $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
     perseusSettings:
-      $ref: "/doc/swagger/include/Perseus.yaml#/PerseusSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
     plutoSdrInputSettings:
-      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
     plutoSdrOutputSettings:
-      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
     rtlSdrSettings:
-      $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
     remoteOutputSettings:
-      $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputSettings"
     remoteInputSettings:
-      $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
     sdrPlaySettings:
-      $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+      $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
     sigMFFileInputSettings:
-      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
     soapySDRInputSettings:
-      $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
     soapySDROutputSettings:
-      $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
     testSourceSettings:
-      $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
     testMISettings:
-      $ref: "/doc/swagger/include/TestMI.yaml#/TestMISettings"
+      $ref: "http://swgserver:8081/api/swagger/include/TestMI.yaml#/TestMISettings"
     testMOSyncSettings:
-      $ref: "/doc/swagger/include/TestMOSync.yaml#/TestMOSyncSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/TestMOSync.yaml#/TestMOSyncSettings"
     xtrxInputSettings:
-      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputSettings"
     xtrxOutputSettings:
-      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
     xtrxMIMOSettings:
-      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"

@@ -44,7 +44,7 @@ AMModSettings:
     reverseAPIChannelIndex:
       type: integer
     cwKeyer:
-      $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+      $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
 
 AMModReport:
   description: AMMod

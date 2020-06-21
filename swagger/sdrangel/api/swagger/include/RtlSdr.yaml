@@ -57,7 +57,7 @@ RtlSdrReport:
     gains:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Gain"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Gain"
 
 RtlSdrActions:
   description: RTLSDR

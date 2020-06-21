@@ -39,6 +39,6 @@ ChannelAnalyzerSettings:
     title:
       type: string
     spectrumConfig:
-      $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     scopeConfig:
-      $ref: "http://localhost:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"

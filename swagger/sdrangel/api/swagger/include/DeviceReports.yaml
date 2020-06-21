@@ -12,50 +12,50 @@ DeviceReport:
       description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
       type: integer
     airspyReport:
-      $ref: "http://localhost:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
+      $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
     airspyHFReport:
-      $ref: "http://localhost:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+      $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
     bladeRF2InputReport:
-      $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
     bladeRF2OutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
     fileInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
     limeSdrInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
     kiwiSDRReport:
-      $ref: "http://localhost:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+      $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
     limeSdrOutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
     limeSdrMIMOReport:
-      $ref: "http://localhost:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
     localInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
     localOutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputReport"
     perseusReport:
-      $ref: "http://localhost:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
+      $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
     plutoSdrInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
     plutoSdrOutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
     rtlSdrReport:
-      $ref: "http://localhost:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+      $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
     remoteOutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
     remoteInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
     sdrPlayReport:
-      $ref: "http://localhost:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+      $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
     sigMFFileInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
     soapySDRInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     soapySDROutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     xtrxInputReport:
-      $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
     xtrxOutputReport:
-      $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
     xtrxMIMOReport:
-      $ref: "http://localhost:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
+      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOReport"

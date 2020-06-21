@@ -37,6 +37,12 @@ AirspySettings:
     transverterDeltaFrequency:
       type: integer
       format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     fileRecordName:
       type: string
     useReverseAPI:
@@ -55,7 +61,7 @@ AirspyReport:
     sampleRates:
       type: array
       items:
-        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/SampleRate"
 
 AirspyActions:
   description: Airspy
