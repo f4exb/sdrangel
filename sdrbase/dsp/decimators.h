@@ -388,7 +388,7 @@ struct TripleByteLE<qint64>
 #endif
 
 /** Decimators with integer input and integer output */
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
 class Decimators
 {
 public:
@@ -442,58 +442,60 @@ public:
 
 private:
 #ifdef SDR_RX_SAMPLE_24BIT
-    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator2;  // 1st stages
-    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator4;  // 2nd stages
-    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator8;  // 3rd stages
-    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator16; // 4th stages
-    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator32; // 5th stages
-    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator64; // 6th stages
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, IQOrder> m_decimator2;  // 1st stages
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, true> m_decimator2s; // 1st stages - straight
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, true> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, true> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, true> m_decimator16; // 4th stages
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, true> m_decimator32; // 5th stages
+    IntHalfbandFilterEO<qint64, qint64, DECIMATORS_HB_FILTER_ORDER, true> m_decimator64; // 6th stages
 #else
-    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator2;  // 1st stages
-    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator4;  // 2nd stages
-    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator8;  // 3rd stages
-    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator16; // 4th stages
-    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator32; // 5th stages
-    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQorder> m_decimator64; // 6th stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, IQOrder> m_decimator2;  // 1st stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, true> m_decimator2s; // 1st stages - straight
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, true> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, true> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, true> m_decimator16; // 4th stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, true> m_decimator32; // 5th stages
+    IntHalfbandFilterEO<qint32, qint32, DECIMATORS_HB_FILTER_ORDER, true> m_decimator64; // 6th stages
 #endif
 };
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate1(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate1(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	qint32 xreal, yimag;
 
 	for (int pos = 0; pos < len - 1; pos += 2)
 	{
-		xreal = IQorder ? buf[pos+0] : buf[pos+1];
-		yimag = IQorder ? buf[pos+1] : buf[pos+0];
+		xreal = IQOrder ? buf[pos+0] : buf[pos+1];
+		yimag = IQOrder ? buf[pos+1] : buf[pos+0];
 		(**it).setReal(xreal << decimation_shifts<SdrBits, InputBits>::pre1); // Valgrind optim (2 - comment not repeated)
 		(**it).setImag(yimag << decimation_shifts<SdrBits, InputBits>::pre1);
 		++(*it); // Valgrind optim (comment not repeated)
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_u(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate2_u(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	StorageType xreal, yimag;
 
 	for (int pos = 0; pos < len - 7; pos += 8)
 	{
-		xreal = IQorder ?
+		xreal = IQOrder ?
             (buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2 :
             (buf[pos+1] + buf[pos+2] - 255) << decimation_shifts<SdrBits, InputBits>::pre2;
-		yimag = IQorder ?
+		yimag = IQOrder ?
             (buf[pos+1] + buf[pos+2] - 255) << decimation_shifts<SdrBits, InputBits>::pre2 :
             (buf[pos+0] - buf[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
 		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
 		(**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
 		++(*it);
 
-		xreal = IQorder ?
+		xreal = IQOrder ?
             (buf[pos+7] - buf[pos+4]) << decimation_shifts<SdrBits, InputBits>::pre2 :
             (255 - buf[pos+5] - buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre2;
-		yimag = IQorder ?
+		yimag = IQOrder ?
             (255 - buf[pos+5] - buf[pos+6]) << decimation_shifts<SdrBits, InputBits>::pre2 :
             (buf[pos+7] - buf[pos+4]) << decimation_shifts<SdrBits, InputBits>::pre2;
 		(**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
@@ -502,8 +504,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_u(Sample
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate2_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[4];
 
@@ -530,8 +532,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_inf(Samp
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate2_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[4];
 
@@ -558,8 +560,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_sup(Samp
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate2_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[4];
 
@@ -586,14 +588,14 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_cen(Samp
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate4_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[8], buf4[4];
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -604,7 +606,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_inf(Samp
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4,
                 &buf2[0]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -626,24 +628,24 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_inf(Samp
                 buf2[7],
                 &buf4[0]);
 
-        (**it).setReal(buf4[0] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder ? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder ? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
 
-        (**it).setReal(buf4[2] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder ? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder ? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate4_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[8], buf4[4];
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -654,7 +656,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_inf_txsy
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4,
                 &buf2[0]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -676,24 +678,24 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_inf_txsy
                 buf2[7],
                 &buf4[0]);
 
-        (**it).setReal(buf4[0] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
 
-        (**it).setReal(buf4[2] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate4_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[8], buf4[4];
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -704,7 +706,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_sup(Samp
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4,
                 &buf2[0]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -726,24 +728,24 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_sup(Samp
                 buf2[7],
                 &buf4[0]);
 
-        (**it).setReal(buf4[0] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
 
-        (**it).setReal(buf4[2] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate4_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[8], buf4[4];
 
     for (int pos = 0; pos < len - 15; pos += 16)
     {
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -754,7 +756,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_sup_txsy
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre4,
                 &buf2[0]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre4,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre4,
@@ -776,18 +778,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_sup_txsy
                 buf2[7],
                 &buf4[0]);
 
-        (**it).setReal(buf4[0] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
 
-        (**it).setReal(buf4[2] >> decimation_shifts<SdrBits, InputBits>::post4);
-        (**it).setImag(buf4[3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setReal(buf4[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post4);
+        (**it).setImag(buf4[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post4);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate4_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	StorageType buf2[8], buf4[4];
 
@@ -829,14 +831,14 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_cen(Samp
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate8_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[16], buf4[8], buf8[4];
 
 	for (int pos = 0; pos < len - 31; pos += 32)
 	{
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -847,7 +849,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf(Samp
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[0]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -858,7 +860,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf(Samp
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[4]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -869,7 +871,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf(Samp
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[8]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -892,18 +894,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf(Samp
                 &buf4[0],
                 &buf8[0]);
 
-        (**it).setReal(buf8[0] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
 
-        (**it).setReal(buf8[2] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate8_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[16], buf4[8], buf8[4];
 
@@ -911,7 +913,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf_txsy
 	{
         for (int i = 0; i < 4; i++)
         {
-            m_decimator2.myDecimateInf(
+            m_decimator2s.myDecimateInf(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -935,24 +937,24 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_inf_txsy
                 &buf4[0],
                 &buf8[0]);
 
-        (**it).setReal(buf8[0] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
 
-        (**it).setReal(buf8[2] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate8_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[16], buf4[8], buf8[4];
 
     for (int pos = 0; pos < len - 31; pos += 32)
     {
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -963,7 +965,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup(Samp
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[0]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -974,7 +976,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup(Samp
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[4]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -985,7 +987,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup(Samp
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre8,
                 &buf2[8]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -1008,18 +1010,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup(Samp
                 &buf4[0],
                 &buf8[0]);
 
-        (**it).setReal(buf8[0] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
 
-        (**it).setReal(buf8[2] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate8_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[16], buf4[8], buf8[4];
 
@@ -1027,7 +1029,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup_txsy
     {
         for (int i = 0; i < 4; i++)
         {
-            m_decimator2.myDecimateSup(
+            m_decimator2s.myDecimateSup(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre8,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre8,
@@ -1051,18 +1053,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_sup_txsy
                 &buf4[0],
                 &buf8[0]);
 
-        (**it).setReal(buf8[0] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
 
-        (**it).setReal(buf8[2] >> decimation_shifts<SdrBits, InputBits>::post8);
-        (**it).setImag(buf8[3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setReal(buf8[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post8);
+        (**it).setImag(buf8[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post8);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate8_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	StorageType intbuf[8];
 
@@ -1121,14 +1123,14 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_cen(Samp
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate16_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[32], buf4[16], buf8[8], buf16[4];
 
     for (int pos = 0; pos < len - 63; pos += 64)
     {
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1139,7 +1141,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[0]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1150,7 +1152,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[4]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1161,7 +1163,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[8]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1172,7 +1174,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[12]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+32] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+33] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+34] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1183,7 +1185,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+39] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[16]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+40] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+41] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+42] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1194,7 +1196,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+47] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[20]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+48] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+49] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+50] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1205,7 +1207,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 buf[pos+55] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[24]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+56] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+57] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+58] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1244,18 +1246,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf(Sam
                 &buf8[0],
                 &buf16[0]);
 
-        (**it).setReal(buf16[0] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
 
-        (**it).setReal(buf16[2] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate16_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[32], buf4[16], buf8[8], buf16[4];
 
@@ -1263,7 +1265,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf_txs
     {
         for (int i = 0; i < 8; i++)
         {
-            m_decimator2.myDecimateInf(
+            m_decimator2s.myDecimateInf(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1294,24 +1296,24 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_inf_txs
                 &buf8[0],
                 &buf16[0]);
 
-        (**it).setReal(buf16[0] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
 
-        (**it).setReal(buf16[2] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate16_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[32], buf4[16], buf8[8], buf16[4];
 
     for (int pos = 0; pos < len - 63; pos += 64)
     {
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1322,7 +1324,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[0]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1333,7 +1335,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[4]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1344,7 +1346,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[8]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1355,7 +1357,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[12]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+32] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+33] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+34] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1366,7 +1368,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+39] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[16]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+40] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+41] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+42] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1377,7 +1379,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+47] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[20]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+48] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+49] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+50] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1388,7 +1390,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 buf[pos+55] << decimation_shifts<SdrBits, InputBits>::pre16,
                 &buf2[24]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+56] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+57] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+58] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1427,18 +1429,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup(Sam
                 &buf8[0],
                 &buf16[0]);
 
-        (**it).setReal(buf16[0] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
 
-        (**it).setReal(buf16[2] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate16_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[32], buf4[16], buf8[8], buf16[4];
 
@@ -1446,7 +1448,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup_txs
     {
         for (int i = 0; i < 8; i++)
         {
-            m_decimator2.myDecimateSup(
+            m_decimator2s.myDecimateSup(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre16,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre16,
@@ -1477,18 +1479,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_sup_txs
                 &buf8[0],
                 &buf16[0]);
 
-        (**it).setReal(buf16[0] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
 
-        (**it).setReal(buf16[2] >> decimation_shifts<SdrBits, InputBits>::post16);
-        (**it).setImag(buf16[3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setReal(buf16[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post16);
+        (**it).setImag(buf16[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post16);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate16_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	StorageType intbuf[16];
 
@@ -1596,14 +1598,14 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_cen(Sam
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate32_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[64], buf4[32], buf8[16], buf16[8], buf32[4];
 
     for (int pos = 0; pos < len - 127; pos += 128)
     {
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1614,7 +1616,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[0]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1625,7 +1627,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[4]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1636,7 +1638,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[8]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1647,7 +1649,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[12]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+32] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+33] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+34] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1658,7 +1660,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+39] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[16]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+40] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+41] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+42] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1669,7 +1671,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+47] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[20]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+48] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+49] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+50] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1680,7 +1682,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+55] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[24]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+56] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+57] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+58] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1691,7 +1693,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+63] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[28]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+64] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+65] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+66] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1702,7 +1704,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+71] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[32]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+72] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+73] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+74] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1713,7 +1715,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+79] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[36]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+80] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+81] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+82] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1724,7 +1726,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+87] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[40]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+88] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+89] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+90] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1735,7 +1737,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+95] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[44]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+96] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+97] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+98] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1746,7 +1748,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+103] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[48]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+104] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+105] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+106] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1757,7 +1759,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+111] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[52]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+112] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+113] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+114] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1768,7 +1770,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 buf[pos+119] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[56]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+120] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+121] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+122] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1839,18 +1841,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf(Sam
                 &buf16[0],
                 &buf32[0]);
 
-        (**it).setReal(buf32[0] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
 
-        (**it).setReal(buf32[2] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate32_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[64], buf4[32], buf8[16], buf16[8], buf32[4];
 
@@ -1858,7 +1860,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf_txs
     {
         for (int i = 0; i < 16; i++)
         {
-            m_decimator2.myDecimateInf(
+            m_decimator2s.myDecimateInf(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1896,24 +1898,24 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_inf_txs
                 &buf16[0],
                 &buf32[0]);
 
-        (**it).setReal(buf32[0] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
 
-        (**it).setReal(buf32[2] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate32_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[64], buf4[32], buf8[16], buf16[8], buf32[4];
 
     for (int pos = 0; pos < len - 127; pos += 128)
     {
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1924,7 +1926,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[0]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1935,7 +1937,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[4]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1946,7 +1948,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[8]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1957,7 +1959,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[12]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+32] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+33] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+34] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1968,7 +1970,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+39] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[16]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+40] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+41] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+42] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1979,7 +1981,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+47] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[20]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+48] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+49] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+50] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -1990,7 +1992,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+55] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[24]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+56] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+57] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+58] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2001,7 +2003,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+63] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[28]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+64] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+65] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+66] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2012,7 +2014,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+71] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[32]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+72] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+73] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+74] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2023,7 +2025,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+79] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[36]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+80] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+81] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+82] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2034,7 +2036,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+87] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[40]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+88] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+89] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+90] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2045,7 +2047,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+95] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[44]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+96] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+97] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+98] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2056,7 +2058,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+103] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[48]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+104] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+105] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+106] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2067,7 +2069,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+111] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[52]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+112] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+113] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+114] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2078,7 +2080,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 buf[pos+119] << decimation_shifts<SdrBits, InputBits>::pre32,
                 &buf2[56]);
 
-        m_decimator2.myDecimateSup(
+        m_decimator2s.myDecimateSup(
                 buf[pos+120] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+121] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+122] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2149,18 +2151,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup(Sam
                 &buf16[0],
                 &buf32[0]);
 
-        (**it).setReal(buf32[0] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
 
-        (**it).setReal(buf32[2] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate32_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[64], buf4[32], buf8[16], buf16[8], buf32[4];
 
@@ -2168,7 +2170,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup_txs
     {
         for (int i = 0; i < 16; i++)
         {
-            m_decimator2.myDecimateSup(
+            m_decimator2s.myDecimateSup(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre32,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre32,
@@ -2206,18 +2208,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_sup_txs
                 &buf16[0],
                 &buf32[0]);
 
-        (**it).setReal(buf32[0] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
 
-        (**it).setReal(buf32[2] >> decimation_shifts<SdrBits, InputBits>::post32);
-        (**it).setImag(buf32[3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setReal(buf32[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post32);
+        (**it).setImag(buf32[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post32);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate32_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	StorageType intbuf[32];
 
@@ -2422,14 +2424,14 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_cen(Sam
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate64_inf(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[128], buf4[64], buf8[32], buf16[16], buf32[8], buf64[4];
 
     for (int pos = 0; pos < len - 255; pos += 256)
     {
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+0] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+1] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+2] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2440,7 +2442,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+7] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[0]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+8] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+9] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+10] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2451,7 +2453,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+15] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[4]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+16] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+17] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+18] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2462,7 +2464,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+23] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[8]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+24] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+25] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+26] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2473,7 +2475,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+31] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[12]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+32] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+33] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+34] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2484,7 +2486,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+39] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[16]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+40] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+41] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+42] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2495,7 +2497,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+47] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[20]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+48] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+49] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+50] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2506,7 +2508,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+55] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[24]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+56] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+57] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+58] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2517,7 +2519,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+63] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[28]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+64] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+65] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+66] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2528,7 +2530,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+71] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[32]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+72] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+73] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+74] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2539,7 +2541,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+79] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[36]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+80] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+81] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+82] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2550,7 +2552,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+87] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[40]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+88] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+89] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+90] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2561,7 +2563,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+95] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[44]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+96] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+97] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+98] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2572,7 +2574,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+103] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[48]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+104] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+105] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+106] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2583,7 +2585,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+111] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[52]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+112] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+113] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+114] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2594,7 +2596,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+119] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[56]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+120] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+121] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+122] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2605,7 +2607,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+127] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[60]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+128] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+129] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+130] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2616,7 +2618,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+135] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[64]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+136] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+137] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+138] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2627,7 +2629,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+143] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[68]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+144] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+145] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+146] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2638,7 +2640,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+151] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[72]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+152] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+153] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+154] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2649,7 +2651,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+159] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[76]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+160] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+161] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+162] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2660,7 +2662,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+167] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[80]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+168] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+169] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+170] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2671,7 +2673,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+175] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[84]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+176] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+177] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+178] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2682,7 +2684,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+183] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[88]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+184] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+185] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+186] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2693,7 +2695,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+191] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[92]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+192] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+193] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+194] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2704,7 +2706,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+199] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[96]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+200] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+201] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+202] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2715,7 +2717,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+207] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[100]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+208] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+209] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+210] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2726,7 +2728,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+215] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[104]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+216] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+217] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+218] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2737,7 +2739,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+223] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[108]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+224] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+225] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+226] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2748,7 +2750,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+231] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[112]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+232] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+233] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+234] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2759,7 +2761,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+239] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[116]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+240] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+241] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+242] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2770,7 +2772,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 buf[pos+247] << decimation_shifts<SdrBits, InputBits>::pre64,
                 &buf2[120]);
 
-        m_decimator2.myDecimateInf(
+        m_decimator2s.myDecimateInf(
                 buf[pos+248] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+249] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+250] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2905,18 +2907,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf(Sam
                 &buf32[0],
                 &buf64[0]);
 
-        (**it).setReal(buf64[0] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
 
-        (**it).setReal(buf64[2] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate64_inf_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[128], buf4[64], buf8[32], buf16[16], buf32[8], buf64[4];
 
@@ -2924,7 +2926,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf_txs
     {
         for (int i = 0; i < 32; i++)
         {
-            m_decimator2.myDecimateInf(
+            m_decimator2s.myDecimateInf(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -2969,18 +2971,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_inf_txs
                 &buf32[0],
                 &buf64[0]);
 
-        (**it).setReal(buf64[0] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
 
-        (**it).setReal(buf64[2] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate64_sup(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[128], buf4[64], buf8[32], buf16[16], buf32[8], buf64[4];
 
@@ -2988,7 +2990,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup(Sam
     {
         for (int i = 0; i < 32; i++)
         {
-            m_decimator2.myDecimateInf(
+            m_decimator2s.myDecimateInf(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -3034,18 +3036,18 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup(Sam
                 &buf64[0]);
 
 
-        (**it).setReal(buf64[0] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
 
-        (**it).setReal(buf64[2] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate64_cen(SampleVector::iterator* it, const T* buf, qint32 len)
 {
 	StorageType intbuf[64];
 
@@ -3444,8 +3446,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_cen(Sam
 	}
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate64_sup_txsync(SampleVector::iterator* it, const T* buf, qint32 len)
 {
     StorageType buf2[128], buf4[64], buf8[32], buf16[16], buf32[8], buf64[4];
 
@@ -3453,7 +3455,7 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup_txs
     {
         for (int i = 0; i < 32; i++)
         {
-            m_decimator2.myDecimateSup(
+            m_decimator2s.myDecimateSup(
                 buf[pos+8*i+0] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+8*i+1] << decimation_shifts<SdrBits, InputBits>::pre64,
                 buf[pos+8*i+2] << decimation_shifts<SdrBits, InputBits>::pre64,
@@ -3498,12 +3500,12 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup_txs
                 &buf32[0],
                 &buf64[0]);
 
-        (**it).setReal(buf64[0] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 0 : 1] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 1 : 0] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
 
-        (**it).setReal(buf64[2] >> decimation_shifts<SdrBits, InputBits>::post64);
-        (**it).setImag(buf64[3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setReal(buf64[IQOrder? 2 : 3] >> decimation_shifts<SdrBits, InputBits>::post64);
+        (**it).setImag(buf64[IQOrder? 3 : 2] >> decimation_shifts<SdrBits, InputBits>::post64);
         ++(*it);
     }
 }
@@ -3511,23 +3513,23 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_sup_txs
 
 // ==============================================================================================================
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate1(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate1(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     qint32 xreal, yimag;
 
     for (int pos = 0; pos < len; pos += 1)
     {
-        xreal = bufI[pos];
-        yimag = bufQ[pos];
+        xreal = IQOrder ? bufI[pos] : bufQ[pos];
+        yimag = IQOrder ? bufQ[pos] : bufI[pos];
         (**it).setReal(xreal << decimation_shifts<SdrBits, InputBits>::pre1); // Valgrind optim (2 - comment not repeated)
         (**it).setImag(yimag << decimation_shifts<SdrBits, InputBits>::pre1);
         ++(*it); // Valgrind optim (comment not repeated)
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_u(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate2_u(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType xreal, yimag;
 
@@ -3536,21 +3538,21 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_u(Sample
         // 0: I[0] 1: Q[0] 2: I[1] 3: Q[1]
         xreal = (bufI[pos] - bufQ[pos+1]) << decimation_shifts<SdrBits, InputBits>::pre2;
         yimag = (bufQ[pos] + bufI[pos+1] - 255) << decimation_shifts<SdrBits, InputBits>::pre2;
-        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal((IQOrder ? xreal : yimag) >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag((IQOrder ? yimag : xreal) >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
 
         // 4: I[2] 5: Q[2] 6: I[3] 7: Q[3]
         xreal = (bufQ[pos+3] - bufI[pos+2]) << decimation_shifts<SdrBits, InputBits>::pre2;
         yimag = (255 - bufQ[pos+2] - bufI[pos+3]) << decimation_shifts<SdrBits, InputBits>::pre2;
-        (**it).setReal(xreal >> decimation_shifts<SdrBits, InputBits>::post2);
-        (**it).setImag(yimag >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setReal((IQOrder ? xreal : yimag) >> decimation_shifts<SdrBits, InputBits>::post2);
+        (**it).setImag((IQOrder ? yimag : xreal) >> decimation_shifts<SdrBits, InputBits>::post2);
         ++(*it);
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate2_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType intbuf[2];
 
@@ -3571,8 +3573,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate2_cen(Samp
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate4_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType intbuf[4];
 
@@ -3606,8 +3608,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate4_cen(Samp
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate8_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType intbuf[8];
 
@@ -3667,8 +3669,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate8_cen(Samp
 }
 
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate16_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType intbuf[16];
 
@@ -3776,8 +3778,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate16_cen(Sam
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate32_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType intbuf[32];
 
@@ -3982,8 +3984,8 @@ void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate32_cen(Sam
     }
 }
 
-template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQorder>
-void Decimators<StorageType, T, SdrBits, InputBits, IQorder>::decimate64_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
+template<typename StorageType, typename T, uint SdrBits, uint InputBits, bool IQOrder>
+void Decimators<StorageType, T, SdrBits, InputBits, IQOrder>::decimate64_cen(SampleVector::iterator* it, const T* bufI, const T* bufQ, qint32 len)
 {
     StorageType intbuf[64];
 

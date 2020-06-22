@@ -49,11 +49,12 @@ public:
     void decimate64_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
 
     IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, IQOrder> m_decimator2;  // 1st stages
-    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, IQOrder> m_decimator4;  // 2nd stages
-    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, IQOrder> m_decimator8;  // 3rd stages
-    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, IQOrder> m_decimator16; // 4th stages
-    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, IQOrder> m_decimator32; // 5th stages
-    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, IQOrder> m_decimator64; // 6th stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator2s; // 1st stages - straight
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator4;  // 2nd stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator8;  // 3rd stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator16; // 4th stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator32; // 5th stages
+    IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator64; // 6th stages
 };
 
 template<bool IQOrder>
@@ -93,10 +94,10 @@ void DecimatorsFF<IQOrder>::decimate8_inf(FSampleVector::iterator* it, const flo
         xreal[1] = (buf[pos+0] - buf[pos+3] + buf[pos+7] - buf[pos+4]);
         yimag[1] = (buf[pos+1] - buf[pos+5] + buf[pos+2] - buf[pos+6]);
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 
-        (**it).setReal(xreal[1]);
-        (**it).setImag(yimag[1]);
+        (**it).setReal(IQOrder ? xreal[1] : yimag[1]);
+        (**it).setImag(IQOrder ? yimag[1] : xreal[1]);
 
         ++(*it);
     }
@@ -116,10 +117,10 @@ void DecimatorsFF<IQOrder>::decimate8_sup(FSampleVector::iterator* it, const flo
         xreal[1] = (buf[pos+1] - buf[pos+2] - buf[pos+5] + buf[pos+6]);
         yimag[1] = (- buf[pos+0] - buf[pos+3] + buf[pos+4] + buf[pos+7]);
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
 
-        (**it).setReal(xreal[1]);
-        (**it).setImag(yimag[1]);
+        (**it).setReal(IQOrder ? xreal[1] : yimag[1]);
+        (**it).setImag(IQOrder ? yimag[1] : xreal[1]);
 
         ++(*it);
     }
@@ -141,13 +142,13 @@ void DecimatorsFF<IQOrder>::decimate16_inf(FSampleVector::iterator* it, const fl
             pos += 8;
         }
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
-        m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
 
         m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
 
-        (**it).setReal(xreal[3]);
-        (**it).setImag(yimag[3]);
+        (**it).setReal(IQOrder ? xreal[3] : yimag[3]);
+        (**it).setImag(IQOrder ? yimag[3] : xreal[3]);
 
         ++(*it);
     }
@@ -169,13 +170,13 @@ void DecimatorsFF<IQOrder>::decimate16_sup(FSampleVector::iterator* it, const fl
             pos += 8;
         }
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
-        m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
 
         m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
 
-        (**it).setReal(xreal[3]);
-        (**it).setImag(yimag[3]);
+        (**it).setReal(IQOrder ? xreal[3] : yimag[3]);
+        (**it).setImag(IQOrder ? yimag[3] : xreal[3]);
 
         ++(*it);
     }
@@ -195,18 +196,18 @@ void DecimatorsFF<IQOrder>::decimate32_inf(FSampleVector::iterator* it, const fl
             pos += 8;
         }
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
-        m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-        m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
-        m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+        m_decimator2s.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
+        m_decimator2s.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
 
         m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
         m_decimator4.myDecimate(xreal[5], yimag[5], &xreal[7], &yimag[7]);
 
         m_decimator8.myDecimate(xreal[3], yimag[3], &xreal[7], &yimag[7]);
 
-        (**it).setReal(xreal[7]);
-        (**it).setImag(yimag[7]);
+        (**it).setReal(IQOrder ? xreal[7] : yimag[7]);
+        (**it).setImag(IQOrder ? yimag[7] : xreal[7]);
 
         ++(*it);
     }
@@ -226,18 +227,18 @@ void DecimatorsFF<IQOrder>::decimate32_sup(FSampleVector::iterator* it, const fl
             pos += 8;
         }
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
-        m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-        m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
-        m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+        m_decimator2s.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
+        m_decimator2s.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
 
         m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
         m_decimator4.myDecimate(xreal[5], yimag[5], &xreal[7], &yimag[7]);
 
         m_decimator8.myDecimate(xreal[3], yimag[3], &xreal[7], &yimag[7]);
 
-        (**it).setReal(xreal[7]);
-        (**it).setImag(yimag[7]);
+        (**it).setReal(IQOrder ? xreal[7] : yimag[7]);
+        (**it).setImag(IQOrder ? yimag[7] : xreal[7]);
 
         ++(*it);
     }
@@ -257,14 +258,14 @@ void DecimatorsFF<IQOrder>::decimate64_inf(FSampleVector::iterator* it, const fl
             pos += 8;
         }
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
-        m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-        m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
-        m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
-        m_decimator2.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
-        m_decimator2.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
-        m_decimator2.myDecimate(xreal[12], yimag[12], &xreal[13], &yimag[13]);
-        m_decimator2.myDecimate(xreal[14], yimag[14], &xreal[15], &yimag[15]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+        m_decimator2s.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
+        m_decimator2s.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
+        m_decimator2s.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
+        m_decimator2s.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
+        m_decimator2s.myDecimate(xreal[12], yimag[12], &xreal[13], &yimag[13]);
+        m_decimator2s.myDecimate(xreal[14], yimag[14], &xreal[15], &yimag[15]);
 
         m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
         m_decimator4.myDecimate(xreal[5], yimag[5], &xreal[7], &yimag[7]);
@@ -276,8 +277,8 @@ void DecimatorsFF<IQOrder>::decimate64_inf(FSampleVector::iterator* it, const fl
 
         m_decimator16.myDecimate(xreal[7], yimag[7], &xreal[15], &yimag[15]);
 
-        (**it).setReal(xreal[15]);
-        (**it).setImag(yimag[15]);
+        (**it).setReal(IQOrder ? xreal[15] : yimag[15]);
+        (**it).setImag(IQOrder ? yimag[15] : xreal[15]);
 
         ++(*it);
     }
@@ -297,14 +298,14 @@ void DecimatorsFF<IQOrder>::decimate64_sup(FSampleVector::iterator* it, const fl
             pos += 8;
         }
 
-        m_decimator2.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
-        m_decimator2.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
-        m_decimator2.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
-        m_decimator2.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
-        m_decimator2.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
-        m_decimator2.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
-        m_decimator2.myDecimate(xreal[12], yimag[12], &xreal[13], &yimag[13]);
-        m_decimator2.myDecimate(xreal[14], yimag[14], &xreal[15], &yimag[15]);
+        m_decimator2s.myDecimate(xreal[0], yimag[0], &xreal[1], &yimag[1]);
+        m_decimator2s.myDecimate(xreal[2], yimag[2], &xreal[3], &yimag[3]);
+        m_decimator2s.myDecimate(xreal[4], yimag[4], &xreal[5], &yimag[5]);
+        m_decimator2s.myDecimate(xreal[6], yimag[6], &xreal[7], &yimag[7]);
+        m_decimator2s.myDecimate(xreal[8], yimag[8], &xreal[9], &yimag[9]);
+        m_decimator2s.myDecimate(xreal[10], yimag[10], &xreal[11], &yimag[11]);
+        m_decimator2s.myDecimate(xreal[12], yimag[12], &xreal[13], &yimag[13]);
+        m_decimator2s.myDecimate(xreal[14], yimag[14], &xreal[15], &yimag[15]);
 
         m_decimator4.myDecimate(xreal[1], yimag[1], &xreal[3], &yimag[3]);
         m_decimator4.myDecimate(xreal[5], yimag[5], &xreal[7], &yimag[7]);
@@ -316,8 +317,8 @@ void DecimatorsFF<IQOrder>::decimate64_sup(FSampleVector::iterator* it, const fl
 
         m_decimator16.myDecimate(xreal[7], yimag[7], &xreal[15], &yimag[15]);
 
-        (**it).setReal(xreal[15]);
-        (**it).setImag(yimag[15]);
+        (**it).setReal(IQOrder ? xreal[15] : yimag[15]);
+        (**it).setImag(IQOrder ? yimag[15] : xreal[15]);
 
         ++(*it);
     }
