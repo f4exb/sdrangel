@@ -173,6 +173,7 @@ bool BladeRF2MIMO::startRx()
     m_sourceThread->setFifo(&m_sampleMIFifo);
     m_sourceThread->setFcPos(m_settings.m_fcPosRx);
     m_sourceThread->setLog2Decimation(m_settings.m_log2Decim);
+    m_sourceThread->setIQOrder(m_settings.m_iqOrder);
 
     for (int i = 0; i < 2; i++)
     {
@@ -444,6 +445,7 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
         << " m_LOppmTenths: " << settings.m_LOppmTenths
         << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
         << " m_log2Decim: " << settings.m_log2Decim
+        << " m_iqOrder: " << settings.m_iqOrder
         << " m_fcPosRx: " << settings.m_fcPosRx
         << " m_rxBandwidth: " << settings.m_rxBandwidth
         << " m_rx0GainMode: " << settings.m_rx0GainMode
@@ -564,6 +566,17 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
         {
             m_sourceThread->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "BladeRF2MIMO::applySettings: set decimation to " << (1<<settings.m_log2Decim);
+        }
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
+
+        if (m_sourceThread)
+        {
+            m_sourceThread->setIQOrder(settings.m_iqOrder);
+            qDebug() << "BladeRF2MIMO::applySettings: set IQ order to " << (settings.m_iqOrder ? "IQ" : "QI");
         }
     }
 
@@ -1049,6 +1062,9 @@ void BladeRF2MIMO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getBladeRf2MimoSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getBladeRf2MimoSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("fcPosRx")) {
         settings.m_fcPosRx = static_cast<BladeRF2MIMOSettings::fcPos_t>(response.getBladeRf2MimoSettings()->getFcPosRx());
     }
@@ -1135,6 +1151,7 @@ void BladeRF2MIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
 
     response.getBladeRf2MimoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
     response.getBladeRf2MimoSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getBladeRf2MimoSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getBladeRf2MimoSettings()->setFcPosRx((int) settings.m_fcPosRx);
     response.getBladeRf2MimoSettings()->setRxBandwidth(settings.m_rxBandwidth);
     response.getBladeRf2MimoSettings()->setRx0GainMode(settings.m_rx0GainMode);
@@ -1243,6 +1260,9 @@ void BladeRF2MIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgBladeRF2MIMOSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgBladeRF2MIMOSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fcPosRx") || force) {
         swgBladeRF2MIMOSettings->setFcPosRx((int) settings.m_fcPosRx);

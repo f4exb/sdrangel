@@ -1404,6 +1404,9 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2SoftDecim")) {
         settings.m_log2SoftDecim = response.getXtrxMimoSettings()->getLog2SoftDecim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getXtrxMimoSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("rxCenterFrequency")) {
         settings.m_rxCenterFrequency = response.getXtrxMimoSettings()->getRxCenterFrequency();
     }
@@ -1540,6 +1543,7 @@ void XTRXMIMO::webapiFormatDeviceSettings(
     response.getXtrxMimoSettings()->setRxDevSampleRate(settings.m_rxDevSampleRate);
     response.getXtrxMimoSettings()->setLog2HardDecim(settings.m_log2HardDecim);
     response.getXtrxMimoSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getXtrxMimoSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getXtrxMimoSettings()->setRxCenterFrequency(settings.m_rxCenterFrequency);
     response.getXtrxMimoSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getXtrxMimoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
@@ -1704,6 +1708,9 @@ void XTRXMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, con
     }
     if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
         swgXTRXMIMOSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgXTRXMIMOSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("rxCenterFrequency") || force) {
         swgXTRXMIMOSettings->setRxCenterFrequency(settings.m_rxCenterFrequency);

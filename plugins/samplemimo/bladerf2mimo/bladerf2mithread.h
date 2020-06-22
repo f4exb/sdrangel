@@ -47,6 +47,7 @@ public:
     int getFcPos() const;
     void setFifo(SampleMIFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
     SampleMIFifo *getFifo() { return m_sampleFifo; }
+    void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
     QMutex m_startWaitMutex;

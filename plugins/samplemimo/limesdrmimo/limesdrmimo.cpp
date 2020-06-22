@@ -676,6 +676,7 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         << " m_rxCenterFrequency: " << settings.m_rxCenterFrequency
         << " m_log2HardDecim: " << settings.m_log2HardDecim
         << " m_log2SoftDecim: " << settings.m_log2SoftDecim
+        << " m_iqOrder: " << settings.m_iqOrder
         << " m_dcBlock: " << settings.m_dcBlock
         << " m_iqCorrection: " << settings.m_iqCorrection
         << " m_rxTransverterMode: " << settings.m_rxTransverterMode
@@ -1838,6 +1839,7 @@ void LimeSDRMIMO::webapiFormatDeviceSettings(
     response.getLimeSdrMimoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getLimeSdrMimoSettings()->setLog2HardDecim(settings.m_log2HardDecim);
     response.getLimeSdrMimoSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getLimeSdrMimoSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getLimeSdrMimoSettings()->setNcoEnableRx(settings.m_ncoEnableRx ? 1 : 0);
     response.getLimeSdrMimoSettings()->setNcoFrequencyRx(settings.m_ncoFrequencyRx);
     response.getLimeSdrMimoSettings()->setRxTransverterDeltaFrequency(settings.m_rxTransverterDeltaFrequency);
@@ -1936,6 +1938,9 @@ void LimeSDRMIMO::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("log2SoftDecim")) {
         settings.m_log2SoftDecim = response.getLimeSdrMimoSettings()->getLog2SoftDecim();
+    }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getLimeSdrMimoSettings()->getIqOrder() != 0;
     }
     if (deviceSettingsKeys.contains("ncoEnableRx")) {
         settings.m_ncoEnableRx = response.getLimeSdrMimoSettings()->getNcoEnableRx() != 0;
@@ -2186,6 +2191,9 @@ void LimeSDRMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
         swgLimeSdrMIMOSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgLimeSdrMIMOSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("ncoEnableRx") || force) {
         swgLimeSdrMIMOSettings->setNcoEnableRx(settings.m_ncoEnableRx ? 1 : 0);
