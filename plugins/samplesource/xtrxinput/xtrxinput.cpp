@@ -1375,6 +1375,9 @@ void XTRXInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2SoftDecim")) {
         settings.m_log2SoftDecim = response.getXtrxInputSettings()->getLog2SoftDecim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getXtrxInputSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getXtrxInputSettings()->getLpfBw();
     }
@@ -1436,6 +1439,7 @@ void XTRXInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getXtrxInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getXtrxInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getXtrxInputSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getXtrxInputSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getXtrxInputSettings()->setLpfBw(settings.m_lpfBW);
     response.getXtrxInputSettings()->setGain(settings.m_gain);
     response.getXtrxInputSettings()->setNcoEnable(settings.m_ncoEnable ? 1 : 0);
@@ -1590,6 +1594,9 @@ void XTRXInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, co
     }
     if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
         swgXtrxInputSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgXtrxInputSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("ncoEnable") || force) {
         swgXtrxInputSettings->setNcoEnable(settings.m_ncoEnable ? 1 : 0);

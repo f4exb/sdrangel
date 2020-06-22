@@ -599,6 +599,7 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool fo
             << " m_vga1: " << m_settings.m_vga1
             << " m_vga2: " << m_settings.m_vga2
             << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_iqOrder: " << m_settings.m_iqOrder
             << " m_fcPos: " << m_settings.m_fcPos
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_dcBlock: " << m_settings.m_dcBlock
@@ -646,6 +647,7 @@ void Bladerf1Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getBladeRf1InputSettings()->setVga2(settings.m_vga2);
     response.getBladeRf1InputSettings()->setBandwidth(settings.m_bandwidth);
     response.getBladeRf1InputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getBladeRf1InputSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getBladeRf1InputSettings()->setFcPos((int) settings.m_fcPos);
     response.getBladeRf1InputSettings()->setXb200(settings.m_xb200 ? 1 : 0);
     response.getBladeRf1InputSettings()->setXb200Path((int) settings.m_xb200Path);
@@ -719,6 +721,9 @@ void Bladerf1Input::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getBladeRf1InputSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getBladeRf1InputSettings()->getIqOrder() != 0;
     }
     if (deviceSettingsKeys.contains("fcPos")) {
         settings.m_fcPos = static_cast<BladeRF1InputSettings::fcPos_t>(response.getBladeRf1InputSettings()->getFcPos());
@@ -845,6 +850,9 @@ void Bladerf1Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgBladeRF1Settings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgBladeRF1Settings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgBladeRF1Settings->setFcPos((int) settings.m_fcPos);

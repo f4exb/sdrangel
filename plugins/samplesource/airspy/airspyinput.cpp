@@ -715,6 +715,9 @@ void AirspyInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getAirspySettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getAirspySettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("fcPos")) {
         int fcPos = response.getAirspySettings()->getFcPos();
         fcPos = fcPos < 0 ? 0 : fcPos > 2 ? 2 : fcPos;
@@ -805,6 +808,7 @@ void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getAirspySettings()->setLnaAgc(settings.m_lnaAGC ? 1 : 0);
     response.getAirspySettings()->setMixerAgc(settings.m_mixerAGC ? 1 : 0);
     response.getAirspySettings()->setLog2Decim(settings.m_log2Decim);
+    response.getAirspySettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getAirspySettings()->setFcPos((int) settings.m_fcPos);
     response.getAirspySettings()->setBiasT(settings.m_biasT ? 1 : 0);
     response.getAirspySettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
@@ -878,6 +882,9 @@ void AirspyInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgAirspySettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgAirspySettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgAirspySettings->setFcPos((int) settings.m_fcPos);

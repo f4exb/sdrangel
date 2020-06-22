@@ -960,6 +960,9 @@ void PlutoSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getPlutoSdrInputSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getPlutoSdrInputSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getPlutoSdrInputSettings()->getLpfBw();
     }
@@ -1057,6 +1060,7 @@ void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getPlutoSdrInputSettings()->setHwRfdcBlock(settings.m_hwRFDCBlock ? 1 : 0);
     response.getPlutoSdrInputSettings()->setHwIqCorrection(settings.m_hwIQCorrection ? 1 : 0);
     response.getPlutoSdrInputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getPlutoSdrInputSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getPlutoSdrInputSettings()->setLpfBw(settings.m_lpfBW);
     response.getPlutoSdrInputSettings()->setGain(settings.m_gain);
     response.getPlutoSdrInputSettings()->setAntennaPath((int) settings.m_antennaPath);
@@ -1147,6 +1151,9 @@ void PlutoSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgPlutoSdrInputSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgPlutoSdrInputSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("lpfBW") || force) {
         swgPlutoSdrInputSettings->setLpfBw(settings.m_lpfBW);

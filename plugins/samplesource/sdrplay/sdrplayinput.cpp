@@ -773,6 +773,9 @@ void SDRPlayInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getSdrPlaySettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getSdrPlaySettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("fcPos"))
     {
         int fcPos = response.getSdrPlaySettings()->getFcPos();
@@ -824,6 +827,7 @@ void SDRPlayInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getSdrPlaySettings()->setBandwidthIndex(settings.m_bandwidthIndex);
     response.getSdrPlaySettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
     response.getSdrPlaySettings()->setLog2Decim(settings.m_log2Decim);
+    response.getSdrPlaySettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getSdrPlaySettings()->setFcPos((int) settings.m_fcPos);
     response.getSdrPlaySettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getSdrPlaySettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
@@ -932,6 +936,9 @@ void SDRPlayInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgSDRPlaySettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgSDRPlaySettings->setIqOrder(settings.m_iqOrder);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgSDRPlaySettings->setFcPos((int) settings.m_fcPos);

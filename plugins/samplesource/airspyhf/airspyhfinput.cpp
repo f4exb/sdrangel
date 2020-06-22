@@ -705,6 +705,9 @@ void AirspyHFInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getAirspyHfSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getAirspyHfSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
         settings.m_transverterDeltaFrequency = response.getAirspyHfSettings()->getTransverterDeltaFrequency();
     }
@@ -758,6 +761,7 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getAirspyHfSettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
     response.getAirspyHfSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getAirspyHfSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getAirspyHfSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getAirspyHfSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getAirspyHfSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getAirspyHfSettings()->setBandIndex(settings.m_bandIndex ? 1 : 0);
@@ -890,6 +894,9 @@ void AirspyHFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgAirspyHFSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgAirspyHFSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
         swgAirspyHFSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);

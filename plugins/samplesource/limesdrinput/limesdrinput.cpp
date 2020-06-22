@@ -1413,6 +1413,7 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
             << " ADC sample rate with hard decimation: " << loc.toString(m_settings.m_devSampleRate*(1<<m_settings.m_log2HardDecim)) << "S/s"
             << " m_log2HardDecim: " << m_settings.m_log2HardDecim
             << " m_log2SoftDecim: " << m_settings.m_log2SoftDecim
+            << " m_iqOrder: " << m_settings.m_iqOrder
             << " m_gain: " << m_settings.m_gain
             << " m_lpfBW: " << loc.toString(static_cast<int>(m_settings.m_lpfBW))
             << " m_lpfFIRBW: " << loc.toString(static_cast<int>(m_settings.m_lpfFIRBW))
@@ -1507,6 +1508,9 @@ void LimeSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2SoftDecim")) {
         settings.m_log2SoftDecim = response.getLimeSdrInputSettings()->getLog2SoftDecim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getLimeSdrInputSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("lpfBW")) {
         settings.m_lpfBW = response.getLimeSdrInputSettings()->getLpfBw();
     }
@@ -1571,6 +1575,7 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getLimeSdrInputSettings()->setLnaGain(settings.m_lnaGain);
     response.getLimeSdrInputSettings()->setLog2HardDecim(settings.m_log2HardDecim);
     response.getLimeSdrInputSettings()->setLog2SoftDecim(settings.m_log2SoftDecim);
+    response.getLimeSdrInputSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getLimeSdrInputSettings()->setLpfBw(settings.m_lpfBW);
     response.getLimeSdrInputSettings()->setLpfFirEnable(settings.m_lpfFIREnable ? 1 : 0);
     response.getLimeSdrInputSettings()->setLpfFirbw(settings.m_lpfFIRBW);
@@ -1757,6 +1762,9 @@ void LimeSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("log2SoftDecim") || force) {
         swgLimeSdrInputSettings->setLog2SoftDecim(settings.m_log2SoftDecim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgLimeSdrInputSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("lpfBW") || force) {
         swgLimeSdrInputSettings->setLpfBw(settings.m_lpfBW);

@@ -1371,6 +1371,7 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
             << " m_centerFrequency: " << m_settings.m_centerFrequency << " Hz"
             << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_iqOrder: " << m_settings.m_iqOrder
             << " m_fcPos: " << m_settings.m_fcPos
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_softDCCorrection: " << m_settings.m_softDCCorrection
@@ -1472,6 +1473,9 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getSoapySdrInputSettings()->getLog2Decim();
+    }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getSoapySdrInputSettings()->getIqOrder() != 0;
     }
     if (deviceSettingsKeys.contains("fcPos")) {
         settings.m_fcPos = static_cast<SoapySDRInputSettings::fcPos_t>(response.getSoapySdrInputSettings()->getFcPos());
@@ -1681,6 +1685,7 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getSoapySdrInputSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getSoapySdrInputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getSoapySdrInputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getSoapySdrInputSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getSoapySdrInputSettings()->setFcPos((int) settings.m_fcPos);
     response.getSoapySdrInputSettings()->setSoftDcCorrection(settings.m_softDCCorrection ? 1 : 0);
     response.getSoapySdrInputSettings()->setSoftIqCorrection(settings.m_softIQCorrection ? 1 : 0);
@@ -2001,6 +2006,9 @@ void SoapySDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgSoapySDRInputSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgSoapySDRInputSettings->setIqOrder(settings.m_iqOrder);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgSoapySDRInputSettings->setFcPos((int) settings.m_fcPos);
