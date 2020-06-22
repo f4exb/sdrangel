@@ -467,6 +467,7 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
             << " m_LOppmTenths: " << m_settings.m_LOppmTenths
             << " m_devSampleRateIndex: " << m_settings.m_devSampleRateIndex
             << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_iqOrder: " << m_settings.m_iqOrder
             << " m_transverterMode: " << m_settings.m_transverterMode
             << " m_transverterDeltaFrequency: " << m_settings.m_transverterDeltaFrequency
             << " m_adcDither: " << m_settings.m_adcDither
@@ -587,6 +588,9 @@ void PerseusInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getPerseusSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getPerseusSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("adcDither")) {
         settings.m_adcDither = response.getPerseusSettings()->getAdcDither() != 0;
     }
@@ -641,6 +645,7 @@ void PerseusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getPerseusSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getPerseusSettings()->setDevSampleRateIndex(settings.m_devSampleRateIndex);
     response.getPerseusSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getPerseusSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getPerseusSettings()->setAdcDither(settings.m_adcDither ? 1 : 0);
     response.getPerseusSettings()->setAdcPreamp(settings.m_adcPreamp ? 1 : 0);
     response.getPerseusSettings()->setWideBand(settings.m_wideBand ? 1 : 0);
@@ -699,6 +704,9 @@ void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgPerseusSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgPerseusSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("adcDither") || force) {
         swgPerseusSettings->setAdcDither(settings.m_adcDither ? 1 : 0);

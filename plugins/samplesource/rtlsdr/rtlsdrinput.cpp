@@ -722,6 +722,9 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getRtlSdrSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getRtlSdrSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("lowSampleRate")) {
         settings.m_lowSampleRate = response.getRtlSdrSettings()->getLowSampleRate() != 0;
     }
@@ -768,6 +771,7 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
     response.getRtlSdrSettings()->setLoPpmCorrection(settings.m_loPpmCorrection);
     response.getRtlSdrSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getRtlSdrSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getRtlSdrSettings()->setLowSampleRate(settings.m_lowSampleRate ? 1 : 0);
     response.getRtlSdrSettings()->setNoModMode(settings.m_noModMode ? 1 : 0);
     response.getRtlSdrSettings()->setOffsetTuning(settings.m_offsetTuning ? 1 : 0);
@@ -911,6 +915,9 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgRtlSdrSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgRtlSdrSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("lowSampleRate") || force) {
         swgRtlSdrSettings->setLowSampleRate(settings.m_lowSampleRate);

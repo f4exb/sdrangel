@@ -613,6 +613,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
             << " m_lnaGain: " << m_settings.m_lnaGain
             << " m_vgaGain: " << m_settings.m_vgaGain
             << " m_log2Decim: " << m_settings.m_log2Decim
+            << " m_iqOrder: " << m_settings.m_iqOrder
             << " m_fcPos: " << m_settings.m_fcPos
             << " m_devSampleRate: " << m_settings.m_devSampleRate
             << " m_biasT: " << m_settings.m_biasT
@@ -679,6 +680,9 @@ void HackRFInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getHackRfInputSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getHackRfInputSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("fcPos"))
     {
         int fcPos = response.getHackRfInputSettings()->getFcPos();
@@ -731,6 +735,7 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getHackRfInputSettings()->setLnaGain(settings.m_lnaGain);
     response.getHackRfInputSettings()->setVgaGain(settings.m_vgaGain);
     response.getHackRfInputSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getHackRfInputSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getHackRfInputSettings()->setFcPos(settings.m_fcPos);
     response.getHackRfInputSettings()->setDevSampleRate(settings.m_devSampleRate);
     response.getHackRfInputSettings()->setBiasT(settings.m_biasT ? 1 : 0);
@@ -845,6 +850,9 @@ void HackRFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgHackRFInputSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgHackRFInputSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgHackRFInputSettings->setFcPos((int) settings.m_fcPos);

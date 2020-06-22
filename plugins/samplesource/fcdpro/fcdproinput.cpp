@@ -1007,6 +1007,9 @@ void FCDProInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getFcdProSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getFcdProSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("fcPos")) {
         settings.m_fcPos = (FCDProSettings::fcPos_t) response.getFcdProSettings()->getFcPos();
     }
@@ -1064,6 +1067,7 @@ void FCDProInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getFcdProSettings()->setGain5Index(settings.m_gain5Index);
     response.getFcdProSettings()->setGain6Index(settings.m_gain6Index);
     response.getFcdProSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getFcdProSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getFcdProSettings()->setFcPos((int) settings.m_fcPos);
     response.getFcdProSettings()->setRcFilterIndex(settings.m_rcFilterIndex);
     response.getFcdProSettings()->setIfFilterIndex(settings.m_ifFilterIndex);
@@ -1151,6 +1155,9 @@ void FCDProInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgFCDProSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgFCDProSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fcPos") || force) {
         swgFCDProSettings->setFcPos(settings.m_fcPos);
