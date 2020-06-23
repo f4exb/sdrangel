@@ -51,17 +51,17 @@ BladeRF2InputReport:
   description: BladeRF2
   properties:
     frequencyRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
     sampleRateRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
     bandwidthRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
     globalGainRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
     gainModes:
       type: array
       items:
-        $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/NamedEnum"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/NamedEnum"
 
 BladeRF2InputActions:
   description: BladeRF2
@@ -110,13 +110,13 @@ BladeRF2OutputReport:
   description: BladeRF2
   properties:
     frequencyRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
     sampleRateRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
     bandwidthRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
     globalGainRange:
-      $ref: "http://localhost:8081/api/swagger/include/Structs.yaml#/Range"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
 
 BladeRF2MIMOSettings:
   description: BladeRF2
