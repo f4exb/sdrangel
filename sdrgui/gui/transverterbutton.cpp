@@ -25,7 +25,8 @@
 TransverterButton::TransverterButton(QWidget* parent) :
     QPushButton(parent),
     m_deltaFrequency(0),
-    m_deltaFrequencyActive(false)
+    m_deltaFrequencyActive(false),
+    m_iqOrder(true)
 {
     setObjectName("TransverterButton");
     connect(this, SIGNAL(clicked()), this, SLOT(onClicked()));
@@ -33,7 +34,8 @@ TransverterButton::TransverterButton(QWidget* parent) :
 
 void TransverterButton::onClicked()
 {
-    TransverterDialog transverterDialog(m_deltaFrequency, m_deltaFrequencyActive, this);
+    TransverterDialog transverterDialog(m_deltaFrequency, m_deltaFrequencyActive, m_iqOrder, this);
+    transverterDialog.setIQSwapEnabled(m_iqOrderEnabled);
     transverterDialog.exec();
     updateState();
 }
