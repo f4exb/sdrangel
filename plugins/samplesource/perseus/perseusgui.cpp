@@ -210,6 +210,7 @@ void PerseusGui::displaySettings()
     updateFrequencyLimits();
     ui->transverter->setDeltaFrequency(m_settings.m_transverterDeltaFrequency);
     ui->transverter->setDeltaFrequencyActive(m_settings.m_transverterMode);
+    ui->transverter->setIQOrder(m_settings.m_iqOrder);
 	ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
 	ui->LOppm->setValue(m_settings.m_LOppmTenths);
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
@@ -335,6 +336,7 @@ void PerseusGui::on_transverter_clicked()
 {
     m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
     m_settings.m_transverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+    m_settings.m_iqOrder = ui->transverter->getIQOrder();
     qDebug("PerseusGui::on_transverter_clicked: %lld Hz %s", m_settings.m_transverterDeltaFrequency, m_settings.m_transverterMode ? "on" : "off");
     updateFrequencyLimits();
     m_settings.m_centerFrequency = ui->centerFrequency->getValueNew()*1000;

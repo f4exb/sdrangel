@@ -64,8 +64,8 @@ LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->lpFIR->setValueRange(5, 1U, 56000U);
 
     ui->ncoFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-
     ui->channelNumberText->setText(tr("#%1").arg(m_limeSDROutput->getChannelIndex()));
+    ui->transverter->setIQOrderEnabled(false);
 
     if (m_limeSDROutput->getLimeType() == DeviceLimeSDRParams::LimeMini)
     {

@@ -70,6 +70,7 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->gain->setMaximum(0);
     ui->gain->setPageStep(1);
     ui->gain->setSingleStep(1);
+    ui->transverter->setIQOrderEnabled(false);
 
     connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
