@@ -34,16 +34,19 @@ class SDRGUI_API TransverterDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit TransverterDialog(qint64& deltaFrequency, bool& deltaFrequencyActive, QWidget* parent = 0);
+    explicit TransverterDialog(qint64& deltaFrequency, bool& deltaFrequencyActive, bool& iqOrder, QWidget* parent = 0);
     ~TransverterDialog();
+    void setIQSwapEnabled(bool enabled);
 
 private:
     Ui::TransverterDialog* ui;
     qint64& m_deltaFrequency;
     bool& m_deltaFrequencyActive;
+    bool& m_iqOrder;
 
 private slots:
     void accept();
+    void on_iqOrder_toggled(bool checked);
 };
 
 

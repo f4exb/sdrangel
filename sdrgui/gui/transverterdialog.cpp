@@ -19,23 +19,29 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
+
 #include "transverterdialog.h"
 
 #include "ui_transverterdialog.h"
 
 
-TransverterDialog::TransverterDialog(qint64& deltaFrequency, bool& deltaFrequencyActive, QWidget* parent) :
+TransverterDialog::TransverterDialog(qint64& deltaFrequency, bool& deltaFrequencyActive, bool& iqOrder, QWidget* parent) :
     QDialog(parent),
     ui(new Ui::TransverterDialog),
     m_deltaFrequency(deltaFrequency),
-    m_deltaFrequencyActive(deltaFrequencyActive)
+    m_deltaFrequencyActive(deltaFrequencyActive),
+    m_iqOrder(iqOrder)
 {
+    qDebug() << "TransverterDialog::TransverterDialog: " << m_iqOrder;
     ui->setupUi(this);
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 10, -9999999999L, 9999999999L);
     ui->deltaFrequency->setValue(m_deltaFrequency);
     ui->deltaFrequencyActive->setChecked(m_deltaFrequencyActive);
+    ui->iqOrder->setEnabled(true);
+    ui->iqOrder->setChecked(m_iqOrder);
 }
 
 TransverterDialog::~TransverterDialog()
@@ -43,9 +49,26 @@ TransverterDialog::~TransverterDialog()
     delete ui;
 }
 
+void TransverterDialog::setIQSwapEnabled(bool enabled)
+{
+    ui->iqOrder->setEnabled(enabled);
+
+    if (enabled) {
+        ui->iqOrder->setChecked(m_iqOrder);
+    } else {
+        ui->iqOrder->setChecked(true);
+    }
+}
+
 void TransverterDialog::accept()
 {
     m_deltaFrequency = ui->deltaFrequency->getValueNew();
     m_deltaFrequencyActive = ui->deltaFrequencyActive->isChecked();
+    m_iqOrder = ui->iqOrder->isChecked();
     QDialog::accept();
+}
+
+void TransverterDialog::on_iqOrder_toggled(bool checked)
+{
+    ui->iqOrder->setText(checked ? "IQ" : "QI");
 }
