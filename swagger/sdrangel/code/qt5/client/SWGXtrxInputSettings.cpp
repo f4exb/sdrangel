@@ -64,6 +64,8 @@ SWGXtrxInputSettings::SWGXtrxInputSettings() {
     m_ext_clock_freq_isSet = false;
     pwrmode = 0;
     m_pwrmode_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -118,6 +120,8 @@ SWGXtrxInputSettings::init() {
     m_ext_clock_freq_isSet = false;
     pwrmode = 0;
     m_pwrmode_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -132,6 +136,7 @@ SWGXtrxInputSettings::init() {
 
 void
 SWGXtrxInputSettings::cleanup() {
+
 
 
 
@@ -207,6 +212,8 @@ SWGXtrxInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ext_clock_freq, pJson["extClockFreq"], "qint32", "");
     
     ::SWGSDRangel::setValue(&pwrmode, pJson["pwrmode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
@@ -287,6 +294,9 @@ SWGXtrxInputSettings::asJsonObject() {
     }
     if(m_pwrmode_isSet){
         obj->insert("pwrmode", QJsonValue(pwrmode));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
@@ -487,6 +497,16 @@ SWGXtrxInputSettings::setPwrmode(qint32 pwrmode) {
     this->m_pwrmode_isSet = true;
 }
 
+qint32
+SWGXtrxInputSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGXtrxInputSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
+}
+
 QString*
 SWGXtrxInputSettings::getFileRecordName() {
     return file_record_name;
@@ -594,6 +614,9 @@ SWGXtrxInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pwrmode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(file_record_name && *file_record_name != QString("")){

@@ -96,6 +96,9 @@ public:
     qint32 getPwrmode();
     void setPwrmode(qint32 pwrmode);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -168,6 +171,9 @@ private:
 
     qint32 pwrmode;
     bool m_pwrmode_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;

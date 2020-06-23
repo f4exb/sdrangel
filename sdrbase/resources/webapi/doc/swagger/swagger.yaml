@@ -565,7 +565,7 @@ paths:
         "200":
           description: On success return configuration information for the given device in input
           schema:
-            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+            $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFESettings"
         "500":
           $ref: "#/responses/Response_500"
         "501":
@@ -583,7 +583,7 @@ paths:
           description: Give device serial path in devicePath field. To switch Rx and/or Tx on or off use the run API.
           required: true
           schema:
-            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+            $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFESettings"
       responses:
         "200":
           description: Success
@@ -611,7 +611,7 @@ paths:
           description: Give device serial path in devicePath field and run status in rxOn and txOn
           required: true
           schema:
-            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFESettings"
+            $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFESettings"
       responses:
         "200":
           description: Success
@@ -643,7 +643,7 @@ paths:
         "200":
           description: On success return forward and reflected powers in centi-Bels
           schema:
-            $ref: "/doc/swagger/include/LimeRFE.yaml#/LimeRFEPower"
+            $ref: "http://swgserver:8081/api/swagger/include/LimeRFE.yaml#/LimeRFEPower"
         "400":
           description: Error
           schema:
@@ -1036,7 +1036,7 @@ paths:
         "200":
           description: On success returns current settings values
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
         "404":
           description: Invalid device set index or device not found
           schema:
@@ -1061,12 +1061,12 @@ paths:
           description: Device settings to apply
           required: true
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
       responses:
         "200":
           description: On success returns new settings values
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
         "404":
           description: Invalid device set index or device not found
           schema:
@@ -1091,12 +1091,12 @@ paths:
           description: Device settings to apply
           required: true
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
       responses:
         "200":
           description: On success returns new settings values
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
         "404":
           description: Invalid device set index or device not found
           schema:
@@ -1152,7 +1152,7 @@ paths:
           description: Originator information in the reverse API case
           required: false
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
       responses:
         "200":
           description: On success return state before change
@@ -1186,7 +1186,7 @@ paths:
           description: Originator information in the reverse API case
           required: false
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
       responses:
         "200":
           description: On success return state before change
@@ -1261,7 +1261,7 @@ paths:
           description: Originator information in the reverse API case
           required: false
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
       responses:
         "200":
           description: On success return state before change
@@ -1300,7 +1300,7 @@ paths:
           description: Originator information in the reverse API case
           required: false
           schema:
-            $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
       responses:
         "200":
           description: On success return state before change
@@ -1400,7 +1400,7 @@ paths:
           description: Action(s) to apply to the device
           required: true
           schema:
-            $ref: "/doc/swagger/include/DeviceActions.yaml#/DeviceActions"
+            $ref: "http://swgserver:8081/api/swagger/include/DeviceActions.yaml#/DeviceActions"
       responses:
         "202":
           description: Message to perform action was sent successfully
@@ -1437,7 +1437,7 @@ paths:
           description: Channel identification (no settings data)
           required: true
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
       responses:
         "202":
           description: Message to add a channel was sent successfully
@@ -1477,7 +1477,7 @@ paths:
         "200":
           description: On success return deleted channel settings
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
         "400":
           description: Invalid device set or channel index
           schema:
@@ -1513,7 +1513,7 @@ paths:
         "200":
           description: On success return channel settings
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
         "400":
           description: Invalid device set or channel index
           schema:
@@ -1547,12 +1547,12 @@ paths:
           description: Channel settings to apply
           required: true
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
       responses:
         "200":
           description: On success return channel new settings
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
         "400":
           description: Invalid device set or channel index
           schema:
@@ -1586,12 +1586,12 @@ paths:
           description: Channel settings to apply
           required: true
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
       responses:
         "200":
           description: On success return channel new settings
           schema:
-            $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
         "400":
           description: Invalid device set or channel index
           schema:
@@ -1664,7 +1664,7 @@ paths:
           description: Action(s) to apply to the channel
           required: true
           schema:
-            $ref: "/doc/swagger/include/ChannelActions.yaml#/ChannelActions"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelActions.yaml#/ChannelActions"
       responses:
         "202":
           description: Message to perform action was sent successfully
@@ -1735,17 +1735,17 @@ definitions:
     description: Preferences, Presets and Commands of the MainSettings saved by Qt
     properties:
       preferences:
-        $ref: "/doc/swagger/include/Preferences.yaml#/Preferences"
+        $ref: "http://swgserver:8081/api/swagger/include/Preferences.yaml#/Preferences"
       workingPreset:
-        $ref: "/doc/swagger/include/Preset.yaml#/Preset"
+        $ref: "http://swgserver:8081/api/swagger/include/Preset.yaml#/Preset"
       presets:
         type: array
         items:
-          $ref: "/doc/swagger/include/Preset.yaml#/Preset"
+          $ref: "http://swgserver:8081/api/swagger/include/Preset.yaml#/Preset"
       commands:
         type: array
         items:
-          $ref: "/doc/swagger/include/Command.yaml#/Command"
+          $ref: "http://swgserver:8081/api/swagger/include/Command.yaml#/Command"
 
   InstanceDevicesResponse:
     description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
@@ -2280,47 +2280,47 @@ definitions:
         description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         type: integer
       airspyReport:
-        $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
+        $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
       airspyHFReport:
-        $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+        $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
       bladeRF2InputReport:
-        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
       bladeRF2OutputReport:
-        $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
       fileInputReport:
-        $ref: "/doc/swagger/include/FileInput.yaml#/FileInputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
       limeSdrInputReport:
-        $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
       kiwiSDRReport:
-        $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+        $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
       limeSdrOutputReport:
-        $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
       localInputReport:
-        $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
       localOutputReport:
-        $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputReport"
       perseusReport:
-        $ref: "/doc/swagger/include/Perseus.yaml#/PerseusReport"
+        $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
       plutoSdrInputReport:
-        $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
       plutoSdrOutputReport:
-        $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
       rtlSdrReport:
-        $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+        $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
       remoteOutputReport:
-        $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
       remoteInputReport:
-        $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
       sdrPlayReport:
-        $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+        $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
       soapySDRInputReport:
-        $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+        $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
       soapySDROutputReport:
-        $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+        $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
       xtrxInputReport:
-        $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
       xtrxOutputReport:
-        $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+        $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
 
   ChannelReport:
     description: Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present.
@@ -2333,41 +2333,41 @@ definitions:
         description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
         type: integer
       AMDemodReport:
-        $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/AMDemod.yaml#/AMDemodReport"
       AMModReport:
-        $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
+        $ref: "http://swgserver:8081/api/swagger/include/AMMod.yaml#/AMModReport"
       ATVModReport:
-        $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
+        $ref: "http://swgserver:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
       BFMDemodReport:
-        $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       DSDDemodReport:
-        $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
       FileSourceReport:
-        $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
+        $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
       FreeDVDemodReport:
-        $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
       FreeDVModReport:
-        $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+        $ref: "http://swgserver:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
       FreqTrackerReport:
-        $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+        $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
       NFMDemodReport:
-        $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
       NFMModReport:
-        $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+        $ref: "http://swgserver:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
       SSBDemodReport:
-        $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
       RemoteSourceReport:
-        $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+        $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
       SSBModReport:
-        $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
+        $ref: "http://swgserver:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSourceReport:
-        $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceReport"
+        $ref: "http://swgserver:8081/api/swagger/include/UDPSource.yaml#/UDPSourceReport"
       UDPSinkReport:
-        $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
+        $ref: "http://swgserver:8081/api/swagger/include/UDPSink.yaml#/UDPSinkReport"
       WFMDemodReport:
-        $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
+        $ref: "http://swgserver:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodReport"
       WFMModReport:
-        $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"
+        $ref: "http://swgserver:8081/api/swagger/include/WFMMod.yaml#/WFMModReport"
 
 responses:
 

@@ -69,6 +69,9 @@ public:
     qint64 getTransverterDeltaFrequency();
     void setTransverterDeltaFrequency(qint64 transverter_delta_frequency);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -117,6 +120,9 @@ private:
 
     qint64 transverter_delta_frequency;
     bool m_transverter_delta_frequency_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;

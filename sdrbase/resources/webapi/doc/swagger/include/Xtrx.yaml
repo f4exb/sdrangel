@@ -52,6 +52,12 @@ XtrxInputSettings:
     pwrmode:
       description: LMS power mode (0 save max to 7 perf max)
       type: integer
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     fileRecordName:
       type: string
     useReverseAPI:

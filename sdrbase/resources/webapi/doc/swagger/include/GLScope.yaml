@@ -139,8 +139,8 @@ GLScope:
     tracesData:
       type: array
       items:
-        $ref: "/doc/swagger/include/GLScope.yaml#/TraceData"
+        $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/TraceData"
     triggersData:
       type: array
       items:
-        $ref: "/doc/swagger/include/GLScope.yaml#/TriggerData"
+        $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/TriggerData"

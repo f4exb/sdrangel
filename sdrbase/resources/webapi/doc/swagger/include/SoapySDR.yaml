@@ -24,6 +24,12 @@ SoapySDRInputSettings:
     transverterDeltaFrequency:
       type: integer
       format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
     fileRecordName:
       type: string
     antenna:
@@ -50,9 +56,9 @@ SoapySDRInputSettings:
       description: boolean not zero for true
       type: integer
     dcCorrection:
-      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Complex"
     iqCorrection:
-      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Complex"
     streamArgSettings:
       type: array
       items:
@@ -113,9 +119,9 @@ SoapySDROutputSettings:
       description: boolean not zero for true
       type: integer
     dcCorrection:
-      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Complex"
     iqCorrection:
-      $ref: "/doc/swagger/include/Structs.yaml#/Complex"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Complex"
     streamArgSettings:
       type: array
       items:
@@ -165,7 +171,7 @@ SoapySDRReport:
       description: boolean not zero for true
       type: integer
     gainRange:
-      $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/RangeFloat"
     gainSettings:
       type: array
       items:
@@ -181,11 +187,11 @@ SoapySDRReport:
     ratesRanges:
       type: array
       items:
-        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/RangeFloat"
     bandwidthsRanges:
       type: array
       items:
-        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/RangeFloat"
 
 definitions:
 
@@ -195,7 +201,7 @@ definitions:
       name:
         type: string
       range:
-        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/RangeFloat"
 
   SoapySDRFrequencySetting:
     description: A named frequency setting specified by a range list
@@ -205,7 +211,7 @@ definitions:
       ranges:
         type: array
         items:
-          $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+          $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/RangeFloat"
 
   ArgValue:
     descripion: Generic argument value
@@ -235,7 +241,7 @@ definitions:
       units:
         type: string
       range:
-        $ref: "/doc/swagger/include/Structs.yaml#/RangeFloat"
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/RangeFloat"
       valueOptions:
         type: array
         items:

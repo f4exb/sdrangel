@@ -81,6 +81,9 @@ public:
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
 
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -138,6 +141,9 @@ private:
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;
