@@ -42,22 +42,12 @@ TransverterDialog::TransverterDialog(qint64& deltaFrequency, bool& deltaFrequenc
     ui->deltaFrequencyActive->setChecked(m_deltaFrequencyActive);
     ui->iqOrder->setEnabled(true);
     ui->iqOrder->setChecked(m_iqOrder);
+    ui->iqOrder->setText(m_iqOrder ? "IQ" : "QI");
 }
 
 TransverterDialog::~TransverterDialog()
 {
     delete ui;
-}
-
-void TransverterDialog::setIQSwapEnabled(bool enabled)
-{
-    ui->iqOrder->setEnabled(enabled);
-
-    if (enabled) {
-        ui->iqOrder->setChecked(m_iqOrder);
-    } else {
-        ui->iqOrder->setChecked(true);
-    }
 }
 
 void TransverterDialog::accept()

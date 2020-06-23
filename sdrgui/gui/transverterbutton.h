@@ -53,12 +53,6 @@ public:
         updateState();
     }
 
-    void setIQOrderEnabled(bool enabled)
-    {
-        m_iqOrderEnabled = enabled;
-        updateState();
-    }
-
 private slots:
     void onClicked();
 
@@ -66,7 +60,6 @@ private:
     qint64 m_deltaFrequency;
     bool m_deltaFrequencyActive;
     bool m_iqOrder;
-    bool m_iqOrderEnabled;
 
     void updateState();
 };
