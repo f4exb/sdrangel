@@ -1,3 +1,9 @@
+sdrangel (5.7.2-1) unstable; urgency=medium
+
+   * I/Q swap option on transverter. Implements #493
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 23 Jun 2020 14:45:23 +0200
+
 sdrangel (5.7.1-1) unstable; urgency=medium
 
    * Fixed Soapy SDR find module. Implements issue #519
