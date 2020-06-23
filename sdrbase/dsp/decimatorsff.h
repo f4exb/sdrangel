@@ -25,15 +25,15 @@
 
 /** Decimators with float input and float output */
 template<bool IQOrder>
-class SDRBASE_API DecimatorsFF
+class DecimatorsFF
 {
 public:
-    void decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    void decimate2_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    void decimate2_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    SDRBASE_API void decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    SDRBASE_API void decimate2_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    SDRBASE_API void decimate2_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate2_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    void decimate4_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    void decimate4_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    SDRBASE_API void decimate4_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    SDRBASE_API void decimate4_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate4_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate8_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate8_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
@@ -56,6 +56,7 @@ public:
     IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator32; // 5th stages
     IntHalfbandFilterEOF<DECIMATORSFF_HB_FILTER_ORDER, true> m_decimator64; // 6th stages
 };
+
 
 template<bool IQOrder>
 void DecimatorsFF<IQOrder>::decimate2_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
