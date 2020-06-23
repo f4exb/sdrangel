@@ -64,7 +64,6 @@ SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     uint64_t f_min, f_max;
     m_sampleSink->getFrequencyRange(f_min, f_max);
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
-    ui->transverter->setIQOrderEnabled(false);
 
     createCorrectionsControl();
     createAntennasControl(m_sampleSink->getAntennas());

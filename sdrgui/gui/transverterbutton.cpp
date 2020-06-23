@@ -35,7 +35,6 @@ TransverterButton::TransverterButton(QWidget* parent) :
 void TransverterButton::onClicked()
 {
     TransverterDialog transverterDialog(m_deltaFrequency, m_deltaFrequencyActive, m_iqOrder, this);
-    transverterDialog.setIQSwapEnabled(m_iqOrderEnabled);
     transverterDialog.exec();
     updateState();
 }

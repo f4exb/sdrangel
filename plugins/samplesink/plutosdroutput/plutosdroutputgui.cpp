@@ -65,7 +65,6 @@ PlutoSDROutputGUI::PlutoSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) 
 
     ui->swInterpLabel->setText(QString::fromUtf8("S\u2191"));
     ui->lpFIRInterpolationLabel->setText(QString::fromUtf8("\u2191"));
-    ui->transverter->setIQOrderEnabled(false);
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
