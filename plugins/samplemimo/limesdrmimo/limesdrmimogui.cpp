@@ -293,6 +293,7 @@ void LimeSDRMIMOGUI::displaySettings()
 
         ui->transverter->setDeltaFrequency(m_settings.m_rxTransverterDeltaFrequency);
         ui->transverter->setDeltaFrequencyActive(m_settings.m_rxTransverterMode);
+        ui->transverter->setIQOrder(m_settings.m_iqOrder);
 
         ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
         ui->extClock->setExternalClockActive(m_settings.m_extClock);
@@ -376,6 +377,7 @@ void LimeSDRMIMOGUI::displaySettings()
 
         ui->transverter->setDeltaFrequency(m_settings.m_txTransverterDeltaFrequency);
         ui->transverter->setDeltaFrequencyActive(m_settings.m_txTransverterMode);
+        ui->transverter->setIQOrder(m_settings.m_iqOrder);
 
         ui->extClock->setExternalClockFrequency(m_settings.m_extClockFreq);
         ui->extClock->setExternalClockActive(m_settings.m_extClock);
@@ -1020,6 +1022,7 @@ void LimeSDRMIMOGUI::on_transverter_clicked()
     {
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settings.m_iqOrder = ui->transverter->getIQOrder();
         qDebug("LimeSDRMIMOGUI::on_transverter_clicked: Rx %lld Hz %s", m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
     }
     else

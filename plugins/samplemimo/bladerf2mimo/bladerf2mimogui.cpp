@@ -171,6 +171,7 @@ void BladeRF2MIMOGui::displaySettings()
     {
         ui->transverter->setDeltaFrequency(m_settings.m_rxTransverterDeltaFrequency);
         ui->transverter->setDeltaFrequencyActive(m_settings.m_rxTransverterMode);
+        ui->transverter->setIQOrder(m_settings.m_iqOrder);
         ui->centerFrequency->setValueRange(7, m_fMinRx / 1000, m_fMaxRx / 1000);
         ui->centerFrequency->setValue(m_settings.m_rxCenterFrequency / 1000);
         ui->bandwidth->setValueRange(5, m_bwMinRx / 1000, m_bwMaxRx / 1000);
@@ -206,6 +207,7 @@ void BladeRF2MIMOGui::displaySettings()
     {
         ui->transverter->setDeltaFrequency(m_settings.m_txTransverterDeltaFrequency);
         ui->transverter->setDeltaFrequencyActive(m_settings.m_txTransverterMode);
+        ui->transverter->setIQOrder(m_settings.m_iqOrder);
         ui->centerFrequency->setValueRange(7, m_fMinTx / 1000, m_fMaxTx / 1000);
         ui->centerFrequency->setValue(m_settings.m_txCenterFrequency / 1000);
         ui->bandwidth->setValueRange(5, m_bwMinTx / 1000, m_bwMaxTx / 1000);
@@ -678,6 +680,7 @@ void BladeRF2MIMOGui::on_transverter_clicked()
     {
         m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
         m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settings.m_iqOrder = ui->transverter->getIQOrder();
         qDebug("BladeRF2InputGui::on_transverter_clicked: Rx: %lld Hz %s", m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
     }
     else
