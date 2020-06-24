@@ -33,7 +33,7 @@ LocalSinkSink::LocalSinkSink() :
         m_sampleRate(48000),
         m_deviceSampleRate(48000)
 {
-    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
+    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(4000000));
     applySettings(m_settings, true);
 }
 
