@@ -154,8 +154,8 @@ void DownChannelizer::applyDecimation()
     m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
     m_requestedOutputSampleRate = m_channelSampleRate;
 
-	qDebug() << "UpChannelizer::applyInterpolation:"
-            << " m_log2Interp:" << m_log2Decim
+	qDebug() << "DownChannelizer::applyDecimation:"
+            << " m_log2Decim:" << m_log2Decim
             << " m_filterChainHash:" << m_filterChainHash
             << " out:" << m_basebandSampleRate
 			<< " in:" << m_channelSampleRate
