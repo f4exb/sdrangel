@@ -56,15 +56,17 @@ public:
 
     void startStop(bool start);
     void setSampleFifo(SampleSinkFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
+    void setDeviceSampleFifo(SampleSinkFifo *sampleFifo) { m_deviceSampleFifo  = sampleFifo; }
 
 public slots:
-    void processSamples(const quint8* data, uint count);
+    void handleData(); //!< Handle data when samples have to be processed
 
 private:
 	QMutex m_startWaitMutex;
 	QWaitCondition m_startWaiter;
 	volatile bool m_running;
     SampleSinkFifo *m_sampleFifo;
+    SampleSinkFifo *m_deviceSampleFifo;
 
     MessageQueue m_inputMessageQueue;
 
