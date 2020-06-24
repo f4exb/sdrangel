@@ -40,10 +40,8 @@ public:
     void stop();
     bool isRunning() const { return m_running; }
 
-signals:
-    void samplesAvailable(const quint8* data, uint count);
-
 private:
+    SampleSinkFifo m_sampleFifo;
     LocalSinkSettings m_settings;
     LocalSinkThread *m_sinkThread;
     bool m_running;

@@ -72,10 +72,31 @@ void LocalSinkThread::run()
     qDebug("LocalSinkThread::run: end");
 }
 
-void LocalSinkThread::processSamples(const quint8* data, uint count)
+void LocalSinkThread::handleData()
 {
-    if (m_sampleFifo && m_running) {
-        m_sampleFifo->write(data, count);
+    while ((m_sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0))
+    {
+		SampleVector::iterator part1begin;
+		SampleVector::iterator part1end;
+		SampleVector::iterator part2begin;
+		SampleVector::iterator part2end;
+
+        std::size_t count = m_sampleFifo->readBegin(m_sampleFifo->fill(), &part1begin, &part1end, &part2begin, &part2end);
+
+        if (m_deviceSampleFifo && m_running)
+        {
+            // first part of FIFO data
+            if (part1begin != part1end) {
+                m_deviceSampleFifo->write(part1begin,part1end);
+            }
+
+            // second part of FIFO data (used when block wraps around)
+            if(part2begin != part2end) {
+                m_deviceSampleFifo->write(part2begin, part2end);
+            }
+        }
+
+		m_sampleFifo->readCommit((unsigned int) count);
     }
 }
 

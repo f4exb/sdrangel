@@ -33,6 +33,7 @@ LocalSinkSink::LocalSinkSink() :
         m_sampleRate(48000),
         m_deviceSampleRate(48000)
 {
+    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     applySettings(m_settings, true);
 }
 
@@ -42,7 +43,7 @@ LocalSinkSink::~LocalSinkSink()
 
 void LocalSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    emit samplesAvailable((const quint8*) &(*begin), (end-begin)*sizeof(Sample));
+    m_sampleFifo.write(begin, end);
 }
 
 void LocalSinkSink::start(DeviceSampleSource *deviceSource)
@@ -54,16 +55,19 @@ void LocalSinkSink::start(DeviceSampleSource *deviceSource)
     }
 
     m_sinkThread = new LocalSinkThread();
+    m_sinkThread->setSampleFifo(&m_sampleFifo);
 
     if (deviceSource) {
-        m_sinkThread->setSampleFifo(deviceSource->getSampleFifo());
+        m_sinkThread->setDeviceSampleFifo(deviceSource->getSampleFifo());
     }
 
-    connect(this,
-            SIGNAL(samplesAvailable(const quint8*, uint)),
-            m_sinkThread,
-            SLOT(processSamples(const quint8*, uint)),
-            Qt::QueuedConnection);
+    QObject::connect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        m_sinkThread,
+        &LocalSinkThread::handleData,
+        Qt::QueuedConnection
+    );
 
     m_sinkThread->startStop(true);
     m_running = true;
@@ -73,10 +77,12 @@ void LocalSinkSink::stop()
 {
     qDebug("LocalSinkSink::stop");
 
-    disconnect(this,
-            SIGNAL(samplesAvailable(const quint8*, uint)),
-            m_sinkThread,
-            SLOT(processSamples(const quint8*, uint)));
+    QObject::disconnect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        m_sinkThread,
+        &LocalSinkThread::handleData
+    );
 
     if (m_sinkThread != 0)
     {
