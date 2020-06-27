@@ -562,6 +562,20 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
+    if ((m_settings.m_biasTee != settings.m_biasTee) || force)
+    {
+        reverseAPIKeys.append("biasTee");
+
+        if(m_dev != 0)
+        {
+            if (rtlsdr_set_bias_tee(m_dev, settings.m_biasTee ? 1 : 0) != 0) {
+                qCritical("RTLSDRInput::applySettings: rtlsdr_set_bias_tee() failed");
+            } else {
+                qDebug("RTLSDRInput::applySettings: rtlsdr_set_bias_tee() to %d", settings.m_biasTee ? 1 : 0);
+            }
+        }
+    }
+
     if (settings.m_useReverseAPI)
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
@@ -676,6 +690,9 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getRtlSdrSettings()->getRfBandwidth();
     }
+    if (deviceSettingsKeys.contains("biasTee")) {
+        settings.m_biasTee = response.getRtlSdrSettings()->getBiasTee() != 0;
+    }
     if (deviceSettingsKeys.contains("fileRecordName")) {
         settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
     }
@@ -708,6 +725,7 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setLowSampleRate(settings.m_lowSampleRate ? 1 : 0);
     response.getRtlSdrSettings()->setNoModMode(settings.m_noModMode ? 1 : 0);
     response.getRtlSdrSettings()->setOffsetTuning(settings.m_offsetTuning ? 1 : 0);
+    response.getRtlSdrSettings()->setBiasTee(settings.m_biasTee ? 1 : 0);
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
@@ -869,6 +887,9 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("rfBandwidth") || force) {
         swgRtlSdrSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (deviceSettingsKeys.contains("biasTee") || force) {
+        swgRtlSdrSettings->setBiasTee(settings.m_biasTee ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("fileRecordName") || force) {
         swgRtlSdrSettings->setFileRecordName(new QString(settings.m_fileRecordName));
