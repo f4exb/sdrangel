@@ -443,6 +443,7 @@ void FreqTracker::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respo
     response.getFreqTrackerReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getFreqTrackerReport()->setSampleRate(m_basebandSink->getSampleRate());
     response.getFreqTrackerReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
+    response.getFreqTrackerReport()->setTrackingDeltaFrequency(getAvgDeltaFreq());
 }
 
 void FreqTracker::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force)
