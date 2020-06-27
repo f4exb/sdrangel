@@ -103,3 +103,8 @@ void LocalSinkSink::applySettings(const LocalSinkSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+void LocalSinkSink::setSampleRate(int sampleRate)
+{
+    m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(sampleRate));
+}

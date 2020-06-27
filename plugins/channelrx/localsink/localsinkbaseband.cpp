@@ -25,7 +25,6 @@
 
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalSinkBaseband, Message)
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalSinkWork, Message)
-MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgBasebandSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(LocalSinkBaseband::MsgConfigureLocalDeviceSampleSource, Message)
 
 LocalSinkBaseband::LocalSinkBaseband() :
@@ -114,13 +113,14 @@ bool LocalSinkBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgBasebandSampleRateNotification::match(cmd))
+    else if (DSPSignalNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        MsgBasebandSampleRateNotification& notif = (MsgBasebandSampleRateNotification&) cmd;
-        qDebug() << "LocalSinkBaseband::handleMessage: MsgBasebandSampleRateNotification: basebandSampleRate: " << notif.getBasebandSampleRate();
-        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getBasebandSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getBasebandSampleRate());
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        qDebug() << "LocalSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
+        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
+        m_channelizer->setBasebandSampleRate(notif.getSampleRate(), true); // apply decimation
+        m_sink.setSampleRate(getChannelSampleRate());
 
 		return true;
     }
@@ -169,6 +169,7 @@ void LocalSinkBaseband::applySettings(const LocalSinkSettings& settings, bool fo
      || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
     {
         m_channelizer->setDecimation(settings.m_log2Decim, settings.m_filterChainHash);
+        m_sink.setSampleRate(getChannelSampleRate());
     }
 
     //m_source.applySettings(settings, force);

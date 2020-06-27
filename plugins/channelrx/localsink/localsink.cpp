@@ -116,7 +116,7 @@ bool LocalSink::handleMessage(const Message& cmd)
         calculateFrequencyOffset(m_settings.m_log2Decim, m_settings.m_filterChainHash); // This is when device sample rate changes
         propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, m_settings.m_log2Decim);
 
-        MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
+        DSPSignalNotification *msg = new DSPSignalNotification(notif.getSampleRate(), notif.getCenterFrequency());
         m_basebandSink->getInputMessageQueue()->push(msg);
 
         if (getMessageQueueToGUI())
