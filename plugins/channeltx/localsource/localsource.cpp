@@ -106,7 +106,7 @@ bool LocalSource::handleMessage(const Message& cmd)
         calculateFrequencyOffset(m_settings.m_log2Interp, m_settings.m_filterChainHash);
         propagateSampleRateAndFrequency(m_settings.m_localDeviceIndex, m_settings.m_log2Interp);
 
-        MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(cfg.getSampleRate());
+        DSPSignalNotification *msg = new DSPSignalNotification(cfg.getSampleRate(), cfg.getCenterFrequency());
         m_basebandSource->getInputMessageQueue()->push(msg);
 
         if (m_guiMessageQueue)

@@ -25,7 +25,6 @@
 
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalSourceBaseband, Message)
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalSourceWork, Message)
-MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgBasebandSampleRateNotification, Message)
 MESSAGE_CLASS_DEFINITION(LocalSourceBaseband::MsgConfigureLocalDeviceSampleSink, Message)
 
 LocalSourceBaseband::LocalSourceBaseband() :
@@ -142,13 +141,13 @@ bool LocalSourceBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgBasebandSampleRateNotification::match(cmd))
+    else if (DSPSignalNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        MsgBasebandSampleRateNotification& notif = (MsgBasebandSampleRateNotification&) cmd;
-        qDebug() << "LocalSourceBaseband::handleMessage: MsgBasebandSampleRateNotification: basebandSampleRate: " << notif.getBasebandSampleRate();
-        m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(notif.getBasebandSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getBasebandSampleRate());
+        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        qDebug() << "LocalSourceBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
+        m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(notif.getSampleRate()));
+        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
 
 		return true;
     }
