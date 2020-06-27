@@ -1,3 +1,9 @@
+sdrangel (5.7.4-1) unstable; urgency=medium
+
+   * Fix issues with REST API generated code
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 27 Jun 2020 17:44:42 +0200
+
 sdrangel (5.7.3-1) unstable; urgency=medium
 
    * RTL-SDR: Bias tee support. Implements #533
