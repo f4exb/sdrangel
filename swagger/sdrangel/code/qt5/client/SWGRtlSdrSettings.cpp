@@ -60,6 +60,8 @@ SWGRtlSdrSettings::SWGRtlSdrSettings() {
     m_iq_order_isSet = false;
     rf_bandwidth = 0;
     m_rf_bandwidth_isSet = false;
+    bias_tee = 0;
+    m_bias_tee_isSet = false;
     file_record_name = nullptr;
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -110,6 +112,8 @@ SWGRtlSdrSettings::init() {
     m_iq_order_isSet = false;
     rf_bandwidth = 0;
     m_rf_bandwidth_isSet = false;
+    bias_tee = 0;
+    m_bias_tee_isSet = false;
     file_record_name = new QString("");
     m_file_record_name_isSet = false;
     use_reverse_api = 0;
@@ -124,6 +128,7 @@ SWGRtlSdrSettings::init() {
 
 void
 SWGRtlSdrSettings::cleanup() {
+
 
 
 
@@ -193,6 +198,8 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&bias_tee, pJson["biasTee"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
@@ -267,6 +274,9 @@ SWGRtlSdrSettings::asJsonObject() {
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
+    }
+    if(m_bias_tee_isSet){
+        obj->insert("biasTee", QJsonValue(bias_tee));
     }
     if(file_record_name != nullptr && *file_record_name != QString("")){
         toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
@@ -447,6 +457,16 @@ SWGRtlSdrSettings::setRfBandwidth(qint32 rf_bandwidth) {
     this->m_rf_bandwidth_isSet = true;
 }
 
+qint32
+SWGRtlSdrSettings::getBiasTee() {
+    return bias_tee;
+}
+void
+SWGRtlSdrSettings::setBiasTee(qint32 bias_tee) {
+    this->bias_tee = bias_tee;
+    this->m_bias_tee_isSet = true;
+}
+
 QString*
 SWGRtlSdrSettings::getFileRecordName() {
     return file_record_name;
@@ -548,6 +568,9 @@ SWGRtlSdrSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_rf_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bias_tee_isSet){
             isObjectUpdated = true; break;
         }
         if(file_record_name && *file_record_name != QString("")){

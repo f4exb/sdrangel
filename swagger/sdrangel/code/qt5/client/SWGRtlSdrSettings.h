@@ -90,6 +90,9 @@ public:
     qint32 getRfBandwidth();
     void setRfBandwidth(qint32 rf_bandwidth);
 
+    qint32 getBiasTee();
+    void setBiasTee(qint32 bias_tee);
+
     QString* getFileRecordName();
     void setFileRecordName(QString* file_record_name);
 
@@ -156,6 +159,9 @@ private:
 
     qint32 rf_bandwidth;
     bool m_rf_bandwidth_isSet;
+
+    qint32 bias_tee;
+    bool m_bias_tee_isSet;
 
     QString* file_record_name;
     bool m_file_record_name_isSet;
