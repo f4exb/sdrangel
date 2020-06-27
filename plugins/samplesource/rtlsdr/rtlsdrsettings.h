@@ -44,6 +44,7 @@ struct RTLSDRSettings {
 	quint32 m_rfBandwidth; //!< RF filter bandwidth in Hz
 	QString m_fileRecordName;
 	bool m_offsetTuning;
+    bool m_biasTee;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

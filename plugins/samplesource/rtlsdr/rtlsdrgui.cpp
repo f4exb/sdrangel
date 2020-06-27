@@ -449,6 +449,12 @@ void RTLSDRGui::on_sampleRateMode_toggled(bool checked)
     displaySampleRate();
 }
 
+void RTLSDRGui::on_biasT_stateChanged(int state)
+{
+	m_settings.m_biasTee = (state == Qt::Checked);
+	sendSettings();
+}
+
 void RTLSDRGui::updateHardware()
 {
     if (m_doApplySettings)

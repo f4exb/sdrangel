@@ -243,7 +243,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="corrLabel">
        <property name="text">
-        <string>Auto corr</string>
+        <string>Auto</string>
        </property>
       </widget>
      </item>
@@ -260,7 +260,7 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="5">
+     <item row="0" column="6">
       <widget class="QComboBox" name="fcPos">
        <property name="maximumSize">
         <size>
@@ -291,14 +291,14 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="0" column="5">
       <widget class="QLabel" name="fcPosLabel">
        <property name="text">
         <string>Fp</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="6">
+     <item row="0" column="7">
       <widget class="TransverterButton" name="transverter">
        <property name="maximumSize">
         <size>
@@ -314,6 +314,19 @@
        </property>
        <property name="checkable">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QCheckBox" name="biasT">
+       <property name="toolTip">
+        <string>Activate antenna bias tee</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Bias T</string>
        </property>
       </widget>
      </item>

@@ -43,6 +43,7 @@ void RTLSDRSettings::resetToDefaults()
 	m_rfBandwidth = 2500 * 1000; // Hz
 	m_fileRecordName = "";
 	m_offsetTuning = false;
+    m_biasTee = false;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -72,6 +73,7 @@ QByteArray RTLSDRSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeBool(20, m_iqOrder);
+    s.writeBool(21, m_biasTee);
 
 	return s.final();
 }
@@ -119,6 +121,7 @@ bool RTLSDRSettings::deserialize(const QByteArray& data)
         d.readU32(19, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readBool(20, &m_iqOrder, true);
+        d.readBool(21, &m_biasTee, false);
 
 		return true;
 	}
