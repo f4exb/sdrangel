@@ -63,6 +63,9 @@ FreqTrackerReport:
       description: power received in channel (dB)
       type: number
       format: float
+    trackingDeltaFrequency:
+      description: difference between channel and PLL or FLL center frequency (Hz)
+      type: integer
     squelch:
       description: squelch status (1 if open else 0)
       type: integer

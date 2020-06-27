@@ -44,6 +44,9 @@ public:
     float getChannelPowerDb();
     void setChannelPowerDb(float channel_power_db);
 
+    qint32 getTrackingDeltaFrequency();
+    void setTrackingDeltaFrequency(qint32 tracking_delta_frequency);
+
     qint32 getSquelch();
     void setSquelch(qint32 squelch);
 
@@ -59,6 +62,9 @@ public:
 private:
     float channel_power_db;
     bool m_channel_power_db_isSet;
+
+    qint32 tracking_delta_frequency;
+    bool m_tracking_delta_frequency_isSet;
 
     qint32 squelch;
     bool m_squelch_isSet;
