@@ -77,26 +77,6 @@ public:
 		{ }
 	};
 
-    class MsgBasebandSampleRateNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgBasebandSampleRateNotification* create(int sampleRate) {
-            return new MsgBasebandSampleRateNotification(sampleRate);
-        }
-
-        int getBasebandSampleRate() const { return m_sampleRate; }
-
-    private:
-
-        MsgBasebandSampleRateNotification(int sampleRate) :
-            Message(),
-            m_sampleRate(sampleRate)
-        { }
-
-        int m_sampleRate;
-    };
-
     class MsgConfigureLocalDeviceSampleSink : public Message {
         MESSAGE_CLASS_DECLARATION
 
