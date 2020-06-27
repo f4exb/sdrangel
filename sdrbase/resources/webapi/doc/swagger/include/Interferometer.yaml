@@ -24,6 +24,6 @@ InterferometerSettings:
     reverseAPIChannelIndex:
       type: integer
     spectrumConfig:
-      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     scopeConfig:
-      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"

@@ -57,19 +57,19 @@ SDRPlayReport:
     sampleRates:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/SampleRate"
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
     bandwidths:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Bandwidth"
+        $ref: "/doc/swagger/include/Structs.yaml#/Bandwidth"
     intermediateFrequencies:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Frequency"
+        $ref: "/doc/swagger/include/Structs.yaml#/Frequency"
     frequencyBands:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/FrequencyBand"
+        $ref: "/doc/swagger/include/Structs.yaml#/FrequencyBand"
 
 SDRPlayActions:
   description: SDRplay1

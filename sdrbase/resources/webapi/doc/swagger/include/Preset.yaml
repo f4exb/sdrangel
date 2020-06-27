@@ -8,7 +8,7 @@ DeviceConfig:
     deviceSequence:
       type: integer
     config:
-      $ref: "http://swgserver:8081/api/swagger/include/DeviceSettings.yaml#/DeviceSettings"
+      $ref: "/doc/swagger/include/DeviceSettings.yaml#/DeviceSettings"
 
 ChannelConfig:
   description: Represents a Preset::ChannelConfig object
@@ -17,7 +17,7 @@ ChannelConfig:
       description: Channel type ID in URI form
       type: string
     config:
-      $ref: "http://swgserver:8081/api/swagger/include/ChannelSettings.yaml#/ChannelSettings"
+      $ref: "/doc/swagger/include/ChannelSettings.yaml#/ChannelSettings"
 
 Preset:
   description: Represents a Preset object
@@ -33,7 +33,7 @@ Preset:
       type: integer
       format: int64
     spectrumConfig:
-      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
     dcOffsetCorrection:
       description: boolean
       type: integer
@@ -43,11 +43,11 @@ Preset:
     channelConfigs:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Preset.yaml#/ChannelConfig"
+        $ref: "/doc/swagger/include/Preset.yaml#/ChannelConfig"
     deviceConfigs:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Preset.yaml#/DeviceConfig"
+        $ref: "/doc/swagger/include/Preset.yaml#/DeviceConfig"
     layout:
       description: screen and dock layout is a QByteArray handled by Qt::QMainWindow translated to base64
       type: string

@@ -18,4 +18,4 @@ ChannelActions:
       description: Optional for reverse API. This is the channel index from where the message comes from.
       type: integer
     FileSourceActions:
-      $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceActions"
+      $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceActions"

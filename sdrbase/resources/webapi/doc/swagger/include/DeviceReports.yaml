@@ -12,50 +12,50 @@ DeviceReport:
       description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
       type: integer
     airspyReport:
-      $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
+      $ref: "/doc/swagger/include/Airspy.yaml#/AirspyReport"
     airspyHFReport:
-      $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
+      $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFReport"
     bladeRF2InputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
+      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
     bladeRF2OutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
+      $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
     fileInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
+      $ref: "/doc/swagger/include/FileInput.yaml#/FileInputReport"
     limeSdrInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
     kiwiSDRReport:
-      $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+      $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
     limeSdrOutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
     limeSdrMIMOReport:
-      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
     localInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
+      $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputReport"
     localOutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputReport"
+      $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputReport"
     perseusReport:
-      $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
+      $ref: "/doc/swagger/include/Perseus.yaml#/PerseusReport"
     plutoSdrInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
+      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
     plutoSdrOutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
     rtlSdrReport:
-      $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
+      $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
     remoteOutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
+      $ref: "/doc/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
     remoteInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
+      $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
     sdrPlayReport:
-      $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+      $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
     sigMFFileInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
     soapySDRInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     soapySDROutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+      $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     xtrxInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
     xtrxOutputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
     xtrxMIMOReport:
-      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
