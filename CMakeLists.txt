@@ -18,7 +18,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # configure version
 set(sdrangel_VERSION_MAJOR "5")
 set(sdrangel_VERSION_MINOR "7")
-set(sdrangel_VERSION_PATCH "2")
+set(sdrangel_VERSION_PATCH "3")
 set(sdrangel_VERSION_SUFFIX "")
 
 # SDRAngel cmake options
