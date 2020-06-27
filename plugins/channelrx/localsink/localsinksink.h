@@ -39,6 +39,7 @@ public:
     void start(DeviceSampleSource *deviceSource);
     void stop();
     bool isRunning() const { return m_running; }
+    void setSampleRate(int sampleRate);
 
 private:
     SampleSinkFifo m_sampleFifo;
