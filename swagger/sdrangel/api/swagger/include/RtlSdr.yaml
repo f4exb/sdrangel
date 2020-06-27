@@ -39,6 +39,12 @@ RtlSdrSettings:
           * 1 - I then Q (straight)
     rfBandwidth:
       type: integer
+    biasTee:
+      type: integer
+      description: >
+        Bias tee
+          * 0 - inactive
+          * 1 - active
     fileRecordName:
       type: string
     useReverseAPI:
