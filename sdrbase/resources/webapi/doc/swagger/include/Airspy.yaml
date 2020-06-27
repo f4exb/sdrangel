@@ -61,7 +61,7 @@ AirspyReport:
     sampleRates:
       type: array
       items:
-        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/SampleRate"
+        $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
 
 AirspyActions:
   description: Airspy

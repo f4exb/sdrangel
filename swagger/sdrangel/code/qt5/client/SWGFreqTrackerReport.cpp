@@ -30,6 +30,8 @@ SWGFreqTrackerReport::SWGFreqTrackerReport(QString* json) {
 SWGFreqTrackerReport::SWGFreqTrackerReport() {
     channel_power_db = 0.0f;
     m_channel_power_db_isSet = false;
+    tracking_delta_frequency = 0;
+    m_tracking_delta_frequency_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
     sample_rate = 0;
@@ -46,6 +48,8 @@ void
 SWGFreqTrackerReport::init() {
     channel_power_db = 0.0f;
     m_channel_power_db_isSet = false;
+    tracking_delta_frequency = 0;
+    m_tracking_delta_frequency_isSet = false;
     squelch = 0;
     m_squelch_isSet = false;
     sample_rate = 0;
@@ -56,6 +60,7 @@ SWGFreqTrackerReport::init() {
 
 void
 SWGFreqTrackerReport::cleanup() {
+
 
 
 
@@ -74,6 +79,8 @@ SWGFreqTrackerReport::fromJson(QString &json) {
 void
 SWGFreqTrackerReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_power_db, pJson["channelPowerDB"], "float", "");
+    
+    ::SWGSDRangel::setValue(&tracking_delta_frequency, pJson["trackingDeltaFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&squelch, pJson["squelch"], "qint32", "");
     
@@ -100,6 +107,9 @@ SWGFreqTrackerReport::asJsonObject() {
     if(m_channel_power_db_isSet){
         obj->insert("channelPowerDB", QJsonValue(channel_power_db));
     }
+    if(m_tracking_delta_frequency_isSet){
+        obj->insert("trackingDeltaFrequency", QJsonValue(tracking_delta_frequency));
+    }
     if(m_squelch_isSet){
         obj->insert("squelch", QJsonValue(squelch));
     }
@@ -121,6 +131,16 @@ void
 SWGFreqTrackerReport::setChannelPowerDb(float channel_power_db) {
     this->channel_power_db = channel_power_db;
     this->m_channel_power_db_isSet = true;
+}
+
+qint32
+SWGFreqTrackerReport::getTrackingDeltaFrequency() {
+    return tracking_delta_frequency;
+}
+void
+SWGFreqTrackerReport::setTrackingDeltaFrequency(qint32 tracking_delta_frequency) {
+    this->tracking_delta_frequency = tracking_delta_frequency;
+    this->m_tracking_delta_frequency_isSet = true;
 }
 
 qint32
@@ -159,6 +179,9 @@ SWGFreqTrackerReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_channel_power_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tracking_delta_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_squelch_isSet){

@@ -50,7 +50,7 @@ NFMModSettings:
     reverseAPIChannelIndex:
       type: integer
     cwKeyer:
-      $ref: "http://swgserver:8081/api/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
+      $ref: "/doc/swagger/include/CWKeyer.yaml#/CWKeyerSettings"
 
 NFMModReport:
   description: NFMMod
