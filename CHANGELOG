@@ -1,3 +1,11 @@
+sdrangel (4.14.12-1) unstable; urgency=medium
+
+   * RTL-SDR: Bias tee support. Implements #533
+   * Frequency tracker: added tracking delta frequency in API report. Implements #550
+   * Local sink: added decoupling FIFO. Implements #549
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 27 Jun 2020 08:50:27 +0200
+
 sdrangel (4.14.11-1) unstable; urgency=medium
 
    * I/Q swap option on transverter. Implements #493
