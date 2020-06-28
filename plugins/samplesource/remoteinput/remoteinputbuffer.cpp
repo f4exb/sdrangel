@@ -27,8 +27,9 @@
 
 
 RemoteInputBuffer::RemoteInputBuffer() :
+        m_decoderSlots(nullptr),
+        m_frames(nullptr),
         m_decoderIndexHead(m_nbDecoderSlots/2),
-        m_frameHead(0),
         m_curNbBlocks(0),
         m_minNbBlocks(256),
         m_curOriginalBlocks(0),
@@ -46,8 +47,7 @@ RemoteInputBuffer::RemoteInputBuffer() :
 	    m_balCorrLimit(0)
 {
 	m_currentMeta.init();
-	m_framesNbBytes = m_nbDecoderSlots * sizeof(BufferFrame);
-	m_wrDeltaEstimate = m_framesNbBytes / 2;
+    setNbDecoderSlots(16);
 	m_tvOut_sec = 0;
 	m_tvOut_usec = 0;
 	m_readNbBytes = 1;
@@ -70,6 +70,32 @@ RemoteInputBuffer::~RemoteInputBuffer()
 	if (m_readBuffer) {
 		delete[] m_readBuffer;
 	}
+    if (m_decoderSlots) {
+        delete[] m_decoderSlots;
+    }
+    if (m_frames) {
+        delete[] m_frames;
+    }
+}
+
+void RemoteInputBuffer::setNbDecoderSlots(int nbDecoderSlots)
+{
+    m_nbDecoderSlots = nbDecoderSlots;
+    m_framesSize = m_nbDecoderSlots * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
+  	m_framesNbBytes = m_nbDecoderSlots * sizeof(BufferFrame);
+    m_wrDeltaEstimate = m_framesNbBytes / 2;
+
+    if (m_decoderSlots) {
+        delete[] m_decoderSlots;
+    }
+    if (m_frames) {
+        delete[] m_frames;
+    }
+
+    m_decoderSlots = new DecoderSlot[m_nbDecoderSlots];
+    m_frames = new BufferFrame[m_nbDecoderSlots];
+
+    m_frameHead = -1;
 }
 
 void RemoteInputBuffer::initDecodeAllSlots()
