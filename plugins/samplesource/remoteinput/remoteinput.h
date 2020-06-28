@@ -329,6 +329,7 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
+    int m_sampleRate;
 	QMutex m_mutex;
 	RemoteInputSettings m_settings;
 	RemoteInputUDPHandler* m_remoteInputUDPHandler;

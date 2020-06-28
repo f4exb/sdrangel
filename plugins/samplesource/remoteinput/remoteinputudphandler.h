@@ -37,10 +37,31 @@ class RemoteInputUDPHandler : public QObject
 {
 	Q_OBJECT
 public:
+	class MsgReportSampleRateChange : public Message {
+		MESSAGE_CLASS_DECLARATION
+
+	public:
+		int getSampleRate() const { return m_sampleRate; }
+
+		static MsgReportSampleRateChange* create(int sampleRate)
+		{
+			return new MsgReportSampleRateChange(sampleRate);
+		}
+
+	protected:
+		int m_sampleRate;
+
+		MsgReportSampleRateChange(int sampleRate) :
+			Message(),
+			m_sampleRate(sampleRate)
+		{ }
+	};
+
 	RemoteInputUDPHandler(SampleSinkFifo* sampleFifo, DeviceAPI *deviceAPI);
 	~RemoteInputUDPHandler();
-	void setMessageQueueToGUI(MessageQueue *queue) { m_outputMessageQueueToGUI = queue; }
-	void start();
+	void setMessageQueueToInput(MessageQueue *queue) { m_messageQueueToInput = queue; }
+	void setMessageQueueToGUI(MessageQueue *queue) { m_messageQueueToGUI = queue; }
+    void start();
 	void stop();
 	void configureUDPLink(const QString& address, quint16 port);
 	void getRemoteAddress(QString& s) const { s = m_remoteAddress.toString(); }
@@ -73,7 +94,8 @@ private:
 	uint32_t m_samplerate;
 	uint64_t m_centerFrequency;
 	uint64_t m_tv_msec;
-	MessageQueue *m_outputMessageQueueToGUI;
+    MessageQueue *m_messageQueueToInput;
+	MessageQueue *m_messageQueueToGUI;
 	uint32_t m_tickCount;
 	std::size_t m_samplesCount;
     QTimer *m_timer;
