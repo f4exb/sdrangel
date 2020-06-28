@@ -112,6 +112,7 @@ private:
 	void connectTimer();
     void disconnectTimer();
 	void processData();
+    void adjustNbDecoderSlots(const RemoteMetaDataFEC& metaData);
 
 private slots:
 	void tick();
