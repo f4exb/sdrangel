@@ -48,13 +48,16 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 
 RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
+    m_sampleRate(48000),
+    m_fileSink(nullptr),
     m_settings(),
 	m_remoteInputUDPHandler(0),
 	m_deviceDescription(),
 	m_startingTimeStamp(0)
 {
-	m_sampleFifo.setSize(96000 * 4);
+	m_sampleFifo.setSize(m_sampleRate * 8);
 	m_remoteInputUDPHandler = new RemoteInputUDPHandler(&m_sampleFifo, m_deviceAPI);
+    m_remoteInputUDPHandler->setMessageQueueToInput(&m_inputMessageQueue);
 
     m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
@@ -166,6 +169,21 @@ bool RemoteInput::handleMessage(const Message& message)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         return m_fileSink->handleMessage(notif); // forward to file sink
+    }
+    else if (RemoteInputUDPHandler::MsgReportSampleRateChange::match(message))
+    {
+        RemoteInputUDPHandler::MsgReportSampleRateChange& notif = (RemoteInputUDPHandler::MsgReportSampleRateChange&) message;
+        int sampleRate = notif.getSampleRate();
+
+        if (sampleRate != m_sampleRate)
+        {
+            qDebug("RemoteInput::handleMessage: RemoteInputUDPHandler::MsgReportSampleRateChange: %d", sampleRate);
+            QMutexLocker mutexLocker(&m_mutex);
+            m_sampleFifo.setSize(sampleRate * 8);
+            m_sampleRate = sampleRate;
+        }
+
+        return true;
     }
     else if (MsgFileRecord::match(message))
     {

@@ -26,6 +26,8 @@
 #include "remoteinputudphandler.h"
 #include "remoteinput.h"
 
+MESSAGE_CLASS_DEFINITION(RemoteInputUDPHandler::MsgReportSampleRateChange, Message)
+
 RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_masterTimer(deviceAPI->getMasterTimer()),
@@ -43,7 +45,7 @@ RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceA
 	m_samplerate(0),
 	m_centerFrequency(0),
 	m_tv_msec(0),
-	m_outputMessageQueueToGUI(0),
+	m_messageQueueToGUI(0),
 	m_tickCount(0),
 	m_samplesCount(0),
 	m_timer(0),
@@ -189,6 +191,12 @@ void RemoteInputUDPHandler::processData()
 
     if (m_samplerate != metaData.m_sampleRate)
     {
+        if (m_messageQueueToInput)
+        {
+            MsgReportSampleRateChange *msg = MsgReportSampleRateChange::create(metaData.m_sampleRate);
+            m_messageQueueToInput->push(msg);
+        }
+
         m_samplerate = metaData.m_sampleRate;
         change = true;
     }
@@ -200,14 +208,14 @@ void RemoteInputUDPHandler::processData()
         DSPSignalNotification *notif = new DSPSignalNotification(m_samplerate, m_centerFrequency); // Frequency in Hz for the DSP engine
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
-        if (m_outputMessageQueueToGUI)
+        if (m_messageQueueToGUI)
         {
             RemoteInput::MsgReportRemoteInputStreamData *report = RemoteInput::MsgReportRemoteInputStreamData::create(
                 m_samplerate,
                 m_centerFrequency, // Frequency in Hz for the GUI
                 m_tv_msec);
 
-            m_outputMessageQueueToGUI->push(report);
+            m_messageQueueToGUI->push(report);
         }
 
         connectTimer();
@@ -326,7 +334,7 @@ void RemoteInputUDPHandler::tick()
 	{
 		m_tickCount = 0;
 
-		if (m_outputMessageQueueToGUI)
+		if (m_messageQueueToGUI)
 		{
 	        int framesDecodingStatus;
 	        int minNbBlocks = m_remoteInputBuffer.getMinNbBlocks();
@@ -362,7 +370,7 @@ void RemoteInputUDPHandler::tick()
 	            sampleBits,
 	            sampleBytes);
 
-	            m_outputMessageQueueToGUI->push(report);
+	            m_messageQueueToGUI->push(report);
 		}
 	}
 }

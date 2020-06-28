@@ -106,10 +106,9 @@ public:
         }
     }
 
-    static const int framesSize = REMOTEINPUT_NBDECODERSLOTS * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
-
 private:
-    static const int nbDecoderSlots = REMOTEINPUT_NBDECODERSLOTS;
+    static const int m_framesSize = REMOTEINPUT_NBDECODERSLOTS * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
+    static const int m_nbDecoderSlots = REMOTEINPUT_NBDECODERSLOTS;
 
 #pragma pack(push, 1)
     struct BufferFrame
@@ -133,8 +132,8 @@ private:
 
     RemoteMetaDataFEC m_currentMeta;          //!< Stored current meta data
     CM256::cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
-    DecoderSlot          m_decoderSlots[nbDecoderSlots]; //!< CM256 decoding control/buffer slots
-    BufferFrame          m_frames[nbDecoderSlots];       //!< Samples buffer
+    DecoderSlot          m_decoderSlots[m_nbDecoderSlots]; //!< CM256 decoding control/buffer slots
+    BufferFrame          m_frames[m_nbDecoderSlots];       //!< Samples buffer
     int                  m_framesNbBytes;                //!< Number of bytes in samples buffer
     int                  m_decoderIndexHead;     //!< index of the current head frame slot in decoding slots
     int                  m_frameHead;            //!< index of the current head frame sent
