@@ -1,3 +1,9 @@
+sdrangel (4.14.13-1) unstable; urgency=medium
+
+   * Remote input: adjust buffer size depending on sample rate. Implements #534
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Jun 2020 08:32:53 +0200
+
 sdrangel (4.14.12-1) unstable; urgency=medium
 
    * RTL-SDR: Bias tee support. Implements #533
