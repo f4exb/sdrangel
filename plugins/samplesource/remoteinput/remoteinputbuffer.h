@@ -28,13 +28,15 @@
 
 #define REMOTEINPUT_UDPSIZE 512               // UDP payload size
 #define REMOTEINPUT_NBORIGINALBLOCKS 128      // number of sample blocks per frame excluding FEC blocks
-#define REMOTEINPUT_NBDECODERSLOTS 16         // power of two sub multiple of uint16_t size. A too large one is superfluous.
 
 class RemoteInputBuffer
 {
 public:
 	RemoteInputBuffer();
 	~RemoteInputBuffer();
+
+    // Sizing
+    void setNbDecoderSlots(int nbDecoderSlots);
 
 	// R/W operations
 	void writeData(char *array); //!< Write data into buffer.
@@ -107,8 +109,8 @@ public:
     }
 
 private:
-    static const int m_framesSize = REMOTEINPUT_NBDECODERSLOTS * (RemoteNbOrginalBlocks - 1) * RemoteNbBytesPerBlock;
-    static const int m_nbDecoderSlots = REMOTEINPUT_NBDECODERSLOTS;
+    int m_nbDecoderSlots;
+    int m_framesSize;
 
 #pragma pack(push, 1)
     struct BufferFrame
@@ -128,13 +130,14 @@ private:
         int                     m_recoveryCount;      //!< number of recovery blocks received
         bool                    m_decoded;            //!< true if decoded
         bool                    m_metaRetrieved;      //!< true if meta data (block zero) was retrieved
+        DecoderSlot() {}
     };
 
-    RemoteMetaDataFEC m_currentMeta;          //!< Stored current meta data
-    CM256::cm256_encoder_params m_paramsCM256;          //!< CM256 decoder parameters block
-    DecoderSlot          m_decoderSlots[m_nbDecoderSlots]; //!< CM256 decoding control/buffer slots
-    BufferFrame          m_frames[m_nbDecoderSlots];       //!< Samples buffer
-    int                  m_framesNbBytes;                //!< Number of bytes in samples buffer
+    RemoteMetaDataFEC m_currentMeta;             //!< Stored current meta data
+    CM256::cm256_encoder_params m_paramsCM256;   //!< CM256 decoder parameters block
+    DecoderSlot          *m_decoderSlots;        //!< CM256 decoding control/buffer slots
+    BufferFrame          *m_frames;              //!< Samples buffer
+    int                  m_framesNbBytes;        //!< Number of bytes in samples buffer
     int                  m_decoderIndexHead;     //!< index of the current head frame slot in decoding slots
     int                  m_frameHead;            //!< index of the current head frame sent
     int                  m_curNbBlocks;          //!< (stats) instantaneous number of blocks received
