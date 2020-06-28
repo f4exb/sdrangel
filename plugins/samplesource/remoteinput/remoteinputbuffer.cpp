@@ -98,6 +98,11 @@ void RemoteInputBuffer::setNbDecoderSlots(int nbDecoderSlots)
     m_frameHead = -1;
 }
 
+void RemoteInputBuffer::setBufferLenSec(const RemoteMetaDataFEC& metaData)
+{
+    m_bufferLenSec = (float) m_framesNbBytes / (float) (metaData.m_sampleRate * metaData.m_sampleBytes * 2);
+}
+
 void RemoteInputBuffer::initDecodeAllSlots()
 {
     for (int i = 0; i < m_nbDecoderSlots; i++)
@@ -343,7 +348,7 @@ void RemoteInputBuffer::writeData(char *array)
 
                 if (sampleRate != 0)
                 {
-                    m_bufferLenSec = (float) m_framesNbBytes / (float) (sampleRate * metaData->m_sampleBytes * 2);
+                    setBufferLenSec(*metaData);
                     m_balCorrLimit = sampleRate / 400; // +/- 5% correction max per read
                     m_readNbBytes = (sampleRate * metaData->m_sampleBytes * 2) / 20;
                 }

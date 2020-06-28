@@ -191,6 +191,9 @@ void RemoteInputUDPHandler::processData()
 
     if (m_samplerate != metaData.m_sampleRate)
     {
+        disconnectTimer();
+        adjustNbDecoderSlots(metaData);
+
         if (m_messageQueueToInput)
         {
             MsgReportSampleRateChange *msg = MsgReportSampleRateChange::create(metaData.m_sampleRate);
@@ -220,6 +223,18 @@ void RemoteInputUDPHandler::processData()
 
         connectTimer();
     }
+}
+
+void RemoteInputUDPHandler::adjustNbDecoderSlots(const RemoteMetaDataFEC& metaData)
+{
+    int sampleRate = metaData.m_sampleRate;
+    int sampleBytes = metaData.m_sampleBytes;
+    int bufferFrameSize = RemoteInputBuffer::getBufferFrameSize();
+    float fNbDecoderSlots = (float) (4 * sampleBytes * sampleRate) / (float) bufferFrameSize;
+    int rawNbDecoderSlots = ((((int) ceil(fNbDecoderSlots)) / 2) * 2) + 2; // next multiple of 2
+    qDebug("RemoteInputUDPHandler::adjustNbDecoderSlots: rawNbDecoderSlots: %d", rawNbDecoderSlots);
+    m_remoteInputBuffer.setNbDecoderSlots(rawNbDecoderSlots < 4 ? 4 : rawNbDecoderSlots);
+    m_remoteInputBuffer.setBufferLenSec(metaData);
 }
 
 void RemoteInputUDPHandler::connectTimer()

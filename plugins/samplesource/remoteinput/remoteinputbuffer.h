@@ -37,6 +37,8 @@ public:
 
     // Sizing
     void setNbDecoderSlots(int nbDecoderSlots);
+    static int getBufferFrameSize() { return sizeof(BufferFrame); }
+    void setBufferLenSec(const RemoteMetaDataFEC& metaData);
 
 	// R/W operations
 	void writeData(char *array); //!< Write data into buffer.
