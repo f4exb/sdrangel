@@ -42,11 +42,11 @@ ATVDemodSink::ATVDemodSink() :
     m_verticalSynchroDetected(false),
     m_ampLineSum(0.0f),
     m_ampLineAvg(0.0f),
-    m_effMin(2000000.0f),
-    m_effMax(-2000000.0f),
-    m_ampMin(0.0f),
-    m_ampMax(0.3f),
-    m_ampDelta(0.3f),
+    m_effMin(2.0f),
+    m_effMax(-2.0f),
+    m_ampMin(-1.0f),
+    m_ampMax(1.0f),
+    m_ampDelta(2.0f),
     m_ampSample(0.0f),
     m_colIndex(0),
     m_sampleIndex(0),
@@ -170,7 +170,7 @@ void ATVDemodSink::demod(Complex& c)
     {
         //Amplitude FM
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage(magSq);
+        m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
         sampleNormI = fltI/sampleNorm;
         sampleNormQ = fltQ/sampleNorm;
@@ -225,14 +225,14 @@ void ATVDemodSink::demod(Complex& c)
     {
         //Amplitude AM
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage(magSq);
+        m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
-        sample = sampleNorm / SDR_RX_SCALEF;
+        sample = 2.0 * (sampleNorm / SDR_RX_SCALEF) - 1.0;
     }
     else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
     {
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage(magSq);
+        m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
 
         Real bfoValues[2];
@@ -254,13 +254,13 @@ void ATVDemodSink::demod(Complex& c)
     {
         float rawDeviation;
         sample = m_objPhaseDiscri.phaseDiscriminatorDelta(c, magSq, rawDeviation) + 0.5f;
-        m_objMagSqAverage(magSq);
+        m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
     }
     else
     {
         magSq = fltI*fltI + fltQ*fltQ;
-        m_objMagSqAverage(magSq);
+        m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
         sample = 0.0f;
     }
@@ -281,7 +281,7 @@ void ATVDemodSink::demod(Complex& c)
             m_effMax = sample;
         }
 
-        if (m_amSampleIndex < m_samplesPerLine * m_settings.m_nbLines) // do not extend estimation period past a full image
+        if (m_amSampleIndex < m_samplesPerLine * m_settings.m_nbLines * m_settings.m_fps * 5) // calculate on 5s
         {
             m_amSampleIndex++;
         }
@@ -290,25 +290,25 @@ void ATVDemodSink::demod(Complex& c)
             // scale signal based on extrema on the estimation period
             m_ampMin = m_effMin;
             m_ampMax = m_effMax;
-            m_ampDelta = (m_ampMax - m_ampMin) * 0.3f;
+            m_ampDelta = (m_ampMax - m_ampMin);
             m_ampSample = 0.3f; // allow passing to fine scale estimation
 
             if (m_ampDelta <= 0.0) {
-                m_ampDelta = 0.3f;
+                m_ampDelta = 1.0f;
             }
 
             qDebug("ATVDemod::demod: m_ampMin: %f m_ampMax: %f m_ampDelta: %f", m_ampMin, m_ampMax, m_ampDelta);
 
             //Reset extrema
-            m_effMin = 2000000.0f;
-            m_effMax = -2000000.0;
+            m_effMin = 2.0f;
+            m_effMax = -2.0f;
 
             m_amSampleIndex = 0;
         }
 
         //Normalisation of current sample
         sample -= m_ampMin;
-        sample /= (m_ampDelta * 3.1f);
+        sample /= (m_ampDelta*0.9);
     }
 
     sample = m_settings.m_invertVideo ? 1.0f - sample : sample;
