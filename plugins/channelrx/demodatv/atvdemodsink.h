@@ -140,7 +140,6 @@ private:
     float m_ampMin;
     float m_ampMax;
     float m_ampDelta; //!< calculated amplitude of HSync pulse (should be ~0.3f)
-    float m_ampSample;
 
     float m_fltBufferI[6];
     float m_fltBufferQ[6];
@@ -159,6 +158,7 @@ private:
     //*************** RF  ***************
 
     MovingAverageUtil<double, double, 32> m_magSqAverage;
+    MovingAverageUtilVar<double, double> m_ampAverage;
 
     NCO m_nco;
     SimplePhaseLock m_bfoPLL;
@@ -194,31 +194,12 @@ private:
         // Floor Detection (0.1 nominal)
         if (sample < m_settings.m_levelSynchroTop)
         {
-            // if (m_synchroSamples == 0) // AM scale reset on transition if within range
-            // {
-            //     m_effMin = 2000000.0f;
-            //     m_effMax = -2000000.0f;
-            //     m_amSampleIndex = 0;
-            // }
-
             m_synchroSamples++;
         }
         // Black detection (0.3 nominal)
         else if (sample > m_settings.m_levelBlack) {
             m_synchroSamples = 0;
         }
-
-        // Refine AM scale estimation on HSync pulse sequence
-        // if (m_amSampleIndex == (3*m_numberSamplesPerHTop)/2)
-        // {
-        //     m_ampMin = m_effMin;
-        //     m_ampMax = m_effMax;
-        //     m_ampDelta = (m_ampMax - m_ampMin);
-
-        //     if (m_ampDelta <= 0.0) {
-        //         m_ampDelta = 0.3f;
-        //     }
-        // }
 
         // H sync pulse
         m_horizontalSynchroDetected = (m_synchroSamples == m_numberSamplesPerHTop);
@@ -285,32 +266,12 @@ private:
         // Floor Detection 0
         if (sample < m_settings.m_levelSynchroTop)
         {
-            // if ((m_synchroSamples == 0) && (m_ampSample > 0.25f) && (m_ampSample < 0.35f)) // AM scale reset on transition
-            // {
-            //     m_effMin = 2000000.0f;;
-            //     m_effMax = -2000000.0f;;
-            //     m_amSampleIndex = 0;
-            // }
-
             m_synchroSamples++;
         }
         // Black detection 0.3
         else if (sample > m_settings.m_levelBlack) {
             m_synchroSamples = 0;
         }
-
-        // Refine AM scale estimation on HSync pulse sequence
-        // if ((m_amSampleIndex == (3*m_numberSamplesPerHTop)/2) && (sample > 0.25f) && (sample < 0.35f))
-        // {
-        //     m_ampSample = sample;
-        //     m_ampMin = m_effMin;
-        //     m_ampMax = m_effMax;
-        //     m_ampDelta = (m_ampMax - m_ampMin);
-
-        //     if (m_ampDelta <= 0.0) {
-        //         m_ampDelta = 0.3f;
-        //     }
-        // }
 
         // H sync pulse
         m_horizontalSynchroDetected = (m_synchroSamples == m_numberSamplesPerHTop) && (m_sampleIndex > (m_samplesPerLine/2) + m_numberSamplesPerLineSignals);

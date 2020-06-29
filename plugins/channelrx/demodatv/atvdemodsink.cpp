@@ -42,18 +42,18 @@ ATVDemodSink::ATVDemodSink() :
     m_verticalSynchroDetected(false),
     m_ampLineSum(0.0f),
     m_ampLineAvg(0.0f),
-    m_effMin(2.0f),
-    m_effMax(-2.0f),
+    m_effMin(20.0f),
+    m_effMax(-20.0f),
     m_ampMin(-1.0f),
     m_ampMax(1.0f),
     m_ampDelta(2.0f),
-    m_ampSample(0.0f),
     m_colIndex(0),
     m_sampleIndex(0),
     m_amSampleIndex(0),
     m_rowIndex(0),
     m_lineIndex(0),
     m_objAvgColIndex(3),
+    m_ampAverage(4800),
     m_bfoPLL(200/1000000, 100/1000000, 0.01),
     m_bfoFilter(200.0, 1000000.0, 0.9),
     m_interpolatorDistance(1.0f),
@@ -227,7 +227,9 @@ void ATVDemodSink::demod(Complex& c)
         magSq = fltI*fltI + fltQ*fltQ;
         m_magSqAverage(magSq);
         sampleNorm = sqrt(magSq);
-        sample = 2.0 * (sampleNorm / SDR_RX_SCALEF) - 1.0;
+        float sampleRaw = sampleNorm / SDR_RX_SCALEF;
+        m_ampAverage(sampleRaw);
+        sample = sampleRaw / (2.0 * m_ampAverage.asFloat()); // AGC
     }
     else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
     {
@@ -281,7 +283,7 @@ void ATVDemodSink::demod(Complex& c)
             m_effMax = sample;
         }
 
-        if (m_amSampleIndex < m_samplesPerLine * m_settings.m_nbLines * m_settings.m_fps * 5) // calculate on 5s
+        if (m_amSampleIndex < m_samplesPerLine * m_settings.m_nbLines * 2) // calculate on two full images
         {
             m_amSampleIndex++;
         }
@@ -291,24 +293,23 @@ void ATVDemodSink::demod(Complex& c)
             m_ampMin = m_effMin;
             m_ampMax = m_effMax;
             m_ampDelta = (m_ampMax - m_ampMin);
-            m_ampSample = 0.3f; // allow passing to fine scale estimation
 
             if (m_ampDelta <= 0.0) {
                 m_ampDelta = 1.0f;
             }
 
-            qDebug("ATVDemod::demod: m_ampMin: %f m_ampMax: %f m_ampDelta: %f", m_ampMin, m_ampMax, m_ampDelta);
+            // qDebug("ATVDemod::demod: m_ampMin: %f m_ampMax: %f m_ampDelta: %f", m_ampMin, m_ampMax, m_ampDelta);
 
             //Reset extrema
-            m_effMin = 2.0f;
-            m_effMax = -2.0f;
+            m_effMin = 20.0f;
+            m_effMax = -20.0f;
 
             m_amSampleIndex = 0;
         }
 
         //Normalisation of current sample
         sample -= m_ampMin;
-        sample /= (m_ampDelta*0.9);
+        sample /= m_ampDelta;
     }
 
     sample = m_settings.m_invertVideo ? 1.0f - sample : sample;
@@ -533,6 +534,7 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
     {
         ATVDemodSettings::getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, m_samplesPerLineNom);
         m_samplesPerLine = m_samplesPerLineNom + settings.m_lineTimeFactor;
+        m_ampAverage.resize(m_samplesPerLine * m_settings.m_nbLines * settings.m_fps * 2); // AGC average in two full images
 
         qDebug() << "ATVDemodSink::applySettings:"
                 << " m_tvSampleRate: " << m_tvSampleRate
