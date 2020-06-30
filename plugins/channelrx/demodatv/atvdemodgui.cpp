@@ -136,6 +136,10 @@ void ATVDemodGUI::displaySettings()
     ui->bfoText->setText(QString("%1").arg(m_settings.m_bfoFrequency * 1.0, 0, 'f', 0));
     ui->fmDeviation->setValue((int) (m_settings.m_fmDeviation * 1000.0f));
     ui->fmDeviationText->setText(QString("%1").arg(m_settings.m_fmDeviation * 100.0, 0, 'f', 1));
+    ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
+    ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
+    ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
+    ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
     blockApplySettings(false);
 
     applyTVSampleRate();
@@ -436,7 +440,7 @@ void ATVDemodGUI::on_lineTime_valueChanged(int value)
 
 void ATVDemodGUI::on_topTime_valueChanged(int value)
 {
-	ui->topTime->setToolTip(QString("Horizontal sync pulse length adjustment (%1)").arg(value));
+	ui->topTime->setToolTip(QString("Horizontal sync pulse length adjustment (%1 %)").arg(value));
     m_settings.m_topTimeFactor = value;
     topTimeUpdate();
     applySettings();
@@ -552,6 +556,22 @@ void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
     applySettings();
 }
 
+void ATVDemodGUI::on_amScaleFactor_valueChanged(int value)
+{
+    ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
+    ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
+    m_settings.m_amScalingFactor = value;
+    applySettings();
+}
+
+void ATVDemodGUI::on_amScaleOffset_valueChanged(int value)
+{
+    ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
+    ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
+    m_settings.m_amOffsetFactor = value;
+    applySettings();
+}
+
 void ATVDemodGUI::on_screenTabWidget_currentChanged(int index)
 {
     m_atvDemod->setVideoTabIndex(index);
@@ -585,15 +605,7 @@ void ATVDemodGUI::lineTimeUpdate()
 void ATVDemodGUI::topTimeUpdate()
 {
     float nominalTopTime = ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps) * (4.7f / 64.0f);
-    int topTimeScaleFactor = (int) std::log10(nominalTopTime);
-
-    if (m_tvSampleRate == 0) {
-        m_fltTopTimeMultiplier = std::pow(10.0, topTimeScaleFactor-3);
-    } else {
-        m_fltTopTimeMultiplier = 1.0f / m_tvSampleRate;
-    }
-
-    float topTime = nominalTopTime + m_fltTopTimeMultiplier * ui->topTime->value();
+    float topTime = nominalTopTime * (ui->topTime->value() / 100.0f);
 
     if (topTime < 0.0)
         ui->topTimeText->setText("invalid");

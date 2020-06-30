@@ -51,6 +51,8 @@ struct ATVDemodSettings
     int           m_bfoFrequency;         //!< BFO frequency (Hz)
     ATVModulation m_atvModulation;        //!< RF modulation type
     float         m_fmDeviation;          //!< Expected FM deviation
+    int           m_amScalingFactor;      //!< Factor in % to apply to detected signal scale
+    int           m_amOffsetFactor;       //!< Factor in % to apply to adjusted signal scale
     bool          m_fftFiltering;         //!< Toggle FFT filter
     unsigned int  m_fftOppBandwidth;      //!< FFT filter lower frequency cutoff (Hz)
     unsigned int  m_fftBandwidth;         //!< FFT filter high frequency cutoff (Hz)
@@ -66,7 +68,7 @@ struct ATVDemodSettings
     float         m_levelSynchroTop;      //!< Horizontal synchronization top level (0.0 to 1.0 scale)
     float         m_levelBlack;           //!< Black level (0.0 to 1.0 scale)
     int           m_lineTimeFactor;       //!< added: +/- 100 something
-    int           m_topTimeFactor;        //!< added: +/-  30 something
+    int           m_topTimeFactor;        //!< percentage of nominal horizontal top (pulse) time
 
     // common channel settings
     quint32 m_rgbColor;
@@ -96,10 +98,8 @@ struct ATVDemodSettings
 
 private:
     void lineTimeUpdate(unsigned int sampleRate);
-    void topTimeUpdate(unsigned int sampleRate);
 
     float m_fltLineTimeMultiplier;
-    float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
 };
 
