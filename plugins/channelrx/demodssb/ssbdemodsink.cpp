@@ -47,7 +47,8 @@ SSBDemodSink::SSBDemodSink() :
         m_squelchDelayLine(2*48000),
         m_audioActive(false),
         m_spectrumSink(nullptr),
-        m_audioFifo(24000)
+        m_audioFifo(24000),
+        m_audioSampleRate(48000)
 {
 	m_Bandwidth = 5000;
 	m_LowCutoff = 300;

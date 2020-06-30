@@ -28,6 +28,7 @@
 
 AMDemodSink::AMDemodSink() :
         m_channelSampleRate(48000),
+        m_audioSampleRate(48000),
         m_channelFrequencyOffset(0),
         m_squelchCount(0),
         m_squelchOpen(false),

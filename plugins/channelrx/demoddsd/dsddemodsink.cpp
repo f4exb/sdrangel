@@ -40,6 +40,7 @@
 
 DSDDemodSink::DSDDemodSink() :
     m_channelSampleRate(48000),
+    m_audioSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_interpolatorDistance(0.0f),
     m_interpolatorDistanceRemain(0.0f),
