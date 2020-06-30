@@ -29,6 +29,7 @@ FreeDVModSource::FreeDVModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_modemSampleRate(48000), // // default 2400A mode
+    m_audioSampleRate(48000),
     m_lowCutoff(0.0),
     m_hiCutoff(6000.0),
     m_SSBFilter(nullptr),

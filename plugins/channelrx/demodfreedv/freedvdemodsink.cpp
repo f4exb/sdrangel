@@ -134,6 +134,7 @@ FreeDVDemodSink::FreeDVDemodSink() :
         m_channelSampleRate(48000),
         m_modemSampleRate(48000),
         m_speechSampleRate(8000), // fixed 8 kS/s
+        m_audioSampleRate(48000),
         m_channelFrequencyOffset(0),
         m_audioMute(false),
         m_simpleAGC(0.003f, 0.0f, 1e-6f),

@@ -33,6 +33,7 @@ const unsigned int WFMDemodSink::m_rfFilterFftLength = 1024;
 
 WFMDemodSink::WFMDemodSink() :
     m_channelSampleRate(384000),
+    m_audioSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_squelchOpen(false),
     m_magsq(0.0f),
