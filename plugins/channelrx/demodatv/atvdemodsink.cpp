@@ -298,6 +298,10 @@ void ATVDemodSink::demod(Complex& c)
                 m_ampDelta = 1.0f;
             }
 
+            // readjustment
+            m_ampDelta /= m_settings.m_amScalingFactor / 100.0f;
+            m_ampMin += m_ampDelta * (m_settings.m_amOffsetFactor / 100.0f);
+
             // qDebug("ATVDemod::demod: m_ampMin: %f m_ampMax: %f m_ampDelta: %f", m_ampMin, m_ampMax, m_ampDelta);
 
             //Reset extrema
@@ -409,7 +413,7 @@ void ATVDemodSink::applyStandard(int sampleRate, const ATVDemodSettings& setting
     m_numberSamplesPerLineSignals = (int) ((12.0f/64.0f) * lineDuration * sampleRate);  // 12.0 = 2.6 + 4.7 + 4.7 : front porch + horizontal sync pulse + back porch
     m_numberSamplesPerHSync = (int) ((9.6f/64.0f) * lineDuration * sampleRate);         //  9.4 = 4.7 + 4.7       : horizontal sync pulse + back porch
     m_numberSamplesPerHTopNom = (int) ((4.7f/64.0f) * lineDuration * sampleRate);       //  4.7                   : horizontal sync pulse (ultra black) nominal value
-    m_numberSamplesPerHTop = m_numberSamplesPerHTopNom + settings.m_topTimeFactor;      // adjust the value used in the system
+    m_numberSamplesPerHTop = m_numberSamplesPerHTopNom * (settings.m_topTimeFactor / 100.0f);  // adjust the value used in the system
 }
 
 bool ATVDemodSink::getBFOLocked()
@@ -585,7 +589,7 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
     }
 
     if ((settings.m_topTimeFactor != m_settings.m_topTimeFactor) || force) {
-        m_numberSamplesPerHTop = m_numberSamplesPerHTopNom + settings.m_topTimeFactor;
+        m_numberSamplesPerHTop = m_numberSamplesPerHTopNom * (settings.m_topTimeFactor / 100.0f);
     }
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {

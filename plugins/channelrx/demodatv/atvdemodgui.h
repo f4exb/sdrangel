@@ -77,7 +77,6 @@ private:
     ScopeVis* m_scopeVis;
 
     float m_fltLineTimeMultiplier;
-    float m_fltTopTimeMultiplier;
     int m_rfSliderDivisor;
     int m_basebandSampleRate;
     int m_tvSampleRate;
@@ -124,6 +123,8 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_bfo_valueChanged(int value);
     void on_fmDeviation_valueChanged(int value);
+    void on_amScaleFactor_valueChanged(int value);
+    void on_amScaleOffset_valueChanged(int value);
     void on_screenTabWidget_currentChanged(int index);
 };
 

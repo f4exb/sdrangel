@@ -35,6 +35,8 @@ void ATVDemodSettings::resetToDefaults()
     m_bfoFrequency = 0.0f;
     m_atvModulation = ATV_FM1;
     m_fmDeviation = 0.5f;
+    m_amScalingFactor = 100;
+    m_amOffsetFactor = 0;
     m_fftFiltering = false;
     m_fftOppBandwidth = 0;
     m_fftBandwidth = 6000;
@@ -48,7 +50,7 @@ void ATVDemodSettings::resetToDefaults()
     m_levelSynchroTop = 0.1f;
     m_levelBlack = 0.3f;
     m_lineTimeFactor = 0;
-    m_topTimeFactor = 0;
+    m_topTimeFactor = 25;
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Demodulator";
     m_udpAddress = "127.0.0.1";
@@ -85,6 +87,10 @@ QByteArray ATVDemodSettings::serialize() const
 
     s.writeString(20, m_title);
     s.writeS32(21, m_streamIndex);
+    s.writeS32(22, m_amScalingFactor);
+    s.writeS32(23, m_amOffsetFactor);
+    s.writeBool(24, m_fftFiltering);
+    s.writeBool(25, m_forceDecimator);
 
     return s.final();
 }
@@ -111,7 +117,7 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         d.readS32(4, &tmp, 310);
         m_levelBlack = tmp / 1000.0f;
         d.readS32(5, &m_lineTimeFactor, 0);
-        d.readS32(6, &m_topTimeFactor, 0);
+        d.readS32(6, &m_topTimeFactor, 25);
         d.readS32(7, &tmp, 0);
         m_atvModulation = static_cast<ATVModulation>(tmp);
         d.readS32(8, &tmp, 25);
@@ -132,6 +138,10 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         d.readS32(18, &tmp, 1);
         m_atvStd = static_cast<ATVStd>(tmp);
         d.readS32(21, &m_streamIndex, 0);
+        d.readS32(22, &m_amScalingFactor, 100);
+        d.readS32(23, &m_amOffsetFactor, 0);
+        d.readBool(24, &m_fftFiltering, false);
+        d.readBool(25, &m_forceDecimator, false);
 
         return true;
     }
@@ -310,25 +320,9 @@ float ATVDemodSettings::getLineTime(unsigned int sampleRate)
     return nominalLineTime + m_fltLineTimeMultiplier * m_lineTimeFactor;
 }
 
-/**
- * calculates m_fltTopTimeMultiplier
- */
-void ATVDemodSettings::topTimeUpdate(unsigned int sampleRate)
-{
-    float nominalTopTime = getNominalLineTime(m_nbLines, m_fps) * (4.7f / 64.0f);
-    int topTimeScaleFactor = (int) std::log10(nominalTopTime);
-
-    if (sampleRate == 0) {
-        m_fltTopTimeMultiplier = std::pow(10.0, topTimeScaleFactor-3);
-    } else {
-        m_fltTopTimeMultiplier = 1.0f / sampleRate;
-    }
-}
-
 float ATVDemodSettings::getTopTime(unsigned int sampleRate)
 {
-    topTimeUpdate(sampleRate);
-    return getNominalLineTime(m_nbLines, m_fps) * (4.7f / 64.0f) + m_fltTopTimeMultiplier * m_topTimeFactor;
+    return getNominalLineTime(m_nbLines, m_fps) * (4.7f / 64.0f) * (m_topTimeFactor / 100.0f);
 }
 
 int ATVDemodSettings::getRFSliderDivisor(unsigned int sampleRate)

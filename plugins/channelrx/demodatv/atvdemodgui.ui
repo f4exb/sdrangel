@@ -368,6 +368,108 @@
        </widget>
       </item>
       <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="amScaleFactorLabel">
+        <property name="text">
+         <string>AM</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="amScaleFactor">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Adjust AM scaling as % of nominal scale</string>
+        </property>
+        <property name="minimum">
+         <number>50</number>
+        </property>
+        <property name="maximum">
+         <number>200</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="amScaleFactorText">
+        <property name="minimumSize">
+         <size>
+          <width>26</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>% of nominal scale</string>
+        </property>
+        <property name="text">
+         <string>100</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="amScaleOffset">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>AM offset as % of adjusted scale</string>
+        </property>
+        <property name="minimum">
+         <number>-50</number>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="amScaleOffsetText">
+        <property name="minimumSize">
+         <size>
+          <width>26</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>% of full scale</string>
+        </property>
+        <property name="text">
+         <string>-50</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="Line" name="line_4">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -906,10 +1008,10 @@
          <string>Horizontal sync pulse length adjustment</string>
         </property>
         <property name="minimum">
-         <number>-30</number>
+         <number>1</number>
         </property>
         <property name="maximum">
-         <number>30</number>
+         <number>100</number>
         </property>
         <property name="singleStep">
          <number>1</number>
@@ -918,7 +1020,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>0</number>
+         <number>25</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
