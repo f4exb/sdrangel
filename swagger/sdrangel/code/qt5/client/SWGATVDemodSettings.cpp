@@ -58,6 +58,10 @@ SWGATVDemodSettings::SWGATVDemodSettings() {
     m_flt_bfo_frequency_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
+    am_scaling_factor = 0;
+    m_am_scaling_factor_isSet = false;
+    am_offset_factor = 0;
+    m_am_offset_factor_isSet = false;
     int_sample_rate = 0;
     m_int_sample_rate_isSet = false;
     enm_atv_standard = 0;
@@ -134,6 +138,10 @@ SWGATVDemodSettings::init() {
     m_flt_bfo_frequency_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
+    am_scaling_factor = 0;
+    m_am_scaling_factor_isSet = false;
+    am_offset_factor = 0;
+    m_am_offset_factor_isSet = false;
     int_sample_rate = 0;
     m_int_sample_rate_isSet = false;
     enm_atv_standard = 0;
@@ -176,6 +184,8 @@ SWGATVDemodSettings::init() {
 
 void
 SWGATVDemodSettings::cleanup() {
+
+
 
 
 
@@ -256,6 +266,10 @@ SWGATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&flt_bfo_frequency, pJson["fltBFOFrequency"], "float", "");
     
     ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&am_scaling_factor, pJson["amScalingFactor"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&am_offset_factor, pJson["amOffsetFactor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&int_sample_rate, pJson["intSampleRate"], "qint32", "");
     
@@ -355,6 +369,12 @@ SWGATVDemodSettings::asJsonObject() {
     }
     if(m_fm_deviation_isSet){
         obj->insert("fmDeviation", QJsonValue(fm_deviation));
+    }
+    if(m_am_scaling_factor_isSet){
+        obj->insert("amScalingFactor", QJsonValue(am_scaling_factor));
+    }
+    if(m_am_offset_factor_isSet){
+        obj->insert("amOffsetFactor", QJsonValue(am_offset_factor));
     }
     if(m_int_sample_rate_isSet){
         obj->insert("intSampleRate", QJsonValue(int_sample_rate));
@@ -565,6 +585,26 @@ void
 SWGATVDemodSettings::setFmDeviation(float fm_deviation) {
     this->fm_deviation = fm_deviation;
     this->m_fm_deviation_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getAmScalingFactor() {
+    return am_scaling_factor;
+}
+void
+SWGATVDemodSettings::setAmScalingFactor(qint32 am_scaling_factor) {
+    this->am_scaling_factor = am_scaling_factor;
+    this->m_am_scaling_factor_isSet = true;
+}
+
+qint32
+SWGATVDemodSettings::getAmOffsetFactor() {
+    return am_offset_factor;
+}
+void
+SWGATVDemodSettings::setAmOffsetFactor(qint32 am_offset_factor) {
+    this->am_offset_factor = am_offset_factor;
+    this->m_am_offset_factor_isSet = true;
 }
 
 qint32
@@ -805,6 +845,12 @@ SWGATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_fm_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_am_scaling_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_am_offset_factor_isSet){
             isObjectUpdated = true; break;
         }
         if(m_int_sample_rate_isSet){
