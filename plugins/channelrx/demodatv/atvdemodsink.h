@@ -256,7 +256,7 @@ private:
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
         // remove only sync pulse empirically, +4 is to compensate shift due to hsync amortizing factor of 1/4
-        m_registeredTVScreen->setDataColor(m_colIndex - m_numberSamplesHSyncCrop, sampleVideo, sampleVideo, sampleVideo);
+        m_registeredTVScreen->setDataColor(m_colIndex - m_numberSamplesPerHSync + m_numberSamplesPerHTop, sampleVideo, sampleVideo, sampleVideo);
 
         int synchroTimeSamples = (3 * m_samplesPerLine) / 4; // count 3/4 line globally
         float synchroTrameLevel =  0.5f * ((float) synchroTimeSamples) * m_settings.m_levelBlack; // threshold is half the black value over 3/4th of line samples
