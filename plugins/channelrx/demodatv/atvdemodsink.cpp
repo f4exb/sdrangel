@@ -38,7 +38,6 @@ ATVDemodSink::ATVDemodSink() :
     m_numberSamplesPerHTop(0),
     m_imageIndex(0),
     m_synchroSamples(0),
-    m_horizontalSynchroDetected(false),
     m_verticalSynchroDetected(false),
     m_ampLineSum(0.0f),
     m_ampLineAvg(0.0f),

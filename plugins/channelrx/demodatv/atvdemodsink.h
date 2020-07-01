@@ -128,7 +128,6 @@ private:
     int m_imageIndex;
     int m_synchroSamples;
 
-    bool m_horizontalSynchroDetected;
     bool m_verticalSynchroDetected;
 
     float m_ampLineSum;
@@ -202,9 +201,7 @@ private:
         }
 
         // H sync pulse
-        m_horizontalSynchroDetected = (m_synchroSamples == m_numberSamplesPerHTop);
-
-        if (m_horizontalSynchroDetected)
+        if (m_synchroSamples == m_numberSamplesPerHTop) // horizontal synchro detected
         {
             // Vertical sync and image rendering
             if ((m_sampleIndex >= (3*m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
@@ -273,14 +270,11 @@ private:
             m_synchroSamples = 0;
         }
 
-        // H sync pulse
-        m_horizontalSynchroDetected = (m_synchroSamples == m_numberSamplesPerHTop) && (m_sampleIndex > (m_samplesPerLine/2) + m_numberSamplesPerLineSignals);
-
         //Horizontal Synchro processing
-
-        if (m_horizontalSynchroDetected)
+        if ((m_synchroSamples == m_numberSamplesPerHTop) // horizontal synchro detected
+         && (m_sampleIndex > (m_samplesPerLine/2) + m_numberSamplesPerLineSignals))
         {
-            m_avgColIndex = m_sampleIndex - m_colIndex - (m_colIndex < m_samplesPerLine/2 ? 150 : 0);
+            m_avgColIndex = m_sampleIndex - m_colIndex;
             //qDebug("HSync: %d %d %d", m_sampleIndex, m_colIndex, m_avgColIndex);
             m_sampleIndex = 0;
         }
