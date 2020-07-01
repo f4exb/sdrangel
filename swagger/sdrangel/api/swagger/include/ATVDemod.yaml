@@ -39,6 +39,12 @@ ATVDemodSettings:
     fmDeviation:
       type: number
       format: float
+    amScalingFactor:
+      type: integer
+      description: Factor in % to apply to detected signal scale
+    amOffsetFactor:
+      type: integer
+      description: Factor in % to apply to adjusted signal scale
     intSampleRate:
       type: integer
     enmATVStandard:
