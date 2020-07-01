@@ -138,7 +138,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->fmDeviation->setEnabled(false);
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
+    ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
 
     ui->glSpectrum->setCenterFrequency(0);
     ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
