@@ -87,6 +87,12 @@ public:
     float getFmDeviation();
     void setFmDeviation(float fm_deviation);
 
+    qint32 getAmScalingFactor();
+    void setAmScalingFactor(qint32 am_scaling_factor);
+
+    qint32 getAmOffsetFactor();
+    void setAmOffsetFactor(qint32 am_offset_factor);
+
     qint32 getIntSampleRate();
     void setIntSampleRate(qint32 int_sample_rate);
 
@@ -192,6 +198,12 @@ private:
 
     float fm_deviation;
     bool m_fm_deviation_isSet;
+
+    qint32 am_scaling_factor;
+    bool m_am_scaling_factor_isSet;
+
+    qint32 am_offset_factor;
+    bool m_am_offset_factor_isSet;
 
     qint32 int_sample_rate;
     bool m_int_sample_rate_isSet;
