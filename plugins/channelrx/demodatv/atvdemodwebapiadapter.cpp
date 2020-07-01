@@ -65,6 +65,8 @@ void ATVDemodWebAPIAdapter::webapiFormatChannelSettings(
     response.getAtvDemodSettings()->setFltVoltLevelSynchroBlack(settings.m_levelBlack);
     response.getAtvDemodSettings()->setFltVoltLevelSynchroTop(settings.m_levelSynchroTop);
     response.getAtvDemodSettings()->setFmDeviation(settings.m_fmDeviation);
+    response.getAtvDemodSettings()->setAmScalingFactor(settings.m_amScalingFactor);
+    response.getAtvDemodSettings()->setAmOffsetFactor(settings.m_amOffsetFactor);
     response.getAtvDemodSettings()->setFpsIndex(ATVDemodSettings::getFpsIndex(settings.m_fps));
     response.getAtvDemodSettings()->setHalfImage(settings.m_halfFrames ? 1 : 0);
     response.getAtvDemodSettings()->setIntFrequencyOffset(settings.m_inputFrequencyOffset);
@@ -124,6 +126,12 @@ void ATVDemodWebAPIAdapter::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("fmDeviation")) {
         settings.m_fmDeviation = response.getAtvDemodSettings()->getFmDeviation();
+    }
+    if (channelSettingsKeys.contains("amOffsetFactor")) {
+        settings.m_amOffsetFactor = response.getAtvDemodSettings()->getAmOffsetFactor();
+    }
+    if (channelSettingsKeys.contains("amScalingFactor")) {
+        settings.m_amScalingFactor = response.getAtvDemodSettings()->getAmScalingFactor();
     }
     if (channelSettingsKeys.contains("halfImage")) {
         settings.m_halfFrames = response.getAtvDemodSettings()->getHalfImage() != 0;
