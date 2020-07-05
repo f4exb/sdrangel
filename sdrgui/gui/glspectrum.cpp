@@ -1988,6 +1988,8 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
         if ((m_waterfallMarkers.size() > 0) && (pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1)) {
             m_waterfallMarkers.pop_back();
         }
+
+        update();
     }
 	else if (event->button() == Qt::LeftButton)
     {
@@ -2076,6 +2078,8 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                     }
                 }
             }
+
+            update();
         }
 
         if  (m_cursorState == CSSplitter)

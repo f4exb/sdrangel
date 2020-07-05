@@ -312,24 +312,26 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+      <widget class="ButtonSwitch" name="freeze">
+       <property name="toolTip">
+        <string>Play/Pause spectrum display</string>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/pause.png</normaloff>
+         <normalon>:/play.png</normalon>:/pause.png</iconset>
        </property>
-      </spacer>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item row="2" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
-      <number>2</number>
+      <number>3</number>
      </property>
      <item>
       <widget class="QComboBox" name="fftWindow">

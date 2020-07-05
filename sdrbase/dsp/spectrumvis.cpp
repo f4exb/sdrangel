@@ -39,11 +39,13 @@ MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureSpectrumVis, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgStartStop, Message)
 
 const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
 
 SpectrumVis::SpectrumVis(Real scalef) :
 	BasebandSampleSink(),
+    m_running(true),
 	m_fft(nullptr),
     m_fftEngineSequence(0),
 	m_fftBuffer(MAX_FFT_SIZE),
@@ -319,8 +321,11 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
 void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
-	// if no visualisation is set, send the samples to /dev/null
+    if (!m_running) {
+        return;
+    }
 
+	// if no visualisation is set, send the samples to /dev/null
 	if (!m_glSpectrum && !m_wsSpectrum.socketOpened()) {
 		return;
 	}
@@ -621,10 +626,12 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 void SpectrumVis::start()
 {
+    m_running = true;
 }
 
 void SpectrumVis::stop()
 {
+    m_running = false;
 }
 
 bool SpectrumVis::handleMessage(const Message& message)
@@ -661,6 +668,17 @@ bool SpectrumVis::handleMessage(const Message& message)
     else if (MsgConfigureWSpectrum::match(message)) {
         MsgConfigureWSpectrum& conf = (MsgConfigureWSpectrum&) message;
         handleConfigureWSSpectrum(conf.getAddress(), conf.getPort());
+        return true;
+    }
+    else if (MsgStartStop::match(message)) {
+        MsgStartStop& cmd = (MsgStartStop&) message;
+
+        if (cmd.getStartStop()) {
+            start();
+        } else {
+            stop();
+        }
+
         return true;
     }
 	else

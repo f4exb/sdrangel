@@ -340,6 +340,12 @@ void GLSpectrumGUI::on_clearSpectrum_clicked(bool checked)
 	}
 }
 
+void GLSpectrumGUI::on_freeze_toggled(bool checked)
+{
+    SpectrumVis::MsgStartStop *msg = SpectrumVis::MsgStartStop::create(!checked);
+    m_spectrumVis->getInputMessageQueue()->push(msg);
+}
+
 int GLSpectrumGUI::getAveragingMaxScale(GLSpectrumSettings::AveragingMode averagingMode)
 {
     if (averagingMode == GLSpectrumSettings::AvgModeMoving) {

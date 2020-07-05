@@ -101,6 +101,7 @@ private slots:
 	void on_invert_toggled(bool checked);
 	void on_grid_toggled(bool checked);
 	void on_clearSpectrum_clicked(bool checked);
+    void on_freeze_toggled(bool checked);
 
 	void handleInputMessages();
 };
