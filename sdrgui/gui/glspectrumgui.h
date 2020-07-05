@@ -103,6 +103,7 @@ private slots:
 	void on_invertWaterfall_toggled(bool checked);
 	void on_grid_toggled(bool checked);
 	void on_clearSpectrum_clicked(bool checked);
+    void on_freeze_toggled(bool checked);
 
 	void handleInputMessages();
     void openWebsocketSpectrumSettingsDialog(const QPoint& p);

@@ -453,7 +453,11 @@ Use this toggle button to switch between spectrum logarithmic and linear scale d
 
 When in linear mode the range control (4.4) has no effect because the actual range is between 0 and the reference level. The reference level in dB (4.3) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 
-<h4>4.K. Spectrum server control</h4>
+<h4>4.K. Spectrum live display pause/resume (freeze)</h4>
+
+Use this control to pause or resume spectrum live display. You can use this control to freeze the spectrum display. This may be useful to make measurements using the markers (see section 7).
+
+<h4>4.L. Spectrum server control</h4>
 
 A websockets based server can be used to send spectrum data to clients. An example of such client can be found in the [SDRangelSpectrum](https://github.com/f4exb/sdrangelspectrum) project.
 
