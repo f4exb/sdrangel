@@ -889,6 +889,20 @@ This shows the spectrum in the passband returned from the sampling device possib
 
 The spectrum display is controlled by the display control (4).
 
+<h4>Spectrum markers</h4>
+
+![Spectrum Markers](../doc/img/Spectrum_Markers.png)
+
+Left click while pressing the Shift key in the spectrum or waterfall window to set the markers. Right click in the same window to remove the last entered marker.
+
+There is a maximum of two markers on each window with a different status:
+  - the legend of the first marker is the frequency (2) and power (1) or delay (5). The frequency legend appears on the spectrum side closest to the frequency rule.
+  - the legend of the second marker is the frequency difference with the first marker (3 or 6) and the difference in power (4) or time (7). It appears on the spectrum opposite side of the corresponding first marker legend.
+
+Frequency difference units are Hz suffixed with a multiplier suffix k, M or G for kHz, MHz or GHz respectively.
+
+Time units are seconds suffixed with a divisor suffix m, u, n, p for ms, us, ns or ps respectively.
+
 <h3>8. Status</h3>
 
 ![Main Window status](../doc/img/MainWindow_status.png)

@@ -126,6 +126,103 @@ private:
 		CSChannel,
 		CSChannelMoving
 	};
+    struct HistogramMarker {
+        QPointF m_point;
+        float m_frequency;
+        float m_power;
+        QString m_frequencyStr;
+        QString m_powerStr;
+        QString m_deltaFrequencyStr;
+        QString m_deltaPowerStr;
+        HistogramMarker() :
+            m_point(0, 0),
+            m_frequency(0),
+            m_power(0),
+            m_frequencyStr(),
+            m_powerStr(),
+            m_deltaFrequencyStr(),
+            m_deltaPowerStr()
+        {}
+        HistogramMarker(
+            const QPointF& point,
+            float frequency,
+            float power,
+            const QString& frequencyStr,
+            const QString& powerStr,
+            const QString& deltaFrequencyStr,
+            const QString& deltaPowerStr
+        ) :
+            m_point(point),
+            m_frequency(frequency),
+            m_power(power),
+            m_frequencyStr(frequencyStr),
+            m_powerStr(powerStr),
+            m_deltaFrequencyStr(deltaFrequencyStr),
+            m_deltaPowerStr(deltaPowerStr)
+        {}
+        HistogramMarker(const HistogramMarker& other) :
+            m_point(other.m_point),
+            m_frequency(other.m_frequency),
+            m_power(other.m_power),
+            m_frequencyStr(other.m_frequencyStr),
+            m_powerStr(other.m_powerStr),
+            m_deltaFrequencyStr(other.m_deltaFrequencyStr),
+            m_deltaPowerStr(other.m_deltaPowerStr)
+        {}
+        explicit operator HistogramMarker() const {
+            return HistogramMarker{static_cast<HistogramMarker>(*this)};
+        }
+    };
+    QList<HistogramMarker> m_histogramMarkers;
+
+    struct WaterfallMarker {
+        QPointF m_point;
+        float m_frequency;
+        float m_time;
+        QString m_frequencyStr;
+        QString m_timeStr;
+        QString m_deltaFrequencyStr;
+        QString m_deltaTimeStr;
+        WaterfallMarker() :
+            m_point(0, 0),
+            m_frequency(0),
+            m_time(0),
+            m_frequencyStr(),
+            m_timeStr(),
+            m_deltaFrequencyStr(),
+            m_deltaTimeStr()
+        {}
+        WaterfallMarker(
+            const QPointF& point,
+            float frequency,
+            float time,
+            const QString& frequencyStr,
+            const QString& timeStr,
+            const QString& deltaFrequencyStr,
+            const QString& deltaTimeStr
+        ) :
+            m_point(point),
+            m_frequency(frequency),
+            m_time(time),
+            m_frequencyStr(frequencyStr),
+            m_timeStr(timeStr),
+            m_deltaFrequencyStr(deltaFrequencyStr),
+            m_deltaTimeStr(deltaTimeStr)
+        {}
+        WaterfallMarker(const WaterfallMarker& other) :
+            m_point(other.m_point),
+            m_frequency(other.m_frequency),
+            m_time(other.m_time),
+            m_frequencyStr(other.m_frequencyStr),
+            m_timeStr(other.m_timeStr),
+            m_deltaFrequencyStr(other.m_deltaFrequencyStr),
+            m_deltaTimeStr(other.m_deltaTimeStr)
+        {}
+        explicit operator WaterfallMarker() const {
+            return WaterfallMarker{static_cast<WaterfallMarker>(*this)};
+        }
+    };
+    QList<WaterfallMarker> m_waterfallMarkers;
 
 	CursorState m_cursorState;
 	int m_cursorChannel;
@@ -158,12 +255,21 @@ private:
 	Real m_waterfallShare;
 
     int m_leftMargin;
+    int m_rightMargin;
+    int m_topMargin;
+    int m_frequencyScaleHeight;
+    int m_histogramHeight;
+    int m_waterfallHeight;
+    int m_bottomMargin;
+    QFont m_textOverlayFont;
 	QPixmap m_leftMarginPixmap;
 	QPixmap m_frequencyPixmap;
 	ScaleEngine m_timeScale;
 	ScaleEngine m_powerScale;
 	ScaleEngine m_frequencyScale;
+    QRectF m_histogramRect;
 	QRect m_frequencyScaleRect;
+    QRectF m_waterfallRect;
 	QMatrix4x4 m_glFrequencyScaleBoxMatrix;
 	QMatrix4x4 m_glLeftScaleBoxMatrix;
 
@@ -195,6 +301,7 @@ private:
 	GLShaderTextured m_glShaderFrequencyScale;
 	GLShaderTextured m_glShaderWaterfall;
 	GLShaderTextured m_glShaderHistogram;
+    GLShaderTextured m_glShaderTextOverlay;
 	int m_matrixLoc;
 	int m_colorLoc;
 	IncrementalArray<GLfloat> m_q3TickTime;
@@ -223,6 +330,20 @@ private:
 
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
+
+    QString displayScaled(int64_t value, char type, int precision, bool showMult);
+    QString displayScaledF(float value, char type, int precision, bool showMult);
+    QString displayScaledM(float value, char type, int precision, bool showMult);
+    int getPrecision(int value);
+    void drawTextOverlay(      //!< Draws a text overlay
+            const QString& text,
+            const QColor& color,
+            const QFont& font,
+            float shiftX,
+            float shiftY,
+            bool leftHalf,
+            bool topHalf,
+            const QRectF& glRect);
 
 private slots:
 	void cleanup();
