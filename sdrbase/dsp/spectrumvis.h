@@ -88,7 +88,7 @@ public:
         {}
     };
 
-    class MsgStartStop : public Message {
+    class SDRBASE_API MsgStartStop : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
