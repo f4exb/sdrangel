@@ -245,7 +245,7 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
 
     while (begin < end)
     {
-        if (begin + m_traceSize > end) // buffer smaller than trace size (end - bagin) < m_traceSize
+        if (end - begin < m_traceSize) // buffer smaller than trace size (end - bagin) < m_traceSize
         {
             triggerPointToEnd = -1;
             processTrace(begin, end, triggerPointToEnd); // use all buffer
