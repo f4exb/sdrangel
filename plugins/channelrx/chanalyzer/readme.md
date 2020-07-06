@@ -453,10 +453,10 @@ Markers can be set on the X and Y individual views. This does not apply to the X
 ![Channel Analyzer markers](../../../doc/img/ChAnalyzerNG_plugin_scope4.png)
 
 Use Shift and mouse left click to set a new marker. There is a maximum of two markers with a different status:
-  - The first marker (A) will display time (2) and value on the scale side of the view (1). Value units are whatever corresponds to the trace type and is suffixed by a multiplier character (see next). Time units are in seconds suffixed by a  multiplier character
-  - The second marker (B) will display time difference (3) and value difference (4) with the first marker on the opposite side of the scales. Displayed values are suffixed by a multiplier character.
+  - The first marker (A) will display time (2) and value on the scale side of the view (1). Value units are whatever corresponds to the trace type and is suffixed with a multiplier character (see next). Time units are in seconds suffixed with a  multiplier character
+  - The second marker (B) will display time difference (3) and value difference (4) with the first marker on the opposite side of the scales. Displayed values are suffixed with a multiplier character.
 
-Displayed values are suffixed by a multiplier character:
+Displayed values are suffixed with a multiplier character:
   - **p**: pico (times 1e-12)
   - **n**: nano (times 1e-9)
   - **u**: micro (times 1e-6)
@@ -467,3 +467,5 @@ Displayed values are suffixed by a multiplier character:
   - **G**: giga (times 1e9)
 
 Use mouse right click anywhere in the view to remove the last entered marker. Use shift and mouse right click to remove all markers.
+
+Any change in the trace settings is not reflected in the markers. You have to clear them and make a new measurement if any critical setting of the trace is changed.
