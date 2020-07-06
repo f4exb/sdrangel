@@ -89,6 +89,55 @@ signals:
     void preTriggerChanged(uint32_t); //!< number of samples
 
 private:
+    struct ScopeMarker {
+        QPointF m_point;
+        float m_time;
+        float m_value;
+        QString m_timeStr;
+        QString m_valueStr;
+        QString m_timeDeltaStr;
+        QString m_valueDeltaStr;
+        ScopeMarker() :
+            m_point(0, 0),
+            m_time(0),
+            m_value(0),
+            m_timeStr(),
+            m_valueStr(),
+            m_timeDeltaStr(),
+            m_valueDeltaStr()
+        {}
+        ScopeMarker(
+            const QPointF& point,
+            float time,
+            float value,
+            const QString timeStr,
+            const QString& valueStr,
+            const QString& timeDeltaStr,
+            const QString& valueDeltaStr
+        ) :
+            m_point(point),
+            m_time(time),
+            m_value(value),
+            m_timeStr(timeStr),
+            m_valueStr(valueStr),
+            m_timeDeltaStr(timeDeltaStr),
+            m_valueDeltaStr(valueDeltaStr)
+        {}
+        ScopeMarker(const ScopeMarker& other) :
+            m_point(other.m_point),
+            m_time(other.m_time),
+            m_timeStr(other.m_timeStr),
+            m_valueStr(other.m_valueStr),
+            m_timeDeltaStr(other.m_timeDeltaStr),
+            m_valueDeltaStr(other.m_valueDeltaStr)
+        {}
+        explicit operator ScopeMarker() const {
+            return ScopeMarker{static_cast<ScopeMarker>(*this)};
+        }
+    };
+    QList<ScopeMarker> m_markers1;
+    QList<ScopeMarker> m_markers2;
+
     std::vector<ScopeVis::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
     std::vector<Projector::ProjectionType> *m_projectionTypes;
@@ -139,6 +188,7 @@ private:
     ScaleEngine m_y2Scale; //!< Display #2 Y scale. Connected to highlighted Y trace (#1..n)
 
     QFont m_channelOverlayFont;
+    QFont m_textOverlayFont;
 
     GLShaderSimple m_glShaderSimple;
     GLShaderColors m_glShaderColors;
@@ -147,6 +197,7 @@ private:
     GLShaderTextured m_glShaderLeft2Scale;
     GLShaderTextured m_glShaderBottom2Scale;
     GLShaderTextured m_glShaderPowerOverlay;
+    GLShaderTextured m_glShaderTextOverlay;
 
     IncrementalArray<GLfloat> m_q3Polar;
     IncrementalArray<GLfloat> m_q3TickY1;
@@ -167,6 +218,7 @@ private:
     void initializeGL();
     void resizeGL(int width, int height);
     void paintGL();
+    void drawMarkers();
 
     void applyConfig();
     void setYScale(ScaleEngine& scale, uint32_t highlightedTraceIndex);
@@ -175,11 +227,22 @@ private:
     void setHorizontalDisplays(); //!< Arrange displays when X and Y are stacked horizontally
     void setPolarDisplays();      //!< Arrange displays when X and Y are stacked over on the left and polar display is on the right
 
+    void mousePressEvent(QMouseEvent* event);
+
     void drawChannelOverlay(      //!< Draws a text overlay
             const QString& text,
             const QColor& color,
             QPixmap& channelOverlayPixmap,
             const QRectF& glScopeRect);
+    void drawTextOverlay(      //!< Draws a text overlay
+            const QString& text,
+            const QColor& color,
+            const QFont& font,
+            float shiftX,
+            float shiftY,
+            bool leftHalf,
+            bool topHalf,
+            const QRectF& glRect);
 
     static bool isPositiveProjection(Projector::ProjectionType& projectionType)
     {
@@ -190,6 +253,8 @@ private:
 
     void drawRectGrid2();
     void drawPolarGrid2();
+    QString displayScaled(float value, char type, int precision);
+
     static void drawCircle(float cx, float cy, float r, int num_segments, bool dotted, GLfloat *vertices);
     static void setColorPalette(int nbVertices, int modulo, GLfloat *colors);
 

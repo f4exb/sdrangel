@@ -77,6 +77,10 @@ GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
     m_channelOverlayFont.setBold(true);
     m_channelOverlayFont.setPointSize(font().pointSize() + 1);
 
+    m_textOverlayFont = font(); // QFontDatabase::systemFont(QFontDatabase::FixedFont);
+    m_textOverlayFont.setBold(true);
+    // m_textOverlayFont.setPointSize(font().pointSize() - 1);
+
     m_q3Radii.allocate(4*8);
     std::copy(m_q3RadiiConst, m_q3RadiiConst + 4*8, m_q3Radii.m_array);
     m_q3Circle.allocate(4*96); // 96 segments = 4*24 with 1/24 being 15 degrees
@@ -199,6 +203,7 @@ void GLScope::initializeGL()
     m_glShaderLeft2Scale.initializeGL();
     m_glShaderBottom2Scale.initializeGL();
     m_glShaderPowerOverlay.initializeGL();
+    m_glShaderTextOverlay.initializeGL();
 }
 
 void GLScope::resizeGL(int width, int height)
@@ -827,9 +832,147 @@ void GLScope::paintGL()
         } // trace length > 0
     } // XY mixed + polar display
 
+    drawMarkers();
+
     m_dataChanged.store(0);
     m_processingTraceIndex.store(-1);
     m_mutex.unlock();
+}
+
+void GLScope::drawMarkers()
+{
+    QVector4D markerColor(1.0f, 1.0f, 1.0f, 0.3f);
+    QVector4D markerTextColor(1.0f, 1.0f, 1.0f, 0.8f);
+
+    if ((m_markers1.size() > 0) && ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV))) // Draw markers1
+    {
+        // crosshairs
+        for (int i = 0; i < m_markers1.size(); i++)
+        {
+            GLfloat h[] {
+                (float) m_markers1.at(i).m_point.x(), 0,
+                (float) m_markers1.at(i).m_point.x(), 1
+            };
+            m_glShaderSimple.drawSegments(m_glScopeMatrix1, markerColor, h, 2);
+            GLfloat v[] {
+                0, (float) m_markers1.at(i).m_point.y(),
+                1, (float) m_markers1.at(i).m_point.y()
+            };
+            m_glShaderSimple.drawSegments(m_glScopeMatrix1, markerColor, v, 2);
+        }
+
+        // text
+        for (int i = 0; i < m_markers1.size(); i++)
+        {
+            if (i == 0)
+            {
+                drawTextOverlay(
+                    m_markers1.at(i).m_timeStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    m_markers1.at(i).m_point.x() * m_glScopeRect1.width(),
+                    m_glScopeRect1.height(),
+                    m_markers1.at(i).m_point.x() < 0.5f,
+                    false,
+                    m_glScopeRect1);
+                drawTextOverlay(
+                    m_markers1.at(i).m_valueStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    0,
+                    m_markers1.at(i).m_point.y() * m_glScopeRect1.height(),
+                    true,
+                    m_markers1.at(i).m_point.y() < 0.5f,
+                    m_glScopeRect1);
+            }
+            else
+            {
+                drawTextOverlay(
+                    m_markers1.at(i).m_timeDeltaStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    m_markers1.at(i).m_point.x() * m_glScopeRect1.width(),
+                    0,
+                    m_markers1.at(i).m_point.x() < 0.5f,
+                    true,
+                    m_glScopeRect1);
+                drawTextOverlay(
+                    m_markers1.at(i).m_valueDeltaStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    m_glScopeRect1.width(),
+                    m_markers1.at(i).m_point.y() * m_glScopeRect1.height(),
+                    false,
+                    m_markers1.at(i).m_point.y() < 0.5f,
+                    m_glScopeRect1);
+            }
+        }
+    }
+
+    if ((m_markers2.size() > 0) && ((m_displayMode == DisplayY) || (m_displayMode == DisplayXYH) || (m_displayMode == DisplayXYV))) // Draw markers2
+    {
+        // crosshairs
+        for (int i = 0; i < m_markers2.size(); i++)
+        {
+            GLfloat h[] {
+                (float) m_markers2.at(i).m_point.x(), 0,
+                (float) m_markers2.at(i).m_point.x(), 1
+            };
+            m_glShaderSimple.drawSegments(m_glScopeMatrix2, markerColor, h, 2);
+            GLfloat v[] {
+                0, (float) m_markers2.at(i).m_point.y(),
+                1, (float) m_markers2.at(i).m_point.y()
+            };
+            m_glShaderSimple.drawSegments(m_glScopeMatrix2, markerColor, v, 2);
+        }
+
+        // text
+        for (int i = 0; i < m_markers2.size(); i++)
+        {
+            if (i == 0)
+            {
+                drawTextOverlay(
+                    m_markers2.at(i).m_timeStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    m_markers2.at(i).m_point.x() * m_glScopeRect2.width(),
+                    m_glScopeRect2.height(),
+                    m_markers2.at(i).m_point.x() < 0.5f,
+                    false,
+                    m_glScopeRect2);
+                drawTextOverlay(
+                    m_markers2.at(i).m_valueStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    0,
+                    m_markers2.at(i).m_point.y() * m_glScopeRect2.height(),
+                    true,
+                    m_markers2.at(i).m_point.y() < 0.5f,
+                    m_glScopeRect2);
+            }
+            else
+            {
+                drawTextOverlay(
+                    m_markers2.at(i).m_timeDeltaStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    m_markers2.at(i).m_point.x() * m_glScopeRect2.width(),
+                    0,
+                    m_markers2.at(i).m_point.x() < 0.5f,
+                    true,
+                    m_glScopeRect2);
+                drawTextOverlay(
+                    m_markers2.at(i).m_valueDeltaStr,
+                    QColor(255, 255, 255, 192),
+                    m_textOverlayFont,
+                    m_glScopeRect2.width(),
+                    m_markers2.at(i).m_point.y() * m_glScopeRect2.height(),
+                    false,
+                    m_markers2.at(i).m_point.y() < 0.5f,
+                    m_glScopeRect2);
+            }
+        }
+    }
 }
 
 void GLScope::setSampleRate(int sampleRate)
@@ -1809,6 +1952,64 @@ void GLScope::drawChannelOverlay(
     }
 }
 
+void GLScope::drawTextOverlay(
+    const QString &text,
+    const QColor &color,
+    const QFont& font,
+    float shiftX,
+    float shiftY,
+    bool leftHalf,
+    bool topHalf,
+    const QRectF &glRect)
+{
+    if (text.isEmpty()) {
+        return;
+    }
+
+    QFontMetricsF metrics(font);
+    QRectF textRect = metrics.boundingRect(text);
+    QRectF overlayRect(0, 0, textRect.width() * 1.05f + 4.0f, textRect.height());
+    QPixmap channelOverlayPixmap = QPixmap(overlayRect.width(), overlayRect.height());
+    channelOverlayPixmap.fill(Qt::transparent);
+    QPainter painter(&channelOverlayPixmap);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing, false);
+    painter.fillRect(overlayRect, QColor(0, 0, 0, 0x80));
+    QColor textColor(color);
+    textColor.setAlpha(0xC0);
+    painter.setPen(textColor);
+    painter.setFont(font);
+    painter.drawText(QPointF(2.0f, overlayRect.height() - 4.0f), text);
+    painter.end();
+
+    m_glShaderTextOverlay.initTexture(channelOverlayPixmap.toImage());
+
+    {
+        GLfloat vtx1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0};
+        GLfloat tex1[] = {
+            0, 1,
+            1, 1,
+            1, 0,
+            0, 0};
+
+        // float shiftX = glRect.width() - ((overlayRect.width() + 4.0f) / width());
+        // float shiftY = 4.0f / height();
+        float rectX = glRect.x() + shiftX - (leftHalf ? 0 : (overlayRect.width()+1)/width());
+        float rectY = glRect.y() + shiftY + (4.0f / height()) - (topHalf ? 0 : (overlayRect.height()+5)/height());
+        float rectW = overlayRect.width() / (float) width();
+        float rectH = overlayRect.height() / (float) height();
+
+        QMatrix4x4 mat;
+        mat.setToIdentity();
+        mat.translate(-1.0f + 2.0f * rectX, 1.0f - 2.0f * rectY);
+        mat.scale(2.0f * rectW, -2.0f * rectH);
+        m_glShaderTextOverlay.drawSurface(mat, tex1, vtx1, 4);
+    }
+}
+
 void GLScope::tick()
 {
     if (m_dataChanged.load()) {
@@ -1832,6 +2033,7 @@ void GLScope::cleanup()
     m_glShaderBottom2Scale.cleanup();
     m_glShaderLeft1Scale.cleanup();
     m_glShaderPowerOverlay.cleanup();
+    m_glShaderTextOverlay.cleanup();
     //doneCurrent();
 }
 
@@ -1990,5 +2192,154 @@ void GLScope::setColorPalette(int nbVertices, int modulo, GLfloat *colors)
         colors[3*v] = c.redF();
         colors[3*v+1] = c.greenF();
         colors[3*v+2] = c.blueF();
+    }
+}
+
+void GLScope::mousePressEvent(QMouseEvent* event)
+{
+    if (m_displayMode == DisplayPol) { // Ignore mouse press on Polar displays
+        return;
+    }
+
+    const QPointF& ep = event->localPos(); // x, y pixel position in whole scope window
+    bool doUpdate = false;
+
+    if (event->button() == Qt::RightButton)
+    {
+        QPointF p1 = ep; // relative position in graph #1
+        p1.rx() = (ep.x()/width() -  m_glScopeRect1.left()) / m_glScopeRect1.width();
+        p1.ry() = (ep.y()/height() - m_glScopeRect1.top()) / m_glScopeRect1.height();
+
+        QPointF p2 = ep; // relative position in graph #2
+        p2.rx() = (ep.x()/width() -  m_glScopeRect2.left()) / m_glScopeRect2.width();
+        p2.ry() = (ep.y()/height() - m_glScopeRect2.top()) / m_glScopeRect2.height();
+
+        if (event->modifiers() & Qt::ShiftModifier)
+        {
+            if ((p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1))
+            {
+                m_markers1.clear();
+                doUpdate = true;
+            }
+            if ((p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1))
+            {
+                m_markers2.clear();
+                doUpdate = true;
+            }
+        }
+        else
+        {
+            if ((m_markers1.size() > 0) && (p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1))
+            {
+                m_markers1.pop_back();
+                doUpdate = true;
+            }
+            if ((m_markers2.size() > 0) && (p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1))
+            {
+                m_markers2.pop_back();
+                doUpdate = true;
+            }
+        }
+    }
+    else if (event->button() == Qt::LeftButton)
+    {
+        if (event->modifiers() & Qt::ShiftModifier)
+        {
+            QPointF p1 = ep; // relative position in graph #1
+            p1.rx() = (ep.x()/width() -  m_glScopeRect1.left()) / m_glScopeRect1.width();
+            p1.ry() = (ep.y()/height() - m_glScopeRect1.top()) / m_glScopeRect1.height();
+
+            QPointF p2 = ep; // relative position in graph #2
+            p2.rx() = (ep.x()/width() -  m_glScopeRect2.left()) / m_glScopeRect2.width();
+            p2.ry() = (ep.y()/height() - m_glScopeRect2.top()) / m_glScopeRect2.height();
+
+            if ((p1.x() >= 0) && (p1.y() >= 0) && (p1.x() <= 1) && (p1.y() <= 1) &&
+                ((m_displayMode == DisplayX) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)))
+            {
+                if (m_markers1.size() < 2)
+                {
+                    m_markers1.push_back(ScopeMarker());
+                    m_markers1.back().m_point = p1;
+                    m_markers1.back().m_time = p1.x() * m_x1Scale.getRange() + m_x1Scale.getRangeMin();
+                    m_markers1.back().m_value = (1.0f - p1.y()) * m_y1Scale.getRange() + m_y1Scale.getRangeMin();
+                    m_markers1.back().m_timeStr = displayScaled(m_markers1.back().m_time, 'f', 1);
+                    m_markers1.back().m_valueStr = displayScaled(m_markers1.back().m_value, 'f', 1);
+
+                    if (m_markers1.size() > 1)
+                    {
+                        float deltaTime = m_markers1.back().m_time - m_markers1.at(0).m_time;
+                        float deltaValue = m_markers1.back().m_value - m_markers1.at(0).m_value;
+                        m_markers1.back().m_timeDeltaStr = displayScaled(deltaTime, 'f', 1);
+                        m_markers1.back().m_valueDeltaStr = displayScaled(deltaValue, 'f', 1);
+                    }
+
+                    qDebug("GLScope::mousePressEvent: M1: t: %f v: %f", m_markers1.back().m_time, m_markers1.back().m_value);
+                    doUpdate = true;
+                }
+            }
+
+            if ((p2.x() >= 0) && (p2.y() >= 0) && (p2.x() <= 1) && (p2.y() <= 1) &&
+                ((m_displayMode == DisplayY) || (m_displayMode == DisplayXYV) || (m_displayMode == DisplayXYH)))
+            {
+                if (m_markers2.size() < 2)
+                {
+                    m_markers2.push_back(ScopeMarker());
+                    m_markers2.back().m_point = p2;
+                    m_markers2.back().m_time = p2.x() * m_x2Scale.getRange() + m_x2Scale.getRangeMin();
+                    m_markers2.back().m_value = (1.0f - p2.y()) * m_y2Scale.getRange() + m_y2Scale.getRangeMin();
+                    m_markers2.back().m_timeStr = displayScaled(m_markers2.back().m_time, 'f', 1);
+                    m_markers2.back().m_valueStr = displayScaled(m_markers2.back().m_value, 'f', 1);
+
+                    if (m_markers2.size() > 1)
+                    {
+                        float deltaTime = m_markers2.back().m_time - m_markers2.at(0).m_time;
+                        float deltaValue = m_markers2.back().m_value - m_markers2.at(0).m_value;
+                        m_markers2.back().m_timeDeltaStr = displayScaled(deltaTime, 'f', 1);
+                        m_markers2.back().m_valueDeltaStr = displayScaled(deltaValue, 'f', 1);
+                    }
+
+                    qDebug("GLScope::mousePressEvent: M2: t: %f v: %f", m_markers2.back().m_time, m_markers2.back().m_value);
+                    doUpdate = true;
+                }
+            }
+        }
+    }
+
+    if (doUpdate) {
+        update();
+    }
+}
+
+QString GLScope::displayScaled(float value, char type, int precision)
+{
+    float posValue = (value < 0) ? -value : value;
+
+    if (posValue < 1)
+    {
+        if (posValue > 0.001) {
+            return tr("%1m").arg(QString::number(value * 1000.0, type, precision));
+        } else if (posValue > 0.000001) {
+            return tr("%1u").arg(QString::number(value * 1000000.0, type, precision));
+        } else if (posValue > 1e-9) {
+            return tr("%1n").arg(QString::number(value * 1e9, type, precision));
+        } else if (posValue > 1e-12) {
+            return tr("%1p").arg(QString::number(value * 1e12, type, precision));
+        } else {
+            return tr("%1").arg(QString::number(value, 'e', precision));
+        }
+    }
+    else
+    {
+        if (posValue < 1000) {
+            return tr("%1").arg(QString::number(value, type, precision));
+        } else if (posValue < 1000000) {
+            return tr("%1k").arg(QString::number(value / 1000.0, type, precision));
+        } else if (posValue < 1000000000) {
+            return tr("%1M").arg(QString::number(value / 1000000.0, type, precision));
+        } else if (posValue < 1000000000000) {
+            return tr("%1G").arg(QString::number(value / 1000000000.0, type, precision));
+        } else {
+            return tr("%1").arg(QString::number(value, 'e', precision));
+        }
     }
 }
