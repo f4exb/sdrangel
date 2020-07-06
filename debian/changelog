@@ -1,3 +1,11 @@
+sdrangel (4.14.15-1) unstable; urgency=medium
+
+   * GLScope: marker feature. Implements #497
+   * GLSpectrum: marker feature. Implements #557
+   * ScopeVis: fixed moving of iterator past the end. Fixes issue #556
+
+-- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 06 Jul 2020 17:33:24 +0200
+
 sdrangel (4.14.14-1) unstable; urgency=medium
 
    * Add 10 MHz digit to wideband channel plugins. Implements #531
