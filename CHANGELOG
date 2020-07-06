@@ -1,3 +1,10 @@
+sdrangel (5.7.8-1) unstable; urgency=medium
+
+   * GLScope: added markers feature. Implements #497
+   * GLSpectrum: enhancements and fixes to the markers feature
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 06 Jul 2020 06:10:56 +0200
+
 sdrangel (5.7.7-1) unstable; urgency=medium
 
    * GLSpectrum: added markers feature. Implements #557
