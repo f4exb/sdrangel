@@ -2314,7 +2314,11 @@ QString GLScope::displayScaled(float value, char type, int precision)
 {
     float posValue = (value < 0) ? -value : value;
 
-    if (posValue < 1)
+    if (posValue == 0)
+    {
+        return tr("%1").arg(QString::number(value, 'f', precision));
+    }
+    else if (posValue < 1)
     {
         if (posValue > 0.001) {
             return tr("%1m").arg(QString::number(value * 1000.0, type, precision));
