@@ -445,3 +445,25 @@ This button toggles a one shot trigger. When the (final) trigger is raised only 
 <h3>15. Freerun</h3>
 
 When active the triggers are disabled and traces are processed continuously. This is the default at plugin start time.
+
+<h2>G. Markers</h2>
+
+Markers can be set on the X and Y individual views. This does not apply to the XY combined and polar view. Y values apply to Y1 trace.
+
+![Channel Analyzer markers](../../../doc/img/ChAnalyzerNG_plugin_scope4.png)
+
+Use Shift and mouse left click to set a new marker. There is a maximum of two markers with a different status:
+  - The first marker (A) will display time (2) and value on the scale side of the view (1). Value units are whatever corresponds to the trace type and is suffixed by a multiplier character (see next). Time units are in seconds suffixed by a  multiplier character
+  - The second marker (B) will display time difference (3) and value difference (4) with the first marker on the opposite side of the scales. Displayed values are suffixed by a multiplier character.
+
+Displayed values are suffixed by a multiplier character:
+  - **p**: pico (times 1e-12)
+  - **n**: nano (times 1e-9)
+  - **u**: micro (times 1e-6)
+  - **m**: milli (times 1e-3)
+  - no character: no change (times one)
+  - **k**: kilo (times 1e3)
+  - **M**: mega (times 1e6)
+  - **G**: giga (times 1e9)
+
+Use mouse right click anywhere in the view to remove the last entered marker. Use shift and mouse right click to remove all markers.
