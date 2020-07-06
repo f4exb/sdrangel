@@ -899,15 +899,25 @@ The spectrum display is controlled by the display control (4).
 
 ![Spectrum Markers](../doc/img/Spectrum_Markers.png)
 
-Left click while pressing the Shift key in the spectrum or waterfall window to set the markers. Right click in the same window to remove the last entered marker.
+Use Shift and mouse left click to set a new marker. There is a maximum of two markers with a different status:
+  - The first marker will display frequency (2) and power (1) or time (5) on the scale side of the view. Frequency units are the same as displayed in the frequency scale.
+  - The second marker will display frequency difference (3 or 6) and power difference (4) or time difference (7) from the first marker on the opposite side of the scales. Difference values may be suffixed with a multiplier character.
 
-There is a maximum of two markers on each window with a different status:
-  - the legend of the first marker is the frequency (2) and power (1) or delay (5). The frequency legend appears on the spectrum side closest to the frequency rule.
-  - the legend of the second marker is the frequency difference with the first marker (3 or 6) and the difference in power (4) or time (7). It appears on the spectrum opposite side of the corresponding first marker legend.
+Base units are Hz for frequency difference and seconds for time. Power is expressed either in dB or plain value depending on the linear or log setting for the spectrum display.
 
-Frequency difference units are Hz suffixed with a multiplier suffix k, M or G for kHz, MHz or GHz respectively.
+Values may be suffixed by a multiplier character:
+  - **p**: pico (times 1e-12)
+  - **n**: nano (times 1e-9)
+  - **u**: micro (times 1e-6)
+  - **m**: milli (times 1e-3)
+  - no character: no change (times one)
+  - **k**: kilo (times 1e3)
+  - **M**: mega (times 1e6)
+  - **G**: giga (times 1e9)
 
-Time units are seconds suffixed with a divisor suffix m, u, n, p for ms, us, ns or ps respectively.
+Use mouse right click anywhere in the view to remove the last entered marker. Use shift and mouse right click to remove all markers.
+
+Any change in the spectrum settings is not reflected in the markers. You have to clear them and make a new measurement if any critical setting of the spectrum is changed.
 
 <h3>8. Status</h3>
 
