@@ -319,6 +319,7 @@ private:
 	void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
+    void drawMarkers();
 
 	void stopDrag();
 	void applyChanges();
