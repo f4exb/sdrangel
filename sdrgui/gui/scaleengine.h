@@ -44,6 +44,8 @@ public:
 	float getSize() { return m_size; }
 	void setRange(Unit::Physical physicalUnit, float rangeMin, float rangeMax);
     float getRange() const { return m_rangeMax - m_rangeMin; }
+    float getRangeMin() const { return m_rangeMin; }
+    float getRangeMax() const { return m_rangeMax; }
 	void setMakeOpposite(bool makeOpposite) { m_makeOpposite = makeOpposite; }
 	void setFixedDecimalPlaces(int decimalPlaces) { m_fixedDecimalPlaces =decimalPlaces; }
 
