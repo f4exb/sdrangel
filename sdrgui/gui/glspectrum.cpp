@@ -191,8 +191,6 @@ void GLSpectrum::setCenterFrequency(qint64 frequency)
 	m_mutex.lock();
 	m_centerFrequency = frequency;
 	m_changesPending = true;
-    m_histogramMarkers.clear();
-    m_waterfallMarkers.clear();
 	m_mutex.unlock();
 	update();
 }
@@ -202,7 +200,6 @@ void GLSpectrum::setReferenceLevel(Real referenceLevel)
 	m_mutex.lock();
 	m_referenceLevel = referenceLevel;
 	m_changesPending = true;
-    m_histogramMarkers.clear();
 	m_mutex.unlock();
 	update();
 }
@@ -212,7 +209,6 @@ void GLSpectrum::setPowerRange(Real powerRange)
 	m_mutex.lock();
 	m_powerRange = powerRange;
 	m_changesPending = true;
-    m_histogramMarkers.clear();
 	m_mutex.unlock();
 	update();
 }
@@ -240,8 +236,6 @@ void GLSpectrum::setSampleRate(qint32 sampleRate)
 	    m_messageQueueToGUI->push(new MsgReportSampleRate(m_sampleRate));
 	}
 	m_changesPending = true;
-    m_histogramMarkers.clear();
-    m_waterfallMarkers.clear();
 	m_mutex.unlock();
 	update();
 }
@@ -259,8 +253,10 @@ void GLSpectrum::setDisplayWaterfall(bool display)
 {
     m_mutex.lock();
 	m_displayWaterfall = display;
+    if (!display) {
+        m_waterfallMarkers.clear();
+    }
 	m_changesPending = true;
-    m_waterfallMarkers.clear();
 	stopDrag();
 	m_mutex.unlock();
 	update();
@@ -282,7 +278,6 @@ void GLSpectrum::setInvertedWaterfall(bool inv)
 {
     m_mutex.lock();
 	m_invertedWaterfall = inv;
-    m_waterfallMarkers.clear();
 	m_changesPending = true;
 	stopDrag();
 	m_mutex.unlock();
@@ -293,6 +288,9 @@ void GLSpectrum::setDisplayMaxHold(bool display)
 {
     m_mutex.lock();
 	m_displayMaxHold = display;
+    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram) {
+        m_histogramMarkers.clear();
+    }
 	m_changesPending = true;
 	stopDrag();
 	m_mutex.unlock();
@@ -303,6 +301,9 @@ void GLSpectrum::setDisplayCurrent(bool display)
 {
     m_mutex.lock();
 	m_displayCurrent = display;
+    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram) {
+        m_histogramMarkers.clear();
+    }
 	m_changesPending = true;
 	stopDrag();
 	m_mutex.unlock();
@@ -313,6 +314,9 @@ void GLSpectrum::setDisplayHistogram(bool display)
 {
     m_mutex.lock();
 	m_displayHistogram = display;
+    if (!m_displayMaxHold && !m_displayCurrent && !m_displayHistogram) {
+        m_histogramMarkers.clear();
+    }
 	m_changesPending = true;
 	stopDrag();
 	m_mutex.unlock();
@@ -1974,28 +1978,58 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
     if (event->button() == Qt::RightButton)
     {
         QPointF pHis = ep;
+        bool doUpdate = false;
         pHis.rx() = (pHis.x() - m_histogramRect.left()*width()) / (width() - m_leftMargin - m_rightMargin);
         pHis.ry() = (pHis.y() - m_histogramRect.top()*height()) / (height() - waterfallShiftY);
 
-        if ((m_histogramMarkers.size() > 0) && (pHis.x() >= 0) && (pHis.x() <= 1) && (pHis.y() >= 0) && (pHis.y() <= 1)) {
-            m_histogramMarkers.pop_back();
+        if (event->modifiers() & Qt::ShiftModifier)
+        {
+            if ((pHis.x() >= 0) && (pHis.x() <= 1) && (pHis.y() >= 0) && (pHis.y() <= 1))
+            {
+                m_histogramMarkers.clear();
+                doUpdate = true;
+            }
+        }
+        else
+        {
+            if ((m_histogramMarkers.size() > 0) && (pHis.x() >= 0) && (pHis.x() <= 1) && (pHis.y() >= 0) && (pHis.y() <= 1))
+            {
+                m_histogramMarkers.pop_back();
+                doUpdate = true;
+            }
         }
 
         QPointF pWat = ep;
         pWat.rx() = (pWat.x() - m_waterfallRect.left()*width()) / (width() - m_leftMargin - m_rightMargin);
         pWat.ry() = (pWat.y() - m_waterfallRect.top()*height()) / (height() - histogramShiftY);
 
-        if ((m_waterfallMarkers.size() > 0) && (pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1)) {
-            m_waterfallMarkers.pop_back();
+        if (event->modifiers() & Qt::ShiftModifier)
+        {
+            if ((pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1))
+            {
+                m_waterfallMarkers.clear();
+                doUpdate = true;
+            }
+        }
+        else
+        {
+            if ((m_waterfallMarkers.size() > 0) && (pWat.x() >= 0) && (pWat.x() <= 1) && (pWat.y() >= 0) && (pWat.y() <= 1))
+            {
+                m_waterfallMarkers.pop_back();
+                doUpdate = true;
+            }
         }
 
-        update();
+        if (doUpdate) {
+            update();
+        }
     }
 	else if (event->button() == Qt::LeftButton)
     {
         if (event->modifiers() & Qt::ShiftModifier)
         {
             QPointF pHis = ep;
+            bool doUpdate = false;
             pHis.rx() = (pHis.x() - m_histogramRect.left()*width()) / (width() - m_leftMargin - m_rightMargin);
             pHis.ry() = (pHis.y() - m_histogramRect.top()*height()) / (height() - waterfallShiftY);
             float frequency = (pHis.x()-0.5)*m_sampleRate + m_centerFrequency;
@@ -2034,6 +2068,8 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                             m_linear ? 3 : 1,
                             false);
                     }
+
+                    doUpdate = true;
                 }
             }
 
@@ -2076,17 +2112,20 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                             3,
                             true);
                     }
+
+                    doUpdate = true;
                 }
             }
 
-            update();
+            if (doUpdate) {
+                update();
+            }
         }
 
         if  (m_cursorState == CSSplitter)
         {
             grabMouse();
             m_cursorState = CSSplitterMoving;
-            m_waterfallMarkers.clear();
             return;
         }
         else if (m_cursorState == CSChannel)
