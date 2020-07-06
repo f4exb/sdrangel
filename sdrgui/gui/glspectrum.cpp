@@ -2094,7 +2094,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                         getPrecision(m_centerFrequency/m_sampleRate),
                         false);
                     m_waterfallMarkers.back().m_time = time;
-                    m_waterfallMarkers.back().m_timeStr = displayScaledM(
+                    m_waterfallMarkers.back().m_timeStr = displayScaledF(
                         time,
                         'f',
                         3,
@@ -2108,7 +2108,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                             'f',
                             getPrecision(deltaFrequency/m_sampleRate),
                             true);
-                        m_waterfallMarkers.back().m_deltaTimeStr = displayScaledM(
+                        m_waterfallMarkers.back().m_deltaTimeStr = displayScaledF(
                             time - m_waterfallMarkers.at(0).m_time,
                             'f',
                             3,
@@ -2312,33 +2312,37 @@ QString GLSpectrum::displayScaledF(float value, char type, int precision, bool s
 {
     float posValue = (value < 0) ? -value : value;
 
-    if (posValue < 1000) {
-        return tr("%1").arg(QString::number(value, type, precision));
-    } else if (posValue < 1000000) {
-        return tr("%1%2").arg(QString::number(value / 1000.0, type, precision)).arg(showMult ? "k" : "");
-    } else if (posValue < 1000000000) {
-        return tr("%1%2").arg(QString::number(value / 1000000.0, type, precision)).arg(showMult ? "M" : "");
-    } else if (posValue < 1000000000000) {
-        return tr("%1%2").arg(QString::number(value / 1000000000.0, type, precision)).arg(showMult ? "G" : "");
+    if (posValue == 0)
+    {
+        return tr("%1").arg(QString::number(value, 'f', precision));
     }
-}
-
-QString GLSpectrum::displayScaledM(float value, char type, int precision, bool showMult)
-{
-    float posValue = (value < 0) ? -value : value;
-
-    if (posValue > 1) {
-        return tr("%1").arg(QString::number(value, type, precision));
-    } else if (posValue > 0.001) {
-        return tr("%1%2").arg(QString::number(value * 1000.0, type, precision)).arg(showMult ? "m" : "");
-    } else if (posValue > 0.000001) {
-        return tr("%1%2").arg(QString::number(value * 1000000.0, type, precision)).arg(showMult ? "u" : "");
-    } else if (posValue > 1e-9) {
-        return tr("%1%2").arg(QString::number(value * 1e9, type, precision)).arg(showMult ? "n" : "");
-    } else if (posValue > 1e-12) {
-        return tr("%1%2").arg(QString::number(value * 1e12, type, precision)).arg(showMult ? "p" : "");
-    } else {
-        return tr("%1").arg(QString::number(value, 'e', precision));
+    else if (posValue < 1)
+    {
+        if (posValue > 0.001) {
+            return tr("%1%2").arg(QString::number(value * 1000.0, type, precision)).arg(showMult ? "m" : "");
+        } else if (posValue > 0.000001) {
+            return tr("%1%2").arg(QString::number(value * 1000000.0, type, precision)).arg(showMult ? "u" : "");
+        } else if (posValue > 1e-9) {
+            return tr("%1%2").arg(QString::number(value * 1e9, type, precision)).arg(showMult ? "n" : "");
+        } else if (posValue > 1e-12) {
+            return tr("%1%2").arg(QString::number(value * 1e12, type, precision)).arg(showMult ? "p" : "");
+        } else {
+            return tr("%1").arg(QString::number(value, 'e', precision));
+        }
+    }
+    else
+    {
+        if (posValue < 1000) {
+            return tr("%1").arg(QString::number(value, type, precision));
+        } else if (posValue < 1000000) {
+            return tr("%1%2").arg(QString::number(value / 1000.0, type, precision)).arg(showMult ? "k" : "");
+        } else if (posValue < 1000000000) {
+            return tr("%1%2").arg(QString::number(value / 1000000.0, type, precision)).arg(showMult ? "M" : "");
+        } else if (posValue < 1000000000000) {
+            return tr("%1%2").arg(QString::number(value / 1000000000.0, type, precision)).arg(showMult ? "G" : "");
+        } else {
+            return tr("%1").arg(QString::number(value, 'e', precision));
+        }
     }
 }
 

@@ -334,7 +334,6 @@ private:
 
     QString displayScaled(int64_t value, char type, int precision, bool showMult);
     QString displayScaledF(float value, char type, int precision, bool showMult);
-    QString displayScaledM(float value, char type, int precision, bool showMult);
     int getPrecision(int value);
     void drawTextOverlay(      //!< Draws a text overlay
             const QString& text,
