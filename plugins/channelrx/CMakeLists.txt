@@ -22,6 +22,10 @@ if (CODEC2_FOUND)
     add_subdirectory(demodfreedv)
 endif(CODEC2_FOUND)
 
+if (LIBSIGMF_FOUND)
+    add_subdirectory(sigmffilesink)
+endif(LIBSIGMF_FOUND)
+
 if(NOT SERVER_MODE)
     add_subdirectory(chanalyzer)
     add_subdirectory(demodatv)
