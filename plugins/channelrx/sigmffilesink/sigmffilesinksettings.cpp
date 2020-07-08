@@ -33,7 +33,7 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_inputFrequencyOffset = 0;
     m_fileRecordName = "";
     m_rgbColor = QColor(140, 4, 4).rgb();
-    m_title = "Local sink";
+    m_title = "SigMF File Sink";
     m_log2Decim = 0;
     m_filterChainHash = 0;
     m_channelMarker = nullptr;
@@ -85,7 +85,7 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_fileRecordName, "");
         d.readS32(4, &m_streamIndex, 0);
         d.readU32(5, &m_rgbColor, QColor(0, 255, 255).rgb());
-        d.readString(6, &m_title, "Local sink");
+        d.readString(6, &m_title, "SigMF File Sink");
         d.readBool(7, &m_useReverseAPI, false);
         d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(9, &tmp, 0);

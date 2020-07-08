@@ -200,7 +200,7 @@ DeviceSampleSource *SigMFFileSink::getLocalDevice(uint32_t index)
         }
         else
         {
-            qDebug("SigMFFileSink::getLocalDevice: source device at index %u is not a Local Input source", index);
+            qDebug("SigMFFileSink::getLocalDevice: source device at index %u is not a SigMF File sink", index);
         }
     }
     else
