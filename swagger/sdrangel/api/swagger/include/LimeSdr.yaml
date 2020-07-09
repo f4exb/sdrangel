@@ -140,8 +140,6 @@ LimeSdrMIMOSettings:
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Boolean
       type: integer

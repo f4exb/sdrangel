@@ -99,9 +99,6 @@ LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
-
     sendSettings();
 }
 
@@ -784,18 +781,6 @@ void LimeSDRMIMOGUI::on_startStopTx_toggled(bool checked)
     }
 }
 
-void LimeSDRMIMOGUI::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    LimeSDRMIMO::MsgFileRecord* message = LimeSDRMIMO::MsgFileRecord::create(checked, m_streamIndex);
-    m_limeSDRMIMO->getInputMessageQueue()->push(message);
-}
-
 void LimeSDRMIMOGUI::on_centerFrequency_changed(quint64 value)
 {
     if (m_rxElseTx) {
@@ -1173,30 +1158,4 @@ void LimeSDRMIMOGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void LimeSDRMIMOGUI::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

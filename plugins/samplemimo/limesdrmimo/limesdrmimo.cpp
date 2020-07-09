@@ -45,7 +45,6 @@ MESSAGE_CLASS_DEFINITION(LimeSDRMIMO::MsgConfigureLimeSDRMIMO, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRMIMO::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRMIMO::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRMIMO::MsgReportStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(LimeSDRMIMO::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRMIMO::MsgStartStop, Message)
 
 LimeSDRMIMO::LimeSDRMIMO(DeviceAPI *deviceAPI) :
@@ -506,30 +505,6 @@ bool LimeSDRMIMO::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        // TODO
-        // MsgFileRecord& conf = (MsgFileRecord&) message;
-        // qDebug() << "LimeSDRMIMO::handleMessage: MsgFileRecord: " << conf.getStartStop();
-        // int istream = conf.getStreamIndex();
-
-        // if (conf.getStartStop())
-        // {
-        //     if (m_settings.m_fileRecordName.size() != 0) {
-        //         m_fileSinks[istream]->setFileName(m_settings.m_fileRecordName + "_0.sdriq");
-        //     } else {
-        //         m_fileSinks[istream]->genUniqueFileName(m_deviceAPI->getDeviceUID(), istream);
-        //     }
-
-        //     m_fileSinks[istream]->startRecording();
-        // }
-        // else
-        // {
-        //     m_fileSinks[istream]->stopRecording();
-        // }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -666,7 +641,6 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
         << " m_gpioPins: " << settings.m_gpioPins
         << " m_extClock: " << settings.m_extClock
         << " m_extClockFreq: " << settings.m_extClockFreq
-        << " m_fileRecordName: " << settings.m_fileRecordName
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -1814,12 +1788,6 @@ void LimeSDRMIMO::webapiFormatDeviceSettings(
     response.getLimeSdrMimoSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getLimeSdrMimoSettings()->setExtClockFreq(settings.m_extClockFreq);
 
-    if (response.getLimeSdrMimoSettings()->getFileRecordName()) {
-        *response.getLimeSdrMimoSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getLimeSdrMimoSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
-
     response.getLimeSdrMimoSettings()->setGpioDir(settings.m_gpioDir);
     response.getLimeSdrMimoSettings()->setGpioPins(settings.m_gpioPins);
     response.getLimeSdrMimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
@@ -1900,9 +1868,6 @@ void LimeSDRMIMO::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("extClockFreq")) {
         settings.m_extClockFreq = response.getLimeSdrMimoSettings()->getExtClockFreq();
-    }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getLimeSdrMimoSettings()->getFileRecordName();
     }
     if (deviceSettingsKeys.contains("gpioDir")) {
         settings.m_gpioDir = response.getLimeSdrMimoSettings()->getGpioDir() & 0xFF;
@@ -2153,9 +2118,6 @@ void LimeSDRMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("extClockFreq") || force) {
         swgLimeSdrMIMOSettings->setExtClockFreq(settings.m_extClockFreq);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgLimeSdrMIMOSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("gpioDir") || force) {
         swgLimeSdrMIMOSettings->setGpioDir(settings.m_gpioDir & 0xFF);

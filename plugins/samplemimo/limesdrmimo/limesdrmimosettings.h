@@ -57,7 +57,6 @@ struct LimeSDRMIMOSettings
     uint8_t   m_gpioPins;         //!< GPIO pins to write; LSB first
     bool      m_extClock;         //!< True if external clock source
     uint32_t  m_extClockFreq;     //!< Frequency (Hz) of external clock source
-    QString   m_fileRecordName;
     bool      m_useReverseAPI;
     QString   m_reverseAPIAddress;
     uint16_t  m_reverseAPIPort;

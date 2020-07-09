@@ -31,7 +31,6 @@ void LimeSDRMIMOSettings::resetToDefaults()
     m_gpioPins = 0;
     m_extClock = false;
     m_extClockFreq = 10000000; // 10 MHz
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -98,7 +97,6 @@ QByteArray LimeSDRMIMOSettings::serialize() const
     s.writeU32(4, m_gpioPins);
     s.writeBool(5, m_extClock);
     s.writeU32(6, m_extClockFreq);
-    s.writeString(7, m_fileRecordName);
     s.writeBool(8, m_useReverseAPI);
     s.writeString(9, m_reverseAPIAddress);
     s.writeU32(10, m_reverseAPIPort);
@@ -180,7 +178,6 @@ bool LimeSDRMIMOSettings::deserialize(const QByteArray& data)
         m_gpioPins = uintval & 0xFF;
         d.readBool(5, &m_extClock, false);
         d.readU32(6, &m_extClockFreq, 10000000);
-        d.readString(7, &m_fileRecordName, "");
         d.readBool(8, &m_useReverseAPI, false);
         d.readString(9, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(10, &uintval, 0);
