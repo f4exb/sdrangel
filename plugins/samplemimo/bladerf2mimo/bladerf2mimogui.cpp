@@ -97,9 +97,6 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStopRx);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
-
     sendSettings();
 }
 
@@ -176,7 +173,6 @@ void BladeRF2MIMOGui::displaySettings()
         ui->centerFrequency->setValue(m_settings.m_rxCenterFrequency / 1000);
         ui->bandwidth->setValueRange(5, m_bwMinRx / 1000, m_bwMaxRx / 1000);
         ui->bandwidth->setValue(m_settings.m_rxBandwidth / 1000);
-        ui->record->setEnabled(true);
         uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
         ui->dcOffset->setEnabled(true);
@@ -212,7 +208,6 @@ void BladeRF2MIMOGui::displaySettings()
         ui->centerFrequency->setValue(m_settings.m_txCenterFrequency / 1000);
         ui->bandwidth->setValueRange(5, m_bwMinTx / 1000, m_bwMaxTx / 1000);
         ui->bandwidth->setValue(m_settings.m_txBandwidth / 1000);
-        ui->record->setEnabled(false);
         uint32_t basebandSampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
         ui->deviceRateText->setText(tr("%1k").arg(QString::number(basebandSampleRate / 1000.0f, 'g', 5)));
         ui->dcOffset->setEnabled(false);
@@ -410,15 +405,6 @@ void BladeRF2MIMOGui::updateSampleRateAndFrequency()
     }
 }
 
-void BladeRF2MIMOGui::updateFileRecordStatus()
-{
-    if (m_sampleMIMO->isRecording(m_streamIndex)) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-}
-
 void BladeRF2MIMOGui::on_streamSide_currentIndexChanged(int index)
 {
     m_rxElseTx = index == 0;
@@ -465,18 +451,6 @@ void BladeRF2MIMOGui::on_startStopTx_toggled(bool checked)
         BladeRF2MIMO::MsgStartStop *message = BladeRF2MIMO::MsgStartStop::create(checked, false);
         m_sampleMIMO->getInputMessageQueue()->push(message);
     }
-}
-
-void BladeRF2MIMOGui::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    BladeRF2MIMO::MsgFileRecord* message = BladeRF2MIMO::MsgFileRecord::create(checked, m_streamIndex);
-    m_sampleMIMO->getInputMessageQueue()->push(message);
 }
 
 void BladeRF2MIMOGui::on_centerFrequency_changed(quint64 value)
@@ -817,30 +791,4 @@ void BladeRF2MIMOGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void BladeRF2MIMOGui::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

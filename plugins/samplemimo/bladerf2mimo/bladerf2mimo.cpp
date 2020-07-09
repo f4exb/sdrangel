@@ -41,7 +41,6 @@
 #include "bladerf2mimo.h"
 
 MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgConfigureBladeRF2MIMO, Message)
-MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2MIMO::MsgStartStop, Message)
 
 BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
@@ -70,12 +69,6 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
         }
     }
 
-    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
-
-    for (; it != m_fileSinks.end(); ++it) {
-        *it = nullptr;
-    }
-
     m_mimoType = MIMOHalfSynchronous;
     m_sampleMIFifo.init(2, 4096 * 64);
     m_sampleMOFifo.init(2, 4096 * 64);
@@ -89,19 +82,7 @@ BladeRF2MIMO::~BladeRF2MIMO()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-
     closeDevice();
-
-    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
-    int istream = 0;
-
-    for (; it != m_fileSinks.end(); ++it, istream++)
-    {
-        if (*it) {
-            m_deviceAPI->removeAncillarySink(*it, istream);
-            delete *it;
-        }
-    }
 }
 
 void BladeRF2MIMO::destroy()
@@ -370,38 +351,6 @@ bool BladeRF2MIMO::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "BladeRF2MIMO::handleMessage: MsgFileRecord: " << conf.getStartStop();
-        int istream = conf.getStreamIndex();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSinks[istream])
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSinks[istream], istream);
-                delete m_fileSinks[istream];
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSinks[istream] = new FileRecord(QString("%1_%2.sdriq"). arg(m_settings.m_fileRecordName).arg(istream));
-            } else {
-                m_fileSinks[istream] = new FileRecord(QString("%1.sdriq").arg(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream)));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSinks[istream], istream);
-            m_fileSinks[istream]->startRecording();
-        }
-        else
-        {
-            m_fileSinks[istream]->stopRecording();
-            delete m_fileSinks[istream];
-            m_fileSinks[istream] = nullptr;
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -466,7 +415,6 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
         << " m_txBiasTee: " << settings.m_txBiasTee
         << " m_txTransverterMode: " << settings.m_txTransverterMode
         << " m_txTransverterDeltaFrequency: " << settings.m_txTransverterDeltaFrequency
-        << " m_fileRecordName: " << settings.m_fileRecordName
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -846,18 +794,6 @@ bool BladeRF2MIMO::applySettings(const BladeRF2MIMOSettings& settings, bool forc
     if (forwardChangeRxDSP)
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
-        DSPSignalNotification *notifFileSink0 = new DSPSignalNotification(sampleRate, settings.m_rxCenterFrequency);
-
-        if (m_fileSinks[0]) {
-            m_fileSinks[0]->handleMessage(*notifFileSink0); // forward to file sinks
-        }
-
-        DSPSignalNotification *notifFileSink1 = new DSPSignalNotification(sampleRate, settings.m_rxCenterFrequency);
-
-        if (m_fileSinks[1]) {
-            m_fileSinks[1]->handleMessage(*notifFileSink0); // forward to file sinks
-        }
-
         DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, true, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
         DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_rxCenterFrequency, true, 1);
@@ -1127,9 +1063,6 @@ void BladeRF2MIMO::webapiUpdateDeviceSettings(
         settings.m_txTransverterDeltaFrequency = response.getBladeRf2MimoSettings()->getTxTransverterDeltaFrequency();
     }
 
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getBladeRf2MimoSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getBladeRf2MimoSettings()->getUseReverseApi() != 0;
     }
@@ -1173,12 +1106,6 @@ void BladeRF2MIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getBladeRf2MimoSettings()->setTxBiasTee(settings.m_txBiasTee ? 1 : 0);
     response.getBladeRf2MimoSettings()->setTxTransverterDeltaFrequency(settings.m_txTransverterDeltaFrequency);
     response.getBladeRf2MimoSettings()->setTxTransverterMode(settings.m_txTransverterMode ? 1 : 0);
-
-    if (response.getBladeRf2MimoSettings()->getFileRecordName()) {
-        *response.getBladeRf2MimoSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getBladeRf2MimoSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getBladeRf2MimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 

@@ -56,7 +56,6 @@ struct BladeRF2MIMOSettings {
     bool     m_txTransverterMode;
     qint64   m_txTransverterDeltaFrequency;
 
-    QString  m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

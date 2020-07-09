@@ -90,7 +90,6 @@ private:
 	void displayGainModes();
 	void sendSettings();
     void updateSampleRateAndFrequency();
-    void updateFileRecordStatus();
     void updateFrequencyLimits();
     void setCenterFrequencySetting(uint64_t kHzValue);
 
@@ -104,7 +103,6 @@ private slots:
 	void on_spectrumIndex_currentIndexChanged(int index);
 	void on_startStopRx_toggled(bool checked);
 	void on_startStopTx_toggled(bool checked);
-	void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
 	void on_LOppm_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);
@@ -119,7 +117,6 @@ private slots:
 	void on_biasTee_toggled(bool checked);
 	void on_transverter_clicked();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // _BLADERF2MIMO_BLADERF2MIMOGUI_H_

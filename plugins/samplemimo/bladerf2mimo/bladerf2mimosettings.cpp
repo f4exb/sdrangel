@@ -54,7 +54,6 @@ void BladeRF2MIMOSettings::resetToDefaults()
     m_txTransverterMode = false;
     m_txTransverterDeltaFrequency = 0;
 
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -93,7 +92,6 @@ QByteArray BladeRF2MIMOSettings::serialize() const
     s.writeS64(37, m_txTransverterDeltaFrequency);
     s.writeS32(38, (int) m_fcPosTx);
 
-    s.writeString(50, m_fileRecordName);
     s.writeBool(51, m_useReverseAPI);
     s.writeString(52, m_reverseAPIAddress);
     s.writeU32(53, m_reverseAPIPort);
@@ -147,7 +145,6 @@ bool BladeRF2MIMOSettings::deserialize(const QByteArray& data)
         d.readS32(38, &intval, 2);
         m_fcPosTx = (fcPos_t) intval;
 
-        d.readString(50, &m_fileRecordName, "");
         d.readBool(51, &m_useReverseAPI, false);
         d.readString(52, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(53, &uintval, 0);
