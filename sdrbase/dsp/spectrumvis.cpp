@@ -626,12 +626,24 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 void SpectrumVis::start()
 {
-    m_running = true;
+    setRunning(true);
+
+    if (getMessageQueueToGUI()) // propagate to GUI if any
+    {
+        MsgStartStop *msg = MsgStartStop::create(true);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 void SpectrumVis::stop()
 {
-    m_running = false;
+    setRunning(false);
+
+    if (getMessageQueueToGUI()) // propagate to GUI if any
+    {
+        MsgStartStop *msg = MsgStartStop::create(false);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 bool SpectrumVis::handleMessage(const Message& message)
@@ -670,14 +682,10 @@ bool SpectrumVis::handleMessage(const Message& message)
         handleConfigureWSSpectrum(conf.getAddress(), conf.getPort());
         return true;
     }
-    else if (MsgStartStop::match(message)) {
+    else if (MsgStartStop::match(message))
+    {
         MsgStartStop& cmd = (MsgStartStop&) message;
-
-        if (cmd.getStartStop()) {
-            start();
-        } else {
-            stop();
-        }
+        setRunning(cmd.getStartStop());
 
         return true;
     }

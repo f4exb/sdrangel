@@ -492,6 +492,14 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         setAveragingToolitp();
         return true;
     }
+    else if (SpectrumVis::MsgStartStop::match(message))
+    {
+        const SpectrumVis::MsgStartStop& msg = (SpectrumVis::MsgStartStop&) message;
+        ui->freeze->blockSignals(true);
+        ui->freeze->doToggle(!msg.getStartStop()); // this is a freeze so stop is true
+        ui->freeze->blockSignals(false);
+        return true;
+    }
 
     return false;
 }
