@@ -11,11 +11,18 @@ ButtonSwitch::ButtonSwitch(QWidget* parent) :
 
 void ButtonSwitch::onToggled(bool checked)
 {
-	if(checked) {
+    blockSignals(true);
+    setChecked(checked);
+    blockSignals(false);
+
+	if (checked)
+    {
 		QPalette p = m_originalPalette;
 		p.setColor(QPalette::Button, QColor(0x80, 0x46, 0x00));
 		setPalette(p);
-	} else {
+	}
+    else
+    {
 		setPalette(m_originalPalette);
 	}
 }
