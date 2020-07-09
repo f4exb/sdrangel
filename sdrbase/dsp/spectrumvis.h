@@ -206,6 +206,7 @@ private:
 
 	QMutex m_mutex;
 
+    void setRunning(bool running) { m_running = running; }
     void applySettings(const GLSpectrumSettings& settings, bool force = false);
     void handleConfigureDSP(uint64_t centerFrequency, int sampleRate);
     void handleScalef(Real scalef);
