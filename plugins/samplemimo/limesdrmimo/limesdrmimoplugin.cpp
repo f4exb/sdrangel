@@ -31,7 +31,7 @@
 const PluginDescriptor LimeSDRMIMOPlugin::m_pluginDescriptor = {
     QString("LimeSDR"),
 	QString("LimeSDR MIMO"),
-	QString("5.7.2"),
+	QString("5.7.9"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

@@ -1,3 +1,9 @@
+sdrangel (5.7.9-1) unstable; urgency=medium
+
+   * Device MIMO plugins: removed recording feature. Fixes issue #559
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 09 Jul 2020 17:51:23 +0200
+
 sdrangel (5.7.8-1) unstable; urgency=medium
 
    * GLScope: added markers feature. Implements #497
