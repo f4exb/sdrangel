@@ -28,7 +28,6 @@ void XTRXMIMOSettings::resetToDefaults()
     // common
     m_extClock = false;
     m_extClockFreq = 0; // Auto
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -85,7 +84,6 @@ QByteArray XTRXMIMOSettings::serialize() const
     // common
     s.writeBool(2, m_extClock);
     s.writeU32(3, m_extClockFreq);
-    s.writeString(4, m_fileRecordName);
     s.writeBool(5, m_useReverseAPI);
     s.writeString(6, m_reverseAPIAddress);
     s.writeU32(7, m_reverseAPIPort);
@@ -153,7 +151,6 @@ bool XTRXMIMOSettings::deserialize(const QByteArray& data)
         // common
         d.readBool(2, &m_extClock, false);
         d.readU32(3, &m_extClockFreq, 0);
-        d.readString(4, &m_fileRecordName, "");
         d.readBool(5, &m_useReverseAPI, false);
         d.readString(6, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(7, &uintval, 0);

@@ -47,7 +47,6 @@ MESSAGE_CLASS_DEFINITION(XTRXMIMO::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXMIMO::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXMIMO::MsgReportClockGenChange, Message)
 MESSAGE_CLASS_DEFINITION(XTRXMIMO::MsgReportStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(XTRXMIMO::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(XTRXMIMO::MsgStartStop, Message)
 
 XTRXMIMO::XTRXMIMO(DeviceAPI *deviceAPI) :
@@ -351,30 +350,6 @@ bool XTRXMIMO::handleMessage(const Message& message)
         if (!success) {
             qDebug("XTRXMIMO::handleMessage: config error");
         }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        // TODO
-        // MsgFileRecord& conf = (MsgFileRecord&) message;
-        // qDebug() << "XTRXMIMO::handleMessage: MsgFileRecord: " << conf.getStartStop();
-        // int istream = conf.getStreamIndex();
-
-        // if (conf.getStartStop())
-        // {
-        //     if (m_settings.m_fileRecordName.size() != 0) {
-        //         m_fileSinks[istream]->setFileName(m_settings.m_fileRecordName + "_0.sdriq");
-        //     } else {
-        //         m_fileSinks[istream]->genUniqueFileName(m_deviceAPI->getDeviceUID(), istream);
-        //     }
-
-        //     m_fileSinks[istream]->startRecording();
-        // }
-        // else
-        // {
-        //     m_fileSinks[istream]->stopRecording();
-        // }
 
         return true;
     }
@@ -1373,9 +1348,6 @@ void XTRXMIMO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("extClockFreq")) {
         settings.m_extClockFreq = response.getXtrxMimoSettings()->getExtClockFreq();
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getXtrxMimoSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("gpioDir")) {
         settings.m_gpioDir = response.getXtrxMimoSettings()->getGpioDir();
     }
@@ -1520,12 +1492,6 @@ void XTRXMIMO::webapiFormatDeviceSettings(
     // common
     response.getXtrxMimoSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getXtrxMimoSettings()->setExtClockFreq(settings.m_extClockFreq);
-
-    if (response.getXtrxMimoSettings()->getFileRecordName()) {
-        *response.getXtrxMimoSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getXtrxMimoSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getXtrxMimoSettings()->setGpioDir(settings.m_gpioDir & 0xFF);
     response.getXtrxMimoSettings()->setGpioPins(settings.m_gpioPins & 0xFF);
@@ -1689,9 +1655,6 @@ void XTRXMIMO::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, con
     }
     if (deviceSettingsKeys.contains("extClock") || force) {
         swgXTRXMIMOSettings->setExtClockFreq(settings.m_extClockFreq);
-    }
-    if (deviceSettingsKeys.contains("extClock") || force) {
-        swgXTRXMIMOSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("gpioDir") || force) {
         swgXTRXMIMOSettings->setGpioDir(settings.m_gpioDir & 0xFF);

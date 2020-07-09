@@ -182,28 +182,6 @@ public:
         { }
     };
 
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-        int getStreamIndex() const { return m_streamIndex; }
-
-        static MsgFileRecord* create(bool startStop, int streamIndex) {
-            return new MsgFileRecord(startStop, streamIndex);
-        }
-
-    protected:
-        bool m_startStop;
-        int m_streamIndex;
-
-        MsgFileRecord(bool startStop, int streamIndex) :
-            Message(),
-            m_startStop(startStop),
-            m_streamIndex(streamIndex)
-        { }
-    };
-
     XTRXMIMO(DeviceAPI *deviceAPI);
 	virtual ~XTRXMIMO();
 	virtual void destroy();
@@ -277,8 +255,6 @@ public:
             SWGSDRangel::SWGDeviceSettings& response);
 
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
-
-    bool isRecording(unsigned int istream) const { (void) istream; return false; }
 
     bool getRxRunning() const { return m_runningRx; }
     bool getTxRunning() const { return m_runningTx; }

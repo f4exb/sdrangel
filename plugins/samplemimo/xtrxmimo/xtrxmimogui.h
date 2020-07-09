@@ -101,7 +101,6 @@ private slots:
 	void on_spectrumIndex_currentIndexChanged(int index);
 	void on_startStopRx_toggled(bool checked);
 	void on_startStopTx_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
     void on_ncoEnable_toggled(bool checked);
     void on_ncoFrequency_changed(qint64 value);
@@ -121,7 +120,6 @@ private slots:
     void on_pgaGain_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // PLUGINS_SAMPLEMIMO_XTRXMIMO_XTRXMIMOGUI_H_

@@ -257,50 +257,23 @@
       <number>4</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="freqLeftLayout">
-       <item>
-        <layout class="QHBoxLayout" name="freqLeftTopLayout">
-         <item>
-          <widget class="ButtonSwitch" name="record">
-           <property name="toolTip">
-            <string>Left: toggle record I/Q samples from device - Right: select output file</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../sdrgui/resources/res.qrc">
-             <normaloff>:/record_off.png</normaloff>
-             <normalon>:/record_on.png</normalon>:/record_off.png</iconset>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="freqLeftBotLayout">
-         <item>
-          <widget class="QLabel" name="adcRateLabel">
-           <property name="minimumSize">
-            <size>
-             <width>54</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>ADC rate before hardware downsampling (k or MS/s)</string>
-           </property>
-           <property name="text">
-            <string>00000k</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
+      <widget class="QLabel" name="adcRateLabel">
+       <property name="minimumSize">
+        <size>
+         <width>54</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>ADC rate before hardware downsampling (k or MS/s)</string>
+       </property>
+       <property name="text">
+        <string>00000k</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="freqLeftSpacer">
