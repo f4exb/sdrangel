@@ -28,8 +28,6 @@ SWGTestMISettings::SWGTestMISettings(QString* json) {
 }
 
 SWGTestMISettings::SWGTestMISettings() {
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -48,8 +46,6 @@ SWGTestMISettings::~SWGTestMISettings() {
 
 void
 SWGTestMISettings::init() {
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -64,9 +60,6 @@ SWGTestMISettings::init() {
 
 void
 SWGTestMISettings::cleanup() {
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -93,8 +86,6 @@ SWGTestMISettings::fromJson(QString &json) {
 
 void
 SWGTestMISettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
-    
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
     ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
@@ -121,9 +112,6 @@ SWGTestMISettings::asJson ()
 QJsonObject*
 SWGTestMISettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
-    }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
     }
@@ -141,16 +129,6 @@ SWGTestMISettings::asJsonObject() {
     }
 
     return obj;
-}
-
-QString*
-SWGTestMISettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGTestMISettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
 }
 
 qint32
@@ -208,9 +186,6 @@ bool
 SWGTestMISettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(file_record_name && *file_record_name != QString("")){
-            isObjectUpdated = true; break;
-        }
         if(m_use_reverse_api_isSet){
             isObjectUpdated = true; break;
         }

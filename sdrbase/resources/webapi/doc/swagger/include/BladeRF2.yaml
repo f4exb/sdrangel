@@ -187,8 +187,6 @@ BladeRF2MIMOSettings:
     txTransverterDeltaFrequency:
       type: integer
       format: int64
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: boolean
       type: integer

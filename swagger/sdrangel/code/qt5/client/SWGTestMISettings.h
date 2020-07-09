@@ -44,9 +44,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGTestMISettings* fromJson(QString &jsonString) override;
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -66,9 +63,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
-
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
 

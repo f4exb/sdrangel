@@ -78,8 +78,6 @@ SWGBladeRF2MIMOSettings::SWGBladeRF2MIMOSettings() {
     m_tx_transverter_mode_isSet = false;
     tx_transverter_delta_frequency = 0L;
     m_tx_transverter_delta_frequency_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -146,8 +144,6 @@ SWGBladeRF2MIMOSettings::init() {
     m_tx_transverter_mode_isSet = false;
     tx_transverter_delta_frequency = 0L;
     m_tx_transverter_delta_frequency_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -185,9 +181,6 @@ SWGBladeRF2MIMOSettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -256,8 +249,6 @@ SWGBladeRF2MIMOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tx_transverter_mode, pJson["txTransverterMode"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_transverter_delta_frequency, pJson["txTransverterDeltaFrequency"], "qint64", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -357,9 +348,6 @@ SWGBladeRF2MIMOSettings::asJsonObject() {
     }
     if(m_tx_transverter_delta_frequency_isSet){
         obj->insert("txTransverterDeltaFrequency", QJsonValue(tx_transverter_delta_frequency));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -627,16 +615,6 @@ SWGBladeRF2MIMOSettings::setTxTransverterDeltaFrequency(qint64 tx_transverter_de
     this->m_tx_transverter_delta_frequency_isSet = true;
 }
 
-QString*
-SWGBladeRF2MIMOSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGBladeRF2MIMOSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
-}
-
 qint32
 SWGBladeRF2MIMOSettings::getUseReverseApi() {
     return use_reverse_api;
@@ -755,9 +733,6 @@ SWGBladeRF2MIMOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_transverter_delta_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

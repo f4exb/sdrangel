@@ -58,8 +58,6 @@ XtrxInputSettings:
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer

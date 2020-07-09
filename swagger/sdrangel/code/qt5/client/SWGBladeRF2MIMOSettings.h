@@ -117,9 +117,6 @@ public:
     qint64 getTxTransverterDeltaFrequency();
     void setTxTransverterDeltaFrequency(qint64 tx_transverter_delta_frequency);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -210,9 +207,6 @@ private:
 
     qint64 tx_transverter_delta_frequency;
     bool m_tx_transverter_delta_frequency_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

@@ -57,9 +57,6 @@ public:
     qint32 getExtClockFreq();
     void setExtClockFreq(qint32 ext_clock_freq);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -225,9 +222,6 @@ private:
 
     qint32 ext_clock_freq;
     bool m_ext_clock_freq_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
