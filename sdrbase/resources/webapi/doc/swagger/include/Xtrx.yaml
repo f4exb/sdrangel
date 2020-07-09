@@ -58,6 +58,8 @@ XtrxInputSettings:
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
+    fileRecordName:
+      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -167,8 +169,6 @@ XtrxMIMOSettings:
     extClockFreq:
       description: Frequency (Hz) of external clock source
       type: integer
-    fileRecordName:
-      type: string
     gpioDir:
       description: 8 bit GPIO pin direction LSB first 0 input, 1 output
       type: integer

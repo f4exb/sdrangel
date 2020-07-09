@@ -48,9 +48,6 @@ public:
     qint32 getExtClockFreq();
     void setExtClockFreq(qint32 ext_clock_freq);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getGpioDir();
     void setGpioDir(qint32 gpio_dir);
 
@@ -189,9 +186,6 @@ private:
 
     qint32 ext_clock_freq;
     bool m_ext_clock_freq_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 gpio_dir;
     bool m_gpio_dir_isSet;

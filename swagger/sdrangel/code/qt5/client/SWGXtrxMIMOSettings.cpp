@@ -32,8 +32,6 @@ SWGXtrxMIMOSettings::SWGXtrxMIMOSettings() {
     m_ext_clock_isSet = false;
     ext_clock_freq = 0;
     m_ext_clock_freq_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     gpio_dir = 0;
     m_gpio_dir_isSet = false;
     gpio_pins = 0;
@@ -132,8 +130,6 @@ SWGXtrxMIMOSettings::init() {
     m_ext_clock_isSet = false;
     ext_clock_freq = 0;
     m_ext_clock_freq_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     gpio_dir = 0;
     m_gpio_dir_isSet = false;
     gpio_pins = 0;
@@ -226,9 +222,6 @@ void
 SWGXtrxMIMOSettings::cleanup() {
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
 
 
@@ -290,8 +283,6 @@ SWGXtrxMIMOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ext_clock, pJson["extClock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ext_clock_freq, pJson["extClockFreq"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&gpio_dir, pJson["gpioDir"], "qint32", "");
     
@@ -400,9 +391,6 @@ SWGXtrxMIMOSettings::asJsonObject() {
     }
     if(m_ext_clock_freq_isSet){
         obj->insert("extClockFreq", QJsonValue(ext_clock_freq));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_gpio_dir_isSet){
         obj->insert("gpioDir", QJsonValue(gpio_dir));
@@ -555,16 +543,6 @@ void
 SWGXtrxMIMOSettings::setExtClockFreq(qint32 ext_clock_freq) {
     this->ext_clock_freq = ext_clock_freq;
     this->m_ext_clock_freq_isSet = true;
-}
-
-QString*
-SWGXtrxMIMOSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGXtrxMIMOSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
 }
 
 qint32
@@ -1006,9 +984,6 @@ SWGXtrxMIMOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ext_clock_freq_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_gpio_dir_isSet){
