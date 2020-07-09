@@ -46,7 +46,6 @@ void TestMIStreamSettings::resetToDefaults()
 
 TestMISettings::TestMISettings()
 {
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -58,7 +57,6 @@ TestMISettings::TestMISettings()
 TestMISettings::TestMISettings(const TestMISettings& other) :
     m_streams(other.m_streams)
 {
-    m_fileRecordName = other.m_fileRecordName;
     m_useReverseAPI = other.m_useReverseAPI;
     m_reverseAPIAddress = other.m_reverseAPIAddress;
     m_reverseAPIPort = other.m_reverseAPIPort;

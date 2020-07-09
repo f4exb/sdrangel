@@ -81,9 +81,6 @@ TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
-
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
 }
 
 TestMIGui::~TestMIGui()
@@ -165,7 +162,6 @@ void TestMIGui::on_streamIndex_currentIndexChanged(int index)
     }
 
     m_streamIndex = index;
-    updateFileRecordStatus();
     updateSampleRateAndFrequency();
     displaySettings();
 }
@@ -183,7 +179,6 @@ void TestMIGui::on_spectrumSource_currentIndexChanged(int index)
         ui->streamIndex->setCurrentIndex(index);
         ui->streamIndex->blockSignals(false);
         m_streamIndex = index;
-        updateFileRecordStatus();
         displaySettings();
     }
 }
@@ -335,18 +330,6 @@ void TestMIGui::on_phaseImbalance_valueChanged(int value)
     sendSettings();
 }
 
-void TestMIGui::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    TestMI::MsgFileRecord* message = TestMI::MsgFileRecord::create(checked, m_streamIndex);
-    m_sampleMIMO->getInputMessageQueue()->push(message);
-}
-
 void TestMIGui::displayAmplitude()
 {
     int amplitudeInt = ui->amplitudeCoarse->value() * 100 + ui->amplitudeFine->value();
@@ -422,15 +405,6 @@ void TestMIGui::updateFrequencyShiftLimit()
     qint64 sampleRate = ui->sampleRate->getValueNew();
     ui->frequencyShift->setValueRange(false, 7, -sampleRate, sampleRate);
     ui->frequencyShift->setValue(m_settings.m_streams[m_streamIndex].m_frequencyShift);
-}
-
-void TestMIGui::updateFileRecordStatus()
-{
-    if (((TestMI*) m_sampleMIMO)->isRecording(m_streamIndex)) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
 }
 
 void TestMIGui::displaySettings()
@@ -606,30 +580,4 @@ void TestMIGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void TestMIGui::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

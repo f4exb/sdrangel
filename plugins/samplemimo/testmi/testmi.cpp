@@ -38,7 +38,6 @@
 #include "testmi.h"
 
 MESSAGE_CLASS_DEFINITION(TestMI::MsgConfigureTestSource, Message)
-MESSAGE_CLASS_DEFINITION(TestMI::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(TestMI::MsgStartStop, Message)
 
 
@@ -51,13 +50,6 @@ TestMI::TestMI(DeviceAPI *deviceAPI) :
 {
     m_mimoType = MIMOAsynchronous;
     m_sampleMIFifo.init(2, 96000 * 4);
-
-    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
-
-    for (; it != m_fileSinks.end(); ++it) {
-        *it = nullptr;
-    }
-
     m_deviceAPI->setNbSourceStreams(2);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -70,18 +62,6 @@ TestMI::~TestMI()
 
     if (m_running) {
         stopRx();
-    }
-
-    std::vector<FileRecord*>::iterator it = m_fileSinks.begin();
-    int istream = 0;
-
-    for (; it != m_fileSinks.end(); ++it, istream++)
-    {
-        if (*it)
-        {
-            m_deviceAPI->removeAncillarySink(*it, istream);
-            delete *it;
-        }
     }
 }
 
@@ -233,38 +213,6 @@ bool TestMI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "TestMI::handleMessage: MsgFileRecord: " << conf.getStartStop();
-        int istream = conf.getStreamIndex();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSinks[istream])
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSinks[istream], istream);
-                delete m_fileSinks[istream];
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSinks[istream] = new FileRecord(QString("%1_%2.sdriq"). arg(m_settings.m_fileRecordName).arg(istream));
-            } else {
-                m_fileSinks[istream] = new FileRecord(QString("%1.sdriq").arg(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID(), istream)));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSinks[istream], istream);
-            m_fileSinks[istream]->startRecording();
-        }
-        else
-        {
-            m_fileSinks[istream]->stopRecording();
-            delete m_fileSinks[istream];
-            m_fileSinks[istream] = nullptr;
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -299,7 +247,6 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
     DeviceSettingsKeys deviceSettingsKeys;
 
     qDebug() << "TestMI::applySettings: common: "
-        << " m_fileRecordName: " << settings.m_fileRecordName
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -476,12 +423,6 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
             || (m_settings.m_streams[istream].m_fcPos != settings.m_streams[istream].m_fcPos) || force)
         {
             int sampleRate = settings.m_streams[istream].m_sampleRate/(1<<settings.m_streams[istream].m_log2Decim);
-            DSPSignalNotification notif(sampleRate, settings.m_streams[istream].m_centerFrequency);
-
-            if (m_fileSinks[istream]) {
-                m_fileSinks[istream]->handleMessage(notif); // forward to file sink
-            }
-
             DSPMIMOSignalNotification *engineNotif = new DSPMIMOSignalNotification(
                 sampleRate, settings.m_streams[istream].m_centerFrequency, true, istream);
             m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineNotif);
@@ -700,9 +641,6 @@ void TestMI::webapiUpdateDeviceSettings(
 
     }
 
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getTestMiSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getTestMiSettings()->getUseReverseApi() != 0;
     }
@@ -744,12 +682,6 @@ void TestMI::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response
         streams->back()->setIFactor(it->m_iFactor);
         streams->back()->setQFactor(it->m_qFactor);
         streams->back()->setPhaseImbalance(it->m_phaseImbalance);
-    }
-
-    if (response.getTestMiSettings()->getFileRecordName()) {
-        *response.getTestMiSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getTestMiSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     response.getTestMiSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
@@ -839,10 +771,6 @@ void TestMI::webapiReverseSendSettings(const DeviceSettingsKeys& deviceSettingsK
         }
     }
 
-    if (deviceSettingsKeys.m_commonSettingsKeys.contains("fileRecordName") || force) {
-        swgTestMISettings->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
-
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
             .arg(settings.m_reverseAPIAddress)
             .arg(settings.m_reverseAPIPort)
@@ -911,13 +839,4 @@ void TestMI::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-bool TestMI::isRecording(unsigned int istream) const
-{
-    if (istream < m_fileSinks.size()) {
-        return m_fileSinks[istream]->isRecording();
-    } else {
-        return false;
-    }
 }
