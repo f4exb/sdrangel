@@ -22,8 +22,6 @@
 #include <QByteArray>
 
 struct FileInputSettings {
-    quint64 m_centerFrequency;
-    qint32  m_sampleRate;
     QString m_fileName;
     quint32 m_accelerationFactor;
     bool m_loop;

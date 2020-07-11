@@ -28,8 +28,6 @@ FileInputSettings::FileInputSettings()
 
 void FileInputSettings::resetToDefaults()
 {
-    m_centerFrequency = 435000000;
-    m_sampleRate = 48000;
     m_fileName = "./test.sdriq";
     m_accelerationFactor = 1;
     m_loop = true;
