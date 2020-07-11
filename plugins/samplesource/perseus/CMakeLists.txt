@@ -5,7 +5,7 @@ set(perseus_SOURCES
     perseusplugin.cpp
     perseussettings.cpp
     perseuswebapiadapter.cpp
-    perseusthread.cpp
+    perseusworker.cpp
 )
 
 set(perseus_HEADERS
@@ -13,7 +13,7 @@ set(perseus_HEADERS
     perseusplugin.h
     perseussettings.h
     perseuswebapiadapter.h
-    perseusthread.h
+    perseusworker.h
 )
 
 include_directories(
