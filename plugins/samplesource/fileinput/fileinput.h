@@ -25,6 +25,8 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
+#include <QThread>
+#include <QMutex>
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
@@ -32,7 +34,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class FileInputThread;
+class FileInputWorker;
 class DeviceAPI;
 
 class FileInput : public DeviceSampleSource {
@@ -333,7 +335,8 @@ public:
 	QMutex m_mutex;
 	FileInputSettings m_settings;
 	std::ifstream m_ifstream;
-	FileInputThread* m_fileInputThread;
+	FileInputWorker* m_fileInputWorker;
+	QThread m_fileInputWorkerThread;
 	QString m_deviceDescription;
 	QString m_fileName;
 	int m_sampleRate;
@@ -345,6 +348,8 @@ public:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+	void startWorker();
+	void stopWorker();
 	void openFileStream();
 	void seekFileStream(int seekMillis);
 	bool applySettings(const FileInputSettings& settings, bool force = false);
