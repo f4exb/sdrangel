@@ -36,6 +36,7 @@ const QString ATVDemod::m_channelId = "ATVDemod";
 ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
     m_deviceAPI(deviceAPI),
+    m_centerFrequency(0),
     m_basebandSampleRate(0)
 {
     qDebug("ATVDemod::ATVDemod");
@@ -64,12 +65,16 @@ void ATVDemod::start()
 {
 	qDebug("ATVDemod::start");
 
-    if (m_basebandSampleRate != 0) {
-        m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
-    }
-
     m_basebandSink->reset();
     m_thread->start();
+
+    // re-apply essential messages
+
+    DSPSignalNotification* notifToSink = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSink->getInputMessageQueue()->push(notifToSink);
+
+    ATVDemodBaseband::MsgConfigureATVDemodBaseband *msg = ATVDemodBaseband::MsgConfigureATVDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 void ATVDemod::stop()
@@ -97,6 +102,7 @@ bool ATVDemod::handleMessage(const Message& cmd)
     else if (DSPSignalNotification::match(cmd))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        m_centerFrequency = notif.getCenterFrequency();
         m_basebandSampleRate = notif.getSampleRate(); // store for init at start
         qDebug() << "ATVDemod::handleMessage: DSPSignalNotification" << m_basebandSampleRate;
 

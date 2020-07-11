@@ -109,7 +109,7 @@ void ATVDemodGUI::displaySettings()
     setWindowTitle(m_channelMarker.getTitle());
     displayStreamIndex();
 
-    blockApplySettings(true);
+    m_doApplySettings = false;
 
     //********** ATV values **********
     ui->synchLevel->setValue((int) (m_settings.m_levelSynchroTop * 1000.0f));
@@ -130,6 +130,7 @@ void ATVDemodGUI::displaySettings()
     topTimeUpdate();
 
     //********** RF values **********
+    ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
     ui->decimatorEnable->setChecked(m_settings.m_forceDecimator);
     ui->rfFiltering->setChecked(m_settings.m_fftFiltering);
     ui->bfo->setValue(m_settings.m_bfoFrequency);
@@ -140,9 +141,10 @@ void ATVDemodGUI::displaySettings()
     ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
     ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
-    blockApplySettings(false);
 
     applyTVSampleRate();
+
+    m_doApplySettings = true;
 }
 
 void ATVDemodGUI::displayStreamIndex()
@@ -168,7 +170,7 @@ void ATVDemodGUI::displayRFBandwidths()
 
 void ATVDemodGUI::applyTVSampleRate()
 {
-    blockApplySettings(true);
+    qDebug("TVDemodGUI::applyTVSampleRate");
     unsigned int nbPointsPerLine;
     ATVDemodSettings::getBaseValues(m_basebandSampleRate, m_settings.m_fps*m_settings.m_nbLines, m_tvSampleRate, nbPointsPerLine);
     ui->tvSampleRateText->setText(tr("%1k").arg(m_tvSampleRate/1000.0f, 0, 'f', 2));
@@ -178,7 +180,6 @@ void ATVDemodGUI::applyTVSampleRate()
     displayRFBandwidths();
     lineTimeUpdate();
     topTimeUpdate();
-    blockApplySettings(false);
 }
 
 bool ATVDemodGUI::handleMessage(const Message& message)
@@ -235,7 +236,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_pluginAPI(objPluginAPI),
         m_deviceUISet(deviceUISet),
         m_channelMarker(this),
-        m_blnDoApplySettings(true),
+        m_doApplySettings(false),
         m_intTickCount(0),
         m_basebandSampleRate(48000),
         m_tvSampleRate(48000)
@@ -306,14 +307,11 @@ ATVDemodGUI::~ATVDemodGUI()
     delete ui;
 }
 
-void ATVDemodGUI::blockApplySettings(bool blnBlock)
-{
-    m_blnDoApplySettings = !blnBlock;
-}
-
 void ATVDemodGUI::applySettings(bool force)
 {
-    if (m_blnDoApplySettings)
+    qDebug() << "ATVDemodGUI::applySettings: " << force << " m_doApplySettings: " << m_doApplySettings;
+
+    if (m_doApplySettings)
     {
 		ATVDemod::MsgConfigureATVDemod *msg = ATVDemod::MsgConfigureATVDemod::create(m_settings, force);
 		m_atvDemod->getInputMessageQueue()->push(msg);
@@ -322,8 +320,12 @@ void ATVDemodGUI::applySettings(bool force)
 
 void ATVDemodGUI::setChannelMarkerBandwidth()
 {
-    m_blnDoApplySettings = false; // avoid infinite recursion
+    // avoid infinite recursion
     m_channelMarker.blockSignals(true);
+    ui->rfFiltering->blockSignals(true);
+    ui->rfBW->blockSignals(true);
+    ui->rfOppBW->blockSignals(true);
+    ui->modulation->blockSignals(true);
 
     if (ui->rfFiltering->isChecked()) // FFT filter
     {
@@ -351,7 +353,11 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
 
     m_channelMarker.blockSignals(false);
     m_channelMarker.emitChangedByAPI();
-    m_blnDoApplySettings = true;
+
+    ui->rfFiltering->blockSignals(false);
+    ui->rfBW->blockSignals(false);
+    ui->rfOppBW->blockSignals(false);
+    ui->modulation->blockSignals(false);
 }
 
 void ATVDemodGUI::setRFFiltersSlidersRange(int sampleRate)

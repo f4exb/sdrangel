@@ -24,7 +24,6 @@
 #include "atvdemodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(ATVDemodBaseband::MsgConfigureATVDemodBaseband, Message)
-MESSAGE_CLASS_DEFINITION(ATVDemodBaseband::MsgConfigureChannelizer, Message)
 
 ATVDemodBaseband::ATVDemodBaseband() :
     m_mutex(QMutex::Recursive)
@@ -52,6 +51,7 @@ ATVDemodBaseband::~ATVDemodBaseband()
 void ATVDemodBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_inputMessageQueue.clear();
     m_sampleFifo.reset();
 }
 
@@ -108,18 +108,6 @@ bool ATVDemodBaseband::handleMessage(const Message& cmd)
         qDebug() << "ATVDemodBaseband::handleMessage: MsgConfigureATVDemodBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "ATVDemodBaseband::handleMessage: MsgConfigureChannelizer"
-            << "(requested) sinkSampleRate: " << cfg.getSinkSampleRate()
-            << "(requested) sinkCenterFrequency: " << cfg.getSinkCenterFrequency();
-        m_channelizer->setChannelization(cfg.getSinkSampleRate(), cfg.getSinkCenterFrequency());
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         return true;
     }

@@ -100,7 +100,8 @@ private:
     QThread *m_thread;
     ATVDemodBaseband* m_basebandSink;
     ATVDemodSettings m_settings;
-    int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
+    qint64 m_centerFrequency; //!< center frequency stored from device message used when starting baseband sink
+    int m_basebandSampleRate; //!< sample rate stored from device message used when starting baseband sink
 
     void applySettings(const ATVDemodSettings& settings, bool force = false);
 };

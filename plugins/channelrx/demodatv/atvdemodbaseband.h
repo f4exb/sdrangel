@@ -56,28 +56,6 @@ public:
         { }
     };
 
-    class MsgConfigureChannelizer : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSinkSampleRate() const { return m_sinkSampleRate; }
-        int getSinkCenterFrequency() const { return m_sinkCenterFrequency; }
-
-        static MsgConfigureChannelizer* create(int sinkSampleRate, int sinkCenterFrequency) {
-            return new MsgConfigureChannelizer(sinkSampleRate, sinkCenterFrequency);
-        }
-
-    private:
-        int m_sinkSampleRate;
-        int m_sinkCenterFrequency;
-
-        MsgConfigureChannelizer(int sinkSampleRate, int sinkCenterFrequency) :
-            Message(),
-            m_sinkSampleRate(sinkSampleRate),
-            m_sinkCenterFrequency(sinkCenterFrequency)
-        { }
-    };
-
     ATVDemodBaseband();
     ~ATVDemodBaseband();
     void reset();
