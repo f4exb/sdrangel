@@ -5,7 +5,7 @@ set(airspy_SOURCES
     airspyplugin.cpp
     airspysettings.cpp
     airspywebapiadapter.cpp
-    airspythread.cpp
+    airspyworker.cpp
 )
 
 set(airspy_HEADERS
@@ -13,7 +13,7 @@ set(airspy_HEADERS
     airspyplugin.h
     airspysettings.h
     airspywebapiadapter.h
-    airspythread.h
+    airspyworker.h
 )
 
 include_directories(
