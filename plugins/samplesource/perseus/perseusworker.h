@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSTHREAD_H_
-#define PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSTHREAD_H_
+#ifndef PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSWORKER_H_
+#define PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSWORKER_H_
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include "perseus-sdr.h"
 
 #include "dsp/samplesinkfifo.h"
@@ -29,12 +27,12 @@
 #define PERSEUS_NBSAMPLES 2048   // Number of I/Q samples in each callback from Perseus
 #define PERSEUS_BLOCKSIZE 6*PERSEUS_NBSAMPLES // Perseus sends 2*3 bytes samples
 
-class PerseusThread : public QThread {
+class PerseusWorker : public QObject {
 	Q_OBJECT
 
 public:
-	PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QObject* parent = 0);
-	~PerseusThread();
+	PerseusWorker(perseus_descr* dev, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+	~PerseusWorker();
 
 	void startWork();
 	void stopWork();
@@ -42,8 +40,6 @@ public:
     void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	perseus_descr* m_dev;
@@ -53,17 +49,16 @@ private:
 
 	unsigned int m_log2Decim;
     bool m_iqOrder;
-	static PerseusThread *m_this;
+	static PerseusWorker *m_this;
 
 	Decimators<qint32, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24, true> m_decimators32IQ; // for no decimation (accumulator is int32)
     Decimators<qint32, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24, true> m_decimators64IQ; // for actual decimation (accumulator is int64)
 	Decimators<qint32, TripleByteLE<qint32>, SDR_RX_SAMP_SZ, 24, false> m_decimators32QI; // for no decimation (accumulator is int32)
     Decimators<qint32, TripleByteLE<qint64>, SDR_RX_SAMP_SZ, 24, false> m_decimators64QI; // for actual decimation (accumulator is int64)
 
-	void run();
 	void callbackIQ(const uint8_t* buf, qint32 len); // inner call back
     void callbackQI(const uint8_t* buf, qint32 len);
 	static int rx_callback(void *buf, int buf_size, void *extra); // call back from Perseus
 };
 
-#endif /* PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSTHREAD_H_ */
+#endif /* PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSWORKER_H_ */

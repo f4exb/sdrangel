@@ -17,12 +17,12 @@
 
 #include <QtGlobal>
 #include <algorithm>
-#include "perseusthread.h"
+#include "perseusworker.h"
 
-PerseusThread *PerseusThread::m_this = 0;
+PerseusWorker *PerseusWorker::m_this = 0;
 
-PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
-    QThread(parent),
+PerseusWorker::PerseusWorker(perseus_descr* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+    QObject(parent),
     m_running(false),
     m_dev(dev),
     m_convertBuffer(PERSEUS_NBSAMPLES),
@@ -34,64 +34,51 @@ PerseusThread::PerseusThread(perseus_descr* dev, SampleSinkFifo* sampleFifo, QOb
     std::fill(m_buf, m_buf + 2*PERSEUS_NBSAMPLES, 0);
 }
 
-PerseusThread::~PerseusThread()
+PerseusWorker::~PerseusWorker()
 {
     stopWork();
     m_this = 0;
 }
 
-void PerseusThread::startWork()
+void PerseusWorker::startWork()
 {
-    qDebug("PerseusThread::startWork");
-    m_startWaitMutex.lock();
-    start();
-    while(!m_running)
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    m_startWaitMutex.unlock();
+    qDebug("PerseusWorker::startWork");
+	int rc = perseus_start_async_input(m_dev, PERSEUS_BLOCKSIZE, rx_callback, 0);
+
+	if (rc < 0)
+    {
+		qCritical("PerseusWorker::run: failed to start Perseus Rx: %s", perseus_errorstr());
+        m_running = false;
+	}
+	else
+	{
+	    qDebug("PerseusWorker::run: start Perseus Rx");
+        m_running = true;
+	}
 }
 
-void PerseusThread::stopWork()
+void PerseusWorker::stopWork()
 {
-    qDebug("PerseusThread::stopWork");
+    qDebug("PerseusWorker::stopWork");
+
+	int rc = perseus_stop_async_input(m_dev);
+
+	if (rc < 0) {
+		qCritical("PerseusWorker::run: failed to stop Perseus Rx: %s", perseus_errorstr());
+	} else {
+		qDebug("PerseusWorker::run: stopped Perseus Rx");
+	}
+
     m_running = false;
-    wait();
 }
 
-void PerseusThread::setLog2Decimation(unsigned int log2_decim)
+void PerseusWorker::setLog2Decimation(unsigned int log2_decim)
 {
     m_log2Decim = log2_decim;
 }
 
-void PerseusThread::run()
-{
-	m_running = true;
-	m_startWaiter.wakeAll();
 
-	int rc = perseus_start_async_input(m_dev, PERSEUS_BLOCKSIZE, rx_callback, 0);
-
-	if (rc < 0) {
-		qCritical("PerseusThread::run: failed to start Perseus Rx: %s", perseus_errorstr());
-	}
-	else
-	{
-	    qDebug("PerseusThread::run: start Perseus Rx");
-		while (m_running) {
-			sleep(1);
-		}
-	}
-
-	rc = perseus_stop_async_input(m_dev);
-
-	if (rc < 0) {
-		qCritical("PerseusThread::run: failed to stop Perseus Rx: %s", perseus_errorstr());
-	} else {
-		qDebug("PerseusThread::run: stopped Perseus Rx");
-	}
-
-	m_running = false;
-}
-
-void PerseusThread::callbackIQ(const uint8_t* buf, qint32 len)
+void PerseusWorker::callbackIQ(const uint8_t* buf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -113,7 +100,7 @@ void PerseusThread::callbackIQ(const uint8_t* buf, qint32 len)
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void PerseusThread::callbackQI(const uint8_t* buf, qint32 len)
+void PerseusWorker::callbackQI(const uint8_t* buf, qint32 len)
 {
     SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -135,7 +122,7 @@ void PerseusThread::callbackQI(const uint8_t* buf, qint32 len)
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-int PerseusThread::rx_callback(void *buf, int buf_size, void *extra)
+int PerseusWorker::rx_callback(void *buf, int buf_size, void *extra)
 {
     (void) extra;
 	qint32 nbIAndQ = buf_size / 3; // 3 bytes per I or Q

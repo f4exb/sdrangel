@@ -33,7 +33,7 @@
 #include "perseus/deviceperseus.h"
 
 #include "perseusinput.h"
-#include "perseusthread.h"
+#include "perseusworker.h"
 
 MESSAGE_CLASS_DEFINITION(PerseusInput::MsgConfigurePerseus, Message)
 MESSAGE_CLASS_DEFINITION(PerseusInput::MsgFileRecord, Message)
@@ -44,7 +44,7 @@ PerseusInput::PerseusInput(DeviceAPI *deviceAPI) :
     m_fileSink(nullptr),
     m_deviceDescription("PerseusInput"),
     m_running(false),
-    m_perseusThread(nullptr),
+    m_perseusWorker(nullptr),
     m_perseusDescriptor(0)
 {
     openDevice();
@@ -79,19 +79,21 @@ void PerseusInput::init()
 
 bool PerseusInput::start()
 {
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
 
     // start / stop streaming is done in the thread.
 
-    m_perseusThread = new PerseusThread(m_perseusDescriptor, &m_sampleFifo);
-    qDebug("PerseusInput::start: thread created");
+    m_perseusWorker = new PerseusWorker(m_perseusDescriptor, &m_sampleFifo);
+    m_perseusWorker->moveToThread(&m_perseusWorkerThread);
+    qDebug("PerseusInput::start: worker created");
+
+    m_perseusWorker->setIQOrder(m_settings.m_iqOrder);
+    m_perseusWorker->setLog2Decimation(m_settings.m_log2Decim);
+    startWorker();
 
     applySettings(m_settings, true);
-
-    m_perseusThread->setIQOrder(m_settings.m_iqOrder);
-    m_perseusThread->setLog2Decimation(m_settings.m_log2Decim);
-    m_perseusThread->startWork();
-
     m_running = true;
 
     return true;
@@ -99,14 +101,27 @@ bool PerseusInput::start()
 
 void PerseusInput::stop()
 {
-    if (m_perseusThread)
+    if (m_perseusWorker)
     {
-        m_perseusThread->stopWork();
-        delete m_perseusThread;
-        m_perseusThread = nullptr;
+        stopWorker();
+        delete m_perseusWorker;
+        m_perseusWorker = nullptr;
     }
 
     m_running = false;
+}
+
+void PerseusInput::startWorker()
+{
+	m_perseusWorker->startWork();
+	m_perseusWorkerThread.start();
+}
+
+void PerseusInput::stopWorker()
+{
+	m_perseusWorker->stopWork();
+	m_perseusWorkerThread.quit();
+	m_perseusWorkerThread.wait();
 }
 
 QByteArray PerseusInput::serialize() const
@@ -354,9 +369,9 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
         forwardChange = true;
 
-        if (m_perseusThread)
+        if (m_perseusWorker)
         {
-            m_perseusThread->setLog2Decimation(settings.m_log2Decim);
+            m_perseusWorker->setLog2Decimation(settings.m_log2Decim);
             qDebug("PerseusInput: set decimation to %d", (1<<settings.m_log2Decim));
         }
     }
@@ -365,8 +380,8 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
     {
         reverseAPIKeys.append("iqOrder");
 
-        if (m_perseusThread) {
-            m_perseusThread->setIQOrder(settings.m_iqOrder);
+        if (m_perseusWorker) {
+            m_perseusWorker->setIQOrder(settings.m_iqOrder);
         }
     }
 
