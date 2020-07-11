@@ -55,9 +55,9 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 	m_fileInputWorker(nullptr),
 	m_deviceDescription(),
 	m_fileName("..."),
-	m_sampleRate(0),
+	m_sampleRate(48000),
 	m_sampleSize(0),
-	m_centerFrequency(0),
+	m_centerFrequency(435000000),
 	m_recordLength(0),
     m_startingTimeStamp(0)
 {
@@ -142,6 +142,8 @@ void FileInput::openFileStream()
 
 	if (getMessageQueueToGUI())
     {
+        DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
+        getMessageQueueToGUI()->push(notif);
 	    MsgReportFileInputStreamData *report = MsgReportFileInputStreamData::create(m_sampleRate,
 	            m_sampleSize,
 	            m_centerFrequency,
@@ -171,7 +173,7 @@ void FileInput::seekFileStream(int seekMillis)
 
 void FileInput::init()
 {
-    DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
+    DSPSignalNotification *notif = new DSPSignalNotification(m_sampleRate, m_centerFrequency);
     m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 }
 
@@ -297,7 +299,7 @@ quint64 FileInput::getCenterFrequency() const
 void FileInput::setCenterFrequency(qint64 centerFrequency)
 {
     FileInputSettings settings = m_settings;
-    settings.m_centerFrequency = centerFrequency;
+    m_centerFrequency = centerFrequency;
 
     MsgConfigureFileInput* message = MsgConfigureFileInput::create(m_settings, false);
     m_inputMessageQueue.push(message);
@@ -427,10 +429,6 @@ bool FileInput::handleMessage(const Message& message)
 bool FileInput::applySettings(const FileInputSettings& settings, bool force)
 {
     QList<QString> reverseAPIKeys;
-
-    if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
-        m_centerFrequency = settings.m_centerFrequency;
-    }
 
     if ((m_settings.m_accelerationFactor != settings.m_accelerationFactor) || force)
     {
