@@ -19,14 +19,14 @@
 #include <errno.h>
 #include <algorithm>
 
-#include "airspythread.h"
+#include "airspyworker.h"
 
 #include "dsp/samplesinkfifo.h"
 
-AirspyThread *AirspyThread::m_this = 0;
+AirspyWorker *AirspyWorker::m_this = 0;
 
-AirspyThread::AirspyThread(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
-	QThread(parent),
+AirspyWorker::AirspyWorker(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
+	QObject(parent),
 	m_running(false),
 	m_dev(dev),
 	m_convertBuffer(AIRSPY_BLOCKSIZE),
@@ -40,80 +40,61 @@ AirspyThread::AirspyThread(struct airspy_device* dev, SampleSinkFifo* sampleFifo
 	std::fill(m_buf, m_buf + 2*AIRSPY_BLOCKSIZE, 0);
 }
 
-AirspyThread::~AirspyThread()
+AirspyWorker::~AirspyWorker()
 {
 	stopWork();
 	m_this = 0;
 }
 
-void AirspyThread::startWork()
+bool AirspyWorker::startWork()
 {
-	m_startWaitMutex.lock();
-	start();
-	while(!m_running)
-		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();
+	airspy_error rc;
+
+	rc = (airspy_error) airspy_start_rx(m_dev, rx_callback, NULL);
+
+	if (rc == AIRSPY_SUCCESS)
+	{
+    	m_running = (airspy_is_streaming(m_dev) == AIRSPY_TRUE);
+	}
+    else
+    {
+		qCritical("AirspyWorker::run: failed to start Airspy Rx: %s", airspy_error_name(rc));
+        m_running = false;
+    }
+
+    return m_running;
 }
 
-void AirspyThread::stopWork()
+void AirspyWorker::stopWork()
 {
-	qDebug("AirspyThread::stopWork");
+	airspy_error rc = (airspy_error) airspy_stop_rx(m_dev);
+
+	if (rc == AIRSPY_SUCCESS) {
+		qDebug("AirspyWorker::run: stopped Airspy Rx");
+	} else {
+		qDebug("AirspyWorker::run: failed to stop Airspy Rx: %s", airspy_error_name(rc));
+	}
+
 	m_running = false;
-	wait();
 }
 
-void AirspyThread::setSamplerate(uint32_t samplerate)
+void AirspyWorker::setSamplerate(uint32_t samplerate)
 {
 	m_samplerate = samplerate;
 }
 
-void AirspyThread::setLog2Decimation(unsigned int log2_decim)
+void AirspyWorker::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void AirspyThread::setFcPos(int fcPos)
+void AirspyWorker::setFcPos(int fcPos)
 {
 	m_fcPos = fcPos;
 }
 
-void AirspyThread::run()
-{
-	airspy_error rc;
-
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-	rc = (airspy_error) airspy_start_rx(m_dev, rx_callback, NULL);
-
-	if (rc != AIRSPY_SUCCESS)
-	{
-		qCritical("AirspyThread::run: failed to start Airspy Rx: %s", airspy_error_name(rc));
-	}
-	else
-	{
-		while ((m_running) && (airspy_is_streaming(m_dev) == AIRSPY_TRUE))
-		{
-			sleep(1);
-		}
-	}
-
-	rc = (airspy_error) airspy_stop_rx(m_dev);
-
-	if (rc == AIRSPY_SUCCESS)
-	{
-		qDebug("AirspyThread::run: stopped Airspy Rx");
-	}
-	else
-	{
-		qDebug("AirspyThread::run: failed to stop Airspy Rx: %s", airspy_error_name(rc));
-	}
-
-	m_running = false;
-}
-
 //  Decimate according to specified log2 (ex: log2=4 => decim=16)
-void AirspyThread::callbackIQ(const qint16* buf, qint32 len)
+void AirspyWorker::callbackIQ(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -206,7 +187,7 @@ void AirspyThread::callbackIQ(const qint16* buf, qint32 len)
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void AirspyThread::callbackQI(const qint16* buf, qint32 len)
+void AirspyWorker::callbackQI(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -299,7 +280,7 @@ void AirspyThread::callbackQI(const qint16* buf, qint32 len)
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-int AirspyThread::rx_callback(airspy_transfer_t* transfer)
+int AirspyWorker::rx_callback(airspy_transfer_t* transfer)
 {
 	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
 

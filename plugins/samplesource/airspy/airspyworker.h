@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AIRSPYTHREAD_H
-#define INCLUDE_AIRSPYTHREAD_H
+#ifndef INCLUDE_AIRSPYWORKER_H
+#define INCLUDE_AIRSPYWORKER_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <libairspy/airspy.h>
 
 #include "dsp/samplesinkfifo.h"
@@ -28,14 +26,14 @@
 
 #define AIRSPY_BLOCKSIZE (1<<17)
 
-class AirspyThread : public QThread {
+class AirspyWorker : public QObject {
 	Q_OBJECT
 
 public:
-	AirspyThread(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
-	~AirspyThread();
+	AirspyWorker(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent = NULL);
+	~AirspyWorker();
 
-	void startWork();
+	bool startWork();
 	void stopWork();
 	void setSamplerate(uint32_t samplerate);
 	void setLog2Decimation(unsigned int log2_decim);
@@ -43,8 +41,6 @@ public:
     void setIQOrder(bool iqOrder) { m_iqOrder = iqOrder; }
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	bool m_running;
 
 	struct airspy_device* m_dev;
@@ -56,15 +52,14 @@ private:
 	unsigned int m_log2Decim;
 	int m_fcPos;
     bool m_iqOrder;
-	static AirspyThread *m_this;
+	static AirspyWorker *m_this;
 
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
 
-	void run();
 	void callbackIQ(const qint16* buf, qint32 len);
 	void callbackQI(const qint16* buf, qint32 len);
 	static int rx_callback(airspy_transfer_t* transfer);
 };
 
-#endif // INCLUDE_AIRSPYTHREAD_H
+#endif // INCLUDE_AIRSPYWORKER_H
