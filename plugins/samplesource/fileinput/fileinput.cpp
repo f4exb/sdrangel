@@ -35,7 +35,7 @@
 #include "device/deviceapi.h"
 
 #include "fileinput.h"
-#include "fileinputthread.h"
+#include "fileinputworker.h"
 
 MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileInput, Message)
 MESSAGE_CLASS_DEFINITION(FileInput::MsgConfigureFileSourceName, Message)
@@ -52,7 +52,7 @@ MESSAGE_CLASS_DEFINITION(FileInput::MsgReportHeaderCRC, Message)
 FileInput::FileInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_fileInputThread(nullptr),
+	m_fileInputWorker(nullptr),
 	m_deviceDescription(),
 	m_fileName("..."),
 	m_sampleRate(0),
@@ -157,10 +157,10 @@ void FileInput::seekFileStream(int seekMillis)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if ((m_ifstream.is_open()) && m_fileInputThread && !m_fileInputThread->isRunning())
+	if ((m_ifstream.is_open()) && m_fileInputWorker && !m_fileInputWorker->isRunning())
 	{
         quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_sampleRate;
-		m_fileInputThread->setSamplesCount(seekPoint);
+		m_fileInputWorker->setSamplesCount(seekPoint);
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
@@ -194,9 +194,11 @@ bool FileInput::start()
 		return false;
 	}
 
-	m_fileInputThread = new FileInputThread(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
-	m_fileInputThread->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
-	m_fileInputThread->startWork();
+	m_fileInputWorker = new FileInputWorker(&m_ifstream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+	m_fileInputWorker->moveToThread(&m_fileInputWorkerThread);
+	m_fileInputWorker->setSampleRateAndSize(m_settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+	startWorker();
+
 	m_deviceDescription = "FileInput";
 
 	mutexLocker.unlock();
@@ -215,11 +217,11 @@ void FileInput::stop()
 	qDebug() << "FileInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_fileInputThread)
+	if (m_fileInputWorker)
 	{
-		m_fileInputThread->stopWork();
-		delete m_fileInputThread;
-		m_fileInputThread = nullptr;
+		stopWorker();
+		delete m_fileInputWorker;
+		m_fileInputWorker = nullptr;
 	}
 
 	m_deviceDescription.clear();
@@ -229,6 +231,20 @@ void FileInput::stop()
         getMessageQueueToGUI()->push(report);
 	}
 }
+
+void FileInput::startWorker()
+{
+	m_fileInputWorker->startWork();
+	m_fileInputWorkerThread.start();
+}
+
+void FileInput::stopWorker()
+{
+	m_fileInputWorker->stopWork();
+	m_fileInputWorkerThread.quit();
+	m_fileInputWorkerThread.wait();
+}
+
 
 QByteArray FileInput::serialize() const
 {
@@ -313,12 +329,12 @@ bool FileInput::handleMessage(const Message& message)
 		MsgConfigureFileInputWork& conf = (MsgConfigureFileInputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileInputThread != 0)
+		if (m_fileInputWorker != 0)
 		{
 			if (working) {
-				m_fileInputThread->startWork();
+				startWorker();
 			} else {
-				m_fileInputThread->stopWork();
+				stopWorker();
 			}
 		}
 
@@ -336,11 +352,11 @@ bool FileInput::handleMessage(const Message& message)
 	{
 		MsgReportFileInputStreamTiming *report;
 
-		if (m_fileInputThread != 0)
+		if (m_fileInputWorker != 0)
 		{
 			if (getMessageQueueToGUI())
 			{
-                report = MsgReportFileInputStreamTiming::create(m_fileInputThread->getSamplesCount());
+                report = MsgReportFileInputStreamTiming::create(m_fileInputWorker->getSamplesCount());
                 getMessageQueueToGUI()->push(report);
 			}
 		}
@@ -370,21 +386,21 @@ bool FileInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (FileInputThread::MsgReportEOF::match(message))
+    else if (FileInputWorker::MsgReportEOF::match(message))
     {
         qDebug() << "FileInput::handleMessage: MsgReportEOF";
-        m_fileInputThread->stopWork();
+		stopWorker();
 
         if (getMessageQueueToGUI())
         {
-            MsgReportFileInputStreamTiming *report = MsgReportFileInputStreamTiming::create(m_fileInputThread->getSamplesCount());
+            MsgReportFileInputStreamTiming *report = MsgReportFileInputStreamTiming::create(m_fileInputWorker->getSamplesCount());
             getMessageQueueToGUI()->push(report);
         }
 
         if (m_settings.m_loop)
         {
             seekFileStream(0);
-            m_fileInputThread->startWork();
+			startWorker();
         }
         else
         {
@@ -415,14 +431,14 @@ bool FileInput::applySettings(const FileInputSettings& settings, bool force)
     {
         reverseAPIKeys.append("accelerationFactor");
 
-        if (m_fileInputThread)
+        if (m_fileInputWorker)
         {
             QMutexLocker mutexLocker(&m_mutex);
             if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
                 qCritical("FileInput::applySettings: could not reallocate sample FIFO size to %lu",
                         m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
             }
-            m_fileInputThread->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+			m_fileInputWorker->setSampleRateAndSize(settings.m_accelerationFactor * m_sampleRate, m_sampleSize); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
         }
     }
 
@@ -571,8 +587,8 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     qint64 t_msec = 0;
     quint64 samplesCount = 0;
 
-    if (m_fileInputThread) {
-        samplesCount = m_fileInputThread->getSamplesCount();
+    if (m_fileInputWorker) {
+        samplesCount = m_fileInputWorker->getSamplesCount();
     }
 
     if (m_sampleRate > 0)

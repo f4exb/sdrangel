@@ -3,7 +3,7 @@ project(fileinput)
 set(fileinput_SOURCES
 	fileinput.cpp
 	fileinputplugin.cpp
-	fileinputthread.cpp
+	fileinputworker.cpp
     fileinputsettings.cpp
     fileinputwebapiadapter.cpp
 )
@@ -11,7 +11,7 @@ set(fileinput_SOURCES
 set(fileinput_HEADERS
 	fileinput.h
 	fileinputplugin.h
-	fileinputthread.h
+	fileinputworker.h
     fileinputsettings.h
     fileinputwebapiadapter.h
 )

@@ -15,12 +15,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILEINPUTTHREAD_H
-#define INCLUDE_FILEINPUTTHREAD_H
+#ifndef INCLUDE_FILEINPUTWORKER_H
+#define INCLUDE_FILEINPUTWORKER_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <iostream>
@@ -35,7 +32,7 @@
 class SampleSinkFifo;
 class MessageQueue;
 
-class FileInputThread : public QThread {
+class FileInputWorker : public QObject {
 	Q_OBJECT
 
 public:
@@ -53,12 +50,12 @@ public:
         { }
     };
 
-	FileInputThread(std::ifstream *samplesStream,
+	FileInputWorker(std::ifstream *samplesStream,
 	        SampleSinkFifo* sampleFifo,
 	        const QTimer& timer,
 	        MessageQueue *fileInputMessageQueue,
 	        QObject* parent = NULL);
-	~FileInputThread();
+	~FileInputWorker();
 
 	void startWork();
 	void stopWork();
@@ -69,8 +66,6 @@ public:
     void setSamplesCount(quint64 samplesCount) { m_samplesCount = samplesCount; }
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	std::ifstream* m_ifstream;
@@ -90,7 +85,6 @@ private:
     QElapsedTimer m_elapsedTimer;
     bool m_throttleToggle;
 
-	void run();
 	//void decimate1(SampleVector::iterator* it, const qint16* buf, qint32 len);
 	void writeToSampleFifo(const quint8* buf, qint32 nbBytes);
 
@@ -98,4 +92,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_FILEINPUTTHREAD_H
+#endif // INCLUDE_FILEINPUTWORKER_H
