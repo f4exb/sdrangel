@@ -35,8 +35,8 @@ FileInputWorker::FileInputWorker(std::ifstream *samplesStream,
 	QObject(parent),
 	m_running(false),
 	m_ifstream(samplesStream),
-	m_fileBuf(0),
-	m_convertBuf(0),
+	m_fileBuf(nullptr),
+	m_convertBuf(nullptr),
 	m_bufsize(0),
 	m_chunksize(0),
 	m_sampleFifo(sampleFifo),
@@ -49,7 +49,7 @@ FileInputWorker::FileInputWorker(std::ifstream *samplesStream,
     m_throttlems(FILESOURCE_THROTTLE_MS),
     m_throttleToggle(false)
 {
-    assert(m_ifstream != 0);
+    assert(m_ifstream != nullptr);
 }
 
 FileInputWorker::~FileInputWorker()
@@ -58,11 +58,11 @@ FileInputWorker::~FileInputWorker()
 		stopWork();
 	}
 
-	if (m_fileBuf != 0) {
+	if (m_fileBuf) {
 		free(m_fileBuf);
 	}
 
-	if (m_convertBuf != 0) {
+	if (m_convertBuf) {
 		free(m_convertBuf);
 	}
 }
@@ -123,7 +123,7 @@ void FileInputWorker::setBuffers(std::size_t chunksize)
         m_bufsize = chunksize;
         int nbSamples = m_bufsize/(2 * m_samplebytes);
 
-        if (m_fileBuf == 0)
+        if (!m_fileBuf)
         {
             qDebug() << "FileInputThread::setBuffers: Allocate file buffer";
             m_fileBuf = (quint8*) malloc(m_bufsize);
@@ -133,10 +133,13 @@ void FileInputWorker::setBuffers(std::size_t chunksize)
             qDebug() << "FileInputThread::setBuffers: Re-allocate file buffer";
             quint8 *buf = m_fileBuf;
             m_fileBuf = (quint8*) realloc((void*) m_fileBuf, m_bufsize);
-            if (!m_fileBuf) free(buf);
+
+            if (!m_fileBuf) {
+                free(buf);
+            }
         }
 
-        if (m_convertBuf == 0)
+        if (!m_convertBuf)
         {
             qDebug() << "FileInputThread::setBuffers: Allocate conversion buffer";
             m_convertBuf = (quint8*) malloc(nbSamples*sizeof(Sample));
@@ -146,7 +149,10 @@ void FileInputWorker::setBuffers(std::size_t chunksize)
             qDebug() << "FileInputThread::setBuffers: Re-allocate conversion buffer";
             quint8 *buf = m_convertBuf;
             m_convertBuf = (quint8*) realloc((void*) m_convertBuf, nbSamples*sizeof(Sample));
-            if (!m_convertBuf) free(buf);
+
+            if (!m_convertBuf) {
+                free(buf);
+            }
         }
 
         qDebug() << "FileInputThread::setBuffers: size: " << m_bufsize
