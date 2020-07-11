@@ -19,13 +19,14 @@
 #define INCLUDE_LOCALSINKSINK_H_
 
 #include <QObject>
+#include <QThread>
 
 #include "dsp/channelsamplesink.h"
 
 #include "localsinksettings.h"
 
 class DeviceSampleSource;
-class LocalSinkThread;
+class LocalSinkWorker;
 
 class LocalSinkSink : public QObject, public ChannelSampleSink {
     Q_OBJECT
@@ -44,7 +45,8 @@ public:
 private:
     SampleSinkFifo m_sampleFifo;
     LocalSinkSettings m_settings;
-    LocalSinkThread *m_sinkThread;
+    LocalSinkWorker *m_sinkWorker;
+    QThread m_sinkWorkerThread;
     bool m_running;
 
     uint64_t m_centerFrequency;
@@ -52,6 +54,8 @@ private:
     uint32_t m_sampleRate;
     uint32_t m_deviceSampleRate;
 
+	void startWorker();
+	void stopWorker();
 };
 
 #endif // INCLUDE_LOCALSINKSINK_H_

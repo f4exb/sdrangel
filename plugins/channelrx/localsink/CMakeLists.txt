@@ -6,7 +6,7 @@ set(localsink_SOURCES
     localsinksink.cpp
     localsinksettings.cpp
     localsinkwebapiadapter.cpp
-    localsinkthread.cpp
+    localsinkworker.cpp
     localsinkplugin.cpp
 )
 
@@ -16,7 +16,7 @@ set(localsink_HEADERS
     localsinksink.h
     localsinksettings.h
     localsinkwebapiadapter.h
-	localsinkthread.h
+	localsinkworker.h
 	localsinkplugin.h
 )
 
