@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SIGMFFILEINPUTTHREAD_H
-#define INCLUDE_SIGMFFILEINPUTTHREAD_H
+#ifndef INCLUDE_SIGMFFILEINPUTWORK_H
+#define INCLUDE_SIGMFFILEINPUTWORK_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <iostream>
@@ -38,7 +36,7 @@ class SigMFFileCapture;
 class SigMFFileMetaInfo;
 class SigMFConverterInterface;
 
-class SigMFFileInputThread : public QThread {
+class SigMFFileInputWorker : public QObject {
 	Q_OBJECT
 
 public:
@@ -73,12 +71,12 @@ public:
         { }
     };
 
-	SigMFFileInputThread(std::ifstream *samplesStream,
+	SigMFFileInputWorker(std::ifstream *samplesStream,
 	        SampleSinkFifo* sampleFifo,
 	        const QTimer& timer,
 	        MessageQueue *fileInputMessageQueue,
 	        QObject* parent = NULL);
-	~SigMFFileInputThread();
+	~SigMFFileInputWorker();
 
 	void startWork();
 	void stopWork();
@@ -92,8 +90,6 @@ public:
     void setTrackIndex(int trackIndex);
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
     const SigMFFileMetaInfo *m_metaInfo;
@@ -131,4 +127,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_SIGMFFILEINPUTTHREAD_H
+#endif // INCLUDE_SIGMFFILEINPUTWORK_H

@@ -42,7 +42,7 @@
 #include "util/sha512.h"
 
 #include "sigmffileinput.h"
-#include "sigmffileinputthread.h"
+#include "sigmffileinputworker.h"
 
 MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgConfigureSigMFFileInput, Message)
 MESSAGE_CLASS_DEFINITION(SigMFFileInput::MsgConfigureTrackWork, Message)
@@ -69,7 +69,7 @@ SigMFFileInput::SigMFFileInput(DeviceAPI *deviceAPI) :
     m_crcAvailable(false),
     m_crcOK(false),
     m_recordLengthOK(false),
-	m_fileInputThread(nullptr),
+	m_fileInputWorker(nullptr),
 	m_deviceDescription(),
 	m_sampleRate(48000),
 	m_sampleBytes(1),
@@ -455,11 +455,12 @@ bool SigMFFileInput::start()
 		return false;
 	}
 
-	m_fileInputThread = new SigMFFileInputThread(&m_dataStream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
-    m_fileInputThread->setMetaInformation(&m_metaInfo, &m_captures);
-    m_fileInputThread->setAccelerationFactor(m_settings.m_accelerationFactor);
-    m_fileInputThread->setTrackIndex(0);
-	m_fileInputThread->startWork();
+	m_fileInputWorker = new SigMFFileInputWorker(&m_dataStream, &m_sampleFifo, m_masterTimer, &m_inputMessageQueue);
+	startWorker();
+    m_fileInputWorker->setMetaInformation(&m_metaInfo, &m_captures);
+    m_fileInputWorker->setAccelerationFactor(m_settings.m_accelerationFactor);
+    m_fileInputWorker->setTrackIndex(0);
+    m_fileInputWorker->moveToThread(&m_fileInputWorkerThread);
 	m_deviceDescription = "SigMFFileInput";
 
 	mutexLocker.unlock();
@@ -478,11 +479,11 @@ void SigMFFileInput::stop()
 	qDebug() << "SigMFFileInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_fileInputThread)
+	if (m_fileInputWorker)
 	{
-		m_fileInputThread->stopWork();
-		delete m_fileInputThread;
-		m_fileInputThread = nullptr;
+		stopWorker();
+		delete m_fileInputWorker;
+		m_fileInputWorker = nullptr;
 	}
 
 	m_deviceDescription.clear();
@@ -491,6 +492,19 @@ void SigMFFileInput::stop()
         MsgReportStartStop *report = MsgReportStartStop::create(false);
         getMessageQueueToGUI()->push(report);
 	}
+}
+
+void SigMFFileInput::startWorker()
+{
+    m_fileInputWorker->startWork();
+    m_fileInputWorkerThread.start();
+}
+
+void SigMFFileInput::stopWorker()
+{
+    m_fileInputWorker->stopWork();
+    m_fileInputWorkerThread.quit();
+    m_fileInputWorkerThread.wait();
 }
 
 QByteArray SigMFFileInput::serialize() const
@@ -571,23 +585,23 @@ bool SigMFFileInput::handleMessage(const Message& message)
         qDebug("SigMFFileInput::handleMessage MsgConfigureTrackIndex: m_currentTrackIndex: %d", m_currentTrackIndex);
         seekTrackMillis(0);
 
-		if (m_fileInputThread)
+		if (m_fileInputWorker)
 		{
-            bool working = m_fileInputThread->isRunning();
+            bool working = m_fileInputWorker->isRunning();
 
             if (working) {
-                m_fileInputThread->stopWork();
+                stopWorker();
             }
 
-            m_fileInputThread->setTrackIndex(m_currentTrackIndex);
-            m_fileInputThread->setTotalSamples(
+            m_fileInputWorker->setTrackIndex(m_currentTrackIndex);
+            m_fileInputWorker->setTotalSamples(
                 m_trackMode ?
                     m_captures[m_currentTrackIndex].m_sampleStart + m_captures[m_currentTrackIndex].m_length :
                     m_metaInfo.m_totalSamples
             );
 
             if (working) {
-        		m_fileInputThread->startWork();
+        		startWorker();
             }
         }
     }
@@ -597,17 +611,17 @@ bool SigMFFileInput::handleMessage(const Message& message)
 		bool working = conf.isWorking();
         m_trackMode = true;
 
-		if (m_fileInputThread)
+		if (m_fileInputWorker)
 		{
 			if (working)
             {
-                m_fileInputThread->setTotalSamples(
+                m_fileInputWorker->setTotalSamples(
                     m_captures[m_currentTrackIndex].m_sampleStart + m_captures[m_currentTrackIndex].m_length);
-				m_fileInputThread->startWork();
+				startWorker();
 			}
             else
             {
-				m_fileInputThread->stopWork();
+				stopWorker();
 			}
 		}
 
@@ -619,19 +633,19 @@ bool SigMFFileInput::handleMessage(const Message& message)
         int seekMillis = conf.getMillis();
         seekTrackMillis(seekMillis);
 
-		if (m_fileInputThread)
+		if (m_fileInputWorker)
 		{
-            bool working = m_fileInputThread->isRunning();
+            bool working = m_fileInputWorker->isRunning();
 
             if (working) {
-                m_fileInputThread->stopWork();
+                stopWorker();
             }
 
-            m_fileInputThread->setSamplesCount(
+            m_fileInputWorker->setSamplesCount(
                 m_captures[m_currentTrackIndex].m_sampleStart + ((m_captures[m_currentTrackIndex].m_length*seekMillis)/1000UL));
 
             if (working) {
-        		m_fileInputThread->startWork();
+        		startWorker();
             }
         }
 
@@ -645,19 +659,19 @@ bool SigMFFileInput::handleMessage(const Message& message)
         uint64_t sampleCount = (m_metaInfo.m_totalSamples*seekMillis)/1000UL;
         m_currentTrackIndex = getTrackIndex(sampleCount);
 
-		if (m_fileInputThread)
+		if (m_fileInputWorker)
 		{
-            bool working = m_fileInputThread->isRunning();
+            bool working = m_fileInputWorker->isRunning();
 
             if (working) {
-                m_fileInputThread->stopWork();
+                stopWorker();
             }
 
-            m_fileInputThread->setTrackIndex(m_currentTrackIndex);
-            m_fileInputThread->setSamplesCount(sampleCount);
+            m_fileInputWorker->setTrackIndex(m_currentTrackIndex);
+            m_fileInputWorker->setSamplesCount(sampleCount);
 
             if (working) {
-        		m_fileInputThread->startWork();
+        		startWorker();
             }
         }
 
@@ -669,16 +683,16 @@ bool SigMFFileInput::handleMessage(const Message& message)
 		bool working = conf.isWorking();
         m_trackMode = false;
 
-		if (m_fileInputThread)
+		if (m_fileInputWorker)
 		{
 			if (working)
             {
-                m_fileInputThread->setTotalSamples(m_metaInfo.m_totalSamples);
-				m_fileInputThread->startWork();
+                m_fileInputWorker->setTotalSamples(m_metaInfo.m_totalSamples);
+				startWorker();
 			}
             else
             {
-				m_fileInputThread->stopWork();
+				stopWorker();
 			}
 		}
 
@@ -686,11 +700,11 @@ bool SigMFFileInput::handleMessage(const Message& message)
 	}
 	else if (MsgConfigureFileInputStreamTiming::match(message))
 	{
-		if (m_fileInputThread)
+		if (m_fileInputWorker)
 		{
 			if (getMessageQueueToGUI())
 			{
-                quint64 totalSamplesCount = m_fileInputThread->getSamplesCount();
+                quint64 totalSamplesCount = m_fileInputWorker->getSamplesCount();
                 quint64 trackSamplesCount = totalSamplesCount - m_captures[m_currentTrackIndex].m_sampleStart;
         		MsgReportFileInputStreamTiming *report = MsgReportFileInputStreamTiming::create(
                     totalSamplesCount,
@@ -726,13 +740,13 @@ bool SigMFFileInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (SigMFFileInputThread::MsgReportEOF::match(message)) // End Of File or end of track
+    else if (SigMFFileInputWorker::MsgReportEOF::match(message)) // End Of File or end of track
     {
         qDebug() << "FileInput::handleMessage: MsgReportEOF";
-        bool working = m_fileInputThread->isRunning();
+        bool working = m_fileInputWorker->isRunning();
 
         if (working) {
-            m_fileInputThread->stopWork();
+            stopWorker();
         }
 
         if (m_trackMode)
@@ -740,7 +754,7 @@ bool SigMFFileInput::handleMessage(const Message& message)
             if (m_settings.m_trackLoop)
             {
                 seekFileStream(m_captures[m_currentTrackIndex].m_sampleStart);
-                m_fileInputThread->setTrackIndex(m_currentTrackIndex);
+                m_fileInputWorker->setTrackIndex(m_currentTrackIndex);
             }
         }
         else
@@ -748,19 +762,19 @@ bool SigMFFileInput::handleMessage(const Message& message)
             if (m_settings.m_fullLoop)
             {
                 seekFileStream(0);
-                m_fileInputThread->setTrackIndex(0);
+                m_fileInputWorker->setTrackIndex(0);
             }
         }
 
         if (working) {
-            m_fileInputThread->startWork();
+            startWorker();
         }
 
         return true;
     }
-    else if (SigMFFileInputThread::MsgReportTrackChange::match(message))
+    else if (SigMFFileInputWorker::MsgReportTrackChange::match(message))
     {
-        SigMFFileInputThread::MsgReportTrackChange& report = (SigMFFileInputThread::MsgReportTrackChange&) message;
+        SigMFFileInputWorker::MsgReportTrackChange& report = (SigMFFileInputWorker::MsgReportTrackChange&) message;
         m_currentTrackIndex = report.getTrackIndex();
         qDebug("SigMFFileInput::handleMessage MsgReportTrackChange: m_currentTrackIndex: %d", m_currentTrackIndex);
         int sampleRate = m_captures.at(m_currentTrackIndex).m_sampleRate;
@@ -795,14 +809,15 @@ bool SigMFFileInput::applySettings(const SigMFFileInputSettings& settings, bool 
     {
         reverseAPIKeys.append("accelerationFactor");
 
-        if (m_fileInputThread)
+        if (m_fileInputWorker)
         {
             QMutexLocker mutexLocker(&m_mutex);
             if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
                 qCritical("SigMFFileInput::applySettings: could not reallocate sample FIFO size to %lu",
                         m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample));
             }
-            m_fileInputThread->setAccelerationFactor(settings.m_accelerationFactor); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
+
+            m_fileInputWorker->setAccelerationFactor(settings.m_accelerationFactor); // Fast Forward: 1 corresponds to live. 1/2 is half speed, 2 is double speed
         }
     }
 
@@ -1069,8 +1084,8 @@ void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
 
     uint64_t totalSamplesCount = 0;
 
-    if (m_fileInputThread) {
-        totalSamplesCount = m_fileInputThread->getSamplesCount();
+    if (m_fileInputWorker) {
+        totalSamplesCount = m_fileInputWorker->getSamplesCount();
     }
 
     unsigned int sampleRate =  m_captures[m_currentTrackIndex].m_sampleRate;

@@ -25,6 +25,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
+#include <QThread>
 #include <QNetworkRequest>
 
 #include "dsp/sigmf_forward.h"
@@ -35,7 +36,7 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class SigMFFileInputThread;
+class SigMFFileInputWorker;
 class DeviceAPI;
 
 class SigMFFileInput : public DeviceSampleSource {
@@ -456,7 +457,8 @@ private:
     bool m_crcOK;
     bool m_recordLengthOK;
     QString m_recordSummary;
-	SigMFFileInputThread* m_fileInputThread;
+	SigMFFileInputWorker* m_fileInputWorker;
+    QThread m_fileInputWorkerThread;
 	QString m_deviceDescription;
 	int m_sampleRate;
 	unsigned int m_sampleBytes;
@@ -467,6 +469,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    void startWorker();
+    void stopWorker();
 	bool openFileStreams(const QString& fileName);
     void extractMeta(
         sigmf::SigMF<sigmf::Global<core::DescrT, sdrangel::DescrT>,

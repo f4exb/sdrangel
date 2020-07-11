@@ -27,17 +27,17 @@
 #include "sigmffiledata.h"
 #include "sigmffileconvert.h"
 #include "sigmffileinputsettings.h"
-#include "sigmffileinputthread.h"
+#include "sigmffileinputworker.h"
 
-MESSAGE_CLASS_DEFINITION(SigMFFileInputThread::MsgReportEOF, Message)
-MESSAGE_CLASS_DEFINITION(SigMFFileInputThread::MsgReportTrackChange, Message)
+MESSAGE_CLASS_DEFINITION(SigMFFileInputWorker::MsgReportEOF, Message)
+MESSAGE_CLASS_DEFINITION(SigMFFileInputWorker::MsgReportTrackChange, Message)
 
-SigMFFileInputThread::SigMFFileInputThread(std::ifstream *samplesStream,
+SigMFFileInputWorker::SigMFFileInputWorker(std::ifstream *samplesStream,
         SampleSinkFifo* sampleFifo,
         const QTimer& timer,
         MessageQueue *fileInputMessageQueue,
         QObject* parent) :
-	QThread(parent),
+	QObject(parent),
 	m_running(false),
     m_currentTrackIndex(0),
 	m_ifstream(samplesStream),
@@ -60,7 +60,7 @@ SigMFFileInputThread::SigMFFileInputThread(std::ifstream *samplesStream,
     assert(m_ifstream != 0);
 }
 
-SigMFFileInputThread::~SigMFFileInputThread()
+SigMFFileInputWorker::~SigMFFileInputWorker()
 {
 	if (m_running) {
 		stopWork();
@@ -75,39 +75,31 @@ SigMFFileInputThread::~SigMFFileInputThread()
 	}
 }
 
-void SigMFFileInputThread::startWork()
+void SigMFFileInputWorker::startWork()
 {
-	qDebug() << "SigMFFileInputThread::startWork: ";
+	qDebug() << "SigMFFileInputWorker::startWork: ";
 
     if (m_ifstream->is_open())
     {
-        qDebug() << "SigMFFileInputThread::startWork: file stream open, starting...";
-        m_startWaitMutex.lock();
+        qDebug() << "SigMFFileInputWorker::startWork: file stream open, starting...";
         m_elapsedTimer.start();
-        start();
-
-        while(!m_running) {
-            m_startWaiter.wait(&m_startWaitMutex, 100);
-        }
-
-        m_startWaitMutex.unlock();
         connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+        m_running = true;
     }
     else
     {
-        qDebug() << "SigMFFileInputThread::startWork: file stream closed, not starting.";
+        qDebug() << "SigMFFileInputWorker::startWork: file stream closed, not starting.";
     }
 }
 
-void SigMFFileInputThread::stopWork()
+void SigMFFileInputWorker::stopWork()
 {
-	qDebug() << "SigMFFileInputThread::stopWork";
+	qDebug() << "SigMFFileInputWorker::stopWork";
 	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_running = false;
-	wait();
 }
 
-void SigMFFileInputThread::setMetaInformation(const SigMFFileMetaInfo *metaInfo, const QList<SigMFFileCapture> *captures)
+void SigMFFileInputWorker::setMetaInformation(const SigMFFileMetaInfo *metaInfo, const QList<SigMFFileCapture> *captures)
 {
     m_metaInfo = metaInfo;
     m_captures = captures;
@@ -117,7 +109,7 @@ void SigMFFileInputThread::setMetaInformation(const SigMFFileMetaInfo *metaInfo,
     setSampleRate();
 }
 
-void SigMFFileInputThread::setTrackIndex(int trackIndex)
+void SigMFFileInputWorker::setTrackIndex(int trackIndex)
 {
     m_currentTrackIndex = trackIndex;
     m_samplesCount = m_captures->at(m_currentTrackIndex).m_sampleStart;
@@ -133,13 +125,13 @@ void SigMFFileInputThread::setTrackIndex(int trackIndex)
     m_fileInputMessageQueue->push(message);
 }
 
-void SigMFFileInputThread::setAccelerationFactor(int accelerationFactor)
+void SigMFFileInputWorker::setAccelerationFactor(int accelerationFactor)
 {
     m_accelerationFactor = accelerationFactor;
     setSampleRate();
 }
 
-void SigMFFileInputThread::setSampleRate()
+void SigMFFileInputWorker::setSampleRate()
 {
     bool running = m_running;
 
@@ -157,7 +149,7 @@ void SigMFFileInputThread::setSampleRate()
     }
 }
 
-void SigMFFileInputThread::setBuffers(std::size_t chunksize)
+void SigMFFileInputWorker::setBuffers(std::size_t chunksize)
 {
     if (chunksize > m_bufsize)
     {
@@ -195,20 +187,7 @@ void SigMFFileInputThread::setBuffers(std::size_t chunksize)
     }
 }
 
-void SigMFFileInputThread::run()
-{
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-	while(m_running) // actual work is in the tick() function
-	{
-		sleep(1);
-	}
-
-	m_running = false;
-}
-
-void SigMFFileInputThread::tick()
+void SigMFFileInputWorker::tick()
 {
 	if (m_running)
 	{
@@ -260,7 +239,7 @@ void SigMFFileInputThread::tick()
 	}
 }
 
-void SigMFFileInputThread::setConverter()
+void SigMFFileInputWorker::setConverter()
 {
     if (m_metaInfo->m_dataType.m_floatingPoint) // float
     {
@@ -448,11 +427,11 @@ void SigMFFileInputThread::setConverter()
     }
 }
 
-void SigMFFileInputThread::writeToSampleFifo(const quint8* buf, qint32 nbBytes)
+void SigMFFileInputWorker::writeToSampleFifo(const quint8* buf, qint32 nbBytes)
 {
     if (!m_sigMFConverter)
     {
-        qDebug("SigMFFileInputThread::writeToSampleFifo: no converter - probably sample format is not supported");
+        qDebug("SigMFFileInputWorker::writeToSampleFifo: no converter - probably sample format is not supported");
         return;
     }
 
@@ -475,7 +454,7 @@ void SigMFFileInputThread::writeToSampleFifo(const quint8* buf, qint32 nbBytes)
     m_sampleFifo->write(m_convertBuf, nbSamples*sizeof(Sample));
 }
 
-void SigMFFileInputThread::writeToSampleFifoBAK(const quint8* buf, qint32 nbBytes)
+void SigMFFileInputWorker::writeToSampleFifoBAK(const quint8* buf, qint32 nbBytes)
 {
     if (m_metaInfo->m_dataType.m_floatingPoint) // FP assumes 32 bit floats (float) always
     {

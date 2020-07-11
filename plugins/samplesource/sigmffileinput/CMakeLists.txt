@@ -3,7 +3,7 @@ project(sigmffileinput)
 set(sigmffileinput_SOURCES
 	sigmffileinput.cpp
 	sigmffileinputplugin.cpp
-	sigmffileinputthread.cpp
+	sigmffileinputworker.cpp
     sigmffileinputsettings.cpp
     sigmffileinputwebapiadapter.cpp
 )
@@ -11,7 +11,7 @@ set(sigmffileinput_SOURCES
 set(sigmffileinput_HEADERS
 	sigmffileinput.h
 	sigmffileinputplugin.h
-	sigmffileinputthread.h
+	sigmffileinputworker.h
     sigmffileinputsettings.h
     sigmffileinputwebapiadapter.h
 )
