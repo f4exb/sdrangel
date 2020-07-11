@@ -122,7 +122,8 @@ void FileInput::openFileStream()
 	        m_recordLength = 0;
 	    }
 
-		if (getMessageQueueToGUI()) {
+		if (getMessageQueueToGUI())
+        {
 			MsgReportHeaderCRC *report = MsgReportHeaderCRC::create(crcOK);
 			getMessageQueueToGUI()->push(report);
 		}
@@ -139,7 +140,8 @@ void FileInput::openFileStream()
 			<< " center frequency: " << m_centerFrequency << " Hz"
 			<< " sample size: " << m_sampleSize << " bits";
 
-	if (getMessageQueueToGUI()) {
+	if (getMessageQueueToGUI())
+    {
 	    MsgReportFileInputStreamData *report = MsgReportFileInputStreamData::create(m_sampleRate,
 	            m_sampleSize,
 	            m_centerFrequency,
@@ -184,12 +186,14 @@ bool FileInput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "FileInput::start";
 
-	if (m_ifstream.tellg() != (std::streampos)0) {
+	if (m_ifstream.tellg() != (std::streampos)0)
+    {
 		m_ifstream.clear();
 		m_ifstream.seekg(sizeof(FileRecord::Header), std::ios::beg);
 	}
 
-	if(!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample))) {
+	if (!m_sampleFifo.setSize(m_settings.m_accelerationFactor * m_sampleRate * sizeof(Sample)))
+    {
 		qCritical("Could not allocate SampleFifo");
 		return false;
 	}
@@ -204,7 +208,8 @@ bool FileInput::start()
 	mutexLocker.unlock();
 	qDebug("FileInput::startInput: started");
 
-	if (getMessageQueueToGUI()) {
+	if (getMessageQueueToGUI())
+    {
         MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(true); // acquisition on
         getMessageQueueToGUI()->push(report);
 	}
@@ -226,7 +231,8 @@ void FileInput::stop()
 
 	m_deviceDescription.clear();
 
-	if (getMessageQueueToGUI()) {
+	if (getMessageQueueToGUI())
+    {
         MsgReportFileSourceAcquisition *report = MsgReportFileSourceAcquisition::create(false); // acquisition off
         getMessageQueueToGUI()->push(report);
 	}
@@ -329,7 +335,7 @@ bool FileInput::handleMessage(const Message& message)
 		MsgConfigureFileInputWork& conf = (MsgConfigureFileInputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileInputWorker != 0)
+		if (m_fileInputWorker)
 		{
 			if (working) {
 				startWorker();
@@ -352,7 +358,7 @@ bool FileInput::handleMessage(const Message& message)
 	{
 		MsgReportFileInputStreamTiming *report;
 
-		if (m_fileInputWorker != 0)
+		if (m_fileInputWorker)
 		{
 			if (getMessageQueueToGUI())
 			{
@@ -370,8 +376,7 @@ bool FileInput::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
+            if (m_deviceAPI->initDeviceEngine()) {
                 m_deviceAPI->startDeviceEngine();
             }
         }
