@@ -22,11 +22,11 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/hbfilterchainconverter.h"
 
-#include "localsinkthread.h"
+#include "localsinkworker.h"
 #include "localsinksink.h"
 
 LocalSinkSink::LocalSinkSink() :
-        m_sinkThread(nullptr),
+        m_sinkWorker(nullptr),
         m_running(false),
         m_centerFrequency(0),
         m_frequencyOffset(0),
@@ -54,22 +54,23 @@ void LocalSinkSink::start(DeviceSampleSource *deviceSource)
         stop();
     }
 
-    m_sinkThread = new LocalSinkThread();
-    m_sinkThread->setSampleFifo(&m_sampleFifo);
+    m_sinkWorker = new LocalSinkWorker();
+    m_sinkWorker->moveToThread(&m_sinkWorkerThread);
+    m_sinkWorker->setSampleFifo(&m_sampleFifo);
 
     if (deviceSource) {
-        m_sinkThread->setDeviceSampleFifo(deviceSource->getSampleFifo());
+        m_sinkWorker->setDeviceSampleFifo(deviceSource->getSampleFifo());
     }
 
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
-        m_sinkThread,
-        &LocalSinkThread::handleData,
+        m_sinkWorker,
+        &LocalSinkWorker::handleData,
         Qt::QueuedConnection
     );
 
-    m_sinkThread->startStop(true);
+    startWorker();
     m_running = true;
 }
 
@@ -80,18 +81,31 @@ void LocalSinkSink::stop()
     QObject::disconnect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
-        m_sinkThread,
-        &LocalSinkThread::handleData
+        m_sinkWorker,
+        &LocalSinkWorker::handleData
     );
 
-    if (m_sinkThread != 0)
+    if (m_sinkWorker != 0)
     {
-        m_sinkThread->startStop(false);
-        m_sinkThread->deleteLater();
-        m_sinkThread = 0;
+        stopWorker();
+        m_sinkWorker->deleteLater();
+        m_sinkWorker = nullptr;
     }
 
     m_running = false;
+}
+
+void LocalSinkSink::startWorker()
+{
+	m_sinkWorker->startStop(true);
+	m_sinkWorkerThread.start();
+}
+
+void LocalSinkSink::stopWorker()
+{
+	m_sinkWorker->startStop(false);
+	m_sinkWorkerThread.quit();
+	m_sinkWorkerThread.wait();
 }
 
 void LocalSinkSink::applySettings(const LocalSinkSettings& settings, bool force)

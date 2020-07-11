@@ -17,62 +17,41 @@
 
 #include "dsp/samplesinkfifo.h"
 
-#include "localsinkthread.h"
+#include "localsinkworker.h"
 
-MESSAGE_CLASS_DEFINITION(LocalSinkThread::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(LocalSinkWorker::MsgStartStop, Message)
 
-LocalSinkThread::LocalSinkThread(QObject* parent) :
-    QThread(parent),
+LocalSinkWorker::LocalSinkWorker(QObject* parent) :
+    QObject(parent),
     m_running(false),
     m_sampleFifo(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-LocalSinkThread::~LocalSinkThread()
+LocalSinkWorker::~LocalSinkWorker()
 {
-    qDebug("LocalSinkThread::~LocalSinkThread");
+    qDebug("LocalSinkWorker::~LocalSinkWorker");
 }
 
-void LocalSinkThread::startStop(bool start)
+void LocalSinkWorker::startStop(bool start)
 {
     MsgStartStop *msg = MsgStartStop::create(start);
     m_inputMessageQueue.push(msg);
 }
 
-void LocalSinkThread::startWork()
+void LocalSinkWorker::startWork()
 {
-    qDebug("LocalSinkThread::startWork");
-	m_startWaitMutex.lock();
-	start();
-	while(!m_running)
-		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();
+    qDebug("LocalSinkWorker::startWork");
+    m_running = true;
 }
 
-void LocalSinkThread::stopWork()
+void LocalSinkWorker::stopWork()
 {
-	qDebug("LocalSinkThread::stopWork");
 	m_running = false;
-	wait();
 }
 
-void LocalSinkThread::run()
-{
-    qDebug("LocalSinkThread::run: begin");
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-    while (m_running)
-    {
-        sleep(1); // Do nothing as everything is in the data handler (dequeuer)
-    }
-
-    m_running = false;
-    qDebug("LocalSinkThread::run: end");
-}
-
-void LocalSinkThread::handleData()
+void LocalSinkWorker::handleData()
 {
     while ((m_sampleFifo->fill() > 0) && (m_inputMessageQueue.size() == 0))
     {
@@ -100,7 +79,7 @@ void LocalSinkThread::handleData()
     }
 }
 
-void LocalSinkThread::handleInputMessages()
+void LocalSinkWorker::handleInputMessages()
 {
     Message* message;
 
@@ -109,7 +88,7 @@ void LocalSinkThread::handleInputMessages()
         if (MsgStartStop::match(*message))
         {
             MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("LocalSinkThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
+            qDebug("LocalSinkWorker::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
 
             if (notif->getStartStop()) {
                 startWork();

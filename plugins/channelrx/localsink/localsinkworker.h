@@ -15,10 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELRX_LOCALSINK_LOCALSINKTHREAD_H_
-#define PLUGINS_CHANNELRX_LOCALSINK_LOCALSINKTHREAD_H_
+#ifndef PLUGINS_CHANNELRX_LOCALSINK_LOCALSINKWORKER_H_
+#define PLUGINS_CHANNELRX_LOCALSINK_LOCALSINKWORKER_H_
 
-#include <QThread>
+#include <QObject>
 #include <QMutex>
 #include <QWaitCondition>
 
@@ -28,7 +28,7 @@
 
 class SampleSinkFifo;
 
-class LocalSinkThread : public QThread {
+class LocalSinkWorker : public QObject {
     Q_OBJECT
 
 public:
@@ -51,8 +51,8 @@ public:
         { }
     };
 
-    LocalSinkThread(QObject* parent = 0);
-    ~LocalSinkThread();
+    LocalSinkWorker(QObject* parent = 0);
+    ~LocalSinkWorker();
 
     void startStop(bool start);
     void setSampleFifo(SampleSinkFifo *sampleFifo) { m_sampleFifo = sampleFifo; }
@@ -62,21 +62,17 @@ public slots:
     void handleData(); //!< Handle data when samples have to be processed
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
     SampleSinkFifo *m_sampleFifo;
     SampleSinkFifo *m_deviceSampleFifo;
-
     MessageQueue m_inputMessageQueue;
 
-    void startWork();
-    void stopWork();
-    void run();
+	void startWork();
+	void stopWork();
 
 private slots:
     void handleInputMessages();
 };
 
-#endif // PLUGINS_CHANNELRX_LOCALSINK_LOCALSINKTHREAD_H_
+#endif // PLUGINS_CHANNELRX_LOCALSINK_LOCALSINKWORKER_H_
 
