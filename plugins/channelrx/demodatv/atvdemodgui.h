@@ -69,7 +69,7 @@ private:
     ATVDemod* m_atvDemod;
     ATVDemodSettings m_settings;
 
-    bool m_blnDoApplySettings;
+    bool m_doApplySettings;
 
     MovingAverageUtil<double, double, 4> m_objMagSqAverage;
     int m_intTickCount;
@@ -85,7 +85,6 @@ private:
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
 	virtual ~ATVDemodGUI();
 
-    void blockApplySettings(bool blnBlock);
 	void applySettings(bool force = false);
     void displaySettings();
     void displayStreamIndex();
