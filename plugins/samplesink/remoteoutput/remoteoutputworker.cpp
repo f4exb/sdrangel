@@ -23,10 +23,10 @@
 
 #include "dsp/samplesourcefifo.h"
 #include "util/timeutil.h"
-#include "remoteoutputthread.h"
+#include "remoteoutputworker.h"
 
-RemoteOutputThread::RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent) :
-	QThread(parent),
+RemoteOutputWorker::RemoteOutputWorker(SampleSourceFifo* sampleFifo, QObject* parent) :
+	QObject(parent),
 	m_running(false),
 	m_samplesChunkSize(0),
 	m_sampleFifo(sampleFifo),
@@ -39,39 +39,33 @@ RemoteOutputThread::RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* pa
 {
 }
 
-RemoteOutputThread::~RemoteOutputThread()
+RemoteOutputWorker::~RemoteOutputWorker()
 {
 	if (m_running) {
 		stopWork();
 	}
 }
 
-void RemoteOutputThread::startWork()
+void RemoteOutputWorker::startWork()
 {
-	qDebug() << "RemoteOutputThread::startWork: ";
+	qDebug() << "RemoteOutputWorker::startWork: ";
 	m_udpSinkFEC.startSender();
     m_maxThrottlems = 0;
-    m_startWaitMutex.lock();
-    m_elapsedTimer.start();
-    start();
-    while(!m_running)
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    m_startWaitMutex.unlock();
+    m_running = true;
 }
 
-void RemoteOutputThread::stopWork()
+void RemoteOutputWorker::stopWork()
 {
-	qDebug() << "RemoteOutputThread::stopWork";
+	qDebug() << "RemoteOutputWorker::stopWork";
 	m_running = false;
-	wait();
 	m_udpSinkFEC.stopSender();
 }
 
-void RemoteOutputThread::setSamplerate(int samplerate)
+void RemoteOutputWorker::setSamplerate(int samplerate)
 {
 	if (samplerate != m_samplerate)
 	{
-	    qDebug() << "RemoteOutputThread::setSamplerate:"
+	    qDebug() << "RemoteOutputWorker::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
@@ -102,26 +96,13 @@ void RemoteOutputThread::setSamplerate(int samplerate)
 	}
 }
 
-void RemoteOutputThread::run()
+void RemoteOutputWorker::connectTimer(const QTimer& timer)
 {
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-	while(m_running) // actual work is in the tick() function
-	{
-		sleep(1);
-	}
-
-	m_running = false;
-}
-
-void RemoteOutputThread::connectTimer(const QTimer& timer)
-{
-	qDebug() << "RemoteOutputThread::connectTimer";
+	qDebug() << "RemoteOutputWorker::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void RemoteOutputThread::tick()
+void RemoteOutputWorker::tick()
 {
 	if (m_running)
 	{
@@ -157,7 +138,7 @@ void RemoteOutputThread::tick()
 	}
 }
 
-uint32_t RemoteOutputThread::getSamplesCount(uint64_t& ts_usecs) const
+uint32_t RemoteOutputWorker::getSamplesCount(uint64_t& ts_usecs) const
 {
     ts_usecs = TimeUtil::nowus();
     return m_samplesCount;

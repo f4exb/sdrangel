@@ -15,17 +15,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_REMOTEOUTPUTTHREAD_H
-#define INCLUDE_REMOTEOUTPUTTHREAD_H
+#ifndef INCLUDE_REMOTEOUTPUTWORKER_H
+#define INCLUDE_REMOTEOUTPUTWORKER_H
 
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <stdint.h>
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
 
@@ -39,12 +37,12 @@
 class SampleSourceFifo;
 struct timeval;
 
-class RemoteOutputThread : public QThread {
+class RemoteOutputWorker : public QObject {
 	Q_OBJECT
 
 public:
-	RemoteOutputThread(SampleSourceFifo* sampleFifo, QObject* parent = 0);
-	~RemoteOutputThread();
+	RemoteOutputWorker(SampleSourceFifo* sampleFifo, QObject* parent = 0);
+	~RemoteOutputWorker();
 
 	void startWork();
 	void stopWork();
@@ -63,8 +61,6 @@ public:
 	void connectTimer(const QTimer& timer);
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	int m_samplesChunkSize;
@@ -79,8 +75,6 @@ private:
     bool m_throttleToggle;
 
     UDPSinkFEC m_udpSinkFEC;
-
-	void run();
 
 private slots:
 	void tick();

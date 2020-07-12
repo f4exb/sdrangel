@@ -26,12 +26,13 @@
 #include <QString>
 #include <QTimer>
 #include <QNetworkRequest>
+#include <QThread>
 
 #include "dsp/devicesamplesink.h"
 
 #include "remoteoutputsettings.h"
 
-class RemoteOutputThread;
+class RemoteOutputWorker;
 class DeviceAPI;
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -180,7 +181,8 @@ private:
 	QMutex m_mutex;
 	RemoteOutputSettings m_settings;
 	uint64_t m_centerFrequency;
-	RemoteOutputThread* m_remoteOutputThread;
+	RemoteOutputWorker* m_remoteOutputWorker;
+    QThread m_remoteOutputWorkerThread;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
@@ -200,6 +202,8 @@ private:
     int m_chunkSizeCorrection;
     static const uint32_t NbSamplesForRateCorrection;
 
+    void startWorker();
+    void stopWorker();
 	void applySettings(const RemoteOutputSettings& settings, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 

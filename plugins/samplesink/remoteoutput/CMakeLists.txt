@@ -14,7 +14,7 @@ set(remoteoutput_SOURCES
 	remoteoutputplugin.cpp
     remoteoutputsettings.cpp
     remoteoutputwebapiadapter.cpp
-	remoteoutputthread.cpp
+	remoteoutputworker.cpp
     udpsinkfec.cpp
     remoteoutputsender.cpp
     remoteoutputfifo.cpp
@@ -25,7 +25,7 @@ set(remoteoutput_HEADERS
 	remoteoutputplugin.h
     remoteoutputsettings.h
     remoteoutputwebapiadapter.h
-	remoteoutputthread.h
+	remoteoutputworker.h
     udpsinkfec.h
     remoteoutputsender.h
     remoteoutputfifo.h
