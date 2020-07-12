@@ -22,12 +22,13 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QNetworkRequest>
+#include <QThread>
 
 #include "dsp/devicesamplemimo.h"
 #include "testmisettings.h"
 
 class DeviceAPI;
-class TestMIThread;
+class TestMIWorker;
 class FileRecord;
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -148,13 +149,16 @@ private:
 	DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
 	TestMISettings m_settings;
-	std::vector<TestMIThread*> m_testSourceThreads;
+	std::vector<TestMIWorker*> m_testSourceWorkers;
+    std::vector<QThread*> m_testSourceWorkerThreads;
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+    void startWorkers();
+    void stopWorkers();
 	bool applySettings(const TestMISettings& settings, bool force);
     void webapiReverseSendSettings(const DeviceSettingsKeys& deviceSettingsKeys, const TestMISettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

@@ -3,7 +3,7 @@ project(testmi)
 set(testmi_SOURCES
 	testmi.cpp
 	testmiplugin.cpp
-	testmithread.cpp
+	testmiworker.cpp
     testmisettings.cpp
     testmiwebapiadapter.cpp
 )
@@ -11,7 +11,7 @@ set(testmi_SOURCES
 set(testmi_HEADERS
 	testmi.h
 	testmiplugin.h
-	testmithread.h
+	testmiworker.h
     testmisettings.h
     testmiwebapiadapter.h
 )

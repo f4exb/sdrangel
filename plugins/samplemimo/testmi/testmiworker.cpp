@@ -22,14 +22,12 @@
 
 #include "dsp/samplemififo.h"
 
-#include "testmithread.h"
+#include "testmiworker.h"
 
 #define TESTMI_BLOCKSIZE 16384
 
-MESSAGE_CLASS_DEFINITION(TestMIThread::MsgStartStop, Message)
-
-TestMIThread::TestMIThread(SampleMIFifo* sampleFifo, int streamIndex, QObject* parent) :
-	QThread(parent),
+TestMIWorker::TestMIWorker(SampleMIFifo* sampleFifo, int streamIndex, QObject* parent) :
+	QObject(parent),
 	m_running(false),
     m_buf(0),
     m_bufsize(0),
@@ -70,32 +68,27 @@ TestMIThread::TestMIThread(SampleMIFifo* sampleFifo, int streamIndex, QObject* p
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-TestMIThread::~TestMIThread()
+TestMIWorker::~TestMIWorker()
 {
 }
 
-void TestMIThread::startWork()
+void TestMIWorker::startWork()
 {
     m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.start(50);
-	m_startWaitMutex.lock();
 	m_elapsedTimer.start();
-	start();
-	while(!m_running)
-		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();
+	m_running = true;
 }
 
-void TestMIThread::stopWork()
+void TestMIWorker::stopWork()
 {
 	m_running = false;
-	wait();
     m_timer.stop();
     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void TestMIThread::setSamplerate(int samplerate)
+void TestMIWorker::setSamplerate(int samplerate)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -106,17 +99,17 @@ void TestMIThread::setSamplerate(int samplerate)
 	m_toneNco.setFreq(m_toneFrequency, m_samplerate);
 }
 
-void TestMIThread::setLog2Decimation(unsigned int log2_decim)
+void TestMIWorker::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void TestMIThread::setFcPos(int fcPos)
+void TestMIWorker::setFcPos(int fcPos)
 {
 	m_fcPos = fcPos;
 }
 
-void TestMIThread::setBitSize(quint32 bitSizeIndex)
+void TestMIWorker::setBitSize(quint32 bitSizeIndex)
 {
     switch (bitSizeIndex)
     {
@@ -136,7 +129,7 @@ void TestMIThread::setBitSize(quint32 bitSizeIndex)
     }
 }
 
-void TestMIThread::setAmplitudeBits(int32_t amplitudeBits)
+void TestMIWorker::setAmplitudeBits(int32_t amplitudeBits)
 {
     m_amplitudeBits = amplitudeBits;
     m_amplitudeBitsDC = m_dcBias * amplitudeBits;
@@ -144,76 +137,57 @@ void TestMIThread::setAmplitudeBits(int32_t amplitudeBits)
     m_amplitudeBitsQ = (1.0f + m_qBias) * amplitudeBits;
 }
 
-void TestMIThread::setDCFactor(float dcFactor)
+void TestMIWorker::setDCFactor(float dcFactor)
 {
     m_dcBias = dcFactor;
     m_amplitudeBitsDC = m_dcBias * m_amplitudeBits;
 }
 
-void TestMIThread::setIFactor(float iFactor)
+void TestMIWorker::setIFactor(float iFactor)
 {
     m_iBias = iFactor;
     m_amplitudeBitsI = (1.0f + m_iBias) * m_amplitudeBits;
 }
 
-void TestMIThread::setQFactor(float iFactor)
+void TestMIWorker::setQFactor(float iFactor)
 {
     m_qBias = iFactor;
     m_amplitudeBitsQ = (1.0f + m_qBias) * m_amplitudeBits;
 }
 
-void TestMIThread::setPhaseImbalance(float phaseImbalance)
+void TestMIWorker::setPhaseImbalance(float phaseImbalance)
 {
     m_phaseImbalance = phaseImbalance;
 }
 
-void TestMIThread::setFrequencyShift(int shift)
+void TestMIWorker::setFrequencyShift(int shift)
 {
     m_nco.setFreq(shift, m_samplerate);
 }
 
-void TestMIThread::setToneFrequency(int toneFrequency)
+void TestMIWorker::setToneFrequency(int toneFrequency)
 {
     m_toneNco.setFreq(toneFrequency, m_samplerate);
 }
 
-void TestMIThread::setModulation(TestMIStreamSettings::Modulation modulation)
+void TestMIWorker::setModulation(TestMIStreamSettings::Modulation modulation)
 {
     m_modulation = modulation;
 }
 
-void TestMIThread::setAMModulation(float amModulation)
+void TestMIWorker::setAMModulation(float amModulation)
 {
     m_amModulation = amModulation < 0.0f ? 0.0f : amModulation > 1.0f ? 1.0f : amModulation;
 }
 
-void TestMIThread::setFMDeviation(float deviation)
+void TestMIWorker::setFMDeviation(float deviation)
 {
     float fmDeviationUnit = deviation / (float) m_samplerate;
     m_fmDeviationUnit = fmDeviationUnit < 0.0f ? 0.0f : fmDeviationUnit > 0.5f ? 0.5f : fmDeviationUnit;
-    qDebug("TestMIThread::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
+    qDebug("TestMIWorker::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
 }
 
-void TestMIThread::startStop(bool start)
-{
-    MsgStartStop *msg = MsgStartStop::create(start);
-    m_inputMessageQueue.push(msg);
-}
-
-void TestMIThread::run()
-{
-    m_running = true;
-    m_startWaiter.wakeAll();
-
-    while (m_running) // actual work is in the tick() function
-    {
-        sleep(1);
-    }
-
-    m_running = false;
-}
-
-void TestMIThread::setBuffers(quint32 chunksize)
+void TestMIWorker::setBuffers(quint32 chunksize)
 {
     if (chunksize > m_bufsize)
     {
@@ -221,14 +195,14 @@ void TestMIThread::setBuffers(quint32 chunksize)
 
         if (m_buf == 0)
         {
-            qDebug() << "TestMIThread::setBuffer: Allocate buffer:    "
+            qDebug() << "TestMIWorker::setBuffer: Allocate buffer:    "
                     << " size: " << m_bufsize << " bytes"
                     << " #samples: " << (m_bufsize/4);
             m_buf = (qint16*) malloc(m_bufsize);
         }
         else
         {
-            qDebug() << "TestMIThread::setBuffer: Re-allocate buffer: "
+            qDebug() << "TestMIWorker::setBuffer: Re-allocate buffer: "
                     << " size: " << m_bufsize << " bytes"
                     << " #samples: " << (m_bufsize/4);
             free(m_buf);
@@ -239,7 +213,7 @@ void TestMIThread::setBuffers(quint32 chunksize)
     }
 }
 
-void TestMIThread::generate(quint32 chunksize)
+void TestMIWorker::generate(quint32 chunksize)
 {
     int n = chunksize / 2;
     setBuffers(chunksize);
@@ -362,13 +336,13 @@ void TestMIThread::generate(quint32 chunksize)
     callback(m_buf, n);
 }
 
-void TestMIThread::pullAF(Real& afSample)
+void TestMIWorker::pullAF(Real& afSample)
 {
     afSample = m_toneNco.next();
 }
 
 //  call appropriate conversion (decimation) routine depending on the number of sample bits
-void TestMIThread::callback(const qint16* buf, qint32 len)
+void TestMIWorker::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -389,7 +363,7 @@ void TestMIThread::callback(const qint16* buf, qint32 len)
 	m_sampleFifo->writeAsync(m_convertBuffer.begin(), it - m_convertBuffer.begin(), m_streamIndex);
 }
 
-void TestMIThread::tick()
+void TestMIWorker::tick()
 {
     if (m_running)
     {
@@ -407,29 +381,11 @@ void TestMIThread::tick()
     }
 }
 
-void TestMIThread::handleInputMessages()
+void TestMIWorker::handleInputMessages()
 {
-    Message* message;
-
-    while ((message = m_inputMessageQueue.pop()) != 0)
-    {
-        if (MsgStartStop::match(*message))
-        {
-            MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("TestMIThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
-
-            if (notif->getStartStop()) {
-                startWork();
-            } else {
-                stopWork();
-            }
-
-            delete message;
-        }
-    }
 }
 
-void TestMIThread::setPattern0()
+void TestMIWorker::setPattern0()
 {
     m_pulseWidth = 150;
     m_pulseSampleCount = 0;
@@ -438,13 +394,13 @@ void TestMIThread::setPattern0()
     m_pulsePatternPlaces = 3;
 }
 
-void TestMIThread::setPattern1()
+void TestMIWorker::setPattern1()
 {
     m_pulseWidth = 1000;
     m_pulseSampleCount = 0;
 }
 
-void TestMIThread::setPattern2()
+void TestMIWorker::setPattern2()
 {
     m_pulseWidth = 1000;
     m_pulseSampleCount = 0;

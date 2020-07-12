@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TESTMI_TESTMITHREAD_H_
-#define _TESTMI_TESTMITHREAD_H_
+#ifndef _TESTMI_TESTMIWORKER_H_
+#define _TESTMI_TESTMIWORKER_H_
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QDebug>
@@ -36,33 +34,15 @@
 
 class SampleMIFifo;
 
-class TestMIThread : public QThread {
+class TestMIWorker : public QObject {
 	Q_OBJECT
 
 public:
-    class MsgStartStop : public Message {
-        MESSAGE_CLASS_DECLARATION
+	TestMIWorker(SampleMIFifo* sampleFifo, int streamIndex, QObject* parent = nullptr);
+	~TestMIWorker();
 
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgStartStop* create(bool startStop) {
-            return new MsgStartStop(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgStartStop(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
-	TestMIThread(SampleMIFifo* sampleFifo, int streamIndex, QObject* parent = nullptr);
-	~TestMIThread();
-
-    void startStop(bool start);
+	void startWork();
+	void stopWork();
 	void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
@@ -82,8 +62,6 @@ public:
     void setPattern2();
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	qint16  *m_buf;
@@ -135,9 +113,6 @@ private:
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimators_12;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimators_16;
 
-	void startWork();
-	void stopWork();
-	void run();
 	void callback(const qint16* buf, qint32 len);
 	void setBuffers(quint32 chunksize);
     void generate(quint32 chunksize);
@@ -384,4 +359,4 @@ private slots:
     void handleInputMessages();
 };
 
-#endif // _TESTSOURCE_TESTSOURCETHREAD_H_
+#endif // _TESTMI_TESTMIWORKER_H_

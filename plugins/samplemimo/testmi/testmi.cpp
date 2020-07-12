@@ -34,7 +34,7 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/filerecord.h"
 
-#include "testmithread.h"
+#include "testmiworker.h"
 #include "testmi.h"
 
 MESSAGE_CLASS_DEFINITION(TestMI::MsgConfigureTestSource, Message)
@@ -84,14 +84,17 @@ bool TestMI::startRx()
         stopRx();
     }
 
-    m_testSourceThreads.push_back(new TestMIThread(&m_sampleMIFifo, 0));
-	m_testSourceThreads.back()->setSamplerate(m_settings.m_streams[0].m_sampleRate);
-	m_testSourceThreads.back()->startStop(true);
+    m_testSourceWorkers.push_back(new TestMIWorker(&m_sampleMIFifo, 0));
+    m_testSourceWorkerThreads.push_back(new QThread());
+    m_testSourceWorkers.back()->moveToThread(m_testSourceWorkerThreads.back());
+	m_testSourceWorkers.back()->setSamplerate(m_settings.m_streams[0].m_sampleRate);
 
-    m_testSourceThreads.push_back(new TestMIThread(&m_sampleMIFifo, 1));
-	m_testSourceThreads.back()->setSamplerate(m_settings.m_streams[1].m_sampleRate);
-	m_testSourceThreads.back()->startStop(true);
+    m_testSourceWorkers.push_back(new TestMIWorker(&m_sampleMIFifo, 1));
+    m_testSourceWorkerThreads.push_back(new QThread());
+    m_testSourceWorkers.back()->moveToThread(m_testSourceWorkerThreads.back());
+	m_testSourceWorkers.back()->setSamplerate(m_settings.m_streams[1].m_sampleRate);
 
+    startWorkers();
 	mutexLocker.unlock();
 
 	applySettings(m_settings, true);
@@ -110,22 +113,50 @@ void TestMI::stopRx()
 {
     qDebug("TestMI::stopRx");
 	QMutexLocker mutexLocker(&m_mutex);
+    stopWorkers();
 
-    std::vector<TestMIThread*>::iterator it = m_testSourceThreads.begin();
+    std::vector<TestMIWorker*>::iterator itW = m_testSourceWorkers.begin();
+    std::vector<QThread*>::iterator itT = m_testSourceWorkerThreads.begin();
 
-    for (; it != m_testSourceThreads.end(); ++it)
+    for (; (itW != m_testSourceWorkers.end()) && (itT != m_testSourceWorkerThreads.end()); ++itW, ++itT)
     {
-        (*it)->startStop(false);
-        (*it)->deleteLater();
+        (*itW)->deleteLater();
+        delete (*itT);
     }
 
-    m_testSourceThreads.clear();
+    m_testSourceWorkers.clear();
+    m_testSourceWorkerThreads.clear();
 	m_running = false;
 }
 
 void TestMI::stopTx()
 {
     qDebug("TestMI::stopTx");
+}
+
+void TestMI::startWorkers()
+{
+    std::vector<TestMIWorker*>::iterator itW = m_testSourceWorkers.begin();
+    std::vector<QThread*>::iterator itT = m_testSourceWorkerThreads.begin();
+
+    for (; (itW != m_testSourceWorkers.end()) && (itT != m_testSourceWorkerThreads.end()); ++itW, ++itT)
+    {
+        (*itW)->startWork();
+        (*itT)->start();
+    }
+}
+
+void TestMI::stopWorkers()
+{
+    std::vector<TestMIWorker*>::iterator itW = m_testSourceWorkers.begin();
+    std::vector<QThread*>::iterator itT = m_testSourceWorkerThreads.begin();
+
+    for (; (itW != m_testSourceWorkers.end()) && (itT != m_testSourceWorkerThreads.end()); ++itW, ++itT)
+    {
+        (*itW)->stopWork();
+        (*itT)->quit();
+        (*itT)->wait();
+    }
 }
 
 QByteArray TestMI::serialize() const
@@ -298,9 +329,9 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("sampleRate");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream]))
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream]))
             {
-                m_testSourceThreads[istream]->setSamplerate(settings.m_streams[istream].m_sampleRate);
+                m_testSourceWorkers[istream]->setSamplerate(settings.m_streams[istream].m_sampleRate);
                 qDebug("TestMI::applySettings: thread on stream: %u sample rate set to %d",
                     istream, settings.m_streams[istream].m_sampleRate);
             }
@@ -310,9 +341,9 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("log2Decim");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream]))
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream]))
             {
-                m_testSourceThreads[istream]->setLog2Decimation(settings.m_streams[istream].m_log2Decim);
+                m_testSourceWorkers[istream]->setLog2Decimation(settings.m_streams[istream].m_log2Decim);
                 qDebug("TestMI::applySettings: thread on stream: %u set decimation to %d",
                     istream, (1<<settings.m_streams[istream].m_log2Decim));
             }
@@ -349,10 +380,10 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
                         DeviceSampleSource::FSHIFT_STD);
             }
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream]))
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream]))
             {
-                m_testSourceThreads[istream]->setFcPos((int) settings.m_streams[istream].m_fcPos);
-                m_testSourceThreads[istream]->setFrequencyShift(frequencyShift);
+                m_testSourceWorkers[istream]->setFcPos((int) settings.m_streams[istream].m_fcPos);
+                m_testSourceWorkers[istream]->setFrequencyShift(frequencyShift);
                 qDebug() << "TestMI::applySettings:"
                         << " thread on istream: " << istream
                         << " center freq: " << settings.m_streams[istream].m_centerFrequency << " Hz"
@@ -367,8 +398,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("amplitudeBits");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setAmplitudeBits(settings.m_streams[istream].m_amplitudeBits);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setAmplitudeBits(settings.m_streams[istream].m_amplitudeBits);
             }
         }
 
@@ -376,8 +407,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("dcFactor");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setDCFactor(settings.m_streams[istream].m_dcFactor);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setDCFactor(settings.m_streams[istream].m_dcFactor);
             }
         }
 
@@ -385,8 +416,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("iFactor");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setIFactor(settings.m_streams[istream].m_iFactor);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setIFactor(settings.m_streams[istream].m_iFactor);
             }
         }
 
@@ -394,8 +425,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("qFactor");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setQFactor(settings.m_streams[istream].m_qFactor);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setQFactor(settings.m_streams[istream].m_qFactor);
             }
         }
 
@@ -403,8 +434,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("phaseImbalance");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setPhaseImbalance(settings.m_streams[istream].m_phaseImbalance);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setPhaseImbalance(settings.m_streams[istream].m_phaseImbalance);
             }
         }
 
@@ -412,8 +443,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("sampleSizeIndex");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setBitSize(settings.m_streams[istream].m_sampleSizeIndex);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setBitSize(settings.m_streams[istream].m_sampleSizeIndex);
             }
         }
 
@@ -432,8 +463,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("modulationTone");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setToneFrequency(settings.m_streams[istream].m_modulationTone * 10);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setToneFrequency(settings.m_streams[istream].m_modulationTone * 10);
             }
         }
 
@@ -441,16 +472,16 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("modulation");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream]))
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream]))
             {
-                m_testSourceThreads[istream]->setModulation(settings.m_streams[istream].m_modulation);
+                m_testSourceWorkers[istream]->setModulation(settings.m_streams[istream].m_modulation);
 
                 if (settings.m_streams[istream].m_modulation == TestMIStreamSettings::ModulationPattern0) {
-                    m_testSourceThreads[istream]->setPattern0();
+                    m_testSourceWorkers[istream]->setPattern0();
                 } else if (settings.m_streams[istream].m_modulation == TestMIStreamSettings::ModulationPattern1) {
-                    m_testSourceThreads[istream]->setPattern1();
+                    m_testSourceWorkers[istream]->setPattern1();
                 } else if (settings.m_streams[istream].m_modulation == TestMIStreamSettings::ModulationPattern2) {
-                    m_testSourceThreads[istream]->setPattern2();
+                    m_testSourceWorkers[istream]->setPattern2();
                 }
             }
         }
@@ -459,8 +490,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("amModulation");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setAMModulation(settings.m_streams[istream].m_amModulation / 100.0f);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setAMModulation(settings.m_streams[istream].m_amModulation / 100.0f);
             }
         }
 
@@ -468,8 +499,8 @@ bool TestMI::applySettings(const TestMISettings& settings, bool force)
         {
             reverseAPIKeys.append("fmDeviation");
 
-            if ((istream < m_testSourceThreads.size()) && (m_testSourceThreads[istream])) {
-                m_testSourceThreads[istream]->setFMDeviation(settings.m_streams[istream].m_fmDeviation * 100.0f);
+            if ((istream < m_testSourceWorkers.size()) && (m_testSourceWorkers[istream])) {
+                m_testSourceWorkers[istream]->setFMDeviation(settings.m_streams[istream].m_fmDeviation * 100.0f);
             }
         }
     } // for each stream index
