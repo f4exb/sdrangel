@@ -20,6 +20,7 @@
 
 #include <QString>
 #include <QTimer>
+#include <QThread>
 #include <ctime>
 #include <iostream>
 #include <fstream>
@@ -28,7 +29,7 @@
 #include "dsp/spectrumvis.h"
 #include "testsinksettings.h"
 
-class TestSinkThread;
+class TestSinkWorker;
 class DeviceAPI;
 class BasebandSampleSink;
 
@@ -113,10 +114,13 @@ private:
 	TestSinkSettings m_settings;
     SpectrumVis m_spectrumVis;
 	std::ofstream m_ofstream;
-	TestSinkThread* m_testSinkThread;
+	TestSinkWorker* m_testSinkWorker;
+    QThread m_testSinkWorkerThread;
 	QString m_deviceDescription;
 	const QTimer& m_masterTimer;
 
+    void startWorker();
+    void stopWorker();
 	void applySettings(const TestSinkSettings& settings, bool force = false);
 };
 

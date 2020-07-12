@@ -4,14 +4,14 @@ set(testsink_SOURCES
 	testsinkoutput.cpp
 	testsinkplugin.cpp
 	testsinksettings.cpp
-	testsinkthread.cpp
+	testsinkworker.cpp
 )
 
 set(testsink_HEADERS
 	testsinkoutput.h
 	testsinkplugin.h
 	testsinksettings.h
-	testsinkthread.h
+	testsinkworker.h
 )
 
 include_directories(

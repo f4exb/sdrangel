@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_TESTSINKTHREAD_H
-#define INCLUDE_TESTSINKTHREAD_H
+#ifndef INCLUDE_TESTSINKWORKER_H
+#define INCLUDE_TESTSINKWORKER_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <iostream>
@@ -37,12 +35,12 @@
 class SampleSourceFifo;
 class BasebandSampleSink;
 
-class TestSinkThread : public QThread {
+class TestSinkWorker : public QObject {
 	Q_OBJECT
 
 public:
-	TestSinkThread(SampleSourceFifo* sampleFifo, QObject* parent = nullptr);
-	~TestSinkThread();
+	TestSinkWorker(SampleSourceFifo* sampleFifo, QObject* parent = nullptr);
+	~TestSinkWorker();
 
 	void startWork();
 	void stopWork();
@@ -64,8 +62,6 @@ private:
         int16_t m_imag;
     };
 #pragma pack(pop)
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	std::size_t m_bufsize;
@@ -85,7 +81,6 @@ private:
     BasebandSampleSink* m_spectrumSink;
     IncrementalVector<Sample> m_samplesVector;
 
-	void run();
     void callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
     void feedSpectrum(int16_t *buf, unsigned int bufSize);
 
@@ -93,4 +88,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_TESTSINKTHREAD_H
+#endif // INCLUDE_TESTSINKWORKER_H

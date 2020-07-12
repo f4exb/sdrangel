@@ -23,10 +23,10 @@
 
 #include "dsp/samplesourcefifo.h"
 #include "dsp/basebandsamplesink.h"
-#include "testsinkthread.h"
+#include "testsinkworker.h"
 
-TestSinkThread::TestSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
-	QThread(parent),
+TestSinkWorker::TestSinkWorker(SampleSourceFifo* sampleFifo, QObject* parent) :
+	QObject(parent),
 	m_running(false),
 	m_bufsize(0),
 	m_samplesChunkSize(0),
@@ -41,7 +41,7 @@ TestSinkThread::TestSinkThread(SampleSourceFifo* sampleFifo, QObject* parent) :
 {
 }
 
-TestSinkThread::~TestSinkThread()
+TestSinkWorker::~TestSinkWorker()
 {
 	if (m_running) {
 		stopWork();
@@ -50,31 +50,25 @@ TestSinkThread::~TestSinkThread()
     if (m_buf) delete[] m_buf;
 }
 
-void TestSinkThread::startWork()
+void TestSinkWorker::startWork()
 {
-	qDebug() << "TestSinkThread::startWork: ";
+	qDebug() << "TestSinkWorker::startWork: ";
     m_maxThrottlems = 0;
-    m_startWaitMutex.lock();
     m_elapsedTimer.start();
-    start();
-    while(!m_running) {
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    }
-    m_startWaitMutex.unlock();
+    m_running = true;
 }
 
-void TestSinkThread::stopWork()
+void TestSinkWorker::stopWork()
 {
-	qDebug() << "TestSinkThread::stopWork";
+	qDebug() << "TestSinkWorker::stopWork";
 	m_running = false;
-	wait();
 }
 
-void TestSinkThread::setSamplerate(int samplerate)
+void TestSinkWorker::setSamplerate(int samplerate)
 {
 	if (samplerate != m_samplerate)
 	{
-	    qDebug() << "TestSinkThread::setSamplerate:"
+	    qDebug() << "TestSinkWorker::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
@@ -104,7 +98,7 @@ void TestSinkThread::setSamplerate(int samplerate)
 	}
 }
 
-void TestSinkThread::setLog2Interpolation(int log2Interpolation)
+void TestSinkWorker::setLog2Interpolation(int log2Interpolation)
 {
     if ((log2Interpolation < 0) || (log2Interpolation > 6)) {
         return;
@@ -112,7 +106,7 @@ void TestSinkThread::setLog2Interpolation(int log2Interpolation)
 
     if (log2Interpolation != m_log2Interpolation)
     {
-        qDebug() << "TestSinkThread::setLog2Interpolation:"
+        qDebug() << "TestSinkWorker::setLog2Interpolation:"
                 << " new:" << log2Interpolation
                 << " old:" << m_log2Interpolation;
 
@@ -136,26 +130,13 @@ void TestSinkThread::setLog2Interpolation(int log2Interpolation)
     }
 }
 
-void TestSinkThread::run()
+void TestSinkWorker::connectTimer(const QTimer& timer)
 {
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-	while(m_running) // actual work is in the tick() function
-	{
-		sleep(1);
-	}
-
-	m_running = false;
-}
-
-void TestSinkThread::connectTimer(const QTimer& timer)
-{
-	qDebug() << "TestSinkThread::connectTimer";
+	qDebug() << "TestSinkWorker::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void TestSinkThread::tick()
+void TestSinkWorker::tick()
 {
 	if (m_running)
 	{
@@ -184,7 +165,7 @@ void TestSinkThread::tick()
 	}
 }
 
-void TestSinkThread::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
+void TestSinkWorker::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
 {
     SampleVector::iterator beginRead = data.begin() + iBegin;
     unsigned int chunkSize = iEnd - iBegin;
@@ -225,7 +206,7 @@ void TestSinkThread::callbackPart(SampleVector& data, unsigned int iBegin, unsig
     }
 }
 
-void TestSinkThread::feedSpectrum(int16_t *buf, unsigned int bufSize)
+void TestSinkWorker::feedSpectrum(int16_t *buf, unsigned int bufSize)
 {
     if (!m_spectrumSink) {
         return;
