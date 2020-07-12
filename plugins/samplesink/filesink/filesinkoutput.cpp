@@ -137,6 +137,19 @@ void FileSinkOutput::stop()
     }
 }
 
+void FileSinkOutput::startWorker()
+{
+    m_fileSinkWorker->startWork();
+    m_fileSinkWorkerThread.start();
+}
+
+void FileSinkOutput::stopWorker()
+{
+    m_fileSinkWorker->stopWork();
+    m_fileSinkWorkerThread.quit();
+    m_fileSinkWorkerThread.wait();
+}
+
 QByteArray FileSinkOutput::serialize() const
 {
     return m_settings.serialize();
