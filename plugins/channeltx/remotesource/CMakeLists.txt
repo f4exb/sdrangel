@@ -13,7 +13,7 @@ set(remotesource_SOURCES
     remotesource.cpp
     remotesourcebaseband.cpp
     remotesourcesource.cpp
-	remotesourcethread.cpp
+	remotesourceworker.cpp
 	remotesourceplugin.cpp
     remotesourcesettings.cpp
     remotesourcewebapiadapter.cpp
@@ -23,7 +23,7 @@ set(remotesource_HEADERS
     remotesource.h
     remotesourcebaseband.h
     remotesourcesource.h
-	remotesourcethread.h
+	remotesourceworker.h
 	remotesourceplugin.h
     remotesourcesettings.h
     remotesourcewebapiadapter.cpp

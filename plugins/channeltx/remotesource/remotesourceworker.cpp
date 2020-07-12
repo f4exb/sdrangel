@@ -15,8 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "remotesourcethread.h"
-
 #include <channel/remotedatablock.h>
 #include <channel/remotedataqueue.h>
 #include <algorithm>
@@ -24,98 +22,57 @@
 #include <QUdpSocket>
 #include "cm256cc/cm256.h"
 
+#include "remotesourceworker.h"
 
+MESSAGE_CLASS_DEFINITION(RemoteSourceWorker::MsgDataBind, Message)
 
-MESSAGE_CLASS_DEFINITION(RemoteSourceThread::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(RemoteSourceThread::MsgDataBind, Message)
-
-RemoteSourceThread::RemoteSourceThread(RemoteDataQueue *dataQueue, QObject* parent) :
-    QThread(parent),
+RemoteSourceWorker::RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* parent) :
+    QObject(parent),
     m_running(false),
     m_dataQueue(dataQueue),
     m_address(QHostAddress::LocalHost),
-    m_socket(0)
+    m_socket(nullptr)
 {
     std::fill(m_dataBlocks, m_dataBlocks+4, (RemoteDataBlock *) 0);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-RemoteSourceThread::~RemoteSourceThread()
+RemoteSourceWorker::~RemoteSourceWorker()
 {
-    qDebug("RemoteSourceThread::~RemoteSourceThread");
+    qDebug("RemoteSourceWorker::~RemoteSourceWorker");
 }
 
-void RemoteSourceThread::startStop(bool start)
-{
-    MsgStartStop *msg = MsgStartStop::create(start);
-    m_inputMessageQueue.push(msg);
-}
-
-void RemoteSourceThread::dataBind(const QString& address, uint16_t port)
+void RemoteSourceWorker::dataBind(const QString& address, uint16_t port)
 {
     MsgDataBind *msg = MsgDataBind::create(address, port);
     m_inputMessageQueue.push(msg);
 }
 
-void RemoteSourceThread::startWork()
+void RemoteSourceWorker::startWork()
 {
-    qDebug("RemoteSourceThread::startWork");
-    m_startWaitMutex.lock();
+    qDebug("RemoteSourceWorker::startWork");
     m_socket = new QUdpSocket(this);
-    start();
-    while(!m_running)
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    m_startWaitMutex.unlock();
+    m_running = false;
 }
 
-void RemoteSourceThread::stopWork()
+void RemoteSourceWorker::stopWork()
 {
-    qDebug("RemoteSourceThread::stopWork");
+    qDebug("RemoteSourceWorker::stopWork");
     delete m_socket;
-    m_socket = 0;
+    m_socket = nullptr;
     m_running = false;
-    wait();
 }
 
-void RemoteSourceThread::run()
-{
-    qDebug("RemoteSourceThread::run: begin");
-    m_running = true;
-    m_startWaiter.wakeAll();
-
-    while (m_running)
-    {
-        sleep(1); // Do nothing as everything is in the data handler (dequeuer)
-    }
-
-    m_running = false;
-    qDebug("RemoteSourceThread::run: end");
-}
-
-
-void RemoteSourceThread::handleInputMessages()
+void RemoteSourceWorker::handleInputMessages()
 {
     Message* message;
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        if (MsgStartStop::match(*message))
-        {
-            MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("RemoteSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
-
-            if (notif->getStartStop()) {
-                startWork();
-            } else {
-                stopWork();
-            }
-
-            delete message;
-        }
-        else if (MsgDataBind::match(*message))
+        if (MsgDataBind::match(*message))
         {
             MsgDataBind* notif = (MsgDataBind*) message;
-            qDebug("RemoteSourceThread::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
+            qDebug("RemoteSourceWorker::handleInputMessages: MsgDataBind: %s:%d", qPrintable(notif->getAddress().toString()), notif->getPort());
 
             if (m_socket)
             {
@@ -127,7 +84,7 @@ void RemoteSourceThread::handleInputMessages()
     }
 }
 
-void RemoteSourceThread::readPendingDatagrams()
+void RemoteSourceWorker::readPendingDatagrams()
 {
     RemoteSuperBlock superBlock;
     qint64 size;
@@ -160,7 +117,7 @@ void RemoteSourceThread::readPendingDatagrams()
 
                 if (superBlock.m_header.m_frameIndex != frameIndex)
                 {
-                    //qDebug("RemoteSourceThread::readPendingDatagrams: push frame %u", frameIndex);
+                    //qDebug("RemoteSourceWorker::readPendingDatagrams: push frame %u", frameIndex);
                     m_dataQueue->push(m_dataBlocks[dataBlockIndex]);
                     m_dataBlocks[dataBlockIndex] = new RemoteDataBlock();
                     m_dataBlocks[dataBlockIndex]->m_rxControlBlock.m_frameIndex = superBlock.m_header.m_frameIndex;
@@ -183,7 +140,7 @@ void RemoteSourceThread::readPendingDatagrams()
         }
         else
         {
-            qWarning("RemoteSourceThread::readPendingDatagrams: wrong super block size not processing");
+            qWarning("RemoteSourceWorker::readPendingDatagrams: wrong super block size not processing");
         }
     }
 }
