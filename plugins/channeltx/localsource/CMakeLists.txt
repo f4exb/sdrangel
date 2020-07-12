@@ -4,7 +4,7 @@ set(localsource_SOURCES
     localsource.cpp
     localsourcebaseband.cpp
     localsourcesource.cpp
-	localsourcethread.cpp
+	localsourceworker.cpp
 	localsourceplugin.cpp
     localsourcesettings.cpp
     localsourcewebapiadapter.cpp
@@ -14,7 +14,7 @@ set(localsource_HEADERS
     localsource.h
     localsourcebaseband.h
     localsourcesource.h
-	localsourcethread.h
+	localsourceworker.h
 	localsourceplugin.h
     localsourcesettings.h
     localsourcewebapiadapter.h

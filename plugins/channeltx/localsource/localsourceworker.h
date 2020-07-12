@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_LOCALOURCE_LOCALOURCETHREAD_H_
-#define PLUGINS_CHANNELTX_LOCALOURCE_LOCALOURCETHREAD_H_
+#ifndef PLUGINS_CHANNELTX_LOCALSOURCE_LOCALOURCEWORKER_H_
+#define PLUGINS_CHANNELTX_LOCALSOURCE_LOCALOURCEWORKER_H_
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 
 #include "dsp/dsptypes.h"
 #include "util/message.h"
@@ -28,33 +26,15 @@
 
 class SampleSourceFifo;
 
-class LocalSourceThread : public QThread {
+class LocalSourceWorker : public QObject {
     Q_OBJECT
 
 public:
-    class MsgStartStop : public Message {
-        MESSAGE_CLASS_DECLARATION
+    LocalSourceWorker(QObject* parent = nullptr);
+    ~LocalSourceWorker();
 
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgStartStop* create(bool startStop) {
-            return new MsgStartStop(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgStartStop(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
-    LocalSourceThread(QObject* parent = nullptr);
-    ~LocalSourceThread();
-
-    void startStop(bool start);
+    void startWork();
+    void stopWork();
     void setSampleFifo(SampleSourceFifo *sampleFifo);
 
 public slots:
@@ -64,20 +44,13 @@ signals:
     void samplesAvailable(unsigned int iPart1Begin, unsigned int iPart1End, unsigned int iPart2Begin, unsigned int iPart2End);
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
     SampleSourceFifo *m_sampleFifo;
-
     MessageQueue m_inputMessageQueue;
-
-    void startWork();
-    void stopWork();
-    void run();
 
 private slots:
     void handleInputMessages();
 };
 
-#endif // PLUGINS_CHANNELTX_LOCALSINK_LOCALSINKTHREAD_H_
+#endif // PLUGINS_CHANNELTX_LOCALSOURCE_LOCALOURCEWORKER_H_
 
