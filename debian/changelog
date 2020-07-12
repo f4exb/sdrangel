@@ -1,3 +1,12 @@
+sdrangel (5.7.10-1) unstable; urgency=medium
+
+   * ATV demod: fixed initialization issues. Fixes #560
+   * GLSpectrum: synchronize spectrum with the GUI spectrum freeze button. Fixes issue #561
+   * File Input: refactored FileInputThread (contribution from Vort). Fixes #562
+   * More changes on the model of File Input
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 12 Jul 2020 18:26:55 +0200
+
 sdrangel (4.14.15-1) unstable; urgency=medium
 
    * GLScope: marker feature. Implements #497
