@@ -36,7 +36,7 @@
 #include "device/deviceapi.h"
 
 #include "remoteoutput.h"
-#include "remoteoutputthread.h"
+#include "remoteoutputworker.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutput, Message)
 MESSAGE_CLASS_DEFINITION(RemoteOutput::MsgConfigureRemoteOutputWork, Message)
@@ -49,7 +49,7 @@ RemoteOutput::RemoteOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_centerFrequency(0),
-    m_remoteOutputThread(0),
+    m_remoteOutputWorker(nullptr),
 	m_deviceDescription("RemoteOutput"),
     m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer()),
@@ -87,12 +87,13 @@ bool RemoteOutput::start()
 	QMutexLocker mutexLocker(&m_mutex);
 	qDebug() << "RemoteOutput::start";
 
-	m_remoteOutputThread = new RemoteOutputThread(&m_sampleSourceFifo);
-	m_remoteOutputThread->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
-	m_remoteOutputThread->setSamplerate(m_settings.m_sampleRate);
-	m_remoteOutputThread->setNbBlocksFEC(m_settings.m_nbFECBlocks);
-	m_remoteOutputThread->connectTimer(m_masterTimer);
-	m_remoteOutputThread->startWork();
+	m_remoteOutputWorker = new RemoteOutputWorker(&m_sampleSourceFifo);
+    m_remoteOutputWorker->moveToThread(&m_remoteOutputWorkerThread);
+	m_remoteOutputWorker->setDataAddress(m_settings.m_dataAddress, m_settings.m_dataPort);
+	m_remoteOutputWorker->setSamplerate(m_settings.m_sampleRate);
+	m_remoteOutputWorker->setNbBlocksFEC(m_settings.m_nbFECBlocks);
+	m_remoteOutputWorker->connectTimer(m_masterTimer);
+	startWorker();
 
 	// restart auto rate correction
 	m_lastRemoteTimestampRateCorrection = 0;
@@ -100,7 +101,7 @@ bool RemoteOutput::start()
 	m_lastQueueLength = -2; // set first value out of bounds
 	m_chunkSizeCorrection = 0;
 
-    m_remoteOutputThread->setTxDelay(m_settings.m_txDelay);
+    m_remoteOutputWorker->setTxDelay(m_settings.m_txDelay);
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
@@ -119,12 +120,25 @@ void RemoteOutput::stop()
 	qDebug() << "RemoteOutput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_remoteOutputThread != 0)
+	if (m_remoteOutputWorker)
 	{
-	    m_remoteOutputThread->stopWork();
-		delete m_remoteOutputThread;
-		m_remoteOutputThread = 0;
+	    stopWorker();
+		delete m_remoteOutputWorker;
+		m_remoteOutputWorker = nullptr;
 	}
+}
+
+void RemoteOutput::startWorker()
+{
+    m_remoteOutputWorker->startWork();
+    m_remoteOutputWorkerThread.start();
+}
+
+void RemoteOutput::stopWorker()
+{
+	m_remoteOutputWorker->stopWork();
+	m_remoteOutputWorkerThread.quit();
+	m_remoteOutputWorkerThread.wait();
 }
 
 QByteArray RemoteOutput::serialize() const
@@ -189,15 +203,15 @@ bool RemoteOutput::handleMessage(const Message& message)
 		MsgConfigureRemoteOutputWork& conf = (MsgConfigureRemoteOutputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_remoteOutputThread != 0)
+		if (m_remoteOutputWorker != 0)
 		{
 			if (working)
 			{
-			    m_remoteOutputThread->startWork();
+			    m_remoteOutputWorker->startWork();
 			}
 			else
 			{
-			    m_remoteOutputThread->stopWork();
+			    m_remoteOutputWorker->stopWork();
 			}
 		}
 
@@ -230,9 +244,9 @@ bool RemoteOutput::handleMessage(const Message& message)
 	{
 	    MsgConfigureRemoteOutputChunkCorrection& conf = (MsgConfigureRemoteOutputChunkCorrection&) message;
 
-	    if (m_remoteOutputThread != 0)
+	    if (m_remoteOutputWorker != 0)
         {
-	        m_remoteOutputThread->setChunkCorrection(conf.getChunkCorrection());
+	        m_remoteOutputWorker->setChunkCorrection(conf.getChunkCorrection());
         }
 
 	    return true;
@@ -265,8 +279,8 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
 
     if (force || (m_settings.m_dataAddress != settings.m_dataAddress) || (m_settings.m_dataPort != settings.m_dataPort))
     {
-        if (m_remoteOutputThread != 0) {
-            m_remoteOutputThread->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
+        if (m_remoteOutputWorker != 0) {
+            m_remoteOutputWorker->setDataAddress(settings.m_dataAddress, settings.m_dataPort);
         }
     }
 
@@ -274,8 +288,8 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
     {
         reverseAPIKeys.append("sampleRate");
 
-        if (m_remoteOutputThread != 0) {
-            m_remoteOutputThread->setSamplerate(settings.m_sampleRate);
+        if (m_remoteOutputWorker != 0) {
+            m_remoteOutputWorker->setSamplerate(settings.m_sampleRate);
         }
 
         m_tickMultiplier = (21*NbSamplesForRateCorrection) / (2*settings.m_sampleRate); // two times per sample filling period plus small extension
@@ -289,8 +303,8 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
     {
         reverseAPIKeys.append("nbFECBlocks");
 
-        if (m_remoteOutputThread != 0) {
-            m_remoteOutputThread->setNbBlocksFEC(settings.m_nbFECBlocks);
+        if (m_remoteOutputWorker != 0) {
+            m_remoteOutputWorker->setNbBlocksFEC(settings.m_nbFECBlocks);
         }
 
         changeTxDelay = true;
@@ -304,8 +318,8 @@ void RemoteOutput::applySettings(const RemoteOutputSettings& settings, bool forc
 
     if (changeTxDelay)
     {
-        if (m_remoteOutputThread != 0) {
-            m_remoteOutputThread->setTxDelay(settings.m_txDelay);
+        if (m_remoteOutputWorker != 0) {
+            m_remoteOutputWorker->setTxDelay(settings.m_txDelay);
         }
     }
 
@@ -485,7 +499,7 @@ void RemoteOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respon
 {
     uint64_t ts_usecs;
     response.getRemoteOutputReport()->setBufferRwBalance(m_sampleSourceFifo.getRWBalance());
-    response.getRemoteOutputReport()->setSampleCount(m_remoteOutputThread ? (int) m_remoteOutputThread->getSamplesCount(ts_usecs) : 0);
+    response.getRemoteOutputReport()->setSampleCount(m_remoteOutputWorker ? (int) m_remoteOutputWorker->getSamplesCount(ts_usecs) : 0);
 }
 
 void RemoteOutput::tick()
@@ -551,7 +565,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
         m_settings.m_centerFrequency = report["deviceCenterFreq"].toInt();
         m_centerFrequency = m_settings.m_centerFrequency * 1000;
 
-        if (!m_remoteOutputThread) {
+        if (!m_remoteOutputWorker) {
             return;
         }
 
@@ -572,7 +586,7 @@ void RemoteOutput::analyzeApiReply(const QJsonObject& jsonObject, const QString&
 
         uint32_t sampleCountDelta, sampleCount;
         uint64_t timestampUs;
-        sampleCount = m_remoteOutputThread->getSamplesCount(timestampUs);
+        sampleCount = m_remoteOutputWorker->getSamplesCount(timestampUs);
 
         if (sampleCount < m_lastSampleCount) {
             sampleCountDelta = (0xFFFFFFFFU - m_lastSampleCount) + sampleCount + 1;
