@@ -22,12 +22,13 @@
 #include <QByteArray>
 #include <QTimer>
 #include <QNetworkRequest>
+#include <QThread>
 
 #include <dsp/devicesamplesource.h>
 #include "testsourcesettings.h"
 
 class DeviceAPI;
-class TestSourceThread;
+class TestSourceWorker;
 class FileRecord;
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -154,13 +155,16 @@ private:
     FileRecord *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	TestSourceSettings m_settings;
-	TestSourceThread* m_testSourceThread;
+	TestSourceWorker* m_testSourceWorker;
+    QThread m_testSourceWorkerThread;
 	QString m_deviceDescription;
 	bool m_running;
     const QTimer& m_masterTimer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+	void startWorker();
+	void stopWorker();
 	bool applySettings(const TestSourceSettings& settings, bool force);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const TestSourceSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
