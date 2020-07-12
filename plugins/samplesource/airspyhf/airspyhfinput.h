@@ -21,6 +21,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QNetworkRequest>
+#include <QThread>
 
 #include <libairspyhf/airspyhf.h>
 #include <dsp/devicesamplesource.h>
@@ -30,7 +31,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class AirspyHFThread;
+class AirspyHFWorker;
 class FileRecord;
 
 class AirspyHFInput : public DeviceSampleSource {
@@ -165,7 +166,8 @@ private:
 	QMutex m_mutex;
 	AirspyHFSettings m_settings;
 	airspyhf_device_t* m_dev;
-	AirspyHFThread* m_airspyHFThread;
+	AirspyHFWorker* m_airspyHFWorker;
+    QThread m_airspyHFWorkerThread;
 	QString m_deviceDescription;
 	std::vector<uint32_t> m_sampleRates;
 	bool m_running;
@@ -173,6 +175,8 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
+	bool startWorker();
+	void stopWorker();
 	bool openDevice();
 	void closeDevice();
 	bool applySettings(const AirspyHFSettings& settings, bool force);

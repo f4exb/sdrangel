@@ -38,7 +38,7 @@
 
 #include "airspyhfplugin.h"
 #include "airspyhfsettings.h"
-#include "airspyhfthread.h"
+#include "airspyhfworker.h"
 
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgConfigureAirspyHF, Message)
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgStartStop, Message)
@@ -53,7 +53,7 @@ AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
 	m_dev(0),
-	m_airspyHFThread(nullptr),
+	m_airspyHFWorker(nullptr),
 	m_deviceDescription("AirspyHF"),
 	m_running(false)
 {
@@ -167,9 +167,12 @@ bool AirspyHFInput::start()
         return false;
     }
 
-    if (m_running) { stop(); }
+    if (m_running) {
+        stop();
+    }
 
-	m_airspyHFThread = new AirspyHFThread(m_dev, &m_sampleFifo);
+	m_airspyHFWorker = new AirspyHFWorker(m_dev, &m_sampleFifo);
+    m_airspyHFWorker->moveToThread(&m_airspyHFWorkerThread);
 	int sampleRateIndex = m_settings.m_devSampleRateIndex;
 
     if (m_settings.m_devSampleRateIndex >= m_sampleRates.size()) {
@@ -177,21 +180,45 @@ bool AirspyHFInput::start()
     }
 
     if (sampleRateIndex >= 0) {
-        m_airspyHFThread->setSamplerate(m_sampleRates[sampleRateIndex]);
+        m_airspyHFWorker->setSamplerate(m_sampleRates[sampleRateIndex]);
     }
 
-	m_airspyHFThread->setLog2Decimation(m_settings.m_log2Decim);
-    m_airspyHFThread->setIQOrder(m_settings.m_iqOrder);
-	m_airspyHFThread->startWork();
+	m_airspyHFWorker->setLog2Decimation(m_settings.m_log2Decim);
+    m_airspyHFWorker->setIQOrder(m_settings.m_iqOrder);
+    mutexLocker.unlock();
 
-	mutexLocker.unlock();
+    if (startWorker())
+    {
+        qDebug("AirspyHFInput::startInput: started");
+        applySettings(m_settings, true);
+        m_running = true;
+    }
+    else
+    {
+        m_running = false;
+    }
 
-	applySettings(m_settings, true);
+	return m_running;
+}
 
-	qDebug("AirspyHFInput::startInput: started");
-	m_running = true;
+bool AirspyHFInput::startWorker()
+{
+	if (m_airspyHFWorker->startWork())
+    {
+    	m_airspyHFWorkerThread.start();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
-	return true;
+void AirspyHFInput::stopWorker()
+{
+	m_airspyHFWorker->stopWork();
+	m_airspyHFWorkerThread.quit();
+	m_airspyHFWorkerThread.wait();
 }
 
 void AirspyHFInput::closeDevice()
@@ -211,11 +238,11 @@ void AirspyHFInput::stop()
 	qDebug("AirspyHFInput::stop");
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_airspyHFThread)
+	if (m_airspyHFWorker)
 	{
-	    m_airspyHFThread->stopWork();
-		delete m_airspyHFThread;
-		m_airspyHFThread = nullptr;
+	    stopWorker();
+		delete m_airspyHFWorker;
+		m_airspyHFWorker = nullptr;
 	}
 
 	m_running = false;
@@ -446,10 +473,10 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 			{
 				qCritical("AirspyHFInput::applySettings: could not set sample rate index %u (%d S/s)", sampleRateIndex, m_sampleRates[sampleRateIndex]);
 			}
-			else if (m_airspyHFThread)
+			else if (m_airspyHFWorker)
 			{
 				qDebug("AirspyHFInput::applySettings: sample rate set to index: %u (%d S/s)", sampleRateIndex, m_sampleRates[sampleRateIndex]);
-				m_airspyHFThread->setSamplerate(m_sampleRates[sampleRateIndex]);
+				m_airspyHFWorker->setSamplerate(m_sampleRates[sampleRateIndex]);
 			}
 		}
 	}
@@ -459,9 +486,9 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         reverseAPIKeys.append("log2Decim");
 		forwardChange = true;
 
-		if (m_airspyHFThread)
+		if (m_airspyHFWorker)
 		{
-		    m_airspyHFThread->setLog2Decimation(settings.m_log2Decim);
+		    m_airspyHFWorker->setLog2Decimation(settings.m_log2Decim);
 			qDebug() << "AirspyInput: set decimation to " << (1<<settings.m_log2Decim);
 		}
 	}
@@ -470,8 +497,8 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	{
         reverseAPIKeys.append("iqOrder");
 
-		if (m_airspyHFThread) {
-		    m_airspyHFThread->setIQOrder(settings.m_iqOrder);
+		if (m_airspyHFWorker) {
+		    m_airspyHFWorker->setIQOrder(settings.m_iqOrder);
 		}
 	}
 
@@ -487,7 +514,7 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
             {
                 qCritical("AirspyHFInput::applySettings: could not set LO ppm correction to %f", settings.m_LOppmTenths / 10.0f);
             }
-            else if (m_airspyHFThread)
+            else if (m_airspyHFWorker)
             {
                 qDebug("AirspyHFInput::applySettings: LO ppm correction set to %f", settings.m_LOppmTenths / 10.0f);
             }
