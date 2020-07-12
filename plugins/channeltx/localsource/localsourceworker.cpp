@@ -17,94 +17,45 @@
 
 #include "dsp/samplesourcefifo.h"
 
-#include "localsourcethread.h"
+#include "localsourceworker.h"
 
-MESSAGE_CLASS_DEFINITION(LocalSourceThread::MsgStartStop, Message)
-
-LocalSourceThread::LocalSourceThread(QObject* parent) :
-    QThread(parent),
+LocalSourceWorker::LocalSourceWorker(QObject* parent) :
+    QObject(parent),
     m_running(false),
     m_sampleFifo(nullptr)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-LocalSourceThread::~LocalSourceThread()
+LocalSourceWorker::~LocalSourceWorker()
 {
-    qDebug("LocalSourceThread::~LocalSourceThread");
+    qDebug("LocalSourceWorker::~LocalSourceWorker");
 }
 
-void LocalSourceThread::startStop(bool start)
-{
-    MsgStartStop *msg = MsgStartStop::create(start);
-    m_inputMessageQueue.push(msg);
-}
-
-void LocalSourceThread::setSampleFifo(SampleSourceFifo *sampleFifo)
+void LocalSourceWorker::setSampleFifo(SampleSourceFifo *sampleFifo)
 {
     m_sampleFifo = sampleFifo;
 }
 
-void LocalSourceThread::pullSamples(unsigned int count)
+void LocalSourceWorker::pullSamples(unsigned int count)
 {
     unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
     m_sampleFifo->read(count, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
     emit samplesAvailable(iPart1Begin, iPart1End, iPart2Begin, iPart2End);
 }
 
-void LocalSourceThread::startWork()
+void LocalSourceWorker::startWork()
 {
-    qDebug("LocalSourceThread::startWork");
-	m_startWaitMutex.lock();
-	start();
-
-    while(!m_running) {
-		m_startWaiter.wait(&m_startWaitMutex, 100);
-    }
-
-    m_startWaitMutex.unlock();
+    qDebug("LocalSourceWorker::startWork");
+    m_running = true;
 }
 
-void LocalSourceThread::stopWork()
+void LocalSourceWorker::stopWork()
 {
-	qDebug("LocalSourceThread::stopWork");
+	qDebug("LocalSourceWorker::stopWork");
 	m_running = false;
-	wait();
 }
 
-void LocalSourceThread::run()
+void LocalSourceWorker::handleInputMessages()
 {
-    qDebug("LocalSinkThread::run: begin");
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-    while (m_running)
-    {
-        sleep(1); // Do nothing as everything is in the data handler (dequeuer)
-    }
-
-    m_running = false;
-    qDebug("LocalSinkThread::run: end");
-}
-
-void LocalSourceThread::handleInputMessages()
-{
-    Message* message;
-
-    while ((message = m_inputMessageQueue.pop()) != 0)
-    {
-        if (MsgStartStop::match(*message))
-        {
-            MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("LocalSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
-
-            if (notif->getStartStop()) {
-                startWork();
-            } else {
-                stopWork();
-            }
-
-            delete message;
-        }
-    }
 }

@@ -16,12 +16,12 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "dsp/devicesamplesink.h"
-#include "localsourcethread.h"
+#include "localsourceworker.h"
 #include "localsourcesource.h"
 
 LocalSourceSource::LocalSourceSource() :
     m_running(false),
-    m_sinkThread(nullptr)
+    m_sinkWorker(nullptr)
 {}
 
 LocalSourceSource::~LocalSourceSource()
@@ -50,7 +50,8 @@ void LocalSourceSource::start(DeviceSampleSink *deviceSink)
         return;
     }
 
-    m_sinkThread = new LocalSourceThread();
+    m_sinkWorker = new LocalSourceWorker();
+    m_sinkWorker->moveToThread(&m_sinkWorkerThread);
 
     if (deviceSink)
     {
@@ -59,7 +60,7 @@ void LocalSourceSource::start(DeviceSampleSink *deviceSink)
         m_localSamples.resize(2*m_chunkSize);
         m_localSamplesIndex = 0;
         m_localSamplesIndexOffset = m_chunkSize;
-        m_sinkThread->setSampleFifo(m_localSampleSourceFifo);
+        m_sinkWorker->setSampleFifo(m_localSampleSourceFifo);
     }
     else
     {
@@ -68,17 +69,17 @@ void LocalSourceSource::start(DeviceSampleSink *deviceSink)
 
     connect(this,
             SIGNAL(pullSamples(unsigned int)),
-            m_sinkThread,
+            m_sinkWorker,
             SLOT(pullSamples(unsigned int)),
             Qt::QueuedConnection);
 
-    connect(m_sinkThread,
+    connect(m_sinkWorker,
             SIGNAL(samplesAvailable(unsigned int, unsigned int, unsigned int, unsigned int)),
             this,
             SLOT(processSamples(unsigned int, unsigned int, unsigned int, unsigned int)),
             Qt::QueuedConnection);
 
-    m_sinkThread->startStop(true);
+    startWorker();
     m_running = true;
 }
 
@@ -86,15 +87,30 @@ void LocalSourceSource::stop()
 {
     qDebug("LocalSourceSource::stop");
 
-    if (m_sinkThread)
+    if (m_sinkWorker)
     {
-        m_sinkThread->startStop(false);
-        m_sinkThread->deleteLater();
-        m_sinkThread = nullptr;
+        stopWorker();
+        m_sinkWorker->deleteLater();
+        m_sinkWorker = nullptr;
     }
 
     m_running = false;
 }
+
+
+void LocalSourceSource::startWorker()
+{
+    m_sinkWorker->startWork();
+    m_sinkWorkerThread.start();
+}
+
+void LocalSourceSource::stopWorker()
+{
+	m_sinkWorker->stopWork();
+	m_sinkWorkerThread.quit();
+	m_sinkWorkerThread.wait();
+}
+
 
 void LocalSourceSource::pullOne(Sample& sample)
 {

@@ -19,13 +19,14 @@
 #define PLUGINS_CHANNELTX_LOCALSOURCE_LOCALSOURCESOURCE_H_
 
 #include <QObject>
+#include <QThread>
 
 #include "dsp/channelsamplesource.h"
 #include "localsourcesettings.h"
 
 class DeviceSampleSink;
 class SampleSourceFifo;
-class LocalSourceThread;
+class LocalSourceWorker;
 
 class LocalSourceSource : public QObject, public ChannelSampleSource {
     Q_OBJECT
@@ -46,12 +47,16 @@ signals:
 
 private:
     bool m_running;
-    LocalSourceThread *m_sinkThread;
+    LocalSourceWorker *m_sinkWorker;
+    QThread m_sinkWorkerThread;
     SampleSourceFifo *m_localSampleSourceFifo;
     int m_chunkSize;
     SampleVector m_localSamples;
     int m_localSamplesIndex;
     int m_localSamplesIndexOffset;
+
+    void startWorker();
+    void stopWorker();
 
 private slots:
     void processSamples(unsigned int iPart1Begin, unsigned int iPart1End, unsigned int iPart2Begin, unsigned int iPart2End);
