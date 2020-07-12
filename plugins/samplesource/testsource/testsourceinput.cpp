@@ -30,7 +30,7 @@
 
 #include "testsourceinput.h"
 #include "device/deviceapi.h"
-#include "testsourcethread.h"
+#include "testsourceworker.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "dsp/filerecord.h"
@@ -44,7 +44,7 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_fileSink(nullptr),
 	m_settings(),
-	m_testSourceThread(0),
+	m_testSourceWorker(nullptr),
 	m_deviceDescription(),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
@@ -89,11 +89,14 @@ bool TestSourceInput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-    if (m_running) stop();
+    if (m_running) {
+        stop();
+    }
 
-    m_testSourceThread = new TestSourceThread(&m_sampleFifo);
-	m_testSourceThread->setSamplerate(m_settings.m_sampleRate);
-	m_testSourceThread->startStop(true);
+    m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
+    m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
+	m_testSourceWorker->setSamplerate(m_settings.m_sampleRate);
+	startWorker();
 
 	mutexLocker.unlock();
 
@@ -107,15 +110,29 @@ void TestSourceInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_testSourceThread != 0)
+	if (m_testSourceWorker)
 	{
-	    m_testSourceThread->startStop(false);
-        m_testSourceThread->deleteLater();
-		m_testSourceThread = 0;
+	    stopWorker();
+        m_testSourceWorker->deleteLater();
+		m_testSourceWorker = nullptr;
 	}
 
 	m_running = false;
 }
+
+void TestSourceInput::startWorker()
+{
+    m_testSourceWorker->startWork();
+    m_testSourceWorkerThread.start();
+}
+
+void TestSourceInput::stopWorker()
+{
+	m_testSourceWorker->stopWork();
+	m_testSourceWorkerThread.quit();
+	m_testSourceWorkerThread.wait();
+}
+
 
 QByteArray TestSourceInput::serialize() const
 {
@@ -278,9 +295,9 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("sampleRate");
 
-        if (m_testSourceThread != 0)
+        if (m_testSourceWorker != 0)
         {
-            m_testSourceThread->setSamplerate(settings.m_sampleRate);
+            m_testSourceWorker->setSamplerate(settings.m_sampleRate);
             qDebug("TestSourceInput::applySettings: sample rate set to %d", settings.m_sampleRate);
         }
     }
@@ -289,9 +306,9 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("log2Decim");
 
-        if (m_testSourceThread != 0)
+        if (m_testSourceWorker != 0)
         {
-            m_testSourceThread->setLog2Decimation(settings.m_log2Decim);
+            m_testSourceWorker->setLog2Decimation(settings.m_log2Decim);
             qDebug() << "TestSourceInput::applySettings: set decimation to " << (1<<settings.m_log2Decim);
         }
     }
@@ -327,10 +344,10 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
                     DeviceSampleSource::FSHIFT_STD);
         }
 
-        if (m_testSourceThread != 0)
+        if (m_testSourceWorker != 0)
         {
-            m_testSourceThread->setFcPos((int) settings.m_fcPos);
-            m_testSourceThread->setFrequencyShift(frequencyShift);
+            m_testSourceWorker->setFcPos((int) settings.m_fcPos);
+            m_testSourceWorker->setFrequencyShift(frequencyShift);
             qDebug() << "TestSourceInput::applySettings:"
                     << " center freq: " << settings.m_centerFrequency << " Hz"
                     << " device center freq: " << deviceCenterFrequency << " Hz"
@@ -344,8 +361,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("amplitudeBits");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setAmplitudeBits(settings.m_amplitudeBits);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setAmplitudeBits(settings.m_amplitudeBits);
         }
     }
 
@@ -353,8 +370,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("dcFactor");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setDCFactor(settings.m_dcFactor);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setDCFactor(settings.m_dcFactor);
         }
     }
 
@@ -362,8 +379,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("iFactor");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setIFactor(settings.m_iFactor);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setIFactor(settings.m_iFactor);
         }
     }
 
@@ -371,8 +388,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("qFactor");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setQFactor(settings.m_qFactor);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setQFactor(settings.m_qFactor);
         }
     }
 
@@ -380,8 +397,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("phaseImbalance");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setPhaseImbalance(settings.m_phaseImbalance);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setPhaseImbalance(settings.m_phaseImbalance);
         }
     }
 
@@ -389,8 +406,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("sampleSizeIndex");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setBitSize(settings.m_sampleSizeIndex);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setBitSize(settings.m_sampleSizeIndex);
         }
     }
 
@@ -413,8 +430,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("modulationTone");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setToneFrequency(settings.m_modulationTone * 10);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setToneFrequency(settings.m_modulationTone * 10);
         }
     }
 
@@ -422,16 +439,16 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("modulation");
 
-        if (m_testSourceThread != 0)
+        if (m_testSourceWorker != 0)
         {
-            m_testSourceThread->setModulation(settings.m_modulation);
+            m_testSourceWorker->setModulation(settings.m_modulation);
 
             if (settings.m_modulation == TestSourceSettings::ModulationPattern0) {
-                m_testSourceThread->setPattern0();
+                m_testSourceWorker->setPattern0();
             } else if (settings.m_modulation == TestSourceSettings::ModulationPattern1) {
-                m_testSourceThread->setPattern1();
+                m_testSourceWorker->setPattern1();
             } else if (settings.m_modulation == TestSourceSettings::ModulationPattern2) {
-                m_testSourceThread->setPattern2();
+                m_testSourceWorker->setPattern2();
             }
         }
     }
@@ -440,8 +457,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("amModulation");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setAMModulation(settings.m_amModulation / 100.0f);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setAMModulation(settings.m_amModulation / 100.0f);
         }
     }
 
@@ -449,8 +466,8 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         reverseAPIKeys.append("fmDeviation");
 
-        if (m_testSourceThread != 0) {
-            m_testSourceThread->setFMDeviation(settings.m_fmDeviation * 100.0f);
+        if (m_testSourceWorker != 0) {
+            m_testSourceWorker->setFMDeviation(settings.m_fmDeviation * 100.0f);
         }
     }
 

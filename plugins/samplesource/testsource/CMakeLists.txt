@@ -3,7 +3,7 @@ project(testsource)
 set(testsource_SOURCES
 	testsourceinput.cpp
 	testsourceplugin.cpp
-	testsourcethread.cpp
+	testsourceworker.cpp
     testsourcesettings.cpp
     testsourcewebapiadapter.cpp
 )
@@ -11,7 +11,7 @@ set(testsource_SOURCES
 set(testsource_HEADERS
 	testsourceinput.h
 	testsourceplugin.h
-	testsourcethread.h
+	testsourceworker.h
     testsourcesettings.h
     testsourcewebapiadapter.h
 )

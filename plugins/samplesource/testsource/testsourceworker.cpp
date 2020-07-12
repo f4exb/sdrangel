@@ -19,16 +19,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <errno.h>
-#include "testsourcethread.h"
+#include "testsourceworker.h"
 
 #include "dsp/samplesinkfifo.h"
 
 #define TESTSOURCE_BLOCKSIZE 16384
 
-MESSAGE_CLASS_DEFINITION(TestSourceThread::MsgStartStop, Message)
-
-TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) :
-	QThread(parent),
+TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) :
+	QObject(parent),
 	m_running(false),
     m_buf(0),
     m_bufsize(0),
@@ -69,32 +67,28 @@ TestSourceThread::TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent) 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-TestSourceThread::~TestSourceThread()
+TestSourceWorker::~TestSourceWorker()
 {
 }
 
-void TestSourceThread::startWork()
+void TestSourceWorker::startWork()
 {
+    qDebug("TestSourceWorker::startWork");
     m_timer.setTimerType(Qt::PreciseTimer);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.start(50);
-	m_startWaitMutex.lock();
-	m_elapsedTimer.start();
-	start();
-	while(!m_running)
-		m_startWaiter.wait(&m_startWaitMutex, 100);
-	m_startWaitMutex.unlock();
+    m_running = true;
 }
 
-void TestSourceThread::stopWork()
+void TestSourceWorker::stopWork()
 {
-	m_running = false;
-	wait();
+    qDebug("TestSourceWorker::stopWork");
     m_timer.stop();
     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+	m_running = false;
 }
 
-void TestSourceThread::setSamplerate(int samplerate)
+void TestSourceWorker::setSamplerate(int samplerate)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -105,17 +99,17 @@ void TestSourceThread::setSamplerate(int samplerate)
 	m_toneNco.setFreq(m_toneFrequency, m_samplerate);
 }
 
-void TestSourceThread::setLog2Decimation(unsigned int log2_decim)
+void TestSourceWorker::setLog2Decimation(unsigned int log2_decim)
 {
 	m_log2Decim = log2_decim;
 }
 
-void TestSourceThread::setFcPos(int fcPos)
+void TestSourceWorker::setFcPos(int fcPos)
 {
 	m_fcPos = fcPos;
 }
 
-void TestSourceThread::setBitSize(quint32 bitSizeIndex)
+void TestSourceWorker::setBitSize(quint32 bitSizeIndex)
 {
     switch (bitSizeIndex)
     {
@@ -135,7 +129,7 @@ void TestSourceThread::setBitSize(quint32 bitSizeIndex)
     }
 }
 
-void TestSourceThread::setAmplitudeBits(int32_t amplitudeBits)
+void TestSourceWorker::setAmplitudeBits(int32_t amplitudeBits)
 {
     m_amplitudeBits = amplitudeBits;
     m_amplitudeBitsDC = m_dcBias * amplitudeBits;
@@ -143,76 +137,57 @@ void TestSourceThread::setAmplitudeBits(int32_t amplitudeBits)
     m_amplitudeBitsQ = (1.0f + m_qBias) * amplitudeBits;
 }
 
-void TestSourceThread::setDCFactor(float dcFactor)
+void TestSourceWorker::setDCFactor(float dcFactor)
 {
     m_dcBias = dcFactor;
     m_amplitudeBitsDC = m_dcBias * m_amplitudeBits;
 }
 
-void TestSourceThread::setIFactor(float iFactor)
+void TestSourceWorker::setIFactor(float iFactor)
 {
     m_iBias = iFactor;
     m_amplitudeBitsI = (1.0f + m_iBias) * m_amplitudeBits;
 }
 
-void TestSourceThread::setQFactor(float iFactor)
+void TestSourceWorker::setQFactor(float iFactor)
 {
     m_qBias = iFactor;
     m_amplitudeBitsQ = (1.0f + m_qBias) * m_amplitudeBits;
 }
 
-void TestSourceThread::setPhaseImbalance(float phaseImbalance)
+void TestSourceWorker::setPhaseImbalance(float phaseImbalance)
 {
     m_phaseImbalance = phaseImbalance;
 }
 
-void TestSourceThread::setFrequencyShift(int shift)
+void TestSourceWorker::setFrequencyShift(int shift)
 {
     m_nco.setFreq(shift, m_samplerate);
 }
 
-void TestSourceThread::setToneFrequency(int toneFrequency)
+void TestSourceWorker::setToneFrequency(int toneFrequency)
 {
     m_toneNco.setFreq(toneFrequency, m_samplerate);
 }
 
-void TestSourceThread::setModulation(TestSourceSettings::Modulation modulation)
+void TestSourceWorker::setModulation(TestSourceSettings::Modulation modulation)
 {
     m_modulation = modulation;
 }
 
-void TestSourceThread::setAMModulation(float amModulation)
+void TestSourceWorker::setAMModulation(float amModulation)
 {
     m_amModulation = amModulation < 0.0f ? 0.0f : amModulation > 1.0f ? 1.0f : amModulation;
 }
 
-void TestSourceThread::setFMDeviation(float deviation)
+void TestSourceWorker::setFMDeviation(float deviation)
 {
     float fmDeviationUnit = deviation / (float) m_samplerate;
     m_fmDeviationUnit = fmDeviationUnit < 0.0f ? 0.0f : fmDeviationUnit > 0.5f ? 0.5f : fmDeviationUnit;
-    qDebug("TestSourceThread::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
+    qDebug("TestSourceWorker::setFMDeviation: m_fmDeviationUnit: %f", m_fmDeviationUnit);
 }
 
-void TestSourceThread::startStop(bool start)
-{
-    MsgStartStop *msg = MsgStartStop::create(start);
-    m_inputMessageQueue.push(msg);
-}
-
-void TestSourceThread::run()
-{
-    m_running = true;
-    m_startWaiter.wakeAll();
-
-    while (m_running) // actual work is in the tick() function
-    {
-        sleep(1);
-    }
-
-    m_running = false;
-}
-
-void TestSourceThread::setBuffers(quint32 chunksize)
+void TestSourceWorker::setBuffers(quint32 chunksize)
 {
     if (chunksize > m_bufsize)
     {
@@ -220,14 +195,14 @@ void TestSourceThread::setBuffers(quint32 chunksize)
 
         if (m_buf == 0)
         {
-            qDebug() << "TestSourceThread::setBuffer: Allocate buffer:    "
+            qDebug() << "TestSourceWorker::setBuffer: Allocate buffer:    "
                     << " size: " << m_bufsize << " bytes"
                     << " #samples: " << (m_bufsize/4);
             m_buf = (qint16*) malloc(m_bufsize);
         }
         else
         {
-            qDebug() << "TestSourceThread::setBuffer: Re-allocate buffer: "
+            qDebug() << "TestSourceWorker::setBuffer: Re-allocate buffer: "
                     << " size: " << m_bufsize << " bytes"
                     << " #samples: " << (m_bufsize/4);
             free(m_buf);
@@ -238,7 +213,7 @@ void TestSourceThread::setBuffers(quint32 chunksize)
     }
 }
 
-void TestSourceThread::generate(quint32 chunksize)
+void TestSourceWorker::generate(quint32 chunksize)
 {
     int n = chunksize / 2;
     setBuffers(chunksize);
@@ -361,13 +336,13 @@ void TestSourceThread::generate(quint32 chunksize)
     callback(m_buf, n);
 }
 
-void TestSourceThread::pullAF(Real& afSample)
+void TestSourceWorker::pullAF(Real& afSample)
 {
     afSample = m_toneNco.next();
 }
 
 //  call appropriate conversion (decimation) routine depending on the number of sample bits
-void TestSourceThread::callback(const qint16* buf, qint32 len)
+void TestSourceWorker::callback(const qint16* buf, qint32 len)
 {
 	SampleVector::iterator it = m_convertBuffer.begin();
 
@@ -388,7 +363,7 @@ void TestSourceThread::callback(const qint16* buf, qint32 len)
 	m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void TestSourceThread::tick()
+void TestSourceWorker::tick()
 {
     if (m_running)
     {
@@ -406,9 +381,9 @@ void TestSourceThread::tick()
         if (m_histoCounter < 49) {
             m_histoCounter++;
         } else {
-            // qDebug("TestSourceThread::tick: -----------");
+            // qDebug("TestSourceWorker::tick: -----------");
             // for (std::map<int,int>::iterator it = m_timerHistogram.begin(); it != m_timerHistogram.end(); ++it) {
-            //     qDebug("TestSourceThread::tick: %d: %d", it->first, it->second);
+            //     qDebug("TestSourceWorker::tick: %d: %d", it->first, it->second);
             // }
             m_histoCounter = 0;
         }
@@ -425,29 +400,11 @@ void TestSourceThread::tick()
     }
 }
 
-void TestSourceThread::handleInputMessages()
+void TestSourceWorker::handleInputMessages()
 {
-    Message* message;
-
-    while ((message = m_inputMessageQueue.pop()) != 0)
-    {
-        if (MsgStartStop::match(*message))
-        {
-            MsgStartStop* notif = (MsgStartStop*) message;
-            qDebug("TestSourceThread::handleInputMessages: MsgStartStop: %s", notif->getStartStop() ? "start" : "stop");
-
-            if (notif->getStartStop()) {
-                startWork();
-            } else {
-                stopWork();
-            }
-
-            delete message;
-        }
-    }
 }
 
-void TestSourceThread::setPattern0()
+void TestSourceWorker::setPattern0()
 {
     m_pulseWidth = 150;
     m_pulseSampleCount = 0;
@@ -456,13 +413,13 @@ void TestSourceThread::setPattern0()
     m_pulsePatternPlaces = 3;
 }
 
-void TestSourceThread::setPattern1()
+void TestSourceWorker::setPattern1()
 {
     m_pulseWidth = 1000;
     m_pulseSampleCount = 0;
 }
 
-void TestSourceThread::setPattern2()
+void TestSourceWorker::setPattern2()
 {
     m_pulseWidth = 1000;
     m_pulseSampleCount = 0;

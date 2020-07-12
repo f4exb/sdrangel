@@ -15,14 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _TESTSOURCE_TESTSOURCETHREAD_H_
-#define _TESTSOURCE_TESTSOURCETHREAD_H_
+#ifndef _TESTSOURCE_TESTSOURCEWORKER_H_
+#define _TESTSOURCE_TESTSOURCEWORKER_H_
 
 #include <map>
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QDebug>
@@ -37,33 +35,15 @@
 
 #define TESTSOURCE_THROTTLE_MS 50
 
-class TestSourceThread : public QThread {
+class TestSourceWorker : public QObject {
 	Q_OBJECT
 
 public:
-    class MsgStartStop : public Message {
-        MESSAGE_CLASS_DECLARATION
+	TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent = 0);
+	~TestSourceWorker();
 
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgStartStop* create(bool startStop) {
-            return new MsgStartStop(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgStartStop(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
-	TestSourceThread(SampleSinkFifo* sampleFifo, QObject* parent = 0);
-	~TestSourceThread();
-
-    void startStop(bool start);
+	void startWork();
+	void stopWork();
 	void setSamplerate(int samplerate);
     void setLog2Decimation(unsigned int log2_decim);
     void setFcPos(int fcPos);
@@ -83,8 +63,6 @@ public:
     void setPattern2();
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	qint16  *m_buf;
@@ -138,9 +116,6 @@ private:
     std::map<int, int> m_timerHistogram;
     uint32_t m_histoCounter;
 
-	void startWork();
-	void stopWork();
-	void run();
 	void callback(const qint16* buf, qint32 len);
 	void setBuffers(quint32 chunksize);
     void generate(quint32 chunksize);
@@ -387,4 +362,4 @@ private slots:
     void handleInputMessages();
 };
 
-#endif // _TESTSOURCE_TESTSOURCETHREAD_H_
+#endif // _TESTSOURCE_TESTSOURCEWORKER_H_
