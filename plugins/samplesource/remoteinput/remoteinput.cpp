@@ -49,9 +49,10 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_sampleRate(48000),
+    m_mutex(QMutex::Recursive),
     m_fileSink(nullptr),
     m_settings(),
-	m_remoteInputUDPHandler(0),
+	m_remoteInputUDPHandler(nullptr),
 	m_deviceDescription(),
 	m_startingTimeStamp(0)
 {
@@ -97,7 +98,6 @@ bool RemoteInput::start()
 void RemoteInput::stop()
 {
 	qDebug() << "RemoteInput::stop";
-    m_remoteInputUDPHandler->stop();
 }
 
 QByteArray RemoteInput::serialize() const
