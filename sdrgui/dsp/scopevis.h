@@ -246,6 +246,7 @@ public:
     virtual void stop();
     virtual bool handleMessage(const Message& message);
     int getTriggerLocation() const { return m_triggerLocation; }
+    bool getFreeRun() const { return m_freeRun; }
 
 private:
     // === messages ===
