@@ -4,14 +4,14 @@ set(filesink_SOURCES
 	filesinkoutput.cpp
 	filesinkplugin.cpp
 	filesinksettings.cpp
-	filesinkthread.cpp
+	filesinkworker.cpp
 )
 
 set(filesink_HEADERS
 	filesinkoutput.h
 	filesinkplugin.h
 	filesinksettings.h
-	filesinkthread.h
+	filesinkworker.h
 )
 
 include_directories(

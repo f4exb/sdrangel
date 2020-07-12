@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKTHREAD_H
-#define INCLUDE_FILESINKTHREAD_H
+#ifndef INCLUDE_FILESINKWORKER_H
+#define INCLUDE_FILESINKWORKER_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
 #include <iostream>
@@ -35,12 +33,12 @@
 
 class SampleSourceFifo;
 
-class FileSinkThread : public QThread {
+class FileSinkWorker : public QObject {
 	Q_OBJECT
 
 public:
-	FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
-	~FileSinkThread();
+	FileSinkWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
+	~FileSinkWorker();
 
 	void startWork();
 	void stopWork();
@@ -54,8 +52,6 @@ public:
 	void connectTimer(const QTimer& timer);
 
 private:
-	QMutex m_startWaitMutex;
-	QWaitCondition m_startWaiter;
 	volatile bool m_running;
 
 	std::ofstream* m_ofstream;
@@ -74,11 +70,10 @@ private:
     Interpolators<qint16, SDR_TX_SAMP_SZ, 16> m_interpolators;
     int16_t *m_buf;
 
-	void run();
 	void callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd);
 
 private slots:
 	void tick();
 };
 
-#endif // INCLUDE_FILESINKTHREAD_H
+#endif // INCLUDE_FILESINKWORKER_H
