@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2018-2019 Edouard Griffiths, F4EXB                              //
+// Copyright (C) 2018-2020 Edouard Griffiths, F4EXB                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,12 +15,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCTHREAD_H_
-#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCTHREAD_H_
+#ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCWORKER_H_
+#define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCWORKER_H_
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QHostAddress>
 
 #include "util/message.h"
@@ -30,28 +28,9 @@ class RemoteDataQueue;
 class RemoteDataBlock;
 class QUdpSocket;
 
-class RemoteSourceThread : public QThread {
+class RemoteSourceWorker : public QObject {
     Q_OBJECT
 public:
-    class MsgStartStop : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgStartStop* create(bool startStop) {
-            return new MsgStartStop(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgStartStop(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
     class MsgDataBind : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -75,15 +54,14 @@ public:
         }
     };
 
-    RemoteSourceThread(RemoteDataQueue *dataQueue, QObject* parent = 0);
-    ~RemoteSourceThread();
+    RemoteSourceWorker(RemoteDataQueue *dataQueue, QObject* parent = 0);
+    ~RemoteSourceWorker();
 
-    void startStop(bool start);
+    void startWork();
+    void stopWork();
     void dataBind(const QString& address, uint16_t port);
 
 private:
-    QMutex m_startWaitMutex;
-    QWaitCondition m_startWaiter;
     volatile bool m_running;
 
     MessageQueue m_inputMessageQueue;
@@ -95,11 +73,6 @@ private:
     static const uint32_t m_nbDataBlocks = 4;          //!< number of data blocks in the ring buffer
     RemoteDataBlock *m_dataBlocks[m_nbDataBlocks];  //!< ring buffer of data blocks indexed by frame affinity
 
-    void startWork();
-    void stopWork();
-
-    void run();
-
 private slots:
     void handleInputMessages();
     void readPendingDatagrams();
@@ -107,4 +80,4 @@ private slots:
 
 
 
-#endif /* PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCTHREAD_H_ */
+#endif /* PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCWORKER_H_ */

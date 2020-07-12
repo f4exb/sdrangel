@@ -18,12 +18,12 @@
 #include <boost/crc.hpp>
 #include <boost/cstdint.hpp>
 
-#include "remotesourcethread.h"
+#include "remotesourceworker.h"
 #include "remotesourcesource.h"
 
 RemoteSourceSource::RemoteSourceSource() :
     m_running(false),
-    m_sourceThread(nullptr),
+    m_sourceWorker(nullptr),
     m_nbCorrectableErrors(0),
     m_nbUncorrectableErrors(0),
     m_channelSampleRate(48000)
@@ -90,9 +90,10 @@ void RemoteSourceSource::start()
         stop();
     }
 
-    m_sourceThread = new RemoteSourceThread(&m_dataQueue);
-    m_sourceThread->startStop(true);
-    m_sourceThread->dataBind(m_settings.m_dataAddress, m_settings.m_dataPort);
+    m_sourceWorker = new RemoteSourceWorker(&m_dataQueue);
+    m_sourceWorker->moveToThread(&m_sourceWorkerThread);
+    startWorker();
+    m_sourceWorker->dataBind(m_settings.m_dataAddress, m_settings.m_dataPort);
     m_running = true;
 }
 
@@ -100,14 +101,27 @@ void RemoteSourceSource::stop()
 {
     qDebug("RemoteSourceSource::stop");
 
-    if (m_sourceThread)
+    if (m_sourceWorker)
     {
-        m_sourceThread->startStop(false);
-        m_sourceThread->deleteLater();
-        m_sourceThread = 0;
+        stopWorker();
+        m_sourceWorker->deleteLater();
+        m_sourceWorker = 0;
     }
 
     m_running = false;
+}
+
+void RemoteSourceSource::startWorker()
+{
+    m_sourceWorker->startWork();
+    m_sourceWorkerThread.start();
+}
+
+void RemoteSourceSource::stopWorker()
+{
+	m_sourceWorker->stopWork();
+	m_sourceWorkerThread.quit();
+	m_sourceWorkerThread.wait();
 }
 
 void RemoteSourceSource::handleData()
@@ -238,8 +252,8 @@ void RemoteSourceSource::printMeta(const QString& header, RemoteMetaDataFEC *met
 
 void RemoteSourceSource::dataBind(const QString& dataAddress, uint16_t dataPort)
 {
-    if (m_sourceThread) {
-        m_sourceThread->dataBind(dataAddress, dataPort);
+    if (m_sourceWorker) {
+        m_sourceWorker->dataBind(dataAddress, dataPort);
     }
 
     m_settings.m_dataAddress = dataAddress;

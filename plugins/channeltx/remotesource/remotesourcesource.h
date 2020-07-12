@@ -19,6 +19,7 @@
 #define PLUGINS_CHANNELTX_REMOTESOURCE_REMOTESOURCESOURCE_H_
 
 #include <QObject>
+#include <QThread>
 
 #include "cm256cc/cm256.h"
 
@@ -30,7 +31,7 @@
 
 #include "remotesourcesettings.h"
 
-class RemoteSourceThread;
+class RemoteSourceWorker;
 
 class RemoteSourceSource : public QObject, public ChannelSampleSource {
     Q_OBJECT
@@ -58,7 +59,8 @@ signals:
 
 private:
     bool m_running;
-    RemoteSourceThread *m_sourceThread;
+    RemoteSourceWorker *m_sourceWorker;
+    QThread m_sourceWorkerThread;
     RemoteDataQueue m_dataQueue;
     RemoteDataReadQueue m_dataReadQueue;
     CM256 m_cm256;
@@ -76,6 +78,8 @@ private:
     bool m_interpolatorConsumed;
     Complex m_modSample;
 
+    void startWorker();
+    void stopWorker();
     void handleDataBlock(RemoteDataBlock *dataBlock);
     void printMeta(const QString& header, RemoteMetaDataFEC *metaData);
     void getSample();
