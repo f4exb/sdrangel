@@ -23,13 +23,14 @@
 #include <QString>
 #include <QByteArray>
 #include <QTimer>
+#include <QThread>
 
 #include "dsp/devicesamplemimo.h"
 #include "dsp/spectrumvis.h"
 #include "testmosyncsettings.h"
 
 class DeviceAPI;
-class TestMOSyncThread;
+class TestMOSyncWorker;
 class BasebandSampleSink;
 
 class TestMOSync : public DeviceSampleMIMO {
@@ -152,12 +153,15 @@ private:
 	QMutex m_mutex;
     SpectrumVis m_spectrumVis;
 	TestMOSyncSettings m_settings;
-    TestMOSyncThread* m_sinkThread;
+    TestMOSyncWorker* m_sinkWorker;
+    QThread m_sinkWorkerThread;
 	QString m_deviceDescription;
 	bool m_runningTx;
     const QTimer& m_masterTimer;
     unsigned int m_feedSpectrumIndex;
 
+    void startWorker();
+    void stopWorker();
 	bool applySettings(const TestMOSyncSettings& settings, bool force);
 };
 

@@ -22,10 +22,10 @@
 #include "dsp/basebandsamplesink.h"
 
 #include "testmosyncsettings.h"
-#include "testmosyncthread.h"
+#include "testmosyncworker.h"
 
-TestMOSyncThread::TestMOSyncThread(QObject* parent) :
-    QThread(parent),
+TestMOSyncWorker::TestMOSyncWorker(QObject* parent) :
+    QObject(parent),
     m_running(false),
     m_buf(nullptr),
     m_log2Interp(0),
@@ -36,13 +36,13 @@ TestMOSyncThread::TestMOSyncThread(QObject* parent) :
     m_feedSpectrumIndex(0),
     m_spectrumSink(nullptr)
 {
-    qDebug("TestMOSyncThread::TestMOSyncThread");
+    qDebug("TestMOSyncWorker::TestMOSyncWorker");
     setSamplerate(48000);
 }
 
-TestMOSyncThread::~TestMOSyncThread()
+TestMOSyncWorker::~TestMOSyncWorker()
 {
-    qDebug("TestMOSyncThread::~TestMOSyncThread");
+    qDebug("TestMOSyncWorker::~TestMOSyncWorker");
 
     if (m_running) {
         stopWork();
@@ -51,51 +51,30 @@ TestMOSyncThread::~TestMOSyncThread()
     delete[] m_buf;
 }
 
-void TestMOSyncThread::startWork()
+void TestMOSyncWorker::startWork()
 {
-    qDebug("TestMOSyncThread::startWork");
-    m_startWaitMutex.lock();
+    qDebug("TestMOSyncWorker::startWork");
     m_elapsedTimer.start();
-    start();
-
-    while(!m_running) {
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    }
-
-    m_startWaitMutex.unlock();
+    m_running = true;
 }
 
-void TestMOSyncThread::stopWork()
+void TestMOSyncWorker::stopWork()
 {
-    qDebug("TestMOSyncThread::stopWork");
+    qDebug("TestMOSyncWorker::stopWork");
     m_running = false;
-    wait();
 }
 
-void TestMOSyncThread::run()
+void TestMOSyncWorker::connectTimer(const QTimer& timer)
 {
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-	while(m_running) // actual work is in the tick() function
-	{
-		sleep(1);
-	}
-
-	m_running = false;
-}
-
-void TestMOSyncThread::connectTimer(const QTimer& timer)
-{
-	qDebug() << "TestMOSyncThread::connectTimer";
+	qDebug() << "TestMOSyncWorker::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void TestMOSyncThread::setSamplerate(int samplerate)
+void TestMOSyncWorker::setSamplerate(int samplerate)
 {
 	if (samplerate != m_samplerate)
 	{
-	    qDebug() << "TestMOSyncThread::setSamplerate:"
+	    qDebug() << "TestMOSyncWorker::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
@@ -123,7 +102,7 @@ void TestMOSyncThread::setSamplerate(int samplerate)
 	}
 }
 
-void TestMOSyncThread::setLog2Interpolation(unsigned int log2Interpolation)
+void TestMOSyncWorker::setLog2Interpolation(unsigned int log2Interpolation)
 {
     if ((log2Interpolation < 0) || (log2Interpolation > 6)) {
         return;
@@ -151,22 +130,22 @@ void TestMOSyncThread::setLog2Interpolation(unsigned int log2Interpolation)
     }
 }
 
-unsigned int TestMOSyncThread::getLog2Interpolation() const
+unsigned int TestMOSyncWorker::getLog2Interpolation() const
 {
     return m_log2Interp;
 }
 
-void TestMOSyncThread::setFcPos(int fcPos)
+void TestMOSyncWorker::setFcPos(int fcPos)
 {
     m_fcPos = fcPos;
 }
 
-int TestMOSyncThread::getFcPos() const
+int TestMOSyncWorker::getFcPos() const
 {
     return m_fcPos;
 }
 
-void TestMOSyncThread::callback(qint16* buf, qint32 samplesPerChannel)
+void TestMOSyncWorker::callback(qint16* buf, qint32 samplesPerChannel)
 {
     unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
     m_sampleFifo->readSync(samplesPerChannel/(1<<m_log2Interp), iPart1Begin, iPart1End, iPart2Begin, iPart2End);
@@ -184,7 +163,7 @@ void TestMOSyncThread::callback(qint16* buf, qint32 samplesPerChannel)
 }
 
 //  Interpolate according to specified log2 (ex: log2=4 => decim=16). len is a number of samples (not a number of I or Q)
-void TestMOSyncThread::callbackPart(qint16* buf, qint32 nSamples, int iBegin)
+void TestMOSyncWorker::callbackPart(qint16* buf, qint32 nSamples, int iBegin)
 {
     for (unsigned int channel = 0; channel < 2; channel++)
     {
@@ -282,7 +261,7 @@ void TestMOSyncThread::callbackPart(qint16* buf, qint32 nSamples, int iBegin)
     }
 }
 
-void TestMOSyncThread::tick()
+void TestMOSyncWorker::tick()
 {
 	if (m_running)
 	{
@@ -309,7 +288,7 @@ void TestMOSyncThread::tick()
 	}
 }
 
-void TestMOSyncThread::callbackPart(std::vector<SampleVector>& data, unsigned int iBegin, unsigned int iEnd)
+void TestMOSyncWorker::callbackPart(std::vector<SampleVector>& data, unsigned int iBegin, unsigned int iEnd)
 {
     unsigned int chunkSize = iEnd - iBegin;
 
@@ -358,7 +337,7 @@ void TestMOSyncThread::callbackPart(std::vector<SampleVector>& data, unsigned in
     }
 }
 
-void TestMOSyncThread::feedSpectrum(int16_t *buf, unsigned int bufSize)
+void TestMOSyncWorker::feedSpectrum(int16_t *buf, unsigned int bufSize)
 {
     if (!m_spectrumSink) {
         return;

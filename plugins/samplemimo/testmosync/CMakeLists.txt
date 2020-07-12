@@ -4,14 +4,14 @@ set(testmosync_SOURCES
 	testmosync.cpp
 	testmosyncplugin.cpp
 	testmosyncsettings.cpp
-	testmosyncthread.cpp
+	testmosyncworker.cpp
 )
 
 set(testmosync_HEADERS
 	testmosync.h
 	testmosyncplugin.h
 	testmosyncsettings.h
-	testmosyncthread.h
+	testmosyncworker.h
 )
 
 include_directories(

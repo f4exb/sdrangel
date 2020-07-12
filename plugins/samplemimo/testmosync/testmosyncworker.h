@@ -15,14 +15,12 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCTHREAD_H_
-#define PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCTHREAD_H_
+#ifndef PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCWORKER_H_
+#define PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCWORKER_H_
 
 // configure two Tx
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 #include <QElapsedTimer>
 
 #include "dsp/interpolators.h"
@@ -34,12 +32,12 @@ class QTimer;
 class SampleMOFifo;
 class BasebandSampleSink;
 
-class TestMOSyncThread : public QThread {
+class TestMOSyncWorker : public QObject {
     Q_OBJECT
 
 public:
-    TestMOSyncThread(QObject* parent = nullptr);
-    ~TestMOSyncThread();
+    TestMOSyncWorker(QObject* parent = nullptr);
+    ~TestMOSyncWorker();
 
     void startWork();
     void stopWork();
@@ -63,8 +61,6 @@ private:
         int16_t m_imag;
     };
 #pragma pack(pop)
-    QMutex m_startWaitMutex;
-    QWaitCondition m_startWaiter;
     bool m_running;
 
     qint16 *m_buf; //!< Full buffer for SISO or MIMO operation
@@ -86,7 +82,6 @@ private:
     IncrementalVector<Sample> m_samplesVector;
     IncrementalVector<Sample> m_testVector;
 
-    void run();
     unsigned int getNbFifos();
     void callbackPart(qint16* buf, qint32 nSamples, int iBegin);
     void callbackPart(std::vector<SampleVector>& data, unsigned int iBegin, unsigned int iEnd);
@@ -97,4 +92,4 @@ private slots:
 	void tick();
 };
 
-#endif // PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCTHREAD_H_
+#endif // PLUGINS_SAMPLEMIMO_TESTMOSYNC_TESTMOSYNCWORKER_H_

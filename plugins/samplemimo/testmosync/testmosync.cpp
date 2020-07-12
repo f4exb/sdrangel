@@ -31,7 +31,7 @@
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 
-#include "testmosyncthread.h"
+#include "testmosyncworker.h"
 #include "testmosync.h"
 
 MESSAGE_CLASS_DEFINITION(TestMOSync::MsgConfigureTestMOSync, Message)
@@ -41,7 +41,7 @@ TestMOSync::TestMOSync(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_TX_SCALEF),
 	m_settings(),
-    m_sinkThread(nullptr),
+    m_sinkWorker(nullptr),
 	m_deviceDescription("TestMOSync"),
     m_runningTx(false),
     m_masterTimer(deviceAPI->getMasterTimer()),
@@ -75,16 +75,17 @@ bool TestMOSync::startTx()
         stopTx();
     }
 
-    m_sinkThread = new TestMOSyncThread();
+    m_sinkWorker = new TestMOSyncWorker();
+    m_sinkWorker->moveToThread(&m_sinkWorkerThread);
     m_sampleMOFifo.reset();
-    m_sinkThread->setFifo(&m_sampleMOFifo);
-    m_sinkThread->setFcPos(m_settings.m_fcPosTx);
-    m_sinkThread->setSamplerate(m_settings.m_sampleRate);
-    m_sinkThread->setLog2Interpolation(m_settings.m_log2Interp);
-    m_sinkThread->setSpectrumSink(&m_spectrumVis);
-    m_sinkThread->setFeedSpectrumIndex(m_feedSpectrumIndex);
-    m_sinkThread->connectTimer(m_masterTimer);
-	m_sinkThread->startWork();
+    m_sinkWorker->setFifo(&m_sampleMOFifo);
+    m_sinkWorker->setFcPos(m_settings.m_fcPosTx);
+    m_sinkWorker->setSamplerate(m_settings.m_sampleRate);
+    m_sinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
+    m_sinkWorker->setSpectrumSink(&m_spectrumVis);
+    m_sinkWorker->setFeedSpectrumIndex(m_feedSpectrumIndex);
+    m_sinkWorker->connectTimer(m_masterTimer);
+	startWorker();
 	mutexLocker.unlock();
 	m_runningTx = true;
 
@@ -95,16 +96,29 @@ void TestMOSync::stopTx()
 {
     qDebug("TestMOSync::stopTx");
 
-    if (!m_sinkThread) {
+    if (!m_sinkWorker) {
         return;
     }
 
 	QMutexLocker mutexLocker(&m_mutex);
 
-    m_sinkThread->stopWork();
-    delete m_sinkThread;
-    m_sinkThread = nullptr;
+    stopWorker();
+    delete m_sinkWorker;
+    m_sinkWorker = nullptr;
     m_runningTx = false;
+}
+
+void TestMOSync::startWorker()
+{
+    m_sinkWorker->startWork();
+    m_sinkWorkerThread.start();
+}
+
+void TestMOSync::stopWorker()
+{
+    m_sinkWorker->stopWork();
+    m_sinkWorkerThread.quit();
+    m_sinkWorkerThread.wait();
 }
 
 QByteArray TestMOSync::serialize() const
@@ -232,8 +246,8 @@ void TestMOSync::setFeedSpectrumIndex(unsigned int feedSpectrumIndex)
 {
     m_feedSpectrumIndex = feedSpectrumIndex > 1 ? 1 : feedSpectrumIndex;
 
-    if (m_sinkThread) {
-        m_sinkThread->setFeedSpectrumIndex(m_feedSpectrumIndex);
+    if (m_sinkWorker) {
+        m_sinkWorker->setFeedSpectrumIndex(m_feedSpectrumIndex);
     }
 }
 
@@ -262,8 +276,8 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
 
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
-        if (m_sinkThread) {
-            m_sinkThread->setSamplerate(settings.m_sampleRate);
+        if (m_sinkWorker) {
+            m_sinkWorker->setSamplerate(settings.m_sampleRate);
         }
 
         forwardChangeTxDSP = true;
@@ -271,8 +285,8 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
 
     if ((m_settings.m_fcPosTx != settings.m_fcPosTx) || force)
     {
-        if (m_sinkThread) {
-            m_sinkThread->setFcPos((int) settings.m_fcPosTx);
+        if (m_sinkWorker) {
+            m_sinkWorker->setFcPos((int) settings.m_fcPosTx);
         }
 
         forwardChangeTxDSP = true;
@@ -280,9 +294,9 @@ bool TestMOSync::applySettings(const TestMOSyncSettings& settings, bool force)
 
     if ((m_settings.m_log2Interp != settings.m_log2Interp) || force)
     {
-        if (m_sinkThread)
+        if (m_sinkWorker)
         {
-            m_sinkThread->setLog2Interpolation(settings.m_log2Interp);
+            m_sinkWorker->setLog2Interpolation(settings.m_log2Interp);
             qDebug() << "TestMOSync::applySettings: set interpolation to " << (1<<settings.m_log2Interp);
         }
 
