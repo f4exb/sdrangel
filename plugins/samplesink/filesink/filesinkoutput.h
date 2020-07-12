@@ -20,6 +20,8 @@
 
 #include <QString>
 #include <QTimer>
+#include <QThread>
+
 #include <ctime>
 #include <iostream>
 #include <fstream>
@@ -27,7 +29,7 @@
 #include "dsp/devicesamplesink.h"
 #include "filesinksettings.h"
 
-class FileSinkThread;
+class FileSinkWorker;
 class DeviceAPI;
 
 class FileSinkOutput : public DeviceSampleSink {
@@ -206,12 +208,15 @@ private:
 	QMutex m_mutex;
 	FileSinkSettings m_settings;
 	std::ofstream m_ofstream;
-	FileSinkThread* m_fileSinkThread;
+	FileSinkWorker* m_fileSinkWorker;
+    QThread m_fileSinkWorkerThread;
 	QString m_deviceDescription;
 	QString m_fileName;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
 
+    void startWorker();
+    void stopWorker();
 	void openFileStream();
 	void applySettings(const FileSinkSettings& settings, bool force = false);
 };

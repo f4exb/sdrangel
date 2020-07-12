@@ -22,10 +22,10 @@
 #include <QDebug>
 
 #include "dsp/samplesourcefifo.h"
-#include "filesinkthread.h"
+#include "filesinkworker.h"
 
-FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
-	QThread(parent),
+FileSinkWorker::FileSinkWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
+	QObject(parent),
 	m_running(false),
 	m_ofstream(samplesStream),
 	m_bufsize(0),
@@ -37,12 +37,12 @@ FileSinkThread::FileSinkThread(std::ofstream *samplesStream, SampleSourceFifo* s
     m_throttlems(FILESINK_THROTTLE_MS),
     m_maxThrottlems(50),
     m_throttleToggle(false),
-    m_buf(0)
+    m_buf(nullptr)
 {
-    assert(m_ofstream != 0);
+    assert(m_ofstream != nullptr);
 }
 
-FileSinkThread::~FileSinkThread()
+FileSinkWorker::~FileSinkWorker()
 {
 	if (m_running) {
 		stopWork();
@@ -51,39 +51,34 @@ FileSinkThread::~FileSinkThread()
     if (m_buf) delete[] m_buf;
 }
 
-void FileSinkThread::startWork()
+void FileSinkWorker::startWork()
 {
-	qDebug() << "FileSinkThread::startWork: ";
+	qDebug() << "FileSinkWorker::startWork: ";
 
     if (m_ofstream->is_open())
     {
-        qDebug() << "FileSinkThread::startWork: file stream open, starting...";
+        qDebug() << "FileSinkWorker::startWork: file stream open, starting...";
         m_maxThrottlems = 0;
-        m_startWaitMutex.lock();
         m_elapsedTimer.start();
-        start();
-        while(!m_running)
-            m_startWaiter.wait(&m_startWaitMutex, 100);
-        m_startWaitMutex.unlock();
+        m_running = true;
     }
     else
     {
-        qDebug() << "FileSinkThread::startWork: file stream closed, not starting.";
+        qDebug() << "FileSinkWorker::startWork: file stream closed, not starting.";
+        m_running = false;
     }
 }
 
-void FileSinkThread::stopWork()
+void FileSinkWorker::stopWork()
 {
-	qDebug() << "FileSinkThread::stopWork";
 	m_running = false;
-	wait();
 }
 
-void FileSinkThread::setSamplerate(int samplerate)
+void FileSinkWorker::setSamplerate(int samplerate)
 {
 	if (samplerate != m_samplerate)
 	{
-	    qDebug() << "FileSinkThread::setSamplerate:"
+	    qDebug() << "FileSinkWorker::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
@@ -113,7 +108,7 @@ void FileSinkThread::setSamplerate(int samplerate)
 	}
 }
 
-void FileSinkThread::setLog2Interpolation(int log2Interpolation)
+void FileSinkWorker::setLog2Interpolation(int log2Interpolation)
 {
     if ((log2Interpolation < 0) || (log2Interpolation > 6))
     {
@@ -122,7 +117,7 @@ void FileSinkThread::setLog2Interpolation(int log2Interpolation)
 
     if (log2Interpolation != m_log2Interpolation)
     {
-        qDebug() << "FileSinkThread::setLog2Interpolation:"
+        qDebug() << "FileSinkWorker::setLog2Interpolation:"
                 << " new:" << log2Interpolation
                 << " old:" << m_log2Interpolation;
 
@@ -146,26 +141,13 @@ void FileSinkThread::setLog2Interpolation(int log2Interpolation)
     }
 }
 
-void FileSinkThread::run()
+void FileSinkWorker::connectTimer(const QTimer& timer)
 {
-	m_running = true;
-	m_startWaiter.wakeAll();
-
-	while(m_running) // actual work is in the tick() function
-	{
-		sleep(1);
-	}
-
-	m_running = false;
-}
-
-void FileSinkThread::connectTimer(const QTimer& timer)
-{
-	qDebug() << "FileSinkThread::connectTimer";
+	qDebug() << "FileSinkWorker::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void FileSinkThread::tick()
+void FileSinkWorker::tick()
 {
 	if (m_running)
 	{
@@ -193,7 +175,7 @@ void FileSinkThread::tick()
     }
 }
 
-void FileSinkThread::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
+void FileSinkWorker::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
 {
     SampleVector::iterator beginRead = data.begin() + iBegin;
     unsigned int chunkSize = iEnd - iBegin;

@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
 #include <errno.h>
 #include <QDebug>
 
@@ -30,7 +29,7 @@
 #include "device/deviceapi.h"
 
 #include "filesinkoutput.h"
-#include "filesinkthread.h"
+#include "filesinkworker.h"
 
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSink, Message)
 MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgStartStop, Message)
@@ -43,7 +42,7 @@ MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
 FileSinkOutput::FileSinkOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_fileSinkThread(0),
+	m_fileSinkWorker(nullptr),
 	m_deviceDescription("FileSink"),
 	m_fileName("./test.sdriq"),
 	m_startingTimeStamp(0),
@@ -95,11 +94,12 @@ bool FileSinkOutput::start()
 
 	openFileStream();
 
-	m_fileSinkThread = new FileSinkThread(&m_ofstream, &m_sampleSourceFifo);
-	m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
-	m_fileSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
-	m_fileSinkThread->connectTimer(m_masterTimer);
-	m_fileSinkThread->startWork();
+	m_fileSinkWorker = new FileSinkWorker(&m_ofstream, &m_sampleSourceFifo);
+    m_fileSinkWorker->moveToThread(&m_fileSinkWorkerThread);
+	m_fileSinkWorker->setSamplerate(m_settings.m_sampleRate);
+	m_fileSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
+	m_fileSinkWorker->connectTimer(m_masterTimer);
+	startWorker();
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
@@ -119,11 +119,11 @@ void FileSinkOutput::stop()
 	qDebug() << "FileSourceInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if(m_fileSinkThread != 0)
+	if (m_fileSinkWorker)
 	{
-		m_fileSinkThread->stopWork();
-		delete m_fileSinkThread;
-		m_fileSinkThread = 0;
+		stopWorker();
+		delete m_fileSinkWorker;
+		m_fileSinkWorker = nullptr;
 	}
 
     if (m_ofstream.is_open()) {
@@ -239,15 +239,12 @@ bool FileSinkOutput::handleMessage(const Message& message)
 		MsgConfigureFileSinkWork& conf = (MsgConfigureFileSinkWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileSinkThread != 0)
+		if (m_fileSinkWorker != 0)
 		{
-			if (working)
-			{
-				m_fileSinkThread->startWork();
-			}
-			else
-			{
-				m_fileSinkThread->stopWork();
+			if (working) {
+				startWorker();
+			} else {
+				stopWorker();
 			}
 		}
 
@@ -257,9 +254,9 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	{
         MsgReportFileSinkStreamTiming *report;
 
-		if (m_fileSinkThread != 0 && getMessageQueueToGUI())
+		if (m_fileSinkWorker != 0 && getMessageQueueToGUI())
 		{
-			report = MsgReportFileSinkStreamTiming::create(m_fileSinkThread->getSamplesCount());
+			report = MsgReportFileSinkStreamTiming::create(m_fileSinkWorker->getSamplesCount());
 			getMessageQueueToGUI()->push(report);
 		}
 
@@ -286,9 +283,9 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
 
-        if (m_fileSinkThread != 0)
+        if (m_fileSinkWorker != 0)
         {
-            m_fileSinkThread->setSamplerate(m_settings.m_sampleRate);
+            m_fileSinkWorker->setSamplerate(m_settings.m_sampleRate);
         }
 
         forwardChange = true;
@@ -298,9 +295,9 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
 
-        if (m_fileSinkThread != 0)
+        if (m_fileSinkWorker != 0)
         {
-            m_fileSinkThread->setLog2Interpolation(m_settings.m_log2Interp);
+            m_fileSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
         }
 
         forwardChange = true;
