@@ -867,16 +867,18 @@ void DeviceAPI::renumerateChannels()
 
         for (; index < m_channelSourceAPIs.size() + m_channelSinkAPIs.size(); ++index)
         {
-            m_channelSourceAPIs.at(index)->setIndexInDeviceSet(index);
-            m_channelSourceAPIs.at(index)->setDeviceSetIndex(m_deviceTabIndex);
-            m_channelSourceAPIs.at(index)->setDeviceAPI(this);
+            int sourceIndex = index - m_channelSinkAPIs.size();
+            m_channelSourceAPIs.at(sourceIndex)->setIndexInDeviceSet(index);
+            m_channelSourceAPIs.at(sourceIndex)->setDeviceSetIndex(m_deviceTabIndex);
+            m_channelSourceAPIs.at(sourceIndex)->setDeviceAPI(this);
         }
 
         for (; index < m_mimoChannelAPIs.size() + m_channelSourceAPIs.size() + m_channelSinkAPIs.size(); ++index)
         {
-            m_mimoChannelAPIs.at(index)->setIndexInDeviceSet(index);
-            m_mimoChannelAPIs.at(index)->setDeviceSetIndex(m_deviceTabIndex);
-            m_mimoChannelAPIs.at(index)->setDeviceAPI(this);
+            int mimoIndex = index - m_channelSourceAPIs.size() - m_channelSinkAPIs.size();
+            m_mimoChannelAPIs.at(mimoIndex)->setIndexInDeviceSet(index);
+            m_mimoChannelAPIs.at(mimoIndex)->setDeviceSetIndex(m_deviceTabIndex);
+            m_mimoChannelAPIs.at(mimoIndex)->setDeviceAPI(this);
         }
     }
 }
