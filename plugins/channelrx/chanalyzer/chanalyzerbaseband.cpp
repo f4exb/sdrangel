@@ -139,7 +139,7 @@ bool ChannelAnalyzerBaseband::handleMessage(const Message& cmd)
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         unsigned int desiredSampleRate = notif.getSampleRate() / (1<<m_settings.m_log2Decim);
         m_channelizer->setChannelization(desiredSampleRate, m_settings.m_inputFrequencyOffset);
-        m_sink.applyChannelSettings(desiredSampleRate, m_channelizer->getChannelFrequencyOffset());
+        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
 		return true;
     }
