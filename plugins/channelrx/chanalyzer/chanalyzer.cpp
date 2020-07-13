@@ -40,9 +40,8 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
     qDebug("ChannelAnalyzer::ChannelAnalyzer");
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
     m_basebandSink = new ChannelAnalyzerBaseband();
-    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->moveToThread(&m_thread);
 
 	applySettings(m_settings, true);
 
@@ -54,8 +53,12 @@ ChannelAnalyzer::~ChannelAnalyzer()
 {
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+
+    if (m_basebandSink->isRunning()) {
+        stop();
+    }
+
     delete m_basebandSink;
-    delete m_thread;
 }
 
 void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -64,24 +67,28 @@ void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const Samp
     m_basebandSink->feed(begin, end);
 }
 
-
 void ChannelAnalyzer::start()
 {
     qDebug() << "ChannelAnalyzer::start";
 
-    if (m_basebandSampleRate != 0) {
-        m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
-    }
-
     m_basebandSink->reset();
-    m_thread->start();
+    m_basebandSink->startWork();
+    m_thread.start();
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSink->getInputMessageQueue()->push(dspMsg);
+
+    ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband *msg =
+        ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 void ChannelAnalyzer::stop()
 {
     qDebug() << "ChannelAnalyzer::stop";
-	m_thread->exit();
-	m_thread->wait();
+	m_basebandSink->stopWork();
+	m_thread.quit();
+	m_thread.wait();
 }
 
 bool ChannelAnalyzer::handleMessage(const Message& cmd)
@@ -99,6 +106,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& cfg = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = cfg.getSampleRate();
+        m_centerFrequency = cfg.getCenterFrequency();
         DSPSignalNotification *notif = new DSPSignalNotification(cfg);
         m_basebandSink->getInputMessageQueue()->push(notif);
 

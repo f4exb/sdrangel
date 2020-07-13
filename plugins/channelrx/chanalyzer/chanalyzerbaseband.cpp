@@ -26,12 +26,30 @@
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband, Message)
 
 ChannelAnalyzerBaseband::ChannelAnalyzerBaseband() :
+    m_running(false),
     m_mutex(QMutex::Recursive)
 {
     qDebug("ChannelAnalyzerBaseband::ChannelAnalyzerBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
+}
 
+ChannelAnalyzerBaseband::~ChannelAnalyzerBaseband()
+{
+    m_inputMessageQueue.clear();
+    delete m_channelizer;
+}
+
+void ChannelAnalyzerBaseband::reset()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    m_inputMessageQueue.clear();
+    m_sampleFifo.reset();
+}
+
+void ChannelAnalyzerBaseband::startWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
@@ -39,19 +57,21 @@ ChannelAnalyzerBaseband::ChannelAnalyzerBaseband() :
         &ChannelAnalyzerBaseband::handleData,
         Qt::QueuedConnection
     );
-
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_running = true;
 }
 
-ChannelAnalyzerBaseband::~ChannelAnalyzerBaseband()
-{
-    delete m_channelizer;
-}
-
-void ChannelAnalyzerBaseband::reset()
+void ChannelAnalyzerBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
-    m_sampleFifo.reset();
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::disconnect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &ChannelAnalyzerBaseband::handleData
+    );
+    m_running = false;
 }
 
 void ChannelAnalyzerBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
