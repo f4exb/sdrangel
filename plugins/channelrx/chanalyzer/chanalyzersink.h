@@ -40,7 +40,7 @@ public:
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
+    void applyChannelSettings(int channelSampleRate, int sinkSampleRate, int channelFrequencyOffset, bool force = false);
 	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
 
 	double getMagSq() const { return m_magsq; }
@@ -57,6 +57,7 @@ public:
 private:
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
+    int m_sinkSampleRate;
     ChannelAnalyzerSettings m_settings;
 
 	bool m_usb;
