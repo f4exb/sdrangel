@@ -50,9 +50,8 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
     m_basebandSink = new AMDemodBaseband();
-    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->moveToThread(&m_thread);
 
 	applySettings(m_settings, true);
 
@@ -69,8 +68,12 @@ AMDemod::~AMDemod()
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+
+    if (m_basebandSink->isRunning()) {
+        stop();
+    }
+
     delete m_basebandSink;
-    delete m_thread;
 }
 
 uint32_t AMDemod::getNumberOfDeviceStreams() const
@@ -88,19 +91,23 @@ void AMDemod::start()
 {
 	qDebug("AMDemod::start");
 
-    if (m_basebandSampleRate != 0) {
-        m_basebandSink->setBasebandSampleRate(m_basebandSampleRate);
-    }
-
     m_basebandSink->reset();
-    m_thread->start();
+    m_basebandSink->startWork();
+    m_thread.start();
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSink->getInputMessageQueue()->push(dspMsg);
+
+    AMDemodBaseband::MsgConfigureAMDemodBaseband *msg = AMDemodBaseband::MsgConfigureAMDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 void AMDemod::stop()
 {
     qDebug("AMDemod::stop");
-	m_thread->exit();
-	m_thread->wait();
+	m_basebandSink->stopWork();
+	m_thread.quit();
+	m_thread.wait();
 }
 
 bool AMDemod::handleMessage(const Message& cmd)
@@ -117,6 +124,7 @@ bool AMDemod::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = notif.getSampleRate();
+        m_centerFrequency = notif.getCenterFrequency();
         // Forward to the sink
         DSPSignalNotification* rep = new DSPSignalNotification(notif); // make a copy
         qDebug() << "AMDemod::handleMessage: DSPSignalNotification";
