@@ -102,6 +102,8 @@ void DeviceAPI::removeChannelSink(BasebandSampleSink* sink, int streamIndex)
 
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->removeSink(sink);
+    } else if (m_deviceMIMOEngine) {
+        m_deviceMIMOEngine->removeChannelSink(sink);
     }
 }
 
