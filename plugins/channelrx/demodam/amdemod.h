@@ -21,6 +21,7 @@
 #include <vector>
 
 #include <QNetworkRequest>
+#include <QThread>
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
@@ -126,10 +127,11 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-    QThread *m_thread;
+    QThread m_thread;
     AMDemodBaseband* m_basebandSink;
     AMDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
+    qint64 m_centerFrequency;
 
     static const int m_udpBlockSize;
 

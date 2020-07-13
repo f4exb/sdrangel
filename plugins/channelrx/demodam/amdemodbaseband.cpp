@@ -26,6 +26,7 @@
 MESSAGE_CLASS_DEFINITION(AMDemodBaseband::MsgConfigureAMDemodBaseband, Message)
 
 AMDemodBaseband::AMDemodBaseband() :
+    m_running(false),
     m_mutex(QMutex::Recursive)
 {
     qDebug("AMDemodBaseband::AMDemodBaseband");
@@ -33,22 +34,13 @@ AMDemodBaseband::AMDemodBaseband() :
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 
-    QObject::connect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        this,
-        &AMDemodBaseband::handleData,
-        Qt::QueuedConnection
-    );
-
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
     m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
-
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 AMDemodBaseband::~AMDemodBaseband()
 {
+    m_inputMessageQueue.clear();
     DSPEngine::instance()->getAudioDeviceManager()->removeAudioSink(m_sink.getAudioFifo());
     delete m_channelizer;
 }
@@ -56,7 +48,35 @@ AMDemodBaseband::~AMDemodBaseband()
 void AMDemodBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_inputMessageQueue.clear();
     m_sampleFifo.reset();
+}
+
+void AMDemodBaseband::startWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    QObject::connect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &AMDemodBaseband::handleData,
+        Qt::QueuedConnection
+    );
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_running = true;
+}
+
+void AMDemodBaseband::stopWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::disconnect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &AMDemodBaseband::handleData
+    );
+    m_running = false;
 }
 
 void AMDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)

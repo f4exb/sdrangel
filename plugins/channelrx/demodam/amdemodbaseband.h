@@ -59,6 +59,8 @@ public:
     AMDemodBaseband();
     ~AMDemodBaseband();
     void reset();
+    void startWork();
+    void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
@@ -69,6 +71,7 @@ public:
     double getMagSq() const { return m_sink.getMagSq(); }
     bool getPllLocked() const { return m_sink.getPllLocked(); }
     Real getPllFrequency() const { return m_sink.getPllFrequency(); }
+    bool isRunning() const { return m_running; }
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -76,6 +79,7 @@ private:
     AMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AMDemodSettings m_settings;
+    bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
