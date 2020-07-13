@@ -1,4 +1,16 @@
-sdrangel (5.7.10-1) unstable; urgency=medium
+sdrangel (4.14.17-1) unstable; urgency=medium
+
+   * Channel Analyzer: fixed sink apply channel settings. Fixes #569 and #570
+   * Channel Analyzer: improved baseband thread management
+   * AM demod: improved baseband thread management
+   * DeviceUISet: fixed deleteChannel method in GUI. Fixes #568
+   * Device API: fixes in MIMO case. Fixes #567
+   * Channel Analyzer: let spectrum free running when in free running mode. Issue #571
+   * RemoteInput: do not stop UDP handler when stop. Fixes #563
+
+ -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 13 Jul 2020 22:12:45 +0200
+
+sdrangel (4.14.16-1) unstable; urgency=medium
 
    * ATV demod: fixed initialization issues. Fixes #560
    * GLSpectrum: synchronize spectrum with the GUI spectrum freeze button. Fixes issue #561
