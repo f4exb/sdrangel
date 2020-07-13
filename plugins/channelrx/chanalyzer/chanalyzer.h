@@ -19,6 +19,7 @@
 #define INCLUDE_CHANALYZER_H
 
 #include <QMutex>
+#include <QThread>
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
@@ -29,7 +30,6 @@
 
 #include "chanalyzerbaseband.h"
 
-class QThread;
 class DownChannelizer;
 
 class ChannelAnalyzer : public BasebandSampleSink, public ChannelAPI {
@@ -98,11 +98,12 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-    QThread *m_thread;
+    QThread m_thread;
     ChannelAnalyzerBaseband *m_basebandSink;
     ChannelAnalyzerSettings m_settings;
     SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
+    qint64 m_centerFrequency; //!< stored from device message used when starting baseband sink
 
 	void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
 };

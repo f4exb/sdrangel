@@ -59,6 +59,9 @@ public:
     ChannelAnalyzerBaseband();
     ~ChannelAnalyzerBaseband();
     void reset();
+    void startWork();
+    void stopWork();
+    bool isRunning() const { return m_running; }
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
@@ -77,6 +80,7 @@ private:
     ChannelAnalyzerSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     ChannelAnalyzerSettings m_settings;
+    bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
