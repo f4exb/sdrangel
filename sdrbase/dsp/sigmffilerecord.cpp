@@ -101,6 +101,11 @@ void SigMFFileRecord::setFileName(const QString& fileName)
     }
 }
 
+unsigned int SigMFFileRecord::getNbCaptures() const
+{
+    return m_metaRecord->captures.size();
+}
+
 void SigMFFileRecord::startRecording()
 {
 

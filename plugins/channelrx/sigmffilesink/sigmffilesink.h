@@ -109,6 +109,9 @@ public:
     void getLocalDevices(std::vector<uint32_t>& indexes);
     uint32_t getNumberOfDeviceStreams() const;
     void record(bool record);
+    uint64_t getMsCount() const;
+    uint64_t getByteCount() const;
+    unsigned int getNbTracks() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

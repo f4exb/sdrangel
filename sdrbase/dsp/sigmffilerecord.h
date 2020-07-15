@@ -50,6 +50,7 @@ public:
     virtual bool isRecording() const { return m_recordOn; }
 
     void setHardwareId(const QString& hardwareId) { m_hardwareId = hardwareId; }
+    unsigned int getNbCaptures() const;
 
 private:
     QString m_hardwareId;

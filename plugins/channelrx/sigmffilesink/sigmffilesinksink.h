@@ -46,6 +46,9 @@ public:
         int64_t centerFrequency,
         bool force = false);
     void applySettings(const SigMFFileSinkSettings& settings, bool force = false);
+    uint64_t getMsCount() const { return m_msCount; }
+    uint64_t getByteCount() const { return m_byteCount; }
+    unsigned int getNbTracks() const { return m_fileSink.getNbCaptures(); }
 
 private:
     int m_channelSampleRate;
@@ -63,6 +66,8 @@ private:
     bool m_record;
     QString m_deviceHwId;
     int m_deviceUId;
+    uint64_t m_msCount;
+    uint64_t m_byteCount;
 };
 
 #endif // INCLUDE_SIFMFFILESINKSINK_H_

@@ -88,6 +88,7 @@ private:
     void displayPos();
     void setFrequencyFromPos();
     void setPosFromFrequency();
+    QString displayScaled(uint64_t value, int precision);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

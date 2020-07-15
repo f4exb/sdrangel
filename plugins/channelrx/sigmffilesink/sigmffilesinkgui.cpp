@@ -17,8 +17,10 @@
 
 #include <QLocale>
 #include <QFileDialog>
+#include <QTime>
 
 #include "device/deviceuiset.h"
+#include "device/deviceapi.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/hbfilterchainconverter.h"
@@ -143,6 +145,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 	ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
+    ui->position->setEnabled(m_fixedPosition);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
@@ -161,6 +164,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
+    connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     displaySettings();
     applySettings(true);
@@ -440,16 +444,41 @@ void SigMFFileSinkGUI::setPosFromFrequency()
     displayPos();
 }
 
-void SigMFFileSinkGUI::tick()
-{
-    if (++m_tickCount == 20) { // once per second
-        m_tickCount = 0;
-    }
-}
-
 void SigMFFileSinkGUI::applyDecimation()
 {
     ui->position->setMaximum(SigMFFileSinkSettings::getNbFixedShiftIndexes(m_settings.m_log2Decim)-1);
     ui->position->setValue(m_fixedShiftIndex);
     m_fixedShiftIndex = ui->position->value();
 }
+
+void SigMFFileSinkGUI::tick()
+{
+    if (++m_tickCount == 20) // once per second
+    {
+        uint64_t msTime = m_sigMFFileSink->getMsCount();
+        uint64_t bytes = m_sigMFFileSink->getByteCount();
+        unsigned int nbTracks = m_sigMFFileSink->getNbTracks();
+        QTime recordLength(0, 0, 0, 0);
+        recordLength = recordLength.addSecs(msTime / 1000);
+        recordLength = recordLength.addMSecs(msTime % 1000);
+        QString s_time = recordLength.toString("HH:mm:ss");
+        ui->recordTimeText->setText(s_time);
+        ui->recordSizeText->setText(displayScaled(bytes, 2));
+        ui->recordNbTracks->setText(tr("#%1").arg(nbTracks));
+        m_tickCount = 0;
+    }
+}
+
+QString SigMFFileSinkGUI::displayScaled(uint64_t value, int precision)
+{
+    if (value < 1000) {
+        return tr("%1").arg(QString::number(value, 'f', precision));
+    } else if (value < 1000000) {
+        return tr("%1k").arg(QString::number(value / 1000.0, 'f', precision));
+    } else if (value < 1000000000) {
+        return tr("%1M").arg(QString::number(value / 1000000.0, 'f', precision));
+    } else if (value < 1000000000000) {
+        return tr("%1G").arg(QString::number(value / 1000000000.0, 'f', precision));
+    }
+}
+

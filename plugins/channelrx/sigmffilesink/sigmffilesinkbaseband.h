@@ -88,6 +88,9 @@ public:
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
     bool isRunning() const { return m_running; }
+    uint64_t getMsCount() const { return m_sink.getMsCount(); }
+    uint64_t getByteCount() const { return m_sink.getByteCount(); }
+    unsigned int getNbTracks() const { return m_sink.getNbTracks(); }
 
 private:
     SampleSinkFifo m_sampleFifo;

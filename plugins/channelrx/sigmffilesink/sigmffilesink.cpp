@@ -254,6 +254,33 @@ void SigMFFileSink::record(bool record)
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
+uint64_t SigMFFileSink::getMsCount() const
+{
+    if (m_basebandSink) {
+        return m_basebandSink->getMsCount();
+    } else {
+        return 0;
+    }
+}
+
+uint64_t SigMFFileSink::getByteCount() const
+{
+    if (m_basebandSink) {
+        return m_basebandSink->getByteCount();
+    } else {
+        return 0;
+    }
+}
+
+unsigned int SigMFFileSink::getNbTracks() const
+{
+    if (m_basebandSink) {
+        return m_basebandSink->getNbTracks();
+    } else {
+        return 0;
+    }
+}
+
 int SigMFFileSink::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)

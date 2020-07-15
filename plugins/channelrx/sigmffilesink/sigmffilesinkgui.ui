@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
+    <width>522</width>
     <height>102</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>494</width>
+    <width>522</width>
     <height>102</height>
    </size>
   </property>
@@ -33,13 +33,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>492</width>
+     <width>520</width>
      <height>100</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>492</width>
+     <width>520</width>
      <height>100</height>
     </size>
    </property>
@@ -202,10 +202,64 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Effective channel rate (kS/s)</string>
+         <string>Sink rate (kS/s)</string>
         </property>
         <property name="text">
          <string>0000k</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="recordNbTracks">
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Number of captures (tracks) in record updated at end of track</string>
+        </property>
+        <property name="text">
+         <string>#000</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="recordTimeText">
+        <property name="minimumSize">
+         <size>
+          <width>52</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Record time (HH:MM:SS)</string>
+        </property>
+        <property name="text">
+         <string>00:00:00</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="recordSizeText">
+        <property name="minimumSize">
+         <size>
+          <width>52</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Data file size (k: kB, M: MB, G: GB)</string>
+        </property>
+        <property name="text">
+         <string>999.99M</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

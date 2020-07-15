@@ -24,7 +24,9 @@
 
 SigMFFileSinkSink::SigMFFileSinkSink() :
     m_recordEnabled(false),
-    m_record(false)
+    m_record(false),
+    m_msCount(0),
+    m_byteCount(0)
 {}
 
 SigMFFileSinkSink::~SigMFFileSinkSink()
@@ -68,8 +70,15 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
 		}
 	}
 
-    if (m_record) {
+    if (m_record)
+    {
         m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+        int nbSamples = m_sampleBuffer.end() - m_sampleBuffer.begin();
+        m_byteCount += nbSamples * sizeof(Sample);
+
+        if (m_sinkSampleRate > 0) {
+            m_msCount += (nbSamples * 1000) / m_sinkSampleRate;
+        }
     }
 
     m_sampleBuffer.clear();
@@ -133,6 +142,8 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         if (recordType == FileRecordInterface::RecordTypeSigMF)
         {
             m_fileSink.setFileName(fileBase);
+            m_msCount = 0;
+            m_byteCount = 0;
             m_recordEnabled = true;
         }
         else
