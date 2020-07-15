@@ -80,7 +80,7 @@
       <item>
        <widget class="ValueDialZ" name="deltaFrequency" native="true">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -122,13 +122,6 @@
        <widget class="Line" name="line">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="nco">
-        <property name="text">
-         <string>NCO</string>
         </property>
        </widget>
       </item>
@@ -227,7 +220,10 @@
        <number>10</number>
       </property>
       <item>
-       <widget class="QLabel" name="positionLabel">
+       <widget class="QCheckBox" name="fixedPosition">
+        <property name="toolTip">
+         <string>Use fixed frequency shift positions for little performance improvement</string>
+        </property>
         <property name="text">
          <string>Pos</string>
         </property>
@@ -265,22 +261,6 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="filterChainText">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Filter chain stages left to right (L: low, C: center, H: high) </string>
-        </property>
-        <property name="text">
-         <string>LLLLLL</string>
         </property>
        </widget>
       </item>

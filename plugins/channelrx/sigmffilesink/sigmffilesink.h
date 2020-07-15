@@ -19,6 +19,7 @@
 #define INCLUDE_SIGMFFILESINK_H_
 
 #include <QObject>
+#include <QThread>
 #include <QMutex>
 #include <QNetworkRequest>
 
@@ -29,7 +30,6 @@
 
 class QNetworkAccessManager;
 class QNetworkReply;
-class QThread;
 
 class DeviceAPI;
 class DeviceSampleSource;
@@ -59,26 +59,6 @@ public:
             m_settings(settings),
             m_force(force)
         { }
-    };
-
-    class MsgBasebandSampleRateNotification : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgBasebandSampleRateNotification* create(int sampleRate) {
-            return new MsgBasebandSampleRateNotification(sampleRate);
-        }
-
-        int getSampleRate() const { return m_sampleRate; }
-
-    private:
-
-        MsgBasebandSampleRateNotification(int sampleRate) :
-            Message(),
-            m_sampleRate(sampleRate)
-        { }
-
-        int m_sampleRate;
     };
 
     SigMFFileSink(DeviceAPI *deviceAPI);
@@ -135,7 +115,7 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    QThread *m_thread;
+    QThread m_thread;
     SigMFFileSinkBaseband *m_basebandSink;
     SigMFFileSinkSettings m_settings;
 
@@ -148,8 +128,6 @@ private:
 
     void applySettings(const SigMFFileSinkSettings& settings, bool force = false);
     void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim);
-    static void validateFilterChainHash(SigMFFileSinkSettings& settings);
-    void calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash);
     DeviceSampleSource *getLocalDevice(uint32_t index);
 
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force);

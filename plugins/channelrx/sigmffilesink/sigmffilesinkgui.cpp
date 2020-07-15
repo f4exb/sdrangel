@@ -16,11 +16,13 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QLocale>
+#include <QFileDialog>
 
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/hbfilterchainconverter.h"
+#include "dsp/dspcommands.h"
 #include "mainwindow.h"
 
 #include "sigmffilesinkgui.h"
@@ -86,12 +88,22 @@ bool SigMFFileSinkGUI::deserialize(const QByteArray& data)
 
 bool SigMFFileSinkGUI::handleMessage(const Message& message)
 {
-    if (SigMFFileSink::MsgBasebandSampleRateNotification::match(message))
+    if (DSPSignalNotification::match(message))
     {
-        SigMFFileSink::MsgBasebandSampleRateNotification& notif = (SigMFFileSink::MsgBasebandSampleRateNotification&) message;
-        //m_channelMarker.setBandwidth(notif.getSampleRate());
+        DSPSignalNotification notif = (const DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
-        displayRateAndShift();
+        displayRate();
+
+        if (m_fixedPosition)
+        {
+            setFrequencyFromPos();
+            applySettings();
+        }
+        else
+        {
+            setPosFromFrequency();
+        }
+
         return true;
     }
     else if (SigMFFileSink::MsgConfigureSigMFFileSink::match(message))
@@ -114,7 +126,10 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
         ui(new Ui::SigMFFileSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
+        m_channelMarker(this),
+        m_fixedShiftIndex(0),
         m_basebandSampleRate(0),
+        m_fixedPosition(false),
         m_tickCount(0)
 {
     ui->setupUi(this);
@@ -132,6 +147,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
     m_channelMarker.setCenterFrequency(0);
+	m_channelMarker.setBandwidth(m_basebandSampleRate);
     m_channelMarker.setTitle("SigMF File Sink");
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -142,8 +158,9 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
+	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
+    connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    //connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     displaySettings();
     applySettings(true);
@@ -175,10 +192,9 @@ void SigMFFileSinkGUI::applySettings(bool force)
 void SigMFFileSinkGUI::displaySettings()
 {
     m_channelMarker.blockSignals(true);
-    m_channelMarker.setCenterFrequency(0);
-    m_channelMarker.setTitle(m_settings.m_title);
+    m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setBandwidth(m_basebandSampleRate / (1<<m_settings.m_log2Decim));
-    m_channelMarker.setMovable(false); // do not let user move the center arbitrarily
+    m_channelMarker.setTitle(m_settings.m_title);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
@@ -187,9 +203,11 @@ void SigMFFileSinkGUI::displaySettings()
 
     blockApplySettings(true);
 
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    ui->fileNameText->setText(m_settings.m_fileRecordName);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
-    applyDecimation();
     displayStreamIndex();
+    setPosFromFrequency();
 
     blockApplySettings(false);
 }
@@ -203,16 +221,17 @@ void SigMFFileSinkGUI::displayStreamIndex()
     }
 }
 
-void SigMFFileSinkGUI::displayRateAndShift()
+void SigMFFileSinkGUI::displayRate()
 {
-    int shift = m_shiftFrequencyFactor * m_basebandSampleRate;
-    ui->deltaFrequency->setValue(shift);
-    //QLocale loc;
-    //ui->offsetFrequencyText->setText(tr("%1 Hz").arg(loc.toString(shift)));
     double channelSampleRate = ((double) m_basebandSampleRate) / (1<<m_settings.m_log2Decim);
     ui->channelRateText->setText(tr("%1k").arg(QString::number(channelSampleRate / 1000.0, 'g', 5)));
-    m_channelMarker.setCenterFrequency(shift);
     m_channelMarker.setBandwidth(channelSampleRate);
+}
+
+void SigMFFileSinkGUI::displayPos()
+{
+    ui->position->setValue(m_fixedShiftIndex);
+    ui->filterChainIndex->setText(tr("%1").arg(m_fixedShiftIndex));
 }
 
 void SigMFFileSinkGUI::leaveEvent(QEvent*)
@@ -223,6 +242,23 @@ void SigMFFileSinkGUI::leaveEvent(QEvent*)
 void SigMFFileSinkGUI::enterEvent(QEvent*)
 {
     m_channelMarker.setHighlighted(true);
+}
+
+void SigMFFileSinkGUI::channelMarkerChangedByCursor()
+{
+    if (m_fixedPosition) {
+        return;
+    }
+
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+    setPosFromFrequency();
+	applySettings();
+}
+
+void SigMFFileSinkGUI::channelMarkerHighlightedByCursor()
+{
+    setHighlighted(m_channelMarker.getHighlighted());
 }
 
 void SigMFFileSinkGUI::handleSourceMessages()
@@ -289,46 +325,119 @@ void SigMFFileSinkGUI::onMenuDialogCalled(const QPoint &p)
     resetContextMenuType();
 }
 
+void SigMFFileSinkGUI::on_deltaFrequency_changed(qint64 value)
+{
+    if (!m_fixedPosition)
+    {
+        m_channelMarker.setCenterFrequency(value);
+        m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+        setPosFromFrequency();
+        applySettings();
+    }
+}
+
 void SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index;
     applyDecimation();
+    displayRate();
+    displayPos();
+
+    if (m_fixedPosition)
+    {
+        setFrequencyFromPos();
+        applySettings();
+    }
+    else
+    {
+        setPosFromFrequency();
+    }
+}
+
+void SigMFFileSinkGUI::on_fixedPosition_toggled(bool checked)
+{
+    m_fixedPosition = checked;
+    m_channelMarker.setMovable(!checked);
+    ui->deltaFrequency->setEnabled(!checked);
+    ui->position->setEnabled(checked);
+
+    if (m_fixedPosition)
+    {
+        setFrequencyFromPos();
+        applySettings();
+    }
 }
 
 void SigMFFileSinkGUI::on_position_valueChanged(int value)
 {
-    m_settings.m_filterChainHash = value;
-    applyPosition();
+    m_fixedShiftIndex = value;
+    displayPos();
+
+    if (m_fixedPosition)
+    {
+        setFrequencyFromPos();
+        applySettings();
+    }
 }
 
 void SigMFFileSinkGUI::on_record_toggled(bool checked)
 {
+    if (checked) {
+        ui->record->setStyleSheet("QToolButton { background-color : red; }");
+    } else {
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+    }
+
     m_sigMFFileSink->record(checked);
 }
 
-void SigMFFileSinkGUI::applyDecimation()
+void SigMFFileSinkGUI::on_showFileDialog_clicked(bool checked)
 {
-    uint32_t maxHash = 1;
+    (void) checked;
+    QFileDialog fileDialog(
+        this,
+        tr("Save SigMF record file"),
+        m_settings.m_fileRecordName,
+        tr("SigMF Files (*.sigmf-meta)")
+    );
 
-    for (uint32_t i = 0; i < m_settings.m_log2Decim; i++) {
-        maxHash *= 3;
+    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
+    fileDialog.setFileMode(QFileDialog::AnyFile);
+    QStringList fileNames;
+
+    if (fileDialog.exec())
+    {
+        fileNames = fileDialog.selectedFiles();
+
+        if (fileNames.size() > 0)
+        {
+            m_settings.m_fileRecordName = fileNames.at(0);
+		    ui->fileNameText->setText(m_settings.m_fileRecordName);
+            applySettings();
+        }
     }
-
-    ui->position->setMaximum(maxHash-1);
-    ui->position->setValue(m_settings.m_filterChainHash);
-    m_settings.m_filterChainHash = ui->position->value();
-    applyPosition();
 }
 
-void SigMFFileSinkGUI::applyPosition()
+void SigMFFileSinkGUI::setFrequencyFromPos()
 {
-    ui->filterChainIndex->setText(tr("%1").arg(m_settings.m_filterChainHash));
-    QString s;
-    m_shiftFrequencyFactor = HBFilterChainConverter::convertToString(m_settings.m_log2Decim, m_settings.m_filterChainHash, s);
-    ui->filterChainText->setText(s);
+    int inputFrequencyOffset = SigMFFileSinkSettings::getOffsetFromFixedShiftIndex(
+        m_basebandSampleRate,
+        m_settings.m_log2Decim,
+        m_fixedShiftIndex);
+    m_channelMarker.setCenterFrequency(inputFrequencyOffset);
+    ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
+}
 
-    displayRateAndShift();
-    applySettings();
+void SigMFFileSinkGUI::setPosFromFrequency()
+{
+    int fshift = SigMFFileSinkSettings::getHalfBand(m_basebandSampleRate, m_settings.m_log2Decim + 1);
+    m_fixedShiftIndex = SigMFFileSinkSettings::getFixedShiftIndexFromOffset(
+        m_basebandSampleRate,
+        m_settings.m_log2Decim,
+        m_settings.m_inputFrequencyOffset + (m_settings.m_inputFrequencyOffset < 0 ? -fshift : fshift)
+    );
+    displayPos();
 }
 
 void SigMFFileSinkGUI::tick()
@@ -336,4 +445,11 @@ void SigMFFileSinkGUI::tick()
     if (++m_tickCount == 20) { // once per second
         m_tickCount = 0;
     }
+}
+
+void SigMFFileSinkGUI::applyDecimation()
+{
+    ui->position->setMaximum(SigMFFileSinkSettings::getNbFixedShiftIndexes(m_settings.m_log2Decim)-1);
+    ui->position->setValue(m_fixedShiftIndex);
+    m_fixedShiftIndex = ui->position->value();
 }

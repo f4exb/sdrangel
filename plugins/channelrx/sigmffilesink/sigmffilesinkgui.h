@@ -55,14 +55,20 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     virtual bool handleMessage(const Message& message);
 
+public slots:
+	void channelMarkerChangedByCursor();
+	void channelMarkerHighlightedByCursor();
+
 private:
     Ui::SigMFFileSinkGUI* ui;
     PluginAPI* m_pluginAPI;
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     SigMFFileSinkSettings m_settings;
+    int m_fixedShiftIndex;
     int m_basebandSampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
+    bool m_fixedPosition;
     bool m_doApplySettings;
 
     SigMFFileSink* m_sigMFFileSink;
@@ -75,22 +81,25 @@ private:
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
+    void applyDecimation();
     void displaySettings();
     void displayStreamIndex();
-    void displayRateAndShift();
-    void updateLocalDevices();
+    void displayRate();
+    void displayPos();
+    void setFrequencyFromPos();
+    void setPosFromFrequency();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
 
-    void applyDecimation();
-    void applyPosition();
-
 private slots:
     void handleSourceMessages();
+    void on_deltaFrequency_changed(qint64 value);
     void on_decimationFactor_currentIndexChanged(int index);
+    void on_fixedPosition_toggled(bool checked);
     void on_position_valueChanged(int value);
     void on_record_toggled(bool checked);
+    void on_showFileDialog_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

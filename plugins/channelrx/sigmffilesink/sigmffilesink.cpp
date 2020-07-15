@@ -38,7 +38,6 @@
 #include "sigmffilesink.h"
 
 MESSAGE_CLASS_DEFINITION(SigMFFileSink::MsgConfigureSigMFFileSink, Message)
-MESSAGE_CLASS_DEFINITION(SigMFFileSink::MsgBasebandSampleRateNotification, Message)
 
 const QString SigMFFileSink::m_channelIdURI = "sdrangel.channel.sigmffilesink";
 const QString SigMFFileSink::m_channelId = "SigMFFileSink";
@@ -52,9 +51,8 @@ SigMFFileSink::SigMFFileSink(DeviceAPI *deviceAPI) :
 {
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
     m_basebandSink = new SigMFFileSinkBaseband();
-    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
 
@@ -71,8 +69,12 @@ SigMFFileSink::~SigMFFileSink()
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+
+    if (m_basebandSink->isRunning()) {
+        stop();
+    }
+
     delete m_basebandSink;
-    delete m_thread;
 }
 
 uint32_t SigMFFileSink::getNumberOfDeviceStreams() const
@@ -90,38 +92,43 @@ void SigMFFileSink::start()
 {
 	qDebug("SigMFFileSink::start");
     m_basebandSink->reset();
-    m_thread->start();
+    m_basebandSink->startWork();
+    m_thread.start();
+
+    DSPSignalNotification *dspMsg = new DSPSignalNotification(m_basebandSampleRate, m_centerFrequency);
+    m_basebandSink->getInputMessageQueue()->push(dspMsg);
+
+    SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband *msg = SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 void SigMFFileSink::stop()
 {
     qDebug("SigMFFileSink::stop");
-	m_thread->exit();
-	m_thread->wait();
+    m_basebandSink->stopWork();
+	m_thread.exit();
+	m_thread.wait();
 }
 
 bool SigMFFileSink::handleMessage(const Message& cmd)
 {
     if (DSPSignalNotification::match(cmd))
     {
-        DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
+        DSPSignalNotification& cfg = (DSPSignalNotification&) cmd;
 
         qDebug() << "SigMFFileSink::handleMessage: DSPSignalNotification:"
-                << " inputSampleRate: " << notif.getSampleRate()
-                << " centerFrequency: " << notif.getCenterFrequency();
+                << " inputSampleRate: " << cfg.getSampleRate()
+                << " centerFrequency: " << cfg.getCenterFrequency();
 
-        m_basebandSampleRate = notif.getSampleRate();
-        m_centerFrequency = notif.getCenterFrequency();
-
-        calculateFrequencyOffset(m_settings.m_log2Decim, m_settings.m_filterChainHash); // This is when device sample rate changes
-
-        DSPSignalNotification *msg = new DSPSignalNotification(notif.getSampleRate(), notif.getCenterFrequency());
-        m_basebandSink->getInputMessageQueue()->push(msg);
+        m_basebandSampleRate = cfg.getSampleRate();
+        m_centerFrequency = cfg.getCenterFrequency();
+        DSPSignalNotification *notif = new DSPSignalNotification(cfg);
+        m_basebandSink->getInputMessageQueue()->push(notif);
 
         if (getMessageQueueToGUI())
         {
-            MsgBasebandSampleRateNotification *msg = MsgBasebandSampleRateNotification::create(notif.getSampleRate());
-            getMessageQueueToGUI()->push(msg);
+            DSPSignalNotification *notifToGUI = new DSPSignalNotification(cfg);
+            getMessageQueueToGUI()->push(notifToGUI);
         }
 
         return true;
@@ -214,22 +221,16 @@ DeviceSampleSource *SigMFFileSink::getLocalDevice(uint32_t index)
 void SigMFFileSink::applySettings(const SigMFFileSinkSettings& settings, bool force)
 {
     qDebug() << "SigMFFileSink::applySettings:"
-            << "force: " << force;
+        << "m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+        << "m_log2Decim: " << settings.m_log2Decim
+        << "m_fileRecordName: " << settings.m_fileRecordName
+        << "force: " << force;
 
     QList<QString> reverseAPIKeys;
 
     if ((settings.m_log2Decim != m_settings.m_log2Decim) || force) {
         reverseAPIKeys.append("log2Decim");
-    }
-    if ((settings.m_filterChainHash != m_settings.m_filterChainHash) || force) {
-        reverseAPIKeys.append("filterChainHash");
-    }
-
-    if ((settings.m_log2Decim != m_settings.m_log2Decim)
-     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
-    {
-        calculateFrequencyOffset(settings.m_log2Decim, settings.m_filterChainHash);
-    }
+    } // TOOO: the rest
 
     SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband *msg = SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
@@ -251,23 +252,6 @@ void SigMFFileSink::record(bool record)
 {
     SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork *msg = SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork::create(record);
     m_basebandSink->getInputMessageQueue()->push(msg);
-}
-
-void SigMFFileSink::validateFilterChainHash(SigMFFileSinkSettings& settings)
-{
-    unsigned int s = 1;
-
-    for (unsigned int i = 0; i < settings.m_log2Decim; i++) {
-        s *= 3;
-    }
-
-    settings.m_filterChainHash = settings.m_filterChainHash >= s ? s-1 : settings.m_filterChainHash;
-}
-
-void SigMFFileSink::calculateFrequencyOffset(uint32_t log2Decim, uint32_t filterChainHash)
-{
-    double shiftFactor = HBFilterChainConverter::getShiftFactor(log2Decim, filterChainHash);
-    m_frequencyOffset = m_basebandSampleRate * shiftFactor;
 }
 
 int SigMFFileSink::webapiSettingsGet(
@@ -320,13 +304,6 @@ void SigMFFileSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getLocalSinkSettings()->getLog2Decim();
     }
-
-    if (channelSettingsKeys.contains("filterChainHash"))
-    {
-        settings.m_filterChainHash = response.getLocalSinkSettings()->getFilterChainHash();
-        validateFilterChainHash(settings);
-    }
-
     if (channelSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getLocalSinkSettings()->getUseReverseApi() != 0;
     }
@@ -355,7 +332,6 @@ void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     }
 
     response.getLocalSinkSettings()->setLog2Decim(settings.m_log2Decim);
-    response.getLocalSinkSettings()->setFilterChainHash(settings.m_filterChainHash);
     response.getLocalSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getLocalSinkSettings()->getReverseApiAddress()) {
@@ -389,9 +365,6 @@ void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKey
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
         swgLocalSinkSettings->setLog2Decim(settings.m_log2Decim);
-    }
-    if (channelSettingsKeys.contains("filterChainHash") || force) {
-        swgLocalSinkSettings->setFilterChainHash(settings.m_filterChainHash);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")

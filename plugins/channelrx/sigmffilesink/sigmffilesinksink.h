@@ -20,6 +20,8 @@
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/sigmffilerecord.h"
+#include "dsp/interpolator.h"
+#include "dsp/ncof.h"
 
 #include "sigmffilesinksettings.h"
 
@@ -37,15 +39,27 @@ public:
     void stopRecording();
     void setDeviceHwId(const QString& hwId) { m_deviceHwId = hwId; }
     void setDeviceUId(int uid) { m_deviceUId = uid; }
-    void setSampleRate(int sampleRate);
-	void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
+    void applyChannelSettings(
+        int channelSampleRate,
+        int sinkSampleRate,
+        int channelFrequencyOffset,
+        int64_t centerFrequency,
+        bool force = false);
     void applySettings(const SigMFFileSinkSettings& settings, bool force = false);
 
 private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
+    int m_sinkSampleRate;
+    int64_t m_centerFrequency;
+	NCOF m_nco;
+    Interpolator m_interpolator;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
+    SampleVector m_sampleBuffer;
     SigMFFileSinkSettings m_settings;
     SigMFFileRecord m_fileSink;
+    bool m_recordEnabled;
     bool m_record;
     QString m_deviceHwId;
     int m_deviceUId;

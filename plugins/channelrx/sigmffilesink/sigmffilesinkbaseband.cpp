@@ -27,12 +27,31 @@ MESSAGE_CLASS_DEFINITION(SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseban
 MESSAGE_CLASS_DEFINITION(SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork, Message)
 
 SigMFFileSinkBaseband::SigMFFileSinkBaseband() :
+    m_running(false),
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 
     qDebug("SigMFFileSinkBaseband::SigMFFileSinkBaseband");
+}
+
+SigMFFileSinkBaseband::~SigMFFileSinkBaseband()
+{
+    m_inputMessageQueue.clear();
+    delete m_channelizer;
+}
+
+void SigMFFileSinkBaseband::reset()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    m_inputMessageQueue.clear();
+    m_sampleFifo.reset();
+}
+
+void SigMFFileSinkBaseband::startWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
@@ -40,19 +59,21 @@ SigMFFileSinkBaseband::SigMFFileSinkBaseband() :
         &SigMFFileSinkBaseband::handleData,
         Qt::QueuedConnection
     );
-
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_running = true;
 }
 
-SigMFFileSinkBaseband::~SigMFFileSinkBaseband()
-{
-    delete m_channelizer;
-}
-
-void SigMFFileSinkBaseband::reset()
+void SigMFFileSinkBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
-    m_sampleFifo.reset();
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::disconnect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &SigMFFileSinkBaseband::handleData
+    );
+    m_running = false;
 }
 
 void SigMFFileSinkBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -115,10 +136,19 @@ bool SigMFFileSinkBaseband::handleMessage(const Message& cmd)
     {
         QMutexLocker mutexLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        qDebug() << "SigMFFileSinkBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
+        qDebug() << "SigMFFileSinkBaseband::handleMessage: DSPSignalNotification:"
+            << " basebandSampleRate: " << notif.getSampleRate()
+            << " cnterFrequency: " << notif.getCenterFrequency();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
-        m_channelizer->setBasebandSampleRate(notif.getSampleRate(), true); // apply decimation
-        m_sink.setSampleRate(getChannelSampleRate());
+        m_centerFrequency = notif.getCenterFrequency();
+        m_channelizer->setBasebandSampleRate(notif.getSampleRate());
+        int desiredSampleRate = m_channelizer->getBasebandSampleRate() / (1<<m_settings.m_log2Decim);
+        m_channelizer->setChannelization(desiredSampleRate, m_settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(
+            m_channelizer->getChannelSampleRate(),
+            desiredSampleRate,
+            m_channelizer->getChannelFrequencyOffset(),
+            m_centerFrequency + m_settings.m_inputFrequencyOffset);
 
 		return true;
     }
@@ -146,17 +176,24 @@ void SigMFFileSinkBaseband::applySettings(const SigMFFileSinkSettings& settings,
 {
     qDebug() << "SigMFFileSinkBaseband::applySettings:"
         << "m_log2Decim:" << settings.m_log2Decim
-        << "m_filterChainHash:" << settings.m_filterChainHash
-        << " force: " << force;
+        << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
+        << "m_fileRecordName: " << settings.m_fileRecordName
+        << "m_centerFrequency: " << m_centerFrequency
+        << "force: " << force;
 
     if ((settings.m_log2Decim != m_settings.m_log2Decim)
-     || (settings.m_filterChainHash != m_settings.m_filterChainHash) || force)
+     || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setDecimation(settings.m_log2Decim, settings.m_filterChainHash);
-        m_sink.setSampleRate(getChannelSampleRate());
+        int desiredSampleRate = m_channelizer->getBasebandSampleRate() / (1<<settings.m_log2Decim);
+        m_channelizer->setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);
+        m_sink.applyChannelSettings(
+            m_channelizer->getChannelSampleRate(),
+            desiredSampleRate,
+            m_channelizer->getChannelFrequencyOffset(),
+            m_centerFrequency + settings.m_inputFrequencyOffset);
     }
 
-    //m_source.applySettings(settings, force);
+    m_sink.applySettings(settings, force);
     m_settings = settings;
 }
 

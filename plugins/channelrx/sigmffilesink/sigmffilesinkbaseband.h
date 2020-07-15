@@ -81,10 +81,13 @@ public:
     ~SigMFFileSinkBaseband();
 
     void reset();
+    void startWork();
+    void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
+    bool isRunning() const { return m_running; }
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -92,6 +95,8 @@ private:
     SigMFFileSinkSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     SigMFFileSinkSettings m_settings;
+    int64_t m_centerFrequency;
+    bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

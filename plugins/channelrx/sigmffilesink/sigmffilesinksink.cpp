@@ -15,11 +15,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "dsp/filerecord.h"
+#include <QDebug>
+
+#include "dsp/dspcommands.h"
+#include "dsp/sigmffilerecord.h"
 
 #include "sigmffilesinksink.h"
 
 SigMFFileSinkSink::SigMFFileSinkSink() :
+    m_recordEnabled(false),
     m_record(false)
 {}
 
@@ -28,12 +32,8 @@ SigMFFileSinkSink::~SigMFFileSinkSink()
 
 void SigMFFileSinkSink::startRecording()
 {
-    QString fileBase;
-    FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(m_settings.m_fileRecordName, fileBase);
-
-    if (recordType == FileRecordInterface::RecordTypeSigMF)
+    if (m_recordEnabled)
     {
-        m_fileSink.setFileName(fileBase);
         m_fileSink.startRecording();
         m_record = true;
     }
@@ -47,11 +47,105 @@ void SigMFFileSinkSink::stopRecording()
 
 void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
+	for (SampleVector::const_iterator it = begin; it < end; ++it)
+	{
+		Complex c(it->real(), it->imag());
+		c *= m_nco.nextIQ();
+
+		if (m_interpolatorDistance == 1)
+		{
+	        m_sampleBuffer.push_back(Sample(c.real(), c.imag()));
+		}
+		else
+		{
+            Complex ci;
+
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            {
+                m_sampleBuffer.push_back(Sample(ci.real(), ci.imag()));
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
+            }
+		}
+	}
+
     if (m_record) {
-        m_fileSink.feed(begin, end, true);
+        m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
     }
+
+    m_sampleBuffer.clear();
 }
 
-void SigMFFileSinkSink::setSampleRate(int sampleRate)
+void SigMFFileSinkSink::applyChannelSettings(
+    int channelSampleRate,
+    int sinkSampleRate,
+    int channelFrequencyOffset,
+    int64_t centerFrequency,
+    bool force)
 {
+    qDebug() << "SigMFFileSinkSink::applyChannelSettings:"
+            << " channelSampleRate: " << channelSampleRate
+            << " sinkSampleRate: " << sinkSampleRate
+            << " channelFrequencyOffset: " << channelFrequencyOffset
+            << " centerFrequency: " << centerFrequency
+            << " force: " << force;
+
+    if ((m_channelFrequencyOffset != channelFrequencyOffset) ||
+        (m_channelSampleRate != channelSampleRate) || force)
+    {
+        m_nco.setFreq(-channelFrequencyOffset, channelSampleRate);
+    }
+
+    if ((m_channelSampleRate != channelSampleRate)
+     || (m_sinkSampleRate != sinkSampleRate) || force)
+    {
+        m_interpolator.create(16, channelSampleRate, channelSampleRate / 2.2f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) channelSampleRate / (Real) sinkSampleRate;
+    }
+
+    if ((m_centerFrequency != centerFrequency)
+     || (m_channelFrequencyOffset != channelFrequencyOffset)
+     || (m_sinkSampleRate != sinkSampleRate) || force)
+    {
+        DSPSignalNotification *notif = new DSPSignalNotification(sinkSampleRate, centerFrequency + m_settings.m_inputFrequencyOffset);
+        m_fileSink.getInputMessageQueue()->push(notif);
+    }
+
+    m_channelSampleRate = channelSampleRate;
+    m_channelFrequencyOffset = channelFrequencyOffset;
+    m_sinkSampleRate = sinkSampleRate;
+    m_centerFrequency = centerFrequency;
+}
+
+void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, bool force)
+{
+    qDebug() << "SigMFFileSinkSink::applySettings:"
+        << "m_log2Decim:" << settings.m_log2Decim
+        << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
+        << "m_fileRecordName: " << settings.m_fileRecordName
+        << "force: " << force;
+
+    if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force)
+    {
+        QString fileBase;
+        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(settings.m_fileRecordName, fileBase);
+
+        if (recordType == FileRecordInterface::RecordTypeSigMF)
+        {
+            m_fileSink.setFileName(fileBase);
+            m_recordEnabled = true;
+        }
+        else
+        {
+            m_recordEnabled = false;
+        }
+    }
+
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
+    {
+        DSPSignalNotification *notif = new DSPSignalNotification(m_sinkSampleRate, m_centerFrequency + m_settings.m_inputFrequencyOffset);
+        m_fileSink.getInputMessageQueue()->push(notif);
+    }
+
+    m_settings = settings;
 }

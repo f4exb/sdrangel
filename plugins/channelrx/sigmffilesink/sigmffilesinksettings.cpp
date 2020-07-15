@@ -35,7 +35,6 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "SigMF File Sink";
     m_log2Decim = 0;
-    m_filterChainHash = 0;
     m_channelMarker = nullptr;
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -60,7 +59,6 @@ QByteArray SigMFFileSinkSettings::serialize() const
     s.writeU32(10, m_reverseAPIDeviceIndex);
     s.writeU32(11, m_reverseAPIChannelIndex);
     s.writeU32(12, m_log2Decim);
-    s.writeU32(13, m_filterChainHash);
 
     return s.final();
 }
@@ -102,7 +100,6 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readU32(12, &tmp, 0);
         m_log2Decim = tmp > 6 ? 6 : tmp;
-        d.readU32(13, &m_filterChainHash, 0);
 
         return true;
     }
@@ -113,7 +110,34 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
     }
 }
 
+unsigned int SigMFFileSinkSettings::getNbFixedShiftIndexes(int log2Decim)
+{
+    int decim = (1<<log2Decim);
+    return 2*decim - 1;
+}
 
+int SigMFFileSinkSettings::getHalfBand(int sampleRate, int log2Decim)
+{
+    int decim = (1<<log2Decim);
+    return sampleRate / (2*decim);
+}
 
+unsigned int SigMFFileSinkSettings::getFixedShiftIndexFromOffset(int sampleRate, int log2Decim, int frequencyOffset)
+{
+    if (sampleRate == 0) {
+        return 0;
+    }
+
+    int decim = (1<<log2Decim);
+    int mid = decim - 1;
+    return ((frequencyOffset*2*decim) / sampleRate) + mid;
+}
+
+int SigMFFileSinkSettings::getOffsetFromFixedShiftIndex(int sampleRate, int log2Decim, int shiftIndex)
+{
+    int decim = (1<<log2Decim);
+    int mid = decim - 1;
+    return ((shiftIndex - mid) * sampleRate) / (2*decim);
+}
 
 
