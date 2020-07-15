@@ -47,11 +47,13 @@ SigMFFileSink::SigMFFileSink(DeviceAPI *deviceAPI) :
         m_deviceAPI(deviceAPI),
         m_centerFrequency(0),
         m_frequencyOffset(0),
+        m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);
 
     m_basebandSink = new SigMFFileSinkBaseband();
+    m_basebandSink->setSpectrumSink(&m_spectrumVis);
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
@@ -92,6 +94,7 @@ void SigMFFileSink::start()
 {
 	qDebug("SigMFFileSink::start");
     m_basebandSink->reset();
+    m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI());
     m_basebandSink->startWork();
     m_thread.start();
 

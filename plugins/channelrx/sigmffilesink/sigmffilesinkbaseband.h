@@ -29,6 +29,7 @@
 #include "sigmffilesinksettings.h"
 
 class DownChannelizer;
+class SpectrumVis;
 
 class SigMFFileSinkBaseband : public QObject
 {
@@ -88,9 +89,11 @@ public:
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
     bool isRunning() const { return m_running; }
+    void setSpectrumSink(SpectrumVis* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }
     uint64_t getMsCount() const { return m_sink.getMsCount(); }
     uint64_t getByteCount() const { return m_sink.getByteCount(); }
     unsigned int getNbTracks() const { return m_sink.getNbTracks(); }
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
 
 private:
     SampleSinkFifo m_sampleFifo;

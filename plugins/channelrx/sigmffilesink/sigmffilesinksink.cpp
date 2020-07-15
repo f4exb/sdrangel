@@ -19,10 +19,14 @@
 
 #include "dsp/dspcommands.h"
 #include "dsp/sigmffilerecord.h"
+#include "dsp/spectrumvis.h"
 
+#include "sigmffilesinkmessages.h"
 #include "sigmffilesinksink.h"
 
 SigMFFileSinkSink::SigMFFileSinkSink() :
+    m_spectrumSink(nullptr),
+    m_msgQueueToGUI(nullptr),
     m_recordEnabled(false),
     m_record(false),
     m_msCount(0),
@@ -81,6 +85,10 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
         }
     }
 
+    if (m_spectrumSink) {
+		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+	}
+
     m_sampleBuffer.clear();
 }
 
@@ -107,7 +115,7 @@ void SigMFFileSinkSink::applyChannelSettings(
     if ((m_channelSampleRate != channelSampleRate)
      || (m_sinkSampleRate != sinkSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, channelSampleRate / 2.2f);
+        m_interpolator.create(16, channelSampleRate, channelSampleRate / 2.0f);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) channelSampleRate / (Real) sinkSampleRate;
     }
@@ -116,8 +124,17 @@ void SigMFFileSinkSink::applyChannelSettings(
      || (m_channelFrequencyOffset != channelFrequencyOffset)
      || (m_sinkSampleRate != sinkSampleRate) || force)
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(sinkSampleRate, centerFrequency + m_settings.m_inputFrequencyOffset);
+        DSPSignalNotification *notif = new DSPSignalNotification(sinkSampleRate, centerFrequency);
+        DSPSignalNotification *notifToSpectrum = new DSPSignalNotification(*notif);
         m_fileSink.getInputMessageQueue()->push(notif);
+        m_spectrumSink->getInputMessageQueue()->push(notifToSpectrum);
+
+        if (m_msgQueueToGUI)
+        {
+            SigMFFileSinkMessages::MsgConfigureSpectrum *msg = SigMFFileSinkMessages::MsgConfigureSpectrum::create(
+                centerFrequency, sinkSampleRate);
+            m_msgQueueToGUI->push(msg);
+        }
     }
 
     m_channelSampleRate = channelSampleRate;
@@ -129,8 +146,6 @@ void SigMFFileSinkSink::applyChannelSettings(
 void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, bool force)
 {
     qDebug() << "SigMFFileSinkSink::applySettings:"
-        << "m_log2Decim:" << settings.m_log2Decim
-        << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
         << "m_fileRecordName: " << settings.m_fileRecordName
         << "force: " << force;
 
@@ -150,12 +165,6 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         {
             m_recordEnabled = false;
         }
-    }
-
-    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
-    {
-        DSPSignalNotification *notif = new DSPSignalNotification(m_sinkSampleRate, m_centerFrequency + m_settings.m_inputFrequencyOffset);
-        m_fileSink.getInputMessageQueue()->push(notif);
     }
 
     m_settings = settings;

@@ -26,6 +26,7 @@
 #include "sigmffilesinksettings.h"
 
 class FileRecordInterface;
+class SpectrumVis;
 
 class SigMFFileSinkSink : public ChannelSampleSink {
 public:
@@ -35,6 +36,7 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     SigMFFileRecord *getFileSink() { return &m_fileSink; }
+    void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
     void startRecording();
     void stopRecording();
     void setDeviceHwId(const QString& hwId) { m_deviceHwId = hwId; }
@@ -49,6 +51,7 @@ public:
     uint64_t getMsCount() const { return m_msCount; }
     uint64_t getByteCount() const { return m_byteCount; }
     unsigned int getNbTracks() const { return m_fileSink.getNbCaptures(); }
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
 
 private:
     int m_channelSampleRate;
@@ -62,6 +65,8 @@ private:
     SampleVector m_sampleBuffer;
     SigMFFileSinkSettings m_settings;
     SigMFFileRecord m_fileSink;
+    SpectrumVis* m_spectrumSink;
+    MessageQueue *m_msgQueueToGUI;
     bool m_recordEnabled;
     bool m_record;
     QString m_deviceHwId;

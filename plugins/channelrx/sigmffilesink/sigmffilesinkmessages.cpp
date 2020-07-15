@@ -15,41 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SIFMFFILESINKSETTINGS_H_
-#define INCLUDE_SIFMFFILESINKSETTINGS_H_
+#include "sigmffilesinkmessages.h"
 
-#include <QByteArray>
-#include <QString>
-
-class Serializable;
-
-struct SigMFFileSinkSettings
-{
-    bool m_ncoMode;
-    qint32 m_inputFrequencyOffset;
-    QString m_fileRecordName;
-    quint32 m_rgbColor;
-    QString m_title;
-    uint32_t m_log2Decim;
-    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
-
-    Serializable *m_spectrumGUI;
-
-    SigMFFileSinkSettings();
-    void resetToDefaults();
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-
-    static unsigned int getNbFixedShiftIndexes(int log2Decim);
-    static int getHalfBand(int sampleRate, int log2Decim);
-    static unsigned int getFixedShiftIndexFromOffset(int sampleRate, int log2Decim, int frequencyOffset);
-    static int getOffsetFromFixedShiftIndex(int sampleRate, int log2Decim, int shiftIndex);
-};
-
-#endif /* INCLUDE_SIFMFFILESINKSETTINGS_H_ */
+MESSAGE_CLASS_DEFINITION(SigMFFileSinkMessages::MsgConfigureSpectrum, Message)

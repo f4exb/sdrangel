@@ -15,41 +15,37 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_SIFMFFILESINKSETTINGS_H_
-#define INCLUDE_SIFMFFILESINKSETTINGS_H_
+#ifndef INCLUDE_SIGMFFILESINKMESSAGES_H_
+#define INCLUDE_SIGMFFILESINKMESSAGES_H_
 
-#include <QByteArray>
-#include <QString>
+#include <QObject>
 
-class Serializable;
+#include "util/message.h"
 
-struct SigMFFileSinkSettings
-{
-    bool m_ncoMode;
-    qint32 m_inputFrequencyOffset;
-    QString m_fileRecordName;
-    quint32 m_rgbColor;
-    QString m_title;
-    uint32_t m_log2Decim;
-    int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
+class SigMFFileSinkMessages : public QObject {
+    Q_OBJECT
+public:
+    class MsgConfigureSpectrum : public Message {
+        MESSAGE_CLASS_DECLARATION
 
-    Serializable *m_spectrumGUI;
+    public:
+        int64_t getCenterFrequency() const { return m_centerFrequency; }
+        int getSampleRate() const { return m_sampleRate; }
 
-    SigMFFileSinkSettings();
-    void resetToDefaults();
-    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+        static MsgConfigureSpectrum* create(int64_t centerFrequency, int sampleRate) {
+            return new MsgConfigureSpectrum(centerFrequency, sampleRate);
+        }
 
-    static unsigned int getNbFixedShiftIndexes(int log2Decim);
-    static int getHalfBand(int sampleRate, int log2Decim);
-    static unsigned int getFixedShiftIndexFromOffset(int sampleRate, int log2Decim, int frequencyOffset);
-    static int getOffsetFromFixedShiftIndex(int sampleRate, int log2Decim, int shiftIndex);
+    private:
+        int64_t m_centerFrequency;
+        int m_sampleRate;
+
+        MsgConfigureSpectrum(int64_t centerFrequency, int sampleRate) :
+            Message(),
+            m_centerFrequency(centerFrequency),
+            m_sampleRate(sampleRate)
+        { }
+    };
 };
 
-#endif /* INCLUDE_SIFMFFILESINKSETTINGS_H_ */
+#endif // INCLUDE_SIGMFFILESINKMESSAGES_H_

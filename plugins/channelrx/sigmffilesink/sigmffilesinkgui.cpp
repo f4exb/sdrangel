@@ -27,8 +27,9 @@
 #include "dsp/dspcommands.h"
 #include "mainwindow.h"
 
-#include "sigmffilesinkgui.h"
+#include "sigmffilesinkmessages.h"
 #include "sigmffilesink.h"
+#include "sigmffilesinkgui.h"
 #include "ui_sigmffilesinkgui.h"
 
 SigMFFileSinkGUI* SigMFFileSinkGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelRx)
@@ -117,6 +118,12 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         blockApplySettings(false);
         return true;
     }
+    else if (SigMFFileSinkMessages::MsgConfigureSpectrum::match(message))
+    {
+        const SigMFFileSinkMessages::MsgConfigureSpectrum& cfg = (SigMFFileSinkMessages::MsgConfigureSpectrum&) message;
+        ui->glSpectrum->setSampleRate(cfg.getSampleRate());
+        ui->glSpectrum->setCenterFrequency(cfg.getCenterFrequency());
+    }
     else
     {
         return false;
@@ -140,12 +147,15 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
     m_sigMFFileSink = (SigMFFileSink*) channelrx;
+    m_spectrumVis = m_sigMFFileSink->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_sigMFFileSink->setMessageQueueToGUI(getInputMessageQueue());
 
 	ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
     ui->position->setEnabled(m_fixedPosition);
+    ui->glSpectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
@@ -155,7 +165,7 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
 
-    m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setSpectrumGUI(ui->glSpectrumGUI);
 
     m_deviceUISet->registerRxChannelInstance(SigMFFileSink::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
@@ -346,14 +356,11 @@ void SigMFFileSinkGUI::on_decimationFactor_currentIndexChanged(int index)
     applyDecimation();
     displayRate();
     displayPos();
+    applySettings();
 
-    if (m_fixedPosition)
-    {
+    if (m_fixedPosition) {
         setFrequencyFromPos();
-        applySettings();
-    }
-    else
-    {
+    } else {
         setPosFromFrequency();
     }
 }

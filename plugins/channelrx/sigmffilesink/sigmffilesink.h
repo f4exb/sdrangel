@@ -24,6 +24,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 
 #include "sigmffilesinksettings.h"
@@ -108,6 +109,7 @@ public:
 
     void getLocalDevices(std::vector<uint32_t>& indexes);
     uint32_t getNumberOfDeviceStreams() const;
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     void record(bool record);
     uint64_t getMsCount() const;
     uint64_t getByteCount() const;
@@ -121,6 +123,7 @@ private:
     QThread m_thread;
     SigMFFileSinkBaseband *m_basebandSink;
     SigMFFileSinkSettings m_settings;
+    SpectrumVis m_spectrumVis;
 
     uint64_t m_centerFrequency;
     int64_t m_frequencyOffset;

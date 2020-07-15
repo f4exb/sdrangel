@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>522</width>
-    <height>102</height>
+    <height>458</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -46,7 +46,7 @@
    <property name="windowTitle">
     <string>Settings</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
     <property name="leftMargin">
      <number>2</number>
     </property>
@@ -383,18 +383,39 @@
       </item>
      </layout>
     </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>100</y>
+     <width>521</width>
+     <height>351</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="SpectrumLayout">
+    <property name="spacing">
+     <number>10</number>
+    </property>
     <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
+     <widget class="GLSpectrum" name="glSpectrum" native="true">
+      <property name="minimumSize">
        <size>
-        <width>20</width>
-        <height>40</height>
+        <width>0</width>
+        <height>300</height>
        </size>
       </property>
-     </spacer>
+      <property name="font">
+       <font>
+        <family>Liberation Mono</family>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="GLSpectrumGUI" name="glSpectrumGUI" native="true"/>
     </item>
    </layout>
   </widget>
@@ -415,6 +436,18 @@
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrum</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrum.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GLSpectrumGUI</class>
+   <extends>QWidget</extends>
+   <header>gui/glspectrumgui.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -33,6 +33,7 @@ class PluginAPI;
 class DeviceUISet;
 class SigMFFileSink;
 class BasebandSampleSink;
+class SpectrumVis;
 
 namespace Ui {
     class SigMFFileSinkGUI;
@@ -72,6 +73,7 @@ private:
     bool m_doApplySettings;
 
     SigMFFileSink* m_sigMFFileSink;
+    SpectrumVis* m_spectrumVis;
     MessageQueue m_inputMessageQueue;
 
     uint32_t m_tickCount;

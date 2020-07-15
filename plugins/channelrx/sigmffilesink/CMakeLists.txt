@@ -5,6 +5,7 @@ set(sigmffilesink_SOURCES
     sigmffilesinkbaseband.cpp
     sigmffilesinksink.cpp
     sigmffilesinksettings.cpp
+    sigmffilesinkmessages.cpp
     sigmffilesinkwebapiadapter.cpp
     sigmffilesinkplugin.cpp
 )
@@ -14,6 +15,7 @@ set(sigmffilesink_HEADERS
     sigmffilesinkbaseband.h
     sigmffilesinksink.h
     sigmffilesinksettings.h
+    sigmffilesinkmessages.h
     sigmffilesinkwebapiadapter.h
 	sigmffilesinkplugin.h
 )

@@ -35,7 +35,7 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_rgbColor = QColor(140, 4, 4).rgb();
     m_title = "SigMF File Sink";
     m_log2Decim = 0;
-    m_channelMarker = nullptr;
+    m_spectrumGUI = nullptr;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -60,6 +60,10 @@ QByteArray SigMFFileSinkSettings::serialize() const
     s.writeU32(11, m_reverseAPIChannelIndex);
     s.writeU32(12, m_log2Decim);
 
+    if (m_spectrumGUI) {
+        s.writeBlob(13, m_spectrumGUI->serialize());
+    }
+
     return s.final();
 }
 
@@ -77,6 +81,7 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
     {
         uint32_t tmp;
         QString strtmp;
+        QByteArray bytetmp;
 
         d.readS32(1, &m_inputFrequencyOffset, 0);
         d.readBool(2, &m_ncoMode, false);
@@ -100,6 +105,12 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = tmp > 99 ? 99 : tmp;
         d.readU32(12, &tmp, 0);
         m_log2Decim = tmp > 6 ? 6 : tmp;
+
+        if (m_spectrumGUI)
+        {
+            d.readBlob(13, &bytetmp);
+            m_spectrumGUI->deserialize(bytetmp);
+        }
 
         return true;
     }
