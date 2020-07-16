@@ -54,6 +54,7 @@ SpectrumVis::SpectrumVis(Real scalef) :
 	m_needMoreSamples(false),
 	m_scalef(scalef),
 	m_glSpectrum(nullptr),
+    m_specMax(0.0f),
     m_centerFrequency(0),
     m_sampleRate(48000),
 	m_ofs(0),
@@ -365,12 +366,15 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 			if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone)
 			{
+                m_specMax = 0.0f;
+
                 if ( positiveOnly )
                 {
                     for (std::size_t i = 0; i < halfSize; i++)
                     {
                         c = fftOut[i];
                         v = c.real() * c.real() + c.imag() * c.imag();
+                        m_specMax = v > m_specMax ? v : m_specMax;
                         v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
                         m_powerSpectrum[i * 2] = v;
                         m_powerSpectrum[i * 2 + 1] = v;
@@ -382,11 +386,13 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     {
                         c = fftOut[i + halfSize];
                         v = c.real() * c.real() + c.imag() * c.imag();
+                        m_specMax = v > m_specMax ? v : m_specMax;
                         v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
                         m_powerSpectrum[i] = v;
 
                         c = fftOut[i];
                         v = c.real() * c.real() + c.imag() * c.imag();
+                        m_specMax = v > m_specMax ? v : m_specMax;
                         v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
                         m_powerSpectrum[i + halfSize] = v;
                     }
@@ -413,6 +419,8 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			}
 			else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMoving)
 			{
+                m_specMax = 0.0f;
+
 	            if ( positiveOnly )
 	            {
 	                for (std::size_t i = 0; i < halfSize; i++)
@@ -420,6 +428,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	                    c = fftOut[i];
 	                    v = c.real() * c.real() + c.imag() * c.imag();
 	                    v = m_movingAverage.storeAndGetAvg(v, i);
+                        m_specMax = v > m_specMax ? v : m_specMax;
 	                    v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
 	                    m_powerSpectrum[i * 2] = v;
 	                    m_powerSpectrum[i * 2 + 1] = v;
@@ -432,12 +441,14 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	                    c = fftOut[i + halfSize];
 	                    v = c.real() * c.real() + c.imag() * c.imag();
 	                    v = m_movingAverage.storeAndGetAvg(v, i+halfSize);
+                        m_specMax = v > m_specMax ? v : m_specMax;
 	                    v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
 	                    m_powerSpectrum[i] = v;
 
 	                    c = fftOut[i];
 	                    v = c.real() * c.real() + c.imag() * c.imag();
 	                    v = m_movingAverage.storeAndGetAvg(v, i);
+                        m_specMax = v > m_specMax ? v : m_specMax;
 	                    v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
 	                    m_powerSpectrum[i + halfSize] = v;
 	                }
@@ -467,6 +478,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed)
 			{
 			    double avg;
+                Real specMax = 0.0f;
 
                 if ( positiveOnly )
                 {
@@ -475,8 +487,10 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         c = fftOut[i];
                         v = c.real() * c.real() + c.imag() * c.imag();
 
+                        // result available
                         if (m_fixedAverage.storeAndGetAvg(avg, v, i))
                         {
+                            specMax = avg > specMax ? avg : specMax;
                             avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                             m_powerSpectrum[i * 2] = avg;
                             m_powerSpectrum[i * 2 + 1] = avg;
@@ -493,6 +507,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_fixedAverage.storeAndGetAvg(avg, v, i+halfSize))
                         {
+                            specMax = avg > specMax ? avg : specMax;
                             avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                             m_powerSpectrum[i] = avg;
                         }
@@ -503,6 +518,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_fixedAverage.storeAndGetAvg(avg, v, i))
                         {
+                            specMax = avg > specMax ? avg : specMax;
                             avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                             m_powerSpectrum[i + halfSize] = avg;
                         }
@@ -512,6 +528,8 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                 // result available
                 if (m_fixedAverage.nextAverage())
                 {
+                    m_specMax = specMax;
+
                     // send new data to visualisation
                     if (m_glSpectrum) {
                         m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
@@ -535,6 +553,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)
 			{
 			    double max;
+                Real specMax = 0.0f;
 
                 if ( positiveOnly )
                 {
@@ -543,8 +562,10 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         c = fftOut[i];
                         v = c.real() * c.real() + c.imag() * c.imag();
 
+                        // result available
                         if (m_max.storeAndGetMax(max, v, i))
                         {
+                            specMax = max > specMax ? max : specMax;
                             max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                             m_powerSpectrum[i * 2] = max;
                             m_powerSpectrum[i * 2 + 1] = max;
@@ -561,6 +582,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_max.storeAndGetMax(max, v, i+halfSize))
                         {
+                            specMax = max > specMax ? max : specMax;
                             max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                             m_powerSpectrum[i] = max;
                         }
@@ -571,6 +593,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_max.storeAndGetMax(max, v, i))
                         {
+                            specMax = max > specMax ? max : specMax;
                             max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                             m_powerSpectrum[i + halfSize] = max;
                         }
@@ -580,6 +603,8 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                 // result available
                 if (m_max.nextMax())
                 {
+                    m_specMax = specMax;
+
                     // send new data to visualisation
                     if (m_glSpectrum) {
                         m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
