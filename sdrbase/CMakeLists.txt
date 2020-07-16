@@ -115,6 +115,7 @@ set(sdrbase_SOURCES
     dsp/samplemififo.cpp
     dsp/samplemofifo.cpp
     dsp/samplesinkfifo.cpp
+    dsp/samplesimplefifo.cpp
     dsp/samplesourcefifo.cpp
     dsp/samplesourcefifodb.cpp
     dsp/basebandsamplesink.cpp
@@ -261,6 +262,7 @@ set(sdrbase_HEADERS
     dsp/samplemififo.h
     dsp/samplemofifo.h
     dsp/samplesinkfifo.h
+    dsp/samplesimplefifo.h
     dsp/samplesourcefifo.h
     dsp/samplesourcefifodb.h
     dsp/basebandsamplesink.h
