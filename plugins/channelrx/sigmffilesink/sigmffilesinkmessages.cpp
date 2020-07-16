@@ -18,3 +18,5 @@
 #include "sigmffilesinkmessages.h"
 
 MESSAGE_CLASS_DEFINITION(SigMFFileSinkMessages::MsgConfigureSpectrum, Message)
+MESSAGE_CLASS_DEFINITION(SigMFFileSinkMessages::MsgReportSquelch, Message)
+MESSAGE_CLASS_DEFINITION(SigMFFileSinkMessages::MsgReportRecording, Message)

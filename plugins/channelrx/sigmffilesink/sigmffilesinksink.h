@@ -21,6 +21,7 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/sigmffilerecord.h"
 #include "dsp/interpolator.h"
+#include "dsp/samplesimplefifo.h"
 #include "dsp/ncof.h"
 
 #include "sigmffilesinksettings.h"
@@ -52,6 +53,7 @@ public:
     uint64_t getByteCount() const { return m_byteCount; }
     unsigned int getNbTracks() const { return m_fileSink.getNbCaptures(); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
+    void squelchRecording(bool squelchOpen);
 
 private:
     int m_channelSampleRate;
@@ -65,10 +67,15 @@ private:
     SampleVector m_sampleBuffer;
     SigMFFileSinkSettings m_settings;
     SigMFFileRecord m_fileSink;
+    SampleSimpleFifo m_preRecordBuffer;
+    unsigned int m_preRecordFill;
+    float m_squelchLevel;
     SpectrumVis* m_spectrumSink;
     MessageQueue *m_msgQueueToGUI;
     bool m_recordEnabled;
     bool m_record;
+    bool m_squelchOpen;
+    int m_postSquelchCounter;
     QString m_deviceHwId;
     int m_deviceUId;
     uint64_t m_msCount;

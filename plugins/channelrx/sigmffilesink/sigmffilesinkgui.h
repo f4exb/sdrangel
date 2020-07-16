@@ -101,6 +101,11 @@ private slots:
     void on_decimationFactor_currentIndexChanged(int index);
     void on_fixedPosition_toggled(bool checked);
     void on_position_valueChanged(int value);
+    void on_spectrumSquelch_toggled(bool checked);
+    void on_squelchLevel_valueChanged(int value);
+    void on_preRecordTime_valueChanged(int value);
+    void on_postSquelchTime_valueChanged(int value);
+    void on_squelchedRecording_toggled(bool checked);
     void on_record_toggled(bool checked);
     void on_showFileDialog_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);

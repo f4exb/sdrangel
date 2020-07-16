@@ -46,6 +46,44 @@ public:
             m_sampleRate(sampleRate)
         { }
     };
+
+    class MsgReportSquelch : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getOpen() const { return m_open; }
+
+        static MsgReportSquelch* create(bool open) {
+            return new MsgReportSquelch(open);
+        }
+
+    private:
+        bool m_open;
+
+        MsgReportSquelch(bool open) :
+            Message(),
+            m_open(open)
+        { }
+    };
+
+    class MsgReportRecording : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getRecording() const { return m_recording; }
+
+        static MsgReportRecording* create(bool recording) {
+            return new MsgReportRecording(recording);
+        }
+
+    private:
+        bool m_recording;
+
+        MsgReportRecording(bool recording) :
+            Message(),
+            m_recording(recording)
+        { }
+    };
 };
 
 #endif // INCLUDE_SIGMFFILESINKMESSAGES_H_

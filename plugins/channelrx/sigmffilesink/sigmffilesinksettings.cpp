@@ -36,6 +36,11 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_title = "SigMF File Sink";
     m_log2Decim = 0;
     m_spectrumGUI = nullptr;
+    m_spectrumSquelchMode = false;
+    m_spectrumSquelch = -50;
+    m_squelchPreRecordTime = 0;
+    m_squelchPostRecordTime = 0;
+    m_squelchRecordingEnable = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -64,6 +69,12 @@ QByteArray SigMFFileSinkSettings::serialize() const
         s.writeBlob(13, m_spectrumGUI->serialize());
     }
 
+    s.writeBool(14, m_spectrumSquelchMode);
+    s.writeS32(15, m_spectrumSquelch);
+    s.writeS32(16, m_squelchPreRecordTime);
+    s.writeS32(17, m_squelchPostRecordTime);
+    s.writeBool(18, m_squelchRecordingEnable);
+
     return s.final();
 }
 
@@ -80,6 +91,7 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         uint32_t tmp;
+        int stmp;
         QString strtmp;
         QByteArray bytetmp;
 
@@ -111,6 +123,13 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
             d.readBlob(13, &bytetmp);
             m_spectrumGUI->deserialize(bytetmp);
         }
+
+        d.readBool(14, &m_spectrumSquelchMode, false);
+        d.readS32(15, &stmp, -50);
+        m_spectrumSquelch = stmp;
+        d.readS32(16, &m_squelchPreRecordTime, 0);
+        d.readS32(17, &m_squelchPostRecordTime, 0);
+        d.readBool(18, &m_squelchRecordingEnable, false);
 
         return true;
     }

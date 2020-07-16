@@ -27,8 +27,12 @@
 SigMFFileSinkSink::SigMFFileSinkSink() :
     m_spectrumSink(nullptr),
     m_msgQueueToGUI(nullptr),
+    m_preRecordBuffer(48000),
+    m_preRecordFill(0),
     m_recordEnabled(false),
     m_record(false),
+    m_squelchOpen(false),
+    m_postSquelchCounter(0),
     m_msCount(0),
     m_byteCount(0)
 {}
@@ -74,7 +78,48 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
 		}
 	}
 
-    if (m_record)
+    if (m_settings.m_squelchRecordingEnable && (m_settings.m_squelchPreRecordTime != 0)) {
+        m_preRecordFill = m_preRecordBuffer.write(m_sampleBuffer.begin(), m_sampleBuffer.end());
+    }
+
+    if (m_settings.m_squelchRecordingEnable)
+    {
+        int nbToWrite = m_sampleBuffer.end() - m_sampleBuffer.begin();
+
+        if (m_squelchOpen)
+        {
+            m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+        }
+        else
+        {
+            if (nbToWrite < m_postSquelchCounter)
+            {
+                m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+                m_postSquelchCounter -= nbToWrite;
+            }
+            else
+            {
+                if (m_msgQueueToGUI)
+                {
+                    SigMFFileSinkMessages::MsgReportRecording *msg = SigMFFileSinkMessages::MsgReportRecording::create(false);
+                    m_msgQueueToGUI->push(msg);
+                }
+
+                m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_postSquelchCounter, true);
+                nbToWrite = m_postSquelchCounter;
+                m_postSquelchCounter = 0;
+                m_record = false;
+                m_fileSink.stopRecording();
+            }
+        }
+
+        m_byteCount += nbToWrite * sizeof(Sample);
+
+        if (m_sinkSampleRate > 0) {
+            m_msCount += (nbToWrite * 1000) / m_sinkSampleRate;
+        }
+    }
+    else if (m_record)
     {
         m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
         int nbSamples = m_sampleBuffer.end() - m_sampleBuffer.begin();
@@ -137,10 +182,15 @@ void SigMFFileSinkSink::applyChannelSettings(
         }
     }
 
+    if ((m_sinkSampleRate != sinkSampleRate) || force) {
+        m_preRecordBuffer.setSize(m_settings.m_squelchPreRecordTime * sinkSampleRate);
+    }
+
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
     m_sinkSampleRate = sinkSampleRate;
     m_centerFrequency = centerFrequency;
+    m_preRecordBuffer.reset();
 }
 
 void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, bool force)
@@ -167,5 +217,53 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         }
     }
 
+    if ((settings.m_squelchPreRecordTime != m_settings.m_squelchPostRecordTime) || force)
+    {
+        m_preRecordBuffer.setSize(settings.m_squelchPreRecordTime * m_sinkSampleRate);
+    }
+
     m_settings = settings;
+}
+
+void SigMFFileSinkSink::squelchRecording(bool squelchOpen)
+{
+    if (!m_recordEnabled || !m_settings.m_squelchRecordingEnable) {
+        return;
+    }
+
+    if (squelchOpen)
+    {
+        if (!m_record)
+        {
+            m_fileSink.startRecording();
+            m_record = true;
+            SampleVector::iterator p1Begin, p1End, p2Begin, p2End;
+            m_preRecordBuffer.readBegin(m_preRecordFill, &p1Begin, &p1End, &p2Begin, &p2End);
+
+            if (p1Begin != p1End) {
+                m_fileSink.feed(p1Begin, p1End, false);
+            }
+            if (p2Begin != p2End) {
+                m_fileSink.feed(p2Begin, p2End, false);
+            }
+
+            m_byteCount += m_preRecordFill * sizeof(Sample);
+
+            if (m_sinkSampleRate > 0) {
+                m_msCount += (m_preRecordFill * 1000) / m_sinkSampleRate;
+            }
+
+            if (m_msgQueueToGUI)
+            {
+                SigMFFileSinkMessages::MsgReportRecording *msg = SigMFFileSinkMessages::MsgReportRecording::create(true);
+                m_msgQueueToGUI->push(msg);
+            }
+        }
+    }
+    else
+    {
+        m_postSquelchCounter = m_settings.m_squelchPostRecordTime * m_sinkSampleRate;
+    }
+
+    m_squelchOpen = squelchOpen;
 }

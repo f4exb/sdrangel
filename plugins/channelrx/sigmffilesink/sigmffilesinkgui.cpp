@@ -124,6 +124,35 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
         ui->glSpectrum->setSampleRate(cfg.getSampleRate());
         ui->glSpectrum->setCenterFrequency(cfg.getCenterFrequency());
     }
+    else if (SigMFFileSinkMessages::MsgReportSquelch::match(message))
+    {
+        const SigMFFileSinkMessages::MsgReportSquelch& report = (SigMFFileSinkMessages::MsgReportSquelch&) message;
+
+        if (report.getOpen()) {
+            ui->squelchLevel->setStyleSheet("QDial { background-color : green; }");
+        } else {
+            ui->squelchLevel->setStyleSheet("QDial { background:rgb(79,79,79); }");
+        }
+
+        return true;
+    }
+    else if (SigMFFileSinkMessages::MsgReportRecording::match(message))
+    {
+        const SigMFFileSinkMessages::MsgReportSquelch& report = (SigMFFileSinkMessages::MsgReportSquelch&) message;
+
+        if (report.getOpen())
+        {
+            ui->record->setStyleSheet("QToolButton { background-color : red; }");
+            ui->squelchedRecording->setEnabled(false);
+        }
+        else
+        {
+            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            ui->squelchedRecording->setEnabled(true);
+        }
+
+        return true;
+    }
     else
     {
         return false;
@@ -220,6 +249,20 @@ void SigMFFileSinkGUI::displaySettings()
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->fileNameText->setText(m_settings.m_fileRecordName);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
+    ui->spectrumSquelch->setChecked(m_settings.m_spectrumSquelchMode);
+    ui->squelchLevel->setValue(m_settings.m_spectrumSquelch);
+    ui->squelchLevelText->setText(tr("%1").arg(m_settings.m_spectrumSquelch));
+    ui->preRecordTime->setValue(m_settings.m_squelchPreRecordTime);
+    ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_squelchPreRecordTime));
+    ui->postSquelchTime->setValue(m_settings.m_squelchPostRecordTime);
+    ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
+    ui->squelchedRecording->setChecked(m_settings.m_squelchRecordingEnable);
+    ui->record->setEnabled(!m_settings.m_squelchRecordingEnable);
+
+    if (!m_settings.m_spectrumSquelchMode) {
+        ui->squelchLevel->setStyleSheet("QDial { background:rgb(79,79,79); }");
+    }
+
     displayStreamIndex();
     setPosFromFrequency();
 
@@ -391,8 +434,57 @@ void SigMFFileSinkGUI::on_position_valueChanged(int value)
     }
 }
 
+void SigMFFileSinkGUI::on_spectrumSquelch_toggled(bool checked)
+{
+    m_settings.m_spectrumSquelchMode = checked;
+
+    if (!m_settings.m_spectrumSquelchMode)
+    {
+        m_settings.m_squelchRecordingEnable = false;
+        ui->squelchLevel->setStyleSheet("QDial { background:rgb(79,79,79); }");
+        ui->squelchedRecording->blockSignals(true);
+        ui->squelchedRecording->setChecked(false);
+        ui->squelchedRecording->blockSignals(false);
+        ui->record->setEnabled(true);
+    }
+
+    ui->squelchedRecording->setEnabled(checked);
+
+    applySettings();
+}
+
+void SigMFFileSinkGUI::on_squelchLevel_valueChanged(int value)
+{
+	m_settings.m_spectrumSquelch = value;
+	ui->squelchLevelText->setText(tr("%1").arg(m_settings.m_spectrumSquelch));
+    applySettings();
+}
+
+void SigMFFileSinkGUI::on_preRecordTime_valueChanged(int value)
+{
+    m_settings.m_squelchPreRecordTime = value;
+    ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_squelchPreRecordTime));
+    applySettings();
+}
+
+void SigMFFileSinkGUI::on_postSquelchTime_valueChanged(int value)
+{
+    m_settings.m_squelchPostRecordTime = value;
+    ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
+    applySettings();
+}
+
+void SigMFFileSinkGUI::on_squelchedRecording_toggled(bool checked)
+{
+    ui->record->setEnabled(!checked);
+    m_settings.m_squelchRecordingEnable = checked;
+    applySettings();
+}
+
 void SigMFFileSinkGUI::on_record_toggled(bool checked)
 {
+    ui->squelchedRecording->setEnabled(!checked);
+
     if (checked) {
         ui->record->setStyleSheet("QToolButton { background-color : red; }");
     } else {

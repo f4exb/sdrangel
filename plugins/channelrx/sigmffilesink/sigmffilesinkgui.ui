@@ -318,6 +318,129 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="spectrumSquelch">
+        <property name="toolTip">
+         <string>Toggle spectrum squelch recording</string>
+        </property>
+        <property name="text">
+         <string>SQ</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="squelchLevel">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Spectrum squelch level (dB)</string>
+        </property>
+        <property name="minimum">
+         <number>-120</number>
+        </property>
+        <property name="maximum">
+         <number>0</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>-50</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="squelchLevelText">
+        <property name="toolTip">
+         <string>Spectrum squelch level (dB)</string>
+        </property>
+        <property name="text">
+         <string>-100</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="preRecordTime">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelched recoding pre-recording time (s)</string>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="preRecordTimeText">
+        <property name="toolTip">
+         <string>Squelched recoding pre-recording time (s)</string>
+        </property>
+        <property name="text">
+         <string>10</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="postSquelchTime">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Squelched recording post-recording time (s) </string>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="postSquelchTimeText">
+        <property name="toolTip">
+         <string>Squelched recording post-recording time (s)</string>
+        </property>
+        <property name="text">
+         <string>10</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="squelchedRecording">
+        <property name="toolTip">
+         <string>Squelched recording enable</string>
+        </property>
+        <property name="text">
+         <string>REC</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

@@ -20,7 +20,10 @@
 #include "dsp/downchannelizer.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
+#include "dsp/spectrumvis.h"
+#include "util/db.h"
 
+#include "sigmffilesinkmessages.h"
 #include "sigmffilesinkbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband, Message)
@@ -28,12 +31,16 @@ MESSAGE_CLASS_DEFINITION(SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork, M
 
 SigMFFileSinkBaseband::SigMFFileSinkBaseband() :
     m_running(false),
+    m_squelchLevel(0),
+    m_squelchOpen(false),
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 
     qDebug("SigMFFileSinkBaseband::SigMFFileSinkBaseband");
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer.start(200);
 }
 
 SigMFFileSinkBaseband::~SigMFFileSinkBaseband()
@@ -158,10 +165,13 @@ bool SigMFFileSinkBaseband::handleMessage(const Message& cmd)
 		MsgConfigureSigMFFileSinkWork& conf = (MsgConfigureSigMFFileSinkWork&) cmd;
         qDebug() << "SigMFFileSinkBaseband::handleMessage: MsgConfigureSigMFFileSinkWork: " << conf.isWorking();
 
-        if (conf.isWorking()) {
-            m_sink.startRecording();
-        } else {
-            m_sink.stopRecording();
+        if (!m_settings.m_squelchRecordingEnable)
+        {
+            if (conf.isWorking()) {
+                m_sink.startRecording();
+            } else {
+                m_sink.stopRecording();
+            }
         }
 
 		return true;
@@ -193,6 +203,16 @@ void SigMFFileSinkBaseband::applySettings(const SigMFFileSinkSettings& settings,
             m_centerFrequency + settings.m_inputFrequencyOffset);
     }
 
+    if ((settings.m_spectrumSquelchMode != m_settings.m_spectrumSquelchMode) || force) {
+        if (!settings.m_spectrumSquelchMode) {
+            m_squelchOpen = false;
+        }
+    }
+
+    if ((settings.m_spectrumSquelch != m_settings.m_spectrumSquelch) || force) {
+        m_squelchLevel = CalcDb::powerFromdB(settings.m_spectrumSquelch);
+    }
+
     m_sink.applySettings(settings, force);
     m_settings = settings;
 }
@@ -200,4 +220,27 @@ void SigMFFileSinkBaseband::applySettings(const SigMFFileSinkSettings& settings,
 int SigMFFileSinkBaseband::getChannelSampleRate() const
 {
     return m_channelizer->getChannelSampleRate();
+}
+
+void SigMFFileSinkBaseband::tick()
+{
+    if (m_spectrumSink && m_settings.m_spectrumSquelchMode)
+    {
+        bool squelchOpen = m_spectrumSink->getSpecMax() > m_squelchLevel;
+
+        if (squelchOpen != m_squelchOpen)
+        {
+            if (m_messageQueueToGUI)
+            {
+                SigMFFileSinkMessages::MsgReportSquelch *msg = SigMFFileSinkMessages::MsgReportSquelch::create(squelchOpen);
+                m_messageQueueToGUI->push(msg);
+            }
+
+            if (m_settings.m_squelchRecordingEnable) {
+                m_sink.squelchRecording(squelchOpen);
+            }
+        }
+
+        m_squelchOpen = squelchOpen;
+    }
 }
