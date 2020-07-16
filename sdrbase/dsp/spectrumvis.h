@@ -122,6 +122,7 @@ public:
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
     const GLSpectrumSettings& getSettings() const { return m_settings; }
+    Real getSpecMax() const { return m_specMax / m_powFFTDiv; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
@@ -196,6 +197,7 @@ private:
 	MovingAverage2D<double> m_movingAverage;
 	FixedAverage2D<double> m_fixedAverage;
 	Max2D<double> m_max;
+    Real m_specMax;
 
     uint64_t m_centerFrequency;
     int m_sampleRate;
