@@ -207,6 +207,7 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         if (recordType == FileRecordInterface::RecordTypeSigMF)
         {
             m_fileSink.setFileName(fileBase);
+            m_fileSink.setHardwareId(m_deviceHwId);
             m_msCount = 0;
             m_byteCount = 0;
             m_recordEnabled = true;
@@ -235,6 +236,8 @@ void SigMFFileSinkSink::squelchRecording(bool squelchOpen)
     {
         if (!m_record)
         {
+            qint64 mSShift = (m_preRecordFill * 1000) / m_sinkSampleRate;
+            m_fileSink.setMsShift(-mSShift);
             m_fileSink.startRecording();
             m_record = true;
             SampleVector::iterator p1Begin, p1End, p2Begin, p2End;

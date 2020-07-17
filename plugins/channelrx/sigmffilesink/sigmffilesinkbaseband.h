@@ -95,6 +95,8 @@ public:
     uint64_t getByteCount() const { return m_sink.getByteCount(); }
     unsigned int getNbTracks() const { return m_sink.getNbTracks(); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; m_sink.setMessageQueueToGUI(messageQueue); }
+    void setDeviceHwId(const QString& hwId) { m_sink.setDeviceHwId(hwId); }
+    void setDeviceUId(int uid) { m_sink.setDeviceUId(uid); }
 
 private:
     SampleSinkFifo m_sampleFifo;
