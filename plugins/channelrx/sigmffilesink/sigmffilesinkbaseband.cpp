@@ -31,6 +31,7 @@ MESSAGE_CLASS_DEFINITION(SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork, M
 
 SigMFFileSinkBaseband::SigMFFileSinkBaseband() :
     m_running(false),
+    m_specMax(0),
     m_squelchLevel(0),
     m_squelchOpen(false),
     m_mutex(QMutex::Recursive)
@@ -226,7 +227,8 @@ void SigMFFileSinkBaseband::tick()
 {
     if (m_spectrumSink && m_settings.m_spectrumSquelchMode)
     {
-        bool squelchOpen = m_spectrumSink->getSpecMax() > m_squelchLevel;
+        m_specMax = m_spectrumSink->getSpecMax();
+        bool squelchOpen = m_specMax > m_squelchLevel;
 
         if (squelchOpen != m_squelchOpen)
         {

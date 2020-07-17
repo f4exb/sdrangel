@@ -98,6 +98,15 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGChannelReport& response,
+            QString& errorMessage);
+
+    virtual int webapiActionsPost(
+            const QStringList& channelActionsKeys,
+            SWGSDRangel::SWGChannelActions& query,
+            QString& errorMessage);
+
     static void webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const SigMFFileSinkSettings& settings);
@@ -136,6 +145,7 @@ private:
     void propagateSampleRateAndFrequency(uint32_t index, uint32_t log2Decim);
     DeviceSampleSource *getLocalDevice(uint32_t index);
 
+    void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force);
 
 private slots:

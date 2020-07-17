@@ -24,6 +24,8 @@
 #include <QBuffer>
 
 #include "SWGChannelSettings.h"
+#include "SWGChannelReport.h"
+#include "SWGChannelActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
@@ -34,6 +36,7 @@
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 
+#include "sigmffilesinkmessages.h"
 #include "sigmffilesinkbaseband.h"
 #include "sigmffilesink.h"
 
@@ -291,8 +294,8 @@ int SigMFFileSink::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
-    response.getLocalSinkSettings()->init();
+    response.setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
+    response.getSigMfFileSinkSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -322,59 +325,158 @@ int SigMFFileSink::webapiSettingsPutPatch(
     return 200;
 }
 
+int SigMFFileSink::webapiReportGet(
+        SWGSDRangel::SWGChannelReport& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setSigMfFileSinkReport(new SWGSDRangel::SWGSigMFFileSinkReport());
+    response.getSigMfFileSinkReport()->init();
+    webapiFormatChannelReport(response);
+    return 200;
+}
+
+int SigMFFileSink::webapiActionsPost(
+        const QStringList& channelActionsKeys,
+        SWGSDRangel::SWGChannelActions& query,
+        QString& errorMessage)
+{
+    SWGSDRangel::SWGSigMFFileSinkActions *swgSigMFFileSinkActions = query.getSigMfFileSinkActions();
+
+    if (swgSigMFFileSinkActions)
+    {
+        if (channelActionsKeys.contains("record"))
+        {
+            bool record = swgSigMFFileSinkActions->getRecord() != 0;
+
+            if (!m_settings.m_squelchRecordingEnable)
+            {
+                SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork *msg = SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkWork::create(record);
+                m_basebandSink->getInputMessageQueue()->push(msg);
+
+                if (getMessageQueueToGUI())
+                {
+                    SigMFFileSinkMessages::MsgReportRecording *msgToGUI = SigMFFileSinkMessages::MsgReportRecording::create(record);
+                    getMessageQueueToGUI()->push(msgToGUI);
+                }
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing SigMFFileSinkActions in query";
+        return 400;
+    }
+}
+
 void SigMFFileSink::webapiUpdateChannelSettings(
         SigMFFileSinkSettings& settings,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_inputFrequencyOffset = response.getSigMfFileSinkSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("fileRecordName")) {
+        settings.m_fileRecordName = *response.getSigMfFileSinkSettings()->getFileRecordName();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getLocalSinkSettings()->getRgbColor();
+        settings.m_rgbColor = response.getSigMfFileSinkSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getLocalSinkSettings()->getTitle();
+        settings.m_title = *response.getSigMfFileSinkSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("log2Decim")) {
-        settings.m_log2Decim = response.getLocalSinkSettings()->getLog2Decim();
+        settings.m_log2Decim = response.getSigMfFileSinkSettings()->getLog2Decim();
+    }
+    if (channelSettingsKeys.contains("spectrumSquelchMode")) {
+        settings.m_spectrumSquelchMode = response.getSigMfFileSinkSettings()->getSpectrumSquelchMode() != 0;
+    }
+    if (channelSettingsKeys.contains("spectrumSquelch")) {
+        settings.m_spectrumSquelch = response.getSigMfFileSinkSettings()->getSpectrumSquelch();
+    }
+    if (channelSettingsKeys.contains("squelchPreRecordTime")) {
+        settings.m_squelchPreRecordTime = response.getSigMfFileSinkSettings()->getSquelchPreRecordTime();
+    }
+    if (channelSettingsKeys.contains("squelchPostRecordTime")) {
+        settings.m_squelchPostRecordTime = response.getSigMfFileSinkSettings()->getSquelchPostRecordTime();
+    }
+    if (channelSettingsKeys.contains("squelchRecordingEnable")) {
+        settings.m_squelchRecordingEnable = response.getSigMfFileSinkSettings()->getSquelchRecordingEnable() != 0;
+    }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        settings.m_streamIndex = response.getSigMfFileSinkSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getLocalSinkSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getSigMfFileSinkSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getLocalSinkSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getSigMfFileSinkSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getLocalSinkSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getSigMfFileSinkSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getLocalSinkSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getSigMfFileSinkSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getLocalSinkSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getSigMfFileSinkSettings()->getReverseApiChannelIndex();
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_reverseAPIChannelIndex = response.getSigMfFileSinkSettings()->getInputFrequencyOffset();
     }
 }
 
 void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const SigMFFileSinkSettings& settings)
 {
-    response.getLocalSinkSettings()->setRgbColor(settings.m_rgbColor);
+    response.getSigMfFileSinkSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
 
-    if (response.getLocalSinkSettings()->getTitle()) {
-        *response.getLocalSinkSettings()->getTitle() = settings.m_title;
+    if (response.getSigMfFileSinkSettings()->getFileRecordName()) {
+        *response.getSigMfFileSinkSettings()->getFileRecordName() = settings.m_fileRecordName;
     } else {
-        response.getLocalSinkSettings()->setTitle(new QString(settings.m_title));
+        response.getSigMfFileSinkSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
-    response.getLocalSinkSettings()->setLog2Decim(settings.m_log2Decim);
-    response.getLocalSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getSigMfFileSinkSettings()->setRgbColor(settings.m_rgbColor);
 
-    if (response.getLocalSinkSettings()->getReverseApiAddress()) {
-        *response.getLocalSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getSigMfFileSinkSettings()->getTitle()) {
+        *response.getSigMfFileSinkSettings()->getTitle() = settings.m_title;
     } else {
-        response.getLocalSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getSigMfFileSinkSettings()->setTitle(new QString(settings.m_title));
     }
 
-    response.getLocalSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getLocalSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getLocalSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getSigMfFileSinkSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getSigMfFileSinkSettings()->setSpectrumSquelchMode(settings.m_spectrumSquelchMode ? 1 : 0);
+    response.getSigMfFileSinkSettings()->setSpectrumSquelch(settings.m_spectrumSquelch);
+    response.getSigMfFileSinkSettings()->setSquelchPreRecordTime(settings.m_squelchPreRecordTime);
+    response.getSigMfFileSinkSettings()->setSquelchPostRecordTime(settings.m_squelchPostRecordTime);
+    response.getSigMfFileSinkSettings()->setSquelchRecordingEnable(settings.m_squelchRecordingEnable ? 1 : 0);
+    response.getSigMfFileSinkSettings()->setStreamIndex(settings.m_streamIndex);
+    response.getSigMfFileSinkSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getSigMfFileSinkSettings()->getReverseApiAddress()) {
+        *response.getSigMfFileSinkSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getSigMfFileSinkSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getSigMfFileSinkSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSigMfFileSinkSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getSigMfFileSinkSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+}
+
+void SigMFFileSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
+{
+    response.getSigMfFileSinkReport()->setSpectrumSquelch(m_basebandSink->isSquelchOpen() ? 1 : 0);
+    response.getSigMfFileSinkReport()->setSpectrumMax(m_basebandSink->getSpecMax());
+    response.getSigMfFileSinkReport()->setSinkSampleRate(m_basebandSink->getSinkSampleRate());
+    response.getSigMfFileSinkReport()->setRecordTimeMs(getMsCount());
+    response.getSigMfFileSinkReport()->setRecordSize(getByteCount());
+    response.getSigMfFileSinkReport()->setRecording(m_basebandSink->isRecording() ? 1 : 0);
+    response.getSigMfFileSinkReport()->setRecordCaptures(getNbTracks());
+    response.getSigMfFileSinkReport()->setChannelSampleRate(m_basebandSink->getChannelSampleRate());
 }
 
 void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force)
@@ -384,19 +486,43 @@ void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKey
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("SigMFFileSink"));
-    swgChannelSettings->setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
-    SWGSDRangel::SWGLocalSinkSettings *swgLocalSinkSettings = swgChannelSettings->getLocalSinkSettings();
+    swgChannelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
+    SWGSDRangel::SWGSigMFFileSinkSettings *swgSigMFFileSinkSettings = swgChannelSettings->getSigMfFileSinkSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        swgSigMFFileSinkSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("fileRecordName")) {
+        swgSigMFFileSinkSettings->setTitle(new QString(settings.m_fileRecordName));
+    }
     if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgLocalSinkSettings->setRgbColor(settings.m_rgbColor);
+        swgSigMFFileSinkSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgLocalSinkSettings->setTitle(new QString(settings.m_title));
+        swgSigMFFileSinkSettings->setTitle(new QString(settings.m_title));
     }
     if (channelSettingsKeys.contains("log2Decim") || force) {
-        swgLocalSinkSettings->setLog2Decim(settings.m_log2Decim);
+        swgSigMFFileSinkSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (channelSettingsKeys.contains("spectrumSquelchMode")) {
+        swgSigMFFileSinkSettings->setSpectrumSquelchMode(settings.m_spectrumSquelchMode ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("spectrumSquelch")) {
+        swgSigMFFileSinkSettings->setSpectrumSquelch(settings.m_spectrumSquelch);
+    }
+    if (channelSettingsKeys.contains("squelchPreRecordTime")) {
+        swgSigMFFileSinkSettings->setSquelchPreRecordTime(settings.m_squelchPreRecordTime);
+    }
+    if (channelSettingsKeys.contains("squelchPostRecordTime")) {
+        swgSigMFFileSinkSettings->setSquelchPostRecordTime(settings.m_squelchPostRecordTime);
+    }
+    if (channelSettingsKeys.contains("squelchRecordingEnable")) {
+        swgSigMFFileSinkSettings->setSquelchRecordingEnable(settings.m_squelchRecordingEnable ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("streamIndex")) {
+        swgSigMFFileSinkSettings->setStreamIndex(settings.m_streamIndex);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
@@ -425,7 +551,7 @@ void SigMFFileSink::networkManagerFinished(QNetworkReply *reply)
 
     if (replyError)
     {
-        qWarning() << "v::networkManagerFinished:"
+        qWarning() << "SigMFFileSink::networkManagerFinished:"
                 << " error(" << (int) replyError
                 << "): " << replyError
                 << ": " << reply->errorString();

@@ -54,6 +54,8 @@ public:
     unsigned int getNbTracks() const { return m_fileSink.getNbCaptures(); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
     void squelchRecording(bool squelchOpen);
+    int getSampleRate() const { return m_sinkSampleRate; }
+    bool isRecording() const { return m_record; }
 
 private:
     int m_channelSampleRate;

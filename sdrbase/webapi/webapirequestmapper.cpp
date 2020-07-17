@@ -91,7 +91,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
     {"sdrangel.channeltx.modwfm", "WFMModSettings"},
     {"sdrangel.channel.beamsteeringcwmod", "BeamSteeringCWModSettings"},
-    {"sdrangel.channelmimo.interferometer", "InterferometerSettings"}
+    {"sdrangel.channelmimo.interferometer", "InterferometerSettings"},
+    {"sdrangel.channel.sigmffilesink", "SigMFFileSinkSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
@@ -164,11 +165,13 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"WFMDemod", "WFMDemodSettings"},
     {"WFMMod", "WFMModSettings"},
     {"BeamSteeringCWMod", "BeamSteeringCWModSettings"},
-    {"Interferometer", "InterferometerSettings"}
+    {"Interferometer", "InterferometerSettings"},
+    {"SigMFFileSink", "SigMFFileSinkSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
-    {"FileSource", "FileSourceActions"}
+    {"FileSource", "FileSourceActions"},
+    {"SigMFFileSink", "SigMFFileSinkActions"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
@@ -3484,6 +3487,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
             channelSettings->getRemoteSourceSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "SigMFFileSinkSettings")
+        {
+            channelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
+            channelSettings->getSigMfFileSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "SSBDemodSettings")
         {
             channelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());
@@ -3555,6 +3563,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setFileSourceActions(new SWGSDRangel::SWGFileSourceActions());
             channelActions->getFileSourceActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "SigMFFileSinkActions")
+        {
+            channelActions->setSigMfFileSinkActions(new SWGSDRangel::SWGSigMFFileSinkActions());
+            channelActions->getSigMfFileSinkActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {

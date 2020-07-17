@@ -97,6 +97,10 @@ public:
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; m_sink.setMessageQueueToGUI(messageQueue); }
     void setDeviceHwId(const QString& hwId) { m_sink.setDeviceHwId(hwId); }
     void setDeviceUId(int uid) { m_sink.setDeviceUId(uid); }
+    bool isSquelchOpen() const { return m_squelchOpen; }
+    bool isRecording() const { return m_sink.isRecording(); }
+    float getSpecMax() const { return m_specMax; }
+    int getSinkSampleRate() const { return m_sink.getSampleRate(); }
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -106,6 +110,7 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_messageQueueToGUI;
     SigMFFileSinkSettings m_settings;
+    float m_specMax; //!< Last max used for comparison
     float m_squelchLevel;
     bool m_squelchOpen;
     int64_t m_centerFrequency;
