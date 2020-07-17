@@ -73,8 +73,12 @@ void SigMFFileSinkSink::startRecording()
 
 void SigMFFileSinkSink::stopRecording()
 {
-    m_record = false;
-    m_fileSink.stopRecording();
+    if (m_record)
+    {
+        m_preRecordBuffer.reset();
+        m_fileSink.stopRecording();
+        m_record = false;
+    }
 }
 
 void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -100,7 +104,7 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
 		}
 	}
 
-    if (m_settings.m_preRecordTime != 0) {
+    if (!m_record && (m_settings.m_preRecordTime != 0)) {
         m_preRecordFill = m_preRecordBuffer.write(m_sampleBuffer.begin(), m_sampleBuffer.end());
     }
 
@@ -130,8 +134,8 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
                 m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_postSquelchCounter, true);
                 nbToWrite = m_postSquelchCounter;
                 m_postSquelchCounter = 0;
-                m_record = false;
-                m_fileSink.stopRecording();
+
+                stopRecording();
             }
         }
 
