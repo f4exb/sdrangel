@@ -35,6 +35,7 @@ SigMFFileRecord::SigMFFileRecord() :
     m_fileName("test"),
     m_sampleRate(0),
     m_centerFrequency(0),
+    m_msShift(0),
 	m_recordOn(false),
     m_recordStart(true),
     m_sampleStart(0),
@@ -126,7 +127,7 @@ void SigMFFileRecord::startRecording()
         qDebug("SigMFFileRecord::startRecording: start new capture");
     }
 
-    m_captureStartDT = QDateTime::currentDateTimeUtc();
+    m_captureStartDT = QDateTime::currentDateTimeUtc().addMSecs(m_msShift);
     m_recordOn = true;
     m_sampleCount = 0;
 }

@@ -50,6 +50,7 @@ public:
     virtual bool isRecording() const { return m_recordOn; }
 
     void setHardwareId(const QString& hardwareId) { m_hardwareId = hardwareId; }
+    void setMsShift(qint64 msShift) { m_msShift = msShift; }
     unsigned int getNbCaptures() const;
 
 private:
@@ -59,6 +60,7 @@ private:
     QString m_metaFileName;
     quint32 m_sampleRate;
     quint64 m_centerFrequency;
+    qint64 m_msShift;
     bool m_recordOn;
     bool m_recordStart;
     QDateTime m_captureStartDT;
