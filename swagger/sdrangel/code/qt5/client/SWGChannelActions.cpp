@@ -38,6 +38,8 @@ SWGChannelActions::SWGChannelActions() {
     m_originator_channel_index_isSet = false;
     file_source_actions = nullptr;
     m_file_source_actions_isSet = false;
+    sig_mf_file_sink_actions = nullptr;
+    m_sig_mf_file_sink_actions_isSet = false;
 }
 
 SWGChannelActions::~SWGChannelActions() {
@@ -56,6 +58,8 @@ SWGChannelActions::init() {
     m_originator_channel_index_isSet = false;
     file_source_actions = new SWGFileSourceActions();
     m_file_source_actions_isSet = false;
+    sig_mf_file_sink_actions = new SWGSigMFFileSinkActions();
+    m_sig_mf_file_sink_actions_isSet = false;
 }
 
 void
@@ -68,6 +72,9 @@ SWGChannelActions::cleanup() {
 
     if(file_source_actions != nullptr) { 
         delete file_source_actions;
+    }
+    if(sig_mf_file_sink_actions != nullptr) { 
+        delete sig_mf_file_sink_actions;
     }
 }
 
@@ -91,6 +98,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_channel_index, pJson["originatorChannelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_sink_actions, pJson["SigMFFileSinkActions"], "SWGSigMFFileSinkActions", "SWGSigMFFileSinkActions");
     
 }
 
@@ -122,6 +131,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((file_source_actions != nullptr) && (file_source_actions->isSet())){
         toJsonValue(QString("FileSourceActions"), file_source_actions, obj, QString("SWGFileSourceActions"));
+    }
+    if((sig_mf_file_sink_actions != nullptr) && (sig_mf_file_sink_actions->isSet())){
+        toJsonValue(QString("SigMFFileSinkActions"), sig_mf_file_sink_actions, obj, QString("SWGSigMFFileSinkActions"));
     }
 
     return obj;
@@ -177,6 +189,16 @@ SWGChannelActions::setFileSourceActions(SWGFileSourceActions* file_source_action
     this->m_file_source_actions_isSet = true;
 }
 
+SWGSigMFFileSinkActions*
+SWGChannelActions::getSigMfFileSinkActions() {
+    return sig_mf_file_sink_actions;
+}
+void
+SWGChannelActions::setSigMfFileSinkActions(SWGSigMFFileSinkActions* sig_mf_file_sink_actions) {
+    this->sig_mf_file_sink_actions = sig_mf_file_sink_actions;
+    this->m_sig_mf_file_sink_actions_isSet = true;
+}
+
 
 bool
 SWGChannelActions::isSet(){
@@ -195,6 +217,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(file_source_actions && file_source_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_sink_actions && sig_mf_file_sink_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

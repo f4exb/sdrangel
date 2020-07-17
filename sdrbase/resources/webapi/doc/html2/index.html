@@ -2157,6 +2157,9 @@ margin-bottom: 20px;
     },
     "FileSourceActions" : {
       "$ref" : "#/definitions/FileSourceActions"
+    },
+    "SigMFFileSinkActions" : {
+      "$ref" : "#/definitions/SigMFFileSinkActions"
     }
   },
   "description" : "Base channel actions. Only the channel actions corresponding to the channel specified in the channelType field is or should be present."
@@ -2322,6 +2325,9 @@ margin-bottom: 20px;
     "RemoteSourceReport" : {
       "$ref" : "#/definitions/RemoteSourceReport"
     },
+    "SigMFFileSinkReport" : {
+      "$ref" : "#/definitions/SigMFFileSinkReport"
+    },
     "SSBModReport" : {
       "$ref" : "#/definitions/SSBModReport"
     },
@@ -2425,6 +2431,9 @@ margin-bottom: 20px;
     },
     "RemoteSourceSettings" : {
       "$ref" : "#/definitions/RemoteSourceSettings"
+    },
+    "SigMFFileSinkSettings" : {
+      "$ref" : "#/definitions/SigMFFileSinkSettings"
     },
     "SSBModSettings" : {
       "$ref" : "#/definitions/SSBModSettings"
@@ -7252,6 +7261,114 @@ margin-bottom: 20px;
     }
   },
   "description" : "SigMFFileInput"
+};
+            defs.SigMFFileSinkActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "SigMFFileSink"
+};
+            defs.SigMFFileSinkReport = {
+  "properties" : {
+    "spectrumSquelch" : {
+      "type" : "integer",
+      "description" : "Spectrum squelch status * 0 - closed * 1 - open\n"
+    },
+    "spectrumMax" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Current spectrum max in squared magnitude (power)"
+    },
+    "sinkSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "recording" : {
+      "type" : "integer",
+      "description" : "Recording status * 0 - not recording * 1 - recording\n"
+    },
+    "recordTimeMs" : {
+      "type" : "integer",
+      "description" : "Record total time in milliseconds"
+    },
+    "recordSize" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Record data size in bytes"
+    },
+    "recordCaptures" : {
+      "type" : "integer",
+      "description" : "Number of record captures not including current if recording"
+    }
+  },
+  "description" : "SigMFFileSink"
+};
+            defs.SigMFFileSinkSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string",
+      "description" : "full path of the meta file"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "spectrumSquelchMode" : {
+      "type" : "integer",
+      "description" : "Spectrum squelch system * 0 - deactivated * 1 - activated\n"
+    },
+    "spectrumSquelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Squelch level in power dB"
+    },
+    "squelchPreRecordTime" : {
+      "type" : "integer",
+      "description" : "Number of seconds to record before spectrum squelch opens"
+    },
+    "squelchPostRecordTime" : {
+      "type" : "integer",
+      "description" : "Number of seconds to record after spectrum squelch cloeses"
+    },
+    "squelchRecordingEnable" : {
+      "type" : "integer",
+      "description" : "Automatic recording triggered by spectrum squalch * 0 - disabled * 1 - enabled\n"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "SigMFFileSink"
 };
             defs.SoapySDRFrequencySetting = {
   "properties" : {
@@ -37491,7 +37608,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-07-09T20:03:50.125+02:00
+              Generated 2020-07-17T06:28:55.248+02:00
             </div>
           </div>
       </div>

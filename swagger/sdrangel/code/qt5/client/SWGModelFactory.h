@@ -178,6 +178,9 @@
 #include "SWGSigMFFileInputActions.h"
 #include "SWGSigMFFileInputReport.h"
 #include "SWGSigMFFileInputSettings.h"
+#include "SWGSigMFFileSinkActions.h"
+#include "SWGSigMFFileSinkReport.h"
+#include "SWGSigMFFileSinkSettings.h"
 #include "SWGSoapySDRFrequencySetting.h"
 #include "SWGSoapySDRGainSetting.h"
 #include "SWGSoapySDRInputActions.h"
@@ -704,6 +707,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSigMFFileInputSettings").compare(type) == 0) {
       return new SWGSigMFFileInputSettings();
+    }
+    if(QString("SWGSigMFFileSinkActions").compare(type) == 0) {
+      return new SWGSigMFFileSinkActions();
+    }
+    if(QString("SWGSigMFFileSinkReport").compare(type) == 0) {
+      return new SWGSigMFFileSinkReport();
+    }
+    if(QString("SWGSigMFFileSinkSettings").compare(type) == 0) {
+      return new SWGSigMFFileSinkSettings();
     }
     if(QString("SWGSoapySDRFrequencySetting").compare(type) == 0) {
       return new SWGSoapySDRFrequencySetting();

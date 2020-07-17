@@ -38,6 +38,7 @@
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
+#include "SWGSigMFFileSinkReport.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSourceReport.h"
 #include "SWGWFMDemodReport.h"
@@ -113,6 +114,9 @@ public:
     SWGRemoteSourceReport* getRemoteSourceReport();
     void setRemoteSourceReport(SWGRemoteSourceReport* remote_source_report);
 
+    SWGSigMFFileSinkReport* getSigMfFileSinkReport();
+    void setSigMfFileSinkReport(SWGSigMFFileSinkReport* sig_mf_file_sink_report);
+
     SWGSSBModReport* getSsbModReport();
     void setSsbModReport(SWGSSBModReport* ssb_mod_report);
 
@@ -182,6 +186,9 @@ private:
 
     SWGRemoteSourceReport* remote_source_report;
     bool m_remote_source_report_isSet;
+
+    SWGSigMFFileSinkReport* sig_mf_file_sink_report;
+    bool m_sig_mf_file_sink_report_isSet;
 
     SWGSSBModReport* ssb_mod_report;
     bool m_ssb_mod_report_isSet;

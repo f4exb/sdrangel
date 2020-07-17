@@ -11,81 +11,48 @@
  */
 
 /*
- * SWGChannelActions.h
+ * SWGSigMFFileSinkActions.h
  *
- * Base channel actions. Only the channel actions corresponding to the channel specified in the channelType field is or should be present.
+ * SigMFFileSink
  */
 
-#ifndef SWGChannelActions_H_
-#define SWGChannelActions_H_
+#ifndef SWGSigMFFileSinkActions_H_
+#define SWGSigMFFileSinkActions_H_
 
 #include <QJsonObject>
 
 
-#include "SWGFileSourceActions.h"
-#include "SWGSigMFFileSinkActions.h"
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGChannelActions: public SWGObject {
+class SWG_API SWGSigMFFileSinkActions: public SWGObject {
 public:
-    SWGChannelActions();
-    SWGChannelActions(QString* json);
-    virtual ~SWGChannelActions();
+    SWGSigMFFileSinkActions();
+    SWGSigMFFileSinkActions(QString* json);
+    virtual ~SWGSigMFFileSinkActions();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelActions* fromJson(QString &jsonString) override;
+    virtual SWGSigMFFileSinkActions* fromJson(QString &jsonString) override;
 
-    QString* getChannelType();
-    void setChannelType(QString* channel_type);
-
-    qint32 getDirection();
-    void setDirection(qint32 direction);
-
-    qint32 getOriginatorDeviceSetIndex();
-    void setOriginatorDeviceSetIndex(qint32 originator_device_set_index);
-
-    qint32 getOriginatorChannelIndex();
-    void setOriginatorChannelIndex(qint32 originator_channel_index);
-
-    SWGFileSourceActions* getFileSourceActions();
-    void setFileSourceActions(SWGFileSourceActions* file_source_actions);
-
-    SWGSigMFFileSinkActions* getSigMfFileSinkActions();
-    void setSigMfFileSinkActions(SWGSigMFFileSinkActions* sig_mf_file_sink_actions);
+    qint32 getRecord();
+    void setRecord(qint32 record);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* channel_type;
-    bool m_channel_type_isSet;
-
-    qint32 direction;
-    bool m_direction_isSet;
-
-    qint32 originator_device_set_index;
-    bool m_originator_device_set_index_isSet;
-
-    qint32 originator_channel_index;
-    bool m_originator_channel_index_isSet;
-
-    SWGFileSourceActions* file_source_actions;
-    bool m_file_source_actions_isSet;
-
-    SWGSigMFFileSinkActions* sig_mf_file_sink_actions;
-    bool m_sig_mf_file_sink_actions_isSet;
+    qint32 record;
+    bool m_record_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelActions_H_ */
+#endif /* SWGSigMFFileSinkActions_H_ */
