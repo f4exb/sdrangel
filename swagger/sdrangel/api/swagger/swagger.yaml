@@ -2499,6 +2499,8 @@ definitions:
         $ref: "http://swgserver:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
       RemoteSourceReport:
         $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+      SigMFFileSinkReport:
+        $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
       SSBModReport:
         $ref: "http://swgserver:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSourceReport:

@@ -61,6 +61,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
     RemoteSourceSettings:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
+    SigMFFileSinkSettings:
+      $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkSettings"
     SSBModSettings:
       $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModSettings"
     SSBDemodSettings:

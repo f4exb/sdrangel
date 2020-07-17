@@ -61,6 +61,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
     RemoteSourceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceSettings"
+    SigMFFileSinkSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkSettings"
     SSBModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SSBMod.yaml#/SSBModSettings"
     SSBDemodSettings:

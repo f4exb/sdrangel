@@ -2499,6 +2499,8 @@ definitions:
         $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
       RemoteSourceReport:
         $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+      SigMFFileSinkReport:
+        $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
       SSBModReport:
         $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
       UDPSourceReport:

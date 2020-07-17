@@ -19,3 +19,5 @@ ChannelActions:
       type: integer
     FileSourceActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceActions"
+    SigMFFileSinkActions:
+      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"

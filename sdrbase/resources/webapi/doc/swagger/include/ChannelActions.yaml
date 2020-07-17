@@ -19,3 +19,5 @@ ChannelActions:
       type: integer
     FileSourceActions:
       $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceActions"
+    SigMFFileSinkActions:
+      $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"
