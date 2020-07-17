@@ -63,8 +63,8 @@ public:
     float getSpectrumSquelch();
     void setSpectrumSquelch(float spectrum_squelch);
 
-    qint32 getSquelchPreRecordTime();
-    void setSquelchPreRecordTime(qint32 squelch_pre_record_time);
+    qint32 getPreRecordTime();
+    void setPreRecordTime(qint32 pre_record_time);
 
     qint32 getSquelchPostRecordTime();
     void setSquelchPostRecordTime(qint32 squelch_post_record_time);
@@ -115,8 +115,8 @@ private:
     float spectrum_squelch;
     bool m_spectrum_squelch_isSet;
 
-    qint32 squelch_pre_record_time;
-    bool m_squelch_pre_record_time_isSet;
+    qint32 pre_record_time;
+    bool m_pre_record_time_isSet;
 
     qint32 squelch_post_record_time;
     bool m_squelch_post_record_time_isSet;

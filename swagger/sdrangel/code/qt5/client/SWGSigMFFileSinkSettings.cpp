@@ -42,8 +42,8 @@ SWGSigMFFileSinkSettings::SWGSigMFFileSinkSettings() {
     m_spectrum_squelch_mode_isSet = false;
     spectrum_squelch = 0.0f;
     m_spectrum_squelch_isSet = false;
-    squelch_pre_record_time = 0;
-    m_squelch_pre_record_time_isSet = false;
+    pre_record_time = 0;
+    m_pre_record_time_isSet = false;
     squelch_post_record_time = 0;
     m_squelch_post_record_time_isSet = false;
     squelch_recording_enable = 0;
@@ -82,8 +82,8 @@ SWGSigMFFileSinkSettings::init() {
     m_spectrum_squelch_mode_isSet = false;
     spectrum_squelch = 0.0f;
     m_spectrum_squelch_isSet = false;
-    squelch_pre_record_time = 0;
-    m_squelch_pre_record_time_isSet = false;
+    pre_record_time = 0;
+    m_pre_record_time_isSet = false;
     squelch_post_record_time = 0;
     m_squelch_post_record_time_isSet = false;
     squelch_recording_enable = 0;
@@ -153,7 +153,7 @@ SWGSigMFFileSinkSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&spectrum_squelch, pJson["spectrumSquelch"], "float", "");
     
-    ::SWGSDRangel::setValue(&squelch_pre_record_time, pJson["squelchPreRecordTime"], "qint32", "");
+    ::SWGSDRangel::setValue(&pre_record_time, pJson["preRecordTime"], "qint32", "");
     
     ::SWGSDRangel::setValue(&squelch_post_record_time, pJson["squelchPostRecordTime"], "qint32", "");
     
@@ -208,8 +208,8 @@ SWGSigMFFileSinkSettings::asJsonObject() {
     if(m_spectrum_squelch_isSet){
         obj->insert("spectrumSquelch", QJsonValue(spectrum_squelch));
     }
-    if(m_squelch_pre_record_time_isSet){
-        obj->insert("squelchPreRecordTime", QJsonValue(squelch_pre_record_time));
+    if(m_pre_record_time_isSet){
+        obj->insert("preRecordTime", QJsonValue(pre_record_time));
     }
     if(m_squelch_post_record_time_isSet){
         obj->insert("squelchPostRecordTime", QJsonValue(squelch_post_record_time));
@@ -310,13 +310,13 @@ SWGSigMFFileSinkSettings::setSpectrumSquelch(float spectrum_squelch) {
 }
 
 qint32
-SWGSigMFFileSinkSettings::getSquelchPreRecordTime() {
-    return squelch_pre_record_time;
+SWGSigMFFileSinkSettings::getPreRecordTime() {
+    return pre_record_time;
 }
 void
-SWGSigMFFileSinkSettings::setSquelchPreRecordTime(qint32 squelch_pre_record_time) {
-    this->squelch_pre_record_time = squelch_pre_record_time;
-    this->m_squelch_pre_record_time_isSet = true;
+SWGSigMFFileSinkSettings::setPreRecordTime(qint32 pre_record_time) {
+    this->pre_record_time = pre_record_time;
+    this->m_pre_record_time_isSet = true;
 }
 
 qint32
@@ -425,7 +425,7 @@ SWGSigMFFileSinkSettings::isSet(){
         if(m_spectrum_squelch_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_squelch_pre_record_time_isSet){
+        if(m_pre_record_time_isSet){
             isObjectUpdated = true; break;
         }
         if(m_squelch_post_record_time_isSet){
