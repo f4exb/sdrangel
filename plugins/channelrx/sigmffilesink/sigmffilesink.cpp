@@ -236,9 +236,49 @@ void SigMFFileSink::applySettings(const SigMFFileSinkSettings& settings, bool fo
 
     QList<QString> reverseAPIKeys;
 
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force) {
+        reverseAPIKeys.append("fileRecordName");
+    }
+    if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((settings.m_title != m_settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
     if ((settings.m_log2Decim != m_settings.m_log2Decim) || force) {
         reverseAPIKeys.append("log2Decim");
-    } // TOOO: the rest
+    }
+    if ((settings.m_spectrumSquelchMode != m_settings.m_spectrumSquelchMode) || force) {
+        reverseAPIKeys.append("spectrumSquelchMode");
+    }
+    if ((settings.m_spectrumSquelch != m_settings.m_spectrumSquelch) || force) {
+        reverseAPIKeys.append("spectrumSquelch");
+    }
+    if ((settings.m_preRecordTime != m_settings.m_preRecordTime) || force) {
+        reverseAPIKeys.append("preRecordTime");
+    }
+    if ((settings.m_squelchPostRecordTime != m_settings.m_squelchPostRecordTime) || force) {
+        reverseAPIKeys.append("squelchPostRecordTime");
+    }
+    if ((settings.m_squelchRecordingEnable != m_settings.m_squelchRecordingEnable) || force) {
+        reverseAPIKeys.append("squelchRecordingEnable");
+    }
+
+    if (m_settings.m_streamIndex != settings.m_streamIndex)
+    {
+        if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
+        {
+            m_deviceAPI->removeChannelSinkAPI(this);
+            m_deviceAPI->removeChannelSink(this, m_settings.m_streamIndex);
+            m_deviceAPI->addChannelSink(this, settings.m_streamIndex);
+            m_deviceAPI->addChannelSinkAPI(this);
+        }
+
+        reverseAPIKeys.append("streamIndex");
+    }
 
     SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband *msg = SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
