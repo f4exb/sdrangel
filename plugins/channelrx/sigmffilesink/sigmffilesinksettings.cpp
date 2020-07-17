@@ -38,7 +38,7 @@ void SigMFFileSinkSettings::resetToDefaults()
     m_spectrumGUI = nullptr;
     m_spectrumSquelchMode = false;
     m_spectrumSquelch = -50;
-    m_squelchPreRecordTime = 0;
+    m_preRecordTime = 0;
     m_squelchPostRecordTime = 0;
     m_squelchRecordingEnable = false;
     m_streamIndex = 0;
@@ -71,7 +71,7 @@ QByteArray SigMFFileSinkSettings::serialize() const
 
     s.writeBool(14, m_spectrumSquelchMode);
     s.writeS32(15, m_spectrumSquelch);
-    s.writeS32(16, m_squelchPreRecordTime);
+    s.writeS32(16, m_preRecordTime);
     s.writeS32(17, m_squelchPostRecordTime);
     s.writeBool(18, m_squelchRecordingEnable);
 
@@ -127,7 +127,7 @@ bool SigMFFileSinkSettings::deserialize(const QByteArray& data)
         d.readBool(14, &m_spectrumSquelchMode, false);
         d.readS32(15, &stmp, -50);
         m_spectrumSquelch = stmp;
-        d.readS32(16, &m_squelchPreRecordTime, 0);
+        d.readS32(16, &m_preRecordTime, 0);
         d.readS32(17, &m_squelchPostRecordTime, 0);
         d.readBool(18, &m_squelchRecordingEnable, false);
 

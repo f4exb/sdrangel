@@ -382,7 +382,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Squelched recoding pre-recording time (s)</string>
+         <string>Pre-recording time (s)</string>
         </property>
         <property name="maximum">
          <number>10</number>

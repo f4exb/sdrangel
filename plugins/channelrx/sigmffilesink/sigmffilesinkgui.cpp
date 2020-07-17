@@ -252,8 +252,8 @@ void SigMFFileSinkGUI::displaySettings()
     ui->spectrumSquelch->setChecked(m_settings.m_spectrumSquelchMode);
     ui->squelchLevel->setValue(m_settings.m_spectrumSquelch);
     ui->squelchLevelText->setText(tr("%1").arg(m_settings.m_spectrumSquelch));
-    ui->preRecordTime->setValue(m_settings.m_squelchPreRecordTime);
-    ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_squelchPreRecordTime));
+    ui->preRecordTime->setValue(m_settings.m_preRecordTime);
+    ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_preRecordTime));
     ui->postSquelchTime->setValue(m_settings.m_squelchPostRecordTime);
     ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
     ui->squelchedRecording->setChecked(m_settings.m_squelchRecordingEnable);
@@ -462,8 +462,8 @@ void SigMFFileSinkGUI::on_squelchLevel_valueChanged(int value)
 
 void SigMFFileSinkGUI::on_preRecordTime_valueChanged(int value)
 {
-    m_settings.m_squelchPreRecordTime = value;
-    ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_squelchPreRecordTime));
+    m_settings.m_preRecordTime = value;
+    ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_preRecordTime));
     applySettings();
 }
 

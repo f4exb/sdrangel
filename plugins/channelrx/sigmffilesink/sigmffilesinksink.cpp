@@ -42,10 +42,32 @@ SigMFFileSinkSink::~SigMFFileSinkSink()
 
 void SigMFFileSinkSink::startRecording()
 {
-    if (m_recordEnabled)
+    if (m_recordEnabled) // File is open for writing and valid
     {
+        // set the length of pre record time
+        qint64 mSShift = (m_preRecordFill * 1000) / m_sinkSampleRate;
+        m_fileSink.setMsShift(-mSShift);
+
+        // notify capture start
         m_fileSink.startRecording();
         m_record = true;
+
+        // copy pre record samples
+        SampleVector::iterator p1Begin, p1End, p2Begin, p2End;
+        m_preRecordBuffer.readBegin(m_preRecordFill, &p1Begin, &p1End, &p2Begin, &p2End);
+
+        if (p1Begin != p1End) {
+            m_fileSink.feed(p1Begin, p1End, false);
+        }
+        if (p2Begin != p2End) {
+            m_fileSink.feed(p2Begin, p2End, false);
+        }
+
+        m_byteCount += m_preRecordFill * sizeof(Sample);
+
+        if (m_sinkSampleRate > 0) {
+            m_msCount += (m_preRecordFill * 1000) / m_sinkSampleRate;
+        }
     }
 }
 
@@ -78,7 +100,7 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
 		}
 	}
 
-    if (m_settings.m_squelchRecordingEnable && (m_settings.m_squelchPreRecordTime != 0)) {
+    if (m_settings.m_preRecordTime != 0) {
         m_preRecordFill = m_preRecordBuffer.write(m_sampleBuffer.begin(), m_sampleBuffer.end());
     }
 
@@ -183,7 +205,7 @@ void SigMFFileSinkSink::applyChannelSettings(
     }
 
     if ((m_sinkSampleRate != sinkSampleRate) || force) {
-        m_preRecordBuffer.setSize(m_settings.m_squelchPreRecordTime * sinkSampleRate);
+        m_preRecordBuffer.setSize(m_settings.m_preRecordTime * sinkSampleRate);
     }
 
     m_channelSampleRate = channelSampleRate;
@@ -218,9 +240,13 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         }
     }
 
-    if ((settings.m_squelchPreRecordTime != m_settings.m_squelchPostRecordTime) || force)
+    if ((settings.m_preRecordTime != m_settings.m_squelchPostRecordTime) || force)
     {
-        m_preRecordBuffer.setSize(settings.m_squelchPreRecordTime * m_sinkSampleRate);
+        m_preRecordBuffer.setSize(settings.m_preRecordTime * m_sinkSampleRate);
+
+        if (settings.m_preRecordTime  == 0) {
+            m_preRecordFill = 0;
+        }
     }
 
     m_settings = settings;
@@ -236,25 +262,7 @@ void SigMFFileSinkSink::squelchRecording(bool squelchOpen)
     {
         if (!m_record)
         {
-            qint64 mSShift = (m_preRecordFill * 1000) / m_sinkSampleRate;
-            m_fileSink.setMsShift(-mSShift);
-            m_fileSink.startRecording();
-            m_record = true;
-            SampleVector::iterator p1Begin, p1End, p2Begin, p2End;
-            m_preRecordBuffer.readBegin(m_preRecordFill, &p1Begin, &p1End, &p2Begin, &p2End);
-
-            if (p1Begin != p1End) {
-                m_fileSink.feed(p1Begin, p1End, false);
-            }
-            if (p2Begin != p2End) {
-                m_fileSink.feed(p2Begin, p2End, false);
-            }
-
-            m_byteCount += m_preRecordFill * sizeof(Sample);
-
-            if (m_sinkSampleRate > 0) {
-                m_msCount += (m_preRecordFill * 1000) / m_sinkSampleRate;
-            }
+            startRecording();
 
             if (m_msgQueueToGUI)
             {

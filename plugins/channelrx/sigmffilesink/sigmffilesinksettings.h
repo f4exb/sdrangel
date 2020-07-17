@@ -33,7 +33,7 @@ struct SigMFFileSinkSettings
     uint32_t m_log2Decim;
     bool m_spectrumSquelchMode;
     float m_spectrumSquelch;
-    int m_squelchPreRecordTime;
+    int m_preRecordTime;
     int m_squelchPostRecordTime;
     bool m_squelchRecordingEnable;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
