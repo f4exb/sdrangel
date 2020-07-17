@@ -22,9 +22,9 @@ SigMFFileSinkSettings:
       type: number
       format: float
       description: Squelch level in power dB
-    squelchPreRecordTime:
+    preRecordTime:
       type: integer
-      description: Number of seconds to record before spectrum squelch opens
+      description: Number of seconds to record before recording is triggered (manual or squelch)
     squelchPostRecordTime:
       type: integer
       description: Number of seconds to record after spectrum squelch cloeses
