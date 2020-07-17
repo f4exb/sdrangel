@@ -397,8 +397,8 @@ void SigMFFileSink::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("spectrumSquelch")) {
         settings.m_spectrumSquelch = response.getSigMfFileSinkSettings()->getSpectrumSquelch();
     }
-    if (channelSettingsKeys.contains("squelchPreRecordTime")) {
-        settings.m_preRecordTime = response.getSigMfFileSinkSettings()->getSquelchPreRecordTime();
+    if (channelSettingsKeys.contains("preRecordTime")) {
+        settings.m_preRecordTime = response.getSigMfFileSinkSettings()->getPreRecordTime();
     }
     if (channelSettingsKeys.contains("squelchPostRecordTime")) {
         settings.m_squelchPostRecordTime = response.getSigMfFileSinkSettings()->getSquelchPostRecordTime();
@@ -450,7 +450,7 @@ void SigMFFileSink::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings&
     response.getSigMfFileSinkSettings()->setLog2Decim(settings.m_log2Decim);
     response.getSigMfFileSinkSettings()->setSpectrumSquelchMode(settings.m_spectrumSquelchMode ? 1 : 0);
     response.getSigMfFileSinkSettings()->setSpectrumSquelch(settings.m_spectrumSquelch);
-    response.getSigMfFileSinkSettings()->setSquelchPreRecordTime(settings.m_preRecordTime);
+    response.getSigMfFileSinkSettings()->setPreRecordTime(settings.m_preRecordTime);
     response.getSigMfFileSinkSettings()->setSquelchPostRecordTime(settings.m_squelchPostRecordTime);
     response.getSigMfFileSinkSettings()->setSquelchRecordingEnable(settings.m_squelchRecordingEnable ? 1 : 0);
     response.getSigMfFileSinkSettings()->setStreamIndex(settings.m_streamIndex);
@@ -512,8 +512,8 @@ void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKey
     if (channelSettingsKeys.contains("spectrumSquelch")) {
         swgSigMFFileSinkSettings->setSpectrumSquelch(settings.m_spectrumSquelch);
     }
-    if (channelSettingsKeys.contains("squelchPreRecordTime")) {
-        swgSigMFFileSinkSettings->setSquelchPreRecordTime(settings.m_preRecordTime);
+    if (channelSettingsKeys.contains("preRecordTime")) {
+        swgSigMFFileSinkSettings->setPreRecordTime(settings.m_preRecordTime);
     }
     if (channelSettingsKeys.contains("squelchPostRecordTime")) {
         swgSigMFFileSinkSettings->setSquelchPostRecordTime(settings.m_squelchPostRecordTime);
