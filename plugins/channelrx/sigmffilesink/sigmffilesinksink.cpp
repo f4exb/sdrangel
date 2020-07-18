@@ -85,23 +85,20 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
 {
 	for (SampleVector::const_iterator it = begin; it < end; ++it)
 	{
-		Complex c(it->real(), it->imag());
-		c *= m_nco.nextIQ();
-
-		if (m_interpolatorDistance == 1)
-		{
-	        m_sampleBuffer.push_back(Sample(c.real(), c.imag()));
-		}
-		else
-		{
+        if (m_decimator.getDecim() == 1)
+        {
+            m_sampleBuffer.push_back(*it);
+        }
+        else
+        {
+            Complex c(it->real(), it->imag());
+            c *= m_nco.nextIQ();
             Complex ci;
 
-            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
-            {
+            if (m_decimator.decimate(c, ci)) {
                 m_sampleBuffer.push_back(Sample(ci.real(), ci.imag()));
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
-		}
+        }
 	}
 
     if (!m_record && (m_settings.m_preRecordTime != 0)) {
@@ -186,9 +183,19 @@ void SigMFFileSinkSink::applyChannelSettings(
     if ((m_channelSampleRate != channelSampleRate)
      || (m_sinkSampleRate != sinkSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, channelSampleRate / 2.0f);
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) sinkSampleRate;
+        int decim = channelSampleRate / sinkSampleRate;
+
+        for (int i = 0; i < 7; i++) // find log2 beween 0 and 6
+        {
+            if (decim & 1 == 1)
+            {
+                qDebug() << "SigMFFileSinkSink::applyChannelSettings: log2decim: " << i;
+                m_decimator.setLog2Decim(i);
+                break;
+            }
+
+            decim >>= 1;
+        }
     }
 
     if ((m_centerFrequency != centerFrequency)

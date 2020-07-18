@@ -20,7 +20,7 @@
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/sigmffilerecord.h"
-#include "dsp/interpolator.h"
+#include "dsp/decimatorc.h"
 #include "dsp/samplesimplefifo.h"
 #include "dsp/ncof.h"
 
@@ -63,9 +63,7 @@ private:
     int m_sinkSampleRate;
     int64_t m_centerFrequency;
 	NCOF m_nco;
-    Interpolator m_interpolator;
-    Real m_interpolatorDistance;
-    Real m_interpolatorDistanceRemain;
+    DecimatorC m_decimator;
     SampleVector m_sampleBuffer;
     SigMFFileSinkSettings m_settings;
     SigMFFileRecord m_fileSink;
