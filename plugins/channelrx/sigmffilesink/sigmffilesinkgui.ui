@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
+    <width>552</width>
     <height>458</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>522</width>
+    <width>552</width>
     <height>102</height>
    </size>
   </property>
@@ -33,13 +33,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>520</width>
+     <width>550</width>
      <height>100</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>520</width>
+     <width>550</width>
      <height>100</height>
     </size>
    </property>
@@ -513,9 +513,12 @@
     <rect>
      <x>0</x>
      <y>100</y>
-     <width>521</width>
+     <width>541</width>
      <height>351</height>
     </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Channel Spectrum</string>
    </property>
    <layout class="QVBoxLayout" name="SpectrumLayout">
     <property name="spacing">
