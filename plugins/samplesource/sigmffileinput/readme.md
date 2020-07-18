@@ -4,11 +4,11 @@
 
 SigMF files support is a v5 only feature.
 
-This plugin reads a file of samples in [SigMF](https://github.com/gnuradio/SigMF/blob/master/sigmf-spec.md) format. SDRangel sampling source devices can save I/Q data in SigMF format. When files are recorded with SDRangel the SDRangel specific SigMF standard extensions are available among which variable sample rate.
+This plugin reads a file of samples in [SigMF](https://github.com/gnuradio/SigMF/blob/master/sigmf-spec.md) format. SDRangel [SigMF file sink plugin](../../channelrx/sigmffilesink/readme.md) can save I/Q data in SigMF format. When files are recorded with SDRangel the SDRangel specific SigMF standard extensions are available among which variable sample rate.
 
 This plugin supports single stream files having one `.sigmf-meta` file and only one `.sigmf-data` file. Thus it does not implement the `multirecordings` extension.
 
-It adds a dependency on the [libsigmf library](https://github.com/f4exb/libsigmf) more specifically the `f4exb` fork that supports `multirecordings` and `sdrangel` extensions.
+It adds a dependency to the [libsigmf library](https://github.com/f4exb/libsigmf) more specifically the `f4exb` fork that supports `multirecordings` and `sdrangel` extensions.
 
 <h2>Interface</h2>
 
