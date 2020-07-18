@@ -83,13 +83,12 @@ void SigMFFileSinkSink::stopRecording()
 
 void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-	for (SampleVector::const_iterator it = begin; it < end; ++it)
-	{
-        if (m_decimator.getDecim() == 1)
-        {
-            m_sampleBuffer.push_back(*it);
-        }
-        else
+    SampleVector::const_iterator beginw = begin;
+    SampleVector::const_iterator endw = end;
+
+    if (m_decimator.getDecim() != 1)
+    {
+        for (SampleVector::const_iterator it = begin; it < end; ++it)
         {
             Complex c(it->real(), it->imag());
             c *= m_nco.nextIQ();
@@ -99,25 +98,29 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
                 m_sampleBuffer.push_back(Sample(ci.real(), ci.imag()));
             }
         }
-	}
+
+        beginw = m_sampleBuffer.begin();
+        endw = m_sampleBuffer.end();
+    }
+
 
     if (!m_record && (m_settings.m_preRecordTime != 0)) {
-        m_preRecordFill = m_preRecordBuffer.write(m_sampleBuffer.begin(), m_sampleBuffer.end());
+        m_preRecordFill = m_preRecordBuffer.write(beginw, endw);
     }
 
     if (m_settings.m_squelchRecordingEnable)
     {
-        int nbToWrite = m_sampleBuffer.end() - m_sampleBuffer.begin();
+        int nbToWrite = endw - beginw;
 
         if (m_squelchOpen)
         {
-            m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+            m_fileSink.feed(beginw, endw, true);
         }
         else
         {
             if (nbToWrite < m_postSquelchCounter)
             {
-                m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+                m_fileSink.feed(beginw, endw, true);
                 m_postSquelchCounter -= nbToWrite;
             }
             else
@@ -128,7 +131,7 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
                     m_msgQueueToGUI->push(msg);
                 }
 
-                m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.begin() + m_postSquelchCounter, true);
+                m_fileSink.feed(beginw, endw + m_postSquelchCounter, true);
                 nbToWrite = m_postSquelchCounter;
                 m_postSquelchCounter = 0;
 
@@ -144,8 +147,8 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
     }
     else if (m_record)
     {
-        m_fileSink.feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
-        int nbSamples = m_sampleBuffer.end() - m_sampleBuffer.begin();
+        m_fileSink.feed(beginw, endw, true);
+        int nbSamples = endw - beginw;
         m_byteCount += nbSamples * sizeof(Sample);
 
         if (m_sinkSampleRate > 0) {
@@ -154,10 +157,12 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
     }
 
     if (m_spectrumSink) {
-		m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+		m_spectrumSink->feed(beginw, endw, false);
 	}
 
-    m_sampleBuffer.clear();
+    if (m_decimator.getDecim() != 1) {
+        m_sampleBuffer.clear();
+    }
 }
 
 void SigMFFileSinkSink::applyChannelSettings(
