@@ -1,3 +1,9 @@
+sdrangel (5.8.1-1) unstable; urgency=medium
+
+   * SigMF file recorder: optimized decimation.
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 18 Jul 2020 23:34:39 +0200
+
 sdrangel (5.8.0-1) unstable; urgency=medium
 
    * SigMF file recorder channel plugin. Implements #544.
