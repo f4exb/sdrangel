@@ -1,3 +1,9 @@
+sdrangel (5.8.0-1) unstable; urgency=medium
+
+   * SigMF file recorder channel plugin. Implements #544.
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 18 Jul 2020 02:50:54 +0200
+
 sdrangel (5.7.11-1) unstable; urgency=medium
 
    * Channel Analyzer: fixed sink apply channel settings. Fixes #569 and #570
