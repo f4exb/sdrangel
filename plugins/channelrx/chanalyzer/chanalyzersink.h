@@ -20,6 +20,7 @@
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/interpolator.h"
+#include "dsp/decimatorc.h"
 #include "dsp/ncof.h"
 #include "dsp/fftcorr.h"
 #include "dsp/fftfilt.h"
@@ -69,6 +70,7 @@ private:
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
+    DecimatorC m_decimator;
 
 	fftfilt* SSBFilter;
 	fftfilt* DSBFilter;
