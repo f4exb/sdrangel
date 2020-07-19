@@ -47,7 +47,7 @@ void ATVDemodSettings::resetToDefaults()
     m_vSync = false;
     m_invertVideo = false;
     m_halfFrames = false; // m_fltRatioOfRowsToDisplay = 1.0
-    m_levelSynchroTop = 0.1f;
+    m_levelSynchroTop = 0.15f;
     m_levelBlack = 0.3f;
     m_lineTimeFactor = 0;
     m_topTimeFactor = 25;

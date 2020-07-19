@@ -97,8 +97,7 @@ private:
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
     int m_tvSampleRate;
-    unsigned int m_samplesPerLineNom; //!< number of samples per complete line (includes sync signals) - nominal value
-    unsigned int m_samplesPerLine;    //!< number of samples per complete line (includes sync signals) - adusted value
+    int m_samplesPerLine;    //!< number of samples per complete line (includes sync signals) - adusted value
     ATVDemodSettings m_settings;
     int m_videoTabIndex;
 
@@ -113,25 +112,31 @@ private:
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTopNom;     //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - nominal value
     int m_numberSamplesPerHTop;        //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - adusted value
-    int m_numberOfSyncLines;           //!< this is the number of non displayable lines at the start of a frame. First displayable row comes next.
     int m_numberOfBlackLines;          //!< this is the total number of lines not part of the image and is used for vertical screen size
-    int m_numberOfEqLines;             //!< number of equalizing lines both whole and partial
+    int m_firstVisibleLine;
+
+    int m_fieldDetectStartPos;
+    int m_fieldDetectEndPos;
+    int m_vSyncDetectStartPos;
+    int m_vSyncDetectEndPos;
+
+    int m_vSyncDetectThreshold;
+    int m_fieldDetectThreshold1;
+    int m_fieldDetectThreshold2;
+
+    int m_numberOfVSyncLines;
     int m_numberSamplesPerLineSignals; //!< number of samples in the non image part of the line (signals = front porch + pulse + back porch)
     int m_numberSamplesPerHSync;       //!< number of samples per horizontal synchronization pattern (pulse + back porch)
     int m_numberSamplesHSyncCrop;      //!< number of samples to crop from start of horizontal synchronization
     bool m_interleaved;                //!< interleaved image
-    int m_firstRowIndexEven;           //!< index of the first row of an even image
-    int m_firstRowIndexOdd;            //!< index of the first row of an even image
 
     //*************** PROCESSING  ***************
 
-    int m_imageIndex;
+    int m_fieldIndex;
     int m_synchroSamples;
 
-    bool m_verticalSynchroDetected;
-
-    float m_ampLineSum;
-    float m_ampLineAvg;
+    int m_fieldDetectSampleCount;
+    int m_vSyncDetectSampleCount;
 
     float m_effMin;
     float m_effMax;
@@ -144,12 +149,18 @@ private:
     float m_fltBufferQ[6];
 
     int m_colIndex;
-    int m_sampleIndex;
+    int m_sampleIndex;         // assumed (averaged) sample offset from the start of horizontal sync pulse
+    int m_sampleIndexDetected; // detected sample offset from the start of horizontal sync pulse
     int m_amSampleIndex;
     int m_rowIndex;
     int m_lineIndex;
 
-    AvgExpInt m_objAvgColIndex;
+    float m_hSyncShiftSum;
+    int m_hSyncShiftCount;
+    int m_hSyncErrorCount;
+
+    float prevSample;
+
     int m_avgColIndex;
 
     SampleVector m_sampleBuffer;
@@ -212,7 +223,6 @@ private:
                 m_avgColIndex = m_colIndex;
                 m_registeredTVScreen->renderImage(0);
 
-                m_imageIndex++;
                 m_lineIndex = 0;
                 m_rowIndex = 0;
                 m_registeredTVScreen->selectRow(m_rowIndex);
@@ -247,136 +257,120 @@ private:
         }
     }
 
-    // Vertical sync is obtained when the average level of signal on a line is below a certain threshold. This is obtained by lowering signal to ultra black during at least 3/4th of the line
-    // We use directly the sum of line sample values
     inline void processClassic(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-        // remove only sync pulse empirically, +4 is to compensate shift due to hsync amortizing factor of 1/4
-        m_registeredTVScreen->setDataColor(m_colIndex - m_numberSamplesPerHSync + m_numberSamplesPerHTop, sampleVideo, sampleVideo, sampleVideo);
+        m_registeredTVScreen->setDataColor(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo, sampleVideo, sampleVideo);
 
-        int synchroTimeSamples = (3 * m_samplesPerLine) / 4; // count 3/4 line globally
-        float synchroTrameLevel =  0.5f * ((float) synchroTimeSamples) * m_settings.m_levelBlack; // threshold is half the black value over 3/4th of line samples
-
-        // Horizontal Synchro detection
-
-        // Floor Detection 0
-        if (sample < m_settings.m_levelSynchroTop)
+        if (m_settings.m_hSync)
         {
-            m_synchroSamples++;
-        }
-        // Black detection 0.3
-        else if (sample > m_settings.m_levelBlack) {
-            m_synchroSamples = 0;
-        }
+            // Horizontal Synchro detection
+            if ((prevSample >= m_settings.m_levelSynchroTop &&
+                sample < m_settings.m_levelSynchroTop) // horizontal synchro detected
+                && (m_sampleIndexDetected > m_samplesPerLine - m_numberSamplesPerHTopNom))
+            {
+                double sampleIndexDetectedFrac = 
+                    (sample - m_settings.m_levelSynchroTop) / (prevSample - sample);
+                double hSyncShift = -m_sampleIndex - sampleIndexDetectedFrac;
+                if (hSyncShift > m_samplesPerLine / 2)
+                    hSyncShift -= m_samplesPerLine;
+                else if (hSyncShift < -m_samplesPerLine / 2)
+                    hSyncShift += m_samplesPerLine;
 
-        //Horizontal Synchro processing
-        if ((m_synchroSamples == m_numberSamplesPerHTop) // horizontal synchro detected
-         && (m_sampleIndex > (m_samplesPerLine/2) + m_numberSamplesPerLineSignals))
-        {
-            m_avgColIndex = m_sampleIndex - m_colIndex;
-            //qDebug("HSync: %d %d %d", m_sampleIndex, m_colIndex, m_avgColIndex);
-            m_sampleIndex = 0;
+                if (fabs(hSyncShift) > m_numberSamplesPerHTopNom)
+                {
+                    m_hSyncErrorCount++;
+                    if (m_hSyncErrorCount >= 8)
+                    {
+                        // Fast sync: shift is too large, needs to be fixed ASAP
+                        m_sampleIndex = 0;
+                        m_hSyncShiftSum = 0.0;
+                        m_hSyncShiftCount = 0;
+                        m_hSyncErrorCount = 0;
+                    }
+                }
+                else
+                {
+                    m_hSyncShiftSum += hSyncShift;
+                    m_hSyncShiftCount++;
+                    m_hSyncErrorCount = 0;
+                }
+                m_sampleIndexDetected = 0;
+            }
+            else
+                m_sampleIndexDetected++;
         }
         else
         {
-            m_sampleIndex++;
+            m_hSyncShiftSum = 0.0f;
+            m_hSyncShiftCount = 0;
         }
+        m_sampleIndex++;
 
-        if (m_colIndex < m_samplesPerLine + m_numberSamplesPerHTop - 1) // increment until full line + next horizontal pulse
+        if (m_settings.m_vSync)
         {
-            m_colIndex++;
-
-            if (m_colIndex < (m_samplesPerLine/2)) { // count on first half of line for better separation between black and ultra black
-                m_ampLineSum += sample;
-            }
+            if (m_sampleIndex > m_fieldDetectStartPos && m_sampleIndex < m_fieldDetectEndPos)
+                m_fieldDetectSampleCount += sample < m_settings.m_levelSynchroTop;
+            if (m_sampleIndex > m_vSyncDetectStartPos && m_sampleIndex < m_vSyncDetectEndPos)
+                m_vSyncDetectSampleCount += sample < m_settings.m_levelSynchroTop;
         }
-        else // full line + next horizontal pulse => start of screen reference line
+
+        // end of line
+        if (m_sampleIndex >= m_samplesPerLine)
         {
-            m_ampLineAvg = m_ampLineSum / ((m_samplesPerLine/2) - m_numberSamplesPerHTop); // avg length is half line less horizontal top
-            m_ampLineSum = 0.0f;
+            m_sampleIndex = 0;
+            m_lineIndex++;
 
-            // set column index to start a new line
-            if (m_settings.m_hSync && (m_lineIndex == 0)) {
-                m_colIndex = m_numberSamplesPerHTop + m_avgColIndex/4; // amortizing 1/4
-            } else {
-                m_colIndex = m_numberSamplesPerHTop;
-            }
-
-            // process line
-            m_lineIndex++; // new line
-            m_rowIndex += m_interleaved ? 2 : 1; // new row considering interleaving
-
-            if (m_rowIndex < m_settings.m_nbLines) {
-                m_registeredTVScreen->selectRow(m_rowIndex - m_numberOfSyncLines);
-            }
-        }
-
-        // Vertical sync and image rendering
-
-        if (m_lineIndex > m_numberOfBlackLines) {
-            m_verticalSynchroDetected = false; // reset trigger when detection zone is left
-        }
-
-        if ((m_settings.m_vSync) && (m_lineIndex <= m_settings.m_nbLines)) // VSync activated and lines in range
-        {
-            if (m_colIndex >= synchroTimeSamples)
+            if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
             {
-                if (m_ampLineAvg < 0.15f) // ultra black detection
+                float shiftSamples = 0.0f;
+
+                // Slow sync: slight adjustment is needed
+                if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
                 {
-                    if (!m_verticalSynchroDetected) // not yet
-                    {
-                        m_verticalSynchroDetected = true; // prevent repetition
-
-                        // Odd frame or not interleaved
-                        if ((m_imageIndex % 2 == 1) || !m_interleaved) {
-                            m_registeredTVScreen->renderImage(0);
-                        }
-
-                        if (m_lineIndex > m_settings.m_nbLines/2) { // long frame done (even)
-                            m_imageIndex = m_firstRowIndexOdd;  // next is odd
-                        } else {
-                            m_imageIndex = m_firstRowIndexEven; // next is even
-                        }
-
-                        if (m_interleaved) {
-                            m_rowIndex = m_imageIndex;
-                        } else {
-                            m_rowIndex = 0; // just the first line
-                        }
-
-                        // qDebug("ATVDemodSink::processClassic: m_lineIndex: %d m_imageIndex: %d m_rowIndex: %d",
-                        //     m_lineIndex, m_imageIndex, m_rowIndex);
-                        m_registeredTVScreen->selectRow(m_rowIndex - m_numberOfSyncLines);
-
-                        m_lineIndex = 0;
-                        m_imageIndex++;
-                    }
+                    shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
+                    m_sampleIndex = shiftSamples;
+                    m_hSyncShiftSum = 0.0f;
+                    m_hSyncShiftCount = 0;
+                    m_hSyncErrorCount = 0;
                 }
+                m_registeredTVScreen->renderImage(0,
+                    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
             }
-        }
-        else // no VSync or lines out of range => set new image arbitrarily
-        {
-            if (m_lineIndex >= m_settings.m_nbLines/2)
+
+            if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
+                (m_lineIndex < 3 || m_lineIndex > m_numberOfVSyncLines + 1) && m_settings.m_vSync)
             {
-                if (m_lineIndex > m_settings.m_nbLines/2) { // long frame done (even)
-                    m_imageIndex = m_firstRowIndexOdd;  // next is odd
-                } else {
-                    m_imageIndex = m_firstRowIndexEven; // next is even
+                if (m_interleaved)
+                {
+                    if (m_fieldDetectSampleCount > m_fieldDetectThreshold1)
+                        m_fieldIndex = 0;
+                    else if (m_fieldDetectSampleCount < m_fieldDetectThreshold2)
+                        m_fieldIndex = 1;
                 }
-
-                if (m_interleaved) {
-                    m_rowIndex = m_imageIndex;
-                } else {
-                    m_rowIndex = 0; // just the first line
-                }
-
-                m_registeredTVScreen->selectRow(m_rowIndex - m_numberOfSyncLines);
-
-                m_lineIndex = 0;
-                m_imageIndex++;
+                m_lineIndex = 2;
             }
+            m_fieldDetectSampleCount = 0;
+            m_vSyncDetectSampleCount = 0;
+
+            if (m_lineIndex > m_settings.m_nbLines / 2 + m_fieldIndex && m_interleaved)
+            {
+                m_lineIndex = 1;
+                m_fieldIndex = 1 - m_fieldIndex;
+            }
+            else if (m_lineIndex > m_settings.m_nbLines && !m_interleaved)
+            {
+                m_lineIndex = 1;
+                m_fieldIndex = 0;
+            }
+
+            int rowIndex = m_lineIndex - m_firstVisibleLine;
+            if (m_interleaved)
+                rowIndex = rowIndex * 2 - m_fieldIndex;
+            m_registeredTVScreen->selectRow(rowIndex);
         }
+
+        prevSample = sample;
     }
 };
 
