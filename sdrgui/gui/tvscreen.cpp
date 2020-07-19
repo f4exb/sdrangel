@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <QDebug>
 
+// Note: When this object is created, QWidget* is converted to bool
 TVScreen::TVScreen(bool blnColor, QWidget* parent) :
         QGLWidget(parent), m_objMutex(QMutex::NonRecursive), m_objGLShaderArray(blnColor)
 {
@@ -36,6 +37,7 @@ TVScreen::TVScreen(bool blnColor, QWidget* parent) :
     m_objTimer.start(40); // capped at 25 FPS
 
     m_chrLastData = NULL;
+    m_subsampleShift = 0.0;
     m_blnConfigChanged = false;
     m_blnDataChanged = false;
     m_blnGLContextInitialized = false;
@@ -57,6 +59,11 @@ void TVScreen::setColor(bool blnColor)
 	m_objGLShaderArray.setColor(blnColor);
 }
 
+void TVScreen::setExtraColumns(bool blnExtraColumns)
+{
+    m_objGLShaderArray.setExtraColumns(blnExtraColumns);
+}
+
 QRgb* TVScreen::getRowBuffer(int intRow)
 {
     if (!m_blnGLContextInitialized)
@@ -67,9 +74,10 @@ QRgb* TVScreen::getRowBuffer(int intRow)
     return m_objGLShaderArray.GetRowBuffer(intRow);
 }
 
-void TVScreen::renderImage(unsigned char * objData)
+void TVScreen::renderImage(unsigned char * objData, float subsampleShift)
 {
     m_chrLastData = objData;
+    m_subsampleShift = subsampleShift;
     m_blnDataChanged = true;
 }
 
@@ -176,6 +184,7 @@ void TVScreen::paintGL()
         m_intAskedRows = 0;
     }
 
+    m_objGLShaderArray.setSubsampleShift(m_subsampleShift);
     m_objGLShaderArray.RenderPixels(m_chrLastData);
 
     m_objMutex.unlock();
