@@ -77,7 +77,7 @@ private:
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;
 
-	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
+	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = nullptr);
 	virtual ~ChannelAnalyzerGUI();
 
 	int  getSinkSampleRate(); //!< get actual sink sample rate from GUI settings
