@@ -69,10 +69,19 @@ void ChannelAnalyzerSink::feed(const SampleVector::const_iterator& begin, const 
 		}
 		else
 		{
-            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            if (m_settings.m_rationalDownSample)
             {
-                processOneSample(ci, sideband);
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
+                if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+                {
+                    processOneSample(ci, sideband);
+                    m_interpolatorDistanceRemain += m_interpolatorDistance;
+                }
+            }
+            else
+            {
+                if (m_decimator.decimate(c, ci)) {
+                    processOneSample(ci, sideband);
+                }
             }
 		}
 	}
@@ -153,6 +162,21 @@ void ChannelAnalyzerSink::applyChannelSettings(int channelSampleRate, int sinkSa
         setFilters(sinkSampleRate, m_settings.m_bandwidth, m_settings.m_lowCutoff);
         m_pll.setSampleRate(sinkSampleRate);
         m_fll.setSampleRate(sinkSampleRate);
+
+        int decim = channelSampleRate / sinkSampleRate;
+        m_decimator.setLog2Decim(0);
+
+        for (int i = 0; i < 7; i++) // find log2 beween 0 and 6
+        {
+            if (decim & 1 == 1)
+            {
+                qDebug() << "ChannelAnalyzerSink::applyChannelSettings: log2decim: " << i;
+                m_decimator.setLog2Decim(i);
+                break;
+            }
+
+            decim >>= 1;
+        }
     }
 
     m_channelSampleRate = channelSampleRate;
