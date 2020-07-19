@@ -463,15 +463,16 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 
 void ChannelAnalyzerGUI::setSinkSampleRate()
 {
-    unsigned int channelSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
+    unsigned int nominalSinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
 
-    ui->rationalDownSamplerRate->setValueRange(7, 0.5*channelSampleRate, channelSampleRate);
+    ui->rationalDownSamplerRate->setValueRange(7, 0.5*nominalSinkSampleRate, nominalSinkSampleRate);
     ui->rationalDownSamplerRate->setValue(m_settings.m_rationalDownSamplerRate);
+    m_settings.m_rationalDownSamplerRate = ui->rationalDownSamplerRate->getValueNew();
 
     unsigned int sinkSampleRate = getSinkSampleRate();
 
-	qDebug("ChannelAnalyzerGUI::setSinkSampleRate: channelSampleRate: %u sinkSampleRate: %u",
-        channelSampleRate, sinkSampleRate);
+	qDebug("ChannelAnalyzerGUI::setSinkSampleRate: nominalSinkSampleRate: %u sinkSampleRate: %u",
+        nominalSinkSampleRate, sinkSampleRate);
 
 	setFiltersUIBoundaries();
 
