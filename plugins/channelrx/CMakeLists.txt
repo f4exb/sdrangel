@@ -34,20 +34,16 @@ if(NOT SERVER_MODE)
     # libavutil 55.27.100
     # libavcodec 57.48.101
     # libavformat 57.40.101
-    # TODO use libavcodec/version.h
-    find_package(FFmpeg)
+    find_package(FFmpeg COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
     if (FFMPEG_FOUND)
       if(WIN32)
         add_subdirectory(demoddatv)
       else()
-        # You can only get FFmpeg version from the command line
-        EXECUTE_PROCESS(COMMAND ffmpeg -version COMMAND grep ffmpeg COMMAND cut -d\  -f3 COMMAND tr -d '\n' OUTPUT_VARIABLE FFMPEG_VERSION)
-        message(STATUS "FFmpeg version ${FFMPEG_VERSION} found")
-        if(FFMPEG_VERSION VERSION_GREATER "3.1")
+        if((AVUTIL_VERSION VERSION_GREATER "55.27.99") AND (AVCODEC_VERSION VERSION_GREATER "57.48.101"))
             message(STATUS "Include demoddatv")
             add_subdirectory(demoddatv)
         else()
-            message(STATUS "FFmpeg too old to compile demoddatv; needs at least ffmpeg 3.1")
+            message(STATUS "FFmpeg too old to compile demoddatv; needs at least avutil: 55.27.100, avcodec/avformat: 57.48.101")
         endif()
       endif()
     endif()
