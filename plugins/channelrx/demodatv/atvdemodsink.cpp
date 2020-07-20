@@ -87,20 +87,13 @@ ATVDemodSink::~ATVDemodSink()
 
 void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    float fltI;
-    float fltQ;
-    Complex ci;
-
     //********** Let's rock and roll buddy ! **********
 
     //********** Accessing ATV Screen context **********
 
     for (SampleVector::const_iterator it = begin; it != end; ++it /* ++it **/)
     {
-
-        fltI = it->real();
-        fltQ = it->imag();
-        Complex c(fltI, fltQ);
+        Complex c(it->real(), it->imag());
 
         if (m_settings.m_inputFrequencyOffset != 0) {
             c *= m_nco.nextIQ();
@@ -112,6 +105,7 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
         }
         else
         {
+            Complex ci;
             if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
                 demod(ci);
@@ -129,7 +123,6 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 void ATVDemodSink::demod(Complex& c)
 {
-    float divSynchroBlack = 1.0f - m_settings.m_levelBlack;
     float sampleNormI;
     float sampleNormQ;
     float sampleNorm;
@@ -226,7 +219,7 @@ void ATVDemodSink::demod(Complex& c)
         sampleNorm = sqrt(magSq);
         float sampleRaw = sampleNorm / SDR_RX_SCALEF;
         m_ampAverage(sampleRaw);
-        sample = sampleRaw / (2.0 * m_ampAverage.asFloat()); // AGC
+        sample = sampleRaw / (2.0f * m_ampAverage.asFloat()); // AGC
     }
     else if ((m_settings.m_atvModulation == ATVDemodSettings::ATV_USB) || (m_settings.m_atvModulation == ATVDemodSettings::ATV_LSB))
     {
@@ -318,12 +311,12 @@ void ATVDemodSink::demod(Complex& c)
     sample = (sample < 0.0f) ? 0.0f : (sample > 1.0f) ? 1.0f : sample;
 
     if ((m_videoTabIndex == 1) && (m_scopeSink != 0)) { // feed scope buffer only if scope is present and visible
-        m_scopeSampleBuffer.push_back(Sample(sample*SDR_RX_SCALEF, 0.0f));
+        m_scopeSampleBuffer.push_back(Sample(sample * (SDR_RX_SCALEF - 1.0f), 0.0f));
     }
 
     //********** gray level **********
     // -0.3 -> 0.7 / 0.7
-    sampleVideo = (int) (255.0*(sample - m_settings.m_levelBlack) / (1.0f - m_settings.m_levelBlack));
+    sampleVideo = (int) ((sample - m_settings.m_levelBlack) * m_sampleRangeCorrection);
 
     // 0 -> 255
     sampleVideo = (sampleVideo < 0) ? 0 : (sampleVideo > 255) ? 255 : sampleVideo;
@@ -603,6 +596,10 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
         m_objPhaseDiscri.setFMScaling(1.0f / settings.m_fmDeviation);
+    }
+
+    if ((settings.m_levelBlack != m_settings.m_levelBlack) || force) {
+        m_sampleRangeCorrection = 255.0f / (1.0f - m_settings.m_levelBlack);
     }
 
     m_settings = settings;
