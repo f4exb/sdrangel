@@ -175,11 +175,3 @@ int ChannelAnalyzerBaseband::getChannelSampleRate() const
 {
     return m_channelizer->getChannelSampleRate();
 }
-
-
-void ChannelAnalyzerBaseband::setBasebandSampleRate(int sampleRate)
-{
-    m_channelizer->setBasebandSampleRate(sampleRate);
-    int desiredSampleRate = getSinkSampleRate(m_settings);
-    m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), desiredSampleRate, m_channelizer->getChannelFrequencyOffset());
-}

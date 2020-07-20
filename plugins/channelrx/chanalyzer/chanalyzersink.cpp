@@ -29,6 +29,7 @@ const unsigned int ChannelAnalyzerSink::m_corrFFTLen = 4*m_ssbFftLen;
 ChannelAnalyzerSink::ChannelAnalyzerSink() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
+    m_sinkSampleRate(48000),
     m_sampleSink(nullptr)
 {
 	m_usb = true;
@@ -41,7 +42,7 @@ ChannelAnalyzerSink::ChannelAnalyzerSink() :
 	m_corr = new fftcorr(2*m_corrFFTLen); // 8k for 4k effective samples
 	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
 
-    applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
+    applyChannelSettings(m_channelSampleRate, m_sinkSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
 }
 
