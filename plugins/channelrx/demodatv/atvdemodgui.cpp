@@ -565,17 +565,17 @@ void ATVDemodGUI::on_fmDeviation_valueChanged(int value)
 
 void ATVDemodGUI::on_amScaleFactor_valueChanged(int value)
 {
+    m_settings.m_amScalingFactor = value;
     ui->amScaleFactor->setValue(m_settings.m_amScalingFactor);
     ui->amScaleFactorText->setText(QString("%1").arg(m_settings.m_amScalingFactor));
-    m_settings.m_amScalingFactor = value;
     applySettings();
 }
 
 void ATVDemodGUI::on_amScaleOffset_valueChanged(int value)
 {
+    m_settings.m_amOffsetFactor = value;
     ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
-    m_settings.m_amOffsetFactor = value;
     applySettings();
 }
 

@@ -75,7 +75,9 @@ class MovingAverageUtilVar
       : m_num_samples(0), m_index(0), m_total(0)
     {
         m_samples.resize(size);
-    }
+		m_samplesSizeInvF = 1.0f / size;
+		m_samplesSizeInvD = 1.0 / size;
+	}
 
     void reset()
     {
@@ -88,7 +90,9 @@ class MovingAverageUtilVar
     {
         reset();
         m_samples.resize(size);
-    }
+		m_samplesSizeInvF = 1.0f / size;
+		m_samplesSizeInvD = 1.0 / size;
+	}
 
     unsigned int size() const
     {
@@ -107,12 +111,14 @@ class MovingAverageUtilVar
             T& oldest = m_samples[m_index];
             m_total += sample - oldest;
             oldest = sample;
-            m_index = (m_index + 1) % m_samples.size();
+            m_index++;
+            if (m_index == m_samples.size())
+                m_index = 0;
         }
     }
 
-    double asDouble() const { return ((double)m_total) / m_samples.size(); }
-    float asFloat() const { return ((float)m_total) / m_samples.size(); }
+    double asDouble() const { return m_total * m_samplesSizeInvD; }
+    float asFloat() const { return m_total * m_samplesSizeInvF; }
     operator T() const { return  m_total / m_samples.size(); }
 
   private:
@@ -120,6 +126,8 @@ class MovingAverageUtilVar
     unsigned int m_num_samples;
     unsigned int m_index;
     Total m_total;
+	float m_samplesSizeInvF;
+	double m_samplesSizeInvD;
 };
 
 

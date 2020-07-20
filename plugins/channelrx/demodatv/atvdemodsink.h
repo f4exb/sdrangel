@@ -165,6 +165,8 @@ private:
 
     SampleVector m_sampleBuffer;
 
+    float m_sampleRangeCorrection;
+
     //*************** RF  ***************
 
     MovingAverageUtil<double, double, 32> m_magSqAverage;
