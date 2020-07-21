@@ -23,10 +23,11 @@
 
 #include "dsp/dsptypes.h"
 #include "dsp/inthalfbandfiltereof.h"
+#include "export.h"
 
 #define DECIMATORSXS_HB_FILTER_ORDER 64
 
-class DecimatorC
+class SDRBASE_API DecimatorC
 {
 public:
     DecimatorC();
