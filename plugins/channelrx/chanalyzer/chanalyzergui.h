@@ -80,7 +80,7 @@ private:
 	explicit ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = nullptr);
 	virtual ~ChannelAnalyzerGUI();
 
-	int  getSinkSampleRate(); //!< get actual sink sample rate from GUI settings
+    int  getSinkSampleRate(); //!< get actual sink sample rate from GUI settings
 	void setSinkSampleRate(); //!< set sample rate after full decimation chain
 	void setFiltersUIBoundaries();
 

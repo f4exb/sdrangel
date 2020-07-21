@@ -65,11 +65,11 @@ private:
 	double m_magsq;
 
 	NCOF m_nco;
+	Interpolator m_interpolator;
+	Real m_interpolatorDistance;
+	Real m_interpolatorDistanceRemain;
 	PhaseLockComplex m_pll;
 	FreqLockComplex m_fll;
-    Interpolator m_interpolator;
-    Real m_interpolatorDistance;
-    Real m_interpolatorDistanceRemain;
     DecimatorC m_decimator;
 
 	fftfilt* SSBFilter;
@@ -84,6 +84,8 @@ private:
 
 	void setFilters(int sampleRate, float bandwidth, float lowCutoff);
 	void processOneSample(Complex& c, fftfilt::cmplx *sideband);
+    int getActualSampleRate();
+    void applySampleRate();
 
 	inline void feedOneSample(const fftfilt::cmplx& s, const fftfilt::cmplx& pll)
 	{

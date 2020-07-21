@@ -274,13 +274,6 @@ void ChannelAnalyzerGUI::on_useRationalDownsampler_toggled(bool checked)
     applySettings();
 }
 
-int ChannelAnalyzerGUI::getSinkSampleRate()
-{
-    return m_settings.m_rationalDownSample ?
-        m_settings.m_rationalDownSamplerRate
-        : m_basebandSampleRate / (1<<m_settings.m_log2Decim);
-}
-
 void ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged(int index)
 {
     m_settings.m_inputType = (ChannelAnalyzerSettings::InputType) index;
@@ -459,6 +452,13 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;
 	delete ui;
+}
+
+int ChannelAnalyzerGUI::getSinkSampleRate()
+{
+    return m_settings.m_rationalDownSample ?
+        m_settings.m_rationalDownSamplerRate
+        : m_basebandSampleRate / (1<<m_settings.m_log2Decim);
 }
 
 void ChannelAnalyzerGUI::setSinkSampleRate()
