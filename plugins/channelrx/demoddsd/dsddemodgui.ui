@@ -1228,41 +1228,6 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="dmrBPLabel">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>170</y>
-         <width>21</width>
-         <height>19</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>BP</string>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="dmrBPKey">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>170</y>
-         <width>50</width>
-         <height>19</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string>DMR Basic Privacy key (0: no encryption)</string>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="maximum">
-        <number>255</number>
-       </property>
-      </widget>
      </widget>
     </item>
    </layout>

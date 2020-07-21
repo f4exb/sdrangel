@@ -46,7 +46,6 @@ void DSDDemodSettings::resetToDefaults()
     m_slot2On = false;
     m_tdmaStereo = false;
     m_pllLock = true;
-    m_dmrBPKey = 0;
     m_rgbColor = QColor(0, 255, 255).rgb();
     m_title = "DSD Demodulator";
     m_highPassFilter = false;
@@ -103,7 +102,6 @@ QByteArray DSDDemodSettings::serialize() const
     s.writeU32(28, m_reverseAPIChannelIndex);
     s.writeBool(29, m_audioMute);
     s.writeS32(30, m_streamIndex);
-    s.writeU32(31, m_dmrBPKey);
 
     return s.final();
 }
@@ -182,8 +180,6 @@ bool DSDDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readBool(29, &m_audioMute, false);
         d.readS32(30, &m_streamIndex, 0);
-        d.readU32(31, &utmp, 0);
-        m_dmrBPKey = utmp < 256 ? utmp : 255;
 
         return true;
     }

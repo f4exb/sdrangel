@@ -30,7 +30,7 @@
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
     DSDDemod::m_channelId,
 	QString("DSD Demodulator"),
-    QString("4.14.14"),
+    QString("4.12.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

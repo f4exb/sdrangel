@@ -50,7 +50,6 @@ public:
     bool getVoice2On() const { return m_decoder.getVoice2On(); }
     void setTDMAStereo(bool tdmaStereo) { m_decoder.setTDMAStereo(tdmaStereo); }
     bool getSymbolPLLLocked() const { return m_decoder.getSymbolPLLLocked(); }
-    void setDMRBasicPrivacyKey(unsigned char key) { m_decoder.setDMRBasicPrivacyKey(key); }
 
     int getMbeRateIndex() const { return (int) m_decoder.getMbeRate(); }
 

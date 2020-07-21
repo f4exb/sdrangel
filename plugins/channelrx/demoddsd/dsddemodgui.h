@@ -132,7 +132,6 @@ private slots:
     void on_highPassFilter_toggled(bool checked);
     void on_audioMute_toggled(bool checked);
     void on_symbolPLLLock_toggled(bool checked);
-    void on_dmrBPKey_valueChanged(int value);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void on_viewStatusLog_clicked();
