@@ -137,7 +137,7 @@ bool ChannelAnalyzerBaseband::handleMessage(const Message& cmd)
         qDebug() << "ChannelAnalyzerBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
-        int desiredSampleRate = getSinkSampleRate(m_settings);
+        int desiredSampleRate = m_channelizer->getBasebandSampleRate() / (1<<m_settings.m_log2Decim);
         m_channelizer->setChannelization(desiredSampleRate, m_settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), desiredSampleRate, m_channelizer->getChannelFrequencyOffset());
 
@@ -156,19 +156,13 @@ void ChannelAnalyzerBaseband::applySettings(const ChannelAnalyzerSettings& setti
      || (settings.m_rationalDownSamplerRate != m_settings.m_rationalDownSamplerRate)
      || (settings.m_rationalDownSample != m_settings.m_rationalDownSample) || force)
     {
-        int desiredSampleRate = getSinkSampleRate(settings);
+        int desiredSampleRate = m_channelizer->getBasebandSampleRate() / (1<<settings.m_log2Decim);
         m_channelizer->setChannelization(desiredSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), desiredSampleRate, m_channelizer->getChannelFrequencyOffset());
     }
 
     m_sink.applySettings(settings, force);
     m_settings = settings;
-}
-
-int ChannelAnalyzerBaseband::getSinkSampleRate(ChannelAnalyzerSettings settings)
-{
-    int normalSinkSampleRate = m_channelizer->getBasebandSampleRate() / (1<<settings.m_log2Decim);
-    return settings.m_rationalDownSample ? settings.m_rationalDownSamplerRate : normalSinkSampleRate;
 }
 
 int ChannelAnalyzerBaseband::getChannelSampleRate() const

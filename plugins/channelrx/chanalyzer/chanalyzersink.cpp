@@ -34,8 +34,6 @@ ChannelAnalyzerSink::ChannelAnalyzerSink() :
 {
 	m_usb = true;
 	m_magsq = 0;
-	m_interpolatorDistance = 1.0f;
-	m_interpolatorDistanceRemain = 0.0f;
 	SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_channelSampleRate, m_settings.m_bandwidth / m_channelSampleRate, m_ssbFftLen);
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_channelSampleRate, 2*m_ssbFftLen);
 	RRCFilter = new fftfilt(m_settings.m_bandwidth / m_channelSampleRate, 2*m_ssbFftLen);
@@ -57,34 +55,37 @@ ChannelAnalyzerSink::~ChannelAnalyzerSink()
 void ChannelAnalyzerSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
 	fftfilt::cmplx *sideband = 0;
-	Complex ci;
 
 	for (SampleVector::const_iterator it = begin; it < end; ++it)
 	{
+    	Complex ci;
 		Complex c(it->real(), it->imag());
 		c *= m_nco.nextIQ();
 
-		if (m_interpolatorDistance == 1)
+		if (m_decimator.getDecim() == 1)
 		{
 	        processOneSample(c, sideband);
 		}
 		else
 		{
-            if (m_settings.m_rationalDownSample)
+            if (m_decimator.decimate(c, ci))
             {
-                if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+                if (m_settings.m_rationalDownSample)
+                {
+                    Complex cj;
+
+                    if (m_interpolator.decimate(&m_interpolatorDistanceRemain, ci, &cj))
+                    {
+                        processOneSample(cj, sideband);
+                        m_interpolatorDistanceRemain += m_interpolatorDistance;
+                    }
+                }
+                else
                 {
                     processOneSample(ci, sideband);
-                    m_interpolatorDistanceRemain += m_interpolatorDistance;
                 }
             }
-            else
-            {
-                if (m_decimator.decimate(c, ci)) {
-                    processOneSample(ci, sideband);
-                }
-            }
-		}
+        }
 	}
 
 	if (m_sampleSink) {
@@ -146,6 +147,7 @@ void ChannelAnalyzerSink::applyChannelSettings(int channelSampleRate, int sinkSa
             << " channelSampleRate: " << channelSampleRate
             << " sinkSampleRate: " << sinkSampleRate
             << " channelFrequencyOffset: " << channelFrequencyOffset;
+    bool doApplySampleRate = false;
 
     if ((m_channelFrequencyOffset != channelFrequencyOffset) ||
         (m_channelSampleRate != channelSampleRate) || force)
@@ -156,13 +158,9 @@ void ChannelAnalyzerSink::applyChannelSettings(int channelSampleRate, int sinkSa
     if ((m_channelSampleRate != channelSampleRate)
      || (m_sinkSampleRate != sinkSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, channelSampleRate / 2.2f);
+        m_interpolator.create(16, sinkSampleRate, sinkSampleRate / 4.0f);
         m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance = (Real) channelSampleRate / (Real) sinkSampleRate;
-
-        setFilters(sinkSampleRate, m_settings.m_bandwidth, m_settings.m_lowCutoff);
-        m_pll.setSampleRate(sinkSampleRate);
-        m_fll.setSampleRate(sinkSampleRate);
+        m_interpolatorDistance = (Real) sinkSampleRate / (Real) m_settings.m_rationalDownSamplerRate;
 
         int decim = channelSampleRate / sinkSampleRate;
         m_decimator.setLog2Decim(0);
@@ -178,11 +176,17 @@ void ChannelAnalyzerSink::applyChannelSettings(int channelSampleRate, int sinkSa
 
             decim >>= 1;
         }
+
+        doApplySampleRate = true;
     }
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
     m_sinkSampleRate = sinkSampleRate;
+
+    if (doApplySampleRate) {
+        applySampleRate();
+    }
 }
 
 void ChannelAnalyzerSink::setFilters(int sampleRate, float bandwidth, float lowCutoff)
@@ -216,29 +220,25 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
 {
     qDebug() << "ChannelAnalyzerSink::applySettings:"
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
-            << " m_rationalDownSample: " << settings.m_rationalDownSample
-            << " m_rationalDownSamplerRate: " << settings.m_rationalDownSamplerRate
             << " m_rcc: " << settings.m_rrc
             << " m_rrcRolloff: " << settings.m_rrcRolloff / 100.0
             << " m_bandwidth: " << settings.m_bandwidth
             << " m_lowCutoff: " << settings.m_lowCutoff
             << " m_log2Decim: " << settings.m_log2Decim
+            << " m_rationalDownSample: " << settings.m_rationalDownSample
+            << " m_rationalDownSamplerRate: " << settings.m_rationalDownSamplerRate
             << " m_ssb: " << settings.m_ssb
             << " m_pll: " << settings.m_pll
             << " m_fll: " << settings.m_fll
             << " m_pllPskOrder: " << settings.m_pllPskOrder
             << " m_inputType: " << (int) settings.m_inputType;
+    bool doApplySampleRate = false;
 
     if ((settings.m_bandwidth != m_settings.m_bandwidth) ||
-        (settings.m_lowCutoff != m_settings.m_lowCutoff)|| force)
+        (settings.m_lowCutoff != m_settings.m_lowCutoff) ||
+        (settings.m_rrcRolloff != m_settings.m_rrcRolloff) || force)
     {
-        setFilters(m_sinkSampleRate, settings.m_bandwidth, settings.m_lowCutoff);
-    }
-
-    if ((settings.m_rrcRolloff != m_settings.m_rrcRolloff) || force)
-    {
-        float sinkSampleRate = (float) m_sinkSampleRate;
-        RRCFilter->create_rrc_filter(settings.m_bandwidth / sinkSampleRate, settings.m_rrcRolloff / 100.0);
+        doApplySampleRate = true;
     }
 
     if (settings.m_pll != m_settings.m_pll || force)
@@ -264,7 +264,20 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
         }
     }
 
+    if ((settings.m_rationalDownSample != m_settings.m_rationalDownSample) ||
+        (settings.m_rationalDownSamplerRate != m_settings.m_rationalDownSamplerRate) || force)
+    {
+        m_interpolator.create(16, m_sinkSampleRate, m_sinkSampleRate / 4.0f);
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorDistance = (Real) m_sinkSampleRate / (Real) settings.m_rationalDownSamplerRate;
+        doApplySampleRate = true;
+    }
+
     m_settings = settings;
+
+    if (doApplySampleRate) {
+        applySampleRate();
+    }
 }
 
 Real ChannelAnalyzerSink::getPllFrequency() const
@@ -276,4 +289,23 @@ Real ChannelAnalyzerSink::getPllFrequency() const
     } else {
         return 0.0;
     }
+}
+
+int ChannelAnalyzerSink::getActualSampleRate()
+{
+    if (m_settings.m_rationalDownSample) {
+        return m_settings.m_rationalDownSamplerRate;
+    } else {
+        return m_sinkSampleRate;
+    }
+}
+
+void ChannelAnalyzerSink::applySampleRate()
+{
+    int sampleRate = getActualSampleRate();
+    qDebug("ChannelAnalyzerSink::applySampleRate: sampleRate: %d m_interpolatorDistance: %f", sampleRate, m_interpolatorDistance);
+    setFilters(sampleRate, m_settings.m_bandwidth, m_settings.m_lowCutoff);
+    m_pll.setSampleRate(sampleRate);
+    m_fll.setSampleRate(sampleRate);
+    RRCFilter->create_rrc_filter(m_settings.m_bandwidth / (float) sampleRate, m_settings.m_rrcRolloff / 100.0);
 }

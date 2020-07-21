@@ -84,7 +84,6 @@ private:
 
     bool handleMessage(const Message& cmd);
     void applySettings(const ChannelAnalyzerSettings& settings, bool force = false);
-    int getSinkSampleRate(ChannelAnalyzerSettings settngs);
 
 private slots:
     void handleInputMessages();
