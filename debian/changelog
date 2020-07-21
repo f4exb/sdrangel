@@ -1,3 +1,13 @@
+sdrangel (5.8.2-1) unstable; urgency=medium
+
+   * ATV Demod: improvements of HSync and VSync algorithms. Fixes #459
+   * ATV Demod: further bug fixes and performance improvements
+   * Set correct output directories for RelWithDebInfo build
+   * ChannelAnalyzer: use complex decimator for decimation by power of two value
+   * ChannelAnalyzer: fixed rational downsampler
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 21 Jul 2020 04:43:43 +0200
+
 sdrangel (5.8.1-1) unstable; urgency=medium
 
    * SigMF file recorder: optimized decimation.
