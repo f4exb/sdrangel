@@ -164,7 +164,7 @@ private:
     float    m_blankLineLvel;    //!< video level of blank lines
     float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
-    bool     m_interleaved;      //!< true if image is interlaced (2 half frames per frame)
+    bool     m_interlaced;      //!< true if image is interlaced (2 half frames per frame)
     bool     m_evenImage;        //!< in interlaced mode true if this is an even image
     int      m_horizontalCount;  //!< current point index on line
     int      m_lineCount;        //!< current line index in frame
@@ -288,7 +288,7 @@ private:
                 {
                 	unsigned char pixv;
 
-                	if (m_interleaved) {
+                	if (m_interlaced) {
                         pixv = m_image.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                 	} else {
                         pixv = m_image.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
@@ -306,7 +306,7 @@ private:
                 {
                 	unsigned char pixv;
 
-                	if (m_interleaved) {
+                	if (m_interlaced) {
                         pixv = m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                 	} else {
                         pixv = m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
@@ -332,7 +332,7 @@ private:
                     {
                         unsigned char pixv;
 
-                        if (m_interleaved) {
+                        if (m_interlaced) {
                             pixv = camera.m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
                         } else {
                             pixv = camera.m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
