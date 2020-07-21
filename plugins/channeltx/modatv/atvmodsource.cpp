@@ -545,7 +545,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     case ATVModSettings::ATVStdHSkip:
         m_nbImageLines     = m_nbLines; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
-        m_interleaved       = false;
+        m_interlaced       = false;
         m_nbSyncLinesHeadE = 0; // number of sync lines on the top of a frame even
         m_nbSyncLinesHeadO = 0; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = -1; // force no vsync in even block
@@ -560,7 +560,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     case ATVModSettings::ATVStdShort:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
-        m_interleaved       = false;
+        m_interlaced       = false;
         m_nbSyncLinesHeadE = 1; // number of sync lines on the top of a frame even
         m_nbSyncLinesHeadO = 1; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 0;
@@ -575,7 +575,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     case ATVModSettings::ATVStdShortInterleaved:
         m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
-        m_interleaved       = true;
+        m_interlaced       = true;
         m_nbSyncLinesHeadE = 1; // number of sync lines on the top of a frame even
         m_nbSyncLinesHeadO = 1; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 0;
@@ -589,7 +589,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     case ATVModSettings::ATVStd405: // Follows loosely the 405 lines standard
         m_nbImageLines     = m_nbLines - 15; // lines less the total number of sync lines
         m_nbImageLines2    = m_nbImageLines / 2;
-        m_interleaved       = true;
+        m_interlaced       = true;
         m_nbSyncLinesHeadE = 5; // number of sync lines on the top of a frame even
         m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 3;
@@ -603,7 +603,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     case ATVModSettings::ATVStdPAL525: // Follows PAL-M standard
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
-        m_interleaved       = true;
+        m_interlaced       = true;
         m_nbSyncLinesHeadE = 5;
         m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 3;
@@ -618,7 +618,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     default:
         m_nbImageLines     = m_nbLines - 15;
         m_nbImageLines2    = m_nbImageLines / 2;
-        m_interleaved       = true;
+        m_interlaced       = true;
         m_nbSyncLinesHeadE = 5;
         m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 3;
