@@ -144,7 +144,7 @@ private:
     int      m_pointsPerBP;      //!< number of line points for the back porch
     int      m_pointsPerImgLine; //!< number of line points for the image line
     uint32_t m_pointsPerFP;      //!< number of line points for the front porch
-    int      m_pointsPerFSync;   //!< number of line points for the field first sync
+    int      m_pointsPerFSync;   //!< number of line points for the field first sync - a.k.a Equalizing pulse
     uint32_t m_pointsPerHBar;    //!< number of line points for a bar of the bar chart
     uint32_t m_linesPerVBar;     //!< number of lines for a bar of the bar chart
     uint32_t m_pointsPerTU;      //!< number of line points per time unit
@@ -275,6 +275,9 @@ private:
                 break;
             case ATVModSettings::ATVModInputVGradient:
                 sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
+                break;
+            case ATVModSettings::ATVModInputDiagonal:
+                sample = pointIndex < (iLine * m_pointsPerImgLine) / m_nbLines2 ? m_blackLevel : m_settings.m_uniformLevel + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputImage:
                 if (!m_imageOK || (iLineImage < -oddity) || m_image.empty())

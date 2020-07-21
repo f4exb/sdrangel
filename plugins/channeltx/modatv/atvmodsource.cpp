@@ -517,8 +517,8 @@ float ATVModSource::getRFBandwidthDivisor(ATVModSettings::ATVModulation modulati
 void ATVModSource::applyStandard(const ATVModSettings& settings)
 {
     m_pointsPerSync  = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
-    m_pointsPerBP    = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
-    m_pointsPerFP    = (uint32_t) ((2.6f / 64.0f) * m_pointsPerLine);
+    m_pointsPerBP    = (uint32_t) ((5.8f / 64.0f) * m_pointsPerLine);
+    m_pointsPerFP    = (uint32_t) ((1.5f / 64.0f) * m_pointsPerLine);
     m_pointsPerFSync = (uint32_t) ((2.3f / 64.0f) * m_pointsPerLine);
 
     m_pointsPerImgLine = m_pointsPerLine - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;

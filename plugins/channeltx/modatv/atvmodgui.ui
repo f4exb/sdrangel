@@ -762,6 +762,11 @@
         </item>
         <item>
          <property name="text">
+          <string>Diagonal</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Image</string>
          </property>
         </item>
