@@ -26,7 +26,7 @@
 const PluginDescriptor ChannelAnalyzerPlugin::m_pluginDescriptor = {
     ChannelAnalyzer::m_channelId,
 	QString("Channel Analyzer"),
-	QString("4.14.17"),
+	QString("4.14.18"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
