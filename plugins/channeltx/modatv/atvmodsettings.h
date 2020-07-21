@@ -44,6 +44,7 @@ struct ATVModSettings
         ATVModInputChessboard,
         ATVModInputHGradient,
         ATVModInputVGradient,
+        ATVModInputDiagonal,
         ATVModInputImage,
         ATVModInputVideo,
         ATVModInputCamera
