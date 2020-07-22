@@ -195,7 +195,7 @@ private:
     void demod(Complex& c);
     void applyStandard(int sampleRate, const ATVDemodSettings& settings, float lineDuration);
 
-    inline void processClassic(float& sample, int& sampleVideo)
+    inline void processSample(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
         m_registeredTVScreen->setDataColor(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo, sampleVideo, sampleVideo);
@@ -257,143 +257,98 @@ private:
         if (m_sampleIndex >= m_samplesPerLine)
         {
             m_sampleIndex = 0;
-            m_lineIndex++;
 
-            if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
-            {
-                float shiftSamples = 0.0f;
-
-                // Slow sync: slight adjustment is needed
-                if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
-                {
-                    shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-                    m_sampleIndex = shiftSamples;
-                    m_hSyncShiftSum = 0.0f;
-                    m_hSyncShiftCount = 0;
-                    m_hSyncErrorCount = 0;
-                }
-                m_registeredTVScreen->renderImage(0,
-                    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+            if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
+                processEOLHSkip();
+            } else {
+                processEOLClassic();
             }
-
-            if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
-                (m_lineIndex < 3 || m_lineIndex > m_numberOfVSyncLines + 1) && m_settings.m_vSync)
-            {
-                if (m_interleaved)
-                {
-                    if (m_fieldDetectSampleCount > m_fieldDetectThreshold1)
-                        m_fieldIndex = 0;
-                    else if (m_fieldDetectSampleCount < m_fieldDetectThreshold2)
-                        m_fieldIndex = 1;
-                }
-                m_lineIndex = 2;
-            }
-            m_fieldDetectSampleCount = 0;
-            m_vSyncDetectSampleCount = 0;
-
-            if (m_lineIndex > m_settings.m_nbLines / 2 + m_fieldIndex && m_interleaved)
-            {
-                m_lineIndex = 1;
-                m_fieldIndex = 1 - m_fieldIndex;
-            }
-            else if (m_lineIndex > m_settings.m_nbLines && !m_interleaved)
-            {
-                m_lineIndex = 1;
-                m_fieldIndex = 0;
-            }
-
-            int rowIndex = m_lineIndex - m_firstVisibleLine;
-            if (m_interleaved)
-                rowIndex = rowIndex * 2 - m_fieldIndex;
-            m_registeredTVScreen->selectRow(rowIndex);
         }
 
         prevSample = sample;
     }
 
-    // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
-    inline void processHSkip(float& sample, int& sampleVideo)
+    // Standard vertical sync
+    inline void processEOLClassic()
     {
-        // Filling pixel on the current line - reference index 0 at start of sync pulse
-        m_registeredTVScreen->setDataColor(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo, sampleVideo, sampleVideo);
+        m_lineIndex++;
 
-        if (m_settings.m_hSync)
+        if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
         {
-            // Horizontal Synchro detection
-            if ((prevSample >= m_settings.m_levelSynchroTop &&
-                sample < m_settings.m_levelSynchroTop) // horizontal synchro detected
-                && (m_sampleIndexDetected > m_samplesPerLine - m_numberSamplesPerHTopNom))
+            float shiftSamples = 0.0f;
+
+            // Slow sync: slight adjustment is needed
+            if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
             {
-                double sampleIndexDetectedFrac =
-                    (sample - m_settings.m_levelSynchroTop) / (prevSample - sample);
-                double hSyncShift = -m_sampleIndex - sampleIndexDetectedFrac;
-                if (hSyncShift > m_samplesPerLine / 2)
-                    hSyncShift -= m_samplesPerLine;
-                else if (hSyncShift < -m_samplesPerLine / 2)
-                    hSyncShift += m_samplesPerLine;
-
-                if (fabs(hSyncShift) > m_numberSamplesPerHTopNom)
-                {
-                    m_hSyncErrorCount++;
-                    if (m_hSyncErrorCount >= 8)
-                    {
-                        // Fast sync: shift is too large, needs to be fixed ASAP
-                        m_sampleIndex = 0;
-                        m_hSyncShiftSum = 0.0;
-                        m_hSyncShiftCount = 0;
-                        m_hSyncErrorCount = 0;
-                    }
-                }
-                else
-                {
-                    m_hSyncShiftSum += hSyncShift;
-                    m_hSyncShiftCount++;
-                    m_hSyncErrorCount = 0;
-                }
-                m_sampleIndexDetected = 0;
+                shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
+                m_sampleIndex = shiftSamples;
+                m_hSyncShiftSum = 0.0f;
+                m_hSyncShiftCount = 0;
+                m_hSyncErrorCount = 0;
             }
-            else
-                m_sampleIndexDetected++;
-        }
-        else
-        {
-            m_hSyncShiftSum = 0.0f;
-            m_hSyncShiftCount = 0;
+            m_registeredTVScreen->renderImage(0,
+                shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
         }
 
-        m_sampleIndex++;
-
-        // end of line
-        if (m_sampleIndex >= m_samplesPerLine)
+        if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
+            (m_lineIndex < 3 || m_lineIndex > m_numberOfVSyncLines + 1) && m_settings.m_vSync)
         {
-            m_sampleIndex = 0;
-            m_lineIndex++;
-            m_rowIndex++;
-
-            if ((m_sampleIndexDetected > (3*m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
-             || (!m_settings.m_vSync && (m_lineIndex >= m_settings.m_nbLines))) // Vsync ignored and reached nominal number of lines per frame
+            if (m_interleaved)
             {
-                float shiftSamples = 0.0f;
-
-                // Slow sync: slight adjustment is needed
-                if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
-                {
-                    shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-                    m_sampleIndex = shiftSamples;
-                    m_hSyncShiftSum = 0.0f;
-                    m_hSyncShiftCount = 0;
-                    m_hSyncErrorCount = 0;
-                }
-                m_registeredTVScreen->renderImage(0,
-                    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
-                m_lineIndex = 0;
-                m_rowIndex = 0;
+                if (m_fieldDetectSampleCount > m_fieldDetectThreshold1)
+                    m_fieldIndex = 0;
+                else if (m_fieldDetectSampleCount < m_fieldDetectThreshold2)
+                    m_fieldIndex = 1;
             }
+            m_lineIndex = 2;
+        }
+        m_fieldDetectSampleCount = 0;
+        m_vSyncDetectSampleCount = 0;
 
-            m_registeredTVScreen->selectRow(m_rowIndex);
+        if (m_lineIndex > m_settings.m_nbLines / 2 + m_fieldIndex && m_interleaved)
+        {
+            m_lineIndex = 1;
+            m_fieldIndex = 1 - m_fieldIndex;
+        }
+        else if (m_lineIndex > m_settings.m_nbLines && !m_interleaved)
+        {
+            m_lineIndex = 1;
+            m_fieldIndex = 0;
         }
 
-        prevSample = sample;
+        int rowIndex = m_lineIndex - m_firstVisibleLine;
+        if (m_interleaved)
+            rowIndex = rowIndex * 2 - m_fieldIndex;
+        m_registeredTVScreen->selectRow(rowIndex);
+    }
+
+    // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
+    inline void processEOLHSkip()
+    {
+        m_lineIndex++;
+        m_rowIndex++;
+
+        if ((m_sampleIndexDetected > (3*m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
+            || (!m_settings.m_vSync && (m_lineIndex >= m_settings.m_nbLines))) // Vsync ignored and reached nominal number of lines per frame
+        {
+            float shiftSamples = 0.0f;
+
+            // Slow sync: slight adjustment is needed
+            if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
+            {
+                shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
+                m_sampleIndex = shiftSamples;
+                m_hSyncShiftSum = 0.0f;
+                m_hSyncShiftCount = 0;
+                m_hSyncErrorCount = 0;
+            }
+            m_registeredTVScreen->renderImage(0,
+                shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+            m_lineIndex = 0;
+            m_rowIndex = 0;
+        }
+
+        m_registeredTVScreen->selectRow(m_rowIndex);
     }
 };
 
