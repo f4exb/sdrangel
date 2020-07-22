@@ -325,11 +325,7 @@ void ATVDemodSink::demod(Complex& c)
 
     if (m_registeredTVScreen) // can process only if the screen is available (set via the GUI)
     {
-        if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
-            processHSkip(sample, sampleVideo);
-        } else {
-            processClassic(sample, sampleVideo);
-        }
+        processSample(sample, sampleVideo);
     }
 }
 
