@@ -587,10 +587,11 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
         m_blankLineLvel    = 0.7f;
         break;
     case ATVModSettings::ATVStd405: // Follows loosely the 405 lines standard
-        m_nbImageLines     = m_nbLines - 15; // lines less the total number of sync lines
+        m_nbImageLines     = m_nbLines - 14; // lines less the total number of sync lines
+        // 14 = m_nbSyncLinesHeadE + m_nbSyncLinesHeadO + m_nbSyncLinesBottom + m_nbHalfLongSync + m_nbWholeEqLines
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interlaced       = true;
-        m_nbSyncLinesHeadE = 5; // number of sync lines on the top of a frame even
+        m_nbSyncLinesHeadE = 4; // number of sync lines on the top of a frame even
         m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 3;
         m_nbLongSyncLines  = 2;
@@ -601,10 +602,10 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
         m_blankLineLvel    = m_blackLevel;
         break;
     case ATVModSettings::ATVStdPAL525: // Follows PAL-M standard
-        m_nbImageLines     = m_nbLines - 15;
+        m_nbImageLines     = m_nbLines - 14;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interlaced       = true;
-        m_nbSyncLinesHeadE = 5;
+        m_nbSyncLinesHeadE = 4;
         m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 3;
         m_nbLongSyncLines  = 2;
@@ -616,10 +617,10 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
         break;
     case ATVModSettings::ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
-        m_nbImageLines     = m_nbLines - 15;
+        m_nbImageLines     = m_nbLines - 14;
         m_nbImageLines2    = m_nbImageLines / 2;
         m_interlaced       = true;
-        m_nbSyncLinesHeadE = 5;
+        m_nbSyncLinesHeadE = 4;
         m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
         m_nbSyncLinesBottom = 3;
         m_nbLongSyncLines  = 2;
