@@ -39,12 +39,80 @@ const int ATVModSource::m_nbBars = 6;
 const int ATVModSource::m_cameraFPSTestNbFrames = 100;
 const int ATVModSource::m_ssbFftLen = 1024;
 
+const ATVModSource::LineType ATVModSource::StdPAL625_F1Start[] = {
+    LineBroadPulses,       // 1 (index 0)
+    LineBroadPulses,       // 2
+    LineBroadShortPulses,  // 3
+    LineShortPulses,       // 4
+    LineShortPulses        // 5
+};
+
+const ATVModSource::LineType ATVModSource::StdPAL625_F2Start[] = {
+    LineBroadPulses,       // 314 (index 313)
+    LineBroadPulses,       // 315
+    LineShortPulses,       // 316
+    LineShortPulses,       // 317
+    LineShortBlackPulses   // 318
+};
+
+const ATVModSource::LineType ATVModSource::StdPAL525_F1Start[] = {
+    LineShortPulses, // 1 (index 0)
+    LineShortPulses,
+    LineShortPulses,
+    LineBroadPulses, // 4
+    LineBroadPulses,
+    LineBroadPulses,
+    LineShortPulses, // 7
+    LineShortPulses,
+    LineShortPulses, // 9
+};
+
+const ATVModSource::LineType ATVModSource::StdPAL525_F2Start[] = {
+    LineShortPulses,      // 264 (index 263)
+    LineShortPulses,      // 265
+    LineShortBroadPulses, // 266
+    LineBroadPulses,      // 267
+    LineBroadPulses,      // 268
+    LineBroadShortPulses, // 269
+    LineShortPulses,      // 270
+    LineShortPulses,      // 271
+    LineShortBlackPulses  // 272
+};
+
+const ATVModSource::LineType ATVModSource::Std819_F1Start[] = {
+    LineBroadPulses,      // 1 (index 0)
+    LineBroadPulses,      // 2
+    LineBroadPulses,      // 3
+    LineBroadShortPulses, // 4
+    LineShortPulses,      // 5
+    LineShortPulses,      // 6
+    LineShortPulses,      // 7
+};
+
+const ATVModSource::LineType ATVModSource::Std819_F2Start[] = {
+    LineBroadPulses, // 410 (index 409)
+    LineBroadPulses, // 411
+    LineBroadPulses, // 412
+    LineShortPulses, // 413
+    LineShortPulses, // 414
+    LineShortPulses, // 415
+};
+
+const ATVModSource::LineType ATVModSource::StdShort_F1Start[] = {
+    LineBroadPulses,
+    LineShortPulses,
+};
+
+const ATVModSource::LineType ATVModSource::StdShort_F2Start[] = {
+    LineBroadPulses,
+    LineShortPulses,
+};
+
 ATVModSource::ATVModSource() :
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
 	m_modPhasor(0.0f),
     m_tvSampleRate(1000000),
-    m_evenImage(true),
     m_horizontalCount(0),
     m_lineCount(0),
 	m_imageOK(false),
@@ -61,7 +129,8 @@ ATVModSource::ATVModSource() :
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
     m_DSBFilterBufferIndex(0),
-    m_messageQueueToGUI(nullptr)
+    m_messageQueueToGUI(nullptr),
+    m_imageLine(0)
 {
     scanCameras();
 
@@ -78,6 +147,8 @@ ATVModSource::ATVModSource() :
 
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
     applySettings(m_settings, true); // does applyStandard() too;
+
+    m_lineType = getLineType(m_settings.m_atvStd, m_lineCount);
 }
 
 ATVModSource::~ATVModSource()
@@ -236,42 +307,44 @@ Complex& ATVModSource::modulateVestigialSSB(Real& sample)
 
 void ATVModSource::pullVideo(Real& sample)
 {
-    if ((m_settings.m_atvStd == ATVModSettings::ATVStdHSkip) && (m_lineCount == m_nbLines2)) // last line in skip mode
+    if (m_settings.m_atvStd == ATVModSettings::ATVStdHSkip)
     {
-        pullImageLine(sample, true); // pull image line without sync
+        pullImageSample(sample, m_lineCount == m_nbLines - 1); // pull image line without sync at end of image
     }
-    else if (m_lineCount < m_nbLines2 + 1) // even image or non interlaced
+    else
     {
-        int iLine = m_lineCount;
-
-        if (iLine < m_nbSyncLinesHeadE + m_nbBlankLines)
+        switch(m_lineType)
         {
-            pullVSyncLine(sample);
-        }
-        else if (iLine > m_nbLines2 - m_nbSyncLinesBottom)
-        {
-            pullVSyncLine(sample);
-        }
-        else
-        {
-            pullImageLine(sample);
-        }
-    }
-    else // odd image
-    {
-        int iLine = m_lineCount - m_nbLines2 - 1;
-
-        if (iLine < m_nbSyncLinesHeadO + m_nbBlankLines)
-        {
-            pullVSyncLine(sample);
-        }
-        else if (iLine > m_nbLines2 - 1 - m_nbSyncLinesBottom)
-        {
-            pullVSyncLine(sample);
-        }
-        else
-        {
-            pullImageLine(sample);
+            case LineImage:
+                pullImageSample(sample);
+                break;
+            case LineImageHalf1Short:
+                pullImageFirstHalfShortSample(sample);
+                break;
+            case LineImageHalf1Broad:
+                pullImageFirstHalfBroadSample(sample);
+                break;
+            case LineImageHalf2:
+                pullImageLastHalfSample(sample);
+                break;
+            case LineShortPulses:
+                pullVSyncLineEquPulsesSample(sample);
+                break;
+            case LineBroadPulses:
+                pullVSyncLineLongPulsesSample(sample);
+                break;
+            case LineShortBroadPulses:
+                pullVSyncLineEquLongPulsesSample(sample);
+                break;
+            case LineBroadShortPulses:
+                pullVSyncLineLongEquPulsesSample(sample);
+                break;
+            case LineShortBlackPulses:
+                pullVSyncLineEquBlackPulsesSample(sample);
+                break;
+            case LineBlack:
+            default:
+                pullBlackLineSample(sample);
         }
     }
 
@@ -284,12 +357,25 @@ void ATVModSource::pullVideo(Real& sample)
         if (m_lineCount < m_nbLines - 1)
         {
             m_lineCount++;
-            if (m_lineCount > (m_nbLines/2)) m_evenImage = !m_evenImage;
+
+            if ((m_lineType == LineImage)
+             || (m_lineType == LineImageHalf1Short)
+             || (m_lineType == LineImageHalf1Broad)
+             || (m_lineType == LineImageHalf2)) {
+                m_imageLine += m_interlaced ? 2 : 1;
+            }
+
+            if (m_lineCount == m_nbLinesField1) { // field 1 -> field 2 or first field2
+                m_imageLine = m_imageLineStart2; // field2 image line start index
+            }
+
+            m_lineType = getLineType(m_settings.m_atvStd, m_lineCount);
         }
         else // new image
         {
             m_lineCount = 0;
-            m_evenImage = !m_evenImage;
+            m_imageLine = m_imageLineStart1; // field1 image line start index
+            m_lineType = getLineType(m_settings.m_atvStd, m_lineCount);
 
             if ((m_settings.m_atvModInput == ATVModSettings::ATVModInputVideo) && m_videoOK && (m_settings.m_videoPlay) && !m_videoEOF)
             {
@@ -519,14 +605,15 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     m_pointsPerSync  = (uint32_t) ((4.7f / 64.0f) * m_pointsPerLine);
     m_pointsPerBP    = (uint32_t) ((5.8f / 64.0f) * m_pointsPerLine);
     m_pointsPerFP    = (uint32_t) ((1.5f / 64.0f) * m_pointsPerLine);
-    m_pointsPerFSync = (uint32_t) ((2.3f / 64.0f) * m_pointsPerLine);
+    m_pointsPerVEqu  = (uint32_t) ((2.3f / 64.0f) * m_pointsPerLine); // short vertical sync pulse (equalizing)
+    m_pointsPerVSync = (uint32_t) (((32.0f - 4.7f) / 64.0f) * m_pointsPerLine); // broad vertical sync pulse (field sync)
 
     m_pointsPerImgLine = m_pointsPerLine - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
     m_nbHorizPoints    = m_pointsPerLine;
 
     m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
-    m_hBarIncrement    = m_spanLevel / (float) (m_nbBars-1);
-    m_vBarIncrement    = m_spanLevel / (float) m_nbBars;
+    m_hBarIncrement    = m_spanLevel / (float) (m_nbBars - 1);
+    m_vBarIncrement    = m_spanLevel / (float) (m_nbBars - 1);
 
     m_nbLines          = settings.m_nbLines;
     m_nbLines2         = m_nbLines / 2;
@@ -537,101 +624,69 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
 //            << " m_fps: " << m_config.m_fps
 //            << " rateUnits: " << rateUnits
 //            << " nbPointsPerRateUnit: " << nbPointsPerRateUnit
-//            << " m_tvSampleRate: " << m_tvSampleRate
-//            << " m_pointsPerTU: " << m_pointsPerTU;
+//            << " m_tvSampleRate: " << m_tvSampleRate;
 
     switch(settings.m_atvStd)
     {
     case ATVModSettings::ATVStdHSkip:
-        m_nbImageLines     = m_nbLines; // lines less the total number of sync lines
-        m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
+        m_nbImageLines     = m_nbLines;      // lines less the total number of sync lines (0)
+        m_nbImageLines2    = m_nbImageLines; // non interlaced (unused)
+        m_imageLineStart1  = 0;
+        m_imageLineStart2  = 0;
         m_interlaced       = false;
-        m_nbSyncLinesHeadE = 0; // number of sync lines on the top of a frame even
-        m_nbSyncLinesHeadO = 0; // number of sync lines on the top of a frame odd
-        m_nbSyncLinesBottom = -1; // force no vsync in even block
-        m_nbLongSyncLines  = 0;
-        m_nbHalfLongSync   = 0;
-        m_nbWholeEqLines   = 0;
-        m_singleLongSync   = true;
-        m_nbBlankLines     = 0;
         m_blankLineLvel    = 0.7f;
-        m_nbLines2         = m_nbLines - 1;
+        m_nbLines2         = m_nbLines;  // non interlaced
+        m_nbLinesField1    = m_nbLines;  // non interlaced
         break;
     case ATVModSettings::ATVStdShort:
-        m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
-        m_nbImageLines2    = m_nbImageLines; // force non interleaved for vbars
+        m_nbImageLines     = m_nbLines - 2;  // lines less the total number of sync lines
+        m_nbImageLines2    = m_nbImageLines; // non interlaced (unused)
+        m_imageLineStart1  = 0;
+        m_imageLineStart2  = 0;
         m_interlaced       = false;
-        m_nbSyncLinesHeadE = 1; // number of sync lines on the top of a frame even
-        m_nbSyncLinesHeadO = 1; // number of sync lines on the top of a frame odd
-        m_nbSyncLinesBottom = 0;
-        m_nbLongSyncLines  = 1;
-        m_nbHalfLongSync   = 0;
-        m_nbWholeEqLines   = 0;
-        m_singleLongSync   = true;
-        m_nbBlankLines     = 1;
         m_blankLineLvel    = 0.7f;
-        m_nbLines2         = m_nbLines; // force non interleaved => treated as even for all lines
+        m_nbLines2         = m_nbLines;      // non interlaced
+        m_nbLinesField1    = m_nbLines;      // non interlaced
         break;
-    case ATVModSettings::ATVStdShortInterleaved:
-        m_nbImageLines     = m_nbLines - 2; // lines less the total number of sync lines
-        m_nbImageLines2    = m_nbImageLines / 2;
+    case ATVModSettings::ATVStdShortInterlaced:
+        m_nbImageLines2    = m_nbLines2 - 2; // lines in half image less number of sync/service lines
+        m_nbImageLines     = 2*m_nbImageLines2;
+        m_imageLineStart1  = 1; //m_nbLines % 2;
+        m_imageLineStart2  = 0; //1 - (m_nbLines % 2);
         m_interlaced       = true;
-        m_nbSyncLinesHeadE = 1; // number of sync lines on the top of a frame even
-        m_nbSyncLinesHeadO = 1; // number of sync lines on the top of a frame odd
-        m_nbSyncLinesBottom = 0;
-        m_nbLongSyncLines  = 1;
-        m_nbHalfLongSync   = 0;
-        m_nbWholeEqLines   = 0;
-        m_singleLongSync   = true;
-        m_nbBlankLines     = 1;
         m_blankLineLvel    = 0.7f;
-        break;
-    case ATVModSettings::ATVStd405: // Follows loosely the 405 lines standard
-        m_nbImageLines     = m_nbLines - 14; // lines less the total number of sync lines
-        // 14 = m_nbSyncLinesHeadE + m_nbSyncLinesHeadO + m_nbSyncLinesBottom + m_nbHalfLongSync + m_nbWholeEqLines
-        m_nbImageLines2    = m_nbImageLines / 2;
-        m_interlaced       = true;
-        m_nbSyncLinesHeadE = 4; // number of sync lines on the top of a frame even
-        m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
-        m_nbSyncLinesBottom = 3;
-        m_nbLongSyncLines  = 2;
-        m_nbHalfLongSync   = 1;
-        m_nbWholeEqLines   = 2;
-        m_singleLongSync   = false;
-        m_nbBlankLines     = 7; // yields 376 lines (195 - 7) * 2
-        m_blankLineLvel    = m_blackLevel;
+        m_nbLinesField1    = m_nbLines2;
         break;
     case ATVModSettings::ATVStdPAL525: // Follows PAL-M standard
-        m_nbImageLines     = m_nbLines - 14;
-        m_nbImageLines2    = m_nbImageLines / 2;
+        m_nbImageLines2    = (m_nbLines/2) - 19; // 525 -> 243 per half
+        m_nbImageLines     = 2*m_nbImageLines2;
+        m_imageLineStart1  = 1;
+        m_imageLineStart2  = 0;
         m_interlaced       = true;
-        m_nbSyncLinesHeadE = 4;
-        m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
-        m_nbSyncLinesBottom = 3;
-        m_nbLongSyncLines  = 2;
-        m_nbHalfLongSync   = 1;
-        m_nbWholeEqLines   = 2;
-        m_singleLongSync   = false;
-        m_nbBlankLines     = 15; // yields 480 lines (255 - 15) * 2
         m_blankLineLvel    = m_blackLevel;
+        m_nbLinesField1    = m_nbLines2+1;
+        break;
+    case ATVModSettings::ATVStd819: // Follows 819 F standard (belgium)
+        m_nbImageLines2    = (m_nbLines/2) - 28;
+        m_nbImageLines     = 2*m_nbImageLines2;
+        m_imageLineStart1  = 1;
+        m_imageLineStart2  = 0;
+        m_interlaced       = true;
+        m_blankLineLvel    = m_blackLevel;
+        m_nbLinesField1    = m_nbLines2;
         break;
     case ATVModSettings::ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
-        m_nbImageLines     = m_nbLines - 14;
-        m_nbImageLines2    = m_nbImageLines / 2;
+        m_nbImageLines2    = (m_nbLines/2) - 24; // 625 -> 288 per half
+        m_nbImageLines     = 2*m_nbImageLines2;
+        m_imageLineStart1  = 0;
+        m_imageLineStart2  = 1;
         m_interlaced       = true;
-        m_nbSyncLinesHeadE = 4;
-        m_nbSyncLinesHeadO = 4; // number of sync lines on the top of a frame odd
-        m_nbSyncLinesBottom = 3;
-        m_nbLongSyncLines  = 2;
-        m_nbHalfLongSync   = 1;
-        m_nbWholeEqLines   = 2;
-        m_singleLongSync   = false;
-        m_nbBlankLines     = 17; // yields 576 lines (305 - 17) * 2
         m_blankLineLvel    = m_blackLevel;
+        m_nbLinesField1    = m_nbLines2+1;
     }
 
-    m_linesPerVBar = m_nbImageLines2  / m_nbBars;
+    m_linesPerVBar = m_nbImageLines  / m_nbBars;
 
     if (m_imageOK)
     {
@@ -713,7 +768,7 @@ void ATVModSource::openVideo(const QString& fileName)
 
 void ATVModSource::resizeImage()
 {
-    float fy = (m_nbImageLines - 2*m_nbBlankLines) / (float) m_imageOriginal.rows;
+    float fy = (float) m_nbImageLines / (float) m_imageOriginal.rows;
     float fx = m_pointsPerImgLine / (float) m_imageOriginal.cols;
     cv::resize(m_imageOriginal, m_image, cv::Size(), fx, fy);
     qDebug("ATVModSource::resizeImage: %d x %d -> %d x %d", m_imageOriginal.cols, m_imageOriginal.rows, m_image.cols, m_image.rows);
@@ -721,7 +776,7 @@ void ATVModSource::resizeImage()
 
 void ATVModSource::calculateVideoSizes()
 {
-	m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) m_videoHeight;
+	m_videoFy = (float) m_nbImageLines / (float) m_videoHeight;
 	m_videoFx = m_pointsPerImgLine / (float) m_videoWidth;
 	m_videoFPSq = m_videoFPS / m_fps;
     m_videoFPSCount = m_videoFPSq;
@@ -741,7 +796,7 @@ void ATVModSource::calculateCamerasSizes()
 {
     for (std::vector<ATVCamera>::iterator it = m_cameras.begin(); it != m_cameras.end(); ++it)
 	{
-		it->m_videoFy = (m_nbImageLines - 2*m_nbBlankLines) / (float) it->m_videoHeight;
+		it->m_videoFy = (float) m_nbImageLines / (float) it->m_videoHeight;
 		it->m_videoFx = m_pointsPerImgLine / (float) it->m_videoWidth;
 		it->m_videoFPSq = it->m_videoFPS / m_fps;
 		it->m_videoFPSqManual = it->m_videoFPSManual / m_fps;
