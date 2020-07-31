@@ -39,7 +39,7 @@ struct ATVDemodSettings
     {
         ATVStdPAL625,
         ATVStdPAL525,
-        ATVStd405,
+        ATVStd819,
         ATVStdShortInterleaved,
         ATVStdShort,
         ATVStdHSkip
