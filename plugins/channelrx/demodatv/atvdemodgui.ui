@@ -624,6 +624,11 @@
         </property>
         <item>
          <property name="text">
+          <string>819</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>640</string>
          </property>
         </item>
@@ -783,7 +788,7 @@
         </item>
         <item>
          <property name="text">
-          <string>PAL405</string>
+          <string>819L</string>
          </property>
         </item>
         <item>

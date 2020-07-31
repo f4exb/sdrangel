@@ -355,12 +355,12 @@ void ATVDemodSink::applyStandard(int sampleRate, const ATVDemodSettings& setting
         m_firstVisibleLine   = 3;
         m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
         break;
-    case ATVDemodSettings::ATVStd405: // Follows loosely the 405 lines standard
+    case ATVDemodSettings::ATVStd819: // 819 lines standard F
         // what is left in a line for the image
         m_interleaved        = true;
-        m_numberOfVSyncLines = 3;
-        m_numberOfBlackLines = 30;
-        m_firstVisibleLine   = 13;
+        m_numberOfVSyncLines = 4;
+        m_numberOfBlackLines = 58;
+        m_firstVisibleLine   = 27;
         m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
         break;
     case ATVDemodSettings::ATVStdPAL525: // Follows PAL-M standard

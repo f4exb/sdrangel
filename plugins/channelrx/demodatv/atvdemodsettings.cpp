@@ -220,42 +220,45 @@ int ATVDemodSettings::getNumberOfLines(int nbLinesIndex)
     switch(nbLinesIndex)
     {
     case 0:
-        return 640;
-        break;
-    case 2:
-        return 525;
-        break;
-    case 3:
-        return 480;
-        break;
-    case 4:
-        return 405;
-        break;
-    case 5:
-        return 360;
-        break;
-    case 6:
-        return 343;
-        break;
-    case 7:
-        return 240;
-        break;
-    case 8:
-        return 180;
-        break;
-    case 9:
-        return 120;
-        break;
-    case 10:
-        return 90;
-        break;
-    case 11:
-        return 60;
-        break;
-    case 12:
-        return 32;
+        return 819;
         break;
     case 1:
+        return 640;
+        break;
+    case 3:
+        return 525;
+        break;
+    case 4:
+        return 480;
+        break;
+    case 5:
+        return 405;
+        break;
+    case 6:
+        return 360;
+        break;
+    case 7:
+        return 343;
+        break;
+    case 8:
+        return 240;
+        break;
+    case 9:
+        return 180;
+        break;
+    case 10:
+        return 120;
+        break;
+    case 11:
+        return 90;
+        break;
+    case 12:
+        return 60;
+        break;
+    case 13:
+        return 32;
+        break;
+    case 2:
     default:
         return 625;
         break;
@@ -265,29 +268,31 @@ int ATVDemodSettings::getNumberOfLines(int nbLinesIndex)
 int ATVDemodSettings::getNumberOfLinesIndex(int nbLines)
 {
     if (nbLines <= 32) {
-        return 12;
+        return 13;
     } else if (nbLines <= 60) {
-        return 11;
+        return 12;
     } else if (nbLines <= 90) {
-        return 10;
+        return 11;
     } else if (nbLines <= 120) {
-        return 9;
+        return 10;
     } else if (nbLines <= 180) {
-        return 8;
+        return 9;
     } else if (nbLines <= 240) {
-        return 7;
+        return 8;
     } else if (nbLines <= 343) {
-        return 6;
+        return 7;
     } else if (nbLines <= 360) {
-        return 5;
+        return 6;
     } else if (nbLines <= 405) {
-        return 4;
+        return 5;
     } else if (nbLines <= 480) {
-        return 3;
+        return 4;
     } else if (nbLines <= 525) {
-        return 2;
+        return 3;
     } else if (nbLines <= 625) {
-        return 1;
+        return 2;
+    } else if (nbLines <= 640) {
+        return 2;
     } else {
         return 0;
     }
