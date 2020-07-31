@@ -128,6 +128,20 @@ private:
         {}
     };
 
+    enum LineType
+    {
+        LineImage,            //!< Full image line
+        LineImageHalf1Short,  //!< Half image line first then short pulse
+        LineImageHalf1Broad,  //!< Half image line first then broad pulse
+        LineImageHalf2,       //!< Half image line first black then image
+        LineShortPulses,      //!< VSync short pulses a.k.a equalizing
+        LineBroadPulses,      //!< VSync broad pulses a.k.a field sync
+        LineShortBroadPulses, //!< VSync short then broad pulses
+        LineBroadShortPulses, //!< VSync broad then short pulses
+        LineShortBlackPulses, //!< VSync short pulse then black
+        LineBlack,            //!< Full black line
+    };
+
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     ATVModSettings m_settings;
@@ -144,31 +158,27 @@ private:
     int      m_pointsPerBP;      //!< number of line points for the back porch
     int      m_pointsPerImgLine; //!< number of line points for the image line
     uint32_t m_pointsPerFP;      //!< number of line points for the front porch
-    int      m_pointsPerFSync;   //!< number of line points for the field first sync - a.k.a Equalizing pulse
-    uint32_t m_pointsPerHBar;    //!< number of line points for a bar of the bar chart
-    uint32_t m_linesPerVBar;     //!< number of lines for a bar of the bar chart
-    uint32_t m_pointsPerTU;      //!< number of line points per time unit
+    int      m_pointsPerVEqu;    //!< number of line points for the equalizing (short) pulse
+    int      m_pointsPerVSync;   //!< number of line points for the vertical sync (broad) pulse
     int      m_nbLines;          //!< number of lines per complete frame
-    int      m_nbLines2;         //!< same number as above (non interlaced) or half the number above (interlaced)
-    uint32_t m_nbImageLines;     //!< number of image lines excluding synchronization lines
-    uint32_t m_nbImageLines2;    //!< same number as above (non interlaced) or half the number above (interlaced)
+    int      m_nbLines2;         //!< same number as above (non interlaced) or Euclidean half the number above (interlaced)
+    int      m_nbLinesField1;    //!< In interlaced mode: number of lines in field1 transition included
+    uint32_t m_nbImageLines2;    //!< half the number of effective image lines
+    uint32_t m_nbImageLines;     //!< number of effective image lines
+    uint32_t m_imageLineStart1;  //!< start index of line for field 1
+    uint32_t m_imageLineStart2;  //!< start index of line for field 2
     int      m_nbHorizPoints;    //!< number of line points per horizontal line
-    int      m_nbSyncLinesHeadE; //!< number of header sync lines on even frame
-    int      m_nbSyncLinesHeadO; //!< number of header sync lines on odd frame
-    int      m_nbSyncLinesBottom;//!< number of sync lines at bottom
-    int      m_nbLongSyncLines;  //!< number of whole long sync lines for vertical synchronization
-    int      m_nbHalfLongSync;   //!< number of half long sync / equalization lines
-    int      m_nbWholeEqLines;   //!< number of whole equalizing lines
-    bool     m_singleLongSync;   //!< single or double long sync per long sync line
-    int      m_nbBlankLines;     //!< number of lines in a frame (full or half) that are blanked (black) at the top of the image
     float    m_blankLineLvel;    //!< video level of blank lines
+    uint32_t m_pointsPerHBar;    //!< number of line points for a bar of the bar chart
     float    m_hBarIncrement;    //!< video level increment at each horizontal bar increment
+    uint32_t m_linesPerVBar;     //!< number of lines for a bar of the bar chart
     float    m_vBarIncrement;    //!< video level increment at each vertical bar increment
-    bool     m_interlaced;      //!< true if image is interlaced (2 half frames per frame)
-    bool     m_evenImage;        //!< in interlaced mode true if this is an even image
+    bool     m_interlaced;       //!< true if image is interlaced (2 half frames per frame)
     int      m_horizontalCount;  //!< current point index on line
     int      m_lineCount;        //!< current line index in frame
+    int      m_imageLine;        //!< current line index in image
     float    m_fps;              //!< resulting frames per second
+    LineType m_lineType;         //!< current line type
 
     MovingAverageUtil<double, double, 16> m_movingAverage;
     quint32 m_levelCalcCount;
@@ -223,6 +233,15 @@ private:
     static const int m_nbBars; //!< number of bars in bar or chessboard patterns
     static const int m_cameraFPSTestNbFrames; //!< number of frames for camera FPS test
 
+    static const LineType StdPAL625_F1Start[];
+    static const LineType StdPAL625_F2Start[];
+    static const LineType StdPAL525_F1Start[];
+    static const LineType StdPAL525_F2Start[];
+    static const LineType Std819_F1Start[];
+    static const LineType Std819_F2Start[];
+    static const LineType StdShort_F1Start[];
+    static const LineType StdShort_F2Start[];
+
     void pullFinalize(Complex& ci, Sample& sample);
     void pullVideo(Real& sample);
     void calculateLevel(Real& sample);
@@ -242,7 +261,185 @@ private:
 
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
 
-    inline void pullImageLine(Real& sample, bool noHSync = false)
+    inline LineType getLineType(ATVModSettings::ATVStd standard, int lineNumber)
+    {
+        if (standard == ATVModSettings::ATVStdHSkip)
+        {
+            return LineImage; // all lines are image lines
+        }
+        else if (standard == ATVModSettings::ATVStdPAL625) // m_nbLines2 = 312 - fieldLine 0 = 313
+        {
+            if (lineNumber < m_nbLines2)
+            {
+                if (lineNumber < 5) { // field 1 start (0..4 in line index = line number - 1)
+                    return StdPAL625_F1Start[lineNumber];
+                } else if (lineNumber < 22) { // field 1 black lines (5..21)
+                    return LineBlack;
+                } else if (lineNumber == 22) { // field 1 half image line (22)
+                    return LineImageHalf2;
+                } else if (lineNumber < m_nbLines2 - 2) { // field 1 full image (23..309)
+                    return LineImage;
+                } else if (lineNumber < m_nbLines2) { // field 1 bottom (310..311)
+                    return LineShortPulses;
+                }
+            }
+            else if (lineNumber == m_nbLines2)  // field transition 1 -> 2 (312)
+            {
+                return LineShortBroadPulses;
+            }
+            else
+            {
+                int fieldLine = lineNumber - m_nbLines2 - 1;
+
+                if (fieldLine < 5) { // field 2 start (313..(313+5-1=317))
+                    return StdPAL625_F2Start[fieldLine];
+                } else if (fieldLine < 22) { // field 2 black lines (318..(313+22-1=334))
+                    return LineBlack;
+                } else if (fieldLine < m_nbLines2 - 3) { // field 2 full image (335..(313+309-1=621))
+                    return LineImage;
+                } else if (fieldLine == m_nbLines2 - 3) { // field 2 half image line (313+309=622)
+                    return LineImageHalf1Short;
+                } else { // field 2 bottom (623..624..)
+                    return LineShortPulses;
+                }
+            }
+        }
+        else if (standard == ATVModSettings::ATVStdPAL525) // m_nbLines2 = 262 - fieldLine 0 = 263
+        {
+            if (lineNumber < m_nbLines2)
+            {
+
+                if (lineNumber < 9) { // field 1 start (0..8 in line index)
+                    return StdPAL525_F1Start[lineNumber];
+                } else if (lineNumber < 20) { // field 1 black lines (9..19)
+                    return LineBlack;
+                } else if (lineNumber < m_nbLines2) { // field 1 full image (20..261)
+                    return LineImage;
+                }
+            }
+            else if (lineNumber == m_nbLines2) // field transition 1 -> 2 or field 1 half image line (262)
+            {
+                return LineImageHalf1Short;
+            }
+            else
+            {
+                int fieldLine = lineNumber - m_nbLines2 - 1;
+
+                if (fieldLine < 9) { // field 2 start (263..(263+9-1=271))
+                    return StdPAL525_F2Start[fieldLine];
+                } else if (fieldLine < 19) { // field 2 black lines (272..(263+19-1=281))
+                    return LineBlack;
+                } else if (fieldLine == 19) { // field 2 half image line (263+19=282)
+                    return LineImageHalf2;
+                } else if (fieldLine < m_nbLines2) { // field 2 full line (283..(263+262-1=524))
+                    return LineImage;
+                } else { // failsafe: should not get there - same as field 1 start first line
+                    return LineShortPulses;
+                }
+            }
+        }
+        else if (standard == ATVModSettings::ATVStd819) // Standard F (Belgian) - m_nbLines2 = 409 - fieldLine 0 = 409
+        {
+            if (lineNumber < m_nbLines2 - 1)
+            {
+                if (lineNumber < 7) { // field 1 start (0..6 in line index)
+                    return Std819_F1Start[lineNumber];
+                } else if (lineNumber < 26) { // field 1 black lines (7..25)
+                    return LineBlack;
+                } else if (lineNumber == 26) { // field 1 half image line (26)
+                    return LineImageHalf2;
+                } else if (lineNumber < m_nbLines2 - 4) { // field 1 full image (27..404)
+                    return LineImage;
+                } else if (lineNumber < m_nbLines2 - 1) { // field 1 bottom (405..407)
+                    return LineShortPulses;
+                }
+            }
+            else if (lineNumber == m_nbLines2 - 1) // transition field 1 -> 2 (408)
+            {
+                return LineShortBroadPulses;
+            }
+            else
+            {
+                int fieldLine = lineNumber - m_nbLines2;
+
+                if (fieldLine < 6) { // field 2 start (409..(409+6-1=414))
+                    return Std819_F2Start[fieldLine];
+                } else if (fieldLine < 26) { // field 2 black lines (415..(409+26-1=434))
+                    return LineBlack;
+                } else if (fieldLine < m_nbLines2 - 3) { // field 2 full image (435..(409+406-1=814))
+                    return LineImage;
+                } else if (fieldLine == m_nbLines2 - 3) { // field 2 half image line (409+406=815)
+                    return LineImageHalf1Short;
+                } else { // field 2 bottom (816..818..)
+                    return LineShortPulses;
+                }
+            }
+        }
+        else if (standard == ATVModSettings::ATVStdShortInterlaced)
+        {
+            if (lineNumber < m_nbLines2)
+            {
+                if (lineNumber < 2) {
+                    return StdShort_F1Start[lineNumber];
+                } else {
+                    return LineImage;
+                }
+            }
+            else
+            {
+                int fieldLine = lineNumber - m_nbLines2;
+
+                if (fieldLine < 2) {
+                    return StdShort_F2Start[fieldLine];
+                } else if (fieldLine < m_nbLines2) {
+                    return LineImage;
+                } else { // failsafe - will add a black line for odd number of lines
+                    return LineBlack;
+                }
+            }
+        }
+        else if (standard == ATVModSettings::ATVStdShort)
+        {
+            if (lineNumber < 2) {
+                return StdShort_F2Start[lineNumber];
+            } else if (lineNumber < m_nbLines) {
+                return LineImage;
+            } else {
+                return LineBlack;
+            }
+        }
+    }
+
+    inline void pullImageLastHalfSample(Real& sample)
+    {
+        if (m_horizontalCount < m_pointsPerSync + m_pointsPerBP) { // sync
+            pullImageSample(sample);
+        } else if (m_horizontalCount < (m_nbHorizPoints/2)) {
+            sample = m_blackLevel;
+        } else {
+            pullImageSample(sample);
+        }
+    }
+
+    inline void pullImageFirstHalfShortSample(Real& sample)
+    {
+        if (m_horizontalCount < (m_nbHorizPoints/2)) {
+            pullImageSample(sample);
+        } else {
+            pullVSyncLineEquPulsesSample(sample);
+        }
+    }
+
+    inline void pullImageFirstHalfBroadSample(Real& sample)
+    {
+        if (m_horizontalCount < (m_nbHorizPoints/2)) {
+            pullImageSample(sample);
+        } else {
+            pullVSyncLineLongPulsesSample(sample);
+        }
+    }
+
+    inline void pullImageSample(Real& sample, bool noHSync = false)
     {
         if (m_horizontalCount < m_pointsPerSync) // sync pulse
         {
@@ -254,10 +451,13 @@ private:
         }
         else if (m_horizontalCount < m_pointsPerSync + m_pointsPerBP + m_pointsPerImgLine)
         {
+            if (m_imageLine >= m_nbImageLines) // out of image zone
+            {
+                sample = m_spanLevel * m_settings.m_uniformLevel + m_blackLevel; // uniform line
+                return;
+            }
+
             int pointIndex = m_horizontalCount - (m_pointsPerSync + m_pointsPerBP);
-            int oddity = m_lineCount < m_nbLines2 + 1 ? 0 : 1;
-            int iLine = oddity == 0 ? m_lineCount :  m_lineCount - m_nbLines2 - 1;
-            int iLineImage = iLine - m_nbBlankLines - (oddity == 0 ? m_nbSyncLinesHeadE : m_nbSyncLinesHeadO);
 
             switch(m_settings.m_atvModInput)
             {
@@ -265,58 +465,46 @@ private:
                 sample = (pointIndex / m_pointsPerHBar) * m_hBarIncrement + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputVBars:
-                sample = (iLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
+                sample = (m_imageLine / m_linesPerVBar) * m_vBarIncrement + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputChessboard:
-                sample = (((iLine / m_linesPerVBar)*5 + (pointIndex / m_pointsPerHBar)) % 2) * m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;
+                sample = (((m_imageLine / m_linesPerVBar)*5 + (pointIndex / m_pointsPerHBar)) % 2) * m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputHGradient:
                 sample = (pointIndex / (float) m_pointsPerImgLine) * m_spanLevel + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputVGradient:
-                sample = ((iLine -5) / (float) m_nbImageLines2) * m_spanLevel + m_blackLevel;
+                sample = (m_imageLine / (float) m_nbImageLines) * m_spanLevel + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputDiagonal:
-                sample = pointIndex < (iLine * m_pointsPerImgLine) / m_nbLines2 ? m_blackLevel : m_settings.m_uniformLevel + m_blackLevel;
+                sample = pointIndex < (m_imageLine * m_pointsPerImgLine) / m_nbImageLines ? m_blackLevel : m_settings.m_uniformLevel + m_blackLevel;
                 break;
             case ATVModSettings::ATVModInputImage:
-                if (!m_imageOK || (iLineImage < -oddity) || m_image.empty())
+                if (!m_imageOK || m_image.empty())
                 {
                     sample = m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;
                 }
                 else
                 {
                 	unsigned char pixv;
-
-                	if (m_interlaced) {
-                        pixv = m_image.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
-                	} else {
-                        pixv = m_image.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
-                	}
-
+                    pixv = m_image.at<unsigned char>(m_imageLine, pointIndex); // row (y), col (x)
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                 }
                 break;
             case ATVModSettings::ATVModInputVideo:
-                if (!m_videoOK || (iLineImage < -oddity) || m_videoFrame.empty())
+                if (!m_videoOK || m_videoFrame.empty())
                 {
                     sample = m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;
                 }
                 else
                 {
                 	unsigned char pixv;
-
-                	if (m_interlaced) {
-                        pixv = m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
-                	} else {
-                        pixv = m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
-                	}
-
+                    pixv = m_videoFrame.at<unsigned char>(m_imageLine, pointIndex); // row (y), col (x)
                     sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                 }
             	break;
             case ATVModSettings::ATVModInputCamera:
-                if ((iLineImage < -oddity) || (m_cameraIndex < 0))
+                if (m_cameraIndex < 0)
                 {
                     sample = m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;
                 }
@@ -331,20 +519,14 @@ private:
                     else
                     {
                         unsigned char pixv;
-
-                        if (m_interlaced) {
-                            pixv = camera.m_videoFrame.at<unsigned char>(2*iLineImage + oddity, pointIndex); // row (y), col (x)
-                        } else {
-                            pixv = camera.m_videoFrame.at<unsigned char>(iLineImage, pointIndex); // row (y), col (x)
-                        }
-
+                        pixv = camera.m_videoFrame.at<unsigned char>(m_imageLine, pointIndex); // row (y), col (x)
                         sample = (pixv / 256.0f) * m_spanLevel + m_blackLevel;
                     }
                 }
                 break;
             case ATVModSettings::ATVModInputUniform:
             default:
-                sample = m_spanLevel * m_settings.m_uniformLevel + m_blackLevel;
+                sample = m_spanLevel * m_settings.m_uniformLevel + m_blackLevel; // uniform line
             }
         }
         else // front porch
@@ -353,149 +535,82 @@ private:
         }
     }
 
-    inline void pullVSyncLineLongPulses(Real& sample)
+    inline void pullVSyncLineEquPulsesSample(Real& sample)
     {
-        int halfIndex = m_horizontalCount % (m_nbHorizPoints/2);
-
-        if (halfIndex < (m_nbHorizPoints/2) - m_pointsPerSync) // ultra-black
-        {
-            sample = 0.0f;
-        }
-        else // black
-        {
-            if (m_singleLongSync && (m_horizontalCount < m_nbHorizPoints/2)) {
-                sample = 0.0f;
-            } else {
-                sample = m_blackLevel;
-            }
-        }
-    }
-
-    inline void pullVSyncLineEqualizingPulses(Real& sample)
-    {
-        if (m_horizontalCount < m_pointsPerSync)
-        {
+        if (m_horizontalCount < m_pointsPerVEqu) {
             sample = 0.0f; // ultra-black
-        }
-        else if (m_horizontalCount < (m_nbHorizPoints/2))
-        {
+        } else if (m_horizontalCount < (m_nbHorizPoints/2)) {
             sample = m_blackLevel; // black
-        }
-        else if (m_horizontalCount < (m_nbHorizPoints/2) + m_pointsPerFSync)
-        {
+        } else if (m_horizontalCount < (m_nbHorizPoints/2) + m_pointsPerVEqu) {
             sample = 0.0f; // ultra-black
-        }
-        else
-        {
+        } else {
             sample = m_blackLevel; // black
         }
     }
 
-    inline void pullVSyncLineEqualizingThenLongPulses(Real& sample)
+    inline void pullVSyncLineLongPulsesSample(Real& sample)
     {
-        if (m_horizontalCount < m_pointsPerSync)
-        {
+        if (m_horizontalCount < m_pointsPerVSync) {
             sample = 0.0f; // ultra-black
-        }
-        else if (m_horizontalCount < (m_nbHorizPoints/2))
-        {
+        } else if (m_horizontalCount < (m_nbHorizPoints/2)) {
             sample = m_blackLevel; // black
-        }
-        else if (m_horizontalCount < m_nbHorizPoints - m_pointsPerSync)
-        {
+        } else if (m_horizontalCount < (m_nbHorizPoints/2) + m_pointsPerVSync) {
             sample = 0.0f; // ultra-black
-        }
-        else
-        {
+        } else {
             sample = m_blackLevel; // black
         }
     }
 
-    inline void pullVSyncLineLongThenEqualizingPulses(Real& sample)
+    inline void pullVSyncLineEquLongPulsesSample(Real& sample)
     {
-        if (m_horizontalCount < (m_nbHorizPoints/2) - m_pointsPerSync)
-        {
+        if (m_horizontalCount < m_pointsPerVEqu) {
             sample = 0.0f; // ultra-black
-        }
-        else if (m_horizontalCount < (m_nbHorizPoints/2))
-        {
+        } else if (m_horizontalCount < (m_nbHorizPoints/2)) {
             sample = m_blackLevel; // black
-        }
-        else if (m_horizontalCount < (m_nbHorizPoints/2) + m_pointsPerFSync)
-        {
+        } else if (m_horizontalCount < (m_nbHorizPoints/2) + m_pointsPerVSync) {
             sample = 0.0f; // ultra-black
-        }
-        else
-        {
+        } else {
             sample = m_blackLevel; // black
         }
     }
 
-    inline void pullVSyncLine(Real& sample)
+    inline void pullVSyncLineEquBlackPulsesSample(Real& sample)
     {
-        if (m_lineCount < m_nbLines2 + 1) // even
-        {
-            int fieldLine = m_lineCount;
-
-            if (fieldLine < m_nbLongSyncLines) // 0,1: Whole line "long" pulses
-            {
-                pullVSyncLineLongPulses(sample);
-            }
-            else if (fieldLine < m_nbLongSyncLines + m_nbHalfLongSync) // long pulse then equalizing pulse
-            {
-                pullVSyncLineLongThenEqualizingPulses(sample);
-            }
-            else if (fieldLine < m_nbLongSyncLines + m_nbHalfLongSync + m_nbWholeEqLines) // Whole line equalizing pulses
-            {
-                pullVSyncLineEqualizingPulses(sample);
-            }
-            else if (fieldLine > m_nbLines2 - m_nbHalfLongSync) // equalizing pulse then long pulse
-            {
-                pullVSyncLineEqualizingThenLongPulses(sample);
-            }
-            else if (fieldLine > m_nbLines2 - m_nbHalfLongSync - m_nbWholeEqLines) // Whole line equalizing pulses
-            {
-                pullVSyncLineEqualizingPulses(sample);
-            }
-            else // black images
-            {
-                if (m_horizontalCount < m_pointsPerSync)
-                {
-                    sample = 0.0f;
-                }
-                else
-                {
-                    sample = m_blankLineLvel;
-                }
-            }
+        if (m_horizontalCount < m_pointsPerVEqu) {
+            sample = 0.0f; // ultra-black
+        } else {
+            sample = m_blackLevel; // black
         }
-        else // odd
-        {
-            int fieldLine = m_lineCount - m_nbLines2 - 1;
+    }
 
-            if (fieldLine < m_nbLongSyncLines) // 0,1: Whole line "long" pulses
-            {
-                pullVSyncLineLongPulses(sample);
-            }
-            else if (fieldLine < m_nbLongSyncLines + m_nbWholeEqLines) // Whole line equalizing pulses
-            {
-                pullVSyncLineEqualizingPulses(sample);
-            }
-            else if (fieldLine > m_nbLines2 - 1 - m_nbWholeEqLines - m_nbHalfLongSync) // Whole line equalizing pulses
-            {
-                pullVSyncLineEqualizingPulses(sample);
-            }
-            else // black images
-            {
-                if (m_horizontalCount < m_pointsPerSync)
-                {
-                    sample = 0.0f;
-                }
-                else
-                {
-                    sample = m_blankLineLvel;
-                }
-            }
+    inline void pullVSyncLineLongEquPulsesSample(Real& sample)
+    {
+        if (m_horizontalCount < m_pointsPerVSync) {
+            sample = 0.0f; // ultra-black
+        } else if (m_horizontalCount < (m_nbHorizPoints/2)) {
+            sample = m_blackLevel; // black
+        } else if (m_horizontalCount < (m_nbHorizPoints/2) + m_pointsPerVEqu) {
+            sample = 0.0f; // ultra-black
+        } else {
+            sample = m_blackLevel; // black
+        }
+    }
+
+    inline void pullVSyncLineLongBlackPulsesSample(Real& sample)
+    {
+        if (m_horizontalCount < m_pointsPerVSync) {
+            sample = 0.0f; // ultra-black
+        } else {
+            sample = m_blackLevel; // black
+        }
+    }
+
+    inline void pullBlackLineSample(Real& sample)
+    {
+        if (m_horizontalCount < m_pointsPerSync) {
+            sample = 0.0f; // ultra-black
+        } else {
+            sample = m_blackLevel; // black
         }
     }
 };
