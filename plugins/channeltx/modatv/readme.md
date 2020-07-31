@@ -121,8 +121,8 @@ This controls the frame synchronization scheme and number of black lines:
 
   - PAL625: this is the PAL 625 lines standard with 25 FPS. Since only black and white (luminance) is supported this corresponds to any of the B,G,I or L PAL standards
   - PAL525: this is the PAL 525 lines standard with 30 FPS. This corresponds to the PAL M standard.
-  - PAL405: this loosely corresponds to the British 405 lines system and is similar to PAL for synchronization. This mode has only 7 black lines.
-  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line at a higher level (0.7) to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved
+  - 819L: this is the 819 lines system F (Belgium).
+  - ShI: this is an experimental mode that uses the least possible vertical sync lines as possible. That is one line for a long synchronization pulse and one line equalizing (short) pulses level to reset the vertical sync condition. Thus only 2 lines are consumed for vertical sync and the rest is left to the image. In this mode the frames are interleaved. In this mode the frames are interleaved and an odd number of lines should be used.
   - ShNI: this is the same as above but with non interleaved frames.
   - HSkip: this is the horizontal sync skip technique for vertical synchronization. This has been in use in the first TV experiments with a small number of lines. This method just skips one horizontal synchronization pulse to mark the last or the first line (here it is the last). This method does not use any full line for vertical sync and all lines can be used for the image thus it suits the modes with a small number of lines. With more lines however the risk of missing pulses gets higher in adverse conditions because the pulses get shorter and may get swallowed by a stray pulse or a stray pulse can be taken for a valid one. In this case two images might get out of sync instead of just two lines. In practice this is suitable up to 90~120 lines.
 
@@ -136,16 +136,20 @@ This controls the frame synchronization scheme and number of black lines:
         <th>standard</th>
     </tr>
     <tr>
+        <td>819</td>
+        <td>819L, ShI, ShNI</td>
+    </tr>
+    <tr>
         <td>640</td>
         <td>ShNI</td>
     </tr>
     <tr>
         <td>625</td>
-        <td>PAL625, PAL525, PAL405</td>
+        <td>PAL625, PAL525, ShI, ShNI</td>
     </tr>
     <tr>
         <td>525</td>
-        <td>PAL525, PAL405</td>
+        <td>PAL525, ShI, ShNI</td>
     </tr>
     <tr>
         <td>480</td>
@@ -153,7 +157,7 @@ This controls the frame synchronization scheme and number of black lines:
     </tr>
     <tr>
         <td>405</td>
-        <td>PAL405, ShI, ShNI</td>
+        <td>ShI, ShNI</td>
     </tr>
     <tr>
         <td>360</td>

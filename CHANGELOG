@@ -1,3 +1,11 @@
+sdrangel (5.8.3-1) unstable; urgency=medium
+
+   * ATV Modulator: complete vertical sync rework. Implements #578
+   * ATV: Removed 405 lines and added 819 lines system
+   * DSDcc: use v1.9.0 in package builds
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 31 Jul 2020 02:20:48 +0200
+
 sdrangel (5.8.2-1) unstable; urgency=medium
 
    * ATV Demod: improvements of HSync and VSync algorithms. Fixes #459
