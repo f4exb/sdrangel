@@ -218,7 +218,9 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
-	m_basicSettingsShown(false)
+	m_basicSettingsShown(false),
+    m_squelchOpen(false),
+    m_audioSampleRate(-1)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -361,16 +363,20 @@ void WFMDemodGUI::tick()
             (100.0f + powDbPeak) / 100.0f,
             nbMagsqSamples);
 
+    int audioSampleRate = m_wfmDemod->getAudioSampleRate();
     bool squelchOpen = m_wfmDemod->getSquelchOpen();
 
-    if (squelchOpen != m_squelchOpen)
+    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
     {
-        if (squelchOpen) {
+        if (audioSampleRate < 0) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (squelchOpen) {
             ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
         } else {
             ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         }
 
+        m_audioSampleRate = audioSampleRate;
         m_squelchOpen = squelchOpen;
     }
 }

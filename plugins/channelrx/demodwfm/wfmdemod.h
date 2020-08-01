@@ -88,6 +88,7 @@ public:
 
 	double getMagSq() const { return m_basebandSink->getMagSq(); }
     bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
+    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
 

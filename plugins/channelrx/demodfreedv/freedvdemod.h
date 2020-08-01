@@ -101,7 +101,7 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-    uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
     uint32_t getModemSampleRate() const { return m_basebandSink->getModemSampleRate(); }
     double getMagSq() const { return m_basebandSink->getMagSq(); }
 	bool getAudioActive() const { return m_basebandSink->getAudioActive(); }

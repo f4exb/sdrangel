@@ -247,8 +247,14 @@ void BFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 	m_sampleBuffer.clear();
 }
 
-void BFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
+void BFMDemodSink::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("BFMDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        return;
+    }
+
     qDebug("BFMDemodSink::applyAudioSampleRate: %u", sampleRate);
 
     m_interpolator.create(16, m_channelSampleRate, m_settings.m_afBandwidth);

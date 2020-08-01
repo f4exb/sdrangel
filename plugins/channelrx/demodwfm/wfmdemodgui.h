@@ -49,6 +49,7 @@ private:
 	bool m_doApplySettings;
     bool m_audioMute;
     bool m_squelchOpen;
+    int m_audioSampleRate;
 
 	WFMDemod* m_wfmDemod;
 	MessageQueue m_inputMessageQueue;

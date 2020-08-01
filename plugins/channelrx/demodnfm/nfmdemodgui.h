@@ -53,6 +53,7 @@ private:
 
 	NFMDemod* m_nfmDemod;
 	bool m_squelchOpen;
+    int m_audioSampleRate;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 

@@ -283,6 +283,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_basicSettingsShown(false),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
+    m_audioSampleRate(-1),
 	m_tickCount(0)
 {
 	ui->setupUi(this);
@@ -490,16 +491,20 @@ void NFMDemodGUI::tick()
         ui->channelPower->setText(tr("%1 dB").arg(powDbAvg, 0, 'f', 1));
     }
 
+    int audioSampleRate = m_nfmDemod->getAudioSampleRate();
     bool squelchOpen = m_nfmDemod->getSquelchOpen();
 
-	if (squelchOpen != m_squelchOpen)
+	if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
 	{
-		if (squelchOpen) {
+        if (audioSampleRate < 0) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (squelchOpen) {
 			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
 		} else {
 			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 		}
 
+        m_audioSampleRate = audioSampleRate;
         m_squelchOpen = squelchOpen;
 	}
 

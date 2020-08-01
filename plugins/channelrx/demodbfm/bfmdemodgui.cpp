@@ -551,20 +551,25 @@ void BFMDemodGUI::tick()
 	pilotPowDbStr.sprintf("%+02.1f", pilotPowDb);
 	ui->pilotPower->setText(pilotPowDbStr);
 
-	if (m_bfmDemod->getPilotLock())
-	{
-		if (ui->audioStereo->isChecked())
-		{
-			ui->audioStereo->setStyleSheet("QToolButton { background-color : green; }");
-		}
-	}
-	else
-	{
-		if (ui->audioStereo->isChecked())
-		{
-			ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-		}
-	}
+    if (m_bfmDemod->getAudioSampleRate() < 0)
+    {
+        ui->audioStereo->setStyleSheet("QToolButton { background-color : red; }");
+    }
+    else
+    {
+        if (m_bfmDemod->getPilotLock())
+        {
+            if (ui->audioStereo->isChecked()) {
+                ui->audioStereo->setStyleSheet("QToolButton { background-color : green; }");
+            }
+        }
+        else
+        {
+            if (ui->audioStereo->isChecked()) {
+                ui->audioStereo->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            }
+        }
+    }
 
 	if (ui->rds->isChecked() && (m_rdsTimerCount == 0))
 	{

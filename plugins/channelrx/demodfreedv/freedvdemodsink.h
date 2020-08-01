@@ -51,7 +51,7 @@ public:
     void resyncFreeDV();
 
 	void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_spectrumSink = spectrumSink; }
-    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
+    int getAudioSampleRate() const { return m_audioSampleRate; }
     uint32_t getModemSampleRate() const { return m_modemSampleRate; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
@@ -155,7 +155,7 @@ private:
 	int m_channelSampleRate;
 	uint32_t m_modemSampleRate;
 	uint32_t m_speechSampleRate;
-	uint32_t m_audioSampleRate;
+	int m_audioSampleRate;
 	int m_channelFrequencyOffset;
 	bool m_audioMute;
 	double m_magsq;

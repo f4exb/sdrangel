@@ -148,8 +148,14 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 	m_sampleBuffer.clear();
 }
 
-void WFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
+void WFMDemodSink::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("WFMDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        return;
+    }
+
     qDebug("WFMDemodSink::applyAudioSampleRate: %u", sampleRate);
 
     m_interpolator.create(16, m_channelSampleRate, m_settings.m_afBandwidth);

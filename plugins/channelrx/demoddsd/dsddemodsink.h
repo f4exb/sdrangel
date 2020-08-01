@@ -47,7 +47,7 @@ public:
 	void applySettings(const DSDDemodSettings& settings, bool force = false);
     AudioFifo *getAudioFifo1() { return &m_audioFifo1; }
     AudioFifo *getAudioFifo2() { return &m_audioFifo2; }
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
+    int getAudioSampleRate() const { return m_audioSampleRate; }
 
 	void setScopeXYSink(BasebandSampleSink* scopeSink) { m_scopeXY = scopeSink; }
 	void configureMyPosition(float myLatitude, float myLongitude);
@@ -106,7 +106,7 @@ private:
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
 	DSDDemodSettings m_settings;
-    quint32 m_audioSampleRate;
+    int m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

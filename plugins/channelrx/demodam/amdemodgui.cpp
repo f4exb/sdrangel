@@ -255,6 +255,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_channelMarker(this),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
+    m_audioSampleRate(-1),
 	m_samUSB(true),
 	m_tickCount(0)
 {
@@ -461,18 +462,22 @@ void AMDemodGUI::tick()
         ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
     }
 
+    int audioSampleRate = m_amDemod->getAudioSampleRate();
 	bool squelchOpen = m_amDemod->getSquelchOpen();
 
-	if (squelchOpen != m_squelchOpen)
-	{
-		m_squelchOpen = squelchOpen;
+    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
+    {
+        if (audioSampleRate < 0) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (squelchOpen) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
+        } else {
+            ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
 
-		if (m_squelchOpen) {
-			ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
-		} else {
-			ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-		}
-	}
+        m_audioSampleRate = audioSampleRate;
+		m_squelchOpen = squelchOpen;
+    }
 
 	if (m_settings.m_pll)
 	{
@@ -482,7 +487,7 @@ void AMDemodGUI::tick()
 	        ui->pll->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 	    }
 
-        int freq = (m_amDemod->getPllFrequency() * m_amDemod->getAudioSampleRate()) / (2.0*M_PI);
+        int freq = (m_amDemod->getPllFrequency() * audioSampleRate) / (2.0*M_PI);
         ui->pll->setToolTip(tr("PLL for synchronous AM. Freq = %1 Hz").arg(freq));
 	}
 

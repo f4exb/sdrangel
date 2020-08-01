@@ -64,7 +64,7 @@ public:
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
 
-    unsigned int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
 	double getMagSq() const { return m_sink.getMagSq(); }
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
     int getSquelchState() const { return m_sink.getSquelchState(); }

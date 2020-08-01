@@ -268,7 +268,8 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_audioBinaural(false),
 	m_audioFlipChannels(false),
     m_audioMute(false),
-	m_squelchOpen(false)
+	m_squelchOpen(false),
+    m_audioSampleRate(-1)
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -486,16 +487,20 @@ void FreeDVDemodGUI::tick()
         ui->snrText->setText(tr("%1 dB").arg(snrAvg < -90 ? -90 : snrAvg > 90 ? 90 : snrAvg, 0, 'f', 1));
     }
 
+    int audioSampleRate = m_freeDVDemod->getAudioSampleRate();
     bool squelchOpen = m_freeDVDemod->getAudioActive();
 
-    if (squelchOpen != m_squelchOpen)
+    if ((audioSampleRate != m_audioSampleRate) || (squelchOpen != m_squelchOpen))
     {
-        if (squelchOpen) {
+        if (audioSampleRate < 0) {
+            ui->audioMute->setStyleSheet("QToolButton { background-color : red; }");
+        } else if (squelchOpen) {
             ui->audioMute->setStyleSheet("QToolButton { background-color : green; }");
         } else {
             ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
         }
 
+        m_audioSampleRate = audioSampleRate;
         m_squelchOpen = squelchOpen;
     }
 

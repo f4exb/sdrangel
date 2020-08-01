@@ -65,8 +65,8 @@ public:
     void applySettings(const WFMDemodSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
-    void applyAudioSampleRate(unsigned int sampleRate);
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
+    void applyAudioSampleRate(int sampleRate);
+    int getAudioSampleRate() const { return m_audioSampleRate; }
 
 private:
     struct MagSqLevelsStore
@@ -88,7 +88,7 @@ private:
     int m_channelFrequencyOffset;
     WFMDemodSettings m_settings;
 
-    quint32 m_audioSampleRate;
+    int m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator; //!< Interpolator between sample rate sent from DSP engine and requested RF bandwidth (rational)

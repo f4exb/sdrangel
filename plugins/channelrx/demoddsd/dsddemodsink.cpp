@@ -281,6 +281,12 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
 void DSDDemodSink::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("DSDDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        return;
+    }
+
     int upsampling = sampleRate / 8000;
 
     qDebug("DSDDemodSink::applyAudioSampleRate: audio rate: %d upsample by %d", sampleRate, upsampling);
