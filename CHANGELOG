@@ -1,3 +1,12 @@
+sdrangel (4.14.19-1) unstable; urgency=medium
+
+   * DSD Demod: removed DMR Basic Privacy feature. Implements #574
+   * ATV Modulator: complete vertical sync rework. Implements #578
+   * ATV: Removed 405 lines and added 819 lines system
+   * DSDcc: use v1.9.0 in package builds
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 Aug 2020 03:11:26 +0200
+
 sdrangel (4.14.18-1) unstable; urgency=medium
 
    * ATV Demod: improvements of HSync and VSync algorithms. Fixes #459
