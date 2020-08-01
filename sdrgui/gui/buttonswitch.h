@@ -11,6 +11,8 @@ class SDRGUI_API ButtonSwitch : public QToolButton {
 public:
 	ButtonSwitch(QWidget* parent = NULL);
 	void doToggle(bool checked);
+    void setColor(QColor color);
+    void resetColor();
 
 private slots:
 	void onToggled(bool checked);

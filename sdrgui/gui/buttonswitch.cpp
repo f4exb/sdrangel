@@ -31,3 +31,25 @@ void ButtonSwitch::doToggle(bool checked)
 {
     onToggled(checked);
 }
+
+void ButtonSwitch::setColor(QColor color)
+{
+    QPalette p = m_originalPalette;
+    p.setColor(QPalette::Button, color);
+    setPalette(p);
+}
+
+void ButtonSwitch::resetColor()
+{
+    if (isChecked())
+    {
+		QPalette p = m_originalPalette;
+		p.setColor(QPalette::Button, QColor(0x80, 0x46, 0x00));
+		setPalette(p);
+    }
+    else
+    {
+        setPalette(m_originalPalette);
+    }
+
+}
