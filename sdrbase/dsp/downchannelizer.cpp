@@ -89,6 +89,12 @@ void DownChannelizer::feed(const SampleVector::const_iterator& begin, const Samp
 
 void DownChannelizer::setChannelization(int requestedSampleRate, qint64 requestedCenterFrequency)
 {
+    if (requestedSampleRate < 0)
+    {
+        qWarning("DownChannelizer::setChannelization: wrong sample rate requested: %d", requestedSampleRate);
+        return;
+    }
+
     m_requestedOutputSampleRate = requestedSampleRate;
     m_requestedCenterFrequency = requestedCenterFrequency;
     applyChannelization();
