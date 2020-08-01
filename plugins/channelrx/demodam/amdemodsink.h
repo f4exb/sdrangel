@@ -44,7 +44,7 @@ public:
     void applySettings(const AMDemodSettings& settings, bool force = false);
     void applyAudioSampleRate(int sampleRate);
 
-    uint32_t getAudioSampleRate() const { return m_audioSampleRate; }
+    int getAudioSampleRate() const { return m_audioSampleRate; }
 	double getMagSq() const { return m_magsq; }
 	bool getSquelchOpen() const { return m_squelchOpen; }
 	bool getPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
@@ -88,7 +88,7 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     AMDemodSettings m_settings;
-    uint32_t m_audioSampleRate;
+    int m_audioSampleRate;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

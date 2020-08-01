@@ -105,6 +105,7 @@ public:
 	Real getDemodAcc() const { return m_basebandSink->getDemodAcc(); }
 	Real getDemodQua() const { return m_basebandSink->getDemodQua(); }
 	Real getDemodFclk() const { return m_basebandSink->getDemodFclk(); }
+    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
 

@@ -91,6 +91,7 @@ private:
     bool m_tdmaStereo;
     bool m_audioMute;
 	bool m_squelchOpen;
+    int  m_audioSampleRate;
 	uint32_t m_tickCount;
 
 	float m_myLatitude;

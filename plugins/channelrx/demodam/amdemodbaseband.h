@@ -66,7 +66,7 @@ public:
     int getChannelSampleRate() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
-    unsigned int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     void setBasebandSampleRate(int sampleRate);
     double getMagSq() const { return m_sink.getMagSq(); }
     bool getPllLocked() const { return m_sink.getPllLocked(); }

@@ -67,7 +67,7 @@ public:
     void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink((BasebandSampleSink*) spectrumSink); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
 
-    unsigned int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     int getSquelchState() const { return m_sink.getSquelchState(); }
 	double getMagSq() const { return m_sink.getMagSq(); }
 	bool getPilotLock() const { return m_sink.getPilotLock(); }

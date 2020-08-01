@@ -119,6 +119,7 @@ public:
 	const DSDDecoder& getDecoder() const { return m_basebandSink->getDecoder(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
     const char *updateAndGetStatusText() { return m_basebandSink->updateAndGetStatusText(); }
+    int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

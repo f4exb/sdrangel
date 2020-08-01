@@ -67,7 +67,7 @@ public:
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
     const Real *getCtcssToneSet(int& nbTones) const { return m_sink.getCtcssToneSet(nbTones); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
-    unsigned int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     void setBasebandSampleRate(int sampleRate);
 
 private:

@@ -52,6 +52,7 @@ private:
 
 	AMDemod* m_amDemod;
 	bool m_squelchOpen;
+    int m_audioSampleRate; //!< for display purposes
 	bool m_samUSB;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;

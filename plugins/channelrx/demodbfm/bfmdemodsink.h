@@ -83,8 +83,8 @@ public:
     void applySettings(const BFMDemodSettings& settings, bool force = false);
 
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
-    void applyAudioSampleRate(unsigned int sampleRate);
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
+    void applyAudioSampleRate(int sampleRate);
+    int getAudioSampleRate() const { return m_audioSampleRate; }
 
 private:
     struct MagSqLevelsStore
@@ -106,7 +106,7 @@ private:
     int m_channelFrequencyOffset;
 	BFMDemodSettings m_settings;
 
-    quint32 m_audioSampleRate;
+    int m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;

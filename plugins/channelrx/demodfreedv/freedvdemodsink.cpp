@@ -379,6 +379,12 @@ void FreeDVDemodSink::applyChannelSettings(int channelSampleRate, int channnelFr
 
 void FreeDVDemodSink::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("FreeDVDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        return;
+    }
+
     qDebug("FreeDVDemodSink::applyAudioSampleRate: %d", sampleRate);
 
     m_audioFifo.setSize(sampleRate);

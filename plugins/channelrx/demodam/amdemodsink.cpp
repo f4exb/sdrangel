@@ -297,6 +297,12 @@ void AMDemodSink::applySettings(const AMDemodSettings& settings, bool force)
 
 void AMDemodSink::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("AMDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        return;
+    }
+
     qDebug("AMDemodSink::applyAudioSampleRate: sampleRate: %d m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
 
     m_interpolator.create(16, m_channelSampleRate, m_settings.m_rfBandwidth / 2.2f);

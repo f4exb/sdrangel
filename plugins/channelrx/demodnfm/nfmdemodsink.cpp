@@ -358,6 +358,12 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
 
 void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("NFMDemodSink::applyAudioSampleRate: invalid sample rate: %d", sampleRate);
+        return;
+    }
+
     qDebug("NFMDemodSink::applyAudioSampleRate: %u m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
 
     m_ctcssLowpass.create(301, sampleRate, 250.0);

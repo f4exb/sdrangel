@@ -165,14 +165,15 @@ void AMDemodBaseband::applySettings(const AMDemodSettings& settings, bool force)
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_audioDeviceName);
         //qDebug("AMDemod::applySettings: audioDeviceName: %s audioDeviceIndex: %d", qPrintable(settings.m_audioDeviceName), audioDeviceIndex);
+        audioDeviceManager->removeAudioSink(m_sink.getAudioFifo());
         audioDeviceManager->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+        int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
 
         if (m_sink.getAudioSampleRate() != audioSampleRate)
         {
-            m_sink.applyAudioSampleRate(audioSampleRate);
             m_channelizer->setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
             m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+            m_sink.applyAudioSampleRate(audioSampleRate);
         }
     }
 
