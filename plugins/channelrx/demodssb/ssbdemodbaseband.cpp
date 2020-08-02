@@ -125,6 +125,7 @@ bool SSBDemodBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply in case of channel sample rate change
 
 		return true;
     }
@@ -140,6 +141,7 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
     {
         m_channelizer->setChannelization(m_audioSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply in case of channel sample rate change
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)

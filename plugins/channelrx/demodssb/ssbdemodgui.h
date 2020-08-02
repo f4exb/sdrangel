@@ -56,6 +56,7 @@ private:
 	bool m_audioFlipChannels;
 	bool m_audioMute;
 	bool m_squelchOpen;
+    int m_audioSampleRate;
 	uint32_t m_tickCount;
 
 	SSBDemod* m_ssbDemod;
