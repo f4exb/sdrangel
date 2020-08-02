@@ -126,6 +126,7 @@ bool BFMDemodBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply in case of channel sample rate change
 
         if (getMessageQueueToGUI())
         {
@@ -154,6 +155,7 @@ void BFMDemodBaseband::applySettings(const BFMDemodSettings& settings, bool forc
     {
         m_channelizer->setChannelization(BFMDemodSettings::requiredBW(settings.m_rfBandwidth), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply in case of channel sample rate change
 
         if (getMessageQueueToGUI())
         {
