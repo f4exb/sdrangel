@@ -76,6 +76,7 @@ private:
     quint32 m_recordLength;
     int m_recordSampleRate;
     int m_samplesCount;
+    int m_audioSampleRate;
     std::size_t m_tickCount;
     bool m_enableNavTime;
     MessageQueue m_inputMessageQueue;

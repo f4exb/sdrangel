@@ -64,8 +64,8 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     CWKeyer& getCWKeyer() { return m_source.getCWKeyer(); }
     double getMagSq() const { return m_source.getMagSq(); }
-    unsigned int getAudioSampleRate() const { return m_source.getAudioSampleRate(); }
-    unsigned int getFeedbackAudioSampleRate() const { return m_source.getFeedbackAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_source.getAudioSampleRate(); }
+    int getFeedbackAudioSampleRate() const { return m_source.getFeedbackAudioSampleRate(); }
     int getChannelSampleRate() const;
     void setInputFileStream(std::ifstream *ifstream) { m_source.setInputFileStream(ifstream); }
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }

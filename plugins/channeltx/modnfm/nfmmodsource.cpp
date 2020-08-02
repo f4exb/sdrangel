@@ -282,9 +282,15 @@ void NFMModSource::calculateLevel(Real& sample)
     }
 }
 
-void NFMModSource::applyAudioSampleRate(unsigned int sampleRate)
+void NFMModSource::applyAudioSampleRate(int sampleRate)
 {
-    qDebug("NFMModSource::applyAudioSampleRate: %u", sampleRate);
+    if (sampleRate < 0)
+    {
+        qWarning("NFMModSource::applyAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
+    qDebug("NFMModSource::applyAudioSampleRate: %d", sampleRate);
 
     m_interpolatorDistanceRemain = 0;
     m_interpolatorConsumed = false;
@@ -301,9 +307,15 @@ void NFMModSource::applyAudioSampleRate(unsigned int sampleRate)
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 }
 
-void NFMModSource::applyFeedbackAudioSampleRate(unsigned int sampleRate)
+void NFMModSource::applyFeedbackAudioSampleRate(int sampleRate)
 {
-    qDebug("NFMModSource::applyFeedbackAudioSampleRate: %u", sampleRate);
+    if (sampleRate < 0)
+    {
+        qWarning("NFMModSource::applyFeedbackAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
+    qDebug("NFMModSource::applyFeedbackAudioSampleRate: %d", sampleRate);
 
     m_feedbackInterpolatorDistanceRemain = 0;
     m_feedbackInterpolatorConsumed = false;

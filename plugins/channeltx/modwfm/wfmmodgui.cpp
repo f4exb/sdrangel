@@ -17,6 +17,7 @@
 
 #include <QDockWidget>
 #include <QMainWindow>
+#include <QColor>
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
@@ -242,6 +243,19 @@ void WFMModGUI::on_mic_toggled(bool checked)
     applySettings();
 }
 
+void WFMModGUI::on_feedbackEnable_toggled(bool checked)
+{
+    m_settings.m_feedbackAudioEnable = checked;
+    applySettings();
+}
+
+void WFMModGUI::on_feedbackVolume_valueChanged(int value)
+{
+    ui->feedbackVolumeText->setText(QString("%1").arg(value / 100.0, 0, 'f', 2));
+    m_settings.m_feedbackVolumeFactor = value / 100.0;
+    applySettings();
+}
+
 void WFMModGUI::on_navTimeSlider_valueChanged(int value)
 {
     if (m_enableNavTime && ((value >= 0) && (value <= 100)))
@@ -339,6 +353,8 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_recordLength(0),
     m_recordSampleRate(48000),
     m_samplesCount(0),
+    m_audioSampleRate(-1),
+    m_feedbackAudioSampleRate(-1),
     m_tickCount(0),
     m_enableNavTime(false)
 {
@@ -365,6 +381,9 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
+
+    CRightClickEnabler *feedbackRightClickEnabler = new CRightClickEnabler(ui->feedbackEnable);
+    connect(feedbackRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioFeedbackSelect()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -469,6 +488,10 @@ void WFMModGUI::displaySettings()
     ui->play->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputFile);
     ui->morseKeyer->setChecked(m_settings.m_modAFInput == WFMModSettings::WFMModInputAF::WFMModInputCWTone);
 
+    ui->feedbackEnable->setChecked(m_settings.m_feedbackAudioEnable);
+    ui->feedbackVolume->setValue(roundf(m_settings.m_feedbackVolumeFactor * 100.0));
+    ui->feedbackVolumeText->setText(QString("%1").arg(m_settings.m_feedbackVolumeFactor, 0, 'f', 2));
+
     blockApplySettings(false);
 }
 
@@ -504,11 +527,50 @@ void WFMModGUI::audioSelect()
     }
 }
 
+void WFMModGUI::audioFeedbackSelect()
+{
+    qDebug("WFMModGUI::audioFeedbackSelect");
+    AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName, false); // false for output
+    audioSelect.exec();
+
+    if (audioSelect.m_selected)
+    {
+        m_settings.m_feedbackAudioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
 void WFMModGUI::tick()
 {
     double powDb = CalcDb::dbPower(m_wfmMod->getMagSq());
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+
+    int audioSampleRate = m_wfmMod->getAudioSampleRate();
+
+    if (audioSampleRate != m_audioSampleRate)
+    {
+        if (audioSampleRate < 0) {
+            ui->mic->setColor(QColor("red"));
+        } else {
+            ui->mic->resetColor();
+        }
+
+        m_audioSampleRate = audioSampleRate;
+    }
+
+    int feedbackAudioSampleRate = m_wfmMod->getFeedbackAudioSampleRate();
+
+    if (feedbackAudioSampleRate != m_feedbackAudioSampleRate)
+    {
+        if (feedbackAudioSampleRate < 0) {
+            ui->feedbackEnable->setStyleSheet("QToolButton { background-color : red; }");
+        } else {
+            ui->feedbackEnable->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        }
+
+        m_feedbackAudioSampleRate = feedbackAudioSampleRate;
+    }
 
     if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == WFMModSettings::WFMModInputFile))
     {

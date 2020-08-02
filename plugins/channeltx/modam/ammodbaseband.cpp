@@ -159,6 +159,7 @@ bool AMModBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_source.applyAudioSampleRate(m_source.getAudioSampleRate()); // reapply in case of channel sample rate change
 
 		return true;
     }
@@ -183,18 +184,23 @@ void AMModBaseband::applySettings(const AMModSettings& settings, bool force)
 {
     if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
+        m_channelizer->setChannelization(m_source.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_source.applyAudioSampleRate(m_source.getAudioSampleRate()); // reapply in case of channel sample rate change
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->removeAudioSource(getAudioFifo());
         audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+        int audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
-        if (getAudioSampleRate() != audioSampleRate) {
+        if (getAudioSampleRate() != audioSampleRate)
+        {
+            m_channelizer->setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
+            m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
             m_source.applyAudioSampleRate(audioSampleRate);
         }
     }
@@ -203,8 +209,9 @@ void AMModBaseband::applySettings(const AMModSettings& settings, bool force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getOutputDeviceIndex(settings.m_feedbackAudioDeviceName);
+        audioDeviceManager->removeAudioSink(getFeedbackAudioFifo());
         audioDeviceManager->addAudioSink(getFeedbackAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
+        int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
 
         if (getFeedbackAudioSampleRate() != audioSampleRate) {
             m_source.applyFeedbackAudioSampleRate(audioSampleRate);

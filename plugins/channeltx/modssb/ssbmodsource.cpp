@@ -510,9 +510,15 @@ void SSBModSource::calculateLevel(Complex& sample)
     }
 }
 
-void SSBModSource::applyAudioSampleRate(unsigned int sampleRate)
+void SSBModSource::applyAudioSampleRate(int sampleRate)
 {
-    qDebug("SSBModSource::applyAudioSampleRate: %u", sampleRate);
+    if (sampleRate < 0)
+    {
+        qWarning("SSBModSource::applyAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
+    qDebug("SSBModSource::applyAudioSampleRate: %d", sampleRate);
 
     m_interpolatorDistanceRemain = 0;
     m_interpolatorConsumed = false;
@@ -551,9 +557,15 @@ void SSBModSource::applyAudioSampleRate(unsigned int sampleRate)
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 }
 
-void SSBModSource::applyFeedbackAudioSampleRate(unsigned int sampleRate)
+void SSBModSource::applyFeedbackAudioSampleRate(int sampleRate)
 {
-    qDebug("SSBModSource::applyFeedbackAudioSampleRate: %u", sampleRate);
+    if (sampleRate < 0)
+    {
+        qWarning("SSBModSource::applyFeedbackAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
+    qDebug("SSBModSource::applyFeedbackAudioSampleRate: %d", sampleRate);
 
     m_feedbackInterpolatorDistanceRemain = 0;
     m_feedbackInterpolatorConsumed = false;

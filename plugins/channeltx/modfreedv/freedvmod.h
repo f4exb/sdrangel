@@ -226,7 +226,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    uint32_t getAudioSampleRate() const;
+    int getAudioSampleRate() const;
     uint32_t getModemSampleRate() const;
     Real getLowCutoff() const;
     Real getHiCutoff() const;

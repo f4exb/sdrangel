@@ -46,9 +46,11 @@ public:
 
     void setInputFileStream(std::ifstream *ifstream) { m_ifstream = ifstream; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
-    void applyAudioSampleRate(unsigned int sampleRate);
-    void applyFeedbackAudioSampleRate(unsigned int sampleRate);
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
+    AudioFifo *getFeedbackAudioFifo() { return &m_feedbackAudioFifo; }
+    void applyAudioSampleRate(int sampleRate);
+    void applyFeedbackAudioSampleRate(int sampleRate);
+    int getAudioSampleRate() const { return m_audioSampleRate; }
+    int getFeedbackAudioSampleRate() const { return m_feedbackAudioSampleRate; }
     CWKeyer& getCWKeyer() { return m_cwKeyer; }
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
@@ -67,6 +69,7 @@ private:
 
     NCO m_carrierNco;
     NCOF m_toneNco;
+    NCOF m_cwToneNco;
     float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
 
@@ -74,6 +77,11 @@ private:
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
     bool m_interpolatorConsumed;
+
+    Interpolator m_feedbackInterpolator;
+    Real m_feedbackInterpolatorDistance;
+    Real m_feedbackInterpolatorDistanceRemain;
+    bool m_feedbackInterpolatorConsumed;
 
     fftfilt* m_rfFilter;
     static const int m_rfFilterFFTLength;
@@ -83,10 +91,15 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
-    quint32 m_audioSampleRate;
+    int m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
+
+    int m_feedbackAudioSampleRate;
+    AudioVector m_feedbackAudioBuffer;
+    uint m_feedbackAudioBufferFill;
+    AudioFifo m_feedbackAudioFifo;
 
     quint32 m_levelCalcCount;
     qreal m_rmsLevel;
@@ -102,6 +115,7 @@ private:
     void processOneSample(Complex& ci);
     void pullAF(Real& sample);
     void pullAudio(unsigned int nbSamples);
+    void pushFeedback(Complex sample);
     void calculateLevel(const Real& sample);
     void modulateAudio();
 };

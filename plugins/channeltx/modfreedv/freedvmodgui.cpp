@@ -361,6 +361,7 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_recordLength(0),
     m_recordSampleRate(48000),
     m_samplesCount(0),
+    m_audioSampleRate(-1),
     m_tickCount(0),
     m_enableNavTime(false)
 {
@@ -558,6 +559,19 @@ void FreeDVModGUI::tick()
     double powDb = CalcDb::dbPower(m_freeDVMod->getMagSq());
 	m_channelPowerDbAvg(powDb);
 	ui->channelPower->setText(tr("%1 dB").arg(m_channelPowerDbAvg.asDouble(), 0, 'f', 1));
+
+    int audioSampleRate = m_freeDVMod->getAudioSampleRate();
+
+    if (audioSampleRate != m_audioSampleRate)
+    {
+        if (audioSampleRate < 0) {
+            ui->mic->setColor(QColor("red"));
+        } else {
+            ui->mic->resetColor();
+        }
+
+        m_audioSampleRate = audioSampleRate;
+    }
 
     if (((++m_tickCount & 0xf) == 0) && (m_settings.m_modAFInput == FreeDVModSettings::FreeDVModInputFile))
     {

@@ -364,6 +364,12 @@ void FreeDVModSource::calculateLevel(qint16& sample)
 
 void FreeDVModSource::applyAudioSampleRate(unsigned int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("FreeDVModSource::applyAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
     qDebug("FreeDVModSource::applyAudioSampleRate: %d", sampleRate);
     // TODO: put up simple IIR interpolator when sampleRate < m_modemSampleRate
 

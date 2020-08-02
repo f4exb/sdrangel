@@ -638,3 +638,13 @@ uint32_t WFMMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
 }
+
+int WFMMod::getAudioSampleRate() const
+{
+    return m_basebandSource->getAudioSampleRate();
+}
+
+int WFMMod::getFeedbackAudioSampleRate() const
+{
+    return m_basebandSource->getFeedbackAudioSampleRate();
+}

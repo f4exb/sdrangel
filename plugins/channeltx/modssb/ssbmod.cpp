@@ -694,9 +694,14 @@ void SSBMod::setLevelMeter(QObject *levelMeter)
     connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
 
-unsigned int SSBMod::getAudioSampleRate() const
+int SSBMod::getAudioSampleRate() const
 {
     return m_basebandSource->getAudioSampleRate();
+}
+
+int SSBMod::getFeedbackAudioSampleRate() const
+{
+    return m_basebandSource->getFeedbackAudioSampleRate();
 }
 
 uint32_t SSBMod::getNumberOfDeviceStreams() const

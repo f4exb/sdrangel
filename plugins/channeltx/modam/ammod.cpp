@@ -643,3 +643,13 @@ void AMMod::setLevelMeter(QObject *levelMeter)
 {
     connect(m_basebandSource, SIGNAL(levelChanged(qreal, qreal, int)), levelMeter, SLOT(levelChanged(qreal, qreal, int)));
 }
+
+int AMMod::getAudioSampleRate() const
+{
+    return m_basebandSource->getAudioSampleRate();
+}
+
+int AMMod::getFeedbackAudioSampleRate() const
+{
+    return m_basebandSource->getFeedbackAudioSampleRate();
+}

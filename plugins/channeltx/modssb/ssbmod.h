@@ -227,7 +227,8 @@ public:
     double getMagSq() const;
     CWKeyer *getCWKeyer();
     void setLevelMeter(QObject *levelMeter);
-    unsigned int getAudioSampleRate() const;
+    int getAudioSampleRate() const;
+    int getFeedbackAudioSampleRate() const;
     uint32_t getNumberOfDeviceStreams() const;
 
     static const QString m_channelIdURI;

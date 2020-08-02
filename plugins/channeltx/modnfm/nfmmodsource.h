@@ -49,10 +49,10 @@ public:
     void setInputFileStream(std::ifstream *ifstream) { m_ifstream = ifstream; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     AudioFifo *getFeedbackAudioFifo() { return &m_feedbackAudioFifo; }
-    void applyAudioSampleRate(unsigned int sampleRate);
-    void applyFeedbackAudioSampleRate(unsigned int sampleRate);
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
-    unsigned int getFeedbackAudioSampleRate() const { return m_feedbackAudioSampleRate; }
+    void applyAudioSampleRate(int sampleRate);
+    void applyFeedbackAudioSampleRate(int sampleRate);
+    int getAudioSampleRate() const { return m_audioSampleRate; }
+    int getFeedbackAudioSampleRate() const { return m_feedbackAudioSampleRate; }
     CWKeyer& getCWKeyer() { return m_cwKeyer; }
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
@@ -92,12 +92,12 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
-    quint32 m_audioSampleRate;
+    int m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
 
-    quint32 m_feedbackAudioSampleRate;
+    int m_feedbackAudioSampleRate;
     AudioVector m_feedbackAudioBuffer;
     uint m_feedbackAudioBufferFill;
     AudioFifo m_feedbackAudioFifo;

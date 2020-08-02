@@ -58,7 +58,7 @@ public:
         peakLevel = m_peakLevelOut;
         numSamples = m_levelNbSamples;
     }
-    unsigned int getAudioSampleRate() const { return m_audioSampleRate; }
+    int getAudioSampleRate() const { return m_audioSampleRate; }
     unsigned int getModemSampleRate() const { return m_modemSampleRate; }
     Real getLowCutoff() const { return m_lowCutoff; }
     Real getHiCutoff() const { return m_hiCutoff; }
@@ -100,7 +100,7 @@ private:
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;
 
-    quint32 m_audioSampleRate;
+    int m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
