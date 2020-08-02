@@ -32,7 +32,7 @@ class QOpenGLShaderProgram;
 class QMatrix4x4;
 class QImage;
 
-class SDRGUI_API GLShaderTextured
+class SDRGUI_API GLShaderTextured : protected QOpenGLFunctions
 {
 public:
 	GLShaderTextured();
@@ -46,11 +46,19 @@ public:
 
 private:
 	void draw(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices);
+    void drawMutable(unsigned int mode, const QMatrix4x4& transformMatrix, GLfloat *textureCoords, GLfloat *vertices, int nbVertices);
+	void initTextureImmutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
+	void subTextureImmutable(int xOffset, int yOffset, int width, int height, const void *pixels);
+	void initTextureMutable(const QImage& image, QOpenGLTexture::WrapMode wrapMode = QOpenGLTexture::Repeat);
+	void subTextureMutable(int xOffset, int yOffset, int width, int height, const void *pixels);
+    bool useImmutableStorage();
 
 	QOpenGLShaderProgram *m_program;
 	QOpenGLTexture *m_texture;
+    unsigned int m_textureId;
 	int m_matrixLoc;
 	int m_textureLoc;
+    bool m_useImmutableStorage;
 	static const QString m_vertexShaderSourceTextured;
 	static const QString m_fragmentShaderSourceTextured;
 };
