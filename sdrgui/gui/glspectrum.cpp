@@ -2305,6 +2305,8 @@ QString GLSpectrum::displayScaled(int64_t value, char type, int precision, bool 
         return tr("%1%2").arg(QString::number(value / 1000000.0, type, precision)).arg(showMult ? "M" : "");
     } else if (posValue < 1000000000000) {
         return tr("%1%2").arg(QString::number(value / 1000000000.0, type, precision)).arg(showMult ? "G" : "");
+    } else {
+        return tr("%1").arg(QString::number(value, 'e', precision));
     }
 }
 

@@ -131,9 +131,6 @@ private:
             m_timeDeltaStr(other.m_timeDeltaStr),
             m_valueDeltaStr(other.m_valueDeltaStr)
         {}
-        explicit operator ScopeMarker() const {
-            return ScopeMarker{static_cast<ScopeMarker>(*this)};
-        }
     };
     QList<ScopeMarker> m_markers1;
     QList<ScopeMarker> m_markers2;

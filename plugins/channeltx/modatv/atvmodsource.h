@@ -408,6 +408,8 @@ private:
                 return LineBlack;
             }
         }
+
+        return LineBlack;
     }
 
     inline void pullImageLastHalfSample(Real& sample)

@@ -169,9 +169,6 @@ private:
             m_deltaFrequencyStr(other.m_deltaFrequencyStr),
             m_deltaPowerStr(other.m_deltaPowerStr)
         {}
-        explicit operator HistogramMarker() const {
-            return HistogramMarker{static_cast<HistogramMarker>(*this)};
-        }
     };
     QList<HistogramMarker> m_histogramMarkers;
 
@@ -218,9 +215,6 @@ private:
             m_deltaFrequencyStr(other.m_deltaFrequencyStr),
             m_deltaTimeStr(other.m_deltaTimeStr)
         {}
-        explicit operator WaterfallMarker() const {
-            return WaterfallMarker{static_cast<WaterfallMarker>(*this)};
-        }
     };
     QList<WaterfallMarker> m_waterfallMarkers;
 
