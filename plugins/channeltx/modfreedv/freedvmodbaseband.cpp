@@ -194,8 +194,9 @@ void FreeDVModBaseband::applySettings(const FreeDVModSettings& settings, bool fo
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->removeAudioSource(getAudioFifo());
         audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+        int audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (getAudioSampleRate() != audioSampleRate) {
             m_source.applyAudioSampleRate(audioSampleRate);

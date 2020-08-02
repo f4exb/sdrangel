@@ -67,7 +67,7 @@ public:
     void setInputFileStream(std::ifstream *ifstream) { m_source.setInputFileStream(ifstream); }
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
     void setSpectrumSampleSink(BasebandSampleSink* sampleSink) { m_source.setSpectrumSink(sampleSink); }
-    unsigned int getAudioSampleRate() const { return m_source.getAudioSampleRate(); }
+    int getAudioSampleRate() const { return m_source.getAudioSampleRate(); }
     unsigned int getModemSampleRate() const { return m_source.getModemSampleRate(); }
     Real getLowCutoff() const { return m_source.getLowCutoff(); }
     Real getHiCutoff() const { return m_source.getHiCutoff(); }

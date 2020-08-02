@@ -71,6 +71,8 @@ private:
     quint32 m_recordLength;
     int m_recordSampleRate;
     int m_samplesCount;
+    int m_audioSampleRate;
+    int m_feedbackAudioSampleRate;
     std::size_t m_tickCount;
     bool m_enableNavTime;
     MessageQueue m_inputMessageQueue;
@@ -116,11 +118,15 @@ private slots:
     void on_navTimeSlider_valueChanged(int value);
     void on_showFileDialog_clicked(bool checked);
 
+    void on_feedbackEnable_toggled(bool checked);
+    void on_feedbackVolume_valueChanged(int value);
+
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
 
     void configureFileName();
     void audioSelect();
+    void audioFeedbackSelect();
     void tick();
 };
 

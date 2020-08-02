@@ -711,3 +711,13 @@ uint32_t NFMMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
 }
+
+int NFMMod::getAudioSampleRate() const
+{
+    return m_basebandSource->getAudioSampleRate();
+}
+
+int NFMMod::getFeedbackAudioSampleRate() const
+{
+    return m_basebandSource->getFeedbackAudioSampleRate();
+}

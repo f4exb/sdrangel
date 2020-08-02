@@ -50,6 +50,9 @@ void WFMModSettings::resetToDefaults()
     m_title = "WFM Modulator";
     m_modAFInput = WFMModInputNone;
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_feedbackAudioDeviceName = AudioDeviceManager::m_defaultDeviceName;
+    m_feedbackVolumeFactor = 0.5f;
+    m_feedbackAudioEnable = false;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -89,6 +92,9 @@ QByteArray WFMModSettings::serialize() const
     s.writeU32(16, m_reverseAPIDeviceIndex);
     s.writeU32(17, m_reverseAPIChannelIndex);
     s.writeS32(18, m_streamIndex);
+    s.writeString(19, m_feedbackAudioDeviceName);
+    s.writeReal(20, m_feedbackVolumeFactor);
+    s.writeBool(21, m_feedbackAudioEnable);
 
     return s.final();
 }
@@ -155,6 +161,9 @@ bool WFMModSettings::deserialize(const QByteArray& data)
         d.readU32(17, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(18, &m_streamIndex, 0);
+        d.readString(19, &m_feedbackAudioDeviceName, AudioDeviceManager::m_defaultDeviceName);
+        d.readReal(20, &m_feedbackVolumeFactor, 1.0);
+        d.readBool(21, &m_feedbackAudioEnable, false);
 
         return true;
     }

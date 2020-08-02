@@ -43,6 +43,9 @@ WFMModBaseband::WFMModBaseband() :
 	DSPEngine::instance()->getAudioDeviceManager()->addAudioSource(m_source.getAudioFifo(), getInputMessageQueue());
     m_source.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getInputSampleRate());
 
+    DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_source.getFeedbackAudioFifo(), getInputMessageQueue());
+    m_source.applyFeedbackAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
+
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
@@ -155,6 +158,7 @@ bool WFMModBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_source.applyAudioSampleRate(m_source.getAudioSampleRate()); // reapply in case of channel sample rate change
 
 		return true;
     }
@@ -181,14 +185,16 @@ void WFMModBaseband::applySettings(const WFMModSettings& settings, bool force)
     {
         m_channelizer->setChannelization(settings.m_rfBandwidth, settings.m_inputFrequencyOffset);
         m_source.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        m_source.applyAudioSampleRate(m_source.getAudioSampleRate()); // reapply in case of channel sample rate change
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)
     {
         AudioDeviceManager *audioDeviceManager = DSPEngine::instance()->getAudioDeviceManager();
         int audioDeviceIndex = audioDeviceManager->getInputDeviceIndex(settings.m_audioDeviceName);
+        audioDeviceManager->removeAudioSource(getAudioFifo());
         audioDeviceManager->addAudioSource(getAudioFifo(), getInputMessageQueue(), audioDeviceIndex);
-        uint32_t audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
+        int audioSampleRate = audioDeviceManager->getInputSampleRate(audioDeviceIndex);
 
         if (getAudioSampleRate() != audioSampleRate) {
             m_source.applyAudioSampleRate(audioSampleRate);

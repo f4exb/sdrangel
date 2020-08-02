@@ -26,11 +26,13 @@ WFMModSource::WFMModSource() :
     m_channelFrequencyOffset(0),
     m_modPhasor(0.0f),
     m_audioFifo(4800),
+    m_feedbackAudioFifo(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
     m_ifstream(nullptr),
-    m_audioSampleRate(48000)
+    m_audioSampleRate(48000),
+    m_feedbackAudioSampleRate(48000)
 {
     m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];
@@ -39,6 +41,8 @@ WFMModSource::WFMModSource() :
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
 	m_magsq = 0.0;
+	m_feedbackAudioBuffer.resize(1<<14);
+	m_feedbackAudioBufferFill = 0;
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -76,7 +80,8 @@ void WFMModSource::pullOne(Sample& sample)
   	Real t;
 
 	if ((m_settings.m_modAFInput == WFMModSettings::WFMModInputFile)
-	   || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAudio))
+	 || (m_settings.m_modAFInput == WFMModSettings::WFMModInputAudio)
+     || (m_settings.m_modAFInput == WFMModSettings::WFMModInputCWTone))
 	{
         if (m_interpolatorDistance > 1.0f) // decimate
         {
@@ -141,6 +146,10 @@ void WFMModSource::modulateAudio()
     calculateLevel(t);
     m_modSample.real(t);
     m_modSample.imag(0.0f);
+
+    if (m_settings.m_feedbackAudioEnable) {
+        pushFeedback(t * m_settings.m_feedbackVolumeFactor * 16384.0f);
+    }
 }
 
 void WFMModSource::prefetch(unsigned int nbSamples)
@@ -217,18 +226,18 @@ void WFMModSource::pullAF(Real& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
-            sample = m_toneNco.next() * m_settings.m_volumeFactor * fadeFactor;
+            sample = m_cwToneNco.next() * m_settings.m_volumeFactor * fadeFactor;
         }
         else
         {
             if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
             {
-                sample = m_toneNco.next() * m_settings.m_volumeFactor * fadeFactor;
+                sample = m_cwToneNco.next() * m_settings.m_volumeFactor * fadeFactor;
             }
             else
             {
                 sample = 0.0f;
-                m_toneNco.setPhase(0);
+                m_cwToneNco.setPhase(0);
             }
         }
         break;
@@ -236,6 +245,49 @@ void WFMModSource::pullAF(Real& sample)
     default:
         sample = 0.0f;
         break;
+    }
+}
+
+void WFMModSource::pushFeedback(Complex c)
+{
+    Complex ci;
+
+    if (m_feedbackInterpolatorDistance < 1.0f) // interpolate
+    {
+        while (!m_feedbackInterpolator.interpolate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
+        {
+            processOneSample(ci);
+            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
+        }
+    }
+    else // decimate
+    {
+        if (m_feedbackInterpolator.decimate(&m_feedbackInterpolatorDistanceRemain, c, &ci))
+        {
+            processOneSample(ci);
+            m_feedbackInterpolatorDistanceRemain += m_feedbackInterpolatorDistance;
+        }
+    }
+}
+
+void WFMModSource::processOneSample(Complex& ci)
+{
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].l = ci.real();
+    m_feedbackAudioBuffer[m_feedbackAudioBufferFill].r = ci.imag();
+    ++m_feedbackAudioBufferFill;
+
+    if (m_feedbackAudioBufferFill >= m_feedbackAudioBuffer.size())
+    {
+        unsigned int res = m_feedbackAudioFifo.write((const quint8*)&m_feedbackAudioBuffer[0], m_feedbackAudioBufferFill);
+
+        if (res != m_feedbackAudioBufferFill)
+        {
+            qDebug("WFMModSource::processOneSample: %u/%u audio samples written m_feedbackInterpolatorDistance: %f",
+                res, m_feedbackAudioBufferFill, m_feedbackInterpolatorDistance);
+            m_feedbackAudioFifo.clear();
+        }
+
+        m_feedbackAudioBufferFill = 0;
     }
 }
 
@@ -257,16 +309,44 @@ void WFMModSource::calculateLevel(const Real& sample)
     }
 }
 
-void WFMModSource::applyAudioSampleRate(unsigned int sampleRate)
+void WFMModSource::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("WFMModSource::applyAudioSampleRate: %d", sampleRate);
+        return;
+    }
+
     qDebug("WFMModSource::applyAudioSampleRate: %d", sampleRate);
 
     m_interpolatorDistanceRemain = 0;
     m_interpolatorConsumed = false;
     m_interpolatorDistance = (Real) sampleRate / (Real) m_channelSampleRate;
     m_interpolator.create(48, sampleRate, m_settings.m_rfBandwidth / 2.2, 3.0);
-
+    m_cwToneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
+    m_cwKeyer.setSampleRate(sampleRate);
+    m_cwKeyer.reset();
     m_audioSampleRate = sampleRate;
+    applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
+}
+
+void WFMModSource::applyFeedbackAudioSampleRate(int sampleRate)
+{
+    if (sampleRate < 0)
+    {
+        qWarning("WFMModSource::applyFeedbackAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
+    qDebug("WFMModSource::applyFeedbackAudioSampleRate: %d", sampleRate);
+
+    m_feedbackInterpolatorDistanceRemain = 0;
+    m_feedbackInterpolatorConsumed = false;
+    m_feedbackInterpolatorDistance = (Real) sampleRate / (Real) m_audioSampleRate;
+    Real cutoff = std::min(sampleRate, m_audioSampleRate) / 2.2f;
+    m_feedbackInterpolator.create(48, sampleRate, cutoff, 3.0);
+
+    m_feedbackAudioSampleRate = sampleRate;
 }
 
 void WFMModSource::applySettings(const WFMModSettings& settings, bool force)
@@ -286,8 +366,10 @@ void WFMModSource::applySettings(const WFMModSettings& settings, bool force)
         m_rfFilter->create_filter(lowCut, hiCut);
     }
 
-    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
+    if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force)
+    {
         m_toneNco.setFreq(settings.m_toneFrequency, m_channelSampleRate);
+        m_cwToneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
     }
 
     m_settings = settings;
@@ -314,8 +396,6 @@ void WFMModSource::applyChannelSettings(int channelSampleRate, int channelFreque
         Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / channelSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
         m_toneNco.setFreq(m_settings.m_toneFrequency, channelSampleRate);
-        m_cwKeyer.setSampleRate(channelSampleRate);
-        m_cwKeyer.reset();
     }
 
     m_channelSampleRate = channelSampleRate;

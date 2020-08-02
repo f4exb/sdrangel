@@ -225,6 +225,8 @@ public:
     CWKeyer *getCWKeyer();
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;
+    int getAudioSampleRate() const;
+    int getFeedbackAudioSampleRate() const;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

@@ -638,7 +638,7 @@ void FreeDVMod::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-uint32_t FreeDVMod::getAudioSampleRate() const
+int FreeDVMod::getAudioSampleRate() const
 {
     return m_basebandSource->getAudioSampleRate();
 }

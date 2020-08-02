@@ -262,8 +262,14 @@ void AMModSource::calculateLevel(Real& sample)
     }
 }
 
-void AMModSource::applyAudioSampleRate(unsigned int sampleRate)
+void AMModSource::applyAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("AMModSource::applyAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
     qDebug("AMModSource::applyAudioSampleRate: %d", sampleRate);
 
     m_interpolatorDistanceRemain = 0;
@@ -277,8 +283,14 @@ void AMModSource::applyAudioSampleRate(unsigned int sampleRate)
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 }
 
-void AMModSource::applyFeedbackAudioSampleRate(unsigned int sampleRate)
+void AMModSource::applyFeedbackAudioSampleRate(int sampleRate)
 {
+    if (sampleRate < 0)
+    {
+        qWarning("AMModSource::applyFeedbackAudioSampleRate: invalid sample rate %d", sampleRate);
+        return;
+    }
+
     qDebug("AMModSource::applyFeedbackAudioSampleRate: %u", sampleRate);
 
     m_feedbackInterpolatorDistanceRemain = 0;
