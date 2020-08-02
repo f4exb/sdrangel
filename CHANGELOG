@@ -1,3 +1,9 @@
+sdrangel (5.8.4-1) unstable; urgency=medium
+
+   * Plugins with audio: revised audio device handling. Implements #585
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 02 Aug 2020 20:09:29 +0200
+
 sdrangel (5.8.3-1) unstable; urgency=medium
 
    * ATV Modulator: complete vertical sync rework. Implements #578
