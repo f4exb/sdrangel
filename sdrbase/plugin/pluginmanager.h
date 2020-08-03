@@ -91,7 +91,7 @@ public:
 	const PluginInterface *getDevicePluginInterface(const QString& deviceId) const;
 
 	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
-	static const QString& getFileSinkDeviceId() { return m_fileOutputDeviceTypeID; }
+	static const QString& getFileOutputDeviceId() { return m_fileOutputDeviceTypeID; }
 
 private:
 	struct SamplingDevice { //!< This is the device registration
