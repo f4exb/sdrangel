@@ -340,7 +340,7 @@ private:
         }
         else if (standard == ATVModSettings::ATVStd819) // Standard F (Belgian) - m_nbLines2 = 409 - fieldLine 0 = 409
         {
-            if (lineNumber < m_nbLines2 - 1)
+            if (lineNumber < m_nbLines2)
             {
                 if (lineNumber < 7) { // field 1 start (0..6 in line index)
                     return Std819_F1Start[lineNumber];
@@ -348,27 +348,27 @@ private:
                     return LineBlack;
                 } else if (lineNumber == 26) { // field 1 half image line (26)
                     return LineImageHalf2;
-                } else if (lineNumber < m_nbLines2 - 4) { // field 1 full image (27..404)
+                } else if (lineNumber < m_nbLines2 - 3) { // field 1 full image (27..405) - 379 lines
                     return LineImage;
-                } else if (lineNumber < m_nbLines2 - 1) { // field 1 bottom (405..407)
+                } else if (lineNumber < m_nbLines2) { // field 1 bottom (405..408)
                     return LineShortPulses;
                 }
             }
-            else if (lineNumber == m_nbLines2 - 1) // transition field 1 -> 2 (408)
+            else if (lineNumber == m_nbLines2) // transition field 1 -> 2 (409)
             {
                 return LineShortBroadPulses;
             }
             else
             {
-                int fieldLine = lineNumber - m_nbLines2;
+                int fieldLine = lineNumber - m_nbLines2 - 1;
 
-                if (fieldLine < 6) { // field 2 start (409..(409+6-1=414))
+                if (fieldLine < 6) { // field 2 start (410..(410+6-1=415))
                     return Std819_F2Start[fieldLine];
-                } else if (fieldLine < 26) { // field 2 black lines (415..(409+26-1=434))
+                } else if (fieldLine < 26) { // field 2 black lines (416..(410+26-1=435))
                     return LineBlack;
-                } else if (fieldLine < m_nbLines2 - 3) { // field 2 full image (435..(409+406-1=814))
+                } else if (fieldLine < m_nbLines2 - 4) { // field 2 full image (436..(410+405-1=814)) - 379 lines
                     return LineImage;
-                } else if (fieldLine == m_nbLines2 - 3) { // field 2 half image line (409+406=815)
+                } else if (fieldLine == m_nbLines2 - 4) { // field 2 half image line (410+405=815)
                     return LineImageHalf1Short;
                 } else { // field 2 bottom (816..818..)
                     return LineShortPulses;

@@ -658,7 +658,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
         m_nbLinesField1    = m_nbLines2;
         break;
     case ATVModSettings::ATVStdPAL525: // Follows PAL-M standard
-        m_nbImageLines2    = (m_nbLines/2) - 19; // 525 -> 243 per half
+        m_nbImageLines2    = m_nbLines2 - 19; // 525 -> 243 per half
         m_nbImageLines     = 2*m_nbImageLines2;
         m_imageLineStart1  = 1;
         m_imageLineStart2  = 0;
@@ -667,17 +667,17 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
         m_nbLinesField1    = m_nbLines2+1;
         break;
     case ATVModSettings::ATVStd819: // Follows 819 F standard (belgium)
-        m_nbImageLines2    = (m_nbLines/2) - 28;
+        m_nbImageLines2    = m_nbLines2 - 29;
         m_nbImageLines     = 2*m_nbImageLines2;
-        m_imageLineStart1  = 1;
-        m_imageLineStart2  = 0;
+        m_imageLineStart1  = 0;
+        m_imageLineStart2  = 1;
         m_interlaced       = true;
         m_blankLineLvel    = m_blackLevel;
         m_nbLinesField1    = m_nbLines2;
         break;
     case ATVModSettings::ATVStdPAL625: // Follows PAL-B/G/H standard
     default:
-        m_nbImageLines2    = (m_nbLines/2) - 24; // 625 -> 288 per half
+        m_nbImageLines2    = m_nbLines2 - 24; // 625 -> 288 per half
         m_nbImageLines     = 2*m_nbImageLines2;
         m_imageLineStart1  = 0;
         m_imageLineStart2  = 1;
