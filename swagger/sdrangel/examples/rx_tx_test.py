@@ -38,7 +38,7 @@ def getInputOptions():
         options.device_hwid_rx = "FileInput"
 
     if options.device_hwid_tx == None:
-        options.device_hwid_tx = "FileSink"
+        options.device_hwid_tx = "FileOutput"
 
     if options.device_freq == None:
         options.device_freq = 435000

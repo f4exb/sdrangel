@@ -23,7 +23,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "ui_filesinkgui.h"
+#include "ui_fileoutputgui.h"
 #include "plugin/pluginapi.h"
 #include "gui/colormapper.h"
 #include "gui/glspectrum.h"
@@ -34,11 +34,11 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
-#include "filesinkgui.h"
+#include "fileoutputgui.h"
 
-FileSinkGui::FileSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
+FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	QWidget(parent),
-	ui(new Ui::FileSinkGui),
+	ui(new Ui::FileOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),
 	m_forceSettings(true),
@@ -69,55 +69,55 @@ FileSinkGui::FileSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
 	displaySettings();
 
-    m_deviceSampleSink = (FileSinkOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
+    m_deviceSampleSink = (FileOutput*) m_deviceUISet->m_deviceAPI->getSampleSink();
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
 }
 
-FileSinkGui::~FileSinkGui()
+FileOutputGui::~FileOutputGui()
 {
 	delete ui;
 }
 
-void FileSinkGui::destroy()
+void FileOutputGui::destroy()
 {
 	delete this;
 }
 
-void FileSinkGui::setName(const QString& name)
+void FileOutputGui::setName(const QString& name)
 {
 	setObjectName(name);
 }
 
-QString FileSinkGui::getName() const
+QString FileOutputGui::getName() const
 {
 	return objectName();
 }
 
-void FileSinkGui::resetToDefaults()
+void FileOutputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
 	displaySettings();
 	sendSettings();
 }
 
-qint64 FileSinkGui::getCenterFrequency() const
+qint64 FileOutputGui::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void FileSinkGui::setCenterFrequency(qint64 centerFrequency)
+void FileOutputGui::setCenterFrequency(qint64 centerFrequency)
 {
     m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
 
-QByteArray FileSinkGui::serialize() const
+QByteArray FileOutputGui::serialize() const
 {
 	return m_settings.serialize();
 }
 
-bool FileSinkGui::deserialize(const QByteArray& data)
+bool FileOutputGui::deserialize(const QByteArray& data)
 {
 	if(m_settings.deserialize(data)) {
 		displaySettings();
@@ -130,35 +130,35 @@ bool FileSinkGui::deserialize(const QByteArray& data)
 	}
 }
 
-bool FileSinkGui::handleMessage(const Message& message)
+bool FileOutputGui::handleMessage(const Message& message)
 {
-    if (FileSinkOutput::MsgConfigureFileSink::match(message))
+    if (FileOutput::MsgConfigureFileOutput::match(message))
     {
-        qDebug("FileSinkGui::handleMessage: message: MsgConfigureFileSink");
-        const FileSinkOutput::MsgConfigureFileSink& cfg = (FileSinkOutput::MsgConfigureFileSink&) message;
+        qDebug("FileOutputGui::handleMessage: message: MsgConfigureFileOutput");
+        const FileOutput::MsgConfigureFileOutput& cfg = (FileOutput::MsgConfigureFileOutput&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (FileSinkOutput::MsgReportFileSinkGeneration::match(message))
+    else if (FileOutput::MsgReportFileOutputGeneration::match(message))
 	{
-		m_generation = ((FileSinkOutput::MsgReportFileSinkGeneration&)message).getAcquisition();
-        qDebug("FileSinkGui::handleMessage: message: MsgReportFileSinkGeneration: %s", m_generation ? "start" : "stop");
+		m_generation = ((FileOutput::MsgReportFileOutputGeneration&)message).getAcquisition();
+        qDebug("FileOutputGui::handleMessage: message: MsgReportFileOutputGeneration: %s", m_generation ? "start" : "stop");
 		updateWithGeneration();
 		return true;
 	}
-	else if (FileSinkOutput::MsgReportFileSinkStreamTiming::match(message))
+	else if (FileOutput::MsgReportFileOutputStreamTiming::match(message))
 	{
-		m_samplesCount = ((FileSinkOutput::MsgReportFileSinkStreamTiming&)message).getSamplesCount();
+		m_samplesCount = ((FileOutput::MsgReportFileOutputStreamTiming&)message).getSamplesCount();
 		updateWithStreamTime();
 		return true;
 	}
-	else if (FileSinkOutput::MsgStartStop::match(message))
+	else if (FileOutput::MsgStartStop::match(message))
 	{
-	    FileSinkOutput::MsgStartStop& notif = (FileSinkOutput::MsgStartStop&) message;
-        qDebug("FileSinkGui::handleMessage: message: MsgStartStop: %s", notif.getStartStop() ? "start" : "stop");
+	    FileOutput::MsgStartStop& notif = (FileOutput::MsgStartStop&) message;
+        qDebug("FileOutputGui::handleMessage: message: MsgStartStop: %s", notif.getStartStop() ? "start" : "stop");
 	    blockApplySettings(true);
 	    ui->startStop->setChecked(notif.getStartStop());
 	    blockApplySettings(false);
@@ -170,7 +170,7 @@ bool FileSinkGui::handleMessage(const Message& message)
 	}
 }
 
-void FileSinkGui::handleInputMessages()
+void FileOutputGui::handleInputMessages()
 {
     Message* message;
 
@@ -180,7 +180,7 @@ void FileSinkGui::handleInputMessages()
         if (DSPSignalNotification::match(*message))
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
-            qDebug("FileSinkGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
+            qDebug("FileOutputGui::handleInputMessages: DSPSignalNotification: SampleRate:%d, CenterFrequency:%llu", notif->getSampleRate(), notif->getCenterFrequency());
             m_sampleRate = notif->getSampleRate();
             m_deviceCenterFrequency = notif->getCenterFrequency();
             updateSampleRateAndFrequency();
@@ -197,36 +197,36 @@ void FileSinkGui::handleInputMessages()
     }
 }
 
-void FileSinkGui::updateSampleRateAndFrequency()
+void FileOutputGui::updateSampleRateAndFrequency()
 {
     m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(m_deviceCenterFrequency);
     ui->deviceRateText->setText(tr("%1k").arg((float)(m_sampleRate*(1<<m_settings.m_log2Interp)) / 1000));
 }
 
-void FileSinkGui::displaySettings()
+void FileOutputGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
 }
 
-void FileSinkGui::sendSettings()
+void FileOutputGui::sendSettings()
 {
     if(!m_updateTimer.isActive())
         m_updateTimer.start(100);
 }
 
 
-void FileSinkGui::updateHardware()
+void FileOutputGui::updateHardware()
 {
-    qDebug() << "FileSinkGui::updateHardware";
-    FileSinkOutput::MsgConfigureFileSink* message = FileSinkOutput::MsgConfigureFileSink::create(m_settings, m_forceSettings);
+    qDebug() << "FileOutputGui::updateHardware";
+    FileOutput::MsgConfigureFileOutput* message = FileOutput::MsgConfigureFileOutput::create(m_settings, m_forceSettings);
     m_deviceSampleSink->getInputMessageQueue()->push(message);
     m_forceSettings = false;
     m_updateTimer.stop();
 }
 
-void FileSinkGui::updateStatus()
+void FileOutputGui::updateStatus()
 {
     int state = m_deviceUISet->m_deviceAPI->state();
 
@@ -255,19 +255,19 @@ void FileSinkGui::updateStatus()
     }
 }
 
-void FileSinkGui::on_centerFrequency_changed(quint64 value)
+void FileOutputGui::on_centerFrequency_changed(quint64 value)
 {
     m_settings.m_centerFrequency = value * 1000;
     sendSettings();
 }
 
-void FileSinkGui::on_sampleRate_changed(quint64 value)
+void FileOutputGui::on_sampleRate_changed(quint64 value)
 {
     m_settings.m_sampleRate = value;
     sendSettings();
 }
 
-void FileSinkGui::on_interp_currentIndexChanged(int index)
+void FileOutputGui::on_interp_currentIndexChanged(int index)
 {
     if (index < 0) {
         return;
@@ -278,16 +278,16 @@ void FileSinkGui::on_interp_currentIndexChanged(int index)
     sendSettings();
 }
 
-void FileSinkGui::on_startStop_toggled(bool checked)
+void FileOutputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        FileSinkOutput::MsgStartStop *message = FileSinkOutput::MsgStartStop::create(checked);
+        FileOutput::MsgStartStop *message = FileOutput::MsgStartStop::create(checked);
         m_deviceSampleSink->getInputMessageQueue()->push(message);
     }
 }
 
-void FileSinkGui::on_showFileDialog_clicked(bool checked)
+void FileOutputGui::on_showFileDialog_clicked(bool checked)
 {
     (void) checked;
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -301,19 +301,19 @@ void FileSinkGui::on_showFileDialog_clicked(bool checked)
 	}
 }
 
-void FileSinkGui::configureFileName()
+void FileOutputGui::configureFileName()
 {
-	qDebug() << "FileSinkGui::configureFileName: " << m_fileName.toStdString().c_str();
-	FileSinkOutput::MsgConfigureFileSinkName* message = FileSinkOutput::MsgConfigureFileSinkName::create(m_fileName);
+	qDebug() << "FileOutputGui::configureFileName: " << m_fileName.toStdString().c_str();
+	FileOutput::MsgConfigureFileOutputName* message = FileOutput::MsgConfigureFileOutputName::create(m_fileName);
 	m_deviceSampleSink->getInputMessageQueue()->push(message);
 }
 
-void FileSinkGui::updateWithGeneration()
+void FileOutputGui::updateWithGeneration()
 {
 	ui->showFileDialog->setEnabled(!m_generation);
 }
 
-void FileSinkGui::updateWithStreamTime()
+void FileOutputGui::updateWithStreamTime()
 {
 	int t_sec = 0;
 	int t_msec = 0;
@@ -330,11 +330,11 @@ void FileSinkGui::updateWithStreamTime()
 	ui->relTimeText->setText(s_timems);
 }
 
-void FileSinkGui::tick()
+void FileOutputGui::tick()
 {
 	if ((++m_tickCount & 0xf) == 0)
 	{
-		FileSinkOutput::MsgConfigureFileSinkStreamTiming* message = FileSinkOutput::MsgConfigureFileSinkStreamTiming::create();
+		FileOutput::MsgConfigureFileOutputStreamTiming* message = FileOutput::MsgConfigureFileOutputStreamTiming::create();
 		m_deviceSampleSink->getInputMessageQueue()->push(message);
 	}
 }

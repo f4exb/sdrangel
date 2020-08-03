@@ -22,9 +22,9 @@
 #include <QDebug>
 
 #include "dsp/samplesourcefifo.h"
-#include "filesinkworker.h"
+#include "fileoutputworker.h"
 
-FileSinkWorker::FileSinkWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
+FileOutputWorker::FileOutputWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent) :
 	QObject(parent),
 	m_running(false),
 	m_ofstream(samplesStream),
@@ -34,7 +34,7 @@ FileSinkWorker::FileSinkWorker(std::ofstream *samplesStream, SampleSourceFifo* s
 	m_samplesCount(0),
     m_samplerate(0),
     m_log2Interpolation(0),
-    m_throttlems(FILESINK_THROTTLE_MS),
+    m_throttlems(FILEOUTPUT_THROTTLE_MS),
     m_maxThrottlems(50),
     m_throttleToggle(false),
     m_buf(nullptr)
@@ -42,7 +42,7 @@ FileSinkWorker::FileSinkWorker(std::ofstream *samplesStream, SampleSourceFifo* s
     assert(m_ofstream != nullptr);
 }
 
-FileSinkWorker::~FileSinkWorker()
+FileOutputWorker::~FileOutputWorker()
 {
 	if (m_running) {
 		stopWork();
@@ -51,34 +51,34 @@ FileSinkWorker::~FileSinkWorker()
     if (m_buf) delete[] m_buf;
 }
 
-void FileSinkWorker::startWork()
+void FileOutputWorker::startWork()
 {
-	qDebug() << "FileSinkWorker::startWork: ";
+	qDebug() << "FileOutputWorker::startWork: ";
 
     if (m_ofstream->is_open())
     {
-        qDebug() << "FileSinkWorker::startWork: file stream open, starting...";
+        qDebug() << "FileOutputWorker::startWork: file stream open, starting...";
         m_maxThrottlems = 0;
         m_elapsedTimer.start();
         m_running = true;
     }
     else
     {
-        qDebug() << "FileSinkWorker::startWork: file stream closed, not starting.";
+        qDebug() << "FileOutputWorker::startWork: file stream closed, not starting.";
         m_running = false;
     }
 }
 
-void FileSinkWorker::stopWork()
+void FileOutputWorker::stopWork()
 {
 	m_running = false;
 }
 
-void FileSinkWorker::setSamplerate(int samplerate)
+void FileOutputWorker::setSamplerate(int samplerate)
 {
 	if (samplerate != m_samplerate)
 	{
-	    qDebug() << "FileSinkWorker::setSamplerate:"
+	    qDebug() << "FileOutputWorker::setSamplerate:"
 	            << " new:" << samplerate
 	            << " old:" << m_samplerate;
 
@@ -108,7 +108,7 @@ void FileSinkWorker::setSamplerate(int samplerate)
 	}
 }
 
-void FileSinkWorker::setLog2Interpolation(int log2Interpolation)
+void FileOutputWorker::setLog2Interpolation(int log2Interpolation)
 {
     if ((log2Interpolation < 0) || (log2Interpolation > 6))
     {
@@ -117,7 +117,7 @@ void FileSinkWorker::setLog2Interpolation(int log2Interpolation)
 
     if (log2Interpolation != m_log2Interpolation)
     {
-        qDebug() << "FileSinkWorker::setLog2Interpolation:"
+        qDebug() << "FileOutputWorker::setLog2Interpolation:"
                 << " new:" << log2Interpolation
                 << " old:" << m_log2Interpolation;
 
@@ -141,13 +141,13 @@ void FileSinkWorker::setLog2Interpolation(int log2Interpolation)
     }
 }
 
-void FileSinkWorker::connectTimer(const QTimer& timer)
+void FileOutputWorker::connectTimer(const QTimer& timer)
 {
-	qDebug() << "FileSinkWorker::connectTimer";
+	qDebug() << "FileOutputWorker::connectTimer";
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
-void FileSinkWorker::tick()
+void FileOutputWorker::tick()
 {
 	if (m_running)
 	{
@@ -175,7 +175,7 @@ void FileSinkWorker::tick()
     }
 }
 
-void FileSinkWorker::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
+void FileOutputWorker::callbackPart(SampleVector& data, unsigned int iBegin, unsigned int iEnd)
 {
     SampleVector::iterator beginRead = data.begin() + iBegin;
     unsigned int chunkSize = iEnd - iBegin;

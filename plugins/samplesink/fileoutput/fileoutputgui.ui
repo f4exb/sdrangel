@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FileSinkGui</class>
- <widget class="QWidget" name="FileSinkGui">
+ <class>FileOutputGui</class>
+ <widget class="QWidget" name="FileOutputGui">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -29,7 +29,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>FileSink</string>
+   <string>FileOutput</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">

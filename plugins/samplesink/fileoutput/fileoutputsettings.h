@@ -15,41 +15,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKPLUGIN_H
-#define INCLUDE_FILESINKPLUGIN_H
+#ifndef PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
+#define PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QByteArray>
 
-#define FILESINK_DEVICE_TYPE_ID "sdrangel.samplesink.filesink"
+struct FileOutputSettings {
+    quint64 m_centerFrequency;
+    quint64 m_sampleRate;
+    quint32 m_log2Interp;
 
-class PluginAPI;
-class DeviceAPI;
-
-class FileSinkPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID FILESINK_DEVICE_TYPE_ID)
-
-public:
-	explicit FileSinkPlugin(QObject* parent = NULL);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
-	virtual SamplingDevices enumSampleSinks(const OriginDevices& originDevices);
-	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
-	        const QString& sinkId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSink* createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI);
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+    FileOutputSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
 };
 
-#endif // INCLUDE_FILESOURCEPLUGIN_H
+#endif /* PLUGINS_SAMPLESINK_FILEOUTPUT_FILEOUTPUTSETTINGS_H_ */

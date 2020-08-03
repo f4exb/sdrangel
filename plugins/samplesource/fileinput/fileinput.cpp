@@ -165,7 +165,7 @@ void FileInput::seekFileStream(int seekMillis)
 	{
         quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_sampleRate;
 		m_fileInputWorker->setSamplesCount(seekPoint);
-        seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileSink::Header)
+        seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileRecord::Header)
 		m_ifstream.clear();
 		m_ifstream.seekg(seekPoint + sizeof(FileRecord::Header), std::ios::beg);
 	}

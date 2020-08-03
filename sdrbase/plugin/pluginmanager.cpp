@@ -42,8 +42,8 @@ const QString PluginManager::m_localOutputHardwareID = "LocalOutput";
 const QString PluginManager::m_localOutputDeviceTypeID = "sdrangel.samplesource.localoutput";
 const QString PluginManager::m_remoteOutputHardwareID = "RemoteOutput";
 const QString PluginManager::m_remoteOutputDeviceTypeID = "sdrangel.samplesink.remoteoutput";
-const QString PluginManager::m_fileSinkHardwareID = "FileSink";
-const QString PluginManager::m_fileSinkDeviceTypeID = "sdrangel.samplesink.filesink";
+const QString PluginManager::m_fileOutputHardwareID = "FileOutput";
+const QString PluginManager::m_fileOutputDeviceTypeID = "sdrangel.samplesink.fileoutput";
 
 const QString PluginManager::m_testMIMOHardwareID = "TestMI";
 const QString PluginManager::m_testMIMODeviceTypeID = "sdrangel.samplemimo.testmi";

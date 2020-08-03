@@ -35,7 +35,7 @@ FileRecord::FileRecord() :
     m_recordStart(false),
     m_byteCount(0)
 {
-	setObjectName("FileSink");
+	setObjectName("FileRecord");
 }
 
 FileRecord::FileRecord(const QString& filename) :
