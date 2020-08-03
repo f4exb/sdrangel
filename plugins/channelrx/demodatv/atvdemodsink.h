@@ -32,7 +32,7 @@
 #include "dsp/phasediscri.h"
 #include "audio/audiofifo.h"
 #include "util/movingaverage.h"
-#include "gui/tvscreen.h"
+#include "gui/tvscreenanalog.h"
 
 #include "atvdemodsettings.h"
 
@@ -44,7 +44,7 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
   	void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
-    void setTVScreen(TVScreen *tvScreen) { m_registeredTVScreen = tvScreen; } //!< set by the GUI
+    void setTVScreen(TVScreenAnalog *tvScreen) { m_registeredTVScreen = tvScreen; } //!< set by the GUI
     double getMagSq() const { return m_magSqAverage; } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
     void setVideoTabIndex(int videoTabIndex) { m_videoTabIndex = videoTabIndex; }
@@ -107,7 +107,7 @@ private:
     SampleVector m_scopeSampleBuffer;
 
     //*************** ATV PARAMETERS  ***************
-    TVScreen *m_registeredTVScreen;
+    TVScreenAnalog *m_registeredTVScreen;
 
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTopNom;     //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - nominal value
@@ -198,7 +198,7 @@ private:
     inline void processSample(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-        m_registeredTVScreen->setDataColor(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo, sampleVideo, sampleVideo);
+        m_registeredTVScreen->setDataColor(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo);
 
         if (m_settings.m_hSync)
         {
@@ -286,8 +286,9 @@ private:
                 m_hSyncShiftCount = 0;
                 m_hSyncErrorCount = 0;
             }
-            m_registeredTVScreen->renderImage(0,
-                shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+			m_registeredTVScreen->renderImage();
+            //m_registeredTVScreen->renderImage(0,
+            //    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
         }
 
         if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
@@ -319,8 +320,14 @@ private:
         int rowIndex = m_lineIndex - m_firstVisibleLine;
         if (m_interleaved)
             rowIndex = rowIndex * 2 - m_fieldIndex;
-        m_registeredTVScreen->selectRow(rowIndex);
-    }
+
+		// TODO: CHANGE
+		float shiftSamples = 0.0f;
+		if (m_hSyncShiftCount != 0)
+			shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
+		m_registeredTVScreen->selectRow(rowIndex,
+			shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+	}
 
     // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
     inline void processEOLHSkip()
@@ -342,13 +349,17 @@ private:
                 m_hSyncShiftCount = 0;
                 m_hSyncErrorCount = 0;
             }
-            m_registeredTVScreen->renderImage(0,
-                shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+			m_registeredTVScreen->renderImage();
+            //m_registeredTVScreen->renderImage(0,
+            //    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
             m_lineIndex = 0;
             m_rowIndex = 0;
         }
 
-        m_registeredTVScreen->selectRow(m_rowIndex);
+		// TODO: CHANGE
+		float shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
+		m_registeredTVScreen->selectRow(m_rowIndex,
+			shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
     }
 };
 

@@ -52,6 +52,7 @@ set(sdrgui_SOURCES
     gui/transverterbutton.cpp
     gui/transverterdialog.cpp
     gui/tvscreen.cpp
+    gui/tvscreenanalog.cpp
     gui/valuedial.cpp
     gui/valuedialz.cpp
     gui/wsspectrumsettingsdialog.cpp
@@ -126,6 +127,7 @@ set(sdrgui_HEADERS
     gui/transverterbutton.h
     gui/transverterdialog.h
     gui/tvscreen.h
+    gui/tvscreenanalog.h
     gui/valuedial.h
     gui/valuedialz.h
     gui/wsspectrumsettingsdialog.h

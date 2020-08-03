@@ -43,8 +43,6 @@ public:
     GLShaderTVArray(bool blnColor);
     ~GLShaderTVArray();
 
-    void setExtraColumns(bool blnExtraColumns) { m_blnExtraColumns = blnExtraColumns; }
-    void setSubsampleShift(float subsampleShift) { m_subsampleShift = subsampleShift; }
     void setColor(bool blnColor) { m_blnColor = blnColor; }
     void setAlphaBlend(bool blnAlphaBlend) { m_blnAlphaBlend = blnAlphaBlend; }
     void setAlphaReset() { m_blnAlphaReset = true; }
@@ -73,7 +71,6 @@ protected:
 
     int m_intCols;
     int m_intRows;
-    float m_subsampleShift;
 
     QRgb * m_objCurrentRow;
 
@@ -81,7 +78,6 @@ protected:
     bool m_blnColor;
     bool m_blnAlphaBlend;
     bool m_blnAlphaReset;
-    bool m_blnExtraColumns;
 };
 
 #endif /* INCLUDE_GUI_GLTVSHADERARRAY_H_ */
