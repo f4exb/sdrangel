@@ -406,7 +406,7 @@ void MainWindow::addSinkDevice()
     ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
 
     // create a file sink by default
-    int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
+    int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
     m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -1863,7 +1863,7 @@ void MainWindow::sampleSinkChanged()
         if (deviceUI->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {
             qDebug("MainWindow::sampleSinkChanged: non existent device replaced by File Sink");
-            int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
+            int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
             const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
             deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);

@@ -376,11 +376,11 @@ int DeviceEnumerator::getFileInputDeviceIndex() const
     return -1;
 }
 
-int DeviceEnumerator::getFileSinkDeviceIndex() const
+int DeviceEnumerator::getFileOutputDeviceIndex() const
 {
     for (DevicesEnumeration::const_iterator it = m_txEnumeration.begin(); it != m_txEnumeration.end(); ++it)
     {
-        if (it->m_samplingDevice.id == PluginManager::getFileSinkDeviceId()) {
+        if (it->m_samplingDevice.id == PluginManager::getFileOutputDeviceId()) {
             return it->m_index;
         }
     }

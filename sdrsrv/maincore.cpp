@@ -303,7 +303,7 @@ void MainCore::addSinkDevice()
     QList<QString> channelNames;
 
     // create a file sink by default
-    int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
+    int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
     m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
     m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
@@ -572,7 +572,7 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {
             qDebug("MainCore::changeSampleSink: non existent device replaced by File Sink");
-            int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileSinkDeviceIndex();
+            int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
             const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
             deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
