@@ -1,4 +1,5 @@
 ﻿///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2020 Vort                                                       //
 // Copyright (C) 2018 F4HKW                                                      //
 // for F4EXB / SDRAngel                                                          //
 //                                                                               //
@@ -19,84 +20,69 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_TVSCREEN_H
-#define INCLUDE_TVSCREEN_H
+#ifndef INCLUDE_TVSCREENANALOG_H
+#define INCLUDE_TVSCREENANALOG_H
 
-#include <QGLWidget>
-#include <QPen>
-#include <QTimer>
-#include <QMutex>
-#include <QFont>
-#include <QMatrix4x4>
-#include "dsp/dsptypes.h"
-#include "glshadertextured.h"
-#include "glshadertvarray.h"
 #include "export.h"
-#include "util/bitfieldindex.h"
 
-class QPainter;
+#include <memory>
 
-class SDRGUI_API TVScreen: public QGLWidget
+#include <QImage>
+#include <QMutex>
+#include <QTimer>
+#include <QGLWidget>
+#include <QOpenGLTexture>
+#include <QOpenGLFunctions>
+#include <QOpenGLShaderProgram>
+
+class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
+	QTimer m_objTimer;
+	QMutex m_objMutex;
+
+	bool m_isDataChanged;
+
+	int m_objTextureLoc1;
+	int m_objTextureLoc2;
+	int m_objImageWidthLoc;
+	int m_objImageHeightLoc;
+	int m_objTexelWidthLoc;
+	int m_objTexelHeightLoc;
+	int m_vertexAttribIndex;
+	int m_texCoordAttribIndex;
+	std::shared_ptr<QOpenGLShaderProgram> m_shader;
+
+	float m_time;
+
+	int m_cols;
+	int m_rows;
+
+	int* m_objCurrentRow;
+
+	std::shared_ptr<QImage> m_image;
+	std::shared_ptr<QImage> m_lineShifts;
+	std::shared_ptr<QOpenGLTexture> m_imageTexture;
+	std::shared_ptr<QOpenGLTexture> m_lineShiftsTexture;
+
 public:
+	TVScreenAnalog(QWidget *parent);
 
-	TVScreen(bool blnColor, QWidget* parent = 0);
-    virtual ~TVScreen();
-
-    void setColor(bool blnColor);
-    void resizeTVScreen(int intCols, int intRows);
-    void getSize(int& intCols, int& intRows) const;
-    void renderImage(unsigned char * objData);
-    QRgb* getRowBuffer(int intRow);
-    void resetImage();
-    void resetImage(int alpha);
-
-    bool selectRow(int intLine);
-    bool setDataColor(int intCol, int intRed, int intGreen, int intBlue);
-    bool setDataColor(int intCol, int intRed, int intGreen, int intBlue, int intAlpha);
-    void setAlphaBlend(bool blnAlphaBlend) { m_objGLShaderArray.setAlphaBlend(blnAlphaBlend); }
-    void setAlphaReset() { m_objGLShaderArray.setAlphaReset(); }
-
-    void connectTimer(const QTimer& timer);
-
-    //Valeurs par défaut
-    static const int TV_COLS=256;
-    static const int TV_ROWS=256;
-
-signals:
-	void traceSizeChanged(int);
-	void sampleRateChanged(int);
+	void resizeTVScreen(int intCols, int intRows);
+	void selectRow(int intLine, float shift);
+	void setDataColor(int intCol, int objColor);
+	void renderImage();
 
 private:
-    bool m_blnGLContextInitialized;
-    int m_intAskedCols;
-    int m_intAskedRows;
-
-
-	// state
-    QTimer m_objTimer;
-    QMutex m_objMutex;
-    bool m_blnDataChanged;
-    bool m_blnConfigChanged;
-
-    GLShaderTVArray m_objGLShaderArray;
-
-    int m_cols;
-    int m_rows;
-
-    void initializeGL();
+	void initializeTextures();
+	void initializeGL() override;
+	void paintGL() override;
 	void resizeGL(int width, int height);
-	void paintGL();
 
-	void mousePressEvent(QMouseEvent*);
-
-	unsigned char *m_chrLastData;
-
-protected slots:
+private slots:
 	void cleanup();
 	void tick();
 };
 
-#endif // INCLUDE_TVSCREEN_H
+#endif // INCLUDE_TVSCREENANALOG_H

@@ -359,7 +359,7 @@ void ATVDemodSink::applyStandard(int sampleRate, const ATVDemodSettings& setting
         // what is left in a line for the image
         m_interleaved        = true;
         m_numberOfVSyncLines = 4;
-        m_numberOfBlackLines = 58;
+        m_numberOfBlackLines = 59;
         m_firstVisibleLine   = 27;
         m_numberSamplesHSyncCrop = (int) (0.085f * lineDuration * sampleRate); // 8.5% of full line empirically
         break;
