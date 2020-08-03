@@ -15,50 +15,41 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "util/simpleserializer.h"
-#include "filesinksettings.h"
+#ifndef INCLUDE_FILEOUTPUTPLUGIN_H
+#define INCLUDE_FILEOUTPUTPLUGIN_H
 
-FileSinkSettings::FileSinkSettings()
-{
-    resetToDefaults();
-}
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-void FileSinkSettings::resetToDefaults()
-{
-    m_centerFrequency = 435000*1000;
-    m_sampleRate = 48000;
-    m_log2Interp = 0;
-}
+#define FILEOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.fileoutput"
 
-QByteArray FileSinkSettings::serialize() const
-{
-    SimpleSerializer s(1);
+class PluginAPI;
+class DeviceAPI;
 
-    s.writeU64(1, m_sampleRate);
-    s.writeU32(2, m_log2Interp);
+class FileOutputPlugin : public QObject, public PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID FILEOUTPUT_DEVICE_TYPE_ID)
 
-    return s.final();
-}
+public:
+	explicit FileOutputPlugin(QObject* parent = NULL);
 
-bool FileSinkSettings::deserialize(const QByteArray& data)
-{
-    SimpleDeserializer d(data);
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
 
-    if (!d.isValid())
-    {
-        resetToDefaults();
-        return false;
-    }
+	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
+	virtual SamplingDevices enumSampleSinks(const OriginDevices& originDevices);
+	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
+	        const QString& sinkId,
+	        QWidget **widget,
+	        DeviceUISet *deviceUISet);
+	virtual DeviceSampleSink* createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI);
 
-    if (d.getVersion() == 1)
-    {
-        d.readU64(1, &m_sampleRate, 48000);
-        d.readU32(2, &m_log2Interp, 0);
-        return true;
-    }
-    else
-    {
-        resetToDefaults();
-        return false;
-    }
-}
+	static const QString m_hardwareID;
+    static const QString m_deviceTypeID;
+
+private:
+	static const PluginDescriptor m_pluginDescriptor;
+};
+
+#endif // INCLUDE_FILEOUTPUTPLUGIN_H

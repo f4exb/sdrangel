@@ -15,20 +15,50 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_SAMPLESINK_FILESINK_FILESINKSETTINGS_H_
-#define PLUGINS_SAMPLESINK_FILESINK_FILESINKSETTINGS_H_
+#include "util/simpleserializer.h"
+#include "fileoutputsettings.h"
 
-#include <QByteArray>
+FileOutputSettings::FileOutputSettings()
+{
+    resetToDefaults();
+}
 
-struct FileSinkSettings {
-    quint64 m_centerFrequency;
-    quint64 m_sampleRate;
-    quint32 m_log2Interp;
+void FileOutputSettings::resetToDefaults()
+{
+    m_centerFrequency = 435000*1000;
+    m_sampleRate = 48000;
+    m_log2Interp = 0;
+}
 
-    FileSinkSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
-};
+QByteArray FileOutputSettings::serialize() const
+{
+    SimpleSerializer s(1);
 
-#endif /* PLUGINS_SAMPLESINK_FILESINK_FILESINKSETTINGS_H_ */
+    s.writeU64(1, m_sampleRate);
+    s.writeU32(2, m_log2Interp);
+
+    return s.final();
+}
+
+bool FileOutputSettings::deserialize(const QByteArray& data)
+{
+    SimpleDeserializer d(data);
+
+    if (!d.isValid())
+    {
+        resetToDefaults();
+        return false;
+    }
+
+    if (d.getVersion() == 1)
+    {
+        d.readU64(1, &m_sampleRate, 48000);
+        d.readU32(2, &m_log2Interp, 0);
+        return true;
+    }
+    else
+    {
+        resetToDefaults();
+        return false;
+    }
+}

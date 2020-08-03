@@ -28,22 +28,22 @@
 
 #include "device/deviceapi.h"
 
-#include "filesinkoutput.h"
-#include "filesinkworker.h"
+#include "fileoutput.h"
+#include "fileoutputworker.h"
 
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSink, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkName, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkWork, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgConfigureFileSinkStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkGeneration, Message)
-MESSAGE_CLASS_DEFINITION(FileSinkOutput::MsgReportFileSinkStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgConfigureFileOutput, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgConfigureFileOutputName, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgConfigureFileOutputWork, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgConfigureFileOutputStreamTiming, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputGeneration, Message)
+MESSAGE_CLASS_DEFINITION(FileOutput::MsgReportFileOutputStreamTiming, Message)
 
-FileSinkOutput::FileSinkOutput(DeviceAPI *deviceAPI) :
+FileOutput::FileOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-	m_fileSinkWorker(nullptr),
-	m_deviceDescription("FileSink"),
+	m_fileOutputWorker(nullptr),
+	m_deviceDescription("FileOutput"),
 	m_fileName("./test.sdriq"),
 	m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer())
@@ -51,17 +51,17 @@ FileSinkOutput::FileSinkOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI->setNbSinkStreams(1);
 }
 
-FileSinkOutput::~FileSinkOutput()
+FileOutput::~FileOutput()
 {
 	stop();
 }
 
-void FileSinkOutput::destroy()
+void FileOutput::destroy()
 {
     delete this;
 }
 
-void FileSinkOutput::openFileStream()
+void FileOutput::openFileStream()
 {
 	if (m_ofstream.is_open()) {
 		m_ofstream.close();
@@ -79,51 +79,51 @@ void FileSinkOutput::openFileStream()
 
     FileRecord::writeHeader(m_ofstream, header);
 
-	qDebug() << "FileSinkOutput::openFileStream: " << m_fileName.toStdString().c_str();
+	qDebug() << "FileOutput::openFileStream: " << m_fileName.toStdString().c_str();
 }
 
-void FileSinkOutput::init()
+void FileOutput::init()
 {
     applySettings(m_settings, true);
 }
 
-bool FileSinkOutput::start()
+bool FileOutput::start()
 {
 	QMutexLocker mutexLocker(&m_mutex);
-	qDebug() << "FileSinkOutput::start";
+	qDebug() << "FileOutput::start";
 
 	openFileStream();
 
-	m_fileSinkWorker = new FileSinkWorker(&m_ofstream, &m_sampleSourceFifo);
-    m_fileSinkWorker->moveToThread(&m_fileSinkWorkerThread);
-	m_fileSinkWorker->setSamplerate(m_settings.m_sampleRate);
-	m_fileSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
-	m_fileSinkWorker->connectTimer(m_masterTimer);
+	m_fileOutputWorker = new FileOutputWorker(&m_ofstream, &m_sampleSourceFifo);
+    m_fileOutputWorker->moveToThread(&m_fileOutputWorkerThread);
+	m_fileOutputWorker->setSamplerate(m_settings.m_sampleRate);
+	m_fileOutputWorker->setLog2Interpolation(m_settings.m_log2Interp);
+	m_fileOutputWorker->connectTimer(m_masterTimer);
 	startWorker();
 
 	mutexLocker.unlock();
 	//applySettings(m_generalSettings, m_settings, true);
-	qDebug("FileSinkOutput::start: started");
+	qDebug("FileOutput::start: started");
 
     if (getMessageQueueToGUI())
     {
-        MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(true); // acquisition on
+        MsgReportFileOutputGeneration *report = MsgReportFileOutputGeneration::create(true); // acquisition on
         getMessageQueueToGUI()->push(report);
     }
 
 	return true;
 }
 
-void FileSinkOutput::stop()
+void FileOutput::stop()
 {
 	qDebug() << "FileSourceInput::stop";
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_fileSinkWorker)
+	if (m_fileOutputWorker)
 	{
 		stopWorker();
-		delete m_fileSinkWorker;
-		m_fileSinkWorker = nullptr;
+		delete m_fileOutputWorker;
+		m_fileOutputWorker = nullptr;
 	}
 
     if (m_ofstream.is_open()) {
@@ -132,30 +132,30 @@ void FileSinkOutput::stop()
 
     if (getMessageQueueToGUI())
     {
-        MsgReportFileSinkGeneration *report = MsgReportFileSinkGeneration::create(false); // acquisition off
+        MsgReportFileOutputGeneration *report = MsgReportFileOutputGeneration::create(false); // acquisition off
         getMessageQueueToGUI()->push(report);
     }
 }
 
-void FileSinkOutput::startWorker()
+void FileOutput::startWorker()
 {
-    m_fileSinkWorker->startWork();
-    m_fileSinkWorkerThread.start();
+    m_fileOutputWorker->startWork();
+    m_fileOutputWorkerThread.start();
 }
 
-void FileSinkOutput::stopWorker()
+void FileOutput::stopWorker()
 {
-    m_fileSinkWorker->stopWork();
-    m_fileSinkWorkerThread.quit();
-    m_fileSinkWorkerThread.wait();
+    m_fileOutputWorker->stopWork();
+    m_fileOutputWorkerThread.quit();
+    m_fileOutputWorkerThread.wait();
 }
 
-QByteArray FileSinkOutput::serialize() const
+QByteArray FileOutput::serialize() const
 {
     return m_settings.serialize();
 }
 
-bool FileSinkOutput::deserialize(const QByteArray& data)
+bool FileOutput::deserialize(const QByteArray& data)
 {
     bool success = true;
 
@@ -165,58 +165,58 @@ bool FileSinkOutput::deserialize(const QByteArray& data)
         success = false;
     }
 
-    MsgConfigureFileSink* message = MsgConfigureFileSink::create(m_settings, true);
+    MsgConfigureFileOutput* message = MsgConfigureFileOutput::create(m_settings, true);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureFileSink* messageToGUI = MsgConfigureFileSink::create(m_settings, true);
+        MsgConfigureFileOutput* messageToGUI = MsgConfigureFileOutput::create(m_settings, true);
         m_guiMessageQueue->push(messageToGUI);
     }
 
     return success;
 }
 
-const QString& FileSinkOutput::getDeviceDescription() const
+const QString& FileOutput::getDeviceDescription() const
 {
 	return m_deviceDescription;
 }
 
-int FileSinkOutput::getSampleRate() const
+int FileOutput::getSampleRate() const
 {
 	return m_settings.m_sampleRate;
 }
 
-quint64 FileSinkOutput::getCenterFrequency() const
+quint64 FileOutput::getCenterFrequency() const
 {
 	return m_settings.m_centerFrequency;
 }
 
-void FileSinkOutput::setCenterFrequency(qint64 centerFrequency)
+void FileOutput::setCenterFrequency(qint64 centerFrequency)
 {
-    FileSinkSettings settings = m_settings;
+    FileOutputSettings settings = m_settings;
     settings.m_centerFrequency = centerFrequency;
 
-    MsgConfigureFileSink* message = MsgConfigureFileSink::create(settings, false);
+    MsgConfigureFileOutput* message = MsgConfigureFileOutput::create(settings, false);
     m_inputMessageQueue.push(message);
 
     if (m_guiMessageQueue)
     {
-        MsgConfigureFileSink* messageToGUI = MsgConfigureFileSink::create(settings, false);
+        MsgConfigureFileOutput* messageToGUI = MsgConfigureFileOutput::create(settings, false);
         m_guiMessageQueue->push(messageToGUI);
     }
 }
 
-std::time_t FileSinkOutput::getStartingTimeStamp() const
+std::time_t FileOutput::getStartingTimeStamp() const
 {
 	return m_startingTimeStamp;
 }
 
-bool FileSinkOutput::handleMessage(const Message& message)
+bool FileOutput::handleMessage(const Message& message)
 {
-	if (MsgConfigureFileSinkName::match(message))
+	if (MsgConfigureFileOutputName::match(message))
 	{
-		MsgConfigureFileSinkName& conf = (MsgConfigureFileSinkName&) message;
+		MsgConfigureFileOutputName& conf = (MsgConfigureFileOutputName&) message;
 		m_fileName = conf.getFileName();
 		openFileStream();
 		return true;
@@ -224,7 +224,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	else if (MsgStartStop::match(message))
 	{
         MsgStartStop& cmd = (MsgStartStop&) message;
-        qDebug() << "FileSinkOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
+        qDebug() << "FileOutput::handleMessage: MsgStartStop: " << (cmd.getStartStop() ? "start" : "stop");
 
         if (cmd.getStartStop())
         {
@@ -240,19 +240,19 @@ bool FileSinkOutput::handleMessage(const Message& message)
 
         return true;
 	}
-	else if (MsgConfigureFileSink::match(message))
+	else if (MsgConfigureFileOutput::match(message))
     {
-	    qDebug() << "FileSinkOutput::handleMessage: MsgConfigureFileSink";
-	    MsgConfigureFileSink& conf = (MsgConfigureFileSink&) message;
+	    qDebug() << "FileOutput::handleMessage: MsgConfigureFileOutput";
+	    MsgConfigureFileOutput& conf = (MsgConfigureFileOutput&) message;
         applySettings(conf.getSettings(), conf.getForce());
         return true;
     }
-	else if (MsgConfigureFileSinkWork::match(message))
+	else if (MsgConfigureFileOutputWork::match(message))
 	{
-		MsgConfigureFileSinkWork& conf = (MsgConfigureFileSinkWork&) message;
+		MsgConfigureFileOutputWork& conf = (MsgConfigureFileOutputWork&) message;
 		bool working = conf.isWorking();
 
-		if (m_fileSinkWorker != 0)
+		if (m_fileOutputWorker != 0)
 		{
 			if (working) {
 				startWorker();
@@ -263,13 +263,13 @@ bool FileSinkOutput::handleMessage(const Message& message)
 
 		return true;
 	}
-	else if (MsgConfigureFileSinkStreamTiming::match(message))
+	else if (MsgConfigureFileOutputStreamTiming::match(message))
 	{
-        MsgReportFileSinkStreamTiming *report;
+        MsgReportFileOutputStreamTiming *report;
 
-		if (m_fileSinkWorker != 0 && getMessageQueueToGUI())
+		if (m_fileOutputWorker != 0 && getMessageQueueToGUI())
 		{
-			report = MsgReportFileSinkStreamTiming::create(m_fileSinkWorker->getSamplesCount());
+			report = MsgReportFileOutputStreamTiming::create(m_fileOutputWorker->getSamplesCount());
 			getMessageQueueToGUI()->push(report);
 		}
 
@@ -281,7 +281,7 @@ bool FileSinkOutput::handleMessage(const Message& message)
 	}
 }
 
-void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
+void FileOutput::applySettings(const FileOutputSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
@@ -296,9 +296,9 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
     {
         m_settings.m_sampleRate = settings.m_sampleRate;
 
-        if (m_fileSinkWorker != 0)
+        if (m_fileOutputWorker != 0)
         {
-            m_fileSinkWorker->setSamplerate(m_settings.m_sampleRate);
+            m_fileOutputWorker->setSamplerate(m_settings.m_sampleRate);
         }
 
         forwardChange = true;
@@ -308,9 +308,9 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
     {
         m_settings.m_log2Interp = settings.m_log2Interp;
 
-        if (m_fileSinkWorker != 0)
+        if (m_fileOutputWorker != 0)
         {
-            m_fileSinkWorker->setLog2Interpolation(m_settings.m_log2Interp);
+            m_fileOutputWorker->setLog2Interpolation(m_settings.m_log2Interp);
         }
 
         forwardChange = true;
@@ -318,7 +318,7 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 
     if (forwardChange)
     {
-        qDebug("FileSinkOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d",
+        qDebug("FileOutput::applySettings: forward: m_centerFrequency: %llu m_sampleRate: %llu m_log2Interp: %d",
                 m_settings.m_centerFrequency,
                 m_settings.m_sampleRate,
                 m_settings.m_log2Interp);
@@ -328,7 +328,7 @@ void FileSinkOutput::applySettings(const FileSinkSettings& settings, bool force)
 
 }
 
-int FileSinkOutput::webapiRunGet(
+int FileOutput::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
@@ -337,7 +337,7 @@ int FileSinkOutput::webapiRunGet(
     return 200;
 }
 
-int FileSinkOutput::webapiRun(
+int FileOutput::webapiRun(
         bool run,
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)

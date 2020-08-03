@@ -21,48 +21,48 @@
 #include "util/simpleserializer.h"
 
 #ifdef SERVER_MODE
-#include "filesinkoutput.h"
+#include "fileoutput.h"
 #else
-#include "filesinkgui.h"
+#include "fileoutputgui.h"
 #endif
-#include "filesinkplugin.h"
+#include "fileoutputplugin.h"
 
-const PluginDescriptor FileSinkPlugin::m_pluginDescriptor = {
-    QString("FileSink"),
-	QString("File sink output"),
-	QString("4.14.16"),
+const PluginDescriptor FileOutputPlugin::m_pluginDescriptor = {
+    QString("FileOutput"),
+	QString("File output"),
+	QString("4.15.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString FileSinkPlugin::m_hardwareID = "FileSink";
-const QString FileSinkPlugin::m_deviceTypeID = FILESINK_DEVICE_TYPE_ID;
+const QString FileOutputPlugin::m_hardwareID = "FileOutput";
+const QString FileOutputPlugin::m_deviceTypeID = FILEOUTPUT_DEVICE_TYPE_ID;
 
-FileSinkPlugin::FileSinkPlugin(QObject* parent) :
+FileOutputPlugin::FileOutputPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& FileSinkPlugin::getPluginDescriptor() const
+const PluginDescriptor& FileOutputPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void FileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
+void FileOutputPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleSink(m_deviceTypeID, this);
 }
 
-void FileSinkPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
+void FileOutputPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
     if (listedHwIds.contains(m_hardwareID)) { // check if it was done
         return;
     }
 
     originDevices.append(OriginDevice(
-        "FileSink",
+        "FileOutput",
         m_hardwareID,
         QString(),
         0, // Sequence
@@ -73,7 +73,7 @@ void FileSinkPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& 
     listedHwIds.append(m_hardwareID);
 }
 
-PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks(const OriginDevices& originDevices)
+PluginInterface::SamplingDevices FileOutputPlugin::enumSampleSinks(const OriginDevices& originDevices)
 {
 	SamplingDevices result;
 
@@ -99,7 +99,7 @@ PluginInterface::SamplingDevices FileSinkPlugin::enumSampleSinks(const OriginDev
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
+PluginInstanceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -107,32 +107,32 @@ PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
     (void) sinkId;
     (void) widget;
     (void) deviceUISet;
-    return 0;
+    return nullptr;
 }
 #else
-PluginInstanceGUI* FileSinkPlugin::createSampleSinkPluginInstanceGUI(
+PluginInstanceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
-	if(sinkId == m_deviceTypeID)
+	if (sinkId == m_deviceTypeID)
 	{
-		FileSinkGui* gui = new FileSinkGui(deviceUISet);
+		FileOutputGui* gui = new FileOutputGui(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 #endif
 
-DeviceSampleSink* FileSinkPlugin::createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI)
+DeviceSampleSink* FileOutputPlugin::createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI)
 {
     if(sinkId == m_deviceTypeID)
     {
-        FileSinkOutput* output = new FileSinkOutput(deviceAPI);
+        FileOutput* output = new FileOutput(deviceAPI);
         return output;
     }
     else

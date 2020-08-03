@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKGUI_H
-#define INCLUDE_FILESINKGUI_H
+#ifndef INCLUDE_FILEOUTPUTGUI_H
+#define INCLUDE_FILEOUTPUTGUI_H
 
 #include <plugin/plugininstancegui.h>
 #include <QTimer>
@@ -24,23 +24,23 @@
 
 #include "util/messagequeue.h"
 
-#include "filesinkoutput.h"
-#include "filesinksettings.h"
+#include "fileoutput.h"
+#include "fileoutputsettings.h"
 
 
 class DeviceSampleSink;
 class DeviceUISet;
 
 namespace Ui {
-	class FileSinkGui;
+	class FileOutputGui;
 }
 
-class FileSinkGui : public QWidget, public PluginInstanceGUI {
+class FileOutputGui : public QWidget, public PluginInstanceGUI {
 	Q_OBJECT
 
 public:
-	explicit FileSinkGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
-	virtual ~FileSinkGui();
+	explicit FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent = 0);
+	virtual ~FileOutputGui();
 	virtual void destroy();
 
 	void setName(const QString& name);
@@ -55,12 +55,12 @@ public:
 	virtual bool handleMessage(const Message& message);
 
 private:
-	Ui::FileSinkGui* ui;
+	Ui::FileOutputGui* ui;
 
 	DeviceUISet* m_deviceUISet;
 	bool m_doApplySettings;
 	bool m_forceSettings;
-	FileSinkSettings m_settings;
+	FileOutputSettings m_settings;
     QString m_fileName;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
@@ -95,4 +95,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_FILESINKGUI_H
+#endif // INCLUDE_FILEOUTPUTGUI_H

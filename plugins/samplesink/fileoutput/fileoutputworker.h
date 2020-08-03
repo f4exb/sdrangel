@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FILESINKWORKER_H
-#define INCLUDE_FILESINKWORKER_H
+#ifndef INCLUDE_FILEOUTPUTWORKER_H
+#define INCLUDE_FILEOUTPUTWORKER_H
 
 #include <QObject>
 #include <QTimer>
@@ -29,16 +29,16 @@
 #include "dsp/inthalfbandfilter.h"
 #include "dsp/interpolators.h"
 
-#define FILESINK_THROTTLE_MS 50
+#define FILEOUTPUT_THROTTLE_MS 50
 
 class SampleSourceFifo;
 
-class FileSinkWorker : public QObject {
+class FileOutputWorker : public QObject {
 	Q_OBJECT
 
 public:
-	FileSinkWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
-	~FileSinkWorker();
+	FileOutputWorker(std::ofstream *samplesStream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
+	~FileOutputWorker();
 
 	void startWork();
 	void stopWork();
@@ -76,4 +76,4 @@ private slots:
 	void tick();
 };
 
-#endif // INCLUDE_FILESINKWORKER_H
+#endif // INCLUDE_FILEOUTPUTWORKER_H

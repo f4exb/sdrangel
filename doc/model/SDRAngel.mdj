@@ -23742,7 +23742,7 @@
 							"width": 153,
 							"height": 38,
 							"autoResize": false,
-							"text": "FileSink does not use this sample FIFO",
+							"text": "FileOutput does not use this sample FIFO",
 							"wordWrap": true
 						},
 						{
@@ -23788,7 +23788,7 @@
 							"width": 153,
 							"height": 77,
 							"autoResize": false,
-							"text": "Does the upsampling from baseband FIFO to device FIFO. FileSink pulls from baseband FIFO directly",
+							"text": "Does the upsampling from baseband FIFO to device FIFO. FileOutput pulls from baseband FIFO directly",
 							"wordWrap": true
 						},
 						{
