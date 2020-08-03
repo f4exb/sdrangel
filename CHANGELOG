@@ -1,3 +1,11 @@
+sdrangel (4.14.20-1) unstable; urgency=medium
+
+   * ATV Modulator: fixed 819 lines system
+   * Plugins with audio: fixed audio sample rate handling. Fixes #585
+   * GLShaderTextured: dynamic fallback to mutable storage. Implements #582
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 03 Aug 2020 11:20:10 +0200
+
 sdrangel (4.14.19-1) unstable; urgency=medium
 
    * DSD Demod: removed DMR Basic Privacy feature. Implements #574
