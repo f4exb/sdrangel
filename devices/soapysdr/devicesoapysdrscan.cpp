@@ -68,7 +68,7 @@ void DeviceSoapySDRScan::scan()
             SoapySDR::Kwargs::const_iterator kargIt;
 
             if ((kargIt = kit->find("label")) != kit->end()) {
-                m_deviceEnums.back().m_label = QString(kargIt->second.c_str());
+                m_deviceEnums.back().m_label = QString("%1: %2").arg(m_deviceEnums.back().m_driverName).arg(kargIt->second.c_str());
             } else { // if no label is registered for this device then create a label with the driver name and sequence
                 m_deviceEnums.back().m_label = QString("%1-%2").arg(m_deviceEnums.back().m_driverName).arg(deviceSeq);
             }
