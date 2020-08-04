@@ -20,6 +20,7 @@
 
 #include <QElapsedTimer>
 #include <vector>
+#include <memory>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/basebandsamplesink.h"
@@ -108,6 +109,7 @@ private:
 
     //*************** ATV PARAMETERS  ***************
     TVScreenAnalog *m_registeredTVScreen;
+	std::shared_ptr<TVScreenAnalogData> m_tvScreenData;
 
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTopNom;     //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - nominal value
@@ -198,7 +200,7 @@ private:
     inline void processSample(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-        m_registeredTVScreen->setDataColor(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo);
+		m_tvScreenData->setSampleValue(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo);
 
         if (m_settings.m_hSync)
         {
@@ -325,7 +327,7 @@ private:
 		float shiftSamples = 0.0f;
 		if (m_hSyncShiftCount != 0)
 			shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-		m_registeredTVScreen->selectRow(rowIndex,
+		m_tvScreenData->selectRow(rowIndex,
 			shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
 	}
 
@@ -358,7 +360,7 @@ private:
 
 		// TODO: CHANGE
 		float shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-		m_registeredTVScreen->selectRow(m_rowIndex,
+		m_tvScreenData->setSampleValue(m_rowIndex,
 			shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
     }
 };
