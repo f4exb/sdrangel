@@ -26,6 +26,7 @@
 #include "export.h"
 
 #include <memory>
+#include <algorithm>
 
 #include <QImage>
 #include <QMutex>
@@ -35,43 +36,110 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 
+class TVScreenAnalogData
+{
+public:
+	TVScreenAnalogData(int width, int height)
+	{
+		m_width = width;
+		m_height = height;
+
+		m_imageData = new int[width * height];
+		m_lineShiftData = new int[height];
+		m_outOfBoundsLine = new int[width];
+		m_currentLine = m_outOfBoundsLine;
+
+		std::fill(m_imageData, m_imageData + width * height, 0);
+		std::fill(m_lineShiftData, m_lineShiftData + height, 127);
+	}
+
+	~TVScreenAnalogData()
+	{
+		delete[] m_imageData;
+		delete[] m_lineShiftData;
+		delete[] m_outOfBoundsLine;
+	}
+
+	int getWidth()
+	{
+		return m_width;
+	}
+
+	int getHeight()
+	{
+		return m_height;
+	}
+
+	const int* getImageData()
+	{
+		return m_imageData;
+	}
+
+	const int* getLineShiftData()
+	{
+		return m_lineShiftData;
+	}
+
+	void selectRow(int line, float shift)
+	{
+		if ((line < m_height) && (line >= 0))
+		{
+			m_currentLine = m_imageData + line * m_width;
+			m_lineShiftData[line] = (1.0f + shift) * 127.5f;
+		}
+		else
+		{
+			m_currentLine = m_outOfBoundsLine;
+		}
+	}
+
+	void setSampleValue(int column, int value)
+	{
+		if ((column < m_width - 2) && (column >= -2))
+		{
+			m_currentLine[column + 2] = value;
+		}
+	}
+
+private:
+	int m_width;
+	int m_height;
+
+	int* m_imageData;
+	int* m_lineShiftData;
+
+	int* m_currentLine;
+	int* m_outOfBoundsLine;
+};
+
 class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
 	QTimer m_objTimer;
-	QMutex m_objMutex;
 
 	bool m_isDataChanged;
 
-	int m_objTextureLoc1;
-	int m_objTextureLoc2;
-	int m_objImageWidthLoc;
-	int m_objImageHeightLoc;
-	int m_objTexelWidthLoc;
-	int m_objTexelHeightLoc;
+	int m_textureLoc1;
+	int m_textureLoc2;
+	int m_imageWidthLoc;
+	int m_imageHeightLoc;
+	int m_texelWidthLoc;
+	int m_texelHeightLoc;
 	int m_vertexAttribIndex;
 	int m_texCoordAttribIndex;
+
+	std::shared_ptr<TVScreenAnalogData> m_data;
+
 	std::shared_ptr<QOpenGLShaderProgram> m_shader;
-
-	float m_time;
-
-	int m_cols;
-	int m_rows;
-
-	int* m_objCurrentRow;
-
-	std::shared_ptr<QImage> m_image;
-	std::shared_ptr<QImage> m_lineShifts;
 	std::shared_ptr<QOpenGLTexture> m_imageTexture;
 	std::shared_ptr<QOpenGLTexture> m_lineShiftsTexture;
 
 public:
 	TVScreenAnalog(QWidget *parent);
 
+	std::shared_ptr<TVScreenAnalogData> getData();
 	void resizeTVScreen(int intCols, int intRows);
-	void selectRow(int intLine, float shift);
-	void setDataColor(int intCol, int objColor);
 	void renderImage();
 
 private:
