@@ -2,6 +2,9 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QMouseEvent>
+#include <QDebug>
+#include <QDialog>
+
 #include "gui/rollupwidget.h"
 #include "ui_glspectrumgui.h"
 
@@ -117,27 +120,24 @@ int RollupWidget::arrangeRollups()
 	QFontMetrics fm(font());
 	int pos = fm.height() + 4;
 
-	for(int i = 0; i < children().count(); ++i)
+	for (int i = 0; i < children().count(); ++i)
 	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
-		if (r != nullptr)
+
+		if ((r != nullptr) && !r->isHidden() && isRollupChild(r))
 		{
-			pos += fm.height() + 2;
+            pos += fm.height() + 2;
+            r->move(2, pos + 3);
+            int h = 0;
 
-			if (!r->isHidden() && (r->windowTitle() != "Basic channel settings") && (r->windowTitle() != "Select device stream"))
-			{
-				r->move(2, pos + 3);
-				int h = 0;
+            if (r->hasHeightForWidth()) {
+                h = r->heightForWidth(width() - 4);
+            } else {
+                h = r->sizeHint().height();
+            }
 
-				if(r->hasHeightForWidth()) {
-					h = r->heightForWidth(width() - 4);
-				} else {
-				    h = r->sizeHint().height();
-				}
-
-				r->resize(width() - 4, h);
-				pos += r->height() + 5;
-			}
+            r->resize(width() - 4, h);
+            pos += r->height() + 5;
 		}
 	}
 
@@ -225,27 +225,32 @@ void RollupWidget::paintEvent(QPaintEvent*)
 	QObjectList::ConstIterator w = c.begin();
 	QObjectList::ConstIterator n = c.begin();
 
-	for(n = c.begin(); n != c.end(); ++n) {
-		if(qobject_cast<QWidget*>(*n) != NULL)
+	for (n = c.begin(); n != c.end(); ++n)
+    {
+		if (qobject_cast<QWidget*>(*n) != nullptr) {
 			break;
+        }
 	}
-	for(w = n; w != c.end(); w = n) {
-		if(n != c.end())
+
+	for (w = n; w != c.end(); w = n)
+    {
+		if (n != c.end()) {
 			++n;
-		for(; n != c.end(); ++n) {
-			if(qobject_cast<QWidget*>(*n) != NULL)
+        }
+
+		for (; n != c.end(); ++n)
+        {
+			if (qobject_cast<QWidget*>(*n) != nullptr) {
 				break;
+            }
 		}
-		pos += paintRollup(qobject_cast<QWidget*>(*w), pos, &p, n == c.end(), frame);
+
+        pos += paintRollup(qobject_cast<QWidget*>(*w), pos, &p, n == c.end(), frame);
 	}
 }
 
 int RollupWidget::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, const QColor& frame)
 {
-    if ((rollup->windowTitle() == "Basic channel settings") || (rollup->windowTitle() == "Select device stream")) {
-		return 0;
-	}
-
 	QFontMetrics fm(font());
 	int height = 1;
 
@@ -391,4 +396,9 @@ void RollupWidget::setStreamIndicator(const QString& indicator)
 {
 	m_streamIndicator = indicator;
 	update();
+}
+
+bool RollupWidget::isRollupChild(QWidget *childWidget)
+{
+    return (qobject_cast<QDialog*>(childWidget) == nullptr); // exclude Dialogs from rollups
 }

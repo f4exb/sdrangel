@@ -49,6 +49,9 @@ protected:
 
     void resetContextMenuType() { m_contextMenuType = ContextMenuNone; }
 	void setStreamIndicator(const QString& indicator);
+
+private:
+    static bool isRollupChild(QWidget *childWidget); //!< chidl is part of rollups (ex: not a dialog)
 };
 
 #endif // INCLUDE_ROLLUPWIDGET_H
