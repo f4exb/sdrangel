@@ -43,14 +43,12 @@ ATVDemodSink::ATVDemodSink() :
     m_ampMin(-1.0f),
     m_ampMax(1.0f),
     m_ampDelta(2.0f),
-    m_colIndex(0),
-    m_sampleIndex(0),
-    m_sampleIndexDetected(0),
-    m_hSyncShiftSum(0.0f),
-    m_hSyncShiftCount(0),
+    m_sampleOffset(0),
+	m_sampleOffsetFrac(0.0f),
+    m_sampleOffsetDetected(0),
+	m_hSyncShift(0.0f),
     m_hSyncErrorCount(0),
     m_amSampleIndex(0),
-    m_rowIndex(0),
     m_lineIndex(0),
     m_ampAverage(4800),
     m_bfoPLL(200/1000000, 100/1000000, 0.01),
@@ -490,8 +488,6 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     }
 
     m_fieldIndex = 0;
-    m_colIndex = 0;
-    m_rowIndex = 0;
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
@@ -584,8 +580,6 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         }
 
         m_fieldIndex = 0;
-        m_colIndex = 0;
-        m_rowIndex = 0;
     }
 
     if ((settings.m_topTimeFactor != m_settings.m_topTimeFactor) || force) {

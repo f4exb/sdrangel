@@ -150,15 +150,14 @@ private:
     float m_fltBufferI[6];
     float m_fltBufferQ[6];
 
-    int m_colIndex;
-    int m_sampleIndex;         // assumed (averaged) sample offset from the start of horizontal sync pulse
-    int m_sampleIndexDetected; // detected sample offset from the start of horizontal sync pulse
-    int m_amSampleIndex;
-    int m_rowIndex;
+	int m_amSampleIndex;
+
+    int m_sampleOffset;         // assumed (averaged) sample offset from the start of horizontal sync pulse
+	float m_sampleOffsetFrac;   // sample offset, fractional part
+    int m_sampleOffsetDetected; // detected sample offset from the start of horizontal sync pulse
     int m_lineIndex;
 
-    float m_hSyncShiftSum;
-    int m_hSyncShiftCount;
+	float m_hSyncShift;
     int m_hSyncErrorCount;
 
     float prevSample;
@@ -200,67 +199,71 @@ private:
     inline void processSample(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-		m_tvScreenData->setSampleValue(m_sampleIndex - m_numberSamplesPerHSync, sampleVideo);
+		m_tvScreenData->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
 
         if (m_settings.m_hSync)
         {
             // Horizontal Synchro detection
             if ((prevSample >= m_settings.m_levelSynchroTop &&
                 sample < m_settings.m_levelSynchroTop) // horizontal synchro detected
-                && (m_sampleIndexDetected > m_samplesPerLine - m_numberSamplesPerHTopNom))
+                && (m_sampleOffsetDetected > m_samplesPerLine - m_numberSamplesPerHTopNom))
             {
-                double sampleIndexDetectedFrac =
+                float sampleOffsetDetectedFrac =
                     (sample - m_settings.m_levelSynchroTop) / (prevSample - sample);
-                double hSyncShift = -m_sampleIndex - sampleIndexDetectedFrac;
+                float hSyncShift = -m_sampleOffset - m_sampleOffsetFrac - sampleOffsetDetectedFrac;
                 if (hSyncShift > m_samplesPerLine / 2)
-                    hSyncShift -= m_samplesPerLine;
+					hSyncShift -= m_samplesPerLine;
                 else if (hSyncShift < -m_samplesPerLine / 2)
-                    hSyncShift += m_samplesPerLine;
+					hSyncShift += m_samplesPerLine;
 
                 if (fabs(hSyncShift) > m_numberSamplesPerHTopNom)
                 {
                     m_hSyncErrorCount++;
-                    if (m_hSyncErrorCount >= 8)
+                    if (m_hSyncErrorCount >= 4)
                     {
                         // Fast sync: shift is too large, needs to be fixed ASAP
-                        m_sampleIndex = 0;
-                        m_hSyncShiftSum = 0.0;
-                        m_hSyncShiftCount = 0;
+						m_hSyncShift = hSyncShift;
                         m_hSyncErrorCount = 0;
                     }
                 }
                 else
                 {
-                    m_hSyncShiftSum += hSyncShift;
-                    m_hSyncShiftCount++;
+					// Slow sync: slight adjustment is needed
+					m_hSyncShift = hSyncShift * 0.2f;
                     m_hSyncErrorCount = 0;
                 }
-                m_sampleIndexDetected = 0;
+				m_sampleOffsetDetected = 0;
             }
             else
-                m_sampleIndexDetected++;
+				m_sampleOffsetDetected++;
         }
-        else
-        {
-            m_hSyncShiftSum = 0.0f;
-            m_hSyncShiftCount = 0;
-        }
-        m_sampleIndex++;
+		m_sampleOffset++;
 
         if (m_settings.m_vSync)
         {
-            if (m_sampleIndex > m_fieldDetectStartPos && m_sampleIndex < m_fieldDetectEndPos)
+            if (m_sampleOffset > m_fieldDetectStartPos && m_sampleOffset < m_fieldDetectEndPos)
                 m_fieldDetectSampleCount += sample < m_settings.m_levelSynchroTop;
-            if (m_sampleIndex > m_vSyncDetectStartPos && m_sampleIndex < m_vSyncDetectEndPos)
+            if (m_sampleOffset > m_vSyncDetectStartPos && m_sampleOffset < m_vSyncDetectEndPos)
                 m_vSyncDetectSampleCount += sample < m_settings.m_levelSynchroTop;
         }
 
         // end of line
-        if (m_sampleIndex >= m_samplesPerLine)
+        if (m_sampleOffset >= m_samplesPerLine)
         {
-            m_sampleIndex = 0;
+			if (m_settings.m_hSync)
+			{
+				float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac;
+				m_sampleOffset = sampleOffsetFloat;
+				m_sampleOffsetFrac = sampleOffsetFloat - m_sampleOffset;
+			}
+			else
+			{
+				m_sampleOffset = 0;
+			}
+			m_hSyncShift = 0.0f;
 
-            if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
+			m_lineIndex++;
+			if (m_settings.m_atvStd == ATVDemodSettings::ATVStdHSkip) {
                 processEOLHSkip();
             } else {
                 processEOLClassic();
@@ -273,24 +276,9 @@ private:
     // Standard vertical sync
     inline void processEOLClassic()
     {
-        m_lineIndex++;
-
         if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
         {
-            float shiftSamples = 0.0f;
-
-            // Slow sync: slight adjustment is needed
-            if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
-            {
-                shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-                m_sampleIndex = shiftSamples;
-                m_hSyncShiftSum = 0.0f;
-                m_hSyncShiftCount = 0;
-                m_hSyncErrorCount = 0;
-            }
 			m_registeredTVScreen->renderImage();
-            //m_registeredTVScreen->renderImage(0,
-            //    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
         }
 
         if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
@@ -323,47 +311,21 @@ private:
         if (m_interleaved)
             rowIndex = rowIndex * 2 - m_fieldIndex;
 
-		// TODO: CHANGE
-		float shiftSamples = 0.0f;
-		if (m_hSyncShiftCount != 0)
-			shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-		m_tvScreenData->selectRow(rowIndex,
-			shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+		m_tvScreenData->selectRow(rowIndex, m_sampleOffsetFrac);
 	}
 
     // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
     inline void processEOLHSkip()
     {
-        m_lineIndex++;
-        m_rowIndex++;
-
-        if ((m_sampleIndexDetected > (3*m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
+		if ((m_sampleOffsetDetected > (3 * m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
             || (!m_settings.m_vSync && (m_lineIndex >= m_settings.m_nbLines))) // Vsync ignored and reached nominal number of lines per frame
         {
-            float shiftSamples = 0.0f;
-
-            // Slow sync: slight adjustment is needed
-            if (m_hSyncShiftCount != 0 && m_settings.m_hSync)
-            {
-                shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-                m_sampleIndex = shiftSamples;
-                m_hSyncShiftSum = 0.0f;
-                m_hSyncShiftCount = 0;
-                m_hSyncErrorCount = 0;
-            }
 			m_registeredTVScreen->renderImage();
-            //m_registeredTVScreen->renderImage(0,
-            //    shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
-            m_lineIndex = 0;
-            m_rowIndex = 0;
+			m_lineIndex = 0;
         }
 
-		// TODO: CHANGE
-		float shiftSamples = m_hSyncShiftSum / m_hSyncShiftCount;
-		m_tvScreenData->setSampleValue(m_rowIndex,
-			shiftSamples < -1.0f ? -1.0f : (shiftSamples > 1.0f ? 1.0f : shiftSamples));
+		m_tvScreenData->selectRow(m_lineIndex, m_sampleOffsetFrac);
     }
 };
-
 
 #endif // INCLUDE_ATVDEMODSINK_H
