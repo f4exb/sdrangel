@@ -104,10 +104,34 @@ void TVScreenAnalog::initializeGL()
 {
 	initializeOpenGLFunctions();
 
+	connect(QOpenGLContext::currentContext(), &QOpenGLContext::aboutToBeDestroyed,
+		this, &TVScreenAnalog::cleanup); // TODO: when migrating to QOpenGLWidget
+
 	m_shader = std::make_shared<QOpenGLShaderProgram>(this);
-	m_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource);
-	m_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource);
-	m_shader->link();
+	if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource))
+	{
+		qWarning()
+			<< "TVScreenAnalog::initializeGL: error in vertex shader:"
+			<< m_shader->log();
+		m_shader = nullptr;
+		return;
+	}
+	if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource))
+	{
+		qWarning()
+			<< "TVScreenAnalog::initializeGL: error in fragment shader:"
+			<< m_shader->log();
+		m_shader = nullptr;
+		return;
+	}
+	if (!m_shader->link())
+	{
+		qWarning()
+			<< "TVScreenAnalog::initializeGL: error linking shader:"
+			<< m_shader->log();
+		m_shader = nullptr;
+		return;
+	}
 
 	m_vertexAttribIndex = m_shader->attributeLocation("vertex");
 	m_texCoordAttribIndex = m_shader->attributeLocation("texCoord");
@@ -117,9 +141,6 @@ void TVScreenAnalog::initializeGL()
 	m_imageHeightLoc = m_shader->uniformLocation("imh");
 	m_texelWidthLoc = m_shader->uniformLocation("tlw");
 	m_texelHeightLoc = m_shader->uniformLocation("tlh");
-
-	connect(QOpenGLContext::currentContext(), &QOpenGLContext::aboutToBeDestroyed,
-		this, &TVScreenAnalog::cleanup); // TODO: when migrating to QOpenGLWidget
 }
 
 void TVScreenAnalog::initializeTextures()
@@ -162,6 +183,13 @@ void TVScreenAnalog::paintGL()
 {
 	m_isDataChanged = false;
 
+	if (!m_shader)
+	{
+		glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		return;
+	}
+
 	if (!m_imageTexture ||
 		m_imageTexture->width() != m_data->getWidth() ||
 		m_imageTexture->height() != m_data->getHeight())
@@ -192,7 +220,7 @@ void TVScreenAnalog::paintGL()
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
 		1, m_data->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, m_data->getLineShiftData());
 
-	float rectHalfWidth = 1.0f + 4 * texelWidth;
+	float rectHalfWidth = 1.0f + 4.0f / (imageWidth - 4.0f);
 	GLfloat vertices[] =
 	{
 		-rectHalfWidth, -1.0f,
