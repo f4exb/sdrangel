@@ -22,13 +22,14 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
 #include <ctime>
+
+#include "dsp/filerecordinterface.h"
 #include "export.h"
 
 class Message;
 
-class SDRBASE_API FileRecord : public BasebandSampleSink {
+class SDRBASE_API FileRecord : public FileRecordInterface {
 public:
 
 #pragma pack(push, 1)
@@ -44,34 +45,39 @@ public:
 #pragma pack(pop)
 
 	FileRecord();
-    FileRecord(const QString& filename);
+    FileRecord(const QString& fileBase);
 	virtual ~FileRecord();
 
     quint64 getByteCount() const { return m_byteCount; }
+    void setMsShift(int shift) { m_msShift = shift; }
+    const QString& getCurrentFileName() { return m_curentFileName; }
 
-    void setFileName(const QString& filename);
     void genUniqueFileName(uint deviceUID, int istream = -1);
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);
-    void startRecording();
-    void stopRecording();
-    bool isRecording() const { return m_recordOn; }
+
+    virtual void setFileName(const QString& fileBase);
+    virtual void startRecording();
+    virtual void stopRecording();
+    virtual bool isRecording() const { return m_recordOn; }
+
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false
     static void writeHeader(std::ofstream& samplefile, Header& header);
 
 private:
-	QString m_fileName;
+	QString m_fileBase;
 	quint32 m_sampleRate;
 	quint64 m_centerFrequency;
 	bool m_recordOn;
     bool m_recordStart;
     std::ofstream m_sampleFile;
+    QString m_curentFileName;
     quint64 m_byteCount;
+    int m_msShift;
 
-	void handleConfigure(const QString& fileName);
     void writeHeader();
 };
 
