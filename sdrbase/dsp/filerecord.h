@@ -44,17 +44,19 @@ public:
 #pragma pack(pop)
 
 	FileRecord();
-    FileRecord(const QString& filename);
+    FileRecord(const QString& fileBase);
 	virtual ~FileRecord();
 
     quint64 getByteCount() const { return m_byteCount; }
+    void setMsShift(int shift) { m_msShift = shift; }
+    const QString& getCurrentFileName() { return m_curentFileName; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);
 
-    virtual void setFileName(const QString& filename);
+    virtual void setFileName(const QString& fileBase);
     virtual void startRecording();
     virtual void stopRecording();
     virtual bool isRecording() const { return m_recordOn; }
@@ -63,15 +65,16 @@ public:
     static void writeHeader(std::ofstream& samplefile, Header& header);
 
 private:
-	QString m_fileName;
+	QString m_fileBase;
 	quint32 m_sampleRate;
 	quint64 m_centerFrequency;
 	bool m_recordOn;
     bool m_recordStart;
     std::ofstream m_sampleFile;
+    QString m_curentFileName;
     quint64 m_byteCount;
+    int m_msShift;
 
-	void handleConfigure(const QString& fileName);
     void writeHeader();
 };
 

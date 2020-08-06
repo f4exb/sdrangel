@@ -31,9 +31,9 @@ FileRecordInterface::~FileRecordInterface()
 QString FileRecordInterface::genUniqueFileName(unsigned int deviceUID, int istream)
 {
     if (istream < 0) {
-        return QString("rec%1_%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+        return QString("rec%1.%2.sdriq").arg(deviceUID).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
     } else {
-        return QString("rec%1_%2_%3.sdriq").arg(deviceUID).arg(istream).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+        return QString("rec%1_%2.%3.sdriq").arg(deviceUID).arg(istream).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
     }
 }
 
@@ -48,6 +48,10 @@ FileRecordInterface::RecordType FileRecordInterface::guessTypeFromFileName(const
 
         if (extension == "sdriq")
         {
+            if (dotBreakout.length() > 1) {
+                dotBreakout.removeLast();
+            }
+
             fileBase = dotBreakout.join(QLatin1Char('.'));
             return RecordTypeSdrIQ;
         }

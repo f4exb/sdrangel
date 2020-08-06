@@ -19,6 +19,7 @@
 #include <boost/cstdint.hpp>
 
 #include <QDebug>
+#include <QDateTime>
 
 #include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
@@ -28,19 +29,20 @@
 
 FileRecord::FileRecord() :
 	FileRecordInterface(),
-    m_fileName("test.sdriq"),
+    m_fileBase("test"),
     m_sampleRate(0),
     m_centerFrequency(0),
 	m_recordOn(false),
     m_recordStart(false),
-    m_byteCount(0)
+    m_byteCount(0),
+    m_msShift(0)
 {
 	setObjectName("FileRecord");
 }
 
-FileRecord::FileRecord(const QString& filename) :
+FileRecord::FileRecord(const QString& fileBase) :
     FileRecordInterface(),
-    m_fileName(filename),
+    m_fileBase(fileBase),
     m_sampleRate(0),
     m_centerFrequency(0),
     m_recordOn(false),
@@ -55,11 +57,11 @@ FileRecord::~FileRecord()
     stopRecording();
 }
 
-void FileRecord::setFileName(const QString& filename)
+void FileRecord::setFileName(const QString& fileBase)
 {
     if (!m_recordOn)
     {
-        m_fileName = filename;
+        m_fileBase = fileBase;
     }
 }
 
@@ -94,13 +96,19 @@ void FileRecord::stop()
 
 void FileRecord::startRecording()
 {
+    if (m_recordOn) {
+        stopRecording();
+    }
+
     if (!m_sampleFile.is_open())
     {
     	qDebug() << "FileRecord::startRecording";
-        m_sampleFile.open(m_fileName.toStdString().c_str(), std::ios::binary);
+        m_curentFileName = QString("%1.%2.sdriq").arg(m_fileBase).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
+        m_sampleFile.open(m_curentFileName.toStdString().c_str(), std::ios::binary);
         m_recordOn = true;
         m_recordStart = true;
         m_byteCount = 0;
+        writeHeader();
     }
 }
 
@@ -124,22 +132,17 @@ bool FileRecord::handleMessage(const Message& message)
 		m_centerFrequency = notif.getCenterFrequency();
 		qDebug() << "FileRecord::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
 				<< " m_centerFrequency: " << m_centerFrequency;
-		return true;
+
+        if (m_recordOn) {
+            startRecording();
+        }
+
+        return true;
 	}
     else
     {
         return false;
     }
-}
-
-void FileRecord::handleConfigure(const QString& fileName)
-{
-    if (fileName != m_fileName)
-    {
-        stopRecording();
-    }
-
-	m_fileName = fileName;
 }
 
 void FileRecord::writeHeader()
@@ -148,7 +151,7 @@ void FileRecord::writeHeader()
     header.sampleRate = m_sampleRate;
     header.centerFrequency = m_centerFrequency;
     std::time_t ts = time(0);
-    header.startTimeStamp = ts;
+    header.startTimeStamp = ts + (m_msShift / 1000);
     header.sampleSize = SDR_RX_SAMP_SZ;
     header.filler = 0;
 
