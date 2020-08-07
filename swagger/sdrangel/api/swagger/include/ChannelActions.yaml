@@ -17,5 +17,7 @@ ChannelActions:
     originatorChannelIndex:
       description: Optional for reverse API. This is the channel index from where the message comes from.
       type: integer
+    FileSinkActions:
+      $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkActions"
     FileSourceActions:
       $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceActions"
