@@ -31,8 +31,8 @@ int FileSinkWebAPIAdapter::webapiSettingsGet(
 {
     (void) errorMessage;
     (void) response;
-    response.setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
-    response.getSigMfFileSinkSettings()->init();
+    response.setFileSinkSettings(new SWGSDRangel::SWGFileSinkSettings());
+    response.getFileSinkSettings()->init();
     FileSink::webapiFormatChannelSettings(response, m_settings);
 
     return 200;

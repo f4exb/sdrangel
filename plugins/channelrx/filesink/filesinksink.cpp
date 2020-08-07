@@ -18,7 +18,6 @@
 #include <QDebug>
 
 #include "dsp/dspcommands.h"
-#include "dsp/sigmffilerecord.h"
 #include "dsp/spectrumvis.h"
 
 #include "filesinkmessages.h"

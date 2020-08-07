@@ -7,6 +7,7 @@ add_subdirectory(demodssb)
 add_subdirectory(udpsink)
 add_subdirectory(demodwfm)
 add_subdirectory(localsink)
+add_subdirectory(filesink)
 add_subdirectory(freqtracker)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
