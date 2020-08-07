@@ -58,6 +58,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_datv_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
+    file_sink_settings = nullptr;
+    m_file_sink_settings_isSet = false;
     file_source_settings = nullptr;
     m_file_source_settings_isSet = false;
     free_dv_demod_settings = nullptr;
@@ -132,6 +134,8 @@ SWGChannelSettings::init() {
     m_datv_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
+    file_sink_settings = new SWGFileSinkSettings();
+    m_file_sink_settings_isSet = false;
     file_source_settings = new SWGFileSourceSettings();
     m_file_source_settings_isSet = false;
     free_dv_demod_settings = new SWGFreeDVDemodSettings();
@@ -210,6 +214,9 @@ SWGChannelSettings::cleanup() {
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
+    }
+    if(file_sink_settings != nullptr) { 
+        delete file_sink_settings;
     }
     if(file_source_settings != nullptr) { 
         delete file_source_settings;
@@ -308,6 +315,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
+    ::SWGSDRangel::setValue(&file_sink_settings, pJson["FileSinkSettings"], "SWGFileSinkSettings", "SWGFileSinkSettings");
+    
     ::SWGSDRangel::setValue(&file_source_settings, pJson["FileSourceSettings"], "SWGFileSourceSettings", "SWGFileSourceSettings");
     
     ::SWGSDRangel::setValue(&free_dv_demod_settings, pJson["FreeDVDemodSettings"], "SWGFreeDVDemodSettings", "SWGFreeDVDemodSettings");
@@ -404,6 +413,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
+    }
+    if((file_sink_settings != nullptr) && (file_sink_settings->isSet())){
+        toJsonValue(QString("FileSinkSettings"), file_sink_settings, obj, QString("SWGFileSinkSettings"));
     }
     if((file_source_settings != nullptr) && (file_source_settings->isSet())){
         toJsonValue(QString("FileSourceSettings"), file_source_settings, obj, QString("SWGFileSourceSettings"));
@@ -611,6 +623,16 @@ void
 SWGChannelSettings::setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings) {
     this->dsd_demod_settings = dsd_demod_settings;
     this->m_dsd_demod_settings_isSet = true;
+}
+
+SWGFileSinkSettings*
+SWGChannelSettings::getFileSinkSettings() {
+    return file_sink_settings;
+}
+void
+SWGChannelSettings::setFileSinkSettings(SWGFileSinkSettings* file_sink_settings) {
+    this->file_sink_settings = file_sink_settings;
+    this->m_file_sink_settings_isSet = true;
 }
 
 SWGFileSourceSettings*
@@ -841,6 +863,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_sink_settings && file_sink_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_source_settings && file_source_settings->isSet()){

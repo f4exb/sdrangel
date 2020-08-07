@@ -36,6 +36,8 @@ SWGChannelActions::SWGChannelActions() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    file_sink_actions = nullptr;
+    m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
     m_file_source_actions_isSet = false;
     sig_mf_file_sink_actions = nullptr;
@@ -56,6 +58,8 @@ SWGChannelActions::init() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    file_sink_actions = new SWGFileSinkActions();
+    m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
     m_file_source_actions_isSet = false;
     sig_mf_file_sink_actions = new SWGSigMFFileSinkActions();
@@ -70,6 +74,9 @@ SWGChannelActions::cleanup() {
 
 
 
+    if(file_sink_actions != nullptr) { 
+        delete file_sink_actions;
+    }
     if(file_source_actions != nullptr) { 
         delete file_source_actions;
     }
@@ -96,6 +103,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_device_set_index, pJson["originatorDeviceSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_channel_index, pJson["originatorChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
     
@@ -128,6 +137,9 @@ SWGChannelActions::asJsonObject() {
     }
     if(m_originator_channel_index_isSet){
         obj->insert("originatorChannelIndex", QJsonValue(originator_channel_index));
+    }
+    if((file_sink_actions != nullptr) && (file_sink_actions->isSet())){
+        toJsonValue(QString("FileSinkActions"), file_sink_actions, obj, QString("SWGFileSinkActions"));
     }
     if((file_source_actions != nullptr) && (file_source_actions->isSet())){
         toJsonValue(QString("FileSourceActions"), file_source_actions, obj, QString("SWGFileSourceActions"));
@@ -179,6 +191,16 @@ SWGChannelActions::setOriginatorChannelIndex(qint32 originator_channel_index) {
     this->m_originator_channel_index_isSet = true;
 }
 
+SWGFileSinkActions*
+SWGChannelActions::getFileSinkActions() {
+    return file_sink_actions;
+}
+void
+SWGChannelActions::setFileSinkActions(SWGFileSinkActions* file_sink_actions) {
+    this->file_sink_actions = file_sink_actions;
+    this->m_file_sink_actions_isSet = true;
+}
+
 SWGFileSourceActions*
 SWGChannelActions::getFileSourceActions() {
     return file_source_actions;
@@ -214,6 +236,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(file_sink_actions && file_sink_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_source_actions && file_source_actions->isSet()){

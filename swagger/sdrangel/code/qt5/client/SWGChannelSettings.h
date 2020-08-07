@@ -33,6 +33,7 @@
 #include "SWGChirpChatModSettings.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
+#include "SWGFileSinkSettings.h"
 #include "SWGFileSourceSettings.h"
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
@@ -115,6 +116,9 @@ public:
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
+
+    SWGFileSinkSettings* getFileSinkSettings();
+    void setFileSinkSettings(SWGFileSinkSettings* file_sink_settings);
 
     SWGFileSourceSettings* getFileSourceSettings();
     void setFileSourceSettings(SWGFileSourceSettings* file_source_settings);
@@ -218,6 +222,9 @@ private:
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
+
+    SWGFileSinkSettings* file_sink_settings;
+    bool m_file_sink_settings_isSet;
 
     SWGFileSourceSettings* file_source_settings;
     bool m_file_source_settings_isSet;

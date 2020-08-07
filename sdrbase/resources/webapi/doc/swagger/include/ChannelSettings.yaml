@@ -39,6 +39,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodSettings"
     DSDDemodSettings:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodSettings"
+    FileSinkSettings:
+      $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkSettings"
     FileSourceSettings:
       $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceSettings"
     FreeDVDemodSettings:
