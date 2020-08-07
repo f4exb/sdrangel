@@ -2483,6 +2483,8 @@ definitions:
         $ref: "http://swgserver:8081/api/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
       DSDDemodReport:
         $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      FileSinkReport:
+        $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkReport"
       FileSourceReport:
         $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
       FreeDVDemodReport:
