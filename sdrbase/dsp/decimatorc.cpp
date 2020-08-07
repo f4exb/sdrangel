@@ -46,6 +46,8 @@ bool DecimatorC::decimate(Complex c, Complex& cd)
         return decimate32(c, cd);
     } else if (m_log2Decim == 6) {
         return decimate64(c, cd);
+    } else {
+        return true; // no decimation
     }
 }
 
