@@ -68,6 +68,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channel.demodatv", "ATVDemodSettings"},
     {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
     {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
+    {"sdrangel.channel.filesink", "FileSinkSettings"},
     {"sdrangel.channeltx.filesource", "FileSourceSettings"},
     {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
     {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
@@ -148,6 +149,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"ChirpChatMod", "ChirpChatModSettings"},
     {"DATVDemod", "DATVDemodSettings"},
     {"DSDDemod", "DSDDemodSettings"},
+    {"FileSink", "FileSinkSettings"},
     {"FileSource", "FileSourceSettings"},
     {"FreeDVDemod", "FreeDVDemodSettings"},
     {"FreeDVMod", "FreeDVModSettings"},
@@ -170,6 +172,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
+    {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
     {"SigMFFileSink", "SigMFFileSinkActions"}
 };
@@ -3426,6 +3429,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
             channelSettings->getDsdDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "FileSinkSettings")
+        {
+            channelSettings->setFileSinkSettings(new SWGSDRangel::SWGFileSinkSettings());
+            channelSettings->getFileSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "FileSourceSettings")
         {
             channelSettings->setFileSourceSettings(new SWGSDRangel::SWGFileSourceSettings());
@@ -3559,7 +3567,12 @@ bool WebAPIRequestMapper::getChannelActions(
         QJsonObject actionsJsonObject = channelActionsJson[channelActionsKey].toObject();
         channelActionsKeys = actionsJsonObject.keys();
 
-        if (channelActionsKey == "FileSourceActions")
+        if (channelActionsKey == "FileSinkActions")
+        {
+            channelActions->setFileSinkActions(new SWGSDRangel::SWGFileSinkActions());
+            channelActions->getFileSinkActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "FileSourceActions")
         {
             channelActions->setFileSourceActions(new SWGSDRangel::SWGFileSourceActions());
             channelActions->getFileSourceActions()->fromJsonObject(actionsJsonObject);
