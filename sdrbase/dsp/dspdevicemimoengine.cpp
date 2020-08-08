@@ -205,26 +205,6 @@ void DSPDeviceMIMOEngine::removeMIMOChannel(MIMOChannel *channel)
     m_syncMessenger.sendWait(cmd);
 }
 
-void DSPDeviceMIMOEngine::addAncillarySink(BasebandSampleSink* sink, int index)
-{
-	qDebug() << "DSPDeviceMIMOEngine::addSink: "
-        << sink->objectName().toStdString().c_str()
-        << " at: "
-        << index;
-	AddBasebandSampleSink cmd(sink, index);
-	m_syncMessenger.sendWait(cmd);
-}
-
-void DSPDeviceMIMOEngine::removeAncillarySink(BasebandSampleSink* sink, int index)
-{
-	qDebug() << "DSPDeviceMIMOEngine::removeSink: "
-        << sink->objectName().toStdString().c_str()
-        << " at: "
-        << index;
-	RemoveBasebandSampleSink cmd(sink, index);
-	m_syncMessenger.sendWait(cmd);
-}
-
 void DSPDeviceMIMOEngine::addSpectrumSink(BasebandSampleSink* spectrumSink)
 {
 	qDebug() << "DSPDeviceMIMOEngine::addSpectrumSink: " << spectrumSink->objectName().toStdString().c_str();
