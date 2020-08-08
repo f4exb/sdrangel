@@ -236,9 +236,6 @@ public:
     void addMIMOChannel(MIMOChannel *channel);                                     //!< Add a MIMO channel
     void removeMIMOChannel(MIMOChannel *channel);                                  //!< Remove a MIMO channel
 
-	void addAncillarySink(BasebandSampleSink* sink, int index = 0);    //!< Add an ancillary sink like a I/Q recorder
-	void removeAncillarySink(BasebandSampleSink* sink, int index = 0); //!< Remove an ancillary sample sink
-
 	void addSpectrumSink(BasebandSampleSink* spectrumSink);    //!< Add a spectrum vis baseband sample sink
 	void removeSpectrumSink(BasebandSampleSink* spectrumSink); //!< Add a spectrum vis baseband sample sink
     void setSpectrumSinkInput(bool sourceElseSink, int index);
