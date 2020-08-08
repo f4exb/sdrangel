@@ -33,7 +33,6 @@ class QNetworkReply;
 class DeviceAPI;
 class BladeRF2MIThread;
 class BladeRF2MOThread;
-class FileRecord;
 class DeviceBladeRF2;
 struct bladerf_gain_modes;
 struct bladerf;

@@ -32,7 +32,6 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
-#include "dsp/filerecord.h"
 
 #include "testmiworker.h"
 #include "testmi.h"

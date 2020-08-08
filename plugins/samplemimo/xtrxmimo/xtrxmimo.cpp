@@ -33,7 +33,6 @@
 #include "dsp/dspdevicemimoengine.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
-#include "dsp/filerecord.h"
 #include "xtrx/devicextrxparam.h"
 #include "xtrx/devicextrxshared.h"
 #include "xtrx/devicextrx.h"

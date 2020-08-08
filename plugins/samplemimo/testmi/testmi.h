@@ -29,7 +29,6 @@
 
 class DeviceAPI;
 class TestMIWorker;
-class FileRecord;
 class QNetworkAccessManager;
 class QNetworkReply;
 
