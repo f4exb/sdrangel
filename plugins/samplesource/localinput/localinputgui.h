@@ -117,11 +117,9 @@ private slots:
 	void on_dcOffset_toggled(bool checked);
 	void on_iqImbalance_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_LOCALINPUTGUI_H

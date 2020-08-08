@@ -40,7 +40,6 @@ void BladeRF2InputSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_iqOrder = true;
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;

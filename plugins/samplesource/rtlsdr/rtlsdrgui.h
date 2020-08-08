@@ -24,6 +24,7 @@
 
 #include "util/messagequeue.h"
 
+#include "rtlsdrsettings.h"
 #include "rtlsdrinput.h"
 
 class DeviceUISet;
@@ -94,12 +95,10 @@ private slots:
 	void on_checkBox_stateChanged(int state);
     void on_agc_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_transverter_clicked();
     void on_sampleRateMode_toggled(bool checked);
     void on_biasT_stateChanged(int state);
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 	void updateHardware();
 	void updateStatus();
 };

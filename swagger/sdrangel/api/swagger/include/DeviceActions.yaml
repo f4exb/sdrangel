@@ -14,39 +14,3 @@ DeviceActions:
     originatorIndex:
       description: Optional for reverse API. This is the device set index from where the message comes from.
       type: integer
-    airspyActions:
-      $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspyActions"
-    airspyHFActions:
-      $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFActions"
-    bladeRF1InputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputActions"
-    bladeRF2InputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputActions"
-    fcdProActions:
-      $ref: "http://swgserver:8081/api/swagger/include/FCDPro.yaml#/FCDProActions"
-    fcdProPlusActions:
-      $ref: "http://swgserver:8081/api/swagger/include/FCDProPlus.yaml#/FCDProPlusActions"
-    hackRFInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/HackRF.yaml#/HackRFInputActions"
-    kiwiSDRActions:
-      $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRActions"
-    limeSdrInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputActions"
-    localInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputActions"
-    perseusActions:
-      $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusActions"
-    plutoSdrInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputActions"
-    remoteInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputActions"
-    rtlSdrActions:
-      $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrActions"
-    sdrPlayActions:
-      $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayActions"
-    soapySDRInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputActions"
-    testSourceActions:
-      $ref: "http://swgserver:8081/api/swagger/include/TestSource.yaml#/TestSourceActions"
-    xtrxInputActions:
-      $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputActions"

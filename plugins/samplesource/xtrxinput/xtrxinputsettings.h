@@ -57,7 +57,6 @@ struct XTRXInputSettings
     uint32_t m_extClockFreq; //!< Frequency (Hz) of external clock source
     uint32_t m_pwrmode;
     bool     m_iqOrder;
-    QString  m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

@@ -33,7 +33,6 @@ class QNetworkReply;
 class DeviceAPI;
 class XTRXInputThread;
 struct DeviceXTRXParams;
-class FileRecord;
 
 class XTRXInput : public DeviceSampleSource
 {
@@ -171,25 +170,6 @@ public:
         { }
     };
 
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-        public:
-            bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
     XTRXInput(DeviceAPI *deviceAPI);
     virtual ~XTRXInput();
     virtual void destroy();
@@ -238,11 +218,6 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const XTRXInputSettings& settings);
@@ -272,8 +247,6 @@ private:
     DeviceXTRXShared m_deviceShared;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
-
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 
     bool openDevice();
     void closeDevice();

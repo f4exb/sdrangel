@@ -88,12 +88,10 @@ private slots:
 	void on_filterIF_currentIndexChanged(int index);
 	void on_ppm_valueChanged(int value);
 	void on_startStop_toggled(bool checked);
-	void on_record_toggled(bool checked);
     void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_FCDGUI_H

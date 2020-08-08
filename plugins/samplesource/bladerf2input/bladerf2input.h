@@ -32,7 +32,6 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class BladeRF2InputThread;
-class FileRecord;
 struct bladerf_gain_modes;
 struct bladerf;
 
@@ -59,25 +58,6 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
-        { }
-    };
-
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
         { }
     };
 
@@ -182,11 +162,6 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const BladeRF2InputSettings& settings);
@@ -204,7 +179,6 @@ private:
     bool m_running;
     DeviceBladeRF2Shared m_deviceShared;
     BladeRF2InputThread *m_thread;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     std::vector<GainMode> m_gainModes;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

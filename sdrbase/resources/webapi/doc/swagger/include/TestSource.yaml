@@ -38,8 +38,6 @@ TestSourceSettings:
     phaseImbalance:
       type: number
       format: float
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -49,13 +47,3 @@ TestSourceSettings:
       type: integer
     reverseAPIDeviceIndex:
       type: integer
-
-TestSourceActions:
-  description: TestSource
-  properties:
-    record:
-      type: integer
-      description: >
-        Record IQ stream action
-          * 0 - stop recording
-          * 1 - start recording

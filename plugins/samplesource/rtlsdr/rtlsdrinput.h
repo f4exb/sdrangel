@@ -23,13 +23,12 @@
 #include <QByteArray>
 #include <QNetworkRequest>
 
-#include <dsp/devicesamplesource.h>
+#include "dsp/devicesamplesource.h"
 #include "rtlsdrsettings.h"
 #include <rtl-sdr.h>
 
 class DeviceAPI;
 class RTLSDRThread;
-class FileRecord;
 class QNetworkAccessManager;
 class QNetworkReply;
 
@@ -58,25 +57,6 @@ public:
 			m_force(force)
 		{ }
 	};
-
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
 
     class MsgStartStop : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -131,11 +111,6 @@ public:
             SWGSDRangel::SWGDeviceReport& response,
             QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -168,7 +143,6 @@ public:
 
 private:
 	DeviceAPI *m_deviceAPI;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
 	QMutex m_mutex;
 	RTLSDRSettings m_settings;
 	rtlsdr_dev_t* m_dev;

@@ -34,7 +34,6 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class FileRecord;
 
 class LocalOutput : public DeviceSampleSink {
     Q_OBJECT
@@ -164,7 +163,6 @@ private:
     int m_sampleRate;
     QString m_remoteAddress;
 	QString m_deviceDescription;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

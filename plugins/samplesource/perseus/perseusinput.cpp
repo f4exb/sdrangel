@@ -22,11 +22,8 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGPerseusReport.h"
-#include "SWGPerseusActions.h"
 
-#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "device/deviceapi.h"
@@ -36,21 +33,17 @@
 #include "perseusworker.h"
 
 MESSAGE_CLASS_DEFINITION(PerseusInput::MsgConfigurePerseus, Message)
-MESSAGE_CLASS_DEFINITION(PerseusInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(PerseusInput::MsgStartStop, Message)
 
 PerseusInput::PerseusInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
     m_deviceDescription("PerseusInput"),
     m_running(false),
     m_perseusWorker(nullptr),
     m_perseusDescriptor(0)
 {
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -60,9 +53,6 @@ PerseusInput::~PerseusInput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
-    closeDevice();
 }
 
 void PerseusInput::destroy()
@@ -216,28 +206,6 @@ bool PerseusInput::handleMessage(const Message& message)
 
         if (m_settings.m_useReverseAPI) {
             webapiReverseSendStartStop(cmd.getStartStop());
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "PerseusInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
         }
 
         return true;
@@ -446,7 +414,6 @@ bool PerseusInput::applySettings(const PerseusSettings& settings, bool force)
     {
         int sampleRate = m_sampleRates[sampleRateIndex]/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -539,37 +506,6 @@ int PerseusInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int PerseusInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGPerseusActions *swgPerseusActions = query.getPerseusActions();
-
-    if (swgPerseusActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgPerseusActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing PerseusActions in query";
-        return 400;
-    }
-}
-
 void PerseusInput::webapiUpdateDeviceSettings(
     PerseusSettings& settings,
     const QStringList& deviceSettingsKeys,
@@ -610,9 +546,6 @@ void PerseusInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getPerseusSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getPerseusSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getPerseusSettings()->getUseReverseApi() != 0;
     }
@@ -651,12 +584,6 @@ void PerseusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getPerseusSettings()->setAttenuator((int) settings.m_attenuator);
     response.getPerseusSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getPerseusSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getPerseusSettings()->getFileRecordName()) {
-        *response.getPerseusSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getPerseusSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getPerseusSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -724,9 +651,6 @@ void PerseusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgPerseusSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgPerseusSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

@@ -101,12 +101,10 @@ private slots:
 	void on_fcPos_currentIndexChanged(int index);
 	void on_setDefaults_clicked(bool checked);
 	void on_startStop_toggled(bool checked);
-	void on_record_toggled(bool checked);
     void on_transverter_clicked();
 	void updateHardware();
 	void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_FCDPROGUI_H

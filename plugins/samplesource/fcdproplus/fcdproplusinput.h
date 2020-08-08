@@ -40,7 +40,6 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class FCDProPlusThread;
-class FileRecord;
 
 class FCDProPlusInput : public DeviceSampleSource {
     Q_OBJECT
@@ -87,25 +86,6 @@ public:
         { }
     };
 
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
 	FCDProPlusInput(DeviceAPI *deviceAPI);
 	virtual ~FCDProPlusInput();
 	virtual void destroy();
@@ -145,11 +125,6 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const FCDProPlusSettings& settings);
@@ -177,7 +152,6 @@ private:
 	FCDProPlusThread* m_FCDThread;
 	QString m_deviceDescription;
 	bool m_running;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

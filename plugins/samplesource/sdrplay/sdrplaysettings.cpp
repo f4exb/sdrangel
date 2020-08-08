@@ -43,7 +43,6 @@ void SDRPlaySettings::resetToDefaults()
     m_mixerAmpOn = false;
     m_basebandGain = 29;
     m_iqOrder = true;
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;

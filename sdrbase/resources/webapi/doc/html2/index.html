@@ -1143,24 +1143,6 @@ margin-bottom: 20px;
   },
   "description" : "ATVMod"
 };
-            defs.AirspyActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "Airspy"
-};
-            defs.AirspyHFActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "AirspyHF"
-};
             defs.AirspyHFReport = {
   "properties" : {
     "sampleRates" : {
@@ -1200,9 +1182,6 @@ margin-bottom: 20px;
     },
     "bandIndex" : {
       "type" : "integer"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -1313,9 +1292,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -1602,6 +1578,7 @@ margin-bottom: 20px;
   },
   "description" : "A bandwidth expressed in Hertz (Hz)"
 };
+<<<<<<< ours
             defs.BladeRF1InputActions = {
   "properties" : {
     "record" : {
@@ -1610,6 +1587,43 @@ margin-bottom: 20px;
     }
   },
   "description" : "BladeRF1"
+=======
+            defs.BeamSteeringCWModSettings = {
+  "properties" : {
+    "steerDegrees" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "BeamSteeringCWMod"
+>>>>>>> theirs
 };
             defs.BladeRF1InputSettings = {
   "properties" : {
@@ -1656,9 +1670,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -1721,15 +1732,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "BladeRF1"
-};
-            defs.BladeRF2InputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "BladeRF2"
 };
             defs.BladeRF2InputReport = {
   "properties" : {
@@ -1800,9 +1802,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -2718,6 +2717,7 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the device set index from where the message comes from."
     },
+<<<<<<< ours
     "airspyActions" : {
       "$ref" : "#/definitions/AirspyActions"
     },
@@ -2771,6 +2771,10 @@ margin-bottom: 20px;
     },
     "xtrxInputActions" : {
       "$ref" : "#/definitions/XtrxInputActions"
+=======
+    "sigMFFileInputActions" : {
+      "$ref" : "#/definitions/SigMFFileInputActions"
+>>>>>>> theirs
     }
   },
   "description" : "Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present."
@@ -3075,24 +3079,6 @@ margin-bottom: 20px;
     }
   }
 };
-            defs.FCDProActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "FCDPro"
-};
-            defs.FCDProPlusActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "FCDProPlus"
-};
             defs.FCDProPlusSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -3149,9 +3135,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -3248,9 +3231,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -3965,15 +3945,6 @@ margin-bottom: 20px;
   },
   "description" : "A gain expressed in centi-Bels (tenths of dB)"
 };
-            defs.HackRFInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "HackRF"
-};
             defs.HackRFInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -4013,9 +3984,6 @@ margin-bottom: 20px;
     },
     "iqCorrection" : {
       "type" : "integer"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "transverterMode" : {
       "type" : "integer"
@@ -4197,6 +4165,7 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about this SDRangel instance"
 };
+<<<<<<< ours
             defs.KiwiSDRActions = {
   "properties" : {
     "record" : {
@@ -4205,6 +4174,50 @@ margin-bottom: 20px;
     }
   },
   "description" : "KiwiSDR"
+=======
+            defs.InterferometerSettings = {
+  "properties" : {
+    "correlationType" : {
+      "type" : "integer",
+      "description" : "see InterferometerSettings::CorrelationType"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    }
+  },
+  "description" : "Interferometer"
+>>>>>>> theirs
 };
             defs.KiwiSDRReport = {
   "properties" : {
@@ -4234,9 +4247,6 @@ margin-bottom: 20px;
     "serverAddress" : {
       "type" : "string",
       "description" : "Distant KiwiSDR instance URL or IPv4 address with port"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -4365,15 +4375,6 @@ margin-bottom: 20px;
   },
   "description" : "LimeRFE"
 };
-            defs.LimeSdrInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "LimeSDR"
-};
             defs.LimeSdrInputReport = {
   "properties" : {
     "success" : {
@@ -4493,9 +4494,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "gpioDir" : {
       "type" : "integer",
@@ -4643,15 +4641,6 @@ margin-bottom: 20px;
   },
   "description" : "LimeSDR"
 };
-            defs.LocalInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "LocalInput"
-};
             defs.LocalInputReport = {
   "properties" : {
     "centerFrequency" : {
@@ -4671,9 +4660,6 @@ margin-bottom: 20px;
     },
     "iqCorrection" : {
       "type" : "integer"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -5056,15 +5042,6 @@ margin-bottom: 20px;
   },
   "description" : "Enumeration with name for values"
 };
-            defs.PerseusActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "Perseus"
-};
             defs.PerseusReport = {
   "properties" : {
     "sampleRates" : {
@@ -5114,9 +5091,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
     },
-    "fileRecordName" : {
-      "type" : "string"
-    },
     "attenuator" : {
       "type" : "integer",
       "description" : "Attenuator setting in Bels (0, 10, 20 30 dB)"
@@ -5136,15 +5110,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "Perseus"
-};
-            defs.PlutoSdrInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "PlutoSDR"
 };
             defs.PlutoSdrInputReport = {
   "properties" : {
@@ -5238,9 +5203,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -5647,15 +5609,6 @@ margin-bottom: 20px;
   },
   "description" : "An arbitrary range of floating point values"
 };
-            defs.RemoteInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "RemoteInput"
-};
             defs.RemoteInputReport = {
   "properties" : {
     "centerFrequency" : {
@@ -5703,9 +5656,6 @@ margin-bottom: 20px;
     },
     "iqCorrection" : {
       "type" : "integer"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -5937,15 +5887,6 @@ margin-bottom: 20px;
   },
   "description" : "Remote channel source settings"
 };
-            defs.RtlSdrActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "RTLSDR"
-};
             defs.RtlSdrReport = {
   "properties" : {
     "gains" : {
@@ -6014,9 +5955,6 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Bias tee\n  * 0 - inactive\n  * 1 - active\n"
     },
-    "fileRecordName" : {
-      "type" : "string"
-    },
     "useReverseAPI" : {
       "type" : "integer",
       "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
@@ -6032,15 +5970,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "RTLSDR"
-};
-            defs.SDRPlayActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "SDRplay1"
 };
             defs.SDRPlayReport = {
   "properties" : {
@@ -6123,9 +6052,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -6440,15 +6366,6 @@ margin-bottom: 20px;
   },
   "description" : "A named gain setting specified by its range"
 };
-            defs.SoapySDRInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "SoapySDR"
-};
             defs.SoapySDRInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -6486,9 +6403,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "antenna" : {
       "type" : "string"
@@ -6731,6 +6645,7 @@ margin-bottom: 20px;
     }
   }
 };
+<<<<<<< ours
             defs.TestSourceActions = {
   "properties" : {
     "record" : {
@@ -6739,6 +6654,114 @@ margin-bottom: 20px;
     }
   },
   "description" : "TestSource"
+=======
+            defs.TestMISettings = {
+  "properties" : {
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "streams" : {
+      "type" : "array",
+      "description" : "Settings for each of the streams",
+      "items" : {
+        "$ref" : "#/definitions/TestMiStreamSettings"
+      }
+    }
+  },
+  "description" : "TestMISettings"
+};
+            defs.TestMOSyncSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "fcPosTx" : {
+      "type" : "integer",
+      "description" : "See BladeRF2MIMO::fcPos_t"
+    }
+  },
+  "description" : "TestMOSync"
+};
+            defs.TestMiStreamSettings = {
+  "properties" : {
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "Index of the stream to which the settings apply"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "frequencyShift" : {
+      "type" : "integer"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "sampleSizeIndex" : {
+      "type" : "integer"
+    },
+    "amplitudeBits" : {
+      "type" : "integer"
+    },
+    "autoCorrOptions" : {
+      "type" : "integer"
+    },
+    "modulation" : {
+      "type" : "integer"
+    },
+    "modulationTone" : {
+      "type" : "integer"
+    },
+    "amModulation" : {
+      "type" : "integer"
+    },
+    "fmDeviation" : {
+      "type" : "integer"
+    },
+    "dcFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "iFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "qFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "phaseImbalance" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "TestMiStreamSettings"
+>>>>>>> theirs
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -6794,9 +6817,6 @@ margin-bottom: 20px;
     "phaseImbalance" : {
       "type" : "number",
       "format" : "float"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -7373,15 +7393,6 @@ margin-bottom: 20px;
   },
   "description" : "WFMMod"
 };
-            defs.XtrxInputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "XTRX"
-};
             defs.XtrxInputReport = {
   "properties" : {
     "success" : {
@@ -7479,9 +7490,6 @@ margin-bottom: 20px;
     "iqOrder" : {
       "type" : "integer",
       "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -33585,7 +33593,11 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
+<<<<<<< ours
               Generated 2020-08-08T23:29:13.057+02:00
+=======
+              Generated 2020-08-08T10:04:58.845+02:00
+>>>>>>> theirs
             </div>
           </div>
       </div>

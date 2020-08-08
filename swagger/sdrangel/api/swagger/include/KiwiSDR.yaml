@@ -14,8 +14,6 @@ KiwiSDRSettings:
     serverAddress:
       description: Distant KiwiSDR instance URL or IPv4 address with port
       type: string
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -32,13 +30,3 @@ KiwiSDRReport:
     status:
       description: 0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected
       type: integer
-
-KiwiSDRActions:
-  description: KiwiSDR
-  properties:
-    record:
-      type: integer
-      description: >
-        Record IQ stream action
-          * 0 - stop recording
-          * 1 - start recording

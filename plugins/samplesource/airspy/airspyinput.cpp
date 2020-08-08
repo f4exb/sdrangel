@@ -26,15 +26,12 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGAirspyReport.h"
-#include "SWGAirspyActions.h"
 
 #include "airspyinput.h"
 #include "airspyplugin.h"
 
 #include "device/deviceapi.h"
-#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "airspysettings.h"
@@ -42,7 +39,6 @@
 
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgConfigureAirspy, Message)
 MESSAGE_CLASS_DEFINITION(AirspyInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(AirspyInput::MsgFileRecord, Message)
 
 const qint64 AirspyInput::loLowLimitFreq = 24000000L;
 const qint64 AirspyInput::loHighLimitFreq = 1900000000L;
@@ -56,9 +52,7 @@ AirspyInput::AirspyInput(DeviceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -73,8 +67,6 @@ AirspyInput::~AirspyInput()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
     closeDevice();
 }
 
@@ -347,28 +339,6 @@ bool AirspyInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "AirspyInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-        }
-
-        return true;
-    }
 	else
 	{
 		return false;
@@ -614,7 +584,6 @@ bool AirspyInput::applySettings(const AirspySettings& settings, bool force)
 	{
 		int sampleRate = m_sampleRates[m_settings.m_devSampleRateIndex]/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
@@ -764,9 +733,6 @@ void AirspyInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getAirspySettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getAirspySettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAirspySettings()->getUseReverseApi() != 0;
     }
@@ -792,37 +758,6 @@ int AirspyInput::webapiReportGet(
     return 200;
 }
 
-int AirspyInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGAirspyActions *swgAirspyActions = query.getAirspyActions();
-
-    if (swgAirspyActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgAirspyActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing AirspyActions in query";
-        return 400;
-    }
-}
-
 void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const AirspySettings& settings)
 {
     response.getAirspySettings()->setCenterFrequency(settings.m_centerFrequency);
@@ -841,12 +776,6 @@ void AirspyInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getAirspySettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getAirspySettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getAirspySettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getAirspySettings()->getFileRecordName()) {
-        *response.getAirspySettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getAirspySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getAirspySettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -929,9 +858,6 @@ void AirspyInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgAirspySettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgAirspySettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

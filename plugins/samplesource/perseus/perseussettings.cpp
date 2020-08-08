@@ -37,7 +37,6 @@ void PerseusSettings::resetToDefaults()
     m_adcPreamp = false;
     m_wideBand = false;
     m_attenuator = Attenuator_None;
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;

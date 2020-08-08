@@ -83,7 +83,6 @@ private:
 private slots:
     void handleInputMessages();
     void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
     void on_ncoFrequency_changed(qint64 value);
     void on_ncoEnable_toggled(bool checked);
@@ -106,7 +105,6 @@ private slots:
     void updateHardware();
     void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTGUI_H_ */

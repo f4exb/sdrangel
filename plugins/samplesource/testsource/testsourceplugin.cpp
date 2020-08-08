@@ -31,7 +31,7 @@
 const PluginDescriptor TestSourcePlugin::m_pluginDescriptor = {
     QString("TestSource"),
 	QString("Test Source input"),
-	QString("4.14.16"),
+	QString("4.15.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

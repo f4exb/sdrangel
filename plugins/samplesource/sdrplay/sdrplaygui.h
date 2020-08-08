@@ -94,9 +94,7 @@ private slots:
     void on_gainMixer_toggled(bool checked);
     void on_gainBaseband_valueChanged(int value);
     void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_ */

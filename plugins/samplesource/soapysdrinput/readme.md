@@ -95,11 +95,6 @@ Device start / stop button.
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again. Check the console log for possible errors.
 
-<h4>1.3: Record</h4>
-
-  - Left click: record baseband I/Q stream toggle button
-  - Right click: choose record file
-
 <h4>1.4: Stream sample rate</h4>
 
 Baseband I/Q sample rate in kS/s. This is the device sample rate (the "SR" SoapySDR control) divided by the decimation factor (4).

@@ -27,19 +27,15 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGKiwiSDRReport.h"
-#include "SWGKiwiSDRActions.h"
 
 #include "kiwisdrinput.h"
 #include "device/deviceapi.h"
 #include "kiwisdrworker.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 
 MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgConfigureKiwiSDR, Message)
-MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(KiwiSDRInput::MsgSetStatus, Message)
 
@@ -54,9 +50,7 @@ KiwiSDRInput::KiwiSDRInput(DeviceAPI *deviceAPI) :
 {
 	m_kiwiSDRWorkerThread.start();
 
-    m_fileSink = new FileRecord();
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     if (!m_sampleFifo.setSize(getSampleRate() * 2)) {
         qCritical("KiwiSDRInput::KiwiSDRInput: Could not allocate SampleFifo");
@@ -77,9 +71,6 @@ KiwiSDRInput::~KiwiSDRInput()
 
 	m_kiwiSDRWorkerThread.quit();
 	m_kiwiSDRWorkerThread.wait();
-
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
 }
 
 void KiwiSDRInput::destroy()
@@ -209,28 +200,6 @@ bool KiwiSDRInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "KiwiSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -276,7 +245,6 @@ bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
         << " m_centerFrequency: " << settings.m_centerFrequency
         << " m_gain: " << settings.m_gain
         << " m_useAGC: " << settings.m_useAGC
-        << " m_fileRecordName: " << settings.m_fileRecordName
         << " m_useAGC: " << settings.m_useAGC
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -318,7 +286,6 @@ bool KiwiSDRInput::applySettings(const KiwiSDRSettings& settings, bool force)
 
 		DSPSignalNotification *notif = new DSPSignalNotification(
 			getSampleRate(), settings.m_centerFrequency);
-		m_fileSink->handleMessage(*notif); // forward to file sink
 		m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
@@ -418,9 +385,6 @@ void KiwiSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("serverAddress")) {
         settings.m_serverAddress = *response.getKiwiSdrSettings()->getServerAddress();
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getKiwiSdrSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getKiwiSdrSettings()->getUseReverseApi() != 0;
     }
@@ -446,37 +410,6 @@ int KiwiSDRInput::webapiReportGet(
     return 200;
 }
 
-int KiwiSDRInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGKiwiSDRActions *swgKiwiSDRActions = query.getKiwiSdrActions();
-
-    if (swgKiwiSDRActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgKiwiSDRActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing KiwiSDRInputActions in query";
-        return 400;
-    }
-}
-
 void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const KiwiSDRSettings& settings)
 {
     response.getKiwiSdrSettings()->setGain(settings.m_gain);
@@ -488,12 +421,6 @@ void KiwiSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
         *response.getKiwiSdrSettings()->getServerAddress() = settings.m_serverAddress;
     } else {
         response.getKiwiSdrSettings()->setServerAddress(new QString(settings.m_serverAddress));
-    }
-
-    if (response.getKiwiSdrSettings()->getFileRecordName()) {
-        *response.getKiwiSdrSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getKiwiSdrSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     response.getKiwiSdrSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
@@ -538,9 +465,6 @@ void KiwiSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("serverAddress") || force) {
         swgKiwiSDRSettings->setServerAddress(new QString(settings.m_serverAddress));
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgKiwiSDRSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

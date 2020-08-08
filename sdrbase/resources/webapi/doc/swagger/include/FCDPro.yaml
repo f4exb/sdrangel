@@ -57,8 +57,6 @@ FCDProSettings:
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -68,13 +66,3 @@ FCDProSettings:
       type: integer
     reverseAPIDeviceIndex:
       type: integer
-
-FCDProActions:
-  description: FCDPro
-  properties:
-    record:
-      type: integer
-      description: >
-        Record IQ stream action
-          * 0 - stop recording
-          * 1 - start recording

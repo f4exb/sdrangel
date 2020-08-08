@@ -70,9 +70,6 @@ PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
-
     blockApplySettings(true);
     displaySettings();
     blockApplySettings(false);
@@ -178,23 +175,6 @@ bool PlutoSDRInputGui::handleMessage(const Message& message)
 
         return true;
     }
-    else if (PlutoSDRInput::MsgFileRecord::match(message)) // API action "record" feedback
-    {
-        const PlutoSDRInput::MsgFileRecord& notif = (const PlutoSDRInput::MsgFileRecord&) message;
-        bool record = notif.getStartStop();
-
-        ui->record->blockSignals(true);
-        ui->record->setChecked(record);
-
-        if (record) {
-            ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        } else {
-            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
-
-        ui->record->blockSignals(false);
-        return true;
-    }
     else
     {
         return false;
@@ -208,18 +188,6 @@ void PlutoSDRInputGui::on_startStop_toggled(bool checked)
         PlutoSDRInput::MsgStartStop *message = PlutoSDRInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
-}
-
-void PlutoSDRInputGui::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    PlutoSDRInput::MsgFileRecord* message = PlutoSDRInput::MsgFileRecord::create(checked);
-    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void PlutoSDRInputGui::on_centerFrequency_changed(quint64 value)
@@ -618,30 +586,4 @@ void PlutoSDRInputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void PlutoSDRInputGui::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

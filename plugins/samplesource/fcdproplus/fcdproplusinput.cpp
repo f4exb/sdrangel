@@ -24,12 +24,9 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
-#include "SWGDeviceActions.h"
-#include "SWGFCDProPlusActions.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 #include "device/deviceapi.h"
 
 #include "fcdproplusinput.h"
@@ -39,11 +36,10 @@
 
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgConfigureFCDProPlus, Message)
 MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(FCDProPlusInput::MsgFileRecord, Message)
 
 FCDProPlusInput::FCDProPlusInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-	m_dev(0),
+	m_dev(nullptr),
 	m_settings(),
 	m_FCDThread(nullptr),
 	m_deviceDescription(fcd_traits<ProPlus>::displayedName),
@@ -51,9 +47,7 @@ FCDProPlusInput::FCDProPlusInput(DeviceAPI *deviceAPI) :
 {
     m_fcdFIFO.setSize(20*fcd_traits<ProPlus>::convBufSize);
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -66,9 +60,6 @@ FCDProPlusInput::~FCDProPlusInput()
     if (m_running) {
         stop();
     }
-
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
 
     closeDevice();
 }
@@ -299,28 +290,6 @@ bool FCDProPlusInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "FCDProPlusInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-        }
-
-        return true;
-    }
 	else
 	{
 		return false;
@@ -487,7 +456,6 @@ void FCDProPlusInput::applySettings(const FCDProPlusSettings& settings, bool for
 	if (forwardChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<ProPlus>::sampleRate/(1<<settings.m_log2Decim), m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }
@@ -631,37 +599,6 @@ int FCDProPlusInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int FCDProPlusInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGFCDProPlusActions *swgFCDProPlusActions = query.getFcdProPlusActions();
-
-    if (swgFCDProPlusActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgFCDProPlusActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing FCDProPlusActions in query";
-        return 400;
-    }
-}
-
 void FCDProPlusInput::webapiUpdateDeviceSettings(
         FCDProPlusSettings& settings,
         const QStringList& deviceSettingsKeys,
@@ -715,9 +652,6 @@ void FCDProPlusInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getFcdProPlusSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getFcdProPlusSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getFcdProPlusSettings()->getUseReverseApi() != 0;
     }
@@ -750,12 +684,6 @@ void FCDProPlusInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     response.getFcdProPlusSettings()->setIqImbalance(settings.m_iqImbalance ? 1 : 0);
     response.getFcdProPlusSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getFcdProPlusSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getFcdProPlusSettings()->getFileRecordName()) {
-        *response.getFcdProPlusSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getFcdProPlusSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getFcdProPlusSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -827,9 +755,6 @@ void FCDProPlusInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgFCDProPlusSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgFCDProPlusSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

@@ -84,7 +84,6 @@ private slots:
 	void on_wideband_toggled(bool checked);
 	void on_decim_currentIndexChanged(int index);
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_transverter_clicked();
     void on_attenuator_currentIndexChanged(int index);
     void on_adcDither_toggled(bool checked);
@@ -93,7 +92,6 @@ private slots:
     void updateStatus();
 	void handleInputMessages();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSGUI_H_ */

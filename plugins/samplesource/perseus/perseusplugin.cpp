@@ -33,7 +33,7 @@
 const PluginDescriptor PerseusPlugin::m_pluginDescriptor = {
     QString("Perseus"),
 	QString("Perseus Input"),
-	QString("4.14.16"),
+	QString("4.15.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

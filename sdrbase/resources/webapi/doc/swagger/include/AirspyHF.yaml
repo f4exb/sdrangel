@@ -23,8 +23,6 @@ AirspyHFSettings:
           * 1 - I then Q (straight)
     bandIndex:
       type: integer
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -61,13 +59,3 @@ AirspyHFReport:
       type: array
       items:
         $ref: "/doc/swagger/include/Structs.yaml#/SampleRate"
-
-AirspyHFActions:
-  description: AirspyHF
-  properties:
-    record:
-      type: integer
-      description: >
-        Record IQ stream action
-          * 0 - stop recording
-          * 1 - start recording

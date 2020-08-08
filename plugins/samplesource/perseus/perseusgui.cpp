@@ -21,7 +21,6 @@
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
-#include "dsp/filerecord.h"
 
 #include "ui_perseusgui.h"
 #include "gui/colormapper.h"
@@ -54,9 +53,6 @@ PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
-
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
 
 	displaySettings();
 
@@ -144,23 +140,6 @@ bool PerseusGui::handleMessage(const Message& message)
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
 
-        return true;
-    }
-    else if (PerseusInput::MsgFileRecord::match(message)) // API action "record" feedback
-    {
-        const PerseusInput::MsgFileRecord& notif = (const PerseusInput::MsgFileRecord&) message;
-        bool record = notif.getStartStop();
-
-        ui->record->blockSignals(true);
-        ui->record->setChecked(record);
-
-        if (record) {
-            ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        } else {
-            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
-
-        ui->record->blockSignals(false);
         return true;
     }
     else
@@ -320,18 +299,6 @@ void PerseusGui::on_startStop_toggled(bool checked)
     }
 }
 
-void PerseusGui::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    PerseusInput::MsgFileRecord* message = PerseusInput::MsgFileRecord::create(checked);
-    m_sampleSource->getInputMessageQueue()->push(message);
-}
-
 void PerseusGui::on_transverter_clicked()
 {
     m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
@@ -444,30 +411,4 @@ void PerseusGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void PerseusGui::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

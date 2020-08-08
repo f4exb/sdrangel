@@ -43,7 +43,6 @@ struct PerseusSettings
     bool m_adcPreamp;
     bool m_wideBand;
     Attenuator m_attenuator;
-    QString m_fileRecordName;
     bool     m_useReverseAPI;
     QString  m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

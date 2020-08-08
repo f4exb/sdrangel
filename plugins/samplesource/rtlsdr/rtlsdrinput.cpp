@@ -35,10 +35,8 @@
 #include "rtlsdrthread.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
-MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 
 const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
@@ -60,9 +58,7 @@ RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
 {
     openDevice();
 
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
@@ -76,9 +72,6 @@ RTLSDRInput::~RTLSDRInput()
     if (m_running) {
         stop();
     }
-
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
 
     closeDevice();
 }
@@ -313,28 +306,6 @@ bool RTLSDRInput::handleMessage(const Message& message)
         if (!success)
         {
             qDebug("RTLSDRInput::handleMessage: config error");
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
         }
 
         return true;
@@ -591,7 +562,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     {
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -693,9 +663,6 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("biasTee")) {
         settings.m_biasTee = response.getRtlSdrSettings()->getBiasTee() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRtlSdrSettings()->getUseReverseApi() != 0;
     }
@@ -729,12 +696,6 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
-
-    if (response.getRtlSdrSettings()->getFileRecordName()) {
-        *response.getRtlSdrSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getRtlSdrSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getRtlSdrSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -785,37 +746,6 @@ int RTLSDRInput::webapiReportGet(
     response.getRtlSdrReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
-}
-
-int RTLSDRInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGRtlSdrActions *swgRtlSdrActions = query.getRtlSdrActions();
-
-    if (swgRtlSdrActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgRtlSdrActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing RtlSdrActions in query";
-        return 400;
-    }
 }
 
 void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -890,9 +820,6 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("biasTee") || force) {
         swgRtlSdrSettings->setBiasTee(settings.m_biasTee ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgRtlSdrSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

@@ -17,7 +17,7 @@ set(bladerf1input_HEADERS
 )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
 	${LIBBLADERF_INCLUDE_DIRS}
 )
@@ -26,7 +26,6 @@ if(NOT SERVER_MODE)
     set(bladerf1input_SOURCES
         ${bladerf1input_SOURCES}
         bladerf1inputgui.cpp
-
         bladerf1inputgui.ui
     )
     set(bladerf1input_HEADERS
@@ -54,13 +53,13 @@ if(LIBBLADERF_EXTERNAL)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
-        ${LIBBLADERF_LIBRARIES}
-        bladerf1device
+    swagger
+    ${LIBBLADERF_LIBRARIES}
+    bladerf1device
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

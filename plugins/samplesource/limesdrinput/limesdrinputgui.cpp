@@ -97,9 +97,6 @@ LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_limeSDRInput->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
-
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
@@ -261,23 +258,6 @@ bool LimeSDRInputGUI::handleMessage(const Message& message)
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
 
-        return true;
-    }
-    else if (LimeSDRInput::MsgFileRecord::match(message)) // API action "record" feedback
-    {
-        const LimeSDRInput::MsgFileRecord& notif = (const LimeSDRInput::MsgFileRecord&) message;
-        bool record = notif.getStartStop();
-
-        ui->record->blockSignals(true);
-        ui->record->setChecked(record);
-
-        if (record) {
-            ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        } else {
-            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
-
-        ui->record->blockSignals(false);
         return true;
     }
     else
@@ -571,18 +551,6 @@ void LimeSDRInputGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void LimeSDRInputGUI::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    LimeSDRInput::MsgFileRecord* message = LimeSDRInput::MsgFileRecord::create(checked);
-    m_limeSDRInput->getInputMessageQueue()->push(message);
-}
-
 void LimeSDRInputGUI::on_centerFrequency_changed(quint64 value)
 {
     setCenterFrequencySetting(value);
@@ -771,30 +739,4 @@ void LimeSDRInputGUI::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void LimeSDRInputGUI::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

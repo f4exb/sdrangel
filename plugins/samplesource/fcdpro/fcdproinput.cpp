@@ -24,12 +24,9 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
-#include "SWGDeviceActions.h"
-#include "SWGFCDProActions.h"
 
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 #include "device/deviceapi.h"
 
 #include "fcdproinput.h"
@@ -39,11 +36,10 @@
 
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgConfigureFCDPro, Message)
 MESSAGE_CLASS_DEFINITION(FCDProInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(FCDProInput::MsgFileRecord, Message)
 
 FCDProInput::FCDProInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-	m_dev(0),
+	m_dev(nullptr),
 	m_settings(),
 	m_FCDThread(nullptr),
 	m_deviceDescription(fcd_traits<Pro>::displayedName),
@@ -51,9 +47,7 @@ FCDProInput::FCDProInput(DeviceAPI *deviceAPI) :
 {
     m_fcdFIFO.setSize(20*fcd_traits<Pro>::convBufSize);
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -66,9 +60,6 @@ FCDProInput::~FCDProInput()
     if (m_running) {
         stop();
     }
-
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
 
     closeDevice();
 }
@@ -293,28 +284,6 @@ bool FCDProInput::handleMessage(const Message& message)
 
         if (m_settings.m_useReverseAPI) {
             webapiReverseSendStartStop(cmd.getStartStop());
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "FCDProInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
         }
 
         return true;
@@ -576,7 +545,6 @@ void FCDProInput::applySettings(const FCDProSettings& settings, bool force)
     if (forwardChange)
     {
 		DSPSignalNotification *notif = new DSPSignalNotification(fcd_traits<Pro>::sampleRate/(1<<m_settings.m_log2Decim), m_settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }
@@ -870,37 +838,6 @@ int FCDProInput::webapiRun(
     return 200;
 }
 
-int FCDProInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGFCDProActions *swgFCDProActions = query.getFcdProActions();
-
-    if (swgFCDProActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgFCDProActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing AirspyActions in query";
-        return 400;
-    }
-}
-
 int FCDProInput::webapiSettingsGet(
                 SWGSDRangel::SWGDeviceSettings& response,
                 QString& errorMessage)
@@ -1015,9 +952,6 @@ void FCDProInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getFcdProSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getFcdProSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getFcdProSettings()->getUseReverseApi() != 0;
     }
@@ -1059,12 +993,6 @@ void FCDProInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getFcdProSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getFcdProSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getFcdProSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getFcdProSettings()->getFileRecordName()) {
-        *response.getFcdProSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getFcdProSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getFcdProSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -1163,9 +1091,6 @@ void FCDProInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgFCDProSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgFCDProSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

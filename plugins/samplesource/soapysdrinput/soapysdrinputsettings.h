@@ -40,7 +40,6 @@ struct SoapySDRInputSettings {
     bool m_transverterMode;
     qint64 m_transverterDeltaFrequency;
     bool m_iqOrder;
-    QString m_fileRecordName;
     QString m_antenna;
     quint32 m_bandwidth;
     QMap<QString, double> m_tunableElements;

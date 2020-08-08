@@ -25,18 +25,14 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
-#include "SWGDeviceActions.h"
-#include "SWGTestSourceActions.h"
 
 #include "testsourceinput.h"
 #include "device/deviceapi.h"
 #include "testsourceworker.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 
 MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgConfigureTestSource, Message)
-MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(TestSourceInput::MsgStartStop, Message)
 
 
@@ -48,9 +44,7 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
 
     if (!m_sampleFifo.setSize(96000 * 4)) {
         qCritical("TestSourceInput::TestSourceInput: Could not allocate SampleFifo");
@@ -68,9 +62,6 @@ TestSourceInput::~TestSourceInput()
     if (m_running) {
         stop();
     }
-
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
 }
 
 void TestSourceInput::destroy()
@@ -201,28 +192,6 @@ bool TestSourceInput::handleMessage(const Message& message)
         if (!success)
         {
             qDebug("TestSourceInput::handleMessage: config error");
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "TestSourceInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink->setFileName(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink->genUniqueFileName(m_deviceAPI->getDeviceUID());
-            }
-
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
         }
 
         return true;
@@ -406,7 +375,6 @@ bool TestSourceInput::applySettings(const TestSourceSettings& settings, bool for
     {
         int sampleRate = settings.m_sampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -531,37 +499,6 @@ int TestSourceInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int TestSourceInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGTestSourceActions *swgTestSourceActions = query.getTestSourceActions();
-
-    if (swgTestSourceActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgTestSourceActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing TestSourceActions in query";
-        return 400;
-    }
-}
-
 void TestSourceInput::webapiUpdateDeviceSettings(
     TestSourceSettings& settings,
     const QStringList& deviceSettingsKeys,
@@ -623,9 +560,6 @@ void TestSourceInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("phaseImbalance")) {
         settings.m_phaseImbalance = response.getTestSourceSettings()->getPhaseImbalance();
     };
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getTestSourceSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getTestSourceSettings()->getUseReverseApi() != 0;
     }
@@ -658,12 +592,6 @@ void TestSourceInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings&
     response.getTestSourceSettings()->setIFactor(settings.m_iFactor);
     response.getTestSourceSettings()->setQFactor(settings.m_qFactor);
     response.getTestSourceSettings()->setPhaseImbalance(settings.m_phaseImbalance);
-
-    if (response.getTestSourceSettings()->getFileRecordName()) {
-        *response.getTestSourceSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getTestSourceSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getTestSourceSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -736,9 +664,6 @@ void TestSourceInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKe
     if (deviceSettingsKeys.contains("phaseImbalance") || force) {
         swgTestSourceSettings->setPhaseImbalance(settings.m_phaseImbalance);
     };
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgTestSourceSettings->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
             .arg(settings.m_reverseAPIAddress)

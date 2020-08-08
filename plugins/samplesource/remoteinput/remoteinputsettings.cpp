@@ -31,7 +31,6 @@ void RemoteInputSettings::resetToDefaults()
     m_dataPort = 9090;
     m_dcBlock = false;
     m_iqCorrection = false;
-    m_fileRecordName = "";
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;

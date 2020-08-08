@@ -60,7 +60,6 @@ struct TestSourceSettings {
     float m_iFactor;        //!< -1.0 < x < 1.0
     float m_qFactor;        //!< -1.0 < x < 1.0
     float m_phaseImbalance; //!< -1.0 < x < 1.0
-    QString m_fileRecordName;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

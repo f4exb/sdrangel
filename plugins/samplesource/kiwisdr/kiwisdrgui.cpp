@@ -79,9 +79,6 @@ KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
     m_sampleSource->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
-
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 }
@@ -173,18 +170,6 @@ void KiwiSDRGui::on_dcBlock_toggled(bool checked)
 {
 	m_settings.m_dcBlock = checked;
 	sendSettings();
-}
-
-void KiwiSDRGui::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-	KiwiSDRInput::MsgFileRecord* message = KiwiSDRInput::MsgFileRecord::create(checked);
-    m_sampleSource->getInputMessageQueue()->push(message);
 }
 
 void KiwiSDRGui::on_agc_toggled(bool checked)
@@ -291,23 +276,6 @@ bool KiwiSDRGui::handleMessage(const Message& message)
 			m_statusColors[status] + "; border-radius: 7px; }");
 		return true;
 	}
-    else if (KiwiSDRInput::MsgFileRecord::match(message)) // API action "record" feedback
-    {
-        const KiwiSDRInput::MsgFileRecord& notif = (const KiwiSDRInput::MsgFileRecord&) message;
-        bool record = notif.getStartStop();
-
-        ui->record->blockSignals(true);
-        ui->record->setChecked(record);
-
-        if (record) {
-            ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        } else {
-            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
-
-        ui->record->blockSignals(false);
-        return true;
-    }
     else
     {
         return false;
@@ -366,30 +334,4 @@ void KiwiSDRGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void KiwiSDRGui::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }
