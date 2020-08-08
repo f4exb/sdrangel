@@ -1,3 +1,9 @@
+sdrangel (5.9.0-1) unstable; urgency=medium
+
+   * Added FileSink channel plugin. Implements #543.
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 08 Aug 2020 10:04:36 +0200
+
 sdrangel (5.8.5-1) unstable; urgency=medium
 
    * GLShaderTextured: dynamic fallback to mutable storage. Implements #582
