@@ -64,7 +64,7 @@ public:
     int getChannelSampleRate() const;
     double getMagSq() const { return m_sink.getMagSq(); }
     void setScopeSink(BasebandSampleSink* scopeSink) { m_sink.setScopeSink(scopeSink); }
-    void setTVScreen(TVScreen *tvScreen) { m_sink.setTVScreen(tvScreen); }
+    void setTVScreen(TVScreenAnalog *tvScreen) { m_sink.setTVScreen(tvScreen); }
     bool getBFOLocked() { return m_sink.getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_sink.setVideoTabIndex(videoTabIndex); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped

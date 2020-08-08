@@ -87,7 +87,7 @@ public:
     }
 
 	void setScopeSink(BasebandSampleSink* scopeSink) { m_basebandSink->setScopeSink(scopeSink); }
-    void setTVScreen(TVScreen *tvScreen) { m_basebandSink->setTVScreen(tvScreen); }; //!< set by the GUI
+    void setTVScreen(TVScreenAnalog *tvScreen) { m_basebandSink->setTVScreen(tvScreen); }; //!< set by the GUI
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_basebandSink->setVideoTabIndex(videoTabIndex); }

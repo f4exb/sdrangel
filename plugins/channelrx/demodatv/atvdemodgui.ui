@@ -1138,7 +1138,7 @@
        <enum>QLayout::SetMinimumSize</enum>
       </property>
       <item>
-       <widget class="TVScreen" name="screenTV" native="true">
+       <widget class="TVScreenAnalog" name="screenTV" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -1242,9 +1242,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TVScreen</class>
+   <class>TVScreenAnalog</class>
    <extends>QWidget</extends>
-   <header>gui/tvscreen.h</header>
+   <header>gui/tvscreenanalog.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

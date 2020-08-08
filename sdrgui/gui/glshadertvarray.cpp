@@ -39,13 +39,11 @@ GLShaderTVArray::GLShaderTVArray(bool blnColor) : m_blnColor(blnColor)
 {
 	m_blnAlphaBlend = false;
     m_blnAlphaReset = false;
-    m_blnExtraColumns = false;
     m_objProgram = 0;
     m_objImage = 0;
     m_objTexture = 0;
     m_intCols = 0;
     m_intRows = 0;
-    m_subsampleShift = 0.0f;
     m_blnInitialized = false;
     m_objCurrentRow = 0;
 
@@ -112,8 +110,7 @@ void GLShaderTVArray::InitializeGL(int intCols, int intRows)
     }
 
     //Image container
-    int cols = intCols + (m_blnExtraColumns ? 2 : 0);
-    m_objImage = new QImage(cols, intRows, QImage::Format_RGBA8888);
+    m_objImage = new QImage(intCols, intRows, QImage::Format_RGBA8888);
     m_objImage->fill(QColor(0, 0, 0));
 
     m_objTexture = new QOpenGLTexture(*m_objImage);
@@ -158,23 +155,11 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
     QMatrix4x4 objQMatrix;
 
-    float rectHalfWidth = 1.0f;
-    float sampleSize = 2.0f / m_intCols;
-    if (m_blnExtraColumns)
-        rectHalfWidth += sampleSize;
-    float xShift = sampleSize * m_subsampleShift;
-
     GLfloat arrVertices[] =
     // 2 3
     // 1 4
-    {
-        -rectHalfWidth + xShift, -1.0f, // 1
-        -rectHalfWidth + xShift,  1.0f, // 2
-         rectHalfWidth + xShift,  1.0f, // 3
-         rectHalfWidth + xShift,  1.0f, // 3
-         rectHalfWidth + xShift, -1.0f, // 4
-        -rectHalfWidth + xShift, -1.0f  // 1
-    };
+    //1             2            3           3           4            1
+    { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f, -1.0f };
 
     GLfloat arrTextureCoords[] =
     // 1 4
@@ -242,9 +227,8 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
     m_objTexture->bind();
 
-    ptrF->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-        m_intCols + (m_blnExtraColumns ? 2 : 0), m_intRows, GL_RGBA,
-        GL_UNSIGNED_BYTE, m_objImage->bits());
+    ptrF->glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_intCols, m_intRows, GL_RGBA,
+            GL_UNSIGNED_BYTE, m_objImage->bits());
 
     ptrF->glEnableVertexAttribArray(0); // vertex
     ptrF->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, arrVertices);
@@ -334,11 +318,9 @@ bool GLShaderTVArray::SetDataColor(int intCol, QRgb objColor)
 
     if (m_blnInitialized)
     {
-        if ((intCol < m_intCols + m_blnExtraColumns) &&
-            (intCol >= -m_blnExtraColumns) &&
-            (m_objCurrentRow != 0))
+        if ((intCol < m_intCols) && (intCol >= 0) && (m_objCurrentRow != 0))
         {
-            m_objCurrentRow[intCol + m_blnExtraColumns] = objColor;
+            m_objCurrentRow[intCol] = objColor;
             blnRslt = true;
         }
     }
