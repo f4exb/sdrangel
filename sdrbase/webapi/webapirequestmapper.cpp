@@ -3846,20 +3846,20 @@ bool WebAPIRequestMapper::getDeviceActions(
 
     if (deviceKeys.contains(deviceActionsKey) && deviceActionsJson[deviceActionsKey].isObject())
     {
-        // QJsonObject actionsJsonObject = deviceActionsJson[deviceActionsKey].toObject();
-        // deviceActionsKeys = actionsJsonObject.keys();
+        QJsonObject actionsJsonObject = deviceActionsJson[deviceActionsKey].toObject();
+        deviceActionsKeys = actionsJsonObject.keys();
 
-        // if (deviceActionsKey == "xtrxInputActions")
-        // {
-        //     deviceActions->setXtrxInputActions(new SWGSDRangel::SWGXtrxInputActions());
-        //     deviceActions->getXtrxInputActions()->fromJsonObject(actionsJsonObject);
-        // }
-        // else
-        // {
+        if (deviceActionsKey == "SigMFFileInputActions")
+        {
+            deviceActions->setSigMfFileInputActions(new SWGSDRangel::SWGSigMFFileInputActions());
+            deviceActions->getSigMfFileInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else
+        {
             return false;
-        // }
+        }
 
-        // return true;
+        return true;
     }
     else
     {
@@ -3958,7 +3958,7 @@ void WebAPIRequestMapper::resetDeviceActions(SWGSDRangel::SWGDeviceActions& devi
 {
     deviceActions.cleanup();
     deviceActions.setDeviceHwType(nullptr);
-    // deviceActions.setXtrxInputActions(nullptr);
+    deviceActions.setSigMfFileInputActions(nullptr);
 }
 
 void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings)
