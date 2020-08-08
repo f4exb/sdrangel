@@ -60,9 +60,6 @@ public:
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -96,9 +93,6 @@ private:
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

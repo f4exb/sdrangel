@@ -93,9 +93,6 @@ public:
     qint32 getBiasTee();
     void setBiasTee(qint32 bias_tee);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -162,9 +159,6 @@ private:
 
     qint32 bias_tee;
     bool m_bias_tee_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

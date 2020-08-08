@@ -62,8 +62,6 @@ SWGRtlSdrSettings::SWGRtlSdrSettings() {
     m_rf_bandwidth_isSet = false;
     bias_tee = 0;
     m_bias_tee_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -114,8 +112,6 @@ SWGRtlSdrSettings::init() {
     m_rf_bandwidth_isSet = false;
     bias_tee = 0;
     m_bias_tee_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -145,9 +141,6 @@ SWGRtlSdrSettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -200,8 +193,6 @@ SWGRtlSdrSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "qint32", "");
     
     ::SWGSDRangel::setValue(&bias_tee, pJson["biasTee"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -277,9 +268,6 @@ SWGRtlSdrSettings::asJsonObject() {
     }
     if(m_bias_tee_isSet){
         obj->insert("biasTee", QJsonValue(bias_tee));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -467,16 +455,6 @@ SWGRtlSdrSettings::setBiasTee(qint32 bias_tee) {
     this->m_bias_tee_isSet = true;
 }
 
-QString*
-SWGRtlSdrSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGRtlSdrSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
-}
-
 qint32
 SWGRtlSdrSettings::getUseReverseApi() {
     return use_reverse_api;
@@ -571,9 +549,6 @@ SWGRtlSdrSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_bias_tee_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

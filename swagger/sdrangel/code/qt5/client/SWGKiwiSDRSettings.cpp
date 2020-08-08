@@ -38,8 +38,6 @@ SWGKiwiSDRSettings::SWGKiwiSDRSettings() {
     m_center_frequency_isSet = false;
     server_address = nullptr;
     m_server_address_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -66,8 +64,6 @@ SWGKiwiSDRSettings::init() {
     m_center_frequency_isSet = false;
     server_address = new QString("");
     m_server_address_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -86,9 +82,6 @@ SWGKiwiSDRSettings::cleanup() {
 
     if(server_address != nullptr) { 
         delete server_address;
-    }
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
     }
 
     if(reverse_api_address != nullptr) { 
@@ -118,8 +111,6 @@ SWGKiwiSDRSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&server_address, pJson["serverAddress"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -159,9 +150,6 @@ SWGKiwiSDRSettings::asJsonObject() {
     }
     if(server_address != nullptr && *server_address != QString("")){
         toJsonValue(QString("serverAddress"), server_address, obj, QString("QString"));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -229,16 +217,6 @@ SWGKiwiSDRSettings::setServerAddress(QString* server_address) {
     this->m_server_address_isSet = true;
 }
 
-QString*
-SWGKiwiSDRSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGKiwiSDRSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
-}
-
 qint32
 SWGKiwiSDRSettings::getUseReverseApi() {
     return use_reverse_api;
@@ -297,9 +275,6 @@ SWGKiwiSDRSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(server_address && *server_address != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

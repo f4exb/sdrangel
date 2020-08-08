@@ -52,8 +52,6 @@ SWGHackRFInputSettings::SWGHackRFInputSettings() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -100,8 +98,6 @@ SWGHackRFInputSettings::init() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     transverter_mode = 0;
     m_transverter_mode_isSet = false;
     transverter_delta_frequency = 0L;
@@ -132,9 +128,6 @@ SWGHackRFInputSettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
 
 
@@ -180,8 +173,6 @@ SWGHackRFInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&transverter_mode, pJson["transverterMode"], "qint32", "");
     
@@ -248,9 +239,6 @@ SWGHackRFInputSettings::asJsonObject() {
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_transverter_mode_isSet){
         obj->insert("transverterMode", QJsonValue(transverter_mode));
@@ -397,16 +385,6 @@ SWGHackRFInputSettings::setIqCorrection(qint32 iq_correction) {
     this->m_iq_correction_isSet = true;
 }
 
-QString*
-SWGHackRFInputSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGHackRFInputSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
-}
-
 qint32
 SWGHackRFInputSettings::getTransverterMode() {
     return transverter_mode;
@@ -516,9 +494,6 @@ SWGHackRFInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_correction_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_transverter_mode_isSet){

@@ -48,8 +48,6 @@ SWGSoapySDRInputSettings::SWGSoapySDRInputSettings() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     antenna = nullptr;
     m_antenna_isSet = false;
     bandwidth = 0;
@@ -110,8 +108,6 @@ SWGSoapySDRInputSettings::init() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     antenna = new QString("");
     m_antenna_isSet = false;
     bandwidth = 0;
@@ -158,9 +154,6 @@ SWGSoapySDRInputSettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
     if(antenna != nullptr) { 
         delete antenna;
     }
@@ -242,8 +235,6 @@ SWGSoapySDRInputSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
-    
     ::SWGSDRangel::setValue(&antenna, pJson["antenna"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&bandwidth, pJson["bandwidth"], "qint32", "");
@@ -321,9 +312,6 @@ SWGSoapySDRInputSettings::asJsonObject() {
     }
     if(m_iq_order_isSet){
         obj->insert("iqOrder", QJsonValue(iq_order));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(antenna != nullptr && *antenna != QString("")){
         toJsonValue(QString("antenna"), antenna, obj, QString("QString"));
@@ -475,16 +463,6 @@ void
 SWGSoapySDRInputSettings::setIqOrder(qint32 iq_order) {
     this->iq_order = iq_order;
     this->m_iq_order_isSet = true;
-}
-
-QString*
-SWGSoapySDRInputSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGSoapySDRInputSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
 }
 
 QString*
@@ -680,9 +658,6 @@ SWGSoapySDRInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_order_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(antenna && *antenna != QString("")){

@@ -75,9 +75,6 @@ public:
     qint32 getIqOrder();
     void setIqOrder(qint32 iq_order);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     QString* getAntenna();
     void setAntenna(QString* antenna);
 
@@ -159,9 +156,6 @@ private:
 
     qint32 iq_order;
     bool m_iq_order_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     QString* antenna;
     bool m_antenna_isSet;

@@ -44,8 +44,6 @@ SWGAirspyHFSettings::SWGAirspyHFSettings() {
     m_iq_order_isSet = false;
     band_index = 0;
     m_band_index_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -92,8 +90,6 @@ SWGAirspyHFSettings::init() {
     m_iq_order_isSet = false;
     band_index = 0;
     m_band_index_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -128,9 +124,6 @@ SWGAirspyHFSettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -172,8 +165,6 @@ SWGAirspyHFSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     ::SWGSDRangel::setValue(&band_index, pJson["bandIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -236,9 +227,6 @@ SWGAirspyHFSettings::asJsonObject() {
     }
     if(m_band_index_isSet){
         obj->insert("bandIndex", QJsonValue(band_index));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -355,16 +343,6 @@ void
 SWGAirspyHFSettings::setBandIndex(qint32 band_index) {
     this->band_index = band_index;
     this->m_band_index_isSet = true;
-}
-
-QString*
-SWGAirspyHFSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGAirspyHFSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
 }
 
 qint32
@@ -504,9 +482,6 @@ SWGAirspyHFSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_band_index_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

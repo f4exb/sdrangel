@@ -48,8 +48,6 @@ SWGPerseusSettings::SWGPerseusSettings() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     attenuator = 0;
     m_attenuator_isSet = false;
     use_reverse_api = 0;
@@ -88,8 +86,6 @@ SWGPerseusSettings::init() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     attenuator = 0;
     m_attenuator_isSet = false;
     use_reverse_api = 0;
@@ -114,9 +110,6 @@ SWGPerseusSettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
 
     if(reverse_api_address != nullptr) { 
@@ -156,8 +149,6 @@ SWGPerseusSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&attenuator, pJson["attenuator"], "qint32", "");
     
@@ -214,9 +205,6 @@ SWGPerseusSettings::asJsonObject() {
     }
     if(m_iq_order_isSet){
         obj->insert("iqOrder", QJsonValue(iq_order));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_attenuator_isSet){
         obj->insert("attenuator", QJsonValue(attenuator));
@@ -337,16 +325,6 @@ SWGPerseusSettings::setIqOrder(qint32 iq_order) {
     this->m_iq_order_isSet = true;
 }
 
-QString*
-SWGPerseusSettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGPerseusSettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
-}
-
 qint32
 SWGPerseusSettings::getAttenuator() {
     return attenuator;
@@ -430,9 +408,6 @@ SWGPerseusSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_order_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_attenuator_isSet){
