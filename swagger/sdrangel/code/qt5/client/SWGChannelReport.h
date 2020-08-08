@@ -27,6 +27,7 @@
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGDSDDemodReport.h"
+#include "SWGFileSinkReport.h"
 #include "SWGFileSourceReport.h"
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
@@ -80,6 +81,9 @@ public:
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
+
+    SWGFileSinkReport* getFileSinkReport();
+    void setFileSinkReport(SWGFileSinkReport* file_sink_report);
 
     SWGFileSourceReport* getFileSourceReport();
     void setFileSourceReport(SWGFileSourceReport* file_source_report);
@@ -144,6 +148,9 @@ private:
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
+
+    SWGFileSinkReport* file_sink_report;
+    bool m_file_sink_report_isSet;
 
     SWGFileSourceReport* file_source_report;
     bool m_file_source_report_isSet;

@@ -58,8 +58,6 @@ SWGDSDDemodSettings::SWGDSDDemodSettings() {
     m_tdma_stereo_isSet = false;
     pll_lock = 0;
     m_pll_lock_isSet = false;
-    dmr_bp_key = 0;
-    m_dmr_bp_key_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -124,8 +122,6 @@ SWGDSDDemodSettings::init() {
     m_tdma_stereo_isSet = false;
     pll_lock = 0;
     m_pll_lock_isSet = false;
-    dmr_bp_key = 0;
-    m_dmr_bp_key_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -156,7 +152,6 @@ SWGDSDDemodSettings::init() {
 
 void
 SWGDSDDemodSettings::cleanup() {
-
 
 
 
@@ -233,8 +228,6 @@ SWGDSDDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&tdma_stereo, pJson["tdmaStereo"], "qint32", "");
     
     ::SWGSDRangel::setValue(&pll_lock, pJson["pllLock"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&dmr_bp_key, pJson["dmrBPKey"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -322,9 +315,6 @@ SWGDSDDemodSettings::asJsonObject() {
     }
     if(m_pll_lock_isSet){
         obj->insert("pllLock", QJsonValue(pll_lock));
-    }
-    if(m_dmr_bp_key_isSet){
-        obj->insert("dmrBPKey", QJsonValue(dmr_bp_key));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -520,16 +510,6 @@ SWGDSDDemodSettings::setPllLock(qint32 pll_lock) {
 }
 
 qint32
-SWGDSDDemodSettings::getDmrBpKey() {
-    return dmr_bp_key;
-}
-void
-SWGDSDDemodSettings::setDmrBpKey(qint32 dmr_bp_key) {
-    this->dmr_bp_key = dmr_bp_key;
-    this->m_dmr_bp_key_isSet = true;
-}
-
-qint32
 SWGDSDDemodSettings::getRgbColor() {
     return rgb_color;
 }
@@ -707,9 +687,6 @@ SWGDSDDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pll_lock_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_dmr_bp_key_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

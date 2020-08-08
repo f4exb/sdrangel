@@ -2089,6 +2089,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the channel index from where the message comes from."
     },
+    "FileSinkActions" : {
+      "$ref" : "#/definitions/FileSinkActions"
+    },
     "FileSourceActions" : {
       "$ref" : "#/definitions/FileSourceActions"
     }
@@ -2226,6 +2229,9 @@ margin-bottom: 20px;
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
+    "FileSinkReport" : {
+      "$ref" : "#/definitions/FileSinkReport"
+    },
     "FileSourceReport" : {
       "$ref" : "#/definitions/FileSourceReport"
     },
@@ -2311,6 +2317,9 @@ margin-bottom: 20px;
     },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
+    },
+    "FileSinkSettings" : {
+      "$ref" : "#/definitions/FileSinkSettings"
     },
     "FileSourceSettings" : {
       "$ref" : "#/definitions/FileSourceSettings"
@@ -2618,9 +2627,6 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "pllLock" : {
-      "type" : "integer"
-    },
-    "dmrBPKey" : {
       "type" : "integer"
     },
     "rgbColor" : {
@@ -3319,6 +3325,114 @@ margin-bottom: 20px;
     }
   },
   "description" : "FileInput"
+};
+            defs.FileSinkActions = {
+  "properties" : {
+    "record" : {
+      "type" : "integer",
+      "description" : "Record action\n  * 0 - stop recording\n  * 1 - start recording\n"
+    }
+  },
+  "description" : "FileSink"
+};
+            defs.FileSinkReport = {
+  "properties" : {
+    "spectrumSquelch" : {
+      "type" : "integer",
+      "description" : "Spectrum squelch status * 0 - closed * 1 - open\n"
+    },
+    "spectrumMax" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Current spectrum max in squared magnitude (power)"
+    },
+    "sinkSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "recording" : {
+      "type" : "integer",
+      "description" : "Recording status * 0 - not recording * 1 - recording\n"
+    },
+    "recordTimeMs" : {
+      "type" : "integer",
+      "description" : "Total recording time in milliseconds"
+    },
+    "recordSize" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Total recording data size in bytes"
+    },
+    "recordCaptures" : {
+      "type" : "integer",
+      "description" : "Number of record flles not including current if recording"
+    }
+  },
+  "description" : "FileSink"
+};
+            defs.FileSinkSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer"
+    },
+    "fileRecordName" : {
+      "type" : "string",
+      "description" : "full path of the reference file"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "spectrumSquelchMode" : {
+      "type" : "integer",
+      "description" : "Spectrum squelch system * 0 - deactivated * 1 - activated\n"
+    },
+    "spectrumSquelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Squelch level in power dB"
+    },
+    "preRecordTime" : {
+      "type" : "integer",
+      "description" : "Number of seconds to record before recording is triggered (manual or squelch)"
+    },
+    "squelchPostRecordTime" : {
+      "type" : "integer",
+      "description" : "Number of seconds to record after spectrum squelch cloeses"
+    },
+    "squelchRecordingEnable" : {
+      "type" : "integer",
+      "description" : "Automatic recording triggered by spectrum squalch * 0 - disabled * 1 - enabled\n"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FileSink"
 };
             defs.FileSourceActions = {
   "properties" : {
@@ -33471,7 +33585,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-07-01T19:58:14.874+02:00
+              Generated 2020-08-08T23:29:13.057+02:00
             </div>
           </div>
       </div>

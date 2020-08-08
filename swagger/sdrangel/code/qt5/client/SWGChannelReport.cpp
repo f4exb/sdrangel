@@ -42,6 +42,8 @@ SWGChannelReport::SWGChannelReport() {
     m_bfm_demod_report_isSet = false;
     dsd_demod_report = nullptr;
     m_dsd_demod_report_isSet = false;
+    file_sink_report = nullptr;
+    m_file_sink_report_isSet = false;
     file_source_report = nullptr;
     m_file_source_report_isSet = false;
     free_dv_demod_report = nullptr;
@@ -90,6 +92,8 @@ SWGChannelReport::init() {
     m_bfm_demod_report_isSet = false;
     dsd_demod_report = new SWGDSDDemodReport();
     m_dsd_demod_report_isSet = false;
+    file_sink_report = new SWGFileSinkReport();
+    m_file_sink_report_isSet = false;
     file_source_report = new SWGFileSourceReport();
     m_file_source_report_isSet = false;
     free_dv_demod_report = new SWGFreeDVDemodReport();
@@ -138,6 +142,9 @@ SWGChannelReport::cleanup() {
     }
     if(dsd_demod_report != nullptr) { 
         delete dsd_demod_report;
+    }
+    if(file_sink_report != nullptr) { 
+        delete file_sink_report;
     }
     if(file_source_report != nullptr) { 
         delete file_source_report;
@@ -205,6 +212,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_report, pJson["DSDDemodReport"], "SWGDSDDemodReport", "SWGDSDDemodReport");
     
+    ::SWGSDRangel::setValue(&file_sink_report, pJson["FileSinkReport"], "SWGFileSinkReport", "SWGFileSinkReport");
+    
     ::SWGSDRangel::setValue(&file_source_report, pJson["FileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
     
     ::SWGSDRangel::setValue(&free_dv_demod_report, pJson["FreeDVDemodReport"], "SWGFreeDVDemodReport", "SWGFreeDVDemodReport");
@@ -267,6 +276,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((dsd_demod_report != nullptr) && (dsd_demod_report->isSet())){
         toJsonValue(QString("DSDDemodReport"), dsd_demod_report, obj, QString("SWGDSDDemodReport"));
+    }
+    if((file_sink_report != nullptr) && (file_sink_report->isSet())){
+        toJsonValue(QString("FileSinkReport"), file_sink_report, obj, QString("SWGFileSinkReport"));
     }
     if((file_source_report != nullptr) && (file_source_report->isSet())){
         toJsonValue(QString("FileSourceReport"), file_source_report, obj, QString("SWGFileSourceReport"));
@@ -379,6 +391,16 @@ void
 SWGChannelReport::setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report) {
     this->dsd_demod_report = dsd_demod_report;
     this->m_dsd_demod_report_isSet = true;
+}
+
+SWGFileSinkReport*
+SWGChannelReport::getFileSinkReport() {
+    return file_sink_report;
+}
+void
+SWGChannelReport::setFileSinkReport(SWGFileSinkReport* file_sink_report) {
+    this->file_sink_report = file_sink_report;
+    this->m_file_sink_report_isSet = true;
 }
 
 SWGFileSourceReport*
@@ -535,6 +557,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_report && dsd_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_sink_report && file_sink_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_source_report && file_source_report->isSet()){

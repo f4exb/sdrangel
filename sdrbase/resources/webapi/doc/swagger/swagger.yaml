@@ -2342,6 +2342,8 @@ definitions:
         $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
       DSDDemodReport:
         $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+      FileSinkReport:
+        $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkReport"
       FileSourceReport:
         $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
       FreeDVDemodReport:

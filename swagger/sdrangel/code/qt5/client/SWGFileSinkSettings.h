@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGDSDDemodSettings.h
+ * SWGFileSinkSettings.h
  *
- * DSDDemod
+ * FileSink
  */
 
-#ifndef SWGDSDDemodSettings_H_
-#define SWGDSDDemodSettings_H_
+#ifndef SWGFileSinkSettings_H_
+#define SWGFileSinkSettings_H_
 
 #include <QJsonObject>
 
@@ -29,63 +29,24 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDSDDemodSettings: public SWGObject {
+class SWG_API SWGFileSinkSettings: public SWGObject {
 public:
-    SWGDSDDemodSettings();
-    SWGDSDDemodSettings(QString* json);
-    virtual ~SWGDSDDemodSettings();
+    SWGFileSinkSettings();
+    SWGFileSinkSettings(QString* json);
+    virtual ~SWGFileSinkSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDSDDemodSettings* fromJson(QString &jsonString) override;
+    virtual SWGFileSinkSettings* fromJson(QString &jsonString) override;
 
-    qint64 getInputFrequencyOffset();
-    void setInputFrequencyOffset(qint64 input_frequency_offset);
+    qint32 getInputFrequencyOffset();
+    void setInputFrequencyOffset(qint32 input_frequency_offset);
 
-    float getRfBandwidth();
-    void setRfBandwidth(float rf_bandwidth);
-
-    float getFmDeviation();
-    void setFmDeviation(float fm_deviation);
-
-    float getDemodGain();
-    void setDemodGain(float demod_gain);
-
-    float getVolume();
-    void setVolume(float volume);
-
-    qint32 getBaudRate();
-    void setBaudRate(qint32 baud_rate);
-
-    qint32 getSquelchGate();
-    void setSquelchGate(qint32 squelch_gate);
-
-    float getSquelch();
-    void setSquelch(float squelch);
-
-    qint32 getAudioMute();
-    void setAudioMute(qint32 audio_mute);
-
-    qint32 getEnableCosineFiltering();
-    void setEnableCosineFiltering(qint32 enable_cosine_filtering);
-
-    qint32 getSyncOrConstellation();
-    void setSyncOrConstellation(qint32 sync_or_constellation);
-
-    qint32 getSlot1On();
-    void setSlot1On(qint32 slot1_on);
-
-    qint32 getSlot2On();
-    void setSlot2On(qint32 slot2_on);
-
-    qint32 getTdmaStereo();
-    void setTdmaStereo(qint32 tdma_stereo);
-
-    qint32 getPllLock();
-    void setPllLock(qint32 pll_lock);
+    QString* getFileRecordName();
+    void setFileRecordName(QString* file_record_name);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -93,20 +54,23 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
-    QString* getAudioDeviceName();
-    void setAudioDeviceName(QString* audio_device_name);
+    qint32 getLog2Decim();
+    void setLog2Decim(qint32 log2_decim);
 
-    qint32 getHighPassFilter();
-    void setHighPassFilter(qint32 high_pass_filter);
+    qint32 getSpectrumSquelchMode();
+    void setSpectrumSquelchMode(qint32 spectrum_squelch_mode);
 
-    qint32 getTraceLengthMutliplier();
-    void setTraceLengthMutliplier(qint32 trace_length_mutliplier);
+    float getSpectrumSquelch();
+    void setSpectrumSquelch(float spectrum_squelch);
 
-    qint32 getTraceStroke();
-    void setTraceStroke(qint32 trace_stroke);
+    qint32 getPreRecordTime();
+    void setPreRecordTime(qint32 pre_record_time);
 
-    qint32 getTraceDecay();
-    void setTraceDecay(qint32 trace_decay);
+    qint32 getSquelchPostRecordTime();
+    void setSquelchPostRecordTime(qint32 squelch_post_record_time);
+
+    qint32 getSquelchRecordingEnable();
+    void setSquelchRecordingEnable(qint32 squelch_recording_enable);
 
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
@@ -130,50 +94,11 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint64 input_frequency_offset;
+    qint32 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
 
-    float rf_bandwidth;
-    bool m_rf_bandwidth_isSet;
-
-    float fm_deviation;
-    bool m_fm_deviation_isSet;
-
-    float demod_gain;
-    bool m_demod_gain_isSet;
-
-    float volume;
-    bool m_volume_isSet;
-
-    qint32 baud_rate;
-    bool m_baud_rate_isSet;
-
-    qint32 squelch_gate;
-    bool m_squelch_gate_isSet;
-
-    float squelch;
-    bool m_squelch_isSet;
-
-    qint32 audio_mute;
-    bool m_audio_mute_isSet;
-
-    qint32 enable_cosine_filtering;
-    bool m_enable_cosine_filtering_isSet;
-
-    qint32 sync_or_constellation;
-    bool m_sync_or_constellation_isSet;
-
-    qint32 slot1_on;
-    bool m_slot1_on_isSet;
-
-    qint32 slot2_on;
-    bool m_slot2_on_isSet;
-
-    qint32 tdma_stereo;
-    bool m_tdma_stereo_isSet;
-
-    qint32 pll_lock;
-    bool m_pll_lock_isSet;
+    QString* file_record_name;
+    bool m_file_record_name_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
@@ -181,20 +106,23 @@ private:
     QString* title;
     bool m_title_isSet;
 
-    QString* audio_device_name;
-    bool m_audio_device_name_isSet;
+    qint32 log2_decim;
+    bool m_log2_decim_isSet;
 
-    qint32 high_pass_filter;
-    bool m_high_pass_filter_isSet;
+    qint32 spectrum_squelch_mode;
+    bool m_spectrum_squelch_mode_isSet;
 
-    qint32 trace_length_mutliplier;
-    bool m_trace_length_mutliplier_isSet;
+    float spectrum_squelch;
+    bool m_spectrum_squelch_isSet;
 
-    qint32 trace_stroke;
-    bool m_trace_stroke_isSet;
+    qint32 pre_record_time;
+    bool m_pre_record_time_isSet;
 
-    qint32 trace_decay;
-    bool m_trace_decay_isSet;
+    qint32 squelch_post_record_time;
+    bool m_squelch_post_record_time_isSet;
+
+    qint32 squelch_recording_enable;
+    bool m_squelch_recording_enable_isSet;
 
     qint32 stream_index;
     bool m_stream_index_isSet;
@@ -218,4 +146,4 @@ private:
 
 }
 
-#endif /* SWGDSDDemodSettings_H_ */
+#endif /* SWGFileSinkSettings_H_ */
