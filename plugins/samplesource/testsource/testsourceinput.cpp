@@ -54,6 +54,16 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
+TestSourceInput::~TestSourceInput()
+{
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
+
+    if (m_running) {
+        stop();
+    }
+}
+
 void TestSourceInput::destroy()
 {
     delete this;
