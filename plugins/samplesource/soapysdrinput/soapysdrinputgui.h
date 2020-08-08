@@ -137,11 +137,9 @@ private slots:
     void on_fcPos_currentIndexChanged(int index);
     void on_transverter_clicked();
     void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void updateHardware();
     void updateStatus();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 

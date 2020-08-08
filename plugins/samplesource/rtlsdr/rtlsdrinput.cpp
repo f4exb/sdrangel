@@ -35,13 +35,8 @@
 #include "rtlsdrthread.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
-#ifdef HAS_LIBSIGMF
-#include "dsp/sigmffilerecord.h"
-#endif
 
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgConfigureRTLSDR, Message)
-MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(RTLSDRInput::MsgStartStop, Message)
 
 const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
@@ -55,7 +50,6 @@ const int RTLSDRInput::sampleRateHighRangeMax = 2400000U;
 
 RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
 	m_rtlSDRThread(nullptr),
@@ -75,12 +69,6 @@ RTLSDRInput::~RTLSDRInput()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -320,64 +308,6 @@ bool RTLSDRInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "RTLSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        QString fileBase;
-        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(m_settings.m_fileRecordName, fileBase);
-
-#ifdef HAS_LIBSIGMF
-        if (recordType == FileRecordInterface::RecordTypeSigMF)
-        {
-            if (conf.getStartStop())
-            {
-                if (!m_fileSink) {
-                    m_fileSink = new SigMFFileRecord(fileBase, m_deviceAPI->getHardwareId());
-                }
-
-                m_deviceAPI->addAncillarySink(m_fileSink);
-                m_fileSink->startRecording();
-            }
-            else
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                m_fileSink->stopRecording();
-            }
-        }
-        else
-        {
-#endif
-            if (conf.getStartStop())
-            {
-                if (m_fileSink)
-                {
-                    m_deviceAPI->removeAncillarySink(m_fileSink);
-                    delete m_fileSink;
-                }
-
-                if (m_settings.m_fileRecordName.size() != 0) {
-                    m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-                } else {
-                    m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-                }
-
-                m_deviceAPI->addAncillarySink(m_fileSink);
-                m_fileSink->startRecording();
-            }
-            else
-            {
-                m_fileSink->stopRecording();
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-                m_fileSink = nullptr;
-            }
-#ifdef HAS_LIBSIGMF
-        }
-#endif
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -615,30 +545,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
         }
     }
 
-    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force)
-    {
-        reverseAPIKeys.append("fileRecordName");
-        QString fileBase;
-        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(settings.m_fileRecordName, fileBase);
-#ifdef HAS_LIBSIGMF
-        if (recordType == FileRecordInterface::RecordTypeSigMF)
-        {
-            if (m_fileSink) {
-                m_fileSink->setFileName(fileBase);
-            }
-        }
-        else
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-                m_fileSink = nullptr;
-            }
-        }
-#endif
-    }
-
     if (settings.m_useReverseAPI)
     {
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
@@ -654,11 +560,6 @@ bool RTLSDRInput::applySettings(const RTLSDRSettings& settings, bool force)
     {
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -760,9 +661,6 @@ void RTLSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("biasTee")) {
         settings.m_biasTee = response.getRtlSdrSettings()->getBiasTee() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getRtlSdrSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRtlSdrSettings()->getUseReverseApi() != 0;
     }
@@ -796,12 +694,6 @@ void RTLSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRtlSdrSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getRtlSdrSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getRtlSdrSettings()->setRfBandwidth(settings.m_rfBandwidth);
-
-    if (response.getRtlSdrSettings()->getFileRecordName()) {
-        *response.getRtlSdrSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getRtlSdrSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getRtlSdrSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -852,37 +744,6 @@ int RTLSDRInput::webapiReportGet(
     response.getRtlSdrReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
-}
-
-int RTLSDRInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGRtlSdrActions *swgRtlSdrActions = query.getRtlSdrActions();
-
-    if (swgRtlSdrActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgRtlSdrActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing RtlSdrActions in query";
-        return 400;
-    }
 }
 
 void RTLSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -957,9 +818,6 @@ void RTLSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("biasTee") || force) {
         swgRtlSdrSettings->setBiasTee(settings.m_biasTee ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgRtlSdrSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

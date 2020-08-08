@@ -28,11 +28,6 @@ If you have the Tx open in another tab and it is running then it will be stopped
 
 The settings on Rx or Tx tab are reapplied on start so these settings can be considered independent.
 
-<h4>1.3: Record</h4>
-
-  - Left click: record baseband I/Q stream toggle button
-  - Right click: choose record file
-
 <h4>1.4: Stream sample rate</h4>
 
 In device to host sample rate input mode (6A) this is the baseband I/Q sample rate in kS/s. This is the device to host sample rate (6) divided by the decimation factor (7).

@@ -29,11 +29,6 @@ Device start / stop button.
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
 
-<h3>2: Record</h3>
-
-  - Left click: record baseband I/Q stream toggle button
-  - Right click: choose record file
-
 <h3>3: Frequency</h3>
 
 This is the center frequency in Hz sent in the meta data from the distant SDRangel instance and corresponds to the center frequency of reception. The sub kHz value (000 to 999 Hz) is represented in smaller digits on the right.

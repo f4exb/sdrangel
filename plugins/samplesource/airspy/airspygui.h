@@ -91,13 +91,11 @@ private slots:
 	void on_lnaAGC_stateChanged(int state);
 	void on_mixAGC_stateChanged(int state);
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_transverter_clicked();
 	void updateHardware();
     void updateStatus();
 	void handleInputMessages();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_AIRSPYGUI_H

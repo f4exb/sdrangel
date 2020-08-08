@@ -81,7 +81,6 @@ private:
 
 private slots:
     void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
     void on_loPPM_valueChanged(int value);
     void on_dcOffset_toggled(bool checked);
@@ -106,7 +105,6 @@ private slots:
     void updateStatus();
     void handleInputMessages();
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif /* PLUGINS_SAMPLESOURCE_PLUTOSDRINPUT_PLUTOSDRINPUTGUI_H_ */

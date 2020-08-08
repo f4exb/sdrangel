@@ -24,15 +24,12 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
-#include "SWGDeviceActions.h"
-#include "SWGBladeRF1InputActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 #include "device/deviceapi.h"
 
 #include "bladerf1input.h"
@@ -40,11 +37,9 @@
 
 MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgConfigureBladerf1, Message)
 MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(Bladerf1Input::MsgFileRecord, Message)
 
 Bladerf1Input::Bladerf1Input(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
 	m_bladerfThread(nullptr),
@@ -52,10 +47,7 @@ Bladerf1Input::Bladerf1Input(DeviceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
-
     m_deviceAPI->setBuddySharedPtr(&m_sharedParams);
 
     m_networkManager = new QNetworkAccessManager();
@@ -69,12 +61,6 @@ Bladerf1Input::~Bladerf1Input()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -294,38 +280,6 @@ bool Bladerf1Input::handleMessage(const Message& message)
 
 		return true;
 	}
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "BladerfInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -592,11 +546,6 @@ bool Bladerf1Input::applySettings(const BladeRF1InputSettings& settings, bool fo
 	{
 		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
@@ -673,12 +622,6 @@ void Bladerf1Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getBladeRf1InputSettings()->setXb200Filter((int) settings.m_xb200Filter);
     response.getBladeRf1InputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getBladeRf1InputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-
-    if (response.getBladeRf1InputSettings()->getFileRecordName()) {
-        *response.getBladeRf1InputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getBladeRf1InputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getBladeRf1InputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -762,9 +705,6 @@ void Bladerf1Input::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getBladeRf1InputSettings()->getIqCorrection() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getBladeRf1InputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getBladeRf1InputSettings()->getUseReverseApi() != 0;
     }
@@ -805,37 +745,6 @@ int Bladerf1Input::webapiRun(
     }
 
     return 200;
-}
-
-int Bladerf1Input::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGBladeRF1InputActions *swgBladeRF1InputActions = query.getBladeRf1InputActions();
-
-    if (swgBladeRF1InputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgBladeRF1InputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing BladeRF1InputActions in query";
-        return 400;
-    }
 }
 
 void Bladerf1Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF1InputSettings& settings, bool force)
@@ -890,9 +799,6 @@ void Bladerf1Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgBladeRF1Settings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgBladeRF1Settings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

@@ -25,14 +25,11 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGSDRPlayReport.h"
-#include "SWGSDRPlayActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include <dsp/filerecord.h>
 #include "sdrplayinput.h"
 
 #include <device/deviceapi.h>
@@ -41,12 +38,10 @@
 
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgConfigureSDRPlay, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgReportSDRPlayGains, Message)
-MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(SDRPlayInput::MsgStartStop, Message)
 
 SDRPlayInput::SDRPlayInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
     m_variant(SDRPlayUndef),
     m_settings(),
 	m_dev(0),
@@ -69,12 +64,6 @@ SDRPlayInput::~SDRPlayInput()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -310,38 +299,6 @@ bool SDRPlayInput::handleMessage(const Message& message)
             {
                 qDebug("SDRPlayInput::handleMessage: config error");
             }
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "SDRPlayInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
         }
 
         return true;
@@ -638,11 +595,6 @@ bool SDRPlayInput::applySettings(const SDRPlaySettings& settings, bool forwardCh
     {
         int sampleRate = getSampleRate();
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -730,37 +682,6 @@ int SDRPlayInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int SDRPlayInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGSDRPlayActions *swgSDRPlayActions = query.getSdrPlayActions();
-
-    if (swgSDRPlayActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgSDRPlayActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing SDRPlayActions in query";
-        return 400;
-    }
-}
-
 void SDRPlayInput::webapiUpdateDeviceSettings(
         SDRPlaySettings& settings,
         const QStringList& deviceSettingsKeys,
@@ -817,9 +738,6 @@ void SDRPlayInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("basebandGain")) {
         settings.m_basebandGain = response.getSdrPlaySettings()->getBasebandGain();
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getSdrPlaySettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getSdrPlaySettings()->getUseReverseApi() != 0;
     }
@@ -852,12 +770,6 @@ void SDRPlayInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getSdrPlaySettings()->setLnaOn(settings.m_lnaOn ? 1 : 0);
     response.getSdrPlaySettings()->setMixerAmpOn(settings.m_mixerAmpOn ? 1 : 0);
     response.getSdrPlaySettings()->setBasebandGain(settings.m_basebandGain);
-
-    if (response.getSdrPlaySettings()->getFileRecordName()) {
-        *response.getSdrPlaySettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getSdrPlaySettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getSdrPlaySettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -977,9 +889,6 @@ void SDRPlayInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("basebandGain") || force) {
         swgSDRPlaySettings->setBasebandGain(settings.m_basebandGain);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgSDRPlaySettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

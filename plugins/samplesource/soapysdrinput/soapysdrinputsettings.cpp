@@ -38,7 +38,6 @@ void SoapySDRInputSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_iqOrder = true;
-    m_fileRecordName = "";
     m_antenna = "NONE";
     m_bandwidth = 1000000;
     m_globalGain = 0;

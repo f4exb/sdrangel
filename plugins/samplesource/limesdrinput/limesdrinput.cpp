@@ -29,13 +29,10 @@
 #include "SWGLimeSdrInputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGLimeSdrInputReport.h"
-#include "SWGLimeSdrInputActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/filerecord.h"
 #include "dsp/dspengine.h"
 #include "limesdrinput.h"
 #include "limesdrinputthread.h"
@@ -47,12 +44,10 @@ MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgConfigureLimeSDR, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgReportStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(LimeSDRInput::MsgStartStop, Message)
 
 LimeSDRInput::LimeSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
     m_settings(),
     m_limeSDRInputThread(nullptr),
     m_deviceDescription("LimeSDRInput"),
@@ -79,12 +74,6 @@ LimeSDRInput::~LimeSDRInput()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     suspendRxBuddies();
@@ -748,38 +737,6 @@ bool LimeSDRInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "LimeSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -1361,11 +1318,6 @@ bool LimeSDRInput::applySettings(const LimeSDRInputSettings& settings, bool forc
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftDecim);
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency + ncoShift);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -1555,9 +1507,6 @@ void LimeSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getLimeSdrInputSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getLimeSdrInputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("gpioDir")) {
         settings.m_gpioDir = response.getLimeSdrInputSettings()->getGpioDir() & 0xFF;
     }
@@ -1602,13 +1551,6 @@ void LimeSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getLimeSdrInputSettings()->setTiaGain(settings.m_tiaGain);
     response.getLimeSdrInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getLimeSdrInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getLimeSdrInputSettings()->getFileRecordName()) {
-        *response.getLimeSdrInputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getLimeSdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
-
     response.getLimeSdrInputSettings()->setGpioDir(settings.m_gpioDir);
     response.getLimeSdrInputSettings()->setGpioPins(settings.m_gpioPins);
     response.getLimeSdrInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
@@ -1660,37 +1602,6 @@ int LimeSDRInput::webapiRun(
     }
 
     return 200;
-}
-
-int LimeSDRInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGLimeSdrInputActions *swgLimeSdrInputActions = query.getLimeSdrInputActions();
-
-    if (swgLimeSdrInputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgLimeSdrInputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing LimeSdrInputActions in query";
-        return 400;
-    }
 }
 
 void LimeSDRInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -1809,9 +1720,6 @@ void LimeSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys,
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgLimeSdrInputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgLimeSdrInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("gpioDir") || force) {
         swgLimeSdrInputSettings->setGpioDir(settings.m_gpioDir & 0xFF);

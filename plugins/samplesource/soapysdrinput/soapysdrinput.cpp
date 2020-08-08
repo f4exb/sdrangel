@@ -25,13 +25,10 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGSoapySDRReport.h"
-#include "SWGSoapySDRInputActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/filerecord.h"
 #include "dsp/dspengine.h"
 #include "soapysdr/devicesoapysdr.h"
 
@@ -39,13 +36,11 @@
 #include "soapysdrinput.h"
 
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgConfigureSoapySDRInput, Message)
-MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(SoapySDRInput::MsgReportGainChange, Message)
 
 SoapySDRInput::SoapySDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
     m_settings(),
     m_deviceDescription("SoapySDRInput"),
     m_running(false),
@@ -70,12 +65,6 @@ SoapySDRInput::~SoapySDRInput()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -799,38 +788,6 @@ bool SoapySDRInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "SoapySDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -1294,11 +1251,6 @@ bool SoapySDRInput::applySettings(const SoapySDRInputSettings& settings, bool fo
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -1508,9 +1460,6 @@ void SoapySDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getSoapySdrInputSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getSoapySdrInputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("antenna")) {
         settings.m_antenna = *response.getSoapySdrInputSettings()->getAntenna();
     }
@@ -1664,37 +1613,6 @@ int SoapySDRInput::webapiRun(
     return 200;
 }
 
-int SoapySDRInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGSoapySDRInputActions *swgSoapySDRInputActions = query.getSoapySdrInputActions();
-
-    if (swgSoapySDRInputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgSoapySDRInputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing SoapySDRInputActions in query";
-        return 400;
-    }
-}
-
 void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const SoapySDRInputSettings& settings)
 {
     response.getSoapySdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
@@ -1707,12 +1625,6 @@ void SoapySDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getSoapySdrInputSettings()->setSoftIqCorrection(settings.m_softIQCorrection ? 1 : 0);
     response.getSoapySdrInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getSoapySdrInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getSoapySdrInputSettings()->getFileRecordName()) {
-        *response.getSoapySdrInputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getSoapySdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     if (response.getSoapySdrInputSettings()->getAntenna()) {
         *response.getSoapySdrInputSettings()->getAntenna() = settings.m_antenna;
@@ -2040,9 +1952,6 @@ void SoapySDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgSoapySDRInputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgSoapySDRInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("antenna") || force) {
         swgSoapySDRInputSettings->setAntenna(new QString(settings.m_antenna));

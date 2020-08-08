@@ -58,8 +58,6 @@ XtrxInputSettings:
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
@@ -86,16 +84,6 @@ XtrxInputReport:
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
-
-XtrxInputActions:
-  description: XTRX
-  properties:
-    record:
-      type: integer
-      description: >
-        Record IQ stream action
-          * 0 - stop recording
-          * 1 - start recording
 
 XtrxOutputSettings:
   description: XTRX

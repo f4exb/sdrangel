@@ -40,7 +40,6 @@ void HackRFInputSettings::resetToDefaults()
 	m_dcBlock = false;
 	m_iqCorrection = false;
 	m_devSampleRate = 2400000;
-	m_fileRecordName = "";
     m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
     m_iqOrder = true;

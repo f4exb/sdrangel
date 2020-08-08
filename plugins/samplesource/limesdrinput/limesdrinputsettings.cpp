@@ -47,7 +47,6 @@ void LimeSDRInputSettings::resetToDefaults()
     m_transverterMode = false;
     m_transverterDeltaFrequency = 0;
     m_iqOrder = true;
-    m_fileRecordName = "";
     m_gpioDir = 0;
     m_gpioPins = 0;
     m_useReverseAPI = false;

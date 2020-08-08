@@ -32,7 +32,6 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class FileRecord;
 class PlutoSDRInputThread;
 
 class PlutoSDRInput : public DeviceSampleSource {
@@ -58,25 +57,6 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
-        { }
-    };
-
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
         { }
     };
 
@@ -142,11 +122,6 @@ public:
             SWGSDRangel::SWGDeviceReport& response,
             QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const PlutoSDRInputSettings& settings);
@@ -168,7 +143,6 @@ public:
  private:
     DeviceAPI *m_deviceAPI;
     bool m_open;
-    FileRecord *m_fileSink;
     QString m_deviceDescription;
     PlutoSDRInputSettings m_settings;
     bool m_running;

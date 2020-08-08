@@ -24,13 +24,10 @@
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
-#include "SWGDeviceActions.h"
-#include "SWGHackRFInputActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
-#include "dsp/filerecord.h"
 #include "device/deviceapi.h"
 #include "hackrf/devicehackrfvalues.h"
 #include "hackrf/devicehackrfshared.h"
@@ -40,12 +37,10 @@
 
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgConfigureHackRF, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgReportHackRF, Message)
-MESSAGE_CLASS_DEFINITION(HackRFInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(HackRFInput::MsgStartStop, Message)
 
 HackRFInput::HackRFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
 	m_settings(),
 	m_dev(nullptr),
 	m_hackRFThread(nullptr),
@@ -68,12 +63,6 @@ HackRFInput::~HackRFInput()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -271,38 +260,6 @@ bool HackRFInput::handleMessage(const Message& message)
 
 		return true;
 	}
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "HackRFInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -349,11 +306,6 @@ bool HackRFInput::handleMessage(const Message& message)
         m_settings.m_centerFrequency = settings.m_centerFrequency;
 		int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         return true;
@@ -587,11 +539,6 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	{
 		int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
@@ -704,9 +651,6 @@ void HackRFInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getHackRfInputSettings()->getIqCorrection() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getHackRfInputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency")) {
         settings.m_transverterDeltaFrequency = response.getHackRfInputSettings()->getTransverterDeltaFrequency();
     }
@@ -744,12 +688,6 @@ void HackRFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getHackRfInputSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
     response.getHackRfInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getHackRfInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getHackRfInputSettings()->getFileRecordName()) {
-        *response.getHackRfInputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getHackRfInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getHackRfInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -789,37 +727,6 @@ int HackRFInput::webapiRun(
     }
 
     return 200;
-}
-
-int HackRFInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGHackRFInputActions *swgHackRFInputActions = query.getHackRfInputActions();
-
-    if (swgHackRFInputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgHackRFInputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing HackRFInputActions in query";
-        return 400;
-    }
 }
 
 void HackRFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const HackRFInputSettings& settings, bool force)
@@ -871,9 +778,6 @@ void HackRFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgHackRFInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgHackRFInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("transverterDeltaFrequency") || force) {
         swgHackRFInputSettings->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);

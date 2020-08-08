@@ -22,11 +22,8 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGPlutoSdrInputReport.h"
-#include "SWGPlutoSdrInputActions.h"
 
-#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "device/deviceapi.h"
@@ -39,12 +36,10 @@
 #define PLUTOSDR_BLOCKSIZE_SAMPLES (16*1024) //complex samples per buffer (must be multiple of 64)
 
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgConfigurePlutoSDR, Message)
-MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(PlutoSDRInput::MsgStartStop, Message)
 
 PlutoSDRInput::PlutoSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
     m_deviceDescription("PlutoSDRInput"),
     m_running(false),
     m_plutoRxBuffer(0),
@@ -76,12 +71,6 @@ PlutoSDRInput::~PlutoSDRInput()
 {
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
-    }
 
     suspendBuddies();
     closeDevice();
@@ -206,38 +195,6 @@ bool PlutoSDRInput::handleMessage(const Message& message)
         if (!applySettings(conf.getSettings(), conf.getForce()))
         {
             qDebug("PlutoSDRInput::handleMessage config error");
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "PlutoSDRInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
         }
 
         return true;
@@ -519,9 +476,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
     if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
         reverseAPIKeys.append("transverterDeltaFrequency");
     }
-    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force) {
-        reverseAPIKeys.append("fileRecordName");
-    }
 
     // determine if buddies threads or own thread need to be suspended
 
@@ -769,11 +723,6 @@ bool PlutoSDRInput::applySettings(const PlutoSDRInputSettings& settings, bool fo
 
         int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -1002,9 +951,6 @@ void PlutoSDRInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getPlutoSdrInputSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getPlutoSdrInputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getPlutoSdrInputSettings()->getUseReverseApi() != 0;
     }
@@ -1030,37 +976,6 @@ int PlutoSDRInput::webapiReportGet(
     return 200;
 }
 
-int PlutoSDRInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGPlutoSdrInputActions *swgPlutoSdrInputActions = query.getPlutoSdrInputActions();
-
-    if (swgPlutoSdrInputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgPlutoSdrInputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing PlutoSdrInputActions in query";
-        return 400;
-    }
-}
-
 void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const PlutoSDRInputSettings& settings)
 {
     response.getPlutoSdrInputSettings()->setCenterFrequency(settings.m_centerFrequency);
@@ -1084,12 +999,6 @@ void PlutoSDRInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getPlutoSdrInputSettings()->setGainMode((int) settings.m_gainMode);
     response.getPlutoSdrInputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getPlutoSdrInputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getPlutoSdrInputSettings()->getFileRecordName()) {
-        *response.getPlutoSdrInputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getPlutoSdrInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getPlutoSdrInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -1189,9 +1098,6 @@ void PlutoSDRInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgPlutoSdrInputSettings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgPlutoSdrInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

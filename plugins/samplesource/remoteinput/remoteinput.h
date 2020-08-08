@@ -35,7 +35,6 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class RemoteInputUDPHandler;
-class FileRecord;
 
 class RemoteInput : public DeviceSampleSource {
     Q_OBJECT
@@ -230,25 +229,6 @@ public:
 		{ }
 	};
 
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
-
     class MsgStartStop : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -313,11 +293,6 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const RemoteInputSettings& settings);
@@ -336,7 +311,6 @@ private:
     QString m_remoteAddress;
 	QString m_deviceDescription;
 	std::time_t m_startingTimeStamp;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

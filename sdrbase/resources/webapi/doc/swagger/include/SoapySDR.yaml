@@ -30,8 +30,6 @@ SoapySDRInputSettings:
         IQ samples order
           * 0 - Q then I (swapped)
           * 1 - I then Q (straight)
-    fileRecordName:
-      type: string
     antenna:
       type: string
     bandwidth:
@@ -250,13 +248,3 @@ definitions:
         type: array
         items:
           type: string
-
-SoapySDRInputActions:
-  description: SoapySDR
-  properties:
-    record:
-      type: integer
-      description: >
-        Record IQ stream action
-          * 0 - stop recording
-          * 1 - start recording

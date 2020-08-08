@@ -25,15 +25,12 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGRemoteInputReport.h"
-#include "SWGRemoteInputActions.h"
 
 #include "util/simpleserializer.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 #include "device/deviceapi.h"
-#include "dsp/filerecord.h"
 
 #include "remoteinput.h"
 #include "remoteinputudphandler.h"
@@ -43,14 +40,12 @@ MESSAGE_CLASS_DEFINITION(RemoteInput::MsgConfigureRemoteInputTiming, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputAcquisition, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgReportRemoteInputStreamTiming, Message)
-MESSAGE_CLASS_DEFINITION(RemoteInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(RemoteInput::MsgStartStop, Message)
 
 RemoteInput::RemoteInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_sampleRate(48000),
     m_mutex(QMutex::Recursive),
-    m_fileSink(nullptr),
     m_settings(),
 	m_remoteInputUDPHandler(nullptr),
 	m_deviceDescription(),
@@ -71,13 +66,6 @@ RemoteInput::~RemoteInput()
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	stop();
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
-    }
-
     delete m_remoteInputUDPHandler;
 }
 
@@ -168,17 +156,7 @@ bool RemoteInput::isStreaming() const
 
 bool RemoteInput::handleMessage(const Message& message)
 {
-    if (DSPSignalNotification::match(message))
-    {
-        DSPSignalNotification& notif = (DSPSignalNotification&) message;
-
-        if (m_fileSink) {
-            return m_fileSink->handleMessage(notif); // forward to file sink
-        } else {
-            return false;
-        }
-    }
-    else if (RemoteInputUDPHandler::MsgReportSampleRateChange::match(message))
+    if (RemoteInputUDPHandler::MsgReportSampleRateChange::match(message))
     {
         RemoteInputUDPHandler::MsgReportSampleRateChange& notif = (RemoteInputUDPHandler::MsgReportSampleRateChange&) message;
         int sampleRate = notif.getSampleRate();
@@ -189,38 +167,6 @@ bool RemoteInput::handleMessage(const Message& message)
             QMutexLocker mutexLocker(&m_mutex);
             m_sampleFifo.setSize(sampleRate * 8);
             m_sampleRate = sampleRate;
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "RemoteInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
         }
 
         return true;
@@ -286,9 +232,6 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
     }
     if ((m_settings.m_apiPort != settings.m_apiPort) || force) {
         reverseAPIKeys.append("apiPort");
-    }
-    if ((m_settings.m_fileRecordName != settings.m_fileRecordName) || force) {
-        reverseAPIKeys.append("fileRecordName");
     }
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
@@ -386,37 +329,6 @@ int RemoteInput::webapiSettingsPutPatch(
     return 200;
 }
 
-int RemoteInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGRemoteInputActions *swgRemoteInputActions = query.getRemoteInputActions();
-
-    if (swgRemoteInputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgRemoteInputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing RemoteInputActions in query";
-        return 400;
-    }
-}
-
 void RemoteInput::webapiUpdateDeviceSettings(
     RemoteInputSettings& settings,
     const QStringList& deviceSettingsKeys,
@@ -440,9 +352,6 @@ void RemoteInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getRemoteInputSettings()->getIqCorrection() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getRemoteInputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getRemoteInputSettings()->getUseReverseApi() != 0;
     }
@@ -465,12 +374,6 @@ void RemoteInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRemoteInputSettings()->setDataPort(settings.m_dataPort);
     response.getRemoteInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getRemoteInputSettings()->setIqCorrection(settings.m_iqCorrection);
-
-    if (response.getRemoteInputSettings()->getFileRecordName()) {
-        *response.getRemoteInputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getRemoteInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getRemoteInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -536,9 +439,6 @@ void RemoteInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgRemoteInputSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgRemoteInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

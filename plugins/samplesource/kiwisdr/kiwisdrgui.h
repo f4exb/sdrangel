@@ -80,14 +80,12 @@ private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
     void on_centerFrequency_changed(quint64 value);
-	void on_record_toggled(bool checked);
 	void on_gain_valueChanged(int value);
 	void on_agc_toggled(bool checked);
 	void on_serverAddress_returnPressed();
 	void on_serverAddressApplyButton_clicked();
   	void on_dcBlock_toggled(bool checked);
 	void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();
 };

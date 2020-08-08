@@ -25,12 +25,9 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGAirspyHFReport.h"
-#include "SWGAirspyHFActions.h"
 
 #include "device/deviceapi.h"
-#include "dsp/filerecord.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
 
@@ -42,7 +39,6 @@
 
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgConfigureAirspyHF, Message)
 MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgStartStop, Message)
-MESSAGE_CLASS_DEFINITION(AirspyHFInput::MsgFileRecord, Message)
 
 const qint64 AirspyHFInput::loLowLimitFreqHF   =      9000L;
 const qint64 AirspyHFInput::loHighLimitFreqHF  =  31000000L;
@@ -51,7 +47,6 @@ const qint64 AirspyHFInput::loHighLimitFreqVHF = 260000000L;
 
 AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
 	m_settings(),
 	m_dev(0),
 	m_airspyHFWorker(nullptr),
@@ -59,9 +54,7 @@ AirspyHFInput::AirspyHFInput(DeviceAPI *deviceAPI) :
 	m_running(false)
 {
     openDevice();
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -73,12 +66,6 @@ AirspyHFInput::~AirspyHFInput()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -363,38 +350,6 @@ bool AirspyHFInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "AirspyHFInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
-        }
-
-        return true;
-    }
 	else
 	{
 		return false;
@@ -433,7 +388,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
         << " m_bandIndex: " << settings.m_bandIndex
         << " m_transverterDeltaFrequency: " << settings.m_transverterDeltaFrequency
         << " m_transverterMode: " << settings.m_transverterMode
-        << " m_fileRecordName: " << settings.m_fileRecordName
         << " m_useDSP: " << settings.m_useDSP
         << " m_useAGC: " << settings.m_useAGC
         << " m_agcHigh: " << settings.m_agcHigh
@@ -654,11 +608,6 @@ bool AirspyHFInput::applySettings(const AirspyHFSettings& settings, bool force)
 	{
 		int sampleRate = m_sampleRates[sampleRateIndex]/(1<<settings.m_log2Decim);
 		DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 	}
 
@@ -763,9 +712,6 @@ void AirspyHFInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("bandIndex")) {
         settings.m_bandIndex = response.getAirspyHfSettings()->getBandIndex();
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getAirspyHfSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAirspyHfSettings()->getUseReverseApi() != 0;
     }
@@ -812,12 +758,6 @@ void AirspyHFInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getAirspyHfSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
     response.getAirspyHfSettings()->setBandIndex(settings.m_bandIndex ? 1 : 0);
 
-    if (response.getAirspyHfSettings()->getFileRecordName()) {
-        *response.getAirspyHfSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getAirspyHfSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
-
     response.getAirspyHfSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getAirspyHfSettings()->getReverseApiAddress()) {
@@ -857,37 +797,6 @@ int AirspyHFInput::webapiReportGet(
     response.getAirspyHfReport()->init();
     webapiFormatDeviceReport(response);
     return 200;
-}
-
-int AirspyHFInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGAirspyHFActions *swgAirspyHFActions = query.getAirspyHfActions();
-
-    if (swgAirspyHFActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgAirspyHFActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing AirspyHFActions in query";
-        return 400;
-    }
 }
 
 int AirspyHFInput::webapiRunGet(
@@ -952,9 +861,6 @@ void AirspyHFInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("bandIndex") || force) {
         swgAirspyHFSettings->setBandIndex(settings.m_bandIndex);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgAirspyHFSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("useAGC")) {
         swgAirspyHFSettings->setUseAgc(settings.m_useAGC ? 1 : 0);

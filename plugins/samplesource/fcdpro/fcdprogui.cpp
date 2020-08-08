@@ -150,9 +150,6 @@ FCDProGui::FCDProGui(DeviceUISet *deviceUISet, QWidget* parent) :
     CRightClickEnabler *startStopRightClickEnabler = new CRightClickEnabler(ui->startStop);
     connect(startStopRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openDeviceSettingsDialog(const QPoint &)));
 
-    CRightClickEnabler *fileRecordRightClickEnabler = new CRightClickEnabler(ui->record);
-    connect(fileRecordRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(openFileRecordDialog(const QPoint &)));
-
 	displaySettings();
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
@@ -237,23 +234,6 @@ bool FCDProGui::handleMessage(const Message& message)
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
 
-        return true;
-    }
-    else if (FCDProInput::MsgFileRecord::match(message)) // API action "record" feedback
-    {
-        const FCDProInput::MsgFileRecord& notif = (const FCDProInput::MsgFileRecord&) message;
-        bool record = notif.getStartStop();
-
-        ui->record->blockSignals(true);
-        ui->record->setChecked(record);
-
-        if (record) {
-            ui->record->setStyleSheet("QToolButton { background-color : red; }");
-        } else {
-            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
-
-        ui->record->blockSignals(false);
         return true;
     }
     else
@@ -526,18 +506,6 @@ void FCDProGui::on_startStop_toggled(bool checked)
     }
 }
 
-void FCDProGui::on_record_toggled(bool checked)
-{
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
-    FCDProInput::MsgFileRecord* message = FCDProInput::MsgFileRecord::create(checked);
-    m_sampleSource->getInputMessageQueue()->push(message);
-}
-
 void FCDProGui::on_transverter_clicked()
 {
     m_settings.m_transverterMode = ui->transverter->getDeltaFrequencyAcive();
@@ -603,30 +571,4 @@ void FCDProGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
-}
-
-void FCDProGui::openFileRecordDialog(const QPoint& p)
-{
-    QFileDialog fileDialog(
-        this,
-        tr("Save I/Q record file"),
-        m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
-    );
-
-    fileDialog.setOptions(QFileDialog::DontUseNativeDialog);
-    fileDialog.setFileMode(QFileDialog::AnyFile);
-    fileDialog.move(p);
-    QStringList fileNames;
-
-    if (fileDialog.exec())
-    {
-        fileNames = fileDialog.selectedFiles();
-
-        if (fileNames.size() > 0)
-        {
-            m_settings.m_fileRecordName = fileNames.at(0);
-            sendSettings();
-        }
-    }
 }

@@ -43,7 +43,6 @@ LocalOutput::LocalOutput(DeviceAPI *deviceAPI) :
     m_settings(),
     m_centerFrequency(0),
     m_sampleRate(48000),
-    m_fileSink(nullptr),
 	m_deviceDescription("LocalOutput")
 {
 	m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_sampleRate));

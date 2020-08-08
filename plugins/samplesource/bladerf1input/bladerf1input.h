@@ -25,15 +25,14 @@
 #include <libbladeRF.h>
 #include <dsp/devicesamplesource.h>
 
-#include "../../../devices/bladerf1/devicebladerf1.h"
-#include "../../../devices/bladerf1/devicebladerf1param.h"
+#include "bladerf1/devicebladerf1.h"
+#include "bladerf1/devicebladerf1param.h"
 #include "bladerf1inputsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class Bladerf1InputThread;
-class FileRecord;
 
 class Bladerf1Input : public DeviceSampleSource {
     Q_OBJECT
@@ -60,25 +59,6 @@ public:
 			m_force(force)
 		{ }
 	};
-
-    class MsgFileRecord : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getStartStop() const { return m_startStop; }
-
-        static MsgFileRecord* create(bool startStop) {
-            return new MsgFileRecord(startStop);
-        }
-
-    protected:
-        bool m_startStop;
-
-        MsgFileRecord(bool startStop) :
-            Message(),
-            m_startStop(startStop)
-        { }
-    };
 
     class MsgStartStop : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -138,11 +118,6 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
-    virtual int webapiActionsPost(
-            const QStringList& deviceActionsKeys,
-            SWGSDRangel::SWGDeviceActions& actions,
-            QString& errorMessage);
-
     static void webapiFormatDeviceSettings(
             SWGSDRangel::SWGDeviceSettings& response,
             const BladeRF1InputSettings& settings);
@@ -161,7 +136,6 @@ private:
 	QString m_deviceDescription;
 	DeviceBladeRF1Params m_sharedParams;
 	bool m_running;
-    FileRecord *m_fileSink; //!< File sink to record device I/Q output
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

@@ -15,11 +15,6 @@ This button is used to start the "device" i.e connect to the remote and start st
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
 
-<h3>2: Record</h3>
-
-  - Left click: record baseband I/Q stream toggle button
-  - Right click: choose record file
-
 <h3>3: Frequency</h3>
 
 This is the center frequency of reception in kHz.

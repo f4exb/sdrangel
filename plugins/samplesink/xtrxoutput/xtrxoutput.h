@@ -32,7 +32,6 @@ class QNetworkReply;
 class DeviceAPI;
 class XTRXOutputThread;
 struct DeviceXTRXParams;
-class FileRecord;
 
 class XTRXOutput : public DeviceSampleSink
 {

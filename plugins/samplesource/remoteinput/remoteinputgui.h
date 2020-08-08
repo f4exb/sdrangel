@@ -130,13 +130,11 @@ private slots:
     void on_dataAddress_returnPressed();
 	void on_dataPort_returnPressed();
 	void on_startStop_toggled(bool checked);
-    void on_record_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
     void updateHardware();
 	void updateStatus();
 	void networkManagerFinished(QNetworkReply *reply);
     void openDeviceSettingsDialog(const QPoint& p);
-    void openFileRecordDialog(const QPoint& p);
 };
 
 #endif // INCLUDE_REMOTEINPUTGUI_H

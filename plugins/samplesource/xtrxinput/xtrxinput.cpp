@@ -28,13 +28,10 @@
 #include "SWGXtrxInputSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
-#include "SWGDeviceActions.h"
 #include "SWGXtrxInputReport.h"
-#include "SWGXtrxInputActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/filerecord.h"
 #include "xtrxinput.h"
 #include "xtrxinputthread.h"
 #include "xtrx/devicextrxparam.h"
@@ -46,7 +43,6 @@ MESSAGE_CLASS_DEFINITION(XTRXInput::MsgGetStreamInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXInput::MsgGetDeviceInfo, Message)
 MESSAGE_CLASS_DEFINITION(XTRXInput::MsgReportClockGenChange, Message)
 MESSAGE_CLASS_DEFINITION(XTRXInput::MsgReportStreamInfo, Message)
-MESSAGE_CLASS_DEFINITION(XTRXInput::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(XTRXInput::MsgStartStop, Message)
 
 XTRXInput::XTRXInput(DeviceAPI *deviceAPI) :
@@ -58,10 +54,7 @@ XTRXInput::XTRXInput(DeviceAPI *deviceAPI) :
 {
     openDevice();
 
-    m_fileSink = new FileRecord(QString("test_%1.sdriq").arg(m_deviceAPI->getDeviceUID()));
     m_deviceAPI->setNbSourceStreams(1);
-    m_deviceAPI->addAncillarySink(m_fileSink);
-
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -75,8 +68,6 @@ XTRXInput::~XTRXInput()
         stop();
     }
 
-    m_deviceAPI->removeAncillarySink(m_fileSink);
-    delete m_fileSink;
     closeDevice();
 }
 
@@ -731,19 +722,6 @@ bool XTRXInput::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "XTRXInput::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop()) {
-            m_fileSink->startRecording();
-        } else {
-            m_fileSink->stopRecording();
-        }
-
-        return true;
-    }
     else if (MsgStartStop::match(message))
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
@@ -1280,7 +1258,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
         int ncoShift = m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0;
 
         DSPSignalNotification *notif = new DSPSignalNotification(getSampleRate(), m_settings.m_centerFrequency + ncoShift);
-        m_fileSink->handleMessage(*notif); // forward to file sink
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
         if (getMessageQueueToGUI())
@@ -1414,9 +1391,6 @@ void XTRXInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("pwrmode")) {
         settings.m_pwrmode = response.getXtrxInputSettings()->getPwrmode();
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getXtrxInputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getXtrxInputSettings()->getUseReverseApi() != 0;
     }
@@ -1452,12 +1426,6 @@ void XTRXInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getXtrxInputSettings()->setExtClock(settings.m_extClock ? 1 : 0);
     response.getXtrxInputSettings()->setExtClockFreq(settings.m_extClockFreq);
     response.getXtrxInputSettings()->setPwrmode(settings.m_pwrmode);
-
-    if (response.getXtrxInputSettings()->getFileRecordName()) {
-        *response.getXtrxInputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getXtrxInputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getXtrxInputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -1508,37 +1476,6 @@ int XTRXInput::webapiRun(
     }
 
     return 200;
-}
-
-int XTRXInput::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGXtrxInputActions *swgXtrxInputActions = query.getXtrxInputActions();
-
-    if (swgXtrxInputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgXtrxInputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing XtrxInputActions in query";
-        return 400;
-    }
 }
 
 void XTRXInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
@@ -1633,9 +1570,6 @@ void XTRXInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, co
     }
     if (deviceSettingsKeys.contains("pwrmode") || force) {
         swgXtrxInputSettings->setPwrmode(settings.m_pwrmode);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgXtrxInputSettings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
 
     QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

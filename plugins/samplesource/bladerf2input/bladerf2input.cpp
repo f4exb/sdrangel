@@ -26,12 +26,9 @@
 #include "SWGDeviceState.h"
 #include "SWGDeviceReport.h"
 #include "SWGBladeRF2InputReport.h"
-#include "SWGDeviceActions.h"
-#include "SWGBladeRF2InputActions.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
-#include "dsp/filerecord.h"
 #include "dsp/dspengine.h"
 
 #include "bladerf2/devicebladerf2shared.h"
@@ -41,13 +38,11 @@
 
 
 MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgConfigureBladeRF2, Message)
-MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgFileRecord, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(BladeRF2Input::MsgReportGainRange, Message)
 
 BladeRF2Input::BladeRF2Input(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
-    m_fileSink(nullptr),
     m_settings(),
     m_deviceDescription("BladeRF2Input"),
     m_running(false),
@@ -80,12 +75,6 @@ BladeRF2Input::~BladeRF2Input()
 
     if (m_running) {
         stop();
-    }
-
-    if (m_fileSink)
-    {
-        m_deviceAPI->removeAncillarySink(m_fileSink);
-        delete m_fileSink;
     }
 
     closeDevice();
@@ -704,11 +693,6 @@ bool BladeRF2Input::handleMessage(const Message& message)
             {
                 int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
                 DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-
-                if (m_fileSink) {
-                    m_fileSink->handleMessage(*notif); // forward to file sink
-                }
-
                 m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
             }
 
@@ -720,38 +704,6 @@ bool BladeRF2Input::handleMessage(const Message& message)
                 MsgConfigureBladeRF2 *reportToGUI = MsgConfigureBladeRF2::create(m_settings, false);
                 getMessageQueueToGUI()->push(reportToGUI);
             }
-        }
-
-        return true;
-    }
-    else if (MsgFileRecord::match(message))
-    {
-        MsgFileRecord& conf = (MsgFileRecord&) message;
-        qDebug() << "BladeRF2Input::handleMessage: MsgFileRecord: " << conf.getStartStop();
-
-        if (conf.getStartStop())
-        {
-            if (m_fileSink)
-            {
-                m_deviceAPI->removeAncillarySink(m_fileSink);
-                delete m_fileSink;
-            }
-
-            if (m_settings.m_fileRecordName.size() != 0) {
-                m_fileSink = new FileRecord(m_settings.m_fileRecordName);
-            } else {
-                m_fileSink = new FileRecord(FileRecordInterface::genUniqueFileName(m_deviceAPI->getDeviceUID()));
-            }
-
-            m_deviceAPI->addAncillarySink(m_fileSink);
-            m_fileSink->startRecording();
-        }
-        else
-        {
-            m_fileSink->stopRecording();
-            m_deviceAPI->removeAncillarySink(m_fileSink);
-            delete m_fileSink;
-            m_fileSink = nullptr;
         }
 
         return true;
@@ -992,11 +944,6 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
     {
         int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Decim);
         DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, settings.m_centerFrequency);
-
-        if (m_fileSink) {
-            m_fileSink->handleMessage(*notif); // forward to file sink
-        }
-
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 
@@ -1147,9 +1094,6 @@ void BladeRF2Input::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("transverterMode")) {
         settings.m_transverterMode = response.getBladeRf2InputSettings()->getTransverterMode() != 0;
     }
-    if (deviceSettingsKeys.contains("fileRecordName")) {
-        settings.m_fileRecordName = *response.getBladeRf2InputSettings()->getFileRecordName();
-    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getBladeRf2InputSettings()->getUseReverseApi() != 0;
     }
@@ -1189,12 +1133,6 @@ void BladeRF2Input::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& r
     response.getBladeRf2InputSettings()->setGlobalGain(settings.m_globalGain);
     response.getBladeRf2InputSettings()->setTransverterDeltaFrequency(settings.m_transverterDeltaFrequency);
     response.getBladeRf2InputSettings()->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-
-    if (response.getBladeRf2InputSettings()->getFileRecordName()) {
-        *response.getBladeRf2InputSettings()->getFileRecordName() = settings.m_fileRecordName;
-    } else {
-        response.getBladeRf2InputSettings()->setFileRecordName(new QString(settings.m_fileRecordName));
-    }
 
     response.getBladeRf2InputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -1287,37 +1225,6 @@ int BladeRF2Input::webapiRun(
     return 200;
 }
 
-int BladeRF2Input::webapiActionsPost(
-        const QStringList& deviceActionsKeys,
-        SWGSDRangel::SWGDeviceActions& query,
-        QString& errorMessage)
-{
-    SWGSDRangel::SWGBladeRF2InputActions *swgBladeRF2InputActions = query.getBladeRf2InputActions();
-
-    if (swgBladeRF2InputActions)
-    {
-        if (deviceActionsKeys.contains("record"))
-        {
-            bool record = swgBladeRF2InputActions->getRecord() != 0;
-            MsgFileRecord *msg = MsgFileRecord::create(record);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgFileRecord *msgToGUI = MsgFileRecord::create(record);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
-        return 202;
-    }
-    else
-    {
-        errorMessage = "Missing BladeRF2InputActions in query";
-        return 400;
-    }
-}
-
 void BladeRF2Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2InputSettings& settings, bool force)
 {
     SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
@@ -1355,9 +1262,6 @@ void BladeRF2Input::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys
     }
     if (deviceSettingsKeys.contains("transverterMode") || force) {
         swgBladeRF2Settings->setTransverterMode(settings.m_transverterMode ? 1 : 0);
-    }
-    if (deviceSettingsKeys.contains("fileRecordName") || force) {
-        swgBladeRF2Settings->setFileRecordName(new QString(settings.m_fileRecordName));
     }
     if (deviceSettingsKeys.contains("devSampleRate")) {
         swgBladeRF2Settings->setDevSampleRate(settings.m_devSampleRate);
