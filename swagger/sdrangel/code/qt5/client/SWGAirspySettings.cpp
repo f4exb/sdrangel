@@ -60,8 +60,6 @@ SWGAirspySettings::SWGAirspySettings() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    file_record_name = nullptr;
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -110,8 +108,6 @@ SWGAirspySettings::init() {
     m_transverter_delta_frequency_isSet = false;
     iq_order = 0;
     m_iq_order_isSet = false;
-    file_record_name = new QString("");
-    m_file_record_name_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -140,9 +136,6 @@ SWGAirspySettings::cleanup() {
 
 
 
-    if(file_record_name != nullptr) { 
-        delete file_record_name;
-    }
 
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
@@ -193,8 +186,6 @@ SWGAirspySettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&transverter_delta_frequency, pJson["transverterDeltaFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&file_record_name, pJson["fileRecordName"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -267,9 +258,6 @@ SWGAirspySettings::asJsonObject() {
     }
     if(m_iq_order_isSet){
         obj->insert("iqOrder", QJsonValue(iq_order));
-    }
-    if(file_record_name != nullptr && *file_record_name != QString("")){
-        toJsonValue(QString("fileRecordName"), file_record_name, obj, QString("QString"));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -447,16 +435,6 @@ SWGAirspySettings::setIqOrder(qint32 iq_order) {
     this->m_iq_order_isSet = true;
 }
 
-QString*
-SWGAirspySettings::getFileRecordName() {
-    return file_record_name;
-}
-void
-SWGAirspySettings::setFileRecordName(QString* file_record_name) {
-    this->file_record_name = file_record_name;
-    this->m_file_record_name_isSet = true;
-}
-
 qint32
 SWGAirspySettings::getUseReverseApi() {
     return use_reverse_api;
@@ -548,9 +526,6 @@ SWGAirspySettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_order_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(file_record_name && *file_record_name != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

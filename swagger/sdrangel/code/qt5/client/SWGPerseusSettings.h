@@ -72,9 +72,6 @@ public:
     qint32 getIqOrder();
     void setIqOrder(qint32 iq_order);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getAttenuator();
     void setAttenuator(qint32 attenuator);
 
@@ -123,9 +120,6 @@ private:
 
     qint32 iq_order;
     bool m_iq_order_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 attenuator;
     bool m_attenuator_isSet;

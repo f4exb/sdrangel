@@ -66,9 +66,6 @@ public:
     qint32 getBandIndex();
     void setBandIndex(qint32 band_index);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -129,9 +126,6 @@ private:
 
     qint32 band_index;
     bool m_band_index_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

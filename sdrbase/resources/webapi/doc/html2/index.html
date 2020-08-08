@@ -1578,53 +1578,6 @@ margin-bottom: 20px;
   },
   "description" : "A bandwidth expressed in Hertz (Hz)"
 };
-<<<<<<< ours
-            defs.BladeRF1InputActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "BladeRF1"
-=======
-            defs.BeamSteeringCWModSettings = {
-  "properties" : {
-    "steerDegrees" : {
-      "type" : "integer"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "log2Interp" : {
-      "type" : "integer"
-    },
-    "filterChainHash" : {
-      "type" : "integer"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    }
-  },
-  "description" : "BeamSteeringCWMod"
->>>>>>> theirs
-};
             defs.BladeRF1InputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -2716,65 +2669,6 @@ margin-bottom: 20px;
     "originatorIndex" : {
       "type" : "integer",
       "description" : "Optional for reverse API. This is the device set index from where the message comes from."
-    },
-<<<<<<< ours
-    "airspyActions" : {
-      "$ref" : "#/definitions/AirspyActions"
-    },
-    "airspyHFActions" : {
-      "$ref" : "#/definitions/AirspyHFActions"
-    },
-    "bladeRF1InputActions" : {
-      "$ref" : "#/definitions/BladeRF1InputActions"
-    },
-    "bladeRF2InputActions" : {
-      "$ref" : "#/definitions/BladeRF2InputActions"
-    },
-    "fcdProActions" : {
-      "$ref" : "#/definitions/FCDProActions"
-    },
-    "fcdProPlusActions" : {
-      "$ref" : "#/definitions/FCDProPlusActions"
-    },
-    "hackRFInputActions" : {
-      "$ref" : "#/definitions/HackRFInputActions"
-    },
-    "kiwiSDRActions" : {
-      "$ref" : "#/definitions/KiwiSDRActions"
-    },
-    "limeSdrInputActions" : {
-      "$ref" : "#/definitions/LimeSdrInputActions"
-    },
-    "localInputActions" : {
-      "$ref" : "#/definitions/LocalInputActions"
-    },
-    "perseusActions" : {
-      "$ref" : "#/definitions/PerseusActions"
-    },
-    "plutoSdrInputActions" : {
-      "$ref" : "#/definitions/PlutoSdrInputActions"
-    },
-    "remoteInputActions" : {
-      "$ref" : "#/definitions/RemoteInputActions"
-    },
-    "rtlSdrActions" : {
-      "$ref" : "#/definitions/RtlSdrActions"
-    },
-    "sdrPlayActions" : {
-      "$ref" : "#/definitions/SDRPlayActions"
-    },
-    "soapySDRInputActions" : {
-      "$ref" : "#/definitions/SoapySDRInputActions"
-    },
-    "testSourceActions" : {
-      "$ref" : "#/definitions/TestSourceActions"
-    },
-    "xtrxInputActions" : {
-      "$ref" : "#/definitions/XtrxInputActions"
-=======
-    "sigMFFileInputActions" : {
-      "$ref" : "#/definitions/SigMFFileInputActions"
->>>>>>> theirs
     }
   },
   "description" : "Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present."
@@ -4164,60 +4058,6 @@ margin-bottom: 20px;
     }
   },
   "description" : "Summarized information about this SDRangel instance"
-};
-<<<<<<< ours
-            defs.KiwiSDRActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording\n"
-    }
-  },
-  "description" : "KiwiSDR"
-=======
-            defs.InterferometerSettings = {
-  "properties" : {
-    "correlationType" : {
-      "type" : "integer",
-      "description" : "see InterferometerSettings::CorrelationType"
-    },
-    "rgbColor" : {
-      "type" : "integer"
-    },
-    "title" : {
-      "type" : "string"
-    },
-    "log2Decim" : {
-      "type" : "integer"
-    },
-    "filterChainHash" : {
-      "type" : "integer"
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
-    },
-    "spectrumConfig" : {
-      "$ref" : "#/definitions/GLSpectrum"
-    },
-    "scopeConfig" : {
-      "$ref" : "#/definitions/GLScope"
-    }
-  },
-  "description" : "Interferometer"
->>>>>>> theirs
 };
             defs.KiwiSDRReport = {
   "properties" : {
@@ -6644,124 +6484,6 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
-};
-<<<<<<< ours
-            defs.TestSourceActions = {
-  "properties" : {
-    "record" : {
-      "type" : "integer",
-      "description" : "Record IQ stream action\n  * 0 - stop recording\n  * 1 - start recording"
-    }
-  },
-  "description" : "TestSource"
-=======
-            defs.TestMISettings = {
-  "properties" : {
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "streams" : {
-      "type" : "array",
-      "description" : "Settings for each of the streams",
-      "items" : {
-        "$ref" : "#/definitions/TestMiStreamSettings"
-      }
-    }
-  },
-  "description" : "TestMISettings"
-};
-            defs.TestMOSyncSettings = {
-  "properties" : {
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
-    "sampleRate" : {
-      "type" : "integer",
-      "format" : "int64"
-    },
-    "log2Interp" : {
-      "type" : "integer"
-    },
-    "fcPosTx" : {
-      "type" : "integer",
-      "description" : "See BladeRF2MIMO::fcPos_t"
-    }
-  },
-  "description" : "TestMOSync"
-};
-            defs.TestMiStreamSettings = {
-  "properties" : {
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "Index of the stream to which the settings apply"
-    },
-    "centerFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "frequencyShift" : {
-      "type" : "integer"
-    },
-    "sampleRate" : {
-      "type" : "integer"
-    },
-    "log2Decim" : {
-      "type" : "integer"
-    },
-    "fcPos" : {
-      "type" : "integer"
-    },
-    "sampleSizeIndex" : {
-      "type" : "integer"
-    },
-    "amplitudeBits" : {
-      "type" : "integer"
-    },
-    "autoCorrOptions" : {
-      "type" : "integer"
-    },
-    "modulation" : {
-      "type" : "integer"
-    },
-    "modulationTone" : {
-      "type" : "integer"
-    },
-    "amModulation" : {
-      "type" : "integer"
-    },
-    "fmDeviation" : {
-      "type" : "integer"
-    },
-    "dcFactor" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "iFactor" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "qFactor" : {
-      "type" : "number",
-      "format" : "float"
-    },
-    "phaseImbalance" : {
-      "type" : "number",
-      "format" : "float"
-    }
-  },
-  "description" : "TestMiStreamSettings"
->>>>>>> theirs
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -33593,11 +33315,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-<<<<<<< ours
-              Generated 2020-08-08T23:29:13.057+02:00
-=======
-              Generated 2020-08-08T10:04:58.845+02:00
->>>>>>> theirs
+              Generated 2020-08-09T00:51:25.713+02:00
             </div>
           </div>
       </div>

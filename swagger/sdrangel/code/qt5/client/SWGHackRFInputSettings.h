@@ -78,9 +78,6 @@ public:
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
 
-    QString* getFileRecordName();
-    void setFileRecordName(QString* file_record_name);
-
     qint32 getTransverterMode();
     void setTransverterMode(qint32 transverter_mode);
 
@@ -141,9 +138,6 @@ private:
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
-
-    QString* file_record_name;
-    bool m_file_record_name_isSet;
 
     qint32 transverter_mode;
     bool m_transverter_mode_isSet;
