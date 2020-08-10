@@ -484,7 +484,7 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
             m_samplesPerLine - m_numberSamplesPerLineSignals,
             m_settings.m_nbLines - m_numberOfBlackLines
         );
-		m_tvScreenData = m_registeredTVScreen->getData();
+		m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
     }
 
     m_fieldIndex = 0;
@@ -576,7 +576,7 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
                 m_samplesPerLine - m_numberSamplesPerLineSignals,
                 m_settings.m_nbLines - m_numberOfBlackLines
             );
-			m_tvScreenData = m_registeredTVScreen->getData();
+			m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
         }
 
         m_fieldIndex = 0;

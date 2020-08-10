@@ -68,10 +68,11 @@ TVScreenAnalog::TVScreenAnalog(QWidget *parent)
 	: QGLWidget(parent)
 {
 	m_isDataChanged = false;
-	m_data = std::make_shared<TVScreenAnalogData>(5, 1);
+	m_frontBuffer = std::make_shared<TVScreenAnalogBuffer>(5, 1);
+	m_backBuffer = std::make_shared<TVScreenAnalogBuffer>(5, 1);
 
-	connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-	m_objTimer.start(40); // capped at 25 FPS
+	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(tick()));
+	m_updateTimer.start(40); // capped at 25 FPS
 }
 
 void TVScreenAnalog::cleanup()
@@ -81,9 +82,9 @@ void TVScreenAnalog::cleanup()
 	m_lineShiftsTexture = nullptr;
 }
 
-std::shared_ptr<TVScreenAnalogData> TVScreenAnalog::getData()
+std::shared_ptr<TVScreenAnalogBuffer> TVScreenAnalog::getBackBuffer()
 {
-	return m_data;
+	return m_backBuffer;
 }
 
 void TVScreenAnalog::resizeTVScreen(int intCols, int intRows)
@@ -91,8 +92,12 @@ void TVScreenAnalog::resizeTVScreen(int intCols, int intRows)
 	qDebug("TVScreen::resizeTVScreen: cols: %d, rows: %d", intCols, intRows);
 
 	int colsAdj = intCols + 4;
-	if (m_data->getWidth() != colsAdj || m_data->getHeight() != intRows)
-		m_data = std::make_shared<TVScreenAnalogData>(colsAdj, intRows);
+	QMutexLocker lock(&m_buffersMutex);
+	if (m_frontBuffer->getWidth() != colsAdj || m_frontBuffer->getHeight() != intRows)
+	{
+		m_frontBuffer = std::make_shared<TVScreenAnalogBuffer>(colsAdj, intRows);
+		m_backBuffer = std::make_shared<TVScreenAnalogBuffer>(colsAdj, intRows);
+	}
 }
 
 void TVScreenAnalog::resizeGL(int intWidth, int intHeight)
@@ -143,12 +148,12 @@ void TVScreenAnalog::initializeGL()
 	m_texelHeightLoc = m_shader->uniformLocation("tlh");
 }
 
-void TVScreenAnalog::initializeTextures()
+void TVScreenAnalog::initializeTextures(std::shared_ptr<TVScreenAnalogBuffer> buffer)
 {
 	m_imageTexture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
 	m_lineShiftsTexture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
-	m_imageTexture->setSize(m_data->getWidth(), m_data->getHeight());
-	m_lineShiftsTexture->setSize(1, m_data->getHeight());
+	m_imageTexture->setSize(buffer->getWidth(), buffer->getHeight());
+	m_lineShiftsTexture->setSize(1, buffer->getHeight());
 	m_imageTexture->setFormat(QOpenGLTexture::RGBA8_UNorm);
 	m_lineShiftsTexture->setFormat(QOpenGLTexture::RGBA8_UNorm);
 	m_imageTexture->setAutoMipMapGenerationEnabled(false);
@@ -166,9 +171,12 @@ void TVScreenAnalog::initializeTextures()
 	m_lineShiftsTexture->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::ClampToEdge);
 }
 
-void TVScreenAnalog::renderImage()
+std::shared_ptr<TVScreenAnalogBuffer> TVScreenAnalog::swapBuffers()
 {
+	QMutexLocker lock(&m_buffersMutex);
+	std::swap(m_frontBuffer, m_backBuffer);
 	m_isDataChanged = true;
+	return m_backBuffer;
 }
 
 void TVScreenAnalog::tick()
@@ -190,15 +198,17 @@ void TVScreenAnalog::paintGL()
 		return;
 	}
 
+	std::shared_ptr<TVScreenAnalogBuffer> buffer = m_frontBuffer;
+
 	if (!m_imageTexture ||
-		m_imageTexture->width() != m_data->getWidth() ||
-		m_imageTexture->height() != m_data->getHeight())
+		m_imageTexture->width() != buffer->getWidth() ||
+		m_imageTexture->height() != buffer->getHeight())
 	{
-		initializeTextures();
+		initializeTextures(buffer);
 	}
 
-	float imageWidth = m_data->getWidth();
-	float imageHeight = m_data->getHeight();
+	float imageWidth = buffer->getWidth();
+	float imageHeight = buffer->getHeight();
 	float texelWidth = 1.0f / imageWidth;
 	float texelHeight = 1.0f / imageHeight;
 
@@ -213,12 +223,12 @@ void TVScreenAnalog::paintGL()
 	glActiveTexture(GL_TEXTURE0);
 	m_imageTexture->bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-		m_data->getWidth(), m_data->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, m_data->getImageData());
+		buffer->getWidth(), buffer->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer->getImageData());
 
 	glActiveTexture(GL_TEXTURE1);
 	m_lineShiftsTexture->bind();
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0,
-		1, m_data->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, m_data->getLineShiftData());
+		1, buffer->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, buffer->getLineShiftData());
 
 	float rectHalfWidth = 1.0f + 4.0f / (imageWidth - 4.0f);
 	GLfloat vertices[] =
