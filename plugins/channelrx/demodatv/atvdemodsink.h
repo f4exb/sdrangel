@@ -109,7 +109,7 @@ private:
 
     //*************** ATV PARAMETERS  ***************
     TVScreenAnalog *m_registeredTVScreen;
-	std::shared_ptr<TVScreenAnalogData> m_tvScreenData;
+	std::shared_ptr<TVScreenAnalogBuffer> m_tvScreenBuffer;
 
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTopNom;     //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - nominal value
@@ -199,7 +199,7 @@ private:
     inline void processSample(float& sample, int& sampleVideo)
     {
         // Filling pixel on the current line - reference index 0 at start of sync pulse
-		m_tvScreenData->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
+		m_tvScreenBuffer->setSampleValue(m_sampleOffset - m_numberSamplesPerHSync, sampleVideo);
 
         if (m_settings.m_hSync)
         {
@@ -278,7 +278,7 @@ private:
     {
         if (m_lineIndex == m_numberOfVSyncLines + 3 && m_fieldIndex == 0)
         {
-			m_registeredTVScreen->renderImage();
+			m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
         }
 
         if (m_vSyncDetectSampleCount > m_vSyncDetectThreshold &&
@@ -311,7 +311,7 @@ private:
         if (m_interleaved)
             rowIndex = rowIndex * 2 - m_fieldIndex;
 
-		m_tvScreenData->selectRow(rowIndex, m_sampleOffsetFrac);
+		m_tvScreenBuffer->selectRow(rowIndex, m_sampleOffsetFrac);
 	}
 
     // Vertical sync is obtained by skipping horizontal sync on the line that triggers vertical sync (new frame)
@@ -320,11 +320,11 @@ private:
 		if ((m_sampleOffsetDetected > (3 * m_samplesPerLine) / 2) // Vertical sync is first horizontal sync after skip (count at least 1.5 line length)
             || (!m_settings.m_vSync && (m_lineIndex >= m_settings.m_nbLines))) // Vsync ignored and reached nominal number of lines per frame
         {
-			m_registeredTVScreen->renderImage();
+			m_tvScreenBuffer = m_registeredTVScreen->swapBuffers();
 			m_lineIndex = 0;
         }
 
-		m_tvScreenData->selectRow(m_lineIndex, m_sampleOffsetFrac);
+		m_tvScreenBuffer->selectRow(m_lineIndex, m_sampleOffsetFrac);
     }
 };
 
