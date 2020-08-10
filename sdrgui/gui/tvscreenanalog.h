@@ -28,7 +28,6 @@
 #include <memory>
 #include <algorithm>
 
-#include <QImage>
 #include <QMutex>
 #include <QTimer>
 #include <QGLWidget>
@@ -36,10 +35,10 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 
-class TVScreenAnalogData
+class TVScreenAnalogBuffer
 {
 public:
-	TVScreenAnalogData(int width, int height)
+	TVScreenAnalogBuffer(int width, int height)
 	{
 		m_width = width;
 		m_height = height;
@@ -53,7 +52,7 @@ public:
 		std::fill(m_lineShiftData, m_lineShiftData + height, 127);
 	}
 
-	~TVScreenAnalogData()
+	~TVScreenAnalogBuffer()
 	{
 		delete[] m_imageData;
 		delete[] m_lineShiftData;
@@ -116,7 +115,7 @@ class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
 {
 	Q_OBJECT
 
-	QTimer m_objTimer;
+	QTimer m_updateTimer;
 
 	bool m_isDataChanged;
 
@@ -129,7 +128,9 @@ class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
 	int m_vertexAttribIndex;
 	int m_texCoordAttribIndex;
 
-	std::shared_ptr<TVScreenAnalogData> m_data;
+	QMutex m_buffersMutex;
+	std::shared_ptr<TVScreenAnalogBuffer> m_frontBuffer;
+	std::shared_ptr<TVScreenAnalogBuffer> m_backBuffer;
 
 	std::shared_ptr<QOpenGLShaderProgram> m_shader;
 	std::shared_ptr<QOpenGLTexture> m_imageTexture;
@@ -138,12 +139,12 @@ class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
 public:
 	TVScreenAnalog(QWidget *parent);
 
-	std::shared_ptr<TVScreenAnalogData> getData();
+	std::shared_ptr<TVScreenAnalogBuffer> getBackBuffer();
+	std::shared_ptr<TVScreenAnalogBuffer> swapBuffers();
 	void resizeTVScreen(int intCols, int intRows);
-	void renderImage();
 
 private:
-	void initializeTextures();
+	void initializeTextures(std::shared_ptr<TVScreenAnalogBuffer> buffer);
 	void initializeGL() override;
 	void paintGL() override;
 	void resizeGL(int width, int height);
