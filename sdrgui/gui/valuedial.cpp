@@ -21,6 +21,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QWheelEvent>
+#include <QApplication>
 #include <cstdlib>
 
 #include "gui/valuedial.h"
@@ -33,8 +34,11 @@ ValueDial::ValueDial(QWidget *parent, ColorMapper colorMapper) :
     setAutoFillBackground(false);
     setAttribute(Qt::WA_OpaquePaintEvent, true);
     setAttribute(Qt::WA_NoSystemBackground, true);
+	setAttribute(Qt::WA_InputMethodEnabled, true);
     setMouseTracking(true);
     setFocusPolicy(Qt::StrongFocus);
+
+	setInputMethodHints(Qt::ImhDigitsOnly);
 
     m_background.setStart(0, 0);
     m_background.setFinalStop(0, 1);
@@ -326,6 +330,11 @@ void ValueDial::mousePressEvent(QMouseEvent *event)
     }
     else if (mouseButton == Qt::LeftButton) // set cursor at current digit
     {
+		if (qApp->autoSipEnabled())
+		{
+			QGuiApplication::inputMethod()->show();
+		}
+
         m_cursor = i;
         m_cursorState = true;
         m_blinkTimer.start(400);
