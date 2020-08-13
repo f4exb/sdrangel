@@ -604,6 +604,8 @@ bool SigMFFileInput::handleMessage(const Message& message)
         		startWorker();
             }
         }
+
+        return true;
     }
 	else if (MsgConfigureTrackWork::match(message))
 	{
@@ -794,6 +796,8 @@ bool SigMFFileInput::handleMessage(const Message& message)
             MsgReportTrackChange *msgToGUI = MsgReportTrackChange::create(m_currentTrackIndex);
             getMessageQueueToGUI()->push(msgToGUI);
         }
+
+        return true;
     }
 	else
 	{

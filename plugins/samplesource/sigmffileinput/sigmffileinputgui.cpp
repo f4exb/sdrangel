@@ -364,6 +364,8 @@ QString SigMFFileInputGUI::displayScaled(uint64_t value, int precision)
         return tr("%1M").arg(QString::number(value / 1000000.0, 'f', precision));
     } else if (value < 1000000000000) {
         return tr("%1G").arg(QString::number(value / 1000000000.0, 'f', precision));
+    } else {
+        return tr("%1").arg(QString::number(value, 'e', precision));
     }
 }
 

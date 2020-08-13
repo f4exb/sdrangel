@@ -62,10 +62,6 @@ struct SigMFFileDataType
 
         return *this;
     }
-
-    explicit operator SigMFFileDataType() const {
-        return SigMFFileDataType{static_cast<SigMFFileDataType>(*this)};
-    }
 };
 
 struct SigMFFileMetaInfo
@@ -155,10 +151,6 @@ struct SigMFFileMetaInfo
 
         return *this;
     }
-
-    explicit operator SigMFFileMetaInfo() const {
-        return SigMFFileMetaInfo{static_cast<SigMFFileMetaInfo>(*this)};
-    }
 };
 
 struct SigMFFileCapture
@@ -202,14 +194,6 @@ struct SigMFFileCapture
         }
 
         return *this;
-    }
-
-    explicit operator SigMFFileCapture() const {
-        return SigMFFileCapture{static_cast<SigMFFileCapture>(*this)};
-    }
-
-    explicit operator SigMFFileCapture() {
-        return SigMFFileCapture{static_cast<const SigMFFileCapture>(*this)};
     }
 };
 
