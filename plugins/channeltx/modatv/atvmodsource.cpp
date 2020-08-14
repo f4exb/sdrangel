@@ -611,7 +611,7 @@ void ATVModSource::applyStandard(const ATVModSettings& settings)
     m_pointsPerImgLine = m_pointsPerLine - m_pointsPerSync - m_pointsPerBP - m_pointsPerFP;
     m_nbHorizPoints    = m_pointsPerLine;
 
-    m_pointsPerHBar    = m_pointsPerImgLine / m_nbBars;
+    m_pointsPerHBar    = std::max(1, m_pointsPerImgLine / m_nbBars);
     m_hBarIncrement    = m_spanLevel / (float) (m_nbBars - 1);
     m_vBarIncrement    = m_spanLevel / (float) (m_nbBars - 1);
 
