@@ -18,11 +18,10 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <algorithm>
 
 #include "dsp/samplesinkfifo.h"
 #include "airspyhfworker.h"
-
-AirspyHFWorker *AirspyHFWorker::m_this = 0;
 
 AirspyHFWorker::AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QObject(parent),
@@ -34,20 +33,18 @@ AirspyHFWorker::AirspyHFWorker(airspyhf_device_t* dev, SampleSinkFifo* sampleFif
 	m_log2Decim(0),
     m_iqOrder(true)
 {
-    memset((char*) m_buf, 0, 2*AIRSPYHF_BLOCKSIZE*sizeof(qint16));
-	m_this = this;
+    std::fill(m_buf, m_buf + 2*AIRSPYHF_BLOCKSIZE, 0);
 }
 
 AirspyHFWorker::~AirspyHFWorker()
 {
 	stopWork();
-	m_this = 0;
 }
 
 bool AirspyHFWorker::startWork()
 {
-    qDebug("AirspyThread::startWork");
-	airspyhf_error rc = (airspyhf_error) airspyhf_start(m_dev, rx_callback, 0);
+    qDebug("AirspyHFWorker::startWork");
+	airspyhf_error rc = (airspyhf_error) airspyhf_start(m_dev, rx_callback, this);
 
 	if (rc == AIRSPYHF_SUCCESS)
 	{
@@ -55,7 +52,7 @@ bool AirspyHFWorker::startWork()
 	}
 	else
 	{
-		qCritical("AirspyHFFThread::run: failed to start Airspy HF Rx");
+		qCritical("AirspyHFWorker::run: failed to start Airspy HF Rx");
         m_running = false;
 	}
 
@@ -64,16 +61,17 @@ bool AirspyHFWorker::startWork()
 
 void AirspyHFWorker::stopWork()
 {
-	qDebug("AirspyThread::stopWork");
+	qDebug("AirspyHFWorker::stopWork");
 	airspyhf_error rc = (airspyhf_error) airspyhf_stop(m_dev);
 
 	if (rc == AIRSPYHF_SUCCESS) {
-		qDebug("AirspyHFFThread::run: stopped Airspy HF Rx");
+		qDebug("AirspyHFWorker::run: stopped Airspy HF Rx");
 	} else {
-		qDebug("AirspyHFFThread::run: failed to stop Airspy HF Rx");
+		qDebug("AirspyHFWorker::run: failed to stop Airspy HF Rx");
 	}
 
-	m_running = false;}
+	m_running = false;
+}
 
 void AirspyHFWorker::setSamplerate(uint32_t samplerate)
 {
@@ -156,12 +154,14 @@ void AirspyHFWorker::callbackQI(const float* buf, qint32 len)
 
 int AirspyHFWorker::rx_callback(airspyhf_transfer_t* transfer)
 {
+    //qDebug("AirspyHFWorker::rx_callback");
+    AirspyHFWorker *worker = (AirspyHFWorker*) transfer->ctx;
 	qint32 nbIAndQ = transfer->sample_count * 2;
 
-    if (m_this->m_iqOrder) {
-    	m_this->callbackIQ((float *) transfer->samples, nbIAndQ);
+    if (worker->m_iqOrder) {
+    	worker->callbackIQ((float *) transfer->samples, nbIAndQ);
     } else {
-        m_this->callbackQI((float *) transfer->samples, nbIAndQ);
+        worker->callbackQI((float *) transfer->samples, nbIAndQ);
     }
 
     return 0;
