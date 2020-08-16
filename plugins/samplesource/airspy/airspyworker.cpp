@@ -23,8 +23,6 @@
 
 #include "dsp/samplesinkfifo.h"
 
-AirspyWorker *AirspyWorker::m_this = 0;
-
 AirspyWorker::AirspyWorker(struct airspy_device* dev, SampleSinkFifo* sampleFifo, QObject* parent) :
 	QObject(parent),
 	m_running(false),
@@ -36,21 +34,19 @@ AirspyWorker::AirspyWorker(struct airspy_device* dev, SampleSinkFifo* sampleFifo
 	m_fcPos(0),
     m_iqOrder(true)
 {
-	m_this = this;
 	std::fill(m_buf, m_buf + 2*AIRSPY_BLOCKSIZE, 0);
 }
 
 AirspyWorker::~AirspyWorker()
 {
 	stopWork();
-	m_this = 0;
 }
 
 bool AirspyWorker::startWork()
 {
 	airspy_error rc;
 
-	rc = (airspy_error) airspy_start_rx(m_dev, rx_callback, NULL);
+	rc = (airspy_error) airspy_start_rx(m_dev, rx_callback, this);
 
 	if (rc == AIRSPY_SUCCESS)
 	{
@@ -282,12 +278,13 @@ void AirspyWorker::callbackQI(const qint16* buf, qint32 len)
 
 int AirspyWorker::rx_callback(airspy_transfer_t* transfer)
 {
+    AirspyWorker *worker = (AirspyWorker*) transfer->ctx;
 	qint32 bytes_to_write = transfer->sample_count * sizeof(qint16);
 
-    if (m_this->m_iqOrder) {
-    	m_this->callbackIQ((qint16 *) transfer->samples, bytes_to_write);
+    if (worker->m_iqOrder) {
+    	worker->callbackIQ((qint16 *) transfer->samples, bytes_to_write);
     } else {
-        m_this->callbackQI((qint16 *) transfer->samples, bytes_to_write);
+        worker->callbackQI((qint16 *) transfer->samples, bytes_to_write);
     }
 
     return 0;
