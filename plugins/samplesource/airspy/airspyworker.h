@@ -52,7 +52,6 @@ private:
 	unsigned int m_log2Decim;
 	int m_fcPos;
     bool m_iqOrder;
-	static AirspyWorker *m_this;
 
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
 	Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, false> m_decimatorsQI;
