@@ -50,7 +50,6 @@ private:
 	int m_samplerate;
 	unsigned int m_log2Decim;
     bool m_iqOrder;
-	static AirspyHFWorker *m_this;
 
 	DecimatorsFI<true> m_decimatorsIQ;
 	DecimatorsFI<false> m_decimatorsQI;
