@@ -56,6 +56,10 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_devRx = iio_context_find_device(m_ctx, "cf-ad9361-lpc");
         m_devTx = iio_context_find_device(m_ctx, "cf-ad9361-dds-core-lpc");
     }
+    else
+    {
+        qCritical("DevicePlutoSDRBox::DevicePlutoSDRBox: cannot create context for uri: %s", uri.c_str());
+    }
 
     m_valid = m_ctx && m_devPhy && m_devRx && m_devTx;
 
