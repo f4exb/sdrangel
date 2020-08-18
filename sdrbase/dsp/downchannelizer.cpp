@@ -134,6 +134,7 @@ void DownChannelizer::applyChannelization()
 	m_channelSampleRate = m_basebandSampleRate / (1 << m_filterStages.size());
 
 	qDebug() << "DownChannelizer::applyChannelization done:"
+        << " nb stages:" << m_filterStages.size()
         << " in (baseband):" << m_basebandSampleRate
 		<< " req:" << m_requestedOutputSampleRate
 		<< " out (channel):" << m_channelSampleRate
