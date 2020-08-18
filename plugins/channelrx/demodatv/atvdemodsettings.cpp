@@ -31,7 +31,6 @@ ATVDemodSettings::ATVDemodSettings() :
 void ATVDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
-    m_forceDecimator = false;
     m_bfoFrequency = 0.0f;
     m_atvModulation = ATV_FM1;
     m_fmDeviation = 0.5f;
@@ -49,8 +48,6 @@ void ATVDemodSettings::resetToDefaults()
     m_halfFrames = false; // m_fltRatioOfRowsToDisplay = 1.0
     m_levelSynchroTop = 0.15f;
     m_levelBlack = 0.3f;
-    m_lineTimeFactor = 0;
-    m_topTimeFactor = 25;
     m_rgbColor = QColor(255, 255, 255).rgb();
     m_title = "ATV Demodulator";
     m_udpAddress = "127.0.0.1";
@@ -66,8 +63,6 @@ QByteArray ATVDemodSettings::serialize() const
     s.writeU32(2, m_rgbColor);
     s.writeS32(3, roundf(m_levelSynchroTop*1000.0)); // mV
     s.writeS32(4, roundf(m_levelBlack*1000.0));      // mV
-    s.writeS32(5, m_lineTimeFactor);
-    s.writeS32(6, m_topTimeFactor);
     s.writeS32(7, m_atvModulation);
     s.writeS32(8, m_fps);
     s.writeBool(9, m_hSync);
@@ -90,7 +85,6 @@ QByteArray ATVDemodSettings::serialize() const
     s.writeS32(22, m_amScalingFactor);
     s.writeS32(23, m_amOffsetFactor);
     s.writeBool(24, m_fftFiltering);
-    s.writeBool(25, m_forceDecimator);
 
     return s.final();
 }
@@ -116,8 +110,6 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         m_levelSynchroTop = tmp / 1000.0f;
         d.readS32(4, &tmp, 310);
         m_levelBlack = tmp / 1000.0f;
-        d.readS32(5, &m_lineTimeFactor, 0);
-        d.readS32(6, &m_topTimeFactor, 25);
         d.readS32(7, &tmp, 0);
         m_atvModulation = static_cast<ATVModulation>(tmp);
         d.readS32(8, &tmp, 25);
@@ -141,7 +133,6 @@ bool ATVDemodSettings::deserialize(const QByteArray& arrData)
         d.readS32(22, &m_amScalingFactor, 100);
         d.readS32(23, &m_amOffsetFactor, 0);
         d.readBool(24, &m_fftFiltering, false);
-        d.readBool(25, &m_forceDecimator, false);
 
         return true;
     }
@@ -303,33 +294,6 @@ float ATVDemodSettings::getNominalLineTime(int nbLines, int fps)
     return 1.0f / ((float) nbLines * (float) fps);
 }
 
-/**
- * calculates m_fltLineTimeMultiplier
- */
-void ATVDemodSettings::lineTimeUpdate(unsigned int sampleRate)
-{
-    float nominalLineTime = getNominalLineTime(m_nbLines, m_fps);
-    int lineTimeScaleFactor = (int) std::log10(nominalLineTime);
-
-    if (sampleRate == 0) {
-        m_fltLineTimeMultiplier = std::pow(10.0, lineTimeScaleFactor-3);
-    } else {
-        m_fltLineTimeMultiplier = 1.0f / sampleRate;
-    }
-}
-
-float ATVDemodSettings::getLineTime(unsigned int sampleRate)
-{
-    lineTimeUpdate(sampleRate);
-    float nominalLineTime =  1.0f / ((float) m_nbLines * (float) m_fps);
-    return nominalLineTime + m_fltLineTimeMultiplier * m_lineTimeFactor;
-}
-
-float ATVDemodSettings::getTopTime(unsigned int sampleRate)
-{
-    return getNominalLineTime(m_nbLines, m_fps) * (4.7f / 64.0f) * (m_topTimeFactor / 100.0f);
-}
-
 int ATVDemodSettings::getRFSliderDivisor(unsigned int sampleRate)
 {
     int scaleFactor = (int) std::log10(sampleRate/2);
@@ -352,7 +316,7 @@ float ATVDemodSettings::getRFBandwidthDivisor(ATVModulation modulation)
     }
 }
 
-void ATVDemodSettings::getBaseValues(int sampleRate, int linesPerSecond, int& tvSampleRate, uint32_t& nbPointsPerLine)
+void ATVDemodSettings::getBaseValues(int sampleRate, int linesPerSecond, uint32_t& nbPointsPerLine)
 {
     int maxPoints = sampleRate / linesPerSecond;
     int i = maxPoints;
@@ -365,5 +329,4 @@ void ATVDemodSettings::getBaseValues(int sampleRate, int linesPerSecond, int& tv
     }
 
     nbPointsPerLine = i == 0 ? maxPoints : i;
-    tvSampleRate = nbPointsPerLine * linesPerSecond;
 }

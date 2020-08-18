@@ -76,10 +76,8 @@ private:
 
     ScopeVis* m_scopeVis;
 
-    float m_fltLineTimeMultiplier;
     int m_rfSliderDivisor;
     int m_basebandSampleRate;
-    int m_tvSampleRate;
     MessageQueue m_inputMessageQueue;
 
     explicit ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent = 0);
@@ -104,8 +102,6 @@ private slots:
     void tick();
     void on_synchLevel_valueChanged(int value);
     void on_blackLevel_valueChanged(int value);
-    void on_lineTime_valueChanged(int value);
-    void on_topTime_valueChanged(int value);
     void on_hSync_clicked();
     void on_vSync_clicked();
     void on_invertVideo_clicked();
@@ -118,7 +114,6 @@ private slots:
     void on_rfBW_valueChanged(int value);
     void on_rfOppBW_valueChanged(int value);
     void on_rfFiltering_toggled(bool checked);
-    void on_decimatorEnable_toggled(bool checked);
     void on_deltaFrequency_changed(qint64 value);
     void on_bfo_valueChanged(int value);
     void on_fmDeviation_valueChanged(int value);

@@ -51,7 +51,6 @@ void ATVDemodWebAPIAdapter::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const ATVDemodSettings& settings)
 {
-    response.getAtvDemodSettings()->setBlndecimatorEnable(settings.m_forceDecimator ? 1 : 0);
     response.getAtvDemodSettings()->setBlnFftFiltering(settings.m_fftFiltering ? 1 : 0);
     response.getAtvDemodSettings()->setBlnHSync(settings.m_hSync ? 1 : 0);
     response.getAtvDemodSettings()->setBlnInvertVideo(settings.m_invertVideo ? 1 : 0);
@@ -71,11 +70,9 @@ void ATVDemodWebAPIAdapter::webapiFormatChannelSettings(
     response.getAtvDemodSettings()->setHalfImage(settings.m_halfFrames ? 1 : 0);
     response.getAtvDemodSettings()->setIntFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getAtvDemodSettings()->setIntNumberOfLines(settings.m_nbLines);
-    response.getAtvDemodSettings()->setLineTimeFactor(settings.m_lineTimeFactor);
     response.getAtvDemodSettings()->setNbLinesIndex(ATVDemodSettings::getNumberOfLinesIndex(settings.m_nbLines));
     response.getAtvDemodSettings()->setRgbColor(settings.m_rgbColor);
     response.getAtvDemodSettings()->setTitle(new QString(settings.m_title));
-    response.getAtvDemodSettings()->setTopTimeFactor(settings.m_topTimeFactor);
     response.getAtvDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
     response.getAtvDemodSettings()->setUdpPort(settings.m_udpPort);
 }
@@ -85,9 +82,6 @@ void ATVDemodWebAPIAdapter::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("blndecimatorEnable")) {
-        settings.m_forceDecimator = response.getAtvDemodSettings()->getBlndecimatorEnable() != 0;
-    }
     if (channelSettingsKeys.contains("blnFFTFiltering")) {
         settings.m_fftFiltering = response.getAtvDemodSettings()->getBlnFftFiltering() != 0;
     }
@@ -142,17 +136,11 @@ void ATVDemodWebAPIAdapter::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("intNumberOfLines")) {
         settings.m_nbLines = response.getAtvDemodSettings()->getIntNumberOfLines();
     }
-    if (channelSettingsKeys.contains("lineTimeFactor")) {
-        settings.m_lineTimeFactor = response.getAtvDemodSettings()->getLineTimeFactor();
-    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAtvDemodSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getAtvDemodSettings()->getTitle();
-    }
-    if (channelSettingsKeys.contains("topTimeFactor")) {
-        settings.m_topTimeFactor = response.getAtvDemodSettings()->getTopTimeFactor();
     }
     if (channelSettingsKeys.contains("udpAddress")) {
         settings.m_udpAddress = *response.getAtvDemodSettings()->getUdpAddress();

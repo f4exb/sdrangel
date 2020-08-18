@@ -97,9 +97,9 @@ private:
 
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
-    int m_tvSampleRate;
-    int m_samplesPerLine;    //!< number of samples per complete line (includes sync signals) - adusted value
-    ATVDemodSettings m_settings;
+    int m_samplesPerLine;       //!< number of samples per complete line (includes sync signals) - adusted value
+	float m_samplesPerLineFrac; //!< number of samples per complete line (includes sync signals), fractional part
+	ATVDemodSettings m_settings;
     int m_videoTabIndex;
 
     //*************** SCOPE  ***************
@@ -112,8 +112,7 @@ private:
 	std::shared_ptr<TVScreenAnalogBuffer> m_tvScreenBuffer;
 
     //int m_intNumberSamplePerLine;
-    int m_numberSamplesPerHTopNom;     //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - nominal value
-    int m_numberSamplesPerHTop;        //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - adusted value
+    int m_numberSamplesPerHTop;        //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - integer value
     int m_numberOfBlackLines;          //!< this is the total number of lines not part of the image and is used for vertical screen size
     int m_firstVisibleLine;
 
@@ -161,7 +160,6 @@ private:
     int m_hSyncErrorCount;
 
     float prevSample;
-
     int m_avgColIndex;
 
     SampleVector m_sampleBuffer;
@@ -177,11 +175,6 @@ private:
     SimplePhaseLock m_bfoPLL;
     SecondOrderRecursiveFilter m_bfoFilter;
 
-    // Interpolator group for decimation and/or double sideband RF filtering
-    Interpolator m_interpolator;
-    Real m_interpolatorDistance;
-    Real m_interpolatorDistanceRemain;
-
     // Used for vestigial SSB with asymmetrical filtering (needs double sideband scheme)
     fftfilt* m_DSBFilter;
     Complex* m_DSBFilterBuffer;
@@ -191,10 +184,8 @@ private:
     // Used for FM
     PhaseDiscriminators m_objPhaseDiscri;
 
-    //QElapsedTimer m_objTimer;
-
     void demod(Complex& c);
-    void applyStandard(int sampleRate, const ATVDemodSettings& settings, float lineDuration);
+    void applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd, float lineDuration);
 
     inline void processSample(float& sample, int& sampleVideo)
     {
@@ -206,7 +197,7 @@ private:
             // Horizontal Synchro detection
             if ((prevSample >= m_settings.m_levelSynchroTop &&
                 sample < m_settings.m_levelSynchroTop) // horizontal synchro detected
-                && (m_sampleOffsetDetected > m_samplesPerLine - m_numberSamplesPerHTopNom))
+                && (m_sampleOffsetDetected > m_samplesPerLine - m_numberSamplesPerHTop))
             {
                 float sampleOffsetDetectedFrac =
                     (sample - m_settings.m_levelSynchroTop) / (prevSample - sample);
@@ -216,7 +207,7 @@ private:
                 else if (hSyncShift < -m_samplesPerLine / 2)
 					hSyncShift += m_samplesPerLine;
 
-                if (fabs(hSyncShift) > m_numberSamplesPerHTopNom)
+                if (fabs(hSyncShift) > m_numberSamplesPerHTop)
                 {
                     m_hSyncErrorCount++;
                     if (m_hSyncErrorCount >= 4)
@@ -252,7 +243,7 @@ private:
         {
 			if (m_settings.m_hSync)
 			{
-				float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac;
+				float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac - m_samplesPerLineFrac;
 				m_sampleOffset = sampleOffsetFloat;
 				m_sampleOffsetFrac = sampleOffsetFloat - m_sampleOffset;
 			}
