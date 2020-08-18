@@ -47,7 +47,6 @@ struct ATVDemodSettings
 
     // RF settings
     qint64        m_inputFrequencyOffset; //!< Offset from baseband center frequency
-    bool          m_forceDecimator;       //!< Force use of rational decimator when channel sample rate matches TV sample rate
     int           m_bfoFrequency;         //!< BFO frequency (Hz)
     ATVModulation m_atvModulation;        //!< RF modulation type
     float         m_fmDeviation;          //!< Expected FM deviation
@@ -67,8 +66,6 @@ struct ATVDemodSettings
     bool          m_halfFrames;           //!< Toggle half frames processing
     float         m_levelSynchroTop;      //!< Horizontal synchronization top level (0.0 to 1.0 scale)
     float         m_levelBlack;           //!< Black level (0.0 to 1.0 scale)
-    int           m_lineTimeFactor;       //!< added: +/- 100 something
-    int           m_topTimeFactor;        //!< percentage of nominal horizontal top (pulse) time
 
     // common channel settings
     quint32 m_rgbColor;
@@ -84,8 +81,6 @@ struct ATVDemodSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
-    float getLineTime(unsigned int sampleRate);
-    float getTopTime(unsigned int sampleRate);
     int getRFSliderDivisor(unsigned int sampleRate);
 
     static int getFps(int fpsIndex);
@@ -94,12 +89,9 @@ struct ATVDemodSettings
     static int getNumberOfLinesIndex(int nbLines);
     static float getNominalLineTime(int nbLines, int fps);
     static float getRFBandwidthDivisor(ATVModulation modulation);
-    static void getBaseValues(int sampleRate, int linesPerSecond, int& tvSampleRate, uint32_t& nbPointsPerLine);
+    static void getBaseValues(int sampleRate, int linesPerSecond, uint32_t& nbPointsPerLine);
 
 private:
-    void lineTimeUpdate(unsigned int sampleRate);
-
-    float m_fltLineTimeMultiplier;
     int m_rfSliderDivisor;
 };
 

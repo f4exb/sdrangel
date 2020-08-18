@@ -129,7 +129,6 @@ void ATVDemod::applySettings(const ATVDemodSettings& settings, bool force)
 {
     qDebug() << "ATVDemod::applySettings:"
             << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
-            << "m_forceDecimator:" << settings.m_forceDecimator
             << "m_bfoFrequency:" << settings.m_bfoFrequency
             << "m_atvModulation:" << settings.m_atvModulation
             << "m_fmDeviation:" << settings.m_fmDeviation
@@ -145,8 +144,6 @@ void ATVDemod::applySettings(const ATVDemodSettings& settings, bool force)
             << "m_halfFrames:" << settings.m_halfFrames
             << "m_levelSynchroTop:" << settings.m_levelSynchroTop
             << "m_levelBlack:" << settings.m_levelBlack
-            << "m_lineTimeFactor:" << settings.m_lineTimeFactor
-            << "m_topTimeFactor:" << settings.m_topTimeFactor
             << "m_rgbColor:" << settings.m_rgbColor
             << "m_title:" << settings.m_title
             << "m_udpAddress:" << settings.m_udpAddress

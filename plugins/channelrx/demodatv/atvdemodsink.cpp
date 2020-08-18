@@ -30,8 +30,8 @@ const int ATVDemodSink::m_ssbFftLen = 1024;
 ATVDemodSink::ATVDemodSink() :
     m_channelSampleRate(1000000),
     m_channelFrequencyOffset(0),
-    m_tvSampleRate(1000000),
     m_samplesPerLine(100),
+	m_samplesPerLineFrac(0.0f),
     m_videoTabIndex(0),
     m_scopeSink(nullptr),
     m_registeredTVScreen(nullptr),
@@ -53,19 +53,16 @@ ATVDemodSink::ATVDemodSink() :
     m_ampAverage(4800),
     m_bfoPLL(200/1000000, 100/1000000, 0.01),
     m_bfoFilter(200.0, 1000000.0, 0.9),
-    m_interpolatorDistance(1.0f),
-    m_interpolatorDistanceRemain(0.0f),
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
     m_DSBFilterBufferIndex(0)
 {
     qDebug("ATVDemodSink::ATVDemodSink");
     //*************** ATV PARAMETERS  ***************
-    //m_intNumberSamplePerLine=0;
     m_synchroSamples=0;
     m_interleaved = true;
 
-    m_DSBFilter = new fftfilt(m_settings.m_fftBandwidth / (float) m_tvSampleRate, 2*m_ssbFftLen); // arbitrary cutoff
+    m_DSBFilter = new fftfilt(m_settings.m_fftBandwidth / (float) m_channelSampleRate, 2*m_ssbFftLen); // arbitrary cutoff
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
     std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
     std::fill(m_fltBufferI, m_fltBufferI+6, 0.0f);
@@ -97,19 +94,7 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
             c *= m_nco.nextIQ();
         }
 
-        if ((m_tvSampleRate == m_channelSampleRate) && (!m_settings.m_forceDecimator)) // no decimation
-        {
-            demod(c);
-        }
-        else
-        {
-            Complex ci;
-            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
-            {
-                demod(ci);
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
-            }
-        }
+        demod(c);
     }
 
     if ((m_videoTabIndex == 1) && (m_scopeSink)) // do only if scope tab is selected and scope is available
@@ -327,9 +312,9 @@ void ATVDemodSink::demod(Complex& c)
     }
 }
 
-void ATVDemodSink::applyStandard(int sampleRate, const ATVDemodSettings& settings, float lineDuration)
+void ATVDemodSink::applyStandard(int sampleRate, ATVDemodSettings::ATVStd atvStd, float lineDuration)
 {
-    switch(settings.m_atvStd)
+    switch(atvStd)
     {
     case ATVDemodSettings::ATVStdHSkip:
         // what is left in a line for the image
@@ -385,7 +370,7 @@ void ATVDemodSink::applyStandard(int sampleRate, const ATVDemodSettings& setting
     // Table 2. Details of line synchronizing signals
     m_numberSamplesPerLineSignals = (int)(lineDuration * sampleRate * 12.0  / 64.0); // "a", Line-blanking interval
     m_numberSamplesPerHSync       = (int)(lineDuration * sampleRate * 10.5  / 64.0); // "b", Interval between time datum and back edge of line-blanking pulse
-    m_numberSamplesPerHTopNom     = (int)(lineDuration * sampleRate *  4.7  / 64.0); // "d", Duration of synchronizing pulse
+    m_numberSamplesPerHTop        = (int)(lineDuration * sampleRate *  4.7  / 64.0); // "d", Duration of synchronizing pulse
 
     // Table 3. Details of field synchronizing signals
     float hl = 32.0f; // half of the line
@@ -406,8 +391,6 @@ void ATVDemodSink::applyStandard(int sampleRate, const ATVDemodSettings& setting
 
     float vSyncDetectPercent = 0.5f;
     m_vSyncDetectThreshold = (int)(detectTotalLen * vSyncDetectPercent);
-
-    m_numberSamplesPerHTop = m_numberSamplesPerHTopNom * (settings.m_topTimeFactor / 100.0f);  // adjust the value used in the system
 }
 
 bool ATVDemodSink::getBFOLocked()
@@ -440,43 +423,31 @@ void ATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
         unsigned int samplesPerLineNom;
-        ATVDemodSettings::getBaseValues(channelSampleRate, m_settings.m_nbLines * m_settings.m_fps, m_tvSampleRate, samplesPerLineNom);
-        m_samplesPerLine = samplesPerLineNom + m_settings.m_lineTimeFactor;
+        ATVDemodSettings::getBaseValues(channelSampleRate, m_settings.m_nbLines * m_settings.m_fps, samplesPerLineNom);
+        m_samplesPerLine = samplesPerLineNom;
+		m_samplesPerLineFrac = (float)channelSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - m_samplesPerLine;
         qDebug() << "ATVDemodSink::applyChannelSettings:"
-                << " m_tvSampleRate: " << m_tvSampleRate
+                << " m_channelSampleRate: " << m_channelSampleRate
                 << " m_fftBandwidth: " << m_settings.m_fftBandwidth
                 << " m_fftOppBandwidth:" << m_settings.m_fftOppBandwidth
                 << " m_bfoFrequency: " << m_settings.m_bfoFrequency;
 
-        if (m_tvSampleRate > 0)
-        {
-            m_interpolatorDistanceRemain = 0;
-            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) channelSampleRate;
-            m_interpolator.create(24,
-                m_tvSampleRate,
-                m_settings.m_fftBandwidth / ATVDemodSettings::getRFBandwidthDivisor(m_settings.m_atvModulation),
-                3.0
-            );
-        }
-        else
-        {
-            m_tvSampleRate = channelSampleRate;
-        }
+        m_channelSampleRate = channelSampleRate;
 
         m_DSBFilter->create_asym_filter(
-            m_settings.m_fftOppBandwidth / (float) m_tvSampleRate,
-            m_settings.m_fftBandwidth / (float) m_tvSampleRate
+            m_settings.m_fftOppBandwidth / (float) m_channelSampleRate,
+            m_settings.m_fftBandwidth / (float) m_channelSampleRate
         );
         std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
         m_DSBFilterBufferIndex = 0;
 
-        m_bfoPLL.configure((float) m_settings.m_bfoFrequency / (float) m_tvSampleRate,
-                100.0 / m_tvSampleRate,
+        m_bfoPLL.configure((float) m_settings.m_bfoFrequency / (float) m_channelSampleRate,
+                100.0 / m_channelSampleRate,
                 0.01);
-        m_bfoFilter.setFrequencies(m_tvSampleRate, m_settings.m_bfoFrequency);
+        m_bfoFilter.setFrequencies(m_channelSampleRate, m_settings.m_bfoFrequency);
     }
 
-    applyStandard(m_tvSampleRate, m_settings, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
+    applyStandard(m_channelSampleRate, m_settings.m_atvStd, ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps));
 
     if (m_registeredTVScreen)
     {
@@ -497,7 +468,6 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
 {
     qDebug() << "ATVDemodSink::applySettings:"
             << "m_inputFrequencyOffset:" << settings.m_inputFrequencyOffset
-            << "m_forceDecimator:" << settings.m_forceDecimator
             << "m_bfoFrequency:" << settings.m_bfoFrequency
             << "m_atvModulation:" << settings.m_atvModulation
             << "m_fmDeviation:" << settings.m_fmDeviation
@@ -513,62 +483,47 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
             << "m_halfFrames:" << settings.m_halfFrames
             << "m_levelSynchroTop:" << settings.m_levelSynchroTop
             << "m_levelBlack:" << settings.m_levelBlack
-            << "m_lineTimeFactor:" << settings.m_lineTimeFactor
-            << "m_topTimeFactor:" << settings.m_topTimeFactor
             << "m_rgbColor:" << settings.m_rgbColor
             << "m_title:" << settings.m_title
             << "m_udpAddress:" << settings.m_udpAddress
             << "m_udpPort:" << settings.m_udpPort
             << "force:" << force;
 
-    if ((settings.m_nbLines != m_settings.m_nbLines)
-     || (settings.m_fps != m_settings.m_fps)
-     || (settings.m_atvStd != m_settings.m_atvStd)
-     || (settings.m_atvModulation != m_settings.m_atvModulation)
-     || (settings.m_fftBandwidth != m_settings.m_fftBandwidth)
-     || (settings.m_fftOppBandwidth != m_settings.m_fftOppBandwidth)
-     || (settings.m_atvStd != m_settings.m_atvStd)
-     || (settings.m_lineTimeFactor != m_settings.m_lineTimeFactor) || force)
+    if ((settings.m_fftBandwidth != m_settings.m_fftBandwidth)
+     || (settings.m_fftOppBandwidth != m_settings.m_fftOppBandwidth) || force)
     {
-        unsigned int samplesPerLineNom;
-        ATVDemodSettings::getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, m_tvSampleRate, samplesPerLineNom);
-        m_samplesPerLine = samplesPerLineNom + settings.m_lineTimeFactor;
-        m_ampAverage.resize(m_samplesPerLine * m_settings.m_nbLines * 2); // AGC average in two full images
-
-        qDebug() << "ATVDemodSink::applySettings:"
-                << " m_tvSampleRate: " << m_tvSampleRate
-                << " m_fftBandwidth: " << settings.m_fftBandwidth
-                << " m_fftOppBandwidth:" << settings.m_fftOppBandwidth
-                << " m_bfoFrequency: " << settings.m_bfoFrequency;
-
-        if (m_tvSampleRate > 0)
-        {
-            m_interpolatorDistanceRemain = 0;
-            m_interpolatorDistance = (Real) m_tvSampleRate / (Real) m_channelSampleRate;
-            m_interpolator.create(24,
-                m_tvSampleRate,
-                settings.m_fftBandwidth / ATVDemodSettings::getRFBandwidthDivisor(settings.m_atvModulation),
-                3.0
-            );
-        }
-        else
-        {
-            m_tvSampleRate = m_channelSampleRate;
-        }
-
         m_DSBFilter->create_asym_filter(
-            settings.m_fftOppBandwidth / (float) m_tvSampleRate,
-            settings.m_fftBandwidth / (float) m_tvSampleRate
+            settings.m_fftOppBandwidth / (float) m_channelSampleRate,
+            settings.m_fftBandwidth / (float) m_channelSampleRate
         );
         std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0.0, 0.0});
         m_DSBFilterBufferIndex = 0;
+    }
 
-        m_bfoPLL.configure((float) settings.m_bfoFrequency / (float) m_tvSampleRate,
-                100.0 / m_tvSampleRate,
+    if ((settings.m_bfoFrequency != m_settings.m_bfoFrequency) || force)
+    {
+        m_bfoPLL.configure((float) settings.m_bfoFrequency / (float) m_channelSampleRate,
+                100.0 / m_channelSampleRate,
                 0.01);
-        m_bfoFilter.setFrequencies(m_tvSampleRate, settings.m_bfoFrequency);
+        m_bfoFilter.setFrequencies(m_channelSampleRate, settings.m_bfoFrequency);
+    }
 
-        applyStandard(m_tvSampleRate, settings, ATVDemodSettings::getNominalLineTime(settings.m_nbLines, settings.m_fps));
+    if ((settings.m_nbLines != m_settings.m_nbLines)
+     || (settings.m_fps != m_settings.m_fps)
+     || (settings.m_atvStd != m_settings.m_atvStd) || force)
+    {
+        unsigned int samplesPerLineNom;
+        ATVDemodSettings::getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, samplesPerLineNom);
+        m_samplesPerLine = samplesPerLineNom;
+		m_samplesPerLineFrac = (float)m_channelSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - m_samplesPerLine;
+		m_ampAverage.resize(m_samplesPerLine * m_settings.m_nbLines * 2); // AGC average in two full images
+
+        qDebug() << "ATVDemodSink::applySettings:"
+                << " m_channelSampleRate: " << m_channelSampleRate
+                << " m_samplesPerLine:" << m_samplesPerLine
+                << " m_samplesPerLineFrac:" << m_samplesPerLineFrac;
+
+        applyStandard(m_channelSampleRate, settings.m_atvStd, ATVDemodSettings::getNominalLineTime(settings.m_nbLines, settings.m_fps));
 
         if (m_registeredTVScreen)
         {
@@ -580,10 +535,6 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         }
 
         m_fieldIndex = 0;
-    }
-
-    if ((settings.m_topTimeFactor != m_settings.m_topTimeFactor) || force) {
-        m_numberSamplesPerHTop = m_numberSamplesPerHTopNom * (settings.m_topTimeFactor / 100.0f);
     }
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {

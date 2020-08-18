@@ -116,8 +116,6 @@ void ATVDemodGUI::displaySettings()
     ui->synchLevelText->setText(QString("%1 mV").arg((int) (m_settings.m_levelSynchroTop * 1000.0f)));
     ui->blackLevel->setValue((int) (m_settings.m_levelBlack * 1000.0f));
     ui->blackLevelText->setText(QString("%1 mV").arg((int) (m_settings.m_levelBlack * 1000.0f)));
-    ui->lineTime->setValue(m_settings.m_lineTimeFactor);
-    ui->topTime->setValue(m_settings.m_topTimeFactor);
     ui->modulation->setCurrentIndex((int) m_settings.m_atvModulation);
     ui->fps->setCurrentIndex(ATVDemodSettings::getFpsIndex(m_settings.m_fps));
     ui->nbLines->setCurrentIndex(ATVDemodSettings::getNumberOfLinesIndex(m_settings.m_nbLines));
@@ -131,7 +129,6 @@ void ATVDemodGUI::displaySettings()
 
     //********** RF values **********
     ui->deltaFrequency->setValue(m_settings.m_inputFrequencyOffset);
-    ui->decimatorEnable->setChecked(m_settings.m_forceDecimator);
     ui->rfFiltering->setChecked(m_settings.m_fftFiltering);
     ui->bfo->setValue(m_settings.m_bfoFrequency);
     ui->bfoText->setText(QString("%1").arg(m_settings.m_bfoFrequency * 1.0, 0, 'f', 0));
@@ -172,11 +169,11 @@ void ATVDemodGUI::applyTVSampleRate()
 {
     qDebug("TVDemodGUI::applyTVSampleRate");
     unsigned int nbPointsPerLine;
-    ATVDemodSettings::getBaseValues(m_basebandSampleRate, m_settings.m_fps*m_settings.m_nbLines, m_tvSampleRate, nbPointsPerLine);
-    ui->tvSampleRateText->setText(tr("%1k").arg(m_tvSampleRate/1000.0f, 0, 'f', 2));
+    ATVDemodSettings::getBaseValues(m_basebandSampleRate, m_settings.m_fps*m_settings.m_nbLines, nbPointsPerLine);
+    ui->tvSampleRateText->setText(tr("%1k").arg(m_basebandSampleRate/1000.0f, 0, 'f', 2));
     ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
-    m_scopeVis->setLiveRate(m_tvSampleRate);
-    setRFFiltersSlidersRange(m_tvSampleRate);
+    m_scopeVis->setLiveRate(m_basebandSampleRate);
+    setRFFiltersSlidersRange(m_basebandSampleRate);
     displayRFBandwidths();
     lineTimeUpdate();
     topTimeUpdate();
@@ -238,8 +235,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
         m_channelMarker(this),
         m_doApplySettings(false),
         m_intTickCount(0),
-        m_basebandSampleRate(48000),
-        m_tvSampleRate(48000)
+        m_basebandSampleRate(48000)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -341,12 +337,7 @@ void ATVDemodGUI::setChannelMarkerBandwidth()
     }
     else
     {
-        if ((m_basebandSampleRate == m_tvSampleRate) && (!m_settings.m_forceDecimator)) {
-            m_channelMarker.setBandwidth(m_basebandSampleRate);
-        } else {
-            m_channelMarker.setBandwidth(ui->rfBW->value()*m_rfSliderDivisor);
-        }
-
+        m_channelMarker.setBandwidth(m_basebandSampleRate);
         m_channelMarker.setSidebands(ChannelMarker::dsb);
     }
 
@@ -435,22 +426,6 @@ void ATVDemodGUI::on_blackLevel_valueChanged(int value)
     applySettings();
 }
 
-void ATVDemodGUI::on_lineTime_valueChanged(int value)
-{
-	ui->lineTime->setToolTip(QString("Line length adjustment (%1)").arg(value));
-    m_settings.m_lineTimeFactor = value;
-    lineTimeUpdate();
-    applySettings();
-}
-
-void ATVDemodGUI::on_topTime_valueChanged(int value)
-{
-	ui->topTime->setToolTip(QString("Horizontal sync pulse length adjustment (%1 %)").arg(value));
-    m_settings.m_topTimeFactor = value;
-    topTimeUpdate();
-    applySettings();
-}
-
 void ATVDemodGUI::on_hSync_clicked()
 {
     m_settings.m_hSync = ui->hSync->isChecked();
@@ -504,7 +479,7 @@ void ATVDemodGUI::on_reset_clicked(bool checked)
 void ATVDemodGUI::on_modulation_currentIndexChanged(int index)
 {
     m_settings.m_atvModulation = (ATVDemodSettings::ATVModulation) index;
-    setRFFiltersSlidersRange(m_tvSampleRate);
+    setRFFiltersSlidersRange(m_basebandSampleRate);
     setChannelMarkerBandwidth();
     applySettings();
 }
@@ -528,14 +503,7 @@ void ATVDemodGUI::on_rfOppBW_valueChanged(int value)
 void ATVDemodGUI::on_rfFiltering_toggled(bool checked)
 {
     m_settings.m_fftFiltering = checked;
-    setRFFiltersSlidersRange(m_tvSampleRate);
-    setChannelMarkerBandwidth();
-    applySettings();
-}
-
-void ATVDemodGUI::on_decimatorEnable_toggled(bool checked)
-{
-    m_settings.m_forceDecimator = checked;
+    setRFFiltersSlidersRange(m_basebandSampleRate);
     setChannelMarkerBandwidth();
     applySettings();
 }
@@ -585,41 +553,31 @@ void ATVDemodGUI::on_screenTabWidget_currentChanged(int index)
 void ATVDemodGUI::lineTimeUpdate()
 {
     float nominalLineTime = ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps);
-    int lineTimeScaleFactor = (int) std::log10(nominalLineTime);
 
-    if (m_tvSampleRate == 0) {
-        m_fltLineTimeMultiplier = std::pow(10.0, lineTimeScaleFactor-3);
-    } else {
-        m_fltLineTimeMultiplier = 1.0f / m_tvSampleRate;
-    }
-
-    float lineTime = nominalLineTime + m_fltLineTimeMultiplier * ui->lineTime->value();
-
-    if (lineTime < 0.0)
+    if (nominalLineTime < 0.0)
         ui->lineTimeText->setText("invalid");
-    else if(lineTime < 0.000001)
-        ui->lineTimeText->setText(tr("%1 ns").arg(lineTime * 1000000000.0, 0, 'f', 2));
-    else if(lineTime < 0.001)
-        ui->lineTimeText->setText(tr("%1 µs").arg(lineTime * 1000000.0, 0, 'f', 2));
-    else if(lineTime < 1.0)
-        ui->lineTimeText->setText(tr("%1 ms").arg(lineTime * 1000.0, 0, 'f', 2));
+    else if(nominalLineTime < 0.000001)
+        ui->lineTimeText->setText(tr("%1 ns").arg(nominalLineTime * 1000000000.0, 0, 'f', 2));
+    else if(nominalLineTime < 0.001)
+        ui->lineTimeText->setText(tr("%1 µs").arg(nominalLineTime * 1000000.0, 0, 'f', 2));
+    else if(nominalLineTime < 1.0)
+        ui->lineTimeText->setText(tr("%1 ms").arg(nominalLineTime * 1000.0, 0, 'f', 2));
     else
-        ui->lineTimeText->setText(tr("%1 s").arg(lineTime * 1.0, 0, 'f', 2));
+        ui->lineTimeText->setText(tr("%1 s").arg(nominalLineTime * 1.0, 0, 'f', 2));
 }
 
 void ATVDemodGUI::topTimeUpdate()
 {
     float nominalTopTime = ATVDemodSettings::getNominalLineTime(m_settings.m_nbLines, m_settings.m_fps) * (4.7f / 64.0f);
-    float topTime = nominalTopTime * (ui->topTime->value() / 100.0f);
 
-    if (topTime < 0.0)
+    if (nominalTopTime < 0.0)
         ui->topTimeText->setText("invalid");
-    else if (topTime < 0.000001)
-        ui->topTimeText->setText(tr("%1 ns").arg(topTime * 1000000000.0, 0, 'f', 2));
-    else if(topTime < 0.001)
-        ui->topTimeText->setText(tr("%1 µs").arg(topTime * 1000000.0, 0, 'f', 2));
-    else if(topTime < 1.0)
-        ui->topTimeText->setText(tr("%1 ms").arg(topTime * 1000.0, 0, 'f', 2));
+    else if (nominalTopTime < 0.000001)
+        ui->topTimeText->setText(tr("%1 ns").arg(nominalTopTime * 1000000000.0, 0, 'f', 2));
+    else if(nominalTopTime < 0.001)
+        ui->topTimeText->setText(tr("%1 µs").arg(nominalTopTime * 1000000.0, 0, 'f', 2));
+    else if(nominalTopTime < 1.0)
+        ui->topTimeText->setText(tr("%1 ms").arg(nominalTopTime * 1000.0, 0, 'f', 2));
     else
-        ui->topTimeText->setText(tr("%1 s").arg(topTime * 1.0, 0, 'f', 2));
+        ui->topTimeText->setText(tr("%1 s").arg(nominalTopTime * 1.0, 0, 'f', 2));
 }
