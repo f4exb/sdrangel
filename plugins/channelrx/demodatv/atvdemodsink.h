@@ -241,16 +241,9 @@ private:
         // end of line
         if (m_sampleOffset >= m_samplesPerLine)
         {
-			if (m_settings.m_hSync)
-			{
-				float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac - m_samplesPerLineFrac;
-				m_sampleOffset = sampleOffsetFloat;
-				m_sampleOffsetFrac = sampleOffsetFloat - m_sampleOffset;
-			}
-			else
-			{
-				m_sampleOffset = 0;
-			}
+            float sampleOffsetFloat = m_hSyncShift + m_sampleOffsetFrac - m_samplesPerLineFrac;
+            m_sampleOffset = sampleOffsetFloat;
+            m_sampleOffsetFrac = sampleOffsetFloat - m_sampleOffset;
 			m_hSyncShift = 0.0f;
 
 			m_lineIndex++;
