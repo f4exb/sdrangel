@@ -137,15 +137,15 @@
        <widget class="QLabel" name="nbPointsPerLineText">
         <property name="minimumSize">
          <size>
-          <width>40</width>
+          <width>80</width>
           <height>0</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>Number of points (samples) per line</string>
+         <string>Number of integer points (samples) per line plus fractional part</string>
         </property>
         <property name="text">
-         <string>000p</string>
+         <string>0000p+0.00</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

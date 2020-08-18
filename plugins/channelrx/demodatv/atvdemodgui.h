@@ -87,7 +87,7 @@ private:
     void displaySettings();
     void displayStreamIndex();
     void displayRFBandwidths();
-    void applyTVSampleRate();
+    void applySampleRate();
     void setChannelMarkerBandwidth();
     void setRFFiltersSlidersRange(int sampleRate);
     void lineTimeUpdate();
