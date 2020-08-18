@@ -139,7 +139,7 @@ void ATVDemodGUI::displaySettings()
     ui->amScaleOffset->setValue(m_settings.m_amOffsetFactor);
     ui->amScaleOffsetText->setText(QString("%1").arg(m_settings.m_amOffsetFactor));
 
-    applyTVSampleRate();
+    applySampleRate();
 
     m_doApplySettings = true;
 }
@@ -165,18 +165,20 @@ void ATVDemodGUI::displayRFBandwidths()
     ui->rfOppBWText->setText(QString("%1k").arg((sliderPosition * m_rfSliderDivisor) / 1000.0, 0, 'f', 0));
 }
 
-void ATVDemodGUI::applyTVSampleRate()
+void ATVDemodGUI::applySampleRate()
 {
-    qDebug("TVDemodGUI::applyTVSampleRate");
+    qDebug("ATVDemodGUI::applySampleRate");
     unsigned int nbPointsPerLine;
     ATVDemodSettings::getBaseValues(m_basebandSampleRate, m_settings.m_fps*m_settings.m_nbLines, nbPointsPerLine);
+    float samplesPerLineFrac = (float) m_basebandSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - nbPointsPerLine;
     ui->tvSampleRateText->setText(tr("%1k").arg(m_basebandSampleRate/1000.0f, 0, 'f', 2));
-    ui->nbPointsPerLineText->setText(tr("%1p").arg(nbPointsPerLine));
+    ui->nbPointsPerLineText->setText(tr("%1p+%2").arg(nbPointsPerLine).arg(samplesPerLineFrac, 0, 'f', 2));
     m_scopeVis->setLiveRate(m_basebandSampleRate);
     setRFFiltersSlidersRange(m_basebandSampleRate);
     displayRFBandwidths();
     lineTimeUpdate();
     topTimeUpdate();
+    setChannelMarkerBandwidth();
 }
 
 bool ATVDemodGUI::handleMessage(const Message& message)
@@ -185,7 +187,7 @@ bool ATVDemodGUI::handleMessage(const Message& message)
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
         m_basebandSampleRate = notif.getSampleRate();
-        applyTVSampleRate();
+        applySampleRate();
 
         return true;
     }
@@ -453,14 +455,14 @@ void ATVDemodGUI::on_halfImage_clicked()
 void ATVDemodGUI::on_nbLines_currentIndexChanged(int index)
 {
     m_settings.m_nbLines = ATVDemodSettings::getNumberOfLines(index);
-    applyTVSampleRate();
+    applySampleRate();
     applySettings();
 }
 
 void ATVDemodGUI::on_fps_currentIndexChanged(int index)
 {
     m_settings.m_fps = ATVDemodSettings::getFps(index);
-    applyTVSampleRate();
+    applySampleRate();
     applySettings();
 }
 
