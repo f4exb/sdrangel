@@ -59,6 +59,8 @@ public:
     ATVDemodBaseband();
     ~ATVDemodBaseband();
     void reset();
+    void startWork();
+    void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
@@ -68,6 +70,7 @@ public:
     bool getBFOLocked() { return m_sink.getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_sink.setVideoTabIndex(videoTabIndex); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
+    bool isRunning() const { return m_running; }
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -75,6 +78,7 @@ private:
     ATVDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     ATVDemodSettings m_settings;
+    bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
