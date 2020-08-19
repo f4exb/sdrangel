@@ -94,7 +94,7 @@ void PlutoSDRInputThread::run()
         // Refill RX buffer
         nbytes_rx = m_plutoBox->rxBufferRefill();
 
-        if (nbytes_rx != m_blockSizeSamples*2)
+        if (nbytes_rx != m_blockSizeSamples*4)
         {
             qWarning("PlutoSDRInputThread::run: error refilling buf (1) %d / %d",(int) nbytes_rx, (int)  m_blockSizeSamples*2);
             usleep(200000);
@@ -111,13 +111,14 @@ void PlutoSDRInputThread::run()
 
         for (p_dat = m_plutoBox->rxBufferFirst(); p_dat < p_end; p_dat += p_inc)
         {
-            m_buf[ihs] = *((int16_t *) p_dat);
+            m_buf[ihs++] = *((int16_t *) p_dat);
+            m_buf[ihs++] = *(((int16_t*)p_dat)+1);
 //            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[ihs], (const void *) &m_buf[ihs]);
-            ihs++;
+            //ihs++;
         }
 
         // Refill RX buffer again - we still need twice more samples to complete since they come as I followed by Q
-        nbytes_rx = m_plutoBox->rxBufferRefill();
+        /*nbytes_rx = m_plutoBox->rxBufferRefill();
 
         if (nbytes_rx != m_blockSizeSamples*2)
         {
@@ -139,7 +140,7 @@ void PlutoSDRInputThread::run()
 //            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[ihs], (const void *) &m_buf[ihs]);
             ihs++;
         }
-
+        */
         if (m_iqOrder) {
             convertIQ(m_buf, 2*m_blockSizeSamples); // size given in number of int16_t (I and Q interleaved)
         } else {
