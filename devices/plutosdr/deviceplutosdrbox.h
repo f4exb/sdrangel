@@ -85,7 +85,7 @@ public:
     void deleteTxBuffer();
     ssize_t getRxSampleSize();
     ssize_t getTxSampleSize();
-    struct iio_channel *getRxChannel0() { return m_chnRx0; }
+    struct iio_channel *getRxChannel0() { return m_chnRx0i; }
     struct iio_channel *getTxChannel0I() { return m_chnTx0i; }
     struct iio_channel *getTxChannel0Q() { return m_chnTx0q; }
     ssize_t rxBufferRefill();
@@ -119,8 +119,8 @@ private:
     struct iio_device  *m_devPhy;
     struct iio_device  *m_devRx;
     struct iio_device  *m_devTx;
-    struct iio_channel *m_chnRx0;
-    struct iio_channel* m_chnRxQ;
+    struct iio_channel *m_chnRx0i;
+    struct iio_channel* m_chnRx0q;
     struct iio_channel *m_chnTx0i;
     struct iio_channel *m_chnTx0q;
     struct iio_buffer  *m_rxBuf;
