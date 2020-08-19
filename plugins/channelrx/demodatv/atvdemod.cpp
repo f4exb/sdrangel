@@ -18,7 +18,6 @@
 
 #include <QTime>
 #include <QDebug>
-#include <QThread>
 
 #include <stdio.h>
 #include <complex.h>
@@ -42,9 +41,8 @@ ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
     qDebug("ATVDemod::ATVDemod");
     setObjectName(m_channelId);
 
-    m_thread = new QThread(this);
     m_basebandSink = new ATVDemodBaseband();
-    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
 
@@ -57,8 +55,12 @@ ATVDemod::~ATVDemod()
     qDebug("ATVDemod::~ATVDemod");
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+
+    if (m_basebandSink->isRunning()) {
+        stop();
+    }
+
     delete m_basebandSink;
-    delete m_thread;
 }
 
 void ATVDemod::start()
@@ -66,7 +68,8 @@ void ATVDemod::start()
 	qDebug("ATVDemod::start");
 
     m_basebandSink->reset();
-    m_thread->start();
+    m_basebandSink->startWork();
+    m_thread.start();
 
     // re-apply essential messages
 
@@ -80,8 +83,9 @@ void ATVDemod::start()
 void ATVDemod::stop()
 {
     qDebug("ATVDemod::stop");
-	m_thread->exit();
-	m_thread->wait();
+    m_basebandSink->stopWork();
+	m_thread.exit();
+	m_thread.wait();
 }
 
 void ATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)

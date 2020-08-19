@@ -26,21 +26,12 @@
 MESSAGE_CLASS_DEFINITION(ATVDemodBaseband::MsgConfigureATVDemodBaseband, Message)
 
 ATVDemodBaseband::ATVDemodBaseband() :
+    m_running(false),
     m_mutex(QMutex::Recursive)
 {
     qDebug("ATVDemodBaseband::ATVDemodBaseband");
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
-
-    QObject::connect(
-        &m_sampleFifo,
-        &SampleSinkFifo::dataReady,
-        this,
-        &ATVDemodBaseband::handleData,
-        Qt::QueuedConnection
-    );
-
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 ATVDemodBaseband::~ATVDemodBaseband()
@@ -53,6 +44,34 @@ void ATVDemodBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_inputMessageQueue.clear();
     m_sampleFifo.reset();
+}
+
+void ATVDemodBaseband::startWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    QObject::connect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &ATVDemodBaseband::handleData,
+        Qt::QueuedConnection
+    );
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    m_running = true;
+}
+
+void ATVDemodBaseband::stopWork()
+{
+    QMutexLocker mutexLocker(&m_mutex);
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+    QObject::disconnect(
+        &m_sampleFifo,
+        &SampleSinkFifo::dataReady,
+        this,
+        &ATVDemodBaseband::handleData
+    );
+    m_running = false;
 }
 
 void ATVDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)

@@ -20,6 +20,7 @@
 #define INCLUDE_ATVDEMOD_H
 
 #include <QElapsedTimer>
+#include <QThread>
 #include <vector>
 
 #include "dsp/basebandsamplesink.h"
@@ -30,7 +31,6 @@
 
 #include "atvdemodbaseband.h"
 
-class QThread;
 class DeviceAPI;
 
 class ATVDemod : public BasebandSampleSink, public ChannelAPI
@@ -97,7 +97,7 @@ public:
 
 private:
     DeviceAPI* m_deviceAPI;
-    QThread *m_thread;
+    QThread m_thread;
     ATVDemodBaseband* m_basebandSink;
     ATVDemodSettings m_settings;
     qint64 m_centerFrequency; //!< center frequency stored from device message used when starting baseband sink
