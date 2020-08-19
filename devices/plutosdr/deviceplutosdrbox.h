@@ -120,6 +120,7 @@ private:
     struct iio_device  *m_devRx;
     struct iio_device  *m_devTx;
     struct iio_channel *m_chnRx0;
+    struct iio_channel* m_chnRxQ;
     struct iio_channel *m_chnTx0i;
     struct iio_channel *m_chnTx0q;
     struct iio_buffer  *m_rxBuf;
