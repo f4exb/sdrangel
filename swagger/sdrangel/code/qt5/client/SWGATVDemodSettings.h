@@ -42,12 +42,6 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGATVDemodSettings* fromJson(QString &jsonString) override;
 
-    qint32 getLineTimeFactor();
-    void setLineTimeFactor(qint32 line_time_factor);
-
-    qint32 getTopTimeFactor();
-    void setTopTimeFactor(qint32 top_time_factor);
-
     qint32 getFpsIndex();
     void setFpsIndex(qint32 fps_index);
 
@@ -77,9 +71,6 @@ public:
 
     qint32 getBlnFftFiltering();
     void setBlnFftFiltering(qint32 bln_fft_filtering);
-
-    qint32 getBlndecimatorEnable();
-    void setBlndecimatorEnable(qint32 blndecimator_enable);
 
     float getFltBfoFrequency();
     void setFltBfoFrequency(float flt_bfo_frequency);
@@ -154,12 +145,6 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 line_time_factor;
-    bool m_line_time_factor_isSet;
-
-    qint32 top_time_factor;
-    bool m_top_time_factor_isSet;
-
     qint32 fps_index;
     bool m_fps_index_isSet;
 
@@ -189,9 +174,6 @@ private:
 
     qint32 bln_fft_filtering;
     bool m_bln_fft_filtering_isSet;
-
-    qint32 blndecimator_enable;
-    bool m_blndecimator_enable_isSet;
 
     float flt_bfo_frequency;
     bool m_flt_bfo_frequency_isSet;

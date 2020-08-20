@@ -28,10 +28,6 @@ SWGATVDemodSettings::SWGATVDemodSettings(QString* json) {
 }
 
 SWGATVDemodSettings::SWGATVDemodSettings() {
-    line_time_factor = 0;
-    m_line_time_factor_isSet = false;
-    top_time_factor = 0;
-    m_top_time_factor_isSet = false;
     fps_index = 0;
     m_fps_index_isSet = false;
     half_image = 0;
@@ -52,8 +48,6 @@ SWGATVDemodSettings::SWGATVDemodSettings() {
     m_flt_rf_opp_bandwidth_isSet = false;
     bln_fft_filtering = 0;
     m_bln_fft_filtering_isSet = false;
-    blndecimator_enable = 0;
-    m_blndecimator_enable_isSet = false;
     flt_bfo_frequency = 0.0f;
     m_flt_bfo_frequency_isSet = false;
     fm_deviation = 0.0f;
@@ -108,10 +102,6 @@ SWGATVDemodSettings::~SWGATVDemodSettings() {
 
 void
 SWGATVDemodSettings::init() {
-    line_time_factor = 0;
-    m_line_time_factor_isSet = false;
-    top_time_factor = 0;
-    m_top_time_factor_isSet = false;
     fps_index = 0;
     m_fps_index_isSet = false;
     half_image = 0;
@@ -132,8 +122,6 @@ SWGATVDemodSettings::init() {
     m_flt_rf_opp_bandwidth_isSet = false;
     bln_fft_filtering = 0;
     m_bln_fft_filtering_isSet = false;
-    blndecimator_enable = 0;
-    m_blndecimator_enable_isSet = false;
     flt_bfo_frequency = 0.0f;
     m_flt_bfo_frequency_isSet = false;
     fm_deviation = 0.0f;
@@ -214,9 +202,6 @@ SWGATVDemodSettings::cleanup() {
 
 
 
-
-
-
     if(title != nullptr) { 
         delete title;
     }
@@ -237,10 +222,6 @@ SWGATVDemodSettings::fromJson(QString &json) {
 
 void
 SWGATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&line_time_factor, pJson["lineTimeFactor"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&top_time_factor, pJson["topTimeFactor"], "qint32", "");
-    
     ::SWGSDRangel::setValue(&fps_index, pJson["fpsIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&half_image, pJson["halfImage"], "qint32", "");
@@ -260,8 +241,6 @@ SWGATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&flt_rf_opp_bandwidth, pJson["fltRFOppBandwidth"], "float", "");
     
     ::SWGSDRangel::setValue(&bln_fft_filtering, pJson["blnFFTFiltering"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&blndecimator_enable, pJson["blndecimatorEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&flt_bfo_frequency, pJson["fltBFOFrequency"], "float", "");
     
@@ -325,12 +304,6 @@ SWGATVDemodSettings::asJson ()
 QJsonObject*
 SWGATVDemodSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_line_time_factor_isSet){
-        obj->insert("lineTimeFactor", QJsonValue(line_time_factor));
-    }
-    if(m_top_time_factor_isSet){
-        obj->insert("topTimeFactor", QJsonValue(top_time_factor));
-    }
     if(m_fps_index_isSet){
         obj->insert("fpsIndex", QJsonValue(fps_index));
     }
@@ -360,9 +333,6 @@ SWGATVDemodSettings::asJsonObject() {
     }
     if(m_bln_fft_filtering_isSet){
         obj->insert("blnFFTFiltering", QJsonValue(bln_fft_filtering));
-    }
-    if(m_blndecimator_enable_isSet){
-        obj->insert("blndecimatorEnable", QJsonValue(blndecimator_enable));
     }
     if(m_flt_bfo_frequency_isSet){
         obj->insert("fltBFOFrequency", QJsonValue(flt_bfo_frequency));
@@ -435,26 +405,6 @@ SWGATVDemodSettings::asJsonObject() {
     }
 
     return obj;
-}
-
-qint32
-SWGATVDemodSettings::getLineTimeFactor() {
-    return line_time_factor;
-}
-void
-SWGATVDemodSettings::setLineTimeFactor(qint32 line_time_factor) {
-    this->line_time_factor = line_time_factor;
-    this->m_line_time_factor_isSet = true;
-}
-
-qint32
-SWGATVDemodSettings::getTopTimeFactor() {
-    return top_time_factor;
-}
-void
-SWGATVDemodSettings::setTopTimeFactor(qint32 top_time_factor) {
-    this->top_time_factor = top_time_factor;
-    this->m_top_time_factor_isSet = true;
 }
 
 qint32
@@ -555,16 +505,6 @@ void
 SWGATVDemodSettings::setBlnFftFiltering(qint32 bln_fft_filtering) {
     this->bln_fft_filtering = bln_fft_filtering;
     this->m_bln_fft_filtering_isSet = true;
-}
-
-qint32
-SWGATVDemodSettings::getBlndecimatorEnable() {
-    return blndecimator_enable;
-}
-void
-SWGATVDemodSettings::setBlndecimatorEnable(qint32 blndecimator_enable) {
-    this->blndecimator_enable = blndecimator_enable;
-    this->m_blndecimator_enable_isSet = true;
 }
 
 float
@@ -802,12 +742,6 @@ bool
 SWGATVDemodSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_line_time_factor_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_top_time_factor_isSet){
-            isObjectUpdated = true; break;
-        }
         if(m_fps_index_isSet){
             isObjectUpdated = true; break;
         }
@@ -836,9 +770,6 @@ SWGATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_bln_fft_filtering_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_blndecimator_enable_isSet){
             isObjectUpdated = true; break;
         }
         if(m_flt_bfo_frequency_isSet){
