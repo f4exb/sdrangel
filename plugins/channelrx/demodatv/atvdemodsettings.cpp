@@ -318,15 +318,6 @@ float ATVDemodSettings::getRFBandwidthDivisor(ATVModulation modulation)
 
 void ATVDemodSettings::getBaseValues(int sampleRate, int linesPerSecond, uint32_t& nbPointsPerLine)
 {
-    int maxPoints = sampleRate / linesPerSecond;
-    int i = maxPoints;
-
-    for (; i > 0; i--)
-    {
-        if ((i * linesPerSecond) % 10 == 0) {
-            break;
-        }
-    }
-
-    nbPointsPerLine = i == 0 ? maxPoints : i;
+    nbPointsPerLine = sampleRate / linesPerSecond;
+    nbPointsPerLine = nbPointsPerLine == 0 ? 1 : nbPointsPerLine;
 }
