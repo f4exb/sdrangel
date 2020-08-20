@@ -2,9 +2,9 @@
 
 <h2>Introduction</h2>
 
-This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white level (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same passband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
+This plugin can be used to view amateur analog television transmissions a.k.a ATV. The transmitted video signal can be black and white or color (PAL, NTSC) but only the black and white level (luminance) is retained and hence image is black and white. There is no provision to demodulate the audio subcarrier either. The modulation can be either AM or FM (SSB with carrier is only experimental). A plugin supporting audio can be used in the same baseband to demodulate an audio carrier but this does not work for a subcarrier which excludes FM.
 
-An optional rational downsampler with lowpass filtering can be used but its ratio is always 1.0 so in fact only the filter functionality is retained. This is a provision for future developments. When this downsampler is not engaged (button A.3) the source feeds the channel directly. A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable.
+A standard image quality for broadcast standard modes requires a sample rate of at least 4 MS/s. The Airspy Mini 3 MS/s mode may still be acceptable.
 
 Experimental modes with smaller number of lines and FPS values can be used in conjunction with the [ATV Modulator plugin](https://github.com/f4exb/sdrangel/tree/master/plugins/channeltx/modatv) to reduce sample rate and occupied bandwidth. Very low line frequencies and thus small bandwidths are reachable with degraded image quality. This is known as NBTV see: [Wikipedia article](https://en.wikipedia.org/wiki/Narrow-bandwidth_television) and [NBTV.org](http://www.nbtv.org/)
 
@@ -28,47 +28,42 @@ Each part is detailed next
 
 Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows.Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-<h3>3: Force use of the rational downsampler</h3>
+<h3>2: Channel sample rate</h3>
 
-Use this toggle button to enable the rational downsampler and its FIR filter even when TV and baseband sample rate match (see next 4). The expected effect is then to engage the FIR filter so that the signal is lowpass filtered and the cutoff frequency can be adjusted with the in band filter cutoff slider (13).
+This is the baseband sample rate as no decimation takes place in this channel plugin.
 
-<h3>4: TV sample rate</h3>
+<h3>3: Number of integer points or samples per line and fractional remainder</h3>
 
-This is the nominal sample rate in kS/s derived from the line frequency so that an integer number of points can fit exactly into one line. This number of (virtual) points is chosen so that the resulting sample rate is the closest 10 S/s multiple to the baseband frequency.
+Format is `<points>p+<remainder>`
 
-&#9888; In practice you should adjust the baseband frequency with the device controls so that baseband and TV sample rates are equal. The rational interpolator does not work very well with video signals for which exact timings are critical.
+<h4>Integer points</h4>
 
-Sb - 10 < St <= Sb
-St = n &#215; l &#215; F
+This is the number of integer points or samples per complete line including sync and padding. It is calculated with the following formula:
+
+n = Sb / (l &times; F) (Euclidean division)
 
 Where:
   - Sb is the baseband sample rate
-  - St is the TV sample rate
-  - n is the number of (virtual) points
+  - n is the number of integer points
   - l is the number of lines
   - F is the frame rate in frames/second
 
-&#9758; The number of points should be a bit larger than the number of lines up to 240 lines then it can be a bit smaller to give an acceptable image quality.
+Let's take an example with a 625 lines 12 frames/s video signal in a 2500 kS/s baseband.
+  - Sb = 2500 kS/s
+  - l &times; F = 7500
+  - thus n = 333
 
-The example taken in the screenshot is from a 405 lines × 20 FPS video signal:
+<h4>Fractional remainder</h4>
 
-  - source sample rate is 1500 kS/s
-  - line frequency is 8100 Hz
-  - 186 points fit in 8100 × 186 = 1506.6 kS/s
-  - 185 points fit in 8100 × 185 = 1498.5 kS/s
-  - therefore the closest sample rate is 1498.5 kS/s for 185 points per line
+This is the fractional part of Sb &divide; (l &times; F). The demodulator can accomodate a non integral value of points per horizontal line. This value represents the fraction of point needed to complete the integer number of points per line.
 
-<h3>5: Number of virtual points or samples per line</h3>
-
-This is the number of (virtual) points or samples per complete line including sync and padding. Calculation of this number is explained above (4)
-
-<h3>6: BFO PLL lock indicator</h3>
+<h3>4: BFO PLL lock indicator</h3>
 
 &#9888; this is experimental.
 
 When single sideband demodulation is selected (USB, LSB) the BFO is phased locked to the carrier. This indicator turns green if the PLL is locked.
 
-<h3>7: BFO frequency adjustment</h3>
+<h3>5: BFO frequency adjustment</h3>
 
 &#9888; this is experimental.
 
@@ -76,11 +71,11 @@ This allows adjustment of BFO frequency in 1 Hz steps from -2 to +2 kHz. You wil
 
 The BFO base frequency in Hz appears on the right. Actual frequency may change according to PLL locking to the carrier.
 
-<h3>8: Channel power</h3>
+<h3>6: Channel power</h3>
 
 Average total power in dB relative to a &#177;1.0 amplitude signal generated in the pass band.
 
-<h3>9: Modulation</h3>
+<h3>7: Modulation</h3>
 
   - **FM1**: this is Frequency Modulation with approximative demodulation algorithm not using atan2
   - **FM2**: this is Frequency Modulation with less approximative demodulation algorithm still not using atan2
@@ -97,47 +92,45 @@ For FM choose the algorithm that best suits your conditions.
 
 &#9888; USB and LSB modes are experimental and do not show good results for sample rates greater than 1 MS/s. Adjusting the BFO can be picky and unstable.
 
-<h3>10: FM deviation adjustment</h3>
+<h3>8: FM deviation adjustment</h3>
 
 Using this button you can adjust the nominal FM deviation as a percentage of the channel bandwidth that is displayed on the right of the button. When a signal with this deviation is received the demodulated signal is in the range -0.5/+0.5 which is shifted to a 0/1 range video signal.
 
 &#9758; The value is accurate only with the atan2 differential demodulator i.e. FM3. With FM1 and FM2 you will have to adjust it for best image results. You can use the scope as an aid to try to fit the video signal in the 0/1 range.
 
-<h3>11: AM signal range correction factor</h3>
+<h3>9: AM signal range correction factor</h3>
 
 This is a factor in % applied to the detected AM signal range. Because of possible overshoots the detected range may be artificially reduced from the original causing possible errors on the different detection lavels on the video signal. This control lets you correct this. Watch the video signal in the scope tab for fine tuning. It affects only AM signals.
 
-<h3>12: AM signal range offset correction factor</h3>
+<h3>10: AM signal range offset correction factor</h3>
 
 This is a factor in % applied to the signal resulting from the previous correction and that shifts its relative position. Using this control you can position the video signal correctly so that the black level is around 0.3V. Again watch the video signal in the scope tab for fine tuning. It affects only AM signals.
 
-<h3>13: FFT asymmetrical filter toggle</h3>
+<h3>11: FFT asymmetrical filter toggle</h3>
 
 Use this button to enable/disable the FFT asymmetrical filter. Use this filter when you want to optimize the reception of vestigial sideband AM signals.
 
-<h3>14: FFT asymmetrical filter opposite band cutoff frequency</h3>
+<h3>12: FFT asymmetrical filter opposite band cutoff frequency</h3>
 
 For all modulations except LSB this is the lower side band.
 
 This slider lets you adjust the opposite band cutoff frequency of the FFT asymmetrical filter. The value in kHz appears on the left of the slider.
 
-<h3>15: FFT asymmetrical filter in band cutoff frequency</h3>
+<h3>13: FFT asymmetrical filter in band cutoff frequency</h3>
 
 For all modulations except LSB this is the upper side band.
 
 This slider lets you adjust the in band cutoff frequency of the FFT asymmetrical filter. The value in kHz appears on the left of the slider.
 
-If the rational downsampler is engaged (3) this slider also controls the downsampler cutoff frequency.
-
 <h2>B: Video settings</h2>
 
 ![ATV Demodulator plugin GUI Video settings](../../../doc/img/ATVDemod_pluginB.png)
 
-<h3>1: Nominal number of lines</h3>
+<h3>1: Number of lines</h3>
 
 This is the total number of lines including all possible synchronization signals.
 
-Choice is between 640, 625, 525, 480, 405, 360, 343, 240, 180, 120, 90, 60 and 32 lines. The actual number of image lines depends on the synchronization scheme.
+Choice is between 819, 640, 625, 525, 480, 405, 360, 343, 240, 180, 120, 90, 60 and 32 lines. The actual number of image lines depends on the synchronization scheme.
 
 <h3>2: Frames Per Second</h3>
 
@@ -255,27 +248,19 @@ Use this push button to reset values to a standard setting:
 
 <h3>9: Synchronization level</h3>
 
-Use this slider to adjust the trigger level of the synchronization pulse on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 100 mV.
+Use this slider to adjust the trigger level of the synchronization pulse on a 0 to 1V scale. The value in mV appears on the right of the slider. Nominal value: 150 mV.
+
+<h3>10: Line length</h3>
+
+This is the line length in time units. The value depends on the line frequency. For example with 625 lines and 12 FPS The line frequency is 625 &times; 12 = 7500 Hz thus the nominal line time is the inverse of this value that is &#8776;133.33 &mu;s
 
 <h3>10: Black level</h3>
 
-Use this slider to adjust the black level of the video signal on a 0 to 1V scale. This also triggers the end of horizontal synchronization pulse. The value in mV appears on the right of the slider. Nominal value: 310 mV.
-
-<h3>11: Line length</h3>
-
-&#9888; Do not change the default setting (no adjustment or 0) in most cases. This is to be used only with signals that do not have any horizontal synchronization so is highly experimental.
-
-This is the line length in time units. The value appears on the right of the slider. Nominal value depends on the nominal line frequency. For example with 405 lines and 20 FPS. The line frequency is 405 &#215; 20 = 8100 Hz thus the nominal line time is the inverse of this value that is &#8776;123.45 &mu;s
-
-The slider step is set to a sample period in order to ensure that the adjustment is done with the best possible precision. For example at 1500 kS/s sample rate this will be the inverse of this value that is &#8776;666.67 ns. The middle position of the slider sets the nominal value and the slider step appears in the tooltip.
+Use this slider to adjust the black level of the video signal on a 0 to 1V scale. This also triggers the end of horizontal synchronization pulse. The value in mV appears on the right of the slider. Nominal value: 300 mV.
 
 <h3>12: Horizontal synchronization pulse length</h3>
 
-This is the length in time units of a horizontal or line synchronization pulse. The value appears on the right of the slider. Nominal value depends on the nominal line length as described above. The nominal pulse length is derived from the 4.7 &mu;s pulse of a 625 lines standard system with a 64 &mu;s line length. For example with a 405 lines &#215; 20 FPS transmission that has a line length of &#8776;123.45 &mu;s this is (4.7 / 64) &#215; 123.45 &#8776; 9.07 &mu;s. In practice you will adjust it to a slightly smaller value to be able to synchronize.
-
-The slider sets a percentage if the nominal pulse length value as described above from 1 to 100%. Therefore it is always shorter than nominal. The ideal position is usually at 25~30% but you have to try the bet value for your own signal.
-
-This percentage appears in the tooltip.
+This is the length in time units of a horizontal or line synchronization pulse. The value depends on the nominal line length as described above. The pulse length is derived from the 4.7 &mu;s pulse of a 625 lines and 25 FPS standard system with a 64 &mu;s line length. For example with a 625 lines &#times; 12 FPS transmission that has a line length of &#8776;133.33 &mu;s this is (4.7 &divide; 64) &times; 133.33 &#8776; 9.79 &mu;s.
 
 <h2>C: Image</h2>
 
