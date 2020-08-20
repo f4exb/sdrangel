@@ -1,10 +1,6 @@
 ATVDemodSettings:
   description: ATVDemod
   properties:
-    lineTimeFactor:
-      type: integer
-    topTimeFactor:
-      type: integer
     fpsIndex:
       type: integer
     halfImage:
@@ -28,9 +24,6 @@ ATVDemodSettings:
       type: number
       format: float
     blnFFTFiltering:
-      description: boolean
-      type: integer
-    blndecimatorEnable:
       description: boolean
       type: integer
     fltBFOFrequency:
