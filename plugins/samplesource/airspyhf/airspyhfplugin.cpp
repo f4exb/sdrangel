@@ -32,7 +32,7 @@
 const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
     QString("AirspyHF"),
 	QString("AirspyHF Input"),
-	QString("4.15.0"),
+	QString("4.15.1"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

@@ -1,3 +1,15 @@
+sdrangel (4.15.1-1) unstable; urgency=medium
+
+   * ATV Demod: implementation of arbitrary sample rate. Implements #594
+   * ATV Demodulator: implement double bufferin
+   * ATV Modulator: fix crash when m_pointsPerHBar = 0
+   * PlutoSDR input: fixed upgrade to FW 0.32. Fixes #604
+   * PlutoSDR: upgrade to libiio v0.21
+   * AirspyHF: upgrade to libairspyhf 1.6.8
+   * ValueDial(Z): add virtual keyboard support
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 20 Aug 2020 11:59:46 +0200
+
 sdrangel (4.15.0-1) unstable; urgency=medium
 
    * Added FileSink channel plugin. Implements #543.
