@@ -515,21 +515,22 @@ void ATVDemodSink::applySettings(const ATVDemodSettings& settings, bool force)
         unsigned int samplesPerLineNom;
         ATVDemodSettings::getBaseValues(m_channelSampleRate, settings.m_nbLines * settings.m_fps, samplesPerLineNom);
         m_samplesPerLine = samplesPerLineNom;
-		m_samplesPerLineFrac = (float)m_channelSampleRate / (m_settings.m_nbLines * m_settings.m_fps) - m_samplesPerLine;
-		m_ampAverage.resize(m_samplesPerLine * m_settings.m_nbLines * 2); // AGC average in two full images
+		m_samplesPerLineFrac = (float)m_channelSampleRate / (settings.m_nbLines * settings.m_fps) - m_samplesPerLine;
+		m_ampAverage.resize(m_samplesPerLine * settings.m_nbLines * 2); // AGC average in two full images
 
         qDebug() << "ATVDemodSink::applySettings:"
                 << " m_channelSampleRate: " << m_channelSampleRate
                 << " m_samplesPerLine:" << m_samplesPerLine
                 << " m_samplesPerLineFrac:" << m_samplesPerLineFrac;
 
-        applyStandard(m_channelSampleRate, settings.m_atvStd, ATVDemodSettings::getNominalLineTime(settings.m_nbLines, settings.m_fps));
+        applyStandard(m_channelSampleRate, settings.m_atvStd,
+            ATVDemodSettings::getNominalLineTime(settings.m_nbLines, settings.m_fps));
 
         if (m_registeredTVScreen)
         {
             m_registeredTVScreen->resizeTVScreen(
                 m_samplesPerLine - m_numberSamplesPerLineSignals,
-                m_settings.m_nbLines - m_numberOfBlackLines
+                settings.m_nbLines - m_numberOfBlackLines
             );
 			m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
         }
