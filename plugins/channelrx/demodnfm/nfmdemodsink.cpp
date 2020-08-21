@@ -383,7 +383,7 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
     m_discriCompensation = (sampleRate/48000.0f);
     m_discriCompensation *= sqrt(m_discriCompensation);
 
-    m_phaseDiscri.setFMScaling(sampleRate / static_cast<float>(m_settings.m_fmDeviation));
+    m_phaseDiscri.setFMScaling((8.0f*sampleRate) / static_cast<float>(m_settings.m_fmDeviation)); // integrate 4x factor
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/2);
 
