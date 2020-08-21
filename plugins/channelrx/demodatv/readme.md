@@ -55,7 +55,9 @@ Let's take an example with a 625 lines 12 frames/s video signal in a 2500 kS/s b
 
 <h4>Fractional remainder</h4>
 
-This is the fractional part of Sb &divide; (l &times; F). The demodulator can accomodate a non integral value of points per horizontal line. This value represents the fraction of point needed to complete the integer number of points per line.
+This is the fractional part of Sb &divide; (l &times; F). The demodulator can accomodate a non integral value of points per horizontal line. This value represents the fraction of a point needed to complete the real number of points per line.
+
+With the previous example this value is 0.333... rounded to 0.33 in the display. Thus a line contains effectively 333.333... points.
 
 <h3>4: BFO PLL lock indicator</h3>
 
@@ -153,7 +155,7 @@ When the standard chosen matches the standard of transmission the image should a
 
 &#9758; Interleaved mode requires an odd number of lines because the system recognizes the even and odd frames depending on a odd or even number of lines respectively for the half images
 
-&#9758; For non interleaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the following recommendations:
+&#9758; For non interleaved mode all standards are supposed to work for any number of lines. You may experiment with any and see if it fits your purpose. However it will be easier to obtain good or optimal results in general with the recommendations in the next table provided the transmitter is set to the same standard. Official standards are only 819L (Belgian), PAL625 and PAL525. In this case one should stick to their respective number of lines:
 
 <table>
     <tr>
@@ -161,16 +163,20 @@ When the standard chosen matches the standard of transmission the image should a
         <th>standard</th>
     </tr>
     <tr>
+        <td>819</td>
+        <td>819L, ShortI, ShortNI</td>
+    </tr>
+    <tr>
         <td>640</td>
         <td>ShortNI</td>
     </tr>
     <tr>
         <td>625</td>
-        <td>PAL625, PAL525, PAL405</td>
+        <td>PAL625, PAL525, ShortI, ShortNI</td>
     </tr>
     <tr>
         <td>525</td>
-        <td>PAL525, PAL405</td>
+        <td>PAL525, ShortI, ShortNI</td>
     </tr>
     <tr>
         <td>480</td>
@@ -178,7 +184,7 @@ When the standard chosen matches the standard of transmission the image should a
     </tr>
     <tr>
         <td>405</td>
-        <td>PAL405, ShortI, ShortNI</td>
+        <td>ShortI, ShortNI</td>
     </tr>
     <tr>
         <td>360</td>
@@ -206,11 +212,11 @@ When the standard chosen matches the standard of transmission the image should a
     </tr>
     <tr>
         <td>60</td>
-        <td>HSkip</td>
+        <td>ShortNI, HSkip</td>
     </tr>
     <tr>
         <td>32</td>
-        <td>HSkip</td>
+        <td>HSkip, ShortNI with 2 lines loss</td>
     </tr>
 </table>
 
