@@ -316,9 +316,13 @@ def process_hotspots(scanned_hotspots):
         channel = distance[1]
         hotspot = distance[2]
         if hotspot in hotspots: # hotspot is not processed yet
+            channel_frequency = get_hotspot_frequency(channel, hotspot)
             channel['usage'] = 2 # mark channel used on this pass
-            channel['frequency'] = get_hotspot_frequency(channel, hotspot)
-            set_channel_frequency(channel)
+            if channel['frequency'] != channel_frequency: # optimization: do not move to same frequency
+                channel['frequency'] = channel_frequency
+                channel_index = channel['index']
+                set_channel_frequency(channel)
+                log_with_timestamp(f'Moved     channel {channel_index} to frequency {channel_frequency} Hz')
             hotspots.remove(hotspot) # done with this hotspot
     # for remaining hotspots we need to allocate new channels
     for hotspot in hotspots:
@@ -329,7 +333,7 @@ def process_hotspots(scanned_hotspots):
             channel['usage'] = 2 # mark channel used on this pass
             channel['frequency'] = channel_frequency
             set_channel_frequency(channel)
-            log_with_timestamp(f'Channel {channel_index} allocated on frequency {channel_frequency} Hz')
+            log_with_timestamp(f'Allocated channel {channel_index} on frequency {channel_frequency} Hz')
         else:
             fc = hotspot['fc']
             if fc not in UNSERVED_FREQUENCIES:
@@ -343,7 +347,7 @@ def process_hotspots(scanned_hotspots):
             fc = channel['frequency']
             set_channel_mute(channel)
             UNSERVED_FREQUENCIES.clear() # at least one channel is able to serve next time
-            log_with_timestamp(f'Released channel {channel_index} on frequency {fc} Hz')
+            log_with_timestamp(f'Released  channel {channel_index} on frequency {fc} Hz')
         elif channel['usage'] == 2:  # channel used on this pass
             channel['usage'] = 1     # reset usage for next pass
 
