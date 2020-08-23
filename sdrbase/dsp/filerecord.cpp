@@ -108,7 +108,6 @@ void FileRecord::startRecording()
         m_recordOn = true;
         m_recordStart = true;
         m_byteCount = 0;
-        writeHeader();
     }
 }
 
