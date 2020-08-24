@@ -96,6 +96,12 @@ public:
     qint32 getUdpPort();
     void setUdpPort(qint32 udp_port);
 
+    QString* getMulticastAddress();
+    void setMulticastAddress(QString* multicast_address);
+
+    qint32 getMulticastJoin();
+    void setMulticastJoin(qint32 multicast_join);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -174,6 +180,12 @@ private:
 
     qint32 udp_port;
     bool m_udp_port_isSet;
+
+    QString* multicast_address;
+    bool m_multicast_address_isSet;
+
+    qint32 multicast_join;
+    bool m_multicast_join_isSet;
 
     QString* title;
     bool m_title_isSet;
