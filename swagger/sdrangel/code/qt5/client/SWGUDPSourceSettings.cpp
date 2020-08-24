@@ -64,6 +64,10 @@ SWGUDPSourceSettings::SWGUDPSourceSettings() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    multicast_address = nullptr;
+    m_multicast_address_isSet = false;
+    multicast_join = 0;
+    m_multicast_join_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     stream_index = 0;
@@ -122,6 +126,10 @@ SWGUDPSourceSettings::init() {
     m_udp_address_isSet = false;
     udp_port = 0;
     m_udp_port_isSet = false;
+    multicast_address = new QString("");
+    m_multicast_address_isSet = false;
+    multicast_join = 0;
+    m_multicast_join_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     stream_index = 0;
@@ -158,6 +166,10 @@ SWGUDPSourceSettings::cleanup() {
 
     if(udp_address != nullptr) { 
         delete udp_address;
+    }
+
+    if(multicast_address != nullptr) { 
+        delete multicast_address;
     }
 
     if(title != nullptr) { 
@@ -219,6 +231,10 @@ SWGUDPSourceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&multicast_address, pJson["multicastAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&multicast_join, pJson["multicastJoin"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -303,6 +319,12 @@ SWGUDPSourceSettings::asJsonObject() {
     }
     if(m_udp_port_isSet){
         obj->insert("udpPort", QJsonValue(udp_port));
+    }
+    if(multicast_address != nullptr && *multicast_address != QString("")){
+        toJsonValue(QString("multicastAddress"), multicast_address, obj, QString("QString"));
+    }
+    if(m_multicast_join_isSet){
+        obj->insert("multicastJoin", QJsonValue(multicast_join));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -510,6 +532,26 @@ SWGUDPSourceSettings::setUdpPort(qint32 udp_port) {
 }
 
 QString*
+SWGUDPSourceSettings::getMulticastAddress() {
+    return multicast_address;
+}
+void
+SWGUDPSourceSettings::setMulticastAddress(QString* multicast_address) {
+    this->multicast_address = multicast_address;
+    this->m_multicast_address_isSet = true;
+}
+
+qint32
+SWGUDPSourceSettings::getMulticastJoin() {
+    return multicast_join;
+}
+void
+SWGUDPSourceSettings::setMulticastJoin(qint32 multicast_join) {
+    this->multicast_join = multicast_join;
+    this->m_multicast_join_isSet = true;
+}
+
+QString*
 SWGUDPSourceSettings::getTitle() {
     return title;
 }
@@ -636,6 +678,12 @@ SWGUDPSourceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(multicast_address && *multicast_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_multicast_join_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
