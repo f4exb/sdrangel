@@ -383,6 +383,12 @@ void UDPSource::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort")) {
         settings.m_udpPort = response.getUdpSourceSettings()->getUdpPort();
     }
+    if (channelSettingsKeys.contains("multicastAddress")) {
+        settings.m_multicastAddress = *response.getUdpSourceSettings()->getMulticastAddress();
+    }
+    if (channelSettingsKeys.contains("multicastJoin")) {
+        settings.m_multicastJoin = response.getUdpSourceSettings()->getMulticastJoin() != 0;
+    }
     if (channelSettingsKeys.contains("title")) {
         settings.m_title = *response.getUdpSourceSettings()->getTitle();
     }
@@ -443,6 +449,14 @@ void UDPSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     }
 
     response.getUdpSourceSettings()->setUdpPort(settings.m_udpPort);
+
+    if (response.getUdpSourceSettings()->getMulticastAddress()) {
+        *response.getUdpSourceSettings()->getMulticastAddress() = settings.m_multicastAddress;
+    } else {
+        response.getUdpSourceSettings()->setMulticastAddress(new QString(settings.m_multicastAddress));
+    }
+
+    response.getUdpSourceSettings()->setMulticastJoin(settings.m_multicastJoin ? 1 : 0);
 
     if (response.getUdpSourceSettings()->getTitle()) {
         *response.getUdpSourceSettings()->getTitle() = settings.m_title;
@@ -537,6 +551,12 @@ void UDPSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("udpPort") || force) {
         swgUDPSourceSettings->setUdpPort(settings.m_udpPort);
+    }
+    if (channelSettingsKeys.contains("multicastAddress") || force) {
+        swgUDPSourceSettings->setMulticastAddress(new QString(settings.m_multicastAddress));
+    }
+    if (channelSettingsKeys.contains("multicastJoin") || force) {
+        swgUDPSourceSettings->setMulticastJoin(settings.m_multicastJoin ? 1 : 0);
     }
     if (channelSettingsKeys.contains("title") || force) {
         swgUDPSourceSettings->setTitle(new QString(settings.m_title));
