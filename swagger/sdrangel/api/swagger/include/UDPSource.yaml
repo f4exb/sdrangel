@@ -47,6 +47,14 @@ UDPSourceSettings:
     udpPort:
       type: integer
       format: uint16
+    multicastAddress:
+      type: string
+    multicastJoin:
+      type: integer
+      description: >
+        Joim multicast group
+        * 0 - leave group
+        * 1 - join group
     title:
       type: string
     streamIndex:
