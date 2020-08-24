@@ -338,6 +338,8 @@ void UDPSourceSource::applySettings(const UDPSourceSettings& settings, bool forc
             << " m_amModFactor: " << settings.m_amModFactor
             << " m_udpAddressStr: " << settings.m_udpAddress
             << " m_udpPort: " << settings.m_udpPort
+            << " m_multicastAddress: " << settings.m_multicastAddress
+            << " m_multicastJoin: " << settings.m_multicastJoin
             << " m_channelMute: " << settings.m_channelMute
             << " m_gainIn: " << settings.m_gainIn
             << " m_gainOut: " << settings.m_gainOut
@@ -385,9 +387,11 @@ void UDPSourceSource::applySettings(const UDPSourceSettings& settings, bool forc
     }
 
     if ((settings.m_udpAddress != m_settings.m_udpAddress) ||
-        (settings.m_udpPort != m_settings.m_udpPort) || force)
+        (settings.m_udpPort != m_settings.m_udpPort) ||
+        (settings.m_multicastAddress != m_settings.m_multicastAddress) ||
+        (settings.m_multicastJoin != m_settings.m_multicastJoin) || force)
     {
-        m_udpHandler.configureUDPLink(settings.m_udpAddress, settings.m_udpPort);
+        m_udpHandler.configureUDPLink(settings.m_udpAddress, settings.m_udpPort, settings.m_multicastAddress, settings.m_multicastJoin);
     }
 
     if ((settings.m_channelMute != m_settings.m_channelMute) || force)

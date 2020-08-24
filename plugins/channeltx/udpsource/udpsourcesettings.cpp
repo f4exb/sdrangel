@@ -49,6 +49,8 @@ void UDPSourceSettings::resetToDefaults()
     m_squelchEnabled = true;
     m_udpAddress = "127.0.0.1";
     m_udpPort = 9998;
+    m_multicastAddress = "224.0.0.1";
+    m_multicastJoin = false;
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_title = "UDP Sample Source";
     m_streamIndex = 0;
@@ -75,6 +77,8 @@ QByteArray UDPSourceSettings::serialize() const
         s.writeBlob(7, m_spectrumGUI->serialize());
     }
 
+    s.writeString(8, m_multicastAddress);
+    s.writeBool(9, m_multicastJoin);
     s.writeS32(10, roundf(m_gainOut * 10.0));
     s.writeS32(11, m_fmDeviation);
     s.writeReal(12, m_amModFactor);
@@ -139,6 +143,8 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
             m_spectrumGUI->deserialize(bytetmp);
         }
 
+        d.readString(8, &m_multicastAddress, "224.0.0.1");
+        d.readBool(9, &m_multicastJoin, false);
         d.readS32(10, &s32tmp, 10);
         m_gainOut = s32tmp / 10.0;
 
@@ -167,7 +173,7 @@ bool UDPSourceSettings::deserialize(const QByteArray& data)
             m_udpPort = 9998;
         }
 
-        d.readString(20, &m_title, "UDP Sample Sink");
+        d.readString(20, &m_title, "UDP Sample Source");
 
         d.readBool(21, &m_useReverseAPI, false);
         d.readString(22, &m_reverseAPIAddress, "127.0.0.1");

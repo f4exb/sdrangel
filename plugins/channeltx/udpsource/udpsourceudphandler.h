@@ -37,7 +37,8 @@ public:
 
     void start();
     void stop();
-    void configureUDPLink(const QString& address, quint16 port);
+    void configureUDPLink(const QString& address, quint16 port, const QString& multicastAddress, bool multicastJoin);
+    void configureMulticastAddress(const QString& address);
     void resetReadIndex();
     void resizeBuffer(float sampleRate);
 
@@ -71,20 +72,26 @@ private:
     public:
         const QString& getAddress() const { return m_address; }
         quint16 getPort() const { return m_port; }
+        const QString& getMulticastAddress() const { return m_multicastAddress; }
+        bool getMulticastJoin() const { return m_multicastJoin; }
 
-        static MsgUDPAddressAndPort* create(QString address, quint16 port)
+        static MsgUDPAddressAndPort* create(const QString& address, quint16 port, const QString& multicastAddress, bool multicastJoin)
         {
-            return new MsgUDPAddressAndPort(address, port);
+            return new MsgUDPAddressAndPort(address, port, multicastAddress, multicastJoin);
         }
 
     private:
         QString m_address;
         quint16 m_port;
+        QString m_multicastAddress;
+        bool m_multicastJoin;
 
-        MsgUDPAddressAndPort(QString address, quint16 port) :
+        MsgUDPAddressAndPort(const QString& address, quint16 port, const QString& multicastAddress, bool multicastJoin) :
             Message(),
             m_address(address),
-            m_port(port)
+            m_port(port),
+            m_multicastAddress(multicastAddress),
+            m_multicastJoin(multicastJoin)
         { }
     };
 
@@ -92,15 +99,17 @@ private:
 
     void moveData(char *blk);
     void advanceReadPointer(int nbBytes);
-    void applyUDPLink(const QString& address, quint16 port);
+    void applyUDPLink(const QString& address, quint16 port, const QString& multicastAddress, bool muticastJoin);
     bool handleMessage(const Message& message);
 
     QUdpSocket *m_dataSocket;
     QHostAddress m_dataAddress;
     QHostAddress m_remoteAddress;
+    QHostAddress m_multicastAddress;
     quint16 m_dataPort;
     quint16 m_remotePort;
     bool m_dataConnected;
+    bool m_multicast;
     udpBlk_t *m_udpBuf;
     char m_udpDump[m_udpBlockSize + 8192]; // UDP block size + largest possible block
     int m_udpDumpIndex;

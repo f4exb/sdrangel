@@ -56,6 +56,8 @@ struct UDPSourceSettings
 
     QString m_udpAddress;
     uint16_t m_udpPort;
+    QString m_multicastAddress;
+    bool m_multicastJoin;
 
     QString m_title;
     int m_streamIndex;

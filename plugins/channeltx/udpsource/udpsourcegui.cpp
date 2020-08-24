@@ -152,7 +152,7 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_channelMarker.setBandwidth(16000);
     m_channelMarker.setCenterFrequency(0);
     m_channelMarker.setColor(m_settings.m_rgbColor);
-    m_channelMarker.setTitle("UDP Sample Sink");
+    m_channelMarker.setTitle("UDP Sample Source");
     m_channelMarker.setSourceOrSinkStream(false);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setVisible(true); // activate signal on the last setting only
@@ -247,6 +247,8 @@ void UDPSourceGUI::displaySettings()
 
     ui->localUDPAddress->setText(m_settings.m_udpAddress);
     ui->localUDPPort->setText(tr("%1").arg(m_settings.m_udpPort));
+    ui->multicastAddress->setText(m_settings.m_multicastAddress);
+    ui->multicastJoin->setChecked(m_settings.m_multicastJoin);
 
     ui->applyBtn->setEnabled(false);
     ui->applyBtn->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
@@ -316,6 +318,20 @@ void UDPSourceGUI::on_localUDPPort_editingFinished()
     m_settings.m_udpPort = udpPort;
     ui->localUDPPort->setText(tr("%1").arg(m_settings.m_udpPort));
 
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSourceGUI::on_multicastAddress_editingFinished()
+{
+    m_settings.m_multicastAddress = ui->multicastAddress->text();
+    ui->applyBtn->setEnabled(true);
+    ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void UDPSourceGUI::on_multicastJoin_toggled(bool checked)
+{
+    m_settings.m_multicastJoin = checked;
     ui->applyBtn->setEnabled(true);
     ui->applyBtn->setStyleSheet("QPushButton { background-color : green; }");
 }
