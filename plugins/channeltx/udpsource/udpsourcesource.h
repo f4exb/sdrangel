@@ -49,7 +49,6 @@ public:
     int32_t getBufferGauge() const { return m_udpHandler.getBufferGauge(); }
     bool getSquelchOpen() const { return m_squelchOpen; }
 
-    void setSpectrumEnabled(bool enabled);
     void resetReadIndex();
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
@@ -75,7 +74,6 @@ private:
     Complex m_modSample;
 
     BasebandSampleSink* m_spectrumSink;
-    bool m_spectrumEnabled;
     SampleVector m_sampleBuffer;
     int m_spectrumChunkSize;
     int m_spectrumChunkCounter;
