@@ -94,6 +94,8 @@ private slots:
     void on_sampleFormat_currentIndexChanged(int index);
     void on_localUDPAddress_editingFinished();
     void on_localUDPPort_editingFinished();
+    void on_multicastAddress_editingFinished();
+    void on_multicastJoin_toggled(bool checked);
     void on_sampleRate_textEdited(const QString& arg1);
     void on_rfBandwidth_textEdited(const QString& arg1);
     void on_fmDeviation_textEdited(const QString& arg1);

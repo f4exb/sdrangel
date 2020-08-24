@@ -43,7 +43,7 @@
      <x>2</x>
      <y>2</y>
      <width>390</width>
-     <height>141</height>
+     <height>221</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -71,320 +71,210 @@
     <property name="spacing">
      <number>3</number>
     </property>
-    <item row="2" column="2">
-     <layout class="QHBoxLayout" name="SampleRateLayout">
+    <item row="4" column="1">
+     <layout class="QHBoxLayout" name="FMDevLayout">
       <item>
-       <widget class="QLabel" name="sampleRateLabel">
+       <widget class="QLabel" name="fmDevLabel">
+        <property name="text">
+         <string>FMd</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="fmDeviation">
+        <property name="toolTip">
+         <string>FM deviation in Hz</string>
+        </property>
+        <property name="inputMask">
+         <string>00000</string>
+        </property>
+        <property name="text">
+         <string>2500</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="amModPercentLabel">
+        <property name="text">
+         <string>AM%</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="amModPercent">
         <property name="minimumSize">
          <size>
-          <width>36</width>
+          <width>26</width>
           <height>0</height>
          </size>
         </property>
-        <property name="text">
-         <string>SRin</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="sampleRate">
         <property name="toolTip">
-         <string>Input sample rate (S/s)</string>
+         <string>Percentage of AM modulation</string>
         </property>
         <property name="inputMask">
-         <string>0009999</string>
+         <string>000</string>
         </property>
         <property name="text">
-         <string>48000</string>
+         <string>95</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
-    <item row="4" column="2">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
+      <property name="topMargin">
+       <number>2</number>
+      </property>
       <item>
-       <widget class="QLabel" name="label_3">
-        <property name="minimumSize">
+       <widget class="QLabel" name="deltaFrequencyLabel">
+        <property name="maximumSize">
          <size>
-          <width>40</width>
-          <height>0</height>
+          <width>16</width>
+          <height>16777215</height>
          </size>
         </property>
         <property name="text">
-         <string>RFBW</string>
+         <string>Df</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="rfBandwidth">
-        <property name="toolTip">
-         <string>Signal bandwidth (Hz)</string>
-        </property>
-        <property name="inputMask">
-         <string>0009999</string>
-        </property>
-        <property name="text">
-         <string>32000</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="10" column="0">
-     <layout class="QHBoxLayout" name="BufferGaugeLayout">
-      <item>
-       <widget class="QProgressBar" name="bufferGaugeNegative">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>12</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Main buffer read/write positions unbalance: write lags read leads</string>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="textVisible">
-         <bool>false</bool>
-        </property>
-        <property name="invertedAppearance">
-         <bool>true</bool>
-        </property>
-        <property name="format">
-         <string>%v</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="bufferGaugeDot">
-        <property name="maximumSize">
-         <size>
-          <width>2</width>
-          <height>14</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QProgressBar" name="bufferGaugePositive">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>12</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Main buffer read/write positions unbalance: read lags write leads</string>
-        </property>
-        <property name="maximum">
-         <number>50</number>
-        </property>
-        <property name="value">
-         <number>0</number>
-        </property>
-        <property name="textVisible">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="9" column="0">
-     <layout class="QHBoxLayout" name="VUMeterLayout">
-      <item>
-       <widget class="LevelMeterVU" name="volumeMeter" native="true">
+       <widget class="ValueDialZ" name="deltaFrequency" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
         <property name="font">
          <font>
           <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Modulator shift frequency from center in Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="deltaUnits">
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="BrightText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="BrightText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Text">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>118</red>
+              <green>118</green>
+              <blue>117</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="BrightText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="PlaceholderText">
+            <brush brushstyle="NoBrush">
+             <color alpha="128">
+              <red>26</red>
+              <green>26</green>
+              <blue>26</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="font">
+         <font>
           <pointsize>8</pointsize>
          </font>
         </property>
-        <property name="toolTip">
-         <string>Amplitude meter in % of maximum</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="9" column="2">
-     <layout class="QHBoxLayout" name="GainLayout">
-      <item>
-       <widget class="QLabel" name="gainInLabel">
         <property name="text">
-         <string>Gi</string>
+         <string> Hz</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="gainIn">
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="gainInText">
-        <property name="minimumSize">
-         <size>
-          <width>32</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>10.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="gainOutLabel">
-        <property name="text">
-         <string>  Go</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDial" name="gainOut">
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="maximum">
-         <number>100</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="gainOutText">
-        <property name="minimumSize">
-         <size>
-          <width>32</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Linear gain value</string>
-        </property>
-        <property name="text">
-         <string>10.0</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="10" column="2">
-     <layout class="QHBoxLayout" name="bufferControlLayout">
-      <item>
-       <widget class="QLabel" name="bufferRWBalanceText">
-        <property name="minimumSize">
-         <size>
-          <width>22</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>R/W pointers offset from optimal (%)</string>
-        </property>
-        <property name="text">
-         <string>-00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="resetUDPReadIndex">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Reset UDP buffer index</string>
-        </property>
-        <property name="text">
-         <string>R</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ButtonSwitch" name="autoRWBalance">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>22</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Automatic R/W balance compensation</string>
-        </property>
-        <property name="text">
-         <string>G</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -398,7 +288,7 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="2">
+    <item row="6" column="0">
      <layout class="QHBoxLayout" name="SquelchLayout">
       <item>
        <widget class="QLabel" name="squelchLabel">
@@ -497,76 +387,7 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="0">
-     <layout class="QHBoxLayout" name="FMDevLayout">
-      <item>
-       <widget class="QLabel" name="fmDevLabel">
-        <property name="text">
-         <string>FMd</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="fmDeviation">
-        <property name="toolTip">
-         <string>FM deviation in Hz</string>
-        </property>
-        <property name="inputMask">
-         <string>00000</string>
-        </property>
-        <property name="text">
-         <string>2500</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="amModPercentLabel">
-        <property name="text">
-         <string>AM%</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="amModPercent">
-        <property name="minimumSize">
-         <size>
-          <width>26</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Percentage of AM modulation</string>
-        </property>
-        <property name="inputMask">
-         <string>000</string>
-        </property>
-        <property name="text">
-         <string>95</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="applyBtn">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Apply text input and/or samples format</string>
-        </property>
-        <property name="text">
-         <string>Apply</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="2">
+    <item row="0" column="1">
      <layout class="QHBoxLayout" name="ChannelPowerLayout">
       <item>
        <widget class="QLabel" name="inputPower">
@@ -645,143 +466,33 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="0">
-     <layout class="QHBoxLayout" name="DeltaFrequencyLayout">
-      <property name="topMargin">
-       <number>2</number>
-      </property>
+    <item row="4" column="0">
+     <layout class="QHBoxLayout" name="rfbwLayout">
       <item>
-       <widget class="QLabel" name="deltaFrequencyLabel">
-        <property name="maximumSize">
-         <size>
-          <width>16</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Df</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="ValueDialZ" name="deltaFrequency" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+       <widget class="QLabel" name="label_3">
         <property name="minimumSize">
          <size>
-          <width>32</width>
-          <height>16</height>
+          <width>40</width>
+          <height>0</height>
          </size>
-        </property>
-        <property name="font">
-         <font>
-          <family>Liberation Mono</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="focusPolicy">
-         <enum>Qt::StrongFocus</enum>
-        </property>
-        <property name="toolTip">
-         <string>Modulator shift frequency from center in Hz</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="deltaUnits">
-        <property name="palette">
-         <palette>
-          <active>
-           <colorrole role="Text">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>26</red>
-              <green>26</green>
-              <blue>26</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="BrightText">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>255</red>
-              <green>255</green>
-              <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </active>
-          <inactive>
-           <colorrole role="Text">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>26</red>
-              <green>26</green>
-              <blue>26</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="BrightText">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>255</red>
-              <green>255</green>
-              <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </inactive>
-          <disabled>
-           <colorrole role="Text">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>118</red>
-              <green>118</green>
-              <blue>117</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="BrightText">
-            <brush brushstyle="SolidPattern">
-             <color alpha="255">
-              <red>255</red>
-              <green>255</green>
-              <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-          </disabled>
-         </palette>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>8</pointsize>
-         </font>
         </property>
         <property name="text">
-         <string> Hz</string>
+         <string>RFBW</string>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QLineEdit" name="rfBandwidth">
+        <property name="toolTip">
+         <string>Signal bandwidth (Hz)</string>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="inputMask">
+         <string>0009999</string>
         </property>
-       </spacer>
+        <property name="text">
+         <string>32000</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -881,7 +592,37 @@
       </item>
      </layout>
     </item>
-    <item row="4" column="0">
+    <item row="3" column="0">
+     <layout class="QHBoxLayout" name="SampleRateLayout">
+      <item>
+       <widget class="QLabel" name="sampleRateLabel">
+        <property name="minimumSize">
+         <size>
+          <width>36</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>SRin</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="sampleRate">
+        <property name="toolTip">
+         <string>Input sample rate (S/s)</string>
+        </property>
+        <property name="inputMask">
+         <string>0009999</string>
+        </property>
+        <property name="text">
+         <string>48000</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="3" column="1">
      <layout class="QHBoxLayout" name="FormatLayout">
       <item>
        <widget class="QLabel" name="sampleFormatLabel">
@@ -951,14 +692,344 @@
       </item>
      </layout>
     </item>
+    <item row="2" column="1">
+     <layout class="QHBoxLayout" name="MulticastLayout">
+      <item>
+       <widget class="ButtonSwitch" name="multicastJoin">
+        <property name="toolTip">
+         <string>Join or leave multicast group</string>
+        </property>
+        <property name="text">
+         <string>MCAST</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="multicastAddress">
+        <property name="minimumSize">
+         <size>
+          <width>110</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>110</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Multicast group address</string>
+        </property>
+        <property name="inputMask">
+         <string>000.000.000.000</string>
+        </property>
+        <property name="text">
+         <string>224.0.0.1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="6" column="1">
+     <layout class="QHBoxLayout" name="GainLayout">
+      <item>
+       <widget class="QLabel" name="gainInLabel">
+        <property name="text">
+         <string>Gi</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="gainIn">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainInText">
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>10.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainOutLabel">
+        <property name="text">
+         <string>  Go</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="gainOut">
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainOutText">
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Linear gain value</string>
+        </property>
+        <property name="text">
+         <string>10.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="9" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="VUMeterLayout">
+      <item>
+       <widget class="LevelMeterVU" name="volumeMeter" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Amplitude meter in % of maximum</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="10" column="0" colspan="2">
+     <layout class="QHBoxLayout" name="BufferGaugeLayout">
+      <item>
+       <widget class="QProgressBar" name="bufferGaugeNegative">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>12</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Main buffer read/write positions unbalance: write lags read leads</string>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+        <property name="invertedAppearance">
+         <bool>true</bool>
+        </property>
+        <property name="format">
+         <string>%v</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="bufferGaugeDot">
+        <property name="maximumSize">
+         <size>
+          <width>2</width>
+          <height>14</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>.</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QProgressBar" name="bufferGaugePositive">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>12</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Main buffer read/write positions unbalance: read lags write leads</string>
+        </property>
+        <property name="maximum">
+         <number>50</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="textVisible">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="bufferRWBalanceText">
+        <property name="minimumSize">
+         <size>
+          <width>22</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>R/W pointers offset from optimal (%)</string>
+        </property>
+        <property name="text">
+         <string>-00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="resetUDPReadIndex">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Reset UDP buffer index</string>
+        </property>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="autoRWBalance">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>22</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Automatic R/W balance compensation</string>
+        </property>
+        <property name="text">
+         <string>G</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="applyBtn">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Apply text input and/or samples format</string>
+        </property>
+        <property name="text">
+         <string>Apply</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="spectrumBox" native="true">
    <property name="geometry">
     <rect>
-     <x>15</x>
-     <y>160</y>
-     <width>321</width>
+     <x>0</x>
+     <y>230</y>
+     <width>391</width>
      <height>156</height>
     </rect>
    </property>
