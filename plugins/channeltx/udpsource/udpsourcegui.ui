@@ -193,15 +193,6 @@
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
-            <brush brushstyle="NoBrush">
-             <color alpha="128">
-              <red>26</red>
-              <green>26</green>
-              <blue>26</blue>
-             </color>
-            </brush>
-           </colorrole>
           </active>
           <inactive>
            <colorrole role="Text">
@@ -222,15 +213,6 @@
              </color>
             </brush>
            </colorrole>
-           <colorrole role="PlaceholderText">
-            <brush brushstyle="NoBrush">
-             <color alpha="128">
-              <red>26</red>
-              <green>26</green>
-              <blue>26</blue>
-             </color>
-            </brush>
-           </colorrole>
           </inactive>
           <disabled>
            <colorrole role="Text">
@@ -248,15 +230,6 @@
               <red>255</red>
               <green>255</green>
               <blue>255</blue>
-             </color>
-            </brush>
-           </colorrole>
-           <colorrole role="PlaceholderText">
-            <brush brushstyle="NoBrush">
-             <color alpha="128">
-              <red>26</red>
-              <green>26</green>
-              <blue>26</blue>
              </color>
             </brush>
            </colorrole>
