@@ -124,20 +124,24 @@ int RollupWidget::arrangeRollups()
 	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
 
-		if ((r != nullptr) && !r->isHidden() && isRollupChild(r))
+		if ((r != nullptr) && isRollupChild(r))
 		{
             pos += fm.height() + 2;
-            r->move(2, pos + 3);
-            int h = 0;
 
-            if (r->hasHeightForWidth()) {
-                h = r->heightForWidth(width() - 4);
-            } else {
-                h = r->sizeHint().height();
+            if (!r->isHidden())
+            {
+                r->move(2, pos + 3);
+                int h = 0;
+
+                if (r->hasHeightForWidth()) {
+                    h = r->heightForWidth(width() - 4);
+                } else {
+                    h = r->sizeHint().height();
+                }
+
+                r->resize(width() - 4, h);
+                pos += r->height() + 5;
             }
-
-            r->resize(width() - 4, h);
-            pos += r->height() + 5;
 		}
 	}
 
