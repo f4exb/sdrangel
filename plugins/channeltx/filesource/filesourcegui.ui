@@ -641,7 +641,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>60</width>
+          <width>90</width>
           <height>0</height>
          </size>
         </property>
@@ -649,7 +649,7 @@
          <string>Total record time</string>
         </property>
         <property name="text">
-         <string>00:00:00</string>
+         <string>00:00:00.000</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -128,7 +128,7 @@ public:
 
     uint32_t getFileSampleRate() const { return m_source.getFileSampleRate(); }
     quint64 getStartingTimeStamp() const { return m_source.getStartingTimeStamp(); }
-    quint64 getRecordLength() const { return m_source.getRecordLength(); }
+    quint64 getRecordLengthMuSec() const { return m_source.getRecordLengthMuSec(); }
     quint32 getFileSampleSize() const { return m_source.getFileSampleSize(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) const

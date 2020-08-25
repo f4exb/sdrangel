@@ -117,7 +117,7 @@ bool FileSourceGUI::handleMessage(const Message& message)
 		m_fileSampleRate = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getSampleRate();
 		m_fileSampleSize = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getSampleSize();
 		m_startingTimeStamp = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getStartingTimeStamp();
-		m_recordLength = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getRecordLength();
+		m_recordLengthMuSec = ((FileSourceReport::MsgReportFileSourceStreamData&)message).getRecordLengthMuSec();
 		updateWithStreamData();
 		return true;
 	}
@@ -188,7 +188,7 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
         m_shiftFrequencyFactor(0.0),
         m_fileSampleRate(0),
         m_fileSampleSize(0),
-        m_recordLength(0),
+        m_recordLengthMuSec(0),
         m_startingTimeStamp(0),
         m_samplesCount(0),
         m_acquisition(false),
@@ -277,8 +277,8 @@ void FileSourceGUI::updateWithStreamData()
 	ui->sampleRateText->setText(tr("%1k").arg((float) m_fileSampleRate / 1000));
 	ui->sampleSizeText->setText(tr("%1b").arg(m_fileSampleSize));
 	QTime recordLength(0, 0, 0, 0);
-	recordLength = recordLength.addSecs(m_recordLength);
-	QString s_time = recordLength.toString("HH:mm:ss");
+	recordLength = recordLength.addMSecs(m_recordLengthMuSec/1000UL);
+	QString s_time = recordLength.toString("HH:mm:ss.zzz");
 	ui->recordLengthText->setText(s_time);
 	updateWithStreamTime();
 }
@@ -309,7 +309,7 @@ void FileSourceGUI::updateWithStreamTime()
 
 	if (!m_enableNavTime)
 	{
-		float posRatio = (float) t_sec / (float) m_recordLength;
+		float posRatio = (float) (t_sec*1000000L + t_msec*1000L) / (float) m_recordLengthMuSec;
 		ui->navTime->setValue((int) (posRatio * 1000.0));
 	}
 }

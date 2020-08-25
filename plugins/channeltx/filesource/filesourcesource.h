@@ -78,7 +78,7 @@ public:
 
     uint32_t getFileSampleRate() const { return m_fileSampleRate; }
     quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
-    quint64 getRecordLength() const { return m_recordLength; }
+    quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
     quint32 getFileSampleSize() const { return m_sampleSize; }
 
 private:
@@ -105,7 +105,7 @@ private:
     quint64 m_samplesCount;
     uint32_t m_sampleRate;
     uint32_t m_deviceSampleRate;
-    quint64 m_recordLength; //!< record length in seconds computed from file size
+    quint64 m_recordLengthMuSec; //!< record length in microseconds computed from file size
     quint64 m_startingTimeStamp;
 	QTimer m_masterTimer;
     bool m_running;

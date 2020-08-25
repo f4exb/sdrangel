@@ -52,15 +52,15 @@ public:
 		quint32 getSampleSize() const { return m_sampleSize; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
         quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
-        quint64 getRecordLength() const { return m_recordLength; }
+        quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
 
 		static MsgReportFileSourceStreamData* create(int sampleRate,
 		        quint32 sampleSize,
 				quint64 centerFrequency,
                 quint64 startingTimeStamp,
-                quint64 recordLength)
+                quint64 recordLengthMuSec)
 		{
-			return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLength);
+			return new MsgReportFileSourceStreamData(sampleRate, sampleSize, centerFrequency, startingTimeStamp, recordLengthMuSec);
 		}
 
 	protected:
@@ -68,19 +68,19 @@ public:
 		quint32 m_sampleSize;
 		quint64 m_centerFrequency;
         quint64 m_startingTimeStamp;
-        quint64 m_recordLength;
+        quint64 m_recordLengthMuSec;
 
 		MsgReportFileSourceStreamData(int sampleRate,
 		        quint32 sampleSize,
 				quint64 centerFrequency,
                 quint64 startingTimeStamp,
-                quint64 recordLength) :
+                quint64 recordLengthMuSec) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_sampleSize(sampleSize),
 			m_centerFrequency(centerFrequency),
 			m_startingTimeStamp(startingTimeStamp),
-			m_recordLength(recordLength)
+			m_recordLengthMuSec(recordLengthMuSec)
 		{ }
 	};
 

@@ -66,7 +66,7 @@ private:
     QString m_fileName;
     int m_fileSampleRate;
     quint32 m_fileSampleSize;
-    quint64 m_recordLength;
+    quint64 m_recordLengthMuSec;
     quint64 m_startingTimeStamp;
     quint64 m_samplesCount;
     bool m_acquisition;
