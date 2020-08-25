@@ -30,15 +30,21 @@ Use this button to switch off the RF on the channel. The background of the butto
 
 <h3>5: UDP address and port</h3>
 
-These parameters are set with the basic channel settings dialog. See: [here](https://github.com/f4exb/sdrangel/blob/master/sdrgui/readme.md#6-channels)
+Enter the network interface address and listening port. The display is in the format `address:data port` 
 
-The display is in the format `address:data port` 
+<h3>6: Join multicast group</h3>
 
-<h3>6: Input sample rate</h3>
+Toggle join/leave multicast group specified by the address next (7). When multicast group is joined the listening address is automatically switched to all addresses (`0.0.0.0`)
+
+<h3>7: Multicast group address</h3>
+
+This is the multicast group address.
+
+<h3>8: Input sample rate</h3>
 
 Sample rate in samples per second of the signal that is received on UDP. The actual byte rate depends on the type of sample which corresponds to a number of bytes per sample.
 
-<h3>7: Type of samples</h3>
+<h3>9: Type of samples</h3>
 
 Combo box to specify the type of samples that are received and sent in the channel.
 
@@ -48,45 +54,27 @@ Combo box to specify the type of samples that are received and sent in the chann
   - `S16LE USB`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a USB modulated signal. Stereo input channels are mixed before modulation.
   - `S16LE AM`: Takes a 1 (mono) or 2 (stereo) channels AF signal and produces a AM modulated signal. Stereo input channels are mixed before modulation.
 
-<h3>8: Mono/Stereo input</h3>
+<h3>10: Mono/Stereo input</h3>
 
 This toggles switches between 1 channel (mono) and 2 channels (stereo) input samples format.
   
-<h3>9: Output signal bandwidth</h3>
+<h3>11: Output signal bandwidth</h3>
 
 The signal is bandpass filtered to this bandwidth (zero frequency centered) before being sent out in the channel. In SSB modes only half of the filter is used (LSB: lower, USB: upper). Thus to send a signal with 3000 Hz bandwidth a bandwidth of 6000 Hz must be selected. In addition in SSB modes a 300 Hz highpass filter is applied.
 
-<h3>10: FM deviation</h3>
+<h3>12: FM deviation</h3>
 
 This is the maximum FM deviation in Hz for a +/- 1.0 amplitude modulating signal. Therefore it is active only for `NFM` types of sample formats.
 
-<h3>11: AM percentage modulation</h3>
+<h3>13: AM percentage modulation</h3>
 
 this is the AM percentage modulation when a +/- 1.0 amplitude modulating signal is applied. Therefore it is active only for `S16LE AM Mono` sample format.
 
-<h3>12: Apply (validation) button</h3>
-
-The changes in the following items only become effective when this button is pressed:
-
-  - Samples format (5)
-  - Output sample rate (6)
-  - Address (7)
-  - Data port (8)
-  - RF bandwidth (9)
-  - FM deviation (10)
-  - AM percentage (11)
-
-When any item of these items is changed the button is lit in green until it is pressed. 
-
-<h3>13: Squelch</h3>
+<h3>14: Squelch</h3>
 
 The slider sets the squelch power threshold based on channel input power (2). At the right of the slider the value in dB is displayed. 
 
 The button sets the delay after which a signal constantly above the squelch threshold effectively opens the squelch. The same delay is used for squelch release. The delay in milliseconds is displayed at the right of the button. 
-
-<h3>14: signal amplitude percentage of maximum</h3>
-
-The gain (15) should be adjusted so that the peak amplitude (small red vertical bar) never exceeds 100%. Above 100% the signal is clipper which results in distortion. 
 
 <h3>15: Input and output Gains</h3>
 
@@ -96,7 +84,11 @@ The input gain is applied to samples received from UDP. The gain value appears a
 
 The output gain is applied to the samples just before they are filtered and sent int the channel. The gain value appears at the right of the button.
 
-<h3>16: Input buffer gauge</h3>
+<h3>16: Volume gauge</h3>
+
+This is the amplitude volume gauge (VU meter) and should not exceed 100%
+
+<h3>17: Input buffer gauge</h3>
 
 This gauge shows the percentage of deviation from a R/W pointer distance of half the buffer size. Ideally this should stay in the middle and no bar should appear. The percentage value appears at the right of the gauge and can vary from -50 to +50 (0 is the middle).
 
@@ -104,15 +96,30 @@ There is an automatic correction to try to maintain the half buffer distance bet
 
 The buffer consists in 512 bytes frames so that a normalized UDP block can be placed in one frame. Half the number of frames is calculated as the sample rate divided by 375. This results in a fixed average delay 0f 341 ms for sample rates of 48 kS/s and above. 
 
-<h3>17: Reset input buffer R/W pointers</h3>
+<h3>18: Reset input buffer R/W pointers</h3>
 
 Resets the read and write pointers at their ideal position that is read at start and write at the middle of the buffer. This may cause occasional mess-up with the modulating signal until the read pointer reaches the middle of the buffer.
 
-<h3>18: Automatic R/W balance toggle</h3>
+<h3>19: Automatic R/W balance toggle</h3>
 
 This button enables or disables the automatic read / write pointers balance compensation so that they are always about half a buffer apart. The compensation adjust the sample rate around nominal input sample rate and can cause some tone wiggle on very narrowband modulations. Therefore you can switch it off at the expense of a small buffer section overlap or drop. With an input from the DSD demodulator it can be better to switch it off since the input samples flow is discontinuous and the automatic compensation may not have the time to adjust.
 
-<h3>19: Spectrum display</h3>
+<h3>20: Apply (validation) button</h3>
+
+The changes in the following items only become effective when this button is pressed:
+
+  - Interface address and port (5)
+  - Multicast join/leave (6)
+  - Multicast address (7)
+  - Output sample rate (8)
+  - Samples format (9)
+  - RF bandwidth (11)
+  - FM deviation (12)
+  - AM percentage (13)
+
+When any item of these items is changed the button is lit in green until it is pressed. 
+
+<h3>21: Spectrum display</h3>
 
 This is the spectrum display of the channel signal before filtering. Please refer to the Spectrum display description for details. 
 
