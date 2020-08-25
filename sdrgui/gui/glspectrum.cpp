@@ -164,8 +164,6 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 
 GLSpectrum::~GLSpectrum()
 {
-	cleanup();
-
 	QMutexLocker mutexLocker(&m_mutex);
 
 	if (m_waterfallBuffer)

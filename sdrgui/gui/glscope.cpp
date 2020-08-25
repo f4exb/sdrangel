@@ -90,7 +90,6 @@ GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
 
 GLScope::~GLScope()
 {
-    cleanup();
 }
 
 void GLScope::setDisplayGridIntensity(int intensity)
