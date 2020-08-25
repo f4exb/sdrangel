@@ -1,3 +1,13 @@
+sdrangel ((4.15.2-1) unstable; urgency=medium
+
+   * UDP Source: added ability to join multicast group. Implements #610
+   * Fixed SDRIQ file recorder adding header multiple times
+   * RollupWidget: fixed collapse section header not showing up. Fixes #608
+   * NFM demod: correct discri setFMScaling when applying audio sample rate 
+   * GLScope and GLSpectrum: removed useless calls to cleanup() in destructor
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 25 Aug 2020 19:02:34 +0200
+
 sdrangel (4.15.1-1) unstable; urgency=medium
 
    * ATV Demod: implementation of arbitrary sample rate. Implements #594
