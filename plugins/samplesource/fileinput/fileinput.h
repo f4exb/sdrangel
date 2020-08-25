@@ -206,7 +206,7 @@ public:
 		quint32 getSampleSize() const { return m_sampleSize; }
 		quint64 getCenterFrequency() const { return m_centerFrequency; }
         quint64 getStartingTimeStamp() const { return m_startingTimeStamp; }
-        quint64 getRecordLength() const { return m_recordLength; }
+        quint64 getRecordLengthMuSec() const { return m_recordLengthMuSec; }
 
 		static MsgReportFileInputStreamData* create(int sampleRate,
 		        quint32 sampleSize,
@@ -222,19 +222,19 @@ public:
 		quint32 m_sampleSize;
 		quint64 m_centerFrequency;
         quint64 m_startingTimeStamp;
-        quint64 m_recordLength;
+        quint64 m_recordLengthMuSec;
 
 		MsgReportFileInputStreamData(int sampleRate,
 		        quint32 sampleSize,
 				quint64 centerFrequency,
                 quint64 startingTimeStamp,
-                quint64 recordLength) :
+                quint64 recordLengthMuSec) :
 			Message(),
 			m_sampleRate(sampleRate),
 			m_sampleSize(sampleSize),
 			m_centerFrequency(centerFrequency),
 			m_startingTimeStamp(startingTimeStamp),
-			m_recordLength(recordLength)
+			m_recordLengthMuSec(recordLengthMuSec)
 		{ }
 	};
 
@@ -342,7 +342,7 @@ public:
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
-    quint64 m_recordLength; //!< record length in seconds computed from file size
+    quint64 m_recordLengthMuSec; //!< record length in microseconds computed from file size
     quint64 m_startingTimeStamp;
 	QTimer m_masterTimer;
     QNetworkAccessManager *m_networkManager;

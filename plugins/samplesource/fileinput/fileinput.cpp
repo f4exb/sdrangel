@@ -58,7 +58,7 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 	m_sampleRate(48000),
 	m_sampleSize(0),
 	m_centerFrequency(435000000),
-	m_recordLength(0),
+	m_recordLengthMuSec(0),
     m_startingTimeStamp(0)
 {
     m_deviceAPI->setNbSourceStreams(1);
@@ -114,12 +114,12 @@ void FileInput::openFileStream()
 	    if (crcOK)
 	    {
 	        qDebug("FileInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
-	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
+	        m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
 	    }
 	    else
 	    {
 	        qCritical("FileInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
-	        m_recordLength = 0;
+	        m_recordLengthMuSec = 0;
 	    }
 
 		if (getMessageQueueToGUI())
@@ -130,12 +130,12 @@ void FileInput::openFileStream()
 	}
 	else
 	{
-		m_recordLength = 0;
+		m_recordLengthMuSec = 0;
 	}
 
 	qDebug() << "FileInput::openFileStream: " << m_fileName.toStdString().c_str()
 			<< " fileSize: " << fileSize << " bytes"
-			<< " length: " << m_recordLength << " seconds"
+			<< " length: " << m_recordLengthMuSec << " microseconds"
 			<< " sample rate: " << m_sampleRate << " S/s"
 			<< " center frequency: " << m_centerFrequency << " Hz"
 			<< " sample size: " << m_sampleSize << " bits";
@@ -148,11 +148,11 @@ void FileInput::openFileStream()
 	            m_sampleSize,
 	            m_centerFrequency,
 	            m_startingTimeStamp,
-	            m_recordLength); // file stream data
+	            m_recordLengthMuSec); // file stream data
 	    getMessageQueueToGUI()->push(report);
 	}
 
-	if (m_recordLength == 0) {
+	if (m_recordLengthMuSec == 0) {
 	    m_ifstream.close();
 	}
 }
@@ -163,7 +163,8 @@ void FileInput::seekFileStream(int seekMillis)
 
 	if ((m_ifstream.is_open()) && m_fileInputWorker && !m_fileInputWorker->isRunning())
 	{
-        quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_sampleRate;
+        quint64 seekPoint = ((m_recordLengthMuSec * seekMillis) / 1000) * m_sampleRate;
+        seekPoint /= 1000000UL;
 		m_fileInputWorker->setSamplesCount(seekPoint);
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileRecord::Header)
 		m_ifstream.clear();
@@ -612,8 +613,8 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     response.getFileInputReport()->setAbsoluteTime(new QString(dt.toString("yyyy-MM-dd HH:mm:ss.zzz")));
 
     QTime recordLength(0, 0, 0, 0);
-    recordLength = recordLength.addSecs(m_recordLength);
-    response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss")));
+    recordLength = recordLength.addMSecs(m_recordLengthMuSec / 1000UL);
+    response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss.zzz")));
 
     response.getFileInputReport()->setFileName(new QString(m_fileName));
     response.getFileInputReport()->setSampleRate(m_sampleRate);
