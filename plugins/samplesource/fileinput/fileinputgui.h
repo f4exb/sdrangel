@@ -66,7 +66,7 @@ private:
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
-    quint64 m_recordLength;
+    quint64 m_recordLengthMuSec;
     quint64 m_startingTimeStamp;
     quint64 m_samplesCount;
 	std::size_t m_tickCount;

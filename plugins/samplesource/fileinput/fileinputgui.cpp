@@ -49,7 +49,7 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_recordLength(0),
+	m_recordLengthMuSec(0),
 	m_startingTimeStamp(0),
 	m_samplesCount(0),
 	m_tickCount(0),
@@ -184,7 +184,7 @@ bool FileInputGUI::handleMessage(const Message& message)
 		m_sampleSize = ((FileInput::MsgReportFileInputStreamData&)message).getSampleSize();
 		m_centerFrequency = ((FileInput::MsgReportFileInputStreamData&)message).getCenterFrequency();
 		m_startingTimeStamp = ((FileInput::MsgReportFileInputStreamData&)message).getStartingTimeStamp();
-		m_recordLength = ((FileInput::MsgReportFileInputStreamData&)message).getRecordLength();
+		m_recordLengthMuSec = ((FileInput::MsgReportFileInputStreamData&)message).getRecordLengthMuSec();
 		updateWithStreamData();
 		return true;
 	}
@@ -362,8 +362,8 @@ void FileInputGUI::updateWithStreamData()
 	ui->sampleSizeText->setText(tr("%1b").arg(m_sampleSize));
 	ui->play->setEnabled(m_acquisition);
 	QTime recordLength(0, 0, 0, 0);
-	recordLength = recordLength.addSecs(m_recordLength);
-	QString s_time = recordLength.toString("HH:mm:ss");
+	recordLength = recordLength.addMSecs(m_recordLengthMuSec/1000UL);
+	QString s_time = recordLength.toString("HH:mm:ss.zzz");
 	ui->recordLengthText->setText(s_time);
 	updateWithStreamTime();
 }
@@ -373,7 +373,8 @@ void FileInputGUI::updateWithStreamTime()
     qint64 t_sec = 0;
     qint64 t_msec = 0;
 
-	if (m_sampleRate > 0){
+	if (m_sampleRate > 0) 
+	{
 		t_sec = m_samplesCount / m_sampleRate;
         t_msec = (m_samplesCount - (t_sec * m_sampleRate)) * 1000LL / m_sampleRate;
 	}
@@ -393,7 +394,7 @@ void FileInputGUI::updateWithStreamTime()
 
 	if (!m_enableNavTime)
 	{
-		float posRatio = (float) t_sec / (float) m_recordLength;
+		float posRatio = (float) (t_sec*1000000L + t_msec*1000L) / (float) m_recordLengthMuSec;
 		ui->navTimeSlider->setValue((int) (posRatio * 1000.0));
 	}
 }
