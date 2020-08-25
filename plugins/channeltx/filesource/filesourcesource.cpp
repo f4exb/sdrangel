@@ -43,7 +43,7 @@ FileSourceSource::FileSourceSource() :
     m_samplesCount(0),
 	m_sampleRate(0),
     m_deviceSampleRate(0),
-	m_recordLength(0),
+	m_recordLengthMuSec(0),
     m_startingTimeStamp(0),
     m_running(false),
     m_guiMessageQueue(nullptr)
@@ -187,12 +187,12 @@ void FileSourceSource::openFileStream(const QString& fileName)
 	    if (crcOK)
 	    {
 	        qDebug("FileSourceSource::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
-	        m_recordLength = (fileSize - sizeof(FileRecord::Header)) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
+	        m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
 	    }
 	    else
 	    {
 	        qCritical("FileSourceSource::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
-	        m_recordLength = 0;
+	        m_recordLengthMuSec = 0;
 	    }
 
 		if (getMessageQueueToGUI())
@@ -203,12 +203,12 @@ void FileSourceSource::openFileStream(const QString& fileName)
 	}
 	else
 	{
-		m_recordLength = 0;
+		m_recordLengthMuSec = 0;
 	}
 
 	qDebug() << "FileSourceSource::openFileStream: " << m_fileName.toStdString().c_str()
 			<< " fileSize: " << fileSize << " bytes"
-			<< " length: " << m_recordLength << " seconds"
+			<< " length: " << m_recordLengthMuSec << " microseconds"
 			<< " sample rate: " << m_fileSampleRate << " S/s"
 			<< " center frequency: " << m_centerFrequency << " Hz"
 			<< " sample size: " << m_sampleSize << " bits"
@@ -220,11 +220,11 @@ void FileSourceSource::openFileStream(const QString& fileName)
 	            m_sampleSize,
 	            m_centerFrequency,
 	            m_startingTimeStamp,
-	            m_recordLength); // file stream data
+	            m_recordLengthMuSec); // file stream data
 	    getMessageQueueToGUI()->push(report);
 	}
 
-	if (m_recordLength == 0) {
+	if (m_recordLengthMuSec == 0) {
 	    m_ifstream.close();
 	}
 }
@@ -233,7 +233,8 @@ void FileSourceSource::seekFileStream(int seekMillis)
 {
 	if ((m_ifstream.is_open()) && !m_running)
 	{
-        quint64 seekPoint = ((m_recordLength * seekMillis) / 1000) * m_fileSampleRate;
+        quint64 seekPoint = ((m_recordLengthMuSec * seekMillis) / 1000) * m_fileSampleRate;
+        seekPoint /= 1000000UL;
         m_samplesCount = seekPoint;
         seekPoint *= (m_sampleSize == 24 ? 8 : 4); // + sizeof(FileRecord::Header)
 		m_ifstream.clear();

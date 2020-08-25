@@ -464,7 +464,7 @@ void FileSource::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     quint64 samplesCount = m_basebandSource->getSamplesCount();
     uint32_t fileSampleRate = m_basebandSource->getFileSampleRate();
     quint64 startingTimeStamp = m_basebandSource->getStartingTimeStamp();
-    quint64 fileRecordLength = m_basebandSource->getRecordLength();
+    quint64 fileRecordLength = m_basebandSource->getRecordLengthMuSec() / 1000000UL;
     quint32 fileSampleSize = m_basebandSource->getFileSampleSize();
 
     if (fileSampleRate > 0)
