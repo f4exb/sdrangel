@@ -1,4 +1,4 @@
-sdrangel ((4.15.2-1) unstable; urgency=medium
+sdrangel (4.15.2-1) unstable; urgency=medium
 
    * UDP Source: added ability to join multicast group. Implements #610
    * Fixed SDRIQ file recorder adding header multiple times
