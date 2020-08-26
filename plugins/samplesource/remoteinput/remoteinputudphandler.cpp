@@ -27,6 +27,7 @@
 #include "remoteinput.h"
 
 MESSAGE_CLASS_DEFINITION(RemoteInputUDPHandler::MsgReportSampleRateChange, Message)
+MESSAGE_CLASS_DEFINITION(RemoteInputUDPHandler::MsgUDPAddressAndPort, Message)
 
 RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -38,6 +39,8 @@ RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceA
 	m_dataAddress(QHostAddress::LocalHost),
 	m_remoteAddress(QHostAddress::LocalHost),
 	m_dataPort(9090),
+    m_multicastAddress(QStringLiteral("224.0.0.1")),
+    m_multicast(false),
 	m_dataConnected(false),
 	m_udpBuf(0),
 	m_udpReadBytes(0),
@@ -68,6 +71,8 @@ RemoteInputUDPHandler::RemoteInputUDPHandler(SampleSinkFifo *sampleFifo, DeviceA
     m_throttlems = m_masterTimer.interval();
 #endif
     m_rateDivider = 1000 / m_throttlems;
+
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()));
 }
 
 RemoteInputUDPHandler::~RemoteInputUDPHandler()
@@ -90,24 +95,31 @@ void RemoteInputUDPHandler::start()
 	    return;
 	}
 
-	if (!m_dataSocket)
-	{
+	if (!m_dataSocket) {
 		m_dataSocket = new QUdpSocket(this);
 	}
 
     if (!m_dataConnected)
 	{
-        connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead())); //, Qt::QueuedConnection);
-
-        if (m_dataSocket->bind(m_dataAddress, m_dataPort))
+        if (m_dataSocket->bind(m_multicast ? QHostAddress::AnyIPv4 : m_dataAddress, m_dataPort, QUdpSocket::ShareAddress))
 		{
 			qDebug("RemoteInputUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
+
+            if (m_multicast)
+            {
+                if (m_dataSocket->joinMulticastGroup(m_multicastAddress)) {
+                    qDebug("RemoteInputUDPHandler::start: joined multicast group %s", qPrintable(m_multicastAddress.toString()));
+                } else {
+                    qDebug("RemoteInputUDPHandler::start: failed joining multicast group %s", qPrintable(m_multicastAddress.toString()));
+                }
+            }
+
+            connect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead())); //, Qt::QueuedConnection);
 			m_dataConnected = true;
 		}
 		else
 		{
 			qWarning("RemoteInputUDPHandler::start: cannot bind data port %d", m_dataPort);
-	        disconnect(m_dataSocket, SIGNAL(readyRead()), this, SLOT(dataReadyRead()));
 			m_dataConnected = false;
 		}
 	}
@@ -143,16 +155,36 @@ void RemoteInputUDPHandler::stop()
 	m_running = false;
 }
 
-void RemoteInputUDPHandler::configureUDPLink(const QString& address, quint16 port)
+void RemoteInputUDPHandler::configureUDPLink(const QString& address, quint16 port, const QString& multicastAddress, bool multicastJoin)
 {
-	qDebug("RemoteInputUDPHandler::configureUDPLink: %s:%d", address.toStdString().c_str(), port);
+    Message* msg = MsgUDPAddressAndPort::create(address, port, multicastAddress, multicastJoin);
+    m_inputMessageQueue.push(msg);
+}
+
+void RemoteInputUDPHandler::applyUDPLink(const QString& address, quint16 port, const QString& multicastAddress, bool multicastJoin)
+{
+    qDebug() << "RemoteInputUDPHandler::applyUDPLink: "
+        << " address: " << address
+        << " port: " << port
+        << " multicastAddress: " << multicastAddress
+        << " multicastJoin: " << multicastJoin;    
+
 	bool addressOK = m_dataAddress.setAddress(address);
 
 	if (!addressOK)
 	{
-		qWarning("RemoteInputUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
+		qWarning("RemoteInputUDPHandler::applyUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
 		m_dataAddress = QHostAddress::LocalHost;
 	}
+
+    m_multicast = multicastJoin;
+    addressOK = m_multicastAddress.setAddress(multicastAddress);
+
+    if (!addressOK)
+    {
+        qWarning("RemoteInputUDPHandler::applyUDPLink: invalid multicast address %s. disabling multicast.", address.toStdString().c_str());
+        m_multicast = false;
+    }
 
 	m_dataPort = port;
 	stop();
@@ -388,4 +420,30 @@ void RemoteInputUDPHandler::tick()
 	            m_messageQueueToGUI->push(report);
 		}
 	}
+}
+
+void RemoteInputUDPHandler::handleMessages()
+{
+    Message* message;
+
+    while ((message = m_inputMessageQueue.pop()) != 0)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
+}
+
+bool RemoteInputUDPHandler::handleMessage(const Message& cmd)
+{
+    if (RemoteInputUDPHandler::MsgUDPAddressAndPort::match(cmd))
+    {
+        RemoteInputUDPHandler::MsgUDPAddressAndPort& notif = (RemoteInputUDPHandler::MsgUDPAddressAndPort&) cmd;
+        applyUDPLink(notif.getAddress(), notif.getPort(), notif.getMulticastAddress(), notif.getMulticastJoin());
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }

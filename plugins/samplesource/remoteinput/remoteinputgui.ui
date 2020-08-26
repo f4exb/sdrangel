@@ -686,6 +686,9 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Set API link</string>
+       </property>
        <property name="text">
         <string>Set</string>
        </property>
@@ -723,7 +726,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Local data connection IPv4 address</string>
+        <string>Local network interface IPv4 address</string>
        </property>
        <property name="inputMask">
         <string>000.000.000.000</string>
@@ -758,7 +761,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Local data connection port</string>
+        <string>Local data port</string>
        </property>
        <property name="inputMask">
         <string>00000</string>
@@ -792,10 +795,65 @@
          <height>16777215</height>
         </size>
        </property>
+       <property name="toolTip">
+        <string>Set data link</string>
+       </property>
        <property name="text">
         <string>Set</string>
        </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="mcastLayout">
+     <item>
+      <widget class="ButtonSwitch" name="multicastJoin">
+       <property name="toolTip">
+        <string>Join or leave multicast group</string>
+       </property>
+       <property name="text">
+        <string>Mcast</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="multicastAddress">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Multicast group address</string>
+       </property>
+       <property name="inputMask">
+        <string>000.000.000.000</string>
+       </property>
+       <property name="text">
+        <string>0.0.0.0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

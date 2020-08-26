@@ -29,6 +29,8 @@ void RemoteInputSettings::resetToDefaults()
     m_apiPort = 9091;
     m_dataAddress = "127.0.0.1";
     m_dataPort = 9090;
+    m_multicastAddress = "224.0.0.1";
+    m_multicastJoin = false;
     m_dcBlock = false;
     m_iqCorrection = false;
     m_useReverseAPI = false;
@@ -41,6 +43,8 @@ QByteArray RemoteInputSettings::serialize() const
 {
     SimpleSerializer s(1);
 
+    s.writeString(3, m_multicastAddress);
+    s.writeBool(4, m_multicastJoin);
     s.writeString(5, m_apiAddress);
     s.writeU32(6, m_apiPort);
     s.writeU32(7, m_dataPort);
@@ -69,6 +73,8 @@ bool RemoteInputSettings::deserialize(const QByteArray& data)
     {
         quint32 uintval;
 
+        d.readString(3, &m_multicastAddress, "224.0.0.1");
+        d.readBool(4, &m_multicastJoin, false);
         d.readString(5, &m_apiAddress, "127.0.0.1");
         d.readU32(6, &uintval, 9090);
         m_apiPort = uintval % (1<<16);

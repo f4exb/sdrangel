@@ -304,6 +304,11 @@ void RemoteInputGui::displaySettings()
     ui->apiPort->setText(tr("%1").arg(m_settings.m_apiPort));
     ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
     ui->dataAddress->setText(m_settings.m_dataAddress);
+    ui->multicastAddress->setText(m_settings.m_multicastAddress);
+    ui->multicastJoin->setChecked(m_settings.m_multicastJoin);
+
+    ui->dataApplyButton->setEnabled(false);
+    ui->dataApplyButton->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
@@ -339,14 +344,9 @@ void RemoteInputGui::on_apiApplyButton_clicked(bool checked)
 void RemoteInputGui::on_dataApplyButton_clicked(bool checked)
 {
     (void) checked;
-    m_settings.m_dataAddress = ui->dataAddress->text();
 
-    bool dataOk;
-    int udpDataPort = ui->dataPort->text().toInt(&dataOk);
-
-    if((dataOk) && (udpDataPort >= 1024) && (udpDataPort < 65535)) {
-        m_settings.m_dataPort = udpDataPort;
-    }
+    ui->dataApplyButton->setEnabled(false);
+    ui->dataApplyButton->setStyleSheet("QPushButton { background:rgb(79,79,79); }");
 
     sendSettings();
 }
@@ -365,23 +365,38 @@ void RemoteInputGui::on_apiAddress_returnPressed()
 void RemoteInputGui::on_dataAddress_returnPressed()
 {
     m_settings.m_dataAddress = ui->dataAddress->text();
-    sendSettings();
+    ui->dataApplyButton->setEnabled(true);
+    ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void RemoteInputGui::on_dataPort_returnPressed()
 {
-    bool dataOk;
-    int udpDataPort = ui->dataPort->text().toInt(&dataOk);
+    bool ok;
+    quint16 udpPort = ui->dataPort->text().toInt(&ok);
 
-    if((!dataOk) || (udpDataPort < 1024) || (udpDataPort > 65535))
-    {
-        return;
+    if ((!ok) || (udpPort < 1024)) {
+        udpPort = 9998;
     }
-    else
-    {
-        m_settings.m_dataPort = udpDataPort;
-        sendSettings();
-    }
+
+    m_settings.m_dataPort = udpPort;
+    ui->dataPort->setText(tr("%1").arg(m_settings.m_dataPort));
+
+    ui->dataApplyButton->setEnabled(true);
+    ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void RemoteInputGui::on_multicastAddress_returnPressed()
+{
+    m_settings.m_multicastAddress = ui->multicastAddress->text();
+    ui->dataApplyButton->setEnabled(true);
+    ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
+}
+
+void RemoteInputGui::on_multicastJoin_toggled(bool checked)
+{
+    m_settings.m_multicastJoin = checked;
+    ui->dataApplyButton->setEnabled(true);
+    ui->dataApplyButton->setStyleSheet("QPushButton { background-color : green; }");
 }
 
 void RemoteInputGui::on_apiPort_returnPressed()
