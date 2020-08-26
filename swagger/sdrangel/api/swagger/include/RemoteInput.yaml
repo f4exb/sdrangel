@@ -9,6 +9,14 @@ RemoteInputSettings:
       type: string
     dataPort:
       type: integer
+    multicastAddress:
+      type: string
+    multicastJoin:
+      type: integer
+      description: >
+        Joim multicast group
+        * 0 - leave group
+        * 1 - join group
     dcBlock:
       type: integer
     iqCorrection:
