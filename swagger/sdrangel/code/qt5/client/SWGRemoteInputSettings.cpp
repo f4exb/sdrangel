@@ -36,6 +36,10 @@ SWGRemoteInputSettings::SWGRemoteInputSettings() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
+    multicast_address = nullptr;
+    m_multicast_address_isSet = false;
+    multicast_join = 0;
+    m_multicast_join_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -64,6 +68,10 @@ SWGRemoteInputSettings::init() {
     m_data_address_isSet = false;
     data_port = 0;
     m_data_port_isSet = false;
+    multicast_address = new QString("");
+    m_multicast_address_isSet = false;
+    multicast_join = 0;
+    m_multicast_join_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -86,6 +94,10 @@ SWGRemoteInputSettings::cleanup() {
 
     if(data_address != nullptr) { 
         delete data_address;
+    }
+
+    if(multicast_address != nullptr) { 
+        delete multicast_address;
     }
 
 
@@ -116,6 +128,10 @@ SWGRemoteInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&data_address, pJson["dataAddress"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&data_port, pJson["dataPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&multicast_address, pJson["multicastAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&multicast_join, pJson["multicastJoin"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
@@ -156,6 +172,12 @@ SWGRemoteInputSettings::asJsonObject() {
     }
     if(m_data_port_isSet){
         obj->insert("dataPort", QJsonValue(data_port));
+    }
+    if(multicast_address != nullptr && *multicast_address != QString("")){
+        toJsonValue(QString("multicastAddress"), multicast_address, obj, QString("QString"));
+    }
+    if(m_multicast_join_isSet){
+        obj->insert("multicastJoin", QJsonValue(multicast_join));
     }
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
@@ -217,6 +239,26 @@ void
 SWGRemoteInputSettings::setDataPort(qint32 data_port) {
     this->data_port = data_port;
     this->m_data_port_isSet = true;
+}
+
+QString*
+SWGRemoteInputSettings::getMulticastAddress() {
+    return multicast_address;
+}
+void
+SWGRemoteInputSettings::setMulticastAddress(QString* multicast_address) {
+    this->multicast_address = multicast_address;
+    this->m_multicast_address_isSet = true;
+}
+
+qint32
+SWGRemoteInputSettings::getMulticastJoin() {
+    return multicast_join;
+}
+void
+SWGRemoteInputSettings::setMulticastJoin(qint32 multicast_join) {
+    this->multicast_join = multicast_join;
+    this->m_multicast_join_isSet = true;
 }
 
 qint32
@@ -294,6 +336,12 @@ SWGRemoteInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_data_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(multicast_address && *multicast_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_multicast_join_isSet){
             isObjectUpdated = true; break;
         }
         if(m_dc_block_isSet){

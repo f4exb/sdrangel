@@ -54,6 +54,12 @@ public:
     qint32 getDataPort();
     void setDataPort(qint32 data_port);
 
+    QString* getMulticastAddress();
+    void setMulticastAddress(QString* multicast_address);
+
+    qint32 getMulticastJoin();
+    void setMulticastJoin(qint32 multicast_join);
+
     qint32 getDcBlock();
     void setDcBlock(qint32 dc_block);
 
@@ -87,6 +93,12 @@ private:
 
     qint32 data_port;
     bool m_data_port_isSet;
+
+    QString* multicast_address;
+    bool m_multicast_address_isSet;
+
+    qint32 multicast_join;
+    bool m_multicast_join_isSet;
 
     qint32 dc_block;
     bool m_dc_block_isSet;
