@@ -26,6 +26,8 @@ struct RemoteInputSettings {
     quint16 m_apiPort;
     QString m_dataAddress;
     quint16 m_dataPort;
+    QString m_multicastAddress;
+    bool    m_multicastJoin;
     bool    m_dcBlock;
     bool    m_iqCorrection;
     bool     m_useReverseAPI;

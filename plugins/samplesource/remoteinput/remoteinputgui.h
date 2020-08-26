@@ -129,6 +129,8 @@ private slots:
 	void on_apiPort_returnPressed();
     void on_dataAddress_returnPressed();
 	void on_dataPort_returnPressed();
+    void on_multicastAddress_returnPressed();
+	void on_multicastJoin_toggled(bool checked);
 	void on_startStop_toggled(bool checked);
     void on_eventCountsReset_clicked(bool checked);
     void updateHardware();

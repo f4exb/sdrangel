@@ -242,8 +242,14 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
                 settings.m_iqCorrection ? "true" : "false");
     }
 
-    m_remoteInputUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort);
-    m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
+    if ((m_settings.m_dataAddress != settings.m_dataAddress) || 
+        (m_settings.m_dataPort != settings.m_dataPort) || 
+        (m_settings.m_multicastAddress != settings.m_multicastAddress) || 
+        (m_settings.m_multicastJoin != settings.m_multicastJoin) || force) 
+    {
+        m_remoteInputUDPHandler->configureUDPLink(settings.m_dataAddress, settings.m_dataPort, settings.m_multicastAddress, settings.m_multicastJoin);
+        m_remoteInputUDPHandler->getRemoteAddress(remoteAddress);
+    }
 
     mutexLocker.unlock();
 
