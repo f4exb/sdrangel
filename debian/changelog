@@ -1,3 +1,11 @@
+sdrangel (5.9.3-1) unstable; urgency=medium
+
+   * RemoteInput: option to join multicast group. Implements #611
+   * FileSource: file record length in microsedoncs. Implements #614
+   * FileInput: file record length in microsedoncs. Implements #614  
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 26 Aug 2020 19:50:06 +0200
+
 sdrangel (5.9.2-1) unstable; urgency=medium
 
    * UDP Source: added ability to join multicast group. Implements #610
