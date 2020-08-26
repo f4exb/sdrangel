@@ -233,6 +233,12 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
     if ((m_settings.m_apiPort != settings.m_apiPort) || force) {
         reverseAPIKeys.append("apiPort");
     }
+    if ((m_settings.m_multicastAddress != settings.m_multicastAddress) || force) {
+        reverseAPIKeys.append("multicastAddress");
+    }
+    if ((m_settings.m_multicastJoin != settings.m_multicastJoin) || force) {
+        reverseAPIKeys.append("multicastJoin");
+    }
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || (m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
     {
@@ -268,6 +274,8 @@ void RemoteInput::applySettings(const RemoteInputSettings& settings, bool force)
     qDebug() << "RemoteInput::applySettings: "
             << " m_dataAddress: " << m_settings.m_dataAddress
             << " m_dataPort: " << m_settings.m_dataPort
+            << " m_multicastAddress: " << m_settings.m_multicastAddress
+            << " m_multicastJoin: " << m_settings.m_multicastJoin
             << " m_apiAddress: " << m_settings.m_apiAddress
             << " m_apiPort: " << m_settings.m_apiPort
             << " m_remoteAddress: " << m_remoteAddress;
@@ -352,6 +360,12 @@ void RemoteInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("dataPort")) {
         settings.m_dataPort = response.getRemoteInputSettings()->getDataPort();
     }
+    if (deviceSettingsKeys.contains("multicastAddress")) {
+        settings.m_multicastAddress = *response.getRemoteInputSettings()->getMulticastAddress();
+    }
+    if (deviceSettingsKeys.contains("multicastAddress")) {
+        settings.m_multicastJoin = response.getRemoteInputSettings()->getMulticastJoin() != 0;
+    }
     if (deviceSettingsKeys.contains("dcBlock")) {
         settings.m_dcBlock = response.getRemoteInputSettings()->getDcBlock() != 0;
     }
@@ -378,6 +392,8 @@ void RemoteInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& res
     response.getRemoteInputSettings()->setApiPort(settings.m_apiPort);
     response.getRemoteInputSettings()->setDataAddress(new QString(settings.m_dataAddress));
     response.getRemoteInputSettings()->setDataPort(settings.m_dataPort);
+    response.getRemoteInputSettings()->setMulticastAddress(new QString(settings.m_multicastAddress));
+    response.getRemoteInputSettings()->setMulticastJoin(settings.m_multicastJoin ? 1 : 0);
     response.getRemoteInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getRemoteInputSettings()->setIqCorrection(settings.m_iqCorrection);
 
@@ -439,6 +455,12 @@ void RemoteInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, 
     }
     if (deviceSettingsKeys.contains("dataPort") || force) {
         swgRemoteInputSettings->setDataPort(settings.m_dataPort);
+    }
+    if (deviceSettingsKeys.contains("multicastAddress") || force) {
+        swgRemoteInputSettings->setMulticastAddress(new QString(settings.m_multicastAddress));
+    }
+    if (deviceSettingsKeys.contains("multicastJoin") || force) {
+        swgRemoteInputSettings->setMulticastJoin(settings.m_multicastJoin ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("dcBlock") || force) {
         swgRemoteInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
