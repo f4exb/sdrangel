@@ -60,14 +60,12 @@ void UDPSourceUDPHandler::start()
 {
     qDebug("UDPSourceUDPHandler::start");
 
-    if (!m_dataSocket)
-    {
+    if (!m_dataSocket) {
         m_dataSocket = new QUdpSocket(this);
     }
 
     if (!m_dataConnected)
     {
-
         if (m_dataSocket->bind(m_multicast ? QHostAddress::AnyIPv4 : m_dataAddress, m_dataPort, QUdpSocket::ShareAddress))
         {
             qDebug("UDPSourceUDPHandler::start: bind data socket to %s:%d", m_dataAddress.toString().toStdString().c_str(),  m_dataPort);
@@ -245,7 +243,7 @@ void UDPSourceUDPHandler::configureUDPLink(const QString& address, quint16 port,
 
 void UDPSourceUDPHandler::applyUDPLink(const QString& address, quint16 port, const QString& multicastAddress, bool multicastJoin)
 {
-    qDebug() << "UDPSourceUDPHandler::configureUDPLink: "
+    qDebug() << "UDPSourceUDPHandler::applyUDPLink: "
         << " address: " << address
         << " port: " << port
         << " multicastAddress: " << multicastAddress
@@ -255,7 +253,7 @@ void UDPSourceUDPHandler::applyUDPLink(const QString& address, quint16 port, con
 
     if (!addressOK)
     {
-        qWarning("UDPSourceUDPHandler::configureUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
+        qWarning("UDPSourceUDPHandler::applyUDPLink: invalid address %s. Set to localhost.", address.toStdString().c_str());
         m_dataAddress = QHostAddress::LocalHost;
     }
 
@@ -264,7 +262,7 @@ void UDPSourceUDPHandler::applyUDPLink(const QString& address, quint16 port, con
 
     if (!addressOK)
     {
-        qWarning("UDPSourceUDPHandler::configureUDPLink: invalid multicast address %s. disabling multicast.", address.toStdString().c_str());
+        qWarning("UDPSourceUDPHandler::applyUDPLink: invalid multicast address %s. disabling multicast.", address.toStdString().c_str());
         m_multicast = false;
     }
 
