@@ -31,7 +31,7 @@
 const PluginDescriptor FileInputPlugin::m_pluginDescriptor = {
     QString("FileInput"),
 	QString("File device input"),
-    QString("4.14.16"),
+    QString("4.15.3"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,
