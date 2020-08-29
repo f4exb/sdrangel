@@ -51,14 +51,27 @@ public:
         MsgReportSampleRate(quint32 sampleRate) :
             Message(),
             m_sampleRate(sampleRate)
-        {
-            m_sampleRate = sampleRate;
-        }
+        {}
 
         quint32 getSampleRate() const { return m_sampleRate; }
 
     private:
         quint32 m_sampleRate;
+    };
+
+    class MsgReportWaterfallShare : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportWaterfallShare(Real waterfallShare) :
+            Message(),
+            m_waterfallShare(waterfallShare)
+        {}
+
+        Real getWaterfallShare() const { return m_waterfallShare; }
+
+    private:
+        Real m_waterfallShare;
     };
 
 	GLSpectrum(QWidget* parent = nullptr);

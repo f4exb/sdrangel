@@ -109,7 +109,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
 		d.readBool(6, &m_displayWaterfall, true);
-		d.readBool(7, &m_invertedWaterfall, false);
+		d.readBool(7, &m_invertedWaterfall, true);
 		d.readBool(8, &m_displayMaxHold, false);
 		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 1);
@@ -117,7 +117,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		d.readS32(13, &m_displayGridIntensity, 5);
 		d.readS32(14, &m_decayDivisor, 1);
 		d.readS32(15, &m_histogramStroke, 30);
-		d.readBool(16, &m_displayCurrent, false);
+		d.readBool(16, &m_displayCurrent, true);
 		d.readS32(17, &m_displayTraceIntensity, 50);
 		d.readReal(18, &m_waterfallShare, 0.66);
 		d.readS32(19, &tmp, 0);
