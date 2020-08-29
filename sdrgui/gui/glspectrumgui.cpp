@@ -87,7 +87,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        displaySettings();
+        displaySettings(); // ends with blockApplySettings(false)
         applySettings();
         return true;
     }
@@ -173,6 +173,7 @@ void GLSpectrumGUI::applySettings()
         m_glSpectrum->setDisplayGrid(m_settings.m_displayGrid);
         m_glSpectrum->setDisplayGridIntensity(m_settings.m_displayGridIntensity);
         m_glSpectrum->setDisplayTraceIntensity(m_settings.m_displayTraceIntensity);
+        m_glSpectrum->setWaterfallShare(m_settings.m_waterfallShare);
 
         if ((m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)) {
             m_glSpectrum->setTimingRate(getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
@@ -491,6 +492,11 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
     {
         setAveragingToolitp();
         return true;
+    }
+    else if (GLSpectrum::MsgReportWaterfallShare::match(message))
+    {
+        const GLSpectrum::MsgReportWaterfallShare& report = (const GLSpectrum::MsgReportWaterfallShare&) message;
+        m_settings.m_waterfallShare = report.getWaterfallShare();
     }
     else if (SpectrumVis::MsgStartStop::match(message))
     {

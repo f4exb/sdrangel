@@ -31,6 +31,7 @@
 #include <QDebug>
 
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportSampleRate, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportWaterfallShare, Message)
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
@@ -1908,6 +1909,10 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 
         m_waterfallShare = newShare;
         m_changesPending = true;
+
+		if (m_messageQueueToGUI) {
+			m_messageQueueToGUI->push(new MsgReportWaterfallShare(m_waterfallShare));
+		}
 
         update();
         return;
