@@ -1,3 +1,10 @@
+sdrangel (4.15.4-1) unstable; urgency=medium
+
+   * GLSpectrum: fixed settings and waterfall share serialization. Fixes #609
+   * DATV decoder: fixed UDP sender dropping packets. Fixes issue #579
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 29 Aug 2020 17:10:35 +0200
+  
 sdrangel (4.15.3-1) unstable; urgency=medium
 
    * RemoteInput: option to join multicast group. Implements #611
