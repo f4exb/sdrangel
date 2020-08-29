@@ -44,9 +44,10 @@ void DATVUDPStream::pushData(const char *chrData, int nbTSBlocks)
 
     for (int i = 0; i < nbTSBlocks; i++)
     {
-        if (m_tsBlockIndex < m_tsBlocksPerFrame)
+        std::copy(chrData + i*m_tsBlockSize, chrData + (i+1)*m_tsBlockSize, m_tsBuffer + m_tsBlockIndex*m_tsBlockSize);
+        
+        if (m_tsBlockIndex < m_tsBlocksPerFrame - 1) 
         {
-            std::copy(chrData + i*m_tsBlockSize, chrData + (i+1)*m_tsBlockSize, m_tsBuffer + m_tsBlockIndex*m_tsBlockSize);
             m_tsBlockIndex++;
         }
         else
