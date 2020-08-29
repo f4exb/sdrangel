@@ -211,6 +211,14 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(opencv_dll)
 
+  file(GLOB CODEC2_DLLS "${CODEC2_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(codec2_dll ${CODEC2_DLLS})
+    get_filename_component(codec2_dll_name "${codec2_dll}"  NAME)
+    add_custom_target(copy_codec2_${codec2_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${codec2_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(codec2_dll)
+
   # TODO we need a way to fixup_bundle() on the build bin/ directory without call install
   if(BUILD_GUI)
     install(CODE "
