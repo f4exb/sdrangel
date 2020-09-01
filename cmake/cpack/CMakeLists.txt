@@ -211,6 +211,26 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(opencv_dll)
 
+  if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
+    # Soapy support libraries
+    file(GLOB SOAPYSUPPORT_DLLS "${SOAPYSUPPORT_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    foreach(soapysupport_dll ${SOAPYSUPPORT_DLLS})
+      get_filename_component(soapysupport_dll_name "${soapysupport_dll}"  NAME)
+      add_custom_target(copy_soapysupport_${soapysupport_dll_name} ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${soapysupport_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+      )
+    endforeach(soapysupport_dll)
+    file(MAKE_DIRECTORY ${SDRANGEL_BINARY_LIB_DIR}/SoapySDR)
+    file(MAKE_DIRECTORY ${SDRANGEL_BINARY_LIB_DIR}/SoapySDR/modules0.7)
+    file(GLOB SOAPYSUPPORT_DLLS "${SOAPYSUPPORT_DIR}/lib/SoapySDR/modules0.7/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    foreach(soapysupport_dll ${SOAPYSUPPORT_DLLS})
+      get_filename_component(soapysupport_dll_name "${soapysupport_dll}"  NAME)
+      add_custom_target(copy_soapysupport_${soapysupport_dll_name} ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${soapysupport_dll}" "${SDRANGEL_BINARY_LIB_DIR}/SoapySDR/modules0.7/"
+      )
+    endforeach(soapysupport_dll)
+  endif()
+
   file(GLOB CODEC2_DLLS "${CODEC2_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(codec2_dll ${CODEC2_DLLS})
     get_filename_component(codec2_dll_name "${codec2_dll}"  NAME)
