@@ -29,6 +29,7 @@ struct MetisMISOSettings {
     quint64 m_rx5CenterFrequency;
     quint64 m_rx6CenterFrequency;
     quint64 m_rx7CenterFrequency;
+    quint64 m_rx8CenterFrequency; //!< Hermes lite-2 or Pavel's Red Pitaya extension
     quint64 m_txCenterFrequency;
 	unsigned int m_sampleRateIndex;
     unsigned int m_log2Decim;
@@ -43,7 +44,7 @@ struct MetisMISOSettings {
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
 
-    static const int m_maxReceivers = 7;
+    static const int m_maxReceivers = 8;
 
 	MetisMISOSettings();
     MetisMISOSettings(const MetisMISOSettings& other);

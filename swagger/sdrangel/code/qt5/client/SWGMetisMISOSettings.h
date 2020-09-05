@@ -66,6 +66,9 @@ public:
     qint32 getRx7CenterFrequency();
     void setRx7CenterFrequency(qint32 rx7_center_frequency);
 
+    qint32 getRx8CenterFrequency();
+    void setRx8CenterFrequency(qint32 rx8_center_frequency);
+
     qint32 getTxCenterFrequency();
     void setTxCenterFrequency(qint32 tx_center_frequency);
 
@@ -132,6 +135,9 @@ private:
 
     qint32 rx7_center_frequency;
     bool m_rx7_center_frequency_isSet;
+
+    qint32 rx8_center_frequency;
+    bool m_rx8_center_frequency_isSet;
 
     qint32 tx_center_frequency;
     bool m_tx_center_frequency_isSet;

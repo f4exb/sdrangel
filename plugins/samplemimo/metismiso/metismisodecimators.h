@@ -39,8 +39,6 @@ private:
     qint32 m_accumulators[MetisMISOSettings::m_maxReceivers][256*2];
     int m_counters[MetisMISOSettings::m_maxReceivers];
     Decimators<qint32, qint32, SDR_RX_SAMP_SZ, 24, true> m_decimatorsIQ[MetisMISOSettings::m_maxReceivers];
-    Decimators<qint32, qint32, SDR_RX_SAMP_SZ, 24, false> m_decimatorsQI[MetisMISOSettings::m_maxReceivers];
-    SampleVector m_wSampleVector;
 };
 
 

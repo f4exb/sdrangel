@@ -44,6 +44,8 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_rx6_center_frequency_isSet = false;
     rx7_center_frequency = 0;
     m_rx7_center_frequency_isSet = false;
+    rx8_center_frequency = 0;
+    m_rx8_center_frequency_isSet = false;
     tx_center_frequency = 0;
     m_tx_center_frequency_isSet = false;
     sample_rate_index = 0;
@@ -94,6 +96,8 @@ SWGMetisMISOSettings::init() {
     m_rx6_center_frequency_isSet = false;
     rx7_center_frequency = 0;
     m_rx7_center_frequency_isSet = false;
+    rx8_center_frequency = 0;
+    m_rx8_center_frequency_isSet = false;
     tx_center_frequency = 0;
     m_tx_center_frequency_isSet = false;
     sample_rate_index = 0;
@@ -124,6 +128,7 @@ SWGMetisMISOSettings::init() {
 
 void
 SWGMetisMISOSettings::cleanup() {
+
 
 
 
@@ -175,6 +180,8 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rx6_center_frequency, pJson["rx6CenterFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx7_center_frequency, pJson["rx7CenterFrequency"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx8_center_frequency, pJson["rx8CenterFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint32", "");
     
@@ -241,6 +248,9 @@ SWGMetisMISOSettings::asJsonObject() {
     }
     if(m_rx7_center_frequency_isSet){
         obj->insert("rx7CenterFrequency", QJsonValue(rx7_center_frequency));
+    }
+    if(m_rx8_center_frequency_isSet){
+        obj->insert("rx8CenterFrequency", QJsonValue(rx8_center_frequency));
     }
     if(m_tx_center_frequency_isSet){
         obj->insert("txCenterFrequency", QJsonValue(tx_center_frequency));
@@ -363,6 +373,16 @@ void
 SWGMetisMISOSettings::setRx7CenterFrequency(qint32 rx7_center_frequency) {
     this->rx7_center_frequency = rx7_center_frequency;
     this->m_rx7_center_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getRx8CenterFrequency() {
+    return rx8_center_frequency;
+}
+void
+SWGMetisMISOSettings::setRx8CenterFrequency(qint32 rx8_center_frequency) {
+    this->rx8_center_frequency = rx8_center_frequency;
+    this->m_rx8_center_frequency_isSet = true;
 }
 
 qint32
@@ -522,6 +542,9 @@ SWGMetisMISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_rx7_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx8_center_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_tx_center_frequency_isSet){

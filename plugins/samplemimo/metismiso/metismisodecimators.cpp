@@ -20,8 +20,8 @@
 MetisMISODecimators::MetisMISODecimators()
 {
     resetCounters();
-    m_wSampleVector.resize(1);
 }
+
 void MetisMISODecimators::resetCounters()
 {
     std::fill(m_counters, m_counters+MetisMISOSettings::m_maxReceivers, 0);

@@ -25,6 +25,9 @@ MetisMISOSettings:
     rx7CenterFrequency:
       type: integer
       format: uint64
+    rx8CenterFrequency:
+      type: integer
+      format: uint64
     txCenterFrequency:
       type: integer
       format: uint64

@@ -118,6 +118,8 @@ qint64 MetisMISOGui::getCenterFrequency() const
     } else if (m_streamIndex == 6) {
         return m_settings.m_rx7CenterFrequency;
     } else if (m_streamIndex == 7) {
+        return m_settings.m_rx8CenterFrequency;
+    } else if (m_streamIndex == 8) {
         return m_settings.m_txCenterFrequency;
     } else {
         return 0;
@@ -141,6 +143,8 @@ void MetisMISOGui::setCenterFrequency(qint64 centerFrequency)
     } else if (m_streamIndex == 6) {
         m_settings.m_rx7CenterFrequency = centerFrequency;
     } else if (m_streamIndex == 7) {
+        m_settings.m_rx8CenterFrequency = centerFrequency;
+    } else if (m_streamIndex == 8) {
         m_settings.m_txCenterFrequency = centerFrequency;
     } else {
         m_settings.m_txCenterFrequency = 0;
@@ -255,6 +259,8 @@ void MetisMISOGui::on_centerFrequency_changed(quint64 value)
     } else if (m_streamIndex == 6) {
         m_settings.m_rx7CenterFrequency = value * 1000;
     } else if (m_streamIndex == 7) {
+        m_settings.m_rx8CenterFrequency = value * 1000;
+    } else if (m_streamIndex == 8) {
         m_settings.m_txCenterFrequency = value * 1000;
     } else {
         m_settings.m_txCenterFrequency = 0;
@@ -443,6 +449,8 @@ void MetisMISOGui::handleInputMessages()
                     m_settings.m_rx6CenterFrequency = frequency;
                 } else if (istream == 6) {
                     m_settings.m_rx7CenterFrequency = frequency;
+                } else if (istream == 7) {
+                    m_settings.m_rx8CenterFrequency = frequency;
                 } 
             }
             else
@@ -490,6 +498,8 @@ void MetisMISOGui::displayFrequency()
     } else if (m_streamIndex == 6) {
         centerFrequency = m_settings.m_rx7CenterFrequency;
     } else if (m_streamIndex == 7) {
+        centerFrequency = m_settings.m_rx8CenterFrequency;
+    } else if (m_streamIndex == 8) {
         centerFrequency = m_settings.m_txCenterFrequency;
     } else {
         centerFrequency = 0;
@@ -524,6 +534,8 @@ void MetisMISOGui::updateSpectrum()
     } else if (m_spectrumStreamIndex == 6) {
         centerFrequency = m_settings.m_rx7CenterFrequency;
     } else if (m_spectrumStreamIndex == 7) {
+        centerFrequency = m_settings.m_rx8CenterFrequency;
+    } else if (m_spectrumStreamIndex == 8) {
         centerFrequency = m_settings.m_txCenterFrequency;
     } else {
         centerFrequency = 0;
