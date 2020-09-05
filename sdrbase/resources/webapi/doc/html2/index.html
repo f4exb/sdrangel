@@ -3372,6 +3372,9 @@ margin-bottom: 20px;
     "localOutputSettings" : {
       "$ref" : "#/definitions/LocalOutputSettings"
     },
+    "metisMISOSettings" : {
+      "$ref" : "#/definitions/MetisMISOSettings"
+    },
     "perseusSettings" : {
       "$ref" : "#/definitions/PerseusSettings"
     },
@@ -5495,6 +5498,78 @@ margin-bottom: 20px;
     }
   },
   "description" : "Logging parameters setting"
+};
+            defs.MetisMISOSettings = {
+  "properties" : {
+    "nbReceivers" : {
+      "type" : "integer",
+      "description" : "Number of activated receivers"
+    },
+    "rx1CenterFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "rx2CenterFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "rx3CenterFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "rx4CenterFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "txCenterFrequency" : {
+      "type" : "integer",
+      "format" : "uint64"
+    },
+    "sampleRateIndex" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "preamp" : {
+      "type" : "integer",
+      "description" : "Preamplifer * 0 - disabled * 1 - enabled\n"
+    },
+    "random" : {
+      "type" : "integer",
+      "description" : "LT2208 Random * 0 - disabled * 1 - enabled\n"
+    },
+    "dither" : {
+      "type" : "integer",
+      "description" : "LT2208 Dither * 0 - disabled * 1 - enabled\n"
+    },
+    "duplex" : {
+      "type" : "integer",
+      "description" : "Duplex * 0 - disabled * 1 - enabled\n"
+    },
+    "dcBlock" : {
+      "type" : "integer",
+      "description" : "DC block in software * 0 - disabled * 1 - enabled\n"
+    },
+    "iqCorrection" : {
+      "type" : "integer",
+      "description" : "DC block in software * 0 - disabled * 1 - enabled\n"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API * 0 - disabled * 1 - enabled\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "MetisMISOSettings"
 };
             defs.NFMDemodReport = {
   "properties" : {
@@ -37459,7 +37534,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-08-26T20:23:03.201+02:00
+              Generated 2020-09-05T10:34:53.674+02:00
             </div>
           </div>
       </div>

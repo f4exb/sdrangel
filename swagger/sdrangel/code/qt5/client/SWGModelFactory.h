@@ -122,6 +122,7 @@
 #include "SWGLocalSourceSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
+#include "SWGMetisMISOSettings.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModReport.h"
@@ -524,6 +525,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLoggingInfo").compare(type) == 0) {
       return new SWGLoggingInfo();
+    }
+    if(QString("SWGMetisMISOSettings").compare(type) == 0) {
+      return new SWGMetisMISOSettings();
     }
     if(QString("SWGNFMDemodReport").compare(type) == 0) {
       return new SWGNFMDemodReport();

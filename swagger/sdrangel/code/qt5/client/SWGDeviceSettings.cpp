@@ -70,6 +70,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_local_input_settings_isSet = false;
     local_output_settings = nullptr;
     m_local_output_settings_isSet = false;
+    metis_miso_settings = nullptr;
+    m_metis_miso_settings_isSet = false;
     perseus_settings = nullptr;
     m_perseus_settings_isSet = false;
     pluto_sdr_input_settings = nullptr;
@@ -152,6 +154,8 @@ SWGDeviceSettings::init() {
     m_local_input_settings_isSet = false;
     local_output_settings = new SWGLocalOutputSettings();
     m_local_output_settings_isSet = false;
+    metis_miso_settings = new SWGMetisMISOSettings();
+    m_metis_miso_settings_isSet = false;
     perseus_settings = new SWGPerseusSettings();
     m_perseus_settings_isSet = false;
     pluto_sdr_input_settings = new SWGPlutoSdrInputSettings();
@@ -246,6 +250,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(local_output_settings != nullptr) { 
         delete local_output_settings;
+    }
+    if(metis_miso_settings != nullptr) { 
+        delete metis_miso_settings;
     }
     if(perseus_settings != nullptr) { 
         delete perseus_settings;
@@ -349,6 +356,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&local_input_settings, pJson["localInputSettings"], "SWGLocalInputSettings", "SWGLocalInputSettings");
     
     ::SWGSDRangel::setValue(&local_output_settings, pJson["localOutputSettings"], "SWGLocalOutputSettings", "SWGLocalOutputSettings");
+    
+    ::SWGSDRangel::setValue(&metis_miso_settings, pJson["metisMISOSettings"], "SWGMetisMISOSettings", "SWGMetisMISOSettings");
     
     ::SWGSDRangel::setValue(&perseus_settings, pJson["perseusSettings"], "SWGPerseusSettings", "SWGPerseusSettings");
     
@@ -460,6 +469,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((local_output_settings != nullptr) && (local_output_settings->isSet())){
         toJsonValue(QString("localOutputSettings"), local_output_settings, obj, QString("SWGLocalOutputSettings"));
+    }
+    if((metis_miso_settings != nullptr) && (metis_miso_settings->isSet())){
+        toJsonValue(QString("metisMISOSettings"), metis_miso_settings, obj, QString("SWGMetisMISOSettings"));
     }
     if((perseus_settings != nullptr) && (perseus_settings->isSet())){
         toJsonValue(QString("perseusSettings"), perseus_settings, obj, QString("SWGPerseusSettings"));
@@ -723,6 +735,16 @@ SWGDeviceSettings::setLocalOutputSettings(SWGLocalOutputSettings* local_output_s
     this->m_local_output_settings_isSet = true;
 }
 
+SWGMetisMISOSettings*
+SWGDeviceSettings::getMetisMisoSettings() {
+    return metis_miso_settings;
+}
+void
+SWGDeviceSettings::setMetisMisoSettings(SWGMetisMISOSettings* metis_miso_settings) {
+    this->metis_miso_settings = metis_miso_settings;
+    this->m_metis_miso_settings_isSet = true;
+}
+
 SWGPerseusSettings*
 SWGDeviceSettings::getPerseusSettings() {
     return perseus_settings;
@@ -949,6 +971,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(local_output_settings && local_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(metis_miso_settings && metis_miso_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(perseus_settings && perseus_settings->isSet()){
