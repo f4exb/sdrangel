@@ -31,6 +31,9 @@ MetisMISOSettings::MetisMISOSettings(const MetisMISOSettings& other)
     m_rx2CenterFrequency = other.m_rx2CenterFrequency;
     m_rx3CenterFrequency = other.m_rx3CenterFrequency;
     m_rx4CenterFrequency = other.m_rx4CenterFrequency;
+    m_rx5CenterFrequency = other.m_rx5CenterFrequency;
+    m_rx6CenterFrequency = other.m_rx6CenterFrequency;
+    m_rx7CenterFrequency = other.m_rx7CenterFrequency;
     m_txCenterFrequency = other.m_txCenterFrequency;
     m_sampleRateIndex = other.m_sampleRateIndex;
     m_log2Decim = other.m_log2Decim;
@@ -53,6 +56,9 @@ void MetisMISOSettings::resetToDefaults()
     m_rx2CenterFrequency = 7074000;
     m_rx3CenterFrequency = 7074000;
     m_rx4CenterFrequency = 7074000;
+    m_rx5CenterFrequency = 7074000;
+    m_rx6CenterFrequency = 7074000;
+    m_rx7CenterFrequency = 7074000;
     m_txCenterFrequency = 7074000;
     m_sampleRateIndex = 0; // 48000 kS/s
     m_log2Decim = 0;
@@ -77,19 +83,22 @@ QByteArray MetisMISOSettings::serialize() const
     s.writeU64(3, m_rx2CenterFrequency);
     s.writeU64(4, m_rx3CenterFrequency);
     s.writeU64(5, m_rx4CenterFrequency);
-    s.writeU64(6, m_txCenterFrequency);
-    s.writeU32(7, m_sampleRateIndex);
-    s.writeU32(8, m_log2Decim);
-    s.writeBool(9, m_preamp);
-    s.writeBool(10, m_random);
-    s.writeBool(11, m_dither);
-    s.writeBool(12, m_duplex);
-    s.writeBool(13, m_dcBlock);
-    s.writeBool(14, m_iqCorrection);
-    s.writeBool(15, m_useReverseAPI);
-    s.writeString(16, m_reverseAPIAddress);
-    s.writeU32(17, m_reverseAPIPort);
-    s.writeU32(18, m_reverseAPIDeviceIndex);
+    s.writeU64(6, m_rx5CenterFrequency);
+    s.writeU64(7, m_rx6CenterFrequency);
+    s.writeU64(8, m_rx7CenterFrequency);
+    s.writeU64(9, m_txCenterFrequency);
+    s.writeU32(10, m_sampleRateIndex);
+    s.writeU32(11, m_log2Decim);
+    s.writeBool(12, m_preamp);
+    s.writeBool(13, m_random);
+    s.writeBool(14, m_dither);
+    s.writeBool(15, m_duplex);
+    s.writeBool(16, m_dcBlock);
+    s.writeBool(17, m_iqCorrection);
+    s.writeBool(18, m_useReverseAPI);
+    s.writeString(19, m_reverseAPIAddress);
+    s.writeU32(20, m_reverseAPIPort);
+    s.writeU32(21, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -114,18 +123,21 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
         d.readU64(3, &m_rx2CenterFrequency, 7074000);
         d.readU64(4, &m_rx3CenterFrequency, 7074000);
         d.readU64(5, &m_rx4CenterFrequency, 7074000);
-        d.readU64(6, &m_txCenterFrequency, 7074000);
-        d.readU32(7, &m_sampleRateIndex, 0);
-        d.readU32(8, &m_log2Decim, 0);
-        d.readBool(8, &m_preamp, false);
-        d.readBool(9, &m_random, false);
-        d.readBool(10, &m_dither, false);
-        d.readBool(11, &m_duplex, false);
-        d.readBool(12, &m_dcBlock, false);
-        d.readBool(13, &m_iqCorrection, false);
-        d.readBool(14, &m_useReverseAPI, false);
-        d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(16, &utmp, 0);
+        d.readU64(6, &m_rx5CenterFrequency, 7074000);
+        d.readU64(7, &m_rx6CenterFrequency, 7074000);
+        d.readU64(8, &m_rx7CenterFrequency, 7074000);
+        d.readU64(9, &m_txCenterFrequency, 7074000);
+        d.readU32(10, &m_sampleRateIndex, 0);
+        d.readU32(11, &m_log2Decim, 0);
+        d.readBool(12, &m_preamp, false);
+        d.readBool(13, &m_random, false);
+        d.readBool(14, &m_dither, false);
+        d.readBool(15, &m_duplex, false);
+        d.readBool(16, &m_dcBlock, false);
+        d.readBool(17, &m_iqCorrection, false);
+        d.readBool(18, &m_useReverseAPI, false);
+        d.readString(19, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(20, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
@@ -133,7 +145,7 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(17, &utmp, 0);
+        d.readU32(21, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
 
         return true;

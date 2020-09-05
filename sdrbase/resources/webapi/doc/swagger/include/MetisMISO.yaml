@@ -16,6 +16,15 @@ MetisMISOSettings:
     rx4CenterFrequency:
       type: integer
       format: uint64
+    rx5CenterFrequency:
+      type: integer
+      format: uint64
+    rx6CenterFrequency:
+      type: integer
+      format: uint64
+    rx7CenterFrequency:
+      type: integer
+      format: uint64
     txCenterFrequency:
       type: integer
       format: uint64

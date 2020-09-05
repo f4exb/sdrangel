@@ -92,6 +92,21 @@
        </item>
        <item>
         <property name="text">
+         <string>Rx4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rx5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rx6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>Tx</string>
         </property>
        </item>
@@ -139,6 +154,21 @@
        <item>
         <property name="text">
          <string>Rx3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rx4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rx5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rx6</string>
         </property>
        </item>
        <item>

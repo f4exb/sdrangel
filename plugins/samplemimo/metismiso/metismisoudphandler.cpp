@@ -310,8 +310,10 @@ void MetisMISOUDPHandler::dataReadyRead()
             qDebug() << "MetisMISOUDPHandler::dataReadyRead: expected data packet (1) got " << receiveBuffer[2];
             break;
         }
-    } else {
-        qDebug()<<"expected EFFE";
+    } 
+    else 
+    {
+        qDebug() << "MetisMISOUDPHandler::dataReadyRead: expected EFFE";
     }
 }
 
@@ -381,6 +383,18 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
     else if (commandIndex == 10)
     {
         return m_settings.m_rx4CenterFrequency;
+    }
+    else if (commandIndex == 12)
+    {
+        return m_settings.m_rx5CenterFrequency;
+    }
+    else if (commandIndex == 14)
+    {
+        return m_settings.m_rx6CenterFrequency;
+    }
+    else if (commandIndex == 16)
+    {
+        return m_settings.m_rx7CenterFrequency;
     }
     else
     {
@@ -527,8 +541,8 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                 }
             }
 
-            sampleMic    = (int)((signed char) buffer[b++]) << 8;
-            sampleMic   += (int)((unsigned char)buffer[b++]);
+            sampleMic  = (int)((signed char) buffer[b++]) << 8;
+            sampleMic += (int)((unsigned char)buffer[b++]);
 
             if (samplesAdded != 0)
             {

@@ -50,8 +50,8 @@ MetisMISO::MetisMISO(DeviceAPI *deviceAPI) :
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_mimoType = MIMOHalfSynchronous;
-    m_sampleMIFifo.init(4, 96000 * 4);
-    m_deviceAPI->setNbSourceStreams(4);
+    m_sampleMIFifo.init(MetisMISOSettings::m_maxReceivers, 96000 * 4);
+    m_deviceAPI->setNbSourceStreams(MetisMISOSettings::m_maxReceivers);
     m_deviceAPI->setNbSinkStreams(1);
     int deviceSequence = m_deviceAPI->getSamplingDeviceSequence();
     const DeviceMetisScan::DeviceScan *deviceScan = DeviceMetis::instance().getDeviceScanAt(deviceSequence);
@@ -330,6 +330,24 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         propagateSettings = true;
     }
 
+    if ((m_settings.m_rx5CenterFrequency != settings.m_rx5CenterFrequency) || force)
+    {
+        reverseAPIKeys.append("rx5CenterFrequency");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_rx6CenterFrequency != settings.m_rx6CenterFrequency) || force)
+    {
+        reverseAPIKeys.append("rx6CenterFrequency");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_rx7CenterFrequency != settings.m_rx7CenterFrequency) || force)
+    {
+        reverseAPIKeys.append("rx7CenterFrequency");
+        propagateSettings = true;
+    }
+
     if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
     {
         reverseAPIKeys.append("txCenterFrequency");
@@ -405,6 +423,39 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         DSPMIMOSignalNotification *engineRx4Notif = new DSPMIMOSignalNotification(
             sampleRate, settings.m_rx4CenterFrequency, true, 3);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx4Notif);
+    }
+
+    if ((m_settings.m_rx5CenterFrequency != settings.m_rx5CenterFrequency) ||
+        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
+        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
+        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
+        DSPMIMOSignalNotification *engineRx5Notif = new DSPMIMOSignalNotification(
+            sampleRate, settings.m_rx5CenterFrequency, true, 4);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx5Notif);
+    }
+
+    if ((m_settings.m_rx6CenterFrequency != settings.m_rx6CenterFrequency) ||
+        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
+        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
+        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
+        DSPMIMOSignalNotification *engineRx6Notif = new DSPMIMOSignalNotification(
+            sampleRate, settings.m_rx6CenterFrequency, true, 5);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx6Notif);
+    }
+
+    if ((m_settings.m_rx7CenterFrequency != settings.m_rx7CenterFrequency) ||
+        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
+        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    {
+        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
+        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
+        DSPMIMOSignalNotification *engineRx7Notif = new DSPMIMOSignalNotification(
+            sampleRate, settings.m_rx7CenterFrequency, true, 6);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx7Notif);
     }
 
     if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) ||
@@ -520,6 +571,9 @@ void MetisMISO::webapiUpdateDeviceSettings(
         const QStringList& deviceSettingsKeys,
         SWGSDRangel::SWGDeviceSettings& response)
 {
+    if (deviceSettingsKeys.contains("nbReceivers")) {
+        settings.m_nbReceivers = response.getMetisMisoSettings()->getNbReceivers();
+    }
     if (deviceSettingsKeys.contains("rx1CenterFrequency")) {
         settings.m_rx1CenterFrequency = response.getMetisMisoSettings()->getRx1CenterFrequency();
     }
@@ -529,11 +583,26 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("rx3CenterFrequency")) {
         settings.m_rx3CenterFrequency = response.getMetisMisoSettings()->getRx3CenterFrequency();
     }
+    if (deviceSettingsKeys.contains("rx4CenterFrequency")) {
+        settings.m_rx4CenterFrequency = response.getMetisMisoSettings()->getRx4CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx5CenterFrequency")) {
+        settings.m_rx5CenterFrequency = response.getMetisMisoSettings()->getRx5CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx6CenterFrequency")) {
+        settings.m_rx6CenterFrequency = response.getMetisMisoSettings()->getRx6CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx7CenterFrequency")) {
+        settings.m_rx7CenterFrequency = response.getMetisMisoSettings()->getRx7CenterFrequency();
+    }
     if (deviceSettingsKeys.contains("txCenterFrequency")) {
         settings.m_txCenterFrequency = response.getMetisMisoSettings()->getTxCenterFrequency();
     }
     if (deviceSettingsKeys.contains("sampleRateIndex")) {
         settings.m_sampleRateIndex = response.getMetisMisoSettings()->getSampleRateIndex();
+    }
+    if (deviceSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getMetisMisoSettings()->getLog2Decim();
     }
     if (deviceSettingsKeys.contains("preamp")) {
         settings.m_preamp = response.getMetisMisoSettings()->getPreamp() != 0;
@@ -569,11 +638,17 @@ void MetisMISO::webapiUpdateDeviceSettings(
 
 void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const MetisMISOSettings& settings)
 {
+    response.getMetisMisoSettings()->setNbReceivers(settings.m_nbReceivers);
     response.getMetisMisoSettings()->setRx1CenterFrequency(settings.m_rx1CenterFrequency);
     response.getMetisMisoSettings()->setRx2CenterFrequency(settings.m_rx2CenterFrequency);
     response.getMetisMisoSettings()->setRx3CenterFrequency(settings.m_rx3CenterFrequency);
+    response.getMetisMisoSettings()->setRx4CenterFrequency(settings.m_rx4CenterFrequency);
+    response.getMetisMisoSettings()->setRx5CenterFrequency(settings.m_rx5CenterFrequency);
+    response.getMetisMisoSettings()->setRx6CenterFrequency(settings.m_rx6CenterFrequency);
+    response.getMetisMisoSettings()->setRx7CenterFrequency(settings.m_rx7CenterFrequency);
     response.getMetisMisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
     response.getMetisMisoSettings()->setSampleRateIndex(settings.m_sampleRateIndex);
+    response.getMetisMisoSettings()->setLog2Decim(settings.m_log2Decim);
     response.getMetisMisoSettings()->setPreamp(settings.m_preamp ? 1 : 0);
     response.getMetisMisoSettings()->setRandom(settings.m_random ? 1 : 0);
     response.getMetisMisoSettings()->setDither(settings.m_dither ? 1 : 0);
@@ -601,6 +676,9 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     swgDeviceSettings->setMetisMisoSettings(new SWGSDRangel::SWGMetisMISOSettings());
     SWGSDRangel::SWGMetisMISOSettings *swgMetisMISOSettings = swgDeviceSettings->getMetisMisoSettings();
 
+    if (deviceSettingsKeys.contains("nbReceivers") || force) {
+        swgMetisMISOSettings->setNbReceivers(settings.m_nbReceivers);
+    }    
     if (deviceSettingsKeys.contains("rx1CenterFrequency") || force) {
         swgMetisMISOSettings->setRx1CenterFrequency(settings.m_rx1CenterFrequency);
     }    
@@ -610,11 +688,26 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     if (deviceSettingsKeys.contains("rx3CenterFrequency") || force) {
         swgMetisMISOSettings->setRx3CenterFrequency(settings.m_rx3CenterFrequency);
     }    
+    if (deviceSettingsKeys.contains("rx4CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx4CenterFrequency(settings.m_rx4CenterFrequency);
+    }    
+    if (deviceSettingsKeys.contains("rx5CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx5CenterFrequency(settings.m_rx5CenterFrequency);
+    }    
+    if (deviceSettingsKeys.contains("rx6CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx6CenterFrequency(settings.m_rx6CenterFrequency);
+    }    
+    if (deviceSettingsKeys.contains("rx7CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx7CenterFrequency(settings.m_rx7CenterFrequency);
+    }    
     if (deviceSettingsKeys.contains("txCenterFrequency") || force) {
         swgMetisMISOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
     }    
     if (deviceSettingsKeys.contains("sampleRateIndex") || force) {
         swgMetisMISOSettings->setSampleRateIndex(settings.m_sampleRateIndex);
+    }    
+    if (deviceSettingsKeys.contains("log2Decim") || force) {
+        swgMetisMISOSettings->setLog2Decim(settings.m_log2Decim);
     }    
     if (deviceSettingsKeys.contains("preamp") || force) {
         swgMetisMISOSettings->setPreamp(settings.m_preamp ? 1 : 0);

@@ -38,6 +38,12 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_rx3_center_frequency_isSet = false;
     rx4_center_frequency = 0;
     m_rx4_center_frequency_isSet = false;
+    rx5_center_frequency = 0;
+    m_rx5_center_frequency_isSet = false;
+    rx6_center_frequency = 0;
+    m_rx6_center_frequency_isSet = false;
+    rx7_center_frequency = 0;
+    m_rx7_center_frequency_isSet = false;
     tx_center_frequency = 0;
     m_tx_center_frequency_isSet = false;
     sample_rate_index = 0;
@@ -82,6 +88,12 @@ SWGMetisMISOSettings::init() {
     m_rx3_center_frequency_isSet = false;
     rx4_center_frequency = 0;
     m_rx4_center_frequency_isSet = false;
+    rx5_center_frequency = 0;
+    m_rx5_center_frequency_isSet = false;
+    rx6_center_frequency = 0;
+    m_rx6_center_frequency_isSet = false;
+    rx7_center_frequency = 0;
+    m_rx7_center_frequency_isSet = false;
     tx_center_frequency = 0;
     m_tx_center_frequency_isSet = false;
     sample_rate_index = 0;
@@ -127,6 +139,9 @@ SWGMetisMISOSettings::cleanup() {
 
 
 
+
+
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -154,6 +169,12 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rx3_center_frequency, pJson["rx3CenterFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx4_center_frequency, pJson["rx4CenterFrequency"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx5_center_frequency, pJson["rx5CenterFrequency"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx6_center_frequency, pJson["rx6CenterFrequency"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx7_center_frequency, pJson["rx7CenterFrequency"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint32", "");
     
@@ -211,6 +232,15 @@ SWGMetisMISOSettings::asJsonObject() {
     }
     if(m_rx4_center_frequency_isSet){
         obj->insert("rx4CenterFrequency", QJsonValue(rx4_center_frequency));
+    }
+    if(m_rx5_center_frequency_isSet){
+        obj->insert("rx5CenterFrequency", QJsonValue(rx5_center_frequency));
+    }
+    if(m_rx6_center_frequency_isSet){
+        obj->insert("rx6CenterFrequency", QJsonValue(rx6_center_frequency));
+    }
+    if(m_rx7_center_frequency_isSet){
+        obj->insert("rx7CenterFrequency", QJsonValue(rx7_center_frequency));
     }
     if(m_tx_center_frequency_isSet){
         obj->insert("txCenterFrequency", QJsonValue(tx_center_frequency));
@@ -303,6 +333,36 @@ void
 SWGMetisMISOSettings::setRx4CenterFrequency(qint32 rx4_center_frequency) {
     this->rx4_center_frequency = rx4_center_frequency;
     this->m_rx4_center_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getRx5CenterFrequency() {
+    return rx5_center_frequency;
+}
+void
+SWGMetisMISOSettings::setRx5CenterFrequency(qint32 rx5_center_frequency) {
+    this->rx5_center_frequency = rx5_center_frequency;
+    this->m_rx5_center_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getRx6CenterFrequency() {
+    return rx6_center_frequency;
+}
+void
+SWGMetisMISOSettings::setRx6CenterFrequency(qint32 rx6_center_frequency) {
+    this->rx6_center_frequency = rx6_center_frequency;
+    this->m_rx6_center_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getRx7CenterFrequency() {
+    return rx7_center_frequency;
+}
+void
+SWGMetisMISOSettings::setRx7CenterFrequency(qint32 rx7_center_frequency) {
+    this->rx7_center_frequency = rx7_center_frequency;
+    this->m_rx7_center_frequency_isSet = true;
 }
 
 qint32
@@ -453,6 +513,15 @@ SWGMetisMISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_rx4_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx5_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx6_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx7_center_frequency_isSet){
             isObjectUpdated = true; break;
         }
         if(m_tx_center_frequency_isSet){

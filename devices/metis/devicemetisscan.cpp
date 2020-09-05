@@ -79,7 +79,7 @@ void DeviceMetisScan::enumOriginDevices(const QString& hardwareId, PluginInterfa
             hardwareId,
             serial,
             i, // sequence
-            4, // Nb Rx
+            7, // Nb Rx
             1  // Nb Tx
         ));        
     }
