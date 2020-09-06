@@ -70,18 +70,16 @@ void DeviceAPI::addChannelSink(BasebandSampleSink* sink, int streamIndex)
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->addSink(sink);
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->addChannelSink(sink);
+        m_deviceMIMOEngine->addChannelSink(sink, streamIndex);
     }
 }
 
 void DeviceAPI::removeChannelSink(BasebandSampleSink* sink, int streamIndex)
 {
-    (void) streamIndex;
-
     if (m_deviceSourceEngine) {
         m_deviceSourceEngine->removeSink(sink);
     } else if (m_deviceMIMOEngine) {
-        m_deviceMIMOEngine->removeChannelSink(sink);
+        m_deviceMIMOEngine->removeChannelSink(sink, streamIndex);
     }
 }
 
