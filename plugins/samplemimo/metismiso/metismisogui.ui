@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
+    <width>483</width>
     <height>200</height>
    </rect>
   </property>
@@ -612,6 +612,16 @@
          <string>8</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="txEnable">
+       <property name="toolTip">
+        <string>Enable/disable Tx</string>
+       </property>
+       <property name="text">
+        <string>Tx</string>
+       </property>
       </widget>
      </item>
     </layout>

@@ -45,6 +45,9 @@ public:
     qint32 getNbReceivers();
     void setNbReceivers(qint32 nb_receivers);
 
+    qint32 getTxEnable();
+    void setTxEnable(qint32 tx_enable);
+
     qint32 getRx1CenterFrequency();
     void setRx1CenterFrequency(qint32 rx1_center_frequency);
 
@@ -114,6 +117,9 @@ public:
 private:
     qint32 nb_receivers;
     bool m_nb_receivers_isSet;
+
+    qint32 tx_enable;
+    bool m_tx_enable_isSet;
 
     qint32 rx1_center_frequency;
     bool m_rx1_center_frequency_isSet;

@@ -22,6 +22,7 @@
 
 struct MetisMISOSettings {
     unsigned int m_nbReceivers;
+    bool m_txEnable;
     quint64 m_rx1CenterFrequency;
     quint64 m_rx2CenterFrequency;
     quint64 m_rx3CenterFrequency;

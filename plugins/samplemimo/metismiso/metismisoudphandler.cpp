@@ -16,19 +16,23 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "dsp/samplemififo.h"
+#include "dsp/samplemofifo.h"
+
 #include "metismisoudphandler.h"
 
 MESSAGE_CLASS_DEFINITION(MetisMISOUDPHandler::MsgStartStop, Message)
 
-MetisMISOUDPHandler::MetisMISOUDPHandler(SampleMIFifo *sampleFifo, DeviceAPI *deviceAPI) :
+MetisMISOUDPHandler::MetisMISOUDPHandler(SampleMIFifo *sampleMIFifo, SampleMOFifo *sampleMOFifo, DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_socket(nullptr),
 	m_metisAddress(QHostAddress::LocalHost),
 	m_metisPort(9090),
     m_running(false),
 	m_dataConnected(false),
-	m_sampleFifo(sampleFifo),
+	m_sampleMIFifo(sampleMIFifo),
+    m_sampleMOFifo(sampleMOFifo),
     m_sampleCount(0),
+    m_sampleTxCount(0),
 	m_messageQueueToGUI(nullptr),
     m_mutex(QMutex::Recursive),
     m_commandBase(0),
@@ -88,7 +92,7 @@ void MetisMISOUDPHandler::start()
     buffer[3] = (unsigned char) 0x01;
     std::fill(&buffer[4], &buffer[64], 0);
 
-    if (m_socket.writeDatagram((const char*) buffer, sizeof(buffer), m_metisAddress, m_metisPort) < 0) 
+    if (m_socket.writeDatagram((const char*) buffer, sizeof(buffer), m_metisAddress, m_metisPort) < 0)
     {
         qDebug() << "MetisMISOUDPHandler::start: writeDatagram start command failed " << m_socket.errorString();
         return;
@@ -98,12 +102,12 @@ void MetisMISOUDPHandler::start()
         qDebug() << "MetisMISOUDPHandler::start: writeDatagram start command" << m_metisAddress.toString() << ":" << m_metisPort;
     }
 
-    m_socket.flush();    
+    m_socket.flush();
 
     // send 2 frames with control data
 
-    sendNullBuffer();
-    sendNullBuffer(); // TODO: on the next send frequencies
+    sendData();
+    sendData(); // TODO: on the next send frequencies
 
     m_running = true;
 }
@@ -132,18 +136,18 @@ void MetisMISOUDPHandler::stop()
 	}
 
 
-    if (m_socket.writeDatagram((const char*)buffer, sizeof(buffer), m_metisAddress,m_metisPort) < 0) 
+    if (m_socket.writeDatagram((const char*)buffer, sizeof(buffer), m_metisAddress,m_metisPort) < 0)
     {
         qDebug() << "MetisMISOUDPHandler::stop: writeDatagram failed " << m_socket.errorString();
         return;
     }
     else
     {
-        qDebug()<<"MetisMISOUDPHandler::stop: writeDatagram stop command" << m_metisAddress.toString() << ":" << m_metisPort;    
+        qDebug()<<"MetisMISOUDPHandler::stop: writeDatagram stop command" << m_metisAddress.toString() << ":" << m_metisPort;
     }
-    
-    m_socket.flush();   
-    m_socket.close(); 
+
+    m_socket.flush();
+    m_socket.close();
 	m_running = false;
 }
 
@@ -151,7 +155,7 @@ void MetisMISOUDPHandler::setNbReceivers(unsigned int nbReceivers)
 {
     m_nbReceivers = nbReceivers;
 
-    switch(m_nbReceivers) 
+    switch(m_nbReceivers)
     {
     case 1: m_bMax = 512-0; break;
     case 2: m_bMax = 512-0; break;
@@ -173,8 +177,8 @@ void MetisMISOUDPHandler::applySettings(const MetisMISOSettings& settings)
     if (m_settings.m_nbReceivers != settings.m_nbReceivers)
     {
         QMutexLocker mutexLocker(&m_mutex);
-        int nbReceivers = settings.m_nbReceivers < 1 ? 
-            1 : settings.m_nbReceivers > MetisMISOSettings::m_maxReceivers ? 
+        int nbReceivers = settings.m_nbReceivers < 1 ?
+            1 : settings.m_nbReceivers > MetisMISOSettings::m_maxReceivers ?
                 MetisMISOSettings::m_maxReceivers : settings.m_nbReceivers;
         setNbReceivers(nbReceivers);
     }
@@ -218,7 +222,7 @@ bool MetisMISOUDPHandler::handleMessage(const Message& message)
     {
         return false;
     }
-    
+
 }
 
 void MetisMISOUDPHandler::sendMetisBuffer(int ep, unsigned char* buffer)
@@ -236,14 +240,14 @@ void MetisMISOUDPHandler::sendMetisBuffer(int ep, unsigned char* buffer)
         m_outputBuffer[7] = (m_sendSequence) & 0xFF;
         std::copy(buffer, buffer+512, &m_outputBuffer[m_offset]); // copy the buffer over
         m_offset = 520;
-    } 
+    }
     else // second HPSDR frame and send
     {
         std::copy(buffer, buffer+512, &m_outputBuffer[m_offset]); // copy the buffer over
         m_offset = 8;
 
         // send the buffer
-        if (m_socket.writeDatagram((const char*) m_outputBuffer, sizeof(m_outputBuffer), m_metisAddress, m_metisPort) < 0) 
+        if (m_socket.writeDatagram((const char*) m_outputBuffer, sizeof(m_outputBuffer), m_metisAddress, m_metisPort) < 0)
         {
             qDebug() << "MetisMISOUDPHandler::sendMetisBuffer: writeDatagram failed " << m_socket.errorString();
             return;
@@ -262,36 +266,33 @@ void MetisMISOUDPHandler::dataReadyRead()
 
     long sequence;
 
-    if ((length = m_socket.readDatagram((char*) &receiveBuffer, (qint64) sizeof(receiveBuffer), &metisAddress, &metisPort)) != 1032) 
+    if ((length = m_socket.readDatagram((char*) &receiveBuffer, (qint64) sizeof(receiveBuffer), &metisAddress, &metisPort)) != 1032)
     {
         qDebug() << "MetisMISOUDPHandler::dataReadyRead: readDatagram failed " << m_socket.errorString();
         return;
     }
 
-    sendNullBuffer(); // TODO: for now a null payload is sent
-    sendNullBuffer();
-
-    if (receiveBuffer[0] == 0xEF && receiveBuffer[1] == 0xFE) 
+    if (receiveBuffer[0] == 0xEF && receiveBuffer[1] == 0xFE)
     {
         // valid frame
-        switch(receiveBuffer[2]) 
+        switch(receiveBuffer[2])
         {
         case 1: // IQ data
-            switch (receiveBuffer[3]) 
+            switch (receiveBuffer[3])
             {
             case 4: // EP4 data
                 break;
             case 6: // EP6 data
                 sequence = ((receiveBuffer[4] & 0xFF)<<24) + ((receiveBuffer[5] & 0xFF)<<16) + ((receiveBuffer[6] & 0xFF)<<8) +(receiveBuffer[7] & 0xFF);
-                if (m_receiveSequence == 0) 
+                if (m_receiveSequence == 0)
                 {
                     m_receiveSequence = sequence;
-                } 
-                else 
+                }
+                else
                 {
                     m_receiveSequence++;
-                    
-                    if (m_receiveSequence != sequence) 
+
+                    if (m_receiveSequence != sequence)
                     {
                         //qDebug()<<"Sequence error: expected "<<receive_sequence<<" got "<<sequence;
                         m_receiveSequence = sequence;
@@ -310,50 +311,85 @@ void MetisMISOUDPHandler::dataReadyRead()
             qDebug() << "MetisMISOUDPHandler::dataReadyRead: expected data packet (1) got " << receiveBuffer[2];
             break;
         }
-    } 
-    else 
+    }
+    else
     {
         qDebug() << "MetisMISOUDPHandler::dataReadyRead: expected EFFE";
     }
 }
 
-void MetisMISOUDPHandler::sendNullBuffer() 
+void MetisMISOUDPHandler::sendData(bool nullPayload)
 {
     unsigned char buffer[512];
-    
-    if (m_txFrame % (m_settings.m_sampleRateIndex+1) == 0)
+
+    if ((m_settings.m_sampleRateIndex == 0) || (m_txFrame % (1<<m_settings.m_sampleRateIndex) == 0))
     {
         int commandIndex = 2*m_commandBase; // command rotation
-    
+
         buffer[0] = (unsigned char) 0x7F;
         buffer[1] = (unsigned char) 0x7F;
         buffer[2] = (unsigned char) 0x7F;
-        buffer[3] = commandIndex; // C0
-    
+        buffer[3] = commandIndex + (m_settings.m_txEnable ? 1 : 0); // C0
+
         int commandValue = getCommandValue(commandIndex);
-    
+
         buffer[4]= commandValue>>24; // C1
         buffer[5]= (commandValue>>16) & 0xFF; // C2
         buffer[6]= (commandValue>>8) & 0xFF; // C3
         buffer[7]= commandValue & 0xFF; // C4
 
-        if (m_commandBase < 15) { // base count 0 to 16
+        if (m_commandBase < 17) { // base count 0 to 18
             m_commandBase++;
         } else {
             m_commandBase = 0;
         }
-        
-        std::fill(&buffer[8], &buffer[512], 0);
+
+        if (nullPayload)
+        {
+            std::fill(&buffer[8], &buffer[512], 0);
+        }
+        else
+        {
+            unsigned int iPart1Begin, iPart1End, iPart2Begin, iPart2End;
+            int bufferIndex = 8;
+
+            m_sampleMOFifo->readSync(63, iPart1Begin, iPart1End, iPart2Begin, iPart2End);
+
+            if (iPart1Begin != iPart1End) {
+                fillBuffer(buffer, bufferIndex, iPart1Begin, iPart1End);
+            }
+
+            if (iPart2Begin != iPart2End) {
+                fillBuffer(buffer, bufferIndex, iPart2Begin, iPart2End);
+            }
+        }
+
         sendMetisBuffer(2, buffer);
     }
 
     m_txFrame++;
 }
 
+void MetisMISOUDPHandler::fillBuffer(unsigned char *buffer, int& bufferIndex, int iBegin, int iEnd)
+{
+    SampleVector::iterator it = m_sampleMOFifo->getData(0).begin() + iBegin;
+    const SampleVector::iterator itEnd = m_sampleMOFifo->getData(0).begin() + iEnd;
+
+    for (; it != itEnd; ++it)
+    {
+        std::fill(&buffer[bufferIndex], &buffer[bufferIndex+4], 0); // Fill <L1><L0><R1><R0> with zeros
+        bufferIndex += 4;
+        buffer[bufferIndex++] = it->imag() >> 8;
+        buffer[bufferIndex++] = it->imag() & 0xFF;
+        buffer[bufferIndex++] = it->real() >> 8;
+        buffer[bufferIndex++] = it->real() & 0xFF;
+    }
+}
+
 int MetisMISOUDPHandler::getCommandValue(int commandIndex)
 {
     int c1 = 0, c2 = 0, c3 = 0, c4 = 0;
-    
+
     if (commandIndex == 0)
     {
         c1 =  m_settings.m_sampleRateIndex & 0x03;
@@ -396,6 +432,10 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
     {
         return m_settings.m_rx7CenterFrequency;
     }
+    else if (commandIndex == 36)
+    {
+        return m_settings.m_rx8CenterFrequency;
+    }
     else
     {
         return 0;
@@ -410,7 +450,7 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
     int sampleI, sampleQ, sampleMic;
 
 
-    if (buffer[b++]==0x7F && buffer[b++]==0x7F && buffer[b++]==0x7F) 
+    if (buffer[b++]==0x7F && buffer[b++]==0x7F && buffer[b++]==0x7F)
     {
         QMutexLocker mutexLocker(&m_mutex);
 
@@ -426,7 +466,7 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
         m_dash = (m_controlIn[0] & 0x02) == 0x02;
         m_dot = (m_controlIn[0] & 0x04) == 0x04;
 
-        switch((m_controlIn[0]>>3) & 0x1F) 
+        switch((m_controlIn[0]>>3) & 0x1F)
         {
         case 0:
             m_lt2208ADCOverflow = m_controlIn[1] & 0x01;
@@ -437,39 +477,39 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
             //     int nbRx = (m_controlIn[4]>>3) & 0x07;
             //     nbRx++;
             //     qDebug("MetisMISOUDPHandler::processIQBuffer: nbRx: %d", nbRx);
-            // }    
-            if (m_mercurySoftwareVersion != m_controlIn[2]) 
+            // }
+            if (m_mercurySoftwareVersion != m_controlIn[2])
             {
                 m_mercurySoftwareVersion = m_controlIn[2];
                 qDebug("MetisMISOUDPHandler::processIQBuffer: Mercury Software version: %d (0x%0X)",
                     m_mercurySoftwareVersion, m_mercurySoftwareVersion);
             }
-            
-            if (m_penelopeSoftwareVersion != m_controlIn[3]) 
+
+            if (m_penelopeSoftwareVersion != m_controlIn[3])
             {
                 m_penelopeSoftwareVersion = m_controlIn[3];
                 qDebug("MetisMISOUDPHandler::processIQBuffer: Penelope Software version: %d (0x%0X)",
                     m_penelopeSoftwareVersion, m_penelopeSoftwareVersion);
             }
-            
-            if (m_ozySoftwareVersion != m_controlIn[4]) 
+
+            if (m_ozySoftwareVersion != m_controlIn[4])
             {
                 m_ozySoftwareVersion = m_controlIn[4];
                 qDebug("MetisMISOUDPHandler::processIQBuffer: Ozy Software version: %d (0x%0X)",
                     m_ozySoftwareVersion, m_ozySoftwareVersion);
             }
             break;
-        
+
         case 1:
             m_forwardPower = (m_controlIn[1]<<8) + m_controlIn[2]; // from Penelope or Hermes
             m_alexForwardPower = (m_controlIn[3]<<8) + m_controlIn[4]; // from Alex or Apollo
             break;
-        
+
         case 2:
             m_alexForwardPower = (m_controlIn[1]<<8) + m_controlIn[2]; // from Alex or Apollo
             m_AIN3 = (m_controlIn[3]<<8) + m_controlIn[4]; // from Pennelope or Hermes
             break;
-        
+
         case 3:
             m_AIN4 = (m_controlIn[1]<<8) + m_controlIn[2]; // from Pennelope or Hermes
             m_AIN6 = (m_controlIn[3]<<8) + m_controlIn[4]; // from Pennelope or Hermes
@@ -477,12 +517,12 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
         }
 
         // extract the samples
-        while (b < m_bMax) 
+        while (b < m_bMax)
         {
             int samplesAdded = 0;
 
             // extract each of the receivers
-            for (r = 0; r < m_nbReceivers; r++) 
+            for (r = 0; r < m_nbReceivers; r++)
             {
                 if (SDR_RX_SAMP_SZ == 16)
                 {
@@ -500,20 +540,20 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                     sampleQ += (int)((unsigned char)buffer[b++]);
                     sampleI  = (int)((signed char)buffer[b++]) << 16;
                     sampleI += (int)((unsigned char)buffer[b++]) << 8;
-                    sampleI += (int)((unsigned char)buffer[b++]);                    
+                    sampleI += (int)((unsigned char)buffer[b++]);
                 }
 
-                if (r < MetisMISOSettings::m_maxReceivers) 
+                if (r < MetisMISOSettings::m_maxReceivers)
                 {
-                    if (m_settings.m_log2Decim == 0) // no decimation - direct conversion 
-                    { 
+                    if (m_settings.m_log2Decim == 0) // no decimation - direct conversion
+                    {
                         m_convertBuffer[r][m_sampleCount] = Sample{sampleI, sampleQ};
                         samplesAdded = 1;
                     }
                     else
                     {
                         SampleVector v(2, Sample{0, 0});
-                        
+
                         switch (m_settings.m_log2Decim)
                         {
                             case 1:
@@ -529,7 +569,7 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                                 break;
                         }
 
-                        if (samplesAdded != 0) 
+                        if (samplesAdded != 0)
                         {
                             std::copy(
                                 v.begin(),
@@ -543,11 +583,18 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
 
             sampleMic  = (int)((signed char) buffer[b++]) << 8;
             sampleMic += (int)((unsigned char)buffer[b++]);
+            m_sampleTxCount++;
+
+            if (m_sampleTxCount >= 63) // 63 samples per 512 byte Tx block
+            {
+                sendData(!m_settings.m_txEnable); // synchronous sending of a Tx frame
+                m_sampleTxCount = 0;
+            }
 
             if (samplesAdded != 0)
             {
                 m_sampleCount += samplesAdded;
-                
+
                 if (m_sampleCount >= 1024)
                 {
                     std::vector<SampleVector::const_iterator> vbegin;
@@ -556,13 +603,13 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                         vbegin.push_back(m_convertBuffer[channel].begin());
                     }
 
-                    m_sampleFifo->writeSync(vbegin, 1024);
+                    m_sampleMIFifo->writeSync(vbegin, 1024);
                     m_sampleCount = 0;
                 }
             }
         }
-    } 
-    else 
+    }
+    else
     {
         qDebug()<<"MetisMISOUDPHandler::processIQBuffer: SYNC Error";
     }

@@ -60,6 +60,7 @@ private:
     int m_streamIndex; //!< Current stream index being dealt with
     int m_spectrumStreamIndex; //!< Index of the stream displayed on main spectrum
     int m_rxSampleRate;
+    int m_txSampleRate;
     QTimer m_updateTimer;
     QTimer m_statusTimer;
 	bool m_doApplySettings;
@@ -94,6 +95,7 @@ private slots:
     void on_dither_toggled(bool checked);
     void on_duplex_toggled(bool checked);
     void on_nbRxIndex_currentIndexChanged(int index);
+    void on_txEnable_toggled(bool checked);
     void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();

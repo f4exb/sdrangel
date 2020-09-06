@@ -31,6 +31,7 @@
 #include "metismisodecimators.h"
 
 class SampleMIFifo;
+class SampleMOFifo;
 class DeviceAPI;
 
 class MetisMISOUDPHandler : public QObject
@@ -56,7 +57,7 @@ public:
         { }
     };
 
-	MetisMISOUDPHandler(SampleMIFifo* sampleFifo, DeviceAPI *deviceAPI);
+	MetisMISOUDPHandler(SampleMIFifo* sampleMIFifo, SampleMOFifo *sampleMOFifo, DeviceAPI *deviceAPI);
 	~MetisMISOUDPHandler();
 	void setMessageQueueToGUI(MessageQueue *queue) { m_messageQueueToGUI = queue; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -79,9 +80,11 @@ private:
     quint16 m_metisPort;
     bool m_running;
     bool m_dataConnected;
-    SampleMIFifo *m_sampleFifo;
+    SampleMIFifo *m_sampleMIFifo;
+    SampleMOFifo *m_sampleMOFifo;
     SampleVector m_convertBuffer[MetisMISOSettings::m_maxReceivers];
     int m_sampleCount;
+    int m_sampleTxCount;
 	MessageQueue *m_messageQueueToGUI;
     MessageQueue m_inputMessageQueue;
     MetisMISOSettings m_settings;
@@ -103,7 +106,7 @@ private:
     int m_bMax;
     bool m_ptt;
     bool m_dash;
-    bool m_dot;    
+    bool m_dot;
     bool m_lt2208ADCOverflow;
     int m_IO1;
     int m_IO2;
@@ -116,10 +119,11 @@ private:
     int m_AIN3;
     int m_AIN4;
     int m_AIN6;
-    
+
     void sendMetisBuffer(int ep, unsigned char* buffer);
 	bool handleMessage(const Message& message);
-    void sendNullBuffer();
+    void sendData(bool nullPayload = true);
+    void fillBuffer(unsigned char *buffer, int& bufferIndex, int iBegin, int iEnd);
     int getCommandValue(int commandIndex);
     void processIQBuffer(unsigned char* buffer);
 

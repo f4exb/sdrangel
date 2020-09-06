@@ -44,13 +44,14 @@ MESSAGE_CLASS_DEFINITION(MetisMISO::MsgStartStop, Message)
 MetisMISO::MetisMISO(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
 	m_settings(),
-    m_udpHandler(&m_sampleMIFifo, deviceAPI),
+    m_udpHandler(&m_sampleMIFifo, &m_sampleMOFifo, deviceAPI),
 	m_deviceDescription("MetisMISO"),
 	m_running(false),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
     m_mimoType = MIMOHalfSynchronous;
     m_sampleMIFifo.init(MetisMISOSettings::m_maxReceivers, 96000 * 4);
+    m_sampleMOFifo.init(1, 96000 * 4);
     m_deviceAPI->setNbSourceStreams(MetisMISOSettings::m_maxReceivers);
     m_deviceAPI->setNbSinkStreams(1);
     int deviceSequence = m_deviceAPI->getSamplingDeviceSequence();
@@ -252,14 +253,20 @@ bool MetisMISO::handleMessage(const Message& message)
 
         if (cmd.getStartStop())
         {
-            if (m_deviceAPI->initDeviceEngine())
-            {
-                m_deviceAPI->startDeviceEngine();
+            // Start Rx engine
+            if (m_deviceAPI->initDeviceEngine(0)) {
+                m_deviceAPI->startDeviceEngine(0);
+            }
+
+            // Start Tx engine
+            if (m_deviceAPI->initDeviceEngine(1)) {
+                m_deviceAPI->startDeviceEngine(1);
             }
         }
         else
         {
-            m_deviceAPI->stopDeviceEngine();
+            m_deviceAPI->stopDeviceEngine(0); // Stop Rx engine
+            m_deviceAPI->stopDeviceEngine(1); // Stop Tx engine
         }
 
         if (m_settings.m_useReverseAPI) {
@@ -280,6 +287,7 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
 
     qDebug() << "MetisMISO::applySettings: "
         << " m_nbReceivers:" << settings.m_nbReceivers
+        << " m_txEnable:" << settings.m_txEnable
         << " m_rx1CenterFrequency:" << settings.m_rx1CenterFrequency
         << " m_rx2CenterFrequency:" << settings.m_rx2CenterFrequency
         << " m_rx3CenterFrequency:" << settings.m_rx3CenterFrequency
@@ -307,6 +315,12 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
     if ((m_settings.m_nbReceivers != settings.m_nbReceivers) || force)
     {
         reverseAPIKeys.append("nbReceivers");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_txEnable != settings.m_txEnable) || force)
+    {
+        reverseAPIKeys.append("txEnable");
         propagateSettings = true;
     }
 
@@ -480,13 +494,10 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
     }
 
     if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
         (m_settings.m_log2Decim != settings.m_log2Decim) || force)
     {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
         DSPMIMOSignalNotification *engineTxNotif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_txCenterFrequency, false, 0);
+            48000, settings.m_txCenterFrequency, false, 0);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineTxNotif);
     }
 
@@ -513,9 +524,9 @@ int MetisMISO::webapiRunGet(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    if (subsystemIndex == 0)
+    if ((subsystemIndex == 0) || (subsystemIndex == 1)) // Rx and Tx always started together
     {
-        m_deviceAPI->getDeviceEngineStateStr(*response.getState()); // Rx only
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState());
         return 200;
     }
     else
@@ -531,9 +542,10 @@ int MetisMISO::webapiRun(
         SWGSDRangel::SWGDeviceState& response,
         QString& errorMessage)
 {
-    if (subsystemIndex == 0)
+    // Rx and Tx are started or stopped together
+    if ((subsystemIndex == 0) || (subsystemIndex == 1))
     {
-        m_deviceAPI->getDeviceEngineStateStr(*response.getState()); // Rx only
+        m_deviceAPI->getDeviceEngineStateStr(*response.getState()); // Rx driven
         MsgStartStop *message = MsgStartStop::create(run);
         m_inputMessageQueue.push(message);
 
@@ -594,6 +606,9 @@ void MetisMISO::webapiUpdateDeviceSettings(
 {
     if (deviceSettingsKeys.contains("nbReceivers")) {
         settings.m_nbReceivers = response.getMetisMisoSettings()->getNbReceivers();
+    }
+    if (deviceSettingsKeys.contains("txEnable")) {
+        settings.m_txEnable = response.getMetisMisoSettings()->getTxEnable() != 0;
     }
     if (deviceSettingsKeys.contains("rx1CenterFrequency")) {
         settings.m_rx1CenterFrequency = response.getMetisMisoSettings()->getRx1CenterFrequency();
@@ -663,6 +678,7 @@ void MetisMISO::webapiUpdateDeviceSettings(
 void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const MetisMISOSettings& settings)
 {
     response.getMetisMisoSettings()->setNbReceivers(settings.m_nbReceivers);
+    response.getMetisMisoSettings()->setTxEnable(settings.m_txEnable ? 1 : 0);
     response.getMetisMisoSettings()->setRx1CenterFrequency(settings.m_rx1CenterFrequency);
     response.getMetisMisoSettings()->setRx2CenterFrequency(settings.m_rx2CenterFrequency);
     response.getMetisMisoSettings()->setRx3CenterFrequency(settings.m_rx3CenterFrequency);
@@ -703,58 +719,61 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
 
     if (deviceSettingsKeys.contains("nbReceivers") || force) {
         swgMetisMISOSettings->setNbReceivers(settings.m_nbReceivers);
-    }    
+    }
+    if (deviceSettingsKeys.contains("txEnable") || force) {
+        swgMetisMISOSettings->setTxEnable(settings.m_txEnable ? 1 : 0);
+    }
     if (deviceSettingsKeys.contains("rx1CenterFrequency") || force) {
         swgMetisMISOSettings->setRx1CenterFrequency(settings.m_rx1CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx2CenterFrequency") || force) {
         swgMetisMISOSettings->setRx2CenterFrequency(settings.m_rx2CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx3CenterFrequency") || force) {
         swgMetisMISOSettings->setRx3CenterFrequency(settings.m_rx3CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx4CenterFrequency") || force) {
         swgMetisMISOSettings->setRx4CenterFrequency(settings.m_rx4CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx5CenterFrequency") || force) {
         swgMetisMISOSettings->setRx5CenterFrequency(settings.m_rx5CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx6CenterFrequency") || force) {
         swgMetisMISOSettings->setRx6CenterFrequency(settings.m_rx6CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx7CenterFrequency") || force) {
         swgMetisMISOSettings->setRx7CenterFrequency(settings.m_rx7CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("rx8CenterFrequency") || force) {
         swgMetisMISOSettings->setRx8CenterFrequency(settings.m_rx8CenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("txCenterFrequency") || force) {
         swgMetisMISOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
-    }    
+    }
     if (deviceSettingsKeys.contains("sampleRateIndex") || force) {
         swgMetisMISOSettings->setSampleRateIndex(settings.m_sampleRateIndex);
-    }    
+    }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgMetisMISOSettings->setLog2Decim(settings.m_log2Decim);
-    }    
+    }
     if (deviceSettingsKeys.contains("preamp") || force) {
         swgMetisMISOSettings->setPreamp(settings.m_preamp ? 1 : 0);
-    }    
+    }
     if (deviceSettingsKeys.contains("random") || force) {
         swgMetisMISOSettings->setRandom(settings.m_random ? 1 : 0);
-    }    
+    }
     if (deviceSettingsKeys.contains("dither") || force) {
         swgMetisMISOSettings->setDither(settings.m_dither ? 1 : 0);
-    }    
+    }
     if (deviceSettingsKeys.contains("duplex") || force) {
         swgMetisMISOSettings->setDuplex(settings.m_duplex ? 1 : 0);
-    }    
+    }
     if (deviceSettingsKeys.contains("dcBlock") || force) {
         swgMetisMISOSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
-    }    
+    }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgMetisMISOSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
-    }    
+    }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
             .arg(settings.m_reverseAPIAddress)

@@ -4,6 +4,12 @@ MetisMISOSettings:
     nbReceivers:
       type: integer
       description: Number of activated receivers
+    txEnable:
+      type: integer
+      description: >
+        Enable Tx 
+        * 0 - disabled sends null payload to Metis device
+        * 1 - enabled sends Tx payload to Metis device
     rx1CenterFrequency:
       type: integer
       format: uint64

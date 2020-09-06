@@ -30,6 +30,8 @@ SWGMetisMISOSettings::SWGMetisMISOSettings(QString* json) {
 SWGMetisMISOSettings::SWGMetisMISOSettings() {
     nb_receivers = 0;
     m_nb_receivers_isSet = false;
+    tx_enable = 0;
+    m_tx_enable_isSet = false;
     rx1_center_frequency = 0;
     m_rx1_center_frequency_isSet = false;
     rx2_center_frequency = 0;
@@ -82,6 +84,8 @@ void
 SWGMetisMISOSettings::init() {
     nb_receivers = 0;
     m_nb_receivers_isSet = false;
+    tx_enable = 0;
+    m_tx_enable_isSet = false;
     rx1_center_frequency = 0;
     m_rx1_center_frequency_isSet = false;
     rx2_center_frequency = 0;
@@ -147,6 +151,7 @@ SWGMetisMISOSettings::cleanup() {
 
 
 
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -166,6 +171,8 @@ SWGMetisMISOSettings::fromJson(QString &json) {
 void
 SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nb_receivers, pJson["nbReceivers"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx_enable, pJson["txEnable"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rx1_center_frequency, pJson["rx1CenterFrequency"], "qint32", "");
     
@@ -227,6 +234,9 @@ SWGMetisMISOSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_nb_receivers_isSet){
         obj->insert("nbReceivers", QJsonValue(nb_receivers));
+    }
+    if(m_tx_enable_isSet){
+        obj->insert("txEnable", QJsonValue(tx_enable));
     }
     if(m_rx1_center_frequency_isSet){
         obj->insert("rx1CenterFrequency", QJsonValue(rx1_center_frequency));
@@ -303,6 +313,16 @@ void
 SWGMetisMISOSettings::setNbReceivers(qint32 nb_receivers) {
     this->nb_receivers = nb_receivers;
     this->m_nb_receivers_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getTxEnable() {
+    return tx_enable;
+}
+void
+SWGMetisMISOSettings::setTxEnable(qint32 tx_enable) {
+    this->tx_enable = tx_enable;
+    this->m_tx_enable_isSet = true;
 }
 
 qint32
@@ -521,6 +541,9 @@ SWGMetisMISOSettings::isSet(){
     bool isObjectUpdated = false;
     do{
         if(m_nb_receivers_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_enable_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rx1_center_frequency_isSet){

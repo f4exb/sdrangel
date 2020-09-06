@@ -56,6 +56,7 @@ MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_streamIndex = 0;
     m_spectrumStreamIndex = 0;
     m_rxSampleRate = 48000;
+    m_txSampleRate = 48000;
 
     ui->setupUi(this);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
@@ -191,20 +192,26 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
             m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+            m_deviceUISet->setSpectrumScalingFactor(SDR_RX_SCALEF);
         }
         else
         {
             m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
             m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
+            m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
         }
-        
+
+        updateSpectrum();
+
         ui->spectrumSource->blockSignals(true);
         ui->spectrumSource->setCurrentIndex(index);
         ui->spectrumSource->blockSignals(false);
     }
 
     m_streamIndex = index;
+
     displayFrequency();
+    displaySampleRate();
 }
 
 void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
@@ -215,13 +222,15 @@ void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(true, index);
         m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(true, m_spectrumStreamIndex);
+        m_deviceUISet->setSpectrumScalingFactor(SDR_RX_SCALEF);
     }
     else
     {
         m_deviceUISet->m_spectrum->setDisplayedStream(false, 0);
         m_deviceUISet->m_deviceAPI->setSpectrumSinkInput(false, 0);
+        m_deviceUISet->setSpectrumScalingFactor(SDR_TX_SCALEF);
     }
-            
+
     updateSpectrum();
 
     if (ui->streamLock->isChecked())
@@ -231,8 +240,8 @@ void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
         ui->streamIndex->blockSignals(false);
         m_streamIndex = index;
         displayFrequency();
+        displaySampleRate();
     }
-
 }
 
 void MetisMISOGui::on_streamLock_toggled(bool checked)
@@ -324,6 +333,12 @@ void MetisMISOGui::on_nbRxIndex_currentIndexChanged(int index)
     sendSettings();
 }
 
+void MetisMISOGui::on_txEnable_toggled(bool checked)
+{
+    m_settings.m_txEnable = checked;
+    sendSettings();
+}
+
 void MetisMISOGui::displaySettings()
 {
     blockApplySettings(true);
@@ -332,12 +347,15 @@ void MetisMISOGui::displaySettings()
     ui->spectrumSource->setCurrentIndex(m_spectrumStreamIndex);
     ui->nbRxIndex->setCurrentIndex(m_settings.m_nbReceivers - 1);
     ui->samplerateIndex->setCurrentIndex(m_settings.m_sampleRateIndex);
+    ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->dcBlock->setChecked(m_settings.m_dcBlock);
     ui->iqCorrection->setChecked(m_settings.m_iqCorrection);
     ui->preamp->setChecked(m_settings.m_preamp);
     ui->random->setChecked(m_settings.m_random);
     ui->dither->setChecked(m_settings.m_dither);
     ui->duplex->setChecked(m_settings.m_duplex);
+    ui->nbRxIndex->setCurrentIndex(m_settings.m_nbReceivers - 1);
+    ui->txEnable->setChecked(m_settings.m_txEnable);
     displayFrequency();
     displaySampleRate();
     updateSpectrum();
@@ -434,7 +452,7 @@ void MetisMISOGui::handleInputMessages()
             if (sourceOrSink)
             {
                 m_rxSampleRate = notif->getSampleRate();
-    
+
                 if (istream == 0) {
                     m_settings.m_rx1CenterFrequency = frequency;
                 } else if (istream == 1) {
@@ -451,18 +469,20 @@ void MetisMISOGui::handleInputMessages()
                     m_settings.m_rx7CenterFrequency = frequency;
                 } else if (istream == 7) {
                     m_settings.m_rx8CenterFrequency = frequency;
-                } 
+                }
             }
             else
             {
+                m_txSampleRate = notif->getSampleRate();
                 m_settings.m_txCenterFrequency = frequency;
             }
-            
-            qDebug("MetisMISOGui::handleInputMessages: DSPMIMOSignalNotification: %s stream: %d m_rxSampleRate:%d, CenterFrequency:%llu",
-                    sourceOrSink ? "source" : "sink",
-                    istream,
-                    m_rxSampleRate,
-                    frequency);
+
+            qDebug() << "MetisMISOGui::handleInputMessages: DSPMIMOSignalNotification: "
+                << "sourceOrSink:" << sourceOrSink
+                << "istream:" << istream
+                << "m_rxSampleRate:" << m_rxSampleRate
+                << "m_txSampleRate:" << m_txSampleRate
+                << "frequency:" << frequency;
 
             displayFrequency();
             updateSpectrum();
@@ -510,9 +530,16 @@ void MetisMISOGui::displayFrequency()
 
 void MetisMISOGui::displaySampleRate()
 {
-    int deviceSampleRate = 48000 * (1<<m_settings.m_sampleRateIndex);
-    int sampleRate = deviceSampleRate / (1<<m_settings.m_log2Decim);
-    ui->deviceRateText->setText(tr("%1k").arg((float) sampleRate / 1000));
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    {
+        int deviceSampleRate = 48000 * (1<<m_settings.m_sampleRateIndex);
+        int sampleRate = deviceSampleRate / (1<<m_settings.m_log2Decim);
+        ui->deviceRateText->setText(tr("%1k").arg((float) sampleRate / 1000));
+    }
+    else
+    {
+        ui->deviceRateText->setText(tr("48k"));
+    }
 }
 
 void MetisMISOGui::updateSpectrum()
@@ -541,8 +568,13 @@ void MetisMISOGui::updateSpectrum()
         centerFrequency = 0;
     }
 
-    m_deviceUISet->getSpectrum()->setSampleRate(m_rxSampleRate);
     m_deviceUISet->getSpectrum()->setCenterFrequency(centerFrequency);
+
+    if (m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
+        m_deviceUISet->getSpectrum()->setSampleRate(m_rxSampleRate);
+    } else {
+        m_deviceUISet->getSpectrum()->setSampleRate(m_txSampleRate);
+    }
 }
 
 void MetisMISOGui::openDeviceSettingsDialog(const QPoint& p)
