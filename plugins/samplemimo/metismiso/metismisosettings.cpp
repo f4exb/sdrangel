@@ -45,6 +45,7 @@ MetisMISOSettings::MetisMISOSettings(const MetisMISOSettings& other)
     m_duplex = other.m_duplex;
     m_dcBlock = other.m_dcBlock;
     m_iqCorrection = other.m_iqCorrection;
+    m_txDrive = other.m_txDrive;
     m_useReverseAPI = other.m_useReverseAPI;
     m_reverseAPIAddress = other.m_reverseAPIAddress;
     m_reverseAPIPort = other.m_reverseAPIPort;
@@ -72,6 +73,7 @@ void MetisMISOSettings::resetToDefaults()
     m_duplex = false;
     m_dcBlock = false;
     m_iqCorrection = false;
+    m_txDrive = 15;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -101,10 +103,11 @@ QByteArray MetisMISOSettings::serialize() const
     s.writeBool(17, m_duplex);
     s.writeBool(18, m_dcBlock);
     s.writeBool(19, m_iqCorrection);
-    s.writeBool(20, m_useReverseAPI);
-    s.writeString(21, m_reverseAPIAddress);
-    s.writeU32(22, m_reverseAPIPort);
-    s.writeU32(23, m_reverseAPIDeviceIndex);
+    s.writeU32(20, m_txDrive);
+    s.writeBool(21, m_useReverseAPI);
+    s.writeString(22, m_reverseAPIAddress);
+    s.writeU32(23, m_reverseAPIPort);
+    s.writeU32(24, m_reverseAPIDeviceIndex);
 
     return s.final();
 }
@@ -143,6 +146,7 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
         d.readBool(17, &m_duplex, false);
         d.readBool(18, &m_dcBlock, false);
         d.readBool(19, &m_iqCorrection, false);
+        d.readU32(20, &m_txDrive, 15);
         d.readBool(20, &m_useReverseAPI, false);
         d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(22, &utmp, 0);

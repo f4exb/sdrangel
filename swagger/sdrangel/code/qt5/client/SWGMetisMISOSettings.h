@@ -99,6 +99,9 @@ public:
     qint32 getIqCorrection();
     void setIqCorrection(qint32 iq_correction);
 
+    qint32 getTxDrive();
+    void setTxDrive(qint32 tx_drive);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -171,6 +174,9 @@ private:
 
     qint32 iq_correction;
     bool m_iq_correction_isSet;
+
+    qint32 tx_drive;
+    bool m_tx_drive_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

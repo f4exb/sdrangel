@@ -305,6 +305,7 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         << " m_duplex:" << settings.m_duplex
         << " m_dcBlock:" << settings.m_dcBlock
         << " m_iqCorrection:" << settings.m_iqCorrection
+        << " m_txDrive:" << settings.m_txDrive
         << " m_useReverseAPI: " << settings.m_useReverseAPI
         << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
         << " m_reverseAPIPort: " << settings.m_reverseAPIPort
@@ -396,6 +397,12 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
 
     if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force) {
         reverseAPIKeys.append("iqCorrection");
+    }
+
+    if ((m_settings.m_txDrive != settings.m_txDrive) || force)
+    {
+        reverseAPIKeys.append("txDrive");
+        propagateSettings = true;
     }
 
     if ((m_settings.m_dcBlock != settings.m_dcBlock) ||
@@ -661,6 +668,9 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("iqCorrection")) {
         settings.m_iqCorrection = response.getMetisMisoSettings()->getIqCorrection() != 0;
     }
+    if (deviceSettingsKeys.contains("txDrive")) {
+        settings.m_txDrive = response.getMetisMisoSettings()->getTxDrive();
+    }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getMetisMisoSettings()->getUseReverseApi() != 0;
     }
@@ -696,6 +706,7 @@ void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getMetisMisoSettings()->setDuplex(settings.m_duplex ? 1 : 0);
     response.getMetisMisoSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getMetisMisoSettings()->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    response.getMetisMisoSettings()->setTxDrive(settings.m_txDrive);
     response.getMetisMisoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getMetisMisoSettings()->getReverseApiAddress()) {
@@ -773,6 +784,9 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("iqCorrection") || force) {
         swgMetisMISOSettings->setIqCorrection(settings.m_iqCorrection ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("txDrive") || force) {
+        swgMetisMISOSettings->setTxDrive(settings.m_txDrive);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")

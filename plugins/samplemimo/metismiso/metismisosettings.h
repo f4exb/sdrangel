@@ -40,6 +40,7 @@ struct MetisMISOSettings {
     bool m_duplex;
     bool m_dcBlock;
     bool m_iqCorrection;
+    unsigned int m_txDrive;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

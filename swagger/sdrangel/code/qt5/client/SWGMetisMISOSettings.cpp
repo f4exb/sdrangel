@@ -66,6 +66,8 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
+    tx_drive = 0;
+    m_tx_drive_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -120,6 +122,8 @@ SWGMetisMISOSettings::init() {
     m_dc_block_isSet = false;
     iq_correction = 0;
     m_iq_correction_isSet = false;
+    tx_drive = 0;
+    m_tx_drive_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -132,6 +136,7 @@ SWGMetisMISOSettings::init() {
 
 void
 SWGMetisMISOSettings::cleanup() {
+
 
 
 
@@ -207,6 +212,8 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
     ::SWGSDRangel::setValue(&iq_correction, pJson["iqCorrection"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx_drive, pJson["txDrive"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -288,6 +295,9 @@ SWGMetisMISOSettings::asJsonObject() {
     }
     if(m_iq_correction_isSet){
         obj->insert("iqCorrection", QJsonValue(iq_correction));
+    }
+    if(m_tx_drive_isSet){
+        obj->insert("txDrive", QJsonValue(tx_drive));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -496,6 +506,16 @@ SWGMetisMISOSettings::setIqCorrection(qint32 iq_correction) {
 }
 
 qint32
+SWGMetisMISOSettings::getTxDrive() {
+    return tx_drive;
+}
+void
+SWGMetisMISOSettings::setTxDrive(qint32 tx_drive) {
+    this->tx_drive = tx_drive;
+    this->m_tx_drive_isSet = true;
+}
+
+qint32
 SWGMetisMISOSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -595,6 +615,9 @@ SWGMetisMISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_iq_correction_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_drive_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

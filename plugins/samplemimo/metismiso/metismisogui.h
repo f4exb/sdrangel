@@ -96,6 +96,7 @@ private slots:
     void on_duplex_toggled(bool checked);
     void on_nbRxIndex_currentIndexChanged(int index);
     void on_txEnable_toggled(bool checked);
+    void on_txDrive_valueChanged(int value);
     void openDeviceSettingsDialog(const QPoint& p);
     void updateStatus();
     void updateHardware();

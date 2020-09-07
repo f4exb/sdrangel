@@ -339,6 +339,13 @@ void MetisMISOGui::on_txEnable_toggled(bool checked)
     sendSettings();
 }
 
+void MetisMISOGui::on_txDrive_valueChanged(int value)
+{
+    m_settings.m_txDrive = value;
+    ui->txDriveText->setText(tr("%1").arg(m_settings.m_txDrive));
+    sendSettings();
+}
+
 void MetisMISOGui::displaySettings()
 {
     blockApplySettings(true);
@@ -356,6 +363,8 @@ void MetisMISOGui::displaySettings()
     ui->duplex->setChecked(m_settings.m_duplex);
     ui->nbRxIndex->setCurrentIndex(m_settings.m_nbReceivers - 1);
     ui->txEnable->setChecked(m_settings.m_txEnable);
+    ui->txDrive->setValue(m_settings.m_txDrive);
+    ui->txDriveText->setText(tr("%1").arg(m_settings.m_txDrive));
     displayFrequency();
     displaySampleRate();
     updateSpectrum();

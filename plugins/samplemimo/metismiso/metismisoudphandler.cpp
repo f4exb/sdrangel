@@ -432,6 +432,11 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
     {
         return m_settings.m_rx7CenterFrequency;
     }
+    else if (commandIndex == 18)
+    {
+        c1 = (m_settings.m_txDrive & 0x0F) << 4;
+        return (c1<<24) + (c3<<8) + c4;
+    }
     else if (commandIndex == 36)
     {
         return m_settings.m_rx8CenterFrequency;
