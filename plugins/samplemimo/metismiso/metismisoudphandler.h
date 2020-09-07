@@ -126,6 +126,8 @@ private:
     void fillBuffer(unsigned char *buffer, int& bufferIndex, int iBegin, int iEnd);
     int getCommandValue(int commandIndex);
     void processIQBuffer(unsigned char* buffer);
+    quint64 getRxCenterFrequency(int index);
+    bool getRxIQInversion(int index);
 
 private slots:
     void handleMessages();

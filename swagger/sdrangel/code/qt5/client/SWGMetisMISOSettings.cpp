@@ -32,24 +32,12 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_nb_receivers_isSet = false;
     tx_enable = 0;
     m_tx_enable_isSet = false;
-    rx1_center_frequency = 0;
-    m_rx1_center_frequency_isSet = false;
-    rx2_center_frequency = 0;
-    m_rx2_center_frequency_isSet = false;
-    rx3_center_frequency = 0;
-    m_rx3_center_frequency_isSet = false;
-    rx4_center_frequency = 0;
-    m_rx4_center_frequency_isSet = false;
-    rx5_center_frequency = 0;
-    m_rx5_center_frequency_isSet = false;
-    rx6_center_frequency = 0;
-    m_rx6_center_frequency_isSet = false;
-    rx7_center_frequency = 0;
-    m_rx7_center_frequency_isSet = false;
-    rx8_center_frequency = 0;
-    m_rx8_center_frequency_isSet = false;
-    tx_center_frequency = 0;
+    rx_center_frequencies = new QList<qint64>();
+    m_rx_center_frequencies_isSet = false;
+    tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
+    rx_subsampling_indexes = new QList<qint32>();
+    m_rx_subsampling_indexes_isSet = false;
     sample_rate_index = 0;
     m_sample_rate_index_isSet = false;
     log2_decim = 0;
@@ -88,24 +76,12 @@ SWGMetisMISOSettings::init() {
     m_nb_receivers_isSet = false;
     tx_enable = 0;
     m_tx_enable_isSet = false;
-    rx1_center_frequency = 0;
-    m_rx1_center_frequency_isSet = false;
-    rx2_center_frequency = 0;
-    m_rx2_center_frequency_isSet = false;
-    rx3_center_frequency = 0;
-    m_rx3_center_frequency_isSet = false;
-    rx4_center_frequency = 0;
-    m_rx4_center_frequency_isSet = false;
-    rx5_center_frequency = 0;
-    m_rx5_center_frequency_isSet = false;
-    rx6_center_frequency = 0;
-    m_rx6_center_frequency_isSet = false;
-    rx7_center_frequency = 0;
-    m_rx7_center_frequency_isSet = false;
-    rx8_center_frequency = 0;
-    m_rx8_center_frequency_isSet = false;
-    tx_center_frequency = 0;
+    rx_center_frequencies = new QList<qint64>();
+    m_rx_center_frequencies_isSet = false;
+    tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
+    rx_subsampling_indexes = new QList<qint32>();
+    m_rx_subsampling_indexes_isSet = false;
     sample_rate_index = 0;
     m_sample_rate_index_isSet = false;
     log2_decim = 0;
@@ -151,12 +127,6 @@ SWGMetisMISOSettings::cleanup() {
 
 
 
-
-
-
-
-
-
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -179,24 +149,12 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&tx_enable, pJson["txEnable"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rx1_center_frequency, pJson["rx1CenterFrequency"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rx2_center_frequency, pJson["rx2CenterFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&rx_center_frequencies, pJson["rxCenterFrequencies"], "QList", "qint64");
+    ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&rx3_center_frequency, pJson["rx3CenterFrequency"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rx4_center_frequency, pJson["rx4CenterFrequency"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&rx5_center_frequency, pJson["rx5CenterFrequency"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&rx6_center_frequency, pJson["rx6CenterFrequency"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&rx7_center_frequency, pJson["rx7CenterFrequency"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&rx8_center_frequency, pJson["rx8CenterFrequency"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint32", "");
-    
+    ::SWGSDRangel::setValue(&rx_subsampling_indexes, pJson["rxSubsamplingIndexes"], "QList", "qint32");
     ::SWGSDRangel::setValue(&sample_rate_index, pJson["sampleRateIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
@@ -245,32 +203,14 @@ SWGMetisMISOSettings::asJsonObject() {
     if(m_tx_enable_isSet){
         obj->insert("txEnable", QJsonValue(tx_enable));
     }
-    if(m_rx1_center_frequency_isSet){
-        obj->insert("rx1CenterFrequency", QJsonValue(rx1_center_frequency));
-    }
-    if(m_rx2_center_frequency_isSet){
-        obj->insert("rx2CenterFrequency", QJsonValue(rx2_center_frequency));
-    }
-    if(m_rx3_center_frequency_isSet){
-        obj->insert("rx3CenterFrequency", QJsonValue(rx3_center_frequency));
-    }
-    if(m_rx4_center_frequency_isSet){
-        obj->insert("rx4CenterFrequency", QJsonValue(rx4_center_frequency));
-    }
-    if(m_rx5_center_frequency_isSet){
-        obj->insert("rx5CenterFrequency", QJsonValue(rx5_center_frequency));
-    }
-    if(m_rx6_center_frequency_isSet){
-        obj->insert("rx6CenterFrequency", QJsonValue(rx6_center_frequency));
-    }
-    if(m_rx7_center_frequency_isSet){
-        obj->insert("rx7CenterFrequency", QJsonValue(rx7_center_frequency));
-    }
-    if(m_rx8_center_frequency_isSet){
-        obj->insert("rx8CenterFrequency", QJsonValue(rx8_center_frequency));
+    if(rx_center_frequencies && rx_center_frequencies->size() > 0){
+        toJsonArray((QList<void*>*)rx_center_frequencies, obj, "rxCenterFrequencies", "");
     }
     if(m_tx_center_frequency_isSet){
         obj->insert("txCenterFrequency", QJsonValue(tx_center_frequency));
+    }
+    if(rx_subsampling_indexes && rx_subsampling_indexes->size() > 0){
+        toJsonArray((QList<void*>*)rx_subsampling_indexes, obj, "rxSubsamplingIndexes", "");
     }
     if(m_sample_rate_index_isSet){
         obj->insert("sampleRateIndex", QJsonValue(sample_rate_index));
@@ -335,94 +275,34 @@ SWGMetisMISOSettings::setTxEnable(qint32 tx_enable) {
     this->m_tx_enable_isSet = true;
 }
 
-qint32
-SWGMetisMISOSettings::getRx1CenterFrequency() {
-    return rx1_center_frequency;
+QList<qint64>*
+SWGMetisMISOSettings::getRxCenterFrequencies() {
+    return rx_center_frequencies;
 }
 void
-SWGMetisMISOSettings::setRx1CenterFrequency(qint32 rx1_center_frequency) {
-    this->rx1_center_frequency = rx1_center_frequency;
-    this->m_rx1_center_frequency_isSet = true;
+SWGMetisMISOSettings::setRxCenterFrequencies(QList<qint64>* rx_center_frequencies) {
+    this->rx_center_frequencies = rx_center_frequencies;
+    this->m_rx_center_frequencies_isSet = true;
 }
 
-qint32
-SWGMetisMISOSettings::getRx2CenterFrequency() {
-    return rx2_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx2CenterFrequency(qint32 rx2_center_frequency) {
-    this->rx2_center_frequency = rx2_center_frequency;
-    this->m_rx2_center_frequency_isSet = true;
-}
-
-qint32
-SWGMetisMISOSettings::getRx3CenterFrequency() {
-    return rx3_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx3CenterFrequency(qint32 rx3_center_frequency) {
-    this->rx3_center_frequency = rx3_center_frequency;
-    this->m_rx3_center_frequency_isSet = true;
-}
-
-qint32
-SWGMetisMISOSettings::getRx4CenterFrequency() {
-    return rx4_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx4CenterFrequency(qint32 rx4_center_frequency) {
-    this->rx4_center_frequency = rx4_center_frequency;
-    this->m_rx4_center_frequency_isSet = true;
-}
-
-qint32
-SWGMetisMISOSettings::getRx5CenterFrequency() {
-    return rx5_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx5CenterFrequency(qint32 rx5_center_frequency) {
-    this->rx5_center_frequency = rx5_center_frequency;
-    this->m_rx5_center_frequency_isSet = true;
-}
-
-qint32
-SWGMetisMISOSettings::getRx6CenterFrequency() {
-    return rx6_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx6CenterFrequency(qint32 rx6_center_frequency) {
-    this->rx6_center_frequency = rx6_center_frequency;
-    this->m_rx6_center_frequency_isSet = true;
-}
-
-qint32
-SWGMetisMISOSettings::getRx7CenterFrequency() {
-    return rx7_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx7CenterFrequency(qint32 rx7_center_frequency) {
-    this->rx7_center_frequency = rx7_center_frequency;
-    this->m_rx7_center_frequency_isSet = true;
-}
-
-qint32
-SWGMetisMISOSettings::getRx8CenterFrequency() {
-    return rx8_center_frequency;
-}
-void
-SWGMetisMISOSettings::setRx8CenterFrequency(qint32 rx8_center_frequency) {
-    this->rx8_center_frequency = rx8_center_frequency;
-    this->m_rx8_center_frequency_isSet = true;
-}
-
-qint32
+qint64
 SWGMetisMISOSettings::getTxCenterFrequency() {
     return tx_center_frequency;
 }
 void
-SWGMetisMISOSettings::setTxCenterFrequency(qint32 tx_center_frequency) {
+SWGMetisMISOSettings::setTxCenterFrequency(qint64 tx_center_frequency) {
     this->tx_center_frequency = tx_center_frequency;
     this->m_tx_center_frequency_isSet = true;
+}
+
+QList<qint32>*
+SWGMetisMISOSettings::getRxSubsamplingIndexes() {
+    return rx_subsampling_indexes;
+}
+void
+SWGMetisMISOSettings::setRxSubsamplingIndexes(QList<qint32>* rx_subsampling_indexes) {
+    this->rx_subsampling_indexes = rx_subsampling_indexes;
+    this->m_rx_subsampling_indexes_isSet = true;
 }
 
 qint32
@@ -566,31 +446,19 @@ SWGMetisMISOSettings::isSet(){
         if(m_tx_enable_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_rx1_center_frequency_isSet){
+        if(m_rx_center_frequencies_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_rx2_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx3_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx4_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx5_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx6_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx7_center_frequency_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_rx8_center_frequency_isSet){
+        if(rx_center_frequencies && (rx_center_frequencies->size() > 0)){
             isObjectUpdated = true; break;
         }
         if(m_tx_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx_subsampling_indexes_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(rx_subsampling_indexes && (rx_subsampling_indexes->size() > 0)){
             isObjectUpdated = true; break;
         }
         if(m_sample_rate_index_isSet){

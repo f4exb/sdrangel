@@ -28,14 +28,8 @@ MetisMISOSettings::MetisMISOSettings(const MetisMISOSettings& other)
 {
     m_nbReceivers = other.m_nbReceivers;
     m_txEnable = other.m_txEnable;
-    m_rx1CenterFrequency = other.m_rx1CenterFrequency;
-    m_rx2CenterFrequency = other.m_rx2CenterFrequency;
-    m_rx3CenterFrequency = other.m_rx3CenterFrequency;
-    m_rx4CenterFrequency = other.m_rx4CenterFrequency;
-    m_rx5CenterFrequency = other.m_rx5CenterFrequency;
-    m_rx6CenterFrequency = other.m_rx6CenterFrequency;
-    m_rx7CenterFrequency = other.m_rx7CenterFrequency;
-    m_rx8CenterFrequency = other.m_rx8CenterFrequency;
+    std::copy(other.m_rxCenterFrequencies, other.m_rxCenterFrequencies + m_maxReceivers, m_rxCenterFrequencies);
+    std::copy(other.m_rxSubsamplingIndexes, other.m_rxSubsamplingIndexes + m_maxReceivers, m_rxSubsamplingIndexes);
     m_txCenterFrequency = other.m_txCenterFrequency;
     m_sampleRateIndex = other.m_sampleRateIndex;
     m_log2Decim = other.m_log2Decim;
@@ -56,14 +50,8 @@ void MetisMISOSettings::resetToDefaults()
 {
     m_nbReceivers = 1;
     m_txEnable = false;
-    m_rx1CenterFrequency = 7074000;
-    m_rx2CenterFrequency = 7074000;
-    m_rx3CenterFrequency = 7074000;
-    m_rx4CenterFrequency = 7074000;
-    m_rx5CenterFrequency = 7074000;
-    m_rx6CenterFrequency = 7074000;
-    m_rx7CenterFrequency = 7074000;
-    m_rx8CenterFrequency = 7074000;
+    std::fill(m_rxCenterFrequencies, m_rxCenterFrequencies + m_maxReceivers, 7074000);
+    std::fill(m_rxSubsamplingIndexes, m_rxSubsamplingIndexes + m_maxReceivers, 0);
     m_txCenterFrequency = 7074000;
     m_sampleRateIndex = 0; // 48000 kS/s
     m_log2Decim = 0;
@@ -86,28 +74,26 @@ QByteArray MetisMISOSettings::serialize() const
 
     s.writeU32(1, m_nbReceivers);
     s.writeBool(2, m_txEnable);
-    s.writeU64(3, m_rx1CenterFrequency);
-    s.writeU64(4, m_rx2CenterFrequency);
-    s.writeU64(5, m_rx3CenterFrequency);
-    s.writeU64(6, m_rx4CenterFrequency);
-    s.writeU64(7, m_rx5CenterFrequency);
-    s.writeU64(8, m_rx6CenterFrequency);
-    s.writeU64(9, m_rx7CenterFrequency);
-    s.writeU64(10, m_rx8CenterFrequency);
-    s.writeU64(11, m_txCenterFrequency);
-    s.writeU32(12, m_sampleRateIndex);
-    s.writeU32(13, m_log2Decim);
-    s.writeBool(14, m_preamp);
-    s.writeBool(15, m_random);
-    s.writeBool(16, m_dither);
-    s.writeBool(17, m_duplex);
-    s.writeBool(18, m_dcBlock);
-    s.writeBool(19, m_iqCorrection);
-    s.writeU32(20, m_txDrive);
-    s.writeBool(21, m_useReverseAPI);
-    s.writeString(22, m_reverseAPIAddress);
-    s.writeU32(23, m_reverseAPIPort);
-    s.writeU32(24, m_reverseAPIDeviceIndex);
+    s.writeU64(3, m_txCenterFrequency);
+    s.writeU32(4, m_sampleRateIndex);
+    s.writeU32(5, m_log2Decim);
+    s.writeBool(6, m_preamp);
+    s.writeBool(7, m_random);
+    s.writeBool(8, m_dither);
+    s.writeBool(9, m_duplex);
+    s.writeBool(10, m_dcBlock);
+    s.writeBool(11, m_iqCorrection);
+    s.writeU32(12, m_txDrive);
+    s.writeBool(13, m_useReverseAPI);
+    s.writeString(14, m_reverseAPIAddress);
+    s.writeU32(15, m_reverseAPIPort);
+    s.writeU32(16, m_reverseAPIDeviceIndex);
+
+    for (int i = 0; i < m_maxReceivers; i++)
+    {
+        s.writeU64(30+i, m_rxCenterFrequencies[i]);
+        s.writeU32(50+i, m_rxSubsamplingIndexes[i]);
+    }
 
     return s.final();
 }
@@ -129,27 +115,19 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
 
         d.readU32(1, &m_nbReceivers, 1);
         d.readBool(2, &m_txEnable, false);
-        d.readU64(3, &m_rx1CenterFrequency, 7074000);
-        d.readU64(4, &m_rx2CenterFrequency, 7074000);
-        d.readU64(5, &m_rx3CenterFrequency, 7074000);
-        d.readU64(6, &m_rx4CenterFrequency, 7074000);
-        d.readU64(7, &m_rx5CenterFrequency, 7074000);
-        d.readU64(8, &m_rx6CenterFrequency, 7074000);
-        d.readU64(9, &m_rx7CenterFrequency, 7074000);
-        d.readU64(10, &m_rx8CenterFrequency, 7074000);
-        d.readU64(11, &m_txCenterFrequency, 7074000);
-        d.readU32(12, &m_sampleRateIndex, 0);
-        d.readU32(13, &m_log2Decim, 0);
-        d.readBool(14, &m_preamp, false);
-        d.readBool(15, &m_random, false);
-        d.readBool(16, &m_dither, false);
-        d.readBool(17, &m_duplex, false);
-        d.readBool(18, &m_dcBlock, false);
-        d.readBool(19, &m_iqCorrection, false);
-        d.readU32(20, &m_txDrive, 15);
-        d.readBool(20, &m_useReverseAPI, false);
-        d.readString(21, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(22, &utmp, 0);
+        d.readU64(3, &m_txCenterFrequency, 7074000);
+        d.readU32(4, &m_sampleRateIndex, 0);
+        d.readU32(5, &m_log2Decim, 0);
+        d.readBool(6, &m_preamp, false);
+        d.readBool(7, &m_random, false);
+        d.readBool(8, &m_dither, false);
+        d.readBool(9, &m_duplex, false);
+        d.readBool(10, &m_dcBlock, false);
+        d.readBool(11, &m_iqCorrection, false);
+        d.readU32(12, &m_txDrive, 15);
+        d.readBool(13, &m_useReverseAPI, false);
+        d.readString(14, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(15, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
@@ -157,8 +135,14 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(23, &utmp, 0);
+        d.readU32(16, &utmp, 0);
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+
+        for (int i = 0; i < m_maxReceivers; i++)
+        {
+            d.readU64(30+i, &m_rxCenterFrequencies[i], 7074000);
+            d.readU32(50+i, &m_rxSubsamplingIndexes[i], 0);
+        }
 
         return true;
     }

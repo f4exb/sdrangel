@@ -76,6 +76,7 @@ private:
 	void displaySettings();
     void displayFrequency();
     void displaySampleRate();
+    void updateSubsamplingIndex();
     void updateSpectrum();
 	void sendSettings();
 
@@ -88,6 +89,7 @@ private slots:
     void on_centerFrequency_changed(quint64 value);
     void on_samplerateIndex_currentIndexChanged(int index);
     void on_log2Decim_currentIndexChanged(int index);
+    void on_subsamplingIndex_currentIndexChanged(int index);
     void on_dcBlock_toggled(bool checked);
     void on_iqCorrection_toggled(bool checked);
     void on_preamp_toggled(bool checked);

@@ -10,33 +10,20 @@ MetisMISOSettings:
         Enable Tx
         * 0 - disabled sends null payload to Metis device
         * 1 - enabled sends Tx payload to Metis device
-    rx1CenterFrequency:
-      type: integer
-      format: uint64
-    rx2CenterFrequency:
-      type: integer
-      format: uint64
-    rx3CenterFrequency:
-      type: integer
-      format: uint64
-    rx4CenterFrequency:
-      type: integer
-      format: uint64
-    rx5CenterFrequency:
-      type: integer
-      format: uint64
-    rx6CenterFrequency:
-      type: integer
-      format: uint64
-    rx7CenterFrequency:
-      type: integer
-      format: uint64
-    rx8CenterFrequency:
-      type: integer
-      format: uint64
+    rxCenterFrequencies:
+      description: center fequencies of receivers
+      type: array
+      items:
+        type: integer
+        format: int64
     txCenterFrequency:
       type: integer
-      format: uint64
+      format: int64
+    rxSubsamplingIndexes:
+      description: subsampling band indexes of receivers
+      type: array
+      items:
+        type: integer
     sampleRateIndex:
       type: integer
     log2Decim:

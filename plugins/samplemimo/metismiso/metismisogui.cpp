@@ -104,24 +104,8 @@ void MetisMISOGui::resetToDefaults()
 
 qint64 MetisMISOGui::getCenterFrequency() const
 {
-    if (m_streamIndex == 0) {
-        return m_settings.m_rx1CenterFrequency;
-    } else if (m_streamIndex == 1) {
-        return m_settings.m_rx2CenterFrequency;
-    } else if (m_streamIndex == 2) {
-        return m_settings.m_rx3CenterFrequency;
-    } else if (m_streamIndex == 3) {
-        return m_settings.m_rx4CenterFrequency;
-    } else if (m_streamIndex == 4) {
-        return m_settings.m_rx5CenterFrequency;
-    } else if (m_streamIndex == 5) {
-        return m_settings.m_rx6CenterFrequency;
-    } else if (m_streamIndex == 6) {
-        return m_settings.m_rx7CenterFrequency;
-    } else if (m_streamIndex == 7) {
-        return m_settings.m_rx8CenterFrequency;
-    } else if (m_streamIndex == 8) {
-        return m_settings.m_txCenterFrequency;
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+        return m_settings.m_rxCenterFrequencies[m_streamIndex];
     } else {
         return 0;
     }
@@ -129,26 +113,10 @@ qint64 MetisMISOGui::getCenterFrequency() const
 
 void MetisMISOGui::setCenterFrequency(qint64 centerFrequency)
 {
-    if (m_streamIndex == 0) {
-        m_settings.m_rx1CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 1) {
-        m_settings.m_rx2CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 2) {
-        m_settings.m_rx3CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 3) {
-        m_settings.m_rx4CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 4) {
-        m_settings.m_rx5CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 5) {
-        m_settings.m_rx6CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 6) {
-        m_settings.m_rx7CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 7) {
-        m_settings.m_rx8CenterFrequency = centerFrequency;
-    } else if (m_streamIndex == 8) {
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+        m_settings.m_rxCenterFrequencies[m_streamIndex] = centerFrequency;
+    } else if (m_streamIndex == MetisMISOSettings::m_maxReceivers) {
         m_settings.m_txCenterFrequency = centerFrequency;
-    } else {
-        m_settings.m_txCenterFrequency = 0;
     }
 
     displaySettings();
@@ -210,6 +178,7 @@ void MetisMISOGui::on_streamIndex_currentIndexChanged(int index)
 
     m_streamIndex = index;
 
+    updateSubsamplingIndex();
     displayFrequency();
     displaySampleRate();
 }
@@ -239,6 +208,7 @@ void MetisMISOGui::on_spectrumSource_currentIndexChanged(int index)
         ui->streamIndex->setCurrentIndex(index);
         ui->streamIndex->blockSignals(false);
         m_streamIndex = index;
+        updateSubsamplingIndex();
         displayFrequency();
         displaySampleRate();
     }
@@ -253,26 +223,10 @@ void MetisMISOGui::on_streamLock_toggled(bool checked)
 
 void MetisMISOGui::on_centerFrequency_changed(quint64 value)
 {
-    if (m_streamIndex == 0) {
-        m_settings.m_rx1CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 1) {
-        m_settings.m_rx2CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 2) {
-        m_settings.m_rx3CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 3) {
-        m_settings.m_rx4CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 4) {
-        m_settings.m_rx5CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 5) {
-        m_settings.m_rx6CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 6) {
-        m_settings.m_rx7CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 7) {
-        m_settings.m_rx8CenterFrequency = value * 1000;
-    } else if (m_streamIndex == 8) {
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+        m_settings.m_rxCenterFrequencies[m_streamIndex] = value * 1000;
+    } else if (m_streamIndex == MetisMISOSettings::m_maxReceivers) {
         m_settings.m_txCenterFrequency = value * 1000;
-    } else {
-        m_settings.m_txCenterFrequency = 0;
     }
 
     sendSettings();
@@ -287,8 +241,20 @@ void MetisMISOGui::on_samplerateIndex_currentIndexChanged(int index)
 void MetisMISOGui::on_log2Decim_currentIndexChanged(int index)
 {
     m_settings.m_log2Decim = index < 0 ? 0 : index > 3 ? 3 : index;
-    displaySampleRate();
+    // displaySampleRate();
     sendSettings();
+}
+
+void MetisMISOGui::on_subsamplingIndex_currentIndexChanged(int index)
+{
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) // valid for Rx only
+    {
+        m_settings.m_rxSubsamplingIndexes[m_streamIndex] = index;
+        ui->subsamplingIndex->setToolTip(tr("Subsampling band index [%1 - %2 MHz]")
+            .arg(index*61.44).arg((index+1)*61.44));
+        displayFrequency();
+        sendSettings();
+    }
 }
 
 void MetisMISOGui::on_dcBlock_toggled(bool checked)
@@ -365,6 +331,7 @@ void MetisMISOGui::displaySettings()
     ui->txEnable->setChecked(m_settings.m_txEnable);
     ui->txDrive->setValue(m_settings.m_txDrive);
     ui->txDriveText->setText(tr("%1").arg(m_settings.m_txDrive));
+    updateSubsamplingIndex();
     displayFrequency();
     displaySampleRate();
     updateSpectrum();
@@ -462,22 +429,8 @@ void MetisMISOGui::handleInputMessages()
             {
                 m_rxSampleRate = notif->getSampleRate();
 
-                if (istream == 0) {
-                    m_settings.m_rx1CenterFrequency = frequency;
-                } else if (istream == 1) {
-                    m_settings.m_rx2CenterFrequency = frequency;
-                } else if (istream == 2) {
-                    m_settings.m_rx3CenterFrequency = frequency;
-                } else if (istream == 3) {
-                    m_settings.m_rx4CenterFrequency = frequency;
-                } else if (istream == 4) {
-                    m_settings.m_rx5CenterFrequency = frequency;
-                } else if (istream == 5) {
-                    m_settings.m_rx6CenterFrequency = frequency;
-                } else if (istream == 6) {
-                    m_settings.m_rx7CenterFrequency = frequency;
-                } else if (istream == 7) {
-                    m_settings.m_rx8CenterFrequency = frequency;
+                if (istream < MetisMISOSettings::m_maxReceivers) {
+                    m_settings.m_rxCenterFrequencies[istream] = frequency;
                 }
             }
             else
@@ -494,6 +447,7 @@ void MetisMISOGui::handleInputMessages()
                 << "frequency:" << frequency;
 
             displayFrequency();
+            displaySampleRate();
             updateSpectrum();
 
             delete message;
@@ -512,26 +466,21 @@ void MetisMISOGui::displayFrequency()
 {
     qint64 centerFrequency;
 
-    if (m_streamIndex == 0) {
-        centerFrequency = m_settings.m_rx1CenterFrequency;
-    } else if (m_streamIndex == 1) {
-        centerFrequency = m_settings.m_rx2CenterFrequency;
-    } else if (m_streamIndex == 2) {
-        centerFrequency = m_settings.m_rx3CenterFrequency;
-    } else if (m_streamIndex == 3) {
-        centerFrequency = m_settings.m_rx4CenterFrequency;
-    } else if (m_streamIndex == 4) {
-        centerFrequency = m_settings.m_rx5CenterFrequency;
-    } else if (m_streamIndex == 5) {
-        centerFrequency = m_settings.m_rx6CenterFrequency;
-    } else if (m_streamIndex == 6) {
-        centerFrequency = m_settings.m_rx7CenterFrequency;
-    } else if (m_streamIndex == 7) {
-        centerFrequency = m_settings.m_rx8CenterFrequency;
-    } else if (m_streamIndex == 8) {
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    {
+        int subsamplingIndex = m_settings.m_rxSubsamplingIndexes[m_streamIndex];
+        centerFrequency = m_settings.m_rxCenterFrequencies[m_streamIndex];
+        ui->centerFrequency->setValueRange(7, subsamplingIndex*61440, (subsamplingIndex+1)*61440);
+    }
+    else if (m_streamIndex == MetisMISOSettings::m_maxReceivers)
+    {
         centerFrequency = m_settings.m_txCenterFrequency;
-    } else {
+        ui->centerFrequency->setValueRange(7, 0, 61440);
+    }
+    else
+    {
         centerFrequency = 0;
+        ui->centerFrequency->setValueRange(7, 0, 61440);
     }
 
     ui->centerFrequency->setValue(centerFrequency / 1000);
@@ -539,15 +488,10 @@ void MetisMISOGui::displayFrequency()
 
 void MetisMISOGui::displaySampleRate()
 {
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
-    {
-        int deviceSampleRate = 48000 * (1<<m_settings.m_sampleRateIndex);
-        int sampleRate = deviceSampleRate / (1<<m_settings.m_log2Decim);
-        ui->deviceRateText->setText(tr("%1k").arg((float) sampleRate / 1000));
-    }
-    else
-    {
-        ui->deviceRateText->setText(tr("48k"));
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
+        ui->deviceRateText->setText(tr("%1k").arg((float) m_rxSampleRate / 1000));
+    } else {
+        ui->deviceRateText->setText(tr("%1k").arg((float) m_txSampleRate / 1000));
     }
 }
 
@@ -555,23 +499,9 @@ void MetisMISOGui::updateSpectrum()
 {
     qint64 centerFrequency;
 
-    if (m_spectrumStreamIndex == 0) {
-        centerFrequency = m_settings.m_rx1CenterFrequency;
-    } else if (m_spectrumStreamIndex == 1) {
-        centerFrequency = m_settings.m_rx2CenterFrequency;
-    } else if (m_spectrumStreamIndex == 2) {
-        centerFrequency = m_settings.m_rx3CenterFrequency;
-    } else if (m_spectrumStreamIndex == 3) {
-        centerFrequency = m_settings.m_rx4CenterFrequency;
-    } else if (m_spectrumStreamIndex == 4) {
-        centerFrequency = m_settings.m_rx5CenterFrequency;
-    } else if (m_spectrumStreamIndex == 5) {
-        centerFrequency = m_settings.m_rx6CenterFrequency;
-    } else if (m_spectrumStreamIndex == 6) {
-        centerFrequency = m_settings.m_rx7CenterFrequency;
-    } else if (m_spectrumStreamIndex == 7) {
-        centerFrequency = m_settings.m_rx8CenterFrequency;
-    } else if (m_spectrumStreamIndex == 8) {
+    if (m_spectrumStreamIndex < MetisMISOSettings::m_maxReceivers) {
+        centerFrequency = m_settings.m_rxCenterFrequencies[m_spectrumStreamIndex];
+    } else if (m_spectrumStreamIndex == MetisMISOSettings::m_maxReceivers) {
         centerFrequency = m_settings.m_txCenterFrequency;
     } else {
         centerFrequency = 0;
@@ -584,6 +514,21 @@ void MetisMISOGui::updateSpectrum()
     } else {
         m_deviceUISet->getSpectrum()->setSampleRate(m_txSampleRate);
     }
+}
+
+void MetisMISOGui::updateSubsamplingIndex()
+{
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    {
+        ui->subsamplingIndex->setEnabled(true);
+        ui->subsamplingIndex->setCurrentIndex(m_settings.m_rxSubsamplingIndexes[m_streamIndex]);
+    }
+    else
+    {
+        ui->subsamplingIndex->setEnabled(false);
+        ui->subsamplingIndex->setToolTip("No subsampling for Tx");
+    }
+
 }
 
 void MetisMISOGui::openDeviceSettingsDialog(const QPoint& p)

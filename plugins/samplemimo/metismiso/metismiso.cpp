@@ -194,15 +194,9 @@ int MetisMISO::getSourceSampleRate(int index) const
 
 quint64 MetisMISO::getSourceCenterFrequency(int index) const
 {
-    switch(index)
-    {
-    case 0:
-        return m_settings.m_rx1CenterFrequency;
-        break;
-    case 1:
-        return m_settings.m_rx2CenterFrequency;
-        break;
-    default:
+    if (index < MetisMISOSettings::m_maxReceivers) {
+        return m_settings.m_rxCenterFrequencies[index];
+    } else {
         return 0;
     }
 }
@@ -211,13 +205,9 @@ void MetisMISO::setSourceCenterFrequency(qint64 centerFrequency, int index)
 {
     MetisMISOSettings settings = m_settings; // note: calls copy constructor
 
-    if (index < 2)
+    if (index < MetisMISOSettings::m_maxReceivers)
     {
-        if (index == 0) {
-            settings.m_rx1CenterFrequency = centerFrequency;
-        } else {
-            settings.m_rx2CenterFrequency = centerFrequency;
-        }
+        settings.m_rxCenterFrequencies[index];
 
         MsgConfigureMetisMISO* message = MsgConfigureMetisMISO::create(settings, false);
         m_inputMessageQueue.push(message);
@@ -288,16 +278,26 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
     qDebug() << "MetisMISO::applySettings: "
         << " m_nbReceivers:" << settings.m_nbReceivers
         << " m_txEnable:" << settings.m_txEnable
-        << " m_rx1CenterFrequency:" << settings.m_rx1CenterFrequency
-        << " m_rx2CenterFrequency:" << settings.m_rx2CenterFrequency
-        << " m_rx3CenterFrequency:" << settings.m_rx3CenterFrequency
-        << " m_rx4CenterFrequency:" << settings.m_rx4CenterFrequency
-        << " m_rx5CenterFrequency:" << settings.m_rx5CenterFrequency
-        << " m_rx6CenterFrequency:" << settings.m_rx6CenterFrequency
-        << " m_rx7CenterFrequency:" << settings.m_rx7CenterFrequency
-        << " m_rx8CenterFrequency:" << settings.m_rx8CenterFrequency
-        << " m_txCenterFrequency:" << settings.m_txCenterFrequency
-        << " m_sampleRateIndex:" << settings.m_sampleRateIndex
+        << " m_rx1CenterFrequencies: ["
+        << " 1:" << settings.m_rxCenterFrequencies[0]
+        << " 2:" << settings.m_rxCenterFrequencies[1]
+        << " 3:" << settings.m_rxCenterFrequencies[2]
+        << " 4:" << settings.m_rxCenterFrequencies[3]
+        << " 5:" << settings.m_rxCenterFrequencies[4]
+        << " 6:" << settings.m_rxCenterFrequencies[5]
+        << " 7:" << settings.m_rxCenterFrequencies[6]
+        << " 8:" << settings.m_rxCenterFrequencies[7]
+        << " ] m_txCenterFrequency:" << settings.m_txCenterFrequency
+        << " m_rxSubsamplingIndexes: ["
+        << " 1:"<< settings.m_rxSubsamplingIndexes[0]
+        << " 2:"<< settings.m_rxSubsamplingIndexes[1]
+        << " 3:"<< settings.m_rxSubsamplingIndexes[2]
+        << " 4:"<< settings.m_rxSubsamplingIndexes[3]
+        << " 5:"<< settings.m_rxSubsamplingIndexes[4]
+        << " 6:"<< settings.m_rxSubsamplingIndexes[5]
+        << " 7:"<< settings.m_rxSubsamplingIndexes[6]
+        << " 8:"<< settings.m_rxSubsamplingIndexes[7]
+        << " ] m_sampleRateIndex:" << settings.m_sampleRateIndex
         << " m_log2Decim:" << settings.m_log2Decim
         << " m_preamp:" << settings.m_preamp
         << " m_random:" << settings.m_random
@@ -325,52 +325,19 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         propagateSettings = true;
     }
 
-    if ((m_settings.m_rx1CenterFrequency != settings.m_rx1CenterFrequency) || force)
+    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
     {
-        reverseAPIKeys.append("rx1CenterFrequency");
-        propagateSettings = true;
-    }
+        if ((m_settings.m_rxCenterFrequencies[i] != settings.m_rxCenterFrequencies[i]) || force)
+        {
+            reverseAPIKeys.append(QString("rx%1CenterFrequency").arg(i+1));
+            propagateSettings = true;
+        }
 
-    if ((m_settings.m_rx2CenterFrequency != settings.m_rx2CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx2CenterFrequency");
-        propagateSettings = true;
-    }
-
-    if ((m_settings.m_rx3CenterFrequency != settings.m_rx3CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx3CenterFrequency");
-        propagateSettings = true;
-    }
-
-    if ((m_settings.m_rx4CenterFrequency != settings.m_rx4CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx4CenterFrequency");
-        propagateSettings = true;
-    }
-
-    if ((m_settings.m_rx5CenterFrequency != settings.m_rx5CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx5CenterFrequency");
-        propagateSettings = true;
-    }
-
-    if ((m_settings.m_rx6CenterFrequency != settings.m_rx6CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx6CenterFrequency");
-        propagateSettings = true;
-    }
-
-    if ((m_settings.m_rx7CenterFrequency != settings.m_rx7CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx7CenterFrequency");
-        propagateSettings = true;
-    }
-
-    if ((m_settings.m_rx8CenterFrequency != settings.m_rx8CenterFrequency) || force)
-    {
-        reverseAPIKeys.append("rx8CenterFrequency");
-        propagateSettings = true;
+        if ((m_settings.m_rxSubsamplingIndexes[i] != settings.m_rxSubsamplingIndexes[i]) || force)
+        {
+            reverseAPIKeys.append(QString("rx%1SubsamplingIndex").arg(i+1));
+            propagateSettings = true;
+        }
     }
 
     if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
@@ -412,92 +379,18 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         m_deviceAPI->configureCorrections(settings.m_dcBlock, settings.m_iqCorrection, 1);
     }
 
-    if ((m_settings.m_rx1CenterFrequency != settings.m_rx1CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
     {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx1Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx1CenterFrequency, true, 0);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx1Notif);
-    }
-
-    if ((m_settings.m_rx2CenterFrequency != settings.m_rx2CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx2Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx2CenterFrequency, true, 1);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx2Notif);
-    }
-
-    if ((m_settings.m_rx3CenterFrequency != settings.m_rx3CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx3Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx3CenterFrequency, true, 2);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx3Notif);
-    }
-
-    if ((m_settings.m_rx4CenterFrequency != settings.m_rx4CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx4Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx4CenterFrequency, true, 3);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx4Notif);
-    }
-
-    if ((m_settings.m_rx5CenterFrequency != settings.m_rx5CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx5Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx5CenterFrequency, true, 4);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx5Notif);
-    }
-
-    if ((m_settings.m_rx6CenterFrequency != settings.m_rx6CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx6Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx6CenterFrequency, true, 5);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx6Notif);
-    }
-
-    if ((m_settings.m_rx7CenterFrequency != settings.m_rx7CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx7Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx7CenterFrequency, true, 6);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx7Notif);
-    }
-
-    if ((m_settings.m_rx8CenterFrequency != settings.m_rx8CenterFrequency) ||
-        (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
-        (m_settings.m_log2Decim != settings.m_log2Decim) || force)
-    {
-        int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
-        int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
-        DSPMIMOSignalNotification *engineRx8Notif = new DSPMIMOSignalNotification(
-            sampleRate, settings.m_rx8CenterFrequency, true, 7);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRx8Notif);
+        if ((m_settings.m_rxCenterFrequencies[i] != settings.m_rxCenterFrequencies[i]) ||
+            (m_settings.m_sampleRateIndex != settings.m_sampleRateIndex) ||
+            (m_settings.m_log2Decim != settings.m_log2Decim) || force)
+        {
+            int devSampleRate = (1<<settings.m_sampleRateIndex) * 48000;
+            int sampleRate = devSampleRate / (1<<settings.m_log2Decim);
+            DSPMIMOSignalNotification *engineRxNotif = new DSPMIMOSignalNotification(
+                sampleRate, settings.m_rxCenterFrequencies[i], true, i);
+            m_deviceAPI->getDeviceEngineInputMessageQueue()->push(engineRxNotif);
+        }
     }
 
     if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) ||
@@ -617,30 +510,13 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("txEnable")) {
         settings.m_txEnable = response.getMetisMisoSettings()->getTxEnable() != 0;
     }
-    if (deviceSettingsKeys.contains("rx1CenterFrequency")) {
-        settings.m_rx1CenterFrequency = response.getMetisMisoSettings()->getRx1CenterFrequency();
+
+    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
+    {
+        QString keyword = QString("rx%1CenterFrequency").arg(i+1);
+        settings.m_rxCenterFrequencies[i] = response.getMetisMisoSettings()->getRxCenterFrequencies()->at(i);
     }
-    if (deviceSettingsKeys.contains("rx2CenterFrequency")) {
-        settings.m_rx2CenterFrequency = response.getMetisMisoSettings()->getRx2CenterFrequency();
-    }
-    if (deviceSettingsKeys.contains("rx3CenterFrequency")) {
-        settings.m_rx3CenterFrequency = response.getMetisMisoSettings()->getRx3CenterFrequency();
-    }
-    if (deviceSettingsKeys.contains("rx4CenterFrequency")) {
-        settings.m_rx4CenterFrequency = response.getMetisMisoSettings()->getRx4CenterFrequency();
-    }
-    if (deviceSettingsKeys.contains("rx5CenterFrequency")) {
-        settings.m_rx5CenterFrequency = response.getMetisMisoSettings()->getRx5CenterFrequency();
-    }
-    if (deviceSettingsKeys.contains("rx6CenterFrequency")) {
-        settings.m_rx6CenterFrequency = response.getMetisMisoSettings()->getRx6CenterFrequency();
-    }
-    if (deviceSettingsKeys.contains("rx7CenterFrequency")) {
-        settings.m_rx7CenterFrequency = response.getMetisMisoSettings()->getRx7CenterFrequency();
-    }
-    if (deviceSettingsKeys.contains("rx8CenterFrequency")) {
-        settings.m_rx8CenterFrequency = response.getMetisMisoSettings()->getRx8CenterFrequency();
-    }
+
     if (deviceSettingsKeys.contains("txCenterFrequency")) {
         settings.m_txCenterFrequency = response.getMetisMisoSettings()->getTxCenterFrequency();
     }
@@ -689,14 +565,11 @@ void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
 {
     response.getMetisMisoSettings()->setNbReceivers(settings.m_nbReceivers);
     response.getMetisMisoSettings()->setTxEnable(settings.m_txEnable ? 1 : 0);
-    response.getMetisMisoSettings()->setRx1CenterFrequency(settings.m_rx1CenterFrequency);
-    response.getMetisMisoSettings()->setRx2CenterFrequency(settings.m_rx2CenterFrequency);
-    response.getMetisMisoSettings()->setRx3CenterFrequency(settings.m_rx3CenterFrequency);
-    response.getMetisMisoSettings()->setRx4CenterFrequency(settings.m_rx4CenterFrequency);
-    response.getMetisMisoSettings()->setRx5CenterFrequency(settings.m_rx5CenterFrequency);
-    response.getMetisMisoSettings()->setRx6CenterFrequency(settings.m_rx6CenterFrequency);
-    response.getMetisMisoSettings()->setRx7CenterFrequency(settings.m_rx7CenterFrequency);
-    response.getMetisMisoSettings()->setRx8CenterFrequency(settings.m_rx8CenterFrequency);
+
+    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++) {
+        response.getMetisMisoSettings()->getRxCenterFrequencies()->replace(i, settings.m_rxCenterFrequencies[i]);
+    }
+
     response.getMetisMisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
     response.getMetisMisoSettings()->setSampleRateIndex(settings.m_sampleRateIndex);
     response.getMetisMisoSettings()->setLog2Decim(settings.m_log2Decim);
@@ -734,30 +607,16 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     if (deviceSettingsKeys.contains("txEnable") || force) {
         swgMetisMISOSettings->setTxEnable(settings.m_txEnable ? 1 : 0);
     }
-    if (deviceSettingsKeys.contains("rx1CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx1CenterFrequency(settings.m_rx1CenterFrequency);
+
+    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
+    {
+        QString keyword = QString("rx%1CenterFrequency").arg(i+1);
+
+        if (deviceSettingsKeys.contains(keyword) || force) {
+            swgMetisMISOSettings->getRxCenterFrequencies()->replace(i, settings.m_rxCenterFrequencies[i]);
+        }
     }
-    if (deviceSettingsKeys.contains("rx2CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx2CenterFrequency(settings.m_rx2CenterFrequency);
-    }
-    if (deviceSettingsKeys.contains("rx3CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx3CenterFrequency(settings.m_rx3CenterFrequency);
-    }
-    if (deviceSettingsKeys.contains("rx4CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx4CenterFrequency(settings.m_rx4CenterFrequency);
-    }
-    if (deviceSettingsKeys.contains("rx5CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx5CenterFrequency(settings.m_rx5CenterFrequency);
-    }
-    if (deviceSettingsKeys.contains("rx6CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx6CenterFrequency(settings.m_rx6CenterFrequency);
-    }
-    if (deviceSettingsKeys.contains("rx7CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx7CenterFrequency(settings.m_rx7CenterFrequency);
-    }
-    if (deviceSettingsKeys.contains("rx8CenterFrequency") || force) {
-        swgMetisMISOSettings->setRx8CenterFrequency(settings.m_rx8CenterFrequency);
-    }
+
     if (deviceSettingsKeys.contains("txCenterFrequency") || force) {
         swgMetisMISOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
     }

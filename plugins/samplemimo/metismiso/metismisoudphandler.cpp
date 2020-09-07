@@ -406,31 +406,31 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
     }
     else if (commandIndex == 4)
     {
-        return m_settings.m_rx1CenterFrequency;
+        return getRxCenterFrequency(0);
     }
     else if (commandIndex == 6)
     {
-        return m_settings.m_rx2CenterFrequency;
+        return getRxCenterFrequency(1);
     }
     else if (commandIndex == 8)
     {
-        return m_settings.m_rx3CenterFrequency;
+        return getRxCenterFrequency(2);
     }
     else if (commandIndex == 10)
     {
-        return m_settings.m_rx4CenterFrequency;
+        return getRxCenterFrequency(3);
     }
     else if (commandIndex == 12)
     {
-        return m_settings.m_rx5CenterFrequency;
+        return getRxCenterFrequency(4);
     }
     else if (commandIndex == 14)
     {
-        return m_settings.m_rx6CenterFrequency;
+        return getRxCenterFrequency(5);
     }
     else if (commandIndex == 16)
     {
-        return m_settings.m_rx7CenterFrequency;
+        return getRxCenterFrequency(6);
     }
     else if (commandIndex == 18)
     {
@@ -439,12 +439,30 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
     }
     else if (commandIndex == 36)
     {
-        return m_settings.m_rx8CenterFrequency;
+        return getRxCenterFrequency(7);
     }
     else
     {
         return 0;
     }
+}
+
+quint64 MetisMISOUDPHandler::getRxCenterFrequency(int index)
+{
+    qint64 deviceCenterFrequency;
+
+    if (m_settings.m_rxSubsamplingIndexes[index] % 2 == 0) {
+        deviceCenterFrequency = m_settings.m_rxCenterFrequencies[index] - m_settings.m_rxSubsamplingIndexes[index]*61440000;
+    } else {
+        deviceCenterFrequency = (m_settings.m_rxSubsamplingIndexes[index] + 1)*61440000 - m_settings.m_rxCenterFrequencies[index];
+    }
+
+    return deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency > 61440000 ? 61440000 : deviceCenterFrequency;
+}
+
+bool MetisMISOUDPHandler::getRxIQInversion(int index)
+{
+    return (m_settings.m_rxSubsamplingIndexes[index] % 2) == 1;
 }
 
 void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
@@ -552,7 +570,7 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                 {
                     if (m_settings.m_log2Decim == 0) // no decimation - direct conversion
                     {
-                        m_convertBuffer[r][m_sampleCount] = Sample{sampleI, sampleQ};
+                        m_convertBuffer[r][m_sampleCount] = getRxIQInversion(r) ? Sample{sampleQ, sampleI} : Sample{sampleI, sampleQ};
                         samplesAdded = 1;
                     }
                     else
@@ -562,13 +580,16 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                         switch (m_settings.m_log2Decim)
                         {
                             case 1:
-                                samplesAdded = m_decimators.decimate2(sampleI, sampleQ, v, r);
+                                samplesAdded = getRxIQInversion(r) ?
+                                    m_decimators.decimate2(sampleQ, sampleI, v, r) : m_decimators.decimate2(sampleI, sampleQ, v, r);
                                 break;
                             case 2:
-                                samplesAdded = m_decimators.decimate4(sampleI, sampleQ, v, r);
+                                samplesAdded = getRxIQInversion(r) ?
+                                    m_decimators.decimate4(sampleQ, sampleI, v, r) : m_decimators.decimate4(sampleI, sampleQ, v, r);
                                 break;
                             case 3:
-                                samplesAdded = m_decimators.decimate8(sampleI, sampleQ, v, r);
+                                samplesAdded = getRxIQInversion(r) ?
+                                    m_decimators.decimate8(sampleQ, sampleI, v, r) : m_decimators.decimate8(sampleI, sampleQ, v, r);
                                 break;
                             default:
                                 break;

@@ -5509,41 +5509,24 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Enable Tx * 0 - disabled sends null payload to Metis device * 1 - enabled sends Tx payload to Metis device\n"
     },
-    "rx1CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx2CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx3CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx4CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx5CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx6CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx7CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
-    },
-    "rx8CenterFrequency" : {
-      "type" : "integer",
-      "format" : "uint64"
+    "rxCenterFrequencies" : {
+      "type" : "array",
+      "description" : "center fequencies of receivers",
+      "items" : {
+        "type" : "integer",
+        "format" : "int64"
+      }
     },
     "txCenterFrequency" : {
       "type" : "integer",
-      "format" : "uint64"
+      "format" : "int64"
+    },
+    "rxSubsamplingIndexes" : {
+      "type" : "array",
+      "description" : "subsampling band indexes of receivers",
+      "items" : {
+        "type" : "integer"
+      }
     },
     "sampleRateIndex" : {
       "type" : "integer"
@@ -37558,7 +37541,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-07T01:54:18.483+02:00
+              Generated 2020-09-07T13:35:30.910+02:00
             </div>
           </div>
       </div>

@@ -21,16 +21,11 @@
 #include <QString>
 
 struct MetisMISOSettings {
+    static const int m_maxReceivers = 8;
     unsigned int m_nbReceivers;
     bool m_txEnable;
-    quint64 m_rx1CenterFrequency;
-    quint64 m_rx2CenterFrequency;
-    quint64 m_rx3CenterFrequency;
-    quint64 m_rx4CenterFrequency;
-    quint64 m_rx5CenterFrequency;
-    quint64 m_rx6CenterFrequency;
-    quint64 m_rx7CenterFrequency;
-    quint64 m_rx8CenterFrequency; //!< Hermes lite-2 or Pavel's Red Pitaya extension
+    quint64 m_rxCenterFrequencies[m_maxReceivers];
+    unsigned int m_rxSubsamplingIndexes[m_maxReceivers];
     quint64 m_txCenterFrequency;
 	unsigned int m_sampleRateIndex;
     unsigned int m_log2Decim;
@@ -45,8 +40,6 @@ struct MetisMISOSettings {
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
-
-    static const int m_maxReceivers = 8;
 
 	MetisMISOSettings();
     MetisMISOSettings(const MetisMISOSettings& other);
