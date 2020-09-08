@@ -97,7 +97,7 @@ MainCore::~MainCore()
     }
 
 	m_apiServer->stop();
-	m_settings.save();
+	m_settings.save(m_pluginManager);
     delete m_apiServer;
     delete m_requestMapper;
     delete m_apiAdapter;
@@ -131,7 +131,7 @@ bool MainCore::handleMessage(const Message& cmd)
         MsgSavePreset& notif = (MsgSavePreset&) cmd;
         savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         m_settings.sortPresets();
-        m_settings.save();
+        m_settings.save(m_pluginManager);
         return true;
     }
     else if (MsgDeletePreset::match(cmd))
@@ -215,7 +215,7 @@ void MainCore::loadSettings()
 {
 	qDebug() << "MainCore::loadSettings";
 
-    m_settings.load();
+    m_settings.load(m_pluginManager);
     m_settings.sortPresets();
     setLoggingOptions();
 }

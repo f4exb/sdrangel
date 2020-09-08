@@ -195,14 +195,15 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("load settings...", Qt::white);
     qDebug() << "MainWindow::MainWindow: load settings...";
 
-	loadSettings();
-
     splash->showStatusMessage("load plugins...", Qt::white);
     qDebug() << "MainWindow::MainWindow: load plugins...";
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("plugins"));
     m_pluginManager->loadPluginsNonDiscoverable(m_settings.getDeviceUserArgs());
+
+    // Load settings after plugins have loaded, as they can include misc plugin settings
+    loadSettings();
 
     splash->showStatusMessage("load file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
@@ -260,6 +261,13 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 #endif
 
     delete splash;
+
+    // Allow plugins to create top-level GUI elements
+    PluginAPI::MiscPluginRegistrations *miscPluginRegistrations = m_pluginManager->getMiscPluginRegistrations();
+    for (int i = 0; i < miscPluginRegistrations->count(); i++)
+    {
+        (*miscPluginRegistrations)[i].m_plugin->createTopLevelGUI(this);
+    }
 
     qDebug() << "MainWindow::MainWindow: end";
 }
@@ -635,7 +643,7 @@ void MainWindow::loadSettings()
 {
 	qDebug() << "MainWindow::loadSettings";
 
-    m_settings.load();
+    m_settings.load(m_pluginManager);
     m_settings.sortPresets();
     int middleIndex = m_settings.getPresetCount() / 2;
     QTreeWidgetItem *treeItem;
@@ -752,7 +760,7 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
     qDebug("MainWindow::closeEvent");
 
     savePresetSettings(m_settings.getWorkingPreset(), 0);
-    m_settings.save();
+    m_settings.save(m_pluginManager);
 
     while (m_deviceUIs.size() > 0)
     {
@@ -895,7 +903,7 @@ bool MainWindow::handleMessage(const Message& cmd)
         savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         if (notif.isNewPreset()) { ui->presetTree->setCurrentItem(addPresetToTree(notif.getPreset())); }
         m_settings.sortPresets();
-        m_settings.save();
+        m_settings.save(m_pluginManager);
         return true;
     }
     else if (MsgDeletePreset::match(cmd))
@@ -1232,7 +1240,7 @@ void MainWindow::on_commandOutput_clicked()
 void MainWindow::on_commandsSave_clicked()
 {
     saveCommandSettings();
-    m_settings.save();
+    m_settings.save(m_pluginManager);
 }
 
 void MainWindow::commandKeysConnect(QObject *object, const char *slot)
@@ -1489,7 +1497,7 @@ void MainWindow::on_presetImport_clicked()
 void MainWindow::on_settingsSave_clicked()
 {
     savePresetSettings(m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
-    m_settings.save();
+    m_settings.save(m_pluginManager);
 }
 
 void MainWindow::on_presetLoad_clicked()

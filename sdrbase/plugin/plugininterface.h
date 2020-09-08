@@ -3,6 +3,7 @@
 
 #include <QtPlugin>
 #include <QString>
+#include <QtWidgets/QMainWindow>
 
 #include "export.h"
 
@@ -310,6 +311,24 @@ public:
 
     virtual void deleteSampleMIMOPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
+
+    // Callback to allow plugin to add elements to top-level GUI (such as menu items)
+    virtual bool createTopLevelGUI(QMainWindow* mainWindow)
+    {
+        return true;
+    }
+
+    // Serialise global plugin settings (i.e. settings that are not per-instance)
+    virtual QByteArray serializeGlobalSettings() const
+    {
+        QByteArray empty;
+        return empty;
+    }
+
+    virtual bool deserializeGlobalSettings(const QByteArray& data)
+    {
+        return true;
+    }
 
     // all devices
 

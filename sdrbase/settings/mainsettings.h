@@ -7,18 +7,20 @@
 #include "preferences.h"
 #include "preset.h"
 #include "export.h"
+#include "plugin/pluginmanager.h"
 
 class Command;
 class AudioDeviceManager;
 class AMBEEngine;
+
 
 class SDRBASE_API MainSettings {
 public:
 	MainSettings();
 	~MainSettings();
 
-	void load();
-	void save() const;
+	void load(PluginManager *pluginManager);
+	void save(PluginManager *pluginManager) const;
 
 	void resetToDefaults();
     void initialize();

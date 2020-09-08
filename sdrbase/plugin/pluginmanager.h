@@ -70,6 +70,7 @@ public:
 	void registerSampleSource(const QString& sourceName, PluginInterface* plugin);
 	void registerSampleSink(const QString& sinkName, PluginInterface* plugin);
     void registerSampleMIMO(const QString& mimoName, PluginInterface* plugin);
+    void registerMiscPlugin(const QString& id, PluginInterface* plugin);
 
 	PluginAPI::SamplingDeviceRegistrations& getSourceDeviceRegistrations() { return m_sampleSourceRegistrations; }
 	PluginAPI::SamplingDeviceRegistrations& getSinkDeviceRegistrations() { return m_sampleSinkRegistrations; }
@@ -77,6 +78,7 @@ public:
 	PluginAPI::ChannelRegistrations *getRxChannelRegistrations() { return &m_rxChannelRegistrations; }
 	PluginAPI::ChannelRegistrations *getTxChannelRegistrations() { return &m_txChannelRegistrations; }
 	PluginAPI::ChannelRegistrations *getMIMOChannelRegistrations() { return &m_mimoChannelRegistrations; }
+	PluginAPI::MiscPluginRegistrations *getMiscPluginRegistrations() { return &m_miscPluginRegistrations; }
 
     void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
     void listRxChannels(QList<QString>& list);
@@ -129,6 +131,8 @@ private:
 	PluginAPI::SamplingDeviceRegistrations m_sampleSourceRegistrations; //!< Input source plugins (one per device kind) register here
 	PluginAPI::SamplingDeviceRegistrations m_sampleSinkRegistrations;   //!< Output sink plugins (one per device kind) register here
 	PluginAPI::SamplingDeviceRegistrations m_sampleMIMORegistrations;   //!< MIMO sink plugins (one per device kind) register here
+
+    PluginAPI::MiscPluginRegistrations m_miscPluginRegistrations;       //<! Misc plugins accessing top-level UI and main settings register here
 
 	// "Local" sample source device IDs
     static const QString m_localInputHardwareID;     //!< Local input hardware ID

@@ -189,6 +189,15 @@ void PluginManager::registerSampleMIMO(const QString& mimoName, PluginInterface*
     ));
 }
 
+void PluginManager::registerMiscPlugin(const QString& id, PluginInterface* plugin)
+{
+	qDebug() << "PluginManager::registerMiscPlugin "
+			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+			<< " with id " << id.toStdString().c_str();
+
+	m_miscPluginRegistrations.append(PluginAPI::MiscPluginRegistration(id, plugin));
+}
+
 void PluginManager::loadPluginsDir(const QDir& dir)
 {
     QDir pluginsDir(dir);

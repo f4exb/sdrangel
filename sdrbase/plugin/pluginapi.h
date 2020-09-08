@@ -45,6 +45,18 @@ public:
 
     typedef QList<ChannelRegistration> ChannelRegistrations;
 
+    struct MiscPluginRegistration
+    {
+        QString m_id;
+        PluginInterface* m_plugin;
+        MiscPluginRegistration(const QString& id, PluginInterface* plugin) :
+            m_id(id),
+            m_plugin(plugin)
+        { }
+    };
+
+    typedef QList<MiscPluginRegistration> MiscPluginRegistrations;
+
 	// Rx Channel stuff
 	void registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	ChannelRegistrations *getRxChannelRegistrations();
@@ -65,6 +77,9 @@ public:
 
 	// Sample MIMO stuff
 	void registerSampleMIMO(const QString& sinkName, PluginInterface* plugin);
+
+    // Access to top-level GUI and main settings. id should be unique among plugins.
+    void registerMiscPlugin(const QString& id, PluginInterface* plugin);
 
 protected:
 	PluginManager* m_pluginManager;

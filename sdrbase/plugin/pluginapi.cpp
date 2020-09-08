@@ -46,6 +46,11 @@ void PluginAPI::registerSampleMIMO(const QString& mimoName, PluginInterface* plu
 	m_pluginManager->registerSampleMIMO(mimoName, plugin);
 }
 
+void PluginAPI::registerMiscPlugin(const QString& id, PluginInterface* plugin)
+{
+	m_pluginManager->registerMiscPlugin(id, plugin);
+}
+
 PluginAPI::PluginAPI(PluginManager* pluginManager) :
 	m_pluginManager(pluginManager)
 {
