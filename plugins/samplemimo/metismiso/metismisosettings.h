@@ -27,6 +27,11 @@ struct MetisMISOSettings {
     quint64 m_rxCenterFrequencies[m_maxReceivers];
     unsigned int m_rxSubsamplingIndexes[m_maxReceivers];
     quint64 m_txCenterFrequency;
+    bool    m_rxTransverterMode;
+    qint64  m_rxTransverterDeltaFrequency;
+    bool    m_txTransverterMode;
+    qint64  m_txTransverterDeltaFrequency;
+    bool    m_iqOrder;
 	unsigned int m_sampleRateIndex;
     unsigned int m_log2Decim;
     int  m_LOppmTenths;

@@ -289,15 +289,20 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         << " 8:" << settings.m_rxCenterFrequencies[7]
         << " ] m_txCenterFrequency:" << settings.m_txCenterFrequency
         << " m_rxSubsamplingIndexes: ["
-        << " 1:"<< settings.m_rxSubsamplingIndexes[0]
-        << " 2:"<< settings.m_rxSubsamplingIndexes[1]
-        << " 3:"<< settings.m_rxSubsamplingIndexes[2]
-        << " 4:"<< settings.m_rxSubsamplingIndexes[3]
-        << " 5:"<< settings.m_rxSubsamplingIndexes[4]
-        << " 6:"<< settings.m_rxSubsamplingIndexes[5]
-        << " 7:"<< settings.m_rxSubsamplingIndexes[6]
-        << " 8:"<< settings.m_rxSubsamplingIndexes[7]
-        << " ] m_sampleRateIndex:" << settings.m_sampleRateIndex
+        << " 1:" << settings.m_rxSubsamplingIndexes[0]
+        << " 2:" << settings.m_rxSubsamplingIndexes[1]
+        << " 3:" << settings.m_rxSubsamplingIndexes[2]
+        << " 4:" << settings.m_rxSubsamplingIndexes[3]
+        << " 5:" << settings.m_rxSubsamplingIndexes[4]
+        << " 6:" << settings.m_rxSubsamplingIndexes[5]
+        << " 7:" << settings.m_rxSubsamplingIndexes[6]
+        << " 8:" << settings.m_rxSubsamplingIndexes[7]
+        << " ] m_rxTransverterMode:" << settings.m_rxTransverterMode
+        << " m_rxTransverterDeltaFrequency:" << settings.m_rxTransverterDeltaFrequency
+        << " m_txTransverterMode:" << settings.m_txTransverterMode
+        << " m_txTransverterDeltaFrequency:" << settings.m_txTransverterDeltaFrequency
+        << " m_iqOrder:" << settings.m_iqOrder
+        << " m_sampleRateIndex:" << settings.m_sampleRateIndex
         << " m_log2Decim:" << settings.m_log2Decim
         << " m_preamp:" << settings.m_preamp
         << " m_random:" << settings.m_random
@@ -343,6 +348,36 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
     if ((m_settings.m_txCenterFrequency != settings.m_txCenterFrequency) || force)
     {
         reverseAPIKeys.append("txCenterFrequency");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_rxTransverterMode != settings.m_rxTransverterMode) || force)
+    {
+        reverseAPIKeys.append("rxTransverterMode");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_rxTransverterDeltaFrequency != settings.m_rxTransverterDeltaFrequency) || force)
+    {
+        reverseAPIKeys.append("rxTransverterDeltaFrequency");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_txTransverterMode != settings.m_txTransverterMode) || force)
+    {
+        reverseAPIKeys.append("txTransverterMode");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency) || force)
+    {
+        reverseAPIKeys.append("txTransverterDeltaFrequency");
+        propagateSettings = true;
+    }
+
+    if ((m_settings.m_iqOrder != settings.m_iqOrder) || force)
+    {
+        reverseAPIKeys.append("iqOrder");
         propagateSettings = true;
     }
 
@@ -526,6 +561,21 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("txCenterFrequency")) {
         settings.m_txCenterFrequency = response.getMetisMisoSettings()->getTxCenterFrequency();
     }
+    if (deviceSettingsKeys.contains("rxTransverterMode")) {
+        settings.m_rxTransverterMode = response.getMetisMisoSettings()->getRxTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("rxTransverterDeltaFrequency")) {
+        settings.m_rxTransverterDeltaFrequency = response.getMetisMisoSettings()->getRxTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("txTransverterMode")) {
+        settings.m_txTransverterMode = response.getMetisMisoSettings()->getTxTransverterMode() != 0;
+    }
+    if (deviceSettingsKeys.contains("txTransverterDeltaFrequency")) {
+        settings.m_txTransverterDeltaFrequency = response.getMetisMisoSettings()->getTxTransverterDeltaFrequency();
+    }
+    if (deviceSettingsKeys.contains("iqOrder")) {
+        settings.m_iqOrder = response.getMetisMisoSettings()->getIqOrder() != 0;
+    }
     if (deviceSettingsKeys.contains("sampleRateIndex")) {
         settings.m_sampleRateIndex = response.getMetisMisoSettings()->getSampleRateIndex();
     }
@@ -580,6 +630,11 @@ void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     }
 
     response.getMetisMisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
+    response.getMetisMisoSettings()->setRxTransverterMode(settings.m_rxTransverterMode ? 1 : 0);
+    response.getMetisMisoSettings()->setRxTransverterDeltaFrequency(settings.m_rxTransverterDeltaFrequency);
+    response.getMetisMisoSettings()->setTxTransverterMode(settings.m_txTransverterMode ? 1 : 0);
+    response.getMetisMisoSettings()->setTxTransverterDeltaFrequency(settings.m_txTransverterDeltaFrequency);
+    response.getMetisMisoSettings()->setIqOrder(settings.m_iqOrder ? 1 : 0);
     response.getMetisMisoSettings()->setSampleRateIndex(settings.m_sampleRateIndex);
     response.getMetisMisoSettings()->setLog2Decim(settings.m_log2Decim);
     response.getMetisMisoSettings()->setLOppmTenths(settings.m_LOppmTenths);
@@ -629,6 +684,21 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
 
     if (deviceSettingsKeys.contains("txCenterFrequency") || force) {
         swgMetisMISOSettings->setTxCenterFrequency(settings.m_txCenterFrequency);
+    }
+    if (deviceSettingsKeys.contains("rxTransverterMode") || force) {
+        swgMetisMISOSettings->setRxTransverterMode(settings.m_rxTransverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("rxTransverterDeltaFrequency") || force) {
+        swgMetisMISOSettings->setRxTransverterDeltaFrequency(settings.m_rxTransverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("txTransverterMode") || force) {
+        swgMetisMISOSettings->setTxTransverterMode(settings.m_txTransverterMode ? 1 : 0);
+    }
+    if (deviceSettingsKeys.contains("txTransverterDeltaFrequency") || force) {
+        swgMetisMISOSettings->setTxTransverterDeltaFrequency(settings.m_txTransverterDeltaFrequency);
+    }
+    if (deviceSettingsKeys.contains("iqOrder") || force) {
+        swgMetisMISOSettings->setIqOrder(settings.m_iqOrder ? 1 : 0);
     }
     if (deviceSettingsKeys.contains("sampleRateIndex") || force) {
         swgMetisMISOSettings->setSampleRateIndex(settings.m_sampleRateIndex);

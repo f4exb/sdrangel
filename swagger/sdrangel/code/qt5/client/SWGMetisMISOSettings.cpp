@@ -36,6 +36,16 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_rx_center_frequencies_isSet = false;
     tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
+    rx_transverter_mode = 0;
+    m_rx_transverter_mode_isSet = false;
+    rx_transverter_delta_frequency = 0L;
+    m_rx_transverter_delta_frequency_isSet = false;
+    tx_transverter_mode = 0;
+    m_tx_transverter_mode_isSet = false;
+    tx_transverter_delta_frequency = 0L;
+    m_tx_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     rx_subsampling_indexes = new QList<qint32>();
     m_rx_subsampling_indexes_isSet = false;
     sample_rate_index = 0;
@@ -82,6 +92,16 @@ SWGMetisMISOSettings::init() {
     m_rx_center_frequencies_isSet = false;
     tx_center_frequency = 0L;
     m_tx_center_frequency_isSet = false;
+    rx_transverter_mode = 0;
+    m_rx_transverter_mode_isSet = false;
+    rx_transverter_delta_frequency = 0L;
+    m_rx_transverter_delta_frequency_isSet = false;
+    tx_transverter_mode = 0;
+    m_tx_transverter_mode_isSet = false;
+    tx_transverter_delta_frequency = 0L;
+    m_tx_transverter_delta_frequency_isSet = false;
+    iq_order = 0;
+    m_iq_order_isSet = false;
     rx_subsampling_indexes = new QList<qint32>();
     m_rx_subsampling_indexes_isSet = false;
     sample_rate_index = 0;
@@ -132,6 +152,11 @@ SWGMetisMISOSettings::cleanup() {
 
 
 
+
+
+
+
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -157,6 +182,16 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rx_center_frequencies, pJson["rxCenterFrequencies"], "QList", "qint64");
     ::SWGSDRangel::setValue(&tx_center_frequency, pJson["txCenterFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&rx_transverter_mode, pJson["rxTransverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rx_transverter_delta_frequency, pJson["rxTransverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&tx_transverter_mode, pJson["txTransverterMode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tx_transverter_delta_frequency, pJson["txTransverterDeltaFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&iq_order, pJson["iqOrder"], "qint32", "");
     
     
     ::SWGSDRangel::setValue(&rx_subsampling_indexes, pJson["rxSubsamplingIndexes"], "QList", "qint32");
@@ -215,6 +250,21 @@ SWGMetisMISOSettings::asJsonObject() {
     }
     if(m_tx_center_frequency_isSet){
         obj->insert("txCenterFrequency", QJsonValue(tx_center_frequency));
+    }
+    if(m_rx_transverter_mode_isSet){
+        obj->insert("rxTransverterMode", QJsonValue(rx_transverter_mode));
+    }
+    if(m_rx_transverter_delta_frequency_isSet){
+        obj->insert("rxTransverterDeltaFrequency", QJsonValue(rx_transverter_delta_frequency));
+    }
+    if(m_tx_transverter_mode_isSet){
+        obj->insert("txTransverterMode", QJsonValue(tx_transverter_mode));
+    }
+    if(m_tx_transverter_delta_frequency_isSet){
+        obj->insert("txTransverterDeltaFrequency", QJsonValue(tx_transverter_delta_frequency));
+    }
+    if(m_iq_order_isSet){
+        obj->insert("iqOrder", QJsonValue(iq_order));
     }
     if(rx_subsampling_indexes && rx_subsampling_indexes->size() > 0){
         toJsonArray((QList<void*>*)rx_subsampling_indexes, obj, "rxSubsamplingIndexes", "");
@@ -303,6 +353,56 @@ void
 SWGMetisMISOSettings::setTxCenterFrequency(qint64 tx_center_frequency) {
     this->tx_center_frequency = tx_center_frequency;
     this->m_tx_center_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getRxTransverterMode() {
+    return rx_transverter_mode;
+}
+void
+SWGMetisMISOSettings::setRxTransverterMode(qint32 rx_transverter_mode) {
+    this->rx_transverter_mode = rx_transverter_mode;
+    this->m_rx_transverter_mode_isSet = true;
+}
+
+qint64
+SWGMetisMISOSettings::getRxTransverterDeltaFrequency() {
+    return rx_transverter_delta_frequency;
+}
+void
+SWGMetisMISOSettings::setRxTransverterDeltaFrequency(qint64 rx_transverter_delta_frequency) {
+    this->rx_transverter_delta_frequency = rx_transverter_delta_frequency;
+    this->m_rx_transverter_delta_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getTxTransverterMode() {
+    return tx_transverter_mode;
+}
+void
+SWGMetisMISOSettings::setTxTransverterMode(qint32 tx_transverter_mode) {
+    this->tx_transverter_mode = tx_transverter_mode;
+    this->m_tx_transverter_mode_isSet = true;
+}
+
+qint64
+SWGMetisMISOSettings::getTxTransverterDeltaFrequency() {
+    return tx_transverter_delta_frequency;
+}
+void
+SWGMetisMISOSettings::setTxTransverterDeltaFrequency(qint64 tx_transverter_delta_frequency) {
+    this->tx_transverter_delta_frequency = tx_transverter_delta_frequency;
+    this->m_tx_transverter_delta_frequency_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getIqOrder() {
+    return iq_order;
+}
+void
+SWGMetisMISOSettings::setIqOrder(qint32 iq_order) {
+    this->iq_order = iq_order;
+    this->m_iq_order_isSet = true;
 }
 
 QList<qint32>*
@@ -473,6 +573,21 @@ SWGMetisMISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_tx_center_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rx_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_transverter_mode_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tx_transverter_delta_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_iq_order_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rx_subsampling_indexes_isSet){

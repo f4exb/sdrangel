@@ -127,6 +127,7 @@ private:
     int getCommandValue(int commandIndex);
     void processIQBuffer(unsigned char* buffer);
     quint64 getRxCenterFrequency(int index);
+    quint64 getTxCenterFrequency();
     bool getRxIQInversion(int index);
 
 private slots:

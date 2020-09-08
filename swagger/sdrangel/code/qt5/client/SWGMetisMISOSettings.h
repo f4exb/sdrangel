@@ -55,6 +55,21 @@ public:
     qint64 getTxCenterFrequency();
     void setTxCenterFrequency(qint64 tx_center_frequency);
 
+    qint32 getRxTransverterMode();
+    void setRxTransverterMode(qint32 rx_transverter_mode);
+
+    qint64 getRxTransverterDeltaFrequency();
+    void setRxTransverterDeltaFrequency(qint64 rx_transverter_delta_frequency);
+
+    qint32 getTxTransverterMode();
+    void setTxTransverterMode(qint32 tx_transverter_mode);
+
+    qint64 getTxTransverterDeltaFrequency();
+    void setTxTransverterDeltaFrequency(qint64 tx_transverter_delta_frequency);
+
+    qint32 getIqOrder();
+    void setIqOrder(qint32 iq_order);
+
     QList<qint32>* getRxSubsamplingIndexes();
     void setRxSubsamplingIndexes(QList<qint32>* rx_subsampling_indexes);
 
@@ -115,6 +130,21 @@ private:
 
     qint64 tx_center_frequency;
     bool m_tx_center_frequency_isSet;
+
+    qint32 rx_transverter_mode;
+    bool m_rx_transverter_mode_isSet;
+
+    qint64 rx_transverter_delta_frequency;
+    bool m_rx_transverter_delta_frequency_isSet;
+
+    qint32 tx_transverter_mode;
+    bool m_tx_transverter_mode_isSet;
+
+    qint64 tx_transverter_delta_frequency;
+    bool m_tx_transverter_delta_frequency_isSet;
+
+    qint32 iq_order;
+    bool m_iq_order_isSet;
 
     QList<qint32>* rx_subsampling_indexes;
     bool m_rx_subsampling_indexes_isSet;

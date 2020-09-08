@@ -5521,6 +5521,26 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
+    "rxTransverterMode" : {
+      "type" : "integer",
+      "description" : "Rx transverter activated * 0 - disabled * 1 - enabled\n"
+    },
+    "rxTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "txTransverterMode" : {
+      "type" : "integer",
+      "description" : "Tx transverter activated * 0 - disabled * 1 - enabled\n"
+    },
+    "txTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "iqOrder" : {
+      "type" : "integer",
+      "description" : "I/Q samples order * 0 - I then Q (direct) * 1 - Q then I (reversed)\n"
+    },
     "rxSubsamplingIndexes" : {
       "type" : "array",
       "description" : "subsampling band indexes of receivers",
@@ -37545,7 +37565,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-08T00:09:01.185+02:00
+              Generated 2020-09-08T08:55:28.204+02:00
             </div>
           </div>
       </div>

@@ -93,6 +93,7 @@ private slots:
     void on_subsamplingIndex_currentIndexChanged(int index);
     void on_dcBlock_toggled(bool checked);
     void on_iqCorrection_toggled(bool checked);
+    void on_transverter_clicked();
     void on_preamp_toggled(bool checked);
     void on_random_toggled(bool checked);
     void on_dither_toggled(bool checked);

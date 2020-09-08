@@ -19,6 +19,30 @@ MetisMISOSettings:
     txCenterFrequency:
       type: integer
       format: int64
+    rxTransverterMode:
+      type: integer
+      description: >
+        Rx transverter activated
+        * 0 - disabled
+        * 1 - enabled
+    rxTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    txTransverterMode:
+      type: integer
+      description: >
+        Tx transverter activated
+        * 0 - disabled
+        * 1 - enabled
+    txTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    iqOrder:
+      type: integer
+      description: >
+        I/Q samples order
+        * 0 - I then Q (direct)
+        * 1 - Q then I (reversed)
     rxSubsamplingIndexes:
       description: subsampling band indexes of receivers
       type: array

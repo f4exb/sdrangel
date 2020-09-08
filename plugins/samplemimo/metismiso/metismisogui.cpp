@@ -260,6 +260,7 @@ void MetisMISOGui::on_subsamplingIndex_currentIndexChanged(int index)
         ui->subsamplingIndex->setToolTip(tr("Subsampling band index [%1 - %2 MHz]")
             .arg(index*61.44).arg((index+1)*61.44));
         displayFrequency();
+        setCenterFrequency(ui->centerFrequency->getValueNew() * 1000);
         sendSettings();
     }
 }
@@ -273,6 +274,27 @@ void MetisMISOGui::on_dcBlock_toggled(bool checked)
 void MetisMISOGui::on_iqCorrection_toggled(bool checked)
 {
     m_settings.m_iqCorrection = checked;
+    sendSettings();
+}
+
+void MetisMISOGui::on_transverter_clicked()
+{
+    if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
+    {
+        m_settings.m_rxTransverterMode = ui->transverter->getDeltaFrequencyAcive();
+        m_settings.m_rxTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        m_settings.m_iqOrder = ui->transverter->getIQOrder();
+        qDebug("MetisMISOGui::on_transverter_clicked: Rx: %lld Hz %s", m_settings.m_rxTransverterDeltaFrequency, m_settings.m_rxTransverterMode ? "on" : "off");
+    }
+    else
+    {
+        m_settings.m_txTransverterMode = ui->transverter->getDeltaFrequencyAcive();
+        m_settings.m_txTransverterDeltaFrequency = ui->transverter->getDeltaFrequency();
+        qDebug("MetisMISOGui::on_transverter_clicked: Tx: %lld Hz %s", m_settings.m_txTransverterDeltaFrequency, m_settings.m_txTransverterMode ? "on" : "off");
+    }
+
+    displayFrequency();
+    setCenterFrequency(ui->centerFrequency->getValueNew() * 1000);
     sendSettings();
 }
 
@@ -472,24 +494,29 @@ void MetisMISOGui::handleInputMessages()
 void MetisMISOGui::displayFrequency()
 {
     qint64 centerFrequency;
+    qint64 fBaseLow, fBaseHigh;
 
     if (m_streamIndex < MetisMISOSettings::m_maxReceivers)
     {
         int subsamplingIndex = m_settings.m_rxSubsamplingIndexes[m_streamIndex];
         centerFrequency = m_settings.m_rxCenterFrequencies[m_streamIndex];
-        ui->centerFrequency->setValueRange(7, subsamplingIndex*61440, (subsamplingIndex+1)*61440);
+        fBaseLow = subsamplingIndex*61440;
+        fBaseHigh = (subsamplingIndex+1)*61440;
     }
     else if (m_streamIndex == MetisMISOSettings::m_maxReceivers)
     {
         centerFrequency = m_settings.m_txCenterFrequency;
-        ui->centerFrequency->setValueRange(7, 0, 61440);
+        fBaseLow = 0;
+        fBaseHigh = 61440;
     }
     else
     {
+        fBaseLow = 0;
+        fBaseHigh = 61440;
         centerFrequency = 0;
-        ui->centerFrequency->setValueRange(7, 0, 61440);
     }
 
+    ui->centerFrequency->setValueRange(7, fBaseLow, fBaseHigh);
     ui->centerFrequency->setValue(centerFrequency / 1000);
 }
 

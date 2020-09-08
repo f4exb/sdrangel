@@ -402,7 +402,7 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
     }
     else if (commandIndex == 2)
     {
-        return m_settings.m_txCenterFrequency;
+        return getTxCenterFrequency();
     }
     else if (commandIndex == 4)
     {
@@ -451,11 +451,14 @@ quint64 MetisMISOUDPHandler::getRxCenterFrequency(int index)
 {
     qint64 deviceCenterFrequency;
     qint64 loHalfFrequency = 61440000LL - ((m_settings.m_LOppmTenths * 122880000LL) / 20000000LL);
+    qint64 requiredRxFrequency =  m_settings.m_rxCenterFrequencies[index]
+        - (m_settings.m_rxTransverterMode ? m_settings.m_rxTransverterDeltaFrequency : 0);
+    requiredRxFrequency = requiredRxFrequency < 0 ? 0 : requiredRxFrequency;
 
     if (m_settings.m_rxSubsamplingIndexes[index] % 2 == 0) {
-        deviceCenterFrequency = m_settings.m_rxCenterFrequencies[index] - m_settings.m_rxSubsamplingIndexes[index]*loHalfFrequency;
+        deviceCenterFrequency = requiredRxFrequency - m_settings.m_rxSubsamplingIndexes[index]*loHalfFrequency;
     } else {
-        deviceCenterFrequency = (m_settings.m_rxSubsamplingIndexes[index] + 1)*loHalfFrequency - m_settings.m_rxCenterFrequencies[index];
+        deviceCenterFrequency = (m_settings.m_rxSubsamplingIndexes[index] + 1)*loHalfFrequency - requiredRxFrequency;
     }
 
 	qint64 df = ((qint64)deviceCenterFrequency * m_settings.m_LOppmTenths) / 10000000LL;
@@ -464,9 +467,17 @@ quint64 MetisMISOUDPHandler::getRxCenterFrequency(int index)
     return deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency > 61440000 ? 61440000 : deviceCenterFrequency;
 }
 
+quint64 MetisMISOUDPHandler::getTxCenterFrequency()
+{
+    qint64 requiredTxFrequency =  m_settings.m_txCenterFrequency;
+        - (m_settings.m_txTransverterMode ? m_settings.m_txTransverterDeltaFrequency : 0);
+    requiredTxFrequency = requiredTxFrequency < 0 ? 0 : requiredTxFrequency;
+    return requiredTxFrequency;
+}
+
 bool MetisMISOUDPHandler::getRxIQInversion(int index)
 {
-    return (m_settings.m_rxSubsamplingIndexes[index] % 2) == 1;
+    return ((m_settings.m_rxSubsamplingIndexes[index] % 2) == 1) ^ !m_settings.m_iqOrder;
 }
 
 void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
