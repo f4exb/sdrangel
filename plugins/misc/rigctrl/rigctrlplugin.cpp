@@ -67,6 +67,11 @@ bool RigCtrlPlugin::createTopLevelGUI(
 {
     return true;
 }
+
+void RigCtrlPlugin::showRigCtrlUI()
+{
+}
+
 #else
 bool RigCtrlPlugin::createTopLevelGUI(
         QMainWindow* mainWindow
