@@ -450,12 +450,16 @@ int MetisMISOUDPHandler::getCommandValue(int commandIndex)
 quint64 MetisMISOUDPHandler::getRxCenterFrequency(int index)
 {
     qint64 deviceCenterFrequency;
+    qint64 loHalfFrequency = 61440000LL - ((m_settings.m_LOppmTenths * 122880000LL) / 20000000LL);
 
     if (m_settings.m_rxSubsamplingIndexes[index] % 2 == 0) {
-        deviceCenterFrequency = m_settings.m_rxCenterFrequencies[index] - m_settings.m_rxSubsamplingIndexes[index]*61440000;
+        deviceCenterFrequency = m_settings.m_rxCenterFrequencies[index] - m_settings.m_rxSubsamplingIndexes[index]*loHalfFrequency;
     } else {
-        deviceCenterFrequency = (m_settings.m_rxSubsamplingIndexes[index] + 1)*61440000 - m_settings.m_rxCenterFrequencies[index];
+        deviceCenterFrequency = (m_settings.m_rxSubsamplingIndexes[index] + 1)*loHalfFrequency - m_settings.m_rxCenterFrequencies[index];
     }
+
+	qint64 df = ((qint64)deviceCenterFrequency * m_settings.m_LOppmTenths) / 10000000LL;
+	deviceCenterFrequency += df;
 
     return deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency > 61440000 ? 61440000 : deviceCenterFrequency;
 }

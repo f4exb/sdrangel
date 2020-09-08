@@ -43,6 +43,7 @@
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
+        <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
         <file>webapi/doc/swagger/include/Perseus.yaml</file>
         <file>webapi/doc/swagger/include/PlutoSdr.yaml</file>
         <file>webapi/doc/swagger/include/Preferences.yaml</file>

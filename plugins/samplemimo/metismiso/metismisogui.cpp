@@ -221,6 +221,13 @@ void MetisMISOGui::on_streamLock_toggled(bool checked)
     }
 }
 
+void MetisMISOGui::on_LOppm_valueChanged(int value)
+{
+	m_settings.m_LOppmTenths = value;
+	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
+	sendSettings();
+}
+
 void MetisMISOGui::on_centerFrequency_changed(quint64 value)
 {
     if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {

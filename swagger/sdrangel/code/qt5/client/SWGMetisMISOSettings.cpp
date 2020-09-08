@@ -42,6 +42,8 @@ SWGMetisMISOSettings::SWGMetisMISOSettings() {
     m_sample_rate_index_isSet = false;
     log2_decim = 0;
     m_log2_decim_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     preamp = 0;
     m_preamp_isSet = false;
     random = 0;
@@ -86,6 +88,8 @@ SWGMetisMISOSettings::init() {
     m_sample_rate_index_isSet = false;
     log2_decim = 0;
     m_log2_decim_isSet = false;
+    l_oppm_tenths = 0;
+    m_l_oppm_tenths_isSet = false;
     preamp = 0;
     m_preamp_isSet = false;
     random = 0;
@@ -112,6 +116,7 @@ SWGMetisMISOSettings::init() {
 
 void
 SWGMetisMISOSettings::cleanup() {
+
 
 
 
@@ -158,6 +163,8 @@ SWGMetisMISOSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&sample_rate_index, pJson["sampleRateIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&l_oppm_tenths, pJson["LOppmTenths"], "qint32", "");
     
     ::SWGSDRangel::setValue(&preamp, pJson["preamp"], "qint32", "");
     
@@ -217,6 +224,9 @@ SWGMetisMISOSettings::asJsonObject() {
     }
     if(m_log2_decim_isSet){
         obj->insert("log2Decim", QJsonValue(log2_decim));
+    }
+    if(m_l_oppm_tenths_isSet){
+        obj->insert("LOppmTenths", QJsonValue(l_oppm_tenths));
     }
     if(m_preamp_isSet){
         obj->insert("preamp", QJsonValue(preamp));
@@ -323,6 +333,16 @@ void
 SWGMetisMISOSettings::setLog2Decim(qint32 log2_decim) {
     this->log2_decim = log2_decim;
     this->m_log2_decim_isSet = true;
+}
+
+qint32
+SWGMetisMISOSettings::getLOppmTenths() {
+    return l_oppm_tenths;
+}
+void
+SWGMetisMISOSettings::setLOppmTenths(qint32 l_oppm_tenths) {
+    this->l_oppm_tenths = l_oppm_tenths;
+    this->m_l_oppm_tenths_isSet = true;
 }
 
 qint32
@@ -465,6 +485,9 @@ SWGMetisMISOSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_log2_decim_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_l_oppm_tenths_isSet){
             isObjectUpdated = true; break;
         }
         if(m_preamp_isSet){

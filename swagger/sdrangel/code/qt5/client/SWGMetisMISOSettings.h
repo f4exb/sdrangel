@@ -64,6 +64,9 @@ public:
     qint32 getLog2Decim();
     void setLog2Decim(qint32 log2_decim);
 
+    qint32 getLOppmTenths();
+    void setLOppmTenths(qint32 l_oppm_tenths);
+
     qint32 getPreamp();
     void setPreamp(qint32 preamp);
 
@@ -121,6 +124,9 @@ private:
 
     qint32 log2_decim;
     bool m_log2_decim_isSet;
+
+    qint32 l_oppm_tenths;
+    bool m_l_oppm_tenths_isSet;
 
     qint32 preamp;
     bool m_preamp_isSet;

@@ -28,6 +28,9 @@ MetisMISOSettings:
       type: integer
     log2Decim:
       type: integer
+    LOppmTenths:
+      type: integer
+      description: LO correction in tenths of ppm
     preamp:
       type: integer
       description: >

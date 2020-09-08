@@ -29,6 +29,7 @@ struct MetisMISOSettings {
     quint64 m_txCenterFrequency;
 	unsigned int m_sampleRateIndex;
     unsigned int m_log2Decim;
+    int  m_LOppmTenths;
     bool m_preamp;
     bool m_random;
     bool m_dither;

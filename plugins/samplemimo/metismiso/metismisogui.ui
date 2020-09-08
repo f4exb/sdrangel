@@ -343,6 +343,49 @@
     </layout>
    </item>
    <item>
+    <layout class="QGridLayout" name="gridLayout_LOppm">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="LOppmLabel">
+       <property name="toolTip">
+        <string>LO correction ppm</string>
+       </property>
+       <property name="text">
+        <string>LO ppm</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QSlider" name="LOppm">
+       <property name="toolTip">
+        <string>Local Oscillator frequency correction (ppm)</string>
+       </property>
+       <property name="minimum">
+        <number>-500</number>
+       </property>
+       <property name="maximum">
+        <number>500</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="LOppmText">
+       <property name="text">
+        <string>0.0</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="autoCorrectionsLayout">
      <item>
       <widget class="QLabel" name="samplerateLabel">
@@ -449,7 +492,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Subsampling band index [n*61.44 - (n+1)*61.44 MHz] </string>
+        <string>Subsampling band index </string>
        </property>
        <item>
         <property name="text">

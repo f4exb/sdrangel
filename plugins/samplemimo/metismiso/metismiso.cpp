@@ -358,6 +358,12 @@ bool MetisMISO::applySettings(const MetisMISOSettings& settings, bool force)
         propagateSettings = true;
     }
 
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    {
+        reverseAPIKeys.append("LOppmTenths");
+        propagateSettings = true;
+    }
+
     if ((m_settings.m_dcBlock != settings.m_dcBlock) || force) {
         reverseAPIKeys.append("dcBlock");
     }
@@ -526,6 +532,9 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("log2Decim")) {
         settings.m_log2Decim = response.getMetisMisoSettings()->getLog2Decim();
     }
+    if (deviceSettingsKeys.contains("LOppmTenths")) {
+        settings.m_LOppmTenths = response.getMetisMisoSettings()->getLOppmTenths();
+    }
     if (deviceSettingsKeys.contains("preamp")) {
         settings.m_preamp = response.getMetisMisoSettings()->getPreamp() != 0;
     }
@@ -573,6 +582,7 @@ void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getMetisMisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
     response.getMetisMisoSettings()->setSampleRateIndex(settings.m_sampleRateIndex);
     response.getMetisMisoSettings()->setLog2Decim(settings.m_log2Decim);
+    response.getMetisMisoSettings()->setLOppmTenths(settings.m_LOppmTenths);
     response.getMetisMisoSettings()->setPreamp(settings.m_preamp ? 1 : 0);
     response.getMetisMisoSettings()->setRandom(settings.m_random ? 1 : 0);
     response.getMetisMisoSettings()->setDither(settings.m_dither ? 1 : 0);
@@ -625,6 +635,9 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
     }
     if (deviceSettingsKeys.contains("log2Decim") || force) {
         swgMetisMISOSettings->setLog2Decim(settings.m_log2Decim);
+    }
+    if (deviceSettingsKeys.contains("LOppmTenths") || force) {
+        swgMetisMISOSettings->setLOppmTenths(settings.m_LOppmTenths);
     }
     if (deviceSettingsKeys.contains("preamp") || force) {
         swgMetisMISOSettings->setPreamp(settings.m_preamp ? 1 : 0);
