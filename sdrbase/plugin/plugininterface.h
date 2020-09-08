@@ -3,9 +3,10 @@
 
 #include <QtPlugin>
 #include <QString>
-#include <QtWidgets/QMainWindow>
 
 #include "export.h"
+
+class QMainWindow;
 
 struct SDRBASE_API PluginDescriptor {
     const QString hardwareId;

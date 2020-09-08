@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-The rigctrl plugin allows SDRangel to be controlled via ![Hamlib](http://hamlib.sourceforge.net/manuals/hamlib.html)'s rigctrld protocol. This allows other software that implements the rigctrld protocol, such at the satelite tracking software GPredict, to control SDRangel, to adjust for doppler or to automatically switch between different satellite frequencies and modes.
+The rigctrl plugin allows SDRangel to be controlled via [Hamlib](http://hamlib.sourceforge.net/manuals/hamlib.html)'s rigctrld protocol. This allows other software that implements the rigctrld protocol, such at the satelite tracking software GPredict, to control SDRangel, to adjust for doppler or to automatically switch between different satellite frequencies and modes.
 
 <h2>Interface</h2>
 

@@ -23,6 +23,7 @@
 #include "rigctrl.h"
 
 class PluginAPI;
+class QMainWindow;
 
 #define RIGCTRL_DEVICE_TYPE_ID "sdrangel.misc.rigctrl"
 

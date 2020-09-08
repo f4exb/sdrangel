@@ -17,10 +17,6 @@
 
 #include <QtPlugin>
 #include <QtDebug>
-#include <QtWidgets/QAction>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMenu>
-#include <QtWidgets/QMenuBar>
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -28,6 +24,10 @@
 #include "rigctrl.h"
 #ifdef SERVER_MODE
 #else
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMenuBar>
 #include "rigctrlgui.h"
 #endif
 #include "rigctrlplugin.h"
@@ -65,6 +65,7 @@ bool RigCtrlPlugin::createTopLevelGUI(
         QMainWindow* mainWindow
         )
 {
+    (void) mainWindow;
     return true;
 }
 
