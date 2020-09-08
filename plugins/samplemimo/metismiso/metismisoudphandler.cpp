@@ -338,7 +338,7 @@ void MetisMISOUDPHandler::sendData(bool nullPayload)
         buffer[6]= (commandValue>>8) & 0xFF; // C3
         buffer[7]= commandValue & 0xFF; // C4
 
-        if (m_commandBase < 17) { // base count 0 to 18
+        if (m_commandBase < 18) { // base count 0 to 18
             m_commandBase++;
         } else {
             m_commandBase = 0;
