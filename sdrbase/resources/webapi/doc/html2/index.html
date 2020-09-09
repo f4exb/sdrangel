@@ -5509,13 +5509,45 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Enable Tx * 0 - disabled sends null payload to Metis device * 1 - enabled sends Tx payload to Metis device\n"
     },
-    "rxCenterFrequencies" : {
-      "type" : "array",
-      "description" : "center fequencies of receivers",
-      "items" : {
-        "type" : "integer",
-        "format" : "int64"
-      }
+    "rx1CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 1"
+    },
+    "rx2CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 2"
+    },
+    "rx3CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 3"
+    },
+    "rx4CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 4"
+    },
+    "rx5CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 5"
+    },
+    "rx6CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 6"
+    },
+    "rx7CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 7"
+    },
+    "rx8CenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "center fequencies of receiver 8"
     },
     "txCenterFrequency" : {
       "type" : "integer",
@@ -5541,12 +5573,37 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "I/Q samples order * 0 - I then Q (direct) * 1 - Q then I (reversed)\n"
     },
-    "rxSubsamplingIndexes" : {
-      "type" : "array",
-      "description" : "subsampling band indexes of receivers",
-      "items" : {
-        "type" : "integer"
-      }
+    "rx1SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 1"
+    },
+    "rx2SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 2"
+    },
+    "rx3SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 3"
+    },
+    "rx4SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 4"
+    },
+    "rx5SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 5"
+    },
+    "rx6SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 6"
+    },
+    "rx7SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 7"
+    },
+    "rx8SubsamplingIndex" : {
+      "type" : "integer",
+      "description" : "subsampling band indexes of receiver 8"
     },
     "sampleRateIndex" : {
       "type" : "integer"
@@ -37565,7 +37622,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-08T08:55:28.204+02:00
+              Generated 2020-09-09T22:58:44.320+02:00
             </div>
           </div>
       </div>

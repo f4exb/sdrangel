@@ -551,13 +551,30 @@ void MetisMISO::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("txEnable")) {
         settings.m_txEnable = response.getMetisMisoSettings()->getTxEnable() != 0;
     }
-
-    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
-    {
-        QString keyword = QString("rx%1CenterFrequency").arg(i+1);
-        settings.m_rxCenterFrequencies[i] = response.getMetisMisoSettings()->getRxCenterFrequencies()->at(i);
+    if (deviceSettingsKeys.contains("rx1CenterFrequency")) {
+        settings.m_rxCenterFrequencies[0] = response.getMetisMisoSettings()->getRx1CenterFrequency();
     }
-
+    if (deviceSettingsKeys.contains("rx2CenterFrequency")) {
+        settings.m_rxCenterFrequencies[1] = response.getMetisMisoSettings()->getRx2CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx3CenterFrequency")) {
+        settings.m_rxCenterFrequencies[2] = response.getMetisMisoSettings()->getRx3CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx4CenterFrequency")) {
+        settings.m_rxCenterFrequencies[3] = response.getMetisMisoSettings()->getRx4CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx5CenterFrequency")) {
+        settings.m_rxCenterFrequencies[4] = response.getMetisMisoSettings()->getRx5CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx6CenterFrequency")) {
+        settings.m_rxCenterFrequencies[5] = response.getMetisMisoSettings()->getRx6CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx7CenterFrequency")) {
+        settings.m_rxCenterFrequencies[6] = response.getMetisMisoSettings()->getRx7CenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("rx8CenterFrequency")) {
+        settings.m_rxCenterFrequencies[7] = response.getMetisMisoSettings()->getRx8CenterFrequency();
+    }
     if (deviceSettingsKeys.contains("txCenterFrequency")) {
         settings.m_txCenterFrequency = response.getMetisMisoSettings()->getTxCenterFrequency();
     }
@@ -575,6 +592,30 @@ void MetisMISO::webapiUpdateDeviceSettings(
     }
     if (deviceSettingsKeys.contains("iqOrder")) {
         settings.m_iqOrder = response.getMetisMisoSettings()->getIqOrder() != 0;
+    }
+    if (deviceSettingsKeys.contains("rx1SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[0] = response.getMetisMisoSettings()->getRx1SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx2SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[1] = response.getMetisMisoSettings()->getRx2SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx3SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[2] = response.getMetisMisoSettings()->getRx3SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx4SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[3] = response.getMetisMisoSettings()->getRx4SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx5SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[4] = response.getMetisMisoSettings()->getRx5SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx6SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[5] = response.getMetisMisoSettings()->getRx6SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx7SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[6] = response.getMetisMisoSettings()->getRx7SubsamplingIndex();
+    }
+    if (deviceSettingsKeys.contains("rx8SubsamplingIndex")) {
+        settings.m_rxSubsamplingIndexes[7] = response.getMetisMisoSettings()->getRx8SubsamplingIndex();
     }
     if (deviceSettingsKeys.contains("sampleRateIndex")) {
         settings.m_sampleRateIndex = response.getMetisMisoSettings()->getSampleRateIndex();
@@ -625,9 +666,23 @@ void MetisMISO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getMetisMisoSettings()->setNbReceivers(settings.m_nbReceivers);
     response.getMetisMisoSettings()->setTxEnable(settings.m_txEnable ? 1 : 0);
 
-    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++) {
-        response.getMetisMisoSettings()->getRxCenterFrequencies()->replace(i, settings.m_rxCenterFrequencies[i]);
-    }
+    response.getMetisMisoSettings()->setRx1CenterFrequency(settings.m_rxCenterFrequencies[0]);
+    response.getMetisMisoSettings()->setRx2CenterFrequency(settings.m_rxCenterFrequencies[1]);
+    response.getMetisMisoSettings()->setRx3CenterFrequency(settings.m_rxCenterFrequencies[2]);
+    response.getMetisMisoSettings()->setRx4CenterFrequency(settings.m_rxCenterFrequencies[3]);
+    response.getMetisMisoSettings()->setRx5CenterFrequency(settings.m_rxCenterFrequencies[4]);
+    response.getMetisMisoSettings()->setRx6CenterFrequency(settings.m_rxCenterFrequencies[5]);
+    response.getMetisMisoSettings()->setRx7CenterFrequency(settings.m_rxCenterFrequencies[6]);
+    response.getMetisMisoSettings()->setRx8CenterFrequency(settings.m_rxCenterFrequencies[7]);
+
+    response.getMetisMisoSettings()->setRx1SubsamplingIndex(settings.m_rxSubsamplingIndexes[0]);
+    response.getMetisMisoSettings()->setRx2SubsamplingIndex(settings.m_rxSubsamplingIndexes[1]);
+    response.getMetisMisoSettings()->setRx3SubsamplingIndex(settings.m_rxSubsamplingIndexes[2]);
+    response.getMetisMisoSettings()->setRx4SubsamplingIndex(settings.m_rxSubsamplingIndexes[3]);
+    response.getMetisMisoSettings()->setRx5SubsamplingIndex(settings.m_rxSubsamplingIndexes[4]);
+    response.getMetisMisoSettings()->setRx6SubsamplingIndex(settings.m_rxSubsamplingIndexes[5]);
+    response.getMetisMisoSettings()->setRx7SubsamplingIndex(settings.m_rxSubsamplingIndexes[6]);
+    response.getMetisMisoSettings()->setRx8SubsamplingIndex(settings.m_rxSubsamplingIndexes[7]);
 
     response.getMetisMisoSettings()->setTxCenterFrequency(settings.m_txCenterFrequency);
     response.getMetisMisoSettings()->setRxTransverterMode(settings.m_rxTransverterMode ? 1 : 0);
@@ -673,13 +728,54 @@ void MetisMISO::webapiReverseSendSettings(const QList<QString>& deviceSettingsKe
         swgMetisMISOSettings->setTxEnable(settings.m_txEnable ? 1 : 0);
     }
 
-    for (int i = 0; i < MetisMISOSettings::m_maxReceivers; i++)
-    {
-        QString keyword = QString("rx%1CenterFrequency").arg(i+1);
+    if (deviceSettingsKeys.contains("rx1CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx1CenterFrequency(settings.m_rxCenterFrequencies[0]);
+    }
+    if (deviceSettingsKeys.contains("rx2CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx2CenterFrequency(settings.m_rxCenterFrequencies[1]);
+    }
+    if (deviceSettingsKeys.contains("rx3CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx3CenterFrequency(settings.m_rxCenterFrequencies[2]);
+    }
+    if (deviceSettingsKeys.contains("rx4CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx4CenterFrequency(settings.m_rxCenterFrequencies[3]);
+    }
+    if (deviceSettingsKeys.contains("rx5CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx5CenterFrequency(settings.m_rxCenterFrequencies[4]);
+    }
+    if (deviceSettingsKeys.contains("rx6CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx6CenterFrequency(settings.m_rxCenterFrequencies[5]);
+    }
+    if (deviceSettingsKeys.contains("rx7CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx7CenterFrequency(settings.m_rxCenterFrequencies[6]);
+    }
+    if (deviceSettingsKeys.contains("rx8CenterFrequency") || force) {
+        swgMetisMISOSettings->setRx8CenterFrequency(settings.m_rxCenterFrequencies[7]);
+    }
 
-        if (deviceSettingsKeys.contains(keyword) || force) {
-            swgMetisMISOSettings->getRxCenterFrequencies()->replace(i, settings.m_rxCenterFrequencies[i]);
-        }
+    if (deviceSettingsKeys.contains("rx1SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx1SubsamplingIndex(settings.m_rxSubsamplingIndexes[0]);
+    }
+    if (deviceSettingsKeys.contains("rx2SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx2SubsamplingIndex(settings.m_rxSubsamplingIndexes[1]);
+    }
+    if (deviceSettingsKeys.contains("rx3SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx3SubsamplingIndex(settings.m_rxSubsamplingIndexes[2]);
+    }
+    if (deviceSettingsKeys.contains("rx4SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx4SubsamplingIndex(settings.m_rxSubsamplingIndexes[3]);
+    }
+    if (deviceSettingsKeys.contains("rx5SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx5SubsamplingIndex(settings.m_rxSubsamplingIndexes[4]);
+    }
+    if (deviceSettingsKeys.contains("rx6SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx6SubsamplingIndex(settings.m_rxSubsamplingIndexes[5]);
+    }
+    if (deviceSettingsKeys.contains("rx7SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx7SubsamplingIndex(settings.m_rxSubsamplingIndexes[6]);
+    }
+    if (deviceSettingsKeys.contains("rx8SubsamplingIndex") || force) {
+        swgMetisMISOSettings->setRx8SubsamplingIndex(settings.m_rxSubsamplingIndexes[7]);
     }
 
     if (deviceSettingsKeys.contains("txCenterFrequency") || force) {

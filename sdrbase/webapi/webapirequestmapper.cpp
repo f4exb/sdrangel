@@ -121,6 +121,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.localinput", "localInputSettings"},
     {"sdrangel.samplesink.localoutput", "localOutputSettings"},
     {"sdrangel.samplesource.localoutput", "localOutputSettings"}, // remap
+    {"sdrangel.samplemimo.metismiso", "metisMISOSettings"},
     {"sdrangel.samplesource.perseus", "perseusSettings"},
     {"sdrangel.samplesource.plutosdr", "plutoSdrInputSettings"},
     {"sdrangel.samplesink.plutosdr", "plutoSdrOutputSettings"},
@@ -238,6 +239,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToActionsKey =
 
 const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
     {"BladeRF2", "bladeRF2MIMOSettings"},
+    {"MetisMISO", "metisMISOSettings"},
     {"TestMI", "testMISettings"},
     {"TestMOSync", "testMOSyncSettings"}
 };
@@ -3728,6 +3730,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
         {
             deviceSettings->setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
             deviceSettings->getLimeSdrOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "metisMISOSettings")
+        {
+            deviceSettings->setMetisMisoSettings(new SWGSDRangel::SWGMetisMISOSettings());
+            deviceSettings->getMetisMisoSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "perseusSettings")
         {

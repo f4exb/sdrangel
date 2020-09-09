@@ -349,6 +349,8 @@ void MetisMISOGui::displaySettings()
     ui->spectrumSource->setCurrentIndex(m_spectrumStreamIndex);
     ui->nbRxIndex->setCurrentIndex(m_settings.m_nbReceivers - 1);
     ui->samplerateIndex->setCurrentIndex(m_settings.m_sampleRateIndex);
+    ui->LOppm->setValue(m_settings.m_LOppmTenths);
+    ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
     ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->dcBlock->setChecked(m_settings.m_dcBlock);
     ui->iqCorrection->setChecked(m_settings.m_iqCorrection);

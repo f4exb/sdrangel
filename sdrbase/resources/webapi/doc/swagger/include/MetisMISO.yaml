@@ -10,12 +10,38 @@ MetisMISOSettings:
         Enable Tx
         * 0 - disabled sends null payload to Metis device
         * 1 - enabled sends Tx payload to Metis device
-    rxCenterFrequencies:
-      description: center fequencies of receivers
-      type: array
-      items:
-        type: integer
-        format: int64
+    rx1CenterFrequency:
+      description: center fequencies of receiver 1
+      type: integer
+      format: int64
+    rx2CenterFrequency:
+      description: center fequencies of receiver 2
+      type: integer
+      format: int64
+    rx3CenterFrequency:
+      description: center fequencies of receiver 3
+      type: integer
+      format: int64
+    rx4CenterFrequency:
+      description: center fequencies of receiver 4
+      type: integer
+      format: int64
+    rx5CenterFrequency:
+      description: center fequencies of receiver 5
+      type: integer
+      format: int64
+    rx6CenterFrequency:
+      description: center fequencies of receiver 6
+      type: integer
+      format: int64
+    rx7CenterFrequency:
+      description: center fequencies of receiver 7
+      type: integer
+      format: int64
+    rx8CenterFrequency:
+      description: center fequencies of receiver 8
+      type: integer
+      format: int64
     txCenterFrequency:
       type: integer
       format: int64
@@ -43,11 +69,30 @@ MetisMISOSettings:
         I/Q samples order
         * 0 - I then Q (direct)
         * 1 - Q then I (reversed)
-    rxSubsamplingIndexes:
-      description: subsampling band indexes of receivers
-      type: array
-      items:
-        type: integer
+    rx1SubsamplingIndex:
+      description: subsampling band indexes of receiver 1
+      type: integer
+    rx2SubsamplingIndex:
+      description: subsampling band indexes of receiver 2
+      type: integer
+    rx3SubsamplingIndex:
+      description: subsampling band indexes of receiver 3
+      type: integer
+    rx4SubsamplingIndex:
+      description: subsampling band indexes of receiver 4
+      type: integer
+    rx5SubsamplingIndex:
+      description: subsampling band indexes of receiver 5
+      type: integer
+    rx6SubsamplingIndex:
+      description: subsampling band indexes of receiver 6
+      type: integer
+    rx7SubsamplingIndex:
+      description: subsampling band indexes of receiver 7
+      type: integer
+    rx8SubsamplingIndex:
+      description: subsampling band indexes of receiver 8
+      type: integer
     sampleRateIndex:
       type: integer
     log2Decim:
