@@ -1,28 +1,42 @@
-<h1>Test source input plugin</h1>
+<h1>Metis Multiple Input Single Output plugin</h1>
 
 <h2>Introduction</h2>
 
 This is a v5 only plugin.
 
-This input sample source plugin is an internal continuous wave generator that can be used to carry out test of software internals.
+This plugin is mainly intended to be used to process samples to/from a [Red Pitaya board](https://www.redpitaya.com/) with [Pavel's HPSDR compatible applications](http://pavel-demin.github.io/red-pitaya-notes/). More precisely:
+
+  - [SDR transceiver compatible with HPSDR](http://pavel-demin.github.io/red-pitaya-notes/sdr-transceiver-hpsdr/)
+  - [SDR receiver compatible with HPSDR](http://pavel-demin.github.io/red-pitaya-notes/sdr-receiver-hpsdr-122-88/)
+
+The plugin has 8 receiving (sink) streams and one transmitting (source) stream. Depending on the design of the Metis compatible hardware you may or may not have all of them available. Streams with no connection will just be filled with zero samples. You may choose the number of active streams with the control (9.5) - see next.
+
+While compatible with [Metis HPSDR-2 protocol](https://github.com/softerhardware/Hermes-Lite2/wiki/Protocol) implementation is minimal in order to be able to control and work with the Red Pitaya. It has not been tested in another context nor has provision to control the Red Pitaya or HPSDR peripherals. These controls may be added in the future as needs arise.
 
 <h2>Build</h2>
 
-The plugin is present in the core of the software and thus is always present in the list of sources.
+The plugin is present in the core of the software and thus is always present in the list of MIMO devices.
 
 <h2>Interface</h2>
 
-![Test source input plugin GUI](../../../doc/img/TestSourceInput_plugin.png)
+![Metis MISO plugin GUI](../../../doc/img/MetisMISO_plugin.png)
 
-<h3>1: Common stream parameters</h3>
+<h3>1: Active stream selection</h3>
 
-![Remote source input stream GUI](../../../doc/img/RemoteInput_plugin_01.png)
+Select for which streams the controls are active. Controls specific to each stream are:
 
-<h4>1.1: Frequency</h4>
+  - Center frequency
+  - Subsampling index
 
-This is the center frequency of reception in kHz.
+<h3>2: Spectrum source selection</h3>
 
-<h4>1.2: Start/Stop</h4>
+Select which stream is routed to the main spectrum display
+
+<h3>3: Active stream / spectrum source lock</h3>
+
+This ties together the stream selection and spectrum source stream selections.
+
+<h3>4: Start/Stop</h3>
 
 Device start / stop button.
 
@@ -30,108 +44,99 @@ Device start / stop button.
   - Green square icon: device is running and can be stopped
   - Magenta (or pink) square icon: an error occurred. In the case the device was accidentally disconnected you may click on the icon, plug back in and start again.
 
-<h4>1.3: Record</h4>
+Starting the device means that the network stream from the Metis compatible device is started. It will be stopped by the stop button. This effectively starts all available streams that can be controlled with the Rx number select (9.5) or Tx enable (9.6)
 
-  - Left click: record baseband I/Q stream toggle button
-  - Right click: choose record file
+<h3>5: Stream sample rate</h3>
 
-<h4>1.4: Stream sample rate</h4>
+Baseband I/Q sample rate in kS/s. This is the device to host sample rate (8.1) divided by the software decimation factor (8.2).
 
-Baseband I/Q sample rate in kS/s. This is the device to host sample rate (3) divided by the decimation factor (4).
+<h3>6: Center frequency</h3>
 
-<h3>2: Various options</h3>
+Tunes the center frequency of the active stream
 
-![Test source input plugin GUI 2](../../../doc/img/TestSourceInput_plugin_2.png)
+<h3>7: Local Oscillator frequency correction in ppm</h3>
 
-<h4>2.1: Auto corrections</h4>
+This lets you compensate for the main oscillator frequency inaccuracy. Value is in ppm (parts per million)
 
-This combo box control the local DSP auto correction options:
+<h3>8: Sample rate - Decimation - Subsampling - DC and IQ corrections</h3>
 
-  - **None**: no correction
-  - **DC**: auto remove DC component
-  - **DC+IQ**: auto remove DC component and correct I/Q balance.
+![Metis Miso GUI 1](../../../doc/img/MetisMISO_plugin_1.png)
 
-<h4>2.2: Decimation factor</h4>
+<h4>8.1: Sample rate</h4>
 
-The I/Q stream from the generator is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32. This exercises the decimation chain.
+This combo box lets you control the four pssible values for the device to host sample rate (Rx). Host to device (Tx) sample rate is fixed by design of the Metis interface at 48 kS/s:
 
-This exercises the decimation chain.
+  - **48k**: 48000 samples per second
+  - **96k**: 96000 samples per second
+  - **192k**: 192000 samples per second
+  - **384k**: 384000 samples per second
 
-<h4>2.3: Baseband center frequency position relative the center frequency</h4>
+<h4>8.2: Decimation factor</h4>
 
-  - **Cen**: the decimation operation takes place around the center frequency Fs
-  - **Inf**: the decimation operation takes place around Fs - Fc.
-  - **Sup**: the decimation operation takes place around Fs + Fc.
+The I/Q stream from the Metis stream is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8.
 
-With SR as the sample rate before decimation Fc is calculated as:
+<h4>8.3: Subsampling index</h4>
 
-  - if decimation n is 4 or lower:  Fc = SR/2^(log2(n)-1). The device center frequency is on the side of the baseband. You need a RF filter bandwidth at least twice the baseband.
-  - if decimation n is 8 or higher: Fc = SR/n. The device center frequency is half the baseband away from the side of the baseband. You need a RF filter bandwidth at least 3 times the baseband.
+The Red Pitaya has a LTC2185 ADC specified for a bandwidth up to 550 MHz. This lets you use the Red Pitaya receivers in subsampling mode with appropriate filtering and LNA chain as a front end. In this mode the received frequency may extend above 61.44 MHz in successive 61.44 MHz wide bands. This index corresponds to the frequency band index from 0 to 7 and let you input the frequency directly corresponding the the subsampling scheme. The band limits appear in the tooltip and are the following:
 
-<h3>2.4: Sample size</h3>
+  - **0**: 0 to 61.44 MHz - fundamental no subsampling
+  - **1**: 61.44 to 122.88 MHz
+  - **2**: 122.88 to 184.32 MHz
+  - **3**: 184.32 to 245.76 MHz
+  - **4**: 245.76 to 307.2 MHz
+  - **5**: 307.2 to 368.64 MHz
+  - **6**: 368.64 to 430.08 MHz
+  - **7**: 430.08 to 491.52 MHz
 
-This is the sample size in number of bits. It corresponds to the actual sample size used by the devices supported:
+Of course the more the higher the frequency above the fundamental range the worse the performance is. In practice it is still OK at VHF frequencies but not much above.
 
-  - **8**: RTL-SDR, HackRF
-  - **12**: Airspy, BladeRF, LimeSDR, PlutoSDR, SDRplay
-  - **16**: Airspy HF+, FCD Pro, FCD Pro+
+<h4>8.4: DC correction</h4>
 
-<h3>3: Sample rate</h3>
+This corrects residual DC present at the center of the passband. By construction this is useless for the Red Pitaya.
 
-This controls the generator sample rate in samples per second.
+<h4>8.5: IQ imbalance correction</h4>
 
-<h3>4: Modulation</h4>
+This corrects I/Q imbalance. By construction this is useless for the Red Pitaya.
 
-  - **No**: No modulation
-  - **AM**: Amplitude modulation (AM)
-  - **FM**: Frequency modulation (FM)
-  - **P0**: Pattern 0 is a binary pattern
-    - Pulse width: 150 samples
-    - Sync pattern: 010 at full amplitude
-    - Binary pattern LSB first on 3 bits from 0 to 7 at 0.3 amplitude
-  - **P1**: Pattern 1 is a sawtooth pattern
-    - Pulse width: 1000 samples
-    - Starts at full amplitude then amplitude decreases linearly down to zero
-  - **P2**: Pattern 2 is a 50% duty cycle square pattern
-    - Pulse width: 1000 samples
-    - Starts with a full amplitude pulse then down to zero for the duration of one pulse
+<h3>9: Preamp - Random - Dither - Duplex - Number of receivers - Tx enable - Transverter</h3>
 
-<h3>5: Modulating tone frequency</h3>
+![Metis Miso GUI 1](../../../doc/img/MetisMISO_plugin_2.png)
 
-This controls the modulating tone frequency in kHz in 10 Hz steps.
+<h4>9.1: Preamp</h4>
 
-<h3>6: Carrier shift from center frequency</h3>
+Toggle Rx preamplifier - not found to be effective
 
-Use this control to set the offset of the carrier from the center frequency of reception.
+<h4>9.2: Random</h4>
 
-<h3>7: AM modulation factor</h3>
+Toggle LTC2185 randomization - not found to be effective
 
-This controls the AM modulation factor from 0 to 99%
+<h4>9.3: Dither</h4>
 
-<h3>8: FM deviation</h3>
+Toggle LTC2185 dithering - not found to be effective
 
-This controls the frequency modulation deviation in kHz in 100 Hz steps. It cannot exceed the sample rate.
+<h4>9.4: Duplex</h4>
 
-<h3>9: Amplitude coarse control</h3>
+Toggle duplex - not found to be effective
 
-This slider controls the number of amplitude bits by steps of 100 bits. The total number of amplitude bits appear on the right.
+<h4>9.5: Number or active receivers</h4>
 
-<h3>10: Amplitude fine control</h3>
+Controls the number of active receivers. Each receiver allocates a slot in the data stream from the Metis interface.
 
-This slider controls the number of amplitude bits by steps of 1 bit. The signal power in dB relative to the maximum power (full bit range) appear on the right.
+  - For the SDR receiver compatible with HPSDR choose a maximum of 4 receivers
+  - For the SDR receiver compatible with HPSDR choose a maximum of 8 receivers
 
-<h3>11: DC bias</h3>
+It is a waste to have more active receivers than you actually need because it will increase network traffic for nothing
 
-Use this slider to give a DC component in percentage of maximum amplitude.
+<h4>9.6: Toggle Tx activation</h4>
 
-<h3>12: I bias</h3>
+Use this button to toggle the generation and sending of Tx samples in the Metis stream from host to device. When inactivated null samples are sent in the return payload from host to device.
 
-Use this slider to give an in-phase (I) bias in percentage of maximum amplitude.
+<h4>9.7: Transverter mode</h4>
 
-<h3>13: Q bias</h3>
+This button opens a dialog to set the transverter mode frequency translation options. The details about this dialog can be found [here](../../../sdrgui/gui/transverterdialog.md)
 
-Use this slider to give an quadrature-phase (Q) bias in percentage of maximum amplitude.
+Transverter mixing is the same for all receivers and may be different for the transmitter.
 
-<h3>14: Phase imbalance</h3>
+<h3>10: Tx drive level</h3>
 
-Use this slider to introduce a phase imbalance in percentage of full period (continuous wave) or percentage of I signal injected in Q (AM, FM).
+Choose a level from 0 (deactivated) to 15 (full power)
