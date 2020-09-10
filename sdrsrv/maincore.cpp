@@ -82,6 +82,8 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_apiAdapter = new WebAPIAdapterSrv(*this);
     m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);
+    m_apiHost = parser.getServerAddress();
+    m_apiPort = parser.getServerPort();
     m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
     m_apiServer->start();
 

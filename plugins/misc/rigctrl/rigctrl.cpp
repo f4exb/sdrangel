@@ -22,10 +22,10 @@
 #include <QtNetwork>
 
 // Length of buffers
-#define CMD_LENGTH      1024
-#define URL_LENGTH      1024
-#define RESPONSE_LENGTH 1024
-#define DATA_LENGTH     1024
+const unsigned int RigCtrl::m_CmdLength = 1024;
+const unsigned int RigCtrl::m_UrlLength = 1024;
+const unsigned int RigCtrl::m_ResponseLength = 1024;
+const unsigned int RigCtrl::m_DataLength = 1024;
 
 // Hamlib rigctrl error codes
 enum rig_errcode_e {
@@ -103,7 +103,7 @@ RigCtrl::RigCtrl() :
     m_state(idle),
     m_tcpServer(nullptr),
     m_clientConnection(nullptr)
-{
+{    
     m_netman = new QNetworkAccessManager(this);
     connect(m_netman, &QNetworkAccessManager::finished, this, &RigCtrl::processAPIResponse);
 
@@ -194,9 +194,9 @@ void RigCtrl::acceptConnection()
 // Get rigctrl command and start processing it
 void RigCtrl::getCommand()
 {
-    char cmd[CMD_LENGTH];
-    char url[URL_LENGTH];
-    char response[RESPONSE_LENGTH];
+    char cmd[m_CmdLength];
+    char url[m_UrlLength];
+    char response[m_ResponseLength];
     qint64 len;
     QNetworkRequest request;
     char *p;
@@ -211,13 +211,13 @@ void RigCtrl::getCommand()
             // Set frequency
             m_targetFrequency = atof(cmd[0] == 'F' ? &cmd[2] : &cmd[9]);
             // Get current centre frequency
-            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->get(request);
             m_state = set_freq;
         } else if (!strncmp(cmd, "f", 1) || !strncmp(cmd, "get_freq", 8)) {
             // Get frequency - need to add centerFrequency and inputFrequencyOffset
-            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->get(request);
             m_state = get_freq_center;
@@ -253,7 +253,7 @@ void RigCtrl::getCommand()
             }
             if (mode_map[i].modem != nullptr) {
                 // Delete current modem
-                sprintf(url, "%s/deviceset/%d/channel/%d", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex, m_settings.m_channelIndex);
+                sprintf(url, "%s/deviceset/%d/channel/%d", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex, m_settings.m_channelIndex);
                 request.setUrl(QUrl(url));
                 m_netman->sendCustomRequest(request, "DELETE");
                 m_state = set_mode_mod;
@@ -263,19 +263,19 @@ void RigCtrl::getCommand()
             }
         } else if (!strncmp(cmd, "set_powerstat 0", 15)) {
             // Power off radio
-            sprintf(url, "%s/deviceset/%d/device/run", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/run", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->sendCustomRequest(request, "DELETE");
             m_state = set_power_off;
         } else if (!strncmp(cmd, "set_powerstat 1", 15)) {
             // Power on radio
-            sprintf(url, "%s/deviceset/%d/device/run", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/run", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->post(request, "");
             m_state = set_power_on;
         } else if (!strncmp(cmd, "get_powerstat", 13)) {
             // Return if powered on or off
-            sprintf(url, "%s/deviceset/%d/device/run", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/run", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->get(request);
             m_state = get_power;
@@ -292,9 +292,9 @@ void RigCtrl::getCommand()
 void RigCtrl::processAPIResponse(QNetworkReply *reply)
 {
     double freq;
-    char response[RESPONSE_LENGTH];
-    char url[URL_LENGTH];
-    char data[DATA_LENGTH];
+    char response[m_ResponseLength];
+    char url[m_UrlLength];
+    char data[m_DataLength];
     QNetworkRequest request;
 
     if (reply->error() == QNetworkReply::NoError) {
@@ -311,7 +311,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
             freq = getSubObjectDouble(jsonObj, "centerFrequency");
             if (freq >= 0.0) {
                 m_targetFrequency = freq;
-                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex, m_settings.m_channelIndex);
+                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex, m_settings.m_channelIndex);
                 request.setUrl(QUrl(url));
                 m_netman->get(request);
             } else {
@@ -333,7 +333,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
             if (fabs(freq - m_targetFrequency) > m_settings.m_maxFrequencyOffset) {
                 // Update centerFrequency
                 setSubObjectDouble(jsonObj, "centerFrequency", m_targetFrequency);
-                sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+                sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
                 request.setUrl(QUrl(url));
                 m_netman->sendCustomRequest(request, "PATCH", QJsonDocument(jsonObj).toJson());
                 m_state = set_freq_center;
@@ -341,7 +341,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
                 // In range, so update inputFrequencyOffset
                 m_targetOffset = m_targetFrequency - freq;
                 // Get settings containg inputFrequencyOffset, so we can patch them
-                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex, m_settings.m_channelIndex);
+                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex, m_settings.m_channelIndex);
                 request.setUrl(QUrl(url));
                 m_netman->get(request);
                 m_state = set_freq_set_offset;
@@ -351,7 +351,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
         case set_freq_no_offset:
             // Update centerFrequency, without trying to set offset
             setSubObjectDouble(jsonObj, "centerFrequency", m_targetFrequency);
-            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->sendCustomRequest(request, "PATCH", QJsonDocument(jsonObj).toJson());
             m_state = set_freq_center_no_offset;
@@ -363,7 +363,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
             if (freq == m_targetFrequency) {
                 // Set inputFrequencyOffset to 0
                 m_targetOffset = 0;
-                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex, m_settings.m_channelIndex);
+                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex, m_settings.m_channelIndex);
                 request.setUrl(QUrl(url));
                 m_netman->get(request);
                 m_state = set_freq_set_offset;
@@ -389,7 +389,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
         case set_freq_set_offset:
             // Patch inputFrequencyOffset
             if (setSubObjectDouble(jsonObj, "inputFrequencyOffset", m_targetOffset)) {
-                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex, m_settings.m_channelIndex);
+                sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex, m_settings.m_channelIndex);
                 request.setUrl(QUrl(url));
                 m_netman->sendCustomRequest(request, "PATCH", QJsonDocument(jsonObj).toJson());
                 m_state = set_freq_offset;
@@ -414,7 +414,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
 
         case set_mode_mod:
             // Create new modem
-            sprintf(url, "%s/deviceset/%d/channel", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/channel", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             sprintf(data, "{ \"channelType\": \"%s\",  \"direction\": 0,  \"originatorDeviceSetIndex\": %d}\n", m_targetModem, m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
@@ -428,7 +428,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
 
         case set_mode_settings:
             // Set modem bandwidth
-            sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex, m_settings.m_channelIndex);
+            sprintf(url, "%s/deviceset/%d/channel/%d/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex, m_settings.m_channelIndex);
             sprintf(data, "{ \"channelType\": \"%s\", \"%sSettings\": {\"rfBandwidth\":%d}}\n", m_targetModem, m_targetModem, m_targetBW);
             request.setUrl(QUrl(url));
             request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");
@@ -476,7 +476,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
         case set_freq_set_offset:
             // Probably no demodulator enabled on the specified channel
             // Just set as center frequency
-            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/device/settings", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             m_netman->get(request);
             m_state = set_freq_no_offset;
@@ -484,7 +484,7 @@ void RigCtrl::processAPIResponse(QNetworkReply *reply)
 
        case set_mode_mod:
             // Probably no modem on channel to delete, so continue to try to create one
-            sprintf(url, "%s/deviceset/%d/channel", qUtf8Printable(m_settings.m_APIAddress), m_settings.m_deviceIndex);
+            sprintf(url, "%s/deviceset/%d/channel", qUtf8Printable(m_APIBaseURI), m_settings.m_deviceIndex);
             sprintf(data, "{ \"channelType\": \"%s\",  \"direction\": 0,  \"originatorDeviceSetIndex\": %d}\n", m_targetModem, m_settings.m_deviceIndex);
             request.setUrl(QUrl(url));
             request.setHeader(QNetworkRequest::ContentTypeHeader,"application/json");

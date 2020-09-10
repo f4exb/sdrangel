@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>351</width>
-    <height>235</height>
+    <height>261</height>
    </rect>
   </property>
   <property name="font">
@@ -33,69 +33,35 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="rigCtrlPortLabel">
         <property name="text">
          <string>rigctrl Port</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="deviceIndexLabel">
-        <property name="text">
-         <string>Device Index</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="deviceIndex">
-        <property name="toolTip">
-         <string>Index of the device that should be controlled by rigctrl commands.
-Default is 0.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="channelIndex">
-        <property name="toolTip">
-         <string>Index of the channel that is to be controlled by rigctrl commands.
-Default is 0.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="channelIndexLabel">
-        <property name="text">
-         <string>Channel Index</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="apiLabel">
-        <property name="text">
-         <string>API Address</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
-       <widget class="QLineEdit" name="api">
+       <widget class="QSpinBox" name="rigCtrlPort">
         <property name="toolTip">
-         <string>URL of SDRangel API server to control.
-Default is http://127.0.0.1:8091/sdrangel</string>
+         <string>TCP port to listen for rigctrl commands on.
+Default is 4532.</string>
         </property>
-        <property name="text">
-         <string>http://127.0.0.1:8091/sdrangel</string>
+        <property name="minimum">
+         <number>1024</number>
+        </property>
+        <property name="maximum">
+         <number>65536</number>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="maxFrequencyOffsetLabel">
         <property name="text">
          <string>Max Frequency Offset</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="2" column="1">
        <widget class="QSpinBox" name="maxFrequencyOffset">
         <property name="toolTip">
          <string>Controls whether the center frequency or frequency offset is adjusted when a new frequency is received via a rigctrl command.
@@ -108,17 +74,33 @@ Default is 10000.</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="rigCtrlPort">
+      <item row="3" column="0">
+       <widget class="QLabel" name="deviceIndexLabel">
+        <property name="text">
+         <string>Device Index</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="deviceIndex">
         <property name="toolTip">
-         <string>TCP port to listen for rigctrl commands on.
-Default is 4532.</string>
+         <string>Index of the device that should be controlled by rigctrl commands.
+Default is 0.</string>
         </property>
-        <property name="minimum">
-         <number>1024</number>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="channelIndexLabel">
+        <property name="text">
+         <string>Channel Index</string>
         </property>
-        <property name="maximum">
-         <number>65536</number>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="channelIndex">
+        <property name="toolTip">
+         <string>Index of the channel that is to be controlled by rigctrl commands.
+Default is 0.</string>
         </property>
        </widget>
       </item>

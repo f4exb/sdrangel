@@ -68,6 +68,9 @@ public:
     void addChannel(int deviceSetIndex, int selectedChannelIndex);
     void deleteChannel(int deviceSetIndex, int channelIndex);
 
+    const QString& getAPIHost() const { return m_apiHost; }
+    int getAPIPort() const { return m_apiPort; }
+
     friend class WebAPIAdapterSrv;
 
 signals:
@@ -288,6 +291,8 @@ private:
     DSPEngine* m_dspEngine;
     int m_lastEngineState;
     qtwebapp::LoggerWithFile *m_logger;
+	QString m_apiHost;
+	int m_apiPort;
 
     MessageQueue m_inputMessageQueue;
     QTimer m_masterTimer;

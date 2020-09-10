@@ -6,8 +6,6 @@
 
 #include "export.h"
 
-class QMainWindow;
-
 struct SDRBASE_API PluginDescriptor {
     const QString hardwareId;
 	// general plugin description
@@ -314,7 +312,7 @@ public:
     virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
 
     // Callback to allow plugin to add elements to top-level GUI (such as menu items)
-    virtual bool createTopLevelGUI(QMainWindow* mainWindow)
+    virtual bool createTopLevelGUI()
     {
         return true;
     }

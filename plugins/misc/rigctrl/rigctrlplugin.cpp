@@ -28,6 +28,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
+#include "mainwindow.h"
 #include "rigctrlgui.h"
 #endif
 #include "rigctrlplugin.h"
@@ -62,10 +63,8 @@ void RigCtrlPlugin::initPlugin(PluginAPI* pluginAPI)
 
 #ifdef SERVER_MODE
 bool RigCtrlPlugin::createTopLevelGUI(
-        QMainWindow* mainWindow
         )
 {
-    (void) mainWindow;
     return true;
 }
 
@@ -74,12 +73,11 @@ void RigCtrlPlugin::showRigCtrlUI()
 }
 
 #else
-bool RigCtrlPlugin::createTopLevelGUI(
-        QMainWindow* mainWindow
-        )
+bool RigCtrlPlugin::createTopLevelGUI()
 {
-    m_mainWindow = mainWindow;
-    QMenuBar *menuBar = mainWindow->menuBar();
+    m_mainWindow = MainWindow::getInstance();
+    m_rigCtrl->setAPIBaseURI(QString("http://%1:%2/sdrangel").arg(m_mainWindow->getAPIHost()).arg(m_mainWindow->getAPIPort()));
+    QMenuBar *menuBar = m_mainWindow->menuBar();
 
     QMenu *prefMenu = menuBar->findChild<QMenu *>("menuPreferences", Qt::FindDirectChildrenOnly);
     if (prefMenu == nullptr) {

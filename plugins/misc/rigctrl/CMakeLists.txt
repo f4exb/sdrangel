@@ -45,7 +45,7 @@ target_link_libraries(${TARGET_NAME}
     Qt5::Core
     ${TARGET_LIB}
 	sdrbase
-	${TARGET_LIB_GUI}
+    ${TARGET_LIB_GUI}
     swagger
 )
 

@@ -32,6 +32,7 @@ public:
     ~RigCtrl();
     void getSettings(RigCtrlSettings *settings);
     void setSettings(RigCtrlSettings *settings);
+    void setAPIBaseURI(const QString& apiBaseURI) { m_APIBaseURI = apiBaseURI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
@@ -40,7 +41,7 @@ private slots:
     void getCommand();
     void processAPIResponse(QNetworkReply *reply);
 
-protected:
+private:
     QTcpServer *m_tcpServer;
     QTcpSocket *m_clientConnection;
     QNetworkAccessManager *m_netman;
@@ -60,8 +61,14 @@ protected:
     double m_targetOffset;
     const char *m_targetModem;
     int m_targetBW;
+    QString m_APIBaseURI; //!< Base URI of own API 
 
     RigCtrlSettings m_settings;
+
+    static const unsigned int m_CmdLength;
+    static const unsigned int m_UrlLength;
+    static const unsigned int m_ResponseLength;
+    static const unsigned int m_DataLength;
 };
 
 #endif // INCLUDE_RIGCTRL_H

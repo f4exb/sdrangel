@@ -266,7 +266,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     PluginAPI::MiscPluginRegistrations *miscPluginRegistrations = m_pluginManager->getMiscPluginRegistrations();
     for (int i = 0; i < miscPluginRegistrations->count(); i++)
     {
-        (*miscPluginRegistrations)[i].m_plugin->createTopLevelGUI(this);
+        (*miscPluginRegistrations)[i].m_plugin->createTopLevelGUI();
     }
 
     qDebug() << "MainWindow::MainWindow: end";

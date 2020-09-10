@@ -21,21 +21,20 @@
 #include <QtDebug>
 #include "util/simpleserializer.h"
 
-#define ENABLED_DEFAULT                 false
-#define API_ADDRESS_DEFAULT             "http://127.0.0.1:8091/sdrangel"
-#define RIG_CTRL_PORT_DEFAULT           4532
-#define MAX_FREQUENCY_OFFSET_DEFAULT    10000
-#define DEVICE_INDEX_DEFAULT            0
-#define CHANNEL_INDEX_DEFAULT           0
+const bool RigCtrlSettings::m_EnabledDefault = false;
+const int RigCtrlSettings::m_RigCtrlPortDefault = 4532;
+const int RigCtrlSettings::m_MaxFrequencyOffsetDefault = 10000;
+const int RigCtrlSettings::m_DeviceIndexDefault = 0;
+const int RigCtrlSettings::m_ChannelIndexDefault = 0;
+
 
 void RigCtrlSettings::resetToDefaults()
 {
-    m_enabled = ENABLED_DEFAULT;
-    m_APIAddress = API_ADDRESS_DEFAULT;
-    m_rigCtrlPort = RIG_CTRL_PORT_DEFAULT;
-    m_maxFrequencyOffset = MAX_FREQUENCY_OFFSET_DEFAULT;
-    m_deviceIndex = DEVICE_INDEX_DEFAULT;
-    m_channelIndex = CHANNEL_INDEX_DEFAULT;
+    m_enabled = m_EnabledDefault;
+    m_rigCtrlPort = m_RigCtrlPortDefault;
+    m_maxFrequencyOffset = m_MaxFrequencyOffsetDefault;
+    m_deviceIndex = m_DeviceIndexDefault;
+    m_channelIndex = m_ChannelIndexDefault;
 }
 
 QByteArray RigCtrlSettings::serialize() const
@@ -43,7 +42,6 @@ QByteArray RigCtrlSettings::serialize() const
 	SimpleSerializer s(1);
 
     s.writeBool(1, m_enabled);
-    s.writeString(2, m_APIAddress);
     s.writeS32(3, m_rigCtrlPort);
     s.writeS32(4, m_maxFrequencyOffset);
     s.writeS32(5, m_deviceIndex);
@@ -64,28 +62,27 @@ bool RigCtrlSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
-        d.readBool(1, &m_enabled, ENABLED_DEFAULT);
-		d.readString(2, &m_APIAddress, API_ADDRESS_DEFAULT);
-		d.readS32(3, &m_rigCtrlPort, RIG_CTRL_PORT_DEFAULT);
-		d.readS32(4, &m_maxFrequencyOffset, MAX_FREQUENCY_OFFSET_DEFAULT);
-		d.readS32(5, &m_deviceIndex, DEVICE_INDEX_DEFAULT);
-		d.readS32(6, &m_channelIndex, CHANNEL_INDEX_DEFAULT);
+        d.readBool(1, &m_enabled, m_EnabledDefault);
+		d.readS32(3, &m_rigCtrlPort, m_RigCtrlPortDefault);
+		d.readS32(4, &m_maxFrequencyOffset, m_MaxFrequencyOffsetDefault);
+		d.readS32(5, &m_deviceIndex, m_DeviceIndexDefault);
+		d.readS32(6, &m_channelIndex, m_ChannelIndexDefault);
 
         if (!((m_rigCtrlPort > 1023) && (m_rigCtrlPort < 65536))) {
             qDebug() << "RigCtrlSettings::deserialize invalid port number ignored";
-            m_rigCtrlPort = RIG_CTRL_PORT_DEFAULT;
+            m_rigCtrlPort = m_RigCtrlPortDefault;
         }
         if (m_maxFrequencyOffset < 0) {
             qDebug() << "RigCtrlSettings::deserialize invalid max frequency offset ignored";
-            m_maxFrequencyOffset = MAX_FREQUENCY_OFFSET_DEFAULT;
+            m_maxFrequencyOffset = m_MaxFrequencyOffsetDefault;
         }
         if (m_deviceIndex < 0) {
             qDebug() << "RigCtrlSettings::deserialize invalid device index ignored";
-            m_deviceIndex = DEVICE_INDEX_DEFAULT;
+            m_deviceIndex = m_DeviceIndexDefault;
         }
         if (m_channelIndex < 0) {
             qDebug() << "RigCtrlSettings::deserialize invalid channel index ignored";
-            m_deviceIndex = CHANNEL_INDEX_DEFAULT;
+            m_deviceIndex = m_ChannelIndexDefault;
         }
 
 		return true;

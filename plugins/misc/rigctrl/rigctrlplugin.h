@@ -23,7 +23,7 @@
 #include "rigctrl.h"
 
 class PluginAPI;
-class QMainWindow;
+class MainWindow;
 
 #define RIGCTRL_DEVICE_TYPE_ID "sdrangel.misc.rigctrl"
 
@@ -33,12 +33,12 @@ class RigCtrlPlugin : public QObject, public PluginInterface {
 	Q_PLUGIN_METADATA(IID RIGCTRL_DEVICE_TYPE_ID)
 
 public:
-	explicit RigCtrlPlugin(RigCtrl *rigCtrl = NULL, QObject* parent = NULL);
+	explicit RigCtrlPlugin(RigCtrl *rigCtrl = nullptr, QObject* parent = nullptr);
 
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	virtual bool createTopLevelGUI(QMainWindow* mainWindow);
+	virtual bool createTopLevelGUI();
     virtual QByteArray serializeGlobalSettings() const;
 	virtual bool deserializeGlobalSettings(const QByteArray& data);
 
@@ -47,7 +47,7 @@ private slots:
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
-    QMainWindow* m_mainWindow;
+    MainWindow* m_mainWindow;
     RigCtrl *m_rigCtrl;
 };
 

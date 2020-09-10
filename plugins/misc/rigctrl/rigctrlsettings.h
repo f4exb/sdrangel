@@ -24,7 +24,6 @@
 struct RigCtrlSettings {
 
     bool m_enabled;
-    QString m_APIAddress;
     int m_rigCtrlPort;
     int m_maxFrequencyOffset;
     int m_deviceIndex;
@@ -37,6 +36,13 @@ struct RigCtrlSettings {
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+private:
+    static const bool m_EnabledDefault;
+    static const int m_RigCtrlPortDefault;
+    static const int m_MaxFrequencyOffsetDefault;
+    static const int m_DeviceIndexDefault;
+    static const int m_ChannelIndexDefault;    
 };
 
 #endif /* INCLUDE_RIGCTRLSETTINGS_H */

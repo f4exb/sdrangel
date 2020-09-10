@@ -27,7 +27,6 @@ RigCtrlGUI::RigCtrlGUI(RigCtrl *rigCtrl, QWidget* parent) :
 	ui->setupUi(this);
     m_rigCtrl->getSettings(&m_settings);
     ui->enable->setChecked(m_settings.m_enabled);
-    ui->api->setText(QString(m_settings.m_APIAddress));
     ui->rigCtrlPort->setValue(m_settings.m_rigCtrlPort);
     ui->maxFrequencyOffset->setValue(m_settings.m_maxFrequencyOffset);
     ui->deviceIndex->setValue(m_settings.m_deviceIndex);
@@ -42,7 +41,6 @@ RigCtrlGUI::~RigCtrlGUI()
 void RigCtrlGUI::accept()
 {
     m_settings.m_enabled = ui->enable->isChecked();
-    m_settings.m_APIAddress = ui->api->text();
     m_settings.m_rigCtrlPort = ui->rigCtrlPort->value();
     m_settings.m_maxFrequencyOffset = ui->maxFrequencyOffset->value();
     m_settings.m_deviceIndex = ui->deviceIndex->value();

@@ -103,6 +103,8 @@ public:
     std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
+    const QString& getAPIHost() const { return m_apiHost; }
+	int getAPIPort() const { return m_apiPort; }
 
 	friend class WebAPIAdapterGUI;
 
