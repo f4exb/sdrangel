@@ -171,7 +171,6 @@ void DeviceUISet::deleteChannel(int channelIndex)
                 qPrintable(m_channelInstanceRegistrations[channelIndex].m_channelName),
                 channelIndex);
         m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
-        m_channelInstanceRegistrations.removeAt(channelIndex);
         renameChannelInstances();
     }
 }
