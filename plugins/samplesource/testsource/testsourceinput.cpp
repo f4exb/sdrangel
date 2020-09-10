@@ -50,6 +50,9 @@ TestSourceInput::TestSourceInput(DeviceAPI *deviceAPI) :
         qCritical("TestSourceInput::TestSourceInput: Could not allocate SampleFifo");
     }
 
+    m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
+    m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
+
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
@@ -62,6 +65,8 @@ TestSourceInput::~TestSourceInput()
     if (m_running) {
         stop();
     }
+
+    m_testSourceWorker->deleteLater();
 }
 
 void TestSourceInput::destroy()
@@ -82,8 +87,6 @@ bool TestSourceInput::start()
         stop();
     }
 
-    m_testSourceWorker = new TestSourceWorker(&m_sampleFifo);
-    m_testSourceWorker->moveToThread(&m_testSourceWorkerThread);
 	m_testSourceWorker->setSamplerate(m_settings.m_sampleRate);
 	startWorker();
 
@@ -98,14 +101,7 @@ bool TestSourceInput::start()
 void TestSourceInput::stop()
 {
 	QMutexLocker mutexLocker(&m_mutex);
-
-	if (m_testSourceWorker)
-	{
-	    stopWorker();
-        m_testSourceWorker->deleteLater();
-		m_testSourceWorker = nullptr;
-	}
-
+    stopWorker();
 	m_running = false;
 }
 
