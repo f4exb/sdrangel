@@ -28,7 +28,7 @@ SWGRemoteOutputSettings::SWGRemoteOutputSettings(QString* json) {
 }
 
 SWGRemoteOutputSettings::SWGRemoteOutputSettings() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
@@ -64,7 +64,7 @@ SWGRemoteOutputSettings::~SWGRemoteOutputSettings() {
 
 void
 SWGRemoteOutputSettings::init() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
@@ -129,7 +129,7 @@ SWGRemoteOutputSettings::fromJson(QString &json) {
 
 void
 SWGRemoteOutputSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
@@ -219,12 +219,12 @@ SWGRemoteOutputSettings::asJsonObject() {
     return obj;
 }
 
-qint32
+qint64
 SWGRemoteOutputSettings::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGRemoteOutputSettings::setCenterFrequency(qint32 center_frequency) {
+SWGRemoteOutputSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }

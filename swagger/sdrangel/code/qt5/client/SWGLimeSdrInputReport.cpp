@@ -44,7 +44,7 @@ SWGLimeSdrInputReport::SWGLimeSdrInputReport() {
     m_dropped_packets_count_isSet = false;
     link_rate = 0.0f;
     m_link_rate_isSet = false;
-    hw_timestamp = 0;
+    hw_timestamp = 0L;
     m_hw_timestamp_isSet = false;
     temperature = 0.0f;
     m_temperature_isSet = false;
@@ -76,7 +76,7 @@ SWGLimeSdrInputReport::init() {
     m_dropped_packets_count_isSet = false;
     link_rate = 0.0f;
     m_link_rate_isSet = false;
-    hw_timestamp = 0;
+    hw_timestamp = 0L;
     m_hw_timestamp_isSet = false;
     temperature = 0.0f;
     m_temperature_isSet = false;
@@ -129,7 +129,7 @@ SWGLimeSdrInputReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&link_rate, pJson["linkRate"], "float", "");
     
-    ::SWGSDRangel::setValue(&hw_timestamp, pJson["hwTimestamp"], "qint32", "");
+    ::SWGSDRangel::setValue(&hw_timestamp, pJson["hwTimestamp"], "qint64", "");
     
     ::SWGSDRangel::setValue(&temperature, pJson["temperature"], "float", "");
     
@@ -273,12 +273,12 @@ SWGLimeSdrInputReport::setLinkRate(float link_rate) {
     this->m_link_rate_isSet = true;
 }
 
-qint32
+qint64
 SWGLimeSdrInputReport::getHwTimestamp() {
     return hw_timestamp;
 }
 void
-SWGLimeSdrInputReport::setHwTimestamp(qint32 hw_timestamp) {
+SWGLimeSdrInputReport::setHwTimestamp(qint64 hw_timestamp) {
     this->hw_timestamp = hw_timestamp;
     this->m_hw_timestamp_isSet = true;
 }

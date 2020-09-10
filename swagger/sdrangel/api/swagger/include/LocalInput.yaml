@@ -20,6 +20,6 @@ LocalInputReport:
   properties:
     centerFrequency:
       type: integer
-      format: uint64
+      format: int64
     sampleRate:
       type: integer

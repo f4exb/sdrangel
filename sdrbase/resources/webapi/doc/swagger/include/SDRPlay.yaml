@@ -3,7 +3,7 @@ SDRPlaySettings:
   properties:
     centerFrequency:
       type: integer
-      format: uint64
+      format: int64
     tunerGain:
       type: integer
     LOppmTenths:

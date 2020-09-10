@@ -28,7 +28,7 @@ SWGLocalOutputReport::SWGLocalOutputReport(QString* json) {
 }
 
 SWGLocalOutputReport::SWGLocalOutputReport() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
@@ -40,7 +40,7 @@ SWGLocalOutputReport::~SWGLocalOutputReport() {
 
 void
 SWGLocalOutputReport::init() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     sample_rate = 0;
     m_sample_rate_isSet = false;
@@ -63,7 +63,7 @@ SWGLocalOutputReport::fromJson(QString &json) {
 
 void
 SWGLocalOutputReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&sample_rate, pJson["sampleRate"], "qint32", "");
     
@@ -93,12 +93,12 @@ SWGLocalOutputReport::asJsonObject() {
     return obj;
 }
 
-qint32
+qint64
 SWGLocalOutputReport::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGLocalOutputReport::setCenterFrequency(qint32 center_frequency) {
+SWGLocalOutputReport::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }

@@ -65,8 +65,8 @@ public:
     float getLinkRate();
     void setLinkRate(float link_rate);
 
-    qint32 getHwTimestamp();
-    void setHwTimestamp(qint32 hw_timestamp);
+    qint64 getHwTimestamp();
+    void setHwTimestamp(qint64 hw_timestamp);
 
     float getTemperature();
     void setTemperature(float temperature);
@@ -105,7 +105,7 @@ private:
     float link_rate;
     bool m_link_rate_isSet;
 
-    qint32 hw_timestamp;
+    qint64 hw_timestamp;
     bool m_hw_timestamp_isSet;
 
     float temperature;
