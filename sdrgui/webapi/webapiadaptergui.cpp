@@ -2277,9 +2277,9 @@ int WebAPIAdapterGUI::devicesetChannelDelete(
         else
         {
             error.init();
-            *error.getMessage() = QString("There is no channel at index %1. There are %2 channels")
+            *error.getMessage() = QString("There is no channel at index %1. %2 channel(s) left")
                     .arg(channelIndex)
-                    .arg(channelIndex < deviceSet->getNumberOfChannels());
+                    .arg(deviceSet->getNumberOfChannels());
             return 400;
         }
     }
