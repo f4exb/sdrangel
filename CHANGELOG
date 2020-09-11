@@ -1,3 +1,11 @@
+sdrangel (5.10.1-1) unstable; urgency=medium
+
+   * REST API: chanded uint64 to int64 integer formats. Fixes #624
+   * Test Source: fixed worker lifecycle. Fixes issue #626
+   * DeviceUISet: fixed deleteChannel. Fixes issue #625
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 11 Sep 2020 06:34:57 +0200
+
 sdrangel (5.10.0-1) unstable; urgency=medium
 
    * Metis/HPSDR MISO plugin. Implements #344
