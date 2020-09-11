@@ -41,8 +41,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGLimeSdrMIMOReport* fromJson(QString &jsonString) override;
 
-    qint32 getHwTimestamp();
-    void setHwTimestamp(qint32 hw_timestamp);
+    qint64 getHwTimestamp();
+    void setHwTimestamp(qint64 hw_timestamp);
 
     float getTemperature();
     void setTemperature(float temperature);
@@ -105,7 +105,7 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 hw_timestamp;
+    qint64 hw_timestamp;
     bool m_hw_timestamp_isSet;
 
     float temperature;

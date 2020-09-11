@@ -28,7 +28,7 @@ SWGTestSourceSettings::SWGTestSourceSettings(QString* json) {
 }
 
 SWGTestSourceSettings::SWGTestSourceSettings() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
     m_frequency_shift_isSet = false;
@@ -76,7 +76,7 @@ SWGTestSourceSettings::~SWGTestSourceSettings() {
 
 void
 SWGTestSourceSettings::init() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
     m_frequency_shift_isSet = false;
@@ -155,7 +155,7 @@ SWGTestSourceSettings::fromJson(QString &json) {
 
 void
 SWGTestSourceSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&frequency_shift, pJson["frequencyShift"], "qint32", "");
     
@@ -275,12 +275,12 @@ SWGTestSourceSettings::asJsonObject() {
     return obj;
 }
 
-qint32
+qint64
 SWGTestSourceSettings::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGTestSourceSettings::setCenterFrequency(qint32 center_frequency) {
+SWGTestSourceSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }

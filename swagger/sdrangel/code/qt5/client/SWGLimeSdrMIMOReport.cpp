@@ -28,7 +28,7 @@ SWGLimeSdrMIMOReport::SWGLimeSdrMIMOReport(QString* json) {
 }
 
 SWGLimeSdrMIMOReport::SWGLimeSdrMIMOReport() {
-    hw_timestamp = 0;
+    hw_timestamp = 0L;
     m_hw_timestamp_isSet = false;
     temperature = 0.0f;
     m_temperature_isSet = false;
@@ -76,7 +76,7 @@ SWGLimeSdrMIMOReport::~SWGLimeSdrMIMOReport() {
 
 void
 SWGLimeSdrMIMOReport::init() {
-    hw_timestamp = 0;
+    hw_timestamp = 0L;
     m_hw_timestamp_isSet = false;
     temperature = 0.0f;
     m_temperature_isSet = false;
@@ -153,7 +153,7 @@ SWGLimeSdrMIMOReport::fromJson(QString &json) {
 
 void
 SWGLimeSdrMIMOReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&hw_timestamp, pJson["hwTimestamp"], "qint32", "");
+    ::SWGSDRangel::setValue(&hw_timestamp, pJson["hwTimestamp"], "qint64", "");
     
     ::SWGSDRangel::setValue(&temperature, pJson["temperature"], "float", "");
     
@@ -273,12 +273,12 @@ SWGLimeSdrMIMOReport::asJsonObject() {
     return obj;
 }
 
-qint32
+qint64
 SWGLimeSdrMIMOReport::getHwTimestamp() {
     return hw_timestamp;
 }
 void
-SWGLimeSdrMIMOReport::setHwTimestamp(qint32 hw_timestamp) {
+SWGLimeSdrMIMOReport::setHwTimestamp(qint64 hw_timestamp) {
     this->hw_timestamp = hw_timestamp;
     this->m_hw_timestamp_isSet = true;
 }

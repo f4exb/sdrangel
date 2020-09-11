@@ -350,7 +350,7 @@ LimeSdrInputReport:
     hwTimestamp:
       description: Hardware timestamp
       type: integer
-      format: uint64
+      format: int64
     temperature:
       type: number
       format: float
@@ -386,7 +386,7 @@ LimeSdrOutputReport:
     hwTimestamp:
       description: Hardware timestamp
       type: integer
-      format: uint64
+      format: int64
     temperature:
       type: number
       format: float
@@ -403,7 +403,7 @@ LimeSdrMIMOReport:
     hwTimestamp:
       description: Hardware timestamp
       type: integer
-      format: uint64
+      format: int64
     temperature:
       type: number
       format: float

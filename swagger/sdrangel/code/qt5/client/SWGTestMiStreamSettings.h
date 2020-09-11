@@ -44,8 +44,8 @@ public:
     qint32 getStreamIndex();
     void setStreamIndex(qint32 stream_index);
 
-    qint32 getCenterFrequency();
-    void setCenterFrequency(qint32 center_frequency);
+    qint64 getCenterFrequency();
+    void setCenterFrequency(qint64 center_frequency);
 
     qint32 getFrequencyShift();
     void setFrequencyShift(qint32 frequency_shift);
@@ -99,7 +99,7 @@ private:
     qint32 stream_index;
     bool m_stream_index_isSet;
 
-    qint32 center_frequency;
+    qint64 center_frequency;
     bool m_center_frequency_isSet;
 
     qint32 frequency_shift;

@@ -30,7 +30,7 @@ SWGTestMiStreamSettings::SWGTestMiStreamSettings(QString* json) {
 SWGTestMiStreamSettings::SWGTestMiStreamSettings() {
     stream_index = 0;
     m_stream_index_isSet = false;
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
     m_frequency_shift_isSet = false;
@@ -72,7 +72,7 @@ void
 SWGTestMiStreamSettings::init() {
     stream_index = 0;
     m_stream_index_isSet = false;
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     frequency_shift = 0;
     m_frequency_shift_isSet = false;
@@ -140,7 +140,7 @@ void
 SWGTestMiStreamSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&frequency_shift, pJson["frequencyShift"], "qint32", "");
     
@@ -253,12 +253,12 @@ SWGTestMiStreamSettings::setStreamIndex(qint32 stream_index) {
     this->m_stream_index_isSet = true;
 }
 
-qint32
+qint64
 SWGTestMiStreamSettings::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGTestMiStreamSettings::setCenterFrequency(qint32 center_frequency) {
+SWGTestMiStreamSettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }

@@ -28,7 +28,7 @@ SWGSDRPlaySettings::SWGSDRPlaySettings(QString* json) {
 }
 
 SWGSDRPlaySettings::SWGSDRPlaySettings() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     tuner_gain = 0;
     m_tuner_gain_isSet = false;
@@ -76,7 +76,7 @@ SWGSDRPlaySettings::~SWGSDRPlaySettings() {
 
 void
 SWGSDRPlaySettings::init() {
-    center_frequency = 0;
+    center_frequency = 0L;
     m_center_frequency_isSet = false;
     tuner_gain = 0;
     m_tuner_gain_isSet = false;
@@ -155,7 +155,7 @@ SWGSDRPlaySettings::fromJson(QString &json) {
 
 void
 SWGSDRPlaySettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint32", "");
+    ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&tuner_gain, pJson["tunerGain"], "qint32", "");
     
@@ -275,12 +275,12 @@ SWGSDRPlaySettings::asJsonObject() {
     return obj;
 }
 
-qint32
+qint64
 SWGSDRPlaySettings::getCenterFrequency() {
     return center_frequency;
 }
 void
-SWGSDRPlaySettings::setCenterFrequency(qint32 center_frequency) {
+SWGSDRPlaySettings::setCenterFrequency(qint64 center_frequency) {
     this->center_frequency = center_frequency;
     this->m_center_frequency_isSet = true;
 }

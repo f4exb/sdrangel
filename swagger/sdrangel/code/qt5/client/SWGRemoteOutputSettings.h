@@ -42,8 +42,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGRemoteOutputSettings* fromJson(QString &jsonString) override;
 
-    qint32 getCenterFrequency();
-    void setCenterFrequency(qint32 center_frequency);
+    qint64 getCenterFrequency();
+    void setCenterFrequency(qint64 center_frequency);
 
     qint32 getSampleRate();
     void setSampleRate(qint32 sample_rate);
@@ -88,7 +88,7 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 center_frequency;
+    qint64 center_frequency;
     bool m_center_frequency_isSet;
 
     qint32 sample_rate;
