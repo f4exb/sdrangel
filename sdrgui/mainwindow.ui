@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1012</width>
-    <height>721</height>
+    <height>811</height>
    </rect>
   </property>
   <property name="font">
@@ -64,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1012</width>
-     <height>20</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -500,7 +500,7 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="channelDock">
+  <widget class="ChannelsDock" name="channelDock">
    <property name="windowTitle">
     <string>Channels</string>
    </property>
@@ -959,6 +959,12 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ChannelsDock</class>
+   <extends>QDockWidget</extends>
+   <header>gui/channelsdock.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>

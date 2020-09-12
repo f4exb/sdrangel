@@ -98,13 +98,3 @@ void SamplingDeviceControl::removeSelectedDeviceIndex()
 
     m_selectedDeviceIndex = -1;
 }
-
-QComboBox *SamplingDeviceControl::getChannelSelector()
-{
-    return ui->channelSelect;
-}
-
-QPushButton *SamplingDeviceControl::getAddChannelButton()
-{
-    return ui->addChannel;
-}

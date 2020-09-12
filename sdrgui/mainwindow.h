@@ -400,7 +400,7 @@ private slots:
 	void sampleSourceChanged();
 	void sampleSinkChanged();
 	void sampleMIMOChanged();
-    void channelAddClicked(bool checked);
+    void channelAddClicked(int channelIndex);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();
@@ -408,6 +408,7 @@ private slots:
     void on_action_addMIMODevice_triggered();
 	void on_action_removeLastDevice_triggered();
 	void tabInputViewIndexChanged();
+    void tabChannelsIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
 };
 

@@ -14,6 +14,8 @@ set(sdrgui_SOURCES
     gui/basicchannelsettingsdialog.cpp
     gui/basicdevicesettingsdialog.cpp
     gui/buttonswitch.cpp
+    gui/channeladddialog.cpp
+    gui/channelsdock.cpp
     gui/channelwindow.cpp
     gui/clickablelabel.cpp
     gui/colormapper.cpp
@@ -86,6 +88,8 @@ set(sdrgui_HEADERS
     gui/basicchannelsettingsdialog.h
     gui/basicdevicesettingsdialog.h
     gui/buttonswitch.h
+    gui/channeladddialog.h
+    gui/channelsdock.h
     gui/channelwindow.h
     gui/colormapper.h
     gui/commanditem.h
@@ -154,6 +158,7 @@ set(sdrgui_FORMS
   gui/ambedevicesdialog.ui
   gui/basicchannelsettingsdialog.ui
   gui/basicdevicesettingsdialog.ui
+  gui/channeladddialog.ui
   gui/commandoutputdialog.ui
   gui/cwkeyergui.ui
   gui/devicestreamselectiondialog.ui
