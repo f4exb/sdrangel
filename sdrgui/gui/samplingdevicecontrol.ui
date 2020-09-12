@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>76</height>
+    <height>40</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>300</width>
-    <height>76</height>
+    <height>40</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -99,43 +99,6 @@
        <property name="icon">
         <iconset resource="../resources/res.qrc">
          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QComboBox" name="channelSelect">
-       <property name="toolTip">
-        <string>Select channel plugin</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="addChannel">
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Add a new channel</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/plusw.png</normaloff>:/plusw.png</iconset>
        </property>
       </widget>
      </item>

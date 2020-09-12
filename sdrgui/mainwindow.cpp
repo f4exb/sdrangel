@@ -210,6 +210,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_settings.getSourceDeviceId(), m_settings.getSourceIndex());
 	addSourceDevice(deviceIndex);  // add the first device set with file input device as default if device in settings is not enumerated
 	m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
+    tabChannelsIndexChanged(); // force channel selection list update
 
     splash->showStatusMessage("load current preset settings...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
@@ -223,6 +224,8 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     splash->showStatusMessage("finishing...", Qt::white);
 	connect(ui->tabInputsView, SIGNAL(currentChanged(int)), this, SLOT(tabInputViewIndexChanged()));
+    connect(ui->tabChannels, SIGNAL(currentChanged(int)), this, SLOT(tabChannelsIndexChanged()));
+    connect(ui->channelDock, SIGNAL(addChannel(int)), this, SLOT(channelAddClicked(int)));
 
 	QString applicationDirPath = qApp->applicationDirPath();
 
@@ -306,11 +309,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     QList<QString> channelNames;
     m_pluginManager->listRxChannels(channelNames);
-    QStringList channelNamesList(channelNames);
-    m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableRxChannels(channelNamesList.size());
-
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
+    m_deviceUIs.back()->setNumberOfAvailableRxChannels(channelNames.size());
 
     dspDeviceSourceEngine->addSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
@@ -388,11 +387,7 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
     QList<QString> channelNames;
     m_pluginManager->listTxChannels(channelNames);
-    QStringList channelNamesList(channelNames);
-    m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector()->addItems(channelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableTxChannels(channelNamesList.size());
-
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
+    m_deviceUIs.back()->setNumberOfAvailableTxChannels(channelNames.size());
 
     dspDeviceSinkEngine->addSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
     m_deviceUIs.back()->m_spectrum->setDisplayedStream(false, 0);
@@ -465,27 +460,18 @@ void MainWindow::addMIMODevice()
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
     m_deviceUIs.back()->m_samplingDeviceControl->setPluginManager(m_pluginManager);
-    QComboBox *channelSelector = m_deviceUIs.back()->m_samplingDeviceControl->getChannelSelector();
     // add MIMO channels
     QList<QString> mimoChannelNames;
     m_pluginManager->listMIMOChannels(mimoChannelNames);
-    QStringList mimoChannelNamesList(mimoChannelNames);
-    channelSelector->addItems(mimoChannelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableMIMOChannels(mimoChannelNamesList.size());
+    m_deviceUIs.back()->setNumberOfAvailableMIMOChannels(mimoChannelNames.size());
     // Add Rx channels
     QList<QString> rxChannelNames;
     m_pluginManager->listRxChannels(rxChannelNames);
-    QStringList rxChannelNamesList(rxChannelNames);
-    channelSelector->addItems(rxChannelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableRxChannels(rxChannelNamesList.size());
+    m_deviceUIs.back()->setNumberOfAvailableRxChannels(rxChannelNames.size());
     // Add Tx channels
     QList<QString> txChannelNames;
     m_pluginManager->listTxChannels(txChannelNames);
-    QStringList txChannelNamesList(txChannelNames);
-    channelSelector->addItems(txChannelNamesList);
-    m_deviceUIs.back()->setNumberOfAvailableTxChannels(txChannelNamesList.size());
-
-    connect(m_deviceUIs.back()->m_samplingDeviceControl->getAddChannelButton(), SIGNAL(clicked(bool)), this, SLOT(channelAddClicked(bool)));
+    m_deviceUIs.back()->setNumberOfAvailableTxChannels(txChannelNames.size());
 
     dspDeviceMIMOEngine->addSpectrumSink(m_deviceUIs.back()->m_spectrumVis);
     ui->tabSpectra->addTab(m_deviceUIs.back()->m_spectrum, tabNameCStr);
@@ -1065,9 +1051,7 @@ bool MainWindow::handleMessage(const Message& cmd)
     {
         MsgAddChannel& notif = (MsgAddChannel&) cmd;
         ui->tabInputsSelect->setCurrentIndex(notif.getDeviceSetIndex());
-        DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
-        deviceUI->m_samplingDeviceControl->getChannelSelector()->setCurrentIndex(notif.getChannelRegistrationIndex());
-        channelAddClicked(true);
+        channelAddClicked(notif.getChannelRegistrationIndex());
 
         return true;
     }
@@ -2004,9 +1988,8 @@ void MainWindow::sampleMIMOChanged()
     }
 }
 
-void MainWindow::channelAddClicked(bool checked)
+void MainWindow::channelAddClicked(int channelIndex)
 {
-    (void) checked;
     // Do it in the currently selected source tab
     int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
 
@@ -2017,31 +2000,30 @@ void MainWindow::channelAddClicked(bool checked)
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
             m_pluginManager->createRxChannelInstance(
-                deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI, deviceUI->m_deviceAPI);
+                channelIndex, deviceUI, deviceUI->m_deviceAPI);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
             m_pluginManager->createTxChannelInstance(
-                deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex(), deviceUI, deviceUI->m_deviceAPI);
+                channelIndex, deviceUI, deviceUI->m_deviceAPI);
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
             int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
             int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
             int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
-            int selectedIndex = deviceUI->m_samplingDeviceControl->getChannelSelector()->currentIndex();
             qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
-                currentSourceTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, selectedIndex);
+                currentSourceTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
 
-            if (selectedIndex < nbMIMOChannels) {
+            if (channelIndex < nbMIMOChannels) {
                 m_pluginManager->createMIMOChannelInstance(
-                    selectedIndex, deviceUI, deviceUI->m_deviceAPI);
-            } else if (selectedIndex < nbMIMOChannels + nbRxChannels) {
+                    channelIndex, deviceUI, deviceUI->m_deviceAPI);
+            } else if (channelIndex < nbMIMOChannels + nbRxChannels) {
                 m_pluginManager->createRxChannelInstance(
-                    selectedIndex - nbMIMOChannels, deviceUI, deviceUI->m_deviceAPI);
-            } else if (selectedIndex < nbMIMOChannels + nbRxChannels + nbTxChannels) {
+                    channelIndex - nbMIMOChannels, deviceUI, deviceUI->m_deviceAPI);
+            } else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels) {
                 m_pluginManager->createTxChannelInstance(
-                    selectedIndex - nbMIMOChannels - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
+                    channelIndex - nbMIMOChannels - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
             }
         }
     }
@@ -2097,6 +2079,38 @@ void MainWindow::tabInputViewIndexChanged()
     ui->tabChannels->setCurrentIndex(inputViewIndex);
     ui->tabInputsSelect->setCurrentIndex(inputViewIndex);
     ui->tabSpectraGUI->setCurrentIndex(inputViewIndex);
+}
+
+void MainWindow::tabChannelsIndexChanged()
+{
+    int channelsTabIndex = ui->tabChannels->currentIndex();
+
+    if (channelsTabIndex >= 0)
+    {
+        DeviceUISet *deviceUI = m_deviceUIs[channelsTabIndex];
+        QList<QString> channelNames;
+        ui->channelDock->resetAvailableChannels();
+
+        if (deviceUI->m_deviceSourceEngine) // source device
+        {
+            m_pluginManager->listRxChannels(channelNames);
+            ui->channelDock->addAvailableChannels(channelNames);
+        }
+        else if (deviceUI->m_deviceSinkEngine) // sink device
+        {
+            m_pluginManager->listTxChannels(channelNames);
+            ui->channelDock->addAvailableChannels(channelNames);
+        }
+        else if (deviceUI->m_deviceMIMOEngine) // MIMO device
+        {
+            m_pluginManager->listMIMOChannels(channelNames);
+            ui->channelDock->addAvailableChannels(channelNames);
+            m_pluginManager->listRxChannels(channelNames);
+            ui->channelDock->addAvailableChannels(channelNames);
+            m_pluginManager->listTxChannels(channelNames);
+            ui->channelDock->addAvailableChannels(channelNames);
+        }
+    }
 }
 
 void MainWindow::updateStatus()

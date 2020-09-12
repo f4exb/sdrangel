@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,49 +16,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_GUI_SAMPLINGDEVICECONTROL_H_
-#define SDRBASE_GUI_SAMPLINGDEVICECONTROL_H_
+#ifndef SDRGUI_GUI_CHANNELADDDIALOG_H_
+#define SDRGUI_GUI_CHANNELADDDIALOG_H_
 
-
-#include <QWidget>
-#include <QComboBox>
-#include <QPushButton>
+#include <QDialog>
+#include <vector>
 
 #include "export.h"
 
+class QStringList;
+class QAbstractButton;
+
 namespace Ui {
-    class SamplingDeviceControl;
+    class ChannelAddDialog;
 }
 
-class ChannelMarker;
-class PluginManager;
-
-class SDRGUI_API SamplingDeviceControl : public QWidget {
+class SDRGUI_API ChannelAddDialog : public QDialog {
     Q_OBJECT
-
 public:
-    explicit SamplingDeviceControl(int tabIndex, int deviceType, QWidget* parent = 0);
-    ~SamplingDeviceControl();
+    explicit ChannelAddDialog(QWidget* parent = nullptr);
+    ~ChannelAddDialog();
 
-    int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
-    void setSelectedDeviceIndex(int index);
-    void removeSelectedDeviceIndex();
-    void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
-
-private slots:
-    void on_deviceChange_clicked();
-    void on_deviceReload_clicked();
+    void resetChannelNames();
+    void addChannelNames(const QStringList& channelNames);
 
 private:
-    Ui::SamplingDeviceControl* ui;
-    PluginManager *m_pluginManager;
-    int m_deviceTabIndex;
-    int m_deviceType;
-    int m_selectedDeviceIndex;
+    Ui::ChannelAddDialog* ui;
+    std::vector<int> m_channelIndexes;
+
+private slots:
+    void apply(QAbstractButton*);
 
 signals:
-    void changed();
+    void addChannel(int);
 };
 
-
-#endif /* SDRBASE_GUI_SAMPLINGDEVICECONTROL_H_ */
+#endif /* SDRGUI_GUI_CHANNELADDDIALOG_H_ */
