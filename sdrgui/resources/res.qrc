@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>swap.png</file>
     <file>info.png</file>
     <file>gridpolar.png</file>
     <file>gridrect.png</file>

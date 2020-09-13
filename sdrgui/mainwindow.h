@@ -363,6 +363,9 @@ private:
     void addMIMODevice();
     void removeLastDevice();
     void deleteChannel(int deviceSetIndex, int channelIndex);
+    void sampleSourceChanged(int tabIndex, int newDeviceIndex);
+	void sampleSinkChanged(int tabIndex, int newDeviceIndex);
+	void sampleMIMOChanged(int tabIndex, int newDeviceIndex);
 
     void setLoggingOptions();
 
@@ -396,6 +399,7 @@ private slots:
     void on_action_LimeRFE_triggered();
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
+    void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
 	void sampleSourceChanged();
 	void sampleSinkChanged();
 	void sampleMIMOChanged();
