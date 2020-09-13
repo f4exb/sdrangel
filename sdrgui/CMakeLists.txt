@@ -46,7 +46,6 @@ set(sdrgui_SOURCES
     gui/pluginsdialog.cpp
     gui/presetitem.cpp
     gui/rollupwidget.cpp
-    gui/samplingdevicecontrol.cpp
     gui/samplingdevicedialog.cpp
     gui/samplingdevicesdock.cpp
     gui/scaleengine.cpp
@@ -124,7 +123,6 @@ set(sdrgui_HEADERS
     gui/pluginsdialog.h
     gui/presetitem.h
     gui/rollupwidget.h
-    gui/samplingdevicecontrol.h
     gui/samplingdevicedialog.h
     gui/samplingdevicesdock.h
     gui/scaleengine.h
@@ -176,7 +174,6 @@ set(sdrgui_FORMS
     gui/pluginsdialog.ui
     gui/audiodialog.ui
     gui/audioselectdialog.ui
-    gui/samplingdevicecontrol.ui
     gui/samplingdevicedialog.ui
     gui/myposdialog.ui
     gui/transverterdialog.ui

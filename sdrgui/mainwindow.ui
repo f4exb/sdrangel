@@ -691,52 +691,6 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="inputSelectDock">
-   <property name="windowTitle">
-    <string>Sampling devices control</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>1</number>
-   </attribute>
-   <widget class="QWidget" name="intputSelectDockWidget">
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_3">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <property name="leftMargin">
-      <number>2</number>
-     </property>
-     <property name="topMargin">
-      <number>2</number>
-     </property>
-     <property name="rightMargin">
-      <number>2</number>
-     </property>
-     <property name="bottomMargin">
-      <number>2</number>
-     </property>
-     <item>
-      <widget class="QTabWidget" name="tabInputsSelect">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>110</height>
-        </size>
-       </property>
-       <property name="currentIndex">
-        <number>-1</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
   <action name="action_Exit">
    <property name="text">
     <string>E&amp;xit</string>
