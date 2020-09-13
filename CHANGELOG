@@ -1,3 +1,10 @@
+sdrangel (5.11.0-1) unstable; urgency=medium
+
+   * Specialized channels dock. Implements #628
+   * Specialized sampling devices dock. Implements #629
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 Sep 2020 21:16:11 +0200
+
 sdrangel (5.10.1-1) unstable; urgency=medium
 
    * REST API: chanded uint64 to int64 integer formats. Fixes #624
