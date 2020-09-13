@@ -35,9 +35,14 @@ class SDRGUI_API SamplingDeviceDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit SamplingDeviceDialog(int deviceType, int deviceTabIndex, QWidget* parent = 0);
+    explicit SamplingDeviceDialog(int deviceType, int deviceTabIndex, QWidget* parent = nullptr);
     ~SamplingDeviceDialog();
     int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
+    void setSelectedDeviceIndex(int deviceIndex);
+    void setTabIndex(int deviceTabIndex) { m_deviceTabIndex = deviceTabIndex; }
+    void getDeviceId(QString& id) const;
+    int exec();
+    bool hasChanged() const { return m_hasChanged; }
 
 private:
     Ui::SamplingDeviceDialog* ui;
@@ -45,9 +50,12 @@ private:
     int m_deviceTabIndex;
     int m_selectedDeviceIndex;
     std::vector<int> m_deviceIndexes;
+    bool m_hasChanged;
 
 private slots:
+    void on_deviceSelect_currentIndexChanged(int index);
     void accept();
+    void reject();
 };
 
 #endif /* SDRGUI_GUI_SAMPLINGDEVICEDIALOG_H_ */

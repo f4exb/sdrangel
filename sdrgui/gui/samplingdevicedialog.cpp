@@ -29,7 +29,8 @@ SamplingDeviceDialog::SamplingDeviceDialog(int deviceType, int deviceTabIndex, Q
     ui(new Ui::SamplingDeviceDialog),
     m_deviceType(deviceType),
     m_deviceTabIndex(deviceTabIndex),
-    m_selectedDeviceIndex(-1)
+    m_selectedDeviceIndex(-1),
+    m_hasChanged(false)
 {
     ui->setupUi(this);
 
@@ -52,6 +53,31 @@ SamplingDeviceDialog::~SamplingDeviceDialog()
     delete ui;
 }
 
+int SamplingDeviceDialog::exec()
+{
+    m_hasChanged = false;
+    return QDialog::exec();
+}
+
+void SamplingDeviceDialog::setSelectedDeviceIndex(int deviceIndex)
+{
+    ui->deviceSelect->blockSignals(true);
+    ui->deviceSelect->setCurrentIndex(deviceIndex);
+    m_selectedDeviceIndex = deviceIndex;
+    ui->deviceSelect->blockSignals(false);
+}
+
+void SamplingDeviceDialog::getDeviceId(QString& id) const
+{
+    id  = ui->deviceSelect->currentText();
+}
+
+void SamplingDeviceDialog::on_deviceSelect_currentIndexChanged(int index)
+{
+    (void) index;
+    m_hasChanged = true;
+}
+
 void SamplingDeviceDialog::accept()
 {
     m_selectedDeviceIndex = m_deviceIndexes[ui->deviceSelect->currentIndex()];
@@ -65,4 +91,10 @@ void SamplingDeviceDialog::accept()
     }
 
     QDialog::accept();
+}
+
+void SamplingDeviceDialog::reject()
+{
+    m_hasChanged = false;
+    QDialog::reject();
 }

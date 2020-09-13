@@ -25,7 +25,6 @@
 SamplingDeviceControl::SamplingDeviceControl(int tabIndex, int deviceType, QWidget* parent) :
     QWidget(parent),
     ui(new Ui::SamplingDeviceControl),
-    m_pluginManager(0),
     m_deviceTabIndex(tabIndex),
     m_deviceType(deviceType),
     m_selectedDeviceIndex(-1)

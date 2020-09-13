@@ -85,6 +85,7 @@ ChannelsDock::~ChannelsDock()
 {
     delete m_closeButton;
     delete m_normalButton;
+    delete m_addChannelButton;
     delete m_titleLabel;
     delete m_titleBarLayout;
     delete m_titleBar;

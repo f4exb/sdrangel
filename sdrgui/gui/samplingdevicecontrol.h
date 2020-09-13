@@ -42,7 +42,6 @@ public:
     int getSelectedDeviceIndex() const { return m_selectedDeviceIndex; }
     void setSelectedDeviceIndex(int index);
     void removeSelectedDeviceIndex();
-    void setPluginManager(PluginManager *pluginManager) { m_pluginManager = pluginManager; }
 
 private slots:
     void on_deviceChange_clicked();
@@ -50,7 +49,6 @@ private slots:
 
 private:
     Ui::SamplingDeviceControl* ui;
-    PluginManager *m_pluginManager;
     int m_deviceTabIndex;
     int m_deviceType;
     int m_selectedDeviceIndex;

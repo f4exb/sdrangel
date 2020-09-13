@@ -47,6 +47,7 @@ set(sdrgui_SOURCES
     gui/rollupwidget.cpp
     gui/samplingdevicecontrol.cpp
     gui/samplingdevicedialog.cpp
+    gui/samplingdevicesdock.cpp
     gui/scaleengine.cpp
     gui/sdrangelsplash.cpp
     gui/tickedslider.cpp
@@ -122,6 +123,7 @@ set(sdrgui_HEADERS
     gui/rollupwidget.h
     gui/samplingdevicecontrol.h
     gui/samplingdevicedialog.h
+    gui/samplingdevicesdock.h
     gui/scaleengine.h
     gui/sdrangelsplash.h
     gui/tickedslider.h
