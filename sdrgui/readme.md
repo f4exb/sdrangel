@@ -9,10 +9,9 @@ The slots are arranged in a stacked fashion so that when a new device is added w
 The tabbed windows are:
 
   - Sampling devices (1)
-  - Sampling devices control (2)
-  - Spectrum display control (3)
-  - Channels (4)
-  - Spectrum from device (5)
+  - Spectrum display control (2)
+  - Channels (3)
+  - Spectrum from device (4)
 
 The combination of a sampling device and its associated channels is called a "device set".
 
@@ -198,15 +197,45 @@ The plugin entry can be expanded or collapsed using the caret on the left. When 
 
 Click here when done to dismiss the dialog.
 
-<h3>2. Sampling devices</h3>
+<h3>2: Sampling devices</h3>
 
-This is where the plugin GUI specific to the device is displayed. Control of one device is done from here. The common controls are:
+This is where the plugin GUI specific to the device is displayed.
 
 ![Sampling Device common](../doc/img/SampleDevice_common.png)
 
-<h4>2.1. Start or stop acquisition</h4>
+**On the top of the dockable widget you have the following controls:**
 
-<h5>2.1.1 left click</h5>
+<h4>2.1: Change device</h4>
+
+Use this push button to open the device selection dialog to change the sampling device. This dialog will open:
+
+![Main Window sampling devices dialog](../doc/img/MainWindow_SDDialog.png)
+
+<h5>2.1.1: Device selection combo</h5>
+
+Use this combo box to select the device. Only available devices will appear in the list. For devices having more than one channel (ex: LimeSDR) the channel number will appear next to the device sequence number inside the brackets. Ex: `LimeSDR[0:1] 0009060B00473419` designates the second Rx (Rx #1) of the first encountered LimeSDR which serial number is 0009060B00473419.
+
+<h5>2.1.2: Device selection confirmation</h5>
+
+Use the `OK` button to confirm your choice and exit the dialog
+
+<h5>2.1.3: Device selection cancellation</h5>
+
+Use the `Cancel` button to exit the dialog without any change
+
+<h4>2.2: Reload currently selected device</h4>
+
+This button activates a close/open sequence to recycle the device. It may be useful when the device is not streaming anymore or in an attempt to clear possible errors. Make sure the streaming is stopped first.
+
+<h4>2.3: Current device identfier</h4>
+
+The identifier as shown in cotrol (2.1.1) appears truncated to the first 40 characters.
+
+**For every device there are the following common controls:**
+
+<h4>2.4. Start or stop acquisition</h4>
+
+<h5>2.4.1 left click</h5>
 
 Left click to start or stop streaming
 
@@ -215,13 +244,13 @@ Left click to start or stop streaming
   - When a stop icon (&#9632;) is displayed with a green background the device is currently running
   - When a play icon (&#9654;) is displayed with a red background there is an error and a popup displays the error message. An Error typically occurs when you try to start the same device in more than one tab.
 
-<h5>2.1.2 right click</h5>
+<h5>2.4.2 right click</h5>
 
 Right click to control device reverse API. This dialog opens:
 
 ![Basic device settings](../doc/img/BasicDeviceSettings.png)
 
-<h6>2.1.2.1: Toggle reverse API feature</h6>
+<h6>2.4.2.1: Toggle reverse API feature</h6>
 
 Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the device settings are forwarded to an API endpoint given by address (2.1.2.2), port (2.1.2.3) and device index (2.1.2.4) in the same format as the SDRangel REST API device settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/device/settings` The JSON payload follows the same format as the SDRangel REST API device settings. For example with HachRF Rx this would be something like:
 
@@ -252,44 +281,31 @@ The start and stop actions are also forwarded with the `/sdrangel/deviceset/{dev
 
 More details on this feature can be found on the corresponding Wiki page.
 
-<h6>2.1.2.2: API address</h6>
+<h6>2.4.2.2: API address</h6>
 
 This is the IP address of the API endpoint
 
-<h6>2.1.2.3: API port</h6>
+<h6>2.4.2.3: API port</h6>
 
 This is the IP port of the API endpoint
 
-<h6>2.1.2.4: Device index</h6>
+<h6>2.4.2.4: Device index</h6>
 
 This is the targeted device index
 
-<h6>2.1.2.5: Cancel changes and exit dialog</h6>
+<h6>2.4.2.5: Cancel changes and exit dialog</h6>
 
 Do not make any changes and exit dialog
 
-<h6>2.1.2.6: Validate and exit dialog</h6>
+<h6>2.4.2.6: Validate and exit dialog</h6>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
 
-<h4>2.2. Record I/Q</h4>
-
-This is the I/Q from device record toggle. When a red background is displayed the recording is currently active. The name of the file created is `test_n.sdriq` where `n` is the slot number.
-
-The format is S16LE I/Q samples. Thus there are 4 bytes per sample. I and Q values are 16 bit signed integers. The file starts with a context header containing information about center frequency, sample rate and timestamp of the start of the recording. This header has a length which is a multiple of a sample size (normally 24 bytes thus 6 samples). Thus this file can be used as a raw I/Q file with S16LE samples tolerating a glitch at the start corresponding to the 6 "random" samples.
-
-You can also zap the 24 bytes header with this Linux command: `tail -c +25 myfile.sdriq > myfile.raw`
-
-To convert in another format you may use the sox utility. For example to convert to 32 bit (float) complex samples do:
-`sox -r 48k −b 16 −e signed-integer -c 2 myfile.raw -e float -c 2 myfilec.raw`
-
-Note that you have to specify the sampling rate and use `.raw` for the file extensions.
-
-<h4>2.3. Device sampling rate</h4>
+<h4>2.5: Device sampling rate</h4>
 
 This is the sampling rate in kS/s of the I/Q stream extracted from the device after possible decimation. The main spectrum display corresponds to this sampling rate.
 
-<h4>2.4. Center frequency</h4>
+<h4>2.6: Center frequency</h4>
 
 This is the current center frequency in kHz with dot separated thousands (MHz, GHz). On devices for which frequency can be directly controlled (i.e. all except File Source and Remote Input) you can use the thumbwheels to set the frequency. Thumbwheels move with the mouse wheel when hovering over a digit.
 
@@ -304,47 +320,7 @@ Most devices will also present an interface to control automatic DC removal and 
   - Example1: ![Sampling Device corr 1](../doc/img/SampleDevice_corr01.png)
   - Example2: ![Sampling Device corr 2](../doc/img/SampleDevice_corr02.png)
 
-<h3>3. Sampling devices control</h3>
-
-This is where the sampling device for one device set is selected and the channel plugins are instantiated.
-
-![Sampling Devices control](../doc/img/MainWindow_SDControl.png)
-
-<h4>3.1. Currently sampling device name</h4>
-
-This label shows the human readable sampling device name
-
-<h4>3.2. Open sampling device change dialog</h4>
-
-Use this push button to open the device selection dialog to change the sampling device. This dialog will open:
-
-![Main Window sampling devices dialog](../doc/img/MainWindow_SDDialog.png)
-
-<h5>3.2.1. Device selection combo</h5>
-
-Use this combo box to select the device. Only available devices will appear in the list. For devices having more than one channel (ex: LimeSDR) the channel number will appear next to the device sequence number inside the brackets. Ex: `LimeSDR[0:1] 0009060B00473419` designates the second Rx (Rx #1) of the first encountered LimeSDR which serial number is 0009060B00473419.
-
-<h5>3.2.2. Device selection confirmation</h5>
-
-Use the `OK` button to confirm your choice and exit the dialog
-
-<h5>3.2.3. Device selection cancellation</h5>
-
-Use the `Cancel` button to exit the dialog without any change
-
-<h4>3.3. Reload currently selected device</h4>
-
-This button activates a close/open sequence to recycle the device. It may be useful when the device is not streaming anymore or in an attempt to clear possible errors. Make sure the streaming is stopped first.
-
-<h4>3.4. Channel selector</h4>
-
-Use this combo box to select a channel plugin to create a new channel
-
-<h4>3.5. Add a new channel</h4>
-
-Use this push button to add a new channel with the selected plugin
-
-<h3>4. Spectrum display control</h3>
+<h3>3. Spectrum display control</h3>
 
 ![Spectrum GUI](../doc/img/MainWindow_spectrum_gui.png)
 
@@ -355,7 +331,7 @@ These are the controls of the main spectrum display in (7). The same controls ar
   - UDP source
   - UDP sink
 
-<h4>4.1. FFT window selector</h4>
+<h4>3.1. FFT window selector</h4>
 
 Use this combo box to select which window is applied to the FFT:
   - **Bart**: Bartlett
@@ -366,7 +342,7 @@ Use this combo box to select which window is applied to the FFT:
   - **Rec**: Rectangular (no window)
   - **Kai**: Kaiser with alpha = 2.15 (beta = 6.76) gives sidelobes &lt; -70dB
 
-<h4>4.2. FFT size</h4>
+<h4>3.2. FFT size</h4>
 
 Select the size of the FFT window among these values:
   - 128
@@ -376,15 +352,15 @@ Select the size of the FFT window among these values:
   - 2k = 2048
   - 4k = 4096
 
-<h4>4.3. Reference level</h4>
+<h4>3.3. Reference level</h4>
 
 This is the level in dB at the top of the display range. You can select values between 0 and -110 in 1 dB steps
 
-<h4>4.4. Range</h4>
+<h4>3.4. Range</h4>
 
 This is the range of display in dB. You can select values between 1 and 100 in 1 dB steps
 
-<h4>4.5. Averaging mode</h4>
+<h4>3.5. Averaging mode</h4>
 
 Use this combo to select which averaging mode is applied:
   - **No**: no averaging. Disables averaging regardless of the number of averaged samples (4.6). This is the default option
@@ -392,72 +368,72 @@ Use this combo to select which averaging mode is applied:
   - **Fix**: fixed average. Average is done over the amount of samples specified next (4.6) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
   - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (4.6). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.
 
-<h4>4.6. Number of averaged samples</h4>
+<h4>3.6. Number of averaged samples</h4>
 
 Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 1 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) for all modes and in addition 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000) for "fixed" and "max" modes. The tooltip mentions the resulting averaging period considering the baseband sample rate and FFT size.
 Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
 
 &#9758; Note: The spectrum display is refreshed every 50ms (20 FPS). Setting an averaging time above this value will make sure that a short burst is not missed particularly when using the max mode.
 
-<h4>4.7. Phosphor display stroke decay</h4>
+<h4>3.7. Phosphor display stroke decay</h4>
 
 This controls the decay rate of the stroke when phosphor display is engaged (4.C). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (4.B) is pressed.
 
-<h4>4.8. Phosphor display stroke decay divisor</h4>
+<h4>3.8. Phosphor display stroke decay divisor</h4>
 
 When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
 
-<h4>4.9. Phosphor display stroke strength</h4>
+<h4>3.9. Phosphor display stroke strength</h4>
 
 This controls the stroke strength when phosphor display is engaged (4.C). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
 
-<h4>4.A. Trace intensity</h4>
+<h4>3.A. Trace intensity</h4>
 
 This controls the intensity of the maximum (4.D) and current (4.E) spectrum trace
 
-<h4>4.B. Clear spectrum</h4>
+<h4>3.B. Clear spectrum</h4>
 
 This resets the maximum spectrum trace and phosphor remanence
 
-<h4>4.C. Phosphor display</h4>
+<h4>3.C. Phosphor display</h4>
 
 Toggles the phosphor display on the spectrum
 
-<h4>4.D. Maximum trace</h4>
+<h4>3.D. Maximum trace</h4>
 
 Toggles the maximum trace display (red trace) on the spectrum
 
-<h4>4.E. Current trace</h4>
+<h4>3.E. Current trace</h4>
 
 Toggles the current trace display (yellow trace) on the spectrum
 
-<h4>4.F. Waterfall/spectrum placement</h4>
+<h4>3.F. Waterfall/spectrum placement</h4>
 
 Toggles the spectrum on top or on bottom versus waterfall
 
-<h4>4.G. Waterfall</h4>
+<h4>3.G. Waterfall</h4>
 
 Toggles the waterfall display
 
-<h4>4.H.Grid</h4>
+<h4>3.H.Grid</h4>
 
 Toggles the grid display
 
-<h4>4.I.Grid intensity</h4>
+<h4>3.I.Grid intensity</h4>
 
 Controls the intensity of the grid display
 
-<h4>4.J. Logarithmic/linear scale</h4>
+<h4>3.J. Logarithmic/linear scale</h4>
 
 Use this toggle button to switch between spectrum logarithmic and linear scale display. The face of the button will change to represent either a logaritmic or linear curve.
 
 When in linear mode the range control (4.4) has no effect because the actual range is between 0 and the reference level. The reference level in dB (4.3) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 
-<h4>4.K. Spectrum live display pause/resume (freeze)</h4>
+<h4>3.K. Spectrum live display pause/resume (freeze)</h4>
 
 Use this control to pause or resume spectrum live display. You can use this control to freeze the spectrum display. This may be useful to make measurements using the markers (see section 7).
 
-<h4>4.L. Spectrum server control</h4>
+<h4>3.L. Spectrum server control</h4>
 
 &#9888; Note: this is a v5 feature only.
 
@@ -519,51 +495,51 @@ The server only sends data. Control including FFT details is done via the REST A
 
 </table>
 
-<h3>5. Presets and commands</h3>
+<h3>4. Presets and commands</h3>
 
 The presets and commands tree view are by default stacked in tabs. The following sections describe the presets section 5A) and commands (section 5B) views successively
 
-<h3>5A. Presets</h3>
+<h3>4A. Presets</h3>
 
 This is a tree view of the saved presets. Presets record the channels setup and a copy of the settings of each sample source that has been used when saving this preset. Thus you can use the same channel arrangement with various devices having their particular setup.
 
 ![Main Window presets view](../doc/img/MainWindow_presets_view.png)
 
-<h4>5A.1. Preset selection</h4>
+<h4>4A.1. Preset selection</h4>
 
 You select a preset or a preset group by clicking on its line in the tree view. All actions (6) will be done relative to this preset or preset group.
 
-<h4>5A.2. Group</h4>
+<h4>4A.2. Group</h4>
 
 You can organize your presets into groups. Groups can be collapsed or expanded by using the caret icon on the left.
 
-<h4>5A.3. Center frequency</h4>
+<h4>4A.3. Center frequency</h4>
 
 The center frequency used in this preset is displayed here.
 
-<h4>5A.4. Rx/Tx indicator</h4>
+<h4>4A.4. Rx/Tx indicator</h4>
 
 "R" is displayed for a Rx device set and "T" for a Tx device set
 
-<h4>5A.5. Preset name</h4>
+<h4>4A.5. Preset name</h4>
 
 You can give a name to your preset. Names need not to be unique.
 
-<h4>5A.6. Preset control or actions</h4>
+<h4>4A.6. Preset control or actions</h4>
 
 The controls are located as icons at the bottom of the window:
 
 ![Main Window presets](../doc/img/MainWindow_presets.png)
 
-<h5>5A.6.1. New preset</h5>
+<h5>4A.6.1. New preset</h5>
 
 Click on this icon to create a new preset with the current values in the selected sample device tab (Main window: 2).
 
-<h5>5A.6.2. Update preset</h5>
+<h5>4A.6.2. Update preset</h5>
 
 Click on this icon to create a update the selected preset with the current values in the selected sample device tab (Main window: 2). Please note that this does not save the preset immediately on disk to save presets immediately you need to use the save button (4).
 
-<h5>5A.6.3. Edit preset</h5>
+<h5>4A.6.3. Edit preset</h5>
 
 Opens a new window where you can change the group name and description.
 
@@ -573,28 +549,28 @@ Opens a new window where you can change the group name and description.
     - assign this preset to a new group by typing in this new group
     - change the description
 
-<h5>5A.6.4. Save presets</h5>
+<h5>4A.6.4. Save presets</h5>
 
 Presets are saved to disk automatically at exit time you can however request to save them immediately using this icon.
 
-<h5>5A.6.5. Export preset</h5>
+<h5>4A.6.5. Export preset</h5>
 
 Using the previous icon presets are saved globally in a system dependent place. Using this icon you can export a specific preset in a single file that can be imported on another machine possibly with a different O/S. The preset binary data (BLOB) is saved in Base-64 format.
 
-<h5>5A.6.6. Import preset</h5>
+<h5>4A.6.6. Import preset</h5>
 
 This is the opposite of the previous operation. This will create a new preset in the selected group or the same group as the preset being selected.
 
-<h5>5A.6.7. Delete preset</h5>
+<h5>4A.6.7. Delete preset</h5>
 
   - on a preset item: deletes the selected preset.
   - on a preset group: deletes the group and all its presets.
 
-<h5>5A.6.8. Load preset</h5>
+<h5>4A.6.8. Load preset</h5>
 
 Applies the selected preset to the current device set (source and channel plugins).
 
-<h3>5B. Commands</h3>
+<h3>4B. Commands</h3>
 
 This is a tree view of the saved commands. Commands describe the path to an executable file, its arguments a possible link to a keystroke event that triggers the execution. Similarly to presets commands can be arranged into groups and have a description short text.
 
@@ -604,43 +580,43 @@ Of course any binary that resides in your system can be used that way like `/bin
 
 ![Main Window presets view](../doc/img/MainWindow_commands_view.png)
 
-<h4>5B.1. Command selection</h4>
+<h4>4B.1. Command selection</h4>
 
 You select a command or a command group by clicking on its line in the tree view. All actions (6) will be done relative to this command or command group.
 
-<h4>5B.2. Group</h4>
+<h4>4B.2. Group</h4>
 
 You can organize your commands into groups. Groups can be collapsed or expanded by using the caret icon on the left.
 
-<h4>5B.3. Description</h4>
+<h4>4B.3. Description</h4>
 
 Short description of a command.
 
-<h4>5B.4. Key binding indicator</h4>
+<h4>4B.4. Key binding indicator</h4>
 
   - `-`: no key binding
   - `P`: key press binding
   - `R`: key release binding
 
-<h4>5B.5. Key binding sequence</h4>
+<h4>4B.5. Key binding sequence</h4>
 
 This is a descriptive text of the key sequence that is used for the key binding.
 
-<h4>5B.6. Command control or actions</h4>
+<h4>4B.6. Command control or actions</h4>
 
 The controls are located as icons at the bottom of the window:
 
 ![Main Window commands](../doc/img/MainWindow_commands.png)
 
-<h5>5B.6.1. Create new command</h5>
+<h5>4B.6.1. Create new command</h5>
 
 Click on this icon to create a new command. This opens an edit dialog see the edit section (5B.6.3) for the details of the edit dialog.
 
-<h5>5B.6.2. Duplicate command</h5>
+<h5>4B.6.2. Duplicate command</h5>
 
 Click on this icon to duplicate the currently selected command (inactive on groups). Later you can edit the details of the copy with the edit dialog (see 5B.6.3 next)
 
-<h5>5B.6.3. Edit command or command group</h5>
+<h5>4B.6.3. Edit command or command group</h5>
 
 <b>Command groups</b>
 
@@ -654,15 +630,15 @@ You can edit the details of the command with this dialog.
 
 ![Main Window command group edit](../doc/img/MainWindow_command_edit.png)
 
-<h6>5B.6.3.1. Edit group </h6>
+<h6>4B.6.3.1. Edit group </h6>
 
 You can select an existing group with the combo or create a new one for this command using the text edit box
 
-<h6>5B.6.3.2. Edit description </h6>
+<h6>4B.6.3.2. Edit description </h6>
 
 You can edit the description using this text box. The description will appear in the tree view.
 
-<h6>5B.6.3.3. Executable file selection </h6>
+<h6>4B.6.3.3. Executable file selection </h6>
 
 Clicking on this button will open a file dialog to select the executable file that will be run with this command. The file selection dialog has predefined file pattern selections:
 
@@ -671,11 +647,11 @@ Clicking on this button will open a file dialog to select the executable file th
   - `*.sh` or `*.bat` for shell or batch files
   - `*.bin` or `*.exe` for binary files
 
-<h6>5B.6.3.4. Executable file path </h6>
+<h6>4B.6.3.4. Executable file path </h6>
 
 This is the full path of the selected executable file.
 
-<h6>5B.6.3.5. Command line arguments</h6>
+<h6>4B.6.3.5. Command line arguments</h6>
 
 Use the text box to edit the arguments given to the executable file as in `program arguments`.
 
@@ -685,41 +661,41 @@ You can use special codes to insert information specific to the application cont
   - `%2`: the port of the web REST API
   - `%3`: the currently selected device set index
 
-<h6>5B.6.3.6. Key binding</h6>
+<h6>4B.6.3.6. Key binding</h6>
 
 Use this checkbox to enable or disable the command execution binding to a key or combination of keys press or release event
 
-<h6>5B.6.3.7. Key binding capture</h6>
+<h6>4B.6.3.7. Key binding capture</h6>
 
 Use this button to capture the key or key combination that will be used for the key binding. After pushing this button just type in the key or key combination.
 
-<h6>5B.6.3.8. Key binding display</h6>
+<h6>4B.6.3.8. Key binding display</h6>
 
 This shows the key or combination of keys used for the key binding.
 
-<h6>5B.6.3.9. Release key binding</h6>
+<h6>4B.6.3.9. Release key binding</h6>
 
 Use this checkbox to bind the key or combination of keys to the key release event. If unchecked the binding will be associated to the key press event.
 
-<h6>5B.6.3.10. Confirm changes</h6>
+<h6>4B.6.3.10. Confirm changes</h6>
 
 Use the "OK" button to confirm the changes.
 
-<h6>5B.6.3.11. Cancel changes</h6>
+<h6>4B.6.3.11. Cancel changes</h6>
 
 Use the "Cancel" button to cancel the changes.
 
-<h5>5B.6.4. Run command or groups of commands</h5>
+<h5>4B.6.4. Run command or groups of commands</h5>
 
 This will run the currently selected command. If the selection is a group it will run all commands of the group starting them in the displayed order. Please note that commands are run in independent processes and therefore all launched commands in the group will run concurrently.
 
-<h5>5B.6.5. View last command run details</h5>
+<h5>4B.6.5. View last command run details</h5>
 
 This dialog will show the results of the last run including the output (merged stdout and stderr).
 
 ![Main Window command output](../doc/img/MainWindow_command_output.png)
 
-<h6>5B.6.5.1. Process status</h6>
+<h6>4B.6.5.1. Process status</h6>
 
 When the process is not running the stop icon (&#9632;) is displayed. The background color indicate different states:
 
@@ -729,31 +705,31 @@ When the process is not running the stop icon (&#9632;) is displayed. The backgr
 
 When the process is running the play icon (&#9654;) is displayed with an orange background.
 
-<h6>5B.6.5.2. Refresh data</h6>
+<h6>4B.6.5.2. Refresh data</h6>
 
 Pushing this button will update the data displayed with the latest status. Please note that the log is displayed only when the process is terminated.
 
-<h6>5B.6.5.3. Start time</h6>
+<h6>4B.6.5.3. Start time</h6>
 
 This is the timestamp of process start. It is filled with dots `...` if the process has never started during this session.
 
-<h6>5B.6.5.4. End time</h6>
+<h6>4B.6.5.4. End time</h6>
 
 This is the timestamp of process end. It is filled with dots `...` if the process has never terminated during this session.
 
-<h6>5B.6.5.3. PID</h6>
+<h6>4B.6.5.3. PID</h6>
 
 This is the process PID. It is 0 if the process has never run during this session.
 
-<h6>5B.6.5.6. Process kill</h6>
+<h6>4B.6.5.6. Process kill</h6>
 
 Use this button to kill (send SIGKILL) the running process. It has no effect if the process is not running.
 
-<h6>5B.6.5.7. Command line</h6>
+<h6>4B.6.5.7. Command line</h6>
 
 This shows the actual command line that was used to start the process
 
-<h6>5B.6.5.8. Error status</h6>
+<h6>4B.6.5.8. Error status</h6>
 
 This is the translation of `QProcess::ProcessError`. Possible values are:
 
@@ -765,41 +741,63 @@ This is the translation of `QProcess::ProcessError`. Possible values are:
   - `Read error`: an error occurred when attempting to read from the process. For example, the process may not be running.
   - `Unknown error`: an unknown error occurred.
 
-<h6>5B.6.5.9. Exit code</h6>
+<h6>4B.6.5.9. Exit code</h6>
 
 This is the program exit code. When the process crashes this is the signal by which the process end was caused. For example if you kill the process with button (6) it sends the process a SIGKILL (code 9) and therefore the value is 9.
 
-<h6>5B.6.5.10. Exit status</h6>
+<h6>4B.6.5.10. Exit status</h6>
 
 There are only two possibilities: either the program exits normally but possibly with a non zero exit code or it ends with a crash.
 
-<h6>5B.6.5.11. Process log</h6>
+<h6>4B.6.5.11. Process log</h6>
 
 This is the log of the process (merged stdout and stderr). Please note that it is updated only on program termination.
 
-<h6>5B.6.5.12. Exit</h6>
+<h6>4B.6.5.12. Exit</h6>
 
 By pushing the "Close" button the process output window is closed.
 
-<h5>5B.6.6. Save commands</h5>
+<h5>4B.6.6. Save commands</h5>
 
 This will save the commands immediately. The commands will be automatically saved when the application exits normally.
 
-<h5>5B.6.7. Delete commands or group of commands</h5>
+<h5>4B.6.7. Delete commands or group of commands</h5>
 
 This will delete the currently selected command or if selection is a group this will delete all commands in the group.
 
-<h5>5B.6.8. Activate keyboard bindings</h5>
+<h5>4B.6.8. Activate keyboard bindings</h5>
 
 Use this button to activate the keyboard bindings. Note that you need to have this button selected (its background should be lit in beige/orange) for the key bindings to be effective.
 
-<h3>6. Channels</h3>
+<h3>5. Channels</h3>
 
 This area shows the control GUIs of the channels currently active for the device. When the preset is saved (as default at exit time or as a saved preset) the GUIs are ordered by increasing frequency. If presets share the same frequency they are ordered by their internal ID name. Thus new channel GUIs will appear ordered only when reloaded.
 
 Details about the GUIs can be found in the channel plugins documentation which consists of a readme.md file in each of the channel plugins folder (done partially).
 
-<h4>6.1. Basic channel settings</h4>
+<h4>5.1: Channel dock top bar - Add channels</h4>
+
+Channels are added by clicking on the circled "+" icon (1) on the top bar of the channels dockable widget:
+
+![Channels dock](../doc/img/Channels_dock.png)
+
+This opens the following dialog:
+
+![Add Channels dialog](../doc/img/AddChannels_dialog.png)
+
+<h5>5.1.1: Channel selection</h5>
+
+Use this combo to select which channel type to add
+
+<h5>5.1.2: Close dialog</h5>
+
+Use this button to dismiss the dialog
+
+<h5>5.1.3: Add channel</h5>
+
+Add a new channel by clicking on the `Apply` button. You may click it several times to add more channels. The dialog can be dismissed with the `Close` button or the closing window icon `X` on the top bar.
+
+<h4>5.2. Basic channel settings</h4>
 
 ![Channel control 01](../doc/img/MainWindow_channel_01.png)
 
@@ -807,15 +805,15 @@ With most channel types some common basic settings can be set with a popup dialo
 
 ![Basic channel settings](../doc/img/BasicChannelSettings.png)
 
-<h5>6.1.1: Window title</h5>
+<h5>5.1.1: Window title</h5>
 
 Changes the channel window title
 
-<h5>6.1.2: Channel color</h5>
+<h5>5.1.2: Channel color</h5>
 
 Changes the color of the window title bar and spectrum overlay. To change the color click on the color square to open a color chooser dialog. The hex rgb value is displayed next to the color square.
 
-<h5>6.1.3: Frequency scale display type</h5>
+<h5>5.1.3: Frequency scale display type</h5>
 
 When the mouse is over the channel window or over the central line in the spectrum a channel parameter is displayed on the frequency scale. This parameter can be:
 
@@ -824,7 +822,7 @@ When the mouse is over the channel window or over the central line in the spectr
   - AdSnd: UDP address and send port
   - AdRcv: UDP address and receive port
 
-<h5>6.1.4: Toggle reverse API feature</h5>
+<h5>5.1.4: Toggle reverse API feature</h5>
 
 Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the channel settings are forwarded to an API endpoint given by address (6.5), port (6.6), device index (6.7) and channel index (6.8) in the same format as the SDRangel REST API channel settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/channel/0/settings` The JSON payload follows the same format as the SDRangel REST API channel settings. Using the same example this would be:
 
@@ -857,31 +855,31 @@ Note that the PATCH method is used. The full set of parameters is sent only when
 
 More details on this feature can be found on the corresponding Wiki page.
 
-<h5>6.1.5: API address</h5>
+<h5>5.1.5: API address</h5>
 
 This is the IP address of the API endpoint
 
-<h5>6.1.6: API port</h5>
+<h5>5.1.6: API port</h5>
 
 This is the IP port of the API endpoint
 
-<h5>6.1.7: Device index</h5>
+<h5>5.1.7: Device index</h5>
 
 This is the targeted device index
 
-<h5>6.1.8: Channel index</h5>
+<h5>5.1.8: Channel index</h5>
 
 This is the targeted channel index
 
-<h5>6.1.9: Cancel changes and exit dialog</h5>
+<h5>5.1.9: Cancel changes and exit dialog</h5>
 
 Do not make any changes and exit dialog
 
-<h5>6.1.10: Validate and exit dialog</h5>
+<h5>5.1.10: Validate and exit dialog</h5>
 
 Validates the data (saves it in the channel marker object) and exits the dialog
 
-<h4>6.2 Device stream assignment</h4>
+<h4>5.2 Device stream assignment</h4>
 
 ![Channel control 02](../doc/img/MainWindow_channel_02.png)
 
@@ -889,7 +887,7 @@ The bigger square next to the leftmost "c" square is the device stream assignmen
 
 This is in place for future MIMO devices and channels support (v.5).
 
-<h3>7. Spectrum from device</h3>
+<h3>6. Spectrum from device</h3>
 
 This shows the spectrum in the passband returned from the sampling device possibly after decimation. The actual sample rate is shown in the device control at the left of the frequency display (2.3)
 
@@ -919,26 +917,26 @@ Use mouse right click anywhere in the view to remove the last entered marker. Us
 
 Any change in the spectrum settings is not reflected in the markers. You have to clear them and make a new measurement if any critical setting of the spectrum is changed.
 
-<h3>8. Status</h3>
+<h3>7. Status</h3>
 
 ![Main Window status](../doc/img/MainWindow_status.png)
 
-<h4>8.1. SDRangel version</h4>
+<h4>7.1. SDRangel version</h4>
 
 This is the current tag or the latest tag followed by the number of commits since the latest tag followed by the git commit SHA1 (8 hex characters) preceded by 'g'. Ex: `v4.5.3-29-gf5f2349d`
 
-<h4>8.2. Qt version</h4>
+<h4>7.2. Qt version</h4>
 
 Qt version with which this copy of SDRangel was compiled.
 
-<h4>8.3. Architecture</h4>
+<h4>7.3. Architecture</h4>
 
 Codename of the CPU architecture in which SDRangel is running.
 
-<h4>8.4. Operating system</h4>
+<h4>7.4. Operating system</h4>
 
 Pretty print of the operating system in which SDRangel is running.
 
-<h4>8.5. Local date and time</h4>
+<h4>7.5. Local date and time</h4>
 
 Local time timestamp according to system clock. Format: `yyyy-mm-dd HH:MM:ss TZ`
