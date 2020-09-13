@@ -400,9 +400,6 @@ private slots:
 	void on_action_My_Position_triggered();
     void on_action_DeviceUserArguments_triggered();
     void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
-	void sampleSourceChanged();
-	void sampleSinkChanged();
-	void sampleMIMOChanged();
     void channelAddClicked(int channelIndex);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();

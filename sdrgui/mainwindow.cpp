@@ -48,7 +48,6 @@
 #include "gui/audiodialog.h"
 #include "gui/loggingdialog.h"
 #include "gui/deviceuserargsdialog.h"
-#include "gui/samplingdevicecontrol.h"
 #include "gui/sdrangelsplash.h"
 #include "gui/mypositiondialog.h"
 #include "gui/ambedevicesdialog.h"
@@ -141,13 +140,11 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 	// work around broken Qt dock widget ordering
     removeDockWidget(ui->inputViewDock);
-	removeDockWidget(ui->inputSelectDock);
 	removeDockWidget(ui->spectraDisplayDock);
 	removeDockWidget(ui->presetDock);
     removeDockWidget(ui->commandsDock);
 	removeDockWidget(ui->channelDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
-	addDockWidget(Qt::LeftDockWidgetArea, ui->inputSelectDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->commandsDock);
@@ -155,14 +152,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
 
 	ui->inputViewDock->show();
-    ui->inputSelectDock->show();
 	ui->spectraDisplayDock->show();
 	ui->presetDock->show();
 	ui->commandsDock->show();
 	ui->channelDock->show();
 
     ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
-	ui->menu_Window->addAction(ui->inputSelectDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
     ui->menu_Window->addAction(ui->commandsDock->toggleViewAction());
@@ -173,11 +168,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
             "QComboBox::item:selected { color: rgb(255,140,0); } "
             "QTabWidget::pane { border: 1px solid #C06900; } "
             "QTabBar::tab:selected { background: rgb(128,70,0); }");
-    ui->tabInputsSelect->setStyleSheet("QWidget { background: rgb(50,50,50); } "
-            "QToolButton::checked { background: rgb(128,70,0); } "
-            "QComboBox::item:selected { color: rgb(255,140,0); } "
-            "QTabWidget::pane { border: 1px solid #808080; } "
-            "QTabBar::tab:selected { background: rgb(100,100,100); }");
 
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
 
@@ -326,11 +316,6 @@ void MainWindow::addSourceDevice(int deviceIndex)
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(sampleSourceChanged()));
-
-    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
-    ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
-
     // Create a file source instance by default if requested device was not enumerated (index = -1)
     if (deviceIndex < 0) {
         deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
@@ -352,7 +337,6 @@ void MainWindow::addSourceDevice(int deviceIndex)
         m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
     }
 
-    m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(deviceIndex);
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, deviceIndex);
 
     // delete previous plugin GUI
@@ -407,11 +391,6 @@ void MainWindow::addSinkDevice()
     ui->tabSpectraGUI->addTab(m_deviceUIs.back()->m_spectrumGUI, tabNameCStr);
     ui->tabChannels->addTab(m_deviceUIs.back()->m_channelWindow, tabNameCStr);
 
-    connect(m_deviceUIs.back()->m_samplingDeviceControl, SIGNAL(changed()), this, SLOT(sampleSinkChanged()));
-
-    ui->tabInputsSelect->addTab(m_deviceUIs.back()->m_samplingDeviceControl, tabNameCStr);
-    ui->tabInputsSelect->setTabToolTip(deviceTabIndex, QString(uidCStr));
-
     // create a file sink by default
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
@@ -430,7 +409,6 @@ void MainWindow::addSinkDevice()
         m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
     }
 
-    m_deviceUIs.back()->m_samplingDeviceControl->setSelectedDeviceIndex(fileSinkDeviceIndex);
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, fileSinkDeviceIndex);
 
     // delete previous plugin GUI if it exists
@@ -461,6 +439,7 @@ void MainWindow::removeLastDevice()
 
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
+        ui->inputViewDock->removeLastDevice();
 
         // deletes old UI and input object
         m_deviceUIs.back()->freeChannels();      // destroys the channel instances
@@ -471,11 +450,8 @@ void MainWindow::removeLastDevice()
         m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceUIs.back()->m_deviceAPI->getSampleSource());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-        m_deviceUIs.back()->m_samplingDeviceControl->removeSelectedDeviceIndex(); // This releases the device in the device list
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
-
-	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
 	    m_deviceWidgetTabs.removeLast();
 	    ui->tabInputsView->clear();
@@ -503,6 +479,7 @@ void MainWindow::removeLastDevice()
 
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
+        ui->inputViewDock->removeLastDevice();
 
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
@@ -513,11 +490,8 @@ void MainWindow::removeLastDevice()
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
 	            m_deviceUIs.back()->m_deviceAPI->getSampleSink());
         m_deviceUIs.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-        m_deviceUIs.back()->m_samplingDeviceControl->removeSelectedDeviceIndex(); // This releases the device in the device list
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
-
-	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
 	    m_deviceWidgetTabs.removeLast();
 	    ui->tabInputsView->clear();
@@ -546,6 +520,7 @@ void MainWindow::removeLastDevice()
 
 	    ui->tabSpectraGUI->removeTab(ui->tabSpectraGUI->count() - 1);
 	    ui->tabSpectra->removeTab(ui->tabSpectra->count() - 1);
+        ui->inputViewDock->removeLastDevice();
 
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
@@ -555,10 +530,8 @@ void MainWindow::removeLastDevice()
 	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
 	            m_deviceUIs.back()->m_deviceAPI->getSampleMIMO());
-        m_deviceUIs.back()->m_samplingDeviceControl->removeSelectedDeviceIndex(); // This releases the device in the device list
 
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
-	    ui->tabInputsSelect->removeTab(ui->tabInputsSelect->count() - 1);
 
 	    m_deviceWidgetTabs.removeLast();
 	    ui->tabInputsView->clear();
@@ -961,25 +934,17 @@ bool MainWindow::handleMessage(const Message& cmd)
     else if (MsgSetDevice::match(cmd))
     {
         MsgSetDevice& notif = (MsgSetDevice&) cmd;
-        ui->tabInputsSelect->setCurrentIndex(notif.getDeviceSetIndex());
+        ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
         DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
-        deviceUI->m_samplingDeviceControl->setSelectedDeviceIndex(notif.getDeviceIndex());
         ui->inputViewDock->setSelectedDeviceIndex(notif.getDeviceSetIndex(), notif.getDeviceIndex());
-
-        if (notif.getDeviceType() == 1) {
-            sampleSinkChanged();
-        } else if (notif.getDeviceType() == 0) {
-            sampleSourceChanged();
-        } else if (notif.getDeviceType() == 2) {
-            sampleMIMOChanged();
-        }
+        samplingDeviceChanged(notif.getDeviceType(), notif.getDeviceSetIndex(), notif.getDeviceIndex());
 
         return true;
     }
     else if (MsgAddChannel::match(cmd))
     {
         MsgAddChannel& notif = (MsgAddChannel&) cmd;
-        ui->tabInputsSelect->setCurrentIndex(notif.getDeviceSetIndex());
+        ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
         channelAddClicked(notif.getChannelRegistrationIndex());
 
         return true;
@@ -1199,7 +1164,7 @@ void MainWindow::on_commandRun_clicked()
 
     if (item != 0)
     {
-        int currentDeviceSetIndex = ui->tabInputsSelect->currentIndex();
+        int currentDeviceSetIndex = ui->tabInputsView->currentIndex();
 
         if (item->type() == PItem) // run individual command
         {
@@ -1753,117 +1718,6 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
     }
 }
 
-void MainWindow::sampleSourceChanged()
-{
-    // Do it in the currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
-
-    if (currentSourceTabIndex >= 0)
-    {
-        qDebug("MainWindow::sampleSourceChanged: tab at %d", currentSourceTabIndex);
-        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
-        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
-        deviceUI->m_deviceAPI->stopDeviceEngine();
-
-        // deletes old UI and input object
-        deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
-        deviceUI->m_deviceAPI->resetSamplingDeviceId();
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-                deviceUI->m_deviceAPI->getSampleSource());
-        deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-
-        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(
-            deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
-        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-        deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-        deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-        deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
-
-        if (deviceUI->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
-        {
-            qDebug("MainWindow::sampleSourceChanged: non existent device replaced by File Input");
-            int  deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
-            samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
-            deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-            deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-            deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-            deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-            deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-            deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-            deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-            deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
-        }
-
-        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
-
-        if (userArgs.size() > 0) {
-            deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
-        }
-
-        // add to buddies list
-        std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
-        int nbOfBuddies = 0;
-
-        for (; it != m_deviceUIs.end(); ++it)
-        {
-            if (*it != deviceUI) // do not add to itself
-            {
-                if ((*it)->m_deviceSourceEngine) // it is a source device
-                {
-                    if ((deviceUI->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                        (deviceUI->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                    {
-                        (*it)->m_deviceAPI->addSourceBuddy(deviceUI->m_deviceAPI);
-                        nbOfBuddies++;
-                    }
-                }
-
-                if ((*it)->m_deviceSinkEngine) // it is a sink device
-                {
-                    if ((deviceUI->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                        (deviceUI->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                    {
-                        (*it)->m_deviceAPI->addSourceBuddy(deviceUI->m_deviceAPI);
-                        nbOfBuddies++;
-                    }
-                }
-            }
-        }
-
-        if (nbOfBuddies == 0) {
-            deviceUI->m_deviceAPI->setBuddyLeader(true);
-        }
-
-        // constructs new GUI and input object
-        DeviceSampleSource *source = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
-                deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
-        deviceUI->m_deviceAPI->setSampleSource(source);
-        QWidget *gui;
-        PluginInstanceGUI *pluginUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDeviceId(),
-                &gui,
-                deviceUI);
-        deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
-        setDeviceGUI(currentSourceTabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName());
-        deviceUI->m_deviceAPI->getSampleSource()->init();
-
-        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
-
-        if (currentSourceTabIndex == 0) // save as default starting device
-        {
-            m_settings.setSourceIndex(samplingDevice->sequence);
-            m_settings.setSourceDeviceId(samplingDevice->id);
-        }
-    }
-}
-
 void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
 {
     if (tabIndex >= 0)
@@ -1965,170 +1819,10 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
     }
 }
 
-void MainWindow::sampleSinkChanged()
-{
-    // Do it in the currently selected source tab
-    int currentSinkTabIndex = ui->tabInputsSelect->currentIndex();
-
-    if (currentSinkTabIndex >= 0)
-    {
-        qDebug("MainWindow::sampleSinkChanged: tab at %d", currentSinkTabIndex);
-        DeviceUISet *deviceUI = m_deviceUIs[currentSinkTabIndex];
-        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
-        deviceUI->m_deviceAPI->stopDeviceEngine();
-
-        // deletes old UI and output object
-        deviceUI->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
-        deviceUI->m_deviceAPI->resetSamplingDeviceId();
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-                deviceUI->m_deviceAPI->getSampleSink());
-        deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
-
-        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
-        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-        deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-        deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-        deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
-
-        if (deviceUI->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
-        {
-            qDebug("MainWindow::sampleSinkChanged: non existent device replaced by File Sink");
-            int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
-            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
-            deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-            deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-            deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-            deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-            deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-            deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-            deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-            deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
-        }
-
-        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
-
-        if (userArgs.size() > 0) {
-            deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
-        }
-
-        // add to buddies list
-        std::vector<DeviceUISet*>::iterator it = m_deviceUIs.begin();
-        int nbOfBuddies = 0;
-
-        for (; it != m_deviceUIs.end(); ++it)
-        {
-            if (*it != deviceUI) // do not add to itself
-            {
-                if ((*it)->m_deviceSourceEngine) // it is a source device
-                {
-                    if ((deviceUI->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                        (deviceUI->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                    {
-                        (*it)->m_deviceAPI->addSinkBuddy(deviceUI->m_deviceAPI);
-                        nbOfBuddies++;
-                    }
-                }
-
-                if ((*it)->m_deviceSinkEngine) // it is a sink device
-                {
-                    if ((deviceUI->m_deviceAPI->getHardwareId() == (*it)->m_deviceAPI->getHardwareId()) &&
-                        (deviceUI->m_deviceAPI->getSamplingDeviceSerial() == (*it)->m_deviceAPI->getSamplingDeviceSerial()))
-                    {
-                        (*it)->m_deviceAPI->addSinkBuddy(deviceUI->m_deviceAPI);
-                        nbOfBuddies++;
-                    }
-                }
-            }
-        }
-
-        if (nbOfBuddies == 0) {
-            deviceUI->m_deviceAPI->setBuddyLeader(true);
-        }
-
-        // constructs new GUI and output object
-        DeviceSampleSink *sink = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
-                deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
-        deviceUI->m_deviceAPI->setSampleSink(sink);
-        QWidget *gui;
-        PluginInstanceGUI *pluginUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDeviceId(),
-                &gui,
-                deviceUI);
-        deviceUI->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
-        setDeviceGUI(currentSinkTabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
-        m_deviceUIs.back()->m_deviceAPI->getSampleSink()->init();
-
-        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
-    }
-}
-
-void MainWindow::sampleMIMOChanged()
-{
-    // Do it in the currently selected source tab
-    int currentMIMOTabIndex = ui->tabInputsSelect->currentIndex();
-
-    if (currentMIMOTabIndex >= 0)
-    {
-        qDebug("MainWindow::sampleMIMOChanged: tab at %d", currentMIMOTabIndex);
-        DeviceUISet *deviceUI = m_deviceUIs[currentMIMOTabIndex];
-        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
-        deviceUI->m_deviceAPI->stopDeviceEngine();
-
-        // deletes old UI and output object
-        deviceUI->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
-        deviceUI->m_deviceAPI->resetSamplingDeviceId();
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
-                deviceUI->m_deviceAPI->getSampleMIMO());
-
-        const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(
-            deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex());
-        deviceUI->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-        deviceUI->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-        deviceUI->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-        deviceUI->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-        deviceUI->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-        deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-        deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(
-            DeviceEnumerator::instance()->getMIMOPluginInterface(deviceUI->m_samplingDeviceControl->getSelectedDeviceIndex()));
-
-        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
-
-        if (userArgs.size() > 0) {
-            deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
-        }
-
-        // constructs new GUI and MIMO object
-        DeviceSampleMIMO *mimo = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
-                deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
-        deviceUI->m_deviceAPI->setSampleMIMO(mimo);
-        QWidget *gui;
-        PluginInstanceGUI *pluginUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDeviceId(),
-                &gui,
-                deviceUI);
-        deviceUI->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
-        setDeviceGUI(currentMIMOTabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName(), 2);
-        m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->init();
-
-        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
-    }
-}
-
 void MainWindow::channelAddClicked(int channelIndex)
 {
     // Do it in the currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsSelect->currentIndex();
+    int currentSourceTabIndex = ui->tabInputsView->currentIndex();
 
     if (currentSourceTabIndex >= 0)
     {
@@ -2210,7 +1904,6 @@ void MainWindow::tabInputViewIndexChanged()
 
     ui->tabSpectra->setCurrentIndex(inputViewIndex);
     ui->tabChannels->setCurrentIndex(inputViewIndex);
-    ui->tabInputsSelect->setCurrentIndex(inputViewIndex);
     ui->tabSpectraGUI->setCurrentIndex(inputViewIndex);
 }
 
@@ -2303,7 +1996,7 @@ void MainWindow::setLoggingOptions()
 void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
 {
     //qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
-    int currentDeviceSetIndex = ui->tabInputsSelect->currentIndex();
+    int currentDeviceSetIndex = ui->tabInputsView->currentIndex();
 
     for (int i = 0; i < m_settings.getCommandCount(); ++i)
     {

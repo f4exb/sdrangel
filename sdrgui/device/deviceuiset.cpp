@@ -23,7 +23,6 @@
 #include "dsp/spectrumvis.h"
 #include "gui/glspectrumgui.h"
 #include "gui/channelwindow.h"
-#include "gui/samplingdevicecontrol.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "plugin/plugininstancegui.h"
@@ -53,7 +52,6 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
-    m_samplingDeviceControl = new SamplingDeviceControl(tabIndex, deviceType);
     m_deviceAPI = nullptr;
     m_deviceSourceEngine = nullptr;
     m_deviceSinkEngine = nullptr;
@@ -72,7 +70,6 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
 
 DeviceUISet::~DeviceUISet()
 {
-    delete m_samplingDeviceControl;
     delete m_channelWindow;
     delete m_spectrumGUI;
     delete m_spectrumVis;

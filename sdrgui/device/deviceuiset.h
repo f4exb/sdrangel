@@ -27,7 +27,6 @@ class SpectrumVis;
 class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
-class SamplingDeviceControl;
 class DeviceAPI;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -44,7 +43,6 @@ public:
     GLSpectrum *m_spectrum;
     GLSpectrumGUI *m_spectrumGUI;
     ChannelWindow *m_channelWindow;
-    SamplingDeviceControl *m_samplingDeviceControl;
     DeviceAPI *m_deviceAPI;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
