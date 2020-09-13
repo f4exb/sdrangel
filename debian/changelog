@@ -1,3 +1,10 @@
+sdrangel (4.16.0-1) unstable; urgency=medium
+
+   * Specialized channels dock. Implements #628
+   * Specialized sampling devices dock. Implements #629
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 Sep 2020 22:14:52 +0200
+
 sdrangel (4.15.5-1) unstable; urgency=medium
 
    * RigCtl plugin: support of hamlib rigctl protocol. Issue #602
