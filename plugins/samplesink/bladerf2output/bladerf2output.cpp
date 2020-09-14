@@ -577,10 +577,10 @@ void BladeRF2Output::getBandwidthRange(int& min, int& max, int& step)
     }
 }
 
-void BladeRF2Output::getGlobalGainRange(int& min, int& max, int& step)
+void BladeRF2Output::getGlobalGainRange(int& min, int& max, int& step, float& scale)
 {
     if (m_deviceShared.m_dev) {
-        m_deviceShared.m_dev->getGlobalGainRangeTx(min, max, step);
+        m_deviceShared.m_dev->getGlobalGainRangeTx(min, max, step, scale);
     }
 }
 
@@ -827,8 +827,9 @@ bool BladeRF2Output::applySettings(const BladeRF2OutputSettings& settings, bool 
                 if (getMessageQueueToGUI())
                 {
                     int min, max, step;
-                    getGlobalGainRange(min, max, step);
-                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step);
+                    float scale;
+                    getGlobalGainRange(min, max, step, scale);
+                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step, scale);
                     getMessageQueueToGUI()->push(msg);
                 }
             }
@@ -1062,6 +1063,7 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
     if (device)
     {
         int min, max, step;
+        float scale;
         uint64_t f_min, f_max;
 
         device->getBandwidthRangeTx(min, max, step);
@@ -1078,7 +1080,7 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getBladeRf2OutputReport()->getFrequencyRange()->setMax(f_max);
         response.getBladeRf2OutputReport()->getFrequencyRange()->setStep(step);
 
-        device->getGlobalGainRangeTx(min, max, step);
+        device->getGlobalGainRangeTx(min, max, step, scale);
 
         response.getBladeRf2OutputReport()->setGlobalGainRange(new SWGSDRangel::SWGRange);
         response.getBladeRf2OutputReport()->getGlobalGainRange()->setMin(min);

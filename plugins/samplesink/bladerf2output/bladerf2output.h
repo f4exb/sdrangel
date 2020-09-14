@@ -85,21 +85,24 @@ public:
         int getMin() const { return m_min; }
         int getMax() const { return m_max; }
         int getStep() const { return m_step; }
+        float getScale() const { return m_scale; }
 
-        static MsgReportGainRange* create(int min, int max, int step) {
-            return new MsgReportGainRange(min, max, step);
+        static MsgReportGainRange* create(int min, int max, int step, float scale) {
+            return new MsgReportGainRange(min, max, step, scale);
         }
 
     protected:
         int m_min;
         int m_max;
         int m_step;
+        float m_scale;
 
-        MsgReportGainRange(int min, int max, int step) :
+        MsgReportGainRange(int min, int max, int step, float scale) :
             Message(),
             m_min(min),
             m_max(max),
-            m_step(step)
+            m_step(step),
+            m_scale(scale)
         {}
     };
 
@@ -126,7 +129,7 @@ public:
     void getFrequencyRange(uint64_t& min, uint64_t& max, int& step);
     void getSampleRateRange(int& min, int& max, int& step);
     void getBandwidthRange(int& min, int& max, int& step);
-    void getGlobalGainRange(int& min, int& max, int& step);
+    void getGlobalGainRange(int& min, int& max, int& step, float& scale);
 
     virtual bool handleMessage(const Message& message);
 

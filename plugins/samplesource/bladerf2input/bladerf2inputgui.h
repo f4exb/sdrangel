@@ -67,6 +67,10 @@ private:
     quint64 m_deviceCenterFrequency; //!< Center frequency in device
     int m_lastEngineState;
     MessageQueue m_inputMessageQueue;
+    int m_gainMin;
+    int m_gainMax;
+    int m_gainStep;
+    float m_gainScale;
 
     void displaySettings();
     void displaySampleRate();
@@ -75,6 +79,8 @@ private:
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
     void setCenterFrequencySetting(uint64_t kHzValue);
+    float getGainDB(int gainValue);
+    int getGainValue(float gainDB);
     void blockApplySettings(bool block);
 
 private slots:
