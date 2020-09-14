@@ -57,7 +57,7 @@ BladeRF2MIMO::BladeRF2MIMO(DeviceAPI *deviceAPI) :
 
     if (m_dev)
     {
-        const bladerf_gain_modes *modes = 0;
+        const bladerf_gain_modes *modes = nullptr;
         int nbModes = m_dev->getGainModesRx(&modes);
 
         if (modes)
@@ -910,10 +910,10 @@ void BladeRF2MIMO::getRxBandwidthRange(int& min, int& max, int& step)
     }
 }
 
-void BladeRF2MIMO::getRxGlobalGainRange(int& min, int& max, int& step)
+void BladeRF2MIMO::getRxGlobalGainRange(int& min, int& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getGlobalGainRangeRx(min, max, step);
+        m_dev->getGlobalGainRangeRx(min, max, step, scale);
     }
 }
 
@@ -938,10 +938,10 @@ void BladeRF2MIMO::getTxBandwidthRange(int& min, int& max, int& step)
     }
 }
 
-void BladeRF2MIMO::getTxGlobalGainRange(int& min, int& max, int& step)
+void BladeRF2MIMO::getTxGlobalGainRange(int& min, int& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getGlobalGainRangeTx(min, max, step);
+        m_dev->getGlobalGainRangeTx(min, max, step, scale);
     }
 }
 

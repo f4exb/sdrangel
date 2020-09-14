@@ -158,13 +158,13 @@ public:
     void getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step);
     void getRxSampleRateRange(int& min, int& max, int& step);
     void getRxBandwidthRange(int& min, int& max, int& step);
-    void getRxGlobalGainRange(int& min, int& max, int& step);
+    void getRxGlobalGainRange(int& min, int& max, int& step, float& scale);
     const std::vector<GainMode>& getRxGainModes() { return m_rxGainModes; }
 
     void getTxFrequencyRange(uint64_t& min, uint64_t& max, int& step);
     void getTxSampleRateRange(int& min, int& max, int& step);
     void getTxBandwidthRange(int& min, int& max, int& step);
-    void getTxGlobalGainRange(int& min, int& max, int& step);
+    void getTxGlobalGainRange(int& min, int& max, int& step, float& scale);
 
     bool getRxRunning() const { return m_runningRx; }
     bool getTxRunning() const { return m_runningTx; }

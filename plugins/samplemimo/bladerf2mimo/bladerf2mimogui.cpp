@@ -83,6 +83,8 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_sampleMIMO->getTxSampleRateRange(minTx, maxTx, stepTx);
     m_srMin = std::max(minRx, minTx);
     m_srMax = std::min(maxRx, maxTx);
+    m_sampleMIMO->getRxGlobalGainRange(m_gainMinRx, m_gainMaxRx, m_gainStepRx, m_gainScaleRx);
+    m_sampleMIMO->getTxGlobalGainRange(m_gainMinTx, m_gainMaxTx, m_gainStepTx, m_gainScaleTx);
 
     displayGainModes();
     displaySettings();
@@ -186,17 +188,10 @@ void BladeRF2MIMOGui::displaySettings()
         ui->gainMode->setEnabled(true);
         ui->fcPos->setCurrentIndex((int) m_settings.m_fcPosRx);
 
-        if (m_streamIndex == 0)
-        {
+        if (m_streamIndex == 0) {
             ui->gainMode->setCurrentIndex(m_settings.m_rx0GainMode);
-            ui->gainText->setText(tr("%1 dB").arg(m_settings.m_rx0GlobalGain));
-            ui->gain->setValue(m_settings.m_rx0GlobalGain);
-        }
-        else if (m_streamIndex == 1)
-        {
+        } else if (m_streamIndex == 1) {
             ui->gainMode->setCurrentIndex(m_settings.m_rx1GainMode);
-            ui->gainText->setText(tr("%1 dB").arg(m_settings.m_rx1GlobalGain));
-            ui->gain->setValue(m_settings.m_rx1GlobalGain);
         }
     }
     else
@@ -218,18 +213,9 @@ void BladeRF2MIMOGui::displaySettings()
         ui->decim->setToolTip(QString("Interpolation factor"));
         ui->gainMode->setEnabled(false);
         ui->fcPos->setCurrentIndex((int) m_settings.m_fcPosTx);
-
-        if (m_streamIndex == 0)
-        {
-            ui->gainText->setText(tr("%1 dB").arg(m_settings.m_tx0GlobalGain));
-            ui->gain->setValue(m_settings.m_tx0GlobalGain);
-        }
-        else if (m_streamIndex == 1)
-        {
-            ui->gainText->setText(tr("%1 dB").arg(m_settings.m_tx1GlobalGain));
-            ui->gain->setValue(m_settings.m_tx1GlobalGain);
-        }
     }
+
+    displayGain();
 
     ui->sampleRate->setValue(m_settings.m_devSampleRate);
     ui->LOppm->setValue(m_settings.m_LOppmTenths);
@@ -316,6 +302,40 @@ void BladeRF2MIMOGui::displayGainModes()
     }
 
     ui->gainMode->blockSignals(false);
+}
+
+void BladeRF2MIMOGui::displayGain()
+{
+    int min, max, step, gainDB;
+    float scale;
+
+    if (m_rxElseTx)
+    {
+        m_sampleMIMO->getRxGlobalGainRange(min, max, step, scale);
+
+        if (m_streamIndex == 0) {
+            gainDB = m_settings.m_rx0GlobalGain;
+        } else {
+            gainDB = m_settings.m_rx1GlobalGain;
+        }
+    }
+    else
+    {
+        m_sampleMIMO->getTxGlobalGainRange(min, max, step, scale);
+
+        if (m_streamIndex == 0) {
+            gainDB = m_settings.m_tx0GlobalGain;
+        } else {
+            gainDB = m_settings.m_tx1GlobalGain;
+        }
+    }
+
+    ui->gain->setMinimum(min/step);
+    ui->gain->setMaximum(max/step);
+    ui->gain->setSingleStep(1);
+    ui->gain->setPageStep(1);
+    ui->gain->setValue(getGainValue(gainDB, min, max, step, scale));
+    ui->gainText->setText(tr("%1 dB").arg(QString::number(gainDB, 'f', 2)));
 }
 
 bool BladeRF2MIMOGui::handleMessage(const Message& message)
@@ -581,7 +601,7 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
             {
                 if (mode.m_value == BLADERF_GAIN_MANUAL)
                 {
-                    m_settings.m_rx0GlobalGain = ui->gain->value();
+                    setGainFromValue(ui->gain->value());
                     ui->gain->setEnabled(true);
                 } else {
                     ui->gain->setEnabled(false);
@@ -597,7 +617,7 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
             {
                 if (mode.m_value == BLADERF_GAIN_MANUAL)
                 {
-                    m_settings.m_rx1GlobalGain = ui->gain->value();
+                    setGainFromValue(ui->gain->value());
                     ui->gain->setEnabled(true);
                 } else {
                     ui->gain->setEnabled(false);
@@ -613,28 +633,42 @@ void BladeRF2MIMOGui::on_gainMode_currentIndexChanged(int index)
 
 void BladeRF2MIMOGui::on_gain_valueChanged(int value)
 {
-    ui->gainText->setText(tr("%1 dB").arg(value));
+    float gainDB = setGainFromValue(value);
+    ui->gainText->setText(tr("%1 dB").arg(QString::number(gainDB, 'f', 2)));
+    sendSettings();
+}
+
+float BladeRF2MIMOGui::setGainFromValue(int value)
+{
+    int min, max, step;
+    float scale, gainDB;
 
     if (m_rxElseTx)
     {
+        m_sampleMIMO->getRxGlobalGainRange(min, max, step, scale);
+        gainDB = getGainDB(value, min, max, step, scale);
+
         if (m_streamIndex == 0 || m_gainLock) {
-            m_settings.m_rx0GlobalGain = value;
+            m_settings.m_rx0GlobalGain = (int) gainDB;
         }
         if (m_streamIndex == 1 || m_gainLock) {
-            m_settings.m_rx1GlobalGain = value;
+            m_settings.m_rx1GlobalGain = (int) gainDB;
         }
     }
     else
     {
+        m_sampleMIMO->getTxGlobalGainRange(min, max, step, scale);
+        gainDB = getGainDB(value, min, max, step, scale);
+
         if (m_streamIndex == 0 || m_gainLock) {
-            m_settings.m_tx0GlobalGain = value;
+            m_settings.m_tx0GlobalGain = (int) gainDB;
         }
         if (m_streamIndex == 1 || m_gainLock) {
-            m_settings.m_tx1GlobalGain = value;
+            m_settings.m_tx1GlobalGain = (int) gainDB;
         }
     }
 
-    sendSettings();
+    return gainDB;
 }
 
 void BladeRF2MIMOGui::on_biasTee_toggled(bool checked)
@@ -791,4 +825,20 @@ void BladeRF2MIMOGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+float BladeRF2MIMOGui::getGainDB(int gainValue, int gainMin, int gainMax, int gainStep, float gainScale)
+{
+    float gain = gainValue * gainStep * gainScale;
+    qDebug("BladeRF2MIMOGui::getGainDB: gainValue: %d gainMin: %d gainMax: %d gainStep: %d gainScale: %f gain: %f",
+        gainValue, gainMin, gainMax, gainStep, gainScale, gain);
+    return gain;
+}
+
+int BladeRF2MIMOGui::getGainValue(float gainDB, int gainMin, int gainMax, int gainStep, float gainScale)
+{
+    int gain = (gainDB/gainScale) / gainStep;
+    qDebug("BladeRF2MIMOGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d gainScale: %f gain: %d",
+        gainDB, gainMin, gainMax, gainStep, gainScale, gain);
+    return gain;
 }

@@ -82,16 +82,23 @@ private:
     uint64_t m_fMinRx, m_fMaxRx;
     uint64_t m_fMinTx, m_fMaxTx;
     int m_fStepRx, m_fStepTx;
+	int m_gainMinRx, m_gainMaxRx, m_gainStepRx;
+	int m_gainMinTx, m_gainMaxTx, m_gainStepTx;
+	float m_gainScaleRx, m_gainScaleTx;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
 	void displaySettings();
     void displaySampleRate();
     void displayFcTooltip();
 	void displayGainModes();
+	void displayGain();
 	void sendSettings();
     void updateSampleRateAndFrequency();
     void updateFrequencyLimits();
     void setCenterFrequencySetting(uint64_t kHzValue);
+	float getGainDB(int gainValue, int gainMin, int gainMax, int gainStep, float gainScale);
+    int getGainValue(float gainDB, int gainMin, int gainMax, int gainStep, float gainScale);
+	float setGainFromValue(int value);
 
 private slots:
     void handleInputMessages();
