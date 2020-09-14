@@ -1072,6 +1072,7 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getBladeRf2OutputReport()->getBandwidthRange()->setMin(min);
         response.getBladeRf2OutputReport()->getBandwidthRange()->setMax(max);
         response.getBladeRf2OutputReport()->getBandwidthRange()->setStep(step);
+        response.getBladeRf2OutputReport()->getBandwidthRange()->setScale(scale);
 
         device->getFrequencyRangeTx(f_min, f_max, step, scale);
 
@@ -1079,6 +1080,7 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getBladeRf2OutputReport()->getFrequencyRange()->setMin(f_min);
         response.getBladeRf2OutputReport()->getFrequencyRange()->setMax(f_max);
         response.getBladeRf2OutputReport()->getFrequencyRange()->setStep(step);
+        response.getBladeRf2OutputReport()->getBandwidthRange()->setScale(scale);
 
         device->getGlobalGainRangeTx(min, max, step, scale);
 
@@ -1086,6 +1088,7 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getBladeRf2OutputReport()->getGlobalGainRange()->setMin(min);
         response.getBladeRf2OutputReport()->getGlobalGainRange()->setMax(max);
         response.getBladeRf2OutputReport()->getGlobalGainRange()->setStep(step);
+        response.getBladeRf2OutputReport()->getBandwidthRange()->setScale(scale);
 
         device->getSampleRateRangeTx(min, max, step, scale);
 
@@ -1093,6 +1096,7 @@ void BladeRF2Output::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
         response.getBladeRf2OutputReport()->getSampleRateRange()->setMin(min);
         response.getBladeRf2OutputReport()->getSampleRateRange()->setMax(max);
         response.getBladeRf2OutputReport()->getSampleRateRange()->setStep(step);
+        response.getBladeRf2OutputReport()->getBandwidthRange()->setScale(scale);
     }
 }
 
