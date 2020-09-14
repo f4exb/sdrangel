@@ -34,6 +34,8 @@ SWGRange::SWGRange() {
     m_max_isSet = false;
     step = 0;
     m_step_isSet = false;
+    scale = 0.0f;
+    m_scale_isSet = false;
 }
 
 SWGRange::~SWGRange() {
@@ -48,10 +50,13 @@ SWGRange::init() {
     m_max_isSet = false;
     step = 0;
     m_step_isSet = false;
+    scale = 0.0f;
+    m_scale_isSet = false;
 }
 
 void
 SWGRange::cleanup() {
+
 
 
 
@@ -73,6 +78,8 @@ SWGRange::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&max, pJson["max"], "qint32", "");
     
     ::SWGSDRangel::setValue(&step, pJson["step"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&scale, pJson["scale"], "float", "");
     
 }
 
@@ -98,6 +105,9 @@ SWGRange::asJsonObject() {
     }
     if(m_step_isSet){
         obj->insert("step", QJsonValue(step));
+    }
+    if(m_scale_isSet){
+        obj->insert("scale", QJsonValue(scale));
     }
 
     return obj;
@@ -133,6 +143,16 @@ SWGRange::setStep(qint32 step) {
     this->m_step_isSet = true;
 }
 
+float
+SWGRange::getScale() {
+    return scale;
+}
+void
+SWGRange::setScale(float scale) {
+    this->scale = scale;
+    this->m_scale_isSet = true;
+}
+
 
 bool
 SWGRange::isSet(){
@@ -145,6 +165,9 @@ SWGRange::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_step_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_scale_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

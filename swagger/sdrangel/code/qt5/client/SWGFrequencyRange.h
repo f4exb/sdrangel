@@ -50,6 +50,9 @@ public:
     qint32 getStep();
     void setStep(qint32 step);
 
+    float getScale();
+    void setScale(float scale);
+
 
     virtual bool isSet() override;
 
@@ -62,6 +65,9 @@ private:
 
     qint32 step;
     bool m_step_isSet;
+
+    float scale;
+    bool m_scale_isSet;
 
 };
 
