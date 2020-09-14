@@ -41,12 +41,12 @@ public:
     void closeRx(int channel);
     void closeTx(int channel);
 
-    void getFrequencyRangeRx(uint64_t& min, uint64_t& max, int& step);
-    void getFrequencyRangeTx(uint64_t& min, uint64_t& max, int& step);
-    void getSampleRateRangeRx(int& min, int& max, int& step);
-    void getSampleRateRangeTx(int& min, int& max, int& step);
-    void getBandwidthRangeRx(int& min, int& max, int& step);
-    void getBandwidthRangeTx(int& min, int& max, int& step);
+    void getFrequencyRangeRx(uint64_t& min, uint64_t& max, int& step, float& scale);
+    void getFrequencyRangeTx(uint64_t& min, uint64_t& max, int& step, float& scale);
+    void getSampleRateRangeRx(int& min, int& max, int& step, float& scale);
+    void getSampleRateRangeTx(int& min, int& max, int& step, float& scale);
+    void getBandwidthRangeRx(int& min, int& max, int& step, float& scale);
+    void getBandwidthRangeTx(int& min, int& max, int& step, float& scale);
     void getGlobalGainRangeRx(int& min, int& max, int& step, float& scale);
     void getGlobalGainRangeTx(int& min, int& max, int& step, float& scale);
     int  getGainModesRx(const bladerf_gain_modes**);
