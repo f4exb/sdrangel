@@ -455,7 +455,7 @@ void DeviceBladeRF2::getBandwidthRangeTx(int& min, int& max, int& step)
     }
 }
 
-void DeviceBladeRF2::getGlobalGainRangeRx(int& min, int& max, int& step)
+void DeviceBladeRF2::getGlobalGainRangeRx(int& min, int& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -474,11 +474,12 @@ void DeviceBladeRF2::getGlobalGainRangeRx(int& min, int& max, int& step)
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 }
 
-void DeviceBladeRF2::getGlobalGainRangeTx(int& min, int& max, int& step)
+void DeviceBladeRF2::getGlobalGainRangeTx(int& min, int& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -497,6 +498,9 @@ void DeviceBladeRF2::getGlobalGainRangeTx(int& min, int& max, int& step)
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
+            qDebug("DeviceBladeRF2::getGlobalGainRangeTx: min: %d max: %d step: %d scale: %f",
+                min, max, step, scale);
         }
     }
 }

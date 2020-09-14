@@ -74,11 +74,11 @@ BladeRF2InputGui::BladeRF2InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 
     ui->gainMode->blockSignals(false);
 
-    m_sampleSource->getGlobalGainRange(min, max, step);
-    ui->gain->setMinimum(min);
-    ui->gain->setMaximum(max);
-    ui->gain->setPageStep(step);
-    ui->gain->setSingleStep(step);
+    m_sampleSource->getGlobalGainRange(m_gainMin, m_gainMax, m_gainStep, m_gainScale);
+    ui->gain->setMinimum(m_gainMin/m_gainStep);
+    ui->gain->setMaximum(m_gainMax/m_gainStep);
+    ui->gain->setPageStep(1);
+    ui->gain->setSingleStep(1);
 
     ui->label_decim->setText(QString::fromUtf8("D\u2193"));
 
@@ -187,12 +187,11 @@ bool BladeRF2InputGui::handleMessage(const Message& message)
         const BladeRF2Input::MsgConfigureBladeRF2& cfg = (BladeRF2Input::MsgConfigureBladeRF2&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
-        int min, max, step;
-        m_sampleSource->getGlobalGainRange(min, max, step);
-        ui->gain->setMinimum(min);
-        ui->gain->setMaximum(max);
-        ui->gain->setPageStep(step);
-        ui->gain->setSingleStep(step);
+        m_sampleSource->getGlobalGainRange(m_gainMin, m_gainMax, m_gainStep, m_gainScale);
+        ui->gain->setMinimum(m_gainMin/m_gainStep);
+        ui->gain->setMaximum(m_gainMax/m_gainStep);
+        ui->gain->setPageStep(1);
+        ui->gain->setSingleStep(1);
         displaySettings();
         blockApplySettings(false);
 
@@ -201,10 +200,14 @@ bool BladeRF2InputGui::handleMessage(const Message& message)
     else if (BladeRF2Input::MsgReportGainRange::match(message))
     {
         const BladeRF2Input::MsgReportGainRange& cfg = (BladeRF2Input::MsgReportGainRange&) message;
-        ui->gain->setMinimum(cfg.getMin());
-        ui->gain->setMaximum(cfg.getMax());
-        ui->gain->setSingleStep(cfg.getStep());
-        ui->gain->setPageStep(cfg.getStep());
+        m_gainMin = cfg.getMin();
+        m_gainMax = cfg.getMax();
+        m_gainStep = cfg.getStep();
+        m_gainScale = cfg.getScale();
+        ui->gain->setMinimum(m_gainMin/m_gainStep);
+        ui->gain->setMaximum(m_gainMax/m_gainStep);
+        ui->gain->setPageStep(1);
+        ui->gain->setSingleStep(1);
 
         return true;
     }
@@ -327,8 +330,8 @@ void BladeRF2InputGui::displaySettings()
     ui->decim->setCurrentIndex(m_settings.m_log2Decim);
     ui->fcPos->setCurrentIndex((int) m_settings.m_fcPos);
     ui->gainMode->setCurrentIndex(m_settings.m_gainMode);
-    ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
-    ui->gain->setValue(m_settings.m_globalGain);
+    ui->gainText->setText(tr("%1 dB").arg(QString::number(m_settings.m_globalGain, 'f', 2)));
+    ui->gain->setValue(getGainValue(m_settings.m_globalGain));
 
     if (m_settings.m_gainMode == BLADERF_GAIN_MANUAL) {
         ui->gain->setEnabled(true);
@@ -446,8 +449,9 @@ void BladeRF2InputGui::on_gainMode_currentIndexChanged(int index)
 
 void BladeRF2InputGui::on_gain_valueChanged(int value)
 {
-    ui->gainText->setText(tr("%1 dB").arg(value));
-    m_settings.m_globalGain = value;
+    float displayableGain = getGainDB(value);
+    ui->gainText->setText(tr("%1 dB").arg(QString::number(displayableGain, 'f', 2)));
+    m_settings.m_globalGain = (int) displayableGain;
     sendSettings();
 }
 
@@ -540,4 +544,20 @@ void BladeRF2InputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+float BladeRF2InputGui::getGainDB(int gainValue)
+{
+    float gain = gainValue*m_gainStep*m_gainScale;
+    // qDebug("BladeRF2InputGui::getGainDB: gainValue: %d m_gainMin: %d m_gainMax: %d m_gainStep: %d m_gainScale: %f gain: %f",
+    //     gainValue, m_gainMin, m_gainMax, m_gainStep, m_gainScale, gain);
+    return gain;
+}
+
+int BladeRF2InputGui::getGainValue(float gainDB)
+{
+    int gain = (gainDB/m_gainScale) / m_gainStep;
+    // qDebug("BladeRF2InputGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d m_gainScale: %f gain: %d",
+    //     gainDB, m_gainMin, m_gainMax, m_gainStep, m_gainScale, gain);
+    return gain;
 }

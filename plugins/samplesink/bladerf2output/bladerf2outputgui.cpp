@@ -64,10 +64,10 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
     ui->bandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->bandwidth->setValueRange(5, min/1000, max/1000);
 
-    m_sampleSink->getGlobalGainRange(min, max, step);
-    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getGlobalGainRange: [%d,%d] step: %d", min, max, step);
-    ui->gain->setMinimum((min-max)/1000);
-    ui->gain->setMaximum(0);
+    m_sampleSink->getGlobalGainRange(m_gainMin, m_gainMax, m_gainStep, m_gainScale);
+    qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getGlobalGainRange: [%d,%d] step: %d scale: %f", m_gainMin, m_gainMax, m_gainStep, m_gainScale);
+    ui->gain->setMinimum(m_gainMin/m_gainStep);
+    ui->gain->setMaximum(m_gainMax/m_gainStep);
     ui->gain->setPageStep(1);
     ui->gain->setSingleStep(1);
 
@@ -174,10 +174,9 @@ bool BladeRF2OutputGui::handleMessage(const Message& message)
         const BladeRF2Output::MsgConfigureBladeRF2& cfg = (BladeRF2Output::MsgConfigureBladeRF2&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
-        int min, max, step;
-        m_sampleSink->getGlobalGainRange(min, max, step);
-        ui->gain->setMinimum((min-max)/1000);
-        ui->gain->setMaximum(0);
+        m_sampleSink->getGlobalGainRange(m_gainMin, m_gainMax, m_gainStep, m_gainScale);
+        ui->gain->setMinimum(m_gainMin/m_gainStep);
+        ui->gain->setMaximum(m_gainMax/m_gainStep);
         ui->gain->setPageStep(1);
         ui->gain->setSingleStep(1);
         displaySettings();
@@ -188,8 +187,12 @@ bool BladeRF2OutputGui::handleMessage(const Message& message)
     else if (BladeRF2Output::MsgReportGainRange::match(message))
     {
         const BladeRF2Output::MsgReportGainRange& cfg = (BladeRF2Output::MsgReportGainRange&) message;
-        ui->gain->setMinimum((cfg.getMin()-cfg.getMax())/1000);
-        ui->gain->setMaximum(0);
+        m_gainMin = cfg.getMin();
+        m_gainMax = cfg.getMax();
+        m_gainStep = cfg.getStep();
+        m_gainScale = cfg.getScale();
+        ui->gain->setMinimum(m_gainMin/m_gainStep);
+        ui->gain->setMaximum(m_gainMax/m_gainStep);
         ui->gain->setSingleStep(1);
         ui->gain->setPageStep(1);
 
@@ -294,8 +297,8 @@ void BladeRF2OutputGui::displaySettings()
 
     ui->bandwidth->setValue(m_settings.m_bandwidth / 1000);
     ui->interp->setCurrentIndex(m_settings.m_log2Interp);
-    ui->gainText->setText(tr("%1 dB").arg(m_settings.m_globalGain));
-    ui->gain->setValue(m_settings.m_globalGain);
+    ui->gainText->setText(tr("%1 dB").arg(QString::number(m_settings.m_globalGain, 'f', 2)));
+    ui->gain->setValue(getGainValue(m_settings.m_globalGain));
     ui->biasTee->setChecked(m_settings.m_biasTee);
 
     blockApplySettings(false);
@@ -363,8 +366,9 @@ void BladeRF2OutputGui::on_interp_currentIndexChanged(int index)
 
 void BladeRF2OutputGui::on_gain_valueChanged(int value)
 {
-    ui->gainText->setText(tr("%1 dB").arg(value));
-    m_settings.m_globalGain = value;
+    float displayableGain = getGainDB(value);
+    ui->gainText->setText(tr("%1 dB").arg(QString::number(displayableGain, 'f', 2)));
+    m_settings.m_globalGain = (int) displayableGain;
     sendSettings();
 }
 
@@ -451,4 +455,20 @@ void BladeRF2OutputGui::openDeviceSettingsDialog(const QPoint& p)
     m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
 
     sendSettings();
+}
+
+float BladeRF2OutputGui::getGainDB(int gainValue)
+{
+    float gain = gainValue*m_gainStep*m_gainScale;
+    // qDebug("BladeRF2OutputGui::getGainDB: gainValue: %d m_gainMin: %d m_gainMax: %d m_gainStep: %d gain: %f",
+    //     gainValue, m_gainMin, m_gainMax, m_gainStep, gain);
+    return gain;
+}
+
+int BladeRF2OutputGui::getGainValue(float gainDB)
+{
+    int gain = (gainDB/m_gainScale) / m_gainStep;
+    // qDebug("BladeRF2OutputGui::getGainValue: gainDB: %f m_gainMin: %d m_gainMax: %d m_gainStep: %d gain: %d",
+    //     gainDB, m_gainMin, m_gainMax, m_gainStep, gain);
+    return gain;
 }

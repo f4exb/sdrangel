@@ -47,8 +47,8 @@ public:
     void getSampleRateRangeTx(int& min, int& max, int& step);
     void getBandwidthRangeRx(int& min, int& max, int& step);
     void getBandwidthRangeTx(int& min, int& max, int& step);
-    void getGlobalGainRangeRx(int& min, int& max, int& step);
-    void getGlobalGainRangeTx(int& min, int& max, int& step);
+    void getGlobalGainRangeRx(int& min, int& max, int& step, float& scale);
+    void getGlobalGainRangeTx(int& min, int& max, int& step, float& scale);
     int  getGainModesRx(const bladerf_gain_modes**);
     void setBiasTeeRx(bool enable);
     void setBiasTeeTx(bool enable);

@@ -591,10 +591,10 @@ void BladeRF2Input::getBandwidthRange(int& min, int& max, int& step)
     }
 }
 
-void BladeRF2Input::getGlobalGainRange(int& min, int& max, int& step)
+void BladeRF2Input::getGlobalGainRange(int& min, int& max, int& step, float& scale)
 {
     if (m_deviceShared.m_dev) {
-        m_deviceShared.m_dev->getGlobalGainRangeRx(min, max, step);
+        m_deviceShared.m_dev->getGlobalGainRangeRx(min, max, step, scale);
     }
 }
 
@@ -681,8 +681,9 @@ bool BladeRF2Input::handleMessage(const Message& message)
                     if (getMessageQueueToGUI())
                     {
                         int min, max, step;
-                        getGlobalGainRange(min, max, step);
-                        MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step);
+                        float scale;
+                        getGlobalGainRange(min, max, step, scale);
+                        MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step, scale);
                         getMessageQueueToGUI()->push(msg);
                     }
                 }
@@ -884,8 +885,9 @@ bool BladeRF2Input::applySettings(const BladeRF2InputSettings& settings, bool fo
                 if (getMessageQueueToGUI())
                 {
                     int min, max, step;
-                    getGlobalGainRange(min, max, step);
-                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step);
+                    float scale;
+                    getGlobalGainRange(min, max, step, scale);
+                    MsgReportGainRange *msg = MsgReportGainRange::create(min, max, step, scale);
                     getMessageQueueToGUI()->push(msg);
                 }
             }
@@ -1153,6 +1155,7 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
     if (device)
     {
         int min, max, step;
+        float scale;
         uint64_t f_min, f_max;
 
         device->getBandwidthRangeRx(min, max, step);
@@ -1169,7 +1172,7 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
         response.getBladeRf2InputReport()->getFrequencyRange()->setMax(f_max);
         response.getBladeRf2InputReport()->getFrequencyRange()->setStep(step);
 
-        device->getGlobalGainRangeRx(min, max, step);
+        device->getGlobalGainRangeRx(min, max, step, scale);
 
         response.getBladeRf2InputReport()->setGlobalGainRange(new SWGSDRangel::SWGRange);
         response.getBladeRf2InputReport()->getGlobalGainRange()->setMin(min);
