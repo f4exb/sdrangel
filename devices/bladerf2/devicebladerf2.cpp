@@ -316,7 +316,7 @@ void DeviceBladeRF2::closeTx(int channel)
     }
 }
 
-void DeviceBladeRF2::getFrequencyRangeRx(uint64_t& min, uint64_t& max, int& step)
+void DeviceBladeRF2::getFrequencyRangeRx(uint64_t& min, uint64_t& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -335,11 +335,12 @@ void DeviceBladeRF2::getFrequencyRangeRx(uint64_t& min, uint64_t& max, int& step
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 }
 
-void DeviceBladeRF2::getFrequencyRangeTx(uint64_t& min, uint64_t& max, int& step)
+void DeviceBladeRF2::getFrequencyRangeTx(uint64_t& min, uint64_t& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -358,11 +359,12 @@ void DeviceBladeRF2::getFrequencyRangeTx(uint64_t& min, uint64_t& max, int& step
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 }
 
-void DeviceBladeRF2::getSampleRateRangeRx(int& min, int& max, int& step)
+void DeviceBladeRF2::getSampleRateRangeRx(int& min, int& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -381,11 +383,12 @@ void DeviceBladeRF2::getSampleRateRangeRx(int& min, int& max, int& step)
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 }
 
-void DeviceBladeRF2::getSampleRateRangeTx(int& min, int& max, int& step)
+void DeviceBladeRF2::getSampleRateRangeTx(int& min, int& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -404,12 +407,13 @@ void DeviceBladeRF2::getSampleRateRangeTx(int& min, int& max, int& step)
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 
 }
 
-void DeviceBladeRF2::getBandwidthRangeRx(int& min, int& max, int& step)
+void DeviceBladeRF2::getBandwidthRangeRx(int& min, int& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -428,11 +432,12 @@ void DeviceBladeRF2::getBandwidthRangeRx(int& min, int& max, int& step)
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 }
 
-void DeviceBladeRF2::getBandwidthRangeTx(int& min, int& max, int& step)
+void DeviceBladeRF2::getBandwidthRangeTx(int& min, int& max, int& step, float& scale)
 {
     if (m_dev)
     {
@@ -451,6 +456,7 @@ void DeviceBladeRF2::getBandwidthRangeTx(int& min, int& max, int& step)
             min = range->min;
             max = range->max;
             step = range->step;
+            scale = range->scale;
         }
     }
 }

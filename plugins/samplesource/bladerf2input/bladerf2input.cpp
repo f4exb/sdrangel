@@ -570,24 +570,24 @@ bool BladeRF2Input::setDeviceCenterFrequency(struct bladerf *dev, int requestedC
     }
 }
 
-void BladeRF2Input::getFrequencyRange(uint64_t& min, uint64_t& max, int& step)
+void BladeRF2Input::getFrequencyRange(uint64_t& min, uint64_t& max, int& step, float& scale)
 {
     if (m_deviceShared.m_dev) {
-        m_deviceShared.m_dev->getFrequencyRangeRx(min, max, step);
+        m_deviceShared.m_dev->getFrequencyRangeRx(min, max, step, scale);
     }
 }
 
-void BladeRF2Input::getSampleRateRange(int& min, int& max, int& step)
+void BladeRF2Input::getSampleRateRange(int& min, int& max, int& step, float& scale)
 {
     if (m_deviceShared.m_dev) {
-        m_deviceShared.m_dev->getSampleRateRangeRx(min, max, step);
+        m_deviceShared.m_dev->getSampleRateRangeRx(min, max, step, scale);
     }
 }
 
-void BladeRF2Input::getBandwidthRange(int& min, int& max, int& step)
+void BladeRF2Input::getBandwidthRange(int& min, int& max, int& step, float& scale)
 {
     if (m_deviceShared.m_dev) {
-        m_deviceShared.m_dev->getBandwidthRangeRx(min, max, step);
+        m_deviceShared.m_dev->getBandwidthRangeRx(min, max, step, scale);
     }
 }
 
@@ -1158,14 +1158,14 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
         float scale;
         uint64_t f_min, f_max;
 
-        device->getBandwidthRangeRx(min, max, step);
+        device->getBandwidthRangeRx(min, max, step, scale);
 
         response.getBladeRf2InputReport()->setBandwidthRange(new SWGSDRangel::SWGRange);
         response.getBladeRf2InputReport()->getBandwidthRange()->setMin(min);
         response.getBladeRf2InputReport()->getBandwidthRange()->setMax(max);
         response.getBladeRf2InputReport()->getBandwidthRange()->setStep(step);
 
-        device->getFrequencyRangeRx(f_min, f_max, step);
+        device->getFrequencyRangeRx(f_min, f_max, step, scale);
 
         response.getBladeRf2InputReport()->setFrequencyRange(new SWGSDRangel::SWGFrequencyRange);
         response.getBladeRf2InputReport()->getFrequencyRange()->setMin(f_min);
@@ -1179,7 +1179,7 @@ void BladeRF2Input::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& respo
         response.getBladeRf2InputReport()->getGlobalGainRange()->setMax(max);
         response.getBladeRf2InputReport()->getGlobalGainRange()->setStep(step);
 
-        device->getSampleRateRangeRx(min, max, step);
+        device->getSampleRateRangeRx(min, max, step, scale);
 
         response.getBladeRf2InputReport()->setSampleRateRange(new SWGSDRangel::SWGRange);
         response.getBladeRf2InputReport()->getSampleRateRange()->setMin(min);

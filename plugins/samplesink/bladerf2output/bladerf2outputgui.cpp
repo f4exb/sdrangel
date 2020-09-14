@@ -45,21 +45,22 @@ BladeRF2OutputGui::BladeRF2OutputGui(DeviceUISet *deviceUISet, QWidget* parent) 
 {
     m_sampleSink = (BladeRF2Output*) m_deviceUISet->m_deviceAPI->getSampleSink();
     int max, min, step;
+    float scale;
     uint64_t f_min, f_max;
 
     ui->setupUi(this);
 
-    m_sampleSink->getFrequencyRange(f_min, f_max, step);
+    m_sampleSink->getFrequencyRange(f_min, f_max, step, scale);
     qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getFrequencyRange: [%lu,%lu] step: %d", f_min, f_max, step);
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->centerFrequency->setValueRange(7, f_min/1000, f_max/1000);
 
-    m_sampleSink->getSampleRateRange(min, max, step);
+    m_sampleSink->getSampleRateRange(min, max, step, scale);
     qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getSampleRateRange: [%d,%d] step: %d", min, max, step);
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, min, max);
 
-    m_sampleSink->getBandwidthRange(min, max, step);
+    m_sampleSink->getBandwidthRange(min, max, step, scale);
     qDebug("BladeRF2OutputGui::BladeRF2OutputGui: getBandwidthRange: [%d,%d] step: %d", min, max, step);
     ui->bandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->bandwidth->setValueRange(5, min/1000, max/1000);
@@ -146,8 +147,9 @@ void BladeRF2OutputGui::updateFrequencyLimits()
     // values in kHz
     uint64_t f_min, f_max;
     int step;
+    float scale;
     qint64 deltaFrequency = m_settings.m_transverterMode ? m_settings.m_transverterDeltaFrequency/1000 : 0;
-    m_sampleSink->getFrequencyRange(f_min, f_max, step);
+    m_sampleSink->getFrequencyRange(f_min, f_max, step, scale);
     qint64 minLimit = f_min/1000 + deltaFrequency;
     qint64 maxLimit = f_max/1000 + deltaFrequency;
 
@@ -251,7 +253,8 @@ void BladeRF2OutputGui::updateSampleRateAndFrequency()
 void BladeRF2OutputGui::displaySampleRate()
 {
     int max, min, step;
-    m_sampleSink->getSampleRateRange(min, max, step);
+    float scale;
+    m_sampleSink->getSampleRateRange(min, max, step, scale);
 
     ui->sampleRate->blockSignals(true);
 

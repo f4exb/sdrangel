@@ -134,9 +134,9 @@ public:
     virtual quint64 getCenterFrequency() const;
     virtual void setCenterFrequency(qint64 centerFrequency);
 
-    void getFrequencyRange(uint64_t& min, uint64_t& max, int& step);
-    void getSampleRateRange(int& min, int& max, int& step);
-    void getBandwidthRange(int& min, int& max, int& step);
+    void getFrequencyRange(uint64_t& min, uint64_t& max, int& step, float& scale);
+    void getSampleRateRange(int& min, int& max, int& step, float& scale);
+    void getBandwidthRange(int& min, int& max, int& step, float& scale);
     void getGlobalGainRange(int& min, int& max, int& step, float& scale);
     const std::vector<GainMode>& getGainModes() { return m_gainModes; }
 
