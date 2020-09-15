@@ -889,24 +889,24 @@ bool BladeRF2MIMO::setTxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_
     return true;
 }
 
-void BladeRF2MIMO::getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step)
+void BladeRF2MIMO::getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getFrequencyRangeRx(min, max, step);
+        m_dev->getFrequencyRangeRx(min, max, step, scale);
     }
 }
 
-void BladeRF2MIMO::getRxSampleRateRange(int& min, int& max, int& step)
+void BladeRF2MIMO::getRxSampleRateRange(int& min, int& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getSampleRateRangeRx(min, max, step);
+        m_dev->getSampleRateRangeRx(min, max, step, scale);
     }
 }
 
-void BladeRF2MIMO::getRxBandwidthRange(int& min, int& max, int& step)
+void BladeRF2MIMO::getRxBandwidthRange(int& min, int& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getBandwidthRangeRx(min, max, step);
+        m_dev->getBandwidthRangeRx(min, max, step, scale);
     }
 }
 
@@ -917,24 +917,24 @@ void BladeRF2MIMO::getRxGlobalGainRange(int& min, int& max, int& step, float& sc
     }
 }
 
-void BladeRF2MIMO::getTxFrequencyRange(uint64_t& min, uint64_t& max, int& step)
+void BladeRF2MIMO::getTxFrequencyRange(uint64_t& min, uint64_t& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getFrequencyRangeTx(min, max, step);
+        m_dev->getFrequencyRangeTx(min, max, step, scale);
     }
 }
 
-void BladeRF2MIMO::getTxSampleRateRange(int& min, int& max, int& step)
+void BladeRF2MIMO::getTxSampleRateRange(int& min, int& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getSampleRateRangeTx(min, max, step);
+        m_dev->getSampleRateRangeTx(min, max, step, scale);
     }
 }
 
-void BladeRF2MIMO::getTxBandwidthRange(int& min, int& max, int& step)
+void BladeRF2MIMO::getTxBandwidthRange(int& min, int& max, int& step, float& scale)
 {
     if (m_dev) {
-        m_dev->getBandwidthRangeTx(min, max, step);
+        m_dev->getBandwidthRangeTx(min, max, step, scale);
     }
 }
 

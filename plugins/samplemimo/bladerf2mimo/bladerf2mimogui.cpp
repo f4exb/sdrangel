@@ -69,18 +69,18 @@ BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->setupUi(this);
     m_sampleMIMO = (BladeRF2MIMO*) m_deviceUISet->m_deviceAPI->getSampleMIMO();
 
-    m_sampleMIMO->getRxFrequencyRange(m_fMinRx, m_fMaxRx, m_fStepRx);
-    m_sampleMIMO->getTxFrequencyRange(m_fMinTx, m_fMaxTx, m_fStepTx);
-    m_sampleMIMO->getRxBandwidthRange(m_bwMinRx, m_bwMaxRx, m_bwStepRx);
-    m_sampleMIMO->getTxBandwidthRange(m_bwMinTx, m_bwMaxTx, m_bwStepTx);
+    m_sampleMIMO->getRxFrequencyRange(m_fMinRx, m_fMaxRx, m_fStepRx, m_fScaleRx);
+    m_sampleMIMO->getTxFrequencyRange(m_fMinTx, m_fMaxTx, m_fStepTx, m_fScaleTx);
+    m_sampleMIMO->getRxBandwidthRange(m_bwMinRx, m_bwMaxRx, m_bwStepRx, m_bwScaleRx);
+    m_sampleMIMO->getTxBandwidthRange(m_bwMinTx, m_bwMaxTx, m_bwStepTx, m_bwScaleTx);
 
     ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->bandwidth->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
 
     int minRx, maxRx, stepRx, minTx, maxTx, stepTx;
-    m_sampleMIMO->getRxSampleRateRange(minRx, maxRx, stepRx);
-    m_sampleMIMO->getTxSampleRateRange(minTx, maxTx, stepTx);
+    m_sampleMIMO->getRxSampleRateRange(minRx, maxRx, stepRx, m_srScaleRx);
+    m_sampleMIMO->getTxSampleRateRange(minTx, maxTx, stepTx, m_srScaleTx);
     m_srMin = std::max(minRx, minTx);
     m_srMax = std::min(maxRx, maxTx);
     m_sampleMIMO->getRxGlobalGainRange(m_gainMinRx, m_gainMaxRx, m_gainStepRx, m_gainScaleRx);
@@ -708,11 +708,12 @@ void BladeRF2MIMOGui::updateFrequencyLimits()
     // values in kHz
     uint64_t f_min, f_max;
     int step;
+    float scale;
 
     if (m_rxElseTx)
     {
         qint64 deltaFrequency = m_settings.m_rxTransverterMode ? m_settings.m_rxTransverterDeltaFrequency/1000 : 0;
-        m_sampleMIMO->getRxFrequencyRange(f_min, f_max, step);
+        m_sampleMIMO->getRxFrequencyRange(f_min, f_max, step, scale);
         qint64 minLimit = f_min/1000 + deltaFrequency;
         qint64 maxLimit = f_max/1000 + deltaFrequency;
 
@@ -726,7 +727,7 @@ void BladeRF2MIMOGui::updateFrequencyLimits()
     else
     {
         qint64 deltaFrequency = m_settings.m_txTransverterMode ? m_settings.m_txTransverterDeltaFrequency/1000 : 0;
-        m_sampleMIMO->getRxFrequencyRange(f_min, f_max, step);
+        m_sampleMIMO->getRxFrequencyRange(f_min, f_max, step, scale);
         qint64 minLimit = f_min/1000 + deltaFrequency;
         qint64 maxLimit = f_max/1000 + deltaFrequency;
 

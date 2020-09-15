@@ -155,15 +155,15 @@ public:
 
     bool isRecording(unsigned int istream) const { (void) istream; return false; }
 
-    void getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step);
-    void getRxSampleRateRange(int& min, int& max, int& step);
-    void getRxBandwidthRange(int& min, int& max, int& step);
+    void getRxFrequencyRange(uint64_t& min, uint64_t& max, int& step, float& scale);
+    void getRxSampleRateRange(int& min, int& max, int& step, float& scale);
+    void getRxBandwidthRange(int& min, int& max, int& step, float& scale);
     void getRxGlobalGainRange(int& min, int& max, int& step, float& scale);
     const std::vector<GainMode>& getRxGainModes() { return m_rxGainModes; }
 
-    void getTxFrequencyRange(uint64_t& min, uint64_t& max, int& step);
-    void getTxSampleRateRange(int& min, int& max, int& step);
-    void getTxBandwidthRange(int& min, int& max, int& step);
+    void getTxFrequencyRange(uint64_t& min, uint64_t& max, int& step, float& scale);
+    void getTxSampleRateRange(int& min, int& max, int& step, float& scale);
+    void getTxBandwidthRange(int& min, int& max, int& step, float& scale);
     void getTxGlobalGainRange(int& min, int& max, int& step, float& scale);
 
     bool getRxRunning() const { return m_runningRx; }

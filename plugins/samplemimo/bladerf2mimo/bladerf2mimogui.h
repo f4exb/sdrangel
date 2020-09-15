@@ -84,6 +84,9 @@ private:
     int m_fStepRx, m_fStepTx;
 	int m_gainMinRx, m_gainMaxRx, m_gainStepRx;
 	int m_gainMinTx, m_gainMaxTx, m_gainStepTx;
+	float m_fScaleRx, m_fScaleTx;
+	float m_srScaleRx, m_srScaleTx;
+	float m_bwScaleRx, m_bwScaleTx;
 	float m_gainScaleRx, m_gainScaleTx;
 
 	void blockApplySettings(bool block) { m_doApplySettings = !block; }
