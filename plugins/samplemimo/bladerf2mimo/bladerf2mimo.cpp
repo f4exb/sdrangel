@@ -26,6 +26,7 @@
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
 #include "SWGTestMISettings.h"
+#include "SWGDeviceReport.h"
 
 #include "device/deviceapi.h"
 #include "dsp/dspcommands.h"
@@ -1299,6 +1300,89 @@ void BladeRF2MIMO::webapiReverseSendStartStop(bool start)
 
     buffer->setParent(reply);
     delete swgDeviceSettings;
+}
+
+int BladeRF2MIMO::webapiReportGet(SWGSDRangel::SWGDeviceReport& response, QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setBladeRf2MimoReport(new SWGSDRangel::SWGBladeRF2MIMOReport());
+    response.getBladeRf2MimoReport()->init();
+    webapiFormatDeviceReport(response);
+    return 200;
+}
+
+void BladeRF2MIMO::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
+{
+    if (m_dev)
+    {
+        int min, max, step;
+        float scale;
+        uint64_t f_min, f_max;
+
+        m_dev->getBandwidthRangeRx(min, max, step, scale);
+
+        response.getBladeRf2MimoReport()->setBandwidthRangeRx(new SWGSDRangel::SWGRange);
+        response.getBladeRf2MimoReport()->getBandwidthRangeRx()->setMin(min);
+        response.getBladeRf2MimoReport()->getBandwidthRangeRx()->setMax(max);
+        response.getBladeRf2MimoReport()->getBandwidthRangeRx()->setStep(step);
+        response.getBladeRf2MimoReport()->getBandwidthRangeRx()->setScale(scale);
+
+        m_dev->getFrequencyRangeRx(f_min, f_max, step, scale);
+
+        response.getBladeRf2MimoReport()->setFrequencyRangeRx(new SWGSDRangel::SWGFrequencyRange);
+        response.getBladeRf2MimoReport()->getFrequencyRangeRx()->setMin(f_min);
+        response.getBladeRf2MimoReport()->getFrequencyRangeRx()->setMax(f_max);
+        response.getBladeRf2MimoReport()->getFrequencyRangeRx()->setStep(step);
+        response.getBladeRf2MimoReport()->getFrequencyRangeRx()->setScale(scale);
+
+        m_dev->getGlobalGainRangeRx(min, max, step, scale);
+
+        response.getBladeRf2MimoReport()->setGlobalGainRangeRx(new SWGSDRangel::SWGRange);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeRx()->setMin(min);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeRx()->setMax(max);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeRx()->setStep(step);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeRx()->setScale(scale);
+
+        m_dev->getSampleRateRangeRx(min, max, step, scale);
+
+        response.getBladeRf2MimoReport()->setSampleRateRangeRx(new SWGSDRangel::SWGRange);
+        response.getBladeRf2MimoReport()->getSampleRateRangeRx()->setMin(min);
+        response.getBladeRf2MimoReport()->getSampleRateRangeRx()->setMax(max);
+        response.getBladeRf2MimoReport()->getSampleRateRangeRx()->setStep(step);
+        response.getBladeRf2MimoReport()->getSampleRateRangeRx()->setScale(scale);
+
+        m_dev->getBandwidthRangeTx(min, max, step, scale);
+
+        response.getBladeRf2MimoReport()->setBandwidthRangeTx(new SWGSDRangel::SWGRange);
+        response.getBladeRf2MimoReport()->getBandwidthRangeTx()->setMin(min);
+        response.getBladeRf2MimoReport()->getBandwidthRangeTx()->setMax(max);
+        response.getBladeRf2MimoReport()->getBandwidthRangeTx()->setStep(step);
+        response.getBladeRf2MimoReport()->getBandwidthRangeTx()->setScale(scale);
+
+        m_dev->getFrequencyRangeTx(f_min, f_max, step, scale);
+
+        response.getBladeRf2MimoReport()->setFrequencyRangeTx(new SWGSDRangel::SWGFrequencyRange);
+        response.getBladeRf2MimoReport()->getFrequencyRangeTx()->setMin(f_min);
+        response.getBladeRf2MimoReport()->getFrequencyRangeTx()->setMax(f_max);
+        response.getBladeRf2MimoReport()->getFrequencyRangeTx()->setStep(step);
+        response.getBladeRf2MimoReport()->getFrequencyRangeTx()->setScale(scale);
+
+        m_dev->getGlobalGainRangeTx(min, max, step, scale);
+
+        response.getBladeRf2MimoReport()->setGlobalGainRangeTx(new SWGSDRangel::SWGRange);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeTx()->setMin(min);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeTx()->setMax(max);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeTx()->setStep(step);
+        response.getBladeRf2MimoReport()->getGlobalGainRangeTx()->setScale(scale);
+
+        m_dev->getSampleRateRangeTx(min, max, step, scale);
+
+        response.getBladeRf2MimoReport()->setSampleRateRangeTx(new SWGSDRangel::SWGRange);
+        response.getBladeRf2MimoReport()->getSampleRateRangeTx()->setMin(min);
+        response.getBladeRf2MimoReport()->getSampleRateRangeTx()->setMax(max);
+        response.getBladeRf2MimoReport()->getSampleRateRangeTx()->setStep(step);
+        response.getBladeRf2MimoReport()->getSampleRateRangeTx()->setScale(scale);
+    }
 }
 
 void BladeRF2MIMO::networkManagerFinished(QNetworkReply *reply)

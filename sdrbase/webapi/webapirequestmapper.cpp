@@ -3959,6 +3959,9 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setRemoteOutputReport(nullptr);
     deviceReport.setRemoteInputReport(nullptr);
     deviceReport.setSdrPlayReport(nullptr);
+    deviceReport.setBladeRf2InputReport(nullptr);
+    deviceReport.setBladeRf2OutputReport(nullptr);
+    deviceReport.setBladeRf2MimoReport(nullptr);
 }
 
 void WebAPIRequestMapper::resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions)

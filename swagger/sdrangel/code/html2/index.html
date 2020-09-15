@@ -1798,6 +1798,41 @@ margin-bottom: 20px;
   },
   "description" : "BladeRF2"
 };
+            defs.BladeRF2MIMOReport = {
+  "properties" : {
+    "frequencyRangeRx" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRangeRx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRangeRx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRangeRx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "gainModesRx" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/NamedEnum"
+      }
+    },
+    "frequencyRangeTx" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRangeTx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRangeTx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRangeTx" : {
+      "$ref" : "#/definitions/Range"
+    }
+  },
+  "description" : "BladeRF2"
+};
             defs.BladeRF2MIMOSettings = {
   "properties" : {
     "devSampleRate" : {
@@ -3198,6 +3233,9 @@ margin-bottom: 20px;
     },
     "bladeRF2OutputReport" : {
       "$ref" : "#/definitions/BladeRF2OutputReport"
+    },
+    "bladeRF2MIMOReport" : {
+      "$ref" : "#/definitions/BladeRF2MIMOReport"
     },
     "fileInputReport" : {
       "$ref" : "#/definitions/FileInputReport"
@@ -37630,7 +37668,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-15T08:45:12.589+02:00
+              Generated 2020-09-15T13:30:17.634+02:00
             </div>
           </div>
       </div>

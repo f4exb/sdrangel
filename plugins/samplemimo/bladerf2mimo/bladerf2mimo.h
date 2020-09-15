@@ -133,6 +133,10 @@ public:
                 SWGSDRangel::SWGDeviceSettings& response, // query + response
                 QString& errorMessage);
 
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGDeviceReport& response,
+            QString& errorMessage);
+
     virtual int webapiRunGet(
             int subsystemIndex,
             SWGSDRangel::SWGDeviceState& response,
@@ -193,6 +197,7 @@ private:
     bool setTxDeviceCenterFrequency(struct bladerf *dev, quint64 freq_hz, int loPpmTenths);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const BladeRF2MIMOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
+    void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

@@ -184,3 +184,27 @@ BladeRF2MIMOSettings:
       type: integer
     reverseAPIDeviceIndex:
       type: integer
+
+BladeRF2MIMOReport:
+  description: BladeRF2
+  properties:
+    frequencyRangeRx:
+      $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
+    sampleRateRangeRx:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    bandwidthRangeRx:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    globalGainRangeRx:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    gainModesRx:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Structs.yaml#/NamedEnum"
+    frequencyRangeTx:
+      $ref: "/doc/swagger/include/Structs.yaml#/FrequencyRange"
+    sampleRateRangeTx:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    bandwidthRangeTx:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
+    globalGainRangeTx:
+      $ref: "/doc/swagger/include/Structs.yaml#/Range"
