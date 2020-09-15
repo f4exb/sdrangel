@@ -1,3 +1,10 @@
+sdrangel (5.11.1-1) unstable; urgency=medium
+
+   * Fixed BladeRF gain range handling. Fixes #630
+   * BladeRF2 MIMO: REST API: added report with range information
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 15 Sep 2020 19:07:05 +0200
+
 sdrangel (5.11.0-1) unstable; urgency=medium
 
    * Specialized channels dock. Implements #628
