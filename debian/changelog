@@ -1,3 +1,10 @@
+sdrangel (4.16.1-1) unstable; urgency=medium
+
+   * BladeRF2: fixed global gain setting. Fixes issue #630
+   * BladeRF2: REST API: add scale in range report
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 16 Sep 2020 11:07:43 +0200
+
 sdrangel (4.16.0-1) unstable; urgency=medium
 
    * Specialized channels dock. Implements #628
