@@ -1,0 +1,83 @@
+PacketModSettings:
+  description: PacketMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    gain:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    repeat:
+      type: integer
+    repeatDelay:
+      type: number
+      format: float
+    repeatCount:
+      type: integer
+    ax25PreFlags:
+      type: integer
+    ax25PostFlags:
+      type: integer
+    preEmphasis:
+      type: integer
+    preEmphasisTau:
+      type: number
+      format: float
+    preEmphasisHighFreq:
+      type: number
+      format: float
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+PacketModReport:
+  description: PacketMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+
+PacketModActions:
+  description: PacketMod
+  properties:
+    tx:
+      type: object
+      properties:
+        callsign:
+          type: string
+        to:
+          type: string
+        via:
+          type: string
+        data:
+          type: string
+      description: >
+        Transmit a packet

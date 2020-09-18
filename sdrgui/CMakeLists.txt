@@ -30,6 +30,7 @@ set(sdrgui_SOURCES
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
+    gui/fmpreemphasisdialog.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -104,6 +105,7 @@ set(sdrgui_HEADERS
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
+    gui/fmpreemphasisdialog.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h
@@ -165,6 +167,7 @@ set(sdrgui_FORMS
   gui/deviceuserargsdialog.ui
   gui/editcommanddialog.ui
   gui/externalclockdialog.ui
+  gui/fmpreemphasisdialog.ui
   gui/glscopegui.ui
   gui/glspectrumgui.ui
   gui/pluginsdialog.ui
