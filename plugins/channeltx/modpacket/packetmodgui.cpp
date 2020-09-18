@@ -210,8 +210,8 @@ void PacketModGUI::on_insertPosition_clicked(bool checked)
 
     int latDeg, latMin, latFrac, latNorth;
     int longDeg, longMin, longFrac, longEast;
-    char latBuf[10];
-    char longBuf[11];
+    char latBuf[40];
+    char longBuf[40];
 
     // Convert decimal latitude to degrees, min and hundreths of a minute
     latNorth = latitude >= 0.0f;
