@@ -30,11 +30,11 @@ This specifies the bandwidth of a LPF that is applied to the output signal to li
 
 <h3>6: Frequency deviation</h3>
 
-Adjusts the frequency deviation in 0.1 kHz steps from 1 to 6 kHz. Typical values are 2.5 kHz and 5 kHz. 
+Adjusts the frequency deviation in 0.1 kHz steps from 1 to 6 kHz. Typical values are 2.5 kHz and 5 kHz.
 
 <h3>7: Gain</h3>
 
-Adjusts the gain in dB from -60 to 0dB. The gain should be set to ensure the level meter remains below 100%. 
+Adjusts the gain in dB from -60 to 0dB. The gain should be set to ensure the level meter remains below 100%.
 
 <h3>8: Level meter in %</h3>
 
@@ -48,11 +48,11 @@ Enter your amateur radio callsign and optionally a sub-station ID (SSID). E.g. M
 
 <h3>10: Preemphaisis Filter</h3>
 
-Check this button to enable a FM preemphasis filter, which amplifiers higher frequencies. Right click to open the dialog to adjust settings for the filter. 
+Check this button to enable a FM preemphasis filter, which amplifiers higher frequencies. Right click to open the dialog to adjust settings for the filter.
 
 <h3>11: Repeat</h3>
 
-Check this button to repeated transmit a packet. Right click to open the dialog to adjust the delay between retransmission and number of times the packet should be repeated. 
+Check this button to repeated transmit a packet. Right click to open the dialog to adjust the delay between retransmission and number of times the packet should be repeated.
 
 <h3>12: Insertion position</h3>
 
@@ -60,7 +60,7 @@ Inserts position as APRS formatted latitude and longitude in to the current curs
 
 <h3>13: To</h3>
 
-Enter the destination for the packet. To send the packet to the APRS network, use APRS or APZ. 
+Enter the destination for the packet. To send the packet to the APRS network, use APRS or APZ.
 
 <h3>14: Via</h3>
 
@@ -76,7 +76,7 @@ Transmits a packet based on the current values in callsign, to, via and data.
 
 <h2>API</h2>
 
-Full details of the API can be found in the Swagger documentation. Here is a quick example of how to transmit a packet from the command line: 
+Full details of the API can be found in the Swagger documentation. Here is a quick example of how to transmit a packet from the command line:
 
     curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "PacketMod",  "direction": 1, "PacketModActions": { "tx": { "callsign": "MYCALL", "to": "APRS", "via": "WIDE2-2", "data": ">Using SDRangel API to transmit" }}}'
 
