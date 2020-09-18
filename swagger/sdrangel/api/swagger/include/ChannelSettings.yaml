@@ -59,6 +59,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalSink.yaml#/LocalSinkSettings"
     LocalSourceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalSource.yaml#/LocalSourceSettings"
+    PacketModSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModSettings"
     RemoteSinkSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
     RemoteSourceSettings:

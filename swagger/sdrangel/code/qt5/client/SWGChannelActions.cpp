@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    ---
  *
  * OpenAPI spec version: 5.9.0
  * Contact: f4exb06@gmail.com
@@ -42,6 +42,8 @@ SWGChannelActions::SWGChannelActions() {
     m_file_source_actions_isSet = false;
     sig_mf_file_sink_actions = nullptr;
     m_sig_mf_file_sink_actions_isSet = false;
+    packet_mod_actions = nullptr;
+    m_packet_mod_actions_isSet = false;
 }
 
 SWGChannelActions::~SWGChannelActions() {
@@ -64,24 +66,28 @@ SWGChannelActions::init() {
     m_file_source_actions_isSet = false;
     sig_mf_file_sink_actions = new SWGSigMFFileSinkActions();
     m_sig_mf_file_sink_actions_isSet = false;
+    packet_mod_actions = new SWGPacketModActions();
+    m_packet_mod_actions_isSet = false;
 }
 
 void
 SWGChannelActions::cleanup() {
-    if(channel_type != nullptr) { 
+    if(channel_type != nullptr) {
         delete channel_type;
     }
 
 
 
-    if(file_sink_actions != nullptr) { 
+    if(file_sink_actions != nullptr) {
         delete file_sink_actions;
     }
-    if(file_source_actions != nullptr) { 
+    if(file_source_actions != nullptr) {
         delete file_source_actions;
     }
-    if(sig_mf_file_sink_actions != nullptr) { 
+    if(sig_mf_file_sink_actions != nullptr) {
         delete sig_mf_file_sink_actions;
+    if(packet_mod_actions != nullptr) {
+        delete packet_mod_actions;
     }
 }
 
@@ -97,19 +103,20 @@ SWGChannelActions::fromJson(QString &json) {
 void
 SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&channel_type, pJson["channelType"], "QString", "QString");
-    
+
     ::SWGSDRangel::setValue(&direction, pJson["direction"], "qint32", "");
-    
+
     ::SWGSDRangel::setValue(&originator_device_set_index, pJson["originatorDeviceSetIndex"], "qint32", "");
-    
+
     ::SWGSDRangel::setValue(&originator_channel_index, pJson["originatorChannelIndex"], "qint32", "");
-    
+
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
-    
+
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
-    
+
     ::SWGSDRangel::setValue(&sig_mf_file_sink_actions, pJson["SigMFFileSinkActions"], "SWGSigMFFileSinkActions", "SWGSigMFFileSinkActions");
-    
+    ::SWGSDRangel::setValue(&packet_mod_actions, pJson["PacketModActions"], "SWGPacketModActions", "SWGPacketModActions");
+
 }
 
 QString
@@ -146,6 +153,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((sig_mf_file_sink_actions != nullptr) && (sig_mf_file_sink_actions->isSet())){
         toJsonValue(QString("SigMFFileSinkActions"), sig_mf_file_sink_actions, obj, QString("SWGSigMFFileSinkActions"));
+    }
+    if((packet_mod_actions != nullptr) && (packet_mod_actions->isSet())){
+        toJsonValue(QString("PacketModActions"), packet_mod_actions, obj, QString("SWGPacketModActions"));
     }
 
     return obj;
@@ -219,6 +229,14 @@ void
 SWGChannelActions::setSigMfFileSinkActions(SWGSigMFFileSinkActions* sig_mf_file_sink_actions) {
     this->sig_mf_file_sink_actions = sig_mf_file_sink_actions;
     this->m_sig_mf_file_sink_actions_isSet = true;
+SWGPacketModActions*
+SWGChannelActions::getPacketModActions() {
+    return packet_mod_actions;
+}
+void
+SWGChannelActions::setPacketModActions(SWGPacketModActions* packet_mod_actions) {
+    this->packet_mod_actions = packet_mod_actions;
+    this->m_packet_mod_actions_isSet = true;
 }
 
 
@@ -245,10 +263,12 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(sig_mf_file_sink_actions && sig_mf_file_sink_actions->isSet()){
+        if(packet_mod_actions && packet_mod_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);
     return isObjectUpdated;
 }
 }
+
 

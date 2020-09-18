@@ -137,6 +137,10 @@
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
 #include "SWGNamedEnum.h"
+#include "SWGPacketModActions.h"
+#include "SWGPacketModActions_tx.h"
+#include "SWGPacketModReport.h"
+#include "SWGPacketModSettings.h"
 #include "SWGPerseusReport.h"
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputReport.h"
@@ -583,6 +587,18 @@ namespace SWGSDRangel {
     }
     if(QString("SWGNamedEnum").compare(type) == 0) {
       return new SWGNamedEnum();
+    }
+    if(QString("SWGPacketModActions").compare(type) == 0) {
+      return new SWGPacketModActions();
+    }
+    if(QString("SWGPacketModActions_tx").compare(type) == 0) {
+      return new SWGPacketModActions_tx();
+    }
+    if(QString("SWGPacketModReport").compare(type) == 0) {
+      return new SWGPacketModReport();
+    }
+    if(QString("SWGPacketModSettings").compare(type) == 0) {
+      return new SWGPacketModSettings();
     }
     if(QString("SWGPerseusReport").compare(type) == 0) {
       return new SWGPerseusReport();

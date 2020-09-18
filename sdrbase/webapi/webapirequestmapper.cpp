@@ -83,6 +83,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
+    {"sdrangel.channeltx.modpacket", "PacketModSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
@@ -161,6 +162,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"FreqTracker", "FreqTrackerSettings"},
     {"NFMDemod", "NFMDemodSettings"},
     {"NFMMod", "NFMModSettings"},
+    {"PacketMod", "PacketModSettings"},
     {"LocalSink", "LocalSinkSettings"},
     {"LocalSource", "LocalSourceSettings"},
     {"RemoteSink", "RemoteSinkSettings"},
@@ -179,7 +181,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
     {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
-    {"SigMFFileSink", "SigMFFileSinkActions"}
+    {"SigMFFileSink", "SigMFFileSinkActions"},
+    {"PacketMod", "PacketModActions"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
@@ -4129,6 +4132,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->getChirpChatModSettings()->init(); // contains a list of strings
             channelSettings->getChirpChatModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "PacketModSettings")
+        {
+            channelSettings->setPacketModSettings(new SWGSDRangel::SWGPacketModSettings());
+            channelSettings->getPacketModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RemoteSinkSettings")
         {
             channelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());
@@ -4225,6 +4233,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setSigMfFileSinkActions(new SWGSDRangel::SWGSigMFFileSinkActions());
             channelActions->getSigMfFileSinkActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "PacketModActions")
+        {
+            channelActions->setPacketModActions(new SWGSDRangel::SWGPacketModActions());
+            channelActions->getPacketModActions()->fromJsonObject(actionsJsonObject);
         }
         else
         {
@@ -4688,6 +4701,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setDsdDemodSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
+    channelSettings.setPacketModSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
     channelSettings.setSsbDemodSettings(nullptr);
@@ -4709,6 +4723,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);
+    channelReport.setPacketModReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
     channelReport.setSsbDemodReport(nullptr);
     channelReport.setSsbModReport(nullptr);
@@ -4723,6 +4738,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.cleanup();
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
+    channelActions.setPacketModActions(nullptr);
 }
 
 void WebAPIRequestMapper::resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice)
