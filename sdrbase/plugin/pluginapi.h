@@ -45,6 +45,20 @@ public:
 
     typedef QList<ChannelRegistration> ChannelRegistrations;
 
+    struct FeatureRegistration
+    {
+        QString m_featureIdURI; //!< Feature type ID in URI form
+        QString m_featureId;    //!< Feature type ID in short form from object name
+        PluginInterface *m_plugin;
+        FeatureRegistration(const QString& featureIdURI, const QString& featureId, PluginInterface* plugin) :
+            m_featureIdURI(featureIdURI),
+            m_featureId(featureId),
+            m_plugin(plugin)
+        { }
+    };
+
+    typedef QList<FeatureRegistration> FeatureRegistrations;
+
 	// Rx Channel stuff
 	void registerRxChannel(const QString& channelIdURI, const QString& channelId, PluginInterface* plugin);
 	ChannelRegistrations *getRxChannelRegistrations();
@@ -65,6 +79,10 @@ public:
 
 	// Sample MIMO stuff
 	void registerSampleMIMO(const QString& sinkName, PluginInterface* plugin);
+
+    // Feature stuff
+    void registerFeature(const QString& featureIdURI, const QString& featureId, PluginInterface* plugin);
+    FeatureRegistrations *getFeatureRegistrations();
 
 protected:
 	PluginManager* m_pluginManager;

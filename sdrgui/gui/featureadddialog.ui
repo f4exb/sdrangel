@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ChannelAddDialog</class>
- <widget class="QDialog" name="ChannelAddDialog">
+ <class>FeatureAddDialog</class>
+ <widget class="QDialog" name="FeatureAddDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Add Channels</string>
+   <string>Add Features</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -29,11 +29,11 @@
       </font>
      </property>
      <property name="title">
-      <string>Available channels</string>
+      <string>Available features</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="1">
-       <widget class="QComboBox" name="channelSelect">
+       <widget class="QComboBox" name="featureSelect">
         <property name="font">
          <font>
           <family>Liberation Sans</family>
@@ -71,7 +71,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ChannelAddDialog</receiver>
+   <receiver>FeatureAddDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -87,7 +87,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ChannelAddDialog</receiver>
+   <receiver>FeatureAddDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

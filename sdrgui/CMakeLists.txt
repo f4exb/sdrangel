@@ -13,6 +13,7 @@ set(sdrgui_SOURCES
     gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
     gui/basicdevicesettingsdialog.cpp
+    gui/basicfeaturesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
     gui/channelsdock.cpp
@@ -31,6 +32,9 @@ set(sdrgui_SOURCES
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
+    gui/featureadddialog.cpp
+    gui/featuresdock.cpp
+    gui/featurewindow.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -65,6 +69,8 @@ set(sdrgui_SOURCES
 
     device/deviceuiset.cpp
 
+    feature/featureuiset.cpp
+
     soapygui/discreterangegui.cpp
     soapygui/intervalrangegui.cpp
     soapygui/itemsettinggui.cpp
@@ -89,6 +95,7 @@ set(sdrgui_HEADERS
     gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h
     gui/basicdevicesettingsdialog.h
+    gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
     gui/channelsdock.h
@@ -107,6 +114,9 @@ set(sdrgui_HEADERS
     gui/editcommanddialog.h
     gui/externalclockbutton.h
     gui/externalclockdialog.h
+    gui/featureadddialog.h
+    gui/featuresdock.h
+    gui/featurewindow.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h
@@ -142,6 +152,8 @@ set(sdrgui_HEADERS
 
     device/deviceuiset.h
 
+    feature/featureuiset.h
+
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h
     soapygui/itemsettinggui.h
@@ -162,6 +174,7 @@ set(sdrgui_FORMS
     gui/ambedevicesdialog.ui
     gui/basicchannelsettingsdialog.ui
     gui/basicdevicesettingsdialog.ui
+    gui/basicfeaturesettingsdialog.ui
     gui/channeladddialog.ui
     gui/commandoutputdialog.ui
     gui/cwkeyergui.ui
@@ -169,6 +182,7 @@ set(sdrgui_FORMS
     gui/deviceuserargsdialog.ui
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
+    gui/featureadddialog.ui
     gui/glscopegui.ui
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui

@@ -35,6 +35,7 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "device/deviceenumerator.h"
+#include "feature/featureuiset.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
 #include "gui/commanditem.h"
@@ -45,6 +46,7 @@
 #include "gui/aboutdialog.h"
 #include "gui/rollupwidget.h"
 #include "gui/channelwindow.h"
+#include "gui/featurewindow.h"
 #include "gui/audiodialog.h"
 #include "gui/loggingdialog.h"
 #include "gui/deviceuserargsdialog.h"
@@ -144,24 +146,28 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	removeDockWidget(ui->presetDock);
     removeDockWidget(ui->commandsDock);
 	removeDockWidget(ui->channelDock);
+    removeDockWidget(ui->featureDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->inputViewDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->spectraDisplayDock);
 	addDockWidget(Qt::LeftDockWidgetArea, ui->presetDock);
     addDockWidget(Qt::LeftDockWidgetArea, ui->commandsDock);
     tabifyDockWidget(ui->presetDock, ui->commandsDock);
 	addDockWidget(Qt::RightDockWidgetArea, ui->channelDock);
+	addDockWidget(Qt::RightDockWidgetArea, ui->featureDock);
 
 	ui->inputViewDock->show();
 	ui->spectraDisplayDock->show();
 	ui->presetDock->show();
 	ui->commandsDock->show();
 	ui->channelDock->show();
+    ui->featureDock->show();
 
     ui->menu_Window->addAction(ui->inputViewDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->spectraDisplayDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->presetDock->toggleViewAction());
     ui->menu_Window->addAction(ui->commandsDock->toggleViewAction());
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
+    ui->menu_Window->addAction(ui->featureDock->toggleViewAction());
 
     ui->tabInputsView->setStyleSheet("QWidget { background: rgb(50,50,50); } "
             "QToolButton::checked { background: rgb(128,70,0); } "
@@ -194,6 +200,12 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_pluginManager->loadPlugins(QString("plugins"));
     m_pluginManager->loadPluginsNonDiscoverable(m_settings.getDeviceUserArgs());
 
+    splash->showStatusMessage("load initial feature set...", Qt::white);
+    QStringList featureNames;
+    m_pluginManager->listFeatures(featureNames);
+    ui->featureDock->addAvailableFeatures(featureNames);    
+    addFeatureSet();
+
     splash->showStatusMessage("load file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
 
@@ -217,6 +229,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     connect(ui->tabChannels, SIGNAL(currentChanged(int)), this, SLOT(tabChannelsIndexChanged()));
     connect(ui->channelDock, SIGNAL(addChannel(int)), this, SLOT(channelAddClicked(int)));
     connect(ui->inputViewDock, SIGNAL(deviceChanged(int, int, int)), this, SLOT(samplingDeviceChanged(int, int, int)));
+    connect(ui->featureDock, SIGNAL(addFeature(int)), this, SLOT(featureAddClicked(int)));
 
 	QString applicationDirPath = qApp->applicationDirPath();
 
@@ -268,6 +281,8 @@ MainWindow::~MainWindow()
     delete m_pluginManager;
 	delete m_dateTimeWidget;
 	delete m_showSystemWidget;
+
+    removeAllFeatureSets();
 
 	delete ui;
 
@@ -624,6 +639,31 @@ void MainWindow::removeLastDevice()
 	}
 
     m_deviceUIs.pop_back();
+}
+
+void MainWindow::addFeatureSet()
+{
+    int tabIndex = m_featureUIs.size();
+    m_featureUIs.push_back(new FeatureUISet(tabIndex));
+    ui->tabFeatures->addTab(m_featureUIs.back()->m_featureWindow, QString("F%1").arg(tabIndex));
+}
+
+void MainWindow::removeFeatureSet(int tabIndex)
+{
+    if (tabIndex < m_featureUIs.size())
+    {
+        delete m_featureUIs[tabIndex];
+        m_featureUIs.erase(m_featureUIs.begin() + tabIndex);
+    }
+}
+
+void MainWindow::removeAllFeatureSets()
+{
+    while (m_featureUIs.size() > 0)
+    {
+        delete m_featureUIs.back();
+        m_featureUIs.erase(std::prev(m_featureUIs.end()));
+    }
 }
 
 void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
@@ -1998,6 +2038,19 @@ void MainWindow::channelAddClicked(int channelIndex)
                     channelIndex - nbMIMOChannels - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
             }
         }
+    }
+}
+
+void MainWindow::featureAddClicked(int featureIndex)
+{
+    // Do it in the currently selected source tab
+    int currentFeatureTabIndex = ui->tabFeatures->currentIndex();
+    qDebug("MainWindow::featureAddClicked: tab: %d index: %d", currentFeatureTabIndex, featureIndex);
+
+    if (currentFeatureTabIndex >= 0)
+    {
+        FeatureUISet *featureUISet = m_featureUIs[currentFeatureTabIndex];
+        m_pluginManager->createFeatureInstance(featureIndex, featureUISet, m_apiAdapter);
     }
 }
 

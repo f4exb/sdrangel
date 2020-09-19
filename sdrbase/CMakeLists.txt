@@ -150,6 +150,8 @@ set(sdrbase_SOURCES
     device/deviceuserargs.cpp
     device/deviceutils.cpp
 
+    feature/feature.cpp
+
     limerfe/limerfeusbcalib.cpp
 
     settings/preferences.cpp
@@ -297,6 +299,8 @@ set(sdrbase_HEADERS
     device/deviceenumerator.h
     device/deviceuserargs.h
     device/deviceutils.h
+
+    feature/feature.h
 
     limerfe/limerfeusbcalib.h
 

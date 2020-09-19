@@ -38,13 +38,13 @@ class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class Indicator;
 class GLSpectrumGUI;
-class ChannelWindow;
 class PluginAPI;
 class PluginInstanceGUI;
 class ChannelMarker;
 class PluginManager;
 class DeviceAPI;
 class DeviceUISet;
+class FeatureUISet;
 class PluginInterface;
 class QWidget;
 class WebAPIRequestMapper;
@@ -317,6 +317,7 @@ private:
 	MessageQueue m_inputMessageQueue;
 	MainSettings m_settings;
 	std::vector<DeviceUISet*> m_deviceUIs;
+    std::vector<FeatureUISet*> m_featureUIs;
 	QList<DeviceWidgetTabData> m_deviceWidgetTabs;
 	int m_masterTabIndex;
 
@@ -362,6 +363,9 @@ private:
 	void addSinkDevice();
     void addMIMODevice();
     void removeLastDevice();
+    void addFeatureSet();
+    void removeFeatureSet(int tabIndex);
+    void removeAllFeatureSets();
     void deleteChannel(int deviceSetIndex, int channelIndex);
     void sampleSourceChanged(int tabIndex, int newDeviceIndex);
 	void sampleSinkChanged(int tabIndex, int newDeviceIndex);
@@ -401,6 +405,7 @@ private slots:
     void on_action_DeviceUserArguments_triggered();
     void samplingDeviceChanged(int deviceType, int tabIndex, int newDeviceIndex);
     void channelAddClicked(int channelIndex);
+    void featureAddClicked(int featureIndex);
 	void on_action_Loaded_Plugins_triggered();
 	void on_action_About_triggered();
 	void on_action_addSourceDevice_triggered();
