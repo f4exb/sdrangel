@@ -1,5 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// API for features                                                              //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,31 +17,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_RIGCTRLGUI_H
-#define INCLUDE_RIGCTRLGUI_H
+#include "util/uid.h"
+#include "util/message.h"
 
-#include <QDialog>
-#include "rigctrlsettings.h"
-#include "rigctrl.h"
+#include "feature.h"
 
-namespace Ui {
-	class RigCtrlGUI;
+Feature::Feature(const QString& name, WebAPIAdapterInterface *webAPIAdapterInterface) :
+    m_name(name),
+    m_uid(UidCalculator::getNewObjectId()),
+	m_webAPIAdapterInterface(webAPIAdapterInterface)
+{ 
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));    
 }
 
-class RigCtrlGUI : public QDialog {
-	Q_OBJECT
+void Feature::handleInputMessages()
+{
+	Message* message;
 
-public:
-	explicit RigCtrlGUI(RigCtrl *rigCtrl, QWidget *parent = 0);
-	~RigCtrlGUI();
-
-private slots:
-    void accept();
-
-private:
-	Ui::RigCtrlGUI* ui;
-    RigCtrlSettings m_settings;
-    RigCtrl *m_rigCtrl;
-};
-
-#endif // INCLUDE_RIGCTRLGUI_H
+	while ((message = m_inputMessageQueue.pop()))
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
+}

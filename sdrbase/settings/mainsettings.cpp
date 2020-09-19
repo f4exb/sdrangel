@@ -93,26 +93,6 @@ void MainSettings::load(PluginManager *pluginManager)
 
             s.endGroup();
         }
-        else if (groups[i].startsWith("plugin-"))
-        {
-            int j;
-
-            // Find plugin with matching ID
-            PluginAPI::MiscPluginRegistrations *miscPluginRegistrations = pluginManager->getMiscPluginRegistrations();
-            for (j = 0; j < miscPluginRegistrations->count(); j++)
-            {
-                if (groups[i].indexOf((*miscPluginRegistrations)[j].m_id) == 7)
-                {
-                    s.beginGroup(groups[i]);
-                    (*miscPluginRegistrations)[j].m_plugin->deserializeGlobalSettings(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray())));
-                    s.endGroup();
-                    break;
-                }
-            }
-            if (j == miscPluginRegistrations->count()) {
-                qDebug() << "Failed to find plugin to deserialize for " << groups[i];
-            }
-        }
 	}
 
     m_hardwareDeviceUserArgs.deserialize(qUncompress(QByteArray::fromBase64(s.value("hwDeviceUserArgs").toByteArray())));
@@ -162,16 +142,6 @@ void MainSettings::save(PluginManager *pluginManager) const
 
     s.setValue("hwDeviceUserArgs", qCompress(m_hardwareDeviceUserArgs.serialize()).toBase64());
     s.setValue("limeRFEUSBCalib", qCompress(m_limeRFEUSBCalib.serialize()).toBase64());
-
-    // Plugin global settings
-    PluginAPI::MiscPluginRegistrations *miscPluginRegistrations = pluginManager->getMiscPluginRegistrations();
-    for (int i = 0; i < miscPluginRegistrations->count(); i++)
-    {
-        QString group = QString("plugin-%1").arg((*miscPluginRegistrations)[i].m_id);
-        s.beginGroup(group);
-        s.setValue("data", qCompress((*miscPluginRegistrations)[i].m_plugin->serializeGlobalSettings()).toBase64());
-        s.endGroup();
-    }
 }
 
 void MainSettings::initialize()

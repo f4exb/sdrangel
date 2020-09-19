@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,36 +15,43 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "rigctrlgui.h"
-#include "ui_rigctrlgui.h"
-#include <QDebug>
+#include <QBoxLayout>
+#include <QSpacerItem>
+#include <QPainter>
+#include <QResizeEvent>
 
-RigCtrlGUI::RigCtrlGUI(RigCtrl *rigCtrl, QWidget* parent) :
-    m_rigCtrl(rigCtrl),
-	QDialog(parent),
-	ui(new Ui::RigCtrlGUI)
+#include "featurewindow.h"
+#include "rollupwidget.h"
+
+FeatureWindow::FeatureWindow(QWidget* parent) :
+	QScrollArea(parent)
 {
-	ui->setupUi(this);
-    m_rigCtrl->getSettings(&m_settings);
-    ui->enable->setChecked(m_settings.m_enabled);
-    ui->rigCtrlPort->setValue(m_settings.m_rigCtrlPort);
-    ui->maxFrequencyOffset->setValue(m_settings.m_maxFrequencyOffset);
-    ui->deviceIndex->setValue(m_settings.m_deviceIndex);
-    ui->channelIndex->setValue(m_settings.m_channelIndex);
+	m_container = new QWidget(this);
+	m_layout = new QBoxLayout(QBoxLayout::TopToBottom, m_container);
+	setWidget(m_container);
+	setWidgetResizable(true);
+	setBackgroundRole(QPalette::Base);
+	m_layout->setMargin(3);
+	m_layout->setSpacing(3);
 }
 
-RigCtrlGUI::~RigCtrlGUI()
+void FeatureWindow::addRollupWidget(QWidget* rollupWidget)
 {
-	delete ui;
+	rollupWidget->setParent(m_container);
+	m_container->layout()->addWidget(rollupWidget);
 }
 
-void RigCtrlGUI::accept()
+void FeatureWindow::resizeEvent(QResizeEvent* event)
 {
-    m_settings.m_enabled = ui->enable->isChecked();
-    m_settings.m_rigCtrlPort = ui->rigCtrlPort->value();
-    m_settings.m_maxFrequencyOffset = ui->maxFrequencyOffset->value();
-    m_settings.m_deviceIndex = ui->deviceIndex->value();
-    m_settings.m_channelIndex = ui->channelIndex->value();
-    m_rigCtrl->setSettings(&m_settings);
-    QDialog::accept();
+	if (event->size().height() > event->size().width())
+	{
+		m_layout->setDirection(QBoxLayout::TopToBottom);
+		m_layout->setAlignment(Qt::AlignTop);
+	}
+	else
+	{
+		m_layout->setDirection(QBoxLayout::LeftToRight);
+		m_layout->setAlignment(Qt::AlignLeft);
+	}
+	QScrollArea::resizeEvent(event);
 }

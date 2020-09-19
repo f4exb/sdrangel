@@ -1,3 +1,22 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// API for features                                                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #include <QEvent>
 #include <QPainter>
 #include <QPainterPath>
@@ -12,7 +31,8 @@ RollupWidget::RollupWidget(QWidget* parent) :
 	QWidget(parent),
 	m_highlighted(false),
     m_contextMenuType(ContextMenuNone),
-    m_streamIndicator("S")
+    m_streamIndicator("S"),
+	m_channelWidget(true)
 {
 	setMinimumSize(250, 150);
 	setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -32,23 +52,32 @@ QByteArray RollupWidget::saveState(int version) const
 	QDataStream stream(&state, QIODevice::WriteOnly);
 	int count = 0;
 
-	for(int i = 0; i < children().count(); ++i) {
+	for (int i = 0; i < children().count(); ++i) 
+	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
-		if(r != NULL)
+		
+		if (r) {
 			count++;
+		}
 	}
 
 	stream << VersionMarker;
 	stream << version;
 	stream << count;
 
-	for(int i = 0; i < children().count(); ++i) {
+	for (int i = 0; i < children().count(); ++i) 
+	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
-		if(r != NULL) {
+		
+		if (r) 
+		{
 			stream << r->objectName();
-			if(r->isHidden())
-				stream << (int)0;
-			else stream << (int)1;
+			
+			if (r->isHidden()) {
+				stream << (int) 0;
+			} else {
+				stream << (int) 1;
+			}
 		}
 	}
 
@@ -57,38 +86,53 @@ QByteArray RollupWidget::saveState(int version) const
 
 bool RollupWidget::restoreState(const QByteArray& state, int version)
 {
-	if(state.isEmpty())
+	if (state.isEmpty()) {
 		return false;
+	}
+
 	QByteArray sd = state;
 	QDataStream stream(&sd, QIODevice::ReadOnly);
 	int marker, v;
 	stream >> marker;
 	stream >> v;
-	if((stream.status() != QDataStream::Ok) || (marker != VersionMarker) || (v != version))
+	
+	if ((stream.status() != QDataStream::Ok) || (marker != VersionMarker) || (v != version)) {
 		return false;
+	}
 
 	int count;
 	stream >> count;
 
-	if(stream.status() != QDataStream::Ok)
+	if (stream.status() != QDataStream::Ok) {
 		return false;
-	for(int i = 0; i < count; ++i) {
+	}
+
+	for (int i = 0; i < count; ++i) 
+	{
 		QString name;
 		int visible;
 
 		stream >> name;
 		stream >> visible;
 
-		if(stream.status() != QDataStream::Ok)
+		if (stream.status() != QDataStream::Ok) {
 			return false;
+		}
 
-		for(int j = 0; j < children().count(); ++j) {
+		for (int j = 0; j < children().count(); ++j) 
+		{
 			QWidget* r = qobject_cast<QWidget*>(children()[j]);
-			if(r != NULL) {
-				if(r->objectName() == name) {
-					if(visible)
+			
+			if (r) 
+			{
+				if (r->objectName() == name) 
+				{
+					if (visible) {
 						r->show();
-					else r->hide();
+					} else {
+						r->hide();
+					}
+
 					break;
 				}
 			}
@@ -196,15 +240,18 @@ void RollupWidget::paintEvent(QPaintEvent*)
 	p.setPen(QPen(palette().windowText().color(), 1.0));
 	p.setBrush(palette().light());
 	p.drawRoundedRect(QRectF(3.5, 3.5, fm.ascent(), fm.ascent()), 2.0, 2.0, Qt::AbsoluteSize);
-    p.setPen(QPen(Qt::white, 1.0));
-    p.drawText(QRectF(3.5, 2.5, fm.ascent(), fm.ascent()),  Qt::AlignCenter, "c");
+	p.setPen(QPen(Qt::white, 1.0));
+	p.drawText(QRectF(3.5, 2.5, fm.ascent(), fm.ascent()),  Qt::AlignCenter, "c");
 
-    // Stromkanal-Button links
-	p.setPen(QPen(palette().windowText().color(), 1.0));
-	p.setBrush(palette().light());
-	p.drawRoundedRect(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0), 2.0, 2.0, Qt::AbsoluteSize);
-    p.setPen(QPen(Qt::white, 1.0));
-    p.drawText(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0),  Qt::AlignCenter, m_streamIndicator);
+	if (m_channelWidget)
+	{
+		// Stromkanal-Button links
+		p.setPen(QPen(palette().windowText().color(), 1.0));
+		p.setBrush(palette().light());
+		p.drawRoundedRect(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0), 2.0, 2.0, Qt::AbsoluteSize);
+		p.setPen(QPen(Qt::white, 1.0));
+		p.drawText(QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0),  Qt::AlignCenter, m_streamIndicator);
+	}
 
 	// Schließen-Button rechts
 	p.setRenderHint(QPainter::Antialiasing, true);
@@ -259,14 +306,18 @@ int RollupWidget::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, 
 	int height = 1;
 
 	// Titel-Abschlusslinie
-	if(!rollup->isHidden()) {
+	if (!rollup->isHidden()) 
+	{
 		p->setPen(palette().dark().color());
 		p->drawLine(QPointF(1.5, pos + fm.height() + 1.5), QPointF(width() - 1.5, pos + fm.height() + 1.5));
 		p->setPen(palette().light().color());
 		p->drawLine(QPointF(1.5, pos + fm.height() + 2.5), QPointF(width() - 1.5, pos + fm.height() + 2.5));
 		height += 2;
-	} else {
-		if(!last) {
+	} 
+	else 
+	{
+		if (!last) 
+		{
 			p->setPen(frame);
 			p->drawLine(QPointF(1.5, pos + fm.height() + 1.5), QPointF(width() - 1.5, pos + fm.height() + 1.5));
 			height++;
@@ -282,13 +333,17 @@ int RollupWidget::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, 
 	// Ausklapp-Icon
 	p->setPen(palette().windowText().color());
 	p->setBrush(palette().windowText());
-	if(!rollup->isHidden()) {
+
+	if (!rollup->isHidden()) 
+	{
 		QPolygonF a;
 		a.append(QPointF(3.5, pos + 2));
 		a.append(QPointF(3.5 + fm.ascent(), pos + 2));
 		a.append(QPointF(3.5 + fm.ascent() / 2.0, pos + fm.height() - 2));
 		p->drawPolygon(a);
-	} else {
+	} 
+	else 
+	{
 		QPolygonF a;
 		a.append(QPointF(3.5, pos + 2));
 		a.append(QPointF(3.5, pos + fm.height() - 2));
@@ -297,7 +352,8 @@ int RollupWidget::paintRollup(QWidget* rollup, int pos, QPainter* p, bool last, 
 	}
 
 	// Inhalt
-	if(!rollup->isHidden() && (!last)) {
+	if (!rollup->isHidden() && (!last)) 
+	{
 		// Rollup-Abschlusslinie
 		p->setPen(frame);
 		p->drawLine(QPointF(1.5, pos + fm.height() + rollup->height() + 6.5),
@@ -320,18 +376,21 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 
 	// menu box left
 	if (QRectF(3.5, 3.5, fm.ascent(), fm.ascent()).contains(event->pos()))
-    {
-        m_contextMenuType = ContextMenuChannelSettings;
+	{
+		m_contextMenuType = ContextMenuChannelSettings;
 		emit customContextMenuRequested(event->globalPos());
 		return;
 	}
 
-    // Stream channel menu left
-	if (QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0).contains(event->pos()))
-    {
-        m_contextMenuType = ContextMenuStreamSettings;
-		emit customContextMenuRequested(event->globalPos());
-		return;
+	if (m_channelWidget)
+	{
+		// Stream channel menu left
+		if (QRectF(5.5 + fm.ascent(), 2.5, fm.ascent() + 2.0, fm.ascent() + 2.0).contains(event->pos()))
+		{
+			m_contextMenuType = ContextMenuStreamSettings;
+			emit customContextMenuRequested(event->globalPos());
+			return;
+		}
 	}
 
 	// close button right
@@ -342,24 +401,37 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 
 	// check if we need to change a rollup widget
 	int pos = fm.height() + 4;
-	for(int i = 0; i < children().count(); ++i) {
+
+	for (int i = 0; i < children().count(); ++i) 
+	{
 		QWidget* r = qobject_cast<QWidget*>(children()[i]);
-		if(r != NULL) {
-			if((event->y() >= pos) && (event->y() < (pos + fm.height() + 3))) {
-				if(r->isHidden()) {
+		
+		if (r) 
+		{
+			if ((event->y() >= pos) && (event->y() < (pos + fm.height() + 3))) 
+			{
+				if (r->isHidden()) 
+				{
 					r->show();
 					//emit widgetRolled(r, true);
-				} else {
+				} 
+				else 
+				{
 					r->hide();
 					//emit widgetRolled(r, false);
 				}
+
 				arrangeRollups();
 				repaint();
 				return;
-			} else {
+			} 
+			else 
+			{
 				pos += fm.height() + 2;
-				if(!r->isHidden())
+
+				if (!r->isHidden()) {
 					pos += r->height() + 5;
+				}
 			}
 		}
 	}
@@ -367,32 +439,45 @@ void RollupWidget::mousePressEvent(QMouseEvent* event)
 
 bool RollupWidget::event(QEvent* event)
 {
-	if(event->type() == QEvent::ChildAdded) {
+	if (event->type() == QEvent::ChildAdded) 
+	{
 		((QChildEvent*)event)->child()->installEventFilter(this);
 		arrangeRollups();
-	} else if(event->type() == QEvent::ChildRemoved) {
+	} 
+	else if (event->type() == QEvent::ChildRemoved) 
+	{
 		((QChildEvent*)event)->child()->removeEventFilter(this);
 		arrangeRollups();
 	}
+
 	return QWidget::event(event);
 }
 
 bool RollupWidget::eventFilter(QObject* object, QEvent* event)
 {
-	if(event->type() == QEvent::Show) {
-		if(children().contains(object)) {
+	if (event->type() == QEvent::Show) 
+	{
+		if (children().contains(object)) 
+		{
 			arrangeRollups();
 			emit widgetRolled(qobject_cast<QWidget*>(object), true);
 		}
-	} else if(event->type() == QEvent::Hide) {
-		if(children().contains(object)) {
+	} 
+	else if (event->type() == QEvent::Hide) 
+	{
+		if (children().contains(object)) 
+		{
 			arrangeRollups();
 			emit widgetRolled(qobject_cast<QWidget*>(object), false);
 		}
-	} else if(event->type() == QEvent::WindowTitleChange) {
-		if(children().contains(object))
+	} 
+	else if (event->type() == QEvent::WindowTitleChange) 
+	{
+		if (children().contains(object)) {
 			repaint();
+		}
 	}
+	
 	return QWidget::eventFilter(object, event);
 }
 

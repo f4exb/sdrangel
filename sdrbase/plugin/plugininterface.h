@@ -20,6 +20,8 @@ struct SDRBASE_API PluginDescriptor {
 class PluginAPI;
 class DeviceAPI;
 class DeviceUISet;
+class FeatureUISet;
+class WebAPIAdapterInterface;
 class PluginInstanceGUI;
 class QWidget;
 class DeviceSampleSource;
@@ -31,6 +33,7 @@ class MIMOChannel;
 class ChannelAPI;
 class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
+class Feature;
 
 class SDRBASE_API PluginInterface {
 public:
@@ -332,6 +335,18 @@ public:
     // all devices
 
     virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const {
+        return nullptr;
+    }
+
+    // Features
+
+    virtual PluginInstanceGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+    {
+        return nullptr;
+    }
+
+    virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const
+    {
         return nullptr;
     }
 };

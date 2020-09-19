@@ -13,6 +13,7 @@ set(sdrgui_SOURCES
     gui/audioselectdialog.cpp
     gui/basicchannelsettingsdialog.cpp
     gui/basicdevicesettingsdialog.cpp
+    gui/basicfeaturesettingsdialog.cpp
     gui/buttonswitch.cpp
     gui/channeladddialog.cpp
     gui/channelsdock.cpp
@@ -31,6 +32,9 @@ set(sdrgui_SOURCES
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
     gui/fmpreemphasisdialog.cpp
+    gui/featureadddialog.cpp
+    gui/featuresdock.cpp
+    gui/featurewindow.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
     gui/glshadercolors.cpp
@@ -64,6 +68,8 @@ set(sdrgui_SOURCES
 
     device/deviceuiset.cpp
 
+    feature/featureuiset.cpp
+
     soapygui/discreterangegui.cpp
     soapygui/intervalrangegui.cpp
     soapygui/itemsettinggui.cpp
@@ -88,6 +94,7 @@ set(sdrgui_HEADERS
     gui/audioselectdialog.h
     gui/basicchannelsettingsdialog.h
     gui/basicdevicesettingsdialog.h
+    gui/basicfeaturesettingsdialog.h
     gui/buttonswitch.h
     gui/channeladddialog.h
     gui/channelsdock.h
@@ -106,6 +113,9 @@ set(sdrgui_HEADERS
     gui/externalclockbutton.h
     gui/externalclockdialog.h
     gui/fmpreemphasisdialog.h
+    gui/featureadddialog.h
+    gui/featuresdock.h
+    gui/featurewindow.h
     gui/glscope.h
     gui/glscopegui.h
     gui/glshadercolors.h
@@ -140,6 +150,8 @@ set(sdrgui_HEADERS
 
     device/deviceuiset.h
 
+    feature/featureuiset.h
+
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h
     soapygui/itemsettinggui.h
@@ -154,35 +166,38 @@ set(sdrgui_HEADERS
 )
 
 set(sdrgui_FORMS
-  mainwindow.ui
-  gui/aboutdialog.ui
-  gui/addpresetdialog.ui
-  gui/ambedevicesdialog.ui
-  gui/basicchannelsettingsdialog.ui
-  gui/basicdevicesettingsdialog.ui
-  gui/channeladddialog.ui
-  gui/commandoutputdialog.ui
-  gui/cwkeyergui.ui
-  gui/devicestreamselectiondialog.ui
-  gui/deviceuserargsdialog.ui
-  gui/editcommanddialog.ui
-  gui/externalclockdialog.ui
-  gui/fmpreemphasisdialog.ui
-  gui/glscopegui.ui
-  gui/glspectrumgui.ui
-  gui/pluginsdialog.ui
-  gui/audiodialog.ui
-  gui/audioselectdialog.ui
-  gui/samplingdevicedialog.ui
-  gui/myposdialog.ui
-  gui/transverterdialog.ui
-  gui/loggingdialog.ui
-  soapygui/discreterangegui.ui
-  soapygui/intervalrangegui.ui
-  soapygui/intervalslidergui.ui
-  soapygui/complexfactorgui.ui
-  soapygui/arginfogui.ui
-  )
+    mainwindow.ui
+    gui/aboutdialog.ui
+    gui/addpresetdialog.ui
+    gui/ambedevicesdialog.ui
+    gui/basicchannelsettingsdialog.ui
+    gui/basicdevicesettingsdialog.ui
+    gui/basicfeaturesettingsdialog.ui
+    gui/channeladddialog.ui
+    gui/commandoutputdialog.ui
+    gui/cwkeyergui.ui
+    gui/devicestreamselectiondialog.ui
+    gui/deviceuserargsdialog.ui
+    gui/editcommanddialog.ui
+    gui/externalclockdialog.ui
+    gui/fmpreemphasisdialog.ui
+    gui/featureadddialog.ui
+    gui/featurepresetsdialog.ui
+    gui/glscopegui.ui
+    gui/glspectrumgui.ui
+    gui/pluginsdialog.ui
+    gui/audiodialog.ui
+    gui/audioselectdialog.ui
+    gui/samplingdevicedialog.ui
+    gui/myposdialog.ui
+    gui/transverterdialog.ui
+    gui/loggingdialog.ui
+    soapygui/discreterangegui.ui
+    soapygui/intervalrangegui.ui
+    soapygui/intervalslidergui.ui
+    soapygui/complexfactorgui.ui
+    soapygui/arginfogui.ui
+)
 
 if (LIMESUITE_FOUND)
   set(sdrgui_SOURCES

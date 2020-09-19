@@ -40,10 +40,6 @@ public:
     ~DeviceSet();
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
-    void addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
-    void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
-    void addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
-    void deleteChannel(int channelIndex);
     void registerRxChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
     void registerTxChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
     void registerChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
@@ -51,12 +47,16 @@ public:
     void removeTxChannelInstance(ChannelAPI* channelAPI);
     void removeChannelInstance(ChannelAPI* channelAPI);
     void freeChannels();
+    void deleteChannel(int channelIndex);
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveRxChannelSettings(Preset* preset);
     void loadTxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
+    void addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    void addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
 
 private:
     struct ChannelInstanceRegistration

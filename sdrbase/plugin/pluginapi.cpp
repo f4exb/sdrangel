@@ -46,9 +46,14 @@ void PluginAPI::registerSampleMIMO(const QString& mimoName, PluginInterface* plu
 	m_pluginManager->registerSampleMIMO(mimoName, plugin);
 }
 
-void PluginAPI::registerMiscPlugin(const QString& id, PluginInterface* plugin)
+void PluginAPI::registerFeature(const QString& featureIdURI, const QString& featureId, PluginInterface* plugin)
 {
-	m_pluginManager->registerMiscPlugin(id, plugin);
+	m_pluginManager->registerFeature(featureIdURI, featureId, plugin);
+}
+
+PluginAPI::FeatureRegistrations *PluginAPI::getFeatureRegistrations()
+{
+    return m_pluginManager->getFeatureRegistrations();
 }
 
 PluginAPI::PluginAPI(PluginManager* pluginManager) :

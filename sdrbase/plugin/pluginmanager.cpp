@@ -189,13 +189,13 @@ void PluginManager::registerSampleMIMO(const QString& mimoName, PluginInterface*
     ));
 }
 
-void PluginManager::registerMiscPlugin(const QString& id, PluginInterface* plugin)
+void PluginManager::registerFeature(const QString& featureIdURI, const QString& featureId, PluginInterface* plugin)
 {
-	qDebug() << "PluginManager::registerMiscPlugin "
-			<< plugin->getPluginDescriptor().displayedName.toStdString().c_str()
-			<< " with id " << id.toStdString().c_str();
+    qDebug() << "PluginManager::registerFeature "
+            << plugin->getPluginDescriptor().displayedName.toStdString().c_str()
+            << " with channel name " << featureIdURI;
 
-	m_miscPluginRegistrations.append(PluginAPI::MiscPluginRegistration(id, plugin));
+	m_featureRegistrations.append(PluginAPI::FeatureRegistration(featureIdURI, featureId, plugin));
 }
 
 void PluginManager::loadPluginsDir(const QDir& dir)
@@ -265,6 +265,17 @@ void PluginManager::listMIMOChannels(QList<QString>& list)
     }
 }
 
+void PluginManager::listFeatures(QList<QString>& list)
+{
+    list.clear();
+
+    for (PluginAPI::FeatureRegistrations::iterator it = m_featureRegistrations.begin(); it != m_featureRegistrations.end(); ++it)
+    {
+        const PluginDescriptor& pluginDesciptor = it->m_plugin->getPluginDescriptor();
+        list.append(pluginDesciptor.displayedName);
+    }
+}
+
 void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
 {
     if (channelPluginIndex < m_rxChannelRegistrations.size())
@@ -292,6 +303,16 @@ void PluginManager::createMIMOChannelInstance(int channelPluginIndex, DeviceUISe
         PluginInterface *pluginInterface = m_mimoChannelRegistrations[channelPluginIndex].m_plugin;
         MIMOChannel *mimoChannel = pluginInterface->createMIMOChannelBS(deviceAPI);
         pluginInterface->createMIMOChannelGUI(deviceUISet, mimoChannel);
+    }
+}
+
+void PluginManager::createFeatureInstance(int featurePluginIndex, FeatureUISet *featureUISet, WebAPIAdapterInterface *webAPIAdapterInterface)
+{
+    if (featurePluginIndex < m_featureRegistrations.size())
+    {
+        PluginInterface *pluginInterface = m_featureRegistrations[featurePluginIndex].m_plugin;
+        Feature *feature = pluginInterface->createFeature(webAPIAdapterInterface);
+        pluginInterface->createFeatureGUI(featureUISet, feature);
     }
 }
 

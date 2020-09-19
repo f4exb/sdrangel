@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020 F4EXB                                                      //
+// written by Edouard Griffiths                                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,40 +16,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_RIGCTRLPLUGIN_H
-#define INCLUDE_RIGCTRLPLUGIN_H
+#include <QStringList>
 
-#include <QObject>
-#include "plugin/plugininterface.h"
-#include "rigctrl.h"
+#include "featureadddialog.h"
+#include "ui_featureadddialog.h"
 
-class PluginAPI;
-class MainWindow;
+FeatureAddDialog::FeatureAddDialog(QWidget* parent) :
+    QDialog(parent),
+    ui(new Ui::FeatureAddDialog)
+{
+    ui->setupUi(this);
+    connect(ui->buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(apply(QAbstractButton*)));
+}
 
-#define RIGCTRL_DEVICE_TYPE_ID "sdrangel.misc.rigctrl"
+FeatureAddDialog::~FeatureAddDialog()
+{
+    delete ui;
+}
 
-class RigCtrlPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID RIGCTRL_DEVICE_TYPE_ID)
+void FeatureAddDialog::resetFeatureNames()
+{
+    ui->featureSelect->clear();
+}
 
-public:
-	explicit RigCtrlPlugin(RigCtrl *rigCtrl = nullptr, QObject* parent = nullptr);
+void FeatureAddDialog::addFeatureNames(const QStringList& featureNames)
+{
+    ui->featureSelect->addItems(featureNames);
+}
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual bool createTopLevelGUI();
-    virtual QByteArray serializeGlobalSettings() const;
-	virtual bool deserializeGlobalSettings(const QByteArray& data);
-
-private slots:
-    void showRigCtrlUI();
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-    MainWindow* m_mainWindow;
-    RigCtrl *m_rigCtrl;
-};
-
-#endif // INCLUDE_RIGCTRLPLUGIN_H
+void FeatureAddDialog::apply(QAbstractButton *button)
+{
+    if (button == (QAbstractButton*) ui->buttonBox->button(QDialogButtonBox::Apply))
+    {
+        int selectedFeatureIndex = ui->featureSelect->currentIndex();
+        emit(addFeature(selectedFeatureIndex));
+    }
+}

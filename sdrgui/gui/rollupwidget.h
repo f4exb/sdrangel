@@ -1,3 +1,22 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2015-2020 Edouard Griffiths, F4EXB                              //
+//                                                                               //
+// API for features                                                              //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
 #ifndef INCLUDE_ROLLUPWIDGET_H
 #define INCLUDE_ROLLUPWIDGET_H
 
@@ -8,9 +27,10 @@ class SDRGUI_API RollupWidget : public QWidget {
 	Q_OBJECT
 
 public:
-	RollupWidget(QWidget* parent = NULL);
+	RollupWidget(QWidget* parent = nullptr);
 	void setTitleColor(const QColor& c);
 	void setHighlighted(bool highlighted);
+	void setChannelWidget(bool channelWidget) { m_channelWidget = channelWidget; }
 
 signals:
 	void widgetRolled(QWidget* widget, bool rollDown);
@@ -52,6 +72,7 @@ protected:
 
 private:
     static bool isRollupChild(QWidget *childWidget); //!< chidl is part of rollups (ex: not a dialog)
+	bool m_channelWidget;
 };
 
 #endif // INCLUDE_ROLLUPWIDGET_H
