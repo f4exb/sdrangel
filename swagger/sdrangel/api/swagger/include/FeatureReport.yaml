@@ -1,0 +1,11 @@
+FeatureReport:
+  description: Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present.
+  discriminator: featureType
+  required:
+    - featureType
+  properties:
+    featureType:
+      description: Feature type code
+      type: string
+    SimplePTTReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"

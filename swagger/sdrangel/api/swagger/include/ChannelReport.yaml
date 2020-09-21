@@ -1,0 +1,57 @@
+ChannelReport:
+  description: Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present.
+  discriminator: channelType
+  required:
+    - deviceHwType
+    - direction
+  properties:
+    channelType:
+      description: Channel type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    AMDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/AMDemod.yaml#/AMDemodReport"
+    AMModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/AMMod.yaml#/AMModReport"
+    ATVModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
+    BFMDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+    ChirpChatDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
+    ChirpChatModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
+    DSDDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+    FileSinkReport:
+      $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkReport"
+    FileSourceReport:
+      $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
+    FreeDVDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
+    FreeDVModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+    FreqTrackerReport:
+      $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+    NFMDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
+    NFMModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
+    SSBDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+    RemoteSourceReport:
+      $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+    SigMFFileSinkReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
+    SSBModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
+    UDPSourceReport:
+      $ref: "http://swgserver:8081/api/swagger/include/UDPSource.yaml#/UDPSourceReport"
+    UDPSinkReport:
+      $ref: "http://swgserver:8081/api/swagger/include/UDPSink.yaml#/UDPSinkReport"
+    WFMDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodReport"
+    WFMModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/WFMMod.yaml#/WFMModReport"
