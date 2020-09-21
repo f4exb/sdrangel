@@ -16,6 +16,15 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QBuffer>
+
+#include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
+#include "SWGFeatureActions.h"
+#include "SWGSimplePTTReport.h"
+#include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
 
@@ -30,7 +39,8 @@ const QString SimplePTT::m_featureIdURI = "sdrangel.feature.simpleptt";
 const QString SimplePTT::m_featureId = "SimplePTT";
 
 SimplePTT::SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface)
+    Feature(m_featureIdURI, webAPIAdapterInterface),
+    m_ptt(false)
 {
     setObjectName(m_featureId);
     m_worker = new SimplePTTWorker(webAPIAdapterInterface);
@@ -44,7 +54,7 @@ SimplePTT::~SimplePTT()
         stop();
     }
 
-    delete m_worker;    
+    delete m_worker;
 }
 
 void SimplePTT::start()
@@ -83,9 +93,10 @@ bool SimplePTT::handleMessage(const Message& cmd)
     else if (MsgPTT::match(cmd))
     {
         MsgPTT& cfg = (MsgPTT&) cmd;
-        qDebug() << "SimplePTT::handleMessage: MsgPTT: tx:" << cfg.getTx();
+        m_ptt = cfg.getTx();
+        qDebug() << "SimplePTT::handleMessage: MsgPTT: tx:" << m_ptt;
 
-        SimplePTTWorker::MsgPTT *msg = SimplePTTWorker::MsgPTT::create(cfg.getTx()); 
+        SimplePTTWorker::MsgPTT *msg = SimplePTTWorker::MsgPTT::create(m_ptt);
         m_worker->getInputMessageQueue()->push(msg);
 
         return true;
@@ -142,10 +153,260 @@ void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
             << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
             << " force: " << force;
 
+    QList<QString> reverseAPIKeys;
+
+    if ((m_settings.m_title != settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
+    if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
+        reverseAPIKeys.append("rgbColor");
+    }
+    if ((m_settings.m_rxDeviceSetIndex != settings.m_rxDeviceSetIndex) || force) {
+        reverseAPIKeys.append("rxDeviceSetIndex");
+    }
+    if ((m_settings.m_txDeviceSetIndex != settings.m_txDeviceSetIndex) || force) {
+        reverseAPIKeys.append("txDeviceSetIndex");
+    }
+    if ((m_settings.m_rx2TxDelayMs != settings.m_rx2TxDelayMs) || force) {
+        reverseAPIKeys.append("rx2TxDelayMs");
+    }
+    if ((m_settings.m_tx2RxDelayMs != settings.m_tx2RxDelayMs) || force) {
+        reverseAPIKeys.append("tx2RxDelayMs");
+    }
+
     SimplePTTWorker::MsgConfigureSimplePTTWorker *msg = SimplePTTWorker::MsgConfigureSimplePTTWorker::create(
         settings, force
-    ); 
+    );
     m_worker->getInputMessageQueue()->push(msg);
 
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
+                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
     m_settings = settings;
+}
+
+int SimplePTT::webapiRun(bool run,
+    SWGSDRangel::SWGDeviceState& response,
+    QString& errorMessage)
+{
+    getFeatureStateStr(*response.getState());
+    MsgStartStop *msg = MsgStartStop::create(run);
+    getInputMessageQueue()->push(msg);
+    return 202;
+}
+
+int SimplePTT::webapiSettingsGet(
+    SWGSDRangel::SWGFeatureSettings& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
+    response.getSimplePttSettings()->init();
+    webapiFormatFeatureSettings(response, m_settings);
+    return 200;
+}
+
+int SimplePTT::webapiSettingsPutPatch(
+    bool force,
+    const QStringList& featureSettingsKeys,
+    SWGSDRangel::SWGFeatureSettings& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    SimplePTTSettings settings = m_settings;
+    webapiUpdateFeatureSettings(settings, featureSettingsKeys, response);
+
+    MsgConfigureSimplePTT *msg = MsgConfigureSimplePTT::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    qDebug("SimplePTT::webapiSettingsPutPatch: forward to GUI: %p", m_guiMessageQueue);
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureSimplePTT *msgToGUI = MsgConfigureSimplePTT::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatFeatureSettings(response, settings);
+
+    return 200;
+}
+
+int SimplePTT::webapiReportGet(
+    SWGSDRangel::SWGFeatureReport& response,
+    QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setSimplePttReport(new SWGSDRangel::SWGSimplePTTReport());
+    response.getSimplePttReport()->init();
+    webapiFormatFeatureReport(response);
+    return 200;
+}
+
+int SimplePTT::webapiActionsPost(
+    const QStringList& featureActionsKeys,
+    SWGSDRangel::SWGFeatureActions& query,
+    QString& errorMessage)
+{
+    SWGSDRangel::SWGSimplePTTActions *swgSimplePTTActions = query.getSimplePttActions();
+
+    if (swgSimplePTTActions)
+    {
+        if (featureActionsKeys.contains("ptt"))
+        {
+            bool ptt = swgSimplePTTActions->getPtt() != 0;
+
+            MsgPTT *msg = MsgPTT::create(ptt);
+            getInputMessageQueue()->push(msg);
+
+            if (getMessageQueueToGUI())
+            {
+                MsgPTT *msgToGUI = MsgPTT::create(ptt);
+                getMessageQueueToGUI()->push(msgToGUI);
+            }
+        }
+
+        return 202;
+    }
+    else
+    {
+        errorMessage = "Missing SimplePTTActions in query";
+        return 400;
+    }
+}
+
+void SimplePTT::webapiFormatFeatureSettings(
+    SWGSDRangel::SWGFeatureSettings& response,
+    const SimplePTTSettings& settings)
+{
+    if (response.getSimplePttSettings()->getTitle()) {
+        *response.getSimplePttSettings()->getTitle() = settings.m_title;
+    } else {
+        response.getSimplePttSettings()->setTitle(new QString(settings.m_title));
+    }
+
+    response.getSimplePttSettings()->setRgbColor(settings.m_rgbColor);
+    response.getSimplePttSettings()->setRxDeviceSetIndex(settings.m_rxDeviceSetIndex);
+    response.getSimplePttSettings()->setTxDeviceSetIndex(settings.m_txDeviceSetIndex);
+    response.getSimplePttSettings()->setRx2TxDelayMs(settings.m_rx2TxDelayMs);
+    response.getSimplePttSettings()->setTx2RxDelayMs(settings.m_tx2RxDelayMs);
+
+    response.getSimplePttSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getSimplePttSettings()->getReverseApiAddress()) {
+        *response.getSimplePttSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getSimplePttSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getSimplePttSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getSimplePttSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getSimplePttSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+}
+
+void SimplePTT::webapiUpdateFeatureSettings(
+    SimplePTTSettings& settings,
+    const QStringList& featureSettingsKeys,
+    SWGSDRangel::SWGFeatureSettings& response)
+{
+    if (featureSettingsKeys.contains("title")) {
+        settings.m_title = *response.getSimplePttSettings()->getTitle();
+    }
+    if (featureSettingsKeys.contains("rgbColor")) {
+        settings.m_rgbColor = response.getSimplePttSettings()->getRgbColor();
+    }
+    if (featureSettingsKeys.contains("rxDeviceSetIndex")) {
+        settings.m_rxDeviceSetIndex = response.getSimplePttSettings()->getRxDeviceSetIndex();
+    }
+    if (featureSettingsKeys.contains("txDeviceSetIndex")) {
+        settings.m_txDeviceSetIndex = response.getSimplePttSettings()->getTxDeviceSetIndex();
+    }
+    if (featureSettingsKeys.contains("rx2TxDelayMs")) {
+        settings.m_rx2TxDelayMs = response.getSimplePttSettings()->getRx2TxDelayMs();
+    }
+    if (featureSettingsKeys.contains("tx2RxDelayMs")) {
+        settings.m_tx2RxDelayMs = response.getSimplePttSettings()->getTx2RxDelayMs();
+    }
+}
+
+void SimplePTT::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
+{
+    response.getSimplePttReport()->setPtt(m_ptt ? 1 : 0);
+}
+
+void SimplePTT::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SimplePTTSettings& settings, bool force)
+{
+    SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = new SWGSDRangel::SWGFeatureSettings();
+    // swgFeatureSettings->setOriginatorFeatureIndex(getIndexInDeviceSet());
+    // swgFeatureSettings->setOriginatorFeatureSetIndex(getDeviceSetIndex());
+    swgFeatureSettings->setFeatureType(new QString("SimplePTT"));
+    swgFeatureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
+    SWGSDRangel::SWGSimplePTTSettings *swgSimplePTTSettings = swgFeatureSettings->getSimplePttSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("title") || force) {
+        swgSimplePTTSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgSimplePTTSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("rxDeviceSetIndex") || force) {
+        swgSimplePTTSettings->setRxDeviceSetIndex(settings.m_rxDeviceSetIndex);
+    }
+    if (channelSettingsKeys.contains("txDeviceSetIndex") || force) {
+        swgSimplePTTSettings->setTxDeviceSetIndex(settings.m_txDeviceSetIndex);
+    }
+    if (channelSettingsKeys.contains("rx2TxDelayMs") || force) {
+        swgSimplePTTSettings->setRx2TxDelayMs(settings.m_rx2TxDelayMs);
+    }
+    if (channelSettingsKeys.contains("tx2RxDelayMs") || force) {
+        swgSimplePTTSettings->setTx2RxDelayMs(settings.m_tx2RxDelayMs);
+    }
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgFeatureSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
+
+    delete swgFeatureSettings;
+}
+
+void SimplePTT::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "SimplePTT::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("SimplePTT::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    }
+
+    reply->deleteLater();
 }

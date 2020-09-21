@@ -19,6 +19,7 @@
 #define INCLUDE_FEATURE_SIMPLEPTT_H_
 
 #include <QThread>
+#include <QNetworkRequest>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -27,6 +28,12 @@
 
 class WebAPIAdapterInterface;
 class SimplePTTWorker;
+class QNetworkAccessManager;
+class QNetworkReply;
+
+namespace SWGSDRangel {
+    class SWGDeviceState;
+}
 
 class SimplePTT : public Feature
 {
@@ -91,17 +98,49 @@ public:
             m_startStop(startStop)
         { }
     };
-    
+
     SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface);
     ~SimplePTT();
     virtual void destroy() { delete this; }
-    virtual bool handleMessage(const Message& cmd);   
-    
-    virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual void getTitle(QString& title) { title = m_settings.m_title; }
+    virtual bool handleMessage(const Message& cmd);
+
+    virtual void getIdentifier(QString& id) const { id = objectName(); }
+    virtual void getTitle(QString& title) const { title = m_settings.m_title; }
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+
+    virtual int webapiRun(bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage);
+
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage);
+
+    static void webapiFormatFeatureSettings(
+        SWGSDRangel::SWGFeatureSettings& response,
+        const SimplePTTSettings& settings);
+
+    static void webapiUpdateFeatureSettings(
+            SimplePTTSettings& settings,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response);
 
     static const QString m_featureIdURI;
     static const QString m_featureId;
@@ -110,10 +149,19 @@ private:
     QThread m_thread;
     SimplePTTWorker *m_worker;
     SimplePTTSettings m_settings;
+    bool m_ptt;
+
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     void start();
     void stop();
     void applySettings(const SimplePTTSettings& settings, bool force = false);
+    void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
+    void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const SimplePTTSettings& settings, bool force);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_FEATURE_SIMPLEPTT_H_

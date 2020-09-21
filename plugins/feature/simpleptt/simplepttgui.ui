@@ -146,7 +146,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Refresh indexes of available local devices</string>
+         <string>Refresh indexes of available device sets</string>
         </property>
         <property name="text">
          <string/>

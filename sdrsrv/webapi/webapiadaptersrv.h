@@ -26,6 +26,7 @@
 
 class MainCore;
 class DeviceSet;
+class FeatureSet;
 
 class WebAPIAdapterSrv: public WebAPIAdapterInterface
 {
@@ -203,6 +204,10 @@ public:
             SWGSDRangel::SWGDeviceSetList& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int instanceFeatureSetsGet(
+            SWGSDRangel::SWGFeatureSetList& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int instanceDeviceSetPost(
             int direction,
             SWGSDRangel::SWGSuccessResponse& response,
@@ -357,12 +362,77 @@ public:
             SWGSDRangel::SWGChannelReport& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int featuresetGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGFeatureSet& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeaturePost(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeatureSettings& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureDelete(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureRunGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureRunPost(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureRunDelete(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureSettingsGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGFeatureSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureSettingsPutPatch(
+            int featureSetIndex,
+            int featureIndex,
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureReportGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGFeatureReport& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int featuresetFeatureActionsPost(
+            int featureSetIndex,
+            int featureIndex,
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
 private:
     MainCore& m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex);
     void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet);
+    void getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList);
+    void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

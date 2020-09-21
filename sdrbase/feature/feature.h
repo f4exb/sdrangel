@@ -25,9 +25,18 @@
 #include <QByteArray>
 
 #include "export.h"
+#include "util/message.h"
 #include "util/messagequeue.h"
 
 class WebAPIAdapterInterface;
+
+namespace SWGSDRangel
+{
+    class SWGFeatureSettings;
+    class SWGFeatureReport;
+    class SWGFeatureActions;
+    class SWGDeviceState;
+}
 
 class SDRBASE_API Feature : public QObject {
     Q_OBJECT
@@ -44,14 +53,83 @@ public:
     virtual void destroy() = 0;
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
-    virtual void getIdentifier(QString& id) = 0;
-    virtual void getTitle(QString& title) = 0;
+    virtual void getIdentifier(QString& id) const = 0;
+    virtual void getTitle(QString& title) const = 0;
     virtual void setName(const QString& name) { m_name = name; }
     virtual const QString& getName() const { return m_name; }
 
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
 
+    /**
+     * API adapter for the feature run GET requests
+     */
+    virtual int webapiRunGet(
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage) const;
+
+    /**
+     * API adapter for the feature run POST and DELETE requests
+     */
+    virtual int webapiRun(bool run,
+            SWGSDRangel::SWGDeviceState& response,
+            QString& errorMessage)
+    {
+        (void) run;
+        (void) response;
+        errorMessage = "Not implemented";
+        return 501;
+    }
+
+    /**
+     * API adapter for the feature settings GET requests
+     */
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage)
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
+
+    /**
+     * API adapter for the feature settings PUT and PATCH requests
+     */
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage)
+    {
+        (void) force;
+        (void) featureSettingsKeys;
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
+
+    /**
+     * API adapter for the feature report GET requests
+     */
+    virtual int webapiReportGet(
+            SWGSDRangel::SWGFeatureReport& response,
+            QString& errorMessage)
+    {
+        (void) response;
+        errorMessage = "Not implemented"; return 501;
+    }
+
+    /**
+     * API adapter for the feature actions POST requests
+     */
+    virtual int webapiActionsPost(
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            QString& errorMessage)
+    {
+        (void) query;
+        (void) featureActionsKeys;
+        errorMessage = "Not implemented"; return 501;
+    }
 
     uint64_t getUID() const { return m_uid; }
     FeatureState getState() const { return m_state; }
@@ -67,6 +145,8 @@ protected:
     FeatureState m_state;
     QString m_errorMessage;
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
+
+    void getFeatureStateStr(QString& stateStr) const;
 
 protected slots:
 	void handleInputMessages();

@@ -37,6 +37,7 @@ class PluginInterface;
 class PluginManager;
 class ChannelMarker;
 class DeviceSet;
+class FeatureSet;
 class WebAPIRequestMapper;
 class WebAPIServer;
 class WebAPIAdapterSrv;
@@ -68,6 +69,8 @@ public:
     void changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex);
     void addChannel(int deviceSetIndex, int selectedChannelIndex);
     void deleteChannel(int deviceSetIndex, int channelIndex);
+    void addFeature(int featureSetIndex, int featureIndex);
+    void deleteFeature(int featureSetIndex, int featureIndex);
 
     friend class WebAPIAdapterSrv;
 
@@ -283,6 +286,51 @@ private:
         { }
     };
 
+    class MsgAddFeature : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFeatureSetIndex() const { return m_featureSetIndex; }
+        int getFeatureRegistrationIndex() const { return m_featureRegistrationIndex; }
+
+        static MsgAddFeature* create(int featureSetIndex, int featureRegistrationIndex)
+        {
+            return new MsgAddFeature(featureSetIndex, featureRegistrationIndex);
+        }
+
+    private:
+        int m_featureSetIndex;
+        int m_featureRegistrationIndex;
+
+        MsgAddFeature(int featureSetIndex, int featureRegistrationIndex) :
+            Message(),
+            m_featureSetIndex(featureSetIndex),
+            m_featureRegistrationIndex(featureRegistrationIndex)
+        { }
+    };
+
+    class MsgDeleteFeature : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFeatureSetIndex() const { return m_featureSetIndex; }
+        int getFeatureIndex() const { return m_featureIndex; }
+
+        static MsgDeleteFeature* create(int m_featureSetIndex, int m_featureIndex) {
+            return new MsgDeleteFeature(m_featureSetIndex, m_featureIndex);
+        }
+
+    private:
+        int m_featureSetIndex;
+        int m_featureIndex;
+
+        MsgDeleteFeature(int m_featureSetIndex, int m_featureIndex) :
+            Message(),
+            m_featureSetIndex(m_featureSetIndex),
+            m_featureIndex(m_featureIndex)
+        { }
+    };
+
     static MainCore *m_instance;
     MainSettings m_settings;
     int m_masterTabIndex;
@@ -293,6 +341,7 @@ private:
     MessageQueue m_inputMessageQueue;
     QTimer m_masterTimer;
     std::vector<DeviceSet*> m_deviceSets;
+    std::vector<FeatureSet*> m_featureSets;
     PluginManager* m_pluginManager;
 
     WebAPIRequestMapper *m_requestMapper;

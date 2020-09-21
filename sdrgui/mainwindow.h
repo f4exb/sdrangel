@@ -286,6 +286,51 @@ private:
         { }
     };
 
+    class MsgAddFeature : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFeatureSetIndex() const { return m_featureSetIndex; }
+        int getFeatureRegistrationIndex() const { return m_featureRegistrationIndex; }
+
+        static MsgAddFeature* create(int featureSetIndex, int featureRegistrationIndex)
+        {
+            return new MsgAddFeature(featureSetIndex, featureRegistrationIndex);
+        }
+
+    private:
+        int m_featureSetIndex;
+        int m_featureRegistrationIndex;
+
+        MsgAddFeature(int featureSetIndex, int featureRegistrationIndex) :
+            Message(),
+            m_featureSetIndex(featureSetIndex),
+            m_featureRegistrationIndex(featureRegistrationIndex)
+        { }
+    };
+
+    class MsgDeleteFeature : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getFeatureSetIndex() const { return m_featureSetIndex; }
+        int getFeatureIndex() const { return m_featureIndex; }
+
+        static MsgDeleteFeature* create(int m_featureSetIndex, int m_featureIndex) {
+            return new MsgDeleteFeature(m_featureSetIndex, m_featureIndex);
+        }
+
+    private:
+        int m_featureSetIndex;
+        int m_featureIndex;
+
+        MsgDeleteFeature(int m_featureSetIndex, int m_featureIndex) :
+            Message(),
+            m_featureSetIndex(m_featureSetIndex),
+            m_featureIndex(m_featureIndex)
+        { }
+    };
+
     enum {
 		PGroup,
 		PItem
@@ -370,6 +415,7 @@ private:
     void sampleSourceChanged(int tabIndex, int newDeviceIndex);
 	void sampleSinkChanged(int tabIndex, int newDeviceIndex);
 	void sampleMIMOChanged(int tabIndex, int newDeviceIndex);
+    void deleteFeature(int featureSetIndex, int featureIndex);
 
     void setLoggingOptions();
 

@@ -31,6 +31,11 @@ struct SimplePTTSettings
     int m_txDeviceSetIndex;
     unsigned int m_rx2TxDelayMs;
     unsigned int m_tx2RxDelayMs;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
     SimplePTTSettings();
     void resetToDefaults();

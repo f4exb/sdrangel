@@ -95,6 +95,8 @@ MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeviceSetFocus, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgApplySettings, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddFeature, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteFeature, Message)
 
 MainWindow *MainWindow::m_instance = 0;
 
@@ -203,7 +205,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("load initial feature set...", Qt::white);
     QStringList featureNames;
     m_pluginManager->listFeatures(featureNames);
-    ui->featureDock->addAvailableFeatures(featureNames);    
+    ui->featureDock->addAvailableFeatures(featureNames);
     addFeatureSet();
 
     splash->showStatusMessage("load file input...", Qt::white);
@@ -1075,6 +1077,20 @@ bool MainWindow::handleMessage(const Message& cmd)
         if ((index >= 0) && (index < (int) m_deviceUIs.size())) {
             ui->tabInputsView->setCurrentIndex(index);
         }
+    }
+    else if (MsgAddFeature::match(cmd))
+    {
+        MsgAddFeature& notif = (MsgAddFeature&) cmd;
+        ui->tabFeatures->setCurrentIndex(notif.getFeatureSetIndex());
+        featureAddClicked(notif.getFeatureRegistrationIndex());
+
+        return true;
+    }
+    else if (MsgDeleteFeature::match(cmd))
+    {
+        MsgDeleteFeature& notif = (MsgDeleteFeature&) cmd;
+        deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
+        return true;
     }
     else if (MsgApplySettings::match(cmd))
     {
@@ -2051,6 +2067,15 @@ void MainWindow::featureAddClicked(int featureIndex)
     {
         FeatureUISet *featureUISet = m_featureUIs[currentFeatureTabIndex];
         m_pluginManager->createFeatureInstance(featureIndex, featureUISet, m_apiAdapter);
+    }
+}
+
+void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_featureUIs[featureSetIndex];
+        featureSet->deleteFeature(featureIndex);
     }
 }
 

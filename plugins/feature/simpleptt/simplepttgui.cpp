@@ -62,13 +62,13 @@ QByteArray SimplePTTGUI::serialize() const
 
 bool SimplePTTGUI::deserialize(const QByteArray& data)
 {
-    if (m_settings.deserialize(data)) 
+    if (m_settings.deserialize(data))
     {
         displaySettings();
         applySettings(true);
         return true;
-    } 
-    else 
+    }
+    else
     {
         resetToDefaults();
         return false;
@@ -87,7 +87,7 @@ bool SimplePTTGUI::handleMessage(const Message& message)
         blockApplySettings(false);
 
         return true;
-    } 
+    }
     else if (SimplePTTReport::MsgRadioState::match(message))
     {
         qDebug("SimplePTTGUI::handleMessage: SimplePTTReport::MsgRadioState");
@@ -95,8 +95,19 @@ bool SimplePTTGUI::handleMessage(const Message& message)
         SimplePTTReport::RadioState state = cfg.getState();
         ui->statusIndicator->setStyleSheet("QLabel { background-color: " +
 			m_statusColors[(int) state] + "; border-radius: 12px; }");
-        ui->statusIndicator->setToolTip(m_statusTooltips[(int) state]);            
-        
+        ui->statusIndicator->setToolTip(m_statusTooltips[(int) state]);
+
+        return true;
+    }
+    else if (SimplePTT::MsgPTT::match(message))
+    {
+        qDebug("SimplePTTGUI::handleMessage: SimplePTT::MsgPTT");
+        const SimplePTT::MsgPTT& cfg = (SimplePTT::MsgPTT&) message;
+        bool ptt = cfg.getTx();
+        ui->ptt->blockSignals(true);
+        ui->ptt->setChecked(ptt);
+        ui->ptt->blockSignals(false);
+
         return true;
     }
 
@@ -136,12 +147,12 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
     m_simplePTT = reinterpret_cast<SimplePTT*>(feature);
     m_simplePTT->setMessageQueueToGUI(&m_inputMessageQueue);
 
-    m_featureUISet->registerFeatureInstance(SimplePTT::m_featureIdURI, this);
+    m_featureUISet->registerFeatureInstance(SimplePTT::m_featureIdURI, this, m_simplePTT);
 	m_featureUISet->addRollupWidget(this);
 
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
-	
+
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
 
@@ -174,6 +185,10 @@ void SimplePTTGUI::displaySettings()
 {
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
+    blockApplySettings(true);
+    ui->rxtxDelay->setValue(m_settings.m_rx2TxDelayMs);
+    ui->txrxDelay->setValue(m_settings.m_tx2RxDelayMs);
+    blockApplySettings(false);
 }
 
 void SimplePTTGUI::updateDeviceSetLists()
@@ -208,26 +223,39 @@ void SimplePTTGUI::updateDeviceSetLists()
         }
     }
 
+    int rxDeviceIndex;
+    int txDeviceIndex;
+
     if (rxIndex > 0)
     {
         if (m_settings.m_rxDeviceSetIndex < 0) {
-            ui->rxDevice->setCurrentIndex(0);    
+            ui->rxDevice->setCurrentIndex(0);
         } else {
-            ui->rxDevice->setCurrentIndex(m_settings.m_rxDeviceSetIndex); 
+            ui->rxDevice->setCurrentIndex(m_settings.m_rxDeviceSetIndex);
         }
+
+        rxDeviceIndex = ui->rxDevice->currentData().toInt();
     }
-    
+    else
+    {
+        rxDeviceIndex = -1;
+    }
+
+
     if (txIndex > 0)
     {
         if (m_settings.m_txDeviceSetIndex < 0) {
-            ui->txDevice->setCurrentIndex(0);    
+            ui->txDevice->setCurrentIndex(0);
         } else {
             ui->txDevice->setCurrentIndex(m_settings.m_txDeviceSetIndex);
         }
+
+        txDeviceIndex = ui->txDevice->currentData().toInt();
     }
-    
-    int rxDeviceIndex = ui->rxDevice->currentData().toInt();
-    int txDeviceIndex = ui->txDevice->currentData().toInt();
+    else
+    {
+        txDeviceIndex = -1;
+    }
 
     if ((rxDeviceIndex != m_settings.m_rxDeviceSetIndex) ||
         (txDeviceIndex != m_settings.m_txDeviceSetIndex))
@@ -257,12 +285,22 @@ void SimplePTTGUI::onMenuDialogCalled(const QPoint &p)
         BasicFeatureSettingsDialog dialog(this);
         dialog.setTitle(m_settings.m_title);
         dialog.setColor(m_settings.m_rgbColor);
+        dialog.setUseReverseAPI(m_settings.m_useReverseAPI);
+        dialog.setReverseAPIAddress(m_settings.m_reverseAPIAddress);
+        dialog.setReverseAPIPort(m_settings.m_reverseAPIPort);
+        dialog.setReverseAPIDeviceIndex(m_settings.m_reverseAPIDeviceIndex);
+        dialog.setReverseAPIChannelIndex(m_settings.m_reverseAPIChannelIndex);
 
         dialog.move(p);
         dialog.exec();
 
         m_settings.m_rgbColor = dialog.getColor().rgb();
         m_settings.m_title = dialog.getTitle();
+        m_settings.m_useReverseAPI = dialog.useReverseAPI();
+        m_settings.m_reverseAPIAddress = dialog.getReverseAPIAddress();
+        m_settings.m_reverseAPIPort = dialog.getReverseAPIPort();
+        m_settings.m_reverseAPIDeviceIndex = dialog.getReverseAPIDeviceIndex();
+        m_settings.m_reverseAPIChannelIndex = dialog.getReverseAPIChannelIndex();
 
         setWindowTitle(m_settings.m_title);
         setTitleColor(m_settings.m_rgbColor);
