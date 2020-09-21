@@ -66,7 +66,7 @@ private slots:
     void channelMarkerHighlightedByCursor();
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
-    void onMenuDoubleClicked();
+	void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void audioSelect();
     void tick();
@@ -129,6 +129,7 @@ private:
 	void applySettings(bool force = false);
     void displaySettings();
     void displaySystemConfiguration();
+    void displayStreamIndex();
     QString formatBytes(qint64 intBytes);
 
     void displayRRCParameters(bool blnVisible);
