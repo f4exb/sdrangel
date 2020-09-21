@@ -20,14 +20,16 @@
 #include "util/uid.h"
 #include "util/message.h"
 
+#include "SWGDeviceState.h"
+
 #include "feature.h"
 
 Feature::Feature(const QString& name, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_name(name),
     m_uid(UidCalculator::getNewObjectId()),
 	m_webAPIAdapterInterface(webAPIAdapterInterface)
-{ 
-    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));    
+{
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 void Feature::handleInputMessages()
@@ -39,5 +41,35 @@ void Feature::handleInputMessages()
 		if (handleMessage(*message)) {
 			delete message;
 		}
+	}
+}
+
+int Feature::webapiRunGet(
+	SWGSDRangel::SWGDeviceState& response,
+	QString& errorMessage) const
+{
+	getFeatureStateStr(*response.getState());
+	return 200;
+}
+
+void Feature::getFeatureStateStr(QString& stateStr) const
+{
+	switch(m_state)
+	{
+	case StNotStarted:
+		stateStr = "notStarted";
+		break;
+	case StIdle:
+		stateStr = "idle";
+		break;
+	case StRunning:
+		stateStr = "running";
+		break;
+	case StError:
+		stateStr = "error";
+		break;
+	default:
+		stateStr = "notStarted";
+		break;
 	}
 }

@@ -15,38 +15,36 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "gui/featurewindow.h"
-#include "plugin/plugininstancegui.h"
+#include <QList>
 
-#include "featureuiset.h"
+#include "plugin/pluginapi.h"
+#include "feature/feature.h"
+#include "featureset.h"
 
-FeatureUISet::FeatureUISet(int tabIndex)
+FeatureSet::FeatureSet(int tabIndex)
 {
-    m_featureWindow = new FeatureWindow;
     m_featureTabIndex = tabIndex;
 }
 
-FeatureUISet::~FeatureUISet()
+FeatureSet::~FeatureSet()
 {
-    delete m_featureWindow;
 }
 
-void FeatureUISet::addRollupWidget(QWidget *widget)
+void FeatureSet::addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter)
 {
-    m_featureWindow->addRollupWidget(widget);
-}
-
-void FeatureUISet::registerFeatureInstance(const QString& featureName, PluginInstanceGUI* pluginGUI, Feature *feature)
-{
-    m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureName, pluginGUI, feature));
+    PluginAPI::FeatureRegistrations *featureRegistrations = pluginAPI->getFeatureRegistrations(); // Available feature plugins
+    Feature *feature = featureRegistrations->at(selectedFeatureIndex).m_plugin->createFeature(apiAdapter);
+    QString featureName;
+    feature->getIdentifier(featureName);
+    m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureName, feature));
     renameFeatureInstances();
 }
 
-void FeatureUISet::removeFeatureInstance(PluginInstanceGUI* pluginGUI)
+void FeatureSet::removeFeatureInstance(Feature* feature)
 {
     for (FeatureInstanceRegistrations::iterator it = m_featureInstanceRegistrations.begin(); it != m_featureInstanceRegistrations.end(); ++it)
     {
-        if (it->m_gui == pluginGUI)
+        if (it->m_feature == feature)
         {
             m_featureInstanceRegistrations.erase(it);
             break;
@@ -56,35 +54,36 @@ void FeatureUISet::removeFeatureInstance(PluginInstanceGUI* pluginGUI)
     renameFeatureInstances();
 }
 
-void FeatureUISet::renameFeatureInstances()
+void FeatureSet::renameFeatureInstances()
 {
     for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
-        m_featureInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_featureInstanceRegistrations[i].m_featureName).arg(i));
+        m_featureInstanceRegistrations[i].m_feature->setName(QString("%1:%2").arg(m_featureInstanceRegistrations[i].m_featureName).arg(i));
     }
 }
 
-void FeatureUISet::freeFeatures()
+void FeatureSet::freeFeatures()
 {
     for(int i = 0; i < m_featureInstanceRegistrations.count(); i++)
     {
-        qDebug("FeatureUISet::freeFeatures: destroying feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_featureName));
-        m_featureInstanceRegistrations[i].m_gui->destroy();
+        qDebug("FeatureSet::freeFeatures: destroying feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_featureName));
+        m_featureInstanceRegistrations[i].m_feature->destroy();
     }
 }
 
-void FeatureUISet::deleteFeature(int featureIndex)
+void FeatureSet::deleteFeature(int featureIndex)
 {
     if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count()))
     {
-        qDebug("FeatureUISet::deleteFeature: delete feature [%s] at %d",
+        qDebug("FeatureSet::deleteFeature: delete feature [%s] at %d",
                 qPrintable(m_featureInstanceRegistrations[featureIndex].m_featureName),
                 featureIndex);
-        m_featureInstanceRegistrations[featureIndex].m_gui->destroy();
+        m_featureInstanceRegistrations[featureIndex].m_feature->destroy();
+        m_featureInstanceRegistrations.removeAt(featureIndex);
         renameFeatureInstances();
     }
 }
 
-const Feature *FeatureUISet::getFeatureAt(int featureIndex) const
+const Feature *FeatureSet::getFeatureAt(int featureIndex) const
 {
     if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count())) {
         return m_featureInstanceRegistrations[featureIndex].m_feature;
@@ -93,7 +92,7 @@ const Feature *FeatureUISet::getFeatureAt(int featureIndex) const
     }
 }
 
-Feature *FeatureUISet::getFeatureAt(int featureIndex)
+Feature *FeatureSet::getFeatureAt(int featureIndex)
 {
     if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count())) {
         return m_featureInstanceRegistrations[featureIndex].m_feature;

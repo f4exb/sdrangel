@@ -27,6 +27,8 @@
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "device/deviceenumerator.h"
+#include "feature/featureuiset.h"
+#include "feature/feature.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/devicesamplemimo.h"
@@ -69,6 +71,10 @@
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeRFEPower.h"
+#include "SWGFeatureSetList.h"
+#include "SWGFeatureSettings.h"
+#include "SWGFeatureReport.h"
+#include "SWGFeatureActions.h"
 
 #ifdef HAS_LIMERFEUSB
 #include "limerfe/limerfecontroller.h"
@@ -1332,6 +1338,15 @@ int WebAPIAdapterGUI::instanceDeviceSetsGet(
     return 200;
 }
 
+int WebAPIAdapterGUI::instanceFeatureSetsGet(
+        SWGSDRangel::SWGFeatureSetList& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    (void) error;
+    getFeatureSetList(&response);
+    return 200;
+}
+
 int WebAPIAdapterGUI::instanceDeviceSetPost(
         int direction,
         SWGSDRangel::SWGSuccessResponse& response,
@@ -1389,7 +1404,7 @@ int WebAPIAdapterGUI::devicesetGet(
 
         return 404;
     }
- }
+}
 
 int WebAPIAdapterGUI::devicesetFocusPatch(
         int deviceSetIndex,
@@ -2287,7 +2302,6 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
     }
 }
 
-
 int WebAPIAdapterGUI::devicesetChannelReportGet(
             int deviceSetIndex,
             int channelIndex,
@@ -2677,6 +2691,352 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
     }
 }
 
+int WebAPIAdapterGUI::featuresetFeaturePost(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeatureSettings& query,
+			SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+
+        PluginAPI::FeatureRegistrations *featureRegistrations = m_mainWindow.m_pluginManager->getFeatureRegistrations();
+        int nbRegistrations = featureRegistrations->size();
+        int index = 0;
+
+        for (; index < nbRegistrations; index++)
+        {
+            if (featureRegistrations->at(index).m_featureId == *query.getFeatureType()) {
+                break;
+            }
+        }
+
+        if (index < nbRegistrations)
+        {
+            MainWindow::MsgAddFeature *msg = MainWindow::MsgAddFeature::create(featureSetIndex, index);
+            m_mainWindow.m_inputMessageQueue.push(msg);
+
+            response.init();
+            *response.getMessage() = QString("Message to add a feature (MsgAddFeature) was submitted successfully");
+
+            return 202;
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no feature with id %1").arg(*query.getFeatureType());
+            return 404;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureDelete(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+
+        if (featureIndex < featureSet->getNumberOfFeatures())
+        {
+            MainWindow::MsgDeleteFeature *msg = MainWindow::MsgDeleteFeature::create(featureSetIndex, featureIndex);
+            m_mainWindow.m_inputMessageQueue.push(msg);
+
+            response.init();
+            *response.getMessage() = QString("Message to delete a feature (MsgDeleteFeature) was submitted successfully");
+
+            return 202;
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no feature at index %1. %2 feature(s) left")
+                    .arg(featureIndex)
+                    .arg(featureSet->getNumberOfFeatures());
+            return 400;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no device set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureRunGet(
+    int featureSetIndex,
+    int featureIndex,
+    SWGSDRangel::SWGDeviceState& response,
+    SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+
+        if (featureIndex < featureSet->getNumberOfFeatures())
+        {
+            response.init();
+            const Feature *feature = featureSet->getFeatureAt(featureIndex);
+            return feature->webapiRunGet(response, *error.getMessage());
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no feature at index %1. %2 feature(s) left")
+                    .arg(featureIndex)
+                    .arg(featureSet->getNumberOfFeatures());
+            return 400;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureRunPost(
+    int featureSetIndex,
+    int featureIndex,
+    SWGSDRangel::SWGDeviceState& response,
+    SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+
+        if (featureIndex < featureSet->getNumberOfFeatures())
+        {
+            response.init();
+            Feature *feature = featureSet->getFeatureAt(featureIndex);
+            return feature->webapiRun(true, response, *error.getMessage());
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no feature at index %1. %2 feature(s) left")
+                    .arg(featureIndex)
+                    .arg(featureSet->getNumberOfFeatures());
+            return 400;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureRunDelete(
+    int featureSetIndex,
+    int featureIndex,
+    SWGSDRangel::SWGDeviceState& response,
+    SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+
+        if (featureIndex < featureSet->getNumberOfFeatures())
+        {
+            response.init();
+            Feature *feature = featureSet->getFeatureAt(featureIndex);
+            return feature->webapiRun(false, response, *error.getMessage());
+        }
+        else
+        {
+            error.init();
+            *error.getMessage() = QString("There is no feature at index %1. %2 feature(s) left")
+                    .arg(featureIndex)
+                    .arg(featureSet->getNumberOfFeatures());
+            return 400;
+        }
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureSettingsGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGFeatureSettings& response,
+            SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        Feature *feature = featureSet->getFeatureAt(featureIndex);
+
+        if (feature)
+        {
+            response.setFeatureType(new QString());
+            feature->getIdentifier(*response.getFeatureType());
+            return feature->webapiSettingsGet(response, *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("There is no feature with index %1").arg(featureIndex);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureSettingsPutPatch(
+        int featureSetIndex,
+        int featureIndex,
+        bool force,
+        const QStringList& featureSettingsKeys,
+        SWGSDRangel::SWGFeatureSettings& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        Feature *feature = featureSet->getFeatureAt(featureIndex);
+
+        if (feature)
+        {
+            QString featureType;
+            feature->getIdentifier(featureType);
+
+            if (featureType == *response.getFeatureType())
+            {
+                return feature->webapiSettingsPutPatch(force, featureSettingsKeys, response, *error.getMessage());
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no feature type %1 at index %2. Found %3.")
+                        .arg(*response.getFeatureType())
+                        .arg(featureIndex)
+                        .arg(featureType);
+                return 404;
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("There is no feature with index %1").arg(featureIndex);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureReportGet(
+    int featureSetIndex,
+    int featureIndex,
+    SWGSDRangel::SWGFeatureReport& response,
+    SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        Feature *feature = featureSet->getFeatureAt(featureIndex);
+
+        if (feature)
+        {
+            response.setFeatureType(new QString());
+            feature->getIdentifier(*response.getFeatureType());
+            return feature->webapiReportGet(response, *error.getMessage());
+        }
+        else
+        {
+            *error.getMessage() = QString("There is no feature with index %1").arg(featureIndex);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureIndex);
+        return 404;
+    }
+}
+
+int WebAPIAdapterGUI::featuresetFeatureActionsPost(
+        int featureSetIndex,
+        int featureIndex,
+        const QStringList& featureActionsKeys,
+        SWGSDRangel::SWGFeatureActions& query,
+        SWGSDRangel::SWGSuccessResponse& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    error.init();
+
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        Feature *feature = featureSet->getFeatureAt(featureIndex);
+
+        if (feature)
+        {
+            QString featureType;
+            feature->getIdentifier(featureType);
+
+            if (featureType == *query.getFeatureType())
+            {
+                int res = feature->webapiActionsPost(featureActionsKeys, query, *error.getMessage());
+
+                if (res/100 == 2)
+                {
+                    response.init();
+                    *response.getMessage() = QString("Message to post action was submitted successfully");
+                }
+
+                return res;
+            }
+            else
+            {
+                *error.getMessage() = QString("There is no feature type %1 at index %2. Found %3.")
+                        .arg(*query.getFeatureType())
+                        .arg(featureIndex)
+                        .arg(featureType);
+                return 404;
+            }
+        }
+        else
+        {
+            *error.getMessage() = QString("There is no feature with index %1").arg(featureIndex);
+            return 404;
+        }
+    }
+    else
+    {
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureIndex);
+        return 404;
+    }
+}
+
 void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();
@@ -2966,6 +3326,63 @@ void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channel
                 delete channelReport;
             }
         }
+    }
+}
+
+int WebAPIAdapterGUI::featuresetGet(
+        int featureSetIndex,
+        SWGSDRangel::SWGFeatureSet& response,
+        SWGSDRangel::SWGErrorResponse& error)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    {
+        const FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        getFeatureSet(&response, featureSet, featureSetIndex);
+
+        return 200;
+    }
+    else
+    {
+        error.init();
+        *error.getMessage() = QString("There is no feature set with index %1").arg(featureSetIndex);
+
+        return 404;
+    }
+}
+
+void WebAPIAdapterGUI::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList)
+{
+    featureSetList->init();
+    featureSetList->setFeaturesetcount((int) m_mainWindow.m_featureUIs.size());
+
+    std::vector<FeatureUISet*>::const_iterator it = m_mainWindow.m_featureUIs.begin();
+
+    for (int i = 0; it != m_mainWindow.m_featureUIs.end(); ++it, i++)
+    {
+        QList<SWGSDRangel::SWGFeatureSet*> *featureSets = featureSetList->getFeatureSets();
+        featureSets->append(new SWGSDRangel::SWGFeatureSet());
+
+        getFeatureSet(featureSets->back(), *it, i);
+    }
+}
+
+void WebAPIAdapterGUI::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureUISet* featureUISet, int featureUISetIndex)
+{
+    featureSet->init();
+    featureSet->setFeaturecount(featureUISet->getNumberOfFeatures());
+    QList<SWGSDRangel::SWGFeature*> *features = featureSet->getFeatures();
+
+    for (int i = 0; i < featureUISet->getNumberOfFeatures(); i++)
+    {
+        const Feature *feature = featureUISet->getFeatureAt(i);
+        features->append(new SWGSDRangel::SWGFeature);
+        features->back()->setIndex(i);
+        QString s;
+        feature->getTitle(s);
+        features->back()->setTitle(new QString(s));
+        feature->getIdentifier(s);
+        features->back()->setId(new QString(s));
+        features->back()->setUid(feature->getUID());
     }
 }
 

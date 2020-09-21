@@ -62,6 +62,11 @@ namespace SWGSDRangel
     class SWGChannelReport;
     class SWGChannelActions;
     class SWGSuccessResponse;
+    class SWGFeatureSetList;
+    class SWGFeatureSet;
+    class SWGFeatureSettings;
+    class SWGFeatureReport;
+    class SWGFeatureActions;
 }
 
 class SDRBASE_API WebAPIAdapterInterface

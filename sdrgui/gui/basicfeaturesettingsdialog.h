@@ -37,6 +37,16 @@ public:
     void setColor(const QColor& color);
     const QString& getTitle() const { return m_title; }
     const QColor& getColor() const { return m_color; }
+    bool useReverseAPI() const { return m_useReverseAPI; }
+    const QString& getReverseAPIAddress() const { return m_reverseAPIAddress; }
+    uint16_t getReverseAPIPort() const { return m_reverseAPIPort; }
+    uint16_t getReverseAPIDeviceIndex() const { return m_reverseAPIDeviceIndex; }
+    uint16_t getReverseAPIChannelIndex() const { return m_reverseAPIChannelIndex; }
+    void setUseReverseAPI(bool useReverseAPI);
+    void setReverseAPIAddress(const QString& address);
+    void setReverseAPIPort(uint16_t port);
+    void setReverseAPIDeviceIndex(uint16_t deviceIndex);
+    void setReverseAPIChannelIndex(uint16_t channelIndex);
     bool hasChanged() const { return m_hasChanged; }
 
 private slots:
@@ -48,6 +58,11 @@ private:
     Ui::BasicFeatureSettingsDialog *ui;
     QColor m_color;
     QString m_title;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
     bool m_hasChanged;
 
     void paintColor();

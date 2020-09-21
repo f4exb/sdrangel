@@ -28,6 +28,7 @@
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
 #include "device/deviceenumerator.h"
+#include "feature/featureset.h"
 #include "plugin/pluginmanager.h"
 #include "loggerwithfile.h"
 #include "webapi/webapirequestmapper.h"
@@ -46,6 +47,8 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteChannel, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgApplySettings, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgAddFeature, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeature, Message)
 
 MainCore *MainCore::m_instance = 0;
 
@@ -188,6 +191,19 @@ bool MainCore::handleMessage(const Message& cmd)
     {
         MsgDeleteChannel& notif = (MsgDeleteChannel&) cmd;
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
+        return true;
+    }
+    else if (MsgAddFeature::match(cmd))
+    {
+        MsgAddFeature& notif = (MsgAddFeature&) cmd;
+        addFeature(notif.getFeatureSetIndex(), notif.getFeatureRegistrationIndex());
+
+        return true;
+    }
+    else if (MsgDeleteFeature::match(cmd))
+    {
+        MsgDeleteFeature& notif = (MsgDeleteFeature&) cmd;
+        deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
         return true;
     }
     else if (MsgApplySettings::match(cmd))
@@ -642,6 +658,24 @@ void MainCore::deleteChannel(int deviceSetIndex, int channelIndex)
     {
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
         deviceSet->deleteChannel(channelIndex);
+    }
+}
+
+void MainCore::addFeature(int featureSetIndex, int featureIndex)
+{
+    if (featureSetIndex >= 0)
+    {
+        FeatureSet *featureSet = m_featureSets[featureSetIndex];
+        featureSet->addFeature(featureSetIndex, m_pluginManager->getPluginAPI(), m_apiAdapter);
+    }
+}
+
+void MainCore::deleteFeature(int featureSetIndex, int featureIndex)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_featureSets.size()))
+    {
+        FeatureSet *featureSet = m_featureSets[featureSetIndex];
+        featureSet->deleteFeature(featureIndex);
     }
 }
 

@@ -15,52 +15,45 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_FEATURE_FEATUREUISET_H_
-#define SDRGUI_FEATURE_FEATUREUISET_H_
+#ifndef SDRSRV_FEATURE_FEATURESET_H_
+#define SDRSRV_FEATURE_FEATURESET_H_
 
 #include <QString>
 #include <QList>
 
 #include "export.h"
 
-class QWidget;
-class FeatureWindow;
-class PluginInstanceGUI;
+class PluginAPI;
 class Feature;
+class WebAPIAdapterInterface;
 
-class SDRGUI_API FeatureUISet
+class SDRGUI_API FeatureSet
 {
 public:
-    FeatureUISet(int tabIndex);
-    ~FeatureUISet();
+    FeatureSet(int tabIndex);
+    ~FeatureSet();
 
-    void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
-    void registerFeatureInstance(const QString& featureName, PluginInstanceGUI* pluginGUI, Feature *feature);
-    void removeFeatureInstance(PluginInstanceGUI* pluginGUI);
+    void addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
+    void removeFeatureInstance(Feature* feature);
     void freeFeatures();
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
 
-    FeatureWindow *m_featureWindow;
-
 private:
     struct FeatureInstanceRegistration
     {
         QString m_featureName;
-        PluginInstanceGUI* m_gui;
         Feature* m_feature;
 
         FeatureInstanceRegistration() :
             m_featureName(),
-            m_gui(nullptr),
             m_feature(nullptr)
         { }
 
-        FeatureInstanceRegistration(const QString& featureName, PluginInstanceGUI* pluginGUI, Feature *feature) :
+        FeatureInstanceRegistration(const QString& featureName, Feature *feature) :
             m_featureName(featureName),
-            m_gui(pluginGUI),
             m_feature(feature)
         { }
 
@@ -75,4 +68,4 @@ private:
     void renameFeatureInstances();
 };
 
-#endif // SDRGUI_FEATURE_FEATUREUISET_H_
+#endif // SDRSRV_FEATURE_FEATURESET_H_

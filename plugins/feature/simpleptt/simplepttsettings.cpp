@@ -33,8 +33,13 @@ void SimplePTTSettings::resetToDefaults()
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_rxDeviceSetIndex = -1;
     m_txDeviceSetIndex = -1;
-    m_rx2TxDelayMs = 0;
-    m_tx2RxDelayMs = 0;
+    m_rx2TxDelayMs = 100;
+    m_tx2RxDelayMs = 100;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray SimplePTTSettings::serialize() const
@@ -47,7 +52,12 @@ QByteArray SimplePTTSettings::serialize() const
     s.writeS32(4, m_txDeviceSetIndex);
     s.writeU32(5, m_rx2TxDelayMs);
     s.writeU32(6, m_tx2RxDelayMs);
-    
+    s.writeBool(7, m_useReverseAPI);
+    s.writeString(8, m_reverseAPIAddress);
+    s.writeU32(9, m_reverseAPIPort);
+    s.writeU32(10, m_reverseAPIDeviceIndex);
+    s.writeU32(11, m_reverseAPIChannelIndex);
+
     return s.final();
 }
 
@@ -72,8 +82,22 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         d.readU32(2, &m_rgbColor, QColor(255, 0, 0).rgb());
         d.readS32(3, &m_rxDeviceSetIndex, -1);
         d.readS32(4, &m_txDeviceSetIndex, -1);
-        d.readU32(5, &m_rx2TxDelayMs, 0);
-        d.readU32(6, &m_tx2RxDelayMs, 0);
+        d.readU32(5, &m_rx2TxDelayMs, 100);
+        d.readU32(6, &m_tx2RxDelayMs, 100);
+        d.readBool(7, &m_useReverseAPI, false);
+        d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(9, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(10, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(11, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }
