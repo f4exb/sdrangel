@@ -105,7 +105,6 @@ private:
     ChannelMarker m_objChannelMarker;
     DATVDemod* m_objDATVDemod;
     MessageQueue m_inputMessageQueue;
-    int m_intCenterFrequency;
     DATVDemodSettings m_settings;
 
     QTimer m_objTimer;

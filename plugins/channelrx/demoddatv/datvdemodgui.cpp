@@ -130,12 +130,8 @@ void DATVDemodGUI::handleInputMessages()
 void DATVDemodGUI::channelMarkerChangedByCursor()
 {
     ui->deltaFrequency->setValue(m_objChannelMarker.getCenterFrequency());
-
-    if(m_intCenterFrequency!=m_objChannelMarker.getCenterFrequency())
-    {
-        m_intCenterFrequency=m_objChannelMarker.getCenterFrequency();
-        applySettings();
-    }
+    m_settings.m_centerFrequency = m_objChannelMarker.getCenterFrequency();
+    applySettings();
 }
 
 void DATVDemodGUI::channelMarkerHighlightedByCursor()
