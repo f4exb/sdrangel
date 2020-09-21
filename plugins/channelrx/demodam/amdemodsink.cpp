@@ -189,7 +189,6 @@ void AMDemodSink::processOneSample(Complex &ci)
         if (m_settings.m_bandpassEnable)
         {
             demod = m_bandpass.filter(demod);
-            demod /= 301.0f;
         }
         else
         {

@@ -104,8 +104,6 @@ private:
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
 
-	float m_discriCompensation; //!< compensation factor that depends on audio rate (1 for 48 kS/s)
-
 	NCO m_nco;
 	Interpolator m_interpolator;
 	Real m_interpolatorDistance;
