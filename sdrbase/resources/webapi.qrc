@@ -15,6 +15,7 @@
         <file>webapi/doc/swagger/include/BladeRF2.yaml</file>
         <file>webapi/doc/swagger/include/ChannelActions.yaml</file>
         <file>webapi/doc/swagger/include/ChannelAnalyzer.yaml</file>
+        <file>webapi/doc/swagger/include/ChannelReport.yaml</file>
         <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatDemod.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatMod.yaml</file>
@@ -27,6 +28,9 @@
         <file>webapi/doc/swagger/include/DeviceReports.yaml</file>
         <file>webapi/doc/swagger/include/FCDPro.yaml</file>
         <file>webapi/doc/swagger/include/FCDProPlus.yaml</file>
+        <file>webapi/doc/swagger/include/FeatureActions.yaml</file>
+        <file>webapi/doc/swagger/include/FeatureReport.yaml</file>
+        <file>webapi/doc/swagger/include/FeatureSettings.yaml</file>
         <file>webapi/doc/swagger/include/FileSink.yaml</file>
         <file>webapi/doc/swagger/include/FileSource.yaml</file>
         <file>webapi/doc/swagger/include/FileInput.yaml</file>
@@ -59,6 +63,7 @@
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileInput.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileSink.yaml</file>
+        <file>webapi/doc/swagger/include/SimplePTT.yaml</file>
         <file>webapi/doc/swagger/include/SoapySDR.yaml</file>
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>

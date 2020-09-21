@@ -76,6 +76,12 @@
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
+#include "SWGFeature.h"
+#include "SWGFeatureActions.h"
+#include "SWGFeatureReport.h"
+#include "SWGFeatureSet.h"
+#include "SWGFeatureSetList.h"
+#include "SWGFeatureSettings.h"
 #include "SWGFileInputReport.h"
 #include "SWGFileInputSettings.h"
 #include "SWGFileSinkActions.h"
@@ -171,6 +177,9 @@
 #include "SWGSigMFFileSinkActions.h"
 #include "SWGSigMFFileSinkReport.h"
 #include "SWGSigMFFileSinkSettings.h"
+#include "SWGSimplePTTActions.h"
+#include "SWGSimplePTTReport.h"
+#include "SWGSimplePTTSettings.h"
 #include "SWGSoapySDRFrequencySetting.h"
 #include "SWGSoapySDRGainSetting.h"
 #include "SWGSoapySDRInputSettings.h"
@@ -388,6 +397,24 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFCDProSettings").compare(type) == 0) {
       return new SWGFCDProSettings();
+    }
+    if(QString("SWGFeature").compare(type) == 0) {
+      return new SWGFeature();
+    }
+    if(QString("SWGFeatureActions").compare(type) == 0) {
+      return new SWGFeatureActions();
+    }
+    if(QString("SWGFeatureReport").compare(type) == 0) {
+      return new SWGFeatureReport();
+    }
+    if(QString("SWGFeatureSet").compare(type) == 0) {
+      return new SWGFeatureSet();
+    }
+    if(QString("SWGFeatureSetList").compare(type) == 0) {
+      return new SWGFeatureSetList();
+    }
+    if(QString("SWGFeatureSettings").compare(type) == 0) {
+      return new SWGFeatureSettings();
     }
     if(QString("SWGFileInputReport").compare(type) == 0) {
       return new SWGFileInputReport();
@@ -673,6 +700,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSigMFFileSinkSettings").compare(type) == 0) {
       return new SWGSigMFFileSinkSettings();
+    }
+    if(QString("SWGSimplePTTActions").compare(type) == 0) {
+      return new SWGSimplePTTActions();
+    }
+    if(QString("SWGSimplePTTReport").compare(type) == 0) {
+      return new SWGSimplePTTReport();
+    }
+    if(QString("SWGSimplePTTSettings").compare(type) == 0) {
+      return new SWGSimplePTTSettings();
     }
     if(QString("SWGSoapySDRFrequencySetting").compare(type) == 0) {
       return new SWGSoapySDRFrequencySetting();

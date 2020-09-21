@@ -37,6 +37,7 @@ namespace SWGSDRangel
     class SWGPreset;
     class SWGChannelConfig;
     class SWGDeviceConfig;
+    class SWGFeatureActions;
 }
 
 class SDRBASE_API WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
@@ -74,6 +75,7 @@ private:
     void instancePresetFileService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void instanceDeviceSetService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void instanceFeatureSetsService(qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
     void devicesetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetFocusService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
@@ -92,6 +94,14 @@ private:
     void devicesetChannelReportService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
     void devicesetChannelActionsService(const std::string& deviceSetIndexStr, const std::string& channelIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
 
+    void featuresetService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureService(const std::string& indexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureIndexService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureRunService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureSettingsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureReportService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+    void featuresetFeatureActionsService(const std::string& featureSetIndexStr, const std::string& featureIndexStr, qtwebapp::HttpRequest& request, qtwebapp::HttpResponse& response);
+
     bool validatePresetTransfer(SWGSDRangel::SWGPresetTransfer& presetTransfer);
     bool validatePresetIdentifer(SWGSDRangel::SWGPresetIdentifier& presetIdentifier);
     bool validatePresetExport(SWGSDRangel::SWGPresetExport& presetExport);
@@ -101,6 +111,8 @@ private:
     bool validateDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions, QJsonObject& jsonObject, QStringList& deviceActionsKeys);
     bool validateChannelSettings(SWGSDRangel::SWGChannelSettings& channelSettings, QJsonObject& jsonObject, QStringList& channelSettingsKeys);
     bool validateChannelActions(SWGSDRangel::SWGChannelActions& channelActions, QJsonObject& jsonObject, QStringList& channelActionsKeys);
+    bool validateFeatureSettings(SWGSDRangel::SWGFeatureSettings& featureSettings, QJsonObject& jsonObject, QStringList& featureSettingsKeys);
+    bool validateFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions, QJsonObject& jsonObject, QStringList& featureActionsKeys);
     bool validateAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice, QJsonObject& jsonObject, QStringList& audioInputDeviceKeys);
     bool validateAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice, QJsonObject& jsonObject, QStringList& audioOutputDeviceKeys);
     bool validateAMBEDevices(SWGSDRangel::SWGAMBEDevices& ambeDevices, QJsonObject& jsonObject);
@@ -108,14 +120,15 @@ private:
     bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
 
     bool appendPresetKeys(
-            SWGSDRangel::SWGPreset *preset,
-            const QJsonObject& presetJson,
-            WebAPIAdapterInterface::PresetKeys& presetKeys);
+        SWGSDRangel::SWGPreset *preset,
+        const QJsonObject& presetJson,
+        WebAPIAdapterInterface::PresetKeys& presetKeys
+    );
 
     bool appendPresetChannelKeys(
-            SWGSDRangel::SWGChannelConfig *channel,
-            const QJsonObject& channelSettngsJson,
-            WebAPIAdapterInterface::ChannelKeys& channelKeys
+        SWGSDRangel::SWGChannelConfig *channel,
+        const QJsonObject& channelSettngsJson,
+        WebAPIAdapterInterface::ChannelKeys& channelKeys
     );
 
     bool getChannelSettings(
@@ -133,9 +146,9 @@ private:
     );
 
     bool appendPresetDeviceKeys(
-            SWGSDRangel::SWGDeviceConfig *device,
-            const QJsonObject& deviceSettngsJson,
-            WebAPIAdapterInterface::DeviceKeys& devicelKeys
+        SWGSDRangel::SWGDeviceConfig *device,
+        const QJsonObject& deviceSettngsJson,
+        WebAPIAdapterInterface::DeviceKeys& devicelKeys
     );
 
     bool getDeviceSettings(
@@ -153,15 +166,31 @@ private:
     );
 
     void appendSettingsSubKeys(
-            const QJsonObject& parentSettingsJsonObject,
-            QJsonObject& childSettingsJsonObject,
-            const QString& parentKey,
-            QStringList& keyList);
+        const QJsonObject& parentSettingsJsonObject,
+        QJsonObject& childSettingsJsonObject,
+        const QString& parentKey,
+        QStringList& keyList
+    );
 
     void appendSettingsArrayKeys(
-            const QJsonObject& parentSettingsJsonObject,
-            const QString& parentKey,
-            QStringList& keyList);
+        const QJsonObject& parentSettingsJsonObject,
+        const QString& parentKey,
+        QStringList& keyList
+    );
+
+    bool getFeatureSettings(
+        const QString& featureSettingsKey,
+        SWGSDRangel::SWGFeatureSettings *featureSettings,
+        const QJsonObject& featureSettingsJson,
+        QStringList& featureSettingsKeys
+    );
+
+    bool getFeatureActions(
+        const QString& featureActionsKey,
+        SWGSDRangel::SWGFeatureActions *featureActions,
+        const QJsonObject& featureActionsJson,
+        QStringList& featureSettingsKeys
+    );
 
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
@@ -174,6 +203,9 @@ private:
     void resetChannelActions(SWGSDRangel::SWGChannelActions& channelActions);
     void resetAudioInputDevice(SWGSDRangel::SWGAudioInputDevice& audioInputDevice);
     void resetAudioOutputDevice(SWGSDRangel::SWGAudioOutputDevice& audioOutputDevice);
+    void resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& deviceSettings);
+    void resetFeatureReport(SWGSDRangel::SWGFeatureReport& featureReport);
+    void resetFeatureActions(SWGSDRangel::SWGFeatureActions& featureActions);
 
     void processChannelAnalyzerSettings(
         SWGSDRangel::SWGChannelSettings *channelSettings,
@@ -198,6 +230,8 @@ private:
     static const QMap<QString, QString> m_sourceDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_sinkDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_mimoDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_featureTypeToSettingsKey;
+    static const QMap<QString, QString> m_featureTypeToActionsKey;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

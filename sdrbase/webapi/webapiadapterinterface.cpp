@@ -41,6 +41,7 @@ QString WebAPIAdapterInterface::instancePresetURL = "/sdrangel/preset";
 QString WebAPIAdapterInterface::instancePresetFileURL = "/sdrangel/preset/file";
 QString WebAPIAdapterInterface::instanceDeviceSetsURL = "/sdrangel/devicesets";
 QString WebAPIAdapterInterface::instanceDeviceSetURL = "/sdrangel/deviceset";
+QString WebAPIAdapterInterface::instanceFeatureSetsURL = "/sdrangel/featuresets";
 
 std::regex WebAPIAdapterInterface::devicesetURLRe("^/sdrangel/deviceset/([0-9]{1,2})$");
 std::regex WebAPIAdapterInterface::devicesetFocusURLRe("^/sdrangel/deviceset/([0-9]{1,2})/focus$");
@@ -58,6 +59,14 @@ std::regex WebAPIAdapterInterface::devicesetChannelIndexURLRe("^/sdrangel/device
 std::regex WebAPIAdapterInterface::devicesetChannelSettingsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/settings$");
 std::regex WebAPIAdapterInterface::devicesetChannelReportURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/report");
 std::regex WebAPIAdapterInterface::devicesetChannelActionsURLRe("^/sdrangel/deviceset/([0-9]{1,2})/channel/([0-9]{1,2})/actions");
+
+std::regex WebAPIAdapterInterface::featuresetURLRe("^/sdrangel/featureset/([0-9]{1,2})$");
+std::regex WebAPIAdapterInterface::featuresetFeatureURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature$");
+std::regex WebAPIAdapterInterface::featuresetFeatureIndexURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})$");
+std::regex WebAPIAdapterInterface::featuresetFeatureRunURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})/run$");
+std::regex WebAPIAdapterInterface::featuresetFeatureSettingsURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})/settings$");
+std::regex WebAPIAdapterInterface::featuresetFeatureReportURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})/report");
+std::regex WebAPIAdapterInterface::featuresetFeatureActionsURLRe("^/sdrangel/featureset/([0-9]{1,2})/feature/([0-9]{1,2})/actions");
 
 void WebAPIAdapterInterface::ConfigKeys::debug() const
 {
