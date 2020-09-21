@@ -58,6 +58,12 @@ void DATVDemodSettings::resetToDefaults()
     m_udpTSAddress = "127.0.0.1";
     m_udpTSPort = 8882;
     m_udpTS = false;
+    m_streamIndex = 0;
+    m_useReverseAPI = false;
+    m_reverseAPIAddress = "127.0.0.1";
+    m_reverseAPIPort = 8888;
+    m_reverseAPIDeviceIndex = 0;
+    m_reverseAPIChannelIndex = 0;
 }
 
 QByteArray DATVDemodSettings::serialize() const
@@ -91,6 +97,12 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeString(23, m_udpTSAddress);
     s.writeU32(24, m_udpTSPort);
     s.writeBool(25, m_udpTS);
+    s.writeS32(26, m_streamIndex);
+    s.writeBool(27, m_useReverseAPI);
+    s.writeString(28, m_reverseAPIAddress);
+    s.writeU32(29, m_reverseAPIPort);
+    s.writeU32(30, m_reverseAPIDeviceIndex);
+    s.writeU32(31, m_reverseAPIChannelIndex);
 
     return s.final();
 }
@@ -157,6 +169,21 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readU32(24, &utmp, 8882);
         m_udpTSPort = utmp < 1024 ? 1024 : utmp > 65536 ? 65535 : utmp;
         d.readBool(25, &m_udpTS, false);
+        d.readS32(26, &m_streamIndex, 0);
+        d.readBool(27, &m_useReverseAPI, false);
+        d.readString(28, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(29, &utmp, 0);
+
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_reverseAPIPort = utmp;
+        } else {
+            m_reverseAPIPort = 8888;
+        }
+
+        d.readU32(30, &utmp, 0);
+        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        d.readU32(31, &utmp, 0);
+        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
         validateSystemConfiguration();
 

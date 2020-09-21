@@ -118,3 +118,8 @@ void DATVDemod::applySettings(const DATVDemodSettings& settings, bool force)
 
     m_settings = settings;
 }
+
+uint32_t DATVDemod::getNumberOfDeviceStreams() const
+{
+    return m_deviceAPI->getNbSourceStreams();
+}
