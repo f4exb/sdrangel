@@ -2036,6 +2036,9 @@ margin-bottom: 20px;
     },
     "FileSourceActions" : {
       "$ref" : "#/definitions/FileSourceActions"
+    },
+    "PacketModActions" : {
+      "$ref" : "#/definitions/PacketModActions"
     }
   },
   "description" : "Base channel actions. Only the channel actions corresponding to the channel specified in the channelType field is or should be present."
@@ -2192,6 +2195,9 @@ margin-bottom: 20px;
     "NFMModReport" : {
       "$ref" : "#/definitions/NFMModReport"
     },
+    "PacketModReport" : {
+      "$ref" : "#/definitions/PacketModReport"
+    },
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
@@ -2286,6 +2292,9 @@ margin-bottom: 20px;
     },
     "LocalSourceSettings" : {
       "$ref" : "#/definitions/LocalSourceSettings"
+    },
+    "PacketModSettings" : {
+      "$ref" : "#/definitions/PacketModSettings"
     },
     "RemoteSinkSettings" : {
       "$ref" : "#/definitions/RemoteSinkSettings"
@@ -4875,6 +4884,124 @@ margin-bottom: 20px;
     }
   },
   "description" : "Enumeration with name for values"
+};
+            defs.PacketModActions = {
+  "properties" : {
+    "tx" : {
+      "$ref" : "#/definitions/PacketModActions_tx"
+    }
+  },
+  "description" : "PacketMod"
+};
+            defs.PacketModActions_tx = {
+  "properties" : {
+    "callsign" : {
+      "type" : "string"
+    },
+    "to" : {
+      "type" : "string"
+    },
+    "via" : {
+      "type" : "string"
+    },
+    "data" : {
+      "type" : "string"
+    }
+  },
+  "description" : "Transmit a packet\n"
+};
+            defs.PacketModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PacketMod"
+};
+            defs.PacketModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "repeat" : {
+      "type" : "integer"
+    },
+    "repeatDelay" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "repeatCount" : {
+      "type" : "integer"
+    },
+    "ax25PreFlags" : {
+      "type" : "integer"
+    },
+    "ax25PostFlags" : {
+      "type" : "integer"
+    },
+    "preEmphasis" : {
+      "type" : "integer"
+    },
+    "preEmphasisTau" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "preEmphasisHighFreq" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PacketMod"
 };
             defs.PerseusReport = {
   "properties" : {
@@ -33327,7 +33454,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-14T23:30:27.272+02:00
+              Generated 2020-09-18T15:59:26.503+02:00
             </div>
           </div>
       </div>

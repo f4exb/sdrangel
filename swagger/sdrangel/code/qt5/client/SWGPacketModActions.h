@@ -11,88 +11,49 @@
  */
 
 /*
- * SWGChannelActions.h
+ * SWGPacketModActions.h
  *
- * Base channel actions. Only the channel actions corresponding to the channel specified in the channelType field is or should be present.
+ * PacketMod
  */
 
-#ifndef SWGChannelActions_H_
-#define SWGChannelActions_H_
+#ifndef SWGPacketModActions_H_
+#define SWGPacketModActions_H_
 
 #include <QJsonObject>
 
 
-#include "SWGFileSinkActions.h"
-#include "SWGFileSourceActions.h"
-#include "SWGPacketModActions.h"
-#include <QString>
+#include "SWGPacketModActions_tx.h"
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGChannelActions: public SWGObject {
+class SWG_API SWGPacketModActions: public SWGObject {
 public:
-    SWGChannelActions();
-    SWGChannelActions(QString* json);
-    virtual ~SWGChannelActions();
+    SWGPacketModActions();
+    SWGPacketModActions(QString* json);
+    virtual ~SWGPacketModActions();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGChannelActions* fromJson(QString &jsonString) override;
+    virtual SWGPacketModActions* fromJson(QString &jsonString) override;
 
-    QString* getChannelType();
-    void setChannelType(QString* channel_type);
-
-    qint32 getDirection();
-    void setDirection(qint32 direction);
-
-    qint32 getOriginatorDeviceSetIndex();
-    void setOriginatorDeviceSetIndex(qint32 originator_device_set_index);
-
-    qint32 getOriginatorChannelIndex();
-    void setOriginatorChannelIndex(qint32 originator_channel_index);
-
-    SWGFileSinkActions* getFileSinkActions();
-    void setFileSinkActions(SWGFileSinkActions* file_sink_actions);
-
-    SWGFileSourceActions* getFileSourceActions();
-    void setFileSourceActions(SWGFileSourceActions* file_source_actions);
-
-    SWGPacketModActions* getPacketModActions();
-    void setPacketModActions(SWGPacketModActions* packet_mod_actions);
+    SWGPacketModActions_tx* getTx();
+    void setTx(SWGPacketModActions_tx* tx);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* channel_type;
-    bool m_channel_type_isSet;
-
-    qint32 direction;
-    bool m_direction_isSet;
-
-    qint32 originator_device_set_index;
-    bool m_originator_device_set_index_isSet;
-
-    qint32 originator_channel_index;
-    bool m_originator_channel_index_isSet;
-
-    SWGFileSinkActions* file_sink_actions;
-    bool m_file_sink_actions_isSet;
-
-    SWGFileSourceActions* file_source_actions;
-    bool m_file_source_actions_isSet;
-
-    SWGPacketModActions* packet_mod_actions;
-    bool m_packet_mod_actions_isSet;
+    SWGPacketModActions_tx* tx;
+    bool m_tx_isSet;
 
 };
 
 }
 
-#endif /* SWGChannelActions_H_ */
+#endif /* SWGPacketModActions_H_ */

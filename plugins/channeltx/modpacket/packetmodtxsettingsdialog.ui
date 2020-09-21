@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PacketModTXSettingsDialog</class>
+ <widget class="QDialog" name="PacketModTXSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>351</width>
+    <height>449</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Packet TX Extra Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="rampUpLabel">
+        <property name="text">
+         <string>Ramp up bits</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="rampUp">
+        <property name="toolTip">
+         <string>Number of bits at start of frame during which output power is ramped up.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="rampDownLabel">
+        <property name="text">
+         <string>Ramp down bits</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="rampDown">
+        <property name="toolTip">
+         <string>Number of bits at end of frame during which output power is ramped down.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="rampRangeLabel">
+        <property name="text">
+         <string>Ramp range (dB)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="rampRange">
+        <property name="toolTip">
+         <string>Range in dB over which power is ramped up or down. E.g. a value of 60 causes power to be ramped from -60dB to 0dB.</string>
+        </property>
+        <property name="maximum">
+         <number>120</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QCheckBox" name="modulateWhileRamping">
+        <property name="toolTip">
+         <string>Modulate during ramping.</string>
+        </property>
+        <property name="text">
+         <string>Modulate while ramping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="markFrequencyLabel">
+        <property name="text">
+         <string>Mark frequency (Hz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="markFrequency">
+        <property name="toolTip">
+         <string>Frequency of tone to generate for a mark (1).</string>
+        </property>
+        <property name="maximum">
+         <number>24000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="spaceFrequencyLabel">
+        <property name="text">
+         <string>Space frequency (Hz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QSpinBox" name="spaceFrequency">
+        <property name="toolTip">
+         <string>Frequency of tone to generate for a space (0).</string>
+        </property>
+        <property name="maximum">
+         <number>24000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="ax25PreFlagsLabel">
+        <property name="text">
+         <string>AX.25 preamble flags</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="ax25PreFlags">
+        <property name="toolTip">
+         <string>Number of flags to be transmitted before the frame. This gives more time for a receiver to unmute.</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1024</number>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="ax25PostFlagsLabel">
+        <property name="text">
+         <string>AX.25 postamble flags</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QSpinBox" name="ax25PostFlags">
+        <property name="toolTip">
+         <string>Number of flags to be transmitted after the frame.</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1024</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="ax25ControlLabel">
+        <property name="text">
+         <string>AX.25 control</string>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QSpinBox" name="ax25Control">
+        <property name="toolTip">
+         <string>Value of control field in AX.25 frame.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="value">
+         <number>3</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="ax25PIDLabel">
+        <property name="text">
+         <string>AX.25 PID</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QSpinBox" name="ax25PID">
+        <property name="toolTip">
+         <string>Value of PID field in AX.25 frame. Use 0xf0 for no L3.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="value">
+         <number>240</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="lpfTapsLabel">
+        <property name="text">
+         <string>Lowpass taps</string>
+        </property>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QSpinBox" name="lpfTaps">
+        <property name="toolTip">
+         <string>Number of taps in LPF for RF BW filter.</string>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QCheckBox" name="rfNoise">
+        <property name="toolTip">
+         <string>Generate white noise as RF signal.</string>
+        </property>
+        <property name="text">
+         <string>Generate RF noise</string>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QCheckBox" name="writeToFile">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Write baseband signal to a CSV file named packetmod.csv</string>
+        </property>
+        <property name="text">
+         <string>Write baseband to CSV</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QCheckBox" name="bbNoise">
+        <property name="toolTip">
+         <string>Generate white noise as baseband signal.</string>
+        </property>
+        <property name="text">
+         <string>Generate BB noise</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>rampUp</tabstop>
+  <tabstop>rampDown</tabstop>
+  <tabstop>rampRange</tabstop>
+  <tabstop>modulateWhileRamping</tabstop>
+  <tabstop>markFrequency</tabstop>
+  <tabstop>spaceFrequency</tabstop>
+  <tabstop>ax25PreFlags</tabstop>
+  <tabstop>ax25PostFlags</tabstop>
+  <tabstop>ax25Control</tabstop>
+  <tabstop>ax25PID</tabstop>
+  <tabstop>lpfTaps</tabstop>
+  <tabstop>bbNoise</tabstop>
+  <tabstop>rfNoise</tabstop>
+  <tabstop>writeToFile</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>PacketModTXSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>PacketModTXSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -39,6 +39,7 @@
 #include "SWGLocalSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
+#include "SWGPacketModSettings.h"
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceSettings.h"
 #include "SWGSSBDemodSettings.h"
@@ -130,6 +131,9 @@ public:
     SWGLocalSourceSettings* getLocalSourceSettings();
     void setLocalSourceSettings(SWGLocalSourceSettings* local_source_settings);
 
+    SWGPacketModSettings* getPacketModSettings();
+    void setPacketModSettings(SWGPacketModSettings* packet_mod_settings);
+
     SWGRemoteSinkSettings* getRemoteSinkSettings();
     void setRemoteSinkSettings(SWGRemoteSinkSettings* remote_sink_settings);
 
@@ -220,6 +224,9 @@ private:
 
     SWGLocalSourceSettings* local_source_settings;
     bool m_local_source_settings_isSet;
+
+    SWGPacketModSettings* packet_mod_settings;
+    bool m_packet_mod_settings_isSet;
 
     SWGRemoteSinkSettings* remote_sink_settings;
     bool m_remote_sink_settings_isSet;

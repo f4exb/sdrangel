@@ -101,6 +101,7 @@ set(sdrbase_SOURCES
     dsp/filtermbe.cpp
     dsp/filerecord.cpp
     dsp/filerecordinterface.cpp
+    dsp/fmpreemphasis.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
     dsp/glscopesettings.cpp
@@ -142,6 +143,7 @@ set(sdrbase_SOURCES
     settings/preset.cpp
     settings/mainsettings.cpp
 
+    util/crc.cpp
     util/CRC64.cpp
     util/db.cpp
     util/fixedtraits.cpp
@@ -232,6 +234,7 @@ set(sdrbase_HEADERS
     dsp/filtermbe.h
     dsp/filerecord.h
     dsp/filerecordinterface.h
+    dsp/fmpreemphasis.h
     dsp/freqlockcomplex.h
     dsp/gfft.h
     dsp/glscopesettings.h

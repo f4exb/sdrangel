@@ -40,6 +40,8 @@ SWGChannelActions::SWGChannelActions() {
     m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
     m_file_source_actions_isSet = false;
+    packet_mod_actions = nullptr;
+    m_packet_mod_actions_isSet = false;
 }
 
 SWGChannelActions::~SWGChannelActions() {
@@ -60,6 +62,8 @@ SWGChannelActions::init() {
     m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
     m_file_source_actions_isSet = false;
+    packet_mod_actions = new SWGPacketModActions();
+    m_packet_mod_actions_isSet = false;
 }
 
 void
@@ -75,6 +79,9 @@ SWGChannelActions::cleanup() {
     }
     if(file_source_actions != nullptr) { 
         delete file_source_actions;
+    }
+    if(packet_mod_actions != nullptr) { 
+        delete packet_mod_actions;
     }
 }
 
@@ -100,6 +107,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
+    
+    ::SWGSDRangel::setValue(&packet_mod_actions, pJson["PacketModActions"], "SWGPacketModActions", "SWGPacketModActions");
     
 }
 
@@ -134,6 +143,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((file_source_actions != nullptr) && (file_source_actions->isSet())){
         toJsonValue(QString("FileSourceActions"), file_source_actions, obj, QString("SWGFileSourceActions"));
+    }
+    if((packet_mod_actions != nullptr) && (packet_mod_actions->isSet())){
+        toJsonValue(QString("PacketModActions"), packet_mod_actions, obj, QString("SWGPacketModActions"));
     }
 
     return obj;
@@ -199,6 +211,16 @@ SWGChannelActions::setFileSourceActions(SWGFileSourceActions* file_source_action
     this->m_file_source_actions_isSet = true;
 }
 
+SWGPacketModActions*
+SWGChannelActions::getPacketModActions() {
+    return packet_mod_actions;
+}
+void
+SWGChannelActions::setPacketModActions(SWGPacketModActions* packet_mod_actions) {
+    this->packet_mod_actions = packet_mod_actions;
+    this->m_packet_mod_actions_isSet = true;
+}
+
 
 bool
 SWGChannelActions::isSet(){
@@ -220,6 +242,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(file_source_actions && file_source_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(packet_mod_actions && packet_mod_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);
