@@ -719,7 +719,7 @@ void SoapySDRInput::setCenterFrequency(qint64 centerFrequency)
 bool SoapySDRInput::setDeviceCenterFrequency(SoapySDR::Device *dev, int requestedChannel, quint64 freq_hz, int loPpmTenths)
 {
     qint64 df = ((qint64)freq_hz * loPpmTenths) / 10000000LL;
-    freq_hz += df;
+    freq_hz -= df;
 
     try
     {
