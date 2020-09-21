@@ -883,6 +883,23 @@ paths:
         "501":
           $ref: "#/responses/Response_501"
 
+  /sdrangel/featuresets:
+    x-swagger-router-controller: instance
+    get:
+      description: Get summary information about feature sets opened in the instance
+      operationId: instanceFeatureSetsGet
+      tags:
+        - Instance
+      responses:
+        "200":
+          description: On success return feature set list
+          schema:
+            $ref: "#/definitions/FeatureSetList"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
   /sdrangel/deviceset:
     x-swagger-router-controller: instance
     post:
@@ -1457,8 +1474,9 @@ paths:
           $ref: "#/responses/Response_501"
 
   /sdrangel/deviceset/{deviceSetIndex}/channel/{channelIndex}:
+    x-swagger-router-controller: deviceset
     delete:
-      description: delete channel (server only)
+      description: delete a channel
       operationId: devicesetChannelDelete
       tags:
         - DeviceSet
@@ -1483,7 +1501,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: Device or channel not found
+          description: Device set or channel not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1519,7 +1537,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: Device or channel not found
+          description: Device set or channel not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1558,7 +1576,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: Device or channel not found
+          description: Device set or channel not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1597,7 +1615,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: Device or channel not found
+          description: Device set or channel not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1627,13 +1645,13 @@ paths:
         "200":
           description: On success return channel report
           schema:
-            $ref: "#/definitions/ChannelReport"
+            $ref: "http://swgserver:8081/api/swagger/include/ChannelReport.yaml#/ChannelReport"
         "400":
           description: Invalid device set or channel index
           schema:
             $ref: "#/definitions/ErrorResponse"
         "404":
-          description: Device or channel not found
+          description: Device set or channel not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1676,6 +1694,400 @@ paths:
             $ref: "#/definitions/ErrorResponse"
         "404":
           description: Device or channel not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}:
+    x-swagger-router-controller: featureset
+    get:
+      description: Get feature set information
+      operationId: featuresetGet
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the device set list
+      responses:
+        "200":
+          description: On success return details on the feature set
+          schema:
+            $ref: "#/definitions/FeatureSet"
+        "404":
+          description: Invalid index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}/feature:
+    x-swagger-router-controller: featureset
+    post:
+      description: add a feature
+      operationId: featuresetFeaturePost
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - name: body
+          in: body
+          description: Feature identification (no settings data)
+          required: true
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+      responses:
+        "202":
+          description: Message to add a feature was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid feature set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}:
+    x-swagger-router-controller: featureset
+    delete:
+      description: delete a feature
+      operationId: featuresetFeatureDelete
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of feature in the features list
+      responses:
+        "200":
+          description: On success return deleted feature settings
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+        "400":
+          description: Invalid feature set or feature index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set or feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/run:
+    x-swagger-router-controller: featureset
+    get:
+      description: get feature run status
+      operationId: featuresetFeatureRunGet
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of feature in the features list
+      responses:
+        "200":
+          description: On success return current feature run state
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid feature set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    post:
+      description: start feature
+      operationId: featuresetFeatureRunPost
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of feature in the features list
+      responses:
+        "200":
+          description: On success return state before change
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid feature set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    delete:
+      description: stop feature
+      operationId: featuresetFeatureRunDelete
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of feature in the features list
+      responses:
+        "200":
+          description: On success return state before change
+          schema:
+            $ref: "#/definitions/DeviceState"
+        "400":
+          description: Invalid device set index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Device not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/settings:
+    x-swagger-router-controller: featureset
+    get:
+      description: get a feature settings
+      operationId: featuresetFeatureSettingsGet
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of the feature in the features list for this feature set
+      responses:
+        "200":
+          description: On success return feature settings
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+        "400":
+          description: Invalid feature set or feature index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set or feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    put:
+      description: apply all settings unconditionally (force)
+      operationId: featuresetFEatureSettingsPut
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of the feature in the features list for this feature set
+        - name: body
+          in: body
+          description: Feature settings to apply
+          required: true
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+      responses:
+        "200":
+          description: On success return feature new settings
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+        "400":
+          description: Invalid feature set or feature index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set or feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+    patch:
+      description: apply settings differentially (no force)
+      operationId: featuresetFeatureSettingsPatch
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of the feature in the features list for this feature set
+        - name: body
+          in: body
+          description: Feature settings to apply
+          required: true
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+      responses:
+        "200":
+          description: On success return feature new settings
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+        "400":
+          description: Invalid feature set or feature index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set or feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/report:
+    x-swagger-router-controller: featureset
+    get:
+      description: get a feature report
+      operationId: featuresetFeatureReportGet
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of the feature in the features list for this feature set
+      responses:
+        "200":
+          description: On success return feature report
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureReport.yaml#/FeatureReport"
+        "400":
+          description: Invalid feature set or feature index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set or feature not found
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          $ref: "#/responses/Response_500"
+        "501":
+          $ref: "#/responses/Response_501"
+
+  /sdrangel/featureset/{featureSetIndex}/feature/{featureIndex}/actions:
+    x-swagger-router-controller: featureset
+    post:
+      description: post an action or actions on a channel
+      operationId: featuresetFeatureActionsPost
+      tags:
+        - FeatureSet
+      parameters:
+        - in: path
+          name: featureSetIndex
+          type: integer
+          required: true
+          description: Index of feature set in the feature set list
+        - in: path
+          name: featureIndex
+          type: integer
+          required: true
+          description: Index of the feature in the features list for this feature set
+        - name: body
+          in: body
+          description: Action(s) to apply to the feature
+          required: true
+          schema:
+            $ref: "http://swgserver:8081/api/swagger/include/FeatureActions.yaml#/FeatureActions"
+      responses:
+        "202":
+          description: Message to perform action was sent successfully
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        "400":
+          description: Invalid feature set or feature index
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "404":
+          description: Feature set or feature not found
           schema:
             $ref: "#/definitions/ErrorResponse"
         "500":
@@ -1891,6 +2303,53 @@ definitions:
         items:
           $ref: "#/definitions/DeviceSet"
 
+  Feature:
+    description: "Feature summarized information"
+    required:
+      - index
+      - id
+      - uid
+      - title
+    properties:
+      index:
+        description: "Index in the list of features"
+        type: integer
+      id:
+        description: "Key to identify the type of feature"
+        type: string
+      uid:
+        description: "Feature instance unique id"
+        type: integer
+        format: int64
+      title:
+        description: "Freeform title of the feature"
+        type: string
+  FeatureSet:
+    description: "Grouping of features"
+    required:
+      - featurecount
+    properties:
+      featurecount:
+        description: "Number of features in the set"
+        type: integer
+      features:
+        description: "Features list"
+        type: array
+        items:
+          $ref:  "#/definitions/Feature"
+  FeatureSetList:
+    description: "List of feature sets opened in this instance"
+    required:
+      - featuresetcount
+    properties:
+      featuresetcount:
+        description: "Number of feature sets opened in this instance"
+        type: integer
+      featureSets:
+        type: array
+        items:
+          $ref: "#/definitions/FeatureSet"
+
   DeviceState:
     description: "Device running state"
     properties:
@@ -1976,7 +2435,7 @@ definitions:
         description: "Channel shift frequency in Hz from the center of baseband"
         type: integer
       report:
-        $ref: "#/definitions/ChannelReport"
+        $ref: "http://swgserver:8081/api/swagger/include/ChannelReport.yaml#/ChannelReport"
 
   ChannelsDetail:
     description: "All channels detailed information"
@@ -2265,113 +2724,6 @@ definitions:
         type: string
       preset:
         $ref: "#/definitions/PresetIdentifier"
-
-  DeviceReport:
-    description: Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present.
-    discriminator: deviceHwType
-    required:
-      - deviceHwType
-      - direction
-    properties:
-      deviceHwType:
-        description: Device hardware type code
-        type: string
-      direction:
-        description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
-        type: integer
-      airspyReport:
-        $ref: "http://swgserver:8081/api/swagger/include/Airspy.yaml#/AirspyReport"
-      airspyHFReport:
-        $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFReport"
-      bladeRF2InputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2InputReport"
-      bladeRF2OutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2OutputReport"
-      fileInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
-      limeSdrInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
-      kiwiSDRReport:
-        $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
-      limeSdrOutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
-      localInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
-      localOutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputReport"
-      perseusReport:
-        $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusReport"
-      plutoSdrInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
-      plutoSdrOutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
-      rtlSdrReport:
-        $ref: "http://swgserver:8081/api/swagger/include/RtlSdr.yaml#/RtlSdrReport"
-      remoteOutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/RemoteOutput.yaml#/RemoteOutputReport"
-      remoteInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
-      sdrPlayReport:
-        $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
-      soapySDRInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
-      soapySDROutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
-      xtrxInputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
-      xtrxOutputReport:
-        $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxOutputReport"
-
-  ChannelReport:
-    description: Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present.
-    discriminator: channelType
-    properties:
-      channelType:
-        description: Channel type code
-        type: string
-      direction:
-        description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
-        type: integer
-      AMDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/AMDemod.yaml#/AMDemodReport"
-      AMModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/AMMod.yaml#/AMModReport"
-      ATVModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
-      BFMDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
-      DSDDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
-      FileSinkReport:
-        $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkReport"
-      FileSourceReport:
-        $ref: "http://swgserver:8081/api/swagger/include/FileSource.yaml#/FileSourceReport"
-      FreeDVDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
-      FreeDVModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
-      FreqTrackerReport:
-        $ref: "http://swgserver:8081/api/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
-      NFMDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
-      NFMModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
-      PacketModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/PacketMod.yaml#/PacketModReport"
-      SSBDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
-      RemoteSourceReport:
-        $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
-      SSBModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/SSBMod.yaml#/SSBModReport"
-      UDPSourceReport:
-        $ref: "http://swgserver:8081/api/swagger/include/UDPSource.yaml#/UDPSourceReport"
-      UDPSinkReport:
-        $ref: "http://swgserver:8081/api/swagger/include/UDPSink.yaml#/UDPSinkReport"
-      WFMDemodReport:
-        $ref: "http://swgserver:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodReport"
-      WFMModReport:
-        $ref: "http://swgserver:8081/api/swagger/include/WFMMod.yaml#/WFMModReport"
 
 responses:
 

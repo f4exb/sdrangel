@@ -1057,6 +1057,58 @@ SWGInstanceApi::instanceDevicesCallback(SWGHttpRequestWorker * worker) {
 }
 
 void
+SWGInstanceApi::instanceFeatureSetsGet() {
+    QString fullPath;
+    fullPath.append(this->host).append(this->basePath).append("/sdrangel/featuresets");
+
+
+
+    SWGHttpRequestWorker *worker = new SWGHttpRequestWorker();
+    SWGHttpRequestInput input(fullPath, "GET");
+
+
+
+
+
+    foreach(QString key, this->defaultHeaders.keys()) {
+        input.headers.insert(key, this->defaultHeaders.value(key));
+    }
+
+    connect(worker,
+            &SWGHttpRequestWorker::on_execution_finished,
+            this,
+            &SWGInstanceApi::instanceFeatureSetsGetCallback);
+
+    worker->execute(&input);
+}
+
+void
+SWGInstanceApi::instanceFeatureSetsGetCallback(SWGHttpRequestWorker * worker) {
+    QString msg;
+    QString error_str = worker->error_str;
+    QNetworkReply::NetworkError error_type = worker->error_type;
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        msg = QString("Success! %1 bytes").arg(worker->response.length());
+    }
+    else {
+        msg = "Error: " + worker->error_str;
+    }
+
+
+    QString json(worker->response);
+    SWGFeatureSetList* output = static_cast<SWGFeatureSetList*>(create(json, QString("SWGFeatureSetList")));
+    worker->deleteLater();
+
+    if (worker->error_type == QNetworkReply::NoError) {
+        emit instanceFeatureSetsGetSignal(output);
+    } else {
+        emit instanceFeatureSetsGetSignalE(output, error_type, error_str);
+        emit instanceFeatureSetsGetSignalEFull(worker, error_type, error_str);
+    }
+}
+
+void
 SWGInstanceApi::instanceLimeRFEConfigGet(QString* serial) {
     QString fullPath;
     fullPath.append(this->host).append(this->basePath).append("/sdrangel/limerfe/config");

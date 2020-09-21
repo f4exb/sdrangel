@@ -1,0 +1,50 @@
+SimplePTTSettings:
+  description: "Simple PTT settings"
+  properties:
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    rxDeviceSetIndex:
+      description: index of the Rx device set to connect the Rx side to
+      type: integer
+    txDeviceSetIndex:
+      description: index of the Tx device set to connect the Tx side to
+      type: integer
+    rx2TxDelayMs:
+      description: Delay in milliseconds from Rx off to Tx on
+      type: integer
+    tx2RxDelayMs:
+      description: Delay in milliseconds from Tx off to Rx on
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+SimplePTTReport:
+  description: "Simple PTT report"
+  properties:
+    ptt:
+      type: integer
+      description: >
+        PTT status
+          * 0 - released
+          * 1 - engaged
+
+SimplePTTActions:
+  description: "Simple PTT actions"
+  properties:
+    ptt:
+      type: integer
+      description: >
+        PTT action
+          * 0 - release
+          * 1 - engage

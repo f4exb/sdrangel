@@ -1,0 +1,17 @@
+FeatureActions:
+  description: Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present.
+  discriminator: featureType
+  required:
+    - featureType
+  properties:
+    featureType:
+      description: Feature type code
+      type: string
+    originatorFeatureSetIndex:
+      description: Optional for reverse API. This is the feature set index from where the message comes from.
+      type: integer
+    originatorFeatureIndex:
+      description: Optional for reverse API. This is the feature index from where the message comes from.
+      type: integer
+    SimplePTTActions:
+      $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTActions"

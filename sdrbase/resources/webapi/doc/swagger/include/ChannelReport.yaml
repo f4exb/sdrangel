@@ -1,0 +1,53 @@
+ChannelReport:
+  description: Base channel report. Only the channel report corresponding to the channel specified in the channelType field is or should be present.
+  discriminator: channelType
+  required:
+    - deviceHwType
+    - direction
+  properties:
+    channelType:
+      description: Channel type code
+      type: string
+    direction:
+      description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
+      type: integer
+    AMDemodReport:
+      $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
+    AMModReport:
+      $ref: "/doc/swagger/include/AMMod.yaml#/AMModReport"
+    ATVModReport:
+      $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
+    BFMDemodReport:
+      $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+    DSDDemodReport:
+      $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+    FileSinkReport:
+      $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkReport"
+    FileSourceReport:
+      $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceReport"
+    FreeDVDemodReport:
+      $ref: "/doc/swagger/include/FreeDVDemod.yaml#/FreeDVDemodReport"
+    FreeDVModReport:
+      $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModReport"
+    FreqTrackerReport:
+      $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerReport"
+    NFMDemodReport:
+      $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
+    NFMModReport:
+      $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+    SSBDemodReport:
+      $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+    RemoteSourceReport:
+      $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
+    PacketModReport:
+      $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModReport"
+    SSBModReport:
+      $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
+    UDPSourceReport:
+      $ref: "/doc/swagger/include/UDPSource.yaml#/UDPSourceReport"
+    UDPSinkReport:
+      $ref: "/doc/swagger/include/UDPSink.yaml#/UDPSinkReport"
+    WFMDemodReport:
+      $ref: "/doc/swagger/include/WFMDemod.yaml#/WFMDemodReport"
+    WFMModReport:
+      $ref: "/doc/swagger/include/WFMMod.yaml#/WFMModReport"

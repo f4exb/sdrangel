@@ -23,24 +23,18 @@
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
-#include "SWGAirspyHFReport.h"
 #include "SWGAirspyHFSettings.h"
-#include "SWGAirspyReport.h"
 #include "SWGAirspySettings.h"
-#include "SWGArgInfo.h"
 #include "SWGArgValue.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
 #include "SWGAudioOutputDevice.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
-#include "SWGBandwidth.h"
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
-#include "SWGBladeRF2InputReport.h"
 #include "SWGBladeRF2InputSettings.h"
 #include "SWGBladeRF2MIMOSettings.h"
-#include "SWGBladeRF2OutputReport.h"
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGCWKeyerSettings.h"
 #include "SWGChannel.h"
@@ -61,7 +55,6 @@
 #include "SWGDeviceActions.h"
 #include "SWGDeviceConfig.h"
 #include "SWGDeviceListItem.h"
-#include "SWGDeviceReport.h"
 #include "SWGDeviceSet.h"
 #include "SWGDeviceSetList.h"
 #include "SWGDeviceSettings.h"
@@ -69,7 +62,12 @@
 #include "SWGErrorResponse.h"
 #include "SWGFCDProPlusSettings.h"
 #include "SWGFCDProSettings.h"
-#include "SWGFileInputReport.h"
+#include "SWGFeature.h"
+#include "SWGFeatureActions.h"
+#include "SWGFeatureReport.h"
+#include "SWGFeatureSet.h"
+#include "SWGFeatureSetList.h"
+#include "SWGFeatureSettings.h"
 #include "SWGFileInputSettings.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSinkReport.h"
@@ -83,31 +81,22 @@
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerReport.h"
 #include "SWGFreqTrackerSettings.h"
-#include "SWGFrequency.h"
-#include "SWGFrequencyBand.h"
-#include "SWGFrequencyRange.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
-#include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
 #include "SWGInstanceSummaryResponse.h"
-#include "SWGKiwiSDRReport.h"
 #include "SWGKiwiSDRSettings.h"
 #include "SWGLimeRFEDevice.h"
 #include "SWGLimeRFEDevices.h"
 #include "SWGLimeRFEPower.h"
 #include "SWGLimeRFESettings.h"
-#include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
-#include "SWGLimeSdrOutputReport.h"
 #include "SWGLimeSdrOutputSettings.h"
-#include "SWGLocalInputReport.h"
 #include "SWGLocalInputSettings.h"
-#include "SWGLocalOutputReport.h"
 #include "SWGLocalOutputSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
@@ -117,16 +106,12 @@
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
-#include "SWGNamedEnum.h"
 #include "SWGPacketModActions.h"
 #include "SWGPacketModActions_tx.h"
 #include "SWGPacketModReport.h"
 #include "SWGPacketModSettings.h"
-#include "SWGPerseusReport.h"
 #include "SWGPerseusSettings.h"
-#include "SWGPlutoSdrInputReport.h"
 #include "SWGPlutoSdrInputSettings.h"
-#include "SWGPlutoSdrOutputReport.h"
 #include "SWGPlutoSdrOutputSettings.h"
 #include "SWGPreferences.h"
 #include "SWGPreset.h"
@@ -139,30 +124,23 @@
 #include "SWGPresets.h"
 #include "SWGRDSReport.h"
 #include "SWGRDSReport_altFrequencies.h"
-#include "SWGRange.h"
-#include "SWGRangeFloat.h"
-#include "SWGRemoteInputReport.h"
 #include "SWGRemoteInputSettings.h"
-#include "SWGRemoteOutputReport.h"
 #include "SWGRemoteOutputSettings.h"
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGRemoteSourceSettings.h"
-#include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
-#include "SWGSDRPlayReport.h"
 #include "SWGSDRPlaySettings.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
 #include "SWGSSBModSettings.h"
-#include "SWGSampleRate.h"
 #include "SWGSamplingDevice.h"
-#include "SWGSoapySDRFrequencySetting.h"
-#include "SWGSoapySDRGainSetting.h"
+#include "SWGSimplePTTActions.h"
+#include "SWGSimplePTTReport.h"
+#include "SWGSimplePTTSettings.h"
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
-#include "SWGSoapySDRReport.h"
 #include "SWGSuccessResponse.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGTraceData.h"
@@ -175,9 +153,7 @@
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
 #include "SWGWFMModSettings.h"
-#include "SWGXtrxInputReport.h"
 #include "SWGXtrxInputSettings.h"
-#include "SWGXtrxOutputReport.h"
 #include "SWGXtrxOutputSettings.h"
 
 namespace SWGSDRangel {
@@ -210,20 +186,11 @@ namespace SWGSDRangel {
     if(QString("SWGATVModSettings").compare(type) == 0) {
       return new SWGATVModSettings();
     }
-    if(QString("SWGAirspyHFReport").compare(type) == 0) {
-      return new SWGAirspyHFReport();
-    }
     if(QString("SWGAirspyHFSettings").compare(type) == 0) {
       return new SWGAirspyHFSettings();
     }
-    if(QString("SWGAirspyReport").compare(type) == 0) {
-      return new SWGAirspyReport();
-    }
     if(QString("SWGAirspySettings").compare(type) == 0) {
       return new SWGAirspySettings();
-    }
-    if(QString("SWGArgInfo").compare(type) == 0) {
-      return new SWGArgInfo();
     }
     if(QString("SWGArgValue").compare(type) == 0) {
       return new SWGArgValue();
@@ -243,26 +210,17 @@ namespace SWGSDRangel {
     if(QString("SWGBFMDemodSettings").compare(type) == 0) {
       return new SWGBFMDemodSettings();
     }
-    if(QString("SWGBandwidth").compare(type) == 0) {
-      return new SWGBandwidth();
-    }
     if(QString("SWGBladeRF1InputSettings").compare(type) == 0) {
       return new SWGBladeRF1InputSettings();
     }
     if(QString("SWGBladeRF1OutputSettings").compare(type) == 0) {
       return new SWGBladeRF1OutputSettings();
     }
-    if(QString("SWGBladeRF2InputReport").compare(type) == 0) {
-      return new SWGBladeRF2InputReport();
-    }
     if(QString("SWGBladeRF2InputSettings").compare(type) == 0) {
       return new SWGBladeRF2InputSettings();
     }
     if(QString("SWGBladeRF2MIMOSettings").compare(type) == 0) {
       return new SWGBladeRF2MIMOSettings();
-    }
-    if(QString("SWGBladeRF2OutputReport").compare(type) == 0) {
-      return new SWGBladeRF2OutputReport();
     }
     if(QString("SWGBladeRF2OutputSettings").compare(type) == 0) {
       return new SWGBladeRF2OutputSettings();
@@ -324,9 +282,6 @@ namespace SWGSDRangel {
     if(QString("SWGDeviceListItem").compare(type) == 0) {
       return new SWGDeviceListItem();
     }
-    if(QString("SWGDeviceReport").compare(type) == 0) {
-      return new SWGDeviceReport();
-    }
     if(QString("SWGDeviceSet").compare(type) == 0) {
       return new SWGDeviceSet();
     }
@@ -348,8 +303,23 @@ namespace SWGSDRangel {
     if(QString("SWGFCDProSettings").compare(type) == 0) {
       return new SWGFCDProSettings();
     }
-    if(QString("SWGFileInputReport").compare(type) == 0) {
-      return new SWGFileInputReport();
+    if(QString("SWGFeature").compare(type) == 0) {
+      return new SWGFeature();
+    }
+    if(QString("SWGFeatureActions").compare(type) == 0) {
+      return new SWGFeatureActions();
+    }
+    if(QString("SWGFeatureReport").compare(type) == 0) {
+      return new SWGFeatureReport();
+    }
+    if(QString("SWGFeatureSet").compare(type) == 0) {
+      return new SWGFeatureSet();
+    }
+    if(QString("SWGFeatureSetList").compare(type) == 0) {
+      return new SWGFeatureSetList();
+    }
+    if(QString("SWGFeatureSettings").compare(type) == 0) {
+      return new SWGFeatureSettings();
     }
     if(QString("SWGFileInputSettings").compare(type) == 0) {
       return new SWGFileInputSettings();
@@ -390,23 +360,11 @@ namespace SWGSDRangel {
     if(QString("SWGFreqTrackerSettings").compare(type) == 0) {
       return new SWGFreqTrackerSettings();
     }
-    if(QString("SWGFrequency").compare(type) == 0) {
-      return new SWGFrequency();
-    }
-    if(QString("SWGFrequencyBand").compare(type) == 0) {
-      return new SWGFrequencyBand();
-    }
-    if(QString("SWGFrequencyRange").compare(type) == 0) {
-      return new SWGFrequencyRange();
-    }
     if(QString("SWGGLScope").compare(type) == 0) {
       return new SWGGLScope();
     }
     if(QString("SWGGLSpectrum").compare(type) == 0) {
       return new SWGGLSpectrum();
-    }
-    if(QString("SWGGain").compare(type) == 0) {
-      return new SWGGain();
     }
     if(QString("SWGHackRFInputSettings").compare(type) == 0) {
       return new SWGHackRFInputSettings();
@@ -426,9 +384,6 @@ namespace SWGSDRangel {
     if(QString("SWGInstanceSummaryResponse").compare(type) == 0) {
       return new SWGInstanceSummaryResponse();
     }
-    if(QString("SWGKiwiSDRReport").compare(type) == 0) {
-      return new SWGKiwiSDRReport();
-    }
     if(QString("SWGKiwiSDRSettings").compare(type) == 0) {
       return new SWGKiwiSDRSettings();
     }
@@ -444,26 +399,14 @@ namespace SWGSDRangel {
     if(QString("SWGLimeRFESettings").compare(type) == 0) {
       return new SWGLimeRFESettings();
     }
-    if(QString("SWGLimeSdrInputReport").compare(type) == 0) {
-      return new SWGLimeSdrInputReport();
-    }
     if(QString("SWGLimeSdrInputSettings").compare(type) == 0) {
       return new SWGLimeSdrInputSettings();
-    }
-    if(QString("SWGLimeSdrOutputReport").compare(type) == 0) {
-      return new SWGLimeSdrOutputReport();
     }
     if(QString("SWGLimeSdrOutputSettings").compare(type) == 0) {
       return new SWGLimeSdrOutputSettings();
     }
-    if(QString("SWGLocalInputReport").compare(type) == 0) {
-      return new SWGLocalInputReport();
-    }
     if(QString("SWGLocalInputSettings").compare(type) == 0) {
       return new SWGLocalInputSettings();
-    }
-    if(QString("SWGLocalOutputReport").compare(type) == 0) {
-      return new SWGLocalOutputReport();
     }
     if(QString("SWGLocalOutputSettings").compare(type) == 0) {
       return new SWGLocalOutputSettings();
@@ -492,9 +435,6 @@ namespace SWGSDRangel {
     if(QString("SWGNFMModSettings").compare(type) == 0) {
       return new SWGNFMModSettings();
     }
-    if(QString("SWGNamedEnum").compare(type) == 0) {
-      return new SWGNamedEnum();
-    }
     if(QString("SWGPacketModActions").compare(type) == 0) {
       return new SWGPacketModActions();
     }
@@ -507,20 +447,11 @@ namespace SWGSDRangel {
     if(QString("SWGPacketModSettings").compare(type) == 0) {
       return new SWGPacketModSettings();
     }
-    if(QString("SWGPerseusReport").compare(type) == 0) {
-      return new SWGPerseusReport();
-    }
     if(QString("SWGPerseusSettings").compare(type) == 0) {
       return new SWGPerseusSettings();
     }
-    if(QString("SWGPlutoSdrInputReport").compare(type) == 0) {
-      return new SWGPlutoSdrInputReport();
-    }
     if(QString("SWGPlutoSdrInputSettings").compare(type) == 0) {
       return new SWGPlutoSdrInputSettings();
-    }
-    if(QString("SWGPlutoSdrOutputReport").compare(type) == 0) {
-      return new SWGPlutoSdrOutputReport();
     }
     if(QString("SWGPlutoSdrOutputSettings").compare(type) == 0) {
       return new SWGPlutoSdrOutputSettings();
@@ -558,20 +489,8 @@ namespace SWGSDRangel {
     if(QString("SWGRDSReport_altFrequencies").compare(type) == 0) {
       return new SWGRDSReport_altFrequencies();
     }
-    if(QString("SWGRange").compare(type) == 0) {
-      return new SWGRange();
-    }
-    if(QString("SWGRangeFloat").compare(type) == 0) {
-      return new SWGRangeFloat();
-    }
-    if(QString("SWGRemoteInputReport").compare(type) == 0) {
-      return new SWGRemoteInputReport();
-    }
     if(QString("SWGRemoteInputSettings").compare(type) == 0) {
       return new SWGRemoteInputSettings();
-    }
-    if(QString("SWGRemoteOutputReport").compare(type) == 0) {
-      return new SWGRemoteOutputReport();
     }
     if(QString("SWGRemoteOutputSettings").compare(type) == 0) {
       return new SWGRemoteOutputSettings();
@@ -585,14 +504,8 @@ namespace SWGSDRangel {
     if(QString("SWGRemoteSourceSettings").compare(type) == 0) {
       return new SWGRemoteSourceSettings();
     }
-    if(QString("SWGRtlSdrReport").compare(type) == 0) {
-      return new SWGRtlSdrReport();
-    }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
       return new SWGRtlSdrSettings();
-    }
-    if(QString("SWGSDRPlayReport").compare(type) == 0) {
-      return new SWGSDRPlayReport();
     }
     if(QString("SWGSDRPlaySettings").compare(type) == 0) {
       return new SWGSDRPlaySettings();
@@ -609,26 +522,23 @@ namespace SWGSDRangel {
     if(QString("SWGSSBModSettings").compare(type) == 0) {
       return new SWGSSBModSettings();
     }
-    if(QString("SWGSampleRate").compare(type) == 0) {
-      return new SWGSampleRate();
-    }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();
     }
-    if(QString("SWGSoapySDRFrequencySetting").compare(type) == 0) {
-      return new SWGSoapySDRFrequencySetting();
+    if(QString("SWGSimplePTTActions").compare(type) == 0) {
+      return new SWGSimplePTTActions();
     }
-    if(QString("SWGSoapySDRGainSetting").compare(type) == 0) {
-      return new SWGSoapySDRGainSetting();
+    if(QString("SWGSimplePTTReport").compare(type) == 0) {
+      return new SWGSimplePTTReport();
+    }
+    if(QString("SWGSimplePTTSettings").compare(type) == 0) {
+      return new SWGSimplePTTSettings();
     }
     if(QString("SWGSoapySDRInputSettings").compare(type) == 0) {
       return new SWGSoapySDRInputSettings();
     }
     if(QString("SWGSoapySDROutputSettings").compare(type) == 0) {
       return new SWGSoapySDROutputSettings();
-    }
-    if(QString("SWGSoapySDRReport").compare(type) == 0) {
-      return new SWGSoapySDRReport();
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();
@@ -666,14 +576,8 @@ namespace SWGSDRangel {
     if(QString("SWGWFMModSettings").compare(type) == 0) {
       return new SWGWFMModSettings();
     }
-    if(QString("SWGXtrxInputReport").compare(type) == 0) {
-      return new SWGXtrxInputReport();
-    }
     if(QString("SWGXtrxInputSettings").compare(type) == 0) {
       return new SWGXtrxInputSettings();
-    }
-    if(QString("SWGXtrxOutputReport").compare(type) == 0) {
-      return new SWGXtrxOutputReport();
     }
     if(QString("SWGXtrxOutputSettings").compare(type) == 0) {
       return new SWGXtrxOutputSettings();
