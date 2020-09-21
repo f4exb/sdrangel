@@ -256,7 +256,6 @@ void UDPSinkSink::feed(const SampleVector::const_iterator& begin, const SampleVe
                 {
                     double demodf = sqrt(inMagSq);
                     demodf = m_bandpass.filter(demodf);
-                    demodf /= 301.0;
                     Real amplitude = demodf * agcFactor * m_settings.m_gain;
                     FixReal demod = (FixReal) amplitude;
                     udpWriteMono(demod);

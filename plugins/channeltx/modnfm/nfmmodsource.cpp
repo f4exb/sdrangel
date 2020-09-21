@@ -134,14 +134,11 @@ void NFMModSource::modulateSample()
     calculateLevel(t);
     m_audioBufferFill++;
 
-    if (m_settings.m_ctcssOn)
-    {
-        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * (0.85f * m_bandpass.filter(t) + 0.15f * 189.0f * m_ctcssNco.next()) * (M_PI / 189.0f);
-    }
-    else
-    {
-        // 378 = 302 * 1.25; 302 = number of filter taps (established experimentally) and 189 = 378/2 for 2*PI
-        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 189.0f);
+    // 0.625 = 1/1.25 (heuristic)
+    if (m_settings.m_ctcssOn) {
+        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * (0.85f * m_bandpass.filter(t) + 0.15f * 0.625f * m_ctcssNco.next()) * (M_PI / 0.625f);
+    } else {
+        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * m_bandpass.filter(t) * (M_PI / 0.625f);
     }
 
     // limit phasor range to ]-pi,pi]
