@@ -32,6 +32,7 @@ class SDRGUI_API FMPreemphasisDialog : public QDialog {
 public:
     explicit FMPreemphasisDialog(float tau, float highFreq, QWidget* parent = 0);
     ~FMPreemphasisDialog();
+    void updateCombo();
     
     float m_tau;
     float m_highFreq;
@@ -40,6 +41,7 @@ private slots:
     void accept();
     void on_tau_valueChanged(double value);
     void on_lowFreq_valueChanged(double value);
+    void on_preset_currentIndexChanged(int value);
 
 private:
     Ui::FMPreemphasisDialog* ui;
