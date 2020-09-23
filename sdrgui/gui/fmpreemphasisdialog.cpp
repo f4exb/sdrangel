@@ -51,6 +51,7 @@ void FMPreemphasisDialog::on_tau_valueChanged(double value)
     // Set corresponding low frequency
     ui->lowFreq->blockSignals(true);
     ui->lowFreq->setValue(1.0/(2.0*M_PI*(value/TAU_SCALE)));
+    updateCombo();
     ui->lowFreq->blockSignals(false);
 }
 
@@ -59,5 +60,41 @@ void FMPreemphasisDialog::on_lowFreq_valueChanged(double value)
     // Set corresponding tau
     ui->tau->blockSignals(true);
     ui->tau->setValue(TAU_SCALE*1.0/(2.0*M_PI*value));
+    updateCombo();
     ui->tau->blockSignals(false);
+}
+
+void FMPreemphasisDialog::updateCombo()
+{
+    double value = ui->tau->value();
+    if (value == 531.0)
+        ui->preset->setCurrentIndex(0);
+    else if (value == 75.0)
+        ui->preset->setCurrentIndex(1);
+    else if (value == 50.0)
+        ui->preset->setCurrentIndex(2);
+    else
+        ui->preset->setCurrentIndex(3);
+}
+
+void FMPreemphasisDialog::on_preset_currentIndexChanged(int value)
+{
+    if (value == 0)
+    {
+        // Narrowband FM
+        ui->lowFreq->setValue(300.0);
+        ui->highFreq->setValue(3000.0);
+    }
+    else if (value == 1)
+    {
+        // Broadcast FM (US)
+        ui->tau->setValue(75.0);
+        ui->highFreq->setValue(12000.0);
+    }
+    else if (value == 2)
+    {
+        // Broadcast FM (EU)
+        ui->tau->setValue(50.0);
+        ui->highFreq->setValue(12000.0);
+    }
 }

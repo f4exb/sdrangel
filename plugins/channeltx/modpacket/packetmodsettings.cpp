@@ -52,8 +52,8 @@ void PacketModSettings::resetToDefaults()
     m_ax25Control = 3;
     m_ax25PID = 0xf0;
     m_preEmphasis = false;
-    m_preEmphasisTau = 50e-6f;
-    m_preEmphasisHighFreq = 12000.0f;
+    m_preEmphasisTau = 531e-6f; // Narrowband FM
+    m_preEmphasisHighFreq = 3000.0f;
     m_lpfTaps = 301;
     m_bbNoise = false;
     m_rfNoise = false;
@@ -222,8 +222,8 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         d.readS32(18, &m_ax25Control, 3);
         d.readS32(19, &m_ax25PID, 0xf0);
         d.readBool(20, &m_preEmphasis, false);
-        d.readReal(21, &m_preEmphasisTau, 50e-6f);
-        d.readReal(22, &m_preEmphasisHighFreq, 12000.0f);
+        d.readReal(21, &m_preEmphasisTau, 531e-6f);
+        d.readReal(22, &m_preEmphasisHighFreq, 3000.0f);
         d.readS32(23, &m_lpfTaps, 301);
         d.readBool(24, &m_bbNoise, false);
         d.readBool(25, &m_rfNoise, false);
