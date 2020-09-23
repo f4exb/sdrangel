@@ -30,6 +30,8 @@ SWGPacketModSettings::SWGPacketModSettings(QString* json) {
 SWGPacketModSettings::SWGPacketModSettings() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
+    mode = nullptr;
+    m_mode_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
@@ -54,6 +56,12 @@ SWGPacketModSettings::SWGPacketModSettings() {
     m_pre_emphasis_tau_isSet = false;
     pre_emphasis_high_freq = 0.0f;
     m_pre_emphasis_high_freq_isSet = false;
+    bpf = 0;
+    m_bpf_isSet = false;
+    bpf_low_cutoff = 0.0f;
+    m_bpf_low_cutoff_isSet = false;
+    bpf_high_cutoff = 0.0f;
+    m_bpf_high_cutoff_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -80,6 +88,8 @@ void
 SWGPacketModSettings::init() {
     input_frequency_offset = 0L;
     m_input_frequency_offset_isSet = false;
+    mode = new QString("");
+    m_mode_isSet = false;
     rf_bandwidth = 0.0f;
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
@@ -104,6 +114,12 @@ SWGPacketModSettings::init() {
     m_pre_emphasis_tau_isSet = false;
     pre_emphasis_high_freq = 0.0f;
     m_pre_emphasis_high_freq_isSet = false;
+    bpf = 0;
+    m_bpf_isSet = false;
+    bpf_low_cutoff = 0.0f;
+    m_bpf_low_cutoff_isSet = false;
+    bpf_high_cutoff = 0.0f;
+    m_bpf_high_cutoff_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -124,6 +140,12 @@ SWGPacketModSettings::init() {
 
 void
 SWGPacketModSettings::cleanup() {
+
+    if(mode != nullptr) { 
+        delete mode;
+    }
+
+
 
 
 
@@ -164,6 +186,8 @@ void
 SWGPacketModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&input_frequency_offset, pJson["inputFrequencyOffset"], "qint64", "");
     
+    ::SWGSDRangel::setValue(&mode, pJson["mode"], "QString", "QString");
+    
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
     ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
@@ -187,6 +211,12 @@ SWGPacketModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pre_emphasis_tau, pJson["preEmphasisTau"], "float", "");
     
     ::SWGSDRangel::setValue(&pre_emphasis_high_freq, pJson["preEmphasisHighFreq"], "float", "");
+    
+    ::SWGSDRangel::setValue(&bpf, pJson["bpf"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&bpf_low_cutoff, pJson["bpfLowCutoff"], "float", "");
+    
+    ::SWGSDRangel::setValue(&bpf_high_cutoff, pJson["bpfHighCutoff"], "float", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -222,6 +252,9 @@ SWGPacketModSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
     if(m_input_frequency_offset_isSet){
         obj->insert("inputFrequencyOffset", QJsonValue(input_frequency_offset));
+    }
+    if(mode != nullptr && *mode != QString("")){
+        toJsonValue(QString("mode"), mode, obj, QString("QString"));
     }
     if(m_rf_bandwidth_isSet){
         obj->insert("rfBandwidth", QJsonValue(rf_bandwidth));
@@ -259,6 +292,15 @@ SWGPacketModSettings::asJsonObject() {
     if(m_pre_emphasis_high_freq_isSet){
         obj->insert("preEmphasisHighFreq", QJsonValue(pre_emphasis_high_freq));
     }
+    if(m_bpf_isSet){
+        obj->insert("bpf", QJsonValue(bpf));
+    }
+    if(m_bpf_low_cutoff_isSet){
+        obj->insert("bpfLowCutoff", QJsonValue(bpf_low_cutoff));
+    }
+    if(m_bpf_high_cutoff_isSet){
+        obj->insert("bpfHighCutoff", QJsonValue(bpf_high_cutoff));
+    }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
     }
@@ -295,6 +337,16 @@ void
 SWGPacketModSettings::setInputFrequencyOffset(qint64 input_frequency_offset) {
     this->input_frequency_offset = input_frequency_offset;
     this->m_input_frequency_offset_isSet = true;
+}
+
+QString*
+SWGPacketModSettings::getMode() {
+    return mode;
+}
+void
+SWGPacketModSettings::setMode(QString* mode) {
+    this->mode = mode;
+    this->m_mode_isSet = true;
 }
 
 float
@@ -418,6 +470,36 @@ SWGPacketModSettings::setPreEmphasisHighFreq(float pre_emphasis_high_freq) {
 }
 
 qint32
+SWGPacketModSettings::getBpf() {
+    return bpf;
+}
+void
+SWGPacketModSettings::setBpf(qint32 bpf) {
+    this->bpf = bpf;
+    this->m_bpf_isSet = true;
+}
+
+float
+SWGPacketModSettings::getBpfLowCutoff() {
+    return bpf_low_cutoff;
+}
+void
+SWGPacketModSettings::setBpfLowCutoff(float bpf_low_cutoff) {
+    this->bpf_low_cutoff = bpf_low_cutoff;
+    this->m_bpf_low_cutoff_isSet = true;
+}
+
+float
+SWGPacketModSettings::getBpfHighCutoff() {
+    return bpf_high_cutoff;
+}
+void
+SWGPacketModSettings::setBpfHighCutoff(float bpf_high_cutoff) {
+    this->bpf_high_cutoff = bpf_high_cutoff;
+    this->m_bpf_high_cutoff_isSet = true;
+}
+
+qint32
 SWGPacketModSettings::getRgbColor() {
     return rgb_color;
 }
@@ -505,6 +587,9 @@ SWGPacketModSettings::isSet(){
         if(m_input_frequency_offset_isSet){
             isObjectUpdated = true; break;
         }
+        if(mode && *mode != QString("")){
+            isObjectUpdated = true; break;
+        }
         if(m_rf_bandwidth_isSet){
             isObjectUpdated = true; break;
         }
@@ -539,6 +624,15 @@ SWGPacketModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pre_emphasis_high_freq_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bpf_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bpf_low_cutoff_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_bpf_high_cutoff_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

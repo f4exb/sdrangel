@@ -22,7 +22,7 @@ Use this button to toggle mute for this channel.
 
 <h3>4: Modulation</h3>
 
-This specifies the baud rate and modulation that is used for the packet transmission. Currently 1200 baud AFSK is supported.
+This specifies the baud rate and modulation that is used for the packet transmission. Currently 1200 baud AFSK and 9600 baud FSK are supported.
 
 <h3>5: RF Bandwidth</h3>
 
@@ -50,29 +50,33 @@ Enter your amateur radio callsign and optionally a sub-station ID (SSID). E.g. M
 
 Check this button to enable a FM preemphasis filter, which amplifiers higher frequencies. Right click to open the dialog to adjust settings for the filter.
 
-<h3>11: Repeat</h3>
+<h3>11: Bandpass Filter</h3>
+
+Check this button to enable a baseband bandpass filter. Right click to open the dialog to adjust settings for the filter.
+
+<h3>12: Repeat</h3>
 
 Check this button to repeated transmit a packet. Right click to open the dialog to adjust the delay between retransmission and number of times the packet should be repeated.
 
-<h3>12: Insertion position</h3>
+<h3>13: Insertion position</h3>
 
 Inserts position as APRS formatted latitude and longitude in to the current cursor position within the data field. Lattitude and longitude can be specified under Preferences > My position.
 
-<h3>13: To</h3>
+<h3>14: To</h3>
 
 Enter the destination for the packet. To send the packet to the APRS network, use APRS or APZ.
 
-<h3>14: Via</h3>
+<h3>15: Via</h3>
 
 Enter the routing for the packet. To have the packet repeated by digipeaters, use WIDE2-2. To have the packet repeated by the International Space Station (ISS), use ARISS.
 
-<h3>15: Data</h3>
+<h3>16: Data</h3>
 
-The packet of data to send. To send an APRS status message, use the format <tt>>Status</tt>. APRS messages can be tracked on https://aprs.fi
+The packet of data to send. To send an APRS status message, use the format <tt>>Status</tt>. The APRS specification can be found at: http://www.aprs.org/doc/APRS101.PDF. APRS messages can be tracked on https://aprs.fi
 
-<h3>16: TX</h3>
+<h3>17: TX</h3>
 
-Transmits a packet based on the current values in callsign, to, via and data.
+Transmits a packet containing the current values in callsign, to, via and data fields.
 
 <h2>API</h2>
 
@@ -80,6 +84,6 @@ Full details of the API can be found in the Swagger documentation. Here is a qui
 
     curl -X POST "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/actions" -d '{"channelType": "PacketMod",  "direction": 1, "PacketModActions": { "tx": { "callsign": "MYCALL", "to": "APRS", "via": "WIDE2-2", "data": ">Using SDRangel API to transmit" }}}'
 
-Or to set the frequency deviation:
+Or to set the mode to 9600 FSK:
 
-    curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings" -d '{"channelType": "PacketMod", "direction": 1, "PacketModSettings": {"fmDeviation": 5000}}'
+    curl -X PATCH "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings" -d '{"channelType": "PacketMod", "direction": 1, "PacketModSettings": {"mode": "9600 FSK"}}'

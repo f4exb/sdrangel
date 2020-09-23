@@ -4932,6 +4932,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "format" : "int64"
     },
+    "mode" : {
+      "type" : "string",
+      "description" : "Transmission mode. \"1200 AFSK\" or \"9600 FSK\"."
+    },
     "rfBandwidth" : {
       "type" : "number",
       "format" : "float"
@@ -4971,6 +4975,17 @@ margin-bottom: 20px;
       "format" : "float"
     },
     "preEmphasisHighFreq" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "bpf" : {
+      "type" : "integer"
+    },
+    "bpfLowCutoff" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "bpfHighCutoff" : {
       "type" : "number",
       "format" : "float"
     },
@@ -33454,7 +33469,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-18T15:59:26.503+02:00
+              Generated 2020-09-23T09:56:01.490+02:00
             </div>
           </div>
       </div>

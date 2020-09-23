@@ -30,6 +30,7 @@ struct PacketModSettings
     static const int infinitePackets = -1;
 
     qint64 m_inputFrequencyOffset;
+    enum Modulation {AFSK, FSK} m_modulation;
     int m_baud;
     Real m_rfBandwidth;
     Real m_fmDeviation;
@@ -49,8 +50,8 @@ struct PacketModSettings
     int m_ax25Control;
     int m_ax25PID;
     bool m_preEmphasis;
-    float m_preEmphasisTau;
-    float m_preEmphasisHighFreq;
+    Real m_preEmphasisTau;
+    Real m_preEmphasisHighFreq;
     int m_lpfTaps;
     bool m_bbNoise;
     bool m_rfNoise;
@@ -69,12 +70,23 @@ struct PacketModSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    bool m_bpf;
+    Real m_bpfLowCutoff;
+    Real m_bpfHighCutoff;
+    int m_bpfTaps;
+    bool m_scramble;
+    int m_polynomial;
+    bool m_pulseShaping;
+    float m_beta;
+    int m_symbolSpan;
 
     PacketModSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+    bool setMode(QString mode);
+    QString getMode() const;
 };
 
 #endif /* PLUGINS_CHANNELTX_MODPACKET_PACKETMODSETTINGS_H */
