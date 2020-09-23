@@ -39,6 +39,7 @@
 #include "packetmodgui.h"
 #include "packetmodrepeatdialog.h"
 #include "packetmodtxsettingsdialog.h"
+#include "packetmodbpfdialog.h"
 
 
 PacketModGUI* PacketModGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
@@ -138,6 +139,28 @@ void PacketModGUI::on_deltaFrequency_changed(qint64 value)
     m_channelMarker.setCenterFrequency(value);
     m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
     applySettings();
+}
+
+void PacketModGUI::on_mode_currentIndexChanged(int value)
+{
+    QString mode = ui->mode->currentText();
+
+    // If m_doApplySettings is set, we are here from a call to displaySettings,
+    // so we only want to display the current settings, not update them
+    // as though a user had selected a new mode
+    if (m_doApplySettings)
+        m_settings.setMode(mode);
+
+    ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
+    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
+    ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
+    ui->glSpectrum->setCenterFrequency(m_settings.m_spectrumRate/4);
+    ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate/2);
+    applySettings();
+
+    // Remove custom mode when deselected, as we no longer know how to set it
+    if (value < 2)
+        ui->mode->removeItem(2);
 }
 
 void PacketModGUI::on_rfBW_valueChanged(int value)
@@ -254,6 +277,12 @@ void PacketModGUI::on_preEmphasis_toggled(bool checked)
     applySettings();
 }
 
+void PacketModGUI::on_bpf_toggled(bool checked)
+{
+    m_settings.m_bpf = checked;
+    applySettings();
+}
+
 void PacketModGUI::preEmphasisSelect()
 {
     FMPreemphasisDialog dialog(m_settings.m_preEmphasisTau, m_settings.m_preEmphasisHighFreq);
@@ -261,6 +290,18 @@ void PacketModGUI::preEmphasisSelect()
     {
         m_settings.m_preEmphasisTau = dialog.m_tau;
         m_settings.m_preEmphasisHighFreq = dialog.m_highFreq;
+        applySettings();
+    }
+}
+
+void PacketModGUI::bpfSelect()
+{
+    PacketModBPFDialog dialog(m_settings.m_bpfLowCutoff, m_settings.m_bpfHighCutoff, m_settings.m_bpfTaps);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settings.m_bpfLowCutoff = dialog.m_lowFreq;
+        m_settings.m_bpfHighCutoff = dialog.m_highFreq;
+        m_settings.m_bpfTaps = dialog.m_taps;
         applySettings();
     }
 }
@@ -280,7 +321,10 @@ void PacketModGUI::txSettingsSelect()
 {
     PacketModTXSettingsDialog dialog(m_settings.m_rampUpBits, m_settings.m_rampDownBits,
                                         m_settings.m_rampRange, m_settings.m_modulateWhileRamping,
+                                        m_settings.m_modulation, m_settings.m_baud,
                                         m_settings.m_markFrequency, m_settings.m_spaceFrequency,
+                                        m_settings.m_pulseShaping, m_settings.m_beta, m_settings.m_symbolSpan,
+                                        m_settings.m_scramble, m_settings.m_polynomial,
                                         m_settings.m_ax25PreFlags, m_settings.m_ax25PostFlags,
                                         m_settings.m_ax25Control, m_settings.m_ax25PID,
                                         m_settings.m_lpfTaps,
@@ -292,8 +336,15 @@ void PacketModGUI::txSettingsSelect()
         m_settings.m_rampDownBits = dialog.m_rampDownBits;
         m_settings.m_rampRange = dialog.m_rampRange;
         m_settings.m_modulateWhileRamping = dialog.m_modulateWhileRamping;
+        m_settings.m_modulation = static_cast<PacketModSettings::Modulation>(dialog.m_modulation);
+        m_settings.m_baud = dialog.m_baud;
         m_settings.m_markFrequency = dialog.m_markFrequency;
         m_settings.m_spaceFrequency = dialog.m_spaceFrequency;
+        m_settings.m_pulseShaping = dialog.m_pulseShaping;
+        m_settings.m_beta = dialog.m_beta;
+        m_settings.m_symbolSpan = dialog.m_symbolSpan;
+        m_settings.m_scramble = dialog.m_scramble;
+        m_settings.m_polynomial = dialog.m_polynomial;
         m_settings.m_ax25PreFlags = dialog.m_ax25PreFlags;
         m_settings.m_ax25PostFlags = dialog.m_ax25PostFlags;
         m_settings.m_ax25Control = dialog.m_ax25Control;
@@ -302,6 +353,7 @@ void PacketModGUI::txSettingsSelect()
         m_settings.m_bbNoise = dialog.m_bbNoise;
         m_settings.m_rfNoise = dialog.m_rfNoise;
         m_settings.m_writeToFile = dialog.m_writeToFile;
+        displaySettings();
         applySettings();
     }
 }
@@ -399,6 +451,9 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     CRightClickEnabler *preempRightClickEnabler = new CRightClickEnabler(ui->preEmphasis);
     connect(preempRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(preEmphasisSelect()));
 
+    CRightClickEnabler *bpfRightClickEnabler = new CRightClickEnabler(ui->bpf);
+    connect(bpfRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(bpfSelect()));
+
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
     ui->deltaFrequency->setValueRange(false, 7, -9999999, 9999999);
@@ -479,6 +534,18 @@ void PacketModGUI::displaySettings()
     blockApplySettings(true);
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
+    if ((m_settings.m_baud == 1200) && (m_settings.m_modulation == PacketModSettings::AFSK))
+        ui->mode->setCurrentIndex(0);
+    else if ((m_settings.m_baud == 9600) && (m_settings.m_modulation == PacketModSettings::FSK))
+        ui->mode->setCurrentIndex(1);
+    else
+    {
+        ui->mode->removeItem(2);
+        ui->mode->addItem(m_settings.getMode());
+        ui->mode->setCurrentIndex(2);
+    }
+    ui->glSpectrum->setCenterFrequency(m_settings.m_spectrumRate/4);
+    ui->glSpectrum->setSampleRate(m_settings.m_spectrumRate/2);
 
     ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);

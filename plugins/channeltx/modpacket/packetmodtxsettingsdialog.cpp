@@ -18,8 +18,10 @@
 #include "packetmodtxsettingsdialog.h"
 
 PacketModTXSettingsDialog::PacketModTXSettingsDialog(int rampUpBits, int rampDownBits,
-        int rampRange, bool modulateWhileRamping,
+        int rampRange, bool modulateWhileRamping, int modulation, int baud,
         int markFrequency, int spaceFrequency,
+        bool pulseShaping, float beta, int symbolSpan,
+        bool scramble, int polynomial,
         int ax25PreFlags, int ax25PostFlags,
         int ax25Control, int ax25PID,
         int lpfTaps, bool bbNoise, bool rfNoise, bool writeToFile,
@@ -32,8 +34,15 @@ PacketModTXSettingsDialog::PacketModTXSettingsDialog(int rampUpBits, int rampDow
     ui->rampDown->setValue(rampDownBits);
     ui->rampRange->setValue(rampRange);
     ui->modulateWhileRamping->setChecked(modulateWhileRamping);
+    ui->modulation->setCurrentIndex(modulation);
+    ui->baud->setValue(baud);
     ui->markFrequency->setValue(markFrequency);
+    ui->pulseShaping->setChecked(pulseShaping);
+    ui->beta->setValue(beta);
+    ui->symbolSpan->setValue(symbolSpan);
     ui->spaceFrequency->setValue(spaceFrequency);
+    ui->scramble->setChecked(scramble);
+    ui->polynomial->setValue(polynomial);
     ui->ax25PreFlags->setValue(ax25PreFlags);
     ui->ax25PostFlags->setValue(ax25PostFlags);
     ui->ax25Control->setValue(ax25Control);
@@ -55,8 +64,15 @@ void PacketModTXSettingsDialog::accept()
     m_rampDownBits = ui->rampDown->value();
     m_rampRange = ui->rampRange->value();
     m_modulateWhileRamping = ui->modulateWhileRamping->isChecked();
+    m_modulation = ui->modulation->currentIndex();
+    m_baud = ui->baud->value();
     m_markFrequency = ui->markFrequency->value();
     m_spaceFrequency = ui->spaceFrequency->value();
+    m_pulseShaping = ui->pulseShaping->isChecked();
+    m_beta = ui->beta->value();
+    m_symbolSpan = ui->symbolSpan->value();
+    m_scramble = ui->scramble->isChecked();
+    m_polynomial = ui->polynomial->value();
     m_ax25PreFlags = ui->ax25PreFlags->value();
     m_ax25PostFlags = ui->ax25PostFlags->value();
     m_ax25Control = ui->ax25Control->value();

@@ -27,6 +27,8 @@ if(NOT SERVER_MODE)
         ${modpacket_SOURCES}
         packetmodgui.cpp
         packetmodgui.ui
+        packetmodbpfdialog.cpp
+        packetmodbpfdialog.ui
         packetmodrepeatdialog.cpp
         packetmodrepeatdialog.ui
         packetmodtxsettingsdialog.cpp
@@ -35,6 +37,7 @@ if(NOT SERVER_MODE)
     set(modpacket_HEADERS
         ${modpacket_HEADERS}
         packetmodgui.h
+        packetmodbpfdialog.h
         packetmodrepeatdialog.h
         packetmodtxsettingsdialog.h
     )

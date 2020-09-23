@@ -154,6 +154,9 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
             << " m_preEmphasis: " << settings.m_preEmphasis
             << " m_preEmphasisTau: " << settings.m_preEmphasisTau
             << " m_preEmphasisHighFreq: " << settings.m_preEmphasisHighFreq
+            << " m_bpf: " << settings.m_bpf
+            << " m_bpfLowCutoff: " << settings.m_bpfLowCutoff
+            << " m_bpfHighCutoff: " << settings.m_bpfHighCutoff
             << " m_useReverseAPI: " << settings.m_useReverseAPI
             << " m_reverseAPIAddress: " << settings.m_reverseAPIAddress
             << " m_reverseAPIAddress: " << settings.m_reverseAPIPort
@@ -213,6 +216,18 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
 
     if((settings.m_preEmphasisHighFreq != m_settings.m_preEmphasisHighFreq) || force) {
         reverseAPIKeys.append("preEmphasisHighFreq");
+    }
+
+    if((settings.m_bpf != m_settings.m_bpf) || force) {
+        reverseAPIKeys.append("bpf");
+    }
+
+    if((settings.m_bpfLowCutoff != m_settings.m_bpfLowCutoff) || force) {
+        reverseAPIKeys.append("bpfLowCutoff");
+    }
+
+    if((settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff) || force) {
+        reverseAPIKeys.append("bpfHighCutoff");
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -309,6 +324,9 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("inputFrequencyOffset")) {
         settings.m_inputFrequencyOffset = response.getPacketModSettings()->getInputFrequencyOffset();
     }
+    if (channelSettingsKeys.contains("mode")) {
+        settings.setMode(*response.getPacketModSettings()->getMode());
+    }
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getPacketModSettings()->getRfBandwidth();
     }
@@ -344,6 +362,15 @@ void PacketMod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("preEmphasisHighFreq")) {
         settings.m_preEmphasisHighFreq = response.getPacketModSettings()->getPreEmphasisHighFreq();
+    }
+    if (channelSettingsKeys.contains("bpf")) {
+        settings.m_bpf = response.getPacketModSettings()->getBpf() != 0;
+    }
+    if (channelSettingsKeys.contains("bpfLowCutoff")) {
+        settings.m_bpfLowCutoff = response.getPacketModSettings()->getBpfLowCutoff();
+    }
+    if (channelSettingsKeys.contains("bpfHighCutoff")) {
+        settings.m_bpfHighCutoff = response.getPacketModSettings()->getBpfHighCutoff();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPacketModSettings()->getRgbColor();
@@ -415,6 +442,7 @@ int PacketMod::webapiActionsPost(
 void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const PacketModSettings& settings)
 {
     response.getPacketModSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getPacketModSettings()->setMode(new QString(settings.getMode()));
     response.getPacketModSettings()->setRfBandwidth(settings.m_rfBandwidth);
     response.getPacketModSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getPacketModSettings()->setGain(settings.m_gain);
@@ -427,6 +455,9 @@ void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getPacketModSettings()->setPreEmphasis(settings.m_preEmphasis ? 1 : 0);
     response.getPacketModSettings()->setPreEmphasisTau(settings.m_preEmphasisTau);
     response.getPacketModSettings()->setPreEmphasisHighFreq(settings.m_preEmphasisHighFreq);
+    response.getPacketModSettings()->setBpf(settings.m_bpf ? 1 : 0);
+    response.getPacketModSettings()->setBpfLowCutoff(settings.m_bpfLowCutoff);
+    response.getPacketModSettings()->setBpfHighCutoff(settings.m_bpfHighCutoff);
     response.getPacketModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getPacketModSettings()->getTitle()) {
@@ -504,6 +535,15 @@ void PacketMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     }
     if (channelSettingsKeys.contains("preEmphasisHighFreq") || force) {
         swgPacketModSettings->setPreEmphasisHighFreq(settings.m_preEmphasisHighFreq);
+    }
+    if (channelSettingsKeys.contains("bpf") || force) {
+        swgPacketModSettings->setBpf(settings.m_preEmphasis);
+    }
+    if (channelSettingsKeys.contains("bpfLowCutoff") || force) {
+        swgPacketModSettings->setBpfLowCutoff(settings.m_bpfLowCutoff);
+    }
+    if (channelSettingsKeys.contains("bpfHighCutoff") || force) {
+        swgPacketModSettings->setBpfHighCutoff(settings.m_bpfHighCutoff);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPacketModSettings->setRgbColor(settings.m_rgbColor);

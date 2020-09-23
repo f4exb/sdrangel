@@ -88,6 +88,7 @@ private slots:
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(qint64 value);
+    void on_mode_currentIndexChanged(int value);
     void on_rfBW_valueChanged(int index);
     void on_fmDev_valueChanged(int value);
     void on_gain_valueChanged(int value);
@@ -101,7 +102,9 @@ private slots:
     void on_packet_returnPressed();
     void on_repeat_toggled(bool checked);
     void on_preEmphasis_toggled(bool checked);
+    void on_bpf_toggled(bool checked);
     void preEmphasisSelect();
+    void bpfSelect();
     void repeatSelect();
     void txSettingsSelect();
 

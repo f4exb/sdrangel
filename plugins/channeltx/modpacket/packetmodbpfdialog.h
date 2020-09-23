@@ -15,53 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_PACKETMODTXSETTINGSDIALOG_H
-#define INCLUDE_PACKETMODTXSETTINGSDIALOG_H
+#ifndef INCLUDE_PACKETMODBPFDIALOG_H
+#define INCLUDE_PACKETMODBPFDIALOG_H
 
-#include "ui_packetmodtxsettingsdialog.h"
+#include <QDialog>
 
-class PacketModTXSettingsDialog : public QDialog {
+namespace Ui {
+    class PacketModBPFDialog;
+}
+
+class PacketModBPFDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit PacketModTXSettingsDialog(int rampUpBits, int rampDownBits, int rampRange,
-                        bool modulateWhileRamping, int modulation, int baud,
-                        int markFrequency, int spaceFrequency,
-                        bool pulseShaping, float beta, int symbolSpan,
-                        bool scramble, int polynomial,
-                        int ax25PreFlags, int ax25PostFlags,
-                        int ax25Control, int ax25PID,
-                        int lpfTaps, bool bbNoise, bool rfNoise, bool writeToFile,
-                        QWidget* parent = 0);
-    ~PacketModTXSettingsDialog();
+    explicit PacketModBPFDialog(float lowFreq, float highFreq, int taps, QWidget* parent = 0);
+    ~PacketModBPFDialog();
 
-   int m_rampUpBits;
-   int m_rampDownBits;
-   int m_rampRange;
-   bool m_modulateWhileRamping;
-   int m_modulation;
-   int m_baud;
-   int m_markFrequency;
-   int m_spaceFrequency;
-   bool m_pulseShaping;
-   float m_beta;
-   int m_symbolSpan;
-   bool m_scramble;
-   int m_polynomial;
-   int m_ax25PreFlags;
-   int m_ax25PostFlags;
-   int m_ax25Control;
-   int m_ax25PID;
-   int m_lpfTaps;
-   bool m_bbNoise;
-   bool m_rfNoise;
-   bool m_writeToFile;
+    float m_lowFreq;
+    float m_highFreq;
+    int m_taps;
 
 private slots:
     void accept();
 
 private:
-    Ui::PacketModTXSettingsDialog* ui;
+    Ui::PacketModBPFDialog* ui;
 };
 
-#endif // INCLUDE_PACKETMODTXSETTINGSDIALOG_H
+#endif // INCLUDE_PACKETMODBPFDIALOG_H
