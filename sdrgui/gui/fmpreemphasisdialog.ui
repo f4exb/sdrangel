@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>351</width>
-    <height>142</height>
+    <height>169</height>
    </rect>
   </property>
   <property name="font">
@@ -23,21 +23,21 @@
    <item>
     <widget class="QGroupBox" name="groupBox">
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QLabel" name="tauLabel">
         <property name="text">
          <string>Time constant (Tau) (us)</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="lowFreqLabel">
         <property name="text">
          <string>Low frequency corner (Hz)</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="lowFreq">
         <property name="toolTip">
          <string>Low frequency corner. Automatically calculated based on tau.</string>
@@ -50,14 +50,14 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="highFreqLabel">
         <property name="text">
          <string>High frequency corner (Hz)</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="highFreq">
         <property name="toolTip">
          <string>High frequency corner.</string>
@@ -70,7 +70,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="tau">
         <property name="toolTip">
          <string>Time constant in us. 50 for EU. 75 for USA.</string>
@@ -83,6 +83,40 @@
         </property>
         <property name="singleStep">
          <double>10.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="preset">
+        <property name="toolTip">
+         <string>Preset preemphasis values.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Narrowband FM</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Broadcast FM (US)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Broadcast FM (EU, Asia)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>User-defined</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="presetLabel">
+        <property name="text">
+         <string>Preset</string>
         </property>
        </widget>
       </item>
