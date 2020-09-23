@@ -4,6 +4,9 @@ PacketModSettings:
     inputFrequencyOffset:
       type: integer
       format: int64
+    mode:
+      description: Transmission mode. "1200 AFSK" or "9600 FSK".
+      type: string
     rfBandwidth:
       type: number
       format: float
@@ -32,6 +35,14 @@ PacketModSettings:
       type: number
       format: float
     preEmphasisHighFreq:
+      type: number
+      format: float
+    bpf:
+      type: integer
+    bpfLowCutoff:
+      type: number
+      format: float
+    bpfHighCutoff:
       type: number
       format: float
     rgbColor:

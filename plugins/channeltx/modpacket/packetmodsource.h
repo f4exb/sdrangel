@@ -31,7 +31,10 @@
 #include "dsp/interpolator.h"
 #include "dsp/lowpass.h"
 #include "dsp/bandpass.h"
+#include "dsp/highpass.h"
+#include "dsp/raisedcosine.h"
 #include "dsp/fmpreemphasis.h"
+#include "util/lfsr.h"
 #include "util/movingaverage.h"
 
 #include "packetmodsettings.h"
@@ -69,13 +72,20 @@ public:
 private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
+    int m_spectrumRate;
     PacketModSettings m_settings;
 
     NCO m_carrierNco;
     Real m_audioPhase;
-    Real m_fmPhase;
+    double m_fmPhase;                   // Double gives cleaner spectrum than Real
+    double m_phaseSensitivity;
+    Real m_linearGain;
     Complex m_modSample;
 
+    int m_nrziBit;                      // Output of NRZI coder
+    int m_scrambledBit;                 // Output from scrambler to be pulse shaped
+    RaisedCosine<Real> m_pulseShape;    // Pulse shaping filter
+    Bandpass<Real> m_bandpass;          // Baseband bandpass filter for AFSK
     Lowpass<Complex> m_lowpass;         // Low pass filter to limit RF bandwidth
     FMPreemphasis m_preemphasisFilter;  // FM preemphasis filter to amplify high frequencies
 
@@ -97,7 +107,6 @@ private:
 
     static const int m_levelNbSamples = 480;  // every 10ms assuming 48k Sa/s
 
-    int m_f;                            // Current frequency
     int m_sampleIdx;                    // Sample index in to symbol
     int m_samplesPerSymbol;             // Number of samples per symbol
     Real m_pow;                         // In dB
@@ -114,6 +123,8 @@ private:
     int m_last5Bits;                    // Last 5 bits to be HDLC encoded
     int m_bitCount;                     // Count of number of valid bits in m_bits
     int m_bitCountTotal;
+
+    LFSR m_scrambler;                   // Scrambler
 
     std::ofstream m_audioFile;          // For debug output of baseband waveform
 

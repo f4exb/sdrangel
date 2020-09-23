@@ -25,11 +25,12 @@
 
 PacketModSource::PacketModSource() :
     m_channelSampleRate(48000),
+    m_spectrumRate(0),
     m_preemphasisFilter(48000, FMPREEMPHASIS_TAU_US),
     m_channelFrequencyOffset(0),
     m_magsq(0.0),
     m_audioPhase(0.0f),
-    m_fmPhase(0.0f),
+    m_fmPhase(0.0),
     m_levelCalcCount(0),
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
@@ -37,9 +38,13 @@ PacketModSource::PacketModSource() :
     m_byteIdx(0),
     m_bitIdx(0),
     m_last5Bits(0),
-    m_state(idle)
+    m_state(idle),
+    m_scrambler(0x10800, 0x0)
 {
     m_lowpass.create(301, m_channelSampleRate, 22000.0 / 2.0);
+    qDebug() << "PacketModSource::PacketModSource creating BPF : " << m_channelSampleRate;
+    m_bandpass.create(301, m_channelSampleRate, 800.0, 2600.0);
+    m_pulseShape.create(0.5, 6, m_channelSampleRate/9600);
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
@@ -111,9 +116,6 @@ void PacketModSource::sampleToSpectrum(Real sample)
 void PacketModSource::modulateSample()
 {
     Real audioMod;
-    Real theta;
-    Real f_delta;
-    Real linearGain;
     Real linearRampGain;
     Real emphasis;
 
@@ -133,14 +135,19 @@ void PacketModSource::modulateSample()
     }
     else
     {
-        // Bell 202 AFSK
+
         if (m_sampleIdx == 0)
         {
             if (bitsValid())
             {
                 // NRZI encoding - encode 0 as change of freq, 1 no change
                 if (getBit() == 0)
-                    m_f = m_f == m_settings.m_markFrequency ? m_settings.m_spaceFrequency : m_settings.m_markFrequency;
+                    m_nrziBit = m_nrziBit == 1 ? 0 : 1;
+                // Scramble to ensure lots of transitions
+                if (m_settings.m_scramble)
+                    m_scrambledBit = m_scrambler.scramble(m_nrziBit);
+                else
+                    m_scrambledBit = m_nrziBit;
             }
             // Should we start ramping down power?
             if ((m_bitCount < m_settings.m_rampDownBits) || ((m_bitCount == 0) && !m_settings.m_rampDownBits))
@@ -151,17 +158,40 @@ void PacketModSource::modulateSample()
             }
         }
         m_sampleIdx++;
-        if (m_sampleIdx > m_samplesPerSymbol)
+        if (m_sampleIdx >= m_samplesPerSymbol)
             m_sampleIdx = 0;
 
         if (!m_settings.m_bbNoise)
-            audioMod = sin(m_audioPhase);
+        {
+            if (m_settings.m_modulation == PacketModSettings::AFSK)
+            {
+                // Bell 202 AFSK
+                audioMod = sin(m_audioPhase);
+                if ((m_state == tx) || m_settings.m_modulateWhileRamping)
+                    m_audioPhase += (M_PI * 2.0f * (m_scrambledBit ? m_settings.m_markFrequency : m_settings.m_spaceFrequency)) / (m_channelSampleRate);
+                if (m_audioPhase > M_PI)
+                    m_audioPhase -= (2.0f * M_PI);
+            }
+            else
+            {
+                // FSK
+                if (m_settings.m_pulseShaping)
+                {
+                    if ((m_sampleIdx == 1) && (m_state != ramp_down))
+                        audioMod = m_pulseShape.filter(m_scrambledBit ? 1.0f : -1.0f);
+                    else
+                        audioMod = m_pulseShape.filter(0.0f);
+                }
+                else
+                    audioMod =  m_scrambledBit ? 1.0f : -1.0f;
+            }
+        }
         else
             audioMod = (Real)rand()/((Real)RAND_MAX)-0.5; // Noise to test filter frequency response
-        if ((m_state == tx) || m_settings.m_modulateWhileRamping)
-            m_audioPhase += (M_PI * 2.0f * m_f) / (m_channelSampleRate);
-        if (m_audioPhase > M_PI)
-            m_audioPhase -= (2.0f * M_PI);
+
+        // Baseband bandpass filter
+        if (m_settings.m_bpf)
+            audioMod = m_bandpass.filter(audioMod);
 
         // Preemphasis filter
         if (m_settings.m_preEmphasis)
@@ -174,25 +204,25 @@ void PacketModSource::modulateSample()
         sampleToSpectrum(audioMod);
 
         // FM
-        m_fmPhase += audioMod;
+        m_fmPhase += m_phaseSensitivity * audioMod;
+        // Keep phase in range -pi,pi
         if (m_fmPhase > M_PI)
-            m_fmPhase -= (2.0f * M_PI);
-        f_delta = m_settings.m_fmDeviation / m_channelSampleRate;
-        theta = 2.0f * M_PI * f_delta * m_fmPhase;
+            m_fmPhase -= 2.0f * M_PI;
+        else if (m_fmPhase < -M_PI)
+            m_fmPhase += 2.0f * M_PI;
 
         linearRampGain = powf(10.0f, m_pow/20.0f);
-        linearGain = powf(10.0f,  m_settings.m_gain/20.0f);
 
         if (!m_settings.m_rfNoise)
         {
-            m_modSample.real(linearGain * linearRampGain * cos(theta));
-            m_modSample.imag(linearGain * linearRampGain * sin(theta));
+            m_modSample.real(m_linearGain * linearRampGain * cos(m_fmPhase));
+            m_modSample.imag(m_linearGain * linearRampGain * sin(m_fmPhase));
         }
         else
         {
             // Noise to test filter frequency response
-            m_modSample.real(linearGain * ((Real)rand()/((Real)RAND_MAX)-0.5f));
-            m_modSample.imag(linearGain * ((Real)rand()/((Real)RAND_MAX)-0.5f));
+            m_modSample.real(m_linearGain * ((Real)rand()/((Real)RAND_MAX)-0.5f));
+            m_modSample.imag(m_linearGain * ((Real)rand()/((Real)RAND_MAX)-0.5f));
         }
 
         // Apply low pass filter to limit RF BW
@@ -262,6 +292,7 @@ void PacketModSource::calculateLevel(Real& sample)
 
 void PacketModSource::applySettings(const PacketModSettings& settings, bool force)
 {
+    // Only recreate filters if settings have changed
     if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || (settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
         qDebug() << "PacketModSource::applySettings: Creating new lpf with taps " << settings.m_lpfTaps << " rfBW " << settings.m_rfBandwidth;
@@ -272,8 +303,40 @@ void PacketModSource::applySettings(const PacketModSettings& settings, bool forc
         qDebug() << "PacketModSource::applySettings: Creating new preemphasis filter with tau " << settings.m_preEmphasisTau << " highFreq " << settings.m_preEmphasisHighFreq  << " sampleRate " << m_channelSampleRate;
         m_preemphasisFilter.configure(m_channelSampleRate, settings.m_preEmphasisTau, settings.m_preEmphasisHighFreq);
     }
+    if ((settings.m_bpfLowCutoff != m_settings.m_bpfLowCutoff) || (settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff)
+        || (settings.m_bpfTaps != m_settings.m_bpfTaps)|| force)
+    {
+        qDebug() << "PacketModSource::applySettings: Recreating bandpass filter: "
+                << " m_bpfTaps: " << settings.m_bpfTaps
+                << " m_channelSampleRate:" << m_channelSampleRate
+                << " m_bpfLowCutoff: " << settings.m_bpfLowCutoff
+                << " m_bpfHighCutoff: " << settings.m_bpfHighCutoff;
+        m_bandpass.create(settings.m_bpfTaps, m_channelSampleRate, settings.m_bpfLowCutoff, settings.m_bpfHighCutoff);
+    }
+    if ((settings.m_beta != m_settings.m_beta) || (settings.m_symbolSpan != m_settings.m_symbolSpan) || (settings.m_baud != m_settings.m_baud) || force)
+    {
+        qDebug() << "PacketModSource::applySettings: Recreating pulse shaping filter: "
+                << " beta: " << settings.m_beta
+                << " symbolSpan: " << settings.m_symbolSpan
+                << " channelSampleRate:" << m_channelSampleRate
+                << " baud:" << settings.m_baud;
+        m_pulseShape.create(settings.m_beta, m_settings.m_symbolSpan, m_channelSampleRate/settings.m_baud);
+    }
+    if ((settings.m_polynomial != m_settings.m_polynomial) || force)
+        m_scrambler.setPolynomial(settings.m_polynomial);
+    if ((settings.m_spectrumRate != m_settings.m_spectrumRate) || force)
+    {
+        m_interpolatorDistanceRemain = 0;
+        m_interpolatorConsumed = false;
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) settings.m_spectrumRate;
+        m_interpolator.create(48, settings.m_spectrumRate, settings.m_spectrumRate / 2.2, 3.0);
+    }
 
     m_settings = settings;
+
+    // Precalculate FM sensensity and linear gain to save doing it in the loop
+    m_phaseSensitivity = 2.0f * M_PI * m_settings.m_fmDeviation / (double)m_channelSampleRate;
+    m_linearGain = powf(10.0f,  m_settings.m_gain/20.0f);
 }
 
 void PacketModSource::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -292,8 +355,25 @@ void PacketModSource::applyChannelSettings(int channelSampleRate, int channelFre
 
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
-        m_preemphasisFilter.configure(channelSampleRate, m_settings.m_preEmphasisTau);
+        qDebug() << "PacketModSource::applyChannelSettings: Recreating filters";
         m_lowpass.create(m_settings.m_lpfTaps, channelSampleRate, m_settings.m_rfBandwidth / 2.0);
+        qDebug() << "PacketModSource::applyChannelSettings: Recreating bandpass filter: "
+                << " bpfTaps: " << m_settings.m_bpfTaps
+                << " channelSampleRate:" << channelSampleRate
+                << " bpfLowCutoff: " << m_settings.m_bpfLowCutoff
+                << " bpfHighCutoff: " << m_settings.m_bpfHighCutoff;
+        m_bandpass.create(m_settings.m_bpfTaps, channelSampleRate, m_settings.m_bpfLowCutoff, m_settings.m_bpfHighCutoff);
+        m_preemphasisFilter.configure(channelSampleRate, m_settings.m_preEmphasisTau);
+        qDebug() << "PacketModSource::applyChannelSettings: Recreating pulse shaping filter: "
+                << " beta: " << m_settings.m_beta
+                << " symbolSpan: " << m_settings.m_symbolSpan
+                << " channelSampleRate:" << m_channelSampleRate
+                << " baud:" << m_settings.m_baud;
+        m_pulseShape.create(m_settings.m_beta, m_settings.m_symbolSpan, channelSampleRate/m_settings.m_baud);
+    }
+
+    if ((m_channelSampleRate != channelSampleRate) || (m_spectrumRate != m_settings.m_spectrumRate) || force)
+    {
         m_interpolatorDistanceRemain = 0;
         m_interpolatorConsumed = false;
         m_interpolatorDistance = (Real) channelSampleRate / (Real) m_settings.m_spectrumRate;
@@ -302,6 +382,11 @@ void PacketModSource::applyChannelSettings(int channelSampleRate, int channelFre
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
+    m_spectrumRate = m_settings.m_spectrumRate;
+    m_samplesPerSymbol = m_channelSampleRate / m_settings.m_baud;
+    qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << m_settings.m_baud << ")";
+    // Precalculate FM sensensity to save doing it in the loop
+    m_phaseSensitivity = 2.0f * M_PI * m_settings.m_fmDeviation / (double)m_channelSampleRate;
 }
 
 static uint8_t *ax25_address(uint8_t *p, QString address, uint8_t crrl)
@@ -395,7 +480,7 @@ void PacketModSource::initTX()
     m_byteIdx = 0;
     m_bitIdx = 0;
     m_bitCount = m_bitCountTotal; // Reset to allow retransmission
-    m_f = m_settings.m_spaceFrequency;
+    m_nrziBit = 0;
     if (m_settings.m_rampUpBits == 0)
     {
         m_state = tx;
@@ -407,6 +492,7 @@ void PacketModSource::initTX()
         m_pow = -(Real)m_settings.m_rampRange;
         m_powRamp = m_settings.m_rampRange/(m_settings.m_rampUpBits * (Real)m_samplesPerSymbol);
     }
+    m_scrambler.init();
 }
 
 void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QString data)
@@ -475,8 +561,10 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
     // single tone
     m_sampleIdx = 0;
     m_audioPhase = 0.0f;
-    m_fmPhase = 0.0f;
+    m_fmPhase = 0.0;
 
     if (m_settings.m_writeToFile)
         m_audioFile.open("packetmod.csv", std::ofstream::out);
+    else if (m_audioFile.is_open())
+        m_audioFile.close();
 }

@@ -33,7 +33,7 @@ void PacketModSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_baud = 1200;
-    m_rfBandwidth = 10000.0f;
+    m_rfBandwidth = 12500.0f;
     m_fmDeviation = 2500.0f;
     m_gain = -2.0f; // To avoid overflow, which results in out-of-band RF
     m_channelMute = false;
@@ -47,7 +47,7 @@ void PacketModSettings::resetToDefaults()
     m_markFrequency = 2200;
     m_spaceFrequency = 1200;
     m_ax25PreFlags = 5;
-    m_ax25PostFlags = 2;
+    m_ax25PostFlags = 4; // Extra seemingly needed for 9600.
     m_ax25Control = 3;
     m_ax25PID = 0xf0;
     m_preEmphasis = false;
@@ -70,6 +70,56 @@ void PacketModSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_bpf = false;
+    m_bpfLowCutoff = m_spaceFrequency - 400.0f;
+    m_bpfHighCutoff = m_markFrequency + 400.0f;
+    m_bpfTaps = 301;
+    m_scramble = false;
+    m_polynomial = 0x10800;
+    m_pulseShaping = true;
+    m_beta = 0.5f;
+    m_symbolSpan = 6;
+}
+
+bool PacketModSettings::setMode(QString mode)
+{
+    int baud;
+    bool valid;
+
+    // First part of mode string should give baud rate
+    baud = mode.split(" ")[0].toInt(&valid);
+    if (!valid)
+        return false;
+
+    if (mode.endsWith("AFSK"))
+    {
+        // UK channels - https://rsgb.org/main/blog/news/gb2rs/headlines/2015/12/04/check-your-aprs-deviation/
+        m_baud = baud;
+        m_scramble = false;
+        m_rfBandwidth = 12500.0f;
+        m_fmDeviation = 2500.0f;
+        m_spectrumRate = 8000;
+        m_modulation = PacketModSettings::AFSK;
+    }
+    else if (mode.endsWith("FSK"))
+    {
+        // G3RUH - http://www.jrmiller.demon.co.uk/products/figs/man9k6.pdf
+        m_baud = baud;
+        m_scramble = true;
+        m_rfBandwidth = 20000.0f;
+        m_fmDeviation = 3000.0f;
+        m_spectrumRate = 24000;
+        m_bpf = false;
+        m_modulation = PacketModSettings::FSK;
+    }
+    else
+        return false;
+    return true;
+}
+
+QString PacketModSettings::getMode() const
+{
+    return QString("%1 %2").arg(m_baud).arg(m_modulation == PacketModSettings::AFSK ? "AFSK" : "FSK");
 }
 
 QByteArray PacketModSettings::serialize() const
@@ -119,6 +169,18 @@ QByteArray PacketModSettings::serialize() const
     s.writeU32(38, m_reverseAPIDeviceIndex);
     s.writeU32(39, m_reverseAPIChannelIndex);
 
+    s.writeBool(40, m_bpf);
+    s.writeReal(41, m_bpfLowCutoff);
+    s.writeReal(42, m_bpfHighCutoff);
+    s.writeS32(43, m_bpfTaps);
+    s.writeBool(44, m_scramble);
+    s.writeS32(45, m_polynomial);
+    s.writeBool(46, m_pulseShaping);
+    s.writeReal(47, m_beta);
+    s.writeS32(48, m_symbolSpan);
+    s.writeS32(49, m_spectrumRate);
+    s.writeS32(50, m_modulation);
+
     return s.final();
 }
 
@@ -155,7 +217,7 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         d.readS32(14, &m_markFrequency, 5);
         d.readS32(15, &m_spaceFrequency, 5);
         d.readS32(16, &m_ax25PreFlags, 5);
-        d.readS32(17, &m_ax25PostFlags, 2);
+        d.readS32(17, &m_ax25PostFlags, 4);
         d.readS32(18, &m_ax25Control, 3);
         d.readS32(19, &m_ax25PID, 0xf0);
         d.readBool(20, &m_preEmphasis, false);
@@ -192,6 +254,18 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(39, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+
+        d.readBool(40, &m_bpf, false);
+        d.readReal(41, &m_bpfLowCutoff, 1200.0 - 400.0f);
+        d.readReal(42, &m_bpfHighCutoff, 2200.0 + 400.0f);
+        d.readS32(43, &m_bpfTaps, 301);
+        d.readBool(44, &m_scramble, m_baud == 9600);
+        d.readS32(45, &m_polynomial, 0x10800);
+        d.readBool(46, &m_pulseShaping, true);
+        d.readReal(47, &m_beta, 0.5f);
+        d.readS32(48, &m_symbolSpan, 6);
+        d.readS32(49, &m_spectrumRate, m_baud == 1200 ? 8000 : 24000);
+        d.readS32(50, (qint32 *)&m_modulation, m_baud == 1200 ? PacketModSettings::AFSK : PacketModSettings::FSK);
 
         return true;
     }

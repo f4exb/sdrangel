@@ -165,6 +165,7 @@ set(sdrbase_SOURCES
     util/CRC64.cpp
     util/db.cpp
     util/fixedtraits.cpp
+    util/lfsr.cpp
     util/message.cpp
     util/messagequeue.cpp
     util/prettyprint.cpp
@@ -284,6 +285,7 @@ set(sdrbase_HEADERS
     dsp/phaselock.h
     dsp/phaselockcomplex.h
     dsp/projector.h
+    dsp/raisedcosine.h
     dsp/recursivefilters.h
     dsp/samplemififo.h
     dsp/samplemofifo.h
@@ -328,6 +330,7 @@ set(sdrbase_HEADERS
     util/fixedtraits.h
     util/incrementalarray.h
     util/incrementalvector.h
+    util/lfsr.h
     util/message.h
     util/messagequeue.h
     util/movingaverage.h

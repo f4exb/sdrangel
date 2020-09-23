@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>351</width>
-    <height>449</height>
+    <height>849</height>
    </rect>
   </property>
   <property name="font">
@@ -21,8 +21,335 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="ax25Group">
+     <property name="title">
+      <string>AX.25 Protocol Settings</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_4">
+      <item row="0" column="0">
+       <widget class="QLabel" name="ax25PreFlagsLabel">
+        <property name="text">
+         <string>AX.25 preamble flags</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="ax25PreFlags">
+        <property name="toolTip">
+         <string>Number of flags to be transmitted before the frame. This gives more time for a receiver to unmute.</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1024</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="ax25PostFlagsLabel">
+        <property name="text">
+         <string>AX.25 postamble flags</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="ax25PostFlags">
+        <property name="toolTip">
+         <string>Number of flags to be transmitted after the frame.</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1024</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="ax25ControlLabel">
+        <property name="text">
+         <string>AX.25 control</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="ax25Control">
+        <property name="toolTip">
+         <string>Value of control field in AX.25 frame.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="value">
+         <number>3</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="ax25PIDLabel">
+        <property name="text">
+         <string>AX.25 PID</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="ax25PID">
+        <property name="toolTip">
+         <string>Value of PID field in AX.25 frame. Use 0xf0 for no L3.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="value">
+         <number>240</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="baudGroup">
+     <property name="title">
+      <string>Modulation</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_8">
+      <item row="1" column="0">
+       <widget class="QLabel" name="baudLabel">
+        <property name="text">
+         <string>Baud rate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="baud">
+        <property name="toolTip">
+         <string>Baud rate (symbols per second).</string>
+        </property>
+        <property name="maximum">
+         <number>100000</number>
+        </property>
+        <property name="value">
+         <number>1200</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="modulation">
+        <property name="toolTip">
+         <string>Modulaton type.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>AFSK</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>FSK</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="modulationLabel">
+        <property name="text">
+         <string>Modulation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lpfTapsLabel">
+        <property name="text">
+         <string>RF BW limit LPF taps</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="lpfTaps">
+        <property name="toolTip">
+         <string>Number of taps in LPF for RF BW filter.</string>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="afskGroup">
+     <property name="title">
+      <string>AFSK Modulation</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_5">
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="markFrequency">
+        <property name="toolTip">
+         <string>Frequency of tone to generate for a mark (1).</string>
+        </property>
+        <property name="maximum">
+         <number>24000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="markFrequencyLabel">
+        <property name="text">
+         <string>Mark frequency (Hz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="spaceFrequencyLabel">
+        <property name="text">
+         <string>Space frequency (Hz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="spaceFrequency">
+        <property name="toolTip">
+         <string>Frequency of tone to generate for a space (0).</string>
+        </property>
+        <property name="maximum">
+         <number>24000</number>
+        </property>
+        <property name="singleStep">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="fskGroup">
+     <property name="title">
+      <string>FSK Modulation</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="pulseShaping">
+        <property name="toolTip">
+         <string>Enable raised cosine pulse shaping filter</string>
+        </property>
+        <property name="text">
+         <string>Raised cosine pulse shaping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="beta">
+        <property name="toolTip">
+         <string>Roll-off of the filter</string>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.250000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="symbolSpan">
+        <property name="toolTip">
+         <string>Number of symbols over which filter is applied</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="betaLabel">
+        <property name="text">
+         <string>Filter rolloff (beta)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="symbolSpanLabel">
+        <property name="text">
+         <string>Filter symbol span</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="scramblingGroup">
+     <property name="title">
+      <string>Scrambing</string>
+     </property>
      <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="scramble">
+        <property name="toolTip">
+         <string>Enabling scrambling.</string>
+        </property>
+        <property name="text">
+         <string>Scramble</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="polynomialLabel">
+        <property name="text">
+         <string>Polynomial</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="polynomial">
+        <property name="toolTip">
+         <string>Polynomial of the scrambler. The +1 is implicit.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>2147483647</number>
+        </property>
+        <property name="value">
+         <number>67584</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="powerRampingGroup">
+     <property name="title">
+      <string>Power Ramping</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_6">
       <item row="0" column="0">
        <widget class="QLabel" name="rampUpLabel">
         <property name="text">
@@ -68,7 +395,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
+      <item row="3" column="0">
        <widget class="QCheckBox" name="modulateWhileRamping">
         <property name="toolTip">
          <string>Modulate during ramping.</string>
@@ -78,156 +405,26 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="markFrequencyLabel">
-        <property name="text">
-         <string>Mark frequency (Hz)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QSpinBox" name="markFrequency">
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="debugGroup">
+     <property name="title">
+      <string>Debug</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="bbNoise">
         <property name="toolTip">
-         <string>Frequency of tone to generate for a mark (1).</string>
+         <string>Generate white noise as baseband signal.</string>
         </property>
-        <property name="maximum">
-         <number>24000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="spaceFrequencyLabel">
         <property name="text">
-         <string>Space frequency (Hz)</string>
+         <string>Generate BB noise</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QSpinBox" name="spaceFrequency">
-        <property name="toolTip">
-         <string>Frequency of tone to generate for a space (0).</string>
-        </property>
-        <property name="maximum">
-         <number>24000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="ax25PreFlagsLabel">
-        <property name="text">
-         <string>AX.25 preamble flags</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QSpinBox" name="ax25PreFlags">
-        <property name="toolTip">
-         <string>Number of flags to be transmitted before the frame. This gives more time for a receiver to unmute.</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1024</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="ax25PostFlagsLabel">
-        <property name="text">
-         <string>AX.25 postamble flags</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QSpinBox" name="ax25PostFlags">
-        <property name="toolTip">
-         <string>Number of flags to be transmitted after the frame.</string>
-        </property>
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1024</number>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="ax25ControlLabel">
-        <property name="text">
-         <string>AX.25 control</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QSpinBox" name="ax25Control">
-        <property name="toolTip">
-         <string>Value of control field in AX.25 frame.</string>
-        </property>
-        <property name="prefix">
-         <string>0x</string>
-        </property>
-        <property name="maximum">
-         <number>255</number>
-        </property>
-        <property name="value">
-         <number>3</number>
-        </property>
-        <property name="displayIntegerBase">
-         <number>16</number>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="ax25PIDLabel">
-        <property name="text">
-         <string>AX.25 PID</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QSpinBox" name="ax25PID">
-        <property name="toolTip">
-         <string>Value of PID field in AX.25 frame. Use 0xf0 for no L3.</string>
-        </property>
-        <property name="prefix">
-         <string>0x</string>
-        </property>
-        <property name="maximum">
-         <number>255</number>
-        </property>
-        <property name="value">
-         <number>240</number>
-        </property>
-        <property name="displayIntegerBase">
-         <number>16</number>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="lpfTapsLabel">
-        <property name="text">
-         <string>Lowpass taps</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <widget class="QSpinBox" name="lpfTaps">
-        <property name="toolTip">
-         <string>Number of taps in LPF for RF BW filter.</string>
-        </property>
-        <property name="maximum">
-         <number>10000</number>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0">
+      <item row="1" column="0">
        <widget class="QCheckBox" name="rfNoise">
         <property name="toolTip">
          <string>Generate white noise as RF signal.</string>
@@ -237,7 +434,7 @@
         </property>
        </widget>
       </item>
-      <item row="13" column="0">
+      <item row="2" column="0">
        <widget class="QCheckBox" name="writeToFile">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -250,16 +447,6 @@
         </property>
         <property name="text">
          <string>Write baseband to CSV</string>
-        </property>
-       </widget>
-      </item>
-      <item row="11" column="0">
-       <widget class="QCheckBox" name="bbNoise">
-        <property name="toolTip">
-         <string>Generate white noise as baseband signal.</string>
-        </property>
-        <property name="text">
-         <string>Generate BB noise</string>
         </property>
        </widget>
       </item>
@@ -278,22 +465,6 @@
    </item>
   </layout>
  </widget>
- <tabstops>
-  <tabstop>rampUp</tabstop>
-  <tabstop>rampDown</tabstop>
-  <tabstop>rampRange</tabstop>
-  <tabstop>modulateWhileRamping</tabstop>
-  <tabstop>markFrequency</tabstop>
-  <tabstop>spaceFrequency</tabstop>
-  <tabstop>ax25PreFlags</tabstop>
-  <tabstop>ax25PostFlags</tabstop>
-  <tabstop>ax25Control</tabstop>
-  <tabstop>ax25PID</tabstop>
-  <tabstop>lpfTaps</tabstop>
-  <tabstop>bbNoise</tabstop>
-  <tabstop>rfNoise</tabstop>
-  <tabstop>writeToFile</tabstop>
- </tabstops>
  <resources/>
  <connections>
   <connection>

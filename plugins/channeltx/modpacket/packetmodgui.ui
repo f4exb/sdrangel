@@ -210,6 +210,11 @@
           <string>1200 AFSK</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>9600 FSK</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -469,6 +474,20 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/filter_highpass.png</normaloff>:/filter_highpass.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="bpf">
+        <property name="toolTip">
+         <string>Baseband bandpass filter. Right click for additional settings.</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/filter_bandpass.png</normaloff>:/filter_bandpass.png</iconset>
         </property>
        </widget>
       </item>

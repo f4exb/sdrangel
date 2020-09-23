@@ -45,6 +45,9 @@ public:
     qint64 getInputFrequencyOffset();
     void setInputFrequencyOffset(qint64 input_frequency_offset);
 
+    QString* getMode();
+    void setMode(QString* mode);
+
     float getRfBandwidth();
     void setRfBandwidth(float rf_bandwidth);
 
@@ -81,6 +84,15 @@ public:
     float getPreEmphasisHighFreq();
     void setPreEmphasisHighFreq(float pre_emphasis_high_freq);
 
+    qint32 getBpf();
+    void setBpf(qint32 bpf);
+
+    float getBpfLowCutoff();
+    void setBpfLowCutoff(float bpf_low_cutoff);
+
+    float getBpfHighCutoff();
+    void setBpfHighCutoff(float bpf_high_cutoff);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -111,6 +123,9 @@ public:
 private:
     qint64 input_frequency_offset;
     bool m_input_frequency_offset_isSet;
+
+    QString* mode;
+    bool m_mode_isSet;
 
     float rf_bandwidth;
     bool m_rf_bandwidth_isSet;
@@ -147,6 +162,15 @@ private:
 
     float pre_emphasis_high_freq;
     bool m_pre_emphasis_high_freq_isSet;
+
+    qint32 bpf;
+    bool m_bpf_isSet;
+
+    float bpf_low_cutoff;
+    bool m_bpf_low_cutoff_isSet;
+
+    float bpf_high_cutoff;
+    bool m_bpf_high_cutoff_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
