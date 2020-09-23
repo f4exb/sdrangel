@@ -32,6 +32,7 @@ PacketModSettings::PacketModSettings()
 void PacketModSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
+    m_modulation = PacketModSettings::AFSK;
     m_baud = 1200;
     m_rfBandwidth = 12500.0f;
     m_fmDeviation = 2500.0f;
