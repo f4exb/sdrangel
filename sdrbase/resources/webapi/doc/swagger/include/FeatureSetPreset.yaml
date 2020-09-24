@@ -1,0 +1,20 @@
+FeatureConfig:
+  description: Represents a FeatureSetPreset::FeatureConfig object
+  properties:
+    featureIdURI:
+      description: Feature type ID in URI form
+      type: string
+    config:
+      $ref: "/doc/swagger/include/FeatureSettings.yaml#/FeatureSettings"
+
+FeatureSetPreset:
+  description: Represents a Feature Set Preset object
+  properties:
+    group:
+      type: string
+    description:
+      type: string
+    featureConfigs:
+      type: array
+      items:
+        $ref: "/doc/swagger/include/FeatureSetPreset.yaml#/FeatureConfig"
