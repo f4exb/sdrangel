@@ -44,7 +44,7 @@ QByteArray SigMFFileInputSettings::serialize() const
     s.writeString(1, m_fileName);
     s.writeU32(2, m_accelerationFactor);
     s.writeBool(3, m_trackLoop);
-    s.writeBool(3, m_fullLoop);
+    s.writeBool(4, m_fullLoop);
     s.writeBool(5, m_useReverseAPI);
     s.writeString(6, m_reverseAPIAddress);
     s.writeU32(7, m_reverseAPIPort);

@@ -121,8 +121,32 @@ void WebAPIAdapterInterface::ConfigKeys::debug() const
         qDebug("  }");
     }
 
+    qDebug("featuresets:");
+    foreach(FeatureSetPresetKeys presetKeys, m_featureSetPresetKeys)
+    {
+        qDebug("  {");
+        foreach(QString presetKey, presetKeys.m_keys) {
+            qDebug("    %s", qPrintable(presetKey));
+        }
+        qDebug("    featureConfigs");
+        foreach(FeatureKeys featureKeys, presetKeys.m_featureKeys)
+        {
+            qDebug("      {");
+            qDebug("        config:");
+            foreach(QString featureKey, featureKeys.m_featureKeys) {
+                qDebug("          %s", qPrintable(featureKey));
+            }
+            qDebug("      }");
+        }
+        qDebug("  }");
+    }
+
     qDebug("workingPreset:");
     foreach(QString presetKey, m_workingPresetKeys.m_keys) {
+        qDebug("  %s", qPrintable(presetKey));
+    }
+    qDebug("workingFeatureSetPreset:");
+    foreach(QString presetKey, m_workingFeatureSetPresetKeys.m_keys) {
         qDebug("  %s", qPrintable(presetKey));
     }
     qDebug("  spectrumConfig:");

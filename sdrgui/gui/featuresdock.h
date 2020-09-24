@@ -22,6 +22,7 @@
 #include <QDockWidget>
 
 #include "featureadddialog.h"
+#include "featurepresetsdialog.h"
 
 class QHBoxLayout;
 class QLabel;
@@ -38,18 +39,26 @@ public:
     void resetAvailableFeatures() { m_featureAddDialog.resetFeatureNames(); }
     void addAvailableFeatures(const QStringList& featureNames) { m_featureAddDialog.addFeatureNames(featureNames); }
 
+    void setPresets(QList<FeatureSetPreset*>* presets) { m_featurePresetsDialog.setPresets(presets); }
+    void setFeatureUISet(FeatureUISet *featureUISet) { m_featurePresetsDialog.setFeatureUISet(featureUISet); }
+    void setPluginAPI(PluginAPI *pluginAPI) { m_featurePresetsDialog.setPluginAPI(pluginAPI); }
+    void setWebAPIAdapter(WebAPIAdapterInterface *apiAdapter) { m_featurePresetsDialog.setWebAPIAdapter(apiAdapter); }
+
 private:
     QPushButton *m_addFeatureButton;
+    QPushButton *m_presetsButton;
     QWidget *m_titleBar;
     QHBoxLayout *m_titleBarLayout;
     QLabel *m_titleLabel;
     QPushButton *m_normalButton;
     QPushButton *m_closeButton;
     FeatureAddDialog m_featureAddDialog;
+    FeaturePresetsDialog m_featurePresetsDialog;
 
 private slots:
     void toggleFloating();
     void addFeatureDialog();
+    void presetsDialog();
     void addFeatureEmitted(int featureIndex);
 
 signals:

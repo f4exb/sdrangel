@@ -34,6 +34,7 @@ set(sdrgui_SOURCES
     gui/externalclockdialog.cpp
     gui/featureadddialog.cpp
     gui/featuresdock.cpp
+    gui/featurepresetsdialog.cpp
     gui/featurewindow.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
@@ -116,6 +117,7 @@ set(sdrgui_HEADERS
     gui/externalclockdialog.h
     gui/featureadddialog.h
     gui/featuresdock.h
+    gui/featurepresetsdialog.h
     gui/featurewindow.h
     gui/glscope.h
     gui/glscopegui.h
@@ -183,6 +185,7 @@ set(sdrgui_FORMS
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
     gui/featureadddialog.ui
+    gui/featurepresetsdialog.ui
     gui/glscopegui.ui
     gui/glspectrumgui.ui
     gui/pluginsdialog.ui

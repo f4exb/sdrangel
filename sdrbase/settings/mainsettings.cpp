@@ -18,14 +18,19 @@ MainSettings::MainSettings() :
 
 MainSettings::~MainSettings()
 {
-	for(int i = 0; i < m_presets.count(); ++i)
+	for (int i = 0; i < m_presets.count(); ++i)
 	{
 		delete m_presets[i];
 	}
 
-	for(int i = 0; i < m_commands.count(); ++i)
+	for (int i = 0; i < m_commands.count(); ++i)
     {
         delete m_commands[i];
+    }
+
+	for (int i = 0; i < m_featureSetPresets.count(); ++i)
+    {
+        delete m_featureSetPresets[i];
     }
 }
 
@@ -47,6 +52,7 @@ void MainSettings::load()
 
 	m_preferences.deserialize(qUncompress(QByteArray::fromBase64(s.value("preferences").toByteArray())));
 	m_workingPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current").toByteArray())));
+	m_workingFeatureSetPreset.deserialize(qUncompress(QByteArray::fromBase64(s.value("current-featureset").toByteArray())));
 
 	if (m_audioDeviceManager) {
 	    m_audioDeviceManager->deserialize(qUncompress(QByteArray::fromBase64(s.value("audio").toByteArray())));
@@ -58,14 +64,14 @@ void MainSettings::load()
 
 	QStringList groups = s.childGroups();
 
-	for(int i = 0; i < groups.size(); ++i)
+	for (int i = 0; i < groups.size(); ++i)
 	{
 		if (groups[i].startsWith("preset"))
 		{
 			s.beginGroup(groups[i]);
 			Preset* preset = new Preset;
 
-			if(preset->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
+			if (preset->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
 			{
 				m_presets.append(preset);
 			}
@@ -81,13 +87,29 @@ void MainSettings::load()
             s.beginGroup(groups[i]);
             Command* command = new Command;
 
-            if(command->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
+            if (command->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
             {
                 m_commands.append(command);
             }
             else
             {
                 delete command;
+            }
+
+            s.endGroup();
+        }
+		else if (groups[i].startsWith("featureset"))
+        {
+            s.beginGroup(groups[i]);
+            FeatureSetPreset* featureSetPreset = new FeatureSetPreset;
+
+            if (featureSetPreset->deserialize(qUncompress(QByteArray::fromBase64(s.value("data").toByteArray()))))
+            {
+                m_featureSetPresets.append(featureSetPreset);
+            }
+            else
+            {
+                delete featureSetPreset;
             }
 
             s.endGroup();
@@ -104,6 +126,7 @@ void MainSettings::save() const
 
 	s.setValue("preferences", qCompress(m_preferences.serialize()).toBase64());
 	s.setValue("current", qCompress(m_workingPreset.serialize()).toBase64());
+	s.setValue("current-featureset", qCompress(m_workingFeatureSetPreset.serialize()).toBase64());
 
 	if (m_audioDeviceManager) {
 	    s.setValue("audio", qCompress(m_audioDeviceManager->serialize()).toBase64());
@@ -139,6 +162,14 @@ void MainSettings::save() const
         s.endGroup();
     }
 
+	for (int i = 0; i < m_featureSetPresets.count(); ++i)
+	{
+		QString group = QString("featureset-%1").arg(i + 1);
+		s.beginGroup(group);
+		s.setValue("data", qCompress(m_featureSetPresets[i]->serialize()).toBase64());
+		s.endGroup();
+	}
+
     s.setValue("hwDeviceUserArgs", qCompress(m_hardwareDeviceUserArgs.serialize()).toBase64());
     s.setValue("limeRFEUSBCalib", qCompress(m_limeRFEUSBCalib.serialize()).toBase64());
 }
@@ -148,13 +179,17 @@ void MainSettings::initialize()
     resetToDefaults();
     clearCommands();
     clearPresets();
+    clearFeatureSetPresets();
 }
 
 void MainSettings::resetToDefaults()
 {
 	m_preferences.resetToDefaults();
 	m_workingPreset.resetToDefaults();
+    m_workingFeatureSetPreset.resetToDefaults();
 }
+
+// DeviceSet presets
 
 Preset* MainSettings::newPreset(const QString& group, const QString& description)
 {
@@ -229,7 +264,7 @@ const Preset* MainSettings::getPreset(const QString& groupName, quint64 centerFr
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void MainSettings::clearPresets()
@@ -240,6 +275,8 @@ void MainSettings::clearPresets()
 
     m_presets.clear();
 }
+
+// Commands
 
 void MainSettings::addCommand(Command *command)
 {
@@ -298,7 +335,7 @@ const Command* MainSettings::getCommand(const QString& groupName, const QString&
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 void MainSettings::clearCommands()
@@ -308,4 +345,84 @@ void MainSettings::clearCommands()
     }
 
     m_commands.clear();
+}
+
+// FeatureSet presets
+
+FeatureSetPreset* MainSettings::newFeatureSetPreset(const QString& group, const QString& description)
+{
+	FeatureSetPreset* preset = new FeatureSetPreset();
+	preset->setGroup(group);
+	preset->setDescription(description);
+	addFeatureSetPreset(preset);
+	return preset;
+}
+
+void MainSettings::addFeatureSetPreset(FeatureSetPreset *preset)
+{
+    m_featureSetPresets.append(preset);
+}
+
+void MainSettings::deleteFeatureSetPreset(const FeatureSetPreset* preset)
+{
+	m_featureSetPresets.removeAll((FeatureSetPreset*) preset);
+	delete (FeatureSetPreset*) preset;
+}
+
+void MainSettings::deleteFeatureSetPresetGroup(const QString& groupName)
+{
+    FeatureSetPresets::iterator it = m_featureSetPresets.begin();
+
+    while (it != m_featureSetPresets.end())
+    {
+        if ((*it)->getGroup() == groupName) {
+            it = m_featureSetPresets.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void MainSettings::sortFeatureSetPresets()
+{
+    std::sort(m_featureSetPresets.begin(), m_featureSetPresets.end(), FeatureSetPreset::presetCompare);
+}
+
+void MainSettings::renameFeatureSetPresetGroup(const QString& oldGroupName, const QString& newGroupName)
+{
+    int nbPresets = getFeatureSetPresetCount();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        if (getPreset(i)->getGroup() == oldGroupName)
+        {
+            FeatureSetPreset *preset_mod = const_cast<FeatureSetPreset*>(getFeatureSetPreset(i));
+            preset_mod->setGroup(newGroupName);
+        }
+    }
+}
+
+const FeatureSetPreset* MainSettings::getFeatureSetPreset(const QString& groupName, const QString& description) const
+{
+    int nbPresets = getFeatureSetPresetCount();
+
+    for (int i = 0; i < nbPresets; i++)
+    {
+        if ((getFeatureSetPreset(i)->getGroup() == groupName) &&
+            (getFeatureSetPreset(i)->getDescription() == description))
+        {
+            return getFeatureSetPreset(i);
+        }
+    }
+
+    return nullptr;
+}
+
+void MainSettings::clearFeatureSetPresets()
+{
+    foreach (FeatureSetPreset *preset, m_featureSetPresets) {
+        delete preset;
+    }
+
+    m_featureSetPresets.clear();
 }

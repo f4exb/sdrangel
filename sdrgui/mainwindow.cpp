@@ -88,6 +88,9 @@
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeletePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgSaveFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteFeatureSetPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainWindow::MsgSetDevice, Message)
@@ -207,6 +210,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_pluginManager->listFeatures(featureNames);
     ui->featureDock->addAvailableFeatures(featureNames);
     addFeatureSet();
+    ui->featureDock->setFeatureUISet(m_featureUIs[0]);
+    ui->featureDock->setPresets(m_settings.getFeatureSetPresets());
+    ui->featureDock->setPluginAPI(m_pluginManager->getPluginAPI());
 
     splash->showStatusMessage("load file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
@@ -220,6 +226,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
 	loadPresetSettings(m_settings.getWorkingPreset(), 0);
+    loadFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
 
     splash->showStatusMessage("update preset controls...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: update preset controls...";
@@ -244,6 +251,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 #endif
 
 	m_apiAdapter = new WebAPIAdapterGUI(*this);
+    ui->featureDock->setWebAPIAdapter(m_apiAdapter);
 	m_requestMapper = new WebAPIRequestMapper(this);
 	m_requestMapper->setAdapter(m_apiAdapter);
 	m_apiHost = parser.getServerAddress();
@@ -821,6 +829,33 @@ void MainWindow::savePresetSettings(Preset* preset, int tabIndex)
     preset->setLayout(saveState());
 }
 
+void MainWindow::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex)
+{
+	qDebug("MainWindow::loadFeatureSetPresetSettings: preset [%s | %s]",
+		qPrintable(preset->getGroup()),
+		qPrintable(preset->getDescription()));
+
+	if (featureSetIndex >= 0)
+	{
+        FeatureUISet *featureSetUI = m_featureUIs[featureSetIndex];
+        featureSetUI->loadFeatureSetSettings(preset, m_pluginManager->getPluginAPI(), m_apiAdapter);
+	}
+}
+
+void MainWindow::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex)
+{
+	qDebug("MainWindow::saveFeatureSetPresetSettings: preset [%s | %s]",
+		qPrintable(preset->getGroup()),
+		qPrintable(preset->getDescription()));
+
+    // Save from currently selected source tab
+    //int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+    FeatureUISet *featureUI = m_featureUIs[featureSetIndex];
+
+    preset->clearFeatures();
+    featureUI->saveFeatureSetSettings(preset);
+}
+
 void MainWindow::saveCommandSettings()
 {
 }
@@ -846,6 +881,7 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
     qDebug("MainWindow::closeEvent");
 
     savePresetSettings(m_settings.getWorkingPreset(), 0);
+    saveFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
     m_settings.save();
 
     while (m_deviceUIs.size() > 0)
@@ -950,6 +986,7 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
 void MainWindow::applySettings()
 {
  	loadPresetSettings(m_settings.getWorkingPreset(), 0);
+    loadFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
 
     m_settings.sortPresets();
     int middleIndex = m_settings.getPresetCount() / 2;
@@ -989,6 +1026,20 @@ bool MainWindow::handleMessage(const Message& cmd)
         savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         if (notif.isNewPreset()) { ui->presetTree->setCurrentItem(addPresetToTree(notif.getPreset())); }
         m_settings.sortPresets();
+        m_settings.save();
+        return true;
+    }
+    else if (MsgLoadFeatureSetPreset::match(cmd))
+    {
+        MsgLoadFeatureSetPreset& notif = (MsgLoadFeatureSetPreset&) cmd;
+        loadFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
+        return true;
+    }
+    else if (MsgSaveFeatureSetPreset::match(cmd))
+    {
+        MsgSaveFeatureSetPreset& notif = (MsgSaveFeatureSetPreset&) cmd;
+        saveFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
+        m_settings.sortFeatureSetPresets();
         m_settings.save();
         return true;
     }
@@ -1590,6 +1641,7 @@ void MainWindow::on_presetImport_clicked()
 void MainWindow::on_settingsSave_clicked()
 {
     savePresetSettings(m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
+    saveFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), ui->tabFeatures->currentIndex());
     m_settings.save();
 }
 

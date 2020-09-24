@@ -41,6 +41,12 @@ FeaturesDock::FeaturesDock(QWidget *parent, Qt::WindowFlags flags) :
     m_addFeatureButton->setToolTip("Add features");
     m_addFeatureButton->setFixedSize(16, 16);
 
+    m_presetsButton = new QPushButton();
+    QIcon presetsIcon(":/star.png");
+    m_presetsButton->setIcon(presetsIcon);
+    m_presetsButton->setToolTip("Feature presets");
+    m_presetsButton->setFixedSize(16, 16);
+
     m_normalButton = new QPushButton();
     QIcon normalIcon = style()->standardIcon(QStyle::SP_TitleBarNormalButton, 0, this);
     m_normalButton->setIcon(normalIcon);
@@ -52,6 +58,7 @@ FeaturesDock::FeaturesDock(QWidget *parent, Qt::WindowFlags flags) :
     m_closeButton->setFixedSize(12, 12);
 
     m_titleBarLayout->addWidget(m_addFeatureButton);
+    m_titleBarLayout->addWidget(m_presetsButton);
     m_titleBarLayout->addWidget(m_titleLabel);
     m_titleBarLayout->addWidget(m_normalButton);
     m_titleBarLayout->addWidget(m_closeButton);
@@ -62,6 +69,13 @@ FeaturesDock::FeaturesDock(QWidget *parent, Qt::WindowFlags flags) :
         &QPushButton::clicked,
         this,
         &FeaturesDock::addFeatureDialog
+    );
+
+    QObject::connect(
+        m_presetsButton,
+        &QPushButton::clicked,
+        this,
+        &FeaturesDock::presetsDialog
     );
 
     QObject::connect(
@@ -99,7 +113,12 @@ void FeaturesDock::toggleFloating()
 void FeaturesDock::addFeatureDialog()
 {
     m_featureAddDialog.exec();
+}
 
+void FeaturesDock::presetsDialog()
+{
+    m_featurePresetsDialog.populateTree();
+    m_featurePresetsDialog.exec();
 }
 
 void FeaturesDock::addFeatureEmitted(int featureIndex)

@@ -42,6 +42,9 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSavePreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeletePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgSaveFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeatureSetPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
@@ -144,6 +147,28 @@ bool MainCore::handleMessage(const Message& cmd)
         const Preset *presetToDelete = notif.getPreset();
         // remove preset from settings
         m_settings.deletePreset(presetToDelete);
+        return true;
+    }
+    else if (MsgLoadFeatureSetPreset::match(cmd))
+    {
+        MsgLoadFeatureSetPreset& notif = (MsgLoadFeatureSetPreset&) cmd;
+        loadFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
+        return true;
+    }
+    else if (MsgSaveFeatureSetPreset::match(cmd))
+    {
+        MsgSaveFeatureSetPreset& notif = (MsgSaveFeatureSetPreset&) cmd;
+        saveFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
+        m_settings.sortPresets();
+        m_settings.save();
+        return true;
+    }
+    else if (MsgDeleteFeatureSetPreset::match(cmd))
+    {
+        MsgDeleteFeatureSetPreset& notif = (MsgDeleteFeatureSetPreset&) cmd;
+        const FeatureSetPreset *presetToDelete = notif.getPreset();
+        // remove preset from settings
+        m_settings.deleteFeatureSetPreset(presetToDelete);
         return true;
     }
     else if (MsgAddDeviceSet::match(cmd))
@@ -795,3 +820,29 @@ void MainCore::savePresetSettings(Preset* preset, int tabIndex)
     }
 }
 
+void MainCore::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex)
+{
+	qDebug("MainCore::loadFeatureSetPresetSettings: preset [%s | %s]",
+		qPrintable(preset->getGroup()),
+		qPrintable(preset->getDescription()));
+
+	if (featureSetIndex >= 0)
+	{
+        FeatureSet *featureSet = m_featureSets[featureSetIndex];
+        featureSet->loadFeatureSetSettings(preset, m_pluginManager->getPluginAPI(), m_apiAdapter);
+	}
+}
+
+void MainCore::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex)
+{
+    qDebug("MainCore::saveFeatureSetPresetSettings: preset [%s | %s]",
+        qPrintable(preset->getGroup()),
+        qPrintable(preset->getDescription()));
+
+    // Save from currently selected source tab
+    //int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+    FeatureSet *featureSet = m_featureSets[featureSetIndex];
+
+    preset->clearFeatures();
+    featureSet->saveFeatureSetSettings(preset);
+}

@@ -84,11 +84,22 @@ public:
         QStringList m_keys;
         QStringList m_deviceKeys;
     };
+    struct FeatureKeys
+    {
+        QStringList m_keys;
+        QStringList m_featureKeys;
+    };
     struct PresetKeys
     {
         QStringList m_keys;
         QStringList m_spectrumKeys;
         QList<ChannelKeys> m_channelsKeys;
+        QList<DeviceKeys> m_devicesKeys;
+    };
+    struct FeatureSetPresetKeys
+    {
+        QStringList m_keys;
+        QList<FeatureKeys> m_featureKeys;
         QList<DeviceKeys> m_devicesKeys;
     };
     struct CommandKeys
@@ -99,7 +110,9 @@ public:
     {
         QStringList m_preferencesKeys;
         PresetKeys m_workingPresetKeys;
+        FeatureSetPresetKeys m_workingFeatureSetPresetKeys;
         QList<PresetKeys> m_presetKeys;
+        QList<FeatureSetPresetKeys> m_featureSetPresetKeys;
         QList<CommandKeys> m_commandKeys;
         void debug() const;
     };

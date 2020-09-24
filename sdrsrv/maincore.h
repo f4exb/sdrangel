@@ -147,6 +147,74 @@ private:
         { }
     };
 
+    class MsgLoadFeatureSetPreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const FeatureSetPreset *getPreset() const { return m_preset; }
+        int getFeatureSetIndex() const { return m_featureSetIndex; }
+
+        static MsgLoadFeatureSetPreset* create(const FeatureSetPreset *preset, int featureSetIndex) {
+            return new MsgLoadFeatureSetPreset(preset, featureSetIndex);
+        }
+
+    private:
+        const FeatureSetPreset *m_preset;
+        int m_featureSetIndex;
+
+        MsgLoadFeatureSetPreset(const FeatureSetPreset *preset, int featureSetIndex) :
+            Message(),
+            m_preset(preset),
+            m_featureSetIndex(featureSetIndex)
+        { }
+    };
+
+    class MsgSaveFeatureSetPreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        FeatureSetPreset *getPreset() const { return m_preset; }
+        int getFeatureSetIndex() const { return m_featureSetIndex; }
+        bool isNewPreset() const { return m_newPreset; }
+
+        static MsgSaveFeatureSetPreset* create(FeatureSetPreset *preset, int featureSetIndex, bool newPreset)
+        {
+            return new MsgSaveFeatureSetPreset(preset, featureSetIndex, newPreset);
+        }
+
+    private:
+        FeatureSetPreset *m_preset;
+        int m_featureSetIndex;
+        bool m_newPreset;
+
+        MsgSaveFeatureSetPreset(FeatureSetPreset *preset, int featureSetIndex, bool newPreset) :
+            Message(),
+            m_preset(preset),
+            m_featureSetIndex(featureSetIndex),
+            m_newPreset(newPreset)
+        { }
+    };
+
+    class MsgDeleteFeatureSetPreset : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const FeatureSetPreset *getPreset() const { return m_preset; }
+
+        static MsgDeleteFeatureSetPreset* create(const FeatureSetPreset *preset)
+        {
+            return new MsgDeleteFeatureSetPreset(preset);
+        }
+
+    private:
+        const FeatureSetPreset *m_preset;
+
+        MsgDeleteFeatureSetPreset(const FeatureSetPreset *preset) :
+            Message(),
+            m_preset(preset)
+        { }
+    };
+
     class MsgDeleteInstance : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -352,6 +420,8 @@ private:
     void applySettings();
 	void loadPresetSettings(const Preset* preset, int tabIndex);
 	void savePresetSettings(Preset* preset, int tabIndex);
+	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex);
+	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
     void setLoggingOptions();
 
     bool handleMessage(const Message& cmd);

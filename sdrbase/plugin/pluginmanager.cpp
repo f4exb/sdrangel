@@ -363,3 +363,15 @@ const PluginInterface *PluginManager::getDevicePluginInterface(const QString& de
 
     return nullptr;
 }
+
+const PluginInterface *PluginManager::getFeaturePluginInterface(const QString& featureIdURI) const
+{
+    for (PluginAPI::FeatureRegistrations::const_iterator it = m_featureRegistrations.begin(); it != m_featureRegistrations.end(); ++it)
+    {
+        if (it->m_featureIdURI == featureIdURI) {
+            return it->m_plugin;
+        }
+    }
+
+    return nullptr;
+}

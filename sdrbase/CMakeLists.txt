@@ -151,9 +151,11 @@ set(sdrbase_SOURCES
     device/deviceutils.cpp
 
     feature/feature.cpp
+    feature/featureutils.cpp
 
     limerfe/limerfeusbcalib.cpp
 
+    settings/featuresetpreset.cpp
     settings/preferences.cpp
     settings/preset.cpp
     settings/mainsettings.cpp
@@ -301,6 +303,7 @@ set(sdrbase_HEADERS
     device/deviceutils.h
 
     feature/feature.h
+    feature/featureutils.h
 
     limerfe/limerfeusbcalib.h
 
@@ -309,6 +312,7 @@ set(sdrbase_HEADERS
     plugin/pluginapi.h
     plugin/pluginmanager.h
 
+    settings/featuresetpreset.h
     settings/preferences.h
     settings/preset.h
     settings/mainsettings.h

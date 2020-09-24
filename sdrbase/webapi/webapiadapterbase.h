@@ -24,9 +24,11 @@
 #include "export.h"
 #include "SWGPreferences.h"
 #include "SWGPreset.h"
+#include "SWGFeatureSetPreset.h"
 #include "SWGCommand.h"
 #include "settings/preferences.h"
 #include "settings/preset.h"
+#include "settings/featuresetpreset.h"
 #include "settings/mainsettings.h"
 #include "commands/command.h"
 #include "webapiadapterinterface.h"
@@ -54,6 +56,10 @@ public:
         SWGSDRangel::SWGPreset *apiPreset,
         const Preset& preset
     );
+    void webapiFormatFeatureSetPreset(
+        SWGSDRangel::SWGFeatureSetPreset *apiPreset,
+        const FeatureSetPreset& preset
+    );
     static void webapiFormatCommand(
         SWGSDRangel::SWGCommand *apiCommand,
         const Command& command
@@ -71,6 +77,12 @@ public:
         SWGSDRangel::SWGPreset *apiPreset,
         const WebAPIAdapterInterface::PresetKeys& presetKeys,
         Preset *preset
+    );
+    void webapiUpdateFeatureSetPreset(
+        bool force,
+        SWGSDRangel::SWGFeatureSetPreset *apiPreset,
+        const WebAPIAdapterInterface::FeatureSetPresetKeys& presetKeys,
+        FeatureSetPreset *preset
     );
     static void webapiUpdateCommand(
         SWGSDRangel::SWGCommand *apiCommand,
@@ -97,9 +109,19 @@ private:
         QMap<QString, DeviceWebAPIAdapter*> m_webAPIDeviceAdapters;
     };
 
+    class WebAPIFeatureAdapters
+    {
+    public:
+        FeatureWebAPIAdapter *getFeatureWebAPIAdapter(const QString& featureURI, const PluginManager *pluginManager);
+        void flush();
+    private:
+        QMap<QString, FeatureWebAPIAdapter*> m_webAPIFeatureAdapters;
+    };
+
     const PluginManager *m_pluginManager;
     WebAPIChannelAdapters m_webAPIChannelAdapters;
     WebAPIDeviceAdapters m_webAPIDeviceAdapters;
+    WebAPIFeatureAdapters m_webAPIFeatureAdapters;
 };
 
 #endif // SDRBASE_WEBAPI_WEBAPIADAPTERBASE_H_

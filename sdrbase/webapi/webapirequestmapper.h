@@ -37,7 +37,9 @@ namespace SWGSDRangel
     class SWGPreset;
     class SWGChannelConfig;
     class SWGDeviceConfig;
+    class SWGFeatureConfig;
     class SWGFeatureActions;
+    class SWGFeatureSetPreset;
 }
 
 class SDRBASE_API WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
@@ -119,10 +121,22 @@ private:
     bool validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings& limeRFESettings, QJsonObject& jsonObject, QStringList& limeRFESettingsKeys);
     bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
 
+    bool appendFeatureSetPresetKeys(
+        SWGSDRangel::SWGFeatureSetPreset *preset,
+        const QJsonObject& presetJson,
+        WebAPIAdapterInterface::FeatureSetPresetKeys& featureSetPresetKeys
+    );
+
     bool appendPresetKeys(
         SWGSDRangel::SWGPreset *preset,
         const QJsonObject& presetJson,
         WebAPIAdapterInterface::PresetKeys& presetKeys
+    );
+
+    bool appendPresetFeatureKeys(
+        SWGSDRangel::SWGFeatureConfig *feature,
+        const QJsonObject& featureSettingsJson,
+        WebAPIAdapterInterface::FeatureKeys& featureKeys
     );
 
     bool appendPresetChannelKeys(
@@ -232,6 +246,7 @@ private:
     static const QMap<QString, QString> m_mimoDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_featureTypeToSettingsKey;
     static const QMap<QString, QString> m_featureTypeToActionsKey;
+    static const QMap<QString, QString> m_featureURIToSettingsKey;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

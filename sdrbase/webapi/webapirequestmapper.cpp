@@ -259,6 +259,10 @@ const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToActionsKey = {
     {"SimplePTT", "SimplePTTActions"}
 };
 
+const QMap<QString, QString> WebAPIRequestMapper::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.simpleptt", "SimplePTTSettings"}
+};
+
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     HttpRequestHandler(parent),
     m_adapter(0)
@@ -3714,7 +3718,10 @@ bool WebAPIRequestMapper::validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings&
     return true;
 }
 
-bool WebAPIRequestMapper::validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys)
+bool WebAPIRequestMapper::validateConfig(
+    SWGSDRangel::SWGInstanceConfigResponse& config,
+    QJsonObject& jsonObject,
+    WebAPIAdapterInterface::ConfigKeys& configKeys)
 {
     if (jsonObject.contains("preferences"))
     {
@@ -3759,12 +3766,81 @@ bool WebAPIRequestMapper::validateConfig(SWGSDRangel::SWGInstanceConfigResponse&
         }
     }
 
+    if (jsonObject.contains("featuresetpresets"))
+    {
+        QList<SWGSDRangel::SWGFeatureSetPreset *> *featureSetPresets = new QList<SWGSDRangel::SWGFeatureSetPreset *>();
+        config.setFeaturesetpresets(featureSetPresets);
+        QJsonArray presetsJson = jsonObject["featuresetpresets"].toArray();
+        QJsonArray::const_iterator featureSetPresetsIt = presetsJson.begin();
+
+        for (; featureSetPresetsIt != presetsJson.end(); ++featureSetPresetsIt)
+        {
+            QJsonObject presetJson = featureSetPresetsIt->toObject();
+            SWGSDRangel::SWGFeatureSetPreset *featureSetPreset = new SWGSDRangel::SWGFeatureSetPreset();
+            featureSetPresets->append(featureSetPreset);
+            configKeys.m_featureSetPresetKeys.append(WebAPIAdapterInterface::FeatureSetPresetKeys());
+            appendFeatureSetPresetKeys(featureSetPreset, presetJson, configKeys.m_featureSetPresetKeys.back());
+        }
+    }
+
     if (jsonObject.contains("workingPreset"))
     {
         SWGSDRangel::SWGPreset *preset = new SWGSDRangel::SWGPreset();
         config.setWorkingPreset(preset);
         QJsonObject presetJson = jsonObject["workingPreset"].toObject();
         appendPresetKeys(preset, presetJson, configKeys.m_workingPresetKeys);
+    }
+
+    if (jsonObject.contains("workingFeatureSetPreset"))
+    {
+        SWGSDRangel::SWGFeatureSetPreset *preset = new SWGSDRangel::SWGFeatureSetPreset();
+        config.setWorkingFeatureSetPreset(preset);
+        QJsonObject presetJson = jsonObject["workingFeatureSetPreset"].toObject();
+        appendFeatureSetPresetKeys(preset, presetJson, configKeys.m_workingFeatureSetPresetKeys);
+    }
+
+    return true;
+}
+
+bool WebAPIRequestMapper::appendFeatureSetPresetKeys(
+    SWGSDRangel::SWGFeatureSetPreset *preset,
+    const QJsonObject& presetJson,
+    WebAPIAdapterInterface::FeatureSetPresetKeys& featureSetPresetKeys
+)
+{
+    if (presetJson.contains("description"))
+    {
+        preset->setDescription(new QString(presetJson["description"].toString()));
+        featureSetPresetKeys.m_keys.append("description");
+    }
+    if (presetJson.contains("group"))
+    {
+        preset->setGroup(new QString(presetJson["group"].toString()));
+        featureSetPresetKeys.m_keys.append("group");
+    }
+    if (presetJson.contains("featureConfigs"))
+    {
+        QJsonArray featuresJson = presetJson["featureConfigs"].toArray();
+        QJsonArray::const_iterator featuresIt = featuresJson.begin();
+        QList<SWGSDRangel::SWGFeatureConfig*> *features = new QList<SWGSDRangel::SWGFeatureConfig*>();
+        preset->setFeatureConfigs(features);
+
+        for (; featuresIt != featuresJson.end(); ++featuresIt)
+        {
+            QJsonObject featureJson = featuresIt->toObject();
+            SWGSDRangel::SWGFeatureConfig *featureConfig = new SWGSDRangel::SWGFeatureConfig();
+            featureSetPresetKeys.m_featureKeys.append(WebAPIAdapterInterface::FeatureKeys());
+
+            if (appendPresetFeatureKeys(featureConfig, featureJson, featureSetPresetKeys.m_featureKeys.back()))
+            {
+                features->append(featureConfig);
+            }
+            else
+            {
+                delete featureConfig;
+                featureSetPresetKeys.m_featureKeys.takeLast(); // remove channel keys
+            }
+        }
     }
 
     return true;
@@ -3872,6 +3948,40 @@ bool WebAPIRequestMapper::appendPresetKeys(
     }
 
     return true;
+}
+
+bool WebAPIRequestMapper::appendPresetFeatureKeys(
+        SWGSDRangel::SWGFeatureConfig *feature,
+        const QJsonObject& featureSettingsJson,
+        WebAPIAdapterInterface::FeatureKeys& featureKeys
+)
+{
+    if (featureSettingsJson.contains("featureIdURI"))
+    {
+        QString *featureURI = new QString(featureSettingsJson["featureIdURI"].toString());
+        feature->setFeatureIdUri(featureURI);
+        featureKeys.m_keys.append("featureIdURI");
+
+        if (featureSettingsJson.contains("config") && m_featureURIToSettingsKey.contains(*featureURI))
+        {
+            SWGSDRangel::SWGFeatureSettings *featureSettings = new SWGSDRangel::SWGFeatureSettings();
+            feature->setConfig(featureSettings);
+            return getFeatureSettings(
+                m_channelURIToSettingsKey[*featureURI],
+                featureSettings,
+                featureSettingsJson["config"].toObject(),
+                featureKeys.m_featureKeys
+            );
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return false;
+    }
 }
 
 bool WebAPIRequestMapper::appendPresetChannelKeys(

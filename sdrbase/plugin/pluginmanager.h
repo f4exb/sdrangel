@@ -30,7 +30,6 @@
 
 class QComboBox;
 class QPluginLoader;
-class Preset;
 class Message;
 class MessageQueue;
 class DeviceAPI;
@@ -95,6 +94,7 @@ public:
 
 	const PluginInterface *getChannelPluginInterface(const QString& channelIdURI) const;
 	const PluginInterface *getDevicePluginInterface(const QString& deviceId) const;
+	const PluginInterface *getFeaturePluginInterface(const QString& featureIdURI) const;
 
 	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
 	static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
