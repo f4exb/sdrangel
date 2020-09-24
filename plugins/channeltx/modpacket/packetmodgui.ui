@@ -55,7 +55,7 @@
    <property name="windowTitle">
     <string>Settings</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="settingsLayout">
     <property name="spacing">
      <number>3</number>
     </property>
@@ -700,7 +700,7 @@ APRS examples:
    <property name="windowTitle">
     <string>Transmitted Packets</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="transmittedLayout">
     <property name="spacing">
      <number>2</number>
     </property>
@@ -737,7 +737,7 @@ APRS examples:
    <property name="windowTitle">
     <string>Baseband Spectrum</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="spectrumLayout">
     <property name="spacing">
      <number>2</number>
     </property>
