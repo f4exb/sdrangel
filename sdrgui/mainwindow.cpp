@@ -1822,11 +1822,11 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
 void MainWindow::channelAddClicked(int channelIndex)
 {
     // Do it in the currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+    int currentChannelTabIndex = ui->tabChannels->currentIndex();
 
-    if (currentSourceTabIndex >= 0)
+    if (currentChannelTabIndex >= 0)
     {
-        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        DeviceUISet *deviceUI = m_deviceUIs[currentChannelTabIndex];
 
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
@@ -1843,7 +1843,7 @@ void MainWindow::channelAddClicked(int channelIndex)
             int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
             int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
             qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbRx: %d nbTx: %d selected: %d",
-                currentSourceTabIndex, nbRxChannels, nbTxChannels, channelIndex);
+                currentChannelTabIndex, nbRxChannels, nbTxChannels, channelIndex);
 
             if (channelIndex < nbRxChannels) {
                 m_pluginManager->createRxChannelInstance(
