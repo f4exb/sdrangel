@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
+    <width>350</width>
     <height>610</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>350</width>
     <height>0</height>
    </size>
   </property>
@@ -192,14 +192,8 @@
        <widget class="QComboBox" name="mode">
         <property name="minimumSize">
          <size>
-          <width>90</width>
+          <width>100</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
