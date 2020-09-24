@@ -1,0 +1,168 @@
+PacketModSettings:
+  description: PacketMod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    mode:
+      type: string
+      description: >
+        Transmission mode
+          * "1200 AFSK"
+          * "9600 FSK".
+    rfBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    gain:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    repeat:
+      type: integer
+    repeatDelay:
+      type: number
+      format: float
+    repeatCount:
+      type: integer
+    rampUpBits:
+      type: integer
+    rampDownBits:
+      type: integer
+    rampRange:
+      type: integer
+    modulateWhileRamping:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    markFrequency:
+      type: integer
+    spaceFrequency:
+      type: integer
+    ax25PreFlags:
+      type: integer
+    ax25PostFlags:
+      type: integer
+    ax25Control:
+      type: integer
+    ax25PID:
+      type: integer
+    preEmphasis:
+      type: integer
+    preEmphasisTau:
+      type: number
+      format: float
+    preEmphasisHighFreq:
+      type: number
+      format: float
+    lpfTaps:
+      type: integer
+    bbNoise:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    rfNoise:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    writeToFile:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    spectrumRate:
+      type: integer
+    callsign:
+      type: string
+    to:
+      type: string
+    via:
+      type: string
+    data:
+      type: string
+    bpf:
+      type: integer
+    bpfLowCutoff:
+      type: number
+      format: float
+    bpfHighCutoff:
+      type: number
+      format: float
+    bpfTaps:
+      type: integer
+    scramble:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    polynomial:
+      type: integer
+    pulseShaping:
+      type: integer
+      description: >
+        Boolean
+          * 0 - off
+          * 1 - on
+    beta:
+      type: number
+      format: float
+    symbolSpan:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+PacketModReport:
+  description: PacketMod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    audioSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+
+PacketModActions:
+  description: PacketMod
+  properties:
+    tx:
+      type: object
+      properties:
+        callsign:
+          type: string
+        to:
+          type: string
+        via:
+          type: string
+        data:
+          type: string
+      description: >
+        Transmit a packet

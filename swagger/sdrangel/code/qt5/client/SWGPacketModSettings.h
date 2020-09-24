@@ -69,11 +69,35 @@ public:
     qint32 getRepeatCount();
     void setRepeatCount(qint32 repeat_count);
 
+    qint32 getRampUpBits();
+    void setRampUpBits(qint32 ramp_up_bits);
+
+    qint32 getRampDownBits();
+    void setRampDownBits(qint32 ramp_down_bits);
+
+    qint32 getRampRange();
+    void setRampRange(qint32 ramp_range);
+
+    qint32 getModulateWhileRamping();
+    void setModulateWhileRamping(qint32 modulate_while_ramping);
+
+    qint32 getMarkFrequency();
+    void setMarkFrequency(qint32 mark_frequency);
+
+    qint32 getSpaceFrequency();
+    void setSpaceFrequency(qint32 space_frequency);
+
     qint32 getAx25PreFlags();
     void setAx25PreFlags(qint32 ax25_pre_flags);
 
     qint32 getAx25PostFlags();
     void setAx25PostFlags(qint32 ax25_post_flags);
+
+    qint32 getAx25Control();
+    void setAx25Control(qint32 ax25_control);
+
+    qint32 getAx25Pid();
+    void setAx25Pid(qint32 ax25_pid);
 
     qint32 getPreEmphasis();
     void setPreEmphasis(qint32 pre_emphasis);
@@ -84,6 +108,33 @@ public:
     float getPreEmphasisHighFreq();
     void setPreEmphasisHighFreq(float pre_emphasis_high_freq);
 
+    qint32 getLpfTaps();
+    void setLpfTaps(qint32 lpf_taps);
+
+    qint32 getBbNoise();
+    void setBbNoise(qint32 bb_noise);
+
+    qint32 getRfNoise();
+    void setRfNoise(qint32 rf_noise);
+
+    qint32 getWriteToFile();
+    void setWriteToFile(qint32 write_to_file);
+
+    qint32 getSpectrumRate();
+    void setSpectrumRate(qint32 spectrum_rate);
+
+    QString* getCallsign();
+    void setCallsign(QString* callsign);
+
+    QString* getTo();
+    void setTo(QString* to);
+
+    QString* getVia();
+    void setVia(QString* via);
+
+    QString* getData();
+    void setData(QString* data);
+
     qint32 getBpf();
     void setBpf(qint32 bpf);
 
@@ -92,6 +143,24 @@ public:
 
     float getBpfHighCutoff();
     void setBpfHighCutoff(float bpf_high_cutoff);
+
+    qint32 getBpfTaps();
+    void setBpfTaps(qint32 bpf_taps);
+
+    qint32 getScramble();
+    void setScramble(qint32 scramble);
+
+    qint32 getPolynomial();
+    void setPolynomial(qint32 polynomial);
+
+    qint32 getPulseShaping();
+    void setPulseShaping(qint32 pulse_shaping);
+
+    float getBeta();
+    void setBeta(float beta);
+
+    qint32 getSymbolSpan();
+    void setSymbolSpan(qint32 symbol_span);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
@@ -148,11 +217,35 @@ private:
     qint32 repeat_count;
     bool m_repeat_count_isSet;
 
+    qint32 ramp_up_bits;
+    bool m_ramp_up_bits_isSet;
+
+    qint32 ramp_down_bits;
+    bool m_ramp_down_bits_isSet;
+
+    qint32 ramp_range;
+    bool m_ramp_range_isSet;
+
+    qint32 modulate_while_ramping;
+    bool m_modulate_while_ramping_isSet;
+
+    qint32 mark_frequency;
+    bool m_mark_frequency_isSet;
+
+    qint32 space_frequency;
+    bool m_space_frequency_isSet;
+
     qint32 ax25_pre_flags;
     bool m_ax25_pre_flags_isSet;
 
     qint32 ax25_post_flags;
     bool m_ax25_post_flags_isSet;
+
+    qint32 ax25_control;
+    bool m_ax25_control_isSet;
+
+    qint32 ax25_pid;
+    bool m_ax25_pid_isSet;
 
     qint32 pre_emphasis;
     bool m_pre_emphasis_isSet;
@@ -163,6 +256,33 @@ private:
     float pre_emphasis_high_freq;
     bool m_pre_emphasis_high_freq_isSet;
 
+    qint32 lpf_taps;
+    bool m_lpf_taps_isSet;
+
+    qint32 bb_noise;
+    bool m_bb_noise_isSet;
+
+    qint32 rf_noise;
+    bool m_rf_noise_isSet;
+
+    qint32 write_to_file;
+    bool m_write_to_file_isSet;
+
+    qint32 spectrum_rate;
+    bool m_spectrum_rate_isSet;
+
+    QString* callsign;
+    bool m_callsign_isSet;
+
+    QString* to;
+    bool m_to_isSet;
+
+    QString* via;
+    bool m_via_isSet;
+
+    QString* data;
+    bool m_data_isSet;
+
     qint32 bpf;
     bool m_bpf_isSet;
 
@@ -171,6 +291,24 @@ private:
 
     float bpf_high_cutoff;
     bool m_bpf_high_cutoff_isSet;
+
+    qint32 bpf_taps;
+    bool m_bpf_taps_isSet;
+
+    qint32 scramble;
+    bool m_scramble_isSet;
+
+    qint32 polynomial;
+    bool m_polynomial_isSet;
+
+    qint32 pulse_shaping;
+    bool m_pulse_shaping_isSet;
+
+    float beta;
+    bool m_beta_isSet;
+
+    qint32 symbol_span;
+    bool m_symbol_span_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
