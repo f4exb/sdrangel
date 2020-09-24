@@ -2072,11 +2072,11 @@ void MainWindow::sampleMIMOChanged(int tabIndex, int newDeviceIndex)
 void MainWindow::channelAddClicked(int channelIndex)
 {
     // Do it in the currently selected source tab
-    int currentSourceTabIndex = ui->tabInputsView->currentIndex();
+    int currentChannelTabIndex = ui->tabChannels->currentIndex();
 
-    if (currentSourceTabIndex >= 0)
+    if (currentChannelTabIndex >= 0)
     {
-        DeviceUISet *deviceUI = m_deviceUIs[currentSourceTabIndex];
+        DeviceUISet *deviceUI = m_deviceUIs[currentChannelTabIndex];
 
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
@@ -2093,8 +2093,8 @@ void MainWindow::channelAddClicked(int channelIndex)
             int nbMIMOChannels = deviceUI->getNumberOfAvailableMIMOChannels();
             int nbRxChannels = deviceUI->getNumberOfAvailableRxChannels();
             int nbTxChannels = deviceUI->getNumberOfAvailableTxChannels();
-            qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbMIMO: %d nbRx: %d nbTx: %d selected: %d",
-                currentSourceTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
+            qDebug("MainWindow::channelAddClicked: MIMO: tab: nbMIMO: %d %d nbRx: %d nbTx: %d selected: %d",
+                currentChannelTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
 
             if (channelIndex < nbMIMOChannels) {
                 m_pluginManager->createMIMOChannelInstance(
