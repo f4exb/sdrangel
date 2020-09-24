@@ -61,15 +61,6 @@ struct PacketModSettings
     QString m_to;
     QString m_via;
     QString m_data;
-    quint32 m_rgbColor;
-    QString m_title;
-    Serializable *m_channelMarker;
-    int m_streamIndex;
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
     bool m_bpf;
     Real m_bpfLowCutoff;
     Real m_bpfHighCutoff;
@@ -79,6 +70,15 @@ struct PacketModSettings
     bool m_pulseShaping;
     float m_beta;
     int m_symbolSpan;
+    quint32 m_rgbColor;
+    QString m_title;
+    Serializable *m_channelMarker;
+    int m_streamIndex;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIDeviceIndex;
+    uint16_t m_reverseAPIChannelIndex;
 
     PacketModSettings();
     void resetToDefaults();
