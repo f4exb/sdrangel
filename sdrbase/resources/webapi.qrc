@@ -31,6 +31,7 @@
         <file>webapi/doc/swagger/include/FeatureActions.yaml</file>
         <file>webapi/doc/swagger/include/FeatureReport.yaml</file>
         <file>webapi/doc/swagger/include/FeatureSettings.yaml</file>
+        <file>webapi/doc/swagger/include/FeatureSetPreset.yaml</file>
         <file>webapi/doc/swagger/include/FileSink.yaml</file>
         <file>webapi/doc/swagger/include/FileSource.yaml</file>
         <file>webapi/doc/swagger/include/FileInput.yaml</file>
