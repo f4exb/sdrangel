@@ -198,12 +198,44 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
         reverseAPIKeys.append("repeatCount");
     }
 
+    if ((settings.m_rampUpBits != m_settings.m_rampUpBits) || force) {
+        reverseAPIKeys.append("rampUpBits");
+    }
+
+    if ((settings.m_rampDownBits != m_settings.m_rampDownBits) || force) {
+        reverseAPIKeys.append("rampDownBits");
+    }
+
+    if ((settings.m_rampRange != m_settings.m_rampRange) || force) {
+        reverseAPIKeys.append("rampRange");
+    }
+
+    if ((settings.m_modulateWhileRamping != m_settings.m_modulateWhileRamping) || force) {
+        reverseAPIKeys.append("modulateWhileRamping");
+    }
+
+    if ((settings.m_markFrequency != m_settings.m_markFrequency) || force) {
+        reverseAPIKeys.append("markFrequency");
+    }
+
+    if ((settings.m_spaceFrequency != m_settings.m_spaceFrequency) || force) {
+        reverseAPIKeys.append("spaceFrequency");
+    }
+
     if((settings.m_ax25PreFlags != m_settings.m_ax25PreFlags) || force) {
         reverseAPIKeys.append("ax25PreFlags");
     }
 
     if((settings.m_ax25PostFlags != m_settings.m_ax25PostFlags) || force) {
         reverseAPIKeys.append("ax25PostFlags");
+    }
+
+    if((settings.m_ax25Control != m_settings.m_ax25Control) || force) {
+        reverseAPIKeys.append("ax25Control");
+    }
+
+    if((settings.m_ax25PID != m_settings.m_ax25PID) || force) {
+        reverseAPIKeys.append("ax25PID");
     }
 
     if((settings.m_preEmphasis != m_settings.m_preEmphasis) || force) {
@@ -218,6 +250,42 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
         reverseAPIKeys.append("preEmphasisHighFreq");
     }
 
+    if((settings.m_lpfTaps != m_settings.m_lpfTaps) || force) {
+        reverseAPIKeys.append("lpfTaps");
+    }
+
+    if((settings.m_bbNoise != m_settings.m_bbNoise) || force) {
+        reverseAPIKeys.append("bbNoise");
+    }
+
+    if((settings.m_rfNoise != m_settings.m_rfNoise) || force) {
+        reverseAPIKeys.append("rfNoise");
+    }
+
+    if((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
+        reverseAPIKeys.append("writeToFile");
+    }
+
+    if((settings.m_spectrumRate != m_settings.m_spectrumRate) || force) {
+        reverseAPIKeys.append("spectrumRate");
+    }
+
+    if((settings.m_callsign != m_settings.m_callsign) || force) {
+        reverseAPIKeys.append("callsign");
+    }
+
+    if((settings.m_to != m_settings.m_to) || force) {
+        reverseAPIKeys.append("to");
+    }
+
+    if((settings.m_via != m_settings.m_via) || force) {
+        reverseAPIKeys.append("via");
+    }
+
+    if((settings.m_data != m_settings.m_data) || force) {
+        reverseAPIKeys.append("data");
+    }
+
     if((settings.m_bpf != m_settings.m_bpf) || force) {
         reverseAPIKeys.append("bpf");
     }
@@ -228,6 +296,26 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
 
     if((settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff) || force) {
         reverseAPIKeys.append("bpfHighCutoff");
+    }
+
+    if((settings.m_bpfTaps != m_settings.m_bpfTaps) || force) {
+        reverseAPIKeys.append("bpfTaps");
+    }
+
+    if((settings.m_scramble != m_settings.m_scramble) || force) {
+        reverseAPIKeys.append("scramble");
+    }
+
+    if((settings.m_polynomial != m_settings.m_polynomial) || force) {
+        reverseAPIKeys.append("polynomial");
+    }
+
+    if((settings.m_beta != m_settings.m_beta) || force) {
+        reverseAPIKeys.append("beta");
+    }
+
+    if((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
+        reverseAPIKeys.append("symbolSpan");
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -348,11 +436,35 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("repeatCount")) {
         settings.m_repeatCount = response.getPacketModSettings()->getRepeatCount();
     }
+    if (channelSettingsKeys.contains("rampUpBits")) {
+        settings.m_rampUpBits = response.getPacketModSettings()->getRampUpBits();
+    }
+    if (channelSettingsKeys.contains("rampDownBits")) {
+        settings.m_rampDownBits = response.getPacketModSettings()->getRampDownBits();
+    }
+    if (channelSettingsKeys.contains("rampRange")) {
+        settings.m_rampRange = response.getPacketModSettings()->getRampRange();
+    }
+    if (channelSettingsKeys.contains("modulateWhileRamping")) {
+        settings.m_modulateWhileRamping = response.getPacketModSettings()->getModulateWhileRamping() != 0;
+    }
+    if (channelSettingsKeys.contains("markFrequency")) {
+        settings.m_markFrequency = response.getPacketModSettings()->getMarkFrequency();
+    }
+    if (channelSettingsKeys.contains("spaceFrequency")) {
+        settings.m_spaceFrequency = response.getPacketModSettings()->getSpaceFrequency();
+    }
     if (channelSettingsKeys.contains("ax25PreFlags")) {
         settings.m_ax25PreFlags = response.getPacketModSettings()->getAx25PreFlags();
     }
     if (channelSettingsKeys.contains("ax25PostFlags")) {
         settings.m_ax25PostFlags = response.getPacketModSettings()->getAx25PostFlags();
+    }
+    if (channelSettingsKeys.contains("ax25Control")) {
+        settings.m_ax25Control = response.getPacketModSettings()->getAx25Control();
+    }
+    if (channelSettingsKeys.contains("ax25PID")) {
+        settings.m_ax25PID = response.getPacketModSettings()->getAx25Pid();
     }
     if (channelSettingsKeys.contains("preEmphasis")) {
         settings.m_preEmphasis = response.getPacketModSettings()->getPreEmphasis() != 0;
@@ -363,6 +475,33 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("preEmphasisHighFreq")) {
         settings.m_preEmphasisHighFreq = response.getPacketModSettings()->getPreEmphasisHighFreq();
     }
+    if (channelSettingsKeys.contains("lpfTaps")) {
+        settings.m_lpfTaps = response.getPacketModSettings()->getLpfTaps();
+    }
+    if (channelSettingsKeys.contains("bbNoise")) {
+        settings.m_bbNoise = response.getPacketModSettings()->getBbNoise() != 0;
+    }
+    if (channelSettingsKeys.contains("rfNoise")) {
+        settings.m_rfNoise = response.getPacketModSettings()->getRfNoise() != 0;
+    }
+    if (channelSettingsKeys.contains("writeToFile")) {
+        settings.m_writeToFile = response.getPacketModSettings()->getWriteToFile() != 0;
+    }
+    if (channelSettingsKeys.contains("spectrumRate")) {
+        settings.m_spectrumRate = response.getPacketModSettings()->getSpectrumRate();
+    }
+    if (channelSettingsKeys.contains("callsign")) {
+        settings.m_callsign = *response.getPacketModSettings()->getCallsign();
+    }
+    if (channelSettingsKeys.contains("to")) {
+        settings.m_to = *response.getPacketModSettings()->getTo();
+    }
+    if (channelSettingsKeys.contains("via")) {
+        settings.m_via = *response.getPacketModSettings()->getVia();
+    }
+    if (channelSettingsKeys.contains("data")) {
+        settings.m_data = *response.getPacketModSettings()->getData();
+    }
     if (channelSettingsKeys.contains("bpf")) {
         settings.m_bpf = response.getPacketModSettings()->getBpf() != 0;
     }
@@ -371,6 +510,21 @@ void PacketMod::webapiUpdateChannelSettings(
     }
     if (channelSettingsKeys.contains("bpfHighCutoff")) {
         settings.m_bpfHighCutoff = response.getPacketModSettings()->getBpfHighCutoff();
+    }
+    if (channelSettingsKeys.contains("bpfTaps")) {
+        settings.m_bpfTaps = response.getPacketModSettings()->getBpfTaps();
+    }
+    if (channelSettingsKeys.contains("scramble")) {
+        settings.m_scramble = response.getPacketModSettings()->getScramble() != 0;
+    }
+    if (channelSettingsKeys.contains("polynomial")) {
+        settings.m_polynomial = response.getPacketModSettings()->getPolynomial();
+    }
+    if (channelSettingsKeys.contains("beta")) {
+        settings.m_beta = response.getPacketModSettings()->getBeta();
+    }
+    if (channelSettingsKeys.contains("symbolSpan")) {
+        settings.m_symbolSpan = response.getPacketModSettings()->getSymbolSpan();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPacketModSettings()->getRgbColor();
@@ -450,14 +604,59 @@ void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getPacketModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
     response.getPacketModSettings()->setRepeatDelay(settings.m_repeatDelay);
     response.getPacketModSettings()->setRepeatCount(settings.m_repeatCount);
+    response.getPacketModSettings()->setRampUpBits(settings.m_rampUpBits);
+    response.getPacketModSettings()->setRampDownBits(settings.m_rampDownBits);
+    response.getPacketModSettings()->setRampRange(settings.m_rampRange);
+    response.getPacketModSettings()->setModulateWhileRamping(settings.m_modulateWhileRamping ? 1 : 0);
+    response.getPacketModSettings()->setMarkFrequency(settings.m_markFrequency);
+    response.getPacketModSettings()->setSpaceFrequency(settings.m_spaceFrequency);
     response.getPacketModSettings()->setAx25PreFlags(settings.m_ax25PreFlags);
     response.getPacketModSettings()->setAx25PostFlags(settings.m_ax25PostFlags);
+    response.getPacketModSettings()->setAx25Control(settings.m_ax25Control);
+    response.getPacketModSettings()->setAx25Pid(settings.m_ax25PID);
     response.getPacketModSettings()->setPreEmphasis(settings.m_preEmphasis ? 1 : 0);
     response.getPacketModSettings()->setPreEmphasisTau(settings.m_preEmphasisTau);
     response.getPacketModSettings()->setPreEmphasisHighFreq(settings.m_preEmphasisHighFreq);
+    response.getPacketModSettings()->setLpfTaps(settings.m_lpfTaps);
+    response.getPacketModSettings()->setBbNoise(settings.m_bbNoise ? 1 : 0);
+    response.getPacketModSettings()->setRfNoise(settings.m_rfNoise ? 1 : 0);
+    response.getPacketModSettings()->setWriteToFile(settings.m_writeToFile ? 1 : 0);
+    response.getPacketModSettings()->setSpectrumRate(settings.m_spectrumRate);
+
+    if (response.getPacketModSettings()->getCallsign()) {
+        *response.getPacketModSettings()->getCallsign() = settings.m_callsign;
+    } else {
+        response.getPacketModSettings()->setCallsign(new QString(settings.m_callsign));
+    }
+
+    if (response.getPacketModSettings()->getTo()) {
+        *response.getPacketModSettings()->getTo() = settings.m_to;
+    } else {
+        response.getPacketModSettings()->setTo(new QString(settings.m_to));
+    }
+
+    if (response.getPacketModSettings()->getVia()) {
+        *response.getPacketModSettings()->getVia() = settings.m_via;
+    } else {
+        response.getPacketModSettings()->setVia(new QString(settings.m_via));
+    }
+
+    if (response.getPacketModSettings()->getData()) {
+        *response.getPacketModSettings()->getData() = settings.m_data;
+    } else {
+        response.getPacketModSettings()->setData(new QString(settings.m_data));
+    }
+
     response.getPacketModSettings()->setBpf(settings.m_bpf ? 1 : 0);
     response.getPacketModSettings()->setBpfLowCutoff(settings.m_bpfLowCutoff);
     response.getPacketModSettings()->setBpfHighCutoff(settings.m_bpfHighCutoff);
+    response.getPacketModSettings()->setBpfTaps(settings.m_bpfTaps);
+    response.getPacketModSettings()->setScramble(settings.m_scramble ? 1 : 0);
+    response.getPacketModSettings()->setPolynomial(settings.m_polynomial);
+    response.getPacketModSettings()->setPulseShaping(settings.m_pulseShaping ? 1 : 0);
+    response.getPacketModSettings()->setBeta(settings.m_beta);
+    response.getPacketModSettings()->setSymbolSpan(settings.m_symbolSpan);
+
     response.getPacketModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getPacketModSettings()->getTitle()) {
@@ -521,14 +720,38 @@ void PacketMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("repeatCount") || force) {
         swgPacketModSettings->setRepeatCount(settings.m_repeatCount);
     }
+    if (channelSettingsKeys.contains("rampUpBits")) {
+        swgPacketModSettings->setRampUpBits(settings.m_rampUpBits);
+    }
+    if (channelSettingsKeys.contains("rampDownBits")) {
+        swgPacketModSettings->setRampDownBits(settings.m_rampDownBits);
+    }
+    if (channelSettingsKeys.contains("rampRange")) {
+        swgPacketModSettings->setRampRange(settings.m_rampRange);
+    }
+    if (channelSettingsKeys.contains("modulateWhileRamping")) {
+        swgPacketModSettings->setRampRange(settings.m_modulateWhileRamping ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("markFrequency")) {
+        swgPacketModSettings->setMarkFrequency(settings.m_markFrequency);
+    }
+    if (channelSettingsKeys.contains("spaceFrequency")) {
+        swgPacketModSettings->setSpaceFrequency(settings.m_spaceFrequency);
+    }
     if (channelSettingsKeys.contains("ax25PreFlags") || force) {
         swgPacketModSettings->setAx25PreFlags(settings.m_ax25PreFlags);
     }
     if (channelSettingsKeys.contains("ax25PostFlags") || force) {
         swgPacketModSettings->setAx25PostFlags(settings.m_ax25PostFlags);
     }
+    if (channelSettingsKeys.contains("ax25Control")) {
+        swgPacketModSettings->setAx25Control(settings.m_ax25Control);
+    }
+    if (channelSettingsKeys.contains("ax25PID")) {
+        swgPacketModSettings->setAx25Pid(settings.m_ax25PID);
+    }
     if (channelSettingsKeys.contains("preEmphasis") || force) {
-        swgPacketModSettings->setPreEmphasis(settings.m_preEmphasis);
+        swgPacketModSettings->setPreEmphasis(settings.m_preEmphasis ? 1 : 0);
     }
     if (channelSettingsKeys.contains("preEmphasisTau") || force) {
         swgPacketModSettings->setPreEmphasisTau(settings.m_preEmphasisTau);
@@ -536,14 +759,56 @@ void PacketMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     if (channelSettingsKeys.contains("preEmphasisHighFreq") || force) {
         swgPacketModSettings->setPreEmphasisHighFreq(settings.m_preEmphasisHighFreq);
     }
+    if (channelSettingsKeys.contains("lpfTaps")) {
+        swgPacketModSettings->setLpfTaps(settings.m_lpfTaps);
+    }
+    if (channelSettingsKeys.contains("bbNoise")) {
+        swgPacketModSettings->setBbNoise(settings.m_bbNoise ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rfNoise")) {
+        swgPacketModSettings->setRfNoise(settings.m_rfNoise ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("writeToFile")) {
+        swgPacketModSettings->setWriteToFile(settings.m_writeToFile ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("spectrumRate")) {
+        swgPacketModSettings->setSpectrumRate(settings.m_spectrumRate);
+    }
+    if (channelSettingsKeys.contains("callsign")) {
+        swgPacketModSettings->setCallsign(new QString(settings.m_callsign));
+    }
+    if (channelSettingsKeys.contains("to")) {
+        swgPacketModSettings->setTo(new QString(settings.m_to));
+    }
+    if (channelSettingsKeys.contains("via")) {
+        swgPacketModSettings->setVia(new QString(settings.m_via));
+    }
+    if (channelSettingsKeys.contains("data")) {
+        swgPacketModSettings->setData(new QString(settings.m_data));
+    }
     if (channelSettingsKeys.contains("bpf") || force) {
-        swgPacketModSettings->setBpf(settings.m_preEmphasis);
+        swgPacketModSettings->setBpf(settings.m_preEmphasis ? 1 : 0);
     }
     if (channelSettingsKeys.contains("bpfLowCutoff") || force) {
         swgPacketModSettings->setBpfLowCutoff(settings.m_bpfLowCutoff);
     }
     if (channelSettingsKeys.contains("bpfHighCutoff") || force) {
         swgPacketModSettings->setBpfHighCutoff(settings.m_bpfHighCutoff);
+    }
+    if (channelSettingsKeys.contains("bpfTaps")) {
+        swgPacketModSettings->setBpfTaps(settings.m_bpfTaps);
+    }
+    if (channelSettingsKeys.contains("scramble")) {
+        swgPacketModSettings->setScramble(settings.m_scramble ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("polynomial")) {
+        swgPacketModSettings->setPolynomial(settings.m_polynomial);
+    }
+    if (channelSettingsKeys.contains("beta")) {
+        swgPacketModSettings->setBeta(settings.m_beta);
+    }
+    if (channelSettingsKeys.contains("symbolSpan")) {
+        swgPacketModSettings->setSymbolSpan(settings.m_symbolSpan);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPacketModSettings->setRgbColor(settings.m_rgbColor);
@@ -610,4 +875,3 @@ uint32_t PacketMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
 }
-
