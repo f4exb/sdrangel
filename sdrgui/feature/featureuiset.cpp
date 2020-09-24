@@ -17,6 +17,9 @@
 
 #include "gui/featurewindow.h"
 #include "plugin/plugininstancegui.h"
+#include "plugin/pluginapi.h"
+#include "settings/featuresetpreset.h"
+#include "feature/featureutils.h"
 
 #include "featureuiset.h"
 
@@ -63,6 +66,16 @@ void FeatureUISet::renameFeatureInstances()
     }
 }
 
+// sort by name
+bool FeatureUISet::FeatureInstanceRegistration::operator<(const FeatureInstanceRegistration& other) const
+{
+    if (m_gui && other.m_gui) {
+        return m_gui->getName() < other.m_gui->getName();
+    } else {
+        return false;
+    }
+}
+
 void FeatureUISet::freeFeatures()
 {
     for(int i = 0; i < m_featureInstanceRegistrations.count(); i++)
@@ -99,5 +112,68 @@ Feature *FeatureUISet::getFeatureAt(int featureIndex)
         return m_featureInstanceRegistrations[featureIndex].m_feature;
     } else{
         return nullptr;
+    }
+}
+
+void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter)
+{
+    qDebug("FeatureUISet::loadFeatureSetSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+
+    // Available feature plugins
+    PluginAPI::FeatureRegistrations *featureRegistrations = pluginAPI->getFeatureRegistrations();
+
+    // copy currently open features and clear list
+    FeatureInstanceRegistrations openFeatures = m_featureInstanceRegistrations;
+    m_featureInstanceRegistrations.clear();
+
+    for (int i = 0; i < openFeatures.count(); i++)
+    {
+        qDebug("FeatureUISet::loadFeatureSetSettings: destroying old feature [%s]", qPrintable(openFeatures[i].m_featureName));
+        openFeatures[i].m_gui->destroy();
+    }
+
+    qDebug("FeatureUISet::loadFeatureSetSettings: %d feature(s) in preset", preset->getFeatureCount());
+
+    for (int i = 0; i < preset->getFeatureCount(); i++)
+    {
+        const FeatureSetPreset::FeatureConfig& featureConfig = preset->getFeatureConfig(i);
+        FeatureInstanceRegistration reg;
+
+        // create feature instance
+
+        for(int i = 0; i < featureRegistrations->count(); i++)
+        {
+            if (FeatureUtils::compareFeatureURIs((*featureRegistrations)[i].m_featureIdURI, featureConfig.m_featureIdURI))
+            {
+                qDebug("FeatureUISet::loadFeatureSetSettings: creating new feature [%s] from config [%s]",
+                        qPrintable((*featureRegistrations)[i].m_featureIdURI),
+                        qPrintable(featureConfig.m_featureIdURI));
+                Feature *feature =
+                        (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
+                PluginInstanceGUI *featureGUI =
+                        (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
+                reg = FeatureInstanceRegistration(featureConfig.m_featureIdURI, featureGUI, feature);
+                break;
+            }
+        }
+
+        if (reg.m_gui)
+        {
+            qDebug("FeatureUISet::loadFeatureSetSettings: deserializing feature [%s]", qPrintable(featureConfig.m_featureIdURI));
+            reg.m_gui->deserialize(featureConfig.m_config);
+        }
+    }
+
+    renameFeatureInstances();
+}
+
+void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
+{
+    std::sort(m_featureInstanceRegistrations.begin(), m_featureInstanceRegistrations.end()); // sort by increasing delta frequency and type
+
+    for (int i = 0; i < m_featureInstanceRegistrations.count(); i++)
+    {
+        qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_featureName));
+        preset->addFeature(m_featureInstanceRegistrations[i].m_featureName, m_featureInstanceRegistrations[i].m_gui->serialize());
     }
 }

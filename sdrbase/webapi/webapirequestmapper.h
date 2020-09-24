@@ -37,6 +37,9 @@ namespace SWGSDRangel
     class SWGPreset;
     class SWGChannelConfig;
     class SWGDeviceConfig;
+    class SWGFeatureConfig;
+    class SWGFeatureActions;
+    class SWGFeatureSetPreset;
 }
 
 class SDRBASE_API WebAPIRequestMapper : public qtwebapp::HttpRequestHandler {
@@ -104,10 +107,22 @@ private:
     bool validateLimeRFEConfig(SWGSDRangel::SWGLimeRFESettings& limeRFESettings, QJsonObject& jsonObject, QStringList& limeRFESettingsKeys);
     bool validateConfig(SWGSDRangel::SWGInstanceConfigResponse& config, QJsonObject& jsonObject, WebAPIAdapterInterface::ConfigKeys& configKeys);
 
+    bool appendFeatureSetPresetKeys(
+        SWGSDRangel::SWGFeatureSetPreset *preset,
+        const QJsonObject& presetJson,
+        WebAPIAdapterInterface::FeatureSetPresetKeys& featureSetPresetKeys
+    );
+
     bool appendPresetKeys(
             SWGSDRangel::SWGPreset *preset,
             const QJsonObject& presetJson,
             WebAPIAdapterInterface::PresetKeys& presetKeys);
+
+    bool appendPresetFeatureKeys(
+        SWGSDRangel::SWGFeatureConfig *feature,
+        const QJsonObject& featureSettingsJson,
+        WebAPIAdapterInterface::FeatureKeys& featureKeys
+    );
 
     bool appendPresetChannelKeys(
             SWGSDRangel::SWGChannelConfig *channel,
@@ -160,6 +175,20 @@ private:
             const QString& parentKey,
             QStringList& keyList);
 
+    bool getFeatureSettings(
+        const QString& featureSettingsKey,
+        SWGSDRangel::SWGFeatureSettings *featureSettings,
+        const QJsonObject& featureSettingsJson,
+        QStringList& featureSettingsKeys
+    );
+
+    bool getFeatureActions(
+        const QString& featureActionsKey,
+        SWGSDRangel::SWGFeatureActions *featureActions,
+        const QJsonObject& featureActionsJson,
+        QStringList& featureSettingsKeys
+    );
+
     bool parseJsonBody(QString& jsonStr, QJsonObject& jsonObject, qtwebapp::HttpResponse& response);
 
     void resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& deviceSettings);
@@ -194,6 +223,9 @@ private:
     static const QMap<QString, QString> m_sourceDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_sinkDeviceHwIdToActionsKey;
     static const QMap<QString, QString> m_mimoDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_featureTypeToSettingsKey;
+    static const QMap<QString, QString> m_featureTypeToActionsKey;
+    static const QMap<QString, QString> m_featureURIToSettingsKey;
 };
 
 #endif /* SDRBASE_WEBAPI_WEBAPIREQUESTMAPPER_H_ */

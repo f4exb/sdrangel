@@ -6,6 +6,7 @@
 #include "limerfe/limerfeusbcalib.h"
 #include "preferences.h"
 #include "preset.h"
+#include "featuresetpreset.h"
 #include "export.h"
 #include "plugin/pluginmanager.h"
 
@@ -19,8 +20,8 @@ public:
 	MainSettings();
 	~MainSettings();
 
-	void load(PluginManager *pluginManager);
-	void save(PluginManager *pluginManager) const;
+	void load();
+	void save() const;
 
 	void resetToDefaults();
     void initialize();
@@ -40,6 +41,8 @@ public:
 	void renamePresetGroup(const QString& oldGroupName, const QString& newGroupName);
 	void deletePresetGroup(const QString& groupName);
     void clearPresets();
+    const Preset& getWorkingPresetConst() const { return m_workingPreset; }
+	Preset* getWorkingPreset() { return &m_workingPreset; }
 
     void addCommand(Command *command);
     void deleteCommand(const Command* command);
@@ -51,8 +54,20 @@ public:
     void deleteCommandGroup(const QString& groupName);
     void clearCommands();
 
-    const Preset& getWorkingPresetConst() const { return m_workingPreset; }
-	Preset* getWorkingPreset() { return &m_workingPreset; }
+	FeatureSetPreset* newFeatureSetPreset(const QString& group, const QString& description);
+    void addFeatureSetPreset(FeatureSetPreset *preset);
+	void deleteFeatureSetPreset(const FeatureSetPreset* preset);
+	int getFeatureSetPresetCount() const { return m_featureSetPresets.count(); }
+	const FeatureSetPreset* getFeatureSetPreset(int index) const { return m_featureSetPresets[index]; }
+	const FeatureSetPreset* getFeatureSetPreset(const QString& groupName, const QString& description) const;
+	void sortFeatureSetPresets();
+	void renameFeatureSetPresetGroup(const QString& oldGroupName, const QString& newGroupName);
+	void deleteFeatureSetPresetGroup(const QString& groupName);
+    void clearFeatureSetPresets();
+    const FeatureSetPreset& getWorkingFeatureSetPresetConst() const { return m_workingFeatureSetPreset; }
+	FeatureSetPreset* getWorkingFeatureSetPreset() { return &m_workingFeatureSetPreset; }
+	QList<FeatureSetPreset*> *getFeatureSetPresets() { return &m_featureSetPresets; }
+
 	int getSourceIndex() const { return m_preferences.getSourceIndex(); }
 	void setSourceIndex(int value) { m_preferences.setSourceIndex(value); }
 	const QString& getSourceDeviceId() const { return m_preferences.getSourceDevice(); }
@@ -82,10 +97,13 @@ protected:
 	Preferences m_preferences;
 	AudioDeviceManager *m_audioDeviceManager;
 	Preset m_workingPreset;
+	FeatureSetPreset m_workingFeatureSetPreset;
 	typedef QList<Preset*> Presets;
 	Presets m_presets;
     typedef QList<Command*> Commands;
     Commands m_commands;
+    typedef QList<FeatureSetPreset*> FeatureSetPresets;
+    FeatureSetPresets m_featureSetPresets;
 	DeviceUserArgs m_hardwareDeviceUserArgs;
 	LimeRFEUSBCalib m_limeRFEUSBCalib;
     AMBEEngine *m_ambeEngine;

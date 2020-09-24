@@ -26,7 +26,10 @@
 class QWidget;
 class FeatureWindow;
 class PluginInstanceGUI;
+class PluginAPI;
 class Feature;
+class FeatureSetPreset;
+class WebAPIAdapterInterface;
 
 class SDRGUI_API FeatureUISet
 {
@@ -42,6 +45,8 @@ public:
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
+    void loadFeatureSetSettings(const FeatureSetPreset* preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
+    void saveFeatureSetSettings(FeatureSetPreset* preset);
 
     FeatureWindow *m_featureWindow;
 

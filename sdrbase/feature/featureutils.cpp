@@ -15,33 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
-#define INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#include "featureutils.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+bool FeatureUtils::compareFeatureURIs(const QString& registeredFeatureURI, const QString& xFeatureURI)
+{
+    return registeredFeatureURI == getRegisteredFeatureURI(xFeatureURI);
+}
 
-class WebAPIAdapterInterface;
-
-class SimplePTTPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.feature.simpleptt")
-
-public:
-	explicit SimplePTTPlugin(QObject* parent = nullptr);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual PluginInstanceGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
-	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
-	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+QString FeatureUtils::getRegisteredFeatureURI(const QString& xFeatureURI)
+{
+    return xFeatureURI;
+}

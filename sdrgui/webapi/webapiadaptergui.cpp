@@ -145,6 +145,8 @@ int WebAPIAdapterGUI::instanceConfigGet(
     WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainWindow.getMainSettings().getPreferences());
     SWGSDRangel::SWGPreset *workingPreset = response.getWorkingPreset();
     webAPIAdapterBase.webapiFormatPreset(workingPreset, m_mainWindow.getMainSettings().getWorkingPresetConst());
+    SWGSDRangel::SWGFeatureSetPreset *workingFeatureSetPreset = response.getWorkingFeatureSetPreset();
+    webAPIAdapterBase.webapiFormatFeatureSetPreset(workingFeatureSetPreset, m_mainWindow.getMainSettings().getWorkingFeatureSetPresetConst());
 
     int nbPresets = m_mainWindow.m_settings.getPresetCount();
     QList<SWGSDRangel::SWGPreset*> *swgPresets = response.getPresets();
@@ -164,6 +166,16 @@ int WebAPIAdapterGUI::instanceConfigGet(
         const Command *command = m_mainWindow.m_settings.getCommand(i);
         swgCommands->append(new SWGSDRangel::SWGCommand);
         WebAPIAdapterBase::webapiFormatCommand(swgCommands->back(), *command);
+    }
+
+    int nbFeatureSetPresets = m_mainWindow.m_settings.getFeatureSetPresetCount();
+    QList<SWGSDRangel::SWGFeatureSetPreset*> *swgFeatureSetPresets = response.getFeaturesetpresets();
+
+    for (int i = 0; i < nbFeatureSetPresets; i++)
+    {
+        const FeatureSetPreset *preset = m_mainWindow.m_settings.getFeatureSetPreset(i);
+        swgFeatureSetPresets->append(new SWGSDRangel::SWGFeatureSetPreset);
+        webAPIAdapterBase.webapiFormatFeatureSetPreset(swgFeatureSetPresets->back(), *preset);
     }
 
     return 200;
@@ -190,6 +202,9 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
     Preset *workingPreset = m_mainWindow.m_settings.getWorkingPreset();
     webAPIAdapterBase.webapiUpdatePreset(force, query.getWorkingPreset(), configKeys.m_workingPresetKeys, workingPreset);
 
+    FeatureSetPreset *workingFeatureSetPreset = m_mainWindow.m_settings.getWorkingFeatureSetPreset();
+    webAPIAdapterBase.webapiUpdateFeatureSetPreset(force, query.getWorkingFeatureSetPreset(), configKeys.m_workingFeatureSetPresetKeys, workingFeatureSetPreset);
+
     QList<PresetKeys>::const_iterator presetKeysIt = configKeys.m_presetKeys.begin();
     int i = 0;
     for (; presetKeysIt != configKeys.m_presetKeys.end(); ++presetKeysIt, i++)
@@ -208,6 +223,16 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
         SWGSDRangel::SWGCommand *swgCommand = query.getCommands()->at(i);
         webAPIAdapterBase.webapiUpdateCommand(swgCommand, *commandKeysIt, *newCommand);
         m_mainWindow.m_settings.addCommand(newCommand);
+    }
+
+    QList<FeatureSetPresetKeys>::const_iterator featureSetPresetKeysIt = configKeys.m_featureSetPresetKeys.begin();
+    i = 0;
+    for (; featureSetPresetKeysIt != configKeys.m_featureSetPresetKeys.end(); ++featureSetPresetKeysIt, i++)
+    {
+        FeatureSetPreset *newPreset = new FeatureSetPreset(); // created with default values
+        SWGSDRangel::SWGFeatureSetPreset *swgPreset = query.getFeaturesetpresets()->at(i);
+        webAPIAdapterBase.webapiUpdateFeatureSetPreset(force, swgPreset, *featureSetPresetKeysIt, newPreset);
+        m_mainWindow.m_settings.addFeatureSetPreset(newPreset);
     }
 
     MainWindow::MsgApplySettings *msg = MainWindow::MsgApplySettings::create();

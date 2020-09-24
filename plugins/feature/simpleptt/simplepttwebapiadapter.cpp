@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,33 +15,36 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
-#define INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#include "SWGFeatureSettings.h"
+#include "simpleptt.h"
+#include "simplepttwebapiadapter.h"
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+SimplePTTWebAPIAdapter::SimplePTTWebAPIAdapter()
+{}
 
-class WebAPIAdapterInterface;
+SimplePTTWebAPIAdapter::~SimplePTTWebAPIAdapter()
+{}
 
-class SimplePTTPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.feature.simpleptt")
+int SimplePTTWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGFeatureSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
+    response.getSimplePttSettings()->init();
+    SimplePTT::webapiFormatFeatureSettings(response, m_settings);
 
-public:
-	explicit SimplePTTPlugin(QObject* parent = nullptr);
+    return 200;
+}
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+int SimplePTTWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& featureSettingsKeys,
+        SWGSDRangel::SWGFeatureSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    SimplePTT::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
 
-	virtual PluginInstanceGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
-	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
-	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+    return 200;
+}

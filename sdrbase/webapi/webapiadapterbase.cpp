@@ -22,6 +22,8 @@
 #include "channel/channelutils.h"
 #include "device/devicewebapiadapter.h"
 #include "device/deviceutils.h"
+#include "feature/featurewebapiadapter.h"
+#include "feature/featureutils.h"
 #include "dsp/glspectrumsettings.h"
 #include "webapiadapterbase.h"
 
@@ -31,6 +33,8 @@ WebAPIAdapterBase::WebAPIAdapterBase()
 WebAPIAdapterBase::~WebAPIAdapterBase()
 {
     m_webAPIChannelAdapters.flush();
+    m_webAPIFeatureAdapters.flush();
+    m_webAPIDeviceAdapters.flush();
 }
 
 void WebAPIAdapterBase::webapiFormatPreferences(
@@ -87,6 +91,37 @@ void WebAPIAdapterBase::webapiUpdatePreferences(
     }
     if (preferenceKeys.contains("useLogFile")) {
         preferences.setUseLogFile(apiPreferences->getUseLogFile() != 0);
+    }
+}
+
+void WebAPIAdapterBase::webapiFormatFeatureSetPreset(
+        SWGSDRangel::SWGFeatureSetPreset *apiPreset,
+        const FeatureSetPreset& preset
+)
+{
+    apiPreset->init();
+    apiPreset->setGroup(new QString(preset.getGroup()));
+    apiPreset->setDescription(new QString(preset.getDescription()));
+
+    int nbFeatures = preset.getFeatureCount();
+    for (int i = 0; i < nbFeatures; i++)
+    {
+        const FeatureSetPreset::FeatureConfig& featureConfig = preset.getFeatureConfig(i);
+        QList<SWGSDRangel::SWGFeatureConfig *> *swgFeatureConfigs = apiPreset->getFeatureConfigs();
+        swgFeatureConfigs->append(new SWGSDRangel::SWGFeatureConfig);
+        swgFeatureConfigs->back()->init();
+        swgFeatureConfigs->back()->setFeatureIdUri(new QString(featureConfig.m_featureIdURI));
+        const QByteArray& featureSettings = featureConfig.m_config;
+        SWGSDRangel::SWGFeatureSettings *swgFeatureSettings = swgFeatureConfigs->back()->getConfig();
+        swgFeatureSettings->init();
+        FeatureWebAPIAdapter *featureWebAPIAdapter = m_webAPIFeatureAdapters.getFeatureWebAPIAdapter(featureConfig.m_featureIdURI, m_pluginManager);
+
+        if (featureWebAPIAdapter)
+        {
+            featureWebAPIAdapter->deserialize(featureSettings);
+            QString errorMessage;
+            featureWebAPIAdapter->webapiSettingsGet(*swgFeatureSettings, errorMessage);
+        }
     }
 }
 
@@ -177,6 +212,65 @@ void WebAPIAdapterBase::webapiFormatPreset(
     }
 
     apiPreset->setLayout(new QString(preset.getLayout().toBase64().toStdString().c_str()));
+}
+
+void WebAPIAdapterBase::webapiUpdateFeatureSetPreset(
+    bool force,
+    SWGSDRangel::SWGFeatureSetPreset *apiPreset,
+    const WebAPIAdapterInterface::FeatureSetPresetKeys& presetKeys,
+    FeatureSetPreset *preset
+)
+{
+    if (presetKeys.m_keys.contains("description")) {
+        preset->setDescription(*apiPreset->getDescription());
+    }
+    if (presetKeys.m_keys.contains("group")) {
+        preset->setGroup(*apiPreset->getGroup());
+    }
+
+    if (force) { // PUT replaces feature list possibly erasing it if no features are given
+        preset->clearFeatures();
+    }
+
+    QList<WebAPIAdapterInterface::FeatureKeys>::const_iterator featureKeysIt = presetKeys.m_featureKeys.begin();
+    int i = 0;
+    QString errorMessage;
+
+    for (; featureKeysIt != presetKeys.m_featureKeys.end(); ++featureKeysIt, i++)
+    {
+        SWGSDRangel::SWGFeatureConfig *swgFeatureConfig = apiPreset->getFeatureConfigs()->at(i);
+
+        if (!swgFeatureConfig) { // safety measure but should not happen
+            continue;
+        }
+
+        if (featureKeysIt->m_keys.contains("featureIdURI"))
+        {
+            QString *featureIdURI = swgFeatureConfig->getFeatureIdUri();
+
+            if (!featureIdURI) {
+                continue;
+            }
+
+            FeatureWebAPIAdapter *featureWebAPIAdapter = m_webAPIFeatureAdapters.getFeatureWebAPIAdapter(*featureIdURI, m_pluginManager);
+
+            if (!featureWebAPIAdapter) {
+                continue;
+            }
+
+            SWGSDRangel::SWGFeatureSettings *featureSettings = swgFeatureConfig->getConfig();
+
+            featureWebAPIAdapter->webapiSettingsPutPatch(
+                true, // features are always appended
+                featureKeysIt->m_featureKeys,
+                *featureSettings,
+                errorMessage
+            );
+
+            QByteArray config = featureWebAPIAdapter->serialize();
+            preset->addFeature(*featureIdURI, config);
+        }
+    }
 }
 
 void WebAPIAdapterBase::webapiUpdatePreset(
@@ -488,4 +582,40 @@ void WebAPIAdapterBase::WebAPIDeviceAdapters::flush()
     }
 
     m_webAPIDeviceAdapters.clear();
+}
+
+FeatureWebAPIAdapter *WebAPIAdapterBase::WebAPIFeatureAdapters::getFeatureWebAPIAdapter(const QString& featureURI, const PluginManager *pluginManager)
+{
+    QString registeredFeatureURI = FeatureUtils::getRegisteredFeatureURI(featureURI);
+    QMap<QString, FeatureWebAPIAdapter*>::iterator it = m_webAPIFeatureAdapters.find(registeredFeatureURI);
+
+    if (it == m_webAPIFeatureAdapters.end())
+    {
+        const PluginInterface *pluginInterface = pluginManager->getFeaturePluginInterface(registeredFeatureURI);
+
+        if (pluginInterface)
+        {
+            FeatureWebAPIAdapter *featureAPI = pluginInterface->createFeatureWebAPIAdapter();
+            m_webAPIFeatureAdapters.insert(registeredFeatureURI, featureAPI);
+            return featureAPI;
+        }
+        else
+        {
+            m_webAPIFeatureAdapters.insert(registeredFeatureURI, nullptr);
+            return nullptr;
+        }
+    }
+    else
+    {
+        return *it;
+    }
+}
+
+void WebAPIAdapterBase::WebAPIFeatureAdapters::flush()
+{
+    foreach(FeatureWebAPIAdapter *featureAPI, m_webAPIFeatureAdapters) {
+        delete featureAPI;
+    }
+
+    m_webAPIFeatureAdapters.clear();
 }

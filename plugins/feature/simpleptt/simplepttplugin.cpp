@@ -24,6 +24,7 @@
 #endif
 #include "simpleptt.h"
 #include "simplepttplugin.h"
+#include "simplepttwebapiadapter.h"
 
 const PluginDescriptor SimplePTTPlugin::m_pluginDescriptor = {
     SimplePTT::m_featureId,
@@ -71,4 +72,9 @@ PluginInstanceGUI* SimplePTTPlugin::createFeatureGUI(FeatureUISet *featureUISet,
 Feature* SimplePTTPlugin::createFeature(WebAPIAdapterInterface* webAPIAdapterInterface) const
 {
     return new SimplePTT(webAPIAdapterInterface);
+}
+
+FeatureWebAPIAdapter* SimplePTTPlugin::createFeatureWebAPIAdapter() const
+{
+	return new SimplePTTWebAPIAdapter();
 }

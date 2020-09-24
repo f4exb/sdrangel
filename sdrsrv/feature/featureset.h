@@ -25,6 +25,7 @@
 
 class PluginAPI;
 class Feature;
+class FeatureSetPreset;
 class WebAPIAdapterInterface;
 
 class SDRGUI_API FeatureSet
@@ -40,6 +41,8 @@ public:
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
+    void loadFeatureSetSettings(const FeatureSetPreset* preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
+    void saveFeatureSetSettings(FeatureSetPreset* preset);
 
 private:
     struct FeatureInstanceRegistration

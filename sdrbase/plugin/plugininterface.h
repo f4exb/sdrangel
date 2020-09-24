@@ -33,6 +33,7 @@ class MIMOChannel;
 class ChannelAPI;
 class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
+class FeatureWebAPIAdapter;
 class Feature;
 
 class SDRBASE_API PluginInterface {
@@ -194,6 +195,13 @@ public:
     // any channel
 
     virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const
+    {
+        return nullptr;
+    }
+
+    // any feature
+
+    virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const
     {
         return nullptr;
     }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // Interface for static web API adapters used for preset serialization and       //
 // deserialization                                                               //
@@ -18,8 +18,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIADAPER_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIADAPER_H_
+#ifndef SDRBASE_FEATURE_FEATUREWEBAPIADAPER_H_
+#define SDRBASE_FEATURE_FEATUREWEBAPIADAPER_H_
 
 #include <QByteArray>
 #include <QStringList>
@@ -28,14 +28,14 @@
 
 namespace SWGSDRangel
 {
-    class SWGChannelSettings;
+    class SWGFeatureSettings;
 }
 
-class SDRBASE_API ChannelWebAPIAdapter
+class SDRBASE_API FeatureWebAPIAdapter
 {
 public:
-    ChannelWebAPIAdapter() {}
-    virtual ~ChannelWebAPIAdapter() {}
+    FeatureWebAPIAdapter() {}
+    virtual ~FeatureWebAPIAdapter() {}
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data)  = 0;
 
@@ -43,7 +43,7 @@ public:
      * API adapter for the channel settings GET requests
      */
     virtual int webapiSettingsGet(
-            SWGSDRangel::SWGChannelSettings& response,
+            SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage)
     {
         (void) response;
@@ -55,15 +55,15 @@ public:
      */
     virtual int webapiSettingsPutPatch(
             bool force,
-            const QStringList& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings& response,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
             QString& errorMessage)
     {
         (void) force;
-        (void) channelSettingsKeys;
+        (void) featureSettingsKeys;
         (void) response;
         errorMessage = "Not implemented"; return 501;
     }
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIADAPER_H_
+#endif // SDRBASE_FEATURE_FEATUREWEBAPIADAPER_H_

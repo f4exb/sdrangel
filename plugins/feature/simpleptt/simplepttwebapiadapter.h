@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,33 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
-#define INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#ifndef INCLUDE_SIMPLEPTT_WEBAPIADAPTER_H
+#define INCLUDE_SIMPLEPTT_WEBAPIADAPTER_H
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include "feature/featurewebapiadapter.h"
+#include "simplepttsettings.h"
 
-class WebAPIAdapterInterface;
-
-class SimplePTTPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.feature.simpleptt")
-
+/**
+ * Standalone API adapter only for the settings
+ */
+class SimplePTTWebAPIAdapter : public FeatureWebAPIAdapter {
 public:
-	explicit SimplePTTPlugin(QObject* parent = nullptr);
+    SimplePTTWebAPIAdapter();
+    virtual ~SimplePTTWebAPIAdapter();
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
 
-	virtual PluginInstanceGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
-	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
-	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
 
 private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
+    SimplePTTSettings m_settings;
 };
 
-#endif // INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#endif // INCLUDE_SIMPLEPTT_WEBAPIADAPTER_H

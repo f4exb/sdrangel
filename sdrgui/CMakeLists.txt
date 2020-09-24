@@ -34,6 +34,7 @@ set(sdrgui_SOURCES
     gui/fmpreemphasisdialog.cpp
     gui/featureadddialog.cpp
     gui/featuresdock.cpp
+    gui/featurepresetsdialog.cpp
     gui/featurewindow.cpp
     gui/glscope.cpp
     gui/glscopegui.cpp
@@ -115,6 +116,7 @@ set(sdrgui_HEADERS
     gui/fmpreemphasisdialog.h
     gui/featureadddialog.h
     gui/featuresdock.h
+    gui/featurepresetsdialog.h
     gui/featurewindow.h
     gui/glscope.h
     gui/glscopegui.h
