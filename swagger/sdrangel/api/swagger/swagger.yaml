@@ -2322,6 +2322,8 @@ definitions:
         $ref: "http://swgserver:8081/api/swagger/include/Preferences.yaml#/Preferences"
       workingPreset:
         $ref: "http://swgserver:8081/api/swagger/include/Preset.yaml#/Preset"
+      workingFeatureSetPreset:
+        $ref: "http://swgserver:8081/api/swagger/include/FeatureSetPreset.yaml#/FeatureSetPreset"
       presets:
         type: array
         items:
@@ -2330,6 +2332,10 @@ definitions:
         type: array
         items:
           $ref: "http://swgserver:8081/api/swagger/include/Command.yaml#/Command"
+      featuresetpresets:
+        type: array
+        items:
+          $ref: "http://swgserver:8081/api/swagger/include/FeatureSetPreset.yaml#/FeatureSetPreset"
 
   InstanceDevicesResponse:
     description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"
