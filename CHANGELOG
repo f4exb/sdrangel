@@ -1,3 +1,14 @@
+sdrangel (4.17.0-1) unstable; urgency=medium
+
+   * Packet modulator: new channel Tx plugin
+   * DATV demod: Spectrum point and click is used fix. Fixes issue #637
+   * DATV demod: added standard basic settings dialog
+   * SoapySDR Input: reversed soft LO ppm correction. Fixes #641
+   * Corrected Highpass and Bandpass filters normalization. Implements #642
+   * Channel add action: fixed tab view being in use. Fixes #645
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 26 Sep 2020 07:12:43 +0200
+
 sdrangel (4.16.1-1) unstable; urgency=medium
 
    * BladeRF2: fixed global gain setting. Fixes issue #630
