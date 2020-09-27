@@ -226,6 +226,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
 	loadPresetSettings(m_settings.getWorkingPreset(), 0);
+	m_apiAdapter = new WebAPIAdapterGUI(*this);
     loadFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
 
     splash->showStatusMessage("update preset controls...", Qt::white);
@@ -250,7 +251,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     }
 #endif
 
-	m_apiAdapter = new WebAPIAdapterGUI(*this);
     ui->featureDock->setWebAPIAdapter(m_apiAdapter);
 	m_requestMapper = new WebAPIRequestMapper(this);
 	m_requestMapper->setAdapter(m_apiAdapter);
@@ -759,6 +759,7 @@ void MainWindow::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, in
 	if (featureSetIndex >= 0)
 	{
         FeatureUISet *featureSetUI = m_featureUIs[featureSetIndex];
+        qDebug("MainWindow::loadFeatureSetPresetSettings: m_apiAdapter: %p", m_apiAdapter);
         featureSetUI->loadFeatureSetSettings(preset, m_pluginManager->getPluginAPI(), m_apiAdapter);
 	}
 }
@@ -1965,6 +1966,7 @@ void MainWindow::featureAddClicked(int featureIndex)
     if (currentFeatureTabIndex >= 0)
     {
         FeatureUISet *featureUISet = m_featureUIs[currentFeatureTabIndex];
+        qDebug("MainWindow::featureAddClicked: m_apiAdapter: %p", m_apiAdapter);
         m_pluginManager->createFeatureInstance(featureIndex, featureUISet, m_apiAdapter);
     }
 }
