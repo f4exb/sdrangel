@@ -15,3 +15,5 @@ FeatureSettings:
       type: integer
     SimplePTTSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
+    RigCtlServerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
