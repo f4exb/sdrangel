@@ -1,0 +1,35 @@
+RigCtlServerSettings:
+  description: "RigCtl server settings"
+  properties:
+    enabled:
+      type: integer
+      description: >
+        Enable RigCtl server
+          * 1 - enabled
+          * 0 - disabled
+    rigCtlPort:
+      type: integer
+    maxFrequencyOffset:
+      type: integer
+    deviceIndex:
+      type: integer
+    channelIndex:
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      type: integer
+      description: >
+        Synchronize with reverse API
+          * 1 - yes
+          * 0 - no
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
