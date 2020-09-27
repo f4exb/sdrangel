@@ -61,8 +61,89 @@ void BasicFeatureSettingsDialog::on_title_editingFinished()
     m_title = ui->title->text();
 }
 
+void BasicFeatureSettingsDialog::on_reverseAPI_toggled(bool checked)
+{
+    m_useReverseAPI = checked;
+}
+
+void BasicFeatureSettingsDialog::on_reverseAPIAddress_editingFinished()
+{
+    m_reverseAPIAddress = ui->reverseAPIAddress->text();
+}
+
+void BasicFeatureSettingsDialog::on_reverseAPIPort_editingFinished()
+{
+    bool dataOk;
+    int reverseAPIPort = ui->reverseAPIPort->text().toInt(&dataOk);
+
+    if((!dataOk) || (reverseAPIPort < 1024) || (reverseAPIPort > 65535)) {
+        return;
+    } else {
+        m_reverseAPIPort = reverseAPIPort;
+    }
+}
+
+void BasicFeatureSettingsDialog::on_reverseAPIFeatureSetIndex_editingFinished()
+{
+    bool dataOk;
+    int reverseAPIFeatureSetIndex = ui->reverseAPIFeatureSetIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (reverseAPIFeatureSetIndex < 0)) {
+        return;
+    } else {
+        m_reverseAPIFeatureSetIndex = reverseAPIFeatureSetIndex;
+    }
+}
+
+void BasicFeatureSettingsDialog::on_reverseAPIFeatureIndex_editingFinished()
+{
+    bool dataOk;
+    int reverseAPIFeatureIndex = ui->reverseAPIFeatureIndex->text().toInt(&dataOk);
+
+    if ((!dataOk) || (reverseAPIFeatureIndex < 0)) {
+        return;
+    } else {
+        m_reverseAPIFeatureIndex = reverseAPIFeatureIndex;
+    }
+}
+
 void BasicFeatureSettingsDialog::accept()
 {
     m_hasChanged = true;
     QDialog::accept();
+}
+
+void BasicFeatureSettingsDialog::setUseReverseAPI(bool useReverseAPI)
+{
+    m_useReverseAPI = useReverseAPI;
+    ui->reverseAPI->setChecked(m_useReverseAPI);
+}
+
+void BasicFeatureSettingsDialog::setReverseAPIAddress(const QString& address)
+{
+    m_reverseAPIAddress = address;
+    ui->reverseAPIAddress->setText(m_reverseAPIAddress);
+}
+
+void BasicFeatureSettingsDialog::setReverseAPIPort(uint16_t port)
+{
+    if (port < 1024) {
+        return;
+    } else {
+        m_reverseAPIPort = port;
+    }
+
+    ui->reverseAPIPort->setText(tr("%1").arg(m_reverseAPIPort));
+}
+
+void BasicFeatureSettingsDialog::setReverseAPIFeatureSetIndex(uint16_t featureSetIndex)
+{
+    m_reverseAPIFeatureSetIndex = featureSetIndex > 99 ? 99 : featureSetIndex;
+    ui->reverseAPIFeatureSetIndex->setText(tr("%1").arg(m_reverseAPIFeatureSetIndex));
+}
+
+void BasicFeatureSettingsDialog::setReverseAPIFeatureIndex(uint16_t featureIndex)
+{
+    m_reverseAPIFeatureIndex = featureIndex > 99 ? 99 : featureIndex;
+    ui->reverseAPIFeatureIndex->setText(tr("%1").arg(m_reverseAPIFeatureIndex));
 }

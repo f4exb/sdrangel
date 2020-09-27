@@ -40,18 +40,23 @@ public:
     bool useReverseAPI() const { return m_useReverseAPI; }
     const QString& getReverseAPIAddress() const { return m_reverseAPIAddress; }
     uint16_t getReverseAPIPort() const { return m_reverseAPIPort; }
-    uint16_t getReverseAPIDeviceIndex() const { return m_reverseAPIDeviceIndex; }
-    uint16_t getReverseAPIChannelIndex() const { return m_reverseAPIChannelIndex; }
+    uint16_t getReverseAPIFeatureSetIndex() const { return m_reverseAPIFeatureSetIndex; }
+    uint16_t getReverseAPIFeatureIndex() const { return m_reverseAPIFeatureIndex; }
     void setUseReverseAPI(bool useReverseAPI);
     void setReverseAPIAddress(const QString& address);
     void setReverseAPIPort(uint16_t port);
-    void setReverseAPIDeviceIndex(uint16_t deviceIndex);
-    void setReverseAPIChannelIndex(uint16_t channelIndex);
+    void setReverseAPIFeatureSetIndex(uint16_t featureSetIndex);
+    void setReverseAPIFeatureIndex(uint16_t featureIndex);
     bool hasChanged() const { return m_hasChanged; }
 
 private slots:
     void on_colorBtn_clicked();
     void on_title_editingFinished();
+    void on_reverseAPI_toggled(bool checked);
+    void on_reverseAPIAddress_editingFinished();
+    void on_reverseAPIPort_editingFinished();
+    void on_reverseAPIFeatureSetIndex_editingFinished();
+    void on_reverseAPIFeatureIndex_editingFinished();
     void accept();
 
 private:
@@ -61,8 +66,8 @@ private:
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIDeviceIndex;
-    uint16_t m_reverseAPIChannelIndex;
+    uint16_t m_reverseAPIFeatureSetIndex;
+    uint16_t m_reverseAPIFeatureIndex;
     bool m_hasChanged;
 
     void paintColor();

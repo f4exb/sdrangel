@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>456</width>
     <height>158</height>
    </rect>
   </property>
@@ -133,14 +133,8 @@
       <widget class="QLineEdit" name="reverseAPIPort">
        <property name="minimumSize">
         <size>
-         <width>45</width>
+         <width>50</width>
          <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>45</width>
-         <height>16777215</height>
         </size>
        </property>
        <property name="toolTip">
@@ -155,28 +149,22 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="reverseAPIDeviceLabel">
+      <widget class="QLabel" name="reverseAPIFeatureSetLabel">
        <property name="text">
-        <string>D</string>
+        <string>Set</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="reverseAPIDeviceIndex">
+      <widget class="QLineEdit" name="reverseAPIFeatureSetIndex">
        <property name="minimumSize">
         <size>
          <width>22</width>
          <height>0</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>22</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="toolTip">
-        <string>Reverse API destination device index</string>
+        <string>Reverse API destination feature set index</string>
        </property>
        <property name="inputMask">
         <string>00</string>
@@ -190,28 +178,22 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="reverseAPIChannelLabel">
+      <widget class="QLabel" name="reverseAPIFeatureLabel">
        <property name="text">
-        <string>C</string>
+        <string>Feat</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="reverseAPIChannelIndex">
+      <widget class="QLineEdit" name="reverseAPIFeatureIndex">
        <property name="minimumSize">
         <size>
          <width>22</width>
          <height>0</height>
         </size>
        </property>
-       <property name="maximumSize">
-        <size>
-         <width>22</width>
-         <height>16777215</height>
-        </size>
-       </property>
        <property name="toolTip">
-        <string>Reverse API destination channel index</string>
+        <string>Reverse API destination feature index</string>
        </property>
        <property name="inputMask">
         <string>00</string>
