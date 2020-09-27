@@ -172,6 +172,7 @@ set(sdrbase_SOURCES
     webapi/webapiadapterinterface.cpp
     webapi/webapirequestmapper.cpp
     webapi/webapiserver.cpp
+    webapi/webapiutils.cpp
 
     websockets/wsspectrum.cpp
 
@@ -333,6 +334,7 @@ set(sdrbase_HEADERS
     webapi/webapiadapterinterface.h
     webapi/webapirequestmapper.h
     webapi/webapiserver.h
+    webapi/webapiutils.h
 
     websockets/wsspectrum.h
 
