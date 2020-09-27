@@ -38,8 +38,8 @@ void SimplePTTSettings::resetToDefaults()
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
-    m_reverseAPIDeviceIndex = 0;
-    m_reverseAPIChannelIndex = 0;
+    m_reverseAPIFeatureSetIndex = 0;
+    m_reverseAPIFeatureIndex = 0;
 }
 
 QByteArray SimplePTTSettings::serialize() const
@@ -55,8 +55,8 @@ QByteArray SimplePTTSettings::serialize() const
     s.writeBool(7, m_useReverseAPI);
     s.writeString(8, m_reverseAPIAddress);
     s.writeU32(9, m_reverseAPIPort);
-    s.writeU32(10, m_reverseAPIDeviceIndex);
-    s.writeU32(11, m_reverseAPIChannelIndex);
+    s.writeU32(10, m_reverseAPIFeatureSetIndex);
+    s.writeU32(11, m_reverseAPIFeatureIndex);
 
     return s.final();
 }
@@ -95,9 +95,9 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
         }
 
         d.readU32(10, &utmp, 0);
-        m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
+        m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(11, &utmp, 0);
-        m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+        m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
 
         return true;
     }

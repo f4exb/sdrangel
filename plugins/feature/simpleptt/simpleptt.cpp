@@ -184,8 +184,8 @@ void SimplePTT::applySettings(const SimplePTTSettings& settings, bool force)
         bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
                 (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
                 (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
-                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex) ||
-                (m_settings.m_reverseAPIChannelIndex != settings.m_reverseAPIChannelIndex);
+                (m_settings.m_reverseAPIFeatureSetIndex != settings.m_reverseAPIFeatureSetIndex) ||
+                (m_settings.m_reverseAPIFeatureIndex != settings.m_reverseAPIFeatureIndex);
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
@@ -306,8 +306,8 @@ void SimplePTT::webapiFormatFeatureSettings(
     }
 
     response.getSimplePttSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getSimplePttSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getSimplePttSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getSimplePttSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIFeatureSetIndex);
+    response.getSimplePttSettings()->setReverseApiChannelIndex(settings.m_reverseAPIFeatureIndex);
 }
 
 void SimplePTT::webapiUpdateFeatureSettings(
@@ -332,6 +332,21 @@ void SimplePTT::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("tx2RxDelayMs")) {
         settings.m_tx2RxDelayMs = response.getSimplePttSettings()->getTx2RxDelayMs();
+    }
+    if (featureSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getSimplePttSettings()->getUseReverseApi() != 0;
+    }
+    if (featureSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getSimplePttSettings()->getReverseApiAddress();
+    }
+    if (featureSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getSimplePttSettings()->getReverseApiPort();
+    }
+    if (featureSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIFeatureSetIndex = response.getSimplePttSettings()->getReverseApiDeviceIndex();
+    }
+    if (featureSettingsKeys.contains("reverseAPIChannelIndex")) {
+        settings.m_reverseAPIFeatureIndex = response.getSimplePttSettings()->getReverseApiChannelIndex();
     }
 }
 
@@ -373,8 +388,8 @@ void SimplePTT::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")
             .arg(settings.m_reverseAPIAddress)
             .arg(settings.m_reverseAPIPort)
-            .arg(settings.m_reverseAPIDeviceIndex)
-            .arg(settings.m_reverseAPIChannelIndex);
+            .arg(settings.m_reverseAPIFeatureSetIndex)
+            .arg(settings.m_reverseAPIFeatureIndex);
     m_networkRequest.setUrl(QUrl(channelSettingsURL));
     m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 

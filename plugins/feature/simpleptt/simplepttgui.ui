@@ -37,9 +37,6 @@
   <property name="windowTitle">
    <string>Simple PTT</string>
   </property>
-  <property name="statusTip">
-   <string>Local Sink</string>
-  </property>
   <widget class="QWidget" name="settingsContainer" native="true">
    <property name="geometry">
     <rect>
