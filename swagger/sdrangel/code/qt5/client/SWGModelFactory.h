@@ -163,6 +163,7 @@
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGRemoteSourceSettings.h"
+#include "SWGRigCtlServerSettings.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
@@ -660,6 +661,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGRemoteSourceSettings").compare(type) == 0) {
       return new SWGRemoteSourceSettings();
+    }
+    if(QString("SWGRigCtlServerSettings").compare(type) == 0) {
+      return new SWGRigCtlServerSettings();
     }
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
       return new SWGRtlSdrReport();

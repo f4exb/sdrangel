@@ -15,3 +15,5 @@ FeatureSettings:
       type: integer
     SimplePTTSettings:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
+    RigCtlServerSettings:
+      $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
