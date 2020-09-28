@@ -39,6 +39,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:
       $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+    PacketModReport:
+      $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModReport"
     SSBDemodReport:
       $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
     RemoteSourceReport:

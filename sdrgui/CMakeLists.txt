@@ -186,6 +186,7 @@ set(sdrgui_FORMS
     gui/deviceuserargsdialog.ui
     gui/editcommanddialog.ui
     gui/externalclockdialog.ui
+    gui/fmpreemphasisdialog.ui
     gui/featureadddialog.ui
     gui/featurepresetsdialog.ui
     gui/glscopegui.ui

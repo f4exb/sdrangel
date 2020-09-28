@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "crc.h"
-#include "QDebug.h"
 
 // Reverse bit ordering
 uint32_t crc::reverse(uint32_t val, int bits)

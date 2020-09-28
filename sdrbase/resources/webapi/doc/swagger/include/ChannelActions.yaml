@@ -23,3 +23,5 @@ ChannelActions:
       $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceActions"
     SigMFFileSinkActions:
       $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"
+    PacketModActions:
+      $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModActions"

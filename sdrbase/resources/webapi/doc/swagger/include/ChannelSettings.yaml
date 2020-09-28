@@ -59,6 +59,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/LocalSink.yaml#/LocalSinkSettings"
     LocalSourceSettings:
       $ref: "/doc/swagger/include/LocalSource.yaml#/LocalSourceSettings"
+    PacketModSettings:
+      $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModSettings"
     RemoteSinkSettings:
       $ref: "/doc/swagger/include/RemoteSink.yaml#/RemoteSinkSettings"
     RemoteSourceSettings:
