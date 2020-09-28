@@ -255,7 +255,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToActionsKey =
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToSettingsKey = {
-    {"SimplePTT", "SimplePTTSettings"}
+    {"SimplePTT", "SimplePTTSettings"},
+    {"RigCtlServer", "RigCtlServerSettings"}
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToActionsKey = {
@@ -263,7 +264,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_featureURIToSettingsKey = {
-    {"sdrangel.feature.simpleptt", "SimplePTTSettings"}
+    {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
+    {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
 };
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
