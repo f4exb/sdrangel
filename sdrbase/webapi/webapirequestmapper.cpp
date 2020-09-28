@@ -4155,6 +4155,10 @@ bool WebAPIRequestMapper::getFeatureSettings(
         {
             featureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
             featureSettings->getSimplePttSettings()->fromJsonObject(settingsJsonObject);
+        } else if (featureSettingsKey == "RigCtlServerSettings")
+        {
+            featureSettings->setRigCtlServerSettings(new SWGSDRangel::SWGRigCtlServerSettings());
+            featureSettings->getRigCtlServerSettings()->fromJsonObject(settingsJsonObject);
         }
         else
         {
