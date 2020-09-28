@@ -1035,6 +1035,196 @@ public:
         return 501;
     }
 
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex} (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGFeatureSet& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) deviceSetIndex;
+        (void) response;
+    	error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature (POST)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeaturePost(
+            int featureSetIndex,
+            SWGSDRangel::SWGFeatureSettings& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) query;
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/run (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureDelete(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) response;
+        (void) error;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/run (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureRunGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) response;
+        (void) error;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/run (POST)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureRunPost(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) response;
+        (void) error;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/run (DELETE)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureRunDelete(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGDeviceState& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) response;
+        (void) error;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/settings (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureSettingsGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGFeatureSettings& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/settings (PUT, PATCH)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureSettingsPutPatch(
+            int featureSetIndex,
+            int featureIndex,
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) force;
+        (void) featureSettingsKeys;
+        (void) response;
+        error.init();
+    	*error.getMessage() = QString("Function not implemented");
+    	return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/report (GET)
+     * returns the Http status code (default 501: not implemented)
+     */
+    virtual int featuresetFeatureReportGet(
+            int featureSetIndex,
+            int featureIndex,
+            SWGSDRangel::SWGFeatureReport& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
+    /**
+     * Handler of /sdrangel/featureset/{featuresetIndex}/feature/{featureIndex}/actions (POST)
+     * posts an action on the channel (default 501: not implemented)
+     */
+    virtual int featuresetFeatureActionsPost(
+            int featureSetIndex,
+            int featureIndex,
+            const QStringList& featureActionsKeys,
+            SWGSDRangel::SWGFeatureActions& query,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error)
+    {
+        (void) featureSetIndex;
+        (void) featureIndex;
+        (void) featureActionsKeys;
+        (void) query;
+        (void) response;
+        error.init();
+        *error.getMessage() = QString("Function not implemented");
+        return 501;
+    }
+
     static QString instanceSummaryURL;
     static QString instanceConfigURL;
     static QString instanceDevicesURL;
@@ -1071,6 +1261,13 @@ public:
     static std::regex devicesetChannelReportURLRe;
     static std::regex devicesetChannelActionsURLRe;
     static std::regex devicesetChannelsReportURLRe;
+    static std::regex featuresetURLRe;
+    static std::regex featuresetFeatureURLRe;
+    static std::regex featuresetFeatureIndexURLRe;
+    static std::regex featuresetFeatureRunURLRe;
+    static std::regex featuresetFeatureSettingsURLRe;
+    static std::regex featuresetFeatureReportURLRe;
+    static std::regex featuresetFeatureActionsURLRe;
 };
 
 
