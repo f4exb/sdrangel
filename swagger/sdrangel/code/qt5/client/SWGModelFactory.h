@@ -64,9 +64,11 @@
 #include "SWGFCDProSettings.h"
 #include "SWGFeature.h"
 #include "SWGFeatureActions.h"
+#include "SWGFeatureConfig.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureSet.h"
 #include "SWGFeatureSetList.h"
+#include "SWGFeatureSetPreset.h"
 #include "SWGFeatureSettings.h"
 #include "SWGFileInputSettings.h"
 #include "SWGFileSinkActions.h"
@@ -309,6 +311,9 @@ namespace SWGSDRangel {
     if(QString("SWGFeatureActions").compare(type) == 0) {
       return new SWGFeatureActions();
     }
+    if(QString("SWGFeatureConfig").compare(type) == 0) {
+      return new SWGFeatureConfig();
+    }
     if(QString("SWGFeatureReport").compare(type) == 0) {
       return new SWGFeatureReport();
     }
@@ -317,6 +322,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFeatureSetList").compare(type) == 0) {
       return new SWGFeatureSetList();
+    }
+    if(QString("SWGFeatureSetPreset").compare(type) == 0) {
+      return new SWGFeatureSetPreset();
     }
     if(QString("SWGFeatureSettings").compare(type) == 0) {
       return new SWGFeatureSettings();

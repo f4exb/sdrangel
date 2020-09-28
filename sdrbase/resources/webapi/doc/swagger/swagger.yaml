@@ -2150,6 +2150,8 @@ definitions:
         $ref: "/doc/swagger/include/Preferences.yaml#/Preferences"
       workingPreset:
         $ref: "/doc/swagger/include/Preset.yaml#/Preset"
+      workingFeatureSetPreset:
+        $ref: "/doc/swagger/include/FeatureSetPreset.yaml#/FeatureSetPreset"
       presets:
         type: array
         items:
@@ -2158,6 +2160,10 @@ definitions:
         type: array
         items:
           $ref: "/doc/swagger/include/Command.yaml#/Command"
+      featuresetpresets:
+        type: array
+        items:
+          $ref: "/doc/swagger/include/FeatureSetPreset.yaml#/FeatureSetPreset"
 
   InstanceDevicesResponse:
     description: "Summarized information about logical devices from hardware devices attached to this SDRangel instance"

@@ -32,10 +32,14 @@ SWGInstanceConfigResponse::SWGInstanceConfigResponse() {
     m_preferences_isSet = false;
     working_preset = nullptr;
     m_working_preset_isSet = false;
+    working_feature_set_preset = nullptr;
+    m_working_feature_set_preset_isSet = false;
     presets = nullptr;
     m_presets_isSet = false;
     commands = nullptr;
     m_commands_isSet = false;
+    featuresetpresets = nullptr;
+    m_featuresetpresets_isSet = false;
 }
 
 SWGInstanceConfigResponse::~SWGInstanceConfigResponse() {
@@ -48,10 +52,14 @@ SWGInstanceConfigResponse::init() {
     m_preferences_isSet = false;
     working_preset = new SWGPreset();
     m_working_preset_isSet = false;
+    working_feature_set_preset = new SWGFeatureSetPreset();
+    m_working_feature_set_preset_isSet = false;
     presets = new QList<SWGPreset*>();
     m_presets_isSet = false;
     commands = new QList<SWGCommand*>();
     m_commands_isSet = false;
+    featuresetpresets = new QList<SWGFeatureSetPreset*>();
+    m_featuresetpresets_isSet = false;
 }
 
 void
@@ -61,6 +69,9 @@ SWGInstanceConfigResponse::cleanup() {
     }
     if(working_preset != nullptr) { 
         delete working_preset;
+    }
+    if(working_feature_set_preset != nullptr) { 
+        delete working_feature_set_preset;
     }
     if(presets != nullptr) { 
         auto arr = presets;
@@ -75,6 +86,13 @@ SWGInstanceConfigResponse::cleanup() {
             delete o;
         }
         delete commands;
+    }
+    if(featuresetpresets != nullptr) { 
+        auto arr = featuresetpresets;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete featuresetpresets;
     }
 }
 
@@ -93,10 +111,14 @@ SWGInstanceConfigResponse::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&working_preset, pJson["workingPreset"], "SWGPreset", "SWGPreset");
     
+    ::SWGSDRangel::setValue(&working_feature_set_preset, pJson["workingFeatureSetPreset"], "SWGFeatureSetPreset", "SWGFeatureSetPreset");
+    
     
     ::SWGSDRangel::setValue(&presets, pJson["presets"], "QList", "SWGPreset");
     
     ::SWGSDRangel::setValue(&commands, pJson["commands"], "QList", "SWGCommand");
+    
+    ::SWGSDRangel::setValue(&featuresetpresets, pJson["featuresetpresets"], "QList", "SWGFeatureSetPreset");
 }
 
 QString
@@ -119,11 +141,17 @@ SWGInstanceConfigResponse::asJsonObject() {
     if((working_preset != nullptr) && (working_preset->isSet())){
         toJsonValue(QString("workingPreset"), working_preset, obj, QString("SWGPreset"));
     }
+    if((working_feature_set_preset != nullptr) && (working_feature_set_preset->isSet())){
+        toJsonValue(QString("workingFeatureSetPreset"), working_feature_set_preset, obj, QString("SWGFeatureSetPreset"));
+    }
     if(presets && presets->size() > 0){
         toJsonArray((QList<void*>*)presets, obj, "presets", "SWGPreset");
     }
     if(commands && commands->size() > 0){
         toJsonArray((QList<void*>*)commands, obj, "commands", "SWGCommand");
+    }
+    if(featuresetpresets && featuresetpresets->size() > 0){
+        toJsonArray((QList<void*>*)featuresetpresets, obj, "featuresetpresets", "SWGFeatureSetPreset");
     }
 
     return obj;
@@ -149,6 +177,16 @@ SWGInstanceConfigResponse::setWorkingPreset(SWGPreset* working_preset) {
     this->m_working_preset_isSet = true;
 }
 
+SWGFeatureSetPreset*
+SWGInstanceConfigResponse::getWorkingFeatureSetPreset() {
+    return working_feature_set_preset;
+}
+void
+SWGInstanceConfigResponse::setWorkingFeatureSetPreset(SWGFeatureSetPreset* working_feature_set_preset) {
+    this->working_feature_set_preset = working_feature_set_preset;
+    this->m_working_feature_set_preset_isSet = true;
+}
+
 QList<SWGPreset*>*
 SWGInstanceConfigResponse::getPresets() {
     return presets;
@@ -169,6 +207,16 @@ SWGInstanceConfigResponse::setCommands(QList<SWGCommand*>* commands) {
     this->m_commands_isSet = true;
 }
 
+QList<SWGFeatureSetPreset*>*
+SWGInstanceConfigResponse::getFeaturesetpresets() {
+    return featuresetpresets;
+}
+void
+SWGInstanceConfigResponse::setFeaturesetpresets(QList<SWGFeatureSetPreset*>* featuresetpresets) {
+    this->featuresetpresets = featuresetpresets;
+    this->m_featuresetpresets_isSet = true;
+}
+
 
 bool
 SWGInstanceConfigResponse::isSet(){
@@ -180,10 +228,16 @@ SWGInstanceConfigResponse::isSet(){
         if(working_preset && working_preset->isSet()){
             isObjectUpdated = true; break;
         }
+        if(working_feature_set_preset && working_feature_set_preset->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(presets && (presets->size() > 0)){
             isObjectUpdated = true; break;
         }
         if(commands && (commands->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(featuresetpresets && (featuresetpresets->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

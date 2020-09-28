@@ -11,83 +11,63 @@
  */
 
 /*
- * SWGInstanceConfigResponse.h
+ * SWGFeatureSetPreset.h
  *
- * Preferences, Presets and Commands of the MainSettings saved by Qt
+ * Represents a Feature Set Preset object
  */
 
-#ifndef SWGInstanceConfigResponse_H_
-#define SWGInstanceConfigResponse_H_
+#ifndef SWGFeatureSetPreset_H_
+#define SWGFeatureSetPreset_H_
 
 #include <QJsonObject>
 
 
-#include "SWGCommand.h"
-#include "SWGFeatureSetPreset.h"
-#include "SWGPreferences.h"
-#include "SWGPreset.h"
+#include "SWGFeatureConfig.h"
 #include <QList>
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGInstanceConfigResponse: public SWGObject {
+class SWG_API SWGFeatureSetPreset: public SWGObject {
 public:
-    SWGInstanceConfigResponse();
-    SWGInstanceConfigResponse(QString* json);
-    virtual ~SWGInstanceConfigResponse();
+    SWGFeatureSetPreset();
+    SWGFeatureSetPreset(QString* json);
+    virtual ~SWGFeatureSetPreset();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGInstanceConfigResponse* fromJson(QString &jsonString) override;
+    virtual SWGFeatureSetPreset* fromJson(QString &jsonString) override;
 
-    SWGPreferences* getPreferences();
-    void setPreferences(SWGPreferences* preferences);
+    QString* getGroup();
+    void setGroup(QString* group);
 
-    SWGPreset* getWorkingPreset();
-    void setWorkingPreset(SWGPreset* working_preset);
+    QString* getDescription();
+    void setDescription(QString* description);
 
-    SWGFeatureSetPreset* getWorkingFeatureSetPreset();
-    void setWorkingFeatureSetPreset(SWGFeatureSetPreset* working_feature_set_preset);
-
-    QList<SWGPreset*>* getPresets();
-    void setPresets(QList<SWGPreset*>* presets);
-
-    QList<SWGCommand*>* getCommands();
-    void setCommands(QList<SWGCommand*>* commands);
-
-    QList<SWGFeatureSetPreset*>* getFeaturesetpresets();
-    void setFeaturesetpresets(QList<SWGFeatureSetPreset*>* featuresetpresets);
+    QList<SWGFeatureConfig*>* getFeatureConfigs();
+    void setFeatureConfigs(QList<SWGFeatureConfig*>* feature_configs);
 
 
     virtual bool isSet() override;
 
 private:
-    SWGPreferences* preferences;
-    bool m_preferences_isSet;
+    QString* group;
+    bool m_group_isSet;
 
-    SWGPreset* working_preset;
-    bool m_working_preset_isSet;
+    QString* description;
+    bool m_description_isSet;
 
-    SWGFeatureSetPreset* working_feature_set_preset;
-    bool m_working_feature_set_preset_isSet;
-
-    QList<SWGPreset*>* presets;
-    bool m_presets_isSet;
-
-    QList<SWGCommand*>* commands;
-    bool m_commands_isSet;
-
-    QList<SWGFeatureSetPreset*>* featuresetpresets;
-    bool m_featuresetpresets_isSet;
+    QList<SWGFeatureConfig*>* feature_configs;
+    bool m_feature_configs_isSet;
 
 };
 
 }
 
-#endif /* SWGInstanceConfigResponse_H_ */
+#endif /* SWGFeatureSetPreset_H_ */

@@ -3001,6 +3001,18 @@ margin-bottom: 20px;
   },
   "description" : "Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present."
 };
+            defs.FeatureConfig = {
+  "properties" : {
+    "featureIdURI" : {
+      "type" : "string",
+      "description" : "Feature type ID in URI form"
+    },
+    "config" : {
+      "$ref" : "#/definitions/FeatureSettings"
+    }
+  },
+  "description" : "Represents a FeatureSetPreset::FeatureConfig object"
+};
             defs.FeatureReport = {
   "required" : [ "featureType" ],
   "discriminator" : "featureType",
@@ -3047,6 +3059,23 @@ margin-bottom: 20px;
     }
   },
   "description" : "List of feature sets opened in this instance"
+};
+            defs.FeatureSetPreset = {
+  "properties" : {
+    "group" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "featureConfigs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FeatureConfig"
+      }
+    }
+  },
+  "description" : "Represents a Feature Set Preset object"
 };
             defs.FeatureSettings = {
   "required" : [ "featureType" ],
@@ -3838,6 +3867,9 @@ margin-bottom: 20px;
     "workingPreset" : {
       "$ref" : "#/definitions/Preset"
     },
+    "workingFeatureSetPreset" : {
+      "$ref" : "#/definitions/FeatureSetPreset"
+    },
     "presets" : {
       "type" : "array",
       "items" : {
@@ -3848,6 +3880,12 @@ margin-bottom: 20px;
       "type" : "array",
       "items" : {
         "$ref" : "#/definitions/Command"
+      }
+    },
+    "featuresetpresets" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FeatureSetPreset"
       }
     }
   },
@@ -38907,7 +38945,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-28T13:34:44.975+02:00
+              Generated 2020-09-28T13:50:10.100+02:00
             </div>
           </div>
       </div>
