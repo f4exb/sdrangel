@@ -55,7 +55,7 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
 
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
-    ui->sampleRate->setValueRange(7, 32000U, 9000000U);
+    ui->sampleRate->setValueRange(8, 32000U, 90000000U);
 
     m_spectrumVis = m_sampleSink->getSpectrumVis();
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
