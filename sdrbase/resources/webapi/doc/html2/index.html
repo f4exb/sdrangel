@@ -1133,6 +1133,17 @@ margin-bottom: 20px;
   },
   "description" : "ATVMod"
 };
+            defs.AirspyHFReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SampleRate"
+      }
+    }
+  },
+  "description" : "AirspyHF"
+};
             defs.AirspyHFSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1203,6 +1214,17 @@ margin-bottom: 20px;
     }
   },
   "description" : "AirspyHF"
+};
+            defs.AirspyReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SampleRate"
+      }
+    }
+  },
+  "description" : "Airspy"
 };
             defs.AirspySettings = {
   "properties" : {
@@ -1276,6 +1298,44 @@ margin-bottom: 20px;
     }
   },
   "description" : "Airspy"
+};
+            defs.ArgInfo = {
+  "properties" : {
+    "key" : {
+      "type" : "string"
+    },
+    "valueType" : {
+      "type" : "string",
+      "enum" : [ "bool", "int", "float", "string" ]
+    },
+    "valueString" : {
+      "type" : "string"
+    },
+    "name" : {
+      "type" : "string"
+    },
+    "description" : {
+      "type" : "string"
+    },
+    "units" : {
+      "type" : "string"
+    },
+    "range" : {
+      "$ref" : "#/definitions/RangeFloat"
+    },
+    "valueOptions" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "optionNames" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    }
+  }
 };
             defs.ArgValue = {
   "properties" : {
@@ -1500,6 +1560,14 @@ margin-bottom: 20px;
   },
   "description" : "BFMDemod"
 };
+            defs.Bandwidth = {
+  "properties" : {
+    "bandwidth" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A bandwidth expressed in Hertz (Hz)"
+};
             defs.BladeRF1InputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -1607,6 +1675,29 @@ margin-bottom: 20px;
     }
   },
   "description" : "BladeRF1"
+};
+            defs.BladeRF2InputReport = {
+  "properties" : {
+    "frequencyRange" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "gainModes" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/NamedEnum"
+      }
+    }
+  },
+  "description" : "BladeRF2"
 };
             defs.BladeRF2InputSettings = {
   "properties" : {
@@ -1776,6 +1867,23 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    }
+  },
+  "description" : "BladeRF2"
+};
+            defs.BladeRF2OutputReport = {
+  "properties" : {
+    "frequencyRange" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRange" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRange" : {
+      "$ref" : "#/definitions/Range"
     }
   },
   "description" : "BladeRF2"
@@ -2623,6 +2731,84 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about attached hardware device"
 };
+            defs.DeviceReport = {
+  "required" : [ "deviceHwType", "direction" ],
+  "discriminator" : "deviceHwType",
+  "properties" : {
+    "deviceHwType" : {
+      "type" : "string",
+      "description" : "Device hardware type code"
+    },
+    "direction" : {
+      "type" : "integer",
+      "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
+    },
+    "airspyReport" : {
+      "$ref" : "#/definitions/AirspyReport"
+    },
+    "airspyHFReport" : {
+      "$ref" : "#/definitions/AirspyHFReport"
+    },
+    "bladeRF2InputReport" : {
+      "$ref" : "#/definitions/BladeRF2InputReport"
+    },
+    "bladeRF2OutputReport" : {
+      "$ref" : "#/definitions/BladeRF2OutputReport"
+    },
+    "fileInputReport" : {
+      "$ref" : "#/definitions/FileInputReport"
+    },
+    "limeSdrInputReport" : {
+      "$ref" : "#/definitions/LimeSdrInputReport"
+    },
+    "kiwiSDRReport" : {
+      "$ref" : "#/definitions/KiwiSDRReport"
+    },
+    "limeSdrOutputReport" : {
+      "$ref" : "#/definitions/LimeSdrOutputReport"
+    },
+    "localInputReport" : {
+      "$ref" : "#/definitions/LocalInputReport"
+    },
+    "localOutputReport" : {
+      "$ref" : "#/definitions/LocalOutputReport"
+    },
+    "perseusReport" : {
+      "$ref" : "#/definitions/PerseusReport"
+    },
+    "plutoSdrInputReport" : {
+      "$ref" : "#/definitions/PlutoSdrInputReport"
+    },
+    "plutoSdrOutputReport" : {
+      "$ref" : "#/definitions/PlutoSdrOutputReport"
+    },
+    "rtlSdrReport" : {
+      "$ref" : "#/definitions/RtlSdrReport"
+    },
+    "remoteOutputReport" : {
+      "$ref" : "#/definitions/RemoteOutputReport"
+    },
+    "remoteInputReport" : {
+      "$ref" : "#/definitions/RemoteInputReport"
+    },
+    "sdrPlayReport" : {
+      "$ref" : "#/definitions/SDRPlayReport"
+    },
+    "soapySDRInputReport" : {
+      "$ref" : "#/definitions/SoapySDRReport"
+    },
+    "soapySDROutputReport" : {
+      "$ref" : "#/definitions/SoapySDRReport"
+    },
+    "xtrxInputReport" : {
+      "$ref" : "#/definitions/XtrxInputReport"
+    },
+    "xtrxOutputReport" : {
+      "$ref" : "#/definitions/XtrxOutputReport"
+    }
+  },
+  "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
+};
             defs.DeviceSet = {
   "required" : [ "channelcount", "samplingDevice" ],
   "properties" : {
@@ -3101,6 +3287,34 @@ margin-bottom: 20px;
     }
   },
   "description" : "Base feature settings. Only the feature settings corresponding to the feature specified in the featureType field is or should be present."
+};
+            defs.FileInputReport = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Record sample rate in S/s"
+    },
+    "sampleSize" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bits"
+    },
+    "absoluteTime" : {
+      "type" : "string",
+      "description" : "Absolute record time string representation"
+    },
+    "elapsedTime" : {
+      "type" : "string",
+      "description" : "Elapsed time since beginning string representation"
+    },
+    "durationTime" : {
+      "type" : "string",
+      "description" : "Duration time string representation"
+    }
+  },
+  "description" : "FileInput"
 };
             defs.FileInputSettings = {
   "properties" : {
@@ -3605,6 +3819,48 @@ margin-bottom: 20px;
   },
   "description" : "FreqTracker"
 };
+            defs.Frequency = {
+  "properties" : {
+    "frequency" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A frequency expressed in Hertz (Hz)"
+};
+            defs.FrequencyBand = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "lowerBound" : {
+      "type" : "integer"
+    },
+    "higherBound" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A band of frequencies given its boudaries in Hertz (Hz)"
+};
+            defs.FrequencyRange = {
+  "properties" : {
+    "min" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "max" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "step" : {
+      "type" : "integer"
+    },
+    "scale" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "An frequency range with 64 bit support for min and max"
+};
             defs.GLScope = {
   "properties" : {
     "displayMode" : {
@@ -3724,6 +3980,14 @@ margin-bottom: 20px;
     }
   },
   "description" : "GLSpectrumGUI settings"
+};
+            defs.Gain = {
+  "properties" : {
+    "gainCB" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A gain expressed in centi-Bels (tenths of dB)"
 };
             defs.HackRFInputSettings = {
   "properties" : {
@@ -3954,6 +4218,15 @@ margin-bottom: 20px;
   },
   "description" : "Summarized information about this SDRangel instance"
 };
+            defs.KiwiSDRReport = {
+  "properties" : {
+    "status" : {
+      "type" : "integer",
+      "description" : "0 for Idle, 1 for Connecting, 2 for Connected, 3 for Error, 4 for Disconnected"
+    }
+  },
+  "description" : "KiwiSDR"
+};
             defs.KiwiSDRSettings = {
   "properties" : {
     "gain" : {
@@ -4101,6 +4374,55 @@ margin-bottom: 20px;
   },
   "description" : "LimeRFE"
 };
+            defs.LimeSdrInputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfullt retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "underrunCount" : {
+      "type" : "integer"
+    },
+    "overrunCount" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCount" : {
+      "type" : "integer"
+    },
+    "linkRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "hwTimestamp" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Hardware timestamp"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "format" : "int8"
+    }
+  },
+  "description" : "LimeSDR"
+};
             defs.LimeSdrInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -4196,6 +4518,55 @@ margin-bottom: 20px;
   },
   "description" : "LimeSDR"
 };
+            defs.LimeSdrOutputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfullt retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "underrunCount" : {
+      "type" : "integer"
+    },
+    "overrunCount" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCount" : {
+      "type" : "integer"
+    },
+    "linkRate" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "hwTimestamp" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Hardware timestamp"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "format" : "int8"
+    }
+  },
+  "description" : "LimeSDR"
+};
             defs.LimeSdrOutputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -4269,6 +4640,18 @@ margin-bottom: 20px;
   },
   "description" : "LimeSDR"
 };
+            defs.LocalInputReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LocalInput"
+};
             defs.LocalInputSettings = {
   "properties" : {
     "dcBlock" : {
@@ -4292,6 +4675,18 @@ margin-bottom: 20px;
     }
   },
   "description" : "LocalInput"
+};
+            defs.LocalOutputReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "LocalOutput"
 };
             defs.LocalOutputSettings = {
   "properties" : {
@@ -4635,6 +5030,17 @@ margin-bottom: 20px;
   },
   "description" : "NFMMod"
 };
+            defs.NamedEnum = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "value" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Enumeration with name for values"
+};
             defs.PacketModActions = {
   "properties" : {
     "tx" : {
@@ -4844,6 +5250,17 @@ margin-bottom: 20px;
   },
   "description" : "PacketMod"
 };
+            defs.PerseusReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SampleRate"
+      }
+    }
+  },
+  "description" : "Perseus"
+};
             defs.PerseusSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -4901,6 +5318,24 @@ margin-bottom: 20px;
     }
   },
   "description" : "Perseus"
+};
+            defs.PlutoSdrInputReport = {
+  "properties" : {
+    "adcRate" : {
+      "type" : "integer"
+    },
+    "rssi" : {
+      "type" : "string"
+    },
+    "gainDB" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "PlutoSDR"
 };
             defs.PlutoSdrInputSettings = {
   "properties" : {
@@ -4989,6 +5424,21 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    }
+  },
+  "description" : "PlutoSDR"
+};
+            defs.PlutoSdrOutputReport = {
+  "properties" : {
+    "dacRate" : {
+      "type" : "integer"
+    },
+    "rssi" : {
+      "type" : "string"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
     }
   },
   "description" : "PlutoSDR"
@@ -5336,6 +5786,69 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.Range = {
+  "properties" : {
+    "min" : {
+      "type" : "integer"
+    },
+    "max" : {
+      "type" : "integer"
+    },
+    "step" : {
+      "type" : "integer"
+    },
+    "scale" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "An arbitrary range of integer values"
+};
+            defs.RangeFloat = {
+  "properties" : {
+    "min" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "max" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "step" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "An arbitrary range of floating point values"
+};
+            defs.RemoteInputReport = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "bufferRWBalance" : {
+      "type" : "integer",
+      "description" : "percentage off the mid buffer (positive read leads)"
+    },
+    "remoteTimestamp" : {
+      "type" : "string",
+      "description" : "string representation of timestamp as sent by the remote instance"
+    },
+    "minNbBlocks" : {
+      "type" : "integer",
+      "description" : "Minimum number of blocks retrieved per frame"
+    },
+    "maxNbRecovery" : {
+      "type" : "integer",
+      "description" : "Maximum number of recovery blocks used per frame"
+    }
+  },
+  "description" : "RemoteInput"
+};
             defs.RemoteInputSettings = {
   "properties" : {
     "apiAddress" : {
@@ -5378,6 +5891,20 @@ margin-bottom: 20px;
     }
   },
   "description" : "RemoteInput"
+};
+            defs.RemoteOutputReport = {
+  "properties" : {
+    "bufferRWBalance" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "ratio off the mid buffer (positive read leads)"
+    },
+    "sampleCount" : {
+      "type" : "integer",
+      "description" : "count of samples that have been sent"
+    }
+  },
+  "description" : "RemoteOutput"
 };
             defs.RemoteOutputSettings = {
   "properties" : {
@@ -5622,6 +6149,17 @@ margin-bottom: 20px;
   },
   "description" : "RigCtl server settings"
 };
+            defs.RtlSdrReport = {
+  "properties" : {
+    "gains" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Gain"
+      }
+    }
+  },
+  "description" : "RTLSDR"
+};
             defs.RtlSdrSettings = {
   "properties" : {
     "devSampleRate" : {
@@ -5694,6 +6232,35 @@ margin-bottom: 20px;
     }
   },
   "description" : "RTLSDR"
+};
+            defs.SDRPlayReport = {
+  "properties" : {
+    "sampleRates" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SampleRate"
+      }
+    },
+    "bandwidths" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Bandwidth"
+      }
+    },
+    "intermediateFrequencies" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Frequency"
+      }
+    },
+    "frequencyBands" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/FrequencyBand"
+      }
+    }
+  },
+  "description" : "SDRplay1"
 };
             defs.SDRPlaySettings = {
   "properties" : {
@@ -5973,6 +6540,14 @@ margin-bottom: 20px;
   },
   "description" : "SSBMod"
 };
+            defs.SampleRate = {
+  "properties" : {
+    "rate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "A sample rate expressed in samples per second (S/s)"
+};
             defs.SamplingDevice = {
   "required" : [ "bandwidth", "centerFrequency", "hwType", "index", "sequence", "serial" ],
   "properties" : {
@@ -6088,6 +6663,31 @@ margin-bottom: 20px;
     }
   },
   "description" : "Simple PTT settings"
+};
+            defs.SoapySDRFrequencySetting = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "ranges" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RangeFloat"
+      }
+    }
+  },
+  "description" : "A named frequency setting specified by a range list"
+};
+            defs.SoapySDRGainSetting = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "range" : {
+      "$ref" : "#/definitions/RangeFloat"
+    }
+  },
+  "description" : "A named gain setting specified by its range"
 };
             defs.SoapySDRInputSettings = {
   "properties" : {
@@ -6280,6 +6880,82 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    }
+  },
+  "description" : "SoapySDR"
+};
+            defs.SoapySDRReport = {
+  "properties" : {
+    "deviceSettingsArgs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "streamSettingsArgs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "hasDCAutoCorrection" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "hasDCOffsetValue" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "hasIQBalanceValue" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "hasFrequencyCorrectionValue" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "antennas" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "hasAGC" : {
+      "type" : "integer",
+      "description" : "boolean not zero for true"
+    },
+    "gainRange" : {
+      "$ref" : "#/definitions/RangeFloat"
+    },
+    "gainSettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SoapySDRGainSetting"
+      }
+    },
+    "frequencySettings" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/SoapySDRFrequencySetting"
+      }
+    },
+    "frequencySettingsArgs" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/ArgInfo"
+      }
+    },
+    "ratesRanges" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RangeFloat"
+      }
+    },
+    "bandwidthsRanges" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/RangeFloat"
+      }
     }
   },
   "description" : "SoapySDR"
@@ -6929,6 +7605,29 @@ margin-bottom: 20px;
   },
   "description" : "WFMMod"
 };
+            defs.XtrxInputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpsLock" : {
+      "type" : "integer",
+      "description" : "1 if GPSDO is locked else 0"
+    }
+  },
+  "description" : "XTRX"
+};
             defs.XtrxInputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -7016,6 +7715,29 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    }
+  },
+  "description" : "XTRX"
+};
+            defs.XtrxOutputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFill" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpsLock" : {
+      "type" : "integer",
+      "description" : "1 if GPSDO is locked else 0"
     }
   },
   "description" : "XTRX"
@@ -38991,7 +39713,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-28T19:24:51.767+02:00
+              Generated 2020-09-29T00:33:21.870+02:00
             </div>
           </div>
       </div>

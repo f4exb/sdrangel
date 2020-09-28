@@ -1353,7 +1353,7 @@ paths:
         "200":
           description: On success return device report
           schema:
-            $ref: "#/definitions/DeviceReport"
+            $ref: "/doc/swagger/include/DeviceReports.yaml#/DeviceReport"
         "400":
           description: Invalid device set
           schema:
