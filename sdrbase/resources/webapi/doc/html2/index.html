@@ -3095,6 +3095,9 @@ margin-bottom: 20px;
     },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
+    },
+    "RigCtlServerSettings" : {
+      "$ref" : "#/definitions/RigCtlServerSettings"
     }
   },
   "description" : "Base feature settings. Only the feature settings corresponding to the feature specified in the featureType field is or should be present."
@@ -5575,6 +5578,49 @@ margin-bottom: 20px;
     }
   },
   "description" : "Remote channel source settings"
+};
+            defs.RigCtlServerSettings = {
+  "properties" : {
+    "enabled" : {
+      "type" : "integer",
+      "description" : "Enable RigCtl server\n  * 1 - enabled\n  * 0 - disabled\n"
+    },
+    "rigCtlPort" : {
+      "type" : "integer"
+    },
+    "maxFrequencyOffset" : {
+      "type" : "integer"
+    },
+    "deviceIndex" : {
+      "type" : "integer"
+    },
+    "channelIndex" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API\n  * 1 - yes\n  * 0 - no\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "RigCtl server settings"
 };
             defs.RtlSdrSettings = {
   "properties" : {
@@ -38945,11 +38991,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-<<<<<<< ours
-              Generated 2020-09-28T13:50:10.100+02:00
-=======
-              Generated 2020-09-23T23:57:22.462+02:00
->>>>>>> theirs
+              Generated 2020-09-28T19:24:51.767+02:00
             </div>
           </div>
       </div>

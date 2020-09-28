@@ -36,6 +36,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_index_isSet = false;
     simple_ptt_settings = nullptr;
     m_simple_ptt_settings_isSet = false;
+    rig_ctl_server_settings = nullptr;
+    m_rig_ctl_server_settings_isSet = false;
 }
 
 SWGFeatureSettings::~SWGFeatureSettings() {
@@ -52,6 +54,8 @@ SWGFeatureSettings::init() {
     m_originator_feature_index_isSet = false;
     simple_ptt_settings = new SWGSimplePTTSettings();
     m_simple_ptt_settings_isSet = false;
+    rig_ctl_server_settings = new SWGRigCtlServerSettings();
+    m_rig_ctl_server_settings_isSet = false;
 }
 
 void
@@ -63,6 +67,9 @@ SWGFeatureSettings::cleanup() {
 
     if(simple_ptt_settings != nullptr) { 
         delete simple_ptt_settings;
+    }
+    if(rig_ctl_server_settings != nullptr) { 
+        delete rig_ctl_server_settings;
     }
 }
 
@@ -84,6 +91,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_feature_index, pJson["originatorFeatureIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
+    
+    ::SWGSDRangel::setValue(&rig_ctl_server_settings, pJson["RigCtlServerSettings"], "SWGRigCtlServerSettings", "SWGRigCtlServerSettings");
     
 }
 
@@ -112,6 +121,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
         toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
+    }
+    if((rig_ctl_server_settings != nullptr) && (rig_ctl_server_settings->isSet())){
+        toJsonValue(QString("RigCtlServerSettings"), rig_ctl_server_settings, obj, QString("SWGRigCtlServerSettings"));
     }
 
     return obj;
@@ -157,6 +169,16 @@ SWGFeatureSettings::setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settin
     this->m_simple_ptt_settings_isSet = true;
 }
 
+SWGRigCtlServerSettings*
+SWGFeatureSettings::getRigCtlServerSettings() {
+    return rig_ctl_server_settings;
+}
+void
+SWGFeatureSettings::setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings) {
+    this->rig_ctl_server_settings = rig_ctl_server_settings;
+    this->m_rig_ctl_server_settings_isSet = true;
+}
+
 
 bool
 SWGFeatureSettings::isSet(){
@@ -172,6 +194,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_settings && simple_ptt_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(rig_ctl_server_settings && rig_ctl_server_settings->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

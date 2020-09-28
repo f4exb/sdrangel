@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGRigCtlServerSettings.h"
 #include "SWGSimplePTTSettings.h"
 #include <QString>
 
@@ -55,6 +56,9 @@ public:
     SWGSimplePTTSettings* getSimplePttSettings();
     void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
 
+    SWGRigCtlServerSettings* getRigCtlServerSettings();
+    void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
+
 
     virtual bool isSet() override;
 
@@ -70,6 +74,9 @@ private:
 
     SWGSimplePTTSettings* simple_ptt_settings;
     bool m_simple_ptt_settings_isSet;
+
+    SWGRigCtlServerSettings* rig_ctl_server_settings;
+    bool m_rig_ctl_server_settings_isSet;
 
 };
 
