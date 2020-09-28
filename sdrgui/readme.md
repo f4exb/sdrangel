@@ -21,6 +21,12 @@ The sampling devices tab (1) acts as a master and when one of its tabs is select
 
 In each slave tab group (2), (3), (4) and (5) an individual tab corresponding to one device can be selected without affecting the selection of the other tabs. This way you can sneak peek into another spectrum or channel group without affecting the display of other tabbed windows.
 
+An additional dock widget supports the feature plugins. Plugins can be grouped in logical sets and graphically presented as tab groups (similarly to channels). For now there is only one "FO" group.
+
+![Features dock](../doc/img/Features_dock.png)
+
+Details of the feature plugins dock widget are presented in section 8
+
 <h2>Interface details</h2>
 
 ![Main Window interface](../doc/img/MainWindow_general.png)
@@ -44,6 +50,7 @@ The following items are presented hierarchically from left to right:
     - _Presets_: the saved presets
     - _Commands_: the defined commands
     - _Channels_: the channels active for each device
+    - _Features_: the feature plugins currently instantiated
   - Preferences:
     - _Audio_: opens a dialog to choose the audio output device (see 1.1 below for details)
     - _Logging_: opens a dialog to choose logging options (see 1.2 below for details)
@@ -824,7 +831,7 @@ When the mouse is over the channel window or over the central line in the spectr
 
 <h5>5.1.4: Toggle reverse API feature</h5>
 
-Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the channel settings are forwarded to an API endpoint given by address (6.5), port (6.6), device index (6.7) and channel index (6.8) in the same format as the SDRangel REST API channel settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/channel/0/settings` The JSON payload follows the same format as the SDRangel REST API channel settings. Using the same example this would be:
+Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the channel settings are forwarded to an API endpoint given by address (5.1.5), port (5.1.6), device index (5.1.7) and channel index (5.1.8) in the same format as the SDRangel REST API channel settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/deviceset/0/channel/0/settings` The JSON payload follows the same format as the SDRangel REST API channel settings. Using the same example this would be:
 
 ```
 {
@@ -940,3 +947,131 @@ Pretty print of the operating system in which SDRangel is running.
 <h4>7.5. Local date and time</h4>
 
 Local time timestamp according to system clock. Format: `yyyy-mm-dd HH:MM:ss TZ`
+
+<h3>8. Features</h3>
+
+Feature plugins implement pieces of functionality not directly related to the I/Q stream(s) DSP processing and not part of the core functionality. It can control and interact devices and channels to achieve this specialzed piece of functionality. Examples are PTT (Push To Talk) to switchover Rx/Tx device sets as you would do with a transciever or control via rigctl protocol.
+
+This area shows the feature GUIs of the features currently instantiated (active). The top bar has the following controls:
+
+![Features dock top](../doc/img/Features_top.png)
+
+<h4>8.1 Add feature</h4>
+
+Click on this button to open a dialog to add features. The dialog function is similarl to the add channels dialog in section 5.1:
+
+![Features add dialog](../doc/img/Features_add.png)
+
+<h5>8.1.1: Feature selection</h5>
+
+Use this combo to select which feature type to add
+
+<h5>8.1.2: Close dialog</h5>
+
+Use this button to dismiss the dialog
+
+<h5>8.1.3: Add feature</h5>
+
+Add a new feature by clicking on the `Apply` button. You may click it several times to add more feature instances. The dialog can be dismissed with the `Close` button or the closing window icon `X` on the top bar.
+
+<h4>8.2: Basic features settings</h4>
+
+![Features top button](../doc/img/Features_basic.png)
+
+At the left of the top bar of every feature GUI a "c" button opens a dialog to set some parameters common to all feature plugins:
+
+![Basic channel settings](../doc/img/Features_basic_dialog.png)
+
+<h5>8.2.1: Window title</h5>
+
+Changes the channel window title
+
+<h5>8.2.2: Feature color</h5>
+
+Changes the color of the window title bar. To change the color click on the color square to open a color chooser dialog. The hex rgb value is displayed next to the color square.
+
+<h5>8.2.3: Toggle reverse API feature</h5>
+
+Use this checkbox to toggle on/off the reverse API feature. With reverse API engaged the changes in the feature settings are forwarded to an API endpoint given by address (8.2.4), port (8.2.5), feature set index (8.2.6) and feature index (8.2.7) in the same format as the SDRangel REST API feature settings endpoint. With the values of the screenshot the API URL is: `http://127.0.0.1:8888/sdrangel/featureeset/0/feature/0/settings` The JSON payload follows the same format as the SDRangel REST API feature settings. Using the same example this would be:
+
+```
+{
+  "SimplePTTSettings": {
+    "reverseAPIAddress": "127.0.0.1",
+    "reverseAPIChannelIndex": 0,
+    "reverseAPIDeviceIndex": 0,
+    "reverseAPIPort": 8888,
+    "rgbColor": -65536,
+    "rx2TxDelayMs": 200,
+    "rxDeviceSetIndex": 0,
+    "title": "Simple PTT",
+    "tx2RxDelayMs": 200,
+    "txDeviceSetIndex": 1,
+    "useReverseAPI": 0
+  },
+  "featureType": "SimplePTT"
+}
+```
+Note that the PATCH method is used. The full set of parameters is sent with the PUT method only when the reverse API is toggled on or a full settings update is done.
+
+<h5>8.2.4: API address</h5>
+
+This is the IP address of the API endpoint
+
+<h5>8.2.5: API port</h5>
+
+This is the IP port of the API endpoint
+
+<h5>8.2.6: Feature set index</h5>
+
+This is the targeted feature set index
+
+<h5>8.2.7: Feature index</h5>
+
+This is the targeted feature index
+
+<h5>8.2.8: Cancel changes and exit dialog</h5>
+
+Do not make any changes and exit dialog
+
+<h5>8.2.9: Validate and exit dialog</h5>
+
+Validates the data and exits the dialog
+
+<h4>8.3: Presets dialog</h4>
+
+Feature sets (groups) can be saved to and retrieved from specialized feature presets
+
+![Features presets dialog](../doc/img/Features_presets.png)
+
+<h5>8.3.1: Feature selection</h5>
+
+Move the cursor to select a feature. Features can be organized into groups at the top level (here "Test"). When selecting a group only Edit and Delete group are available
+
+<h5>8.3.2: Add new preset</h5>
+
+Save the current feature set in a new preset.
+
+<h5>8.3.3: Update selected preset</h5>
+
+Update the selected preset with the current feature set
+
+<h5>8.3.4: Save presets</h5>
+
+This button is inactive. All presets are saved at program exit or with the Presets save button.
+
+<h5>8.3.5: Edit preset</h5>
+
+Change preset name or the preset group to which this preset belongs. If selection is a group the group name can be changed.
+
+<h5>8.3.6: Delete preset</h5>
+
+Delete selected preset or selected group
+
+<h5>8.3.7: Load preset</h5>
+
+Load preset in the current feature set. The Features that were present before are dismissed.
+
+<h5>8.3.8: Close dialog</h5>
+
+This button dismisses the dialog.
