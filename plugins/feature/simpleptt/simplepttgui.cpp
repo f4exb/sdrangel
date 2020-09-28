@@ -104,9 +104,9 @@ bool SimplePTTGUI::handleMessage(const Message& message)
         qDebug("SimplePTTGUI::handleMessage: SimplePTT::MsgPTT");
         const SimplePTT::MsgPTT& cfg = (SimplePTT::MsgPTT&) message;
         bool ptt = cfg.getTx();
-        ui->ptt->blockSignals(true);
+        blockApplySettings(true);
         ui->ptt->setChecked(ptt);
-        ui->ptt->blockSignals(false);
+        blockApplySettings(false);
 
         return true;
     }
