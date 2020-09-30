@@ -24,6 +24,8 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "channel/channelapi.h"
+#include "util/message.h"
+
 #include "localsinksettings.h"
 
 class QNetworkAccessManager;
