@@ -279,46 +279,6 @@ void PluginManager::listFeatures(QList<QString>& list)
     }
 }
 
-void PluginManager::createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
-{
-    if (channelPluginIndex < m_rxChannelRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_rxChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceAPI);
-        pluginInterface->createRxChannelGUI(deviceUISet, rxChannel);
-    }
-}
-
-void PluginManager::createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
-{
-    if (channelPluginIndex < m_txChannelRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_txChannelRegistrations[channelPluginIndex].m_plugin;
-        BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceAPI);
-        pluginInterface->createTxChannelGUI(deviceUISet, txChannel);
-    }
-}
-
-void PluginManager::createMIMOChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI)
-{
-    if (channelPluginIndex < m_mimoChannelRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_mimoChannelRegistrations[channelPluginIndex].m_plugin;
-        MIMOChannel *mimoChannel = pluginInterface->createMIMOChannelBS(deviceAPI);
-        pluginInterface->createMIMOChannelGUI(deviceUISet, mimoChannel);
-    }
-}
-
-void PluginManager::createFeatureInstance(int featurePluginIndex, FeatureUISet *featureUISet, WebAPIAdapterInterface *webAPIAdapterInterface)
-{
-    if (featurePluginIndex < m_featureRegistrations.size())
-    {
-        PluginInterface *pluginInterface = m_featureRegistrations[featurePluginIndex].m_plugin;
-        Feature *feature = pluginInterface->createFeature(webAPIAdapterInterface);
-        pluginInterface->createFeatureGUI(featureUISet, feature);
-    }
-}
-
 const PluginInterface *PluginManager::getChannelPluginInterface(const QString& channelIdURI) const
 {
     for (PluginAPI::ChannelRegistrations::const_iterator it = m_rxChannelRegistrations.begin(); it != m_rxChannelRegistrations.end(); ++it)

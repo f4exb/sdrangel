@@ -685,17 +685,6 @@ void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
     }
 }
 
-void MainWindow::addChannelRollup(int deviceTabIndex, QWidget* widget)
-{
-    if (deviceTabIndex < ui->tabInputsView->count())
-    {
-        DeviceUISet *deviceUI = m_deviceUIs[deviceTabIndex];
-        deviceUI->m_channelWindow->addRollupWidget(widget);
-        ui->channelDock->show();
-        ui->channelDock->raise();
-    }
-}
-
 void MainWindow::addViewAction(QAction* action)
 {
 	ui->menu_Window->addAction(action);
@@ -2080,13 +2069,17 @@ void MainWindow::channelAddClicked(int channelIndex)
 
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
-            m_pluginManager->createRxChannelInstance(
-                channelIndex, deviceUI, deviceUI->m_deviceAPI);
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceUI->m_deviceAPI);
+            pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
-            m_pluginManager->createTxChannelInstance(
-                channelIndex, deviceUI, deviceUI->m_deviceAPI);
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceUI->m_deviceAPI);
+            pluginInterface->createTxChannelGUI(deviceUI, txChannel);
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
@@ -2096,15 +2089,26 @@ void MainWindow::channelAddClicked(int channelIndex)
             qDebug("MainWindow::channelAddClicked: MIMO: tab: nbMIMO: %d %d nbRx: %d nbTx: %d selected: %d",
                 currentChannelTabIndex, nbMIMOChannels, nbRxChannels, nbTxChannels, channelIndex);
 
-            if (channelIndex < nbMIMOChannels) {
-                m_pluginManager->createMIMOChannelInstance(
-                    channelIndex, deviceUI, deviceUI->m_deviceAPI);
-            } else if (channelIndex < nbMIMOChannels + nbRxChannels) {
-                m_pluginManager->createRxChannelInstance(
-                    channelIndex - nbMIMOChannels, deviceUI, deviceUI->m_deviceAPI);
-            } else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels) {
-                m_pluginManager->createTxChannelInstance(
-                    channelIndex - nbMIMOChannels - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
+            if (channelIndex < nbMIMOChannels)
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getMIMOChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+                MIMOChannel *mimoChannel = pluginInterface->createMIMOChannelBS(deviceUI->m_deviceAPI);
+                pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
+            }
+            else if (channelIndex < nbMIMOChannels + nbRxChannels) // Rx
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels].m_plugin;
+                BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceUI->m_deviceAPI);
+                pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+            }
+            else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbMIMOChannels - nbRxChannels].m_plugin;
+                BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceUI->m_deviceAPI);
+                pluginInterface->createTxChannelGUI(deviceUI, txChannel);
             }
         }
     }
@@ -2120,7 +2124,10 @@ void MainWindow::featureAddClicked(int featureIndex)
     {
         FeatureUISet *featureUISet = m_featureUIs[currentFeatureTabIndex];
         qDebug("MainWindow::featureAddClicked: m_apiAdapter: %p", m_apiAdapter);
-        m_pluginManager->createFeatureInstance(featureIndex, featureUISet, m_apiAdapter);
+        PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations(); // Available feature plugins
+        PluginInterface *pluginInterface = (*featureRegistrations)[featureIndex].m_plugin;
+        Feature *feature = pluginInterface->createFeature(m_apiAdapter);
+        pluginInterface->createFeatureGUI(featureUISet, feature);
     }
 }
 

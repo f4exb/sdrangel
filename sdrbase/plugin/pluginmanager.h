@@ -80,16 +80,9 @@ public:
 	PluginAPI::ChannelRegistrations *getMIMOChannelRegistrations() { return &m_mimoChannelRegistrations; }
 	PluginAPI::FeatureRegistrations *getFeatureRegistrations() { return &m_featureRegistrations; }
 
-    void createRxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
     void listRxChannels(QList<QString>& list);
-
-	void createTxChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
 	void listTxChannels(QList<QString>& list);
-
-	void createMIMOChannelInstance(int channelPluginIndex, DeviceUISet *deviceUISet, DeviceAPI *deviceAPI);
 	void listMIMOChannels(QList<QString>& list);
-
-	void createFeatureInstance(int featurePluginIndex, FeatureUISet *featureUISet, WebAPIAdapterInterface *webAPIAdapterInterface);
 	void listFeatures(QList<QString>& list);
 
 	const PluginInterface *getChannelPluginInterface(const QString& channelIdURI) const;
