@@ -40,12 +40,6 @@ public:
     ~DeviceSet();
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
-    void registerRxChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
-    void registerTxChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
-    void registerChannelInstance(const QString& channelName, ChannelAPI* channelAPI);
-    void removeRxChannelInstance(ChannelAPI* channelAPI);
-    void removeTxChannelInstance(ChannelAPI* channelAPI);
-    void removeChannelInstance(ChannelAPI* channelAPI);
     void freeChannels();
     void deleteChannel(int channelIndex);
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
