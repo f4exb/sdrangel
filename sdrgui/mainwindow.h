@@ -95,7 +95,6 @@ public:
 
 	void addViewAction(QAction* action);
 
-    void addChannelRollup(int deviceTabIndex, QWidget* widget);
 	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
 
 	const QTimer& getMasterTimer() const { return m_masterTimer; }

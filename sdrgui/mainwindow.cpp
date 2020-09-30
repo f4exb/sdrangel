@@ -606,17 +606,6 @@ void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
     }
 }
 
-void MainWindow::addChannelRollup(int deviceTabIndex, QWidget* widget)
-{
-    if (deviceTabIndex < ui->tabInputsView->count())
-    {
-        DeviceUISet *deviceUI = m_deviceUIs[deviceTabIndex];
-        deviceUI->m_channelWindow->addRollupWidget(widget);
-        ui->channelDock->show();
-        ui->channelDock->raise();
-    }
-}
-
 void MainWindow::addViewAction(QAction* action)
 {
 	ui->menu_Window->addAction(action);
@@ -1931,13 +1920,17 @@ void MainWindow::channelAddClicked(int channelIndex)
 
         if (deviceUI->m_deviceSourceEngine) // source device => Rx channels
         {
-            m_pluginManager->createRxChannelInstance(
-                channelIndex, deviceUI, deviceUI->m_deviceAPI);
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceUI->m_deviceAPI);
+            pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
-            m_pluginManager->createTxChannelInstance(
-                channelIndex, deviceUI, deviceUI->m_deviceAPI);
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+            PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+            BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceUI->m_deviceAPI);
+            pluginInterface->createTxChannelGUI(deviceUI, txChannel);
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
@@ -1946,12 +1939,19 @@ void MainWindow::channelAddClicked(int channelIndex)
             qDebug("MainWindow::channelAddClicked: MIMO: tab: %d nbRx: %d nbTx: %d selected: %d",
                 currentChannelTabIndex, nbRxChannels, nbTxChannels, channelIndex);
 
-            if (channelIndex < nbRxChannels) {
-                m_pluginManager->createRxChannelInstance(
-                    channelIndex, deviceUI, deviceUI->m_deviceAPI);
-            } else if (channelIndex < nbRxChannels + nbTxChannels) {
-                m_pluginManager->createTxChannelInstance(
-                    channelIndex - nbRxChannels, deviceUI, deviceUI->m_deviceAPI);
+            if (channelIndex < nbRxChannels)
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
+                BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceUI->m_deviceAPI);
+                pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+            }
+            else if (channelIndex < nbRxChannels + nbTxChannels)
+            {
+                PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
+                PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbRxChannels].m_plugin;
+                BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceUI->m_deviceAPI);
+                pluginInterface->createTxChannelGUI(deviceUI, txChannel);
             }
         }
     }
@@ -1967,7 +1967,10 @@ void MainWindow::featureAddClicked(int featureIndex)
     {
         FeatureUISet *featureUISet = m_featureUIs[currentFeatureTabIndex];
         qDebug("MainWindow::featureAddClicked: m_apiAdapter: %p", m_apiAdapter);
-        m_pluginManager->createFeatureInstance(featureIndex, featureUISet, m_apiAdapter);
+        PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations(); // Available feature plugins
+        PluginInterface *pluginInterface = (*featureRegistrations)[featureIndex].m_plugin;
+        Feature *feature = pluginInterface->createFeature(m_apiAdapter);
+        pluginInterface->createFeatureGUI(featureUISet, feature);
     }
 }
 
