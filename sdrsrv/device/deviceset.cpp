@@ -55,65 +55,6 @@ DeviceSet::~DeviceSet()
     delete m_spectrumVis;
 }
 
-void DeviceSet::registerRxChannelInstance(const QString& channelName, ChannelAPI* channelAPI)
-{
-    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI));
-    renameChannelInstances();
-}
-
-void DeviceSet::registerTxChannelInstance(const QString& channelName, ChannelAPI* channelAPI)
-{
-    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI));
-    renameChannelInstances();
-}
-
-void DeviceSet::registerChannelInstance(const QString& channelName, ChannelAPI* channelAPI)
-{
-    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI));
-    renameChannelInstances();
-}
-
-void DeviceSet::removeRxChannelInstance(ChannelAPI* channelAPI)
-{
-    for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-    {
-        if (it->m_channelAPI == channelAPI)
-        {
-            m_channelInstanceRegistrations.erase(it);
-            break;
-        }
-    }
-
-    renameChannelInstances();
-}
-
-void DeviceSet::removeTxChannelInstance(ChannelAPI* channelAPI)
-{
-    for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-    {
-        if(it->m_channelAPI == channelAPI)
-        {
-            m_channelInstanceRegistrations.erase(it);
-            break;
-        }
-    }
-
-    renameChannelInstances();
-}
-
-void DeviceSet::removeChannelInstance(ChannelAPI* channelAPI)
-{
-    for(ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-    {
-        if(it->m_channelAPI == channelAPI)
-        {
-            m_channelInstanceRegistrations.erase(it);
-            break;
-        }
-    }
-
-    renameChannelInstances();
-}
 
 void DeviceSet::freeChannels()
 {
