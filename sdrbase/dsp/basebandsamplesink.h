@@ -23,34 +23,12 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 #include "util/messagequeue.h"
-#include "util/message.h"
 
 class Message;
 
 class SDRBASE_API BasebandSampleSink : public QObject {
 	Q_OBJECT
 public:
-	/** Used to notify on which thread the sample sink is now running (with ThreadedSampleSink) */
-    class SDRBASE_API MsgThreadedSink : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const QThread* getThread() const { return m_thread; }
-
-        static MsgThreadedSink* create(const QThread* thread)
-        {
-            return new MsgThreadedSink(thread);
-        }
-
-    private:
-        const QThread *m_thread;
-
-        MsgThreadedSink(const QThread *thread) :
-            Message(),
-            m_thread(thread)
-        { }
-    };
-
 	BasebandSampleSink();
 	virtual ~BasebandSampleSink();
 
