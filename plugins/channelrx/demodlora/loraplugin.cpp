@@ -34,18 +34,23 @@ void LoRaPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(LoRaDemod::m_channelIdURI, LoRaDemod::m_channelId, this);
 }
 
+void LoRaPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		LoRaDemod *instance = new LoRaDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return LoRaDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
-
-BasebandSampleSink* LoRaPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new LoRaDemod(deviceAPI);
-}
-
-ChannelAPI* LoRaPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new LoRaDemod(deviceAPI);
-}
-
