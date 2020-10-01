@@ -53,6 +53,22 @@ void ChirpChatPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(ChirpChatDemod::m_channelIdURI, ChirpChatDemod::m_channelId, this);
 }
 
+void ChirpChatPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		ChirpChatDemod *instance = new ChirpChatDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* ChirpChatPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -66,14 +82,3 @@ PluginInstanceGUI* ChirpChatPlugin::createRxChannelGUI(DeviceUISet *deviceUISet,
 	return ChirpChatDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* ChirpChatPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new ChirpChatDemod(deviceAPI);
-}
-
-ChannelAPI* ChirpChatPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new ChirpChatDemod(deviceAPI);
-}
-

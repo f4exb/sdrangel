@@ -55,6 +55,22 @@ void BeamSteeringCWModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerMIMOChannel(BeamSteeringCWMod::m_channelIdURI, BeamSteeringCWMod::m_channelId, this);
 }
 
+void BeamSteeringCWModPlugin::createMIMOChannel(DeviceAPI *deviceAPI, MIMOChannel **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		BeamSteeringCWMod *instance = new BeamSteeringCWMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(
         DeviceUISet *deviceUISet,
@@ -68,16 +84,6 @@ PluginInstanceGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(DeviceUISet *de
     return BeamSteeringCWModGUI::create(m_pluginAPI, deviceUISet, mimoChannel);
 }
 #endif
-
-MIMOChannel* BeamSteeringCWModPlugin::createMIMOChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new BeamSteeringCWMod(deviceAPI);
-}
-
-ChannelAPI* BeamSteeringCWModPlugin::createMIMOChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new BeamSteeringCWMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* BeamSteeringCWModPlugin::createChannelWebAPIAdapter() const
 {

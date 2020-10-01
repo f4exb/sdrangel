@@ -54,6 +54,22 @@ void ChirpChatModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(ChirpChatMod::m_channelIdURI, ChirpChatMod::m_channelId, this);
 }
 
+void ChirpChatModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		ChirpChatMod *instance = new ChirpChatMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* ChirpChatModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* ChirpChatModPlugin::createTxChannelGUI(DeviceUISet *deviceUIS
     return ChirpChatModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* ChirpChatModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new ChirpChatMod(deviceAPI);
-}
-
-ChannelAPI* ChirpChatModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new ChirpChatMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* ChirpChatModPlugin::createChannelWebAPIAdapter() const
 {

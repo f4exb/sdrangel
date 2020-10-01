@@ -55,6 +55,22 @@ void SigMFFileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerRxChannel(SigMFFileSink::m_channelIdURI, SigMFFileSink::m_channelId, this);
 }
 
+void SigMFFileSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		SigMFFileSink *instance = new SigMFFileSink(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* SigMFFileSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -68,16 +84,6 @@ PluginInstanceGUI* SigMFFileSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUI
     return SigMFFileSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* SigMFFileSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new SigMFFileSink(deviceAPI);
-}
-
-ChannelAPI* SigMFFileSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new SigMFFileSink(deviceAPI);
-}
 
 ChannelWebAPIAdapter* SigMFFileSinkPlugin::createChannelWebAPIAdapter() const
 {

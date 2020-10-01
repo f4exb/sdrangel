@@ -56,6 +56,22 @@ void InterferometerPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerMIMOChannel(Interferometer::m_channelIdURI, Interferometer::m_channelId, this);
 }
 
+void InterferometerPlugin::createMIMOChannel(DeviceAPI *deviceAPI, MIMOChannel **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		Interferometer *instance = new Interferometer(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* InterferometerPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -69,16 +85,6 @@ PluginInstanceGUI* InterferometerPlugin::createMIMOChannelGUI(DeviceUISet *devic
     return InterferometerGUI::create(m_pluginAPI, deviceUISet, mimoChannel);
 }
 #endif
-
-MIMOChannel* InterferometerPlugin::createMIMOChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new Interferometer(deviceAPI);
-}
-
-ChannelAPI* InterferometerPlugin::createMIMOChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new Interferometer(deviceAPI);
-}
 
 ChannelWebAPIAdapter* InterferometerPlugin::createChannelWebAPIAdapter() const
 {
