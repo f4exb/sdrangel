@@ -78,7 +78,8 @@ void DeviceSet::deleteChannel(int channelIndex)
 void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations(); // Available channel plugins
-    ChannelAPI *rxChannel =(*channelRegistrations)[selectedChannelIndex].m_plugin->createRxChannelCS(m_deviceAPI);
+    ChannelAPI *rxChannel;
+    (*channelRegistrations)[selectedChannelIndex].m_plugin->createRxChannel(m_deviceAPI, nullptr, &rxChannel);
     ChannelInstanceRegistration reg = ChannelInstanceRegistration(rxChannel->getName(), rxChannel);
     m_channelInstanceRegistrations.append(reg);
     qDebug("DeviceSet::addRxChannel: %s", qPrintable(rxChannel->getName()));
@@ -87,7 +88,8 @@ void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 void DeviceSet::addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations(); // Available channel plugins
-    ChannelAPI *txChannel = (*channelRegistrations)[selectedChannelIndex].m_plugin->createTxChannelCS(m_deviceAPI);
+    ChannelAPI *txChannel;
+    (*channelRegistrations)[selectedChannelIndex].m_plugin->createTxChannel(m_deviceAPI, nullptr, &txChannel);
     ChannelInstanceRegistration reg = ChannelInstanceRegistration(txChannel->getName(), txChannel);
     m_channelInstanceRegistrations.append(reg);
     qDebug("DeviceSet::addTxChannel: %s", qPrintable(txChannel->getName()));
@@ -96,7 +98,8 @@ void DeviceSet::addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 void DeviceSet::addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
 {
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations(); // Available channel plugins
-    ChannelAPI *mimoChannel = (*channelRegistrations)[selectedChannelIndex].m_plugin->createMIMOChannelCS(m_deviceAPI);
+    ChannelAPI *mimoChannel;
+    (*channelRegistrations)[selectedChannelIndex].m_plugin->createMIMOChannel(m_deviceAPI, nullptr, &mimoChannel);
     ChannelInstanceRegistration reg = ChannelInstanceRegistration(mimoChannel->getName(), mimoChannel);
     m_channelInstanceRegistrations.append(reg);
     qDebug("DeviceSet::addMIMOChannel: %s", qPrintable(mimoChannel->getName()));
@@ -150,7 +153,8 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                         qDebug("DeviceSet::loadChannelSettings: creating new channel [%s] from config [%s]",
                                 qPrintable((*channelRegistrations)[i].m_channelIdURI),
                                 qPrintable(channelConfig.m_channelIdURI));
-                        ChannelAPI *rxChannel = (*channelRegistrations)[i].m_plugin->createRxChannelCS(m_deviceAPI);
+                        ChannelAPI *rxChannel;
+                        (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceAPI, nullptr, &rxChannel);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, rxChannel);
                         m_channelInstanceRegistrations.append(reg);
                         break;
@@ -242,7 +246,8 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                     if ((*channelRegistrations)[i].m_channelIdURI == channelConfig.m_channelIdURI)
                     {
                         qDebug("DeviceSet::loadTxChannelSettings: creating new channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                        ChannelAPI *txChannel = (*channelRegistrations)[i].m_plugin->createTxChannelCS(m_deviceAPI);
+                        ChannelAPI *txChannel;
+                        (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceAPI, nullptr, &txChannel);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, txChannel);
                         m_channelInstanceRegistrations.append(reg);
                         break;
@@ -339,7 +344,8 @@ void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginA
                         qDebug("DeviceSet::loadMIMOChannelSettings: creating new channel [%s] from config [%s]",
                                 qPrintable((*channelRegistrations)[i].m_channelIdURI),
                                 qPrintable(channelConfig.m_channelIdURI));
-                        ChannelAPI *mimoChannel = (*channelRegistrations)[i].m_plugin->createMIMOChannelCS(m_deviceAPI);
+                        ChannelAPI *mimoChannel;
+                        (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, nullptr, &mimoChannel);
                         reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, mimoChannel);
                         m_channelInstanceRegistrations.append(reg);
                         break;

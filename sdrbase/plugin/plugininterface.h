@@ -19,6 +19,7 @@ struct SDRBASE_API PluginDescriptor {
 
 class PluginAPI;
 class DeviceAPI;
+class DeviceSet;
 class DeviceUISet;
 class FeatureUISet;
 class WebAPIAdapterInterface;
@@ -125,6 +126,13 @@ public:
 
 	// channel Rx plugins
 
+    virtual void createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+    {
+        (void) deviceAPI;
+        (void) bs;
+        (void) cs;
+    }
+
     virtual PluginInstanceGUI* createRxChannelGUI(
             DeviceUISet *deviceUISet,
             BasebandSampleSink *rxChannel) const
@@ -134,19 +142,14 @@ public:
         return nullptr;
     }
 
-    virtual BasebandSampleSink* createRxChannelBS(DeviceAPI *deviceAPI) const
-    {
-        (void) deviceAPI;
-        return nullptr;
-    }
-
-    virtual ChannelAPI* createRxChannelCS(DeviceAPI *deviceAPI) const
-    {
-        (void) deviceAPI;
-        return nullptr;
-    }
-
     // channel Tx plugins
+
+    virtual void createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+    {
+        (void) deviceAPI;
+        (void) bs;
+        (void) cs;
+    }
 
 	virtual PluginInstanceGUI* createTxChannelGUI(
             DeviceUISet *deviceUISet,
@@ -157,19 +160,14 @@ public:
         return nullptr;
     }
 
-    virtual BasebandSampleSource* createTxChannelBS(DeviceAPI *deviceAPI) const
-    {
-        (void) deviceAPI;
-        return nullptr;
-    }
-
-    virtual ChannelAPI* createTxChannelCS(DeviceAPI *deviceAPI) const
-    {
-        (void) deviceAPI;
-        return nullptr;
-    }
-
     // channel MIMO plugins
+
+    virtual void createMIMOChannel(DeviceAPI *deviceAPI, MIMOChannel **bs, ChannelAPI **cs) const
+    {
+        (void) deviceAPI;
+        (void) bs;
+        (void) cs;
+    }
 
 	virtual PluginInstanceGUI* createMIMOChannelGUI(
             DeviceUISet *deviceUISet,
@@ -177,18 +175,6 @@ public:
     {
         (void) deviceUISet;
         (void) mimoChannel;
-        return nullptr;
-    }
-
-    virtual MIMOChannel* createMIMOChannelBS(DeviceAPI *deviceAPI) const
-    {
-        (void) deviceAPI;
-        return nullptr;
-    }
-
-    virtual ChannelAPI* createMIMOChannelCS(DeviceAPI *deviceAPI) const
-    {
-        (void) deviceAPI;
         return nullptr;
     }
 
