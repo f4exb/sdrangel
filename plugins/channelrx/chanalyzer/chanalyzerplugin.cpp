@@ -52,19 +52,25 @@ void ChannelAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(ChannelAnalyzer::m_channelIdURI, ChannelAnalyzer::m_channelId, this);
 }
 
+void ChannelAnalyzerPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		ChannelAnalyzer *instance = new ChannelAnalyzer(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
-}
-
-BasebandSampleSink* ChannelAnalyzerPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new ChannelAnalyzer(deviceAPI);
-}
-
-ChannelAPI* ChannelAnalyzerPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new ChannelAnalyzer(deviceAPI);
 }
 
 ChannelWebAPIAdapter* ChannelAnalyzerPlugin::createChannelWebAPIAdapter() const

@@ -56,6 +56,22 @@ void LocalSinkPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerRxChannel(LocalSink::m_channelIdURI, LocalSink::m_channelId, this);
 }
 
+void LocalSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		LocalSink *instance = new LocalSink(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -69,16 +85,6 @@ PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet,
     return LocalSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* LocalSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new LocalSink(deviceAPI);
-}
-
-ChannelAPI* LocalSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new LocalSink(deviceAPI);
-}
 
 ChannelWebAPIAdapter* LocalSinkPlugin::createChannelWebAPIAdapter() const
 {

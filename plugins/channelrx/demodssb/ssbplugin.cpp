@@ -38,6 +38,22 @@ void SSBPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(SSBDemod::m_channelIdURI, SSBDemod::m_channelId, this);
 }
 
+void SSBPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		SSBDemod *instance = new SSBDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* SSBPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -51,16 +67,6 @@ PluginInstanceGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 	return SSBDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* SSBPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new SSBDemod(deviceAPI);
-}
-
-ChannelAPI* SSBPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new SSBDemod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* SSBPlugin::createChannelWebAPIAdapter() const
 {

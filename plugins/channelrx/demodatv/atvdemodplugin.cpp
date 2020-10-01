@@ -57,19 +57,25 @@ void ATVDemodPlugin::initPlugin(PluginAPI* ptrPluginAPI)
     m_ptrPluginAPI->registerRxChannel(ATVDemod::m_channelIdURI, ATVDemod::m_channelId, this);
 }
 
+void ATVDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		ATVDemod *instance = new ATVDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
-}
-
-BasebandSampleSink* ATVDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new ATVDemod(deviceAPI);
-}
-
-ChannelAPI* ATVDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new ATVDemod(deviceAPI);
 }
 
 ChannelWebAPIAdapter* ATVDemodPlugin::createChannelWebAPIAdapter() const

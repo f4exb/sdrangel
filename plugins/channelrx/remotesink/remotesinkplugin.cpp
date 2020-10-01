@@ -56,6 +56,22 @@ void RemoteSinkPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerRxChannel(RemoteSink::m_channelIdURI, RemoteSink::m_channelId, this);
 }
 
+void RemoteSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		RemoteSink *instance = new RemoteSink(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -69,16 +85,6 @@ PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet
     return RemoteSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* RemoteSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new RemoteSink(deviceAPI);
-}
-
-ChannelAPI* RemoteSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new RemoteSink(deviceAPI);
-}
 
 ChannelWebAPIAdapter* RemoteSinkPlugin::createChannelWebAPIAdapter() const
 {

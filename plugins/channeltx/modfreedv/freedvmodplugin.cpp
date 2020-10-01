@@ -54,6 +54,22 @@ void FreeDVModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(FreeDVMod::m_channelIdURI, FreeDVMod::m_channelId, this);
 }
 
+void FreeDVModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		FreeDVMod *instance = new FreeDVMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* FreeDVModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* FreeDVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet,
     return FreeDVModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* FreeDVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new FreeDVMod(deviceAPI);
-}
-
-ChannelAPI* FreeDVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new FreeDVMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* FreeDVModPlugin::createChannelWebAPIAdapter() const
 {
