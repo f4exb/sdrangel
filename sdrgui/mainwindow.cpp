@@ -1922,14 +1922,16 @@ void MainWindow::channelAddClicked(int channelIndex)
         {
             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
             PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
-            BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceUI->m_deviceAPI);
+            BasebandSampleSink *rxChannel;
+            pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, nullptr);
             pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
             PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
             PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
-            BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceUI->m_deviceAPI);
+            BasebandSampleSource *txChannel;
+            pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, nullptr);
             pluginInterface->createTxChannelGUI(deviceUI, txChannel);
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
@@ -1943,14 +1945,16 @@ void MainWindow::channelAddClicked(int channelIndex)
             {
                 PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getRxChannelRegistrations(); // Available channel plugins
                 PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex].m_plugin;
-                BasebandSampleSink *rxChannel = pluginInterface->createRxChannelBS(deviceUI->m_deviceAPI);
+                BasebandSampleSink *rxChannel;
+                pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, nullptr);
                 pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
             }
             else if (channelIndex < nbRxChannels + nbTxChannels)
             {
                 PluginAPI::ChannelRegistrations *channelRegistrations = m_pluginManager->getTxChannelRegistrations(); // Available channel plugins
                 PluginInterface *pluginInterface = (*channelRegistrations)[channelIndex - nbRxChannels].m_plugin;
-                BasebandSampleSource *txChannel = pluginInterface->createTxChannelBS(deviceUI->m_deviceAPI);
+                BasebandSampleSource *txChannel;
+                pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, nullptr);
                 pluginInterface->createTxChannelGUI(deviceUI, txChannel);
             }
         }

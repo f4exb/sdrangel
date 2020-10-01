@@ -208,8 +208,8 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     qDebug("DeviceUISet::loadRxChannelSettings: creating new channel [%s] from config [%s]",
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
-                    BasebandSampleSink *rxChannel =
-                            (*channelRegistrations)[i].m_plugin->createRxChannelBS(m_deviceAPI);
+                    BasebandSampleSink *rxChannel;
+                    (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceAPI, &rxChannel, nullptr);
                     PluginInstanceGUI *rxChannelGUI =
                             (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
                     reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, rxChannelGUI, 0);
@@ -285,8 +285,8 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     qDebug("DeviceUISet::loadTxChannelSettings: creating new channel [%s] from config [%s]",
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
-                    BasebandSampleSource *txChannel =
-                            (*channelRegistrations)[i].m_plugin->createTxChannelBS(m_deviceAPI);
+                    BasebandSampleSource *txChannel;
+                    (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceAPI, &txChannel, nullptr);
                     PluginInstanceGUI *txChannelGUI =
                             (*channelRegistrations)[i].m_plugin->createTxChannelGUI(this, txChannel);
                     reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, txChannelGUI, 1);
@@ -364,8 +364,8 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                     qDebug("DeviceUISet::loadMIMOChannelSettings: creating new channel [%s] from config [%s]",
                             qPrintable((*channelRegistrations)[i].m_channelIdURI),
                             qPrintable(channelConfig.m_channelIdURI));
-                    MIMOChannel *mimoChannel =
-                            (*channelRegistrations)[i].m_plugin->createMIMOChannelBS(m_deviceAPI);
+                    MIMOChannel *mimoChannel;
+                    (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, &mimoChannel, nullptr);
                     PluginInstanceGUI *mimoChannelGUI =
                             (*channelRegistrations)[i].m_plugin->createMIMOChannelGUI(this, mimoChannel);
                     reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, mimoChannelGUI, 2);
