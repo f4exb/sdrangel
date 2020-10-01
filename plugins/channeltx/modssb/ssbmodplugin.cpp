@@ -54,6 +54,22 @@ void SSBModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(SSBMod::m_channelIdURI, SSBMod::m_channelId, this);
 }
 
+void SSBModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		SSBMod *instance = new SSBMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
     return SSBModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* SSBModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new SSBMod(deviceAPI);
-}
-
-ChannelAPI* SSBModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new SSBMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* SSBModPlugin::createChannelWebAPIAdapter() const
 {

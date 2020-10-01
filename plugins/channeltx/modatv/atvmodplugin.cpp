@@ -54,6 +54,22 @@ void ATVModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(ATVMod::m_channelIdURI, ATVMod::m_channelId, this);
 }
 
+void ATVModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		ATVMod *instance = new ATVMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
     return ATVModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* ATVModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new ATVMod(deviceAPI);
-}
-
-ChannelAPI* ATVModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new ATVMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* ATVModPlugin::createChannelWebAPIAdapter() const
 {

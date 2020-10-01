@@ -57,6 +57,22 @@ void UDPSourcePlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(UDPSource::m_channelIdURI, UDPSource::m_channelId, this);
 }
 
+void UDPSourcePlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		UDPSource *instance = new UDPSource(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* UDPSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -70,16 +86,6 @@ PluginInstanceGUI* UDPSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet,
     return UDPSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* UDPSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new UDPSource(deviceAPI);
-}
-
-ChannelAPI* UDPSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new UDPSource(deviceAPI);
-}
 
 ChannelWebAPIAdapter* UDPSourcePlugin::createChannelWebAPIAdapter() const
 {

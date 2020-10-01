@@ -54,6 +54,22 @@ void RemoteSourcePlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(RemoteSource::m_channelIdURI, RemoteSource::m_channelId, this);
 }
 
+void RemoteSourcePlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		RemoteSource *instance = new RemoteSource(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* RemoteSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* RemoteSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUIS
     return RemoteSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* RemoteSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new RemoteSource(deviceAPI);
-}
-
-ChannelAPI* RemoteSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new RemoteSource(deviceAPI);
-}
 
 ChannelWebAPIAdapter* RemoteSourcePlugin::createChannelWebAPIAdapter() const
 {

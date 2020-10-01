@@ -54,6 +54,22 @@ void NFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(NFMMod::m_channelIdURI, NFMMod::m_channelId, this);
 }
 
+void NFMModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		NFMMod *instance = new NFMMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* NFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
     return NFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* NFMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new NFMMod(deviceAPI);
-}
-
-ChannelAPI* NFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new NFMMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* NFMModPlugin::createChannelWebAPIAdapter() const
 {

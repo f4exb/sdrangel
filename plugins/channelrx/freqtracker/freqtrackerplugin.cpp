@@ -54,6 +54,22 @@ void FreqTrackerPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(FreqTracker::m_channelIdURI, FreqTracker::m_channelId, this);
 }
 
+void FreqTrackerPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		FreqTracker *instance = new FreqTracker(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* FreqTrackerPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* FreqTrackerPlugin::createRxChannelGUI(DeviceUISet *deviceUISe
 	return FreqTrackerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* FreqTrackerPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new FreqTracker(deviceAPI);
-}
-
-ChannelAPI* FreqTrackerPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new FreqTracker(deviceAPI);
-}
 
 ChannelWebAPIAdapter* FreqTrackerPlugin::createChannelWebAPIAdapter() const
 {

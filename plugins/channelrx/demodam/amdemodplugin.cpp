@@ -37,6 +37,22 @@ void AMDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(AMDemod::m_channelIdURI, AMDemod::m_channelId, this);
 }
 
+void AMDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		AMDemod *instance = new AMDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -50,16 +66,6 @@ PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, B
 	return AMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* AMDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new AMDemod(deviceAPI);
-}
-
-ChannelAPI* AMDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new AMDemod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* AMDemodPlugin::createChannelWebAPIAdapter() const
 {

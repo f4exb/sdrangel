@@ -38,6 +38,22 @@ void NFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(NFMDemod::m_channelIdURI, NFMDemod::m_channelId, this);
 }
 
+void NFMPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		NFMDemod *instance = new NFMDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* NFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -51,16 +67,6 @@ PluginInstanceGUI* NFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 	return NFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* NFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new NFMDemod(deviceAPI);
-}
-
-ChannelAPI* NFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new NFMDemod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* NFMPlugin::createChannelWebAPIAdapter() const
 {

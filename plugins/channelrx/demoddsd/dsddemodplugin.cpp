@@ -56,6 +56,22 @@ void DSDDemodPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(DSDDemod::m_channelIdURI, DSDDemod::m_channelId, this);
 }
 
+void DSDDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		DSDDemod *instance = new DSDDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -69,16 +85,6 @@ PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, 
 	return DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* DSDDemodPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new DSDDemod(deviceAPI);
-}
-
-ChannelAPI* DSDDemodPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new DSDDemod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* DSDDemodPlugin::createChannelWebAPIAdapter() const
 {

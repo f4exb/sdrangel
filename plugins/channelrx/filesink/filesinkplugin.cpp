@@ -55,6 +55,22 @@ void FileSinkPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerRxChannel(FileSink::m_channelIdURI, FileSink::m_channelId, this);
 }
 
+void FileSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		FileSink *instance = new FileSink(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* FileSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -68,16 +84,6 @@ PluginInstanceGUI* FileSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, 
     return FileSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* FileSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new FileSink(deviceAPI);
-}
-
-ChannelAPI* FileSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new FileSink(deviceAPI);
-}
 
 ChannelWebAPIAdapter* FileSinkPlugin::createChannelWebAPIAdapter() const
 {

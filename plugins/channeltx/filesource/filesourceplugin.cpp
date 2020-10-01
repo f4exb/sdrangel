@@ -54,6 +54,22 @@ void FileSourcePlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(FileSource::m_channelIdURI, FileSource::m_channelId, this);
 }
 
+void FileSourcePlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		FileSource *instance = new FileSource(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* FileSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* FileSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet
     return FileSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* FileSourcePlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new FileSource(deviceAPI);
-}
-
-ChannelAPI* FileSourcePlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new FileSource(deviceAPI);
-}
 
 ChannelWebAPIAdapter* FileSourcePlugin::createChannelWebAPIAdapter() const
 {

@@ -57,6 +57,22 @@ void BFMPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(BFMDemod::m_channelIdURI, BFMDemod::m_channelId, this);
 }
 
+void BFMPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		BFMDemod *instance = new BFMDemod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* BFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -70,16 +86,6 @@ PluginInstanceGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, Baseb
 	return BFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* BFMPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new BFMDemod(deviceAPI);
-}
-
-ChannelAPI* BFMPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new BFMDemod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* BFMPlugin::createChannelWebAPIAdapter() const
 {

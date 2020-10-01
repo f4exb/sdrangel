@@ -55,6 +55,22 @@ void UDPSinkPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerRxChannel(UDPSink::m_channelIdURI, UDPSink::m_channelId, this);
 }
 
+void UDPSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		UDPSink *instance = new UDPSink(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -68,16 +84,6 @@ PluginInstanceGUI* UDPSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, B
 	return UDPSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }
 #endif
-
-BasebandSampleSink* UDPSinkPlugin::createRxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new UDPSink(deviceAPI);
-}
-
-ChannelAPI* UDPSinkPlugin::createRxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new UDPSink(deviceAPI);
-}
 
 ChannelWebAPIAdapter* UDPSinkPlugin::createChannelWebAPIAdapter() const
 {

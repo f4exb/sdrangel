@@ -54,6 +54,22 @@ void PacketModPlugin::initPlugin(PluginAPI* pluginAPI)
     m_pluginAPI->registerTxChannel(PacketMod::m_channelIdURI, PacketMod::m_channelId, this);
 }
 
+void PacketModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		PacketMod *instance = new PacketMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* PacketModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* PacketModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet,
     return PacketModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* PacketModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new PacketMod(deviceAPI);
-}
-
-ChannelAPI* PacketModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new PacketMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* PacketModPlugin::createChannelWebAPIAdapter() const
 {

@@ -54,6 +54,22 @@ void WFMModPlugin::initPlugin(PluginAPI* pluginAPI)
 	m_pluginAPI->registerTxChannel(WFMMod::m_channelIdURI, WFMMod::m_channelId, this);
 }
 
+void WFMModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const
+{
+	if (bs || cs)
+	{
+		WFMMod *instance = new WFMMod(deviceAPI);
+
+		if (bs) {
+			*bs = instance;
+		}
+
+		if (cs) {
+			*cs = instance;
+		}
+	}
+}
+
 #ifdef SERVER_MODE
 PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
@@ -67,16 +83,6 @@ PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, Ba
     return WFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }
 #endif
-
-BasebandSampleSource* WFMModPlugin::createTxChannelBS(DeviceAPI *deviceAPI) const
-{
-    return new WFMMod(deviceAPI);
-}
-
-ChannelAPI* WFMModPlugin::createTxChannelCS(DeviceAPI *deviceAPI) const
-{
-    return new WFMMod(deviceAPI);
-}
 
 ChannelWebAPIAdapter* WFMModPlugin::createChannelWebAPIAdapter() const
 {
