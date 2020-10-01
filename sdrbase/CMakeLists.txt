@@ -148,6 +148,7 @@ set(sdrbase_SOURCES
 
     device/deviceapi.cpp
     device/deviceenumerator.cpp
+    device/deviceset.cpp
     device/deviceuserargs.cpp
     device/deviceutils.cpp
 
@@ -305,6 +306,7 @@ set(sdrbase_HEADERS
 
     device/deviceapi.h
     device/deviceenumerator.h
+    device/deviceset.h
     device/deviceuserargs.h
     device/deviceutils.h
 

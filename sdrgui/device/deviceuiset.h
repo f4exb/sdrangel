@@ -64,12 +64,6 @@ public:
     void addRollupWidget(QWidget *widget);               //!< Add rollup widget to channel window
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
-    void registerRxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
-    void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
     void freeChannels();
     void deleteChannel(int channelIndex);
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
@@ -78,6 +72,12 @@ public:
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
+    void registerRxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
+    void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
+    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
