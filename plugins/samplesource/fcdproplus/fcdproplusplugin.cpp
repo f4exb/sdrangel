@@ -71,7 +71,7 @@ void FCDProPlusPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices
 
         originDevices.append(OriginDevice(
             displayableName,
-            fcd_traits<Pro>::hardwareID,
+            fcd_traits<ProPlus>::hardwareID,
             serialNumber,
             i,
             1, // nb Rx
