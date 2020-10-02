@@ -128,6 +128,8 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.soapysdrinput", "soapySDRInputSettings"},
     {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
     {"sdrangel.samplesource.testsource", "testSourceSettings"},
+    {"sdrangel.samplesource.usrp", "usrpInputSettings"},
+    {"sdrangel.samplesink.usrp", "usrpOutputSettings"},
     {"sdrangel.samplesource.xtrx", "XtrxInputSettings"},
     {"sdrangel.samplesink.xtrx", "XtrxOutputSettings"}
 };
@@ -186,6 +188,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKe
     {"SDRplay1", "sdrPlaySettings"},
     {"SoapySDR", "soapySDRInputSettings"},
     {"TestSource", "testSourceSettings"},
+    {"USRP", "usrpInputSettings"},
     {"XTRX", "XtrxInputSettings"}
 };
 
@@ -206,6 +209,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToActionsKey
     {"SDRplay1", "sdrPlayActions"},
     {"SoapySDR", "soapySDRInputActions"},
     {"TestSource", "testSourceActions"},
+    {"USRP", "usrpSourceActions"},
     {"XTRX", "xtrxInputActions"}
 };
 
@@ -218,6 +222,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey 
     {"PlutoSDR", "plutoSdrOutputSettings"},
     {"RemoteOutput", "remoteOutputSettings"},
     {"SoapySDR", "soapySDROutputSettings"},
+    {"USRP", "usrpOutputSettings"},
     {"XTRX", "xtrxOutputSettings"}
 };
 
@@ -4060,6 +4065,16 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
             deviceSettings->getTestSourceSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "usrpInputSettings")
+        {
+            deviceSettings->setUsrpInputSettings(new SWGSDRangel::SWGUSRPInputSettings());
+            deviceSettings->getUsrpInputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "usrpOutputSettings")
+        {
+            deviceSettings->setUsrpOutputSettings(new SWGSDRangel::SWGUSRPOutputSettings());
+            deviceSettings->getUsrpOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "XtrxInputSettings")
         {
             deviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
@@ -4266,6 +4281,8 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setRemoteInputSettings(nullptr);
     deviceSettings.setSdrPlaySettings(nullptr);
     deviceSettings.setTestSourceSettings(nullptr);
+    deviceSettings.setUsrpInputSettings(nullptr);
+    deviceSettings.setUsrpOutputSettings(nullptr);
 }
 
 void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& deviceReport)
@@ -4284,6 +4301,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setRemoteOutputReport(nullptr);
     deviceReport.setRemoteInputReport(nullptr);
     deviceReport.setSdrPlayReport(nullptr);
+    deviceReport.setUsrpOutputReport(nullptr);
 }
 
 void WebAPIRequestMapper::resetDeviceActions(SWGSDRangel::SWGDeviceActions& deviceActions)

@@ -58,4 +58,8 @@ if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdrinput)
 endif()
 
+if(ENABLE_USRP AND UHD_FOUND)
+    add_subdirectory(usrpinput)
+endif()
+
 add_subdirectory(kiwisdr)

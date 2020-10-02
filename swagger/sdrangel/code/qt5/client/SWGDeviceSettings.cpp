@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1, USRP and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
  *
  * OpenAPI spec version: 4.15.0
  * Contact: f4exb06@gmail.com
@@ -88,6 +88,10 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_soapy_sdr_output_settings_isSet = false;
     test_source_settings = nullptr;
     m_test_source_settings_isSet = false;
+    usrp_input_settings = nullptr;
+    m_usrp_input_settings_isSet = false;
+    usrp_output_settings = nullptr;
+    m_usrp_output_settings_isSet = false;
     xtrx_input_settings = nullptr;
     m_xtrx_input_settings_isSet = false;
     xtrx_output_settings = nullptr;
@@ -160,6 +164,10 @@ SWGDeviceSettings::init() {
     m_soapy_sdr_output_settings_isSet = false;
     test_source_settings = new SWGTestSourceSettings();
     m_test_source_settings_isSet = false;
+    usrp_input_settings = new SWGUSRPInputSettings();
+    m_usrp_input_settings_isSet = false;
+    usrp_output_settings = new SWGUSRPOutputSettings();
+    m_usrp_output_settings_isSet = false;
     xtrx_input_settings = new SWGXtrxInputSettings();
     m_xtrx_input_settings_isSet = false;
     xtrx_output_settings = new SWGXtrxOutputSettings();
@@ -254,6 +262,12 @@ SWGDeviceSettings::cleanup() {
     if(test_source_settings != nullptr) { 
         delete test_source_settings;
     }
+    if(usrp_input_settings != nullptr) { 
+        delete usrp_input_settings;
+    }
+    if(usrp_output_settings != nullptr) { 
+        delete usrp_output_settings;
+    }
     if(xtrx_input_settings != nullptr) { 
         delete xtrx_input_settings;
     }
@@ -332,6 +346,10 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&soapy_sdr_output_settings, pJson["soapySDROutputSettings"], "SWGSoapySDROutputSettings", "SWGSoapySDROutputSettings");
     
     ::SWGSDRangel::setValue(&test_source_settings, pJson["testSourceSettings"], "SWGTestSourceSettings", "SWGTestSourceSettings");
+    
+    ::SWGSDRangel::setValue(&usrp_input_settings, pJson["usrpInputSettings"], "SWGUSRPInputSettings", "SWGUSRPInputSettings");
+    
+    ::SWGSDRangel::setValue(&usrp_output_settings, pJson["usrpOutputSettings"], "SWGUSRPOutputSettings", "SWGUSRPOutputSettings");
     
     ::SWGSDRangel::setValue(&xtrx_input_settings, pJson["xtrxInputSettings"], "SWGXtrxInputSettings", "SWGXtrxInputSettings");
     
@@ -442,6 +460,12 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((test_source_settings != nullptr) && (test_source_settings->isSet())){
         toJsonValue(QString("testSourceSettings"), test_source_settings, obj, QString("SWGTestSourceSettings"));
+    }
+    if((usrp_input_settings != nullptr) && (usrp_input_settings->isSet())){
+        toJsonValue(QString("usrpInputSettings"), usrp_input_settings, obj, QString("SWGUSRPInputSettings"));
+    }
+    if((usrp_output_settings != nullptr) && (usrp_output_settings->isSet())){
+        toJsonValue(QString("usrpOutputSettings"), usrp_output_settings, obj, QString("SWGUSRPOutputSettings"));
     }
     if((xtrx_input_settings != nullptr) && (xtrx_input_settings->isSet())){
         toJsonValue(QString("xtrxInputSettings"), xtrx_input_settings, obj, QString("SWGXtrxInputSettings"));
@@ -753,6 +777,26 @@ SWGDeviceSettings::setTestSourceSettings(SWGTestSourceSettings* test_source_sett
     this->m_test_source_settings_isSet = true;
 }
 
+SWGUSRPInputSettings*
+SWGDeviceSettings::getUsrpInputSettings() {
+    return usrp_input_settings;
+}
+void
+SWGDeviceSettings::setUsrpInputSettings(SWGUSRPInputSettings* usrp_input_settings) {
+    this->usrp_input_settings = usrp_input_settings;
+    this->m_usrp_input_settings_isSet = true;
+}
+
+SWGUSRPOutputSettings*
+SWGDeviceSettings::getUsrpOutputSettings() {
+    return usrp_output_settings;
+}
+void
+SWGDeviceSettings::setUsrpOutputSettings(SWGUSRPOutputSettings* usrp_output_settings) {
+    this->usrp_output_settings = usrp_output_settings;
+    this->m_usrp_output_settings_isSet = true;
+}
+
 SWGXtrxInputSettings*
 SWGDeviceSettings::getXtrxInputSettings() {
     return xtrx_input_settings;
@@ -866,6 +910,12 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(test_source_settings && test_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(usrp_input_settings && usrp_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(usrp_output_settings && usrp_output_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(xtrx_input_settings && xtrx_input_settings->isSet()){

@@ -213,13 +213,6 @@ elseif(WIN32 OR MINGW)
 
   if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     # Soapy support libraries
-    file(GLOB SOAPYSUPPORT_DLLS "${SOAPYSUPPORT_DIR}/bin/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    foreach(soapysupport_dll ${SOAPYSUPPORT_DLLS})
-      get_filename_component(soapysupport_dll_name "${soapysupport_dll}"  NAME)
-      add_custom_target(copy_soapysupport_${soapysupport_dll_name} ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${soapysupport_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
-      )
-    endforeach(soapysupport_dll)
     file(MAKE_DIRECTORY ${SDRANGEL_BINARY_LIB_DIR}/SoapySDR)
     file(MAKE_DIRECTORY ${SDRANGEL_BINARY_LIB_DIR}/SoapySDR/modules0.7)
     file(GLOB SOAPYSUPPORT_DLLS "${SOAPYSUPPORT_DIR}/lib/SoapySDR/modules0.7/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -238,6 +231,16 @@ elseif(WIN32 OR MINGW)
       COMMAND ${CMAKE_COMMAND} -E copy_if_different "${codec2_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
     )
   endforeach(codec2_dll)
+
+  if(ENABLE_USRP AND UHD_FOUND)
+    file(GLOB UHD_DLLS "${UHD_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    foreach(uhd_dll ${UHD_DLLS})
+      get_filename_component(uhd_dll_name "${uhd_dll}"  NAME)
+      add_custom_target(copy_uhd_${uhd_dll_name} ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${uhd_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+      )
+    endforeach(uhd_dll)
+  endif()
 
   # TODO we need a way to fixup_bundle() on the build bin/ directory without call install
   if(BUILD_GUI)
@@ -291,7 +294,7 @@ elseif(WIN32 OR MINGW)
     # libusb
     get_filename_component(GFN_LIBUSB_DIR "${LIBUSB_LIBRARIES}" DIRECTORY)
     install(FILES "${GFN_LIBUSB_DIR}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-
+    
     install(CODE "
       # remove *.lib files
       # TODO find a better way
