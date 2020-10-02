@@ -28,7 +28,7 @@ class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
 
-class SDRGUI_API FeatureSet
+class FeatureSet
 {
 public:
     FeatureSet(int tabIndex);
