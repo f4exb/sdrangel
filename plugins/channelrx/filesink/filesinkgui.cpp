@@ -203,7 +203,6 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     m_settings.setSpectrumGUI(ui->glSpectrumGUI);
 
-    m_deviceUISet->registerRxChannelInstance(FileSink::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

@@ -383,7 +383,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 	m_settings.setChannelMarker(&m_channelMarker);
 	m_settings.setCWKeyerGUI(ui->cwKeyerGUI);
 
-	m_deviceUISet->registerTxChannelInstance(AMMod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

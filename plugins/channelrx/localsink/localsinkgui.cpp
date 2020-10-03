@@ -136,7 +136,6 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerRxChannelInstance(LocalSink::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

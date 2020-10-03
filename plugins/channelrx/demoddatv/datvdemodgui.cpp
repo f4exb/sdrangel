@@ -248,7 +248,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     connect(&m_objChannelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_objChannelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
 
-    m_deviceUISet->registerRxChannelInstance(DATVDemod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_objChannelMarker);
     m_deviceUISet->addRollupWidget(this);
 

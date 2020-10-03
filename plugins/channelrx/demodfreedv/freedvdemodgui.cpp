@@ -309,7 +309,6 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_settings.setChannelMarker(&m_channelMarker);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
 
-	m_deviceUISet->registerRxChannelInstance(FreeDVDemod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

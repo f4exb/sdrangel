@@ -291,7 +291,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerRxChannelInstance(AMDemod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
