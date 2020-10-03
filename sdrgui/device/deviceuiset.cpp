@@ -54,6 +54,7 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;
     m_deviceAPI = nullptr;
+    m_deviceGUI = nullptr;
     m_deviceSourceEngine = nullptr;
     m_deviceSinkEngine = nullptr;
     m_deviceMIMOEngine = nullptr;

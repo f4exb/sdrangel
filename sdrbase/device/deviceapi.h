@@ -33,7 +33,6 @@ class DeviceSampleSource;
 class DeviceSampleMIMO;
 class MessageQueue;
 class PluginInterface;
-class PluginInstanceGUI;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class DSPDeviceMIMOEngine;
@@ -110,7 +109,6 @@ public:
     void setSamplingDeviceSequence(int sequence) { m_samplingDeviceSequence = sequence; }
     void setHardwareUserArguments(const QString& userArguments) { m_hardwareUserArguments = userArguments; }
     void setSamplingDevicePluginInterface(PluginInterface *iface);
-    void setSamplingDevicePluginInstanceGUI(PluginInstanceGUI *gui);
 
     const QString& getHardwareId() const { return m_hardwareId; }
     const QString& getSamplingDeviceId() const { return m_samplingDeviceId; }
@@ -126,8 +124,6 @@ public:
 
     int getDeviceSetIndex() const { return m_deviceTabIndex; }
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
-
-    PluginInstanceGUI *getSamplingDevicePluginInstanceGUI() { return m_samplingDevicePluginInstanceUI; }
 
     void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0);
 
@@ -185,7 +181,6 @@ protected:
     QString m_samplingDeviceDisplayName; //!< The human readable name identifying this instance
     uint32_t m_samplingDeviceSequence;   //!< The device sequence. >0 when more than one device of the same type is connected
     QString m_hardwareUserArguments;     //!< User given arguments to be used at hardware level i.e. for the hardware device and device sequence
-    PluginInstanceGUI* m_samplingDevicePluginInstanceUI;
 
     // Buddies (single Rx or single Tx)
 

@@ -51,6 +51,7 @@ public:
     GLSpectrumGUI *m_spectrumGUI;
     ChannelWindow *m_channelWindow;
     DeviceAPI *m_deviceAPI;
+    PluginInstanceGUI *m_deviceGUI;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
