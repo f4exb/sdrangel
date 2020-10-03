@@ -472,6 +472,7 @@ if (LINUX)
                 GIT_TAG ${UHD_TAG}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
                 CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+                SOURCE_SUBDIR host
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
