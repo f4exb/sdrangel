@@ -31,7 +31,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 public slots:
 	void channelMarkerChangedByCursor();
@@ -62,6 +61,7 @@ private:
 	void applySettings(bool force = false);
 	void displaySettings();
 	void displayStreamIndex();
+	bool handleMessage(const Message& message);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

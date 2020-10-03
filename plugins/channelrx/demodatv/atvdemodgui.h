@@ -50,7 +50,6 @@ public:
 	QByteArray serialize() const;
     bool deserialize(const QByteArray& arrData);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& objMessage);
 
 public slots:
 	void channelMarkerChangedByCursor();
@@ -87,6 +86,7 @@ private:
     void setRFFiltersSlidersRange(int sampleRate);
     void lineTimeUpdate();
     void topTimeUpdate();
+    bool handleMessage(const Message& objMessage);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

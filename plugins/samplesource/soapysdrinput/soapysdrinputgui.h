@@ -51,7 +51,6 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
 
 private:
     void createRangesControl(
@@ -105,6 +104,7 @@ private:
     void updateFrequencyLimits();
     void setCenterFrequencySetting(uint64_t kHzValue);
     void blockApplySettings(bool block);
+    bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

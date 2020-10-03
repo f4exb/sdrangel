@@ -44,7 +44,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::Bladerf1InputGui* ui;
@@ -70,6 +69,7 @@ private:
 	unsigned int getXb200Index(bool xb_200, bladerf_xb200_path xb200Path, bladerf_xb200_filter xb200Filter);
 	void updateSampleRateAndFrequency();
 	void blockApplySettings(bool block);
+	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

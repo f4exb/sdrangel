@@ -296,8 +296,6 @@ public:
     virtual void setCenterFrequency(qint64 centerFrequency);
     quint64 getStartingTimeStamp() const;
 
-	virtual bool handleMessage(const Message& message);
-
 	virtual int webapiSettingsGet(
 	            SWGSDRangel::SWGDeviceSettings& response,
 	            QString& errorMessage);
@@ -356,6 +354,7 @@ public:
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
+	bool handleMessage(const Message& message);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

@@ -44,7 +44,6 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
 
 private:
     Ui::LimeSDRInputGUI* ui;
@@ -74,6 +73,7 @@ private:
     void updateADCRate();
     void updateFrequencyLimits();
     void blockApplySettings(bool block);
+    bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

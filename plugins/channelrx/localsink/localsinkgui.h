@@ -48,7 +48,6 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
 
 private:
     Ui::LocalSinkGUI* ui;
@@ -75,6 +74,7 @@ private:
     void displayRateAndShift();
     void updateLocalDevices();
     int getLocalDeviceIndexInCombo(int localDeviceIndex);
+    bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
