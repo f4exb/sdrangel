@@ -22,7 +22,6 @@
 #include <cstdio>
 #include <algorithm>
 
-#include <plugin/plugininstancegui.h>
 #include "device/deviceenumerator.h"
 #include "settings/preset.h"
 #include "util/message.h"

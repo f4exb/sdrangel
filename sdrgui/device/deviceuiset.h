@@ -34,6 +34,7 @@ class DSPDeviceMIMOEngine;
 class ChannelMarker;
 class PluginAPI;
 class PluginInstanceGUI;
+class ChannelAPI;
 class Preset;
 
 class SDRGUI_API DeviceUISet
@@ -66,9 +67,9 @@ public:
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
-    void registerRxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void registerTxChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
-    void registerChannelInstance(const QString& channelName, PluginInstanceGUI* pluginGUI);
+    void registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI);
+    void registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI);
+    void registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI);
     void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
     void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
     void removeChannelInstance(PluginInstanceGUI* pluginGUI);
@@ -85,17 +86,20 @@ private:
     struct ChannelInstanceRegistration
     {
         QString m_channelName;
+        ChannelAPI *m_channelAPI;
         PluginInstanceGUI* m_gui;
         int m_channelType;
 
         ChannelInstanceRegistration() :
             m_channelName(),
+            m_channelAPI(nullptr),
             m_gui(nullptr),
             m_channelType(0)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, PluginInstanceGUI* pluginGUI, int channelType) :
+        ChannelInstanceRegistration(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI, int channelType) :
             m_channelName(channelName),
+            m_channelAPI(channelAPI),
             m_gui(pluginGUI),
             m_channelType(channelType)
         { }
