@@ -43,11 +43,7 @@ public:
     virtual ~PlutoSDRInputGui();
 
     virtual void destroy();
-    virtual void setName(const QString& name);
-    virtual QString getName() const;
     virtual void resetToDefaults();
-    virtual qint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }

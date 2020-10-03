@@ -85,31 +85,9 @@ void TestSourceGui::destroy()
     delete this;
 }
 
-void TestSourceGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString TestSourceGui::getName() const
-{
-    return objectName();
-}
-
 void TestSourceGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 TestSourceGui::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void TestSourceGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

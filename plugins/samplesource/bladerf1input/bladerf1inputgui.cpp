@@ -86,31 +86,9 @@ void Bladerf1InputGui::destroy()
 	delete this;
 }
 
-void Bladerf1InputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString Bladerf1InputGui::getName() const
-{
-	return objectName();
-}
-
 void Bladerf1InputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 Bladerf1InputGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void Bladerf1InputGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

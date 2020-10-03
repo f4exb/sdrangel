@@ -121,26 +121,6 @@ ATVModGUI::~ATVModGUI()
 	delete ui;
 }
 
-void ATVModGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString ATVModGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 ATVModGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void ATVModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void ATVModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

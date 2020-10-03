@@ -84,31 +84,9 @@ void TestSinkGui::destroy()
 	delete this;
 }
 
-void TestSinkGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString TestSinkGui::getName() const
-{
-	return objectName();
-}
-
 void TestSinkGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 TestSinkGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void TestSinkGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

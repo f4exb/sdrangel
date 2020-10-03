@@ -81,31 +81,9 @@ void HackRFInputGui::destroy()
 	delete this;
 }
 
-void HackRFInputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString HackRFInputGui::getName() const
-{
-	return objectName();
-}
-
 void HackRFInputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 HackRFInputGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void HackRFInputGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

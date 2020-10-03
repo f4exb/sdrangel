@@ -41,27 +41,6 @@ void UDPSinkGUI::destroy()
 	delete this;
 }
 
-void UDPSinkGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-qint64 UDPSinkGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void UDPSinkGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
-QString UDPSinkGUI::getName() const
-{
-	return objectName();
-}
-
 void UDPSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

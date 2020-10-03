@@ -96,19 +96,16 @@ void DeviceUISet::addRollupWidget(QWidget *widget)
 void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 0));
-    renameChannelInstances();
 }
 
 void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 1));
-    renameChannelInstances();
 }
 
 void DeviceUISet::registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 2));
-    renameChannelInstances();
 }
 
 void DeviceUISet::removeRxChannelInstance(PluginInstanceGUI* pluginGUI)
@@ -121,8 +118,6 @@ void DeviceUISet::removeRxChannelInstance(PluginInstanceGUI* pluginGUI)
             break;
         }
     }
-
-    renameChannelInstances();
 }
 
 void DeviceUISet::removeTxChannelInstance(PluginInstanceGUI* pluginGUI)
@@ -135,8 +130,6 @@ void DeviceUISet::removeTxChannelInstance(PluginInstanceGUI* pluginGUI)
             break;
         }
     }
-
-    renameChannelInstances();
 }
 
 void DeviceUISet::removeChannelInstance(PluginInstanceGUI* pluginGUI)
@@ -149,8 +142,6 @@ void DeviceUISet::removeChannelInstance(PluginInstanceGUI* pluginGUI)
             break;
         }
     }
-
-    renameChannelInstances();
 }
 
 void DeviceUISet::freeChannels()
@@ -170,7 +161,6 @@ void DeviceUISet::deleteChannel(int channelIndex)
                 qPrintable(m_channelInstanceRegistrations[channelIndex].m_channelName),
                 channelIndex);
         m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
-        renameChannelInstances();
     }
 }
 
@@ -225,8 +215,6 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 rxChannelGUI->deserialize(channelConfig.m_config);
             }
         }
-
-        renameChannelInstances();
     }
     else
     {
@@ -302,8 +290,6 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                 txChannelGUI->deserialize(channelConfig.m_config);
             }
         }
-
-        renameChannelInstances();
     }
     else
     {
@@ -382,8 +368,6 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                 mimoChannelGUI->deserialize(channelConfig.m_config);
             }
         }
-
-        renameChannelInstances();
     }
     else
     {
@@ -409,25 +393,18 @@ void DeviceUISet::saveMIMOChannelSettings(Preset *preset)
     }
 }
 
-void DeviceUISet::renameChannelInstances()
-{
-    for (int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
-        m_channelInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i].m_channelName).arg(i));
-    }
-}
-
 // sort by increasing delta frequency and type (i.e. name)
 bool DeviceUISet::ChannelInstanceRegistration::operator<(const ChannelInstanceRegistration& other) const
 {
-    if (m_gui && other.m_gui)
+    if (m_channelAPI && other.m_channelAPI)
     {
-        if (m_gui->getCenterFrequency() == other.m_gui->getCenterFrequency())
+        if (m_channelAPI->getCenterFrequency() == other.m_channelAPI->getCenterFrequency())
         {
-            return m_gui->getName() < other.m_gui->getName();
+            return m_channelAPI->getName() < other.m_channelAPI->getName();
         }
         else
         {
-            return m_gui->getCenterFrequency() < other.m_gui->getCenterFrequency();
+            return m_channelAPI->getCenterFrequency() < other.m_channelAPI->getCenterFrequency();
         }
     }
     else

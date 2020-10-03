@@ -95,31 +95,9 @@ void BladeRF2OutputGui::destroy()
     delete this;
 }
 
-void BladeRF2OutputGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString BladeRF2OutputGui::getName() const
-{
-    return objectName();
-}
-
 void BladeRF2OutputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 BladeRF2OutputGui::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void BladeRF2OutputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

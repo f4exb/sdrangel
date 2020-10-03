@@ -38,16 +38,6 @@ void SimplePTTGUI::destroy()
 	delete this;
 }
 
-void SimplePTTGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString SimplePTTGUI::getName() const
-{
-	return objectName();
-}
-
 void SimplePTTGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

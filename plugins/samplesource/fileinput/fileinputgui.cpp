@@ -91,31 +91,9 @@ void FileInputGUI::destroy()
 	delete this;
 }
 
-void FileInputGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString FileInputGUI::getName() const
-{
-	return objectName();
-}
-
 void FileInputGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 FileInputGUI::getCenterFrequency() const
-{
-	return m_centerFrequency;
-}
-
-void FileInputGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
@@ -373,7 +351,7 @@ void FileInputGUI::updateWithStreamTime()
     qint64 t_sec = 0;
     qint64 t_msec = 0;
 
-	if (m_sampleRate > 0) 
+	if (m_sampleRate > 0)
 	{
 		t_sec = m_samplesCount / m_sampleRate;
         t_msec = (m_samplesCount - (t_sec * m_sampleRate)) * 1000LL / m_sampleRate;

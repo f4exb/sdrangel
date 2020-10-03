@@ -106,31 +106,9 @@ void LimeSDROutputGUI::destroy()
     delete this;
 }
 
-void LimeSDROutputGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString LimeSDROutputGUI::getName() const
-{
-    return objectName();
-}
-
 void LimeSDROutputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 LimeSDROutputGUI::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
-}
-
-void LimeSDROutputGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
     displaySettings();
     sendSettings();
 }

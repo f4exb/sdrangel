@@ -123,16 +123,6 @@ void RemoteOutputSinkGui::destroy()
 	delete this;
 }
 
-void RemoteOutputSinkGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString RemoteOutputSinkGui::getName() const
-{
-	return objectName();
-}
-
 void RemoteOutputSinkGui::resetToDefaults()
 {
     blockApplySettings(true);

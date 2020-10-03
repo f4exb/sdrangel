@@ -48,26 +48,6 @@ void AMModGUI::destroy()
     delete this;
 }
 
-void AMModGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString AMModGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 AMModGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void AMModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void AMModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

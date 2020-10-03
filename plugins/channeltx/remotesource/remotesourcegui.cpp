@@ -37,25 +37,6 @@ void RemoteSourceGUI::destroy()
     delete this;
 }
 
-void RemoteSourceGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString RemoteSourceGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 RemoteSourceGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void RemoteSourceGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void RemoteSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

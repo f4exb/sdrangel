@@ -52,27 +52,6 @@ void DSDDemodGUI::destroy()
 	delete this;
 }
 
-void DSDDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString DSDDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 DSDDemodGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void DSDDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void DSDDemodGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();

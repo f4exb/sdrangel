@@ -38,10 +38,6 @@ class SimplePTTGUI : public RollupWidget, public PluginInstanceGUI {
 public:
 	static SimplePTTGUI* create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature);
 	virtual void destroy();
-	void setName(const QString& name);
-	QString getName() const;
-	virtual qint64 getCenterFrequency() const { return 0; }
-	virtual void setCenterFrequency(qint64 centerFrequency) {}
 
 	void resetToDefaults();
 	QByteArray serialize() const;
@@ -71,7 +67,7 @@ private:
 	void applyPTT(bool tx);
 	void displaySettings();
     void updateDeviceSetLists();
-    
+
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
 

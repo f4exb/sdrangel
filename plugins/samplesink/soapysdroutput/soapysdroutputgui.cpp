@@ -412,31 +412,9 @@ void SoapySDROutputGui::createArgumentsControl(const SoapySDR::ArgInfoList& argI
     }
 }
 
-void SoapySDROutputGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString SoapySDROutputGui::getName() const
-{
-    return objectName();
-}
-
 void SoapySDROutputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 SoapySDROutputGui::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void SoapySDROutputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

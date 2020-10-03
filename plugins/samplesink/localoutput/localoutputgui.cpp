@@ -108,16 +108,6 @@ void LocalOutputGui::destroy()
 	delete this;
 }
 
-void LocalOutputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString LocalOutputGui::getName() const
-{
-	return objectName();
-}
-
 void LocalOutputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
@@ -147,16 +137,6 @@ bool LocalOutputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
-}
-
-qint64 LocalOutputGui::getCenterFrequency() const
-{
-    return m_streamCenterFrequency;
-}
-
-void LocalOutputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
 }
 
 bool LocalOutputGui::handleMessage(const Message& message)

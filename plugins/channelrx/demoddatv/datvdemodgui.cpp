@@ -51,27 +51,6 @@ void DATVDemodGUI::destroy()
     delete this;
 }
 
-void DATVDemodGUI::setName(const QString& strName)
-{
-    setObjectName(strName);
-}
-
-QString DATVDemodGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 DATVDemodGUI::getCenterFrequency() const
-{
-    return m_objChannelMarker.getCenterFrequency();
-}
-
-void DATVDemodGUI::setCenterFrequency(qint64 intCenterFrequency)
-{
-    m_objChannelMarker.setCenterFrequency(intCenterFrequency);
-    applySettings();
-}
-
 void DATVDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

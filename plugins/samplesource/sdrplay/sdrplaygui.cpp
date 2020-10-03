@@ -93,31 +93,9 @@ void SDRPlayGui::destroy()
     delete this;
 }
 
-void SDRPlayGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString SDRPlayGui::getName() const
-{
-    return objectName();
-}
-
 void SDRPlayGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 SDRPlayGui::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void SDRPlayGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

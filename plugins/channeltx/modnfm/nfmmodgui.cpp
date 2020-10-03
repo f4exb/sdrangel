@@ -48,26 +48,6 @@ void NFMModGUI::destroy()
     delete this;
 }
 
-void NFMModGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString NFMModGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 NFMModGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void NFMModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void NFMModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

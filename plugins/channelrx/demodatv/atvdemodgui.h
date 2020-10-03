@@ -46,11 +46,6 @@ public:
     static ATVDemodGUI* create(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
-    void setName(const QString& strName);
-	QString getName() const;
-	virtual qint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 intCenterFrequency);
-
 	void resetToDefaults();
 	QByteArray serialize() const;
     bool deserialize(const QByteArray& arrData);

@@ -416,31 +416,9 @@ void SoapySDRInputGui::createArgumentsControl(const SoapySDR::ArgInfoList& argIn
     }
 }
 
-void SoapySDRInputGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString SoapySDRInputGui::getName() const
-{
-    return objectName();
-}
-
 void SoapySDRInputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 SoapySDRInputGui::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void SoapySDRInputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

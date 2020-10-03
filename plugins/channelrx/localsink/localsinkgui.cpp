@@ -38,25 +38,6 @@ void LocalSinkGUI::destroy()
     delete this;
 }
 
-void LocalSinkGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString LocalSinkGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 LocalSinkGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void LocalSinkGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void LocalSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

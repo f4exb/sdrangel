@@ -49,27 +49,6 @@ void SSBModGUI::destroy()
     delete this;
 }
 
-void SSBModGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString SSBModGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 SSBModGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void SSBModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
-}
-
 void SSBModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

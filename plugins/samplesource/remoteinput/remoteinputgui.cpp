@@ -126,16 +126,6 @@ void RemoteInputGui::destroy()
 	delete this;
 }
 
-void RemoteInputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString RemoteInputGui::getName() const
-{
-	return objectName();
-}
-
 void RemoteInputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
@@ -165,16 +155,6 @@ bool RemoteInputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
-}
-
-qint64 RemoteInputGui::getCenterFrequency() const
-{
-    return m_streamCenterFrequency;
-}
-
-void RemoteInputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
 }
 
 bool RemoteInputGui::handleMessage(const Message& message)

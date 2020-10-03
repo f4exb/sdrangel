@@ -53,26 +53,6 @@ void PacketModGUI::destroy()
     delete this;
 }
 
-void PacketModGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString PacketModGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 PacketModGUI::getCenterFrequency() const {
-    return m_channelMarker.getCenterFrequency();
-}
-
-void PacketModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_channelMarker.setCenterFrequency(centerFrequency);
-    applySettings();
-}
-
 void PacketModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

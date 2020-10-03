@@ -78,31 +78,9 @@ void HackRFOutputGui::destroy()
 	delete this;
 }
 
-void HackRFOutputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString HackRFOutputGui::getName() const
-{
-	return objectName();
-}
-
 void HackRFOutputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 HackRFOutputGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void HackRFOutputGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

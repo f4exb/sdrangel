@@ -30,27 +30,6 @@ void WFMDemodGUI::destroy()
 	delete this;
 }
 
-void WFMDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString WFMDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 WFMDemodGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void WFMDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void WFMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

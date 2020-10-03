@@ -48,28 +48,6 @@ void FreeDVDemodGUI::destroy()
 	delete this;
 }
 
-void FreeDVDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString FreeDVDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 FreeDVDemodGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void FreeDVDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
-}
-
 void FreeDVDemodGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
