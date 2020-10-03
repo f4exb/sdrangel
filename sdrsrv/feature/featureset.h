@@ -21,8 +21,6 @@
 #include <QString>
 #include <QList>
 
-#include "export.h"
-
 class PluginAPI;
 class Feature;
 class FeatureSetPreset;
