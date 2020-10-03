@@ -396,7 +396,6 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_channelMarker.setSourceOrSinkStream(false);
 	m_channelMarker.setVisible(true);
 
-    m_deviceUISet->registerTxChannelInstance(FreeDVMod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

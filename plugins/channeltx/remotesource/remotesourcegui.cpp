@@ -195,7 +195,6 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerTxChannelInstance(RemoteSource::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

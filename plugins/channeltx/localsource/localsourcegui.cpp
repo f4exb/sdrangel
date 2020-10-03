@@ -131,7 +131,6 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerTxChannelInstance(LocalSource::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

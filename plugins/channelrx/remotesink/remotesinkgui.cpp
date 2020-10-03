@@ -136,7 +136,6 @@ RemoteSinkGUI::RemoteSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerRxChannelInstance(RemoteSink::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
