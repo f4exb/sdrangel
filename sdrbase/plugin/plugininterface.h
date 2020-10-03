@@ -235,7 +235,6 @@ public:
         (void) deviceAPI;
         return nullptr;
     }
-	virtual void deleteSampleSourcePluginInstanceGUI(PluginInstanceGUI *ui);
 	virtual void deleteSampleSourcePluginInstanceInput(DeviceSampleSource *source);
 
     virtual int getDefaultRxNbItems() const {
@@ -270,7 +269,6 @@ public:
         return nullptr;
     }
 
-    virtual void deleteSampleSinkPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleSinkPluginInstanceOutput(DeviceSampleSink *sink);
 
     virtual int getDefaultTxNbItems() const {
@@ -305,7 +303,6 @@ public:
         return nullptr;
     }
 
-    virtual void deleteSampleMIMOPluginInstanceGUI(PluginInstanceGUI *ui);
     virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
 
     // Callback to allow plugin to add elements to top-level GUI (such as menu items)
