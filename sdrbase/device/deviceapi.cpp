@@ -15,7 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "plugin/plugininstancegui.h"
 #include "plugin/plugininterface.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
@@ -45,7 +44,6 @@ DeviceAPI::DeviceAPI(
     m_pluginInterface(nullptr),
     m_masterTimer(DSPEngine::instance()->getMasterTimer()),
     m_samplingDeviceSequence(0),
-    m_samplingDevicePluginInstanceUI(0),
     m_buddySharedPtr(nullptr),
     m_isBuddyLeader(false),
     m_deviceSourceEngine(deviceSourceEngine),
@@ -352,11 +350,6 @@ void DeviceAPI::setSamplingDevicePluginInterface(PluginInterface *iface)
      m_pluginInterface = iface;
 }
 
-void DeviceAPI::setSamplingDevicePluginInstanceGUI(PluginInstanceGUI *gui)
-{
-    m_samplingDevicePluginInstanceUI = gui;
-}
-
 void DeviceAPI::getDeviceEngineStateStr(QString& state, int subsystemIndex)
 {
     if (m_deviceSourceEngine)
@@ -479,11 +472,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
             qDebug("DeviceAPI::loadSamplingDeviceSettings: deserializing source %s[%d]: %s",
                 qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-            if (m_samplingDevicePluginInstanceUI != 0) // GUI flavor
-            {
-                m_samplingDevicePluginInstanceUI->deserialize(*sourceConfig);
-            }
-            else if (m_deviceSourceEngine->getSource() != 0) // Server flavor
+            if (m_deviceSourceEngine->getSource() != 0) // Server flavor
             {
                 m_deviceSourceEngine->getSource()->deserialize(*sourceConfig);
             }
@@ -499,11 +488,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
         }
 
         // set center frequency anyway
-        if (m_samplingDevicePluginInstanceUI != 0) // GUI flavor
-        {
-            m_samplingDevicePluginInstanceUI->setCenterFrequency(centerFrequency);
-        }
-        else if (m_deviceSourceEngine->getSource() != 0) // Server flavor
+        if (m_deviceSourceEngine->getSource() != 0) // Server flavor
         {
             m_deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency);
         }
@@ -525,12 +510,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
             qDebug("DeviceAPI::loadSamplingDeviceSettings: deserializing sink %s[%d]: %s",
                 qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-            if (m_samplingDevicePluginInstanceUI != 0) // GUI flavor
-            {
-                m_samplingDevicePluginInstanceUI->deserialize(*sinkConfig);
-                m_samplingDevicePluginInstanceUI->setCenterFrequency(centerFrequency);
-            }
-            else if (m_deviceSinkEngine->getSink() != 0) // Server flavor
+            if (m_deviceSinkEngine->getSink() != 0) // Server flavor
             {
                 m_deviceSinkEngine->getSink()->deserialize(*sinkConfig);
                 m_deviceSinkEngine->getSink()->setCenterFrequency(centerFrequency);
@@ -559,12 +539,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
             qDebug("DeviceAPI::loadSamplingDeviceSettings: deserializing MIMO %s[%d]: %s",
                 qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-            if (m_samplingDevicePluginInstanceUI != 0) // GUI flavor
-            {
-                m_samplingDevicePluginInstanceUI->deserialize(*mimoConfig);
-                m_samplingDevicePluginInstanceUI->setCenterFrequency(centerFrequency);
-            }
-            else if (m_deviceSinkEngine->getSink() != 0) // Server flavor
+            if (m_deviceSinkEngine->getSink() != 0) // Server flavor
             {
                 m_deviceSinkEngine->getSink()->deserialize(*mimoConfig);
                 m_deviceSinkEngine->getSink()->setCenterFrequency(centerFrequency);
@@ -593,12 +568,7 @@ void DeviceAPI::saveSamplingDeviceSettings(Preset* preset)
         qDebug("DeviceAPI::saveSamplingDeviceSettings: serializing source %s[%d]: %s",
             qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-        if (m_samplingDevicePluginInstanceUI) // GUI flavor
-        {
-            preset->addOrUpdateDeviceConfig(m_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence, m_samplingDevicePluginInstanceUI->serialize());
-            preset->setCenterFrequency(m_samplingDevicePluginInstanceUI->getCenterFrequency());
-        }
-        else if (m_deviceSourceEngine->getSource()) // Server flavor
+        if (m_deviceSourceEngine->getSource()) // Server flavor
         {
             preset->addOrUpdateDeviceConfig(m_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence, m_deviceSourceEngine->getSource()->serialize());
             preset->setCenterFrequency(m_deviceSourceEngine->getSource()->getCenterFrequency());
@@ -613,12 +583,7 @@ void DeviceAPI::saveSamplingDeviceSettings(Preset* preset)
         qDebug("DeviceAPI::saveSamplingDeviceSettings: serializing sink %s[%d]: %s",
             qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-        if (m_samplingDevicePluginInstanceUI) // GUI flavor
-        {
-            preset->addOrUpdateDeviceConfig(m_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence, m_deviceSinkEngine->getSink()->serialize());
-            preset->setCenterFrequency(m_deviceSinkEngine->getSink()->getCenterFrequency());
-        }
-        else if (m_deviceSinkEngine->getSink()) // Server flavor
+        if (m_deviceSinkEngine->getSink()) // Server flavor
         {
             preset->addOrUpdateDeviceConfig(m_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence, m_deviceSinkEngine->getSink()->serialize());
             preset->setCenterFrequency(m_deviceSinkEngine->getSink()->getCenterFrequency());
@@ -633,12 +598,7 @@ void DeviceAPI::saveSamplingDeviceSettings(Preset* preset)
         qDebug("DeviceAPI::saveSamplingDeviceSettings: serializing MIMO %s[%d]: %s",
             qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-        if (m_samplingDevicePluginInstanceUI) // GUI flavor
-        {
-            preset->addOrUpdateDeviceConfig(m_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence, m_deviceMIMOEngine->getMIMO()->serialize());
-            preset->setCenterFrequency(m_deviceMIMOEngine->getMIMO()->getMIMOCenterFrequency());
-        }
-        else if (m_deviceMIMOEngine->getMIMO()) // Server flavor
+        if (m_deviceMIMOEngine->getMIMO()) // Server flavor
         {
             preset->addOrUpdateDeviceConfig(m_samplingDeviceId, m_samplingDeviceSerial, m_samplingDeviceSequence, m_deviceMIMOEngine->getMIMO()->serialize());
             preset->setCenterFrequency(m_deviceMIMOEngine->getMIMO()->getMIMOCenterFrequency());

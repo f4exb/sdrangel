@@ -359,9 +359,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, deviceIndex);
 
     // delete previous plugin GUI
-    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
-
+    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(m_deviceUIs.back()->m_deviceGUI);
 
     DeviceSampleSource *source = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
@@ -372,7 +370,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
             &gui,
             m_deviceUIs.back());
     m_deviceUIs.back()->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginGUI);
+    m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleSource()->init();
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName());
 }
@@ -431,19 +429,18 @@ void MainWindow::addSinkDevice()
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, fileSinkDeviceIndex);
 
     // delete previous plugin GUI if it exists
-    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
+    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(m_deviceUIs.back()->m_deviceGUI);
 
     DeviceSampleSink *sink = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
     m_deviceUIs.back()->m_deviceAPI->setSampleSink(sink);
     QWidget *gui;
-    PluginInstanceGUI *pluginUI = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
+    PluginInstanceGUI *pluginGUI = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
             m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(),
             &gui,
             m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
+    m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
+    m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleSink()->init();
     setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
 }
@@ -463,8 +460,7 @@ void MainWindow::removeLastDevice()
         // deletes old UI and input object
         m_deviceUIs.back()->freeChannels();      // destroys the channel instances
         m_deviceUIs.back()->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(0); // have source stop sending messages to the GUI
-        m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-                m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
+        m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(m_deviceUIs.back()->m_deviceGUI);
         m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
         m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
                 m_deviceUIs.back()->m_deviceAPI->getSampleSource());
@@ -503,8 +499,7 @@ void MainWindow::removeLastDevice()
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
-	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-	            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
+	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(m_deviceUIs.back()->m_deviceGUI);
 	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
 	            m_deviceUIs.back()->m_deviceAPI->getSampleSink());
@@ -544,8 +539,7 @@ void MainWindow::removeLastDevice()
         // deletes old UI and output object
         m_deviceUIs.back()->freeChannels();
         m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceGUI(
-	            m_deviceUIs.back()->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
+	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceGUI(m_deviceUIs.back()->m_deviceGUI);
 	    m_deviceUIs.back()->m_deviceAPI->resetSamplingDeviceId();
 	    m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->deleteSampleMIMOPluginInstanceMIMO(
 	            m_deviceUIs.back()->m_deviceAPI->getSampleMIMO());
@@ -1712,11 +1706,9 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
 
         // deletes old UI and input object
         deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
+        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceGUI);
         deviceUI->m_deviceAPI->resetSamplingDeviceId();
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-                deviceUI->m_deviceAPI->getSampleSource());
+        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUI->m_deviceAPI->getSampleSource());
         deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(newDeviceIndex);
@@ -1791,12 +1783,12 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleSource(source);
         QWidget *gui;
-        PluginInstanceGUI *pluginUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+        PluginInstanceGUI *pluginGUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(),
                 &gui,
                 deviceUI);
-        deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
+        deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
+        deviceUI->m_deviceGUI = pluginGUI;
         setDeviceGUI(tabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName());
         deviceUI->m_deviceAPI->getSampleSource()->init();
 
@@ -1821,11 +1813,9 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
 
         // deletes old UI and output object
         deviceUI->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(0); // have sink stop sending messages to the GUI
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(
-                deviceUI->m_deviceAPI->getSamplingDevicePluginInstanceGUI());
+        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceGUI(deviceUI->m_deviceGUI);
         deviceUI->m_deviceAPI->resetSamplingDeviceId();
-        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-                deviceUI->m_deviceAPI->getSampleSink());
+        deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(deviceUI->m_deviceAPI->getSampleSink());
         deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
         const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(newDeviceIndex);
@@ -1898,12 +1888,12 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
                 deviceUI->m_deviceAPI->getSamplingDeviceId(), deviceUI->m_deviceAPI);
         deviceUI->m_deviceAPI->setSampleSink(sink);
         QWidget *gui;
-        PluginInstanceGUI *pluginUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
+        PluginInstanceGUI *pluginGUI = deviceUI->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
                 deviceUI->m_deviceAPI->getSamplingDeviceId(),
                 &gui,
                 deviceUI);
-        deviceUI->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginUI->getInputMessageQueue());
-        deviceUI->m_deviceAPI->setSamplingDevicePluginInstanceGUI(pluginUI);
+        deviceUI->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
+        deviceUI->m_deviceGUI = pluginGUI;
         setDeviceGUI(tabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
         deviceUI->m_deviceAPI->getSampleSink()->init();
 
