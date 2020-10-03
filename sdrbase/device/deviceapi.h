@@ -128,8 +128,6 @@ public:
     PluginInterface *getPluginInterface() { return m_pluginInterface; }
 
     PluginInstanceGUI *getSamplingDevicePluginInstanceGUI() { return m_samplingDevicePluginInstanceUI; }
-    // PluginInstanceGUI *getSampleSourcePluginInstanceGUI() { return m_sampleSourcePluginInstanceUI; }
-    // PluginInstanceGUI *getSampleSinkPluginInstanceGUI() { return m_sampleSinkPluginInstanceUI; }
 
     void getDeviceEngineStateStr(QString& state, int subsystemIndex = 0);
 
