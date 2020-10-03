@@ -44,7 +44,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::RigCtlServerGUI* ui;
@@ -66,6 +65,7 @@ private:
 	void displaySettings();
     void updateDeviceSetList();
 	bool updateChannelList(); //!< true if channel index has changed
+	bool handleMessage(const Message& message);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

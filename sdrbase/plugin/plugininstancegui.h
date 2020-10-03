@@ -21,8 +21,6 @@ public:
 	virtual bool deserialize(const QByteArray& data) = 0;
 
 	virtual MessageQueue* getInputMessageQueue() = 0;
-
-	virtual bool handleMessage(const Message& message) = 0;
 };
 
 #endif // INCLUDE_PLUGININSTANCEUI_H

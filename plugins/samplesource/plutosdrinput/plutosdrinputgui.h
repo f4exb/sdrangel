@@ -47,7 +47,6 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
 
 private:
     Ui::PlutoSDRInputGUI* ui;
@@ -74,6 +73,7 @@ private:
     void setFIRBWLimits();
     void setSampleRateLimits();
     void updateFrequencyLimits();
+    bool handleMessage(const Message& message);
 
 private slots:
     void on_startStop_toggled(bool checked);

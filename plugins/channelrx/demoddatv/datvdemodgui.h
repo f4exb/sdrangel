@@ -52,7 +52,6 @@ public:
     bool deserialize(const QByteArray& arrData);
 
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& objMessage);
 
     static const QString m_strChannelID;
 
@@ -131,6 +130,7 @@ private:
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);
+    bool handleMessage(const Message& objMessage);
 };
 
 #endif // INCLUDE_DATVDEMODGUI_H

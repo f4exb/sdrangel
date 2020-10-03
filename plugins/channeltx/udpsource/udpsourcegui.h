@@ -49,7 +49,6 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -80,6 +79,7 @@ private:
     void displayStreamIndex();
     void setSampleFormat(int index);
     void setSampleFormatIndex(const UDPSourceSettings::SampleFormat& sampleFormat);
+    bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

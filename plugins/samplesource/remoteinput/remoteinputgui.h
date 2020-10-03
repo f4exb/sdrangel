@@ -49,7 +49,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::RemoteInputGui* ui;
@@ -113,6 +112,7 @@ private:
 	void displayEventCounts();
     void displayEventTimer();
     void analyzeApiReply(const QJsonObject& jsonObject);
+	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

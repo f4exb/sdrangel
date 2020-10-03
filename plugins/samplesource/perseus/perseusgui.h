@@ -44,7 +44,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 	uint32_t getDevSampleRate(unsigned int index);
 	int getDevSampleRateIndex(uint32_t sampleRate);
 
@@ -70,6 +69,7 @@ private:
 	void updateFrequencyLimits();
 	void sendSettings();
     void updateSampleRateAndFrequency();
+	bool handleMessage(const Message& message);
 
 private slots:
 	void on_centerFrequency_changed(quint64 value);
