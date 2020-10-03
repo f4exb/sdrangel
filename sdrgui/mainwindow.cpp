@@ -37,6 +37,7 @@
 #include "device/deviceenumerator.h"
 #include "channel/channelapi.h"
 #include "feature/featureuiset.h"
+#include "feature/feature.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
 #include "gui/commanditem.h"
@@ -2143,7 +2144,8 @@ void MainWindow::featureAddClicked(int featureIndex)
         PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations(); // Available feature plugins
         PluginInterface *pluginInterface = (*featureRegistrations)[featureIndex].m_plugin;
         Feature *feature = pluginInterface->createFeature(m_apiAdapter);
-        pluginInterface->createFeatureGUI(featureUISet, feature);
+        PluginInstanceGUI *gui = pluginInterface->createFeatureGUI(featureUISet, feature);
+        featureUISet->registerFeatureInstance(feature->getURI(), gui, feature);
     }
 }
 

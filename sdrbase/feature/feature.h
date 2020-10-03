@@ -53,6 +53,7 @@ public:
     virtual void destroy() = 0;
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
+    virtual const QString& getURI() const = 0;
     virtual void getIdentifier(QString& id) const = 0;
     virtual void getTitle(QString& title) const = 0;
     virtual void setName(const QString& name) { m_name = name; }
