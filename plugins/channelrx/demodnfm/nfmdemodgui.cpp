@@ -29,27 +29,6 @@ void NFMDemodGUI::destroy()
 	delete this;
 }
 
-void NFMDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString NFMDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 NFMDemodGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void NFMDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void NFMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

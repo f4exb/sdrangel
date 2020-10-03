@@ -76,31 +76,9 @@ void AirspyHFGui::destroy()
 	delete this;
 }
 
-void AirspyHFGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString AirspyHFGui::getName() const
-{
-	return objectName();
-}
-
 void AirspyHFGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 AirspyHFGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void AirspyHFGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

@@ -38,25 +38,6 @@ void LocalSourceGUI::destroy()
     delete this;
 }
 
-void LocalSourceGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString LocalSourceGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 LocalSourceGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void LocalSourceGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void LocalSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

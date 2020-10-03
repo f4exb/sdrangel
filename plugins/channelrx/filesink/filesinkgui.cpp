@@ -43,25 +43,6 @@ void FileSinkGUI::destroy()
     delete this;
 }
 
-void FileSinkGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString FileSinkGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 FileSinkGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void FileSinkGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void FileSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

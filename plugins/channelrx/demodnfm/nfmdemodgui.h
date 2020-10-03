@@ -26,11 +26,6 @@ public:
 	static NFMDemodGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);
 	virtual void destroy();
 
-	void setName(const QString& name);
-	QString getName() const;
-	virtual qint64 getCenterFrequency() const;
-	virtual void setCenterFrequency(qint64 centerFrequency);
-
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);

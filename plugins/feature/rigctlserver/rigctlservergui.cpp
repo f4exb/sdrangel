@@ -38,16 +38,6 @@ void RigCtlServerGUI::destroy()
 	delete this;
 }
 
-void RigCtlServerGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString RigCtlServerGUI::getName() const
-{
-	return objectName();
-}
-
 void RigCtlServerGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

@@ -93,31 +93,9 @@ void KiwiSDRGui::destroy()
     delete this;
 }
 
-void KiwiSDRGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString KiwiSDRGui::getName() const
-{
-    return objectName();
-}
-
 void KiwiSDRGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 KiwiSDRGui::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void KiwiSDRGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

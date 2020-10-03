@@ -83,31 +83,9 @@ void FileOutputGui::destroy()
 	delete this;
 }
 
-void FileOutputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString FileOutputGui::getName() const
-{
-	return objectName();
-}
-
 void FileOutputGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 FileOutputGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void FileOutputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

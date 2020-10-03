@@ -43,7 +43,6 @@ void FeatureUISet::addRollupWidget(QWidget *widget)
 void FeatureUISet::registerFeatureInstance(const QString& featureURI, PluginInstanceGUI* pluginGUI, Feature *feature)
 {
     m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureURI, pluginGUI, feature));
-    renameFeatureInstances();
 }
 
 void FeatureUISet::removeFeatureInstance(PluginInstanceGUI* pluginGUI)
@@ -56,22 +55,13 @@ void FeatureUISet::removeFeatureInstance(PluginInstanceGUI* pluginGUI)
             break;
         }
     }
-
-    renameFeatureInstances();
-}
-
-void FeatureUISet::renameFeatureInstances()
-{
-    for (int i = 0; i < m_featureInstanceRegistrations.count(); i++) {
-        m_featureInstanceRegistrations[i].m_gui->setName(QString("%1:%2").arg(m_featureInstanceRegistrations[i].m_featureURI).arg(i));
-    }
 }
 
 // sort by name
 bool FeatureUISet::FeatureInstanceRegistration::operator<(const FeatureInstanceRegistration& other) const
 {
-    if (m_gui && other.m_gui) {
-        return m_gui->getName() < other.m_gui->getName();
+    if (m_feature && other.m_feature) {
+        return m_feature->getName() < other.m_feature->getName();
     } else {
         return false;
     }
@@ -94,7 +84,6 @@ void FeatureUISet::deleteFeature(int featureIndex)
                 qPrintable(m_featureInstanceRegistrations[featureIndex].m_featureURI),
                 featureIndex);
         m_featureInstanceRegistrations[featureIndex].m_gui->destroy();
-        renameFeatureInstances();
     }
 }
 
@@ -164,8 +153,6 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
             featureGUI->deserialize(featureConfig.m_config);
         }
     }
-
-    renameFeatureInstances();
 }
 
 void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)

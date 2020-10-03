@@ -74,31 +74,9 @@ void PerseusGui::destroy()
 	delete this;
 }
 
-void PerseusGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString PerseusGui::getName() const
-{
-	return objectName();
-}
-
 void PerseusGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 PerseusGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void PerseusGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

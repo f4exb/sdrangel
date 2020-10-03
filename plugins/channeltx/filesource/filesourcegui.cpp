@@ -44,25 +44,6 @@ void FileSourceGUI::destroy()
     delete this;
 }
 
-void FileSourceGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString FileSourceGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 FileSourceGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void FileSourceGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void FileSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

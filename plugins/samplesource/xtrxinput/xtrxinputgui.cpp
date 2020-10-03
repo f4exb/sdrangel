@@ -91,31 +91,9 @@ void XTRXInputGUI::destroy()
     delete this;
 }
 
-void XTRXInputGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString XTRXInputGUI::getName() const
-{
-    return objectName();
-}
-
 void XTRXInputGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 XTRXInputGUI::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency + (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
-}
-
-void XTRXInputGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency - (m_settings.m_ncoEnable ? m_settings.m_ncoFrequency : 0);
     displaySettings();
     sendSettings();
 }

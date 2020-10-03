@@ -134,8 +134,6 @@ private:
     int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
     int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
-
-    void renameChannelInstances();
 };
 
 

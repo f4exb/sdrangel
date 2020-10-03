@@ -48,26 +48,6 @@ void AMDemodGUI::destroy()
 	delete this;
 }
 
-void AMDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString AMDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 AMDemodGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void AMDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void AMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

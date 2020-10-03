@@ -49,26 +49,6 @@ void FreqTrackerGUI::destroy()
 	delete this;
 }
 
-void FreqTrackerGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString FreqTrackerGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 FreqTrackerGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void FreqTrackerGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void FreqTrackerGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

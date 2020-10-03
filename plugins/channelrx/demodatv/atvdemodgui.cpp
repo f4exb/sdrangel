@@ -45,28 +45,6 @@ void ATVDemodGUI::destroy()
     delete this;
 }
 
-void ATVDemodGUI::setName(const QString& strName)
-{
-    setObjectName(strName);
-}
-
-QString ATVDemodGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 ATVDemodGUI::getCenterFrequency() const
-{
-    return m_channelMarker.getCenterFrequency();
-}
-
-void ATVDemodGUI::setCenterFrequency(qint64 intCenterFrequency)
-{
-    m_channelMarker.setCenterFrequency(intCenterFrequency);
-    m_settings.m_inputFrequencyOffset = intCenterFrequency;
-    applySettings();
-}
-
 void ATVDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

@@ -39,25 +39,6 @@ void RemoteSinkGUI::destroy()
     delete this;
 }
 
-void RemoteSinkGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString RemoteSinkGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 RemoteSinkGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void RemoteSinkGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void RemoteSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

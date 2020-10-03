@@ -40,26 +40,6 @@ void UDPSourceGUI::destroy()
     delete this;
 }
 
-void UDPSourceGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString UDPSourceGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 UDPSourceGUI::getCenterFrequency() const {
-    return m_channelMarker.getCenterFrequency();
-}
-
-void UDPSourceGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_channelMarker.setCenterFrequency(centerFrequency);
-    applySettings();
-}
-
 void UDPSourceGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

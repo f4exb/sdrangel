@@ -90,31 +90,9 @@ void PlutoSDROutputGUI::destroy()
     delete this;
 }
 
-void PlutoSDROutputGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString PlutoSDROutputGUI::getName() const
-{
-    return objectName();
-}
-
 void PlutoSDROutputGUI::resetToDefaults()
 {
 
-}
-
-qint64 PlutoSDROutputGUI::getCenterFrequency() const
-{
-    return m_settings.m_centerFrequency;
-}
-
-void PlutoSDROutputGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
-    displaySettings();
-    sendSettings();
 }
 
 QByteArray PlutoSDROutputGUI::serialize() const

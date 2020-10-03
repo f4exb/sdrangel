@@ -44,11 +44,6 @@ public:
     static AMModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx);
     virtual void destroy();
 
-    void setName(const QString& name);
-    QString getName() const;
-    virtual qint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
-
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);

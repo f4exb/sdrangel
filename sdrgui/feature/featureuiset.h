@@ -76,8 +76,6 @@ private:
 
     FeatureInstanceRegistrations m_featureInstanceRegistrations;
     int m_featureTabIndex;
-
-    void renameFeatureInstances();
 };
 
 #endif // SDRGUI_FEATURE_FEATUREUISET_H_

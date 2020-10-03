@@ -46,28 +46,6 @@ void ChannelAnalyzerGUI::destroy()
 	delete this;
 }
 
-void ChannelAnalyzerGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString ChannelAnalyzerGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 ChannelAnalyzerGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void ChannelAnalyzerGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
-}
-
 void ChannelAnalyzerGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

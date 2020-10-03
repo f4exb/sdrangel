@@ -49,27 +49,6 @@ void FreeDVModGUI::destroy()
     delete this;
 }
 
-void FreeDVModGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString FreeDVModGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 FreeDVModGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void FreeDVModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-    m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
-}
-
 void FreeDVModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

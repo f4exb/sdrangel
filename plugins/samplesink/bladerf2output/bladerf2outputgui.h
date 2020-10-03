@@ -41,12 +41,7 @@ public:
     virtual ~BladeRF2OutputGui();
     virtual void destroy();
 
-    void setName(const QString& name);
-    QString getName() const;
-
     void resetToDefaults();
-    virtual qint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }

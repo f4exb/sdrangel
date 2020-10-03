@@ -56,27 +56,6 @@ void BFMDemodGUI::destroy()
 	delete this;
 }
 
-void BFMDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString BFMDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 BFMDemodGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void BFMDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void BFMDemodGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

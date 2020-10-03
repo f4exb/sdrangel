@@ -81,31 +81,9 @@ void RTLSDRGui::destroy()
 	delete this;
 }
 
-void RTLSDRGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString RTLSDRGui::getName() const
-{
-	return objectName();
-}
-
 void RTLSDRGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 RTLSDRGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void RTLSDRGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

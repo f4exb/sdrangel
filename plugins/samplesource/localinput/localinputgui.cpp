@@ -122,16 +122,6 @@ void LocalInputGui::destroy()
 	delete this;
 }
 
-void LocalInputGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString LocalInputGui::getName() const
-{
-	return objectName();
-}
-
 void LocalInputGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
@@ -161,16 +151,6 @@ bool LocalInputGui::deserialize(const QByteArray& data)
     {
         return false;
     }
-}
-
-qint64 LocalInputGui::getCenterFrequency() const
-{
-    return m_streamCenterFrequency;
-}
-
-void LocalInputGui::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
 }
 
 bool LocalInputGui::handleMessage(const Message& message)

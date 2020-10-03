@@ -30,28 +30,6 @@ void SSBDemodGUI::destroy()
 	delete this;
 }
 
-void SSBDemodGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString SSBDemodGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 SSBDemodGUI::getCenterFrequency() const
-{
-	return m_channelMarker.getCenterFrequency();
-}
-
-void SSBDemodGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	m_settings.m_inputFrequencyOffset = m_channelMarker.getCenterFrequency();
-	applySettings();
-}
-
 void SSBDemodGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();

@@ -84,31 +84,9 @@ void FCDProPlusGui::destroy()
 	delete this;
 }
 
-void FCDProPlusGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString FCDProPlusGui::getName() const
-{
-	return objectName();
-}
-
 void FCDProPlusGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 FCDProPlusGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void FCDProPlusGui::setCenterFrequency(qint64 centerFrequency)
-{
-	m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }
