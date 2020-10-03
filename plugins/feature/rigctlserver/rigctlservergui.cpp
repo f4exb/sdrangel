@@ -116,7 +116,7 @@ void RigCtlServerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 }
 
 RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
-	RollupWidget(parent),
+	FeatureGUI(parent),
 	ui(new Ui::RigCtlServerGUI),
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
@@ -145,7 +145,6 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
 RigCtlServerGUI::~RigCtlServerGUI()
 {
-    m_featureUISet->removeFeatureInstance(this);
 	delete m_rigCtlServer; // When the GUI closes it has to delete the demodulator because it can be done with (x)
 	delete ui;
 }

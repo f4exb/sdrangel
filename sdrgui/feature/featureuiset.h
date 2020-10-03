@@ -18,6 +18,7 @@
 #ifndef SDRGUI_FEATURE_FEATUREUISET_H_
 #define SDRGUI_FEATURE_FEATUREUISET_H_
 
+#include <QObject>
 #include <QString>
 #include <QList>
 
@@ -25,22 +26,23 @@
 
 class QWidget;
 class FeatureWindow;
-class PluginInstanceGUI;
+class FeatureGUI;
 class PluginAPI;
 class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
 
-class SDRGUI_API FeatureUISet
+class SDRGUI_API FeatureUISet : public QObject
 {
+    Q_OBJECT
 public:
     FeatureUISet(int tabIndex);
     ~FeatureUISet();
 
     void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
-    void registerFeatureInstance(const QString& featureURI, PluginInstanceGUI* pluginGUI, Feature *feature);
-    void removeFeatureInstance(PluginInstanceGUI* pluginGUI);
+    void registerFeatureInstance(const QString& featureURI, FeatureGUI* featureGUI, Feature *feature);
+    void removeFeatureInstance(FeatureGUI* featureGUI);
     void freeFeatures();
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
@@ -54,7 +56,7 @@ private:
     struct FeatureInstanceRegistration
     {
         QString m_featureURI;
-        PluginInstanceGUI* m_gui;
+        FeatureGUI* m_gui;
         Feature* m_feature;
 
         FeatureInstanceRegistration() :
@@ -63,7 +65,7 @@ private:
             m_feature(nullptr)
         { }
 
-        FeatureInstanceRegistration(const QString& featureURI, PluginInstanceGUI* pluginGUI, Feature *feature) :
+        FeatureInstanceRegistration(const QString& featureURI, FeatureGUI* pluginGUI, Feature *feature) :
             m_featureURI(featureURI),
             m_gui(pluginGUI),
             m_feature(feature)
@@ -76,6 +78,9 @@ private:
 
     FeatureInstanceRegistrations m_featureInstanceRegistrations;
     int m_featureTabIndex;
+
+private slots:
+    void handleClosingFeatureGUI(FeatureGUI *featureGUI);
 };
 
 #endif // SDRGUI_FEATURE_FEATUREUISET_H_

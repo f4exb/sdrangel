@@ -36,6 +36,7 @@ class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
 class FeatureWebAPIAdapter;
 class Feature;
+class FeatureGUI;
 
 class SDRBASE_API PluginInterface {
 public:
@@ -313,7 +314,7 @@ public:
 
     // Features
 
-    virtual PluginInstanceGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+    virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
     {
         return nullptr;
     }

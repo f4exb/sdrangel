@@ -21,8 +21,7 @@
 
 #include <QTimer>
 
-#include "plugin/plugininstancegui.h"
-#include "gui/rollupwidget.h"
+#include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "rigctlserversettings.h"
 
@@ -34,7 +33,7 @@ namespace Ui {
 	class RigCtlServerGUI;
 }
 
-class RigCtlServerGUI : public RollupWidget, public PluginInstanceGUI {
+class RigCtlServerGUI : public FeatureGUI {
 	Q_OBJECT
 public:
 	static RigCtlServerGUI* create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature);

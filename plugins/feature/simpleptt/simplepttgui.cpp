@@ -123,7 +123,7 @@ void SimplePTTGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 }
 
 SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent) :
-	RollupWidget(parent),
+	FeatureGUI(parent),
 	ui(new Ui::SimplePTTGUI),
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
@@ -160,7 +160,6 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 
 SimplePTTGUI::~SimplePTTGUI()
 {
-    m_featureUISet->removeFeatureInstance(this);
 	delete m_simplePTT; // When the GUI closes it has to delete the demodulator because it can be done with (x)
 	delete ui;
 }

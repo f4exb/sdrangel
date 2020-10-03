@@ -15,35 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
-#define INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#include <QCloseEvent>
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include "featuregui.h"
 
-class PluginInstanceGUI;
-class FeatureGUI;
-class WebAPIAdapterInterface;
-
-class SimplePTTPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.feature.simpleptt")
-
-public:
-	explicit SimplePTTPlugin(QObject* parent = nullptr);
-
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
-
-	virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
-	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
-	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
-
-	PluginAPI* m_pluginAPI;
-};
-
-#endif // INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+void FeatureGUI::closeEvent(QCloseEvent *event)
+{
+    qDebug("FeatureGUI::closeEvent");
+    emit closing();
+    event->accept();
+}

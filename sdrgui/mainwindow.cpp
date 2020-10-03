@@ -2137,7 +2137,7 @@ void MainWindow::featureAddClicked(int featureIndex)
         PluginAPI::FeatureRegistrations *featureRegistrations = m_pluginManager->getFeatureRegistrations(); // Available feature plugins
         PluginInterface *pluginInterface = (*featureRegistrations)[featureIndex].m_plugin;
         Feature *feature = pluginInterface->createFeature(m_apiAdapter);
-        PluginInstanceGUI *gui = pluginInterface->createFeatureGUI(featureUISet, feature);
+        FeatureGUI *gui = pluginInterface->createFeatureGUI(featureUISet, feature);
         featureUISet->registerFeatureInstance(feature->getURI(), gui, feature);
     }
 }

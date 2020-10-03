@@ -20,8 +20,7 @@
 
 #include <QTimer>
 
-#include "plugin/plugininstancegui.h"
-#include "gui/rollupwidget.h"
+#include "feature/featuregui.h"
 #include "util/messagequeue.h"
 #include "simplepttsettings.h"
 
@@ -33,7 +32,7 @@ namespace Ui {
 	class SimplePTTGUI;
 }
 
-class SimplePTTGUI : public RollupWidget, public PluginInstanceGUI {
+class SimplePTTGUI : public FeatureGUI {
 	Q_OBJECT
 public:
 	static SimplePTTGUI* create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature);

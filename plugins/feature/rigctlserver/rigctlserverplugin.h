@@ -22,6 +22,8 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
+class PluginInstanceGUI;
+class FeatureGUI;
 class WebAPIAdapterInterface;
 
 class RigCtlServerPlugin : public QObject, PluginInterface {
@@ -35,7 +37,7 @@ public:
 	const PluginDescriptor& getPluginDescriptor() const;
 	void initPlugin(PluginAPI* pluginAPI);
 
-	virtual PluginInstanceGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
+	virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
 	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
 	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
 

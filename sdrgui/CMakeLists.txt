@@ -71,6 +71,7 @@ set(sdrgui_SOURCES
 
     device/deviceuiset.cpp
 
+    feature/featuregui.cpp
     feature/featureuiset.cpp
 
     soapygui/discreterangegui.cpp
@@ -156,6 +157,7 @@ set(sdrgui_HEADERS
 
     device/deviceuiset.h
 
+    feature/featuregui.h
     feature/featureuiset.h
 
     plugin/plugininstancegui.h
