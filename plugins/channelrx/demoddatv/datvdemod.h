@@ -41,7 +41,8 @@ public:
     ~DATVDemod();
 
     virtual void destroy() { delete this; }
-    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getIdentifier(QString& id) { id = m_channelId; }
+    virtual const QString& getURI() const { return m_channelIdURI; }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_centerFrequency; }
 
