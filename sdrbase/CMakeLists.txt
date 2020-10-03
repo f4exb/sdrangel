@@ -301,7 +301,6 @@ set(sdrbase_HEADERS
 
     limerfe/limerfeusbcalib.h
 
-    plugin/plugininstancegui.h
     plugin/plugininterface.h
     plugin/pluginapi.h
     plugin/pluginmanager.h

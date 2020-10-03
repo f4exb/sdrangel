@@ -154,6 +154,8 @@ set(sdrgui_HEADERS
 
     feature/featureuiset.h
 
+    plugin/plugininstancegui.h
+
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h
     soapygui/itemsettinggui.h
