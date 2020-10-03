@@ -47,26 +47,6 @@ void ChirpChatModGUI::destroy()
     delete this;
 }
 
-void ChirpChatModGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString ChirpChatModGUI::getName() const
-{
-	return objectName();
-}
-
-qint64 ChirpChatModGUI::getCenterFrequency() const {
-	return m_channelMarker.getCenterFrequency();
-}
-
-void ChirpChatModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_channelMarker.setCenterFrequency(centerFrequency);
-	applySettings();
-}
-
 void ChirpChatModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

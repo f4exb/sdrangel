@@ -85,30 +85,11 @@ void MetisMISOGui::destroy()
     delete this;
 }
 
-void MetisMISOGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString MetisMISOGui::getName() const
-{
-    return objectName();
-}
-
 void MetisMISOGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
     displaySettings();
     sendSettings();
-}
-
-qint64 MetisMISOGui::getCenterFrequency() const
-{
-    if (m_streamIndex < MetisMISOSettings::m_maxReceivers) {
-        return m_settings.m_rxCenterFrequencies[m_streamIndex];
-    } else {
-        return 0;
-    }
 }
 
 void MetisMISOGui::setCenterFrequency(qint64 centerFrequency)

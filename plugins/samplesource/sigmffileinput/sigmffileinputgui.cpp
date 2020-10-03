@@ -108,31 +108,9 @@ void SigMFFileInputGUI::destroy()
 	delete this;
 }
 
-void SigMFFileInputGUI::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString SigMFFileInputGUI::getName() const
-{
-	return objectName();
-}
-
 void SigMFFileInputGUI::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 SigMFFileInputGUI::getCenterFrequency() const
-{
-	return m_centerFrequency;
-}
-
-void SigMFFileInputGUI::setCenterFrequency(qint64 centerFrequency)
-{
-	m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

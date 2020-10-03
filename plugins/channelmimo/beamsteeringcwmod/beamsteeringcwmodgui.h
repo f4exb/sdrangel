@@ -44,11 +44,7 @@ public:
     static BeamSteeringCWModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);
 
     virtual void destroy();
-    void setName(const QString& name);
-    QString getName() const;
     virtual void resetToDefaults();
-    virtual qint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }

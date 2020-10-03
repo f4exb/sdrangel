@@ -93,31 +93,9 @@ void TestMIGui::destroy()
     delete this;
 }
 
-void TestMIGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString TestMIGui::getName() const
-{
-    return objectName();
-}
-
 void TestMIGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 TestMIGui::getCenterFrequency() const
-{
-    return m_settings.m_streams[m_streamIndex].m_centerFrequency;
-}
-
-void TestMIGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_streams[m_streamIndex].m_centerFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

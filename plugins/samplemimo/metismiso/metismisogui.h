@@ -41,12 +41,7 @@ public:
 	virtual ~MetisMISOGui();
 	virtual void destroy();
 
-	void setName(const QString& name);
-	QString getName() const;
-
 	void resetToDefaults();
-	virtual qint64 getCenterFrequency() const;
-	virtual void setCenterFrequency(qint64 centerFrequency);
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
@@ -79,6 +74,7 @@ private:
     void updateSubsamplingIndex();
     void updateSpectrum();
 	void sendSettings();
+	void setCenterFrequency(qint64 centerFrequency);
 
 private slots:
     void handleInputMessages();

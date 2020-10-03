@@ -39,25 +39,6 @@ void InterferometerGUI::destroy()
     delete this;
 }
 
-void InterferometerGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString InterferometerGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 InterferometerGUI::getCenterFrequency() const {
-    return m_centerFrequency;
-}
-
-void InterferometerGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void InterferometerGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

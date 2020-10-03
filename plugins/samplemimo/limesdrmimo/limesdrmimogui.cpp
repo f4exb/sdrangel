@@ -112,31 +112,9 @@ void LimeSDRMIMOGUI::destroy()
     delete this;
 }
 
-void LimeSDRMIMOGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString LimeSDRMIMOGUI::getName() const
-{
-    return objectName();
-}
-
 void LimeSDRMIMOGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 LimeSDRMIMOGUI::getCenterFrequency() const
-{
-    return m_settings.m_rxCenterFrequency;
-}
-
-void LimeSDRMIMOGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_rxCenterFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

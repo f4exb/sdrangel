@@ -43,25 +43,6 @@ void SigMFFileSinkGUI::destroy()
     delete this;
 }
 
-void SigMFFileSinkGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString SigMFFileSinkGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 SigMFFileSinkGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void SigMFFileSinkGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void SigMFFileSinkGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

@@ -37,25 +37,6 @@ void BeamSteeringCWModGUI::destroy()
     delete this;
 }
 
-void BeamSteeringCWModGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString BeamSteeringCWModGUI::getName() const
-{
-    return objectName();
-}
-
-qint64 BeamSteeringCWModGUI::getCenterFrequency() const {
-    return 0;
-}
-
-void BeamSteeringCWModGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    (void) centerFrequency;
-}
-
 void BeamSteeringCWModGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();

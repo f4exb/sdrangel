@@ -90,31 +90,9 @@ void TestMOSyncGui::destroy()
 	delete this;
 }
 
-void TestMOSyncGui::setName(const QString& name)
-{
-	setObjectName(name);
-}
-
-QString TestMOSyncGui::getName() const
-{
-	return objectName();
-}
-
 void TestMOSyncGui::resetToDefaults()
 {
 	m_settings.resetToDefaults();
-	displaySettings();
-	sendSettings();
-}
-
-qint64 TestMOSyncGui::getCenterFrequency() const
-{
-	return m_settings.m_centerFrequency;
-}
-
-void TestMOSyncGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_centerFrequency = centerFrequency;
 	displaySettings();
 	sendSettings();
 }

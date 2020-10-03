@@ -109,31 +109,9 @@ void XTRXMIMOGUI::destroy()
     delete this;
 }
 
-void XTRXMIMOGUI::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString XTRXMIMOGUI::getName() const
-{
-    return objectName();
-}
-
 void XTRXMIMOGUI::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 XTRXMIMOGUI::getCenterFrequency() const
-{
-    return m_settings.m_rxCenterFrequency;
-}
-
-void XTRXMIMOGUI::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_rxCenterFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }

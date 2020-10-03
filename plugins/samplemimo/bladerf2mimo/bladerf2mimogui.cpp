@@ -112,31 +112,9 @@ void BladeRF2MIMOGui::destroy()
     delete this;
 }
 
-void BladeRF2MIMOGui::setName(const QString& name)
-{
-    setObjectName(name);
-}
-
-QString BladeRF2MIMOGui::getName() const
-{
-    return objectName();
-}
-
 void BladeRF2MIMOGui::resetToDefaults()
 {
     m_settings.resetToDefaults();
-    displaySettings();
-    sendSettings();
-}
-
-qint64 BladeRF2MIMOGui::getCenterFrequency() const
-{
-    return m_settings.m_rxCenterFrequency;
-}
-
-void BladeRF2MIMOGui::setCenterFrequency(qint64 centerFrequency)
-{
-    m_settings.m_rxCenterFrequency = centerFrequency;
     displaySettings();
     sendSettings();
 }
