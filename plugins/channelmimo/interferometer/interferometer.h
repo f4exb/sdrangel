@@ -98,7 +98,8 @@ public:
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples, unsigned int sourceIndex);
 	virtual bool handleMessage(const Message& cmd); //!< Processing of a message. Returns true if message has actually been processed
 
-    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual void getIdentifier(QString& id) { id = m_channelId; }
+    virtual const QString& getURI() const { return m_channelIdURI; }
     virtual void getTitle(QString& title) { title = "Interferometer"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
     uint32_t getDeviceSampleRate() const { return m_deviceSampleRate; }
