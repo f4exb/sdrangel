@@ -133,7 +133,6 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(viewChanged()));
 
-	m_deviceUISet->registerRxChannelInstance(LoRaDemod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 
