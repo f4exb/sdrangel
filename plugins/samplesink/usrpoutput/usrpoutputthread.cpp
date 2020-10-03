@@ -98,7 +98,7 @@ void USRPOutputThread::run()
             m_packets++;
             if (samples_sent != DeviceUSRP::blockSize)
             {
-                qDebug("USRPOutputThread::run written %d/%d samples", samples_sent, DeviceUSRP::blockSize);
+                qDebug("USRPOutputThread::run written %ld/%d samples", samples_sent, DeviceUSRP::blockSize);
             }
         }
         catch (std::exception& e)

@@ -1048,7 +1048,7 @@ void USRPOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, c
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
     if (deviceSettingsKeys.contains("antennaPath") || force) {
-        swgUsrpOutputSettings->setAntennaPath(&QString(settings.m_antennaPath));
+        swgUsrpOutputSettings->setAntennaPath(new QString(settings.m_antennaPath));
     }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgUsrpOutputSettings->setCenterFrequency(settings.m_centerFrequency);
@@ -1057,7 +1057,7 @@ void USRPOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, c
         swgUsrpOutputSettings->setDevSampleRate(settings.m_devSampleRate);
     }
     if (deviceSettingsKeys.contains("clockSource") || force) {
-        swgUsrpOutputSettings->setClockSource(&QString(settings.m_clockSource));
+        swgUsrpOutputSettings->setClockSource(new QString(settings.m_clockSource));
     }
     if (deviceSettingsKeys.contains("gain") || force) {
         swgUsrpOutputSettings->setGain(settings.m_gain);

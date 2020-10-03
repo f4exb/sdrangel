@@ -132,7 +132,7 @@ void USRPInputThread::run()
             m_packets++;
             if (samples_received != DeviceUSRP::blockSize)
             {
-                qDebug("USRPInputThread::run - received %d/%d samples", samples_received, DeviceUSRP::blockSize);
+                qDebug("USRPInputThread::run - received %ld/%d samples", samples_received, DeviceUSRP::blockSize);
             }
             if (md.error_code ==  uhd::rx_metadata_t::ERROR_CODE_TIMEOUT)
             {
