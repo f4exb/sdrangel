@@ -46,7 +46,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::SigMFFileInputGUI* ui;
@@ -94,6 +93,7 @@ private:
 	void updateWithStreamTime();
     void setAccelerationCombo();
     void setNumberStr(int n, QString& s);
+	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

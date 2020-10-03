@@ -49,7 +49,6 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    virtual bool handleMessage(const Message& message);
 
 public slots:
 	void channelMarkerChangedByCursor();
@@ -86,6 +85,7 @@ private:
     void setFrequencyFromPos();
     void setPosFromFrequency();
     QString displayScaled(uint64_t value, int precision);
+    bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

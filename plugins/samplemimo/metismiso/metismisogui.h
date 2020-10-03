@@ -45,7 +45,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::MetisMISOGui* ui;
@@ -75,6 +74,7 @@ private:
     void updateSpectrum();
 	void sendSettings();
 	void setCenterFrequency(qint64 centerFrequency);
+	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

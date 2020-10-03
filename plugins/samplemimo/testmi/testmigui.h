@@ -45,7 +45,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::TestMIGui* ui;
@@ -73,6 +72,7 @@ private:
     void updateAmpCoarseLimit();
     void updateAmpFineLimit();
     void updateFrequencyShiftLimit();
+	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

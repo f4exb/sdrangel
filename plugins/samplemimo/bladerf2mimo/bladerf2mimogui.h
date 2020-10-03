@@ -44,7 +44,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::BladeRF2MIMOGui* ui;
@@ -97,6 +96,7 @@ private:
 	float getGainDB(int gainValue, int gainMin, int gainMax, int gainStep, float gainScale);
     int getGainValue(float gainDB, int gainMin, int gainMax, int gainStep, float gainScale);
 	float setGainFromValue(int value);
+	bool handleMessage(const Message& message);
 
 private slots:
     void handleInputMessages();

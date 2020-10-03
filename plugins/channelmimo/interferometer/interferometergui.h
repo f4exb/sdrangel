@@ -47,7 +47,6 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
     virtual MessageQueue* getInputMessageQueue();
-    virtual bool handleMessage(const Message& message);
 
 private:
 	Ui::InterferometerGUI* ui;
@@ -75,6 +74,7 @@ private:
     void applyPosition();
 	void displaySettings();
     void displayRateAndShift();
+    bool handleMessage(const Message& message);
 
 	void leaveEvent(QEvent*);
 	void enterEvent(QEvent*);

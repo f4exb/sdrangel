@@ -46,7 +46,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	virtual bool handleMessage(const Message& message);
 
 private slots:
 	void channelMarkerChangedByCursor();
@@ -114,6 +113,7 @@ private:
     void displayLoRaStatus(int headerParityStatus, bool headerCRCStatus, int payloadParityStatus, bool payloadCRCStatus);
 	QString getParityStr(int parityStatus);
     void resetLoRaStatus();
+	bool handleMessage(const Message& message);
 };
 
 #endif // INCLUDE_CHIRPCHATDEMODGUI_H
