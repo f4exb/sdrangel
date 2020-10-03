@@ -86,7 +86,7 @@ public:
     virtual void destroy() { delete this; }
     virtual bool handleMessage(const Message& cmd);
 
-    virtual void getIdentifier(QString& id) const { id = objectName(); }
+    virtual void getIdentifier(QString& id) const { id = m_featureId; }
     virtual void getTitle(QString& title) const { title = m_settings.m_title; }
 
     virtual QByteArray serialize() const;
