@@ -21,6 +21,7 @@
 #include "settings/featuresetpreset.h"
 #include "feature/featureutils.h"
 #include "feature/feature.h"
+#include "feature/featuregui.h"
 
 #include "featureuiset.h"
 
@@ -40,16 +41,23 @@ void FeatureUISet::addRollupWidget(QWidget *widget)
     m_featureWindow->addRollupWidget(widget);
 }
 
-void FeatureUISet::registerFeatureInstance(const QString& featureURI, PluginInstanceGUI* pluginGUI, Feature *feature)
+void FeatureUISet::registerFeatureInstance(const QString& featureURI, FeatureGUI* featureGUI, Feature *feature)
 {
-    m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureURI, pluginGUI, feature));
+    m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureURI, featureGUI, feature));
+    QObject::connect(
+        featureGUI,
+        &FeatureGUI::closing,
+        this,
+        [=](){ this->handleClosingFeatureGUI(featureGUI); },
+        Qt::QueuedConnection
+    );
 }
 
-void FeatureUISet::removeFeatureInstance(PluginInstanceGUI* pluginGUI)
+void FeatureUISet::removeFeatureInstance(FeatureGUI* featureGUI)
 {
     for (FeatureInstanceRegistrations::iterator it = m_featureInstanceRegistrations.begin(); it != m_featureInstanceRegistrations.end(); ++it)
     {
-        if (it->m_gui == pluginGUI)
+        if (it->m_gui == featureGUI)
         {
             m_featureInstanceRegistrations.erase(it);
             break;
@@ -140,7 +148,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
                         qPrintable(featureConfig.m_featureIdURI));
                 Feature *feature =
                         (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
-                PluginInstanceGUI *featureGUI =
+                FeatureGUI *featureGUI =
                         (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
                 registerFeatureInstance(feature->getURI(), featureGUI, feature);
                 break;
@@ -164,4 +172,11 @@ void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
         qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_featureURI));
         preset->addFeature(m_featureInstanceRegistrations[i].m_featureURI, m_featureInstanceRegistrations[i].m_gui->serialize());
     }
+}
+
+
+void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
+{
+    qDebug("FeatureUISet::handleClosingFeatureGUI");
+    removeFeatureInstance(featureGUI);
 }

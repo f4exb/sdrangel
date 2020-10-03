@@ -57,14 +57,14 @@ void RigCtlServerPlugin::initPlugin(PluginAPI* pluginAPI)
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* RigCtlServerPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+FeatureGUI* RigCtlServerPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
 	(void) featureUISet;
 	(void) feature;
     return nullptr;
 }
 #else
-PluginInstanceGUI* RigCtlServerPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+FeatureGUI* RigCtlServerPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
 	return RigCtlServerGUI::create(m_pluginAPI, featureUISet, feature);
 }

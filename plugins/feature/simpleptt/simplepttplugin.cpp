@@ -56,14 +56,14 @@ void SimplePTTPlugin::initPlugin(PluginAPI* pluginAPI)
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SimplePTTPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+FeatureGUI* SimplePTTPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
 	(void) featureUISet;
 	(void) feature;
     return nullptr;
 }
 #else
-PluginInstanceGUI* SimplePTTPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+FeatureGUI* SimplePTTPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
 	return SimplePTTGUI::create(m_pluginAPI, featureUISet, feature);
 }

@@ -15,35 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
-#define INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#ifndef SDRGUI_FEATURE_FEATUREGUI_H_
+#define SDRGUI_FEATURE_FEATUREGUI_H_
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include "gui/rollupwidget.h"
 
-class PluginInstanceGUI;
-class FeatureGUI;
-class WebAPIAdapterInterface;
+class QCloseEvent;
+class MessageQueue;
 
-class SimplePTTPlugin : public QObject, PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID "sdrangel.feature.simpleptt")
-
+class FeatureGUI : public RollupWidget
+{
+    Q_OBJECT
 public:
-	explicit SimplePTTPlugin(QObject* parent = nullptr);
+	FeatureGUI(QWidget *parent = nullptr) :
+        RollupWidget(parent)
+    { }
+	virtual ~FeatureGUI() { }
+	virtual void destroy() = 0;
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+	virtual void resetToDefaults() = 0;
+	virtual QByteArray serialize() const = 0;
+	virtual bool deserialize(const QByteArray& data) = 0;
 
-	virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
-	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
-	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
+	virtual MessageQueue* getInputMessageQueue() = 0;
 
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+protected:
+    void closeEvent(QCloseEvent *event);
 
-	PluginAPI* m_pluginAPI;
+signals:
+    void closing();
 };
 
-#endif // INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#endif // SDRGUI_FEATURE_FEATUREGUI_H_
