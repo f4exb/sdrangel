@@ -138,7 +138,6 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
     m_settings.setChannelMarker(&m_channelMarker);
 
-    m_deviceUISet->registerChannelInstance(BeamSteeringCWMod::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

@@ -161,7 +161,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     m_settings.setScopeGUI(ui->scopeGUI);
     m_settings.setSpectrumGUI(ui->spectrumGUI);
 
-    m_deviceUISet->registerChannelInstance(Interferometer::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 

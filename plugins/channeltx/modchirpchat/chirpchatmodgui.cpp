@@ -438,7 +438,6 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
     m_channelMarker.blockSignals(false);
 	m_channelMarker.setVisible(true); // activate signal on the last setting only
 
-	m_deviceUISet->registerTxChannelInstance(ChirpChatMod::m_channelIdURI, this);
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
 

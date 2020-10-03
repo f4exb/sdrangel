@@ -197,7 +197,6 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 
     m_settings.setSpectrumGUI(ui->glSpectrumGUI);
 
-    m_deviceUISet->registerRxChannelInstance(SigMFFileSink::m_channelIdURI, this);
     m_deviceUISet->addChannelMarker(&m_channelMarker);
     m_deviceUISet->addRollupWidget(this);
 
