@@ -39,7 +39,7 @@ public:
 
     void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
-    void registerFeatureInstance(const QString& featureName, PluginInstanceGUI* pluginGUI, Feature *feature);
+    void registerFeatureInstance(const QString& featureURI, PluginInstanceGUI* pluginGUI, Feature *feature);
     void removeFeatureInstance(PluginInstanceGUI* pluginGUI);
     void freeFeatures();
     void deleteFeature(int featureIndex);
@@ -53,18 +53,18 @@ public:
 private:
     struct FeatureInstanceRegistration
     {
-        QString m_featureName;
+        QString m_featureURI;
         PluginInstanceGUI* m_gui;
         Feature* m_feature;
 
         FeatureInstanceRegistration() :
-            m_featureName(),
+            m_featureURI(),
             m_gui(nullptr),
             m_feature(nullptr)
         { }
 
-        FeatureInstanceRegistration(const QString& featureName, PluginInstanceGUI* pluginGUI, Feature *feature) :
-            m_featureName(featureName),
+        FeatureInstanceRegistration(const QString& featureURI, PluginInstanceGUI* pluginGUI, Feature *feature) :
+            m_featureURI(featureURI),
             m_gui(pluginGUI),
             m_feature(feature)
         { }
