@@ -19,16 +19,17 @@
 
 #include <algorithm>
 
-#include "gui/glspectrum.h"
 #include "dsp/spectrumvis.h"
-#include "gui/glspectrumgui.h"
-#include "gui/channelwindow.h"
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
+#include "gui/glspectrum.h"
+#include "gui/glspectrumgui.h"
+#include "gui/channelwindow.h"
 #include "plugin/plugininstancegui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "channel/channelutils.h"
+#include "channel/channelapi.h"
 #include "settings/preset.h"
 
 #include "deviceuiset.h"
@@ -196,7 +197,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            ChannelInstanceRegistration reg;
+            PluginInstanceGUI *rxChannelGUI = nullptr;
 
             // create channel instance
 
@@ -211,17 +212,16 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     ChannelAPI *channelAPI;
                     BasebandSampleSink *rxChannel;
                     (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceAPI, &rxChannel, &channelAPI);
-                    PluginInstanceGUI *rxChannelGUI =
-                            (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
-                    reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, channelAPI, rxChannelGUI, 0);
+                    rxChannelGUI = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
+                    registerRxChannelInstance(channelAPI->getURI(), channelAPI, rxChannelGUI);
                     break;
                 }
             }
 
-            if (reg.m_gui != 0)
+            if (rxChannelGUI)
             {
                 qDebug("DeviceUISet::loadRxChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                reg.m_gui->deserialize(channelConfig.m_config);
+                rxChannelGUI->deserialize(channelConfig.m_config);
             }
         }
 
@@ -275,7 +275,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
         for(int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            ChannelInstanceRegistration reg;
+            PluginInstanceGUI *txChannelGUI = nullptr;
 
             // create channel instance
 
@@ -289,17 +289,16 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     ChannelAPI *channelAPI;
                     BasebandSampleSource *txChannel;
                     (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceAPI, &txChannel, &channelAPI);
-                    PluginInstanceGUI *txChannelGUI =
-                            (*channelRegistrations)[i].m_plugin->createTxChannelGUI(this, txChannel);
-                    reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, channelAPI, txChannelGUI, 1);
+                    txChannelGUI = (*channelRegistrations)[i].m_plugin->createTxChannelGUI(this, txChannel);
+                    registerTxChannelInstance(channelAPI->getURI(), channelAPI, txChannelGUI);
                     break;
                 }
             }
 
-            if(reg.m_gui != 0)
+            if(txChannelGUI)
             {
                 qDebug("DeviceUISet::loadTxChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                reg.m_gui->deserialize(channelConfig.m_config);
+                txChannelGUI->deserialize(channelConfig.m_config);
             }
         }
 
@@ -354,7 +353,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            ChannelInstanceRegistration reg;
+            PluginInstanceGUI *mimoChannelGUI = nullptr;
 
             // create channel instance
 
@@ -369,18 +368,17 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                     ChannelAPI *channelAPI;
                     MIMOChannel *mimoChannel;
                     (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
-                    PluginInstanceGUI *mimoChannelGUI =
-                            (*channelRegistrations)[i].m_plugin->createMIMOChannelGUI(this, mimoChannel);
+                    mimoChannelGUI = (*channelRegistrations)[i].m_plugin->createMIMOChannelGUI(this, mimoChannel);
                     (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
-                    reg = ChannelInstanceRegistration(channelConfig.m_channelIdURI, channelAPI, mimoChannelGUI, 2);
+                    registerChannelInstance(channelAPI->getURI(), channelAPI, mimoChannelGUI);
                     break;
                 }
             }
 
-            if (reg.m_gui != 0)
+            if (mimoChannelGUI)
             {
                 qDebug("DeviceUISet::loadMIMOChannelSettings: deserializing channel [%s]", qPrintable(channelConfig.m_channelIdURI));
-                reg.m_gui->deserialize(channelConfig.m_config);
+                mimoChannelGUI->deserialize(channelConfig.m_config);
             }
         }
 
