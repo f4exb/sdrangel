@@ -473,6 +473,9 @@ if (LINUX)
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
                 CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
                 -DENABLE_PYTHON_API=OFF
+                -DENABLE_EXAMPLES=OFF
+                -DENABLE_UTILS=OFF
+                -DENABLE_TESTS=OFF
                 SOURCE_SUBDIR host
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
