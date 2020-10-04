@@ -24,7 +24,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "remotesinksettings.h"
@@ -38,7 +38,7 @@ namespace Ui {
     class RemoteSinkGUI;
 }
 
-class RemoteSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class RemoteSinkGUI : public ChannelGUI {
     Q_OBJECT
 public:
     static RemoteSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);

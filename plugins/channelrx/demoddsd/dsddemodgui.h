@@ -22,7 +22,7 @@
 #include <plugin/plugininstancegui.h>
 #include <QMenu>
 
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
@@ -42,7 +42,7 @@ namespace Ui {
 	class DSDDemodGUI;
 }
 
-class DSDDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class DSDDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

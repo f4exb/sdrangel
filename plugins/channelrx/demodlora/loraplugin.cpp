@@ -50,7 +50,7 @@ void LoRaPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, 
 	}
 }
 
-PluginInstanceGUI* LoRaPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* LoRaPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return LoRaDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

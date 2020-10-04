@@ -2,7 +2,7 @@
 #define INCLUDE_WFMDEMODGUI_H
 
 #include <plugin/plugininstancegui.h>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 
@@ -17,7 +17,7 @@ namespace Ui {
 	class WFMDemodGUI;
 }
 
-class WFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class WFMDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

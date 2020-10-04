@@ -96,7 +96,7 @@ void UDPSourceGUI::handleSourceMessages()
 }
 
 UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::UDPSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -163,7 +163,6 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 UDPSourceGUI::~UDPSourceGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
     delete m_udpSource; // TODO: check this: when the GUI closes it has to delete the modulator
     delete ui;
 }

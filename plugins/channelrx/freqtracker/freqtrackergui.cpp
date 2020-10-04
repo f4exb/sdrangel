@@ -283,7 +283,7 @@ void FreqTrackerGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::FreqTrackerGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -332,7 +332,6 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 FreqTrackerGUI::~FreqTrackerGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_freqTracker; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

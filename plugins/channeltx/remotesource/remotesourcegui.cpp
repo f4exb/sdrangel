@@ -141,7 +141,7 @@ bool RemoteSourceGUI::handleMessage(const Message& message)
 }
 
 RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::RemoteSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -190,7 +190,6 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
 RemoteSourceGUI::~RemoteSourceGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
     delete m_remoteSrc;
     delete ui;
 }

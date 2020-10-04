@@ -73,14 +73,14 @@ void RemoteSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink 
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(
+ChannelGUI* RemoteSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* RemoteSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* RemoteSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return RemoteSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

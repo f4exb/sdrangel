@@ -54,14 +54,14 @@ void AMDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **b
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(
+ChannelGUI* AMDemodPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* AMDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* AMDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return AMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

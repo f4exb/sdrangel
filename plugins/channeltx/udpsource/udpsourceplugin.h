@@ -37,7 +37,7 @@ public:
 	void initPlugin(PluginAPI* pluginAPI);
 
 	virtual void createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const;
-	virtual PluginInstanceGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const;
+	virtual ChannelGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const;
 	virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
 
 private:

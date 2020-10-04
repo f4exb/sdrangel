@@ -49,7 +49,7 @@ void ATVModGUI::destroy()
 }
 
 ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::ATVModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -116,7 +116,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 ATVModGUI::~ATVModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_atvMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }

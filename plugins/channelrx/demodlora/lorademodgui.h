@@ -2,7 +2,7 @@
 #define INCLUDE_LoRaDEMODGUI_H
 
 #include <plugin/plugininstancegui.h>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 
@@ -18,7 +18,7 @@ namespace Ui {
 	class LoRaDemodGUI;
 }
 
-class LoRaDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class LoRaDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

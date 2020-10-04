@@ -324,7 +324,7 @@ void WFMModGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::WFMModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -402,7 +402,6 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 WFMModGUI::~WFMModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_wfmMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }

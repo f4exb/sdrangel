@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,34 +15,13 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef PLUGINS_CHANNELTX_MODATV_ATVMODPLUGIN_H_
-#define PLUGINS_CHANNELTX_MODATV_ATVMODPLUGIN_H_
+#include <QCloseEvent>
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include "channelgui.h"
 
-class DeviceAPI;
-class BasebandSampleSource;
-
-class ATVModPlugin : public QObject, PluginInterface {
-    Q_OBJECT
-    Q_INTERFACES(PluginInterface)
-    Q_PLUGIN_METADATA(IID "sdrangel.channeltx.atvmod")
-
-public:
-    explicit ATVModPlugin(QObject* parent = 0);
-
-    const PluginDescriptor& getPluginDescriptor() const;
-    void initPlugin(PluginAPI* pluginAPI);
-
-    virtual void createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **bs, ChannelAPI **cs) const;
-    virtual ChannelGUI* createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const;
-    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
-
-private:
-    static const PluginDescriptor m_pluginDescriptor;
-
-    PluginAPI* m_pluginAPI;
-};
-
-#endif /* PLUGINS_CHANNELTX_MODATV_ATVMODPLUGIN_H_ */
+void ChannelGUI::closeEvent(QCloseEvent *event)
+{
+    qDebug("ChannelGUI::closeEvent");
+    emit closing();
+    event->accept();
+}

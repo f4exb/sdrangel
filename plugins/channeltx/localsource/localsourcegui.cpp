@@ -87,7 +87,7 @@ bool LocalSourceGUI::handleMessage(const Message& message)
 }
 
 LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channeltx, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::LocalSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -125,7 +125,6 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 LocalSourceGUI::~LocalSourceGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
     delete m_localSource; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }

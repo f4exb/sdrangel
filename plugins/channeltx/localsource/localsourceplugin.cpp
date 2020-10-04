@@ -73,14 +73,14 @@ void LocalSourcePlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSour
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LocalSourcePlugin::createTxChannelGUI(
+ChannelGUI* LocalSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* LocalSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* LocalSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return LocalSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

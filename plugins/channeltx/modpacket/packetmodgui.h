@@ -20,7 +20,7 @@
 #define PLUGINS_CHANNELTX_MODPACKET_PACKETMODGUI_H_
 
 #include <plugin/plugininstancegui.h>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
@@ -37,7 +37,7 @@ namespace Ui {
     class PacketModGUI;
 }
 
-class PacketModGUI : public RollupWidget, public PluginInstanceGUI {
+class PacketModGUI : public ChannelGUI {
     Q_OBJECT
 
 public:

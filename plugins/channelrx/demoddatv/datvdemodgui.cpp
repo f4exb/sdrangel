@@ -173,7 +173,7 @@ void DATVDemodGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
-        RollupWidget(objParent),
+        ChannelGUI(objParent),
         ui(new Ui::DATVDemodGUI),
         m_objPluginAPI(objPluginAPI),
         m_deviceUISet(deviceUISet),
@@ -244,7 +244,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
 DATVDemodGUI::~DATVDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
     delete m_objDATVDemod;
     delete ui;
 }

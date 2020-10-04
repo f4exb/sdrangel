@@ -71,14 +71,14 @@ void ATVModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(
+ChannelGUI* ATVModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* ATVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* ATVModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return ATVModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

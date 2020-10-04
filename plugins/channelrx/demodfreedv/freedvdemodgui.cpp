@@ -236,7 +236,7 @@ void FreeDVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 }
 
 FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::FreeDVDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -308,7 +308,6 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 FreeDVDemodGUI::~FreeDVDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_freeDVDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

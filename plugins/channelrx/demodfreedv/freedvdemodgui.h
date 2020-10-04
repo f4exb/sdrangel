@@ -21,7 +21,7 @@
 #include <QIcon>
 
 #include "plugin/plugininstancegui.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
@@ -39,7 +39,7 @@ namespace Ui {
 	class FreeDVDemodGUI;
 }
 
-class FreeDVDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class FreeDVDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

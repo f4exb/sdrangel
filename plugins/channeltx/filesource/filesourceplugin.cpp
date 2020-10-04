@@ -71,14 +71,14 @@ void FileSourcePlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSourc
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* FileSourcePlugin::createTxChannelGUI(
+ChannelGUI* FileSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* FileSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* FileSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return FileSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

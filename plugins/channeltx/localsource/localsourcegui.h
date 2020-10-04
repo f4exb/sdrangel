@@ -24,7 +24,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "localsourcesettings.h"
@@ -38,7 +38,7 @@ namespace Ui {
     class LocalSourceGUI;
 }
 
-class LocalSourceGUI : public RollupWidget, public PluginInstanceGUI {
+class LocalSourceGUI : public ChannelGUI {
     Q_OBJECT
 public:
     static LocalSourceGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *txChannel);

@@ -74,14 +74,14 @@ void UDPSourcePlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* UDPSourcePlugin::createTxChannelGUI(
+ChannelGUI* UDPSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* UDPSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* UDPSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return UDPSourceGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

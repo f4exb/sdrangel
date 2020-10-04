@@ -55,14 +55,14 @@ void NFMPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, C
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* NFMPlugin::createRxChannelGUI(
+ChannelGUI* NFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* NFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* NFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return NFMDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

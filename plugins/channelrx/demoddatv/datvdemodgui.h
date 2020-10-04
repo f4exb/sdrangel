@@ -20,7 +20,7 @@
 #ifndef INCLUDE_DATVDEMODGUI_H
 #define INCLUDE_DATVDEMODGUI_H
 
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
@@ -39,7 +39,7 @@ namespace Ui
     class DATVDemodGUI;
 }
 
-class DATVDemodGUI : public RollupWidget, public PluginInstanceGUI
+class DATVDemodGUI : public ChannelGUI
 {
 	Q_OBJECT
 

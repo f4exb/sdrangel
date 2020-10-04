@@ -73,14 +73,14 @@ void LocalSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink *
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(
+ChannelGUI* LocalSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return LocalSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

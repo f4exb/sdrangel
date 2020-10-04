@@ -21,7 +21,7 @@
 
 #include <plugin/plugininstancegui.h>
 #include <QHostAddress>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
@@ -38,7 +38,7 @@ namespace Ui {
 	class UDPSinkGUI;
 }
 
-class UDPSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class UDPSinkGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

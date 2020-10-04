@@ -208,7 +208,7 @@ void ATVDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 }
 
 ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* objParent) :
-        RollupWidget(objParent),
+        ChannelGUI(objParent),
         ui(new Ui::ATVDemodGUI),
         m_pluginAPI(objPluginAPI),
         m_deviceUISet(deviceUISet),
@@ -275,7 +275,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
     delete m_atvDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete m_scopeVis;
     delete ui;

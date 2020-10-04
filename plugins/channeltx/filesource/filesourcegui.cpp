@@ -161,7 +161,7 @@ bool FileSourceGUI::handleMessage(const Message& message)
 }
 
 FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::FileSourceGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -216,7 +216,6 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
 FileSourceGUI::~FileSourceGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
     delete m_fileSource;
     delete ui;
 }

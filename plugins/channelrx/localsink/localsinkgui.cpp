@@ -93,7 +93,7 @@ bool LocalSinkGUI::handleMessage(const Message& message)
 }
 
 LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelrx, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::LocalSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -130,7 +130,6 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 LocalSinkGUI::~LocalSinkGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
     delete m_localSink; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }

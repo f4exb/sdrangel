@@ -330,7 +330,7 @@ void FreeDVModGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::FreeDVModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -396,7 +396,6 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 FreeDVModGUI::~FreeDVModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_freeDVMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }

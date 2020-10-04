@@ -71,14 +71,14 @@ void FreeDVPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* FreeDVPlugin::createRxChannelGUI(
+ChannelGUI* FreeDVPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* FreeDVPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* FreeDVPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return FreeDVDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

@@ -133,7 +133,7 @@ void UDPSinkGUI::tick()
 }
 
 UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::UDPSinkGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -209,7 +209,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 UDPSinkGUI::~UDPSinkGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_udpSink; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

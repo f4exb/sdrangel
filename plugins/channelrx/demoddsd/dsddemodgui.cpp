@@ -301,7 +301,7 @@ void DSDDemodGUI::on_viewStatusLog_clicked()
 }
 
 DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::DSDDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -381,7 +381,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 DSDDemodGUI::~DSDDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVisXY;
 	delete ui;
