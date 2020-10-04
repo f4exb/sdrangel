@@ -476,6 +476,16 @@ if (LINUX)
                 -DENABLE_EXAMPLES=OFF
                 -DENABLE_UTILS=OFF
                 -DENABLE_TESTS=OFF
+                -DENABLE_B100=OFF
+                -DENABLE_USRP1=OFF
+                -DENABLE_X300=OFF
+                -DENABLE_MPMD=OFF
+                -DENABLE_N300=OFF
+                -DENABLE_N320=OFF
+                -DENABLE_E320=OFF
+                -DENABLE_E300=OFF
+                -DENABLE_OCTOCLOCK=OFF
+                -DENABLE_DPDK=OFF
                 SOURCE_SUBDIR host
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
