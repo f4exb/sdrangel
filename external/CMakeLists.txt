@@ -19,6 +19,7 @@ set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1.1.5")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 set(MIRISDR_TAG "v1.1.2")
+set(UHD_TAG "v4.0.0.0")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
 set(RTLSDR_TAG be1d1206bfb6e6c41f7d91b20b77e20f929fa6a7)
@@ -463,6 +464,38 @@ if (LINUX)
         set(LIBMIRISDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr/src/libmirisdr/include" CACHE INTERNAL "")
         set(LIBMIRISDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libmirisdr.so" CACHE INTERNAL "")
     endif (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL)
+
+    # needs boost and libusb
+    if (NOT UHD_FOUND OR UHD_EXTERNAL)
+        ExternalProject_Add(uhd
+                GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
+                GIT_TAG ${UHD_TAG}
+                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
+                CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+                -DENABLE_PYTHON_API=OFF
+                -DENABLE_EXAMPLES=OFF
+                -DENABLE_UTILS=OFF
+                -DENABLE_TESTS=OFF
+                -DENABLE_B100=OFF
+                -DENABLE_USRP1=OFF
+                -DENABLE_X300=OFF
+                -DENABLE_MPMD=OFF
+                -DENABLE_N300=OFF
+                -DENABLE_N320=OFF
+                -DENABLE_E320=OFF
+                -DENABLE_E300=OFF
+                -DENABLE_OCTOCLOCK=OFF
+                -DENABLE_DPDK=OFF
+                SOURCE_SUBDIR host
+                INSTALL_COMMAND ""
+                TEST_COMMAND ""
+                )
+        set(UHD_FOUND ON CACHE INTERNAL "")
+        set(UHD_EXTERNAL ON CACHE INTERNAL "")
+        set(UHD_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/uhd/src/uhd/host/include" CACHE INTERNAL "")
+        set(UHD_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libuhd.so" CACHE INTERNAL "")
+    endif (NOT UHD_FOUND OR UHD_EXTERNAL)
+
 endif (LINUX)
 
 if (WIN32 OR APPLE)

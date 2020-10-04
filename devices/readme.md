@@ -25,3 +25,7 @@ This folder contains classes and methods that can be used by different plugins t
   - SoapySDR: Soapy SDR virtual device
     - soapysdrinput
     - soapysdroutput
+
+  - USRP: Up to 2 Rx and 2 Tx full duplex. Plugins are
+    - usrpinput
+    - usrpoutput

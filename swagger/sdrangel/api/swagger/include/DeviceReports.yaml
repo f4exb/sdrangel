@@ -49,6 +49,10 @@ DeviceReport:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     soapySDROutputReport:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+    usrpInputReport:
+      $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPInputReport"
+    usrpOutputReport:
+      $ref: "http://swgserver:8081/api/swagger/include/USRP.yaml#/USRPOutputReport"
     xtrxInputReport:
       $ref: "http://swgserver:8081/api/swagger/include/Xtrx.yaml#/XtrxInputReport"
     xtrxOutputReport:

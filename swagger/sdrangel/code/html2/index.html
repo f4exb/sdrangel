@@ -2800,6 +2800,12 @@ margin-bottom: 20px;
     "soapySDROutputReport" : {
       "$ref" : "#/definitions/SoapySDRReport"
     },
+    "usrpInputReport" : {
+      "$ref" : "#/definitions/USRPInputReport"
+    },
+    "usrpOutputReport" : {
+      "$ref" : "#/definitions/USRPOutputReport"
+    },
     "xtrxInputReport" : {
       "$ref" : "#/definitions/XtrxInputReport"
     },
@@ -2945,6 +2951,12 @@ margin-bottom: 20px;
     },
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
+    },
+    "usrpInputSettings" : {
+      "$ref" : "#/definitions/USRPInputSettings"
+    },
+    "usrpOutputSettings" : {
+      "$ref" : "#/definitions/USRPOutputSettings"
     },
     "xtrxInputSettings" : {
       "$ref" : "#/definitions/XtrxInputSettings"
@@ -7441,6 +7453,148 @@ margin-bottom: 20px;
   },
   "description" : "UDPSource"
 };
+            defs.USRPInputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "overrunCount" : {
+      "type" : "integer"
+    },
+    "timeoutCount" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "USRP"
+};
+            defs.USRPInputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "log2SoftDecim" : {
+      "type" : "integer"
+    },
+    "lpfBW" : {
+      "type" : "integer"
+    },
+    "antennaPath" : {
+      "type" : "string"
+    },
+    "gain" : {
+      "type" : "integer"
+    },
+    "gainMode" : {
+      "type" : "integer",
+      "description" : "0 for auto, 1 for manual"
+    },
+    "clockSource" : {
+      "type" : "string"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "USRP"
+};
+            defs.USRPOutputReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "streamActive" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "underrunCount" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCount" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "USRP"
+};
+            defs.USRPOutputSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2SoftInterp" : {
+      "type" : "integer"
+    },
+    "lpfBW" : {
+      "type" : "integer"
+    },
+    "gain" : {
+      "type" : "integer"
+    },
+    "antennaPath" : {
+      "type" : "string"
+    },
+    "clockSource" : {
+      "type" : "string"
+    },
+    "transverterMode" : {
+      "type" : "integer"
+    },
+    "transverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "USRP"
+};
             defs.WFMDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -8055,7 +8209,7 @@ margin-bottom: 20px;
             <h2 id="welcome-to-apidoc">API and SDK Documentation</h2>
               <div class="app-desc">Version: 4.15.0</div>
             <hr>
-            <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube</p>
+            <div><p>This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1, USRP and FunCube</p>
 <hr />
 <p>Limitations and specifcities:</p>
 <ul>
@@ -39713,7 +39867,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-09-29T00:33:21.870+02:00
+              Generated 2020-10-02T22:20:44.346+02:00
             </div>
           </div>
       </div>

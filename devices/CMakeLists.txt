@@ -35,3 +35,7 @@ endif()
 if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdr)
 endif()
+
+if(ENABLE_USRP AND UHD_FOUND)
+    add_subdirectory(usrp)
+endif()
