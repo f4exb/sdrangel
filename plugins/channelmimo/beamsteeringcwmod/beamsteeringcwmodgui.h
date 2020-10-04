@@ -24,7 +24,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "beamsteeringcwmodsettings.h"
@@ -38,7 +38,7 @@ namespace Ui {
     class BeamSteeringCWModGUI;
 }
 
-class BeamSteeringCWModGUI : public RollupWidget, public PluginInstanceGUI {
+class BeamSteeringCWModGUI : public ChannelGUI, public PluginInstanceGUI {
     Q_OBJECT
 public:
     static BeamSteeringCWModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);

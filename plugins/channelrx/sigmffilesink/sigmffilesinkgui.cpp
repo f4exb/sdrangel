@@ -142,7 +142,7 @@ bool SigMFFileSinkGUI::handleMessage(const Message& message)
 }
 
 SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *channelrx, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::SigMFFileSinkGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -192,7 +192,6 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 
 SigMFFileSinkGUI::~SigMFFileSinkGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
     delete m_sigMFFileSink; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }

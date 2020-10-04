@@ -72,14 +72,14 @@ void BeamSteeringCWModPlugin::createMIMOChannel(DeviceAPI *deviceAPI, MIMOChanne
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(
+ChannelGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(
         DeviceUISet *deviceUISet,
         MIMOChannel *mimoChannel) const
 {
     return nullptr;
 }
 #else
-PluginInstanceGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const
+ChannelGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const
 {
     return BeamSteeringCWModGUI::create(m_pluginAPI, deviceUISet, mimoChannel);
 }

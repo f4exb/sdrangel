@@ -87,7 +87,7 @@ bool BeamSteeringCWModGUI::handleMessage(const Message& message)
 }
 
 BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::BeamSteeringCWModGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -132,7 +132,6 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
 BeamSteeringCWModGUI::~BeamSteeringCWModGUI()
 {
-    m_deviceUISet->removeChannelInstance(this);
     delete m_bsCWSource; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }

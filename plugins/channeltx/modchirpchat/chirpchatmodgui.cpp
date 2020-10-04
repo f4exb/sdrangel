@@ -385,7 +385,7 @@ void ChirpChatModGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::ChirpChatModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -434,7 +434,6 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
 ChirpChatModGUI::~ChirpChatModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_chirpChatMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }

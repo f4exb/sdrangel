@@ -19,7 +19,7 @@
 #define INCLUDE_INTERFEROMETERGUI_H
 
 #include "plugin/plugininstancegui.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
@@ -37,7 +37,7 @@ namespace Ui {
 	class InterferometerGUI;
 }
 
-class InterferometerGUI : public RollupWidget, public PluginInstanceGUI {
+class InterferometerGUI : public ChannelGUI {
 	Q_OBJECT
 public:
     static InterferometerGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);

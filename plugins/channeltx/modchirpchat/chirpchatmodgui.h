@@ -19,7 +19,7 @@
 #define PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
 
 #include <plugin/plugininstancegui.h>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
 #include "util/messagequeue.h"
@@ -35,7 +35,7 @@ namespace Ui {
     class ChirpChatModGUI;
 }
 
-class ChirpChatModGUI : public RollupWidget, public PluginInstanceGUI {
+class ChirpChatModGUI : public ChannelGUI {
     Q_OBJECT
 
 public:

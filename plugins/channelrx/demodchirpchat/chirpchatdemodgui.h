@@ -19,7 +19,7 @@
 #define INCLUDE_CHIRPCHATDEMODGUI_H
 
 #include <plugin/plugininstancegui.h>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 
@@ -35,7 +35,7 @@ namespace Ui {
 	class ChirpChatDemodGUI;
 }
 
-class ChirpChatDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class ChirpChatDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

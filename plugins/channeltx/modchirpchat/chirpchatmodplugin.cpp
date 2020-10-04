@@ -71,14 +71,14 @@ void ChirpChatModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSou
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* ChirpChatModPlugin::createTxChannelGUI(
+ChannelGUI* ChirpChatModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* ChirpChatModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* ChirpChatModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return ChirpChatModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

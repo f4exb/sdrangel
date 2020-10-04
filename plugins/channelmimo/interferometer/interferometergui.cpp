@@ -95,7 +95,7 @@ bool InterferometerGUI::handleMessage(const Message& message)
 }
 
 InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *channelMIMO, QWidget* parent) :
-        RollupWidget(parent),
+        ChannelGUI(parent),
         ui(new Ui::InterferometerGUI),
         m_pluginAPI(pluginAPI),
         m_deviceUISet(deviceUISet),
@@ -161,7 +161,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
 InterferometerGUI::~InterferometerGUI()
 {
-    m_deviceUISet->removeChannelInstance(this);
     delete m_interferometer; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVis;
     delete ui;

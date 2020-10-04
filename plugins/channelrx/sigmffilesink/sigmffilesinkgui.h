@@ -24,7 +24,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "sigmffilesinksettings.h"
@@ -39,7 +39,7 @@ namespace Ui {
     class SigMFFileSinkGUI;
 }
 
-class SigMFFileSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class SigMFFileSinkGUI : public ChannelGUI {
     Q_OBJECT
 public:
     static SigMFFileSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);

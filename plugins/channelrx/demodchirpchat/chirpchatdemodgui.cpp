@@ -368,7 +368,7 @@ void ChirpChatDemodGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::ChirpChatDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -423,7 +423,6 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
 ChirpChatDemodGUI::~ChirpChatDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_chirpChatDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

@@ -72,14 +72,14 @@ void SigMFFileSinkPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSi
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SigMFFileSinkPlugin::createRxChannelGUI(
+ChannelGUI* SigMFFileSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* SigMFFileSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* SigMFFileSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return SigMFFileSinkGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

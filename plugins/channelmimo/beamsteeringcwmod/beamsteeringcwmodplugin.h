@@ -37,7 +37,7 @@ public:
     void initPlugin(PluginAPI* pluginAPI);
 
     virtual void createMIMOChannel(DeviceAPI *deviceAPI, MIMOChannel **bs, ChannelAPI **cs) const;
-    virtual PluginInstanceGUI* createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const;
+    virtual ChannelGUI* createMIMOChannelGUI(DeviceUISet *deviceUISet, MIMOChannel *mimoChannel) const;
     virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
 
 private:
