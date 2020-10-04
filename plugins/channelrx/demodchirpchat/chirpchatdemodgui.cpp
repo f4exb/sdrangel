@@ -423,7 +423,6 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
 ChirpChatDemodGUI::~ChirpChatDemodGUI()
 {
-	delete m_chirpChatDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

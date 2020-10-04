@@ -434,7 +434,6 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
 ChirpChatModGUI::~ChirpChatModGUI()
 {
-	delete m_chirpChatMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

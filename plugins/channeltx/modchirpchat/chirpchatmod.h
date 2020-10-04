@@ -87,7 +87,7 @@ public:
     //=================================================================
 
     ChirpChatMod(DeviceAPI *deviceAPI);
-    ~ChirpChatMod();
+    virtual ~ChirpChatMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

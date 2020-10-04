@@ -192,7 +192,6 @@ SigMFFileSinkGUI::SigMFFileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISe
 
 SigMFFileSinkGUI::~SigMFFileSinkGUI()
 {
-    delete m_sigMFFileSink; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 

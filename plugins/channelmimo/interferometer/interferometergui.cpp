@@ -161,7 +161,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
 InterferometerGUI::~InterferometerGUI()
 {
-    delete m_interferometer; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVis;
     delete ui;
 }
