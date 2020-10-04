@@ -163,7 +163,6 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 UDPSourceGUI::~UDPSourceGUI()
 {
-    delete m_udpSource; // TODO: check this: when the GUI closes it has to delete the modulator
     delete ui;
 }
 

@@ -60,7 +60,7 @@ public:
     };
 
     FreqTracker(DeviceAPI *deviceAPI);
-	~FreqTracker();
+	virtual ~FreqTracker();
 	virtual void destroy() { delete this; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);

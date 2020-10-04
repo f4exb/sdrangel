@@ -275,7 +275,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    delete m_atvDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete m_scopeVis;
     delete ui;
 }

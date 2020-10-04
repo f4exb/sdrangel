@@ -424,7 +424,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
-	delete m_channelAnalyzer; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;
 	delete ui;

@@ -418,7 +418,6 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 NFMModGUI::~NFMModGUI()
 {
-	delete m_nfmMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

@@ -464,7 +464,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 SSBModGUI::~SSBModGUI()
 {
-	delete m_ssbMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

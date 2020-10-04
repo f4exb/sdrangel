@@ -244,7 +244,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
 DATVDemodGUI::~DATVDemodGUI()
 {
-    delete m_objDATVDemod;
     delete ui;
 }
 

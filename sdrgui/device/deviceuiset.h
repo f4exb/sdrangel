@@ -18,6 +18,7 @@
 #ifndef SDRGUI_DEVICE_DEVICEUISET_H_
 #define SDRGUI_DEVICE_DEVICEUISET_H_
 
+#include <QObject>
 #include <QTimer>
 #include <QByteArray>
 
@@ -38,8 +39,9 @@ class ChannelAPI;
 class ChannelGUI;
 class Preset;
 
-class SDRGUI_API DeviceUISet
+class SDRGUI_API DeviceUISet : public QObject
 {
+    Q_OBJECT
 public:
     SpectrumVis *m_spectrumVis;
     GLSpectrum *m_spectrum;
@@ -72,9 +74,6 @@ public:
     void registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
     void registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
     void registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
-    void removeRxChannelInstance(ChannelGUI* channelGUI);
-    void removeTxChannelInstance(ChannelGUI* channelGUI);
-    void removeChannelInstance(ChannelGUI* channelGUI);
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
@@ -87,22 +86,22 @@ public:
 private:
     struct ChannelInstanceRegistration
     {
-        QString m_channelName;
+        QString m_channelURI;
         ChannelAPI *m_channelAPI;
         ChannelGUI* m_gui;
         int m_channelType;
 
         ChannelInstanceRegistration() :
-            m_channelName(),
-            m_channelAPI(nullptr),
+            m_channelURI(),
             m_gui(nullptr),
+            m_channelAPI(nullptr),
             m_channelType(0)
         { }
 
         ChannelInstanceRegistration(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI, int channelType) :
-            m_channelName(channelName),
-            m_channelAPI(channelAPI),
+            m_channelURI(channelName),
             m_gui(channelGUI),
+            m_channelAPI(channelAPI),
             m_channelType(channelType)
         { }
 
@@ -118,6 +117,9 @@ private:
     int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
     int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
+
+private slots:
+    void handleChannelGUIClosing(ChannelGUI* channelGUI);
 };
 
 

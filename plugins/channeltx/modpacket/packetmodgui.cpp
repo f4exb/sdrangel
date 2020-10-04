@@ -465,7 +465,6 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 PacketModGUI::~PacketModGUI()
 {
-    delete m_packetMod; // TODO: check this: when the GUI closes it has to delete the modulator
     delete ui;
 }
 

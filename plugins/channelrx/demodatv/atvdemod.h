@@ -61,7 +61,7 @@ public:
     };
 
     ATVDemod(DeviceAPI *deviceAPI);
-	~ATVDemod();
+	virtual ~ATVDemod();
 	virtual void destroy() { delete this; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);

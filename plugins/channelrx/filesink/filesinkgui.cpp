@@ -198,7 +198,6 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 FileSinkGUI::~FileSinkGUI()
 {
-    delete m_fileSink; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 

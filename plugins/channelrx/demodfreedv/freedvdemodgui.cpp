@@ -308,7 +308,6 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 FreeDVDemodGUI::~FreeDVDemodGUI()
 {
-	delete m_freeDVDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

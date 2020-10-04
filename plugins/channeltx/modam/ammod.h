@@ -173,7 +173,7 @@ public:
     //=================================================================
 
     AMMod(DeviceAPI *deviceAPI);
-    ~AMMod();
+    virtual ~AMMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

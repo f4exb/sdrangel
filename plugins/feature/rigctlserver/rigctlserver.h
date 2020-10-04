@@ -82,7 +82,7 @@ public:
     };
 
     RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface);
-    ~RigCtlServer();
+    virtual ~RigCtlServer();
     virtual void destroy() { delete this; }
     virtual bool handleMessage(const Message& cmd);
 

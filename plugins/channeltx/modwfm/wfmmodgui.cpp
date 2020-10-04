@@ -402,7 +402,6 @@ WFMModGUI::WFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 WFMModGUI::~WFMModGUI()
 {
-	delete m_wfmMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

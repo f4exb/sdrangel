@@ -147,8 +147,6 @@ LoRaDemodGUI::LoRaDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 LoRaDemodGUI::~LoRaDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
-	delete m_LoRaDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

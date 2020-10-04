@@ -381,7 +381,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 DSDDemodGUI::~DSDDemodGUI()
 {
-	delete m_dsdDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVisXY;
 	delete ui;
 }

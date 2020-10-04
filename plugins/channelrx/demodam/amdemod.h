@@ -62,7 +62,7 @@ public:
     };
 
     AMDemod(DeviceAPI *deviceAPI);
-	~AMDemod();
+	virtual ~AMDemod();
 	virtual void destroy() { delete this; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);

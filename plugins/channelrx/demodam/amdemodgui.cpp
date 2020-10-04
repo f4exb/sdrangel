@@ -289,7 +289,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 AMDemodGUI::~AMDemodGUI()
 {
-	delete m_amDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

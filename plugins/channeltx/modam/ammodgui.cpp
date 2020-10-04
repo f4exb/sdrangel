@@ -385,7 +385,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 
 AMModGUI::~AMModGUI()
 {
-	delete m_amMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

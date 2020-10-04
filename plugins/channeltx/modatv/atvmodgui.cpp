@@ -116,7 +116,6 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 ATVModGUI::~ATVModGUI()
 {
-	delete m_atvMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

@@ -245,7 +245,7 @@ public:
     //=================================================================
 
     ATVMod(DeviceAPI *deviceAPI);
-    ~ATVMod();
+    virtual ~ATVMod();
     virtual void destroy() { delete this; }
 
     virtual void start();
