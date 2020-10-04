@@ -160,7 +160,6 @@ SimplePTTGUI::SimplePTTGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Fea
 
 SimplePTTGUI::~SimplePTTGUI()
 {
-	delete m_simplePTT; // When the GUI closes it has to delete the demodulator because it can be done with (x)
 	delete ui;
 }
 
