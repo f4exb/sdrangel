@@ -73,7 +73,7 @@ void ATVDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **
 	}
 }
 
-PluginInstanceGUI* ATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* ATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return ATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
 }

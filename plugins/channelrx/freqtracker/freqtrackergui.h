@@ -21,7 +21,7 @@
 #include <QIcon>
 
 #include "plugin/plugininstancegui.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
@@ -37,7 +37,7 @@ namespace Ui {
 	class FreqTrackerGUI;
 }
 
-class FreqTrackerGUI : public RollupWidget, public PluginInstanceGUI {
+class FreqTrackerGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

@@ -342,7 +342,7 @@ void BFMDemodGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::BFMDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -410,7 +410,6 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 BFMDemodGUI::~BFMDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_bfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

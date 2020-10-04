@@ -71,6 +71,8 @@ set(sdrgui_SOURCES
 
     device/deviceuiset.cpp
 
+    channel/channelgui.cpp
+
     feature/featuregui.cpp
     feature/featureuiset.cpp
 
@@ -156,6 +158,8 @@ set(sdrgui_HEADERS
     dsp/spectrumscopecombovis.h
 
     device/deviceuiset.h
+
+    channel/channelgui.h
 
     feature/featuregui.h
     feature/featureuiset.h

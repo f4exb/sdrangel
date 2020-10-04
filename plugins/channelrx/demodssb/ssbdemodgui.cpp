@@ -268,7 +268,7 @@ void SSBDemodGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 }
 
 SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::SSBDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -342,7 +342,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 SSBDemodGUI::~SSBDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_ssbDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

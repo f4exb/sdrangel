@@ -317,7 +317,7 @@ void AMModGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::AMModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -385,7 +385,6 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 
 AMModGUI::~AMModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_amMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }

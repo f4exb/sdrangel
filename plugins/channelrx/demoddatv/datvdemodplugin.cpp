@@ -74,7 +74,7 @@ void DATVDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink *
 	}
 }
 
-PluginInstanceGUI* DATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* DATVDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return DATVDemodGUI::create(m_ptrPluginAPI, deviceUISet, rxChannel);
 }

@@ -32,6 +32,7 @@ class BasebandSampleSink;
 class BasebandSampleSource;
 class MIMOChannel;
 class ChannelAPI;
+class ChannelGUI;
 class ChannelWebAPIAdapter;
 class DeviceWebAPIAdapter;
 class FeatureWebAPIAdapter;
@@ -134,7 +135,7 @@ public:
         (void) cs;
     }
 
-    virtual PluginInstanceGUI* createRxChannelGUI(
+    virtual ChannelGUI* createRxChannelGUI(
             DeviceUISet *deviceUISet,
             BasebandSampleSink *rxChannel) const
     {
@@ -152,7 +153,7 @@ public:
         (void) cs;
     }
 
-	virtual PluginInstanceGUI* createTxChannelGUI(
+	virtual ChannelGUI* createTxChannelGUI(
             DeviceUISet *deviceUISet,
             BasebandSampleSource *txChannel) const
     {
@@ -170,7 +171,7 @@ public:
         (void) cs;
     }
 
-	virtual PluginInstanceGUI* createMIMOChannelGUI(
+	virtual ChannelGUI* createMIMOChannelGUI(
             DeviceUISet *deviceUISet,
             MIMOChannel *mimoChannel) const
     {

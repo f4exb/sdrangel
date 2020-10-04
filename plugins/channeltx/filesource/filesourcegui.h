@@ -20,7 +20,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "filesourcesettings.h"
@@ -34,7 +34,7 @@ namespace Ui {
     class FileSourceGUI;
 }
 
-class FileSourceGUI : public RollupWidget, public PluginInstanceGUI {
+class FileSourceGUI : public ChannelGUI {
     Q_OBJECT
 
 public:

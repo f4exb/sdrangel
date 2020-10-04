@@ -228,7 +228,7 @@ void AMDemodGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::AMDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -289,7 +289,6 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 AMDemodGUI::~AMDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_amDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }

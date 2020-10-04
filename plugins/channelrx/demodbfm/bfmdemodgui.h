@@ -20,7 +20,7 @@
 #define INCLUDE_BFMDEMODGUI_H
 
 #include <plugin/plugininstancegui.h>
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 #include "bfmdemodsettings.h"
@@ -37,7 +37,7 @@ namespace Ui {
 	class BFMDemodGUI;
 }
 
-class BFMDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class BFMDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

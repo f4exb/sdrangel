@@ -24,7 +24,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "filesinksettings.h"
@@ -39,7 +39,7 @@ namespace Ui {
     class FileSinkGUI;
 }
 
-class FileSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class FileSinkGUI : public ChannelGUI {
     Q_OBJECT
 public:
     static FileSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);

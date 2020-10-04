@@ -68,7 +68,7 @@ void ChannelAnalyzerPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSample
 	}
 }
 
-PluginInstanceGUI* ChannelAnalyzerPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* ChannelAnalyzerPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
     return ChannelAnalyzerGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

@@ -24,7 +24,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "localsinksettings.h"
@@ -38,7 +38,7 @@ namespace Ui {
     class LocalSinkGUI;
 }
 
-class LocalSinkGUI : public RollupWidget, public PluginInstanceGUI {
+class LocalSinkGUI : public ChannelGUI {
     Q_OBJECT
 public:
     static LocalSinkGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel);

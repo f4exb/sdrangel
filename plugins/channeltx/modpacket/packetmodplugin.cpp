@@ -71,14 +71,14 @@ void PacketModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* PacketModPlugin::createTxChannelGUI(
+ChannelGUI* PacketModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* PacketModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* PacketModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return PacketModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

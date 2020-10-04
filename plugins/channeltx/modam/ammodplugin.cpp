@@ -71,14 +71,14 @@ void AMModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **b
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* AMModPlugin::createTxChannelGUI(
+ChannelGUI* AMModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* AMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
 	return AMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

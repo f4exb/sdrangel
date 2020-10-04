@@ -36,6 +36,7 @@
 #include "device/deviceuiset.h"
 #include "device/deviceenumerator.h"
 #include "channel/channelapi.h"
+#include "channel/channelgui.h"
 #include "feature/featureuiset.h"
 #include "feature/feature.h"
 #include "gui/indicator.h"
@@ -2069,8 +2070,15 @@ void MainWindow::channelAddClicked(int channelIndex)
             ChannelAPI *channelAPI;
             BasebandSampleSink *rxChannel;
             pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
-            PluginInstanceGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+            ChannelGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
             deviceUI->registerRxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+            QObject::connect(
+                gui,
+                &ChannelGUI::closing,
+                this,
+                [=](){ this->handleClosingRxChannelGUI(deviceUI, gui); },
+                Qt::QueuedConnection
+            );
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
@@ -2079,8 +2087,15 @@ void MainWindow::channelAddClicked(int channelIndex)
             ChannelAPI *channelAPI;
             BasebandSampleSource *txChannel;
             pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
-            PluginInstanceGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+            ChannelGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
             deviceUI->registerTxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+            QObject::connect(
+                gui,
+                &ChannelGUI::closing,
+                this,
+                [=](){ this->handleClosingTxChannelGUI(deviceUI, gui); },
+                Qt::QueuedConnection
+            );
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
@@ -2097,8 +2112,15 @@ void MainWindow::channelAddClicked(int channelIndex)
                 ChannelAPI *channelAPI;
                 MIMOChannel *mimoChannel;
                 pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
-                PluginInstanceGUI *gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
+                ChannelGUI *gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
                 deviceUI->registerChannelInstance(channelAPI->getURI(), channelAPI, gui);
+                QObject::connect(
+                    gui,
+                    &ChannelGUI::closing,
+                    this,
+                    [=](){ this->handleClosingMIMOChannelGUI(deviceUI, gui); },
+                    Qt::QueuedConnection
+                );
             }
             else if (channelIndex < nbMIMOChannels + nbRxChannels) // Rx
             {
@@ -2107,8 +2129,15 @@ void MainWindow::channelAddClicked(int channelIndex)
                 ChannelAPI *channelAPI;
                 BasebandSampleSink *rxChannel;
                 pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
-                PluginInstanceGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
+                ChannelGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
                 deviceUI->registerRxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+                QObject::connect(
+                    gui,
+                    &ChannelGUI::closing,
+                    this,
+                    [=](){ this->handleClosingRxChannelGUI(deviceUI, gui); },
+                    Qt::QueuedConnection
+                );
             }
             else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
             {
@@ -2117,8 +2146,15 @@ void MainWindow::channelAddClicked(int channelIndex)
                 ChannelAPI *channelAPI;
                 BasebandSampleSource *txChannel;
                 pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
-                PluginInstanceGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
+                ChannelGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
                 deviceUI->registerTxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+                QObject::connect(
+                    gui,
+                    &ChannelGUI::closing,
+                    this,
+                    [=](){ this->handleClosingTxChannelGUI(deviceUI, gui); },
+                    Qt::QueuedConnection
+                );
             }
         }
     }
@@ -2310,4 +2346,19 @@ void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifie
             command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
         }
     }
+}
+
+void MainWindow::handleClosingRxChannelGUI(DeviceUISet *deviceUISet, ChannelGUI *gui)
+{
+    deviceUISet->removeRxChannelInstance(gui);
+}
+
+void MainWindow::handleClosingTxChannelGUI(DeviceUISet *deviceUISet, ChannelGUI *gui)
+{
+    deviceUISet->removeTxChannelInstance(gui);
+}
+
+void MainWindow::handleClosingMIMOChannelGUI(DeviceUISet *deviceUISet, ChannelGUI *gui)
+{
+    deviceUISet->removeChannelInstance(gui);
 }

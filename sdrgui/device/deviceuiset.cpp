@@ -30,6 +30,7 @@
 #include "plugin/plugininterface.h"
 #include "channel/channelutils.h"
 #include "channel/channelapi.h"
+#include "channel/channelgui.h"
 #include "settings/preset.h"
 
 #include "deviceuiset.h"
@@ -93,22 +94,22 @@ void DeviceUISet::addRollupWidget(QWidget *widget)
     m_channelWindow->addRollupWidget(widget);
 }
 
-void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI)
+void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 0));
 }
 
-void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI)
+void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 1));
 }
 
-void DeviceUISet::registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI)
+void DeviceUISet::registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* pluginGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 2));
 }
 
-void DeviceUISet::removeRxChannelInstance(PluginInstanceGUI* pluginGUI)
+void DeviceUISet::removeRxChannelInstance(ChannelGUI* pluginGUI)
 {
     for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {
@@ -120,7 +121,7 @@ void DeviceUISet::removeRxChannelInstance(PluginInstanceGUI* pluginGUI)
     }
 }
 
-void DeviceUISet::removeTxChannelInstance(PluginInstanceGUI* pluginGUI)
+void DeviceUISet::removeTxChannelInstance(ChannelGUI* pluginGUI)
 {
     for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {
@@ -132,7 +133,7 @@ void DeviceUISet::removeTxChannelInstance(PluginInstanceGUI* pluginGUI)
     }
 }
 
-void DeviceUISet::removeChannelInstance(PluginInstanceGUI* pluginGUI)
+void DeviceUISet::removeChannelInstance(ChannelGUI* pluginGUI)
 {
     for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
     {
@@ -188,7 +189,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            PluginInstanceGUI *rxChannelGUI = nullptr;
+            ChannelGUI *rxChannelGUI = nullptr;
 
             // create channel instance
 
@@ -264,7 +265,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
         for(int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            PluginInstanceGUI *txChannelGUI = nullptr;
+            ChannelGUI *txChannelGUI = nullptr;
 
             // create channel instance
 
@@ -340,7 +341,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
         for (int i = 0; i < preset->getChannelCount(); i++)
         {
             const Preset::ChannelConfig& channelConfig = preset->getChannelConfig(i);
-            PluginInstanceGUI *mimoChannelGUI = nullptr;
+            ChannelGUI *mimoChannelGUI = nullptr;
 
             // create channel instance
 

@@ -22,7 +22,7 @@
 
 #include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "util/messagequeue.h"
 
 #include "../remotesource/remotesourcesettings.h"
@@ -36,7 +36,7 @@ namespace Ui {
     class RemoteSourceGUI;
 }
 
-class RemoteSourceGUI : public RollupWidget, public PluginInstanceGUI {
+class RemoteSourceGUI : public ChannelGUI {
     Q_OBJECT
 
 public:

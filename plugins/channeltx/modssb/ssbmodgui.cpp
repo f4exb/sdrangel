@@ -380,7 +380,7 @@ void SSBModGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::SSBModGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -464,7 +464,6 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
 SSBModGUI::~SSBModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
 	delete m_ssbMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }

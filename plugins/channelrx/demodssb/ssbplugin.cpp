@@ -55,14 +55,14 @@ void SSBPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, C
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SSBPlugin::createRxChannelGUI(
+ChannelGUI* SSBPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* SSBPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return SSBDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

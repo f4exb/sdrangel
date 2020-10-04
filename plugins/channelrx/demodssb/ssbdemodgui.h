@@ -4,7 +4,7 @@
 #include <QIcon>
 
 #include "plugin/plugininstancegui.h"
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
@@ -22,7 +22,7 @@ namespace Ui {
 	class SSBDemodGUI;
 }
 
-class SSBDemodGUI : public RollupWidget, public PluginInstanceGUI {
+class SSBDemodGUI : public ChannelGUI {
 	Q_OBJECT
 
 public:

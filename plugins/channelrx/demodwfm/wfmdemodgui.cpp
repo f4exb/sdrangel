@@ -192,7 +192,7 @@ void WFMDemodGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::WFMDemodGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -246,7 +246,6 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 WFMDemodGUI::~WFMDemodGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_wfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	//delete m_channelMarker;
 	delete ui;

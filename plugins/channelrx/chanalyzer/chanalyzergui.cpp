@@ -356,7 +356,7 @@ void ChannelAnalyzerGUI::onMenuDialogCalled(const QPoint& p)
 }
 
 ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent) :
-	RollupWidget(parent),
+	ChannelGUI(parent),
 	ui(new Ui::ChannelAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
@@ -424,7 +424,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
-    m_deviceUISet->removeRxChannelInstance(this);
 	delete m_channelAnalyzer; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete m_scopeVis;
 	delete m_spectrumScopeComboVis;

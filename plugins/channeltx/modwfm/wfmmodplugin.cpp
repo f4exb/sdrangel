@@ -71,14 +71,14 @@ void WFMModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(
+ChannelGUI* WFMModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* WFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* WFMModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return WFMModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

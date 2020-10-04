@@ -21,7 +21,7 @@
 #include <plugin/plugininstancegui.h>
 #include <QObject>
 
-#include "gui/rollupwidget.h"
+#include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"
 #include "util/movingaverage.h"
@@ -38,7 +38,7 @@ namespace Ui {
     class UDPSourceGUI;
 }
 
-class UDPSourceGUI : public RollupWidget, public PluginInstanceGUI {
+class UDPSourceGUI : public ChannelGUI {
     Q_OBJECT
 
 public:

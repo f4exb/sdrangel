@@ -73,14 +73,14 @@ void DSDDemodPlugin::createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(
+ChannelGUI* DSDDemodPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
+ChannelGUI* DSDDemodPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const
 {
 	return DSDDemodGUI::create(m_pluginAPI, deviceUISet, rxChannel);
 }

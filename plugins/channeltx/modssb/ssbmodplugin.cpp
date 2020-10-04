@@ -71,14 +71,14 @@ void SSBModPlugin::createTxChannel(DeviceAPI *deviceAPI, BasebandSampleSource **
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(
+ChannelGUI* SSBModPlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
     return 0;
 }
 #else
-PluginInstanceGUI* SSBModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
+ChannelGUI* SSBModPlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const
 {
     return SSBModGUI::create(m_pluginAPI, deviceUISet, txChannel);
 }

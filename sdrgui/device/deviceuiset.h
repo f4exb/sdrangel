@@ -35,6 +35,7 @@ class ChannelMarker;
 class PluginAPI;
 class PluginInstanceGUI;
 class ChannelAPI;
+class ChannelGUI;
 class Preset;
 
 namespace SWGSDRangel {
@@ -74,12 +75,12 @@ public:
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
-    void registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI);
-    void registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI);
-    void registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI);
-    void removeRxChannelInstance(PluginInstanceGUI* pluginGUI);
-    void removeTxChannelInstance(PluginInstanceGUI* pluginGUI);
-    void removeChannelInstance(PluginInstanceGUI* pluginGUI);
+    void registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void removeRxChannelInstance(ChannelGUI* channelGUI);
+    void removeTxChannelInstance(ChannelGUI* channelGUI);
+    void removeChannelInstance(ChannelGUI* channelGUI);
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
@@ -105,7 +106,7 @@ private:
     {
         QString m_channelName;
         ChannelAPI *m_channelAPI;
-        PluginInstanceGUI* m_gui;
+        ChannelGUI* m_gui;
         int m_channelType;
 
         ChannelInstanceRegistration() :
@@ -115,10 +116,10 @@ private:
             m_channelType(0)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, ChannelAPI *channelAPI, PluginInstanceGUI* pluginGUI, int channelType) :
+        ChannelInstanceRegistration(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI, int channelType) :
             m_channelName(channelName),
             m_channelAPI(channelAPI),
-            m_gui(pluginGUI),
+            m_gui(channelGUI),
             m_channelType(channelType)
         { }
 

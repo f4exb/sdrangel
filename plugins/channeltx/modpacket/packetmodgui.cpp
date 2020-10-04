@@ -390,7 +390,7 @@ void PacketModGUI::onMenuDialogCalled(const QPoint &p)
 }
 
 PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent) :
-    RollupWidget(parent),
+    ChannelGUI(parent),
     ui(new Ui::PacketModGUI),
     m_pluginAPI(pluginAPI),
     m_deviceUISet(deviceUISet),
@@ -465,7 +465,6 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 PacketModGUI::~PacketModGUI()
 {
-    m_deviceUISet->removeTxChannelInstance(this);
     delete m_packetMod; // TODO: check this: when the GUI closes it has to delete the modulator
     delete ui;
 }
