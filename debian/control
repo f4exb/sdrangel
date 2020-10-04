@@ -26,7 +26,8 @@ Build-Depends: debhelper (>= 9),
  libavformat-dev,
  libopus-dev,
  libairspy-dev,
- libhackrf-dev
+ libhackrf-dev,
+ python-mako
 # TODO:
 #   - more dependencies based on version; newer has more devices
 #   - manage dependencies not present upstream
@@ -36,7 +37,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libasound2, libgl1-mesa-glx, libqt5multimedia5-plugins, pulseaudio, ffmpeg
 Description: SDR/Analyzer/Generator front-end for various hardware
  SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF,
- RTL-SDR, FunCube, LimeSDR, PlutoSDR.
+ RTL-SDR, FunCube, LimeSDR, PlutoSDR, USRP.
  Also File source and sink for I/Q samples, network I/Q sources with
  remote instance.
  Based on Qt5 framework and OpenGL for the spectrum and scope rendering.
