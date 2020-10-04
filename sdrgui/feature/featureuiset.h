@@ -43,7 +43,6 @@ public:
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
     void registerFeatureInstance(const QString& featureURI, FeatureGUI* featureGUI, Feature *feature);
     void removeFeatureInstance(FeatureGUI* featureGUI);
-    void freeFeatures();
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
@@ -79,8 +78,10 @@ private:
     FeatureInstanceRegistrations m_featureInstanceRegistrations;
     int m_featureTabIndex;
 
+    void freeFeatures();
+
 private slots:
-    void handleClosingFeatureGUI(FeatureGUI *featureGUI);
+    void handleClosingFeatureGUI(FeatureGUI *featureGUI, Feature *feature);
 };
 
 #endif // SDRGUI_FEATURE_FEATUREUISET_H_

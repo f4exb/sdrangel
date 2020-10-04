@@ -145,7 +145,6 @@ RigCtlServerGUI::RigCtlServerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
 RigCtlServerGUI::~RigCtlServerGUI()
 {
-	delete m_rigCtlServer; // When the GUI closes it has to delete the demodulator because it can be done with (x)
 	delete ui;
 }
 
