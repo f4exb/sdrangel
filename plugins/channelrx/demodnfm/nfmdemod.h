@@ -62,7 +62,7 @@ public:
     };
 
     NFMDemod(DeviceAPI *deviceAPI);
-	~NFMDemod();
+	virtual ~NFMDemod();
 	virtual void destroy() { delete this; }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positive);

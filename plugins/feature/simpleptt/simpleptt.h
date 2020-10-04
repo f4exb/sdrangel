@@ -100,7 +100,7 @@ public:
     };
 
     SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface);
-    ~SimplePTT();
+    virtual ~SimplePTT();
     virtual void destroy() { delete this; }
     virtual bool handleMessage(const Message& cmd);
 

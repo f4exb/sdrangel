@@ -199,7 +199,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 
 UDPSinkGUI::~UDPSinkGUI()
 {
-	delete m_udpSink; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

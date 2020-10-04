@@ -166,7 +166,7 @@ public:
 	};
 
     FileSource(DeviceAPI *deviceAPI);
-    ~FileSource();
+    virtual ~FileSource();
     virtual void destroy() { delete this; }
 
     virtual void start();

@@ -216,7 +216,6 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
 FileSourceGUI::~FileSourceGUI()
 {
-    delete m_fileSource;
     delete ui;
 }
 

@@ -342,7 +342,6 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 SSBDemodGUI::~SSBDemodGUI()
 {
-	delete m_ssbDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

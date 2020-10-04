@@ -190,7 +190,6 @@ RemoteSourceGUI::RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 
 RemoteSourceGUI::~RemoteSourceGUI()
 {
-    delete m_remoteSrc;
     delete ui;
 }
 

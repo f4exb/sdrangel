@@ -533,9 +533,6 @@ private slots:
 	void tabInputViewIndexChanged();
     void tabChannelsIndexChanged();
 	void commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release);
-    void handleClosingRxChannelGUI(DeviceUISet *deviceUISet, ChannelGUI *gui);
-    void handleClosingTxChannelGUI(DeviceUISet *deviceUISet, ChannelGUI *gui);
-    void handleClosingMIMOChannelGUI(DeviceUISet *deviceUISet, ChannelGUI *gui);
 };
 
 #endif // INCLUDE_MAINWINDOW_H

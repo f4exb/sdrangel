@@ -246,8 +246,6 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 WFMDemodGUI::~WFMDemodGUI()
 {
-	delete m_wfmDemod; // TODO: check this: when the GUI closes it has to delete the demodulator
-	//delete m_channelMarker;
 	delete ui;
 }
 

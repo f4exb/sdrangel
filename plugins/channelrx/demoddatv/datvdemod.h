@@ -38,7 +38,7 @@ class DATVDemod : public BasebandSampleSink, public ChannelAPI
 public:
 
     DATVDemod(DeviceAPI *);
-    ~DATVDemod();
+    virtual ~DATVDemod();
 
     virtual void destroy() { delete this; }
     virtual void getIdentifier(QString& id) { id = m_channelId; }

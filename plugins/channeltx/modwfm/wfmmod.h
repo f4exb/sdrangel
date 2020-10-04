@@ -173,7 +173,7 @@ public:
     //=================================================================
 
     WFMMod(DeviceAPI *deviceAPI);
-    ~WFMMod();
+    virtual ~WFMMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

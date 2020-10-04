@@ -396,7 +396,6 @@ FreeDVModGUI::FreeDVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 FreeDVModGUI::~FreeDVModGUI()
 {
-	delete m_freeDVMod; // TODO: check this: when the GUI closes it has to delete the modulator
 	delete ui;
 }
 

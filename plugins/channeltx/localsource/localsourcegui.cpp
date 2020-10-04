@@ -125,7 +125,6 @@ LocalSourceGUI::LocalSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 LocalSourceGUI::~LocalSourceGUI()
 {
-    delete m_localSource; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 

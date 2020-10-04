@@ -49,21 +49,9 @@ void FeatureUISet::registerFeatureInstance(const QString& featureURI, FeatureGUI
         featureGUI,
         &FeatureGUI::closing,
         this,
-        [=](){ this->handleClosingFeatureGUI(featureGUI, feature); },
+        [=](){ this->handleClosingFeatureGUI(featureGUI); },
         Qt::QueuedConnection
     );
-}
-
-void FeatureUISet::removeFeatureInstance(FeatureGUI* featureGUI)
-{
-    for (FeatureInstanceRegistrations::iterator it = m_featureInstanceRegistrations.begin(); it != m_featureInstanceRegistrations.end(); ++it)
-    {
-        if (it->m_gui == featureGUI)
-        {
-            m_featureInstanceRegistrations.erase(it);
-            break;
-        }
-    }
 }
 
 // sort by name
@@ -179,8 +167,15 @@ void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
 }
 
 
-void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI, Feature *feature)
+void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
 {
-    removeFeatureInstance(featureGUI);
-    feature->destroy();
+    for (FeatureInstanceRegistrations::iterator it = m_featureInstanceRegistrations.begin(); it != m_featureInstanceRegistrations.end(); ++it)
+    {
+        if (it->m_gui == featureGUI)
+        {
+            it->m_feature->destroy();
+            m_featureInstanceRegistrations.erase(it);
+            break;
+        }
+    }
 }

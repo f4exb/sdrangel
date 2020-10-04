@@ -175,7 +175,7 @@ public:
     //=================================================================
 
     SSBMod(DeviceAPI *deviceAPI);
-    ~SSBMod();
+    virtual ~SSBMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

@@ -332,7 +332,6 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 FreqTrackerGUI::~FreqTrackerGUI()
 {
-	delete m_freqTracker; // TODO: check this: when the GUI closes it has to delete the demodulator
 	delete ui;
 }
 

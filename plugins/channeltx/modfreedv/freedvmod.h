@@ -177,7 +177,7 @@ public:
     //=================================================================
 
     FreeDVMod(DeviceAPI *deviceAPI);
-    ~FreeDVMod();
+    virtual ~FreeDVMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

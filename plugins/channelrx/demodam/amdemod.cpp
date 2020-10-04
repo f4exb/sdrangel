@@ -64,6 +64,7 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
 
 AMDemod::~AMDemod()
 {
+    qDebug("AMDemod::~AMDemod");
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
 	m_deviceAPI->removeChannelSinkAPI(this);

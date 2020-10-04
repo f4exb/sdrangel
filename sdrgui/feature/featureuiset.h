@@ -42,7 +42,6 @@ public:
     void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
     void registerFeatureInstance(const QString& featureURI, FeatureGUI* featureGUI, Feature *feature);
-    void removeFeatureInstance(FeatureGUI* featureGUI);
     void deleteFeature(int featureIndex);
     const Feature *getFeatureAt(int featureIndex) const;
     Feature *getFeatureAt(int featureIndex);
@@ -81,7 +80,7 @@ private:
     void freeFeatures();
 
 private slots:
-    void handleClosingFeatureGUI(FeatureGUI *featureGUI, Feature *feature);
+    void handleClosingFeatureGUI(FeatureGUI *featureGUI);
 };
 
 #endif // SDRGUI_FEATURE_FEATUREUISET_H_

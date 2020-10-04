@@ -94,7 +94,7 @@ public:
     //=================================================================
 
     PacketMod(DeviceAPI *deviceAPI);
-    ~PacketMod();
+    virtual ~PacketMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

@@ -130,7 +130,6 @@ LocalSinkGUI::LocalSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
 LocalSinkGUI::~LocalSinkGUI()
 {
-    delete m_localSink; // TODO: check this: when the GUI closes it has to delete the demodulator
     delete ui;
 }
 

@@ -94,63 +94,49 @@ void DeviceUISet::addRollupWidget(QWidget *widget)
     m_channelWindow->addRollupWidget(widget);
 }
 
-void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* pluginGUI)
+void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
-    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 0));
+    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, channelGUI, 0));
+    QObject::connect(
+        channelGUI,
+        &ChannelGUI::closing,
+        this,
+        [=](){ this->handleChannelGUIClosing(channelGUI); },
+        Qt::QueuedConnection
+    );
 }
 
-void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* pluginGUI)
+void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
-    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 1));
+    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, channelGUI, 1));
+    QObject::connect(
+        channelGUI,
+        &ChannelGUI::closing,
+        this,
+        [=](){ this->handleChannelGUIClosing(channelGUI); },
+        Qt::QueuedConnection
+    );
 }
 
-void DeviceUISet::registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* pluginGUI)
+void DeviceUISet::registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
-    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, pluginGUI, 2));
-}
-
-void DeviceUISet::removeRxChannelInstance(ChannelGUI* pluginGUI)
-{
-    for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-    {
-        if (it->m_gui == pluginGUI)
-        {
-            m_channelInstanceRegistrations.erase(it);
-            break;
-        }
-    }
-}
-
-void DeviceUISet::removeTxChannelInstance(ChannelGUI* pluginGUI)
-{
-    for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-    {
-        if (it->m_gui == pluginGUI)
-        {
-            m_channelInstanceRegistrations.erase(it);
-            break;
-        }
-    }
-}
-
-void DeviceUISet::removeChannelInstance(ChannelGUI* pluginGUI)
-{
-    for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
-    {
-        if (it->m_gui == pluginGUI)
-        {
-            m_channelInstanceRegistrations.erase(it);
-            break;
-        }
-    }
+    m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, channelGUI, 2));
+    QObject::connect(
+        channelGUI,
+        &ChannelGUI::closing,
+        this,
+        [=](){ this->handleChannelGUIClosing(channelGUI); },
+        Qt::QueuedConnection
+    );
 }
 
 void DeviceUISet::freeChannels()
 {
     for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
-        qDebug("DeviceUISet::freeChannels: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
+        qDebug("DeviceUISet::freeChannels: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
         m_channelInstanceRegistrations[i].m_gui->destroy();
+        m_channelInstanceRegistrations[i].m_channelAPI->destroy();
     }
 }
 
@@ -159,9 +145,10 @@ void DeviceUISet::deleteChannel(int channelIndex)
     if ((channelIndex >= 0) && (channelIndex < m_channelInstanceRegistrations.count()))
     {
         qDebug("DeviceUISet::deleteChannel: delete channel [%s] at %d",
-                qPrintable(m_channelInstanceRegistrations[channelIndex].m_channelName),
+                qPrintable(m_channelInstanceRegistrations[channelIndex].m_channelURI),
                 channelIndex);
         m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
+        m_channelInstanceRegistrations[channelIndex].m_channelAPI->destroy();
     }
 }
 
@@ -169,21 +156,22 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
 {
     if (preset->isSourcePreset())
     {
-        qDebug("DeviceUISet::loadRxChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceUISet::loadRxChannelSettings: Loading preset [%s | %s]",
+            qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations();
 
-        // copy currently open channels and clear list
-        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
-        m_channelInstanceRegistrations.clear();
-
-        for(int i = 0; i < openChannels.count(); i++)
+        // clear list
+        for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceUISet::loadRxChannelSettings: destroying old channel [%s]", qPrintable(openChannels[i].m_channelName));
-            openChannels[i].m_gui->destroy(); // FIXME: stop channel before
+            qDebug("DeviceUISet::loadRxChannelSettings: destroying old channel [%s]",
+                qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
+            m_channelInstanceRegistrations[i].m_gui->destroy(); // FIXME: stop channel before
+            m_channelInstanceRegistrations[i].m_channelAPI->destroy();
         }
 
+        m_channelInstanceRegistrations.clear();
         qDebug("DeviceUISet::loadRxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for (int i = 0; i < preset->getChannelCount(); i++)
@@ -206,6 +194,13 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceAPI, &rxChannel, &channelAPI);
                     rxChannelGUI = (*channelRegistrations)[i].m_plugin->createRxChannelGUI(this, rxChannel);
                     registerRxChannelInstance(channelAPI->getURI(), channelAPI, rxChannelGUI);
+                    QObject::connect(
+                        rxChannelGUI,
+                        &ChannelGUI::closing,
+                        this,
+                        [=](){ this->handleChannelGUIClosing(rxChannelGUI); },
+                        Qt::QueuedConnection
+                    );
                     break;
                 }
             }
@@ -231,8 +226,8 @@ void DeviceUISet::saveRxChannelSettings(Preset *preset)
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceUISet::saveRxChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
-            preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
+            qDebug("DeviceUISet::saveRxChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
+            preset->addChannel(m_channelInstanceRegistrations[i].m_channelURI, m_channelInstanceRegistrations[i].m_gui->serialize());
         }
     }
     else
@@ -245,21 +240,22 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
 {
     if (preset->isSinkPreset())
     {
-        qDebug("DeviceUISet::loadTxChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceUISet::loadTxChannelSettings: Loading preset [%s | %s]",
+            qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations();
 
-        // copy currently open channels and clear list
-        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
-        m_channelInstanceRegistrations.clear();
-
-        for(int i = 0; i < openChannels.count(); i++)
+        //  clear list
+        for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceUISet::loadTxChannelSettings: destroying old channel [%s]", qPrintable(openChannels[i].m_channelName));
-            openChannels[i].m_gui->destroy();
+            qDebug("DeviceUISet::loadTxChannelSettings: destroying old channel [%s]",
+                qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
+            m_channelInstanceRegistrations[i].m_gui->destroy();
+            m_channelInstanceRegistrations[i].m_channelAPI->destroy();
         }
 
+        m_channelInstanceRegistrations.clear();
         qDebug("DeviceUISet::loadTxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for(int i = 0; i < preset->getChannelCount(); i++)
@@ -281,6 +277,13 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
                     (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceAPI, &txChannel, &channelAPI);
                     txChannelGUI = (*channelRegistrations)[i].m_plugin->createTxChannelGUI(this, txChannel);
                     registerTxChannelInstance(channelAPI->getURI(), channelAPI, txChannelGUI);
+                    QObject::connect(
+                        txChannelGUI,
+                        &ChannelGUI::closing,
+                        this,
+                        [=](){ this->handleChannelGUIClosing(txChannelGUI); },
+                        Qt::QueuedConnection
+                    );
                     break;
                 }
             }
@@ -307,8 +310,8 @@ void DeviceUISet::saveTxChannelSettings(Preset *preset)
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceUISet::saveTxChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
-            preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
+            qDebug("DeviceUISet::saveTxChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
+            preset->addChannel(m_channelInstanceRegistrations[i].m_channelURI, m_channelInstanceRegistrations[i].m_gui->serialize());
         }
     }
     else
@@ -321,21 +324,22 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
 {
     if (preset->isMIMOPreset())
     {
-        qDebug("DeviceUISet::loadMIMOChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
+        qDebug("DeviceUISet::loadMIMOChannelSettings: Loading preset [%s | %s]",
+            qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
         PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations();
 
-        // copy currently open channels and clear list
-        ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
-        m_channelInstanceRegistrations.clear();
-
-        for(int i = 0; i < openChannels.count(); i++)
+        // clear list
+        for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceUISet::loadMIMOChannelSettings: destroying old channel [%s]", qPrintable(openChannels[i].m_channelName));
-            openChannels[i].m_gui->destroy(); // FIXME: stop channel before
+            qDebug("DeviceUISet::loadMIMOChannelSettings: destroying old channel [%s]",
+                qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
+            m_channelInstanceRegistrations[i].m_gui->destroy(); // FIXME: stop channel before
+            m_channelInstanceRegistrations[i].m_channelAPI->destroy();
         }
 
+        m_channelInstanceRegistrations.clear();
         qDebug("DeviceUISet::loadMIMOChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for (int i = 0; i < preset->getChannelCount(); i++)
@@ -359,6 +363,13 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
                     mimoChannelGUI = (*channelRegistrations)[i].m_plugin->createMIMOChannelGUI(this, mimoChannel);
                     (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, &mimoChannel, &channelAPI);
                     registerChannelInstance(channelAPI->getURI(), channelAPI, mimoChannelGUI);
+                    QObject::connect(
+                        mimoChannelGUI,
+                        &ChannelGUI::closing,
+                        this,
+                        [=](){ this->handleChannelGUIClosing(mimoChannelGUI); },
+                        Qt::QueuedConnection
+                    );
                     break;
                 }
             }
@@ -384,8 +395,8 @@ void DeviceUISet::saveMIMOChannelSettings(Preset *preset)
 
         for(int i = 0; i < m_channelInstanceRegistrations.count(); i++)
         {
-            qDebug("DeviceUISet::saveMIMOChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelName));
-            preset->addChannel(m_channelInstanceRegistrations[i].m_channelName, m_channelInstanceRegistrations[i].m_gui->serialize());
+            qDebug("DeviceUISet::saveMIMOChannelSettings: saving channel [%s]", qPrintable(m_channelInstanceRegistrations[i].m_channelURI));
+            preset->addChannel(m_channelInstanceRegistrations[i].m_channelURI, m_channelInstanceRegistrations[i].m_gui->serialize());
         }
     }
     else
@@ -441,4 +452,17 @@ int DeviceUISet::webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& respo
 int DeviceUISet::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
 {
     return m_spectrumVis->webapiSpectrumServerDelete(response, errorMessage);
+}
+
+void DeviceUISet::handleChannelGUIClosing(ChannelGUI* channelGUI)
+{
+    for (ChannelInstanceRegistrations::iterator it = m_channelInstanceRegistrations.begin(); it != m_channelInstanceRegistrations.end(); ++it)
+    {
+        if (it->m_gui == channelGUI)
+        {
+            it->m_channelAPI->destroy();
+            m_channelInstanceRegistrations.erase(it);
+            break;
+        }
+    }
 }

@@ -173,7 +173,7 @@ public:
     //=================================================================
 
     NFMMod(DeviceAPI *deviceAPI);
-    ~NFMMod();
+    virtual ~NFMMod();
     virtual void destroy() { delete this; }
 
     virtual void start();

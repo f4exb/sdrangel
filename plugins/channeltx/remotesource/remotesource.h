@@ -155,7 +155,7 @@ public:
     };
 
     RemoteSource(DeviceAPI *deviceAPI);
-    ~RemoteSource();
+    virtual ~RemoteSource();
 
     virtual void destroy() { delete this; }
 
