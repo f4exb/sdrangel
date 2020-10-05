@@ -26,10 +26,8 @@ Build-Depends: debhelper (>= 9),
  libavformat-dev,
  libopus-dev,
  libairspy-dev,
- libhackrf-dev
- python3-mako
- python3-cheetah
- python3-numpy
+ libhackrf-dev,
+ libuhd-dev
 # TODO:
 #   - more dependencies based on version; newer has more devices
 #   - manage dependencies not present upstream
