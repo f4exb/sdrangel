@@ -211,6 +211,16 @@ elseif(WIN32 OR MINGW)
     )
   endforeach(opencv_dll)
 
+  if(ENABLE_USRP AND UHD_FOUND)
+    file(GLOB UHD_DLLS "${UHD_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    foreach(uhd_dll ${UHD_DLLS})
+      get_filename_component(uhd_dll_name "${uhd_dll}"  NAME)
+      add_custom_target(copy_uhd_${uhd_dll_name} ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${uhd_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+      )
+    endforeach(uhd_dll)
+  endif()
+
   # TODO we need a way to fixup_bundle() on the build bin/ directory without call install
   if(BUILD_GUI)
     install(CODE "
@@ -263,7 +273,7 @@ elseif(WIN32 OR MINGW)
     # libusb
     get_filename_component(GFN_LIBUSB_DIR "${LIBUSB_LIBRARIES}" DIRECTORY)
     install(FILES "${GFN_LIBUSB_DIR}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-
+    
     install(CODE "
       # remove *.lib files
       # TODO find a better way

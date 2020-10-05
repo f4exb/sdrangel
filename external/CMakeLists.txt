@@ -18,6 +18,7 @@ set(BLADERF_TAG "2019.07")
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1.1.5")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
+set(UHD_TAG "v4.0.0.0")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
 set(RTLSDR_TAG be1d1206bfb6e6c41f7d91b20b77e20f929fa6a7)
@@ -400,6 +401,21 @@ if (LINUX)
     set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
     set(LIBRTLSDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr/src/rtlsdr/include" CACHE INTERNAL "")
     set(LIBRTLSDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/librtlsdr.so" CACHE INTERNAL "")
+
+    # needs boost and libusb
+    ExternalProject_Add(uhd
+            GIT_REPOSITORY https://github.com/EttusResearch/uhd.git
+            GIT_TAG ${UHD_TAG}
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
+            CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    set(UHD_FOUND ON CACHE INTERNAL "")
+    set(UHD_EXTERNAL ON CACHE INTERNAL "")
+    set(UHD_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/uhd/include" CACHE INTERNAL "")
+    set(UHD_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/uhd/libuhd.so" CACHE INTERNAL "")
+
 endif(LINUX)
 
 if(WIN32 OR APPLE)

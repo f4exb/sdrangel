@@ -1,0 +1,730 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>USRPOutputGUI</class>
+ <widget class="QWidget" name="USRPOutputGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>360</width>
+    <height>290</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>360</width>
+    <height>290</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>USRP output</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="topMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <property name="bottomMargin">
+    <number>2</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_freq">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" name="freqLeftLayout">
+       <item>
+        <layout class="QHBoxLayout" name="freqLeftTopLayout">
+         <item>
+          <widget class="ButtonSwitch" name="startStop">
+           <property name="toolTip">
+            <string>start/stop acquisition</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../sdrgui/resources/res.qrc">
+             <normaloff>:/play.png</normaloff>
+             <normalon>:/stop.png</normalon>:/play.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="freqLeftBotLayout">
+         <item>
+          <widget class="QLabel" name="sampleRateLabel">
+           <property name="minimumSize">
+            <size>
+             <width>54</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Host to device sample rate (k or MS/s)</string>
+           </property>
+           <property name="text">
+            <string>00000k</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <spacer name="freqLeftSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="ValueDial" name="centerFrequency" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>20</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Main center frequency in kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="freqRightLayout">
+       <item>
+        <layout class="QHBoxLayout" name="freqRightTopLayout">
+         <item>
+          <widget class="QLabel" name="freqUnits">
+           <property name="text">
+            <string> kHz</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="channelNumberText">
+           <property name="minimumSize">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Channel number</string>
+           </property>
+           <property name="text">
+            <string>#0</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="freqRightBotLayout">
+         <item>
+          <widget class="QLabel" name="deviceRateText">
+           <property name="minimumSize">
+            <size>
+             <width>54</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Baseband I/Q sample rate kS/s</string>
+           </property>
+           <property name="text">
+            <string>00000k</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="antennaLabel">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../../sdrgui/resources/res.qrc">:/antenna.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="antenna">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Antenna select: TX/RX, RX2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="TransverterButton" name="transverter">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Transverter frequency translation dialog</string>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="clockSourceLabel">
+       <property name="text">
+        <string>Clock</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="clockSource"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_lna">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="ncoSampleRateLayout">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QToolButton" name="sampleRateMode">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>SR</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ValueDial" name="sampleRate" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Device to host sample rate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="samplerateUnit">
+       <property name="text">
+        <string>S/s</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="swInterpLabel">
+       <property name="text">
+        <string>Int</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="swInterp">
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Software interpolation factor</string>
+       </property>
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>64</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_freq">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="gainLayout">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="gainLabel">
+       <property name="text">
+        <string>Gain</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="gain">
+       <property name="toolTip">
+        <string>Global gain setting (dB)</string>
+       </property>
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="maximum">
+        <number>70</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="value">
+        <number>20</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="gainText">
+       <property name="minimumSize">
+        <size>
+         <width>40</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Global gain (dB)</string>
+       </property>
+       <property name="text">
+        <string>20dB</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="lpfLayout">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="lpfLabel">
+       <property name="toolTip">
+        <string>Clock source</string>
+       </property>
+       <property name="text">
+        <string>LPF</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ValueDial" name="lpf" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>Analog lowpass filer bandwidth (kHz)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lpfUnits">
+       <property name="text">
+        <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="streamStatusLabel">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Green when stream is transmitting data</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="../../../sdrgui/resources/res.qrc">:/stream.png</pixmap>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="underrunLabel">
+       <property name="minimumSize">
+        <size>
+         <width>12</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Red if underruns occured. Cleared when restarting acquisition</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background:rgb(79,79,79);</string>
+       </property>
+       <property name="text">
+        <string>U</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="droppedLabel">
+       <property name="minimumSize">
+        <size>
+         <width>12</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Red if dropped packets. Cleared when restarting acquisition</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background:rgb(79,79,79);</string>
+       </property>
+       <property name="text">
+        <string>D</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="padLayout">
+     <item>
+      <spacer name="verticalPadSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TransverterButton</class>
+   <extends>QPushButton</extends>
+   <header>gui/transverterbutton.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>
