@@ -205,6 +205,10 @@
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSourceReport.h"
 #include "SWGUDPSourceSettings.h"
+#include "SWGUSRPInputReport.h"
+#include "SWGUSRPInputSettings.h"
+#include "SWGUSRPOutputReport.h"
+#include "SWGUSRPOutputSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
@@ -791,6 +795,18 @@ namespace SWGSDRangel {
     }
     if(QString("SWGUDPSourceSettings").compare(type) == 0) {
       return new SWGUDPSourceSettings();
+    }
+    if(QString("SWGUSRPInputReport").compare(type) == 0) {
+      return new SWGUSRPInputReport();
+    }
+    if(QString("SWGUSRPInputSettings").compare(type) == 0) {
+      return new SWGUSRPInputSettings();
+    }
+    if(QString("SWGUSRPOutputReport").compare(type) == 0) {
+      return new SWGUSRPOutputReport();
+    }
+    if(QString("SWGUSRPOutputSettings").compare(type) == 0) {
+      return new SWGUSRPOutputSettings();
     }
     if(QString("SWGWFMDemodReport").compare(type) == 0) {
       return new SWGWFMDemodReport();

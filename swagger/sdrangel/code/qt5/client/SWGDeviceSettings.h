@@ -54,6 +54,8 @@
 #include "SWGTestMISettings.h"
 #include "SWGTestMOSyncSettings.h"
 #include "SWGTestSourceSettings.h"
+#include "SWGUSRPInputSettings.h"
+#include "SWGUSRPOutputSettings.h"
 #include "SWGXtrxInputSettings.h"
 #include "SWGXtrxMIMOSettings.h"
 #include "SWGXtrxOutputSettings.h"
@@ -182,6 +184,12 @@ public:
     SWGTestMOSyncSettings* getTestMoSyncSettings();
     void setTestMoSyncSettings(SWGTestMOSyncSettings* test_mo_sync_settings);
 
+    SWGUSRPInputSettings* getUsrpInputSettings();
+    void setUsrpInputSettings(SWGUSRPInputSettings* usrp_input_settings);
+
+    SWGUSRPOutputSettings* getUsrpOutputSettings();
+    void setUsrpOutputSettings(SWGUSRPOutputSettings* usrp_output_settings);
+
     SWGXtrxInputSettings* getXtrxInputSettings();
     void setXtrxInputSettings(SWGXtrxInputSettings* xtrx_input_settings);
 
@@ -299,6 +307,12 @@ private:
 
     SWGTestMOSyncSettings* test_mo_sync_settings;
     bool m_test_mo_sync_settings_isSet;
+
+    SWGUSRPInputSettings* usrp_input_settings;
+    bool m_usrp_input_settings_isSet;
+
+    SWGUSRPOutputSettings* usrp_output_settings;
+    bool m_usrp_output_settings_isSet;
 
     SWGXtrxInputSettings* xtrx_input_settings;
     bool m_xtrx_input_settings_isSet;

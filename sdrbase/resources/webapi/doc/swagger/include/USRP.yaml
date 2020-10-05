@@ -1,0 +1,100 @@
+USRPInputSettings:
+  description: USRP
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    log2SoftDecim:
+      type: integer
+    lpfBW:
+      type: integer
+    antennaPath:
+      type: string
+    gain:
+      type: integer
+    gainMode:
+      description: 0 for auto, 1 for manual
+      type: integer
+    clockSource:
+      type: string
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+USRPOutputSettings:
+  description: USRP
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    devSampleRate:
+      type: integer
+    log2SoftInterp:
+      type: integer
+    lpfBW:
+      type: integer
+    gain:
+      type: integer
+    antennaPath:
+      type: string
+    clockSource:
+      type: string
+    transverterMode:
+      type: integer
+    transverterDeltaFrequency:
+      type: integer
+      format: int64
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+USRPInputReport:
+  description: USRP
+  properties:
+    success:
+      description: 1 if info was successfully retrieved else 0
+      type: integer
+    streamActive:
+      description: 1 if active else 0
+      type: integer
+    overrunCount:
+      type: integer
+    timeoutCount:
+      type: integer
+
+USRPOutputReport:
+  description: USRP
+  properties:
+    success:
+      description: 1 if info was successfully retrieved else 0
+      type: integer
+    streamActive:
+      description: 1 if active else 0
+      type: integer
+    underrunCount:
+      type: integer
+    droppedPacketsCount:
+      type: integer

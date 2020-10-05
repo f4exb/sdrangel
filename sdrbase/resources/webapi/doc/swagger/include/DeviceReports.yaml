@@ -55,6 +55,10 @@ DeviceReport:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     soapySDROutputReport:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
+    usrpInputReport:
+      $ref: "/doc/swagger/include/USRP.yaml#/USRPInputReport"
+    usrpOutputReport:
+      $ref: "/doc/swagger/include/USRP.yaml#/USRPOutputReport"
     xtrxInputReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
     xtrxOutputReport:

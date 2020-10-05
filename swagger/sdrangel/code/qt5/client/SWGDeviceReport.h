@@ -43,6 +43,8 @@
 #include "SWGSDRPlayReport.h"
 #include "SWGSigMFFileInputReport.h"
 #include "SWGSoapySDRReport.h"
+#include "SWGUSRPInputReport.h"
+#include "SWGUSRPOutputReport.h"
 #include "SWGXtrxInputReport.h"
 #include "SWGXtrxMIMOReport.h"
 #include "SWGXtrxOutputReport.h"
@@ -138,6 +140,12 @@ public:
     SWGSoapySDRReport* getSoapySdrOutputReport();
     void setSoapySdrOutputReport(SWGSoapySDRReport* soapy_sdr_output_report);
 
+    SWGUSRPInputReport* getUsrpInputReport();
+    void setUsrpInputReport(SWGUSRPInputReport* usrp_input_report);
+
+    SWGUSRPOutputReport* getUsrpOutputReport();
+    void setUsrpOutputReport(SWGUSRPOutputReport* usrp_output_report);
+
     SWGXtrxInputReport* getXtrxInputReport();
     void setXtrxInputReport(SWGXtrxInputReport* xtrx_input_report);
 
@@ -222,6 +230,12 @@ private:
 
     SWGSoapySDRReport* soapy_sdr_output_report;
     bool m_soapy_sdr_output_report_isSet;
+
+    SWGUSRPInputReport* usrp_input_report;
+    bool m_usrp_input_report_isSet;
+
+    SWGUSRPOutputReport* usrp_output_report;
+    bool m_usrp_output_report_isSet;
 
     SWGXtrxInputReport* xtrx_input_report;
     bool m_xtrx_input_report_isSet;
