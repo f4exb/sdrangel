@@ -21,7 +21,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
 #include "soapysdroutput.h"
@@ -41,7 +41,7 @@ namespace Ui {
     class SoapySDROutputGui;
 }
 
-class SoapySDROutputGui : public QWidget, public PluginInstanceGUI {
+class SoapySDROutputGui : public DeviceGUI {
     Q_OBJECT
 
 public:

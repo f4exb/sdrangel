@@ -93,7 +93,7 @@ PluginInterface::SamplingDevices HackRFOutputPlugin::enumSampleSinks(const Origi
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -104,7 +104,7 @@ PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* HackRFOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

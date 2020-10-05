@@ -160,7 +160,7 @@ set(sdrgui_HEADERS
     feature/featuregui.h
     feature/featureuiset.h
 
-    plugin/plugininstancegui.h
+    device/devicegui.h
 
     soapygui/discreterangegui.h
     soapygui/intervalrangegui.h

@@ -100,7 +100,7 @@ PluginInterface::SamplingDevices LocalInputPlugin::enumSampleSources(const Origi
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LocalInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* LocalInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -111,7 +111,7 @@ PluginInstanceGUI* LocalInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* LocalInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* LocalInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

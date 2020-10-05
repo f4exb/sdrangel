@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,41 +15,30 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_HACKRFOUTPUTPLUGIN_H
-#define INCLUDE_HACKRFOUTPUTPLUGIN_H
+#ifndef INCLUDE_DEVICEGUI_H
+#define INCLUDE_DEVICEGUI_H
 
-#include <QObject>
-#include "plugin/plugininterface.h"
+#include <QtGlobal>
+#include <QString>
+#include <QByteArray>
+#include <QWidget>
 
-#define HACKRFOUTPUT_DEVICE_TYPE_ID "sdrangel.samplesink.hackrf"
+#include "export.h"
 
-class PluginAPI;
+class Message;
+class MessageQueue;
 
-class HackRFOutputPlugin : public QObject, public PluginInterface {
-	Q_OBJECT
-	Q_INTERFACES(PluginInterface)
-	Q_PLUGIN_METADATA(IID HACKRFOUTPUT_DEVICE_TYPE_ID)
-
+class SDRBASE_API DeviceGUI : public QWidget {
 public:
-	explicit HackRFOutputPlugin(QObject* parent = NULL);
+	DeviceGUI(QWidget *parent = nullptr) : QWidget(parent) { };
+	virtual ~DeviceGUI() { };
+	virtual void destroy() = 0;
 
-	const PluginDescriptor& getPluginDescriptor() const;
-	void initPlugin(PluginAPI* pluginAPI);
+	virtual void resetToDefaults() = 0;
+	virtual QByteArray serialize() const = 0;
+	virtual bool deserialize(const QByteArray& data) = 0;
 
-	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
-	virtual SamplingDevices enumSampleSinks(const OriginDevices& originDevices);
-	virtual DeviceGUI* createSampleSinkPluginInstanceGUI(
-	        const QString& sinkId,
-	        QWidget **widget,
-	        DeviceUISet *deviceUISet);
-	virtual DeviceSampleSink* createSampleSinkPluginInstance(const QString& sinkId, DeviceAPI *deviceAPI);
-    virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
-
-	static const QString m_hardwareID;
-    static const QString m_deviceTypeID;
-
-private:
-	static const PluginDescriptor m_pluginDescriptor;
+	virtual MessageQueue* getInputMessageQueue() = 0;
 };
 
-#endif // INCLUDE_HACKRFOUTPUTPLUGIN_H
+#endif // INCLUDE_DEVICEGUI_H

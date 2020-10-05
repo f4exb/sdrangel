@@ -99,7 +99,7 @@ PluginInterface::SamplingDevices FileOutputPlugin::enumSampleSinks(const OriginD
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -110,7 +110,7 @@ PluginInstanceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
     return nullptr;
 }
 #else
-PluginInstanceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* FileOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

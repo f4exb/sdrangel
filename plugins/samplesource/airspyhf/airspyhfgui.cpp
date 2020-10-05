@@ -34,7 +34,7 @@
 #include "airspyhfgui.h"
 
 AirspyHFGui::AirspyHFGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::AirspyHFGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

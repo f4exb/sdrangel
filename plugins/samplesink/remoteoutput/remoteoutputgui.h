@@ -25,7 +25,7 @@
 #include <QWidget>
 #include <QNetworkRequest>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 #include "util/limitedcounter.h"
 
@@ -69,7 +69,7 @@ private:
     float m_s;
 };
 
-class RemoteOutputSinkGui : public QWidget, public PluginInstanceGUI {
+class RemoteOutputSinkGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

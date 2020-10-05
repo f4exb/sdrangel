@@ -46,7 +46,7 @@
 
 
 RemoteInputGui::RemoteInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::RemoteInputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

@@ -32,7 +32,7 @@
 #include "bladerf1outputgui.h"
 
 Bladerf1OutputGui::Bladerf1OutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::Bladerf1OutputGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

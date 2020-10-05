@@ -19,7 +19,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_XTRXINPUT_XTRXINPUTGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -33,7 +33,7 @@ namespace Ui {
 class XTRXInputGUI;
 }
 
-class XTRXInputGUI : public QWidget, public PluginInstanceGUI {
+class XTRXInputGUI : public DeviceGUI {
     Q_OBJECT
 
 public:

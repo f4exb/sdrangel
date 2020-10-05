@@ -39,7 +39,7 @@
 #include "device/deviceuiset.h"
 
 FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::FileInputGUI),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

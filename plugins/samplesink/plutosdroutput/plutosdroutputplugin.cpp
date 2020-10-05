@@ -94,7 +94,7 @@ PluginInterface::SamplingDevices PlutoSDROutputPlugin::enumSampleSinks(const Ori
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -105,7 +105,7 @@ PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* PlutoSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

@@ -18,7 +18,7 @@
 #ifndef INCLUDE_HACKRFINPUTGUI_H
 #define INCLUDE_HACKRFINPUTGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -34,7 +34,7 @@ namespace Ui {
 	class HackRFInputGui;
 }
 
-class HackRFInputGui : public QWidget, public PluginInstanceGUI {
+class HackRFInputGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

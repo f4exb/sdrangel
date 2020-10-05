@@ -19,7 +19,7 @@
 #ifndef _KIWISDR_KIWISDRGUI_H_
 #define _KIWISDR_KIWISDRGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -34,7 +34,7 @@ namespace Ui {
 	class KiwiSDRGui;
 }
 
-class KiwiSDRGui : public QWidget, public PluginInstanceGUI {
+class KiwiSDRGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

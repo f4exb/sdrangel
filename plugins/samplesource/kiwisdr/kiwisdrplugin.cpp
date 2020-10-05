@@ -101,7 +101,7 @@ PluginInterface::SamplingDevices KiwiSDRPlugin::enumSampleSources(const OriginDe
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* KiwiSDRPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* KiwiSDRPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -112,7 +112,7 @@ PluginInstanceGUI* KiwiSDRPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* KiwiSDRPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* KiwiSDRPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

@@ -92,7 +92,7 @@ PluginInterface::SamplingDevices Blderf1InputPlugin::enumSampleSources(const Ori
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -103,7 +103,7 @@ PluginInstanceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* Blderf1InputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

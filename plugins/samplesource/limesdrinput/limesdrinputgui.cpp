@@ -34,7 +34,7 @@
 #include "device/deviceuiset.h"
 
 LimeSDRInputGUI::LimeSDRInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::LimeSDRInputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

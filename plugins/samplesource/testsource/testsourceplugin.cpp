@@ -100,7 +100,7 @@ PluginInterface::SamplingDevices TestSourcePlugin::enumSampleSources(const Origi
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* TestSourcePlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* TestSourcePlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -111,7 +111,7 @@ PluginInstanceGUI* TestSourcePlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* TestSourcePlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* TestSourcePlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

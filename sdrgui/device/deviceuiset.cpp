@@ -25,7 +25,7 @@
 #include "gui/glspectrum.h"
 #include "gui/glspectrumgui.h"
 #include "gui/channelwindow.h"
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "channel/channelutils.h"

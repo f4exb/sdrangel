@@ -102,7 +102,7 @@ PluginInterface::SamplingDevices LimeSDRInputPlugin::enumSampleSources(const Ori
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -113,7 +113,7 @@ PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* LimeSDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

@@ -22,7 +22,7 @@
 #include <QWidget>
 #include <QNetworkRequest>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
 #include "localinput.h"
@@ -36,7 +36,7 @@ namespace Ui {
 	class LocalInputGui;
 }
 
-class LocalInputGui : public QWidget, public PluginInstanceGUI {
+class LocalInputGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

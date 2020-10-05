@@ -35,7 +35,7 @@
 #include "ui_hackrfoutputgui.h"
 
 HackRFOutputGui::HackRFOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::HackRFOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),

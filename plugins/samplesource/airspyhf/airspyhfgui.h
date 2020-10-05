@@ -18,7 +18,7 @@
 #ifndef INCLUDE_AIRSPYHFGUI_H
 #define INCLUDE_AIRSPYHFGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class AirspyHFSampleRates;
 }
 
-class AirspyHFGui : public QWidget, public PluginInstanceGUI {
+class AirspyHFGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

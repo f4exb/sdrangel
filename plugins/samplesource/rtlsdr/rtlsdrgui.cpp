@@ -33,7 +33,7 @@
 #include "dsp/dspcommands.h"
 
 RTLSDRGui::RTLSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::RTLSDRGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

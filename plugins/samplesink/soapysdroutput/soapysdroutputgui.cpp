@@ -39,7 +39,7 @@
 #include "soapysdroutputgui.h"
 
 SoapySDROutputGui::SoapySDROutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::SoapySDROutputGui),
     m_deviceUISet(deviceUISet),
     m_forceSettings(true),

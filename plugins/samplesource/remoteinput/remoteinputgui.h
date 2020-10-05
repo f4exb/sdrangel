@@ -23,7 +23,7 @@
 #include <QWidget>
 #include <QNetworkRequest>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
 #include "remoteinput.h"
@@ -37,7 +37,7 @@ namespace Ui {
 	class RemoteInputGui;
 }
 
-class RemoteInputGui : public QWidget, public PluginInstanceGUI {
+class RemoteInputGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

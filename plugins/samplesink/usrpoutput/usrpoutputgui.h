@@ -19,7 +19,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_USRPOUTPUT_USRPOUTPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_USRPOUTPUT_USRPOUTPUTGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -34,7 +34,7 @@ namespace Ui {
     class USRPOutputGUI;
 }
 
-class USRPOutputGUI : public QWidget, public PluginInstanceGUI {
+class USRPOutputGUI : public DeviceGUI {
     Q_OBJECT
 
 public:

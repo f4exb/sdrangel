@@ -105,7 +105,7 @@ PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources(const Origin
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -116,7 +116,7 @@ PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* XTRXInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

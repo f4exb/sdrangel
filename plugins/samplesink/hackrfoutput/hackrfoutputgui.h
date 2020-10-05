@@ -21,7 +21,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
 #include "hackrfoutput.h"
@@ -35,7 +35,7 @@ namespace Ui {
 	class HackRFOutputGui;
 }
 
-class HackRFOutputGui : public QWidget, public PluginInstanceGUI {
+class HackRFOutputGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

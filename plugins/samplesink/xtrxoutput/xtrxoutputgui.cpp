@@ -32,7 +32,7 @@
 #include "xtrxoutputgui.h"
 
 XTRXOutputGUI::XTRXOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::XTRXOutputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

@@ -103,7 +103,7 @@ PluginInterface::SamplingDevices XTRXOutputPlugin::enumSampleSinks(const OriginD
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -114,7 +114,7 @@ PluginInstanceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* XTRXOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

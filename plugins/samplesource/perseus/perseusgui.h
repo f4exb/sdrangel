@@ -18,7 +18,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSGUI_H_
 #define PLUGINS_SAMPLESOURCE_PERSEUS_PERSEUSGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -32,7 +32,7 @@ namespace Ui {
 	class PerseusGui;
 }
 
-class PerseusGui : public QWidget, public PluginInstanceGUI {
+class PerseusGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

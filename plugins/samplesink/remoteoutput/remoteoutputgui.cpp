@@ -47,7 +47,7 @@
 #include "udpsinkfec.h"
 
 RemoteOutputSinkGui::RemoteOutputSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::RemoteOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

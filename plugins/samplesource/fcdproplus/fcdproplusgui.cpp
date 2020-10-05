@@ -34,7 +34,7 @@
 #include "fcdtraits.h"
 
 FCDProPlusGui::FCDProPlusGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::FCDProPlusGui),
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),

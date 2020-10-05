@@ -18,7 +18,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_BLADERF2INPUT_BLADERF2INPUTGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -32,7 +32,7 @@ namespace Ui {
     class Bladerf2InputGui;
 }
 
-class BladeRF2InputGui : public QWidget, public PluginInstanceGUI {
+class BladeRF2InputGui : public DeviceGUI {
     Q_OBJECT
 
 public:
