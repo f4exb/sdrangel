@@ -98,7 +98,7 @@ PluginInterface::SamplingDevices BladeRF2OutputPlugin::enumSampleSinks(const Ori
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -109,7 +109,7 @@ PluginInstanceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* BladeRF2OutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

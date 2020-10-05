@@ -36,7 +36,7 @@
 #include "ui_hackrfinputgui.h"
 
 HackRFInputGui::HackRFInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::HackRFInputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

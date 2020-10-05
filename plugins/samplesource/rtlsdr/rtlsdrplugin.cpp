@@ -101,7 +101,7 @@ PluginInterface::SamplingDevices RTLSDRPlugin::enumSampleSources(const OriginDev
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -112,7 +112,7 @@ PluginInstanceGUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* RTLSDRPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

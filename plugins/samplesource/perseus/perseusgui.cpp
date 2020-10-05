@@ -32,7 +32,7 @@
 #include "perseusgui.h"
 
 PerseusGui::PerseusGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::PerseusGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

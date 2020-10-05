@@ -96,7 +96,7 @@ PluginInterface::SamplingDevices PlutoSDRInputPlugin::enumSampleSources(const Or
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -107,7 +107,7 @@ PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* PlutoSDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

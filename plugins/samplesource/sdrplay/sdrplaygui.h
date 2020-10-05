@@ -18,7 +18,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_
 #define PLUGINS_SAMPLESOURCE_SDRPLAY_SDRPLAYGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 #include <vector>
@@ -34,7 +34,7 @@ namespace Ui {
     class SDRPlayGui;
 }
 
-class SDRPlayGui : public QWidget, public PluginInstanceGUI {
+class SDRPlayGui : public DeviceGUI {
     Q_OBJECT
 
 public:

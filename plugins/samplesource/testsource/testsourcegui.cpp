@@ -40,7 +40,7 @@
 #include "device/deviceuiset.h"
 
 TestSourceGui::TestSourceGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::TestSourceGui),
     m_deviceUISet(deviceUISet),
     m_settings(),

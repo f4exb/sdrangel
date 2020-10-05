@@ -18,7 +18,7 @@
 #ifndef _TESTSOURCE_TESTSOURCEGUI_H_
 #define _TESTSOURCE_TESTSOURCEGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class TestSourceGui;
 }
 
-class TestSourceGui : public QWidget, public PluginInstanceGUI {
+class TestSourceGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

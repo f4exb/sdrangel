@@ -102,7 +102,7 @@ PluginInterface::SamplingDevices USRPInputPlugin::enumSampleSources(const Origin
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* USRPInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* USRPInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -113,7 +113,7 @@ PluginInstanceGUI* USRPInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* USRPInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* USRPInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

@@ -38,7 +38,7 @@ public:
 
 	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
 	virtual SamplingDevices enumSampleSources(const OriginDevices& originDevices);
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
+	virtual DeviceGUI* createSampleSourcePluginInstanceGUI(
 	        const QString& sourceId,
 	        QWidget **widget,
 	        DeviceUISet *deviceUISet);

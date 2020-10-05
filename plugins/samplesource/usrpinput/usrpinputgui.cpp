@@ -35,7 +35,7 @@
 #include "device/deviceuiset.h"
 
 USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::USRPInputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

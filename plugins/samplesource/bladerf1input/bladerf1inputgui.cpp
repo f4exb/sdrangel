@@ -34,7 +34,7 @@
 #include "bladerf1inputgui.h"
 
 Bladerf1InputGui::Bladerf1InputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::Bladerf1InputGui),
 	m_deviceUISet(deviceUISet),
 	m_forceSettings(true),

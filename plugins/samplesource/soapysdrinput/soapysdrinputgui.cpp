@@ -40,7 +40,7 @@
 #include "soapysdrinputgui.h"
 
 SoapySDRInputGui::SoapySDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::SoapySDRInputGui),
     m_deviceUISet(deviceUISet),
     m_forceSettings(true),

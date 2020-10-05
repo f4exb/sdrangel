@@ -35,7 +35,7 @@
 #include "dsp/dspcommands.h"
 
 AirspyGui::AirspyGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::AirspyGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

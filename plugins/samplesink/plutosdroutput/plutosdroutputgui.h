@@ -23,7 +23,7 @@
 #include <QTimer>
 
 #include "util/messagequeue.h"
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 
 #include "plutosdroutput.h"
 #include "plutosdroutputsettings.h"
@@ -35,7 +35,7 @@ namespace Ui {
     class PlutoSDROutputGUI;
 }
 
-class PlutoSDROutputGUI : public QWidget, public PluginInstanceGUI {
+class PlutoSDROutputGUI : public DeviceGUI {
     Q_OBJECT
 
 public:

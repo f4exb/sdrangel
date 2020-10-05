@@ -46,7 +46,7 @@
 
 
 LocalInputGui::LocalInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::LocalInputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

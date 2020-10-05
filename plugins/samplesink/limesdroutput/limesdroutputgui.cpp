@@ -30,7 +30,7 @@
 #include "limesdroutputgui.h"
 
 LimeSDROutputGUI::LimeSDROutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::LimeSDROutputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

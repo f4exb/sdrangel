@@ -34,7 +34,7 @@ class DSPDeviceSinkEngine;
 class DSPDeviceMIMOEngine;
 class ChannelMarker;
 class PluginAPI;
-class PluginInstanceGUI;
+class DeviceGUI;
 class ChannelAPI;
 class ChannelGUI;
 class Preset;
@@ -54,7 +54,7 @@ public:
     GLSpectrumGUI *m_spectrumGUI;
     ChannelWindow *m_channelWindow;
     DeviceAPI *m_deviceAPI;
-    PluginInstanceGUI *m_deviceGUI;
+    DeviceGUI *m_deviceGUI;
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;

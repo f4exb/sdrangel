@@ -24,7 +24,7 @@
 
 #include "util/messagequeue.h"
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "plutosdrinput.h"
 #include "plutosdrinputsettings.h"
 
@@ -35,7 +35,7 @@ namespace Ui {
     class PlutoSDRInputGUI;
 }
 
-class PlutoSDRInputGui : public QWidget, public PluginInstanceGUI {
+class PlutoSDRInputGui : public DeviceGUI {
     Q_OBJECT
 
 public:

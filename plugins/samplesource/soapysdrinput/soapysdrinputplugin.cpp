@@ -103,7 +103,7 @@ PluginInterface::SamplingDevices SoapySDRInputPlugin::enumSampleSources(const Or
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -114,7 +114,7 @@ PluginInstanceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* SoapySDRInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

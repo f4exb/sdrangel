@@ -33,7 +33,7 @@
 #include "plutosdrinputgui.h"
 
 PlutoSDRInputGui::PlutoSDRInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::PlutoSDRInputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

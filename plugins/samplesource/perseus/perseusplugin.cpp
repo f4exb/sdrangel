@@ -119,7 +119,7 @@ PluginInterface::SamplingDevices PerseusPlugin::enumSampleSources(const OriginDe
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -130,7 +130,7 @@ PluginInstanceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* PerseusPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

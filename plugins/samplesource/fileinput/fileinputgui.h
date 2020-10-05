@@ -18,7 +18,7 @@
 #ifndef INCLUDE_FILEINPUTGUI_H
 #define INCLUDE_FILEINPUTGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class FileInputGUI;
 }
 
-class FileInputGUI : public QWidget, public PluginInstanceGUI {
+class FileInputGUI : public DeviceGUI {
 	Q_OBJECT
 
 public:

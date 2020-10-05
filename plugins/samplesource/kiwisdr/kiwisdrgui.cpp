@@ -41,7 +41,7 @@
 #include "device/deviceuiset.h"
 
 KiwiSDRGui::KiwiSDRGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::KiwiSDRGui),
     m_deviceUISet(deviceUISet),
     m_settings(),

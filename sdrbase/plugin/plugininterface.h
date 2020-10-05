@@ -23,7 +23,7 @@ class DeviceSet;
 class DeviceUISet;
 class FeatureUISet;
 class WebAPIAdapterInterface;
-class PluginInstanceGUI;
+class DeviceGUI;
 class QWidget;
 class DeviceSampleSource;
 class DeviceSampleSink;
@@ -218,7 +218,7 @@ public:
         return SamplingDevices();
     }
 
-	virtual PluginInstanceGUI* createSampleSourcePluginInstanceGUI(
+	virtual DeviceGUI* createSampleSourcePluginInstanceGUI(
             const QString& sourceId,
             QWidget **widget,
             DeviceUISet *deviceUISet)
@@ -251,7 +251,7 @@ public:
         return SamplingDevices();
     }
 
-	virtual PluginInstanceGUI* createSampleSinkPluginInstanceGUI(
+	virtual DeviceGUI* createSampleSinkPluginInstanceGUI(
             const QString& sinkId,
             QWidget **widget,
             DeviceUISet *deviceUISet)
@@ -285,7 +285,7 @@ public:
         return SamplingDevices();
     }
 
-	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
+	virtual DeviceGUI* createSampleMIMOPluginInstanceGUI(
             const QString& mimoId,
             QWidget **widget,
             DeviceUISet *deviceUISet)

@@ -19,7 +19,7 @@
 #ifndef PLUGINS_SAMPLESOURCE_USRPINPUT_USRPINPUTGUI_H_
 #define PLUGINS_SAMPLESOURCE_USRPINPUT_USRPINPUTGUI_H_
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -33,7 +33,7 @@ namespace Ui {
     class USRPInputGUI;
 }
 
-class USRPInputGUI : public QWidget, public PluginInstanceGUI {
+class USRPInputGUI : public DeviceGUI {
     Q_OBJECT
 
 public:

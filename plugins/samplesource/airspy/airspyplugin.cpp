@@ -159,7 +159,7 @@ PluginInterface::SamplingDevices AirspyPlugin::enumSampleSources(const OriginDev
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -170,7 +170,7 @@ PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
     return nullptr;
 }
 #else
-PluginInstanceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* AirspyPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

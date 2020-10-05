@@ -35,7 +35,7 @@
 #include "device/deviceuiset.h"
 
 XTRXInputGUI::XTRXInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::XTRXInputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

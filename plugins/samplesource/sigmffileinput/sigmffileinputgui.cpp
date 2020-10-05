@@ -41,7 +41,7 @@
 #include "sigmffileinputgui.h"
 
 SigMFFileInputGUI::SigMFFileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::SigMFFileInputGUI),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

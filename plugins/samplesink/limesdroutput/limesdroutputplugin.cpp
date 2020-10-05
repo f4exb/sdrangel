@@ -102,7 +102,7 @@ PluginInterface::SamplingDevices LimeSDROutputPlugin::enumSampleSinks(const Orig
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -113,7 +113,7 @@ PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* LimeSDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

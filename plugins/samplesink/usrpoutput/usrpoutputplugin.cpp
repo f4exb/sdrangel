@@ -102,7 +102,7 @@ PluginInterface::SamplingDevices USRPOutputPlugin::enumSampleSinks(const OriginD
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* USRPOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* USRPOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -113,7 +113,7 @@ PluginInstanceGUI* USRPOutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* USRPOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* USRPOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

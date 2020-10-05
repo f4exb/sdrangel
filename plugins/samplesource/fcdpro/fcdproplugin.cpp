@@ -108,7 +108,7 @@ PluginInterface::SamplingDevices FCDProPlugin::enumSampleSources(const OriginDev
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -119,7 +119,7 @@ PluginInstanceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* FCDProPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

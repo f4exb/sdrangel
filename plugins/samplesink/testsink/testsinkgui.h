@@ -18,7 +18,7 @@
 #ifndef INCLUDE_TESTSINKGUI_H
 #define INCLUDE_TESTSINKGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -36,7 +36,7 @@ namespace Ui {
 	class TestSinkGui;
 }
 
-class TestSinkGui : public QWidget, public PluginInstanceGUI {
+class TestSinkGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

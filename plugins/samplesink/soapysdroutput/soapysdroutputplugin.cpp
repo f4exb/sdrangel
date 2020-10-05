@@ -104,7 +104,7 @@ PluginInterface::SamplingDevices SoapySDROutputPlugin::enumSampleSinks(const Ori
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -115,7 +115,7 @@ PluginInstanceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* SoapySDROutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

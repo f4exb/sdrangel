@@ -37,7 +37,7 @@
 #include "fileoutputgui.h"
 
 FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::FileOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

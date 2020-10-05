@@ -18,7 +18,7 @@
 #ifndef INCLUDE_FCDPROGUI_H
 #define INCLUDE_FCDPROGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class FCDProGui;
 }
 
-class FCDProGui : public QWidget, public PluginInstanceGUI {
+class FCDProGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

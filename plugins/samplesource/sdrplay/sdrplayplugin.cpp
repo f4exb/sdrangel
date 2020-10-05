@@ -122,7 +122,7 @@ PluginInterface::SamplingDevices SDRPlayPlugin::enumSampleSources(const OriginDe
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -133,7 +133,7 @@ PluginInstanceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* SDRPlayPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

@@ -31,7 +31,7 @@
 #include "usrpoutputgui.h"
 
 USRPOutputGUI::USRPOutputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::USRPOutputGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

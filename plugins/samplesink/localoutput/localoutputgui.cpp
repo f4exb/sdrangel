@@ -45,7 +45,7 @@
 
 
 LocalOutputGui::LocalOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::LocalOutputGui),
 	m_deviceUISet(deviceUISet),
 	m_settings(),

@@ -21,7 +21,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
 #include "sigmffileinputsettings.h"
@@ -34,7 +34,7 @@ namespace Ui {
 	class SigMFFileInputGUI;
 }
 
-class SigMFFileInputGUI : public QWidget, public PluginInstanceGUI {
+class SigMFFileInputGUI : public DeviceGUI {
 	Q_OBJECT
 
 public:

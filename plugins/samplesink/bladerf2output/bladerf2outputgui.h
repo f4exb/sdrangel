@@ -21,7 +21,7 @@
 #include <QTimer>
 #include <QWidget>
 
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 #include "util/messagequeue.h"
 
 #include "bladerf2output.h"
@@ -33,7 +33,7 @@ namespace Ui {
     class BladeRF2OutputGui;
 }
 
-class BladeRF2OutputGui : public QWidget, public PluginInstanceGUI {
+class BladeRF2OutputGui : public DeviceGUI {
     Q_OBJECT
 
 public:

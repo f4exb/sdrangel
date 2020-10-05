@@ -100,7 +100,7 @@ PluginInterface::SamplingDevices LocalOutputPlugin::enumSampleSinks(const Origin
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LocalOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* LocalOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -111,7 +111,7 @@ PluginInstanceGUI* LocalOutputPlugin::createSampleSinkPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* LocalOutputPlugin::createSampleSinkPluginInstanceGUI(
+DeviceGUI* LocalOutputPlugin::createSampleSinkPluginInstanceGUI(
         const QString& sinkId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

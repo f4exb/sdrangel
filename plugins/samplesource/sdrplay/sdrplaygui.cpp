@@ -34,7 +34,7 @@
 
 
 SDRPlayGui::SDRPlayGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::SDRPlayGui),
     m_deviceUISet(deviceUISet),
     m_doApplySettings(true),

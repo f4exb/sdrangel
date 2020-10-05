@@ -18,7 +18,7 @@
 #ifndef INCLUDE_FILEOUTPUTGUI_H
 #define INCLUDE_FILEOUTPUTGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -35,7 +35,7 @@ namespace Ui {
 	class FileOutputGui;
 }
 
-class FileOutputGui : public QWidget, public PluginInstanceGUI {
+class FileOutputGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

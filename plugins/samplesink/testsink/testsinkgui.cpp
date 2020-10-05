@@ -36,7 +36,7 @@
 #include "testsinkgui.h"
 
 TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::TestSinkGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

@@ -100,7 +100,7 @@ PluginInterface::SamplingDevices SigMFFileInputPlugin::enumSampleSources(const O
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* SigMFFileInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* SigMFFileInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -111,7 +111,7 @@ PluginInstanceGUI* SigMFFileInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* SigMFFileInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* SigMFFileInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

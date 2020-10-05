@@ -94,7 +94,7 @@ PluginInterface::SamplingDevices HackRFInputPlugin::enumSampleSources(const Orig
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -105,7 +105,7 @@ PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
+DeviceGUI* HackRFInputPlugin::createSampleSourcePluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
