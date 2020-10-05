@@ -408,13 +408,14 @@ if (LINUX)
             GIT_TAG ${UHD_TAG}
             PREFIX "${EXTERNAL_BUILD_LIBRARIES}/uhd"
             CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+            SOURCE_SUBDIR host
             INSTALL_COMMAND ""
             TEST_COMMAND ""
             )
     set(UHD_FOUND ON CACHE INTERNAL "")
     set(UHD_EXTERNAL ON CACHE INTERNAL "")
-    set(UHD_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/uhd/include" CACHE INTERNAL "")
-    set(UHD_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/uhd/libuhd.so" CACHE INTERNAL "")
+    set(UHD_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/uhd/src/uhd/host/include" CACHE INTERNAL "")
+    set(UHD_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libuhd.so" CACHE INTERNAL "")
 
 endif(LINUX)
 
