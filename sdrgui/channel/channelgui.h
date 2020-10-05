@@ -19,11 +19,12 @@
 #define SDRGUI_CHANNEL_CHANNELGUI_H_
 
 #include "gui/rollupwidget.h"
+#include "export.h"
 
 class QCloseEvent;
 class MessageQueue;
 
-class ChannelGUI : public RollupWidget
+class SDRGUI_API ChannelGUI : public RollupWidget
 {
     Q_OBJECT
 public:

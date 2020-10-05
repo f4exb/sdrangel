@@ -20,6 +20,8 @@
 
 #include <QTimer>
 
+#include "export.h"
+
 class DeviceAPI;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -28,7 +30,7 @@ class PluginAPI;
 class ChannelAPI;
 class Preset;
 
-class DeviceSet
+class SDRBASE_API DeviceSet
 {
 public:
     DeviceAPI *m_deviceAPI;

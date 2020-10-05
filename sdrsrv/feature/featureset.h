@@ -21,12 +21,14 @@
 #include <QString>
 #include <QList>
 
+#include "export.h"
+
 class PluginAPI;
 class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
 
-class FeatureSet
+class SDRSRV_API FeatureSet
 {
 public:
     FeatureSet(int tabIndex);

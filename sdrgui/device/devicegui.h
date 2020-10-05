@@ -28,7 +28,7 @@
 class Message;
 class MessageQueue;
 
-class SDRBASE_API DeviceGUI : public QWidget {
+class SDRGUI_API DeviceGUI : public QWidget {
 public:
 	DeviceGUI(QWidget *parent = nullptr) : QWidget(parent) { };
 	virtual ~DeviceGUI() { };
