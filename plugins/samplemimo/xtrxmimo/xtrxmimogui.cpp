@@ -42,7 +42,7 @@
 #include "xtrxmimogui.h"
 
 XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::XTRXMIMOGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

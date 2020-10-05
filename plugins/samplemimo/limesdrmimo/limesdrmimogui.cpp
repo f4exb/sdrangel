@@ -44,7 +44,7 @@
 #include "limesdrmimogui.h"
 
 LimeSDRMIMOGUI::LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::LimeSDRMIMOGUI),
     m_deviceUISet(deviceUISet),
     m_settings(),

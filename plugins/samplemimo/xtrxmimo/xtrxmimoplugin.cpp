@@ -94,7 +94,7 @@ PluginInterface::SamplingDevices XTRXMIMOPlugin::enumSampleMIMO(const OriginDevi
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* XTRXMIMOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* XTRXMIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -105,7 +105,7 @@ PluginInstanceGUI* XTRXMIMOPlugin::createSampleMIMOPluginInstanceGUI(
     return nullptr;
 }
 #else
-PluginInstanceGUI* XTRXMIMOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* XTRXMIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

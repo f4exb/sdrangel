@@ -41,7 +41,7 @@
 #include "testmigui.h"
 
 TestMIGui::TestMIGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::TestMIGui),
     m_deviceUISet(deviceUISet),
     m_settings(),

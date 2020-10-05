@@ -44,7 +44,7 @@
 #include "bladerf2mimogui.h"
 
 BladeRF2MIMOGui::BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::BladeRF2MIMOGui),
     m_deviceUISet(deviceUISet),
     m_settings(),

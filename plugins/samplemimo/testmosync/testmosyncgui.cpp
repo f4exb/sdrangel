@@ -36,7 +36,7 @@
 #include "testmosyncgui.h"
 
 TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
-	QWidget(parent),
+	DeviceGUI(parent),
 	ui(new Ui::TestMOSyncGui),
 	m_deviceUISet(deviceUISet),
 	m_doApplySettings(true),

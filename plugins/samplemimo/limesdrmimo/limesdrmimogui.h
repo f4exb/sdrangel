@@ -22,7 +22,7 @@
 #include <QWidget>
 
 #include "util/messagequeue.h"
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 
 #include "limesdrmimosettings.h"
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class LimeSDRMIMOGUI;
 }
 
-class LimeSDRMIMOGUI : public QWidget, public PluginInstanceGUI {
+class LimeSDRMIMOGUI : public DeviceGUI {
 	Q_OBJECT
 public:
 	explicit LimeSDRMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent = nullptr);

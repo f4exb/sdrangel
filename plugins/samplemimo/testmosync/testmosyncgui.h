@@ -18,7 +18,7 @@
 #ifndef INCLUDE_TESTMOSYNCGUI_H
 #define INCLUDE_TESTMOSYNCGUI_H
 
-#include <plugin/plugininstancegui.h>
+#include <device/devicegui.h>
 #include <QTimer>
 #include <QWidget>
 
@@ -35,7 +35,7 @@ namespace Ui {
 	class TestMOSyncGui;
 }
 
-class TestMOSyncGui : public QWidget, public PluginInstanceGUI {
+class TestMOSyncGui : public DeviceGUI {
 	Q_OBJECT
 
 public:

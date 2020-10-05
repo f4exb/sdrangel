@@ -93,7 +93,7 @@ PluginInterface::SamplingDevices BladeRF2MIMOPlugin::enumSampleMIMO(const Origin
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* BladeRF2MIMOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* BladeRF2MIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -104,7 +104,7 @@ PluginInstanceGUI* BladeRF2MIMOPlugin::createSampleMIMOPluginInstanceGUI(
     return nullptr;
 }
 #else
-PluginInstanceGUI* BladeRF2MIMOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* BladeRF2MIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

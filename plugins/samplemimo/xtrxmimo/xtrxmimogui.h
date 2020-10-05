@@ -22,7 +22,7 @@
 #include <QWidget>
 
 #include "util/messagequeue.h"
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 
 #include "xtrxmimosettings.h"
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class XTRXMIMOGUI;
 }
 
-class XTRXMIMOGUI : public QWidget, public PluginInstanceGUI {
+class XTRXMIMOGUI : public DeviceGUI {
 	Q_OBJECT
 public:
 	explicit XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent = nullptr);

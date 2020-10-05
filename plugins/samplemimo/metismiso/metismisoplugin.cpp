@@ -94,7 +94,7 @@ PluginInterface::SamplingDevices MetisMISOPlugin::enumSampleMIMO(const OriginDev
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* MetisMISOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* MetisMISOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -105,7 +105,7 @@ PluginInstanceGUI* MetisMISOPlugin::createSampleMIMOPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* MetisMISOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* MetisMISOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

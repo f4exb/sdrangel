@@ -94,7 +94,7 @@ PluginInterface::SamplingDevices LimeSDRMIMOPlugin::enumSampleMIMO(const OriginD
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -105,7 +105,7 @@ PluginInstanceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
     return nullptr;
 }
 #else
-PluginInstanceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

@@ -39,7 +39,7 @@ public:
 
 	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
 	virtual SamplingDevices enumSampleMIMO(const OriginDevices& originDevices);
-	virtual PluginInstanceGUI* createSampleMIMOPluginInstanceGUI(
+	virtual DeviceGUI* createSampleMIMOPluginInstanceGUI(
 	        const QString& sourceId,
 	        QWidget **widget,
 	        DeviceUISet *deviceUISet);
@@ -48,7 +48,7 @@ public:
 
 	static const QString m_hardwareID;
     static const QString m_deviceTypeID;
-	
+
 private:
 	static const PluginDescriptor m_pluginDescriptor;
 };

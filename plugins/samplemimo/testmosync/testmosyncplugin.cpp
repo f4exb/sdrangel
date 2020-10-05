@@ -98,7 +98,7 @@ PluginInterface::SamplingDevices TestMOSyncPlugin::enumSampleMIMO(const OriginDe
 }
 
 #ifdef SERVER_MODE
-PluginInstanceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -109,7 +109,7 @@ PluginInstanceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
     return 0;
 }
 #else
-PluginInstanceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)

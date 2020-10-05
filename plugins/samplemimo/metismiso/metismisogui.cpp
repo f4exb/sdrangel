@@ -41,7 +41,7 @@
 #include "metismisogui.h"
 
 MetisMISOGui::MetisMISOGui(DeviceUISet *deviceUISet, QWidget* parent) :
-    QWidget(parent),
+    DeviceGUI(parent),
     ui(new Ui::MetisMISOGui),
     m_deviceUISet(deviceUISet),
     m_settings(),

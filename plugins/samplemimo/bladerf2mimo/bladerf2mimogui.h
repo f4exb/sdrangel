@@ -22,7 +22,7 @@
 #include <QWidget>
 
 #include "util/messagequeue.h"
-#include "plugin/plugininstancegui.h"
+#include "device/devicegui.h"
 
 #include "bladerf2mimosettings.h"
 
@@ -33,7 +33,7 @@ namespace Ui {
 	class BladeRF2MIMOGui;
 }
 
-class BladeRF2MIMOGui : public QWidget, public PluginInstanceGUI {
+class BladeRF2MIMOGui : public DeviceGUI {
 	Q_OBJECT
 public:
 	explicit BladeRF2MIMOGui(DeviceUISet *deviceUISet, QWidget* parent = nullptr);
