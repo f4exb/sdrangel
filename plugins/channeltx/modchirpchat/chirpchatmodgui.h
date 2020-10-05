@@ -18,7 +18,6 @@
 #ifndef PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
 #define PLUGINS_CHANNELTX_MODLORA_LORAMODGUI_H_
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"

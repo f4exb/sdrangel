@@ -18,7 +18,6 @@
 #ifndef INCLUDE_INTERFEROMETERGUI_H
 #define INCLUDE_INTERFEROMETERGUI_H
 
-#include "plugin/plugininstancegui.h"
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"

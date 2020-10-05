@@ -22,7 +22,6 @@
 
 #include <QObject>
 
-#include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"
@@ -38,7 +37,7 @@ namespace Ui {
     class BeamSteeringCWModGUI;
 }
 
-class BeamSteeringCWModGUI : public ChannelGUI, public PluginInstanceGUI {
+class BeamSteeringCWModGUI : public ChannelGUI {
     Q_OBJECT
 public:
     static BeamSteeringCWModGUI* create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, MIMOChannel *mimoChannel);
