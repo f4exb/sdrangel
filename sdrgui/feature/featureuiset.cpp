@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "gui/featurewindow.h"
-#include "plugin/plugininstancegui.h"
 #include "plugin/pluginapi.h"
 #include "settings/featuresetpreset.h"
 #include "feature/featureutils.h"
@@ -127,7 +126,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
     for (int i = 0; i < preset->getFeatureCount(); i++)
     {
         const FeatureSetPreset::FeatureConfig& featureConfig = preset->getFeatureConfig(i);
-        PluginInstanceGUI *featureGUI = nullptr;
+        FeatureGUI *featureGUI = nullptr;
 
         // create feature instance
 
@@ -140,7 +139,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
                         qPrintable(featureConfig.m_featureIdURI));
                 Feature *feature =
                         (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
-                FeatureGUI *featureGUI =
+                featureGUI =
                         (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
                 registerFeatureInstance(feature->getURI(), featureGUI, feature);
                 break;

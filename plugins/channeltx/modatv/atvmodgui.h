@@ -18,7 +18,6 @@
 #ifndef PLUGINS_CHANNELTX_MODTV_ATVMODGUI_H_
 #define PLUGINS_CHANNELTX_MODTV_ATVMODGUI_H_
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"

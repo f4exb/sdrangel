@@ -18,7 +18,6 @@
 #ifndef PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEGUI_H_
 #define PLUGINS_CHANNELTX_UDPSINK_UDPSOURCEGUI_H_
 
-#include <plugin/plugininstancegui.h>
 #include <QObject>
 
 #include "channel/channelgui.h"

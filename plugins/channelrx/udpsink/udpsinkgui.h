@@ -19,7 +19,6 @@
 #ifndef INCLUDE_UDPSRCGUI_H
 #define INCLUDE_UDPSRCGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include <QHostAddress>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"

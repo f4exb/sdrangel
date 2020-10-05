@@ -1,7 +1,6 @@
 #ifndef INCLUDE_WFMDEMODGUI_H
 #define INCLUDE_WFMDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"

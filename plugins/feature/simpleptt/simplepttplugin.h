@@ -21,7 +21,6 @@
 #include <QObject>
 #include "plugin/plugininterface.h"
 
-class PluginInstanceGUI;
 class FeatureGUI;
 class WebAPIAdapterInterface;
 

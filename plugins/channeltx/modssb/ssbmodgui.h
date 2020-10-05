@@ -20,7 +20,6 @@
 
 #include <QIcon>
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"

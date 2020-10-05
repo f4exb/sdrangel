@@ -126,7 +126,7 @@ public:
 private:
     StreamType m_streamType;
     /** Unique identifier in a device set used for sorting. Used when there is no GUI.
-     * In GUI version it is supported by GUI object name accessed through PluginInstanceGUI.
+     * In GUI version it is supported by GUI object name accessed through ChannelGUI.
      */
     QString m_name;
 

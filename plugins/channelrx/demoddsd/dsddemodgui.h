@@ -19,7 +19,6 @@
 #ifndef INCLUDE_DSDDEMODGUI_H
 #define INCLUDE_DSDDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include <QMenu>
 
 #include "channel/channelgui.h"

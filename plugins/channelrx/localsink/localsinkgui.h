@@ -22,7 +22,6 @@
 
 #include <QObject>
 
-#include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"

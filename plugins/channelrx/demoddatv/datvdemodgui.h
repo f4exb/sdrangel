@@ -21,7 +21,6 @@
 #define INCLUDE_DATVDEMODGUI_H
 
 #include "channel/channelgui.h"
-#include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/movingaverage.h"
 

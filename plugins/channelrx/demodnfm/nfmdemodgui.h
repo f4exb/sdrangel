@@ -1,7 +1,6 @@
 #ifndef INCLUDE_NFMDEMODGUI_H
 #define INCLUDE_NFMDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
 #include "dsp/channelmarker.h"
