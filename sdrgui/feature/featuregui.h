@@ -19,11 +19,12 @@
 #define SDRGUI_FEATURE_FEATUREGUI_H_
 
 #include "gui/rollupwidget.h"
+#include "export.h"
 
 class QCloseEvent;
 class MessageQueue;
 
-class FeatureGUI : public RollupWidget
+class SDRGUI_API FeatureGUI : public RollupWidget
 {
     Q_OBJECT
 public:

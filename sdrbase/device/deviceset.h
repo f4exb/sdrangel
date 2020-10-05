@@ -20,6 +20,8 @@
 
 #include <QTimer>
 
+#include "export.h"
+
 class DeviceAPI;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -35,7 +37,7 @@ namespace SWGSDRangel {
     class SWGSuccessResponse;
 };
 
-class DeviceSet
+class SDRBASE_API DeviceSet
 {
 public:
     DeviceAPI *m_deviceAPI;
