@@ -11,7 +11,6 @@ class QString;
 
 class PluginManager;
 class MessageQueue;
-class PluginInstanceGUI;
 
 class SDRBASE_API PluginAPI : public QObject {
 	Q_OBJECT

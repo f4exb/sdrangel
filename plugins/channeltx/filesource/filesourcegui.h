@@ -18,7 +18,6 @@
 #ifndef PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEGUI_H_
 #define PLUGINS_CHANNELTX_FILESOURCE_FILESOURCEGUI_H_
 
-#include "plugin/plugininstancegui.h"
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
 #include "util/messagequeue.h"

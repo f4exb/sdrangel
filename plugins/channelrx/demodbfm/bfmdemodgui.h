@@ -19,7 +19,6 @@
 #ifndef INCLUDE_BFMDEMODGUI_H
 #define INCLUDE_BFMDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/messagequeue.h"

@@ -18,7 +18,6 @@
 #ifndef INCLUDE_CHANNELANALYZERNGGUI_H
 #define INCLUDE_CHANNELANALYZERNGGUI_H
 
-#include "plugin/plugininstancegui.h"
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "dsp/dsptypes.h"

@@ -39,7 +39,6 @@ class DSPDeviceSinkEngine;
 class Indicator;
 class GLSpectrumGUI;
 class PluginAPI;
-class PluginInstanceGUI;
 class ChannelGUI;
 class ChannelMarker;
 class PluginManager;

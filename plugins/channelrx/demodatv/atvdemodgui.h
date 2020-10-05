@@ -19,7 +19,6 @@
 #ifndef INCLUDE_ATVDEMODGUI_H
 #define INCLUDE_ATVDEMODGUI_H
 
-#include <plugin/plugininstancegui.h>
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
