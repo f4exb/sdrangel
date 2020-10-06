@@ -32,7 +32,7 @@
 const PluginDescriptor MetisMISOPlugin::m_pluginDescriptor = {
     QString("MetisMISO"),
 	QString("Metis MISO"),
-	QString("5.10.0"),
+	QString("5.13.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

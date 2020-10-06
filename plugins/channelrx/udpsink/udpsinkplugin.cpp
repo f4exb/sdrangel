@@ -29,7 +29,7 @@
 const PluginDescriptor UDPSinkPlugin::m_pluginDescriptor = {
     UDPSink::m_channelId,
 	QString("UDP Channel Sink"),
-	QString("4.12.3"),
+	QString("4.19.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

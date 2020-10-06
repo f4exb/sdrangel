@@ -1,3 +1,10 @@
+sdrangel (5.13.0-1) unstable; urgency=medium
+
+   * USRP support. PR #652 (cherry picked)
+   * Removal of PluginInstanceGUI and related refactoring
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 06 Oct 2020 05:40:30 +0200
+
 sdrangel (5.12.1-1) unstable; urgency=medium
 
    * Fixes to RigCtl Server and Simple PTT plugins
