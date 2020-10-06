@@ -28,7 +28,7 @@
 const PluginDescriptor FileSourcePlugin::m_pluginDescriptor = {
     FileSource::m_channelId,
     QString("File channel source"),
-    QString("4.15.3"),
+    QString("4.19.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

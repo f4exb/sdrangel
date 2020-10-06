@@ -30,7 +30,7 @@
 const PluginDescriptor RemoteSinkPlugin::m_pluginDescriptor = {
     RemoteSink::m_channelId,
     QString("Remote channel sink"),
-    QString("4.12.3"),
+    QString("4.19.0"),
     QString("(c) Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
