@@ -273,7 +273,13 @@ elseif(WIN32 OR MINGW)
     # libusb
     get_filename_component(GFN_LIBUSB_DIR "${LIBUSB_LIBRARIES}" DIRECTORY)
     install(FILES "${GFN_LIBUSB_DIR}/libusb-1.0${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-    
+    # codec2
+    install(DIRECTORY "${CODEC2_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # uhd
+    install(DIRECTORY "${UHD_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
     install(CODE "
       # remove *.lib files
       # TODO find a better way
