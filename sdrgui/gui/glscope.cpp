@@ -46,6 +46,7 @@ GLScope::GLScope(QWidget *parent) : QGLWidget(parent),
     m_bufferIndex(0),
     m_displayMode(DisplayX),
     m_displayPolGrid(false),
+    m_masterTimer(nullptr),
     m_dataChanged(0),
     m_configChanged(false),
     m_sampleRate(0),
@@ -2022,6 +2023,18 @@ void GLScope::connectTimer(const QTimer &timer)
     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
     m_timer.stop();
+    m_masterTimer = &timer;
+}
+
+void GLScope::disconnectTimer()
+{
+    qDebug() << "GLScope::disconnectTimer";
+
+    if (m_masterTimer) {
+        disconnect(m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
+    }
+
+    m_masterTimer = nullptr;
 }
 
 void GLScope::cleanup()
