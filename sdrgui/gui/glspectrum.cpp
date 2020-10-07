@@ -37,6 +37,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
 	m_cursorState(CSNormal),
     m_cursorChannel(0),
+	m_masterTimer(nullptr),
 	m_mouseInside(false),
 	m_changesPending(true),
 	m_centerFrequency(100000000),
@@ -52,7 +53,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_displayTraceIntensity(50),
 	m_invertedWaterfall(true),
 	m_displayMaxHold(false),
-	m_currentSpectrum(0),
+	m_currentSpectrum(nullptr),
 	m_displayCurrent(false),
     m_leftMargin(0),
     m_rightMargin(0),
@@ -61,22 +62,22 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_waterfallHeight(0),
     m_frequencyScaleHeight(0),
     m_bottomMargin(0),
-	m_waterfallBuffer(0),
+	m_waterfallBuffer(nullptr),
 	m_waterfallBufferPos(0),
     m_waterfallTextureHeight(-1),
     m_waterfallTexturePos(0),
     m_displayWaterfall(true),
     m_ssbSpectrum(false),
     m_lsbDisplay(false),
-    m_histogramBuffer(0),
-    m_histogram(0),
+    m_histogramBuffer(nullptr),
+    m_histogram(nullptr),
     m_displayHistogram(true),
     m_displayChanged(false),
     m_displaySourceOrSink(true),
     m_displayStreamIndex(0),
     m_matrixLoc(0),
     m_colorLoc(0),
-    m_messageQueueToGUI(0)
+    m_messageQueueToGUI(nullptr)
 {
 	setAutoFillBackground(false);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -2281,7 +2282,19 @@ void GLSpectrum::connectTimer(const QTimer& timer)
 	qDebug() << "GLSpectrum::connectTimer";
 	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+	m_masterTimer = &timer;
 	m_timer.stop();
+}
+
+void GLSpectrum::disconnectTimer()
+{
+    qDebug() << "GLScope::disconnectTimer";
+
+    if (m_masterTimer) {
+        disconnect(m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
+    }
+
+    m_masterTimer = nullptr;
 }
 
 void GLSpectrum::cleanup()

@@ -55,6 +55,7 @@ public:
     virtual ~GLScope();
 
     void connectTimer(const QTimer& timer);
+    void disconnectTimer();
 
     void setTraces(std::vector<ScopeVis::TraceData>* tracesData, std::vector<float *>* traces);
     void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes);
@@ -145,6 +146,7 @@ private:
     DisplayMode m_displayMode;
     bool m_displayPolGrid;
     QTimer m_timer;
+    const QTimer *m_masterTimer;
     QMutex m_mutex;
     QAtomicInt m_dataChanged;
     bool m_configChanged;

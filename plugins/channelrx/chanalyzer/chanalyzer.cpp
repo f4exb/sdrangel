@@ -51,6 +51,7 @@ ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
 
 ChannelAnalyzer::~ChannelAnalyzer()
 {
+    qDebug("ChannelAnalyzer::~ChannelAnalyzer");
 	m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
@@ -59,6 +60,7 @@ ChannelAnalyzer::~ChannelAnalyzer()
     }
 
     delete m_basebandSink;
+    qDebug("ChannelAnalyzer::~ChannelAnalyzer: done");
 }
 
 void ChannelAnalyzer::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
@@ -106,6 +108,7 @@ bool ChannelAnalyzer::handleMessage(const Message& cmd)
     {
         DSPSignalNotification& cfg = (DSPSignalNotification&) cmd;
         m_basebandSampleRate = cfg.getSampleRate();
+        qDebug("ChannelAnalyzer::handleMessage: DSPSignalNotification: %d", m_basebandSampleRate);
         m_centerFrequency = cfg.getCenterFrequency();
         DSPSignalNotification *notif = new DSPSignalNotification(cfg);
         m_basebandSink->getInputMessageQueue()->push(notif);
