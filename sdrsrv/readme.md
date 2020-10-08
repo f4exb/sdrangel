@@ -1,18 +1,18 @@
 <h1>SDRangel Server</h1>
 
-This folder holds the objects specific to the server (headless) version of SDRangel. The `MainCore` class is the headless equivalent of the `MainWindow` class in the GUI version and plays the same central role. Plugins are built specifically without GUI and are located in the `pluginssrv` folder. 
+This folder holds the objects specific to the server (headless) version of SDRangel. The `MainServer` class is the headless equivalent of the `MainWindow` class in the GUI version and plays the same central role. Plugins are built specifically without GUI and are located in the `pluginssrv` folder.
 
 This document focuses on the functional description of SDRangel server. More details on the technical architecture can be found in the developer's documentation.
 
 The main motivations are:
-  - be able to run SDRangel on hardware with less CPU/GPU requirements in particular without OpenGL support. 
-  - be used in sophisticated remote transponders or repeaters in a headless server configuration. 
+  - be able to run SDRangel on hardware with less CPU/GPU requirements in particular without OpenGL support.
+  - be used in sophisticated remote transponders or repeaters in a headless server configuration.
   - possibility to use Docker technology to host SDRangel server instances in a distributed environment.
-  - possibility to use SDRangel remotely for the RF device interface even more distributed architectures can be supported to share workload in a cluster.   
+  - possibility to use SDRangel remotely for the RF device interface even more distributed architectures can be supported to share workload in a cluster.
   - using the Web REST API interface developers with web technology skills can implement their own GUI.
 
 <h2>Plugins supported</h2>
-  
+
   - Rx channels:
     - AM demodulator
     - BFM (Broadcast FM) demodulator
@@ -31,7 +31,7 @@ The main motivations are:
     - SSB modulator
     - WFM (Wideband FM) modulator
     - UDP source
-    
+
   - Sample sources:
     - Airspy
     - Airspy HF
@@ -47,7 +47,7 @@ The main motivations are:
     - Remote input
     - SDRplay RSP1
     - Test source
-    
+
   - Sample sinks:
     - BladeRF output
     - File sink
@@ -62,9 +62,9 @@ The main motivations are:
   - **-v**: displays version information
   - **-a**: Web REST API server interface IP address
   - **-p**: Web REST API server port
-  
+
 &#9758; the GUI version supports the exact same options.
-  
+
 <h2>Interface</h2>
 
 You can control the SDRangel application (server or GUI) by the means of the REST API. For SDRangel server the REST API is the only interface as there is no GUI. The network interface on which the REST API server listens can be controlled with the `-a` option and its port with the `-p` option. By default the server listens on the loopback address `127.0.0.1` and port `8091`

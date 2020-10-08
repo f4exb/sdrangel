@@ -53,7 +53,7 @@
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
 
-#include "maincore.h"
+#include "mainserver.h"
 #include "loggerwithfile.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
@@ -78,7 +78,7 @@
 #include "limerfe/limerfecontroller.h"
 #endif
 
-WebAPIAdapterSrv::WebAPIAdapterSrv(MainCore& mainCore) :
+WebAPIAdapterSrv::WebAPIAdapterSrv(MainServer& mainCore) :
     m_mainCore(mainCore)
 {
 }
@@ -124,7 +124,7 @@ int WebAPIAdapterSrv::instanceDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    MainCore::MsgDeleteInstance *msg = MainCore::MsgDeleteInstance::create();
+    MainServer::MsgDeleteInstance *msg = MainServer::MsgDeleteInstance::create();
     m_mainCore.getInputMessageQueue()->push(msg);
 
     response.init();
@@ -234,7 +234,7 @@ int WebAPIAdapterSrv::instanceConfigPutPatch(
         m_mainCore.m_settings.addFeatureSetPreset(newPreset);
     }
 
-    MainCore::MsgApplySettings *msg = MainCore::MsgApplySettings::create();
+    MainServer::MsgApplySettings *msg = MainServer::MsgApplySettings::create();
     m_mainCore.m_inputMessageQueue.push(msg);
 
     return 200;
@@ -1284,7 +1284,7 @@ int WebAPIAdapterSrv::instancePresetPatch(
         return 404;
     }
 
-    MainCore::MsgLoadPreset *msg = MainCore::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
+    MainServer::MsgLoadPreset *msg = MainServer::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
@@ -1353,7 +1353,7 @@ int WebAPIAdapterSrv::instancePresetPut(
         }
     }
 
-    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
+    MainServer::MsgSavePreset *msg = MainServer::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
@@ -1420,7 +1420,7 @@ int WebAPIAdapterSrv::instancePresetPost(
         return 409;
     }
 
-    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
+    MainServer::MsgSavePreset *msg = MainServer::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
@@ -1457,7 +1457,7 @@ int WebAPIAdapterSrv::instancePresetDelete(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
-    MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
+    MainServer::MsgDeletePreset *msg = MainServer::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
     m_mainCore.m_inputMessageQueue.push(msg);
 
     return 202;
@@ -1485,7 +1485,7 @@ int WebAPIAdapterSrv::instanceDeviceSetPost(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(direction);
+    MainServer::MsgAddDeviceSet *msg = MainServer::MsgAddDeviceSet::create(direction);
     m_mainCore.m_inputMessageQueue.push(msg);
 
     response.init();
@@ -1500,7 +1500,7 @@ int WebAPIAdapterSrv::instanceDeviceSetDelete(
 {
     if (m_mainCore.m_deviceSets.size() > 0)
     {
-        MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
+        MainServer::MsgRemoveLastDeviceSet *msg = MainServer::MsgRemoveLastDeviceSet::create();
         m_mainCore.m_inputMessageQueue.push(msg);
 
         response.init();
@@ -1635,7 +1635,7 @@ int WebAPIAdapterSrv::devicesetDevicePut(
                 continue;
             }
 
-            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
+            MainServer::MsgSetDevice *msg = MainServer::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();
@@ -2295,7 +2295,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, false);
+                MainServer::MsgAddChannel *msg = MainServer::MsgAddChannel::create(deviceSetIndex, index, false);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
                 response.init();
@@ -2331,7 +2331,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+            	MainServer::MsgAddChannel *msg = MainServer::MsgAddChannel::create(deviceSetIndex, index, true);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
                 response.init();
@@ -2367,7 +2367,7 @@ int WebAPIAdapterSrv::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+            	MainServer::MsgAddChannel *msg = MainServer::MsgAddChannel::create(deviceSetIndex, index, true);
                 m_mainCore.m_inputMessageQueue.push(msg);
 
                 response.init();
@@ -2409,7 +2409,7 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
 
         if (channelIndex < deviceSet->getNumberOfChannels())
         {
-            MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
+            MainServer::MsgDeleteChannel *msg = MainServer::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();
@@ -2945,7 +2945,7 @@ int WebAPIAdapterSrv::featuresetFeaturePost(
 
         if (index < nbRegistrations)
         {
-            MainCore::MsgAddFeature *msg = MainCore::MsgAddFeature::create(featureSetIndex, index);
+            MainServer::MsgAddFeature *msg = MainServer::MsgAddFeature::create(featureSetIndex, index);
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();
@@ -2980,7 +2980,7 @@ int WebAPIAdapterSrv::featuresetFeatureDelete(
 
         if (featureIndex < featureSet->getNumberOfFeatures())
         {
-            MainCore::MsgDeleteFeature *msg = MainCore::MsgDeleteFeature::create(featureSetIndex, featureIndex);
+            MainServer::MsgDeleteFeature *msg = MainServer::MsgDeleteFeature::create(featureSetIndex, featureIndex);
             m_mainCore.m_inputMessageQueue.push(msg);
 
             response.init();

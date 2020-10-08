@@ -46,13 +46,13 @@ namespace qtwebapp {
     class LoggerWithFile;
 }
 
-class SDRSRV_API MainCore : public QObject {
+class SDRSRV_API MainServer : public QObject {
     Q_OBJECT
 
 public:
-    explicit MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent = 0);
-    ~MainCore();
-    static MainCore *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
+    explicit MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent = 0);
+    ~MainServer();
+    static MainServer *getInstance() { return m_instance; } // Main Core is de facto a singleton so this just returns its reference
 
     MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
@@ -399,7 +399,7 @@ private:
         { }
     };
 
-    static MainCore *m_instance;
+    static MainServer *m_instance;
     MainSettings m_settings;
     int m_masterTabIndex;
     DSPEngine* m_dspEngine;
