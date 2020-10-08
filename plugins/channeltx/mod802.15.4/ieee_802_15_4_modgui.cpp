@@ -36,7 +36,7 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "mainwindow.h"
 
-#include "ui_IEEE_802_15_4_Modgui.h"
+#include "ui_ieee_802_15_4_modgui.h"
 #include "ieee_802_15_4_modgui.h"
 #include "ieee_802_15_4_modrepeatdialog.h"
 #include "ieee_802_15_4_modtxsettingsdialog.h"

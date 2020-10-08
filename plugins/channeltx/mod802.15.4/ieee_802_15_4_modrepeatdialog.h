@@ -18,7 +18,7 @@
 #ifndef INCLUDE_IEEE_802_15_4_MODREPEATDIALOG_H
 #define INCLUDE_IEEE_802_15_4_MODREPEATDIALOG_H
 
-#include "ui_IEEE_802_15_4_Modrepeatdialog.h"
+#include "ui_ieee_802_15_4_modrepeatdialog.h"
 
 class IEEE_802_15_4_ModRepeatDialog : public QDialog {
     Q_OBJECT
