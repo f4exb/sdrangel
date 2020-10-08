@@ -224,6 +224,13 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
         return;
     }
 
+    if (m_triggerWaitForReset)
+    {
+        m_triggerLocation = 0;
+        m_mutex.unlock();
+        return;
+    }
+
     if (m_freeRun) {
         m_triggerLocation = end - cbegin;
     }
@@ -231,9 +238,6 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
         m_triggerLocation = end - cbegin;
     }
     else if (m_triggerState == TriggerUntriggered) {
-        m_triggerLocation = 0;
-    }
-    else if (m_triggerWaitForReset) {
         m_triggerLocation = 0;
     }
     else {
@@ -858,11 +862,15 @@ bool ScopeVis::handleMessage(const Message& message)
     }
     else if (MsgScopeVisNGOneShot::match(message))
     {
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGOneShot";
         MsgScopeVisNGOneShot& conf = (MsgScopeVisNGOneShot&) message;
         bool oneShot = conf.getOneShot();
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGOneShot: oneShot:" << oneShot;
         m_triggerOneShot = oneShot;
-        if (m_triggerWaitForReset && !oneShot) m_triggerWaitForReset = false;
+
+        if (m_triggerWaitForReset && !oneShot) {
+            m_triggerWaitForReset = false;
+        }
+
         return true;
     }
     else if (MsgScopeVisNGMemoryTrace::match(message))
