@@ -18,7 +18,7 @@
 #ifndef INCLUDE_IEEE_802_15_4_MODTXSETTINGSDIALOG_H
 #define INCLUDE_IEEE_802_15_4_MODTXSETTINGSDIALOG_H
 
-#include "ui_IEEE_802_15_4_Modtxsettingsdialog.h"
+#include "ui_ieee_802_15_4_modtxsettingsdialog.h"
 
 class IEEE_802_15_4_ModTXSettingsDialog : public QDialog {
     Q_OBJECT
