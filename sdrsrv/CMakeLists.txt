@@ -1,13 +1,13 @@
 project (sdrsrv)
 
 set(sdrsrv_SOURCES
-    maincore.cpp
+    mainserver.cpp
     feature/featureset.cpp
     webapi/webapiadaptersrv.cpp
 )
 
 set(sdrsrv_HEADERS
-    maincore.h
+    mainserver.h
     feature/featureset.h
     webapi/webapiadaptersrv.h
 )

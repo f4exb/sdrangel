@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "loggerwithfile.h"
-#include "maincore.h"
+#include "mainserver.h"
 #include "dsp/dsptypes.h"
 
 void handler(int sig) {
@@ -91,7 +91,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
                      QCoreApplication::applicationPid());
 #endif
 
-          MainCore m(logger, parser, &a);
+          MainServer m(logger, parser, &a);
 
           // This will cause the application to exit when the main core is finished
           QObject::connect(&m, SIGNAL(finished()), &a, SLOT(quit()));

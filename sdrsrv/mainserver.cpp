@@ -35,27 +35,27 @@
 #include "webapi/webapiserver.h"
 #include "webapi/webapiadaptersrv.h"
 
-#include "maincore.h"
+#include "mainserver.h"
 
-MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgSavePreset, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgDeletePreset, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgSaveFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgAddDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgRemoveLastDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgSetDevice, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgAddChannel, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteChannel, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgApplySettings, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgAddFeature, Message)
-MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeature, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteInstance, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgLoadPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgSavePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgDeletePreset, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgLoadFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgSaveFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteFeatureSetPreset, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgAddDeviceSet, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgRemoveLastDeviceSet, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgSetDevice, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgAddChannel, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteChannel, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgApplySettings, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgAddFeature, Message)
+MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteFeature, Message)
 
-MainCore *MainCore::m_instance = 0;
+MainServer *MainServer::m_instance = 0;
 
-MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
+MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
     QObject(parent),
     m_settings(),
     m_masterTabIndex(-1),
@@ -63,26 +63,26 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
     m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
     m_logger(logger)
 {
-    qDebug() << "MainCore::MainCore: start";
+    qDebug() << "MainServer::MainServer: start";
 
     m_instance = this;
     m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
     m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
-    qDebug() << "MainCore::MainCore: create FFT factory...";
+    qDebug() << "MainServer::MainServer: create FFT factory...";
     m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
 
-    qDebug() << "MainCore::MainCore: load plugins...";
+    qDebug() << "MainServer::MainServer: load plugins...";
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("pluginssrv"));
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
     m_masterTimer.start(50);
 
-    qDebug() << "MainCore::MainCore: load setings...";
+    qDebug() << "MainServer::MainServer: load setings...";
 	loadSettings();
 
-    qDebug() << "MainCore::MainCore: finishing...";
+    qDebug() << "MainServer::MainServer: finishing...";
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 
     m_apiAdapter = new WebAPIAdapterSrv(*this);
@@ -95,10 +95,10 @@ MainCore::MainCore(qtwebapp::LoggerWithFile *logger, const MainParser& parser, Q
 
     m_dspEngine->setMIMOSupport(parser.getMIMOSupport());
 
-    qDebug() << "MainCore::MainCore: end";
+    qDebug() << "MainServer::MainServer: end";
 }
 
-MainCore::~MainCore()
+MainServer::~MainServer()
 {
     while (m_deviceSets.size() > 0) {
         removeLastDevice();
@@ -112,11 +112,11 @@ MainCore::~MainCore()
 
     delete m_pluginManager;
 
-    qDebug() << "MainCore::~MainCore: end";
+    qDebug() << "MainServer::~MainServer: end";
     delete m_logger;
 }
 
-bool MainCore::handleMessage(const Message& cmd)
+bool MainServer::handleMessage(const Message& cmd)
 {
     if (MsgDeleteInstance::match(cmd))
     {
@@ -242,34 +242,34 @@ bool MainCore::handleMessage(const Message& cmd)
     }
 }
 
-void MainCore::handleMessages()
+void MainServer::handleMessages()
 {
     Message* message;
 
     while ((message = m_inputMessageQueue.pop()) != 0)
     {
-        qDebug("MainCore::handleMessages: message: %s", message->getIdentifier());
+        qDebug("MainServer::handleMessages: message: %s", message->getIdentifier());
         handleMessage(*message);
         delete message;
     }
 }
 
-void MainCore::loadSettings()
+void MainServer::loadSettings()
 {
-	qDebug() << "MainCore::loadSettings";
+	qDebug() << "MainServer::loadSettings";
 
     m_settings.load();
     m_settings.sortPresets();
     setLoggingOptions();
 }
 
-void MainCore::applySettings()
+void MainServer::applySettings()
 {
     m_settings.sortPresets();
     setLoggingOptions();
 }
 
-void MainCore::setLoggingOptions()
+void MainServer::setLoggingOptions()
 {
     m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
 
@@ -318,7 +318,7 @@ void MainCore::setLoggingOptions()
     }
 }
 
-void MainCore::addSinkDevice()
+void MainServer::addSinkDevice()
 {
     DSPDeviceSinkEngine *dspDeviceSinkEngine = m_dspEngine->addDeviceSinkEngine();
     dspDeviceSinkEngine->start();
@@ -364,7 +364,7 @@ void MainCore::addSinkDevice()
     m_deviceSets.back()->m_deviceAPI->setSampleSink(sink);
 }
 
-void MainCore::addSourceDevice()
+void MainServer::addSourceDevice()
 {
     DSPDeviceSourceEngine *dspDeviceSourceEngine = m_dspEngine->addDeviceSourceEngine();
     dspDeviceSourceEngine->start();
@@ -409,7 +409,7 @@ void MainCore::addSourceDevice()
     m_deviceSets.back()->m_deviceAPI->setSampleSource(source);
 }
 
-void MainCore::removeLastDevice()
+void MainServer::removeLastDevice()
 {
     if (m_deviceSets.back()->m_deviceSourceEngine) // source set
     {
@@ -455,11 +455,11 @@ void MainCore::removeLastDevice()
     m_deviceSets.pop_back();
 }
 
-void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
+void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
 {
     if (deviceSetIndex >= 0)
     {
-        qDebug("MainCore::changeSampleSource: deviceSet at %d", deviceSetIndex);
+        qDebug("MainServer::changeSampleSource: deviceSet at %d", deviceSetIndex);
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
         deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceAPI->stopDeviceEngine();
@@ -482,7 +482,7 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
 
         if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {
-            qDebug("MainCore::changeSampleSource: non existent device replaced by File Input");
+            qDebug("MainServer::changeSampleSource: non existent device replaced by File Input");
             int  deviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
             samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -538,11 +538,11 @@ void MainCore::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
     }
 }
 
-void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
+void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
 {
     if (deviceSetIndex >= 0)
     {
-        qDebug("MainCore::changeSampleSink: device set at %d", deviceSetIndex);
+        qDebug("MainServer::changeSampleSink: device set at %d", deviceSetIndex);
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
         deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceAPI->stopDeviceEngine();
@@ -565,7 +565,7 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
 
         if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {
-            qDebug("MainCore::changeSampleSink: non existent device replaced by File Sink");
+            qDebug("MainServer::changeSampleSink: non existent device replaced by File Sink");
             int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
             const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
             deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
@@ -621,11 +621,11 @@ void MainCore::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
     }
 }
 
-void MainCore::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
+void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
 {
     if (deviceSetIndex >= 0)
     {
-        qDebug("MainCore::changeSampleMIMO: device set at %d", deviceSetIndex);
+        qDebug("MainServer::changeSampleMIMO: device set at %d", deviceSetIndex);
         DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
         deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceAPI->stopDeviceEngine();
@@ -660,7 +660,7 @@ void MainCore::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
     }
 }
 
-void MainCore::addChannel(int deviceSetIndex, int selectedChannelIndex)
+void MainServer::addChannel(int deviceSetIndex, int selectedChannelIndex)
 {
     if (deviceSetIndex >= 0)
     {
@@ -677,7 +677,7 @@ void MainCore::addChannel(int deviceSetIndex, int selectedChannelIndex)
     }
 }
 
-void MainCore::deleteChannel(int deviceSetIndex, int channelIndex)
+void MainServer::deleteChannel(int deviceSetIndex, int channelIndex)
 {
     if (deviceSetIndex >= 0)
     {
@@ -686,7 +686,7 @@ void MainCore::deleteChannel(int deviceSetIndex, int channelIndex)
     }
 }
 
-void MainCore::addFeature(int featureSetIndex, int featureIndex)
+void MainServer::addFeature(int featureSetIndex, int featureIndex)
 {
     if (featureSetIndex >= 0)
     {
@@ -695,7 +695,7 @@ void MainCore::addFeature(int featureSetIndex, int featureIndex)
     }
 }
 
-void MainCore::deleteFeature(int featureSetIndex, int featureIndex)
+void MainServer::deleteFeature(int featureSetIndex, int featureIndex)
 {
     if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_featureSets.size()))
     {
@@ -704,9 +704,9 @@ void MainCore::deleteFeature(int featureSetIndex, int featureIndex)
     }
 }
 
-void MainCore::loadPresetSettings(const Preset* preset, int tabIndex)
+void MainServer::loadPresetSettings(const Preset* preset, int tabIndex)
 {
-	qDebug("MainCore::loadPresetSettings: preset [%s | %s]",
+	qDebug("MainServer::loadPresetSettings: preset [%s | %s]",
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
@@ -725,9 +725,9 @@ void MainCore::loadPresetSettings(const Preset* preset, int tabIndex)
 	}
 }
 
-void MainCore::savePresetSettings(Preset* preset, int tabIndex)
+void MainServer::savePresetSettings(Preset* preset, int tabIndex)
 {
-    qDebug("MainCore::savePresetSettings: preset [%s | %s]",
+    qDebug("MainServer::savePresetSettings: preset [%s | %s]",
         qPrintable(preset->getGroup()),
         qPrintable(preset->getDescription()));
 
@@ -758,9 +758,9 @@ void MainCore::savePresetSettings(Preset* preset, int tabIndex)
     }
 }
 
-void MainCore::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex)
+void MainServer::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex)
 {
-	qDebug("MainCore::loadFeatureSetPresetSettings: preset [%s | %s]",
+	qDebug("MainServer::loadFeatureSetPresetSettings: preset [%s | %s]",
 		qPrintable(preset->getGroup()),
 		qPrintable(preset->getDescription()));
 
@@ -771,9 +771,9 @@ void MainCore::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int 
 	}
 }
 
-void MainCore::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex)
+void MainServer::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex)
 {
-    qDebug("MainCore::saveFeatureSetPresetSettings: preset [%s | %s]",
+    qDebug("MainServer::saveFeatureSetPresetSettings: preset [%s | %s]",
         qPrintable(preset->getGroup()),
         qPrintable(preset->getDescription()));
 
