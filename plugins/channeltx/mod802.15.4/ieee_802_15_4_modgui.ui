@@ -475,7 +475,7 @@
    <property name="windowTitle">
     <string>Transmitted Frames</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_1">
     <property name="spacing">
      <number>2</number>
     </property>
@@ -561,7 +561,7 @@
    <property name="windowTitle">
     <string>Baseband Spectrum</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
     <property name="spacing">
      <number>2</number>
     </property>
