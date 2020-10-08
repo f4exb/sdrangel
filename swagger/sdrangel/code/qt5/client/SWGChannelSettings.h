@@ -38,6 +38,7 @@
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
+#include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGInterferometerSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
@@ -135,6 +136,9 @@ public:
 
     SWGInterferometerSettings* getInterferometerSettings();
     void setInterferometerSettings(SWGInterferometerSettings* interferometer_settings);
+
+    SWGIEEE_802_15_4_ModSettings* getIeee802154ModSettings();
+    void setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -244,6 +248,9 @@ private:
 
     SWGInterferometerSettings* interferometer_settings;
     bool m_interferometer_settings_isSet;
+
+    SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings;
+    bool m_ieee_802_15_4_mod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;

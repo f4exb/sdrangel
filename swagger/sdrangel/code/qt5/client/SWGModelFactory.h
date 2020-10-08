@@ -106,6 +106,10 @@
 #include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
+#include "SWGIEEE_802_15_4_ModActions.h"
+#include "SWGIEEE_802_15_4_ModActions_tx.h"
+#include "SWGIEEE_802_15_4_ModReport.h"
+#include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGInstanceChannelsResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
@@ -498,6 +502,18 @@ namespace SWGSDRangel {
     }
     if(QString("SWGHackRFOutputSettings").compare(type) == 0) {
       return new SWGHackRFOutputSettings();
+    }
+    if(QString("SWGIEEE_802_15_4_ModActions").compare(type) == 0) {
+      return new SWGIEEE_802_15_4_ModActions();
+    }
+    if(QString("SWGIEEE_802_15_4_ModActions_tx").compare(type) == 0) {
+      return new SWGIEEE_802_15_4_ModActions_tx();
+    }
+    if(QString("SWGIEEE_802_15_4_ModReport").compare(type) == 0) {
+      return new SWGIEEE_802_15_4_ModReport();
+    }
+    if(QString("SWGIEEE_802_15_4_ModSettings").compare(type) == 0) {
+      return new SWGIEEE_802_15_4_ModSettings();
     }
     if(QString("SWGInstanceChannelsResponse").compare(type) == 0) {
       return new SWGInstanceChannelsResponse();

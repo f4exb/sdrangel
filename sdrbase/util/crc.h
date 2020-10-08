@@ -87,6 +87,12 @@ public:
     crc16ccitt() : crc(16, 0x1021, true, 0xffff, 0) {}
 };
 
+class SDRBASE_API crc16itut : public crc
+{
+public:
+    crc16itut() : crc(16, 0x1021, false, 0x0000, 0) {}
+};
+
 class SDRBASE_API crc16x25 : public crc
 {
 public:

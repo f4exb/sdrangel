@@ -25,6 +25,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
     DSDDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+    IEEE_802_15_4_ModReport:
+      $ref: "http://swgserver:8081/api/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModReport"
     FileSinkReport:
       $ref: "http://swgserver:8081/api/swagger/include/FileSink.yaml#/FileSinkReport"
     FileSourceReport:

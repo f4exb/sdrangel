@@ -23,5 +23,7 @@ ChannelActions:
       $ref: "/doc/swagger/include/FileSource.yaml#/FileSourceActions"
     SigMFFileSinkActions:
       $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkActions"
+    IEEE_802_15_4_ModActions:
+      $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModActions"
     PacketModActions:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModActions"

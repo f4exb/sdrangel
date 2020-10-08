@@ -46,6 +46,8 @@ SWGChannelReport::SWGChannelReport() {
     m_chirp_chat_mod_report_isSet = false;
     dsd_demod_report = nullptr;
     m_dsd_demod_report_isSet = false;
+    ieee_802_15_4_mod_report = nullptr;
+    m_ieee_802_15_4_mod_report_isSet = false;
     file_sink_report = nullptr;
     m_file_sink_report_isSet = false;
     file_source_report = nullptr;
@@ -104,6 +106,8 @@ SWGChannelReport::init() {
     m_chirp_chat_mod_report_isSet = false;
     dsd_demod_report = new SWGDSDDemodReport();
     m_dsd_demod_report_isSet = false;
+    ieee_802_15_4_mod_report = new SWGIEEE_802_15_4_ModReport();
+    m_ieee_802_15_4_mod_report_isSet = false;
     file_sink_report = new SWGFileSinkReport();
     m_file_sink_report_isSet = false;
     file_source_report = new SWGFileSourceReport();
@@ -164,6 +168,9 @@ SWGChannelReport::cleanup() {
     }
     if(dsd_demod_report != nullptr) { 
         delete dsd_demod_report;
+    }
+    if(ieee_802_15_4_mod_report != nullptr) { 
+        delete ieee_802_15_4_mod_report;
     }
     if(file_sink_report != nullptr) { 
         delete file_sink_report;
@@ -244,6 +251,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&dsd_demod_report, pJson["DSDDemodReport"], "SWGDSDDemodReport", "SWGDSDDemodReport");
     
+    ::SWGSDRangel::setValue(&ieee_802_15_4_mod_report, pJson["IEEE_802_15_4_ModReport"], "SWGIEEE_802_15_4_ModReport", "SWGIEEE_802_15_4_ModReport");
+    
     ::SWGSDRangel::setValue(&file_sink_report, pJson["FileSinkReport"], "SWGFileSinkReport", "SWGFileSinkReport");
     
     ::SWGSDRangel::setValue(&file_source_report, pJson["FileSourceReport"], "SWGFileSourceReport", "SWGFileSourceReport");
@@ -318,6 +327,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((dsd_demod_report != nullptr) && (dsd_demod_report->isSet())){
         toJsonValue(QString("DSDDemodReport"), dsd_demod_report, obj, QString("SWGDSDDemodReport"));
+    }
+    if((ieee_802_15_4_mod_report != nullptr) && (ieee_802_15_4_mod_report->isSet())){
+        toJsonValue(QString("IEEE_802_15_4_ModReport"), ieee_802_15_4_mod_report, obj, QString("SWGIEEE_802_15_4_ModReport"));
     }
     if((file_sink_report != nullptr) && (file_sink_report->isSet())){
         toJsonValue(QString("FileSinkReport"), file_sink_report, obj, QString("SWGFileSinkReport"));
@@ -459,6 +471,16 @@ void
 SWGChannelReport::setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report) {
     this->dsd_demod_report = dsd_demod_report;
     this->m_dsd_demod_report_isSet = true;
+}
+
+SWGIEEE_802_15_4_ModReport*
+SWGChannelReport::getIeee802154ModReport() {
+    return ieee_802_15_4_mod_report;
+}
+void
+SWGChannelReport::setIeee802154ModReport(SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report) {
+    this->ieee_802_15_4_mod_report = ieee_802_15_4_mod_report;
+    this->m_ieee_802_15_4_mod_report_isSet = true;
 }
 
 SWGFileSinkReport*
@@ -651,6 +673,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_report && dsd_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ieee_802_15_4_mod_report && ieee_802_15_4_mod_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_sink_report && file_sink_report->isSet()){

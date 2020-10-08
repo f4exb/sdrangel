@@ -25,6 +25,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/ChirpChatMod.yaml#/ChirpChatModReport"
     DSDDemodReport:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
+    IEEE_802_15_4_ModReport:
+      $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModReport"
     FileSinkReport:
       $ref: "/doc/swagger/include/FileSink.yaml#/FileSinkReport"
     FileSourceReport:
