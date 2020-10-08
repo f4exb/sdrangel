@@ -80,6 +80,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
     {"sdrangel.channeltx.modpacket", "PacketModSettings"},
+    {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
     {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
     {"sdrangel.channeltx.modssb", "SSBModSettings"},
@@ -148,6 +149,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
     {"FreeDVDemod", "FreeDVDemodSettings"},
     {"FreeDVMod", "FreeDVModSettings"},
     {"FreqTracker", "FreqTrackerSettings"},
+    {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModSettings"},
     {"NFMDemod", "NFMDemodSettings"},
     {"NFMMod", "NFMModSettings"},
     {"PacketMod", "PacketModSettings"},
@@ -166,6 +168,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
     {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
+    {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
     {"PacketMod", "PacketModActions"}
 };
 
@@ -3776,6 +3779,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setFreqTrackerSettings(new SWGSDRangel::SWGFreqTrackerSettings());
             channelSettings->getFreqTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "IEEE_802_15_4_ModSettings")
+        {
+            channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());
+            channelSettings->getIeee802154ModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "NFMDemodSettings")
         {
             channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());
@@ -3877,6 +3885,11 @@ bool WebAPIRequestMapper::getChannelActions(
         {
             channelActions->setFileSourceActions(new SWGSDRangel::SWGFileSourceActions());
             channelActions->getFileSourceActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "IEEE_802_15_4_ModActions")
+        {
+            channelActions->setIeee802154ModActions(new SWGSDRangel::SWGIEEE_802_15_4_ModActions());
+            channelActions->getIeee802154ModActions()->fromJsonObject(actionsJsonObject);
         }
         else if (channelActionsKey == "PacketModActions")
         {
@@ -4320,6 +4333,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setAtvModSettings(nullptr);
     channelSettings.setBfmDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
+    channelSettings.setIeee802154ModSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
     channelSettings.setPacketModSettings(nullptr);
@@ -4344,6 +4358,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);
+    channelReport.setIeee802154ModReport(nullptr);
     channelReport.setPacketModReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);
     channelReport.setSsbDemodReport(nullptr);
@@ -4359,6 +4374,7 @@ void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& ch
     channelActions.cleanup();
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
+    channelActions.setIeee802154ModActions(nullptr);
     channelActions.setPacketModActions(nullptr);
 }
 

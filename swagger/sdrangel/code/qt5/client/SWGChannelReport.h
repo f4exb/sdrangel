@@ -32,6 +32,7 @@
 #include "SWGFreeDVDemodReport.h"
 #include "SWGFreeDVModReport.h"
 #include "SWGFreqTrackerReport.h"
+#include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
 #include "SWGPacketModReport.h"
@@ -82,6 +83,9 @@ public:
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
+
+    SWGIEEE_802_15_4_ModReport* getIeee802154ModReport();
+    void setIeee802154ModReport(SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report);
 
     SWGFileSinkReport* getFileSinkReport();
     void setFileSinkReport(SWGFileSinkReport* file_sink_report);
@@ -152,6 +156,9 @@ private:
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
+
+    SWGIEEE_802_15_4_ModReport* ieee_802_15_4_mod_report;
+    bool m_ieee_802_15_4_mod_report_isSet;
 
     SWGFileSinkReport* file_sink_report;
     bool m_file_sink_report_isSet;

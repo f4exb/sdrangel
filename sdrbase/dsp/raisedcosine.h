@@ -34,10 +34,13 @@ public:
     // beta - roll-off factor
     // symbolSpan - number of symbols over which the filter is spread
     // samplesPerSymbol - number of samples per symbol
-    void create(double beta, int symbolSpan, int samplesPerSymbol)
+    // normaliseUpsampledAmplitude - when true, scale the filter such that an upsampled
+    // (by samplesPerSymbol) bipolar sequence (E.g. [1 0 0 -1 0 0..]) has maximum
+    // output values close to (1,-1)
+    void create(double beta, int symbolSpan, int samplesPerSymbol, bool normaliseUpsampledAmplitude = false)
     {
         int nTaps = symbolSpan * samplesPerSymbol + 1;
-        int i;
+        int i, j;
 
         // check constraints
         if(!(nTaps & 1)) {
@@ -72,13 +75,36 @@ public:
         }
 
         // normalize
-        double sum = 0;
-        for(i = 0; i < (int)m_taps.size() - 1; i++)
-            sum += std::pow(m_taps[i], 2.0) * 2;
-        sum += std::pow(m_taps[i], 2.0);
-        sum = std::sqrt(sum);
-        for(i = 0; i < (int)m_taps.size(); i++)
-            m_taps[i] /= sum;
+        if (!normaliseUpsampledAmplitude)
+        {
+            // normalize energy
+            double sum = 0;
+            for(i = 0; i < (int)m_taps.size() - 1; i++)
+                sum += std::pow(m_taps[i], 2.0) * 2;
+            sum += std::pow(m_taps[i], 2.0);
+            sum = std::sqrt(sum);
+            for(i = 0; i < (int)m_taps.size(); i++)
+                m_taps[i] /= sum;
+        }
+        else
+        {
+            // Calculate maximum output of filter, assuming upsampled bipolar input E.g. [1 0 0 -1 0 0..]
+            // This doesn't necessarily include the centre tap, so we try each offset
+            double maxGain = 0.0;
+            for (i = 0; i < samplesPerSymbol; i++)
+            {
+                double g = 0.0;
+                for (j = 0; j < (int)m_taps.size() - 1; j += samplesPerSymbol)
+                    g += std::fabs(2.0 * m_taps[j]);
+                if ((i & 1) == 0)
+                    g += std::fabs(m_taps[j]);
+                if (g > maxGain)
+                    maxGain = g;
+            }
+            // Scale up so maximum out is 1
+            for(i = 0; i < (int)m_taps.size(); i++)
+                m_taps[i] /= maxGain;
+        }
     }
 
     Type filter(Type sample)

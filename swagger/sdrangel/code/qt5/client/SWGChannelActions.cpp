@@ -40,6 +40,8 @@ SWGChannelActions::SWGChannelActions() {
     m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
     m_file_source_actions_isSet = false;
+    ieee_802_15_4_mod_actions = nullptr;
+    m_ieee_802_15_4_mod_actions_isSet = false;
     packet_mod_actions = nullptr;
     m_packet_mod_actions_isSet = false;
 }
@@ -62,6 +64,8 @@ SWGChannelActions::init() {
     m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
     m_file_source_actions_isSet = false;
+    ieee_802_15_4_mod_actions = new SWGIEEE_802_15_4_ModActions();
+    m_ieee_802_15_4_mod_actions_isSet = false;
     packet_mod_actions = new SWGPacketModActions();
     m_packet_mod_actions_isSet = false;
 }
@@ -79,6 +83,9 @@ SWGChannelActions::cleanup() {
     }
     if(file_source_actions != nullptr) { 
         delete file_source_actions;
+    }
+    if(ieee_802_15_4_mod_actions != nullptr) { 
+        delete ieee_802_15_4_mod_actions;
     }
     if(packet_mod_actions != nullptr) { 
         delete packet_mod_actions;
@@ -107,6 +114,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
     ::SWGSDRangel::setValue(&file_source_actions, pJson["FileSourceActions"], "SWGFileSourceActions", "SWGFileSourceActions");
+    
+    ::SWGSDRangel::setValue(&ieee_802_15_4_mod_actions, pJson["IEEE_802_15_4_ModActions"], "SWGIEEE_802_15_4_ModActions", "SWGIEEE_802_15_4_ModActions");
     
     ::SWGSDRangel::setValue(&packet_mod_actions, pJson["PacketModActions"], "SWGPacketModActions", "SWGPacketModActions");
     
@@ -143,6 +152,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((file_source_actions != nullptr) && (file_source_actions->isSet())){
         toJsonValue(QString("FileSourceActions"), file_source_actions, obj, QString("SWGFileSourceActions"));
+    }
+    if((ieee_802_15_4_mod_actions != nullptr) && (ieee_802_15_4_mod_actions->isSet())){
+        toJsonValue(QString("IEEE_802_15_4_ModActions"), ieee_802_15_4_mod_actions, obj, QString("SWGIEEE_802_15_4_ModActions"));
     }
     if((packet_mod_actions != nullptr) && (packet_mod_actions->isSet())){
         toJsonValue(QString("PacketModActions"), packet_mod_actions, obj, QString("SWGPacketModActions"));
@@ -211,6 +223,16 @@ SWGChannelActions::setFileSourceActions(SWGFileSourceActions* file_source_action
     this->m_file_source_actions_isSet = true;
 }
 
+SWGIEEE_802_15_4_ModActions*
+SWGChannelActions::getIeee802154ModActions() {
+    return ieee_802_15_4_mod_actions;
+}
+void
+SWGChannelActions::setIeee802154ModActions(SWGIEEE_802_15_4_ModActions* ieee_802_15_4_mod_actions) {
+    this->ieee_802_15_4_mod_actions = ieee_802_15_4_mod_actions;
+    this->m_ieee_802_15_4_mod_actions_isSet = true;
+}
+
 SWGPacketModActions*
 SWGChannelActions::getPacketModActions() {
     return packet_mod_actions;
@@ -242,6 +264,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(file_source_actions && file_source_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ieee_802_15_4_mod_actions && ieee_802_15_4_mod_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(packet_mod_actions && packet_mod_actions->isSet()){

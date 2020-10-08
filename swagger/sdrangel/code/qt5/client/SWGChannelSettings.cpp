@@ -62,6 +62,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_free_dv_mod_settings_isSet = false;
     freq_tracker_settings = nullptr;
     m_freq_tracker_settings_isSet = false;
+    ieee_802_15_4_mod_settings = nullptr;
+    m_ieee_802_15_4_mod_settings_isSet = false;
     nfm_demod_settings = nullptr;
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
@@ -130,6 +132,8 @@ SWGChannelSettings::init() {
     m_free_dv_mod_settings_isSet = false;
     freq_tracker_settings = new SWGFreqTrackerSettings();
     m_freq_tracker_settings_isSet = false;
+    ieee_802_15_4_mod_settings = new SWGIEEE_802_15_4_ModSettings();
+    m_ieee_802_15_4_mod_settings_isSet = false;
     nfm_demod_settings = new SWGNFMDemodSettings();
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
@@ -204,6 +208,9 @@ SWGChannelSettings::cleanup() {
     }
     if(freq_tracker_settings != nullptr) { 
         delete freq_tracker_settings;
+    }
+    if(ieee_802_15_4_mod_settings != nullptr) { 
+        delete ieee_802_15_4_mod_settings;
     }
     if(nfm_demod_settings != nullptr) { 
         delete nfm_demod_settings;
@@ -290,6 +297,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&free_dv_mod_settings, pJson["FreeDVModSettings"], "SWGFreeDVModSettings", "SWGFreeDVModSettings");
     
     ::SWGSDRangel::setValue(&freq_tracker_settings, pJson["FreqTrackerSettings"], "SWGFreqTrackerSettings", "SWGFreqTrackerSettings");
+    
+    ::SWGSDRangel::setValue(&ieee_802_15_4_mod_settings, pJson["IEEE_802_15_4_ModSettings"], "SWGIEEE_802_15_4_ModSettings", "SWGIEEE_802_15_4_ModSettings");
     
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
@@ -383,6 +392,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((freq_tracker_settings != nullptr) && (freq_tracker_settings->isSet())){
         toJsonValue(QString("FreqTrackerSettings"), freq_tracker_settings, obj, QString("SWGFreqTrackerSettings"));
+    }
+    if((ieee_802_15_4_mod_settings != nullptr) && (ieee_802_15_4_mod_settings->isSet())){
+        toJsonValue(QString("IEEE_802_15_4_ModSettings"), ieee_802_15_4_mod_settings, obj, QString("SWGIEEE_802_15_4_ModSettings"));
     }
     if((nfm_demod_settings != nullptr) && (nfm_demod_settings->isSet())){
         toJsonValue(QString("NFMDemodSettings"), nfm_demod_settings, obj, QString("SWGNFMDemodSettings"));
@@ -597,6 +609,16 @@ SWGChannelSettings::setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_
     this->m_freq_tracker_settings_isSet = true;
 }
 
+SWGIEEE_802_15_4_ModSettings*
+SWGChannelSettings::getIeee802154ModSettings() {
+    return ieee_802_15_4_mod_settings;
+}
+void
+SWGChannelSettings::setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings) {
+    this->ieee_802_15_4_mod_settings = ieee_802_15_4_mod_settings;
+    this->m_ieee_802_15_4_mod_settings_isSet = true;
+}
+
 SWGNFMDemodSettings*
 SWGChannelSettings::getNfmDemodSettings() {
     return nfm_demod_settings;
@@ -781,6 +803,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(freq_tracker_settings && freq_tracker_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ieee_802_15_4_mod_settings && ieee_802_15_4_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(nfm_demod_settings && nfm_demod_settings->isSet()){

@@ -24,6 +24,7 @@
 
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
+#include "SWGIEEE_802_15_4_ModActions.h"
 #include "SWGPacketModActions.h"
 #include <QString>
 
@@ -63,6 +64,9 @@ public:
     SWGFileSourceActions* getFileSourceActions();
     void setFileSourceActions(SWGFileSourceActions* file_source_actions);
 
+    SWGIEEE_802_15_4_ModActions* getIeee802154ModActions();
+    void setIeee802154ModActions(SWGIEEE_802_15_4_ModActions* ieee_802_15_4_mod_actions);
+
     SWGPacketModActions* getPacketModActions();
     void setPacketModActions(SWGPacketModActions* packet_mod_actions);
 
@@ -87,6 +91,9 @@ private:
 
     SWGFileSourceActions* file_source_actions;
     bool m_file_source_actions_isSet;
+
+    SWGIEEE_802_15_4_ModActions* ieee_802_15_4_mod_actions;
+    bool m_ieee_802_15_4_mod_actions_isSet;
 
     SWGPacketModActions* packet_mod_actions;
     bool m_packet_mod_actions_isSet;
