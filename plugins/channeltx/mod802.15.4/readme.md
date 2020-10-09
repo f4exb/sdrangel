@@ -23,33 +23,33 @@ Use this button to toggle mute for this channel.
 <h3>4: PHY</h3>
 
 This specifies the parameters of the PHY (physical layer), including the bit rate and modulation that is used for the frame transmission. Supported PHYs are 20kbps BPSK, 40kbps BPSK, 100kpbs <1GHZ O-QPSK, 250kpbs <1GHz O-QPSK and 250kbps 2.4GHz O-QPSK.
-These 802.15.4 PHYs use DSSS (Direct sequence spread spectrum), whereby multiple chips are transmitted per symbol. This means that a high sample rate (>3MSa/s) and large RF bandwidth is required. The baseband sample rate should be set to an integer multiple of the chip rate.
+These 802.15.4 PHYs use DSSS (Direct sequence spread spectrum), whereby multiple chips are transmitted per symbol. This means that a high baseband sample rate and large RF bandwidth is required. The baseband sample rate should be set to an integer multiple of the chip rate (at least 4x).
 Each PHY is applicable only for specific frequency bands as detailed below:
 
 Channel Page | Channels | Frequencies (MHz)  | Bit rate (kbps) | Chip rate (kcps) | Modulation | Shaping | Min sample rate (MSa/s)
--------------|----------|--------------------|-----------------|------------------|------------|---------|---------------
+-------------|----------|--------------------|-----------------|------------------|------------|---------|------------------------
 0            | 0        | 868.3              | 20              | 300              | BPSK       | RC r=1  | 1.2
 0            | 1-10     | 906, 908... 926    | 40              | 600              | BPSK       | RC r=1  | 2.4
-0            | 11-26    | 2405, 2410... 2480 | 250             | 2000             | O-QPSK     | Sine    |
-2            | 0        | 868.3              | 100             | 400              | O-QPSK     | Sine/RC | 4
-2            | 1-10     | 906, 908... 926    | 250             | 1000             | O-QPSK     | Sine    | 6
-5            | 0-3      | 780, 782.. 786     | 250             | 1000             | O-QPSK     | RC r=.8 | 6
-11           | 0-6      | 2363, 2368... 2393 | 250             | 2000             | O-QPSK     | Sine    |
-11           | 7-13     | 2367, 2372... 2397 | 250             | 2000             | O-QPSK     | Sine    |
-11           | 14       | 2395               | 250             | 2000             | O-QPSK     | Sine    |
+0            | 11-26    | 2405, 2410... 2480 | 250             | 2000             | O-QPSK     | Sine    | 8
+2            | 0        | 868.3              | 100             | 400              | O-QPSK     | Sine/RC | 2.4
+2            | 1-10     | 906, 908... 926    | 250             | 1000             | O-QPSK     | Sine    | 4
+5            | 0-3      | 780, 782.. 786     | 250             | 1000             | O-QPSK     | RC r=.8 | 4
+11           | 0-6      | 2363, 2368... 2393 | 250             | 2000             | O-QPSK     | Sine    | 8
+11           | 7-13     | 2367, 2372... 2397 | 250             | 2000             | O-QPSK     | Sine    | 8
+11           | 14       | 2395               | 250             | 2000             | O-QPSK     | Sine    | 8
 
 <h3>5: RF Bandwidth</h3>
 
 This specifies the bandwidth of a LPF that is applied to the output signal to limit the RF bandwidth.
 
-PHY                         | Occupied BW (99%) | Mesaured Occupied BW
-----------------------------|-----------------------------------------
-20kbps BPSK                 | 400kHz            | 440kHz
-40kbps BPSK                 | 760kHz            | 940kHz
-100kbps O-QPSK              | 330kHz            | 500kHz
-250kbps <1GHz O-QPSK (Sine) | 1.200MHz          | 1.8MHz
-250kbps <1GHz O-QPSK (RC)   | 1.200MHz          | 1.4MHz
-250kbps >2GHz O-QPSK        |                   | 3.2MHz
+PHY                         | Occupied BW (99%) 
+----------------------------|-------------------
+20kbps BPSK                 | 400kHz            
+40kbps BPSK                 | 760kHz            
+100kbps O-QPSK              | 330kHz            
+250kbps <1GHz O-QPSK (Sine) | 1.2MHz            
+250kbps <1GHz O-QPSK (RC)   | 1.2MHz            
+250kbps >2GHz O-QPSK        | 2.6MHz            
 
 <h3>6: Gain</h3>
 
