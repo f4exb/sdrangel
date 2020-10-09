@@ -24,14 +24,14 @@
 
 #include "webapi/webapiadapterinterface.h"
 
-class MainServer;
+class MainCore;
 class DeviceSet;
 class FeatureSet;
 
 class WebAPIAdapterSrv: public WebAPIAdapterInterface
 {
 public:
-    WebAPIAdapterSrv(MainServer& mainCore);
+    WebAPIAdapterSrv(MainCore& mainCore);
     virtual ~WebAPIAdapterSrv();
 
     virtual int instanceSummary(
@@ -426,7 +426,7 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
 private:
-    MainServer& m_mainCore;
+    MainCore& m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
     void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceUISetIndex);

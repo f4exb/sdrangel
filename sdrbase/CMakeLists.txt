@@ -192,6 +192,7 @@ set(sdrbase_SOURCES
     websockets/wsspectrum.cpp
 
     mainparser.cpp
+    maincore.cpp
 
     resources/webapi.qrc
 )
@@ -354,11 +355,13 @@ set(sdrbase_HEADERS
     websockets/wsspectrum.h
 
     mainparser.h
+    maincore.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/exports
     ${CMAKE_SOURCE_DIR}/httpserver
+    ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
     ${Boost_INCLUDE_DIRS}
@@ -383,6 +386,7 @@ target_link_libraries(sdrbase
     Qt5::Multimedia
     Qt5::WebSockets
     httpserver
+    logging
     qrtplib
     swagger
 )

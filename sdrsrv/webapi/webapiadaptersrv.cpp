@@ -78,7 +78,7 @@
 #include "limerfe/limerfecontroller.h"
 #endif
 
-WebAPIAdapterSrv::WebAPIAdapterSrv(MainServer& mainCore) :
+WebAPIAdapterSrv::WebAPIAdapterSrv(MainCore& mainCore) :
     m_mainCore(mainCore)
 {
 }
@@ -124,8 +124,8 @@ int WebAPIAdapterSrv::instanceDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    MainServer::MsgDeleteInstance *msg = MainServer::MsgDeleteInstance::create();
-    m_mainCore.getInputMessageQueue()->push(msg);
+    MainCore::MsgDeleteInstance *msg = MainCore::MsgDeleteInstance::create();
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     response.init();
     *response.getMessage() = QString("Message to stop the SDRangel instance (MsgDeleteInstance) was submitted successfully");
@@ -141,11 +141,11 @@ int WebAPIAdapterSrv::instanceConfigGet(
     WebAPIAdapterBase webAPIAdapterBase;
     webAPIAdapterBase.setPluginManager(m_mainCore.getPluginManager());
     SWGSDRangel::SWGPreferences *preferences = response.getPreferences();
-    WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainCore.getMainSettings().getPreferences());
+    WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainCore.getSettings().getPreferences());
     SWGSDRangel::SWGPreset *workingPreset = response.getWorkingPreset();
-    webAPIAdapterBase.webapiFormatPreset(workingPreset, m_mainCore.getMainSettings().getWorkingPresetConst());
+    webAPIAdapterBase.webapiFormatPreset(workingPreset, m_mainCore.getSettings().getWorkingPresetConst());
     SWGSDRangel::SWGFeatureSetPreset *workingFeatureSetPreset = response.getWorkingFeatureSetPreset();
-    webAPIAdapterBase.webapiFormatFeatureSetPreset(workingFeatureSetPreset, m_mainCore.getMainSettings().getWorkingFeatureSetPresetConst());
+    webAPIAdapterBase.webapiFormatFeatureSetPreset(workingFeatureSetPreset, m_mainCore.getSettings().getWorkingFeatureSetPresetConst());
 
     int nbPresets = m_mainCore.m_settings.getPresetCount();
     QList<SWGSDRangel::SWGPreset*> *swgPresets = response.getPresets();
@@ -234,8 +234,8 @@ int WebAPIAdapterSrv::instanceConfigPutPatch(
         m_mainCore.m_settings.addFeatureSetPreset(newPreset);
     }
 
-    MainServer::MsgApplySettings *msg = MainServer::MsgApplySettings::create();
-    m_mainCore.m_inputMessageQueue.push(msg);
+    MainCore::MsgApplySettings *msg = MainCore::MsgApplySettings::create();
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     return 200;
 }
@@ -401,8 +401,9 @@ int WebAPIAdapterSrv::instanceAudioGet(
         SWGSDRangel::SWGAudioDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    const QList<QAudioDeviceInfo>& audioInputDevices = dspEngine->getAudioDeviceManager()->getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
@@ -417,7 +418,7 @@ int WebAPIAdapterSrv::instanceAudioGet(
     // system default input device
     inputDevices->append(new SWGSDRangel::SWGAudioInputDevice);
     inputDevices->back()->init();
-    bool found = m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inputDeviceInfo);
+    bool found = dspEngine->getAudioDeviceManager()->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inputDeviceInfo);
     *inputDevices->back()->getName() = AudioDeviceManager::m_defaultDeviceName;
     inputDevices->back()->setIndex(-1);
     inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
@@ -431,7 +432,7 @@ int WebAPIAdapterSrv::instanceAudioGet(
         inputDevices->append(new SWGSDRangel::SWGAudioInputDevice);
         inputDevices->back()->init();
         inputDeviceInfo.resetToDefaults();
-        found = m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(audioInputDevices.at(i).deviceName(), inputDeviceInfo);
+        found = dspEngine->getAudioDeviceManager()->getInputDeviceInfo(audioInputDevices.at(i).deviceName(), inputDeviceInfo);
         *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
         inputDevices->back()->setIndex(i);
         inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
@@ -443,7 +444,7 @@ int WebAPIAdapterSrv::instanceAudioGet(
     // system default output device
     outputDevices->append(new SWGSDRangel::SWGAudioOutputDevice);
     outputDevices->back()->init();
-    found = m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outputDeviceInfo);
+    found = dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outputDeviceInfo);
     *outputDevices->back()->getName() = AudioDeviceManager::m_defaultDeviceName;
     outputDevices->back()->setIndex(-1);
     outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
@@ -463,7 +464,7 @@ int WebAPIAdapterSrv::instanceAudioGet(
         outputDevices->append(new SWGSDRangel::SWGAudioOutputDevice);
         outputDevices->back()->init();
         outputDeviceInfo.resetToDefaults();
-        found = m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(audioOutputDevices.at(i).deviceName(), outputDeviceInfo);
+        found = dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(audioOutputDevices.at(i).deviceName(), outputDeviceInfo);
         *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
         outputDevices->back()->setIndex(i);
         outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
@@ -486,19 +487,19 @@ int WebAPIAdapterSrv::instanceAudioInputPatch(
         const QStringList& audioInputKeys,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    // TODO
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no input audio device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
     if (audioInputKeys.contains("sampleRate")) {
         inputDeviceInfo.sampleRate = response.getSampleRate();
@@ -507,8 +508,8 @@ int WebAPIAdapterSrv::instanceAudioInputPatch(
         inputDeviceInfo.volume = response.getVolume();
     }
 
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->setInputDeviceInfo(deviceIndex, inputDeviceInfo);
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->setInputDeviceInfo(deviceIndex, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
     response.setSampleRate(inputDeviceInfo.sampleRate);
     response.setVolume(inputDeviceInfo.volume);
@@ -521,18 +522,19 @@ int WebAPIAdapterSrv::instanceAudioOutputPatch(
         const QStringList& audioOutputKeys,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no output audio device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
 
     if (audioOutputKeys.contains("sampleRate")) {
         outputDeviceInfo.sampleRate = response.getSampleRate();
@@ -559,8 +561,8 @@ int WebAPIAdapterSrv::instanceAudioOutputPatch(
         outputDeviceInfo.udpPort = response.getUdpPort() % (1<<16);
     }
 
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->setOutputDeviceInfo(deviceIndex, outputDeviceInfo);
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->setOutputDeviceInfo(deviceIndex, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
 
     response.setSampleRate(outputDeviceInfo.sampleRate);
     response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
@@ -584,19 +586,20 @@ int WebAPIAdapterSrv::instanceAudioInputDelete(
             SWGSDRangel::SWGAudioInputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no audio input device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
     response.setSampleRate(inputDeviceInfo.sampleRate);
     response.setVolume(inputDeviceInfo.volume);
@@ -608,19 +611,20 @@ int WebAPIAdapterSrv::instanceAudioOutputDelete(
             SWGSDRangel::SWGAudioOutputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no audio output device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
 
     response.setSampleRate(outputDeviceInfo.sampleRate);
     response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
@@ -644,7 +648,8 @@ int WebAPIAdapterSrv::instanceAudioInputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->inputInfosCleanup();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAudioDeviceManager()->inputInfosCleanup();
 
     response.init();
     *response.getMessage() = QString("Unregistered parameters for devices not in list of available input devices for this instance");
@@ -656,7 +661,8 @@ int WebAPIAdapterSrv::instanceAudioOutputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    m_mainCore.m_dspEngine->getAudioDeviceManager()->outputInfosCleanup();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAudioDeviceManager()->outputInfosCleanup();
 
     response.init();
     *response.getMessage() = QString("Unregistered parameters for devices not in list of available output devices for this instance");
@@ -698,10 +704,11 @@ int WebAPIAdapterSrv::instanceDVSerialGet(
             SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     response.init();
 
     std::vector<std::string> deviceNames;
-    m_mainCore.m_dspEngine->getDVSerialNames(deviceNames);
+    dspEngine->getDVSerialNames(deviceNames);
     response.setNbDevices((int) deviceNames.size());
     QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
@@ -723,13 +730,14 @@ int WebAPIAdapterSrv::instanceDVSerialPatch(
             SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    m_mainCore.m_dspEngine->setDVSerialSupport(dvserial);
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->setDVSerialSupport(dvserial);
     response.init();
 
     if (dvserial)
     {
         std::vector<std::string> deviceNames;
-        m_mainCore.m_dspEngine->getDVSerialNames(deviceNames);
+        dspEngine->getDVSerialNames(deviceNames);
         response.setNbDevices((int) deviceNames.size());
         QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
@@ -757,11 +765,12 @@ int WebAPIAdapterSrv::instanceAMBESerialGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
+    DSPEngine *dspEngine = DSPEngine::instance();
     response.init();
 
     std::vector<std::string> deviceNames;
     std::vector<QString> qDeviceNames;
-    m_mainCore.m_dspEngine->getAMBEEngine()->scan(qDeviceNames);
+    dspEngine->getAMBEEngine()->scan(qDeviceNames);
 
     for (std::vector<QString>::const_iterator it = qDeviceNames.begin(); it != qDeviceNames.end(); ++it) {
         deviceNames.push_back(it->toStdString());
@@ -788,10 +797,11 @@ int WebAPIAdapterSrv::instanceAMBEDevicesGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
+    DSPEngine *dspEngine = DSPEngine::instance();
     response.init();
 
     std::vector<std::string> deviceNames;
-    m_mainCore.m_dspEngine->getDVSerialNames(deviceNames);
+    dspEngine->getDVSerialNames(deviceNames);
     response.setNbDevices((int) deviceNames.size());
     QList<SWGSDRangel::SWGAMBEDevice*> *deviceNamesList = response.getAmbeDevices();
 
@@ -814,7 +824,8 @@ int WebAPIAdapterSrv::instanceAMBEDevicesDelete(
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    m_mainCore.m_dspEngine->getAMBEEngine()->releaseAll();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAMBEEngine()->releaseAll();
 
     response.init();
     *response.getMessage() = QString("All AMBE devices released");
@@ -827,12 +838,13 @@ int WebAPIAdapterSrv::instanceAMBEDevicesPut(
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    m_mainCore.m_dspEngine->getAMBEEngine()->releaseAll();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAMBEEngine()->releaseAll();
 
     QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = query.getAmbeDevices();
 
     for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it) {
-        m_mainCore.m_dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
+        dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
     }
 
     instanceAMBEDevicesGet(response, error);
@@ -844,14 +856,15 @@ int WebAPIAdapterSrv::instanceAMBEDevicesPatch(
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = query.getAmbeDevices();
 
     for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it)
     {
         if ((*it)->getDelete()) {
-            m_mainCore.m_dspEngine->getAMBEEngine()->releaseController((*it)->getDeviceRef()->toStdString());
+            dspEngine->getAMBEEngine()->releaseController((*it)->getDeviceRef()->toStdString());
         } else {
-            m_mainCore.m_dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
+            dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
         }
     }
 
@@ -1284,8 +1297,8 @@ int WebAPIAdapterSrv::instancePresetPatch(
         return 404;
     }
 
-    MainServer::MsgLoadPreset *msg = MainServer::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
-    m_mainCore.m_inputMessageQueue.push(msg);
+    MainCore::MsgLoadPreset *msg = MainCore::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
@@ -1353,8 +1366,8 @@ int WebAPIAdapterSrv::instancePresetPut(
         }
     }
 
-    MainServer::MsgSavePreset *msg = MainServer::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
-    m_mainCore.m_inputMessageQueue.push(msg);
+    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
@@ -1420,8 +1433,8 @@ int WebAPIAdapterSrv::instancePresetPost(
         return 409;
     }
 
-    MainServer::MsgSavePreset *msg = MainServer::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
-    m_mainCore.m_inputMessageQueue.push(msg);
+    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     response.init();
     response.setCenterFrequency(deviceCenterFrequency);
@@ -1457,8 +1470,8 @@ int WebAPIAdapterSrv::instancePresetDelete(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
-    MainServer::MsgDeletePreset *msg = MainServer::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
-    m_mainCore.m_inputMessageQueue.push(msg);
+    MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     return 202;
 }
@@ -1485,8 +1498,8 @@ int WebAPIAdapterSrv::instanceDeviceSetPost(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    MainServer::MsgAddDeviceSet *msg = MainServer::MsgAddDeviceSet::create(direction);
-    m_mainCore.m_inputMessageQueue.push(msg);
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(direction);
+    m_mainCore.m_mainMessageQueue->push(msg);
 
     response.init();
     *response.getMessage() = QString("Message to add a new device set (MsgAddDeviceSet) was submitted successfully");
@@ -1500,8 +1513,8 @@ int WebAPIAdapterSrv::instanceDeviceSetDelete(
 {
     if (m_mainCore.m_deviceSets.size() > 0)
     {
-        MainServer::MsgRemoveLastDeviceSet *msg = MainServer::MsgRemoveLastDeviceSet::create();
-        m_mainCore.m_inputMessageQueue.push(msg);
+        MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
+        m_mainCore.m_mainMessageQueue->push(msg);
 
         response.init();
         *response.getMessage() = QString("Message to remove last device set (MsgRemoveLastDeviceSet) was submitted successfully");
@@ -1635,8 +1648,8 @@ int WebAPIAdapterSrv::devicesetDevicePut(
                 continue;
             }
 
-            MainServer::MsgSetDevice *msg = MainServer::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
-            m_mainCore.m_inputMessageQueue.push(msg);
+            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
+            m_mainCore.m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getDisplayedName() = samplingDevice->displayedName;
@@ -2295,8 +2308,8 @@ int WebAPIAdapterSrv::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-                MainServer::MsgAddChannel *msg = MainServer::MsgAddChannel::create(deviceSetIndex, index, false);
-                m_mainCore.m_inputMessageQueue.push(msg);
+                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, false);
+                m_mainCore.m_mainMessageQueue->push(msg);
 
                 response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
@@ -2331,8 +2344,8 @@ int WebAPIAdapterSrv::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-            	MainServer::MsgAddChannel *msg = MainServer::MsgAddChannel::create(deviceSetIndex, index, true);
-                m_mainCore.m_inputMessageQueue.push(msg);
+            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+                m_mainCore.m_mainMessageQueue->push(msg);
 
                 response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
@@ -2367,8 +2380,8 @@ int WebAPIAdapterSrv::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-            	MainServer::MsgAddChannel *msg = MainServer::MsgAddChannel::create(deviceSetIndex, index, true);
-                m_mainCore.m_inputMessageQueue.push(msg);
+            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+                m_mainCore.m_mainMessageQueue->push(msg);
 
                 response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
@@ -2409,8 +2422,8 @@ int WebAPIAdapterSrv::devicesetChannelDelete(
 
         if (channelIndex < deviceSet->getNumberOfChannels())
         {
-            MainServer::MsgDeleteChannel *msg = MainServer::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
-            m_mainCore.m_inputMessageQueue.push(msg);
+            MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
+            m_mainCore.m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
@@ -2945,8 +2958,8 @@ int WebAPIAdapterSrv::featuresetFeaturePost(
 
         if (index < nbRegistrations)
         {
-            MainServer::MsgAddFeature *msg = MainServer::MsgAddFeature::create(featureSetIndex, index);
-            m_mainCore.m_inputMessageQueue.push(msg);
+            MainCore::MsgAddFeature *msg = MainCore::MsgAddFeature::create(featureSetIndex, index);
+            m_mainCore.m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getMessage() = QString("Message to add a feature (MsgAddFeature) was submitted successfully");
@@ -2980,8 +2993,8 @@ int WebAPIAdapterSrv::featuresetFeatureDelete(
 
         if (featureIndex < featureSet->getNumberOfFeatures())
         {
-            MainServer::MsgDeleteFeature *msg = MainServer::MsgDeleteFeature::create(featureSetIndex, featureIndex);
-            m_mainCore.m_inputMessageQueue.push(msg);
+            MainCore::MsgDeleteFeature *msg = MainCore::MsgDeleteFeature::create(featureSetIndex, featureIndex);
+            m_mainCore.m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getMessage() = QString("Message to delete a feature (MsgDeleteFeature) was submitted successfully");
