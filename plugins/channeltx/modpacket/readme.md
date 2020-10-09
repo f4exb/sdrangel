@@ -48,7 +48,7 @@ Enter your amateur radio callsign and optionally a sub-station ID (SSID). E.g. M
 
 <h3>10: Preemphaisis Filter</h3>
 
-Check this button to enable a FM preemphasis filter, which amplifiers higher frequencies. Right click to open the dialog to adjust settings for the filter.
+Check this button to enable a FM preemphasis filter, which amplifies higher frequencies. Right click to open the dialog to adjust settings for the filter.
 
 <h3>11: Bandpass Filter</h3>
 
@@ -58,7 +58,7 @@ Check this button to enable a baseband bandpass filter. Right click to open the 
 
 Check this button to repeated transmit a packet. Right click to open the dialog to adjust the delay between retransmission and number of times the packet should be repeated.
 
-<h3>13: Insertion position</h3>
+<h3>13: Insert position</h3>
 
 Inserts position as APRS formatted latitude and longitude in to the current cursor position within the data field. Lattitude and longitude can be specified under Preferences > My position.
 
