@@ -1,3 +1,9 @@
+sdrangel (5.13.1-1) unstable; urgency=medium
+
+   * Create a MainCore singleton and renamed MainCore to MainServer
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 09 Oct 2020 06:53:32 +0200
+
 sdrangel (5.13.0-1) unstable; urgency=medium
 
    * USRP support. PR #652 (cherry picked)
