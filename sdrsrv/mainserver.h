@@ -23,8 +23,8 @@
 #include <QObject>
 #include <QTimer>
 
+#include "maincore.h"
 #include "settings/mainsettings.h"
-#include "util/message.h"
 #include "util/messagequeue.h"
 #include "export.h"
 #include "mainparser.h"
@@ -34,7 +34,6 @@ class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class PluginAPI;
 class PluginInterface;
-class PluginManager;
 class ChannelMarker;
 class DeviceSet;
 class FeatureSet;
@@ -56,9 +55,7 @@ public:
 
     MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
 
-    const QTimer& getMasterTimer() const { return m_masterTimer; }
-    const MainSettings& getMainSettings() const { return m_settings; }
-    const PluginManager *getPluginManager() const { return m_pluginManager; }
+    const QTimer& getMasterTimer() const { return m_mainCore->m_masterTimer; }
 
     void addSourceDevice();
     void addSinkDevice();
@@ -80,341 +77,14 @@ signals:
     void finished();
 
 private:
-    class MsgLoadPreset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const Preset *getPreset() const { return m_preset; }
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-
-        static MsgLoadPreset* create(const Preset *preset, int deviceSetIndex)
-        {
-            return new MsgLoadPreset(preset, deviceSetIndex);
-        }
-
-    private:
-        const Preset *m_preset;
-        int m_deviceSetIndex;
-
-        MsgLoadPreset(const Preset *preset, int deviceSetIndex) :
-            Message(),
-            m_preset(preset),
-            m_deviceSetIndex(deviceSetIndex)
-        { }
-    };
-
-    class MsgSavePreset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        Preset *getPreset() const { return m_preset; }
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-        bool isNewPreset() const { return m_newPreset; }
-
-        static MsgSavePreset* create(Preset *preset, int deviceSetIndex, bool newPreset)
-        {
-            return new MsgSavePreset(preset, deviceSetIndex, newPreset);
-        }
-
-    private:
-        Preset *m_preset;
-        int m_deviceSetIndex;
-        bool m_newPreset;
-
-        MsgSavePreset(Preset *preset, int deviceSetIndex, bool newPreset) :
-            Message(),
-            m_preset(preset),
-            m_deviceSetIndex(deviceSetIndex),
-            m_newPreset(newPreset)
-        { }
-    };
-
-    class MsgDeletePreset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const Preset *getPreset() const { return m_preset; }
-
-        static MsgDeletePreset* create(const Preset *preset)
-        {
-            return new MsgDeletePreset(preset);
-        }
-
-    private:
-        const Preset *m_preset;
-
-        MsgDeletePreset(const Preset *preset) :
-            Message(),
-            m_preset(preset)
-        { }
-    };
-
-    class MsgLoadFeatureSetPreset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const FeatureSetPreset *getPreset() const { return m_preset; }
-        int getFeatureSetIndex() const { return m_featureSetIndex; }
-
-        static MsgLoadFeatureSetPreset* create(const FeatureSetPreset *preset, int featureSetIndex) {
-            return new MsgLoadFeatureSetPreset(preset, featureSetIndex);
-        }
-
-    private:
-        const FeatureSetPreset *m_preset;
-        int m_featureSetIndex;
-
-        MsgLoadFeatureSetPreset(const FeatureSetPreset *preset, int featureSetIndex) :
-            Message(),
-            m_preset(preset),
-            m_featureSetIndex(featureSetIndex)
-        { }
-    };
-
-    class MsgSaveFeatureSetPreset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        FeatureSetPreset *getPreset() const { return m_preset; }
-        int getFeatureSetIndex() const { return m_featureSetIndex; }
-        bool isNewPreset() const { return m_newPreset; }
-
-        static MsgSaveFeatureSetPreset* create(FeatureSetPreset *preset, int featureSetIndex, bool newPreset)
-        {
-            return new MsgSaveFeatureSetPreset(preset, featureSetIndex, newPreset);
-        }
-
-    private:
-        FeatureSetPreset *m_preset;
-        int m_featureSetIndex;
-        bool m_newPreset;
-
-        MsgSaveFeatureSetPreset(FeatureSetPreset *preset, int featureSetIndex, bool newPreset) :
-            Message(),
-            m_preset(preset),
-            m_featureSetIndex(featureSetIndex),
-            m_newPreset(newPreset)
-        { }
-    };
-
-    class MsgDeleteFeatureSetPreset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const FeatureSetPreset *getPreset() const { return m_preset; }
-
-        static MsgDeleteFeatureSetPreset* create(const FeatureSetPreset *preset)
-        {
-            return new MsgDeleteFeatureSetPreset(preset);
-        }
-
-    private:
-        const FeatureSetPreset *m_preset;
-
-        MsgDeleteFeatureSetPreset(const FeatureSetPreset *preset) :
-            Message(),
-            m_preset(preset)
-        { }
-    };
-
-    class MsgDeleteInstance : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgDeleteInstance* create()
-        {
-            return new MsgDeleteInstance();
-        }
-
-    private:
-        MsgDeleteInstance() :
-            Message()
-        { }
-    };
-
-    class MsgAddDeviceSet : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getDirection() const { return m_direction; }
-
-        static MsgAddDeviceSet* create(int direction)
-        {
-            return new MsgAddDeviceSet(direction);
-        }
-
-    private:
-        int m_direction;
-
-        MsgAddDeviceSet(int direction) :
-            Message(),
-            m_direction(direction)
-        { }
-    };
-
-    class MsgRemoveLastDeviceSet : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgRemoveLastDeviceSet* create()
-        {
-            return new MsgRemoveLastDeviceSet();
-        }
-
-    private:
-        MsgRemoveLastDeviceSet() :
-            Message()
-        { }
-    };
-
-    class MsgSetDevice : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-        int getDeviceIndex() const { return m_deviceIndex; }
-        int getDeviceType() const { return m_deviceType; }
-
-        static MsgSetDevice* create(int deviceSetIndex, int deviceIndex, int deviceType)
-        {
-            return new MsgSetDevice(deviceSetIndex, deviceIndex, deviceType);
-        }
-
-    private:
-        int m_deviceSetIndex;
-        int m_deviceIndex;
-        int m_deviceType;
-
-        MsgSetDevice(int deviceSetIndex, int deviceIndex, int deviceType) :
-            Message(),
-            m_deviceSetIndex(deviceSetIndex),
-            m_deviceIndex(deviceIndex),
-            m_deviceType(deviceType)
-        { }
-    };
-
-    class MsgAddChannel : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-        int getChannelRegistrationIndex() const { return m_channelRegistrationIndex; }
-        bool isTx() const { return m_tx; }
-
-        static MsgAddChannel* create(int deviceSetIndex, int channelRegistrationIndex, bool tx)
-        {
-            return new MsgAddChannel(deviceSetIndex, channelRegistrationIndex, tx);
-        }
-
-    private:
-        int m_deviceSetIndex;
-        int m_channelRegistrationIndex;
-        bool m_tx;
-
-        MsgAddChannel(int deviceSetIndex, int channelRegistrationIndex, bool tx) :
-            Message(),
-            m_deviceSetIndex(deviceSetIndex),
-            m_channelRegistrationIndex(channelRegistrationIndex),
-            m_tx(tx)
-        { }
-    };
-
-    class MsgDeleteChannel : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getDeviceSetIndex() const { return m_deviceSetIndex; }
-        int getChannelIndex() const { return m_channelIndex; }
-
-        static MsgDeleteChannel* create(int deviceSetIndex, int channelIndex)
-        {
-            return new MsgDeleteChannel(deviceSetIndex, channelIndex);
-        }
-
-    private:
-        int m_deviceSetIndex;
-        int m_channelIndex;
-
-        MsgDeleteChannel(int deviceSetIndex, int channelIndex) :
-            Message(),
-            m_deviceSetIndex(deviceSetIndex),
-            m_channelIndex(channelIndex)
-        { }
-    };
-
-    class MsgApplySettings : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgApplySettings* create() {
-            return new MsgApplySettings();
-        }
-
-    private:
-        MsgApplySettings() :
-            Message()
-        { }
-    };
-
-    class MsgAddFeature : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getFeatureSetIndex() const { return m_featureSetIndex; }
-        int getFeatureRegistrationIndex() const { return m_featureRegistrationIndex; }
-
-        static MsgAddFeature* create(int featureSetIndex, int featureRegistrationIndex)
-        {
-            return new MsgAddFeature(featureSetIndex, featureRegistrationIndex);
-        }
-
-    private:
-        int m_featureSetIndex;
-        int m_featureRegistrationIndex;
-
-        MsgAddFeature(int featureSetIndex, int featureRegistrationIndex) :
-            Message(),
-            m_featureSetIndex(featureSetIndex),
-            m_featureRegistrationIndex(featureRegistrationIndex)
-        { }
-    };
-
-    class MsgDeleteFeature : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getFeatureSetIndex() const { return m_featureSetIndex; }
-        int getFeatureIndex() const { return m_featureIndex; }
-
-        static MsgDeleteFeature* create(int m_featureSetIndex, int m_featureIndex) {
-            return new MsgDeleteFeature(m_featureSetIndex, m_featureIndex);
-        }
-
-    private:
-        int m_featureSetIndex;
-        int m_featureIndex;
-
-        MsgDeleteFeature(int m_featureSetIndex, int m_featureIndex) :
-            Message(),
-            m_featureSetIndex(m_featureSetIndex),
-            m_featureIndex(m_featureIndex)
-        { }
-    };
-
     static MainServer *m_instance;
-    MainSettings m_settings;
-    int m_masterTabIndex;
+    MainCore *m_mainCore;
     DSPEngine* m_dspEngine;
     int m_lastEngineState;
-    qtwebapp::LoggerWithFile *m_logger;
 	QString m_apiHost;
 	int m_apiPort;
 
     MessageQueue m_inputMessageQueue;
-    QTimer m_masterTimer;
-    std::vector<DeviceSet*> m_deviceSets;
-    std::vector<FeatureSet*> m_featureSets;
-    PluginManager* m_pluginManager;
 
     WebAPIRequestMapper *m_requestMapper;
     WebAPIServer *m_apiServer;
@@ -426,7 +96,6 @@ private:
 	void savePresetSettings(Preset* preset, int tabIndex);
 	void loadFeatureSetPresetSettings(const FeatureSetPreset* preset, int featureSetIndex);
 	void saveFeatureSetPresetSettings(FeatureSetPreset* preset, int featureSetIndex);
-    void setLoggingOptions();
 
     bool handleMessage(const Message& cmd);
 

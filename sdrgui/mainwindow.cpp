@@ -16,7 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <gui/commandkeyreceiver.h>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QLabel>
@@ -30,8 +29,7 @@
 #include <QResource>
 #include <QFontDatabase>
 
-#include <device/devicegui.h>
-#include <device/devicegui.h>
+#include "device/devicegui.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
 #include "device/deviceenumerator.h"
@@ -39,6 +37,7 @@
 #include "channel/channelgui.h"
 #include "feature/featureuiset.h"
 #include "feature/feature.h"
+#include "gui/commandkeyreceiver.h"
 #include "gui/indicator.h"
 #include "gui/presetitem.h"
 #include "gui/commanditem.h"

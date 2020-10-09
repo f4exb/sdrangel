@@ -30,54 +30,37 @@
 #include "device/deviceenumerator.h"
 #include "feature/featureset.h"
 #include "plugin/pluginmanager.h"
-#include "loggerwithfile.h"
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
 #include "webapi/webapiadaptersrv.h"
 
 #include "mainserver.h"
 
-MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteInstance, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgLoadPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgSavePreset, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgDeletePreset, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgLoadFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgSaveFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgAddDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgRemoveLastDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgSetDevice, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgAddChannel, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteChannel, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgApplySettings, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgAddFeature, Message)
-MESSAGE_CLASS_DEFINITION(MainServer::MsgDeleteFeature, Message)
-
 MainServer *MainServer::m_instance = 0;
 
 MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QObject *parent) :
     QObject(parent),
-    m_settings(),
-    m_masterTabIndex(-1),
-    m_dspEngine(DSPEngine::instance()),
-    m_lastEngineState(DSPDeviceSourceEngine::StNotStarted),
-    m_logger(logger)
+    m_mainCore(MainCore::instance()),
+    m_dspEngine(DSPEngine::instance())
 {
     qDebug() << "MainServer::MainServer: start";
 
     m_instance = this;
-    m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
-    m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
+    m_mainCore->m_logger = logger;
+    m_mainCore->m_mainMessageQueue = &m_inputMessageQueue;
+    m_mainCore->m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
+    m_mainCore->m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
+    m_mainCore->m_masterTabIndex = -1;
 
     qDebug() << "MainServer::MainServer: create FFT factory...";
     m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
 
     qDebug() << "MainServer::MainServer: load plugins...";
-    m_pluginManager = new PluginManager(this);
-    m_pluginManager->loadPlugins(QString("pluginssrv"));
+    m_mainCore->m_pluginManager = new PluginManager(this);
+    m_mainCore->m_pluginManager->loadPlugins(QString("pluginssrv"));
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleMessages()), Qt::QueuedConnection);
-    m_masterTimer.start(50);
+    m_mainCore->m_masterTimer.start(50);
 
     qDebug() << "MainServer::MainServer: load setings...";
 	loadSettings();
@@ -85,7 +68,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     qDebug() << "MainServer::MainServer: finishing...";
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 
-    m_apiAdapter = new WebAPIAdapterSrv(*this);
+    m_apiAdapter = new WebAPIAdapterSrv(*m_mainCore);
     m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);
     m_apiHost = parser.getServerAddress();
@@ -100,27 +83,26 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
 MainServer::~MainServer()
 {
-    while (m_deviceSets.size() > 0) {
+    while (m_mainCore->m_deviceSets.size() > 0) {
         removeLastDevice();
     }
 
 	m_apiServer->stop();
-	m_settings.save();
+	m_mainCore->m_settings.save();
     delete m_apiServer;
     delete m_requestMapper;
     delete m_apiAdapter;
 
-    delete m_pluginManager;
+    delete m_mainCore->m_pluginManager;
 
     qDebug() << "MainServer::~MainServer: end";
-    delete m_logger;
 }
 
 bool MainServer::handleMessage(const Message& cmd)
 {
-    if (MsgDeleteInstance::match(cmd))
+    if (MainCore::MsgDeleteInstance::match(cmd))
     {
-        while (m_deviceSets.size() > 0)
+        while (m_mainCore->m_deviceSets.size() > 0)
         {
             removeLastDevice();
         }
@@ -128,53 +110,53 @@ bool MainServer::handleMessage(const Message& cmd)
         emit finished();
         return true;
     }
-    else if (MsgLoadPreset::match(cmd))
+    else if (MainCore::MsgLoadPreset::match(cmd))
     {
-        MsgLoadPreset& notif = (MsgLoadPreset&) cmd;
+        MainCore::MsgLoadPreset& notif = (MainCore::MsgLoadPreset&) cmd;
         loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         return true;
     }
-    else if (MsgSavePreset::match(cmd))
+    else if (MainCore::MsgSavePreset::match(cmd))
     {
-        MsgSavePreset& notif = (MsgSavePreset&) cmd;
+        MainCore::MsgSavePreset& notif = (MainCore::MsgSavePreset&) cmd;
         savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
-        m_settings.sortPresets();
-        m_settings.save();
+        m_mainCore->m_settings.sortPresets();
+        m_mainCore->m_settings.save();
         return true;
     }
-    else if (MsgDeletePreset::match(cmd))
+    else if (MainCore::MsgDeletePreset::match(cmd))
     {
-        MsgDeletePreset& notif = (MsgDeletePreset&) cmd;
+        MainCore::MsgDeletePreset& notif = (MainCore::MsgDeletePreset&) cmd;
         const Preset *presetToDelete = notif.getPreset();
         // remove preset from settings
-        m_settings.deletePreset(presetToDelete);
+        m_mainCore->m_settings.deletePreset(presetToDelete);
         return true;
     }
-    else if (MsgLoadFeatureSetPreset::match(cmd))
+    else if (MainCore::MsgLoadFeatureSetPreset::match(cmd))
     {
-        MsgLoadFeatureSetPreset& notif = (MsgLoadFeatureSetPreset&) cmd;
+        MainCore::MsgLoadFeatureSetPreset& notif = (MainCore::MsgLoadFeatureSetPreset&) cmd;
         loadFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
         return true;
     }
-    else if (MsgSaveFeatureSetPreset::match(cmd))
+    else if (MainCore::MsgSaveFeatureSetPreset::match(cmd))
     {
-        MsgSaveFeatureSetPreset& notif = (MsgSaveFeatureSetPreset&) cmd;
+        MainCore::MsgSaveFeatureSetPreset& notif = (MainCore::MsgSaveFeatureSetPreset&) cmd;
         saveFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
-        m_settings.sortPresets();
-        m_settings.save();
+        m_mainCore->m_settings.sortPresets();
+        m_mainCore->m_settings.save();
         return true;
     }
-    else if (MsgDeleteFeatureSetPreset::match(cmd))
+    else if (MainCore::MsgDeleteFeatureSetPreset::match(cmd))
     {
-        MsgDeleteFeatureSetPreset& notif = (MsgDeleteFeatureSetPreset&) cmd;
+        MainCore::MsgDeleteFeatureSetPreset& notif = (MainCore::MsgDeleteFeatureSetPreset&) cmd;
         const FeatureSetPreset *presetToDelete = notif.getPreset();
         // remove preset from settings
-        m_settings.deleteFeatureSetPreset(presetToDelete);
+        m_mainCore->m_settings.deleteFeatureSetPreset(presetToDelete);
         return true;
     }
-    else if (MsgAddDeviceSet::match(cmd))
+    else if (MainCore::MsgAddDeviceSet::match(cmd))
     {
-        MsgAddDeviceSet& notif = (MsgAddDeviceSet&) cmd;
+        MainCore::MsgAddDeviceSet& notif = (MainCore::MsgAddDeviceSet&) cmd;
         int direction = notif.getDirection();
 
         if (direction == 1) { // Single stream Tx
@@ -185,17 +167,17 @@ bool MainServer::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgRemoveLastDeviceSet::match(cmd))
+    else if (MainCore::MsgRemoveLastDeviceSet::match(cmd))
     {
-        if (m_deviceSets.size() > 0) {
+        if (m_mainCore->m_deviceSets.size() > 0) {
             removeLastDevice();
         }
 
         return true;
     }
-    else if (MsgSetDevice::match(cmd))
+    else if (MainCore::MsgSetDevice::match(cmd))
     {
-        MsgSetDevice& notif = (MsgSetDevice&) cmd;
+        MainCore::MsgSetDevice& notif = (MainCore::MsgSetDevice&) cmd;
 
         if (notif.getDeviceType() == 1) {
             changeSampleSink(notif.getDeviceSetIndex(), notif.getDeviceIndex());
@@ -206,32 +188,32 @@ bool MainServer::handleMessage(const Message& cmd)
         }
         return true;
     }
-    else if (MsgAddChannel::match(cmd))
+    else if (MainCore::MsgAddChannel::match(cmd))
     {
-        MsgAddChannel& notif = (MsgAddChannel&) cmd;
+        MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
         addChannel(notif.getDeviceSetIndex(), notif.getChannelRegistrationIndex());
         return true;
     }
-    else if (MsgDeleteChannel::match(cmd))
+    else if (MainCore::MsgDeleteChannel::match(cmd))
     {
-        MsgDeleteChannel& notif = (MsgDeleteChannel&) cmd;
+        MainCore::MsgDeleteChannel& notif = (MainCore::MsgDeleteChannel&) cmd;
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
     }
-    else if (MsgAddFeature::match(cmd))
+    else if (MainCore::MsgAddFeature::match(cmd))
     {
-        MsgAddFeature& notif = (MsgAddFeature&) cmd;
+        MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
         addFeature(notif.getFeatureSetIndex(), notif.getFeatureRegistrationIndex());
 
         return true;
     }
-    else if (MsgDeleteFeature::match(cmd))
+    else if (MainCore::MsgDeleteFeature::match(cmd))
     {
-        MsgDeleteFeature& notif = (MsgDeleteFeature&) cmd;
+        MainCore::MsgDeleteFeature& notif = (MainCore::MsgDeleteFeature&) cmd;
         deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
         return true;
     }
-    else if (MsgApplySettings::match(cmd))
+    else if (MainCore::MsgApplySettings::match(cmd))
     {
         applySettings();
         return true;
@@ -258,64 +240,15 @@ void MainServer::loadSettings()
 {
 	qDebug() << "MainServer::loadSettings";
 
-    m_settings.load();
-    m_settings.sortPresets();
-    setLoggingOptions();
+    m_mainCore->m_settings.load();
+    m_mainCore->m_settings.sortPresets();
+    m_mainCore->setLoggingOptions();
 }
 
 void MainServer::applySettings()
 {
-    m_settings.sortPresets();
-    setLoggingOptions();
-}
-
-void MainServer::setLoggingOptions()
-{
-    m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
-
-    if (m_settings.getUseLogFile())
-    {
-        qtwebapp::FileLoggerSettings fileLoggerSettings; // default values
-
-        if (m_logger->hasFileLogger()) {
-            fileLoggerSettings = m_logger->getFileLoggerSettings(); // values from file logger if it exists
-        }
-
-        fileLoggerSettings.fileName = m_settings.getLogFileName(); // put new values
-        m_logger->createOrSetFileLogger(fileLoggerSettings, 2000); // create file logger if it does not exist and apply settings in any case
-    }
-
-    if (m_logger->hasFileLogger()) {
-        m_logger->setFileMinMessageLevel(m_settings.getFileMinLogLevel());
-    }
-
-    m_logger->setUseFileLogger(m_settings.getUseLogFile());
-
-    if (m_settings.getUseLogFile())
-    {
-#if QT_VERSION >= 0x050400
-        QString appInfoStr(tr("%1 %2 Qt %3 %4b %5 %6 DSP Rx:%7b Tx:%8b PID %9")
-                .arg(QCoreApplication::applicationName())
-                .arg(QCoreApplication::applicationVersion())
-                .arg(QT_VERSION_STR)
-                .arg(QT_POINTER_SIZE*8)
-                .arg(QSysInfo::currentCpuArchitecture())
-                .arg(QSysInfo::prettyProductName())
-                .arg(SDR_RX_SAMP_SZ)
-                .arg(SDR_TX_SAMP_SZ)
-                .arg(QCoreApplication::applicationPid()));
-#else
-        QString appInfoStr(tr("%1 %2 Qt %3 %4b DSP Rx:%5b Tx:%6b PID %7")
-                .arg(QCoreApplication::applicationName())
-                .arg(QCoreApplication::applicationVersion())
-                .arg(QT_VERSION_STR)
-                .arg(QT_POINTER_SIZE*8)
-                .arg(SDR_RX_SAMP_SZ)
-                .arg(SDR_RX_SAMP_SZ)
-                .arg(QCoreApplication::applicationPid());
- #endif
-        m_logger->logToFile(QtInfoMsg, appInfoStr);
-    }
+    m_mainCore->m_settings.sortPresets();
+    m_mainCore->setLoggingOptions();
 }
 
 void MainServer::addSinkDevice()
@@ -327,41 +260,41 @@ void MainServer::addSinkDevice()
     char uidCStr[16];
     sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
 
-    int deviceTabIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
-    m_deviceSets.back()->m_deviceSourceEngine = nullptr;
-    m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
-    m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
+    int deviceTabIndex = m_mainCore->m_deviceSets.size();
+    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
+    m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
 
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine, nullptr);
 
-    m_deviceSets.back()->m_deviceAPI = deviceAPI;
+    m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
     QList<QString> channelNames;
 
     // create a file sink by default
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceSets.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
 
-    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+    QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
-        m_deviceSets.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
     }
 
-    DeviceSampleSink *sink = m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
-            m_deviceSets.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceSets.back()->m_deviceAPI);
-    m_deviceSets.back()->m_deviceAPI->setSampleSink(sink);
+    DeviceSampleSink *sink = m_mainCore->m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
+            m_mainCore->m_deviceSets.back()->m_deviceAPI->getSamplingDeviceId(), m_mainCore->m_deviceSets.back()->m_deviceAPI);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSampleSink(sink);
 }
 
 void MainServer::addSourceDevice()
@@ -373,78 +306,78 @@ void MainServer::addSourceDevice()
     char uidCStr[16];
     sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
 
-    int deviceTabIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
-    m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
-    m_deviceSets.back()->m_deviceSinkEngine = nullptr;
-    m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
+    int deviceTabIndex = m_mainCore->m_deviceSets.size();
+    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
+    m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
 
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
 
-    m_deviceSets.back()->m_deviceAPI = deviceAPI;
+    m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
 
     // Create a file source instance by default
     int fileSourceDeviceIndex = DeviceEnumerator::instance()->getFileInputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(fileSourceDeviceIndex);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceSets.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(fileSourceDeviceIndex));
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(fileSourceDeviceIndex));
 
-    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+    QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
-        m_deviceSets.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
     }
 
-    DeviceSampleSource *source = m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
-            m_deviceSets.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceSets.back()->m_deviceAPI);
-    m_deviceSets.back()->m_deviceAPI->setSampleSource(source);
+    DeviceSampleSource *source = m_mainCore->m_deviceSets.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
+            m_mainCore->m_deviceSets.back()->m_deviceAPI->getSamplingDeviceId(), m_mainCore->m_deviceSets.back()->m_deviceAPI);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSampleSource(source);
 }
 
 void MainServer::removeLastDevice()
 {
-    if (m_deviceSets.back()->m_deviceSourceEngine) // source set
+    if (m_mainCore->m_deviceSets.back()->m_deviceSourceEngine) // source set
     {
-        DSPDeviceSourceEngine *lastDeviceEngine = m_deviceSets.back()->m_deviceSourceEngine;
+        DSPDeviceSourceEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSourceEngine;
         lastDeviceEngine->stopAcquistion();
 
         // deletes old UI and input object
-        m_deviceSets.back()->freeChannels();      // destroys the channel instances
-        m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
-        m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
-                m_deviceSets.back()->m_deviceAPI->getSampleSource());
-        m_deviceSets.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
+        m_mainCore->m_deviceSets.back()->freeChannels();      // destroys the channel instances
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(
+                m_mainCore->m_deviceSets.back()->m_deviceAPI->getSampleSource());
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        DeviceAPI *sourceAPI = m_deviceSets.back()->m_deviceAPI;
-        delete m_deviceSets.back();
+        DeviceAPI *sourceAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
+        delete m_mainCore->m_deviceSets.back();
 
         lastDeviceEngine->stop();
         m_dspEngine->removeLastDeviceSourceEngine();
 
         delete sourceAPI;
     }
-    else if (m_deviceSets.back()->m_deviceSinkEngine) // sink set
+    else if (m_mainCore->m_deviceSets.back()->m_deviceSinkEngine) // sink set
     {
-        DSPDeviceSinkEngine *lastDeviceEngine = m_deviceSets.back()->m_deviceSinkEngine;
+        DSPDeviceSinkEngine *lastDeviceEngine = m_mainCore->m_deviceSets.back()->m_deviceSinkEngine;
         lastDeviceEngine->stopGeneration();
 
         // deletes old UI and output object
-        m_deviceSets.back()->freeChannels();
-        m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
-        m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
-                m_deviceSets.back()->m_deviceAPI->getSampleSink());
-        m_deviceSets.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
+        m_mainCore->m_deviceSets.back()->freeChannels();
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->resetSamplingDeviceId();
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(
+                m_mainCore->m_deviceSets.back()->m_deviceAPI->getSampleSink());
+        m_mainCore->m_deviceSets.back()->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
 
-        DeviceAPI *sinkAPI = m_deviceSets.back()->m_deviceAPI;
-        delete m_deviceSets.back();
+        DeviceAPI *sinkAPI = m_mainCore->m_deviceSets.back()->m_deviceAPI;
+        delete m_mainCore->m_deviceSets.back();
 
         lastDeviceEngine->stop();
         m_dspEngine->removeLastDeviceSinkEngine();
@@ -452,7 +385,7 @@ void MainServer::removeLastDevice()
         delete sinkAPI;
     }
 
-    m_deviceSets.pop_back();
+    m_mainCore->m_deviceSets.pop_back();
 }
 
 void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
@@ -460,8 +393,8 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
     if (deviceSetIndex >= 0)
     {
         qDebug("MainServer::changeSampleSource: deviceSet at %d", deviceSetIndex);
-        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
-        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and input object
@@ -496,10 +429,10 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
         }
 
         // add to buddies list
-        std::vector<DeviceSet*>::iterator it = m_deviceSets.begin();
+        std::vector<DeviceSet*>::iterator it = m_mainCore->m_deviceSets.begin();
         int nbOfBuddies = 0;
 
-        for (; it != m_deviceSets.end(); ++it)
+        for (; it != m_mainCore->m_deviceSets.end(); ++it)
         {
             if (*it != deviceSet) // do not add to itself
             {
@@ -534,7 +467,7 @@ void MainServer::changeSampleSource(int deviceSetIndex, int selectedDeviceIndex)
                 deviceSet->m_deviceAPI->getSamplingDeviceId(), deviceSet->m_deviceAPI);
         deviceSet->m_deviceAPI->setSampleSource(source);
 
-        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
+        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
@@ -543,8 +476,8 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
     if (deviceSetIndex >= 0)
     {
         qDebug("MainServer::changeSampleSink: device set at %d", deviceSetIndex);
-        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
-        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
@@ -579,10 +512,10 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
         }
 
         // add to buddies list
-        std::vector<DeviceSet*>::iterator it = m_deviceSets.begin();
+        std::vector<DeviceSet*>::iterator it = m_mainCore->m_deviceSets.begin();
         int nbOfBuddies = 0;
 
-        for (; it != m_deviceSets.end(); ++it)
+        for (; it != m_mainCore->m_deviceSets.end(); ++it)
         {
             if (*it != deviceSet) // do not add to itself
             {
@@ -617,7 +550,7 @@ void MainServer::changeSampleSink(int deviceSetIndex, int selectedDeviceIndex)
                 deviceSet->m_deviceAPI->getSamplingDeviceId(), deviceSet->m_deviceAPI);
         deviceSet->m_deviceAPI->setSampleSink(sink);
 
-        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
+        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
@@ -626,8 +559,8 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
     if (deviceSetIndex >= 0)
     {
         qDebug("MainServer::changeSampleMIMO: device set at %d", deviceSetIndex);
-        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
-        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
+        deviceSet->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceSet->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
@@ -645,7 +578,7 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(selectedDeviceIndex));
 
-        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+        QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
         if (userArgs.size() > 0) {
             deviceSet->m_deviceAPI->setHardwareUserArguments(userArgs);
@@ -656,7 +589,7 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
                 deviceSet->m_deviceAPI->getSamplingDeviceId(), deviceSet->m_deviceAPI);
         deviceSet->m_deviceAPI->setSampleMIMO(mimo);
 
-        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
+        deviceSet->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
@@ -664,15 +597,15 @@ void MainServer::addChannel(int deviceSetIndex, int selectedChannelIndex)
 {
     if (deviceSetIndex >= 0)
     {
-        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // source device => Rx channels
         {
-            deviceSet->addRxChannel(selectedChannelIndex, m_pluginManager->getPluginAPI());
+            deviceSet->addRxChannel(selectedChannelIndex, m_mainCore->m_pluginManager->getPluginAPI());
         }
         else if (deviceSet->m_deviceSinkEngine) // sink device => Tx channels
         {
-            deviceSet->addTxChannel(selectedChannelIndex, m_pluginManager->getPluginAPI());
+            deviceSet->addTxChannel(selectedChannelIndex, m_mainCore->m_pluginManager->getPluginAPI());
         }
     }
 }
@@ -681,7 +614,7 @@ void MainServer::deleteChannel(int deviceSetIndex, int channelIndex)
 {
     if (deviceSetIndex >= 0)
     {
-        DeviceSet *deviceSet = m_deviceSets[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         deviceSet->deleteChannel(channelIndex);
     }
 }
@@ -690,16 +623,16 @@ void MainServer::addFeature(int featureSetIndex, int featureIndex)
 {
     if (featureSetIndex >= 0)
     {
-        FeatureSet *featureSet = m_featureSets[featureSetIndex];
-        featureSet->addFeature(featureSetIndex, m_pluginManager->getPluginAPI(), m_apiAdapter);
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
+        featureSet->addFeature(featureSetIndex, m_mainCore->m_pluginManager->getPluginAPI(), m_apiAdapter);
     }
 }
 
 void MainServer::deleteFeature(int featureSetIndex, int featureIndex)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_featureSets.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureSet *featureSet = m_featureSets[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         featureSet->deleteFeature(featureIndex);
     }
 }
@@ -712,15 +645,15 @@ void MainServer::loadPresetSettings(const Preset* preset, int tabIndex)
 
 	if (tabIndex >= 0)
 	{
-        DeviceSet *deviceSet = m_deviceSets[tabIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[tabIndex];
         deviceSet->m_deviceAPI->loadSamplingDeviceSettings(preset);
 
         if (deviceSet->m_deviceSourceEngine) { // source device
-        	deviceSet->loadRxChannelSettings(preset, m_pluginManager->getPluginAPI());
+        	deviceSet->loadRxChannelSettings(preset, m_mainCore->m_pluginManager->getPluginAPI());
         } else if (deviceSet->m_deviceSinkEngine) { // sink device
-        	deviceSet->loadTxChannelSettings(preset, m_pluginManager->getPluginAPI());
+        	deviceSet->loadTxChannelSettings(preset, m_mainCore->m_pluginManager->getPluginAPI());
         } else if (deviceSet->m_deviceMIMOEngine) { // MIMO device
-        	deviceSet->loadMIMOChannelSettings(preset, m_pluginManager->getPluginAPI());
+        	deviceSet->loadMIMOChannelSettings(preset, m_mainCore->m_pluginManager->getPluginAPI());
         }
 	}
 }
@@ -733,7 +666,7 @@ void MainServer::savePresetSettings(Preset* preset, int tabIndex)
 
     // Save from currently selected source tab
     //int currentSourceTabIndex = ui->tabInputsView->currentIndex();
-    DeviceSet *deviceSet = m_deviceSets[tabIndex];
+    DeviceSet *deviceSet = m_mainCore->m_deviceSets[tabIndex];
 
     if (deviceSet->m_deviceSourceEngine) // source device
     {
@@ -766,8 +699,8 @@ void MainServer::loadFeatureSetPresetSettings(const FeatureSetPreset* preset, in
 
 	if (featureSetIndex >= 0)
 	{
-        FeatureSet *featureSet = m_featureSets[featureSetIndex];
-        featureSet->loadFeatureSetSettings(preset, m_pluginManager->getPluginAPI(), m_apiAdapter);
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
+        featureSet->loadFeatureSetSettings(preset, m_mainCore->m_pluginManager->getPluginAPI(), m_apiAdapter);
 	}
 }
 
@@ -779,7 +712,7 @@ void MainServer::saveFeatureSetPresetSettings(FeatureSetPreset* preset, int feat
 
     // Save from currently selected source tab
     //int currentSourceTabIndex = ui->tabInputsView->currentIndex();
-    FeatureSet *featureSet = m_featureSets[featureSetIndex];
+    FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
 
     preset->clearFeatures();
     featureSet->saveFeatureSetSettings(preset);
