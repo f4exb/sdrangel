@@ -21,6 +21,7 @@
 
 #include "loggerwithfile.h"
 #include "dsp/dsptypes.h"
+#include "feature/featureset.h"
 
 #include "maincore.h"
 
@@ -100,5 +101,25 @@ void MainCore::setLoggingOptions()
                 .arg(QCoreApplication::applicationPid());
  #endif
         m_logger->logToFile(QtInfoMsg, appInfoStr);
+    }
+}
+
+void MainCore::appendFeatureSet()
+{
+    int newIndex = m_featureSets.size();
+    m_featureSets.push_back(new FeatureSet(newIndex));
+}
+
+void MainCore::removeFeatureSet(int index)
+{
+    if (index < m_featureSets.size()) {
+        m_featureSets.erase(m_featureSets.begin() + index);
+    }
+}
+
+void MainCore::removeLastFeatureSet()
+{
+    if (m_featureSets.size() != 0) {
+        m_featureSets.pop_back();
     }
 }

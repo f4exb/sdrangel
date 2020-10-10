@@ -2921,7 +2921,7 @@ int WebAPIAdapterGUI::featuresetFeatureSettingsGet(
 {
     error.init();
 
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_deviceSets.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
         FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         Feature *feature = featureSet->getFeatureAt(featureIndex);

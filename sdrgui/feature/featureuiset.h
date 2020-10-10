@@ -28,6 +28,7 @@ class QWidget;
 class FeatureWindow;
 class FeatureGUI;
 class PluginAPI;
+class FeatureSet;
 class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
@@ -36,7 +37,7 @@ class SDRGUI_API FeatureUISet : public QObject
 {
     Q_OBJECT
 public:
-    FeatureUISet(int tabIndex);
+    FeatureUISet(int tabIndex, FeatureSet *featureSet);
     ~FeatureUISet();
 
     void addRollupWidget(QWidget *widget); //!< Add feature rollup widget to feature window
@@ -76,6 +77,7 @@ private:
 
     FeatureInstanceRegistrations m_featureInstanceRegistrations;
     int m_featureTabIndex;
+    FeatureSet *m_featureSet;
 
     void freeFeatures();
 

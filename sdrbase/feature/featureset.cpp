@@ -174,3 +174,21 @@ void FeatureSet::saveFeatureSetSettings(FeatureSetPreset *preset)
         preset->addFeature(m_featureInstanceRegistrations[i].m_featureName, m_featureInstanceRegistrations[i].m_feature->serialize());
     }
 }
+
+void FeatureSet::addFeatureInstance(const QString& featureURI, Feature *feature)
+{
+    qDebug("FeatureSet::addFeatureInstance");
+    m_featureInstanceRegistrations.push_back(FeatureInstanceRegistration(featureURI, feature));
+}
+
+void FeatureSet::removeFeatureInstanceAt(int index)
+{
+    if (index < m_featureInstanceRegistrations.size()) {
+        m_featureInstanceRegistrations.removeAt(index);
+    }
+}
+
+void FeatureSet::clearFeatures()
+{
+    m_featureInstanceRegistrations.clear();
+}
