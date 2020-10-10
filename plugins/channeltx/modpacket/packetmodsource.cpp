@@ -39,8 +39,9 @@ PacketModSource::PacketModSource() :
     m_bitIdx(0),
     m_last5Bits(0),
     m_state(idle),
-    m_scrambler(0x10800, 0x0)
-{
+    m_scrambler(0x10800, 0x0),
+    m_spectrumSink(nullptr)
+ {
     m_lowpass.create(301, m_channelSampleRate, 22000.0 / 2.0);
     qDebug() << "PacketModSource::PacketModSource creating BPF : " << m_channelSampleRate;
     m_bandpass.create(301, m_channelSampleRate, 800.0, 2600.0);

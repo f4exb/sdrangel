@@ -575,16 +575,32 @@ int PacketMod::webapiActionsPost(
         if (channelActionsKeys.contains("tx"))
         {
             SWGSDRangel::SWGPacketModActions_tx* tx = swgPacketModActions->getTx();
-            QString callsign(*tx->getCallsign());
-            QString to(*tx->getTo());
-            QString via(*tx->getVia());
-            QString data(*tx->getData());
+            QString *callsignP = tx->getCallsign();
+            QString *toP = tx->getTo();
+            QString *viaP = tx->getVia();
+            QString *dataP = tx->getData();
+            if (callsignP && toP && viaP && dataP)
+            {
+                QString callsign(*callsignP);
+                QString to(*toP);
+                QString via(*viaP);
+                QString data(*dataP);
 
-            PacketMod::MsgTXPacketMod *msg = PacketMod::MsgTXPacketMod::create(callsign, to, via, data);
-            m_basebandSource->getInputMessageQueue()->push(msg);
+                PacketMod::MsgTXPacketMod *msg = PacketMod::MsgTXPacketMod::create(callsign, to, via, data);
+                m_basebandSource->getInputMessageQueue()->push(msg);
+                return 202;
+            }
+            else
+            {
+                errorMessage = "Packet must contain callsign, to, via and data";
+                return 400;
+            }
         }
-
-        return 202;
+        else
+        {
+            errorMessage = "Unknown action";
+            return 400;
+        }
     }
     else
     {
