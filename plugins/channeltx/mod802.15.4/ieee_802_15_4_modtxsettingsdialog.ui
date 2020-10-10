@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>IEEE_802_15_4_ModTXSettingsDialog</class>
+ <widget class="QDialog" name="IEEE_802_15_4_ModTXSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>351</width>
+    <height>592</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>802.15.4 Extra Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="bitRateGroup">
+     <property name="title">
+      <string>Modulation</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_8">
+      <item row="1" column="0">
+       <widget class="QLabel" name="bitRateLabel">
+        <property name="text">
+         <string>Bitrate</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="bitRate">
+        <property name="toolTip">
+         <string>Bitrate (bits per second).</string>
+        </property>
+        <property name="maximum">
+         <number>500000</number>
+        </property>
+        <property name="value">
+         <number>40000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="modulation">
+        <property name="toolTip">
+         <string>Modulaton type.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>BPSK</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>O-QPSK</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="modulationLabel">
+        <property name="text">
+         <string>Modulation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lpfTapsLabel">
+        <property name="text">
+         <string>RF BW limit LPF taps</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="lpfTaps">
+        <property name="toolTip">
+         <string>Number of taps in LPF for RF BW filter.</string>
+        </property>
+        <property name="maximum">
+         <number>10000</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="fskGroup">
+     <property name="title">
+      <string>Pulse shaping</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Pulse shaping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="pulseShaping">
+        <item>
+         <property name="text">
+          <string>Raised Cosine</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Half sine</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="betaLabel">
+        <property name="text">
+         <string>Filter rolloff (beta)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="beta">
+        <property name="toolTip">
+         <string>Roll-off of the filter</string>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.250000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="symbolSpanLabel">
+        <property name="text">
+         <string>Filter symbol span</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="symbolSpan">
+        <property name="toolTip">
+         <string>Number of symbols over which filter is applied</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="scramblingGroup">
+     <property name="title">
+      <string>Scrambing</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="scramble">
+        <property name="toolTip">
+         <string>Enabling scrambling.</string>
+        </property>
+        <property name="text">
+         <string>Scramble</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="polynomialLabel">
+        <property name="text">
+         <string>Polynomial</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="polynomial">
+        <property name="toolTip">
+         <string>Polynomial of the scrambler. The +1 is implicit.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>2147483647</number>
+        </property>
+        <property name="value">
+         <number>67584</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="powerRampingGroup">
+     <property name="title">
+      <string>Power Ramping</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_6">
+      <item row="0" column="0">
+       <widget class="QLabel" name="rampUpLabel">
+        <property name="text">
+         <string>Ramp up bits</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="rampUp">
+        <property name="toolTip">
+         <string>Number of bits at start of frame during which output power is ramped up.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="rampDownLabel">
+        <property name="text">
+         <string>Ramp down bits</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="rampDown">
+        <property name="toolTip">
+         <string>Number of bits at end of frame during which output power is ramped down.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="rampRangeLabel">
+        <property name="text">
+         <string>Ramp range (dB)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="rampRange">
+        <property name="toolTip">
+         <string>Range in dB over which power is ramped up or down. E.g. a value of 60 causes power to be ramped from -60dB to 0dB.</string>
+        </property>
+        <property name="maximum">
+         <number>120</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="modulateWhileRamping">
+        <property name="toolTip">
+         <string>Modulate during ramping.</string>
+        </property>
+        <property name="text">
+         <string>Modulate while ramping</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="debugGroup">
+     <property name="title">
+      <string>Debug</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout_3">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="bbNoise">
+        <property name="toolTip">
+         <string>Generate white noise as baseband signal.</string>
+        </property>
+        <property name="text">
+         <string>Generate BB noise</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="writeToFile">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Write baseband signal to a CSV file named IEEE_802_15_4_Mod.csv</string>
+        </property>
+        <property name="text">
+         <string>Write baseband to CSV</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>modulation</tabstop>
+  <tabstop>bitRate</tabstop>
+  <tabstop>lpfTaps</tabstop>
+  <tabstop>pulseShaping</tabstop>
+  <tabstop>beta</tabstop>
+  <tabstop>symbolSpan</tabstop>
+  <tabstop>scramble</tabstop>
+  <tabstop>polynomial</tabstop>
+  <tabstop>rampUp</tabstop>
+  <tabstop>rampDown</tabstop>
+  <tabstop>rampRange</tabstop>
+  <tabstop>modulateWhileRamping</tabstop>
+  <tabstop>bbNoise</tabstop>
+  <tabstop>writeToFile</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>IEEE_802_15_4_ModTXSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>IEEE_802_15_4_ModTXSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -102,4 +102,12 @@ public:
     RandomizeCCSDS() : LFSR(0x95, 0xff, 7) {}
 };
 
+// 802.15.4 GFSK PHY
+// Call randomize()
+class SDRBASE_API Randomize_802_15_4_PN9 : public LFSR
+{
+public:
+     Randomize_802_15_4_PN9() : LFSR(0x108, 0x1fe, 0) {}
+};
+
 #endif

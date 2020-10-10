@@ -35,6 +35,7 @@
 #include "SWGFreeDVDemodSettings.h"
 #include "SWGFreeDVModSettings.h"
 #include "SWGFreqTrackerSettings.h"
+#include "SWGIEEE_802_15_4_ModSettings.h"
 #include "SWGLocalSinkSettings.h"
 #include "SWGLocalSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
@@ -118,6 +119,9 @@ public:
 
     SWGFreqTrackerSettings* getFreqTrackerSettings();
     void setFreqTrackerSettings(SWGFreqTrackerSettings* freq_tracker_settings);
+
+    SWGIEEE_802_15_4_ModSettings* getIeee802154ModSettings();
+    void setIeee802154ModSettings(SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings);
 
     SWGNFMDemodSettings* getNfmDemodSettings();
     void setNfmDemodSettings(SWGNFMDemodSettings* nfm_demod_settings);
@@ -212,6 +216,9 @@ private:
 
     SWGFreqTrackerSettings* freq_tracker_settings;
     bool m_freq_tracker_settings_isSet;
+
+    SWGIEEE_802_15_4_ModSettings* ieee_802_15_4_mod_settings;
+    bool m_ieee_802_15_4_mod_settings_isSet;
 
     SWGNFMDemodSettings* nfm_demod_settings;
     bool m_nfm_demod_settings_isSet;
