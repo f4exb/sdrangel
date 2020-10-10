@@ -424,7 +424,6 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
 IEEE_802_15_4_ModGUI::~IEEE_802_15_4_ModGUI()
 {
-    delete m_IEEE_802_15_4_Mod; // TODO: check this: when the GUI closes it has to delete the modulator
     delete m_scopeVis;
     delete ui;
 }
