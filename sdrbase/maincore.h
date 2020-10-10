@@ -410,6 +410,10 @@ public:
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
     void setLoggingOptions();
+    // slave mode
+    void appendFeatureSet();
+    void removeFeatureSet(int index);
+    void removeLastFeatureSet();
 
     friend class MainServer;
     friend class MainWindow;

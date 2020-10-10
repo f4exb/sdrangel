@@ -36,6 +36,7 @@
 #include "channel/channelapi.h"
 #include "channel/channelgui.h"
 #include "feature/featureuiset.h"
+#include "feature/featureset.h"
 #include "feature/feature.h"
 #include "gui/commandkeyreceiver.h"
 #include "gui/indicator.h"
@@ -635,7 +636,8 @@ void MainWindow::removeLastDevice()
 void MainWindow::addFeatureSet()
 {
     int tabIndex = m_featureUIs.size();
-    m_featureUIs.push_back(new FeatureUISet(tabIndex));
+    m_mainCore->appendFeatureSet();
+    m_featureUIs.push_back(new FeatureUISet(tabIndex, m_mainCore->m_featureSets[tabIndex]));
     ui->tabFeatures->addTab(m_featureUIs.back()->m_featureWindow, QString("F%1").arg(tabIndex));
 }
 
@@ -645,6 +647,7 @@ void MainWindow::removeFeatureSet(int tabIndex)
     {
         delete m_featureUIs[tabIndex];
         m_featureUIs.erase(m_featureUIs.begin() + tabIndex);
+        m_mainCore->removeFeatureSet(tabIndex);
     }
 }
 
@@ -663,6 +666,7 @@ void MainWindow::deleteChannel(int deviceSetIndex, int channelIndex)
     {
         DeviceUISet *deviceSet = m_deviceUIs[deviceSetIndex];
         deviceSet->deleteChannel(channelIndex);
+        m_mainCore->removeLastFeatureSet();
     }
 }
 

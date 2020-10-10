@@ -19,15 +19,17 @@
 #include "plugin/pluginapi.h"
 #include "settings/featuresetpreset.h"
 #include "feature/featureutils.h"
+#include "feature/featureset.h"
 #include "feature/feature.h"
 #include "feature/featuregui.h"
 
 #include "featureuiset.h"
 
-FeatureUISet::FeatureUISet(int tabIndex)
+FeatureUISet::FeatureUISet(int tabIndex, FeatureSet *featureSet)
 {
     m_featureWindow = new FeatureWindow;
     m_featureTabIndex = tabIndex;
+    m_featureSet = featureSet;
 }
 
 FeatureUISet::~FeatureUISet()
@@ -44,6 +46,7 @@ void FeatureUISet::addRollupWidget(QWidget *widget)
 void FeatureUISet::registerFeatureInstance(const QString& featureURI, FeatureGUI* featureGUI, Feature *feature)
 {
     m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureURI, featureGUI, feature));
+    m_featureSet->addFeatureInstance(featureURI, feature);
     QObject::connect(
         featureGUI,
         &FeatureGUI::closing,
@@ -71,6 +74,8 @@ void FeatureUISet::freeFeatures()
         m_featureInstanceRegistrations[i].m_gui->destroy();
         m_featureInstanceRegistrations[i].m_feature->destroy();
     }
+
+    m_featureSet->clearFeatures();
 }
 
 void FeatureUISet::deleteFeature(int featureIndex)
@@ -82,6 +87,7 @@ void FeatureUISet::deleteFeature(int featureIndex)
                 featureIndex);
         m_featureInstanceRegistrations[featureIndex].m_gui->destroy();
         m_featureInstanceRegistrations[featureIndex].m_feature->destroy();
+        m_featureSet->removeFeatureInstanceAt(featureIndex);
     }
 }
 
@@ -113,6 +119,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
     // copy currently open features and clear list
     FeatureInstanceRegistrations openFeatures = m_featureInstanceRegistrations;
     m_featureInstanceRegistrations.clear();
+    m_featureSet->clearFeatures();
 
     for (int i = 0; i < openFeatures.count(); i++)
     {
@@ -172,6 +179,7 @@ void FeatureUISet::handleClosingFeatureGUI(FeatureGUI *featureGUI)
     {
         if (it->m_gui == featureGUI)
         {
+            m_featureSet->removeFeatureInstance(it->m_feature);
             it->m_feature->destroy();
             m_featureInstanceRegistrations.erase(it);
             break;

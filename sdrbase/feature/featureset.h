@@ -43,6 +43,10 @@ public:
     Feature *getFeatureAt(int featureIndex);
     void loadFeatureSetSettings(const FeatureSetPreset* preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
     void saveFeatureSetSettings(FeatureSetPreset* preset);
+    // slave mode
+    void addFeatureInstance(const QString& featureURI, Feature *feature);
+    void removeFeatureInstanceAt(int index);
+    void clearFeatures();
 
 private:
     struct FeatureInstanceRegistration
