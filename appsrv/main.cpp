@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "loggerwithfile.h"
+#include "mainparser.h"
 #include "mainserver.h"
 #include "dsp/dsptypes.h"
 

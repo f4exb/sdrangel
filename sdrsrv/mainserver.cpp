@@ -34,6 +34,7 @@
 #include "webapi/webapiserver.h"
 #include "webapi/webapiadaptersrv.h"
 
+#include "mainparser.h"
 #include "mainserver.h"
 
 MainServer *MainServer::m_instance = 0;

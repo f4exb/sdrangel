@@ -17,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRSRV_MAINCORE_H_
-#define SDRSRV_MAINCORE_H_
+#ifndef SDRSRV_MAINSERVER_H_
+#define SDRSRV_MAINSERVER_H_
 
 #include <QObject>
 #include <QTimer>
@@ -27,8 +27,8 @@
 #include "settings/mainsettings.h"
 #include "util/messagequeue.h"
 #include "export.h"
-#include "mainparser.h"
 
+class MainParser;
 class DSPEngine;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
@@ -106,4 +106,4 @@ private slots:
 
 
 
-#endif /* SDRSRV_MAINCORE_H_ */
+#endif /* SDRSRV_MAINSERVER_H_ */
