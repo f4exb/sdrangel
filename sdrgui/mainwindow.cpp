@@ -87,40 +87,27 @@
 #include "limerfegui/limerfeusbdialog.h"
 #endif
 
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgSavePreset, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeletePreset, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgLoadFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgSaveFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteFeatureSetPreset, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgRemoveLastDeviceSet, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgSetDevice, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddChannel, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteChannel, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeviceSetFocus, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgApplySettings, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgAddFeature, Message)
-MESSAGE_CLASS_DEFINITION(MainWindow::MsgDeleteFeature, Message)
-
 MainWindow *MainWindow::m_instance = 0;
 
 MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	m_settings(),
-    m_masterTabIndex(0),
+    m_mainCore(MainCore::instance()),
 	m_dspEngine(DSPEngine::instance()),
 	m_lastEngineState(DeviceAPI::StNotStarted),
 	m_inputGUI(0),
 	m_sampleRate(0),
 	m_centerFrequency(0),
-	m_sampleFileName(std::string("./test.sdriq")),
-	m_logger(logger)
+	m_sampleFileName(std::string("./test.sdriq"))
 {
 	qDebug() << "MainWindow::MainWindow: start";
 
     m_instance = this;
+    m_mainCore->m_logger = logger;
+    m_mainCore->m_masterTabIndex = 0;
+    m_mainCore->m_mainMessageQueue = &m_inputMessageQueue;
+	m_mainCore->m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
+    m_mainCore->m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
     QFontDatabase::addApplicationFont(":/LiberationSans-Regular.ttf");
     QFontDatabase::addApplicationFont(":/LiberationMono-Regular.ttf");
@@ -135,9 +122,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->show();
     splash->showStatusMessage("starting...", Qt::white);
     splash->showStatusMessage("starting...", Qt::white);
-
-	m_settings.setAudioDeviceManager(m_dspEngine->getAudioDeviceManager());
-    m_settings.setAMBEEngine(m_dspEngine->getAMBEEngine());
 
 	ui->setupUi(this);
 	createStatusBar();
@@ -187,9 +171,6 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
 
-	m_masterTimer.setTimerType(Qt::PreciseTimer);
-	m_masterTimer.start(50);
-
     splash->showStatusMessage("allocate FFTs...", Qt::white);
     splash->showStatusMessage("allocate FFTs...", Qt::white);
     m_dspEngine->createFFTFactory(parser.getFFTWFWisdomFileName());
@@ -205,7 +186,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 
     m_pluginManager = new PluginManager(this);
     m_pluginManager->loadPlugins(QString("plugins"));
-    m_pluginManager->loadPluginsNonDiscoverable(m_settings.getDeviceUserArgs());
+    m_pluginManager->loadPluginsNonDiscoverable(m_mainCore->m_settings.getDeviceUserArgs());
 
     splash->showStatusMessage("load initial feature set...", Qt::white);
     QStringList featureNames;
@@ -213,13 +194,13 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     ui->featureDock->addAvailableFeatures(featureNames);
     addFeatureSet();
     ui->featureDock->setFeatureUISet(m_featureUIs[0]);
-    ui->featureDock->setPresets(m_settings.getFeatureSetPresets());
+    ui->featureDock->setPresets(m_mainCore->m_settings.getFeatureSetPresets());
     ui->featureDock->setPluginAPI(m_pluginManager->getPluginAPI());
 
     splash->showStatusMessage("load file input...", Qt::white);
     qDebug() << "MainWindow::MainWindow: select SampleSource from settings or default (file input)...";
 
-	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_settings.getSourceDeviceId(), m_settings.getSourceIndex());
+	int deviceIndex = DeviceEnumerator::instance()->getRxSamplingDeviceIndex(m_mainCore->m_settings.getSourceDeviceId(), m_mainCore->m_settings.getSourceIndex());
 	addSourceDevice(deviceIndex);  // add the first device set with file input device as default if device in settings is not enumerated
 	m_deviceUIs.back()->m_deviceAPI->setBuddyLeader(true); // the first device is always the leader
     tabChannelsIndexChanged(); // force channel selection list update
@@ -227,9 +208,9 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     splash->showStatusMessage("load current preset settings...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
-	loadPresetSettings(m_settings.getWorkingPreset(), 0);
-	m_apiAdapter = new WebAPIAdapterGUI(*this);
-    loadFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
+	loadPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
+	m_apiAdapter = new WebAPIAdapterGUI();
+    loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
 
     splash->showStatusMessage("update preset controls...", Qt::white);
 	qDebug() << "MainWindow::MainWindow: update preset controls...";
@@ -299,7 +280,6 @@ MainWindow::~MainWindow()
 	delete ui;
 
 	qDebug() << "MainWindow::~MainWindow: end";
-	delete m_logger;
 	delete m_commandKeyReceiver;
 }
 
@@ -315,7 +295,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     int deviceTabIndex = m_deviceUIs.size();
     ui->inputViewDock->addDevice(0, deviceTabIndex);
 
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 0, m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 0, m_mainCore->m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_deviceUIs.back()->m_deviceSinkEngine = nullptr;
     m_deviceUIs.back()->m_deviceMIMOEngine = nullptr;
@@ -350,7 +330,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
 
-    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+    QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
         m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
@@ -389,7 +369,7 @@ void MainWindow::addSinkDevice()
     int deviceTabIndex = m_deviceUIs.size();
     ui->inputViewDock->addDevice(1, deviceTabIndex);
 
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 1, m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 1, m_mainCore->m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = nullptr;
     m_deviceUIs.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
     m_deviceUIs.back()->m_deviceMIMOEngine = nullptr;
@@ -422,7 +402,7 @@ void MainWindow::addSinkDevice()
     m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
     m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
 
-    QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+    QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
         m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
@@ -647,28 +627,28 @@ void MainWindow::loadSettings()
 {
 	qDebug() << "MainWindow::loadSettings";
 
-    m_settings.load();
-    m_settings.sortPresets();
-    int middleIndex = m_settings.getPresetCount() / 2;
+    m_mainCore->m_settings.load();
+    m_mainCore->m_settings.sortPresets();
+    int middleIndex = m_mainCore->m_settings.getPresetCount() / 2;
     QTreeWidgetItem *treeItem;
 
-    for (int i = 0; i < m_settings.getPresetCount(); ++i)
+    for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
     {
-        treeItem = addPresetToTree(m_settings.getPreset(i));
+        treeItem = addPresetToTree(m_mainCore->m_settings.getPreset(i));
 
         if (i == middleIndex) {
             ui->presetTree->setCurrentItem(treeItem);
         }
     }
 
-    m_settings.sortCommands();
+    m_mainCore->m_settings.sortCommands();
 
-    for (int i = 0; i < m_settings.getCommandCount(); ++i)
+    for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
     {
-        treeItem = addCommandToTree(m_settings.getCommand(i));
+        treeItem = addCommandToTree(m_mainCore->m_settings.getCommand(i));
     }
 
-    setLoggingOptions();
+    m_mainCore->setLoggingOptions();
 }
 
 void MainWindow::loadPresetSettings(const Preset* preset, int tabIndex)
@@ -791,9 +771,9 @@ void MainWindow::closeEvent(QCloseEvent *closeEvent)
 {
     qDebug("MainWindow::closeEvent");
 
-    savePresetSettings(m_settings.getWorkingPreset(), 0);
-    saveFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
-    m_settings.save();
+    savePresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
+    saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
+    m_mainCore->m_settings.save();
 
     while (m_deviceUIs.size() > 0)
     {
@@ -896,67 +876,67 @@ QTreeWidgetItem* MainWindow::addCommandToTree(const Command* command)
 
 void MainWindow::applySettings()
 {
- 	loadPresetSettings(m_settings.getWorkingPreset(), 0);
-    loadFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), 0);
+ 	loadPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
+    loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
 
-    m_settings.sortPresets();
-    int middleIndex = m_settings.getPresetCount() / 2;
+    m_mainCore->m_settings.sortPresets();
+    int middleIndex = m_mainCore->m_settings.getPresetCount() / 2;
     QTreeWidgetItem *treeItem;
     ui->presetTree->clear();
 
-    for (int i = 0; i < m_settings.getPresetCount(); ++i)
+    for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
     {
-        treeItem = addPresetToTree(m_settings.getPreset(i));
+        treeItem = addPresetToTree(m_mainCore->m_settings.getPreset(i));
 
         if (i == middleIndex) {
             ui->presetTree->setCurrentItem(treeItem);
         }
     }
 
-    m_settings.sortCommands();
+    m_mainCore->m_settings.sortCommands();
     ui->commandTree->clear();
 
-    for (int i = 0; i < m_settings.getCommandCount(); ++i) {
-        treeItem = addCommandToTree(m_settings.getCommand(i));
+    for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i) {
+        treeItem = addCommandToTree(m_mainCore->m_settings.getCommand(i));
     }
 
-    setLoggingOptions();
+    m_mainCore->setLoggingOptions();
 }
 
 bool MainWindow::handleMessage(const Message& cmd)
 {
-    if (MsgLoadPreset::match(cmd))
+    if (MainCore::MsgLoadPreset::match(cmd))
     {
-        MsgLoadPreset& notif = (MsgLoadPreset&) cmd;
+        MainCore::MsgLoadPreset& notif = (MainCore::MsgLoadPreset&) cmd;
         loadPresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         return true;
     }
-    else if (MsgSavePreset::match(cmd))
+    else if (MainCore::MsgSavePreset::match(cmd))
     {
-        MsgSavePreset& notif = (MsgSavePreset&) cmd;
+        MainCore::MsgSavePreset& notif = (MainCore::MsgSavePreset&) cmd;
         savePresetSettings(notif.getPreset(), notif.getDeviceSetIndex());
         if (notif.isNewPreset()) { ui->presetTree->setCurrentItem(addPresetToTree(notif.getPreset())); }
-        m_settings.sortPresets();
-        m_settings.save();
+        m_mainCore->m_settings.sortPresets();
+        m_mainCore->m_settings.save();
         return true;
     }
-    else if (MsgLoadFeatureSetPreset::match(cmd))
+    else if (MainCore::MsgLoadFeatureSetPreset::match(cmd))
     {
-        MsgLoadFeatureSetPreset& notif = (MsgLoadFeatureSetPreset&) cmd;
+        MainCore::MsgLoadFeatureSetPreset& notif = (MainCore::MsgLoadFeatureSetPreset&) cmd;
         loadFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
         return true;
     }
-    else if (MsgSaveFeatureSetPreset::match(cmd))
+    else if (MainCore::MsgSaveFeatureSetPreset::match(cmd))
     {
-        MsgSaveFeatureSetPreset& notif = (MsgSaveFeatureSetPreset&) cmd;
+        MainCore::MsgSaveFeatureSetPreset& notif = (MainCore::MsgSaveFeatureSetPreset&) cmd;
         saveFeatureSetPresetSettings(notif.getPreset(), notif.getFeatureSetIndex());
-        m_settings.sortFeatureSetPresets();
-        m_settings.save();
+        m_mainCore->m_settings.sortFeatureSetPresets();
+        m_mainCore->m_settings.save();
         return true;
     }
-    else if (MsgDeletePreset::match(cmd))
+    else if (MainCore::MsgDeletePreset::match(cmd))
     {
-        MsgDeletePreset& notif = (MsgDeletePreset&) cmd;
+        MainCore::MsgDeletePreset& notif = (MainCore::MsgDeletePreset&) cmd;
         const Preset *presetToDelete = notif.getPreset();
 
         // remove preset from tree
@@ -982,12 +962,12 @@ bool MainWindow::handleMessage(const Message& cmd)
         }
 
         // remove preset from settings
-        m_settings.deletePreset(presetToDelete);
+        m_mainCore->m_settings.deletePreset(presetToDelete);
         return true;
     }
-    else if (MsgAddDeviceSet::match(cmd))
+    else if (MainCore::MsgAddDeviceSet::match(cmd))
     {
-        MsgAddDeviceSet& notif = (MsgAddDeviceSet&) cmd;
+        MainCore::MsgAddDeviceSet& notif = (MainCore::MsgAddDeviceSet&) cmd;
         int direction = notif.getDirection();
 
         if (direction == 1) { // Single stream Tx
@@ -998,7 +978,7 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgRemoveLastDeviceSet::match(cmd))
+    else if (MainCore::MsgRemoveLastDeviceSet::match(cmd))
     {
         if (m_deviceUIs.size() > 1) {
             removeLastDevice();
@@ -1006,9 +986,9 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgSetDevice::match(cmd))
+    else if (MainCore::MsgSetDevice::match(cmd))
     {
-        MsgSetDevice& notif = (MsgSetDevice&) cmd;
+        MainCore::MsgSetDevice& notif = (MainCore::MsgSetDevice&) cmd;
         ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
         DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
         ui->inputViewDock->setSelectedDeviceIndex(notif.getDeviceSetIndex(), notif.getDeviceIndex());
@@ -1016,45 +996,51 @@ bool MainWindow::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgAddChannel::match(cmd))
+    else if (MainCore::MsgAddChannel::match(cmd))
     {
-        MsgAddChannel& notif = (MsgAddChannel&) cmd;
+        MainCore::MsgAddChannel& notif = (MainCore::MsgAddChannel&) cmd;
         ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
         channelAddClicked(notif.getChannelRegistrationIndex());
 
         return true;
     }
-    else if (MsgDeleteChannel::match(cmd))
+    else if (MainCore::MsgDeleteChannel::match(cmd))
     {
-        MsgDeleteChannel& notif = (MsgDeleteChannel&) cmd;
+        MainCore::MsgDeleteChannel& notif = (MainCore::MsgDeleteChannel&) cmd;
         deleteChannel(notif.getDeviceSetIndex(), notif.getChannelIndex());
         return true;
     }
-    else if (MsgDeviceSetFocus::match(cmd))
+    else if (MainCore::MsgDeviceSetFocus::match(cmd))
     {
-        MsgDeviceSetFocus& notif = (MsgDeviceSetFocus&) cmd;
+        MainCore::MsgDeviceSetFocus& notif = (MainCore::MsgDeviceSetFocus&) cmd;
         int index = notif.getDeviceSetIndex();
         if ((index >= 0) && (index < (int) m_deviceUIs.size())) {
             ui->tabInputsView->setCurrentIndex(index);
         }
     }
-    else if (MsgAddFeature::match(cmd))
+    else if (MainCore::MsgAddFeature::match(cmd))
     {
-        MsgAddFeature& notif = (MsgAddFeature&) cmd;
+        MainCore::MsgAddFeature& notif = (MainCore::MsgAddFeature&) cmd;
         ui->tabFeatures->setCurrentIndex(notif.getFeatureSetIndex());
         featureAddClicked(notif.getFeatureRegistrationIndex());
 
         return true;
     }
-    else if (MsgDeleteFeature::match(cmd))
+    else if (MainCore::MsgDeleteFeature::match(cmd))
     {
-        MsgDeleteFeature& notif = (MsgDeleteFeature&) cmd;
+        MainCore::MsgDeleteFeature& notif = (MainCore::MsgDeleteFeature&) cmd;
         deleteFeature(notif.getFeatureSetIndex(), notif.getFeatureIndex());
         return true;
     }
-    else if (MsgApplySettings::match(cmd))
+    else if (MainCore::MsgApplySettings::match(cmd))
     {
         applySettings();
+        return true;
+    }
+    else if (MainCore::MsgDVSerial::match(cmd))
+    {
+        MainCore::MsgDVSerial& notif = (MainCore::MsgDVSerial&) cmd;
+        ui->action_DV_Serial->setChecked(notif.getActive());
         return true;
     }
 
@@ -1113,9 +1099,9 @@ void MainWindow::on_commandNew_clicked()
     if (editCommandDialog.exec() == QDialog::Accepted)
     {
         editCommandDialog.toCommand(*command);
-        m_settings.addCommand(command);
+        m_mainCore->m_settings.addCommand(command);
         ui->commandTree->setCurrentItem(addCommandToTree(command));
-        m_settings.sortCommands();
+        m_mainCore->m_settings.sortCommands();
     }
 }
 
@@ -1124,9 +1110,9 @@ void MainWindow::on_commandDuplicate_clicked()
     QTreeWidgetItem* item = ui->commandTree->currentItem();
     const Command* command = qvariant_cast<const Command*>(item->data(0, Qt::UserRole));
     Command *commandCopy = new Command(*command);
-    m_settings.addCommand(commandCopy);
+    m_mainCore->m_settings.addCommand(commandCopy);
     ui->commandTree->setCurrentItem(addCommandToTree(commandCopy));
-    m_settings.sortCommands();
+    m_mainCore->m_settings.sortCommands();
 }
 
 void MainWindow::on_commandEdit_clicked()
@@ -1171,7 +1157,7 @@ void MainWindow::on_commandEdit_clicked()
 
             if (dlg.exec() == QDialog::Accepted)
             {
-                m_settings.renameCommandGroup(item->text(0), dlg.group());
+                m_mainCore->m_settings.renameCommandGroup(item->text(0), dlg.group());
                 newGroupName = dlg.group();
                 change = true;
             }
@@ -1180,12 +1166,12 @@ void MainWindow::on_commandEdit_clicked()
 
     if (change)
     {
-        m_settings.sortCommands();
+        m_mainCore->m_settings.sortCommands();
         ui->commandTree->clear();
 
-        for (int i = 0; i < m_settings.getCommandCount(); ++i)
+        for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
         {
-            QTreeWidgetItem *item_x = addCommandToTree(m_settings.getCommand(i));
+            QTreeWidgetItem *item_x = addCommandToTree(m_mainCore->m_settings.getCommand(i));
             const Command* command_x = qvariant_cast<const Command*>(item_x->data(0, Qt::UserRole));
             if (changedCommand &&  (command_x == changedCommand)) { // set cursor on changed command
                 ui->commandTree->setCurrentItem(item_x);
@@ -1224,7 +1210,7 @@ void MainWindow::on_commandDelete_clicked()
                             .arg(command->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 {
                     delete item;
-                    m_settings.deleteCommand(command);
+                    m_mainCore->m_settings.deleteCommand(command);
                 }
             }
         }
@@ -1235,12 +1221,12 @@ void MainWindow::on_commandDelete_clicked()
                     tr("Do you want to delete command group '%1'?")
                         .arg(item->text(0)), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             {
-                m_settings.deleteCommandGroup(item->text(0));
+                m_mainCore->m_settings.deleteCommandGroup(item->text(0));
 
                 ui->commandTree->clear();
 
-                for (int i = 0; i < m_settings.getCommandCount(); ++i) {
-                    addCommandToTree(m_settings.getCommand(i));
+                for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i) {
+                    addCommandToTree(m_mainCore->m_settings.getCommand(i));
                 }
             }
         }
@@ -1265,9 +1251,9 @@ void MainWindow::on_commandRun_clicked()
         {
             QString group = item->text(0);
 
-            for (int i = 0; i < m_settings.getCommandCount(); ++i)
+            for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
             {
-                Command *command_mod = const_cast<Command*>(m_settings.getCommand(i));
+                Command *command_mod = const_cast<Command*>(m_mainCore->m_settings.getCommand(i));
 
                 if (command_mod->getGroup() == group) {
                     command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
@@ -1293,7 +1279,7 @@ void MainWindow::on_commandOutput_clicked()
 void MainWindow::on_commandsSave_clicked()
 {
     saveCommandSettings();
-    m_settings.save();
+    m_mainCore->m_settings.save();
 }
 
 void MainWindow::commandKeysConnect(QObject *object, const char *slot)
@@ -1352,13 +1338,13 @@ void MainWindow::on_presetSave_clicked()
     }
 
     if(dlg.exec() == QDialog::Accepted) {
-        Preset* preset = m_settings.newPreset(dlg.group(), dlg.description());
+        Preset* preset = m_mainCore->m_settings.newPreset(dlg.group(), dlg.description());
         savePresetSettings(preset, ui->tabInputsView->currentIndex());
 
         ui->presetTree->setCurrentItem(addPresetToTree(preset));
     }
 
-    m_settings.sortPresets();
+    m_mainCore->m_settings.sortPresets();
 }
 
 void MainWindow::on_presetUpdate_clicked()
@@ -1381,12 +1367,12 @@ void MainWindow::on_presetUpdate_clicked()
 		}
 	}
 
-	m_settings.sortPresets();
+	m_mainCore->m_settings.sortPresets();
     ui->presetTree->clear();
 
-    for (int i = 0; i < m_settings.getPresetCount(); ++i)
+    for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
     {
-        QTreeWidgetItem *item_x = addPresetToTree(m_settings.getPreset(i));
+        QTreeWidgetItem *item_x = addPresetToTree(m_mainCore->m_settings.getPreset(i));
         const Preset* preset_x = qvariant_cast<const Preset*>(item_x->data(0, Qt::UserRole));
         if (changedPreset &&  (preset_x == changedPreset)) { // set cursor on changed preset
             ui->presetTree->setCurrentItem(item_x);
@@ -1431,7 +1417,7 @@ void MainWindow::on_presetEdit_clicked()
 
             if (dlg.exec() == QDialog::Accepted)
             {
-                m_settings.renamePresetGroup(item->text(0), dlg.group());
+                m_mainCore->m_settings.renamePresetGroup(item->text(0), dlg.group());
                 newGroupName = dlg.group();
                 change = true;
             }
@@ -1440,12 +1426,12 @@ void MainWindow::on_presetEdit_clicked()
 
     if (change)
     {
-        m_settings.sortPresets();
+        m_mainCore->m_settings.sortPresets();
         ui->presetTree->clear();
 
-        for (int i = 0; i < m_settings.getPresetCount(); ++i)
+        for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i)
         {
-            QTreeWidgetItem *item_x = addPresetToTree(m_settings.getPreset(i));
+            QTreeWidgetItem *item_x = addPresetToTree(m_mainCore->m_settings.getPreset(i));
             const Preset* preset_x = qvariant_cast<const Preset*>(item_x->data(0, Qt::UserRole));
             if (changedPreset &&  (preset_x == changedPreset)) { // set cursor on changed preset
                 ui->presetTree->setCurrentItem(item_x);
@@ -1533,7 +1519,7 @@ void MainWindow::on_presetImport_clicked()
 				instream >> base64Str;
 				exportFile.close();
 
-				Preset* preset = m_settings.newPreset("", "");
+				Preset* preset = m_mainCore->m_settings.newPreset("", "");
 				preset->deserialize(QByteArray::fromBase64(base64Str));
 				preset->setGroup(group); // override with current group
 
@@ -1549,9 +1535,9 @@ void MainWindow::on_presetImport_clicked()
 
 void MainWindow::on_settingsSave_clicked()
 {
-    savePresetSettings(m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
-    saveFeatureSetPresetSettings(m_settings.getWorkingFeatureSetPreset(), ui->tabFeatures->currentIndex());
-    m_settings.save();
+    savePresetSettings(m_mainCore->m_settings.getWorkingPreset(), ui->tabInputsView->currentIndex());
+    saveFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), ui->tabFeatures->currentIndex());
+    m_mainCore->m_settings.save();
 }
 
 void MainWindow::on_presetLoad_clicked()
@@ -1597,7 +1583,7 @@ void MainWindow::on_presetDelete_clicked()
             {
                 if(QMessageBox::question(this, tr("Delete Preset"), tr("Do you want to delete preset '%1'?").arg(preset->getDescription()), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
                     delete item;
-                    m_settings.deletePreset(preset);
+                    m_mainCore->m_settings.deletePreset(preset);
                 }
             }
         }
@@ -1608,12 +1594,12 @@ void MainWindow::on_presetDelete_clicked()
                     tr("Do you want to delete preset group '%1'?")
                         .arg(item->text(0)), QMessageBox::No | QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             {
-                m_settings.deletePresetGroup(item->text(0));
+                m_mainCore->m_settings.deletePresetGroup(item->text(0));
 
                 ui->presetTree->clear();
 
-                for (int i = 0; i < m_settings.getPresetCount(); ++i) {
-                    addPresetToTree(m_settings.getPreset(i));
+                for (int i = 0; i < m_mainCore->m_settings.getPresetCount(); ++i) {
+                    addPresetToTree(m_mainCore->m_settings.getPreset(i));
                 }
             }
         }
@@ -1648,21 +1634,21 @@ void MainWindow::on_action_Audio_triggered()
 
 void MainWindow::on_action_Logging_triggered()
 {
-    LoggingDialog loggingDialog(m_settings, this);
+    LoggingDialog loggingDialog(m_mainCore->m_settings, this);
     loggingDialog.exec();
-    setLoggingOptions();
+    m_mainCore->setLoggingOptions();
 }
 
 void MainWindow::on_action_My_Position_triggered()
 {
-	MyPositionDialog myPositionDialog(m_settings, this);
+	MyPositionDialog myPositionDialog(m_mainCore->m_settings, this);
 	myPositionDialog.exec();
 }
 
 void MainWindow::on_action_DeviceUserArguments_triggered()
 {
     qDebug("MainWindow::on_action_DeviceUserArguments_triggered");
-    DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_settings.getDeviceUserArgs(), this);
+    DeviceUserArgsDialog deviceUserArgsDialog(DeviceEnumerator::instance(), m_mainCore->m_settings.getDeviceUserArgs(), this);
     deviceUserArgsDialog.exec();
 }
 
@@ -1680,7 +1666,7 @@ void MainWindow::on_action_LimeRFE_triggered()
     qDebug("MainWindow::on_action_LimeRFE_triggered");
 #if defined(HAS_LIMERFEUSB)
     qDebug("MainWindow::on_action_LimeRFE_triggered: activated");
-    LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(m_settings.getLimeRFEUSBCalib(), this);
+    LimeRFEUSBDialog *limeRFEUSBDialog = new LimeRFEUSBDialog(m_mainCore->m_settings.getLimeRFEUSBCalib(), this);
     limeRFEUSBDialog->setModal(false);
     limeRFEUSBDialog->show();
 #endif
@@ -1705,7 +1691,7 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
     {
         qDebug("MainWindow::sampleSourceChanged: tab at %d", tabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
-        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
+        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceUI->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and input object
@@ -1742,7 +1728,7 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
             deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(fileInputDeviceIndex));
         }
 
-        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+        QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
         if (userArgs.size() > 0) {
             deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
@@ -1796,12 +1782,12 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
         setDeviceGUI(tabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName());
         deviceUI->m_deviceAPI->getSampleSource()->init();
 
-        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
+        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
 
         if (tabIndex == 0) // save as default starting device
         {
-            m_settings.setSourceIndex(samplingDevice->sequence);
-            m_settings.setSourceDeviceId(samplingDevice->id);
+            m_mainCore->m_settings.setSourceIndex(samplingDevice->sequence);
+            m_mainCore->m_settings.setSourceDeviceId(samplingDevice->id);
         }
     }
 }
@@ -1812,7 +1798,7 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
     {
         qDebug("MainWindow::sampleSinkChanged: tab at %d", tabIndex);
         DeviceUISet *deviceUI = m_deviceUIs[tabIndex];
-        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_settings.getWorkingPreset()); // save old API settings
+        deviceUI->m_deviceAPI->saveSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // save old API settings
         deviceUI->m_deviceAPI->stopDeviceEngine();
 
         // deletes old UI and output object
@@ -1847,7 +1833,7 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
             deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
         }
 
-        QString userArgs = m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+        QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
         if (userArgs.size() > 0) {
             deviceUI->m_deviceAPI->setHardwareUserArguments(userArgs);
@@ -1901,7 +1887,7 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
         setDeviceGUI(tabIndex, gui, deviceUI->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
         deviceUI->m_deviceAPI->getSampleSink()->init();
 
-        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_settings.getWorkingPreset()); // load new API settings
+        deviceUI->m_deviceAPI->loadSamplingDeviceSettings(m_mainCore->m_settings.getWorkingPreset()); // load new API settings
     }
 }
 
@@ -1994,7 +1980,7 @@ void MainWindow::deleteFeature(int featureSetIndex, int featureIndex)
 
 void MainWindow::on_action_About_triggered()
 {
-	AboutDialog dlg(m_apiHost, m_apiPort, m_settings, this);
+	AboutDialog dlg(m_apiHost, m_apiPort, m_mainCore->m_settings, this);
 	dlg.exec();
 }
 
@@ -2029,13 +2015,13 @@ void MainWindow::tabInputViewIndexChanged()
         ui->inputViewDock->setCurrentTabIndex(inputViewIndex);
     }
 
-    if ((inputViewIndex >= 0) && (m_masterTabIndex >= 0) && (inputViewIndex != m_masterTabIndex))
+    if ((inputViewIndex >= 0) && (m_mainCore->m_masterTabIndex >= 0) && (inputViewIndex != m_mainCore->m_masterTabIndex))
     {
         DeviceUISet *deviceUI = m_deviceUIs[inputViewIndex];
-        DeviceUISet *lastdeviceUI = m_deviceUIs[m_masterTabIndex];
+        DeviceUISet *lastdeviceUI = m_deviceUIs[m_mainCore->m_masterTabIndex];
         lastdeviceUI->m_mainWindowState = saveState();
         restoreState(deviceUI->m_mainWindowState);
-        m_masterTabIndex = inputViewIndex;
+        m_mainCore->m_masterTabIndex = inputViewIndex;
     }
 
     ui->tabSpectra->setCurrentIndex(inputViewIndex);
@@ -2080,63 +2066,14 @@ void MainWindow::updateStatus()
     m_dateTimeWidget->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss t"));
 }
 
-void MainWindow::setLoggingOptions()
-{
-    m_logger->setConsoleMinMessageLevel(m_settings.getConsoleMinLogLevel());
-
-    if (m_settings.getUseLogFile())
-    {
-        qtwebapp::FileLoggerSettings fileLoggerSettings; // default values
-
-        if (m_logger->hasFileLogger()) {
-            fileLoggerSettings = m_logger->getFileLoggerSettings(); // values from file logger if it exists
-        }
-
-        fileLoggerSettings.fileName = m_settings.getLogFileName(); // put new values
-        m_logger->createOrSetFileLogger(fileLoggerSettings, 2000); // create file logger if it does not exist and apply settings in any case
-    }
-
-    if (m_logger->hasFileLogger()) {
-        m_logger->setFileMinMessageLevel(m_settings.getFileMinLogLevel());
-    }
-
-    m_logger->setUseFileLogger(m_settings.getUseLogFile());
-
-    if (m_settings.getUseLogFile())
-    {
-#if QT_VERSION >= 0x050400
-        QString appInfoStr(tr("%1 %2 Qt %3 %4b %5 %6 DSP Rx:%7b Tx:%8b PID %9")
-                .arg(qApp->applicationName())
-                .arg(qApp->applicationVersion())
-                .arg(QT_VERSION_STR)
-                .arg(QT_POINTER_SIZE*8)
-                .arg(QSysInfo::currentCpuArchitecture())
-                .arg(QSysInfo::prettyProductName())
-                .arg(SDR_RX_SAMP_SZ)
-                .arg(SDR_TX_SAMP_SZ)
-                .arg(qApp->applicationPid()));
-#else
-        QString appInfoStr(tr("%1 %2 Qt %3 %4b DSP Rx:%5b Tx:%6b PID %7")
-                .arg(qApp->applicationName())
-                .arg(qApp->applicationVersion())
-                .arg(QT_VERSION_STR)
-                .arg(QT_POINTER_SIZE*8)
-                .arg(SDR_RX_SAMP_SZ)
-                .arg(SDR_TX_SAMP_SZ)
-                .arg(qApp->applicationPid()));
- #endif
-        m_logger->logToFile(QtInfoMsg, appInfoStr);
-    }
-}
-
 void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifiers, bool release)
 {
     //qDebug("MainWindow::commandKeyPressed: key: %x mod: %x %s", (int) key, (int) keyModifiers, release ? "release" : "press");
     int currentDeviceSetIndex = ui->tabInputsView->currentIndex();
 
-    for (int i = 0; i < m_settings.getCommandCount(); ++i)
+    for (int i = 0; i < m_mainCore->m_settings.getCommandCount(); ++i)
     {
-        const Command* command = m_settings.getCommand(i);
+        const Command* command = m_mainCore->m_settings.getCommand(i);
 
         if (command->getAssociateKey()
                 && (command->getRelease() == release)
