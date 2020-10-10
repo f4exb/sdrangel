@@ -25,12 +25,13 @@
 #include "webapi/webapiadapterinterface.h"
 #include "export.h"
 
-class MainWindow;
+class MainCore;
+class FeatureSet;
 
 class SDRGUI_API WebAPIAdapterGUI: public WebAPIAdapterInterface
 {
 public:
-    WebAPIAdapterGUI(MainWindow& mainWindow);
+    WebAPIAdapterGUI();
     virtual ~WebAPIAdapterGUI();
 
     virtual int instanceSummary(
@@ -415,13 +416,13 @@ public:
             SWGSDRangel::SWGErrorResponse& error);
 
 private:
-    MainWindow& m_mainWindow;
+    MainCore *m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
-    void getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex);
-    void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceUISet* deviceUISet);
+    void getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceSet* deviceUISet, int deviceUISetIndex);
+    void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceUISet);
     void getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList);
-    void getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureUISet* featureUISet, int featureUISetIndex);
+    void getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureSet* featureUISet, int featureUISetIndex);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

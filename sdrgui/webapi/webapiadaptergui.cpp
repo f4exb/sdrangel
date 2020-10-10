@@ -21,13 +21,13 @@
 #include <QList>
 #include <QSysInfo>
 
-#include "mainwindow.h"
+#include "maincore.h"
 #include "ui_mainwindow.h"
 #include "loggerwithfile.h"
 #include "device/deviceapi.h"
-#include "device/deviceuiset.h"
+#include "device/deviceset.h"
 #include "device/deviceenumerator.h"
-#include "feature/featureuiset.h"
+#include "feature/featureset.h"
 #include "feature/feature.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
@@ -82,9 +82,9 @@
 
 #include "webapiadaptergui.h"
 
-WebAPIAdapterGUI::WebAPIAdapterGUI(MainWindow& mainWindow) :
-    m_mainWindow(mainWindow)
+WebAPIAdapterGUI::WebAPIAdapterGUI()
 {
+    m_mainCore = MainCore::instance();
 }
 
 WebAPIAdapterGUI::~WebAPIAdapterGUI()
@@ -110,14 +110,14 @@ int WebAPIAdapterGUI::instanceSummary(
 
     SWGSDRangel::SWGLoggingInfo *logging = response.getLogging();
     logging->init();
-    logging->setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
+    logging->setDumpToFile(m_mainCore->m_logger->getUseFileLogger() ? 1 : 0);
 
     if (logging->getDumpToFile()) {
-        m_mainWindow.m_logger->getLogFileName(*logging->getFileName());
-        m_mainWindow.m_logger->getFileMinMessageLevelStr(*logging->getFileLevel());
+        m_mainCore->m_logger->getLogFileName(*logging->getFileName());
+        m_mainCore->m_logger->getFileMinMessageLevelStr(*logging->getFileLevel());
     }
 
-    m_mainWindow.m_logger->getConsoleMinMessageLevelStr(*logging->getConsoleLevel());
+    m_mainCore->m_logger->getConsoleMinMessageLevelStr(*logging->getConsoleLevel());
 
     SWGSDRangel::SWGDeviceSetList *deviceSetList = response.getDevicesetlist();
     getDeviceSetList(deviceSetList);
@@ -140,40 +140,40 @@ int WebAPIAdapterGUI::instanceConfigGet(
 {
     response.init();
     WebAPIAdapterBase webAPIAdapterBase;
-    webAPIAdapterBase.setPluginManager(m_mainWindow.getPluginManager());
+    webAPIAdapterBase.setPluginManager(m_mainCore->getPluginManager());
     SWGSDRangel::SWGPreferences *preferences = response.getPreferences();
-    WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainWindow.getMainSettings().getPreferences());
+    WebAPIAdapterBase::webapiFormatPreferences(preferences, m_mainCore->m_settings.getPreferences());
     SWGSDRangel::SWGPreset *workingPreset = response.getWorkingPreset();
-    webAPIAdapterBase.webapiFormatPreset(workingPreset, m_mainWindow.getMainSettings().getWorkingPresetConst());
+    webAPIAdapterBase.webapiFormatPreset(workingPreset, m_mainCore->m_settings.getWorkingPresetConst());
     SWGSDRangel::SWGFeatureSetPreset *workingFeatureSetPreset = response.getWorkingFeatureSetPreset();
-    webAPIAdapterBase.webapiFormatFeatureSetPreset(workingFeatureSetPreset, m_mainWindow.getMainSettings().getWorkingFeatureSetPresetConst());
+    webAPIAdapterBase.webapiFormatFeatureSetPreset(workingFeatureSetPreset, m_mainCore->m_settings.getWorkingFeatureSetPresetConst());
 
-    int nbPresets = m_mainWindow.m_settings.getPresetCount();
+    int nbPresets = m_mainCore->m_settings.getPresetCount();
     QList<SWGSDRangel::SWGPreset*> *swgPresets = response.getPresets();
 
     for (int i = 0; i < nbPresets; i++)
     {
-        const Preset *preset = m_mainWindow.m_settings.getPreset(i);
+        const Preset *preset = m_mainCore->m_settings.getPreset(i);
         swgPresets->append(new SWGSDRangel::SWGPreset);
         webAPIAdapterBase.webapiFormatPreset(swgPresets->back(), *preset);
     }
 
-    int nbCommands = m_mainWindow.m_settings.getCommandCount();
+    int nbCommands = m_mainCore->m_settings.getCommandCount();
     QList<SWGSDRangel::SWGCommand*> *swgCommands = response.getCommands();
 
     for (int i = 0; i < nbCommands; i++)
     {
-        const Command *command = m_mainWindow.m_settings.getCommand(i);
+        const Command *command = m_mainCore->m_settings.getCommand(i);
         swgCommands->append(new SWGSDRangel::SWGCommand);
         WebAPIAdapterBase::webapiFormatCommand(swgCommands->back(), *command);
     }
 
-    int nbFeatureSetPresets = m_mainWindow.m_settings.getFeatureSetPresetCount();
+    int nbFeatureSetPresets = m_mainCore->m_settings.getFeatureSetPresetCount();
     QList<SWGSDRangel::SWGFeatureSetPreset*> *swgFeatureSetPresets = response.getFeaturesetpresets();
 
     for (int i = 0; i < nbFeatureSetPresets; i++)
     {
-        const FeatureSetPreset *preset = m_mainWindow.m_settings.getFeatureSetPreset(i);
+        const FeatureSetPreset *preset = m_mainCore->m_settings.getFeatureSetPreset(i);
         swgFeatureSetPresets->append(new SWGSDRangel::SWGFeatureSetPreset);
         webAPIAdapterBase.webapiFormatFeatureSetPreset(swgFeatureSetPresets->back(), *preset);
     }
@@ -189,20 +189,20 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
         SWGSDRangel::SWGErrorResponse& error)
 {
     WebAPIAdapterBase webAPIAdapterBase;
-    webAPIAdapterBase.setPluginManager(m_mainWindow.getPluginManager());
+    webAPIAdapterBase.setPluginManager(m_mainCore->getPluginManager());
 
     if (force) {
-        webAPIAdapterBase.webapiInitConfig(m_mainWindow.m_settings);
+        webAPIAdapterBase.webapiInitConfig(m_mainCore->m_settings);
     }
 
-    Preferences newPreferences = m_mainWindow.m_settings.getPreferences();
+    Preferences newPreferences = m_mainCore->m_settings.getPreferences();
     webAPIAdapterBase.webapiUpdatePreferences(query.getPreferences(), configKeys.m_preferencesKeys, newPreferences);
-    m_mainWindow.m_settings.setPreferences(newPreferences);
+    m_mainCore->m_settings.setPreferences(newPreferences);
 
-    Preset *workingPreset = m_mainWindow.m_settings.getWorkingPreset();
+    Preset *workingPreset = m_mainCore->m_settings.getWorkingPreset();
     webAPIAdapterBase.webapiUpdatePreset(force, query.getWorkingPreset(), configKeys.m_workingPresetKeys, workingPreset);
 
-    FeatureSetPreset *workingFeatureSetPreset = m_mainWindow.m_settings.getWorkingFeatureSetPreset();
+    FeatureSetPreset *workingFeatureSetPreset = m_mainCore->m_settings.getWorkingFeatureSetPreset();
     webAPIAdapterBase.webapiUpdateFeatureSetPreset(force, query.getWorkingFeatureSetPreset(), configKeys.m_workingFeatureSetPresetKeys, workingFeatureSetPreset);
 
     QList<PresetKeys>::const_iterator presetKeysIt = configKeys.m_presetKeys.begin();
@@ -212,7 +212,7 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
         Preset *newPreset = new Preset(); // created with default values
         SWGSDRangel::SWGPreset *swgPreset = query.getPresets()->at(i);
         webAPIAdapterBase.webapiUpdatePreset(force, swgPreset, *presetKeysIt, newPreset);
-        m_mainWindow.m_settings.addPreset(newPreset);
+        m_mainCore->m_settings.addPreset(newPreset);
     }
 
     QList<CommandKeys>::const_iterator commandKeysIt = configKeys.m_commandKeys.begin();
@@ -222,7 +222,7 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
         Command *newCommand = new Command(); // created with default values
         SWGSDRangel::SWGCommand *swgCommand = query.getCommands()->at(i);
         webAPIAdapterBase.webapiUpdateCommand(swgCommand, *commandKeysIt, *newCommand);
-        m_mainWindow.m_settings.addCommand(newCommand);
+        m_mainCore->m_settings.addCommand(newCommand);
     }
 
     QList<FeatureSetPresetKeys>::const_iterator featureSetPresetKeysIt = configKeys.m_featureSetPresetKeys.begin();
@@ -232,11 +232,11 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
         FeatureSetPreset *newPreset = new FeatureSetPreset(); // created with default values
         SWGSDRangel::SWGFeatureSetPreset *swgPreset = query.getFeaturesetpresets()->at(i);
         webAPIAdapterBase.webapiUpdateFeatureSetPreset(force, swgPreset, *featureSetPresetKeysIt, newPreset);
-        m_mainWindow.m_settings.addFeatureSetPreset(newPreset);
+        m_mainCore->m_settings.addFeatureSetPreset(newPreset);
     }
 
-    MainWindow::MsgApplySettings *msg = MainWindow::MsgApplySettings::create();
-    m_mainWindow.m_inputMessageQueue.push(msg);
+    MainCore::MsgApplySettings *msg = MainCore::MsgApplySettings::create();
+    m_mainCore->m_mainMessageQueue->push(msg);
 
     return 200;
 }
@@ -305,17 +305,17 @@ int WebAPIAdapterGUI::instanceChannels(
 
     if (direction == 0) // Single sink (Rx) channel
     {
-        channelRegistrations = m_mainWindow.m_pluginManager->getRxChannelRegistrations();
+        channelRegistrations = m_mainCore->m_pluginManager->getRxChannelRegistrations();
         nbChannelDevices = channelRegistrations->size();
     }
     else if (direction == 1) // Single source (Tx) channel
     {
-        channelRegistrations = m_mainWindow.m_pluginManager->getTxChannelRegistrations();
+        channelRegistrations = m_mainCore->m_pluginManager->getTxChannelRegistrations();
         nbChannelDevices = channelRegistrations->size();
     }
     else if (direction == 2) // MIMO channel
     {
-        channelRegistrations = m_mainWindow.m_pluginManager->getMIMOChannelRegistrations();
+        channelRegistrations = m_mainCore->m_pluginManager->getMIMOChannelRegistrations();
         nbChannelDevices = channelRegistrations->size();
     }
     else // not supported
@@ -350,14 +350,14 @@ int WebAPIAdapterGUI::instanceLoggingGet(
 {
     (void) error;
     response.init();
-    response.setDumpToFile(m_mainWindow.m_logger->getUseFileLogger() ? 1 : 0);
+    response.setDumpToFile(m_mainCore->m_logger->getUseFileLogger() ? 1 : 0);
 
     if (response.getDumpToFile()) {
-        m_mainWindow.m_logger->getLogFileName(*response.getFileName());
-        m_mainWindow.m_logger->getFileMinMessageLevelStr(*response.getFileLevel());
+        m_mainCore->m_logger->getLogFileName(*response.getFileName());
+        m_mainCore->m_logger->getFileMinMessageLevelStr(*response.getFileLevel());
     }
 
-    m_mainWindow.m_logger->getConsoleMinMessageLevelStr(*response.getConsoleLevel());
+    m_mainCore->m_logger->getConsoleMinMessageLevelStr(*response.getConsoleLevel());
 
     return 200;
 }
@@ -376,27 +376,27 @@ int WebAPIAdapterGUI::instanceLoggingPut(
 
     // perform actions
     if (consoleLevel) {
-        m_mainWindow.m_settings.setConsoleMinLogLevel(getMsgTypeFromString(*consoleLevel));
+        m_mainCore->m_settings.setConsoleMinLogLevel(getMsgTypeFromString(*consoleLevel));
     }
 
     if (fileLevel) {
-        m_mainWindow.m_settings.setFileMinLogLevel(getMsgTypeFromString(*fileLevel));
+        m_mainCore->m_settings.setFileMinLogLevel(getMsgTypeFromString(*fileLevel));
     }
 
-    m_mainWindow.m_settings.setUseLogFile(dumpToFile);
+    m_mainCore->m_settings.setUseLogFile(dumpToFile);
 
     if (fileName) {
-        m_mainWindow.m_settings.setLogFileName(*fileName);
+        m_mainCore->m_settings.setLogFileName(*fileName);
     }
 
-    m_mainWindow.setLoggingOptions();
+    m_mainCore->setLoggingOptions();
 
     // build response
     response.init();
-    getMsgTypeString(m_mainWindow.m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
-    response.setDumpToFile(m_mainWindow.m_settings.getUseLogFile() ? 1 : 0);
-    getMsgTypeString(m_mainWindow.m_settings.getFileMinLogLevel(), *response.getFileLevel());
-    *response.getFileName() = m_mainWindow.m_settings.getLogFileName();
+    getMsgTypeString(m_mainCore->m_settings.getConsoleMinLogLevel(), *response.getConsoleLevel());
+    response.setDumpToFile(m_mainCore->m_settings.getUseLogFile() ? 1 : 0);
+    getMsgTypeString(m_mainCore->m_settings.getFileMinLogLevel(), *response.getFileLevel());
+    *response.getFileName() = m_mainCore->m_settings.getLogFileName();
 
     return 200;
 }
@@ -406,8 +406,9 @@ int WebAPIAdapterGUI::instanceAudioGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    const QList<QAudioDeviceInfo>& audioInputDevices = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDevices();
-    const QList<QAudioDeviceInfo>& audioOutputDevices = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDevices();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    const QList<QAudioDeviceInfo>& audioInputDevices = dspEngine->getAudioDeviceManager()->getInputDevices();
+    const QList<QAudioDeviceInfo>& audioOutputDevices = dspEngine->getAudioDeviceManager()->getOutputDevices();
     int nbInputDevices = audioInputDevices.size();
     int nbOutputDevices = audioOutputDevices.size();
 
@@ -422,7 +423,7 @@ int WebAPIAdapterGUI::instanceAudioGet(
     // system default input device
     inputDevices->append(new SWGSDRangel::SWGAudioInputDevice);
     inputDevices->back()->init();
-    bool found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inputDeviceInfo);
+    bool found = dspEngine->getAudioDeviceManager()->getInputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, inputDeviceInfo);
     *inputDevices->back()->getName() = AudioDeviceManager::m_defaultDeviceName;
     inputDevices->back()->setIndex(-1);
     inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
@@ -436,7 +437,7 @@ int WebAPIAdapterGUI::instanceAudioGet(
         inputDevices->append(new SWGSDRangel::SWGAudioInputDevice);
         inputDevices->back()->init();
         inputDeviceInfo.resetToDefaults();
-        found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(audioInputDevices.at(i).deviceName(), inputDeviceInfo);
+        found = dspEngine->getAudioDeviceManager()->getInputDeviceInfo(audioInputDevices.at(i).deviceName(), inputDeviceInfo);
         *inputDevices->back()->getName() = audioInputDevices.at(i).deviceName();
         inputDevices->back()->setIndex(i);
         inputDevices->back()->setSampleRate(inputDeviceInfo.sampleRate);
@@ -448,7 +449,7 @@ int WebAPIAdapterGUI::instanceAudioGet(
     // system default output device
     outputDevices->append(new SWGSDRangel::SWGAudioOutputDevice);
     outputDevices->back()->init();
-    found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outputDeviceInfo);
+    found = dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(AudioDeviceManager::m_defaultDeviceName, outputDeviceInfo);
     *outputDevices->back()->getName() = AudioDeviceManager::m_defaultDeviceName;
     outputDevices->back()->setIndex(-1);
     outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
@@ -468,7 +469,7 @@ int WebAPIAdapterGUI::instanceAudioGet(
         outputDevices->append(new SWGSDRangel::SWGAudioOutputDevice);
         outputDevices->back()->init();
         outputDeviceInfo.resetToDefaults();
-        found = m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(audioOutputDevices.at(i).deviceName(), outputDeviceInfo);
+        found = dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(audioOutputDevices.at(i).deviceName(), outputDeviceInfo);
         *outputDevices->back()->getName() = audioOutputDevices.at(i).deviceName();
         outputDevices->back()->setIndex(i);
         outputDevices->back()->setSampleRate(outputDeviceInfo.sampleRate);
@@ -491,19 +492,19 @@ int WebAPIAdapterGUI::instanceAudioInputPatch(
         const QStringList& audioInputKeys,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    // TODO
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no audio input device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
     if (audioInputKeys.contains("sampleRate")) {
         inputDeviceInfo.sampleRate = response.getSampleRate();
@@ -512,8 +513,8 @@ int WebAPIAdapterGUI::instanceAudioInputPatch(
         inputDeviceInfo.volume = response.getVolume();
     }
 
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->setInputDeviceInfo(deviceIndex, inputDeviceInfo);
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->setInputDeviceInfo(deviceIndex, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
     response.setSampleRate(inputDeviceInfo.sampleRate);
     response.setVolume(inputDeviceInfo.volume);
@@ -526,18 +527,19 @@ int WebAPIAdapterGUI::instanceAudioOutputPatch(
         const QStringList& audioOutputKeys,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no audio output device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
 
     if (audioOutputKeys.contains("sampleRate")) {
         outputDeviceInfo.sampleRate = response.getSampleRate();
@@ -564,8 +566,8 @@ int WebAPIAdapterGUI::instanceAudioOutputPatch(
         outputDeviceInfo.udpPort = response.getUdpPort() % (1<<16);
     }
 
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->setOutputDeviceInfo(deviceIndex, outputDeviceInfo);
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->setOutputDeviceInfo(deviceIndex, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
 
     response.setSampleRate(outputDeviceInfo.sampleRate);
     response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
@@ -589,19 +591,20 @@ int WebAPIAdapterGUI::instanceAudioInputDelete(
             SWGSDRangel::SWGAudioInputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::InputDeviceInfo inputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getInputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no audio input device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    dspEngine->getAudioDeviceManager()->getInputDeviceInfo(deviceName, inputDeviceInfo);
 
     response.setSampleRate(inputDeviceInfo.sampleRate);
     response.setVolume(inputDeviceInfo.volume);
@@ -613,19 +616,20 @@ int WebAPIAdapterGUI::instanceAudioOutputDelete(
             SWGSDRangel::SWGAudioOutputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     AudioDeviceManager::OutputDeviceInfo outputDeviceInfo;
     QString deviceName;
     int deviceIndex = response.getIndex();
 
-    if (!m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
+    if (!dspEngine->getAudioDeviceManager()->getOutputDeviceName(deviceIndex, deviceName))
     {
         error.init();
         *error.getMessage() = QString("There is no audio output device at index %1").arg(deviceIndex);
         return 404;
     }
 
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
+    dspEngine->getAudioDeviceManager()->unsetInputDeviceInfo(deviceIndex);
+    dspEngine->getAudioDeviceManager()->getOutputDeviceInfo(deviceName, outputDeviceInfo);
 
     response.setSampleRate(outputDeviceInfo.sampleRate);
     response.setCopyToUdp(outputDeviceInfo.copyToUDP == 0 ? 0 : 1);
@@ -650,7 +654,8 @@ int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->inputInfosCleanup();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAudioDeviceManager()->inputInfosCleanup();
 
     response.init();
     *response.getMessage() = QString("Unregistered parameters for devices not in list of available input devices for this instance");
@@ -663,7 +668,8 @@ int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    m_mainWindow.m_dspEngine->getAudioDeviceManager()->outputInfosCleanup();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAudioDeviceManager()->outputInfosCleanup();
 
     response.init();
     *response.getMessage() = QString("Unregistered parameters for devices not in list of available output devices for this instance");
@@ -677,8 +683,8 @@ int WebAPIAdapterGUI::instanceLocationGet(
 {
     (void) error;
     response.init();
-    response.setLatitude(m_mainWindow.m_settings.getLatitude());
-    response.setLongitude(m_mainWindow.m_settings.getLongitude());
+    response.setLatitude(m_mainCore->m_settings.getLatitude());
+    response.setLongitude(m_mainCore->m_settings.getLongitude());
 
     return 200;
 }
@@ -694,11 +700,11 @@ int WebAPIAdapterGUI::instanceLocationPut(
     latitude = latitude < -90.0 ? -90.0 : latitude > 90.0 ? 90.0 : latitude;
     longitude = longitude < -180.0 ? -180.0 : longitude > 180.0 ? 180.0 : longitude;
 
-    m_mainWindow.m_settings.setLatitude(latitude);
-    m_mainWindow.m_settings.setLongitude(longitude);
+    m_mainCore->m_settings.setLatitude(latitude);
+    m_mainCore->m_settings.setLongitude(longitude);
 
-    response.setLatitude(m_mainWindow.m_settings.getLatitude());
-    response.setLongitude(m_mainWindow.m_settings.getLongitude());
+    response.setLatitude(m_mainCore->m_settings.getLatitude());
+    response.setLongitude(m_mainCore->m_settings.getLongitude());
 
     return 200;
 }
@@ -708,10 +714,11 @@ int WebAPIAdapterGUI::instanceDVSerialGet(
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
+    DSPEngine *dspEngine = DSPEngine::instance();
     response.init();
 
     std::vector<std::string> deviceNames;
-    m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
+    dspEngine->getDVSerialNames(deviceNames);
     response.setNbDevices((int) deviceNames.size());
     QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
@@ -734,14 +741,17 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    m_mainWindow.m_dspEngine->setDVSerialSupport(dvserial);
-    m_mainWindow.ui->action_DV_Serial->setChecked(dvserial);
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->setDVSerialSupport(dvserial);
+
+    MainCore::MsgDVSerial *msg = MainCore::MsgDVSerial::create(dvserial);
+    m_mainCore->m_mainMessageQueue->push(msg);
     response.init();
 
     if (dvserial)
     {
         std::vector<std::string> deviceNames;
-        m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
+        dspEngine->getDVSerialNames(deviceNames);
         response.setNbDevices((int) deviceNames.size());
         QList<SWGSDRangel::SWGDVSerialDevice*> *deviceNamesList = response.getDvSerialDevices();
 
@@ -768,11 +778,12 @@ int WebAPIAdapterGUI::instanceAMBESerialGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
+    DSPEngine *dspEngine = DSPEngine::instance();
     response.init();
 
     std::vector<std::string> deviceNames;
     std::vector<QString> qDeviceNames;
-    m_mainWindow.m_dspEngine->getAMBEEngine()->scan(qDeviceNames);
+    dspEngine->getAMBEEngine()->scan(qDeviceNames);
 
     for (std::vector<QString>::const_iterator it = qDeviceNames.begin(); it != qDeviceNames.end(); ++it) {
         deviceNames.push_back(it->toStdString());
@@ -799,10 +810,11 @@ int WebAPIAdapterGUI::instanceAMBEDevicesGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
+    DSPEngine *dspEngine = DSPEngine::instance();
     response.init();
 
     std::vector<std::string> deviceNames;
-    m_mainWindow.m_dspEngine->getDVSerialNames(deviceNames);
+    dspEngine->getDVSerialNames(deviceNames);
     response.setNbDevices((int) deviceNames.size());
     QList<SWGSDRangel::SWGAMBEDevice*> *deviceNamesList = response.getAmbeDevices();
 
@@ -825,7 +837,8 @@ int WebAPIAdapterGUI::instanceAMBEDevicesDelete(
             SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    m_mainWindow.m_dspEngine->getAMBEEngine()->releaseAll();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAMBEEngine()->releaseAll();
 
     response.init();
     *response.getMessage() = QString("All AMBE devices released");
@@ -838,12 +851,13 @@ int WebAPIAdapterGUI::instanceAMBEDevicesPut(
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    m_mainWindow.m_dspEngine->getAMBEEngine()->releaseAll();
+    DSPEngine *dspEngine = DSPEngine::instance();
+    dspEngine->getAMBEEngine()->releaseAll();
 
     QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = query.getAmbeDevices();
 
     for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it) {
-        m_mainWindow.m_dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
+        dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
     }
 
     instanceAMBEDevicesGet(response, error);
@@ -855,14 +869,15 @@ int WebAPIAdapterGUI::instanceAMBEDevicesPatch(
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    DSPEngine *dspEngine = DSPEngine::instance();
     QList<SWGSDRangel::SWGAMBEDevice *> *ambeList = query.getAmbeDevices();
 
     for (QList<SWGSDRangel::SWGAMBEDevice *>::const_iterator it = ambeList->begin(); it != ambeList->end(); ++it)
     {
         if ((*it)->getDelete()) {
-            m_mainWindow.m_dspEngine->getAMBEEngine()->releaseController((*it)->getDeviceRef()->toStdString());
+            dspEngine->getAMBEEngine()->releaseController((*it)->getDeviceRef()->toStdString());
         } else {
-            m_mainWindow.m_dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
+            dspEngine->getAMBEEngine()->registerController((*it)->getDeviceRef()->toStdString());
         }
     }
 
@@ -1084,7 +1099,7 @@ int WebAPIAdapterGUI::instancePresetsGet(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    int nbPresets = m_mainWindow.m_settings.getPresetCount();
+    int nbPresets = m_mainCore->m_settings.getPresetCount();
     int nbGroups = 0;
     int nbPresetsThisGroup = 0;
     QString groupName;
@@ -1097,7 +1112,7 @@ int WebAPIAdapterGUI::instancePresetsGet(
 
     for (; i < nbPresets; i++)
     {
-        const Preset *preset = m_mainWindow.m_settings.getPreset(i);
+        const Preset *preset = m_mainCore->m_settings.getPreset(i);
 
         if ((i == 0) || (groupName != preset->getGroup())) // new group
         {
@@ -1132,7 +1147,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
 {
     int deviceSetIndex = query.getDeviceSetIndex();
     SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
-    int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
+    int nbDeviceSets = m_mainCore->m_deviceSets.size();
 
     if (deviceSetIndex >= nbDeviceSets)
     {
@@ -1141,7 +1156,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
         return 404;
     }
 
-    const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*presetIdentifier->getGroupName(),
+    const Preset *selectedPreset = m_mainCore->m_settings.getPreset(*presetIdentifier->getGroupName(),
             presetIdentifier->getCenterFrequency(),
             *presetIdentifier->getName(),
             *presetIdentifier->getType());
@@ -1157,7 +1172,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
         return 404;
     }
 
-    DeviceUISet *deviceUI = m_mainWindow.m_deviceUIs[deviceSetIndex];
+    DeviceSet *deviceUI = m_mainCore->m_deviceSets[deviceSetIndex];
 
     if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
     {
@@ -1180,8 +1195,8 @@ int WebAPIAdapterGUI::instancePresetPatch(
         return 404;
     }
 
-    MainWindow::MsgLoadPreset *msg = MainWindow::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
-    m_mainWindow.m_inputMessageQueue.push(msg);
+    MainCore::MsgLoadPreset *msg = MainCore::MsgLoadPreset::create(selectedPreset, deviceSetIndex);
+    m_mainCore->m_mainMessageQueue->push(msg);
 
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
@@ -1199,7 +1214,7 @@ int WebAPIAdapterGUI::instancePresetPut(
 {
     int deviceSetIndex = query.getDeviceSetIndex();
     SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
-    int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
+    int nbDeviceSets = m_mainCore->m_deviceSets.size();
 
     if (deviceSetIndex >= nbDeviceSets)
     {
@@ -1208,7 +1223,7 @@ int WebAPIAdapterGUI::instancePresetPut(
         return 404;
     }
 
-    const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*presetIdentifier->getGroupName(),
+    const Preset *selectedPreset = m_mainCore->m_settings.getPreset(*presetIdentifier->getGroupName(),
             presetIdentifier->getCenterFrequency(),
             *presetIdentifier->getName(),
             *presetIdentifier->getType());
@@ -1225,7 +1240,7 @@ int WebAPIAdapterGUI::instancePresetPut(
     }
     else // update existing preset
     {
-        DeviceUISet *deviceUI = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceUI = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceUI->m_deviceSourceEngine && !selectedPreset->isSourcePreset())
         {
@@ -1249,8 +1264,8 @@ int WebAPIAdapterGUI::instancePresetPut(
         }
     }
 
-    MainWindow::MsgSavePreset *msg = MainWindow::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
-    m_mainWindow.m_inputMessageQueue.push(msg);
+    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, false);
+    m_mainCore->m_mainMessageQueue->push(msg);
 
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
@@ -1268,7 +1283,7 @@ int WebAPIAdapterGUI::instancePresetPost(
 {
     int deviceSetIndex = query.getDeviceSetIndex();
     SWGSDRangel::SWGPresetIdentifier *presetIdentifier = query.getPreset();
-    int nbDeviceSets = m_mainWindow.m_deviceUIs.size();
+    int nbDeviceSets = m_mainCore->m_deviceSets.size();
 
     if (deviceSetIndex >= nbDeviceSets)
     {
@@ -1277,7 +1292,7 @@ int WebAPIAdapterGUI::instancePresetPost(
         return 404;
     }
 
-    DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+    DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
     int deviceCenterFrequency = 0;
 
     if (deviceSet->m_deviceSourceEngine) { // Rx
@@ -1292,14 +1307,14 @@ int WebAPIAdapterGUI::instancePresetPost(
         return 500;
     }
 
-    const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*presetIdentifier->getGroupName(),
+    const Preset *selectedPreset = m_mainCore->m_settings.getPreset(*presetIdentifier->getGroupName(),
             deviceCenterFrequency,
             *presetIdentifier->getName(),
             *presetIdentifier->getType());
 
     if (selectedPreset == 0) // save on a new preset
     {
-        selectedPreset = m_mainWindow.m_settings.newPreset(*presetIdentifier->getGroupName(), *presetIdentifier->getName());
+        selectedPreset = m_mainCore->m_settings.newPreset(*presetIdentifier->getGroupName(), *presetIdentifier->getName());
     }
     else
     {
@@ -1312,8 +1327,8 @@ int WebAPIAdapterGUI::instancePresetPost(
         return 409;
     }
 
-    MainWindow::MsgSavePreset *msg = MainWindow::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
-    m_mainWindow.m_inputMessageQueue.push(msg);
+    MainCore::MsgSavePreset *msg = MainCore::MsgSavePreset::create(const_cast<Preset*>(selectedPreset), deviceSetIndex, true);
+    m_mainCore->m_mainMessageQueue->push(msg);
 
     response.init();
     response.setCenterFrequency(selectedPreset->getCenterFrequency());
@@ -1328,7 +1343,7 @@ int WebAPIAdapterGUI::instancePresetDelete(
         SWGSDRangel::SWGPresetIdentifier& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    const Preset *selectedPreset = m_mainWindow.m_settings.getPreset(*response.getGroupName(),
+    const Preset *selectedPreset = m_mainCore->m_settings.getPreset(*response.getGroupName(),
             response.getCenterFrequency(),
             *response.getName(),
             *response.getType());
@@ -1348,8 +1363,8 @@ int WebAPIAdapterGUI::instancePresetDelete(
     *response.getType() = selectedPreset->isSourcePreset() ? "R" : selectedPreset->isSinkPreset() ? "T" : selectedPreset->isMIMOPreset() ? "M" : "X";
     *response.getName() = selectedPreset->getDescription();
 
-    MainWindow::MsgDeletePreset *msg = MainWindow::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
-    m_mainWindow.m_inputMessageQueue.push(msg);
+    MainCore::MsgDeletePreset *msg = MainCore::MsgDeletePreset::create(const_cast<Preset*>(selectedPreset));
+    m_mainCore->m_mainMessageQueue->push(msg);
 
     return 202;
 }
@@ -1378,8 +1393,8 @@ int WebAPIAdapterGUI::instanceDeviceSetPost(
         SWGSDRangel::SWGErrorResponse& error)
 {
     (void) error;
-    MainWindow::MsgAddDeviceSet *msg = MainWindow::MsgAddDeviceSet::create(direction);
-    m_mainWindow.m_inputMessageQueue.push(msg);
+    MainCore::MsgAddDeviceSet *msg = MainCore::MsgAddDeviceSet::create(direction);
+    m_mainCore->m_mainMessageQueue->push(msg);
 
     response.init();
     *response.getMessage() = QString("Message to add a new device set (MsgAddDeviceSet) was submitted successfully");
@@ -1391,10 +1406,10 @@ int WebAPIAdapterGUI::instanceDeviceSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if (m_mainWindow.m_deviceUIs.size() > 1)
+    if (m_mainCore->m_deviceSets.size() > 1)
     {
-        MainWindow::MsgRemoveLastDeviceSet *msg = MainWindow::MsgRemoveLastDeviceSet::create();
-        m_mainWindow.m_inputMessageQueue.push(msg);
+        MainCore::MsgRemoveLastDeviceSet *msg = MainCore::MsgRemoveLastDeviceSet::create();
+        m_mainCore->m_mainMessageQueue->push(msg);
 
         response.init();
         *response.getMessage() = QString("Message to remove last device set (MsgRemoveLastDeviceSet) was submitted successfully");
@@ -1415,9 +1430,9 @@ int WebAPIAdapterGUI::devicesetGet(
         SWGSDRangel::SWGDeviceSet& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         getDeviceSet(&response, deviceSet, deviceSetIndex);
 
         return 200;
@@ -1436,10 +1451,10 @@ int WebAPIAdapterGUI::devicesetFocusPatch(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        MainWindow::MsgDeviceSetFocus *msg = MainWindow::MsgDeviceSetFocus::create(deviceSetIndex);
-        m_mainWindow.m_inputMessageQueue.push(msg);
+        MainCore::MsgDeviceSetFocus *msg = MainCore::MsgDeviceSetFocus::create(deviceSetIndex);
+        m_mainCore->m_mainMessageQueue->push(msg);
 
         response.init();
         *response.getMessage() = QString("Message to focus on device set (MsgDeviceSetFocus) was submitted successfully");
@@ -1460,9 +1475,9 @@ int WebAPIAdapterGUI::devicesetSpectrumSettingsGet(
         SWGSDRangel::SWGGLSpectrum& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         return deviceSet->webapiSpectrumSettingsGet(response, *error.getMessage());
     }
     else
@@ -1481,9 +1496,9 @@ int WebAPIAdapterGUI::devicesetSpectrumSettingsPutPatch(
         SWGSDRangel::SWGGLSpectrum& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         return deviceSet->webapiSpectrumSettingsPutPatch(force, spectrumSettingsKeys, response, *error.getMessage());
     }
     else
@@ -1500,9 +1515,9 @@ int WebAPIAdapterGUI::devicesetSpectrumServerGet(
         SWGSDRangel::SWGSpectrumServer& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         deviceSet->webapiSpectrumServerGet(response, *error.getMessage());
 
         return 200;
@@ -1521,9 +1536,9 @@ int WebAPIAdapterGUI::devicesetSpectrumServerPost(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         deviceSet->webapiSpectrumServerPost(response, *error.getMessage());
 
         return 200;
@@ -1542,9 +1557,9 @@ int WebAPIAdapterGUI::devicesetSpectrumServerDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         deviceSet->webapiSpectrumServerDelete(response, *error.getMessage());
 
         return 200;
@@ -1564,9 +1579,9 @@ int WebAPIAdapterGUI::devicesetDevicePut(
         SWGSDRangel::SWGDeviceListItem& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if ((query.getDirection() != 1) && (deviceSet->m_deviceSinkEngine))
         {
@@ -1636,8 +1651,8 @@ int WebAPIAdapterGUI::devicesetDevicePut(
                 continue;
             }
 
-            MainWindow::MsgSetDevice *msg = MainWindow::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
-            m_mainWindow.m_inputMessageQueue.push(msg);
+            MainCore::MsgSetDevice *msg = MainCore::MsgSetDevice::create(deviceSetIndex, i, query.getDirection());
+            m_mainCore->m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getDisplayedName() = samplingDevice->displayedName;
@@ -1672,9 +1687,9 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsGet(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -1719,9 +1734,9 @@ int WebAPIAdapterGUI::devicesetDeviceActionsPost(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -1823,9 +1838,9 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -1901,9 +1916,9 @@ int WebAPIAdapterGUI::devicesetDeviceRunGet(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
@@ -1938,9 +1953,9 @@ int WebAPIAdapterGUI::devicesetDeviceSubsystemRunGet(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceMIMOEngine) // MIMO
         {
@@ -1968,9 +1983,9 @@ int WebAPIAdapterGUI::devicesetDeviceRunPost(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
@@ -2005,9 +2020,9 @@ int WebAPIAdapterGUI::devicesetDeviceSubsystemRunPost(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceMIMOEngine) // MIMO
         {
@@ -2035,9 +2050,9 @@ int WebAPIAdapterGUI::devicesetDeviceRunDelete(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Rx
         {
@@ -2072,9 +2087,9 @@ int WebAPIAdapterGUI::devicesetDeviceSubsystemRunDelete(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceMIMOEngine) // MIMO
         {
@@ -2102,9 +2117,9 @@ int WebAPIAdapterGUI::devicesetDeviceReportGet(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -2145,9 +2160,9 @@ int WebAPIAdapterGUI::devicesetChannelsReportGet(
         SWGSDRangel::SWGChannelsDetail& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        const DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        const DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
         getChannelsDetail(&response, deviceSet);
 
         return 200;
@@ -2167,9 +2182,9 @@ int WebAPIAdapterGUI::devicesetChannelPost(
 			SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (query.getDirection() == 0) // Single Rx
         {
@@ -2180,7 +2195,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 return 400;
             }
 
-            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainWindow.m_pluginManager->getRxChannelRegistrations();
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainCore->m_pluginManager->getRxChannelRegistrations();
             int nbRegistrations = channelRegistrations->size();
             int index = 0;
             for (; index < nbRegistrations; index++)
@@ -2192,8 +2207,8 @@ int WebAPIAdapterGUI::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-                MainWindow::MsgAddChannel *msg = MainWindow::MsgAddChannel::create(deviceSetIndex, index, false);
-                m_mainWindow.m_inputMessageQueue.push(msg);
+                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, false);
+                m_mainCore->m_mainMessageQueue->push(msg);
 
                 response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
@@ -2216,7 +2231,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 return 400;
             }
 
-            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainWindow.m_pluginManager->getTxChannelRegistrations();
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainCore->m_pluginManager->getTxChannelRegistrations();
             int nbRegistrations = channelRegistrations->size();
             int index = 0;
             for (; index < nbRegistrations; index++)
@@ -2228,8 +2243,8 @@ int WebAPIAdapterGUI::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-                MainWindow::MsgAddChannel *msg = MainWindow::MsgAddChannel::create(deviceSetIndex, index, true);
-                m_mainWindow.m_inputMessageQueue.push(msg);
+                MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+                m_mainCore->m_mainMessageQueue->push(msg);
 
                 response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
@@ -2252,7 +2267,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
                 return 400;
             }
 
-            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainWindow.m_pluginManager->getMIMOChannelRegistrations();
+            PluginAPI::ChannelRegistrations *channelRegistrations = m_mainCore->m_pluginManager->getMIMOChannelRegistrations();
             int nbRegistrations = channelRegistrations->size();
             int index = 0;
             for (; index < nbRegistrations; index++)
@@ -2264,8 +2279,8 @@ int WebAPIAdapterGUI::devicesetChannelPost(
 
             if (index < nbRegistrations)
             {
-            	MainWindow::MsgAddChannel *msg = MainWindow::MsgAddChannel::create(deviceSetIndex, index, true);
-                m_mainWindow.m_inputMessageQueue.push(msg);
+            	MainCore::MsgAddChannel *msg = MainCore::MsgAddChannel::create(deviceSetIndex, index, true);
+                m_mainCore->m_mainMessageQueue->push(msg);
 
                 response.init();
                 *response.getMessage() = QString("Message to add a channel (MsgAddChannel) was submitted successfully");
@@ -2300,14 +2315,14 @@ int WebAPIAdapterGUI::devicesetChannelDelete(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (channelIndex < deviceSet->getNumberOfChannels())
         {
-            MainWindow::MsgDeleteChannel *msg = MainWindow::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
-            m_mainWindow.m_inputMessageQueue.push(msg);
+            MainCore::MsgDeleteChannel *msg = MainCore::MsgDeleteChannel::create(deviceSetIndex, channelIndex);
+            m_mainCore->m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getMessage() = QString("Message to delete a channel (MsgDeleteChannel) was submitted successfully");
@@ -2339,9 +2354,9 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -2438,9 +2453,9 @@ int WebAPIAdapterGUI::devicesetChannelReportGet(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -2539,9 +2554,9 @@ int WebAPIAdapterGUI::devicesetChannelActionsPost(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -2694,9 +2709,9 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
 {
     error.init();
 
-    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        DeviceUISet *deviceSet = m_mainWindow.m_deviceUIs[deviceSetIndex];
+        DeviceSet *deviceSet = m_mainCore->m_deviceSets[deviceSetIndex];
 
         if (deviceSet->m_deviceSourceEngine) // Single Rx
         {
@@ -2825,11 +2840,11 @@ int WebAPIAdapterGUI::featuresetFeaturePost(
 			SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
 
-        PluginAPI::FeatureRegistrations *featureRegistrations = m_mainWindow.m_pluginManager->getFeatureRegistrations();
+        PluginAPI::FeatureRegistrations *featureRegistrations = m_mainCore->m_pluginManager->getFeatureRegistrations();
         int nbRegistrations = featureRegistrations->size();
         int index = 0;
 
@@ -2842,8 +2857,8 @@ int WebAPIAdapterGUI::featuresetFeaturePost(
 
         if (index < nbRegistrations)
         {
-            MainWindow::MsgAddFeature *msg = MainWindow::MsgAddFeature::create(featureSetIndex, index);
-            m_mainWindow.m_inputMessageQueue.push(msg);
+            MainCore::MsgAddFeature *msg = MainCore::MsgAddFeature::create(featureSetIndex, index);
+            m_mainCore->m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getMessage() = QString("Message to add a feature (MsgAddFeature) was submitted successfully");
@@ -2871,14 +2886,14 @@ int WebAPIAdapterGUI::featuresetFeatureDelete(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
 
         if (featureIndex < featureSet->getNumberOfFeatures())
         {
-            MainWindow::MsgDeleteFeature *msg = MainWindow::MsgDeleteFeature::create(featureSetIndex, featureIndex);
-            m_mainWindow.m_inputMessageQueue.push(msg);
+            MainCore::MsgDeleteFeature *msg = MainCore::MsgDeleteFeature::create(featureSetIndex, featureIndex);
+            m_mainCore->m_mainMessageQueue->push(msg);
 
             response.init();
             *response.getMessage() = QString("Message to delete a feature (MsgDeleteFeature) was submitted successfully");
@@ -2908,9 +2923,9 @@ int WebAPIAdapterGUI::featuresetFeatureRunGet(
     SWGSDRangel::SWGDeviceState& response,
     SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
 
         if (featureIndex < featureSet->getNumberOfFeatures())
         {
@@ -2941,9 +2956,9 @@ int WebAPIAdapterGUI::featuresetFeatureRunPost(
     SWGSDRangel::SWGDeviceState& response,
     SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
 
         if (featureIndex < featureSet->getNumberOfFeatures())
         {
@@ -2974,9 +2989,9 @@ int WebAPIAdapterGUI::featuresetFeatureRunDelete(
     SWGSDRangel::SWGDeviceState& response,
     SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
 
         if (featureIndex < featureSet->getNumberOfFeatures())
         {
@@ -3009,9 +3024,9 @@ int WebAPIAdapterGUI::featuresetFeatureSettingsGet(
 {
     error.init();
 
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_deviceUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_deviceSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         Feature *feature = featureSet->getFeatureAt(featureIndex);
 
         if (feature)
@@ -3043,9 +3058,9 @@ int WebAPIAdapterGUI::featuresetFeatureSettingsPutPatch(
 {
     error.init();
 
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         Feature *feature = featureSet->getFeatureAt(featureIndex);
 
         if (feature)
@@ -3087,9 +3102,9 @@ int WebAPIAdapterGUI::featuresetFeatureReportGet(
 {
     error.init();
 
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         Feature *feature = featureSet->getFeatureAt(featureIndex);
 
         if (feature)
@@ -3121,9 +3136,9 @@ int WebAPIAdapterGUI::featuresetFeatureActionsPost(
 {
     error.init();
 
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         Feature *feature = featureSet->getFeatureAt(featureIndex);
 
         if (feature)
@@ -3168,15 +3183,15 @@ int WebAPIAdapterGUI::featuresetFeatureActionsPost(
 void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();
-    deviceSetList->setDevicesetcount((int) m_mainWindow.m_deviceUIs.size());
+    deviceSetList->setDevicesetcount((int) m_mainCore->m_deviceSets.size());
 
-    if (m_mainWindow.m_deviceUIs.size() > 0) {
-        deviceSetList->setDevicesetfocus(m_mainWindow.ui->tabInputsView->currentIndex());
+    if (m_mainCore->m_deviceSets.size() > 0) {
+        deviceSetList->setDevicesetfocus(m_mainCore->m_masterTabIndex);
     }
 
-    std::vector<DeviceUISet*>::const_iterator it = m_mainWindow.m_deviceUIs.begin();
+    std::vector<DeviceSet*>::const_iterator it = m_mainCore->m_deviceSets.begin();
 
-    for (int i = 0; it != m_mainWindow.m_deviceUIs.end(); ++it, i++)
+    for (int i = 0; it != m_mainCore->m_deviceSets.end(); ++it, i++)
     {
         QList<SWGSDRangel::SWGDeviceSet*> *deviceSets = deviceSetList->getDeviceSets();
         deviceSets->append(new SWGSDRangel::SWGDeviceSet());
@@ -3185,7 +3200,7 @@ void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSet
     }
 }
 
-void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceUISet* deviceUISet, int deviceUISetIndex)
+void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceSet* deviceUISet, int deviceUISetIndex)
 {
     deviceSet->init();
     SWGSDRangel::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
@@ -3324,7 +3339,7 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
     }
 }
 
-void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceUISet* deviceUISet)
+void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceUISet)
 {
     channelsDetail->init();
     SWGSDRangel::SWGChannelReport *channelReport;
@@ -3462,9 +3477,9 @@ int WebAPIAdapterGUI::featuresetGet(
         SWGSDRangel::SWGFeatureSet& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
-    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainWindow.m_featureUIs.size()))
+    if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        const FeatureUISet *featureSet = m_mainWindow.m_featureUIs[featureSetIndex];
+        const FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
         getFeatureSet(&response, featureSet, featureSetIndex);
 
         return 200;
@@ -3481,11 +3496,11 @@ int WebAPIAdapterGUI::featuresetGet(
 void WebAPIAdapterGUI::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList)
 {
     featureSetList->init();
-    featureSetList->setFeaturesetcount((int) m_mainWindow.m_featureUIs.size());
+    featureSetList->setFeaturesetcount((int) m_mainCore->m_featureSets.size());
 
-    std::vector<FeatureUISet*>::const_iterator it = m_mainWindow.m_featureUIs.begin();
+    std::vector<FeatureSet*>::const_iterator it = m_mainCore->m_featureSets.begin();
 
-    for (int i = 0; it != m_mainWindow.m_featureUIs.end(); ++it, i++)
+    for (int i = 0; it != m_mainCore->m_featureSets.end(); ++it, i++)
     {
         QList<SWGSDRangel::SWGFeatureSet*> *featureSets = featureSetList->getFeatureSets();
         featureSets->append(new SWGSDRangel::SWGFeatureSet());
@@ -3494,7 +3509,7 @@ void WebAPIAdapterGUI::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* feature
     }
 }
 
-void WebAPIAdapterGUI::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureUISet* featureUISet, int featureUISetIndex)
+void WebAPIAdapterGUI::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureSet* featureUISet, int featureUISetIndex)
 {
     featureSet->init();
     featureSet->setFeaturecount(featureUISet->getNumberOfFeatures());

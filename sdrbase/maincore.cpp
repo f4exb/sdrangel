@@ -24,6 +24,8 @@
 
 #include "maincore.h"
 
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDeviceSetFocus, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgDVSerial, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteInstance, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgLoadPreset, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgSavePreset, Message)

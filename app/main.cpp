@@ -135,6 +135,7 @@ int main(int argc, char* argv[])
 	qtwebapp::LoggerWithFile *logger = new qtwebapp::LoggerWithFile(qApp);
     logger->installMsgHandler();
 	int res = runQtApplication(argc, argv, logger);
+	delete logger;
 	qWarning("SDRangel quit.");
 	return res;
 }

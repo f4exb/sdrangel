@@ -38,6 +38,46 @@ namespace qtwebapp {
 class SDRBASE_API MainCore
 {
 public:
+	class MsgDeviceSetFocus : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        int getDeviceSetIndex() const { return m_deviceSetIndex; }
+
+        static MsgDeviceSetFocus* create(int deviceSetIndex)
+        {
+            return new MsgDeviceSetFocus(deviceSetIndex);
+        }
+
+    private:
+        int m_deviceSetIndex;
+
+        MsgDeviceSetFocus(int deviceSetIndex) :
+            Message(),
+            m_deviceSetIndex(deviceSetIndex)
+        { }
+    };
+
+	class MsgDVSerial : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getActive() const { return m_active; }
+
+        static MsgDVSerial* create(bool active)
+        {
+            return new MsgDVSerial(active);
+        }
+
+    private:
+        bool m_active;
+
+        MsgDVSerial(bool active) :
+            Message(),
+            m_active(active)
+        { }
+    };
+
     class MsgLoadPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -374,6 +414,7 @@ public:
     friend class MainServer;
     friend class MainWindow;
     friend class WebAPIAdapterSrv;
+    friend class WebAPIAdapterGUI;
 
 private:
     MainSettings m_settings;

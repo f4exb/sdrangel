@@ -665,8 +665,9 @@ void LimeRFEUSBDialog::stopStartRx(bool start)
             deviceSourceEngine->startAcquisition();
         }
 
-        MainWindow::MsgDeviceSetFocus *msg = MainWindow::MsgDeviceSetFocus::create(m_rxDeviceSetIndex[rxDeviceSetSequence]);
-        m_mainWindow->getInputMessageQueue()->push(msg);
+        MainCore *mainCore = MainCore::instance();
+        MainCore::MsgDeviceSetFocus *msg = MainCore::MsgDeviceSetFocus::create(m_rxDeviceSetIndex[rxDeviceSetSequence]);
+        mainCore->getMainMessageQueue()->push(msg);
     }
     else
     {
@@ -690,8 +691,9 @@ void LimeRFEUSBDialog::stopStartTx(bool start)
             deviceSinkEngine->startGeneration();
         }
 
-        MainWindow::MsgDeviceSetFocus *msg = MainWindow::MsgDeviceSetFocus::create(m_txDeviceSetIndex[txDeviceSetSequence]);
-        m_mainWindow->getInputMessageQueue()->push(msg);
+        MainCore *mainCore = MainCore::instance();
+        MainCore::MsgDeviceSetFocus *msg = MainCore::MsgDeviceSetFocus::create(m_txDeviceSetIndex[txDeviceSetSequence]);
+        mainCore->getMainMessageQueue()->push(msg);
     }
     else
     {

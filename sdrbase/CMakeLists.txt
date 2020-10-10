@@ -153,6 +153,7 @@ set(sdrbase_SOURCES
     device/deviceutils.cpp
 
     feature/feature.cpp
+    feature/featureset.cpp
     feature/featureutils.cpp
 
     limerfe/limerfeusbcalib.cpp
@@ -312,6 +313,7 @@ set(sdrbase_HEADERS
     device/deviceutils.h
 
     feature/feature.h
+    feature/featureset.h
     feature/featureutils.h
 
     limerfe/limerfeusbcalib.h
