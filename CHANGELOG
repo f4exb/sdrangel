@@ -1,3 +1,12 @@
+sdrangel (4.20.0-1) unstable; urgency=medium
+
+   * New IEEE 802.15.4 modulator. PR #654
+   * Packet modulator fixes. PR #655
+   * Implementation of MainCore singleton in MainWindow and MainServer
+   * Unique Web API adapter
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 11 Oct 2020 20:39:16 +0200
+
 sdrangel (4.19.0-1) unstable; urgency=medium
 
    * USRP support. PR #652
