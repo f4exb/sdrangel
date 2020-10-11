@@ -2037,6 +2037,9 @@ margin-bottom: 20px;
     "FileSourceActions" : {
       "$ref" : "#/definitions/FileSourceActions"
     },
+    "IEEE_802_15_4_ModActions" : {
+      "$ref" : "#/definitions/IEEE_802_15_4_ModActions"
+    },
     "PacketModActions" : {
       "$ref" : "#/definitions/PacketModActions"
     }
@@ -2175,6 +2178,9 @@ margin-bottom: 20px;
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
+    "IEEE_802_15_4_ModReport" : {
+      "$ref" : "#/definitions/IEEE_802_15_4_ModReport"
+    },
     "FileSinkReport" : {
       "$ref" : "#/definitions/FileSinkReport"
     },
@@ -2281,6 +2287,9 @@ margin-bottom: 20px;
     },
     "FreqTrackerSettings" : {
       "$ref" : "#/definitions/FreqTrackerSettings"
+    },
+    "IEEE_802_15_4_ModSettings" : {
+      "$ref" : "#/definitions/IEEE_802_15_4_ModSettings"
     },
     "NFMDemodSettings" : {
       "$ref" : "#/definitions/NFMDemodSettings"
@@ -4121,6 +4130,99 @@ margin-bottom: 20px;
     }
   },
   "description" : "HackRF"
+};
+            defs.IEEE_802_15_4_ModActions = {
+  "properties" : {
+    "tx" : {
+      "$ref" : "#/definitions/IEEE_802_15_4_ModActions_tx"
+    }
+  },
+  "description" : "IEEE_802_15_4_Mod"
+};
+            defs.IEEE_802_15_4_ModActions_tx = {
+  "properties" : {
+    "data" : {
+      "type" : "string",
+      "description" : "Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00)."
+    }
+  },
+  "description" : "Transmit a frame\n"
+};
+            defs.IEEE_802_15_4_ModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "IEEE_802_15_4_Mod"
+};
+            defs.IEEE_802_15_4_ModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "phy" : {
+      "type" : "string",
+      "description" : "Physical layer. \"20kbps BPSK\", \"40kbps BPSK\", \"100kbps <1GHz O-QPSK\", \"250kbps <1GHz O-QPSK (Sine)\", \"250kbps <1GHz O-QPSK (RC)\", or \"250kbps >2GHz O-QPSK\"."
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "repeat" : {
+      "type" : "integer",
+      "description" : "Whether to repeated transmit the frame (1 for yes, 0 for no)."
+    },
+    "repeatDelay" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Delay between repeated transmissions."
+    },
+    "repeatCount" : {
+      "type" : "integer",
+      "description" : "Number of times to repeat the frame (-1 for infinite)."
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "IEEE_802_15_4_Mod"
 };
             defs.InstanceChannelsResponse = {
   "required" : [ "channelcount" ],
@@ -39867,7 +39969,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-02T22:20:44.346+02:00
+              Generated 2020-10-11T08:49:12.690+02:00
             </div>
           </div>
       </div>

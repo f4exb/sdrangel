@@ -38,7 +38,6 @@
         <file>webapi/doc/swagger/include/GLSpectrum.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
-        <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/LimeRFE.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
@@ -46,7 +45,6 @@
         <file>webapi/doc/swagger/include/LocalOutput.yaml</file>
         <file>webapi/doc/swagger/include/LocalSink.yaml</file>
         <file>webapi/doc/swagger/include/LocalSource.yaml</file>
-        <file>webapi/doc/swagger/include/MetisMISO.yaml</file>
         <file>webapi/doc/swagger/include/NFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/NFMMod.yaml</file>
         <file>webapi/doc/swagger/include/PacketMod.yaml</file>

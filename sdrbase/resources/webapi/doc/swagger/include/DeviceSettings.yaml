@@ -68,6 +68,10 @@ DeviceSettings:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
     testSourceSettings:
       $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
+    usrpInputSettings:
+      $ref: "/doc/swagger/include/USRP.yaml#/USRPInputSettings"
+    usrpOutputSettings:
+      $ref: "/doc/swagger/include/USRP.yaml#/USRPOutputSettings"
     xtrxInputSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
     xtrxOutputSettings:

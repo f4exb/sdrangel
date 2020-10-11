@@ -1,0 +1,67 @@
+IEEE_802_15_4_ModSettings:
+  description: IEEE_802_15_4_Mod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    phy:
+      description: Physical layer. "20kbps BPSK", "40kbps BPSK", "100kbps <1GHz O-QPSK", "250kbps <1GHz O-QPSK (Sine)", "250kbps <1GHz O-QPSK (RC)", or "250kbps >2GHz O-QPSK".
+      type: string
+    rfBandwidth:
+      type: number
+      format: float
+    gain:
+      type: number
+      format: float
+    channelMute:
+      type: integer
+    repeat:
+      description: Whether to repeated transmit the frame (1 for yes, 0 for no).
+      type: integer
+    repeatDelay:
+      description: Delay between repeated transmissions.
+      type: number
+      format: float
+    repeatCount:
+      description: Number of times to repeat the frame (-1 for infinite).
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+IEEE_802_15_4_ModReport:
+  description: IEEE_802_15_4_Mod
+  properties:
+    channelPowerDB:
+      description: power transmitted in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+
+IEEE_802_15_4_ModActions:
+  description: IEEE_802_15_4_Mod
+  properties:
+    tx:
+      type: object
+      properties:
+        data:
+          description: Hex coded bytes of data to transmit, excluding CRC (E.g for an ACK - 02 00 00).
+          type: string
+      description: >
+        Transmit a frame
