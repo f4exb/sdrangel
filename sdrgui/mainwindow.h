@@ -50,7 +50,7 @@ class PluginInterface;
 class QWidget;
 class WebAPIRequestMapper;
 class WebAPIServer;
-class WebAPIAdapterGUI;
+class WebAPIAdapter;
 class Preset;
 class Command;
 class FeatureSetPreset;
@@ -81,7 +81,7 @@ public:
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
 
-	friend class WebAPIAdapterGUI;
+	friend class WebAPIAdapter;
 
 private:
     enum {
@@ -121,7 +121,7 @@ private:
 
 	WebAPIRequestMapper *m_requestMapper;
 	WebAPIServer *m_apiServer;
-	WebAPIAdapterGUI *m_apiAdapter;
+	WebAPIAdapter *m_apiAdapter;
 	QString m_apiHost;
 	int m_apiPort;
 

@@ -39,7 +39,7 @@ class DeviceSet;
 class FeatureSet;
 class WebAPIRequestMapper;
 class WebAPIServer;
-class WebAPIAdapterSrv;
+class WebAPIAdapter;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -69,7 +69,7 @@ public:
     void addFeature(int featureSetIndex, int featureIndex);
     void deleteFeature(int featureSetIndex, int featureIndex);
 
-    friend class WebAPIAdapterSrv;
+    friend class WebAPIAdapter;
 
 signals:
     void finished();
@@ -83,7 +83,7 @@ private:
 
     WebAPIRequestMapper *m_requestMapper;
     WebAPIServer *m_apiServer;
-    WebAPIAdapterSrv *m_apiAdapter;
+    WebAPIAdapter *m_apiAdapter;
 
 	void loadSettings();
     void applySettings();

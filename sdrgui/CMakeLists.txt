@@ -86,8 +86,6 @@ set(sdrgui_SOURCES
     soapygui/complexfactorgui.cpp
     soapygui/arginfogui.cpp
 
-    webapi/webapiadaptergui.cpp
-
     resources/res.qrc
 )
 

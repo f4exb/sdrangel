@@ -72,7 +72,7 @@
 #include "loggerwithfile.h"
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
-#include "webapi/webapiadaptergui.h"
+#include "webapi/webapiadapter.h"
 #include "commands/command.h"
 
 #include "mainwindow.h"
@@ -212,7 +212,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	qDebug() << "MainWindow::MainWindow: load current preset settings...";
 
 	loadPresetSettings(m_mainCore->m_settings.getWorkingPreset(), 0);
-	m_apiAdapter = new WebAPIAdapterGUI();
+	m_apiAdapter = new WebAPIAdapter();
     loadFeatureSetPresetSettings(m_mainCore->m_settings.getWorkingFeatureSetPreset(), 0);
 
     splash->showStatusMessage("update preset controls...", Qt::white);

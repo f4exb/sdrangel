@@ -33,7 +33,7 @@
 #include "plugin/pluginmanager.h"
 #include "webapi/webapirequestmapper.h"
 #include "webapi/webapiserver.h"
-#include "webapi/webapiadaptersrv.h"
+#include "webapi/webapiadapter.h"
 
 #include "mainparser.h"
 #include "mainserver.h"
@@ -70,7 +70,7 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     qDebug() << "MainServer::MainServer: finishing...";
     QString applicationDirPath = QCoreApplication::instance()->applicationDirPath();
 
-    m_apiAdapter = new WebAPIAdapterSrv(*m_mainCore);
+    m_apiAdapter = new WebAPIAdapter();
     m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);
     m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);

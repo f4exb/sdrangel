@@ -17,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
-#define SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
+#ifndef SDRBASE_WEBAPI_WEBAPIADAPTER_H_
+#define SDRBASE_WEBAPI_WEBAPIADAPTER_H_
 
 #include <QtGlobal>
 
@@ -26,13 +26,14 @@
 #include "export.h"
 
 class MainCore;
+class DeviceSet;
 class FeatureSet;
 
-class SDRGUI_API WebAPIAdapterGUI: public WebAPIAdapterInterface
+class SDRGUI_API WebAPIAdapter: public WebAPIAdapterInterface
 {
 public:
-    WebAPIAdapterGUI();
-    virtual ~WebAPIAdapterGUI();
+    WebAPIAdapter();
+    virtual ~WebAPIAdapter();
 
     virtual int instanceSummary(
             SWGSDRangel::SWGInstanceSummaryResponse& response,
