@@ -45,7 +45,10 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgAddFeature, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeature, Message)
 
 MainCore::MainCore()
-{}
+{
+	m_masterTimer.setTimerType(Qt::PreciseTimer);
+	m_masterTimer.start(50);
+}
 
 MainCore::~MainCore()
 {}
