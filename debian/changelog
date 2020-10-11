@@ -1,3 +1,12 @@
+sdrangel (5.14.0-1) unstable; urgency=medium
+
+   * New IEEE 802.15.4 modulator. PR #654
+   * Packet modulator fixes. PR #655
+   * Implementation of MainCore singleton in MainWindow and MainServer
+   * Unique Web API adapter
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 11 Oct 2020 08:11:42 +0200
+
 sdrangel (5.13.1-1) unstable; urgency=medium
 
    * Create a MainCore singleton and renamed MainCore to MainServer
