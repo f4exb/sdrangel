@@ -393,10 +393,10 @@ private:
     MainCore *m_mainCore;
 
     void getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList);
-    void getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceSet* deviceUISet, int deviceUISetIndex);
-    void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceUISet);
+    void getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex);
+    void getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet);
     void getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList);
-    void getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureSet* featureUISet, int featureUISetIndex);
+    void getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex);
     static QtMsgType getMsgTypeFromString(const QString& msgTypeString);
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };

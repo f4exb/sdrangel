@@ -3096,37 +3096,37 @@ void WebAPIAdapter::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetLis
     }
 }
 
-void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceSet* deviceUISet, int deviceUISetIndex)
+void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *swgDeviceSet, const DeviceSet* deviceSet, int deviceSetIndex)
 {
-    deviceSet->init();
-    SWGSDRangel::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
+    swgDeviceSet->init();
+    SWGSDRangel::SWGSamplingDevice *samplingDevice = swgDeviceSet->getSamplingDevice();
     samplingDevice->init();
-    samplingDevice->setIndex(deviceUISetIndex);
+    samplingDevice->setIndex(deviceSetIndex);
 
-    if (deviceUISet->m_deviceSinkEngine) // Single Tx data
+    if (deviceSet->m_deviceSinkEngine) // Single Tx data
     {
         samplingDevice->setDirection(1);
-        *samplingDevice->getHwType() = deviceUISet->m_deviceAPI->getHardwareId();
-        *samplingDevice->getSerial() = deviceUISet->m_deviceAPI->getSamplingDeviceSerial();
-        samplingDevice->setSequence(deviceUISet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getDeviceNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getDeviceItemIndex());
-        deviceUISet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
-        DeviceSampleSink *sampleSink = deviceUISet->m_deviceSinkEngine->getSink();
+        *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
+        *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
+        samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getDeviceItemIndex());
+        deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
+        DeviceSampleSink *sampleSink = deviceSet->m_deviceSinkEngine->getSink();
 
         if (sampleSink) {
             samplingDevice->setCenterFrequency(sampleSink->getCenterFrequency());
             samplingDevice->setBandwidth(sampleSink->getSampleRate());
         }
 
-        deviceSet->setChannelcount(deviceUISet->m_deviceAPI->getNbSourceChannels());
-        QList<SWGSDRangel::SWGChannel*> *channels = deviceSet->getChannels();
+        swgDeviceSet->setChannelcount(deviceSet->m_deviceAPI->getNbSourceChannels());
+        QList<SWGSDRangel::SWGChannel*> *channels = swgDeviceSet->getChannels();
 
-        for (int i = 0; i <  deviceSet->getChannelcount(); i++)
+        for (int i = 0; i <  swgDeviceSet->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSourceAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(1);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3136,30 +3136,30 @@ void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const Dev
         }
     }
 
-    if (deviceUISet->m_deviceSourceEngine) // Rx data
+    if (deviceSet->m_deviceSourceEngine) // Rx data
     {
         samplingDevice->setDirection(0);
-        *samplingDevice->getHwType() = deviceUISet->m_deviceAPI->getHardwareId();
-        *samplingDevice->getSerial() = deviceUISet->m_deviceAPI->getSamplingDeviceSerial();
-        samplingDevice->setSequence(deviceUISet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getDeviceNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getDeviceItemIndex());
-        deviceUISet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
-        DeviceSampleSource *sampleSource = deviceUISet->m_deviceSourceEngine->getSource();
+        *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
+        *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
+        samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getDeviceItemIndex());
+        deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getState());
+        DeviceSampleSource *sampleSource = deviceSet->m_deviceSourceEngine->getSource();
 
         if (sampleSource) {
             samplingDevice->setCenterFrequency(sampleSource->getCenterFrequency());
             samplingDevice->setBandwidth(sampleSource->getSampleRate());
         }
 
-        deviceSet->setChannelcount(deviceUISet->m_deviceAPI->getNbSinkChannels());
-        QList<SWGSDRangel::SWGChannel*> *channels = deviceSet->getChannels();
+        swgDeviceSet->setChannelcount(deviceSet->m_deviceAPI->getNbSinkChannels());
+        QList<SWGSDRangel::SWGChannel*> *channels = swgDeviceSet->getChannels();
 
-        for (int i = 0; i <  deviceSet->getChannelcount(); i++)
+        for (int i = 0; i <  swgDeviceSet->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSinkAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(0);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3169,18 +3169,18 @@ void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const Dev
         }
     }
 
-    if (deviceUISet->m_deviceMIMOEngine) // MIMO data
+    if (deviceSet->m_deviceMIMOEngine) // MIMO data
     {
         samplingDevice->setDirection(2);
-        *samplingDevice->getHwType() = deviceUISet->m_deviceAPI->getHardwareId();
-        *samplingDevice->getSerial() = deviceUISet->m_deviceAPI->getSamplingDeviceSerial();
-        samplingDevice->setSequence(deviceUISet->m_deviceAPI->getSamplingDeviceSequence());
-        samplingDevice->setDeviceNbStreams(deviceUISet->m_deviceAPI->getDeviceNbItems());
-        samplingDevice->setDeviceStreamIndex(deviceUISet->m_deviceAPI->getDeviceItemIndex());
+        *samplingDevice->getHwType() = deviceSet->m_deviceAPI->getHardwareId();
+        *samplingDevice->getSerial() = deviceSet->m_deviceAPI->getSamplingDeviceSerial();
+        samplingDevice->setSequence(deviceSet->m_deviceAPI->getSamplingDeviceSequence());
+        samplingDevice->setDeviceNbStreams(deviceSet->m_deviceAPI->getDeviceNbItems());
+        samplingDevice->setDeviceStreamIndex(deviceSet->m_deviceAPI->getDeviceItemIndex());
         samplingDevice->setState(new QString("notStarted"));
-        deviceUISet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getStateRx(), 0);
-        deviceUISet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getStateTx(), 1);
-        DeviceSampleMIMO *sampleMIMO = deviceUISet->m_deviceMIMOEngine->getMIMO();
+        deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getStateRx(), 0);
+        deviceSet->m_deviceAPI->getDeviceEngineStateStr(*samplingDevice->getStateTx(), 1);
+        DeviceSampleMIMO *sampleMIMO = deviceSet->m_deviceMIMOEngine->getMIMO();
 
         if (sampleMIMO)
         {
@@ -3188,17 +3188,17 @@ void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const Dev
             samplingDevice->setBandwidth(sampleMIMO->getMIMOSampleRate());
         }
 
-        int nbSinkChannels = deviceUISet->m_deviceAPI->getNbSinkChannels();
-        int nbSourceChannels = deviceUISet->m_deviceAPI->getNbSourceChannels();
-        int nbMIMOChannels = deviceUISet->m_deviceAPI->getNbMIMOChannels();
-        deviceSet->setChannelcount(nbSinkChannels + nbSourceChannels + nbMIMOChannels);
-        QList<SWGSDRangel::SWGChannel*> *channels = deviceSet->getChannels();
+        int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+        int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+        int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
+        swgDeviceSet->setChannelcount(nbSinkChannels + nbSourceChannels + nbMIMOChannels);
+        QList<SWGSDRangel::SWGChannel*> *channels = swgDeviceSet->getChannels();
 
         for (int i = 0; i < nbSinkChannels; i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSinkAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(0);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3211,7 +3211,7 @@ void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const Dev
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSourceAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(1);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3224,7 +3224,7 @@ void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const Dev
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getMIMOChannelAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(2);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3235,22 +3235,22 @@ void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const Dev
     }
 }
 
-void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceUISet)
+void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceSet)
 {
     channelsDetail->init();
     SWGSDRangel::SWGChannelReport *channelReport;
     QString channelReportError;
 
-    if (deviceUISet->m_deviceSinkEngine) // Tx data
+    if (deviceSet->m_deviceSinkEngine) // Tx data
     {
-        channelsDetail->setChannelcount(deviceUISet->m_deviceAPI->getNbSourceChannels());
+        channelsDetail->setChannelcount(deviceSet->m_deviceAPI->getNbSourceChannels());
         QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
 
         for (int i = 0; i <  channelsDetail->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSourceAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(1);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3268,16 +3268,16 @@ void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDe
         }
     }
 
-    if (deviceUISet->m_deviceSourceEngine) // Rx data
+    if (deviceSet->m_deviceSourceEngine) // Rx data
     {
-        channelsDetail->setChannelcount(deviceUISet->m_deviceAPI->getNbSinkChannels());
+        channelsDetail->setChannelcount(deviceSet->m_deviceAPI->getNbSinkChannels());
         QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
 
         for (int i = 0; i <  channelsDetail->getChannelcount(); i++)
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSinkAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(0);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3295,11 +3295,11 @@ void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDe
         }
     }
 
-    if (deviceUISet->m_deviceMIMOEngine) // MIMO data
+    if (deviceSet->m_deviceMIMOEngine) // MIMO data
     {
-        int nbSinkChannels = deviceUISet->m_deviceAPI->getNbSinkChannels();
-        int nbSourceChannels = deviceUISet->m_deviceAPI->getNbSourceChannels();
-        int nbMIMOChannels = deviceUISet->m_deviceAPI->getNbMIMOChannels();
+        int nbSinkChannels = deviceSet->m_deviceAPI->getNbSinkChannels();
+        int nbSourceChannels = deviceSet->m_deviceAPI->getNbSourceChannels();
+        int nbMIMOChannels = deviceSet->m_deviceAPI->getNbMIMOChannels();
         QList<SWGSDRangel::SWGChannel*> *channels = channelsDetail->getChannels();
         channelsDetail->setChannelcount(nbSinkChannels + nbSourceChannels + nbMIMOChannels);
 
@@ -3307,7 +3307,7 @@ void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDe
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSinkAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSinkAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(0);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3328,7 +3328,7 @@ void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDe
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getChanelSourceAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getChanelSourceAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(1);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3349,7 +3349,7 @@ void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDe
         {
             channels->append(new SWGSDRangel::SWGChannel);
             channels->back()->init();
-            ChannelAPI *channel = deviceUISet->m_deviceAPI->getMIMOChannelAPIAt(i);
+            ChannelAPI *channel = deviceSet->m_deviceAPI->getMIMOChannelAPIAt(i);
             channels->back()->setDeltaFrequency(channel->getCenterFrequency());
             channels->back()->setDirection(2);
             channels->back()->setIndex(channel->getIndexInDeviceSet());
@@ -3405,15 +3405,16 @@ void WebAPIAdapter::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSet
     }
 }
 
-void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureSet* featureUISet, int featureUISetIndex)
+void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *swgFeatureSet, const FeatureSet* featureSet, int featureSetIndex)
 {
-    featureSet->init();
-    featureSet->setFeaturecount(featureUISet->getNumberOfFeatures());
-    QList<SWGSDRangel::SWGFeature*> *features = featureSet->getFeatures();
+    (void) featureSetIndex; // FIXME: the index should be present in the API FeatureSet structure
+    swgFeatureSet->init();
+    swgFeatureSet->setFeaturecount(featureSet->getNumberOfFeatures());
+    QList<SWGSDRangel::SWGFeature*> *features = swgFeatureSet->getFeatures();
 
-    for (int i = 0; i < featureUISet->getNumberOfFeatures(); i++)
+    for (int i = 0; i < featureSet->getNumberOfFeatures(); i++)
     {
-        const Feature *feature = featureUISet->getFeatureAt(i);
+        const Feature *feature = featureSet->getFeatureAt(i);
         features->append(new SWGSDRangel::SWGFeature);
         features->back()->setIndex(i);
         QString s;
