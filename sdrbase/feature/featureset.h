@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRSRV_FEATURE_FEATURESET_H_
-#define SDRSRV_FEATURE_FEATURESET_H_
+#ifndef SDRBASE_FEATURE_FEATURESET_H_
+#define SDRBASE_FEATURE_FEATURESET_H_
 
 #include <QString>
 #include <QList>
@@ -75,4 +75,4 @@ private:
     void renameFeatureInstances();
 };
 
-#endif // SDRSRV_FEATURE_FEATURESET_H_
+#endif // SDRBASE_FEATURE_FEATURESET_H_
