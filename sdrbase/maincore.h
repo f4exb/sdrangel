@@ -414,6 +414,8 @@ public:
     void appendFeatureSet();
     void removeFeatureSet(int index);
     void removeLastFeatureSet();
+    void appendDeviceSet(int deviceType);
+    void removeLastDeviceSet();
 
     friend class MainServer;
     friend class MainWindow;

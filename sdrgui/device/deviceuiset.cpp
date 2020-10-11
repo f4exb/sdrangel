@@ -26,6 +26,7 @@
 #include "gui/glspectrumgui.h"
 #include "gui/channelwindow.h"
 #include "device/devicegui.h"
+#include "device/deviceset.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "channel/channelutils.h"
@@ -35,7 +36,7 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet, int deviceType, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
 
@@ -60,6 +61,7 @@ DeviceUISet::DeviceUISet(int tabIndex, int deviceType, QTimer& timer)
     m_deviceSinkEngine = nullptr;
     m_deviceMIMOEngine = nullptr;
     m_deviceTabIndex = tabIndex;
+    m_deviceSet = deviceSet;
     m_nbAvailableRxChannels = 0;   // updated at enumeration for UI selector
     m_nbAvailableTxChannels = 0;   // updated at enumeration for UI selector
     m_nbAvailableMIMOChannels = 0; // updated at enumeration for UI selector
@@ -97,6 +99,7 @@ void DeviceUISet::addRollupWidget(QWidget *widget)
 void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, channelGUI, 0));
+    m_deviceSet->addChannelInstance(channelName, channelAPI);
     QObject::connect(
         channelGUI,
         &ChannelGUI::closing,
@@ -109,6 +112,7 @@ void DeviceUISet::registerRxChannelInstance(const QString& channelName, ChannelA
 void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, channelGUI, 1));
+    m_deviceSet->addChannelInstance(channelName, channelAPI);
     QObject::connect(
         channelGUI,
         &ChannelGUI::closing,
@@ -121,6 +125,7 @@ void DeviceUISet::registerTxChannelInstance(const QString& channelName, ChannelA
 void DeviceUISet::registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI)
 {
     m_channelInstanceRegistrations.append(ChannelInstanceRegistration(channelName, channelAPI, channelGUI, 2));
+    m_deviceSet->addChannelInstance(channelName, channelAPI);
     QObject::connect(
         channelGUI,
         &ChannelGUI::closing,
@@ -138,6 +143,8 @@ void DeviceUISet::freeChannels()
         m_channelInstanceRegistrations[i].m_gui->destroy();
         m_channelInstanceRegistrations[i].m_channelAPI->destroy();
     }
+
+    m_deviceSet->clearChannels();
 }
 
 void DeviceUISet::deleteChannel(int channelIndex)
@@ -150,6 +157,8 @@ void DeviceUISet::deleteChannel(int channelIndex)
         m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
         m_channelInstanceRegistrations[channelIndex].m_channelAPI->destroy();
     }
+
+    m_deviceSet->removeChannelInstanceAt(channelIndex);
 }
 
 void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI)
@@ -172,6 +181,7 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
         }
 
         m_channelInstanceRegistrations.clear();
+        m_deviceSet->clearChannels();
         qDebug("DeviceUISet::loadRxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for (int i = 0; i < preset->getChannelCount(); i++)
@@ -256,6 +266,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
         }
 
         m_channelInstanceRegistrations.clear();
+        m_deviceSet->clearChannels();
         qDebug("DeviceUISet::loadTxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for(int i = 0; i < preset->getChannelCount(); i++)
@@ -340,6 +351,7 @@ void DeviceUISet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *plugi
         }
 
         m_channelInstanceRegistrations.clear();
+        m_deviceSet->clearChannels();
         qDebug("DeviceUISet::loadMIMOChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
         for (int i = 0; i < preset->getChannelCount(); i++)
@@ -460,6 +472,7 @@ void DeviceUISet::handleChannelGUIClosing(ChannelGUI* channelGUI)
     {
         if (it->m_gui == channelGUI)
         {
+            m_deviceSet->removeChannelInstance(it->m_channelAPI);
             it->m_channelAPI->destroy();
             m_channelInstanceRegistrations.erase(it);
             break;

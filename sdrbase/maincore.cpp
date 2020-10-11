@@ -22,6 +22,7 @@
 #include "loggerwithfile.h"
 #include "dsp/dsptypes.h"
 #include "feature/featureset.h"
+#include "device/deviceset.h"
 
 #include "maincore.h"
 
@@ -121,5 +122,18 @@ void MainCore::removeLastFeatureSet()
 {
     if (m_featureSets.size() != 0) {
         m_featureSets.pop_back();
+    }
+}
+
+void MainCore::appendDeviceSet(int deviceType)
+{
+    int newIndex = m_deviceSets.size();
+    m_deviceSets.push_back(new DeviceSet(newIndex, deviceType));
+}
+
+void MainCore::removeLastDeviceSet()
+{
+    if (m_deviceSets.size() != 0) {
+        m_deviceSets.pop_back();
     }
 }

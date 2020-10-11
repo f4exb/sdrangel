@@ -61,6 +61,11 @@ public:
     void addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     void addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
+    // slave mode
+    void addChannelInstance(const QString& channelURI, ChannelAPI *channelAPI);
+    void removeChannelInstanceAt(int index);
+    void removeChannelInstance(ChannelAPI *channelAPI);
+    void clearChannels();
 
     // REST API
     int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;

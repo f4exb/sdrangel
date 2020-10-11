@@ -32,6 +32,7 @@
 #include "device/devicegui.h"
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
+#include "device/deviceset.h"
 #include "device/deviceenumerator.h"
 #include "channel/channelapi.h"
 #include "channel/channelgui.h"
@@ -186,6 +187,7 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     qDebug() << "MainWindow::MainWindow: load plugins...";
 
     m_pluginManager = new PluginManager(this);
+    m_mainCore->m_pluginManager = m_pluginManager;
     m_pluginManager->loadPlugins(QString("plugins"));
     m_pluginManager->loadPluginsNonDiscoverable(m_mainCore->m_settings.getDeviceUserArgs());
 
@@ -296,10 +298,14 @@ void MainWindow::addSourceDevice(int deviceIndex)
     int deviceTabIndex = m_deviceUIs.size();
     ui->inputViewDock->addDevice(0, deviceTabIndex);
 
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 0, m_mainCore->m_masterTimer));
+    m_mainCore->appendDeviceSet(0);
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back(), 0, m_mainCore->m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
+    m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_deviceUIs.back()->m_deviceSinkEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_deviceUIs.back()->m_deviceMIMOEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
@@ -307,6 +313,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleRx, deviceTabIndex, dspDeviceSourceEngine, nullptr, nullptr);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
+    m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
     QList<QString> channelNames;
     m_pluginManager->listRxChannels(channelNames);
     m_deviceUIs.back()->setNumberOfAvailableRxChannels(channelNames.size());
@@ -322,19 +329,19 @@ void MainWindow::addSourceDevice(int deviceIndex)
     }
 
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getRxSamplingDevice(deviceIndex);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
+    deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+    deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+    deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(deviceIndex));
 
     QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
-        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+        deviceAPI->setHardwareUserArguments(userArgs);
     }
 
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, deviceIndex);
@@ -344,18 +351,18 @@ void MainWindow::addSourceDevice(int deviceIndex)
         m_deviceUIs.back()->m_deviceGUI->destroy();
     }
 
-    DeviceSampleSource *source = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
-    m_deviceUIs.back()->m_deviceAPI->setSampleSource(source);
+    DeviceSampleSource *source = deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
+            deviceAPI->getSamplingDeviceId(), deviceAPI);
+    deviceAPI->setSampleSource(source);
     QWidget *gui;
-    DeviceGUI *pluginGUI = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(),
+    DeviceGUI *pluginGUI = deviceAPI->getPluginInterface()->createSampleSourcePluginInstanceGUI(
+            deviceAPI->getSamplingDeviceId(),
             &gui,
             m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
+    deviceAPI->getSampleSource()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleSource()->init();
-    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName());
+    setDeviceGUI(deviceTabIndex, gui, deviceAPI->getSamplingDeviceDisplayName());
 }
 
 void MainWindow::addSinkDevice()
@@ -370,10 +377,14 @@ void MainWindow::addSinkDevice()
     int deviceTabIndex = m_deviceUIs.size();
     ui->inputViewDock->addDevice(1, deviceTabIndex);
 
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 1, m_mainCore->m_masterTimer));
+    m_mainCore->appendDeviceSet(1);
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back(), 1, m_mainCore->m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_deviceUIs.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
+    m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
     m_deviceUIs.back()->m_deviceMIMOEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
@@ -381,6 +392,7 @@ void MainWindow::addSinkDevice()
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamSingleTx, deviceTabIndex, nullptr, dspDeviceSinkEngine, nullptr);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
+    m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
     QList<QString> channelNames;
     m_pluginManager->listTxChannels(channelNames);
     m_deviceUIs.back()->setNumberOfAvailableTxChannels(channelNames.size());
@@ -394,19 +406,19 @@ void MainWindow::addSinkDevice()
     // create a file sink by default
     int fileSinkDeviceIndex = DeviceEnumerator::instance()->getFileOutputDeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getTxSamplingDevice(fileSinkDeviceIndex);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
+    deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+    deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+    deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(fileSinkDeviceIndex));
 
     QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
-        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+        deviceAPI->setHardwareUserArguments(userArgs);
     }
 
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, fileSinkDeviceIndex);
@@ -416,18 +428,18 @@ void MainWindow::addSinkDevice()
         m_deviceUIs.back()->m_deviceGUI->destroy();
     }
 
-    DeviceSampleSink *sink = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
-    m_deviceUIs.back()->m_deviceAPI->setSampleSink(sink);
+    DeviceSampleSink *sink = deviceAPI->getPluginInterface()->createSampleSinkPluginInstance(
+            deviceAPI->getSamplingDeviceId(), deviceAPI);
+    deviceAPI->setSampleSink(sink);
     QWidget *gui;
-    DeviceGUI *pluginGUI = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(),
+    DeviceGUI *pluginGUI = deviceAPI->getPluginInterface()->createSampleSinkPluginInstanceGUI(
+            deviceAPI->getSamplingDeviceId(),
             &gui,
             m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
+    deviceAPI->getSampleSink()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleSink()->init();
-    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), 1);
+    setDeviceGUI(deviceTabIndex, gui, deviceAPI->getSamplingDeviceDisplayName(), 1);
 }
 
 void MainWindow::addMIMODevice()
@@ -442,10 +454,14 @@ void MainWindow::addMIMODevice()
     int deviceTabIndex = m_deviceUIs.size();
     ui->inputViewDock->addDevice(2, deviceTabIndex);
 
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, 2, m_mainCore->m_masterTimer));
+    m_mainCore->appendDeviceSet(2);
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back(), 2, m_mainCore->m_masterTimer));
     m_deviceUIs.back()->m_deviceSourceEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_deviceUIs.back()->m_deviceSinkEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_deviceUIs.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
+    m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "M%d", deviceTabIndex);
@@ -453,6 +469,7 @@ void MainWindow::addMIMODevice()
     DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
 
     m_deviceUIs.back()->m_deviceAPI = deviceAPI;
+    m_mainCore->m_deviceSets.back()->m_deviceAPI = deviceAPI;
     // add MIMO channels
     QList<QString> mimoChannelNames;
     m_pluginManager->listMIMOChannels(mimoChannelNames);
@@ -474,19 +491,19 @@ void MainWindow::addMIMODevice()
     // create a test MIMO by default
     int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
     const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
-    m_deviceUIs.back()->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
-    m_deviceUIs.back()->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
-    m_deviceUIs.back()->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
+    deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+    deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+    deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
 
     QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
     if (userArgs.size() > 0) {
-        m_deviceUIs.back()->m_deviceAPI->setHardwareUserArguments(userArgs);
+        deviceAPI->setHardwareUserArguments(userArgs);
     }
 
     ui->inputViewDock->setSelectedDeviceIndex(deviceTabIndex, testMIMODeviceIndex);
@@ -496,18 +513,18 @@ void MainWindow::addMIMODevice()
         m_deviceUIs.back()->m_deviceGUI->destroy();
     }
 
-    DeviceSampleMIMO *mimo = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(), m_deviceUIs.back()->m_deviceAPI);
-    m_deviceUIs.back()->m_deviceAPI->setSampleMIMO(mimo);
+    DeviceSampleMIMO *mimo = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
+            deviceAPI->getSamplingDeviceId(), deviceAPI);
+    deviceAPI->setSampleMIMO(mimo);
     QWidget *gui;
-    DeviceGUI *pluginGUI = m_deviceUIs.back()->m_deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceGUI(
-            m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceId(),
+    DeviceGUI *pluginGUI = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstanceGUI(
+            deviceAPI->getSamplingDeviceId(),
             &gui,
             m_deviceUIs.back());
-    m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
+    deviceAPI->getSampleMIMO()->setMessageQueueToGUI(pluginGUI->getInputMessageQueue());
     m_deviceUIs.back()->m_deviceGUI = pluginGUI;
     m_deviceUIs.back()->m_deviceAPI->getSampleMIMO()->init();
-    setDeviceGUI(deviceTabIndex, gui, m_deviceUIs.back()->m_deviceAPI->getSamplingDeviceDisplayName(), 2);
+    setDeviceGUI(deviceTabIndex, gui, deviceAPI->getSamplingDeviceDisplayName(), 2);
 }
 
 void MainWindow::removeLastDevice()
@@ -631,6 +648,7 @@ void MainWindow::removeLastDevice()
 	}
 
     m_deviceUIs.pop_back();
+    m_mainCore->removeLastDeviceSet();
 }
 
 void MainWindow::addFeatureSet()
