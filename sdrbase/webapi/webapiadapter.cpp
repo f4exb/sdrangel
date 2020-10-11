@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2017-2020 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
 // Swagger server adapter interface                                              //
 //                                                                               //

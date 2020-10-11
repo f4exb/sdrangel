@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2017-2020 Edouard Griffiths, F4EXB.                             //
 //                                                                               //
 // Swagger server adapter interface                                              //
 //                                                                               //
@@ -17,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
-#define SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_
+#ifndef SDRBASE_WEBAPI_WEBAPIADAPTERGUI_H_
+#define SDRBASE_WEBAPI_WEBAPIADAPTERGUI_H_
 
 #include <QtGlobal>
 
@@ -401,4 +401,4 @@ private:
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };
 
-#endif /* SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_ */
+#endif /* SDRBASE_WEBAPI_WEBAPIADAPTERGUI_H_ */
