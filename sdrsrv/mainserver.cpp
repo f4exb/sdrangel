@@ -262,7 +262,7 @@ void MainServer::addSinkDevice()
     sprintf(uidCStr, "UID:%d", dspDeviceSinkEngineUID);
 
     int deviceTabIndex = m_mainCore->m_deviceSets.size();
-    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 1));
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
@@ -308,7 +308,7 @@ void MainServer::addSourceDevice()
     sprintf(uidCStr, "UID:%d", dspDeviceSourceEngineUID);
 
     int deviceTabIndex = m_mainCore->m_deviceSets.size();
-    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex));
+    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 0));
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;

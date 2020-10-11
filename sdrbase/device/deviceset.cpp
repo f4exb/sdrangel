@@ -34,8 +34,9 @@ DeviceSet::ChannelInstanceRegistration::ChannelInstanceRegistration(const QStrin
     m_channelAPI(channelAPI)
 {}
 
-DeviceSet::DeviceSet(int tabIndex)
+DeviceSet::DeviceSet(int tabIndex, int deviceType)
 {
+    (void) deviceType;
     m_deviceAPI = nullptr;
     m_deviceSourceEngine = nullptr;
     m_deviceSinkEngine = nullptr;
@@ -413,3 +414,32 @@ bool DeviceSet::ChannelInstanceRegistration::operator<(const ChannelInstanceRegi
     }
 }
 
+void DeviceSet::addChannelInstance(const QString& channelURI, ChannelAPI *channelAPI)
+{
+    ChannelInstanceRegistration reg = ChannelInstanceRegistration(channelURI, channelAPI);
+    m_channelInstanceRegistrations.append(reg);
+}
+
+void DeviceSet::removeChannelInstanceAt(int index)
+{
+    if (index < m_channelInstanceRegistrations.size()) {
+        m_channelInstanceRegistrations.removeAt(index);
+    }
+}
+
+void DeviceSet::removeChannelInstance(ChannelAPI *channelAPI)
+{
+    for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+    {
+        if (m_channelInstanceRegistrations.at(i).m_channelAPI == channelAPI)
+        {
+            m_channelInstanceRegistrations.removeAt(i);
+            break;
+        }
+    }
+}
+
+void DeviceSet::clearChannels()
+{
+    m_channelInstanceRegistrations.clear();
+}

@@ -38,7 +38,7 @@ public:
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
 
-    DeviceSet(int tabIndex);
+    DeviceSet(int tabIndex, int deviceType);
     ~DeviceSet();
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
