@@ -38,7 +38,7 @@ namespace qtwebapp {
 class SDRBASE_API MainCore
 {
 public:
-	class MsgDeviceSetFocus : public Message {
+	class SDRBASE_API MsgDeviceSetFocus : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -58,7 +58,7 @@ public:
         { }
     };
 
-	class MsgDVSerial : public Message {
+	class SDRBASE_API MsgDVSerial : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -78,7 +78,7 @@ public:
         { }
     };
 
-    class MsgLoadPreset : public Message {
+    class SDRBASE_API MsgLoadPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -101,7 +101,7 @@ public:
         { }
     };
 
-    class MsgSavePreset : public Message {
+    class SDRBASE_API MsgSavePreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -127,7 +127,7 @@ public:
         { }
     };
 
-    class MsgDeletePreset : public Message {
+    class SDRBASE_API MsgDeletePreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -147,7 +147,7 @@ public:
         { }
     };
 
-    class MsgLoadFeatureSetPreset : public Message {
+    class SDRBASE_API MsgLoadFeatureSetPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -169,7 +169,7 @@ public:
         { }
     };
 
-    class MsgSaveFeatureSetPreset : public Message {
+    class SDRBASE_API MsgSaveFeatureSetPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -195,7 +195,7 @@ public:
         { }
     };
 
-    class MsgDeleteFeatureSetPreset : public Message {
+    class SDRBASE_API MsgDeleteFeatureSetPreset : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -215,7 +215,7 @@ public:
         { }
     };
 
-    class MsgDeleteInstance : public Message {
+    class SDRBASE_API MsgDeleteInstance : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -230,7 +230,7 @@ public:
         { }
     };
 
-    class MsgAddDeviceSet : public Message {
+    class SDRBASE_API MsgAddDeviceSet : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -250,7 +250,7 @@ public:
         { }
     };
 
-    class MsgRemoveLastDeviceSet : public Message {
+    class SDRBASE_API MsgRemoveLastDeviceSet : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -265,7 +265,7 @@ public:
         { }
     };
 
-    class MsgSetDevice : public Message {
+    class SDRBASE_API MsgSetDevice : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -291,7 +291,7 @@ public:
         { }
     };
 
-    class MsgAddChannel : public Message {
+    class SDRBASE_API MsgAddChannel : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -317,7 +317,7 @@ public:
         { }
     };
 
-    class MsgDeleteChannel : public Message {
+    class SDRBASE_API MsgDeleteChannel : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -340,7 +340,7 @@ public:
         { }
     };
 
-    class MsgApplySettings : public Message {
+    class SDRBASE_API MsgApplySettings : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -354,7 +354,7 @@ public:
         { }
     };
 
-    class MsgAddFeature : public Message {
+    class SDRBASE_API MsgAddFeature : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -377,7 +377,7 @@ public:
         { }
     };
 
-    class MsgDeleteFeature : public Message {
+    class SDRBASE_API MsgDeleteFeature : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
