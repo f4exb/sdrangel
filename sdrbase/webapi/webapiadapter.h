@@ -29,7 +29,7 @@ class MainCore;
 class DeviceSet;
 class FeatureSet;
 
-class SDRGUI_API WebAPIAdapter: public WebAPIAdapterInterface
+class SDRBASE_API WebAPIAdapter: public WebAPIAdapterInterface
 {
 public:
     WebAPIAdapter();
