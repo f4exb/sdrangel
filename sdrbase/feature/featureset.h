@@ -28,7 +28,7 @@ class Feature;
 class FeatureSetPreset;
 class WebAPIAdapterInterface;
 
-class SDRSRV_API FeatureSet
+class SDRBASE_API FeatureSet
 {
 public:
     FeatureSet(int tabIndex);
