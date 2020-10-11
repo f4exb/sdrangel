@@ -29,6 +29,7 @@ class GLSpectrum;
 class GLSpectrumGUI;
 class ChannelWindow;
 class DeviceAPI;
+class DeviceSet;
 class DSPDeviceSourceEngine;
 class DSPDeviceSinkEngine;
 class DSPDeviceMIMOEngine;
@@ -54,7 +55,7 @@ public:
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     QByteArray m_mainWindowState;
 
-    DeviceUISet(int tabIndex, int deviceType, QTimer& timer);
+    DeviceUISet(int tabIndex, DeviceSet *deviceSet, int deviceType, QTimer& timer);
     ~DeviceUISet();
 
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter
@@ -114,6 +115,7 @@ private:
     // ChannelInstanceRegistrations m_txChannelInstanceRegistrations;
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
     int m_deviceTabIndex;
+    DeviceSet *m_deviceSet;
     int m_nbAvailableRxChannels;   //!< Number of Rx channels available for selection
     int m_nbAvailableTxChannels;   //!< Number of Tx channels available for selection
     int m_nbAvailableMIMOChannels; //!< Number of MIMO channels available for selection
