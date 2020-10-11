@@ -84,8 +84,6 @@ set(sdrgui_SOURCES
     soapygui/complexfactorgui.cpp
     soapygui/arginfogui.cpp
 
-    webapi/webapiadaptergui.cpp
-
     resources/res.qrc
 )
 
@@ -171,8 +169,6 @@ set(sdrgui_HEADERS
     soapygui/intervalslidergui.h
     soapygui/complexfactorgui.h
     soapygui/arginfogui.h
-
-    webapi/webapiadaptergui.h
 )
 
 set(sdrgui_FORMS

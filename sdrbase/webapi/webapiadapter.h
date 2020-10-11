@@ -26,13 +26,14 @@
 #include "export.h"
 
 class MainCore;
+class DeviceSet;
 class FeatureSet;
 
-class SDRGUI_API WebAPIAdapterGUI: public WebAPIAdapterInterface
+class SDRBASE_API WebAPIAdapter: public WebAPIAdapterInterface
 {
 public:
-    WebAPIAdapterGUI();
-    virtual ~WebAPIAdapterGUI();
+    WebAPIAdapter();
+    virtual ~WebAPIAdapter();
 
     virtual int instanceSummary(
             SWGSDRangel::SWGInstanceSummaryResponse& response,

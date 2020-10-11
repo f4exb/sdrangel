@@ -419,8 +419,7 @@ public:
 
     friend class MainServer;
     friend class MainWindow;
-    friend class WebAPIAdapterSrv;
-    friend class WebAPIAdapterGUI;
+    friend class WebAPIAdapter;
 
 private:
     MainSettings m_settings;

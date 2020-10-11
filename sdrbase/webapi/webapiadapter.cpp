@@ -17,12 +17,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QApplication>
+#include <QCoreApplication>
 #include <QList>
 #include <QSysInfo>
 
 #include "maincore.h"
-#include "ui_mainwindow.h"
 #include "loggerwithfile.h"
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
@@ -80,18 +79,18 @@
 #include "limerfe/limerfecontroller.h"
 #endif
 
-#include "webapiadaptergui.h"
+#include "webapiadapter.h"
 
-WebAPIAdapterGUI::WebAPIAdapterGUI()
+WebAPIAdapter::WebAPIAdapter()
 {
     m_mainCore = MainCore::instance();
 }
 
-WebAPIAdapterGUI::~WebAPIAdapterGUI()
+WebAPIAdapter::~WebAPIAdapter()
 {
 }
 
-int WebAPIAdapterGUI::instanceSummary(
+int WebAPIAdapter::instanceSummary(
         SWGSDRangel::SWGInstanceSummaryResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -125,7 +124,7 @@ int WebAPIAdapterGUI::instanceSummary(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceDelete(
+int WebAPIAdapter::instanceDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -134,7 +133,7 @@ int WebAPIAdapterGUI::instanceDelete(
     return 400;
 }
 
-int WebAPIAdapterGUI::instanceConfigGet(
+int WebAPIAdapter::instanceConfigGet(
         SWGSDRangel::SWGInstanceConfigResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -181,7 +180,7 @@ int WebAPIAdapterGUI::instanceConfigGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceConfigPutPatch(
+int WebAPIAdapter::instanceConfigPutPatch(
         bool force, // PUT else PATCH
         SWGSDRangel::SWGInstanceConfigResponse& query,
         const ConfigKeys& configKeys,
@@ -241,7 +240,7 @@ int WebAPIAdapterGUI::instanceConfigPutPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceDevices(
+int WebAPIAdapter::instanceDevices(
             int direction,
             SWGSDRangel::SWGInstanceDevicesResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
@@ -293,7 +292,7 @@ int WebAPIAdapterGUI::instanceDevices(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceChannels(
+int WebAPIAdapter::instanceChannels(
             int direction,
             SWGSDRangel::SWGInstanceChannelsResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
@@ -344,7 +343,7 @@ int WebAPIAdapterGUI::instanceChannels(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLoggingGet(
+int WebAPIAdapter::instanceLoggingGet(
         SWGSDRangel::SWGLoggingInfo& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -362,7 +361,7 @@ int WebAPIAdapterGUI::instanceLoggingGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLoggingPut(
+int WebAPIAdapter::instanceLoggingPut(
         SWGSDRangel::SWGLoggingInfo& query,
         SWGSDRangel::SWGLoggingInfo& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -401,7 +400,7 @@ int WebAPIAdapterGUI::instanceLoggingPut(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioGet(
+int WebAPIAdapter::instanceAudioGet(
         SWGSDRangel::SWGAudioDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -487,7 +486,7 @@ int WebAPIAdapterGUI::instanceAudioGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioInputPatch(
+int WebAPIAdapter::instanceAudioInputPatch(
         SWGSDRangel::SWGAudioInputDevice& response,
         const QStringList& audioInputKeys,
         SWGSDRangel::SWGErrorResponse& error)
@@ -522,7 +521,7 @@ int WebAPIAdapterGUI::instanceAudioInputPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioOutputPatch(
+int WebAPIAdapter::instanceAudioOutputPatch(
         SWGSDRangel::SWGAudioOutputDevice& response,
         const QStringList& audioOutputKeys,
         SWGSDRangel::SWGErrorResponse& error)
@@ -587,7 +586,7 @@ int WebAPIAdapterGUI::instanceAudioOutputPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioInputDelete(
+int WebAPIAdapter::instanceAudioInputDelete(
             SWGSDRangel::SWGAudioInputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
@@ -612,7 +611,7 @@ int WebAPIAdapterGUI::instanceAudioInputDelete(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioOutputDelete(
+int WebAPIAdapter::instanceAudioOutputDelete(
             SWGSDRangel::SWGAudioOutputDevice& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
@@ -649,7 +648,7 @@ int WebAPIAdapterGUI::instanceAudioOutputDelete(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
+int WebAPIAdapter::instanceAudioInputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
@@ -663,7 +662,7 @@ int WebAPIAdapterGUI::instanceAudioInputCleanupPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
+int WebAPIAdapter::instanceAudioOutputCleanupPatch(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
@@ -677,7 +676,7 @@ int WebAPIAdapterGUI::instanceAudioOutputCleanupPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLocationGet(
+int WebAPIAdapter::instanceLocationGet(
         SWGSDRangel::SWGLocationInformation& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -689,7 +688,7 @@ int WebAPIAdapterGUI::instanceLocationGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLocationPut(
+int WebAPIAdapter::instanceLocationPut(
         SWGSDRangel::SWGLocationInformation& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -709,7 +708,7 @@ int WebAPIAdapterGUI::instanceLocationPut(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceDVSerialGet(
+int WebAPIAdapter::instanceDVSerialGet(
             SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
@@ -735,7 +734,7 @@ int WebAPIAdapterGUI::instanceDVSerialGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceDVSerialPatch(
+int WebAPIAdapter::instanceDVSerialPatch(
             bool dvserial,
             SWGSDRangel::SWGDVSerialDevices& response,
             SWGSDRangel::SWGErrorResponse& error)
@@ -773,7 +772,7 @@ int WebAPIAdapterGUI::instanceDVSerialPatch(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAMBESerialGet(
+int WebAPIAdapter::instanceAMBESerialGet(
         SWGSDRangel::SWGDVSerialDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -805,7 +804,7 @@ int WebAPIAdapterGUI::instanceAMBESerialGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAMBEDevicesGet(
+int WebAPIAdapter::instanceAMBEDevicesGet(
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -832,7 +831,7 @@ int WebAPIAdapterGUI::instanceAMBEDevicesGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAMBEDevicesDelete(
+int WebAPIAdapter::instanceAMBEDevicesDelete(
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error)
 {
@@ -846,7 +845,7 @@ int WebAPIAdapterGUI::instanceAMBEDevicesDelete(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAMBEDevicesPut(
+int WebAPIAdapter::instanceAMBEDevicesPut(
         SWGSDRangel::SWGAMBEDevices& query,
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -864,7 +863,7 @@ int WebAPIAdapterGUI::instanceAMBEDevicesPut(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceAMBEDevicesPatch(
+int WebAPIAdapter::instanceAMBEDevicesPatch(
         SWGSDRangel::SWGAMBEDevices& query,
         SWGSDRangel::SWGAMBEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -886,7 +885,7 @@ int WebAPIAdapterGUI::instanceAMBEDevicesPatch(
 }
 
 #ifdef HAS_LIMERFEUSB
-int WebAPIAdapterGUI::instanceLimeRFESerialGet(
+int WebAPIAdapter::instanceLimeRFESerialGet(
         SWGSDRangel::SWGLimeRFEDevices& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -909,7 +908,7 @@ int WebAPIAdapterGUI::instanceLimeRFESerialGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLimeRFEConfigGet(
+int WebAPIAdapter::instanceLimeRFEConfigGet(
         const QString& serial,
         SWGSDRangel::SWGLimeRFESettings& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -961,7 +960,7 @@ int WebAPIAdapterGUI::instanceLimeRFEConfigGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
+int WebAPIAdapter::instanceLimeRFEConfigPut(
         SWGSDRangel::SWGLimeRFESettings& query,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1012,7 +1011,7 @@ int WebAPIAdapterGUI::instanceLimeRFEConfigPut(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLimeRFERunPut(
+int WebAPIAdapter::instanceLimeRFERunPut(
         SWGSDRangel::SWGLimeRFESettings& query,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1047,7 +1046,7 @@ int WebAPIAdapterGUI::instanceLimeRFERunPut(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceLimeRFEPowerGet(
+int WebAPIAdapter::instanceLimeRFEPowerGet(
         const QString& serial,
         SWGSDRangel::SWGLimeRFEPower& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1094,7 +1093,7 @@ int WebAPIAdapterGUI::instanceLimeRFEPowerGet(
 }
 #endif
 
-int WebAPIAdapterGUI::instancePresetsGet(
+int WebAPIAdapter::instancePresetsGet(
         SWGSDRangel::SWGPresets& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -1140,7 +1139,7 @@ int WebAPIAdapterGUI::instancePresetsGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instancePresetPatch(
+int WebAPIAdapter::instancePresetPatch(
         SWGSDRangel::SWGPresetTransfer& query,
         SWGSDRangel::SWGPresetIdentifier& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1207,7 +1206,7 @@ int WebAPIAdapterGUI::instancePresetPatch(
     return 202;
 }
 
-int WebAPIAdapterGUI::instancePresetPut(
+int WebAPIAdapter::instancePresetPut(
         SWGSDRangel::SWGPresetTransfer& query,
         SWGSDRangel::SWGPresetIdentifier& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1276,7 +1275,7 @@ int WebAPIAdapterGUI::instancePresetPut(
     return 202;
 }
 
-int WebAPIAdapterGUI::instancePresetPost(
+int WebAPIAdapter::instancePresetPost(
         SWGSDRangel::SWGPresetTransfer& query,
         SWGSDRangel::SWGPresetIdentifier& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1339,7 +1338,7 @@ int WebAPIAdapterGUI::instancePresetPost(
     return 202;
 }
 
-int WebAPIAdapterGUI::instancePresetDelete(
+int WebAPIAdapter::instancePresetDelete(
         SWGSDRangel::SWGPresetIdentifier& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -1369,7 +1368,7 @@ int WebAPIAdapterGUI::instancePresetDelete(
     return 202;
 }
 
-int WebAPIAdapterGUI::instanceDeviceSetsGet(
+int WebAPIAdapter::instanceDeviceSetsGet(
         SWGSDRangel::SWGDeviceSetList& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -1378,7 +1377,7 @@ int WebAPIAdapterGUI::instanceDeviceSetsGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceFeatureSetsGet(
+int WebAPIAdapter::instanceFeatureSetsGet(
         SWGSDRangel::SWGFeatureSetList& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -1387,7 +1386,7 @@ int WebAPIAdapterGUI::instanceFeatureSetsGet(
     return 200;
 }
 
-int WebAPIAdapterGUI::instanceDeviceSetPost(
+int WebAPIAdapter::instanceDeviceSetPost(
         int direction,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1402,7 +1401,7 @@ int WebAPIAdapterGUI::instanceDeviceSetPost(
     return 202;
 }
 
-int WebAPIAdapterGUI::instanceDeviceSetDelete(
+int WebAPIAdapter::instanceDeviceSetDelete(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
@@ -1425,7 +1424,7 @@ int WebAPIAdapterGUI::instanceDeviceSetDelete(
     }
 }
 
-int WebAPIAdapterGUI::devicesetGet(
+int WebAPIAdapter::devicesetGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceSet& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1446,7 +1445,7 @@ int WebAPIAdapterGUI::devicesetGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetFocusPatch(
+int WebAPIAdapter::devicesetFocusPatch(
         int deviceSetIndex,
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1470,7 +1469,7 @@ int WebAPIAdapterGUI::devicesetFocusPatch(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDevicePut(
+int WebAPIAdapter::devicesetDevicePut(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceListItem& query,
         SWGSDRangel::SWGDeviceListItem& response,
@@ -1577,7 +1576,7 @@ int WebAPIAdapterGUI::devicesetDevicePut(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceSettingsGet(
+int WebAPIAdapter::devicesetDeviceSettingsGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceSettings& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1622,7 +1621,7 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceActionsPost(
+int WebAPIAdapter::devicesetDeviceActionsPost(
         int deviceSetIndex,
         const QStringList& deviceActionsKeys,
         SWGSDRangel::SWGDeviceActions& query,
@@ -1726,7 +1725,7 @@ int WebAPIAdapterGUI::devicesetDeviceActionsPost(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
+int WebAPIAdapter::devicesetDeviceSettingsPutPatch(
         int deviceSetIndex,
         bool force,
         const QStringList& deviceSettingsKeys,
@@ -1806,7 +1805,7 @@ int WebAPIAdapterGUI::devicesetDeviceSettingsPutPatch(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceRunGet(
+int WebAPIAdapter::devicesetDeviceRunGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1842,7 +1841,7 @@ int WebAPIAdapterGUI::devicesetDeviceRunGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceSubsystemRunGet(
+int WebAPIAdapter::devicesetDeviceSubsystemRunGet(
         int deviceSetIndex,
         int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
@@ -1873,7 +1872,7 @@ int WebAPIAdapterGUI::devicesetDeviceSubsystemRunGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceRunPost(
+int WebAPIAdapter::devicesetDeviceRunPost(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1909,7 +1908,7 @@ int WebAPIAdapterGUI::devicesetDeviceRunPost(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceSubsystemRunPost(
+int WebAPIAdapter::devicesetDeviceSubsystemRunPost(
         int deviceSetIndex,
         int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
@@ -1940,7 +1939,7 @@ int WebAPIAdapterGUI::devicesetDeviceSubsystemRunPost(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceRunDelete(
+int WebAPIAdapter::devicesetDeviceRunDelete(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceState& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -1976,7 +1975,7 @@ int WebAPIAdapterGUI::devicesetDeviceRunDelete(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceSubsystemRunDelete(
+int WebAPIAdapter::devicesetDeviceSubsystemRunDelete(
         int deviceSetIndex,
         int subsystemIndex,
         SWGSDRangel::SWGDeviceState& response,
@@ -2007,7 +2006,7 @@ int WebAPIAdapterGUI::devicesetDeviceSubsystemRunDelete(
     }
 }
 
-int WebAPIAdapterGUI::devicesetDeviceReportGet(
+int WebAPIAdapter::devicesetDeviceReportGet(
         int deviceSetIndex,
         SWGSDRangel::SWGDeviceReport& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -2052,7 +2051,7 @@ int WebAPIAdapterGUI::devicesetDeviceReportGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelsReportGet(
+int WebAPIAdapter::devicesetChannelsReportGet(
         int deviceSetIndex,
         SWGSDRangel::SWGChannelsDetail& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -2073,7 +2072,7 @@ int WebAPIAdapterGUI::devicesetChannelsReportGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelPost(
+int WebAPIAdapter::devicesetChannelPost(
             int deviceSetIndex,
             SWGSDRangel::SWGChannelSettings& query,
 			SWGSDRangel::SWGSuccessResponse& response,
@@ -2206,7 +2205,7 @@ int WebAPIAdapterGUI::devicesetChannelPost(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelDelete(
+int WebAPIAdapter::devicesetChannelDelete(
             int deviceSetIndex,
             int channelIndex,
             SWGSDRangel::SWGSuccessResponse& response,
@@ -2243,7 +2242,7 @@ int WebAPIAdapterGUI::devicesetChannelDelete(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelSettingsGet(
+int WebAPIAdapter::devicesetChannelSettingsGet(
             int deviceSetIndex,
             int channelIndex,
             SWGSDRangel::SWGChannelSettings& response,
@@ -2342,7 +2341,7 @@ int WebAPIAdapterGUI::devicesetChannelSettingsGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelReportGet(
+int WebAPIAdapter::devicesetChannelReportGet(
             int deviceSetIndex,
             int channelIndex,
             SWGSDRangel::SWGChannelReport& response,
@@ -2441,7 +2440,7 @@ int WebAPIAdapterGUI::devicesetChannelReportGet(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelActionsPost(
+int WebAPIAdapter::devicesetChannelActionsPost(
         int deviceSetIndex,
         int channelIndex,
         const QStringList& channelActionsKeys,
@@ -2596,7 +2595,7 @@ int WebAPIAdapterGUI::devicesetChannelActionsPost(
     }
 }
 
-int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
+int WebAPIAdapter::devicesetChannelSettingsPutPatch(
         int deviceSetIndex,
         int channelIndex,
         bool force,
@@ -2731,7 +2730,7 @@ int WebAPIAdapterGUI::devicesetChannelSettingsPutPatch(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeaturePost(
+int WebAPIAdapter::featuresetFeaturePost(
             int featureSetIndex,
             SWGSDRangel::SWGFeatureSettings& query,
 			SWGSDRangel::SWGSuccessResponse& response,
@@ -2777,7 +2776,7 @@ int WebAPIAdapterGUI::featuresetFeaturePost(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureDelete(
+int WebAPIAdapter::featuresetFeatureDelete(
             int featureSetIndex,
             int featureIndex,
             SWGSDRangel::SWGSuccessResponse& response,
@@ -2814,7 +2813,7 @@ int WebAPIAdapterGUI::featuresetFeatureDelete(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureRunGet(
+int WebAPIAdapter::featuresetFeatureRunGet(
     int featureSetIndex,
     int featureIndex,
     SWGSDRangel::SWGDeviceState& response,
@@ -2847,7 +2846,7 @@ int WebAPIAdapterGUI::featuresetFeatureRunGet(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureRunPost(
+int WebAPIAdapter::featuresetFeatureRunPost(
     int featureSetIndex,
     int featureIndex,
     SWGSDRangel::SWGDeviceState& response,
@@ -2880,7 +2879,7 @@ int WebAPIAdapterGUI::featuresetFeatureRunPost(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureRunDelete(
+int WebAPIAdapter::featuresetFeatureRunDelete(
     int featureSetIndex,
     int featureIndex,
     SWGSDRangel::SWGDeviceState& response,
@@ -2913,7 +2912,7 @@ int WebAPIAdapterGUI::featuresetFeatureRunDelete(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureSettingsGet(
+int WebAPIAdapter::featuresetFeatureSettingsGet(
             int featureSetIndex,
             int featureIndex,
             SWGSDRangel::SWGFeatureSettings& response,
@@ -2945,7 +2944,7 @@ int WebAPIAdapterGUI::featuresetFeatureSettingsGet(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureSettingsPutPatch(
+int WebAPIAdapter::featuresetFeatureSettingsPutPatch(
         int featureSetIndex,
         int featureIndex,
         bool force,
@@ -2991,7 +2990,7 @@ int WebAPIAdapterGUI::featuresetFeatureSettingsPutPatch(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureReportGet(
+int WebAPIAdapter::featuresetFeatureReportGet(
     int featureSetIndex,
     int featureIndex,
     SWGSDRangel::SWGFeatureReport& response,
@@ -3023,7 +3022,7 @@ int WebAPIAdapterGUI::featuresetFeatureReportGet(
     }
 }
 
-int WebAPIAdapterGUI::featuresetFeatureActionsPost(
+int WebAPIAdapter::featuresetFeatureActionsPost(
         int featureSetIndex,
         int featureIndex,
         const QStringList& featureActionsKeys,
@@ -3077,7 +3076,7 @@ int WebAPIAdapterGUI::featuresetFeatureActionsPost(
     }
 }
 
-void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
+void WebAPIAdapter::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSetList)
 {
     deviceSetList->init();
     deviceSetList->setDevicesetcount((int) m_mainCore->m_deviceSets.size());
@@ -3097,7 +3096,7 @@ void WebAPIAdapterGUI::getDeviceSetList(SWGSDRangel::SWGDeviceSetList* deviceSet
     }
 }
 
-void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceSet* deviceUISet, int deviceUISetIndex)
+void WebAPIAdapter::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const DeviceSet* deviceUISet, int deviceUISetIndex)
 {
     deviceSet->init();
     SWGSDRangel::SWGSamplingDevice *samplingDevice = deviceSet->getSamplingDevice();
@@ -3236,7 +3235,7 @@ void WebAPIAdapterGUI::getDeviceSet(SWGSDRangel::SWGDeviceSet *deviceSet, const 
     }
 }
 
-void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceUISet)
+void WebAPIAdapter::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channelsDetail, const DeviceSet* deviceUISet)
 {
     channelsDetail->init();
     SWGSDRangel::SWGChannelReport *channelReport;
@@ -3369,7 +3368,7 @@ void WebAPIAdapterGUI::getChannelsDetail(SWGSDRangel::SWGChannelsDetail *channel
     }
 }
 
-int WebAPIAdapterGUI::featuresetGet(
+int WebAPIAdapter::featuresetGet(
         int featureSetIndex,
         SWGSDRangel::SWGFeatureSet& response,
         SWGSDRangel::SWGErrorResponse& error)
@@ -3390,7 +3389,7 @@ int WebAPIAdapterGUI::featuresetGet(
     }
 }
 
-void WebAPIAdapterGUI::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList)
+void WebAPIAdapter::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* featureSetList)
 {
     featureSetList->init();
     featureSetList->setFeaturesetcount((int) m_mainCore->m_featureSets.size());
@@ -3406,7 +3405,7 @@ void WebAPIAdapterGUI::getFeatureSetList(SWGSDRangel::SWGFeatureSetList* feature
     }
 }
 
-void WebAPIAdapterGUI::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureSet* featureUISet, int featureUISetIndex)
+void WebAPIAdapter::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, const FeatureSet* featureUISet, int featureUISetIndex)
 {
     featureSet->init();
     featureSet->setFeaturecount(featureUISet->getNumberOfFeatures());
@@ -3426,7 +3425,7 @@ void WebAPIAdapterGUI::getFeatureSet(SWGSDRangel::SWGFeatureSet *featureSet, con
     }
 }
 
-QtMsgType WebAPIAdapterGUI::getMsgTypeFromString(const QString& msgTypeString)
+QtMsgType WebAPIAdapter::getMsgTypeFromString(const QString& msgTypeString)
 {
     if (msgTypeString == "debug") {
         return QtDebugMsg;
@@ -3441,7 +3440,7 @@ QtMsgType WebAPIAdapterGUI::getMsgTypeFromString(const QString& msgTypeString)
     }
 }
 
-void WebAPIAdapterGUI::getMsgTypeString(const QtMsgType& msgType, QString& levelStr)
+void WebAPIAdapter::getMsgTypeString(const QtMsgType& msgType, QString& levelStr)
 {
     switch (msgType)
     {

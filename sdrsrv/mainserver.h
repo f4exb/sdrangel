@@ -39,7 +39,7 @@ class DeviceSet;
 class FeatureSet;
 class WebAPIRequestMapper;
 class WebAPIServer;
-class WebAPIAdapterSrv;
+class WebAPIAdapter;
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -71,8 +71,6 @@ public:
     const QString& getAPIHost() const { return m_apiHost; }
     int getAPIPort() const { return m_apiPort; }
 
-    friend class WebAPIAdapterSrv;
-
 signals:
     void finished();
 
@@ -88,7 +86,7 @@ private:
 
     WebAPIRequestMapper *m_requestMapper;
     WebAPIServer *m_apiServer;
-    WebAPIAdapterSrv *m_apiAdapter;
+    WebAPIAdapter *m_apiAdapter;
 
 	void loadSettings();
     void applySettings();

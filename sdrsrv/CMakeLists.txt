@@ -2,12 +2,10 @@ project (sdrsrv)
 
 set(sdrsrv_SOURCES
     mainserver.cpp
-    webapi/webapiadaptersrv.cpp
 )
 
 set(sdrsrv_HEADERS
     mainserver.h
-    webapi/webapiadaptersrv.h
 )
 
 if (LIMESUITE_FOUND)
