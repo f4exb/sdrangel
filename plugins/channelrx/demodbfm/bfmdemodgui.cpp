@@ -37,7 +37,7 @@
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "bfmdemodreport.h"
 #include "bfmdemodsettings.h"
@@ -385,7 +385,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
         FFTWindow::BlackmanHarris,
         false // logarithmic scale
     );
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(m_settings.m_rgbColor);

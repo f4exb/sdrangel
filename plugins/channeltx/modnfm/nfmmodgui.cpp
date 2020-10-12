@@ -31,7 +31,7 @@
 #include "gui/audioselectdialog.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_nfmmodgui.h"
 #include "nfmmodgui.h"
@@ -368,7 +368,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	m_nfmMod = (NFMMod*) channelTx; //new NFMMod(m_deviceUISet->m_deviceSinkAPI);
 	m_nfmMod->setMessageQueueToGUI(getInputMessageQueue());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->mic);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));

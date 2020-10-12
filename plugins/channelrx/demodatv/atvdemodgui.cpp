@@ -28,7 +28,7 @@
 #include "util/simpleserializer.h"
 #include "util/db.h"
 #include "dsp/dspengine.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "atvdemod.h"
 
@@ -227,8 +227,8 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setTVScreen(ui->screenTV);
 
-    ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+    ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

@@ -31,9 +31,9 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
-#include "mainwindow.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "maincore.h"
 
 #include "freqtracker.h"
 #include "freqtrackerreport.h"
@@ -301,7 +301,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel); //new FreqTracker(m_deviceUISet->m_deviceSourceAPI);
 	m_freqTracker->setMessageQueueToGUI(getInputMessageQueue());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));

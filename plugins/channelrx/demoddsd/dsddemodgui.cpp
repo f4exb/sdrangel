@@ -30,7 +30,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "dsp/dspengine.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "dsddemodbaudrates.h"
 #include "dsddemod.h"
@@ -349,7 +349,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_dsdDemod->setScopeXYSink(m_scopeVisXY);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     ui->audioMute->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
 
@@ -387,8 +387,8 @@ DSDDemodGUI::~DSDDemodGUI()
 
 void DSDDemodGUI::updateMyPosition()
 {
-    float latitude = MainWindow::getInstance()->getMainSettings().getLatitude();
-    float longitude = MainWindow::getInstance()->getMainSettings().getLongitude();
+    float latitude = MainCore::instance()->getSettings().getLatitude();
+    float longitude = MainCore::instance()->getSettings().getLongitude();
 
     if ((m_myLatitude != latitude) || (m_myLongitude != longitude))
     {

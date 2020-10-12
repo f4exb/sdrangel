@@ -16,7 +16,7 @@
 #include "util/db.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 #include "ssbdemod.h"
 
 SSBDemodGUI* SSBDemodGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel)
@@ -305,9 +305,9 @@ SSBDemodGUI::SSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
     ui->glSpectrum->setSsbSpectrum(true);
-	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(Qt::green);

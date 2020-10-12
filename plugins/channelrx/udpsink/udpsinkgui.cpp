@@ -25,7 +25,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "ui_udpsinkgui.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "udpsink.h"
 #include "udpsinkgui.h"
@@ -177,8 +177,8 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
         false // logarithmic scale
     );
 
-	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
 	m_channelMarker.setBandwidth(16000);
