@@ -20,7 +20,7 @@
 #include "device/deviceuiset.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "dsp/hbfilterchainconverter.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "beamsteeringcwmodgui.h"
 #include "beamsteeringcwmod.h"
@@ -106,7 +106,7 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_bsCWSource->setMessageQueueToGUI(getInputMessageQueue());
     m_basebandSampleRate = m_bsCWSource->getBasebandSampleRate();
 
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.addStreamIndex(1);

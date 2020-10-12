@@ -22,7 +22,7 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/scopevis.h"
 #include "dsp/spectrumvis.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "interferometergui.h"
 #include "interferometer.h"
@@ -126,9 +126,9 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->glSpectrum->setLsbDisplay(false);
     ui->glScope->setTraceModulo(Interferometer::m_fftSize);
 
-	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
-	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
+	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.addStreamIndex(1);

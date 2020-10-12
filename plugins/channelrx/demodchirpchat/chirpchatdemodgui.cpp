@@ -31,7 +31,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "chirpchatdemod.h"
 #include "chirpchatdemodgui.h"
@@ -387,7 +387,7 @@ ChirpChatDemodGUI::ChirpChatDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_chirpChatDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);

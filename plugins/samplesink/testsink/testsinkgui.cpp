@@ -29,7 +29,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
@@ -61,7 +61,7 @@ TestSinkGui::TestSinkGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
-    ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+    ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));

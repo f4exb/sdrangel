@@ -30,7 +30,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_chirpchatmodgui.h"
 #include "chirpchatmodgui.h"
@@ -403,7 +403,7 @@ ChirpChatModGUI::ChirpChatModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet,
 	m_chirpChatMod = (ChirpChatMod*) channelTx;
 	m_chirpChatMod->setMessageQueueToGUI(getInputMessageQueue());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
     ui->deltaFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
