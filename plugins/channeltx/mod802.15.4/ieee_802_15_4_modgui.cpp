@@ -34,7 +34,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_ieee_802_15_4_modgui.h"
 #include "ieee_802_15_4_modgui.h"
@@ -338,12 +338,12 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_IEEE_802_15_4_Mod = (IEEE_802_15_4_Mod*) channelTx;
     m_IEEE_802_15_4_Mod->setMessageQueueToGUI(getInputMessageQueue());
 
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_scopeVis = new ScopeVis(ui->glScope);
     m_IEEE_802_15_4_Mod->setScopeSink(m_scopeVis);
-    ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+    ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 
     // Scope settings to display the IQ waveforms
@@ -385,7 +385,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->glSpectrum->setDisplayWaterfall(false);
     ui->glSpectrum->setDisplayMaxHold(false);
     ui->glSpectrum->setDisplayHistogram(false);
-    ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+    ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
     connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect()));

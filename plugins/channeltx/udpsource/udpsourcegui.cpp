@@ -25,7 +25,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "plugin/pluginapi.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_udpsourcegui.h"
 
@@ -125,8 +125,8 @@ UDPSourceGUI::UDPSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->glSpectrum->setDisplayWaterfall(true);
     ui->glSpectrum->setDisplayMaxHold(true);
 
-    ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+    ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setBandwidth(16000);

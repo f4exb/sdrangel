@@ -33,7 +33,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/fmpreemphasisdialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_packetmodgui.h"
 #include "packetmodgui.h"
@@ -208,8 +208,8 @@ void PacketModGUI::on_packet_editingFinished()
 
 void PacketModGUI::on_insertPosition_clicked(bool checked)
 {
-    float latitude = MainWindow::getInstance()->getMainSettings().getLatitude();
-    float longitude = MainWindow::getInstance()->getMainSettings().getLongitude();
+    float latitude = MainCore::instance()->getSettings().getLatitude();
+    float longitude = MainCore::instance()->getSettings().getLongitude();
 
     int latDeg, latMin, latFrac, latNorth;
     int longDeg, longMin, longFrac, longEast;
@@ -406,7 +406,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_packetMod = (PacketMod*) channelTx;
     m_packetMod->setMessageQueueToGUI(getInputMessageQueue());
 
-    connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+    connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
     m_spectrumVis = m_packetMod->getSpectrumVis();
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
@@ -420,7 +420,7 @@ PacketModGUI::PacketModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     ui->glSpectrum->setDisplayWaterfall(false);
     ui->glSpectrum->setDisplayMaxHold(false);
     ui->glSpectrum->setDisplayHistogram(false);
-    ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+    ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
     connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect()));

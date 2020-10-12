@@ -32,7 +32,7 @@
 #include "util/db.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_freedvdemodgui.h"
 #include "freedvdemod.h"
@@ -267,9 +267,9 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
     ui->glSpectrum->setSsbSpectrum(true);
-	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
+	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
     connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));

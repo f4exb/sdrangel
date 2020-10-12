@@ -29,7 +29,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
-#include "mainwindow.h"
+#include "maincore.h"
 
 #include "ui_chanalyzergui.h"
 #include "chanalyzer.h"
@@ -392,9 +392,9 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
 
-	ui->glSpectrum->connectTimer(MainWindow::getInstance()->getMasterTimer());
-	ui->glScope->connectTimer(MainWindow::getInstance()->getMasterTimer());
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
+	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
+	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
 	m_channelMarker.blockSignals(true);
 	m_channelMarker.setColor(Qt::gray);

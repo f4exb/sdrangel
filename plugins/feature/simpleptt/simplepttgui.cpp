@@ -19,8 +19,8 @@
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
+#include "device/deviceset.h"
+#include "maincore.h"
 
 #include "ui_simplepttgui.h"
 #include "simplepttreport.h"
@@ -180,9 +180,9 @@ void SimplePTTGUI::displaySettings()
 
 void SimplePTTGUI::updateDeviceSetLists()
 {
-    MainWindow *mainWindow = MainWindow::getInstance();
-    std::vector<DeviceUISet*>& deviceUISets = mainWindow->getDeviceUISets();
-    std::vector<DeviceUISet*>::const_iterator it = deviceUISets.begin();
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
 
     ui->rxDevice->blockSignals(true);
     ui->txDevice->blockSignals(true);
@@ -193,7 +193,7 @@ void SimplePTTGUI::updateDeviceSetLists()
     unsigned int rxIndex = 0;
     unsigned int txIndex = 0;
 
-    for (; it != deviceUISets.end(); ++it, deviceIndex++)
+    for (; it != deviceSets.end(); ++it, deviceIndex++)
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
         DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;

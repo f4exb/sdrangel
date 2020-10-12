@@ -31,9 +31,9 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
-#include "mainwindow.h"
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
+#include "maincore.h"
 
 #include "amdemod.h"
 
@@ -247,7 +247,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel); //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
 	m_amDemod->setMessageQueueToGUI(getInputMessageQueue());
 
-	connect(&MainWindow::getInstance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
+	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));

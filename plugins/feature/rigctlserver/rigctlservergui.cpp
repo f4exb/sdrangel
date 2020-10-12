@@ -20,8 +20,8 @@
 
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
-#include "mainwindow.h"
-#include "device/deviceuiset.h"
+#include "device/deviceset.h"
+#include "maincore.h"
 
 #include "ui_rigctlservergui.h"
 #include "rigctlserver.h"
@@ -165,18 +165,18 @@ void RigCtlServerGUI::displaySettings()
 
 void RigCtlServerGUI::updateDeviceSetList()
 {
-    MainWindow *mainWindow = MainWindow::getInstance();
-    std::vector<DeviceUISet*>& deviceUISets = mainWindow->getDeviceUISets();
-    std::vector<DeviceUISet*>::const_iterator it = deviceUISets.begin();
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
 
     ui->device->blockSignals(true);
 
     ui->device->clear();
     unsigned int deviceIndex = 0;
 
-    for (; it != deviceUISets.end(); ++it, deviceIndex++)
+    for (; it != deviceSets.end(); ++it, deviceIndex++)
     {
-        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
+        DSPDeviceSourceEngine *deviceSourceEngine = (*it)->m_deviceSourceEngine;
         DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
         DSPDeviceMIMOEngine *deviceMIMOEngine = (*it)->m_deviceMIMOEngine;
 
@@ -187,7 +187,7 @@ void RigCtlServerGUI::updateDeviceSetList()
 
     int newDeviceIndex;
 
-    if (it != deviceUISets.begin())
+    if (it != deviceSets.begin())
     {
         if (m_settings.m_deviceIndex < 0) {
             ui->device->setCurrentIndex(0);
@@ -226,10 +226,10 @@ bool RigCtlServerGUI::updateChannelList()
     }
     else
     {
-        MainWindow *mainWindow = MainWindow::getInstance();
-        std::vector<DeviceUISet*>& deviceUISets = mainWindow->getDeviceUISets();
-        DeviceUISet *deviceUISet = deviceUISets[m_settings.m_deviceIndex];
-        int nbChannels = deviceUISet->getNumberOfChannels();
+        MainCore *mainCore = MainCore::instance();
+        std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+        DeviceSet *deviceSet = deviceSets[m_settings.m_deviceIndex];
+        int nbChannels = deviceSet->getNumberOfChannels();
 
         for (int ch = 0; ch < nbChannels; ch++) {
             ui->channel->addItem(QString("%1").arg(ch), ch);
