@@ -43,6 +43,8 @@ public:
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
     void freeChannels();
+    const ChannelAPI *getChannelAt(int channelIndex) const;
+    ChannelAPI *getChannelAt(int channelIndex);
     void deleteChannel(int channelIndex);
     void loadRxChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveRxChannelSettings(Preset* preset);
@@ -71,6 +73,11 @@ private:
         { }
 
         ChannelInstanceRegistration(const QString& channelName, ChannelAPI* channelAPI);
+
+        ChannelInstanceRegistration(const ChannelInstanceRegistration& other) :
+            m_channelName(other.m_channelName),
+            m_channelAPI(other.m_channelAPI)
+        { }
 
         bool operator<(const ChannelInstanceRegistration& other) const;
     };
