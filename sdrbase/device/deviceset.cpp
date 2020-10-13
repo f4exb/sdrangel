@@ -65,6 +65,24 @@ void DeviceSet::freeChannels()
     }
 }
 
+const ChannelAPI *DeviceSet::getChannelAt(int channelIndex) const
+{
+    if ((channelIndex >= 0) && (channelIndex < m_channelInstanceRegistrations.size())) {
+        return m_channelInstanceRegistrations[channelIndex].m_channelAPI;
+    } else {
+        return nullptr;
+    }
+}
+
+ChannelAPI *DeviceSet::getChannelAt(int channelIndex)
+{
+    if ((channelIndex >= 0) && (channelIndex < m_channelInstanceRegistrations.size())) {
+        return m_channelInstanceRegistrations[channelIndex].m_channelAPI;
+    } else {
+        return nullptr;
+    }
+}
+
 void DeviceSet::deleteChannel(int channelIndex)
 {
     if (channelIndex < m_channelInstanceRegistrations.count())

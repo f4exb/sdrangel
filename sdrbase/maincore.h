@@ -28,6 +28,8 @@
 
 class DeviceSet;
 class FeatureSet;
+class ChannelAPI;
+class Feature;
 class PluginManager;
 class MessageQueue;
 
@@ -410,6 +412,8 @@ public:
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
     void setLoggingOptions();
+    ChannelAPI *getChannel(int deviceSetIndex, int channelIndex);
+    Feature *getFeature(int featureSetIndex, int featureIndex);
     // slave mode
     void appendFeatureSet();
     void removeFeatureSet(int index);

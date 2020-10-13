@@ -108,6 +108,24 @@ void MainCore::setLoggingOptions()
     }
 }
 
+ChannelAPI *MainCore::getChannel(int deviceSetIndex, int channelIndex)
+{
+    if ((deviceSetIndex >= 0) && (deviceSetIndex < m_deviceSets.size())) {
+        return m_deviceSets[deviceSetIndex]->getChannelAt(channelIndex);
+    } else {
+        return nullptr;
+    }
+}
+
+Feature *MainCore::getFeature(int featureSetIndex, int featureIndex)
+{
+    if ((featureSetIndex >= 0) && (featureSetIndex < m_featureSets.size())) {
+        return m_featureSets[featureSetIndex]->getFeatureAt(featureIndex);
+    } else {
+        return nullptr;
+    }
+}
+
 void MainCore::appendFeatureSet()
 {
     int newIndex = m_featureSets.size();
