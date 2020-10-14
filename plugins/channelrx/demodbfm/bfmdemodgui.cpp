@@ -364,7 +364,7 @@ BFMDemodGUI::BFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	m_bfmDemod = (BFMDemod*) rxChannel; //new BFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_bfmDemod = (BFMDemod*) rxChannel;
     m_spectrumVis = m_bfmDemod->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_bfmDemod->setMessageQueueToGUI(getInputMessageQueue());

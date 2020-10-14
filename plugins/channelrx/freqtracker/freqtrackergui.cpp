@@ -298,7 +298,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel); //new FreqTracker(m_deviceUISet->m_deviceSourceAPI);
+	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel);
 	m_freqTracker->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms

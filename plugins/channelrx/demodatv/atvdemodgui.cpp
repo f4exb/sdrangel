@@ -222,7 +222,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
     m_scopeVis = new ScopeVis(ui->glScope);
-    m_atvDemod = (ATVDemod*) rxChannel; //new ATVDemod(m_deviceUISet->m_deviceSourceAPI);
+    m_atvDemod = (ATVDemod*) rxChannel;
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvDemod->setScopeSink(m_scopeVis);
     m_atvDemod->setTVScreen(ui->screenTV);

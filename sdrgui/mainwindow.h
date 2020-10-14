@@ -67,15 +67,9 @@ public:
 	explicit MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parser, QWidget* parent = 0);
 	~MainWindow();
 	static MainWindow *getInstance() { return m_instance; } // Main Window is de facto a singleton so this just returns its reference
-
 	MessageQueue* getInputMessageQueue() { return &m_inputMessageQueue; }
-
 	void addViewAction(QAction* action);
-
 	void setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType = 0);
-
-	const QTimer& getMasterTimer() const { return m_mainCore->m_masterTimer; }
-	const MainSettings& getMainSettings() const { return m_mainCore->m_settings; }
     const PluginManager *getPluginManager() const { return m_pluginManager; }
     std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);

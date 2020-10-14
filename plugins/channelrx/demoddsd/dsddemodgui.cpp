@@ -345,7 +345,7 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 	m_scopeVisXY->calculateGraticule(200,200);
 
-	m_dsdDemod = (DSDDemod*) rxChannel; //new DSDDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_dsdDemod = (DSDDemod*) rxChannel;
 	m_dsdDemod->setScopeXYSink(m_scopeVisXY);
 	m_dsdDemod->setMessageQueueToGUI(getInputMessageQueue());
 
