@@ -152,7 +152,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->scopeGUI->traceLengthChange();
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    //connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     displaySettings();
     displayRateAndShift();

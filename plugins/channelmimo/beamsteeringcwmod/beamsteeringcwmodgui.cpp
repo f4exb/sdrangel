@@ -123,7 +123,6 @@ BeamSteeringCWModGUI::BeamSteeringCWModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     m_deviceUISet->addRollupWidget(this);
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
-    //connect(&(m_deviceUISet->m_deviceSourceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
     displaySettings();
     displayRateAndShift();
