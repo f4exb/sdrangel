@@ -64,18 +64,18 @@ public:
 private:
     struct ChannelInstanceRegistration
     {
-        QString m_channelName;
+        QString m_channelURI;
         ChannelAPI *m_channelAPI;
 
         ChannelInstanceRegistration() :
-            m_channelName(),
+            m_channelURI(),
             m_channelAPI(nullptr)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, ChannelAPI* channelAPI);
+        ChannelInstanceRegistration(const QString& channelURI, ChannelAPI* channelAPI);
 
         ChannelInstanceRegistration(const ChannelInstanceRegistration& other) :
-            m_channelName(other.m_channelName),
+            m_channelURI(other.m_channelURI),
             m_channelAPI(other.m_channelAPI)
         { }
 
