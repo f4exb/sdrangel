@@ -336,7 +336,7 @@ AMModGUI::AMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampl
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_amMod = (AMMod*) channelTx; //new AMMod(m_deviceUISet->m_deviceSinkAPI);
+	m_amMod = (AMMod*) channelTx;
 	m_amMod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));

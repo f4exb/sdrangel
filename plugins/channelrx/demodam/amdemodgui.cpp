@@ -244,7 +244,7 @@ AMDemodGUI::AMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel); //new AMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_amDemod = reinterpret_cast<AMDemod*>(rxChannel);
 	m_amDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms

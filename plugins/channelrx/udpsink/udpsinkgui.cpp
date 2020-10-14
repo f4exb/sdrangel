@@ -150,7 +150,7 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-	m_udpSink = (UDPSink*) rxChannel; //new UDPSrc(m_deviceUISet->m_deviceSourceAPI);
+	m_udpSink = (UDPSink*) rxChannel;
     m_spectrumVis = m_udpSink->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_udpSink->setMessageQueueToGUI(getInputMessageQueue());

@@ -400,7 +400,7 @@ SSBModGUI::SSBModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_ssbMod = (SSBMod*) channelTx; //new SSBMod(m_deviceUISet->m_deviceSinkAPI);
+	m_ssbMod = (SSBMod*) channelTx;
     m_spectrumVis = m_ssbMod->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_ssbMod->setMessageQueueToGUI(getInputMessageQueue());

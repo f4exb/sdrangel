@@ -207,7 +207,7 @@ WFMDemodGUI::WFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-	m_wfmDemod = (WFMDemod*) rxChannel; //new WFMDemod(m_deviceUISet->m_deviceSourceAPI);
+	m_wfmDemod = (WFMDemod*) rxChannel;
 	m_wfmDemod->setMessageQueueToGUI(getInputMessageQueue());
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));

@@ -68,7 +68,7 @@ ATVModGUI::ATVModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_atvMod = (ATVMod*) channelTx; //new ATVMod(m_deviceUISet->m_deviceSinkAPI);
+	m_atvMod = (ATVMod*) channelTx;
 	m_atvMod->setMessageQueueToGUI(getInputMessageQueue());
     m_atvMod->propagateMessageQueueToGUI();
 
