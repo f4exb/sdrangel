@@ -2078,7 +2078,7 @@ void MainWindow::channelAddClicked(int channelIndex)
             BasebandSampleSink *rxChannel;
             pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
             ChannelGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
-            deviceUI->registerRxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+            deviceUI->registerRxChannelInstance(channelAPI, gui);
         }
         else if (deviceUI->m_deviceSinkEngine) // sink device => Tx channels
         {
@@ -2088,7 +2088,7 @@ void MainWindow::channelAddClicked(int channelIndex)
             BasebandSampleSource *txChannel;
             pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
             ChannelGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
-            deviceUI->registerTxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+            deviceUI->registerTxChannelInstance(channelAPI, gui);
         }
         else if (deviceUI->m_deviceMIMOEngine) // MIMO device => all possible channels. Depends on index range
         {
@@ -2106,7 +2106,7 @@ void MainWindow::channelAddClicked(int channelIndex)
                 MIMOChannel *mimoChannel;
                 pluginInterface->createMIMOChannel(deviceUI->m_deviceAPI, &mimoChannel, &channelAPI);
                 ChannelGUI *gui = pluginInterface->createMIMOChannelGUI(deviceUI, mimoChannel);
-                deviceUI->registerChannelInstance(channelAPI->getURI(), channelAPI, gui);
+                deviceUI->registerChannelInstance(channelAPI, gui);
             }
             else if (channelIndex < nbMIMOChannels + nbRxChannels) // Rx
             {
@@ -2116,7 +2116,7 @@ void MainWindow::channelAddClicked(int channelIndex)
                 BasebandSampleSink *rxChannel;
                 pluginInterface->createRxChannel(deviceUI->m_deviceAPI, &rxChannel, &channelAPI);
                 ChannelGUI *gui = pluginInterface->createRxChannelGUI(deviceUI, rxChannel);
-                deviceUI->registerRxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+                deviceUI->registerRxChannelInstance(channelAPI, gui);
             }
             else if (channelIndex < nbMIMOChannels + nbRxChannels + nbTxChannels)
             {
@@ -2126,7 +2126,7 @@ void MainWindow::channelAddClicked(int channelIndex)
                 BasebandSampleSource *txChannel;
                 pluginInterface->createTxChannel(deviceUI->m_deviceAPI, &txChannel, &channelAPI);
                 ChannelGUI *gui = pluginInterface->createTxChannelGUI(deviceUI, txChannel);
-                deviceUI->registerTxChannelInstance(channelAPI->getURI(), channelAPI, gui);
+                deviceUI->registerTxChannelInstance(channelAPI, gui);
             }
         }
     }

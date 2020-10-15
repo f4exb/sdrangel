@@ -466,9 +466,8 @@ int DeviceSet::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& respo
     return m_spectrumVis->webapiSpectrumServerDelete(response, errorMessage);
 }
 
-void DeviceSet::addChannelInstance(const QString& channelURI, ChannelAPI *channelAPI)
+void DeviceSet::addChannelInstance(ChannelAPI *channelAPI)
 {
-    (void) channelURI;
     m_channelInstanceRegistrations.append(channelAPI);
 }
 
