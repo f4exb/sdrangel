@@ -62,32 +62,13 @@ public:
     void clearChannels();
 
 private:
-    struct ChannelInstanceRegistration
-    {
-        QString m_channelURI;
-        ChannelAPI *m_channelAPI;
-
-        ChannelInstanceRegistration() :
-            m_channelURI(),
-            m_channelAPI(nullptr)
-        { }
-
-        ChannelInstanceRegistration(const QString& channelURI, ChannelAPI* channelAPI);
-
-        ChannelInstanceRegistration(const ChannelInstanceRegistration& other) :
-            m_channelURI(other.m_channelURI),
-            m_channelAPI(other.m_channelAPI)
-        { }
-
-        bool operator<(const ChannelInstanceRegistration& other) const;
-    };
-
-    typedef QList<ChannelInstanceRegistration> ChannelInstanceRegistrations;
+    typedef QList<ChannelAPI*> ChannelInstanceRegistrations;
 
     ChannelInstanceRegistrations m_channelInstanceRegistrations;
     int m_deviceTabIndex;
 
     void renameChannelInstances();
+    static bool compareChannels(const ChannelAPI *channelA, const ChannelAPI *channelB);
 };
 
 #endif /* SDRSRV_DEVICE_DEVICESET_H_ */
