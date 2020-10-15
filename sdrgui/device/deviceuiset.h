@@ -72,9 +72,9 @@ public:
     void saveTxChannelSettings(Preset* preset);
     void loadMIMOChannelSettings(const Preset* preset, PluginAPI *pluginAPI);
     void saveMIMOChannelSettings(Preset* preset);
-    void registerRxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
-    void registerTxChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
-    void registerChannelInstance(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void registerRxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void registerTxChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
+    void registerChannelInstance(ChannelAPI *channelAPI, ChannelGUI* channelGUI);
 
     // These are the number of channel types available for selection
     void setNumberOfAvailableRxChannels(int number) { m_nbAvailableRxChannels = number; }
@@ -87,20 +87,17 @@ public:
 private:
     struct ChannelInstanceRegistration
     {
-        QString m_channelURI;
         ChannelAPI *m_channelAPI;
         ChannelGUI* m_gui;
         int m_channelType;
 
         ChannelInstanceRegistration() :
-            m_channelURI(),
             m_gui(nullptr),
             m_channelAPI(nullptr),
             m_channelType(0)
         { }
 
-        ChannelInstanceRegistration(const QString& channelName, ChannelAPI *channelAPI, ChannelGUI* channelGUI, int channelType) :
-            m_channelURI(channelName),
+        ChannelInstanceRegistration(ChannelAPI *channelAPI, ChannelGUI* channelGUI, int channelType) :
             m_gui(channelGUI),
             m_channelAPI(channelAPI),
             m_channelType(channelType)

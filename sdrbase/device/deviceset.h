@@ -56,7 +56,7 @@ public:
     void addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     void addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI);
     // slave mode
-    void addChannelInstance(const QString& channelURI, ChannelAPI *channelAPI);
+    void addChannelInstance(ChannelAPI *channelAPI);
     void removeChannelInstanceAt(int index);
     void removeChannelInstance(ChannelAPI *channelAPI);
     void clearChannels();

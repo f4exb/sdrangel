@@ -430,9 +430,8 @@ bool DeviceSet::compareChannels(const ChannelAPI *channelA, const ChannelAPI *ch
     }
 }
 
-void DeviceSet::addChannelInstance(const QString& channelURI, ChannelAPI *channelAPI)
+void DeviceSet::addChannelInstance(ChannelAPI *channelAPI)
 {
-    (void) channelURI;
     m_channelInstanceRegistrations.append(channelAPI);
 }
 
