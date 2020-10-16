@@ -34,6 +34,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
+    afc_settings = nullptr;
+    m_afc_settings_isSet = false;
     simple_ptt_settings = nullptr;
     m_simple_ptt_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
@@ -52,6 +54,8 @@ SWGFeatureSettings::init() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
+    afc_settings = new SWGAFCSettings();
+    m_afc_settings_isSet = false;
     simple_ptt_settings = new SWGSimplePTTSettings();
     m_simple_ptt_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
@@ -65,6 +69,9 @@ SWGFeatureSettings::cleanup() {
     }
 
 
+    if(afc_settings != nullptr) { 
+        delete afc_settings;
+    }
     if(simple_ptt_settings != nullptr) { 
         delete simple_ptt_settings;
     }
@@ -89,6 +96,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_feature_set_index, pJson["originatorFeatureSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_feature_index, pJson["originatorFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&afc_settings, pJson["AFCSettings"], "SWGAFCSettings", "SWGAFCSettings");
     
     ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
     
@@ -118,6 +127,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if(m_originator_feature_index_isSet){
         obj->insert("originatorFeatureIndex", QJsonValue(originator_feature_index));
+    }
+    if((afc_settings != nullptr) && (afc_settings->isSet())){
+        toJsonValue(QString("AFCSettings"), afc_settings, obj, QString("SWGAFCSettings"));
     }
     if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
         toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
@@ -159,6 +171,16 @@ SWGFeatureSettings::setOriginatorFeatureIndex(qint32 originator_feature_index) {
     this->m_originator_feature_index_isSet = true;
 }
 
+SWGAFCSettings*
+SWGFeatureSettings::getAfcSettings() {
+    return afc_settings;
+}
+void
+SWGFeatureSettings::setAfcSettings(SWGAFCSettings* afc_settings) {
+    this->afc_settings = afc_settings;
+    this->m_afc_settings_isSet = true;
+}
+
 SWGSimplePTTSettings*
 SWGFeatureSettings::getSimplePttSettings() {
     return simple_ptt_settings;
@@ -191,6 +213,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(afc_settings && afc_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_settings && simple_ptt_settings->isSet()){

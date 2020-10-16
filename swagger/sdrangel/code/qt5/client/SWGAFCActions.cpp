@@ -10,64 +10,99 @@
  * Do not edit the class manually.
  */
 
-/*
- * SWGFeatureReport.h
- *
- * Base feature report. Only the feature report corresponding to the feature specified in the featureType field is or should be present.
- */
 
-#ifndef SWGFeatureReport_H_
-#define SWGFeatureReport_H_
+#include "SWGAFCActions.h"
 
-#include <QJsonObject>
+#include "SWGHelpers.h"
 
-
-#include "SWGAFCReport.h"
-#include "SWGSimplePTTReport.h"
-#include <QString>
-
-#include "SWGObject.h"
-#include "export.h"
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QObject>
+#include <QDebug>
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFeatureReport: public SWGObject {
-public:
-    SWGFeatureReport();
-    SWGFeatureReport(QString* json);
-    virtual ~SWGFeatureReport();
-    void init();
-    void cleanup();
+SWGAFCActions::SWGAFCActions(QString* json) {
+    init();
+    this->fromJson(*json);
+}
 
-    virtual QString asJson () override;
-    virtual QJsonObject* asJsonObject() override;
-    virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFeatureReport* fromJson(QString &jsonString) override;
+SWGAFCActions::SWGAFCActions() {
+    ptt = 0;
+    m_ptt_isSet = false;
+}
 
-    QString* getFeatureType();
-    void setFeatureType(QString* feature_type);
+SWGAFCActions::~SWGAFCActions() {
+    this->cleanup();
+}
 
-    SWGAFCReport* getAfcReport();
-    void setAfcReport(SWGAFCReport* afc_report);
+void
+SWGAFCActions::init() {
+    ptt = 0;
+    m_ptt_isSet = false;
+}
 
-    SWGSimplePTTReport* getSimplePttReport();
-    void setSimplePttReport(SWGSimplePTTReport* simple_ptt_report);
-
-
-    virtual bool isSet() override;
-
-private:
-    QString* feature_type;
-    bool m_feature_type_isSet;
-
-    SWGAFCReport* afc_report;
-    bool m_afc_report_isSet;
-
-    SWGSimplePTTReport* simple_ptt_report;
-    bool m_simple_ptt_report_isSet;
-
-};
+void
+SWGAFCActions::cleanup() {
 
 }
 
-#endif /* SWGFeatureReport_H_ */
+SWGAFCActions*
+SWGAFCActions::fromJson(QString &json) {
+    QByteArray array (json.toStdString().c_str());
+    QJsonDocument doc = QJsonDocument::fromJson(array);
+    QJsonObject jsonObject = doc.object();
+    this->fromJsonObject(jsonObject);
+    return this;
+}
+
+void
+SWGAFCActions::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&ptt, pJson["ptt"], "qint32", "");
+    
+}
+
+QString
+SWGAFCActions::asJson ()
+{
+    QJsonObject* obj = this->asJsonObject();
+
+    QJsonDocument doc(*obj);
+    QByteArray bytes = doc.toJson();
+    delete obj;
+    return QString(bytes);
+}
+
+QJsonObject*
+SWGAFCActions::asJsonObject() {
+    QJsonObject* obj = new QJsonObject();
+    if(m_ptt_isSet){
+        obj->insert("ptt", QJsonValue(ptt));
+    }
+
+    return obj;
+}
+
+qint32
+SWGAFCActions::getPtt() {
+    return ptt;
+}
+void
+SWGAFCActions::setPtt(qint32 ptt) {
+    this->ptt = ptt;
+    this->m_ptt_isSet = true;
+}
+
+
+bool
+SWGAFCActions::isSet(){
+    bool isObjectUpdated = false;
+    do{
+        if(m_ptt_isSet){
+            isObjectUpdated = true; break;
+        }
+    }while(false);
+    return isObjectUpdated;
+}
+}
+
