@@ -35,6 +35,7 @@ public:
     ~FeatureSet();
 
     int getNumberOfFeatures() const { return m_featureInstanceRegistrations.size(); }
+    int getIndex() const { return m_featureTabIndex; }
     void addFeature(int selectedFeatureIndex, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
     void removeFeatureInstance(Feature* feature);
     void freeFeatures();
@@ -44,35 +45,18 @@ public:
     void loadFeatureSetSettings(const FeatureSetPreset* preset, PluginAPI *pluginAPI, WebAPIAdapterInterface *apiAdapter);
     void saveFeatureSetSettings(FeatureSetPreset* preset);
     // slave mode
-    void addFeatureInstance(const QString& featureURI, Feature *feature);
+    void addFeatureInstance(Feature *feature);
     void removeFeatureInstanceAt(int index);
     void clearFeatures();
 
 private:
-    struct FeatureInstanceRegistration
-    {
-        QString m_featureName;
-        Feature* m_feature;
-
-        FeatureInstanceRegistration() :
-            m_featureName(),
-            m_feature(nullptr)
-        { }
-
-        FeatureInstanceRegistration(const QString& featureName, Feature *feature) :
-            m_featureName(featureName),
-            m_feature(feature)
-        { }
-
-        bool operator<(const FeatureInstanceRegistration& other) const;
-    };
-
-    typedef QList<FeatureInstanceRegistration> FeatureInstanceRegistrations;
+    typedef QList<Feature*> FeatureInstanceRegistrations;
 
     FeatureInstanceRegistrations m_featureInstanceRegistrations;
     int m_featureTabIndex;
 
     void renameFeatureInstances();
+    static bool compareFeatures(Feature *featureA, Feature *featureB);
 };
 
 #endif // SDRBASE_FEATURE_FEATURESET_H_

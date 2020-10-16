@@ -43,10 +43,10 @@ void FeatureUISet::addRollupWidget(QWidget *widget)
     m_featureWindow->addRollupWidget(widget);
 }
 
-void FeatureUISet::registerFeatureInstance(const QString& featureURI, FeatureGUI* featureGUI, Feature *feature)
+void FeatureUISet::registerFeatureInstance(FeatureGUI* featureGUI, Feature *feature)
 {
-    m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureURI, featureGUI, feature));
-    m_featureSet->addFeatureInstance(featureURI, feature);
+    m_featureInstanceRegistrations.append(FeatureInstanceRegistration(featureGUI, feature));
+    m_featureSet->addFeatureInstance(feature);
     QObject::connect(
         featureGUI,
         &FeatureGUI::closing,
@@ -70,7 +70,7 @@ void FeatureUISet::freeFeatures()
 {
     for(int i = 0; i < m_featureInstanceRegistrations.count(); i++)
     {
-        qDebug("FeatureUISet::freeFeatures: destroying feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_featureURI));
+        qDebug("FeatureUISet::freeFeatures: destroying feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_feature->getURI()));
         m_featureInstanceRegistrations[i].m_gui->destroy();
         m_featureInstanceRegistrations[i].m_feature->destroy();
     }
@@ -83,7 +83,7 @@ void FeatureUISet::deleteFeature(int featureIndex)
     if ((featureIndex >= 0) && (featureIndex < m_featureInstanceRegistrations.count()))
     {
         qDebug("FeatureUISet::deleteFeature: delete feature [%s] at %d",
-                qPrintable(m_featureInstanceRegistrations[featureIndex].m_featureURI),
+                qPrintable(m_featureInstanceRegistrations[featureIndex].m_feature->getURI()),
                 featureIndex);
         m_featureInstanceRegistrations[featureIndex].m_gui->destroy();
         m_featureInstanceRegistrations[featureIndex].m_feature->destroy();
@@ -123,7 +123,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
 
     for (int i = 0; i < openFeatures.count(); i++)
     {
-        qDebug("FeatureUISet::loadFeatureSetSettings: destroying old feature [%s]", qPrintable(openFeatures[i].m_featureURI));
+        qDebug("FeatureUISet::loadFeatureSetSettings: destroying old feature [%s]", qPrintable(openFeatures[i].m_feature->getURI()));
         openFeatures[i].m_gui->destroy();
         openFeatures[i].m_feature->destroy();
     }
@@ -148,7 +148,7 @@ void FeatureUISet::loadFeatureSetSettings(const FeatureSetPreset *preset, Plugin
                         (*featureRegistrations)[i].m_plugin->createFeature(apiAdapter);
                 featureGUI =
                         (*featureRegistrations)[i].m_plugin->createFeatureGUI(this, feature);
-                registerFeatureInstance(feature->getURI(), featureGUI, feature);
+                registerFeatureInstance(featureGUI, feature);
                 break;
             }
         }
@@ -167,8 +167,8 @@ void FeatureUISet::saveFeatureSetSettings(FeatureSetPreset *preset)
 
     for (int i = 0; i < m_featureInstanceRegistrations.count(); i++)
     {
-        qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_featureURI));
-        preset->addFeature(m_featureInstanceRegistrations[i].m_featureURI, m_featureInstanceRegistrations[i].m_gui->serialize());
+        qDebug("FeatureUISet::saveFeatureSetSettings: saving feature [%s]", qPrintable(m_featureInstanceRegistrations[i].m_feature->getURI()));
+        preset->addFeature(m_featureInstanceRegistrations[i].m_feature->getURI(), m_featureInstanceRegistrations[i].m_gui->serialize());
     }
 }
 

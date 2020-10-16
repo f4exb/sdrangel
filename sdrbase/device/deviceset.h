@@ -50,6 +50,7 @@ public:
     ~DeviceSet();
 
     int getNumberOfChannels() const { return m_channelInstanceRegistrations.size(); }
+    int getIndex() const { return m_deviceTabIndex; }
     void freeChannels();
     const ChannelAPI *getChannelAt(int channelIndex) const;
     ChannelAPI *getChannelAt(int channelIndex);
