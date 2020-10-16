@@ -13,6 +13,8 @@ FeatureSettings:
     originatorFeatureIndex:
       description: Optional for reverse API. This is the feature index from where the message comes from.
       type: integer
+    AFCSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCSettings"
     SimplePTTSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     RigCtlServerSettings:
