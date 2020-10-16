@@ -25,6 +25,7 @@
 #include "channel/channelapi.h"
 #include "channel/channelutils.h"
 #include "settings/preset.h"
+#include "maincore.h"
 
 #include "deviceset.h"
 
@@ -51,6 +52,8 @@ void DeviceSet::freeChannels()
         qDebug("DeviceSet::freeChannels: destroying channel [%s]", qPrintable(m_channelInstanceRegistrations[i]->getURI()));
         m_channelInstanceRegistrations[i]->destroy();
     }
+
+    MainCore::instance()->clearChannels(this);
 }
 
 const ChannelAPI *DeviceSet::getChannelAt(int channelIndex) const
@@ -77,6 +80,7 @@ void DeviceSet::deleteChannel(int channelIndex)
     {
         m_channelInstanceRegistrations[channelIndex]->destroy();
         m_channelInstanceRegistrations.removeAt(channelIndex);
+        MainCore::instance()->removeChannelInstanceAt(this, channelIndex);
         renameChannelInstances();
     }
 }
@@ -86,8 +90,10 @@ void DeviceSet::addRxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getRxChannelRegistrations(); // Available channel plugins
     ChannelAPI *rxChannel;
     (*channelRegistrations)[selectedChannelIndex].m_plugin->createRxChannel(m_deviceAPI, nullptr, &rxChannel);
-    ChannelAPI *reg = rxChannel;
-    m_channelInstanceRegistrations.append(reg);
+    ChannelAPI *channelAPI = rxChannel;
+    m_channelInstanceRegistrations.append(channelAPI);
+    MainCore::instance()->addChannelInstance(this, channelAPI);
+    renameChannelInstances();
     qDebug("DeviceSet::addRxChannel: %s", qPrintable(rxChannel->getName()));
 }
 
@@ -96,8 +102,10 @@ void DeviceSet::addTxChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getTxChannelRegistrations(); // Available channel plugins
     ChannelAPI *txChannel;
     (*channelRegistrations)[selectedChannelIndex].m_plugin->createTxChannel(m_deviceAPI, nullptr, &txChannel);
-    ChannelAPI *reg = txChannel;
-    m_channelInstanceRegistrations.append(reg);
+    ChannelAPI *channelAPI = txChannel;
+    m_channelInstanceRegistrations.append(channelAPI);
+    MainCore::instance()->addChannelInstance(this, channelAPI);
+    renameChannelInstances();
     qDebug("DeviceSet::addTxChannel: %s", qPrintable(txChannel->getName()));
 }
 
@@ -106,8 +114,10 @@ void DeviceSet::addMIMOChannel(int selectedChannelIndex, PluginAPI *pluginAPI)
     PluginAPI::ChannelRegistrations *channelRegistrations = pluginAPI->getMIMOChannelRegistrations(); // Available channel plugins
     ChannelAPI *mimoChannel;
     (*channelRegistrations)[selectedChannelIndex].m_plugin->createMIMOChannel(m_deviceAPI, nullptr, &mimoChannel);
-    ChannelAPI *reg = mimoChannel;
-    m_channelInstanceRegistrations.append(reg);
+    ChannelAPI *channelAPI = mimoChannel;
+    m_channelInstanceRegistrations.append(channelAPI);
+    MainCore::instance()->addChannelInstance(this, channelAPI);
+    renameChannelInstances();
     qDebug("DeviceSet::addMIMOChannel: %s", qPrintable(mimoChannel->getName()));
 }
 
@@ -115,6 +125,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
 {
     if (preset->isSourcePreset())
     {
+        MainCore *mainCore = MainCore::instance();
         qDebug("DeviceSet::loadChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
@@ -123,6 +134,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         // copy currently open channels and clear list
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
+        mainCore->clearChannels(this);
 
         qDebug("DeviceSet::loadChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
@@ -144,6 +156,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                     qDebug("DeviceSet::loadChannelSettings: channel [%s] found", qPrintable(openChannels[i]->getURI()));
                     channelAPI = openChannels.takeAt(i);
                     m_channelInstanceRegistrations.append(channelAPI);
+                    mainCore->addChannelInstance(this, channelAPI);
                     break;
                 }
             }
@@ -164,6 +177,7 @@ void DeviceSet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                         (*channelRegistrations)[i].m_plugin->createRxChannel(m_deviceAPI, nullptr, &rxChannel);
                         channelAPI = rxChannel;
                         m_channelInstanceRegistrations.append(channelAPI);
+                        mainCore->addChannelInstance(this, channelAPI);
                         break;
                     }
                 }
@@ -214,6 +228,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
 {
     if (preset->isSinkPreset())
     {
+        MainCore *mainCore = MainCore::instance();
         qDebug("DeviceSet::loadTxChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
@@ -222,6 +237,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
         // copy currently open channels and clear list
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
+        mainCore->clearChannels(this);
 
         qDebug("DeviceSet::loadTxChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
@@ -242,6 +258,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                     qDebug("DeviceSet::loadTxChannelSettings: channel [%s] found", qPrintable(openChannels[i]->getURI()));
                     channelAPI = openChannels.takeAt(i);
                     m_channelInstanceRegistrations.append(channelAPI);
+                    mainCore->addChannelInstance(this, channelAPI);
                     break;
                 }
             }
@@ -259,6 +276,7 @@ void DeviceSet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginAPI
                         (*channelRegistrations)[i].m_plugin->createTxChannel(m_deviceAPI, nullptr, &txChannel);
                         channelAPI = txChannel;
                         m_channelInstanceRegistrations.append(channelAPI);
+                        mainCore->addChannelInstance(this, channelAPI);
                         break;
                     }
                 }
@@ -311,6 +329,7 @@ void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginA
 {
     if (preset->isMIMOPreset())
     {
+        MainCore *mainCore = MainCore::instance();
         qDebug("DeviceSet::loadMIMOChannelSettings: Loading preset [%s | %s]", qPrintable(preset->getGroup()), qPrintable(preset->getDescription()));
 
         // Available channel plugins
@@ -319,6 +338,7 @@ void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginA
         // copy currently open channels and clear list
         ChannelInstanceRegistrations openChannels = m_channelInstanceRegistrations;
         m_channelInstanceRegistrations.clear();
+        mainCore->clearChannels(this);
 
         qDebug("DeviceSet::loadMIMOChannelSettings: %d channel(s) in preset", preset->getChannelCount());
 
@@ -340,6 +360,7 @@ void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginA
                     qDebug("DeviceSet::loadMIMOChannelSettings: channel [%s] found", qPrintable(openChannels[i]->getURI()));
                     channelAPI = openChannels.takeAt(i);
                     m_channelInstanceRegistrations.append(channelAPI);
+                    mainCore->addChannelInstance(this, channelAPI);
                     break;
                 }
             }
@@ -360,6 +381,7 @@ void DeviceSet::loadMIMOChannelSettings(const Preset *preset, PluginAPI *pluginA
                         (*channelRegistrations)[i].m_plugin->createMIMOChannel(m_deviceAPI, nullptr, &mimoChannel);
                         channelAPI = mimoChannel;
                         m_channelInstanceRegistrations.append(channelAPI);
+                        mainCore->addChannelInstance(this, channelAPI);
                         break;
                     }
                 }
@@ -408,8 +430,10 @@ void DeviceSet::saveMIMOChannelSettings(Preset *preset)
 
 void DeviceSet::renameChannelInstances()
 {
-    for (int i = 0; i < m_channelInstanceRegistrations.count(); i++) {
+    for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
+    {
         m_channelInstanceRegistrations[i]->setName(QString("%1:%2").arg(m_channelInstanceRegistrations[i]->getURI()).arg(i));
+        m_channelInstanceRegistrations[i]->setIndexInDeviceSet(i);
     }
 }
 
@@ -432,29 +456,43 @@ bool DeviceSet::compareChannels(const ChannelAPI *channelA, const ChannelAPI *ch
 
 void DeviceSet::addChannelInstance(ChannelAPI *channelAPI)
 {
+    MainCore *mainCore = MainCore::instance();
     m_channelInstanceRegistrations.append(channelAPI);
+    mainCore->addChannelInstance(this, channelAPI);
+    renameChannelInstances();
 }
 
 void DeviceSet::removeChannelInstanceAt(int index)
 {
-    if (index < m_channelInstanceRegistrations.size()) {
+    if (index < m_channelInstanceRegistrations.size())
+    {
+        MainCore *mainCore = MainCore::instance();
         m_channelInstanceRegistrations.removeAt(index);
+        mainCore->removeChannelInstanceAt(this, index);
+        renameChannelInstances();
     }
 }
 
 void DeviceSet::removeChannelInstance(ChannelAPI *channelAPI)
 {
+    MainCore *mainCore = MainCore::instance();
+
     for (int i = 0; i < m_channelInstanceRegistrations.count(); i++)
     {
         if (m_channelInstanceRegistrations.at(i) == channelAPI)
         {
             m_channelInstanceRegistrations.removeAt(i);
+            mainCore->removeChannelInstance(channelAPI);
             break;
         }
     }
+
+    renameChannelInstances();
 }
 
 void DeviceSet::clearChannels()
 {
+    MainCore *mainCore = MainCore::instance();
     m_channelInstanceRegistrations.clear();
+    mainCore->clearChannels(this);
 }

@@ -22,7 +22,9 @@
 #include "loggerwithfile.h"
 #include "dsp/dsptypes.h"
 #include "feature/featureset.h"
+#include "feature/feature.h"
 #include "device/deviceset.h"
+#include "channel/channelapi.h"
 
 #include "maincore.h"
 
@@ -129,19 +131,27 @@ Feature *MainCore::getFeature(int featureSetIndex, int featureIndex)
 void MainCore::appendFeatureSet()
 {
     int newIndex = m_featureSets.size();
-    m_featureSets.push_back(new FeatureSet(newIndex));
+    FeatureSet *featureSet = new FeatureSet(newIndex);
+    m_featureSets.push_back(featureSet);
+    m_featureSetsMap.insert(featureSet, newIndex);
 }
 
 void MainCore::removeFeatureSet(int index)
 {
-    if (index < m_featureSets.size()) {
+    if (index < m_featureSets.size())
+    {
+        FeatureSet *featureSet = m_featureSets[index];
+        m_featureSetsMap.remove(featureSet);
         m_featureSets.erase(m_featureSets.begin() + index);
     }
 }
 
 void MainCore::removeLastFeatureSet()
 {
-    if (m_featureSets.size() != 0) {
+    if (m_featureSets.size() != 0)
+    {
+        FeatureSet *featureSet = m_featureSets.back();
+        m_featureSetsMap.remove(featureSet);
         m_featureSets.pop_back();
     }
 }
@@ -149,12 +159,110 @@ void MainCore::removeLastFeatureSet()
 void MainCore::appendDeviceSet(int deviceType)
 {
     int newIndex = m_deviceSets.size();
-    m_deviceSets.push_back(new DeviceSet(newIndex, deviceType));
+    DeviceSet *deviceSet = new DeviceSet(newIndex, deviceType);
+    m_deviceSets.push_back(deviceSet);
+    m_deviceSetsMap.insert(deviceSet, newIndex);
 }
 
 void MainCore::removeLastDeviceSet()
 {
-    if (m_deviceSets.size() != 0) {
+    if (m_deviceSets.size() != 0)
+    {
+        DeviceSet *deviceSet = m_deviceSets.back();
+        m_deviceSetsMap.remove(deviceSet);
         m_deviceSets.pop_back();
+    }
+}
+
+void MainCore::addChannelInstance(DeviceSet *deviceSet, ChannelAPI *channelAPI)
+{
+    m_channelsMap.insert(channelAPI, deviceSet);
+    // debugMaps();
+}
+
+void MainCore::removeChannelInstanceAt(DeviceSet *deviceSet, int channelIndex)
+{
+    int deviceSetIndex = m_deviceSetsMap[deviceSet];
+    ChannelAPI *channelAPI = m_deviceSets[deviceSetIndex]->getChannelAt(channelIndex);
+
+    if (channelAPI) {
+        m_channelsMap.remove(channelAPI);
+    }
+}
+
+void MainCore::removeChannelInstance(ChannelAPI *channelAPI)
+{
+    if (channelAPI) {
+        m_channelsMap.remove(channelAPI);
+    }
+}
+
+void MainCore::clearChannels(DeviceSet *deviceSet)
+{
+    for (int i = 0; i < deviceSet->getNumberOfChannels(); i++)
+    {
+        ChannelAPI *channelAPI = deviceSet->getChannelAt(i);
+        m_channelsMap.remove(channelAPI);
+    }
+}
+
+void MainCore::addFeatureInstance(FeatureSet *featureSet, Feature *feature)
+{
+    m_featuresMap.insert(feature, featureSet);
+    // debugMaps();
+}
+
+void MainCore::removeFeatureInstanceAt(FeatureSet *featureSet, int featureIndex)
+{
+    int featureSetIndex = m_featureSetsMap[featureSet];
+    Feature *feature = m_featureSets[featureSetIndex]->getFeatureAt(featureIndex);
+
+    if (feature) {
+        m_featuresMap.remove(feature);
+    }
+}
+
+void MainCore::removeFeatureInstance(Feature *feature)
+{
+    if (feature) {
+        m_featuresMap.remove(feature);
+    }
+}
+
+void MainCore::clearFeatures(FeatureSet *featureSet)
+{
+    for (int i = 0; i < featureSet->getNumberOfFeatures(); i++)
+    {
+        Feature *feature = featureSet->getFeatureAt(i);
+        m_featuresMap.remove(feature);
+    }
+}
+
+void MainCore::debugMaps()
+{
+    QMap<DeviceSet*, int>::const_iterator dsIt = m_deviceSetsMap.begin();
+
+    for (; dsIt != m_deviceSetsMap.end(); ++dsIt) {
+        qDebug("MainCore::debugMaps: device set %d #%d", dsIt.key()->getIndex(), dsIt.value());
+    }
+
+    QMap<FeatureSet*, int>::const_iterator fsIt = m_featureSetsMap.begin();
+
+    for (; fsIt != m_featureSetsMap.end(); ++fsIt) {
+        qDebug("MainCore::debugMaps: feature set %d #%d", fsIt.key()->getIndex(), fsIt.value());
+    }
+
+    QMap<ChannelAPI*, DeviceSet*>::const_iterator chIt = m_channelsMap.begin();
+
+    for (; chIt != m_channelsMap.end(); ++chIt) {
+        qDebug("MainCore::debugMaps: channel ds: %d - %d: %s %s",
+            chIt.value()->getIndex(), chIt.key()->getIndexInDeviceSet(), qPrintable(chIt.key()->getURI()), qPrintable(chIt.key()->getName()));
+    }
+
+    QMap<Feature*, FeatureSet*>::const_iterator feIt = m_featuresMap.begin();
+
+    for (; feIt != m_featuresMap.end(); ++feIt) {
+        qDebug("MainCore::debugMaps: feature fs: %d - %d: %s %s",
+            feIt.value()->getIndex(), feIt.key()->getIndexInFeatureSet(), qPrintable(feIt.key()->getURI()), qPrintable(feIt.key()->getName()));
     }
 }

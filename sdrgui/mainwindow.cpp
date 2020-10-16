@@ -1982,7 +1982,7 @@ void MainWindow::featureAddClicked(int featureIndex)
         PluginInterface *pluginInterface = (*featureRegistrations)[featureIndex].m_plugin;
         Feature *feature = pluginInterface->createFeature(m_apiAdapter);
         FeatureGUI *gui = pluginInterface->createFeatureGUI(featureUISet, feature);
-        featureUISet->registerFeatureInstance(feature->getURI(), gui, feature);
+        featureUISet->registerFeatureInstance(gui, feature);
     }
 }
 

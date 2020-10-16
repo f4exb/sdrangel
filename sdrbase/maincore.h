@@ -20,6 +20,7 @@
 
 #include <vector>
 
+#include <QMap>
 #include <QTimer>
 
 #include "export.h"
@@ -414,12 +415,24 @@ public:
     void setLoggingOptions();
     ChannelAPI *getChannel(int deviceSetIndex, int channelIndex);
     Feature *getFeature(int featureSetIndex, int featureIndex);
+    bool existsChannel(ChannelAPI *channel) const { return m_channelsMap.contains(channel); }
+    bool existsFeature(Feature *feature) const { return m_featuresMap.contains(feature); }
     // slave mode
     void appendFeatureSet();
     void removeFeatureSet(int index);
     void removeLastFeatureSet();
     void appendDeviceSet(int deviceType);
     void removeLastDeviceSet();
+    // slave mode - channels
+    void addChannelInstance(DeviceSet *deviceSet, ChannelAPI *channelAPI);
+    void removeChannelInstanceAt(DeviceSet *deviceSet, int channelIndex);
+    void removeChannelInstance(ChannelAPI *channelAPI);
+    void clearChannels(DeviceSet *deviceSet);
+    // slave mode - features
+    void addFeatureInstance(FeatureSet *featureSet, Feature *feature);
+    void removeFeatureInstanceAt(FeatureSet *featureSet, int featureIndex);
+    void removeFeatureInstance(Feature *feature);
+    void clearFeatures(FeatureSet *featureSet);
 
     friend class MainServer;
     friend class MainWindow;
@@ -433,7 +446,13 @@ private:
     QTimer m_masterTimer;
     std::vector<DeviceSet*> m_deviceSets;
     std::vector<FeatureSet*> m_featureSets;
+    QMap<DeviceSet*, int> m_deviceSetsMap;       //!< Device set instance to device set index map
+    QMap<FeatureSet*, int> m_featureSetsMap;     //!< Feature set instance to feature set index map
+    QMap<ChannelAPI*, DeviceSet*> m_channelsMap; //!< Channel to device set map
+    QMap<Feature*, FeatureSet*> m_featuresMap;   //!< Feature to feature set map
     PluginManager* m_pluginManager;
+
+    void debugMaps();
 };
 
 #endif // SDRBASE_MAINCORE_H_
