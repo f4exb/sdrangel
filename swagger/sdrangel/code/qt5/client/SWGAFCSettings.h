@@ -48,17 +48,23 @@ public:
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
-    qint32 getRxDeviceSetIndex();
-    void setRxDeviceSetIndex(qint32 rx_device_set_index);
+    qint32 getTrackerDeviceSetIndex();
+    void setTrackerDeviceSetIndex(qint32 tracker_device_set_index);
 
-    qint32 getTxDeviceSetIndex();
-    void setTxDeviceSetIndex(qint32 tx_device_set_index);
+    qint32 getTrackedDeviceSetIndex();
+    void setTrackedDeviceSetIndex(qint32 tracked_device_set_index);
 
-    qint32 getRx2TxDelayMs();
-    void setRx2TxDelayMs(qint32 rx2_tx_delay_ms);
+    qint32 getHasTargetFrequency();
+    void setHasTargetFrequency(qint32 has_target_frequency);
 
-    qint32 getTx2RxDelayMs();
-    void setTx2RxDelayMs(qint32 tx2_rx_delay_ms);
+    qint32 getTransverterTarget();
+    void setTransverterTarget(qint32 transverter_target);
+
+    qint64 getTargetFrequency();
+    void setTargetFrequency(qint64 target_frequency);
+
+    qint64 getFreqTolerance();
+    void setFreqTolerance(qint64 freq_tolerance);
 
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
@@ -85,17 +91,23 @@ private:
     qint32 rgb_color;
     bool m_rgb_color_isSet;
 
-    qint32 rx_device_set_index;
-    bool m_rx_device_set_index_isSet;
+    qint32 tracker_device_set_index;
+    bool m_tracker_device_set_index_isSet;
 
-    qint32 tx_device_set_index;
-    bool m_tx_device_set_index_isSet;
+    qint32 tracked_device_set_index;
+    bool m_tracked_device_set_index_isSet;
 
-    qint32 rx2_tx_delay_ms;
-    bool m_rx2_tx_delay_ms_isSet;
+    qint32 has_target_frequency;
+    bool m_has_target_frequency_isSet;
 
-    qint32 tx2_rx_delay_ms;
-    bool m_tx2_rx_delay_ms_isSet;
+    qint32 transverter_target;
+    bool m_transverter_target_isSet;
+
+    qint64 target_frequency;
+    bool m_target_frequency_isSet;
+
+    qint64 freq_tolerance;
+    bool m_freq_tolerance_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

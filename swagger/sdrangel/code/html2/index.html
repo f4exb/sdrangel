@@ -722,21 +722,30 @@ margin-bottom: 20px;
     "rgbColor" : {
       "type" : "integer"
     },
-    "rxDeviceSetIndex" : {
+    "trackerDeviceSetIndex" : {
       "type" : "integer",
-      "description" : "index of the Rx device set to connect the Rx side to"
+      "description" : "index of the device set of frequency tracker being used"
     },
-    "txDeviceSetIndex" : {
+    "trackedDeviceSetIndex" : {
       "type" : "integer",
-      "description" : "index of the Tx device set to connect the Tx side to"
+      "description" : "index of the device set being tracked (channels and possibly device)"
     },
-    "rx2TxDelayMs" : {
+    "hasTargetFrequency" : {
       "type" : "integer",
-      "description" : "Delay in milliseconds from Rx off to Tx on"
+      "description" : "Adjust device frequency to match tracker frequency\n  * 0 - disabled\n  * 1 - enabled\n"
     },
-    "tx2RxDelayMs" : {
+    "transverterTarget" : {
       "type" : "integer",
-      "description" : "Delay in milliseconds from Tx off to Rx on"
+      "description" : "Use transverter or device frequency for tracker frequency adjustment\n  * 0 - device\n  * 1 - transverter\n"
+    },
+    "targetFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Target frequency for the tracker"
+    },
+    "freqTolerance" : {
+      "type" : "integer",
+      "format" : "int64"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -44380,7 +44389,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-16T18:54:04.281+02:00
+              Generated 2020-10-17T12:02:31.545+02:00
             </div>
           </div>
       </div>

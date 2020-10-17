@@ -32,14 +32,18 @@ SWGAFCSettings::SWGAFCSettings() {
     m_title_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
-    rx_device_set_index = 0;
-    m_rx_device_set_index_isSet = false;
-    tx_device_set_index = 0;
-    m_tx_device_set_index_isSet = false;
-    rx2_tx_delay_ms = 0;
-    m_rx2_tx_delay_ms_isSet = false;
-    tx2_rx_delay_ms = 0;
-    m_tx2_rx_delay_ms_isSet = false;
+    tracker_device_set_index = 0;
+    m_tracker_device_set_index_isSet = false;
+    tracked_device_set_index = 0;
+    m_tracked_device_set_index_isSet = false;
+    has_target_frequency = 0;
+    m_has_target_frequency_isSet = false;
+    transverter_target = 0;
+    m_transverter_target_isSet = false;
+    target_frequency = 0L;
+    m_target_frequency_isSet = false;
+    freq_tolerance = 0L;
+    m_freq_tolerance_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -62,14 +66,18 @@ SWGAFCSettings::init() {
     m_title_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
-    rx_device_set_index = 0;
-    m_rx_device_set_index_isSet = false;
-    tx_device_set_index = 0;
-    m_tx_device_set_index_isSet = false;
-    rx2_tx_delay_ms = 0;
-    m_rx2_tx_delay_ms_isSet = false;
-    tx2_rx_delay_ms = 0;
-    m_tx2_rx_delay_ms_isSet = false;
+    tracker_device_set_index = 0;
+    m_tracker_device_set_index_isSet = false;
+    tracked_device_set_index = 0;
+    m_tracked_device_set_index_isSet = false;
+    has_target_frequency = 0;
+    m_has_target_frequency_isSet = false;
+    transverter_target = 0;
+    m_transverter_target_isSet = false;
+    target_frequency = 0L;
+    m_target_frequency_isSet = false;
+    freq_tolerance = 0L;
+    m_freq_tolerance_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -87,6 +95,8 @@ SWGAFCSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
+
 
 
 
@@ -116,13 +126,17 @@ SWGAFCSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rx_device_set_index, pJson["rxDeviceSetIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&tracker_device_set_index, pJson["trackerDeviceSetIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&tx_device_set_index, pJson["txDeviceSetIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&tracked_device_set_index, pJson["trackedDeviceSetIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&rx2_tx_delay_ms, pJson["rx2TxDelayMs"], "qint32", "");
+    ::SWGSDRangel::setValue(&has_target_frequency, pJson["hasTargetFrequency"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&tx2_rx_delay_ms, pJson["tx2RxDelayMs"], "qint32", "");
+    ::SWGSDRangel::setValue(&transverter_target, pJson["transverterTarget"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&target_frequency, pJson["targetFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&freq_tolerance, pJson["freqTolerance"], "qint64", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -156,17 +170,23 @@ SWGAFCSettings::asJsonObject() {
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
     }
-    if(m_rx_device_set_index_isSet){
-        obj->insert("rxDeviceSetIndex", QJsonValue(rx_device_set_index));
+    if(m_tracker_device_set_index_isSet){
+        obj->insert("trackerDeviceSetIndex", QJsonValue(tracker_device_set_index));
     }
-    if(m_tx_device_set_index_isSet){
-        obj->insert("txDeviceSetIndex", QJsonValue(tx_device_set_index));
+    if(m_tracked_device_set_index_isSet){
+        obj->insert("trackedDeviceSetIndex", QJsonValue(tracked_device_set_index));
     }
-    if(m_rx2_tx_delay_ms_isSet){
-        obj->insert("rx2TxDelayMs", QJsonValue(rx2_tx_delay_ms));
+    if(m_has_target_frequency_isSet){
+        obj->insert("hasTargetFrequency", QJsonValue(has_target_frequency));
     }
-    if(m_tx2_rx_delay_ms_isSet){
-        obj->insert("tx2RxDelayMs", QJsonValue(tx2_rx_delay_ms));
+    if(m_transverter_target_isSet){
+        obj->insert("transverterTarget", QJsonValue(transverter_target));
+    }
+    if(m_target_frequency_isSet){
+        obj->insert("targetFrequency", QJsonValue(target_frequency));
+    }
+    if(m_freq_tolerance_isSet){
+        obj->insert("freqTolerance", QJsonValue(freq_tolerance));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -208,43 +228,63 @@ SWGAFCSettings::setRgbColor(qint32 rgb_color) {
 }
 
 qint32
-SWGAFCSettings::getRxDeviceSetIndex() {
-    return rx_device_set_index;
+SWGAFCSettings::getTrackerDeviceSetIndex() {
+    return tracker_device_set_index;
 }
 void
-SWGAFCSettings::setRxDeviceSetIndex(qint32 rx_device_set_index) {
-    this->rx_device_set_index = rx_device_set_index;
-    this->m_rx_device_set_index_isSet = true;
+SWGAFCSettings::setTrackerDeviceSetIndex(qint32 tracker_device_set_index) {
+    this->tracker_device_set_index = tracker_device_set_index;
+    this->m_tracker_device_set_index_isSet = true;
 }
 
 qint32
-SWGAFCSettings::getTxDeviceSetIndex() {
-    return tx_device_set_index;
+SWGAFCSettings::getTrackedDeviceSetIndex() {
+    return tracked_device_set_index;
 }
 void
-SWGAFCSettings::setTxDeviceSetIndex(qint32 tx_device_set_index) {
-    this->tx_device_set_index = tx_device_set_index;
-    this->m_tx_device_set_index_isSet = true;
+SWGAFCSettings::setTrackedDeviceSetIndex(qint32 tracked_device_set_index) {
+    this->tracked_device_set_index = tracked_device_set_index;
+    this->m_tracked_device_set_index_isSet = true;
 }
 
 qint32
-SWGAFCSettings::getRx2TxDelayMs() {
-    return rx2_tx_delay_ms;
+SWGAFCSettings::getHasTargetFrequency() {
+    return has_target_frequency;
 }
 void
-SWGAFCSettings::setRx2TxDelayMs(qint32 rx2_tx_delay_ms) {
-    this->rx2_tx_delay_ms = rx2_tx_delay_ms;
-    this->m_rx2_tx_delay_ms_isSet = true;
+SWGAFCSettings::setHasTargetFrequency(qint32 has_target_frequency) {
+    this->has_target_frequency = has_target_frequency;
+    this->m_has_target_frequency_isSet = true;
 }
 
 qint32
-SWGAFCSettings::getTx2RxDelayMs() {
-    return tx2_rx_delay_ms;
+SWGAFCSettings::getTransverterTarget() {
+    return transverter_target;
 }
 void
-SWGAFCSettings::setTx2RxDelayMs(qint32 tx2_rx_delay_ms) {
-    this->tx2_rx_delay_ms = tx2_rx_delay_ms;
-    this->m_tx2_rx_delay_ms_isSet = true;
+SWGAFCSettings::setTransverterTarget(qint32 transverter_target) {
+    this->transverter_target = transverter_target;
+    this->m_transverter_target_isSet = true;
+}
+
+qint64
+SWGAFCSettings::getTargetFrequency() {
+    return target_frequency;
+}
+void
+SWGAFCSettings::setTargetFrequency(qint64 target_frequency) {
+    this->target_frequency = target_frequency;
+    this->m_target_frequency_isSet = true;
+}
+
+qint64
+SWGAFCSettings::getFreqTolerance() {
+    return freq_tolerance;
+}
+void
+SWGAFCSettings::setFreqTolerance(qint64 freq_tolerance) {
+    this->freq_tolerance = freq_tolerance;
+    this->m_freq_tolerance_isSet = true;
 }
 
 qint32
@@ -308,16 +348,22 @@ SWGAFCSettings::isSet(){
         if(m_rgb_color_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_rx_device_set_index_isSet){
+        if(m_tracker_device_set_index_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_tx_device_set_index_isSet){
+        if(m_tracked_device_set_index_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_rx2_tx_delay_ms_isSet){
+        if(m_has_target_frequency_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_tx2_rx_delay_ms_isSet){
+        if(m_transverter_target_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_target_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_freq_tolerance_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
