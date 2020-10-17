@@ -18,8 +18,9 @@
 #include <QMessageBox>
 
 #include "feature/featureuiset.h"
-#include "gui/basicfeaturesettingsdialog.h"
 #include "device/deviceset.h"
+#include "channel/channelapi.h"
+#include "gui/basicfeaturesettingsdialog.h"
 #include "maincore.h"
 
 #include "ui_afcgui.h"
@@ -89,17 +90,6 @@ bool AFCGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (AFC::MsgPTT::match(message))
-    {
-        qDebug("AFCGUI::handleMessage: AFC::MsgPTT");
-        const AFC::MsgPTT& cfg = (AFC::MsgPTT&) message;
-        bool ptt = cfg.getTx();
-        blockApplySettings(true);
-        ui->ptt->setChecked(ptt);
-        blockApplySettings(false);
-
-        return true;
-    }
 
 	return false;
 }
@@ -132,10 +122,17 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
+
+    ui->targetFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
+    ui->targetFrequency->setValueRange(11, 0, 99999999999L);
+
+    ui->toleranceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->toleranceFrequency->setValueRange(5, 0, 99999L);
+
     setChannelWidget(false);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-    m_simplePTT = reinterpret_cast<AFC*>(feature);
-    m_simplePTT->setMessageQueueToGUI(&m_inputMessageQueue);
+    m_afc = reinterpret_cast<AFC*>(feature);
+    m_afc->setMessageQueueToGUI(&m_inputMessageQueue);
 
 	m_featureUISet->addRollupWidget(this);
 
@@ -173,8 +170,10 @@ void AFCGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
     blockApplySettings(true);
-    ui->rxtxDelay->setValue(m_settings.m_rx2TxDelayMs);
-    ui->txrxDelay->setValue(m_settings.m_tx2RxDelayMs);
+    ui->hasTargetFrequency->setChecked(m_settings.m_hasTargetFrequency);
+    ui->transverterTarget->setChecked(m_settings.m_transverterTarget);
+    ui->targetFrequency->setValue(m_settings.m_targetFrequency);
+    ui->toleranceFrequency->setValue(m_settings.m_freqTolerance);
     blockApplySettings(false);
 }
 
@@ -184,77 +183,74 @@ void AFCGUI::updateDeviceSetLists()
     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
     std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
 
-    ui->rxDevice->blockSignals(true);
-    ui->txDevice->blockSignals(true);
+    ui->trackerDevice->blockSignals(true);
+    ui->trackedDevice->blockSignals(true);
 
-    ui->rxDevice->clear();
-    ui->txDevice->clear();
+    ui->trackerDevice->clear();
+    ui->trackedDevice->clear();
+
     unsigned int deviceIndex = 0;
-    unsigned int rxIndex = 0;
-    unsigned int txIndex = 0;
 
     for (; it != deviceSets.end(); ++it, deviceIndex++)
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
         DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
 
-        if (deviceSourceEngine)
-        {
-            ui->rxDevice->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
-            rxIndex++;
+        if (deviceSourceEngine) {
+            ui->trackedDevice->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
+        } else if (deviceSinkEngine) {
+            ui->trackedDevice->addItem(QString("T%1").arg(deviceIndex), deviceIndex);
         }
-        else if (deviceSinkEngine)
+
+        for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
         {
-            ui->txDevice->addItem(QString("T%1").arg(deviceIndex), deviceIndex);
-            txIndex++;
+            ChannelAPI *channel = (*it)->getChannelAt(chi);
+
+            if (channel->getURI() == "sdrangel.channel.freqtracker")
+            {
+                ui->trackerDevice->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
+                break;
+            }
         }
     }
 
-    int rxDeviceIndex;
-    int txDeviceIndex;
+    int trackedDeviceIndex;
+    int trackerDeviceIndex;
 
-    if (rxIndex > 0)
+    if (deviceIndex > 0)
     {
-        if (m_settings.m_rxDeviceSetIndex < 0) {
-            ui->rxDevice->setCurrentIndex(0);
+        if (m_settings.m_trackedDeviceSetIndex < 0) {
+            ui->trackedDevice->setCurrentIndex(0);
         } else {
-            ui->rxDevice->setCurrentIndex(m_settings.m_rxDeviceSetIndex);
+            ui->trackedDevice->setCurrentIndex(m_settings.m_trackedDeviceSetIndex);
         }
 
-        rxDeviceIndex = ui->rxDevice->currentData().toInt();
+        if (m_settings.m_trackerDeviceSetIndex < 0) {
+            ui->trackerDevice->setCurrentIndex(0);
+        } else {
+            ui->trackerDevice->setCurrentIndex(m_settings.m_trackerDeviceSetIndex);
+        }
+
+        trackedDeviceIndex = ui->trackedDevice->currentData().toInt();
+        trackerDeviceIndex = ui->trackerDevice->currentData().toInt();
     }
     else
     {
-        rxDeviceIndex = -1;
+        trackedDeviceIndex = -1;
+        trackerDeviceIndex = -1;
     }
 
-
-    if (txIndex > 0)
+    if ((trackedDeviceIndex != m_settings.m_trackedDeviceSetIndex) ||
+        (trackerDeviceIndex != m_settings.m_trackerDeviceSetIndex))
     {
-        if (m_settings.m_txDeviceSetIndex < 0) {
-            ui->txDevice->setCurrentIndex(0);
-        } else {
-            ui->txDevice->setCurrentIndex(m_settings.m_txDeviceSetIndex);
-        }
-
-        txDeviceIndex = ui->txDevice->currentData().toInt();
-    }
-    else
-    {
-        txDeviceIndex = -1;
-    }
-
-    if ((rxDeviceIndex != m_settings.m_rxDeviceSetIndex) ||
-        (txDeviceIndex != m_settings.m_txDeviceSetIndex))
-    {
-        qDebug("AFCGUI::updateDeviceSetLists: device index changed: %d:%d", rxDeviceIndex, txDeviceIndex);
-        m_settings.m_rxDeviceSetIndex = rxDeviceIndex;
-        m_settings.m_txDeviceSetIndex = txDeviceIndex;
+        qDebug("AFCGUI::updateDeviceSetLists: device index changed: %d:%d", trackerDeviceIndex, trackedDeviceIndex);
+        m_settings.m_trackerDeviceSetIndex = trackerDeviceIndex;
+        m_settings.m_trackedDeviceSetIndex = trackedDeviceIndex;
         applySettings();
     }
 
-    ui->rxDevice->blockSignals(false);
-    ui->txDevice->blockSignals(false);
+    ui->trackerDevice->blockSignals(false);
+    ui->trackedDevice->blockSignals(false);
 }
 
 void AFCGUI::leaveEvent(QEvent*)
@@ -303,7 +299,7 @@ void AFCGUI::on_startStop_toggled(bool checked)
     if (m_doApplySettings)
     {
         AFC::MsgStartStop *message = AFC::MsgStartStop::create(checked);
-        m_simplePTT->getInputMessageQueue()->push(message);
+        m_afc->getInputMessageQueue()->push(message);
     }
 }
 
@@ -313,45 +309,52 @@ void AFCGUI::on_devicesRefresh_clicked()
     displaySettings();
 }
 
-void AFCGUI::on_rxDevice_currentIndexChanged(int index)
+void AFCGUI::on_hasTargetFrequency_toggled(bool checked)
+{
+    m_settings.m_hasTargetFrequency = checked;
+    applySettings();
+}
+
+void AFCGUI::on_targetFrequency_changed(quint64 value)
+{
+    m_settings.m_targetFrequency = value;
+    applySettings();
+}
+
+void AFCGUI::on_transverterTarget_toggled(bool checked)
+{
+    m_settings.m_transverterTarget = checked;
+    applySettings();
+}
+
+void AFCGUI::on_trackerDevice_currentIndexChanged(int index)
 {
     if (index >= 0)
     {
-        m_settings.m_rxDeviceSetIndex = index;
+        m_settings.m_trackerDeviceSetIndex = index;
         applySettings();
     }
 }
 
-void AFCGUI::on_txDevice_currentIndexChanged(int index)
+void AFCGUI::on_trackedDevice_currentIndexChanged(int index)
 {
     if (index >= 0)
     {
-        m_settings.m_txDeviceSetIndex = index;
+        m_settings.m_trackedDeviceSetIndex = index;
         applySettings();
     }
-
 }
 
-void AFCGUI::on_rxtxDelay_valueChanged(int value)
+
+void AFCGUI::on_toleranceFrequency_changed(quint64 value)
 {
-    m_settings.m_rx2TxDelayMs = value;
+    m_settings.m_freqTolerance = value;
     applySettings();
-}
-
-void AFCGUI::on_txrxDelay_valueChanged(int value)
-{
-    m_settings.m_tx2RxDelayMs = value;
-    applySettings();
-}
-
-void AFCGUI::on_ptt_toggled(bool checked)
-{
-    applyPTT(checked);
 }
 
 void AFCGUI::updateStatus()
 {
-    int state = m_simplePTT->getState();
+    int state = m_afc->getState();
 
     if (m_lastFeatureState != state)
     {
@@ -368,7 +371,7 @@ void AFCGUI::updateStatus()
                 break;
             case Feature::StError:
                 ui->startStop->setStyleSheet("QToolButton { background-color : red; }");
-                QMessageBox::information(this, tr("Message"), m_simplePTT->getErrorMessage());
+                QMessageBox::information(this, tr("Message"), m_afc->getErrorMessage());
                 break;
             default:
                 break;
@@ -383,15 +386,6 @@ void AFCGUI::applySettings(bool force)
 	if (m_doApplySettings)
 	{
 	    AFC::MsgConfigureAFC* message = AFC::MsgConfigureAFC::create( m_settings, force);
-	    m_simplePTT->getInputMessageQueue()->push(message);
-	}
-}
-
-void AFCGUI::applyPTT(bool tx)
-{
-	if (m_doApplySettings)
-	{
-	    AFC::MsgPTT* message = AFC::MsgPTT::create(tx);
-	    m_simplePTT->getInputMessageQueue()->push(message);
+	    m_afc->getInputMessageQueue()->push(message);
 	}
 }

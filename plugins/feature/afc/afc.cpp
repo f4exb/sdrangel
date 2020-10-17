@@ -147,10 +147,12 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
     qDebug() << "AFC::applySettings:"
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
-            << " m_rxDeviceSetIndex: " << settings.m_rxDeviceSetIndex
-            << " m_txDeviceSetIndex: " << settings.m_txDeviceSetIndex
-            << " m_rx2TxDelayMs: " << settings.m_rx2TxDelayMs
-            << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
+            << " m_trackerDeviceSetIndex: " << settings.m_trackerDeviceSetIndex
+            << " m_trackedDeviceSetIndex: " << settings.m_trackedDeviceSetIndex
+            << " m_hasTargetFrequency: " << settings.m_hasTargetFrequency
+            << " m_transverterTarget: " << settings.m_transverterTarget
+            << " m_targetFrequency: " << settings.m_targetFrequency
+            << " m_freqTolerance: " << settings.m_freqTolerance
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -161,17 +163,23 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
     if ((m_settings.m_rgbColor != settings.m_rgbColor) || force) {
         reverseAPIKeys.append("rgbColor");
     }
-    if ((m_settings.m_rxDeviceSetIndex != settings.m_rxDeviceSetIndex) || force) {
-        reverseAPIKeys.append("rxDeviceSetIndex");
+    if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force) {
+        reverseAPIKeys.append("trackerDeviceSetIndex");
     }
-    if ((m_settings.m_txDeviceSetIndex != settings.m_txDeviceSetIndex) || force) {
-        reverseAPIKeys.append("txDeviceSetIndex");
+    if ((m_settings.m_trackedDeviceSetIndex != settings.m_trackedDeviceSetIndex) || force) {
+        reverseAPIKeys.append("trackedDeviceSetIndex");
     }
-    if ((m_settings.m_rx2TxDelayMs != settings.m_rx2TxDelayMs) || force) {
-        reverseAPIKeys.append("rx2TxDelayMs");
+    if ((m_settings.m_hasTargetFrequency != settings.m_hasTargetFrequency) || force) {
+        reverseAPIKeys.append("hasTargetFrequency");
     }
-    if ((m_settings.m_tx2RxDelayMs != settings.m_tx2RxDelayMs) || force) {
-        reverseAPIKeys.append("tx2RxDelayMs");
+    if ((m_settings.m_transverterTarget != settings.m_transverterTarget) || force) {
+        reverseAPIKeys.append("transverterTarget");
+    }
+    if ((m_settings.m_targetFrequency != settings.m_targetFrequency) || force) {
+        reverseAPIKeys.append("targetFrequency");
+    }
+    if ((m_settings.m_freqTolerance != settings.m_freqTolerance) || force) {
+        reverseAPIKeys.append("freqTolerance");
     }
 
     AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(
@@ -292,10 +300,12 @@ void AFC::webapiFormatFeatureSettings(
     }
 
     response.getAfcSettings()->setRgbColor(settings.m_rgbColor);
-    response.getAfcSettings()->setRxDeviceSetIndex(settings.m_rxDeviceSetIndex);
-    response.getAfcSettings()->setTxDeviceSetIndex(settings.m_txDeviceSetIndex);
-    response.getAfcSettings()->setRx2TxDelayMs(settings.m_rx2TxDelayMs);
-    response.getAfcSettings()->setTx2RxDelayMs(settings.m_tx2RxDelayMs);
+    response.getAfcSettings()->setTrackerDeviceSetIndex(settings.m_trackerDeviceSetIndex);
+    response.getAfcSettings()->setTrackedDeviceSetIndex(settings.m_trackedDeviceSetIndex);
+    response.getAfcSettings()->setHasTargetFrequency(settings.m_hasTargetFrequency);
+    response.getAfcSettings()->setTransverterTarget(settings.m_transverterTarget);
+    response.getAfcSettings()->setTargetFrequency(settings.m_targetFrequency);
+    response.getAfcSettings()->setFreqTolerance(settings.m_freqTolerance);
 
     response.getAfcSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -321,17 +331,23 @@ void AFC::webapiUpdateFeatureSettings(
     if (featureSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAfcSettings()->getRgbColor();
     }
-    if (featureSettingsKeys.contains("rxDeviceSetIndex")) {
-        settings.m_rxDeviceSetIndex = response.getAfcSettings()->getRxDeviceSetIndex();
+    if (featureSettingsKeys.contains("trackerDeviceSetIndex")) {
+        settings.m_trackerDeviceSetIndex = response.getAfcSettings()->getTrackerDeviceSetIndex();
     }
-    if (featureSettingsKeys.contains("txDeviceSetIndex")) {
-        settings.m_txDeviceSetIndex = response.getAfcSettings()->getTxDeviceSetIndex();
+    if (featureSettingsKeys.contains("trackedDeviceSetIndex")) {
+        settings.m_trackedDeviceSetIndex = response.getAfcSettings()->getTrackedDeviceSetIndex();
     }
-    if (featureSettingsKeys.contains("rx2TxDelayMs")) {
-        settings.m_rx2TxDelayMs = response.getAfcSettings()->getRx2TxDelayMs();
+    if (featureSettingsKeys.contains("hasTargetFrequency")) {
+        settings.m_hasTargetFrequency = response.getAfcSettings()->getHasTargetFrequency() != 0;
     }
-    if (featureSettingsKeys.contains("tx2RxDelayMs")) {
-        settings.m_tx2RxDelayMs = response.getAfcSettings()->getTx2RxDelayMs();
+    if (featureSettingsKeys.contains("hasTargetFrequency")) {
+        settings.m_hasTargetFrequency = response.getAfcSettings()->getHasTargetFrequency() != 0;
+    }
+    if (featureSettingsKeys.contains("targetFrequency")) {
+        settings.m_targetFrequency = response.getAfcSettings()->getTargetFrequency();
+    }
+    if (featureSettingsKeys.contains("freqTolerance")) {
+        settings.m_freqTolerance = response.getAfcSettings()->getFreqTolerance();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAfcSettings()->getUseReverseApi() != 0;
@@ -372,17 +388,23 @@ void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const A
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgAFCSettings->setRgbColor(settings.m_rgbColor);
     }
-    if (channelSettingsKeys.contains("rxDeviceSetIndex") || force) {
-        swgAFCSettings->setRxDeviceSetIndex(settings.m_rxDeviceSetIndex);
+    if (channelSettingsKeys.contains("trackerDeviceSetIndex") || force) {
+        swgAFCSettings->setTrackerDeviceSetIndex(settings.m_trackerDeviceSetIndex);
     }
-    if (channelSettingsKeys.contains("txDeviceSetIndex") || force) {
-        swgAFCSettings->setTxDeviceSetIndex(settings.m_txDeviceSetIndex);
+    if (channelSettingsKeys.contains("trackedDeviceSetIndex") || force) {
+        swgAFCSettings->setTrackedDeviceSetIndex(settings.m_trackedDeviceSetIndex);
     }
-    if (channelSettingsKeys.contains("rx2TxDelayMs") || force) {
-        swgAFCSettings->setRx2TxDelayMs(settings.m_rx2TxDelayMs);
+    if (channelSettingsKeys.contains("hasTargetFrequency") || force) {
+        swgAFCSettings->setHasTargetFrequency(settings.m_hasTargetFrequency ? 1 : 0);
     }
-    if (channelSettingsKeys.contains("tx2RxDelayMs") || force) {
-        swgAFCSettings->setTx2RxDelayMs(settings.m_tx2RxDelayMs);
+    if (channelSettingsKeys.contains("targetFrequency") || force) {
+        swgAFCSettings->setTargetFrequency(settings.m_targetFrequency ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("targetFrequency") || force) {
+        swgAFCSettings->setTargetFrequency(settings.m_targetFrequency);
+    }
+    if (channelSettingsKeys.contains("freqTolerance") || force) {
+        swgAFCSettings->setFreqTolerance(settings.m_freqTolerance);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")

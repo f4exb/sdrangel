@@ -31,10 +31,12 @@ void AFCSettings::resetToDefaults()
 {
     m_title = "AFC";
     m_rgbColor = QColor(255, 255, 0).rgb();
-    m_rxDeviceSetIndex = -1;
-    m_txDeviceSetIndex = -1;
-    m_rx2TxDelayMs = 100;
-    m_tx2RxDelayMs = 100;
+    m_trackerDeviceSetIndex = -1;
+    m_trackedDeviceSetIndex = -1;
+    m_hasTargetFrequency = false;
+    m_transverterTarget = false;
+    m_targetFrequency = 0;
+    m_freqTolerance = 1000;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -48,15 +50,17 @@ QByteArray AFCSettings::serialize() const
 
     s.writeString(1, m_title);
     s.writeU32(2, m_rgbColor);
-    s.writeS32(3, m_rxDeviceSetIndex);
-    s.writeS32(4, m_txDeviceSetIndex);
-    s.writeU32(5, m_rx2TxDelayMs);
-    s.writeU32(6, m_tx2RxDelayMs);
-    s.writeBool(7, m_useReverseAPI);
-    s.writeString(8, m_reverseAPIAddress);
-    s.writeU32(9, m_reverseAPIPort);
-    s.writeU32(10, m_reverseAPIFeatureSetIndex);
-    s.writeU32(11, m_reverseAPIFeatureIndex);
+    s.writeS32(3, m_trackerDeviceSetIndex);
+    s.writeS32(5, m_trackedDeviceSetIndex);
+    s.writeBool(6, m_hasTargetFrequency);
+    s.writeBool(7, m_transverterTarget);
+    s.writeU64(8, m_targetFrequency);
+    s.writeU64(9, m_freqTolerance);
+    s.writeBool(10, m_useReverseAPI);
+    s.writeString(11, m_reverseAPIAddress);
+    s.writeU32(12, m_reverseAPIPort);
+    s.writeU32(13, m_reverseAPIFeatureSetIndex);
+    s.writeU32(14, m_reverseAPIFeatureIndex);
 
     return s.final();
 }
@@ -80,13 +84,15 @@ bool AFCSettings::deserialize(const QByteArray& data)
 
         d.readString(1, &m_title, "AFC");
         d.readU32(2, &m_rgbColor, QColor(255, 255, 0).rgb());
-        d.readS32(3, &m_rxDeviceSetIndex, -1);
-        d.readS32(4, &m_txDeviceSetIndex, -1);
-        d.readU32(5, &m_rx2TxDelayMs, 100);
-        d.readU32(6, &m_tx2RxDelayMs, 100);
-        d.readBool(7, &m_useReverseAPI, false);
-        d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
-        d.readU32(9, &utmp, 0);
+        d.readS32(3, &m_trackerDeviceSetIndex, -1);
+        d.readS32(5, &m_trackedDeviceSetIndex, -1);
+        d.readBool(6, &m_hasTargetFrequency, false);
+        d.readBool(7, &m_transverterTarget, false);
+        d.readU64(8, &m_targetFrequency, 0);
+        d.readU64(9, &m_freqTolerance, 1000);
+        d.readBool(10, &m_useReverseAPI, false);
+        d.readString(11, &m_reverseAPIAddress, "127.0.0.1");
+        d.readU32(12, &utmp, 0);
 
         if ((utmp > 1023) && (utmp < 65535)) {
             m_reverseAPIPort = utmp;
@@ -94,9 +100,9 @@ bool AFCSettings::deserialize(const QByteArray& data)
             m_reverseAPIPort = 8888;
         }
 
-        d.readU32(10, &utmp, 0);
+        d.readU32(13, &utmp, 0);
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
-        d.readU32(11, &utmp, 0);
+        d.readU32(14, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
 
         return true;

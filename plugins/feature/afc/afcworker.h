@@ -95,12 +95,9 @@ private:
 
     bool handleMessage(const Message& cmd);
     void applySettings(const AFCSettings& settings, bool force = false);
-    void sendPTT(bool tx);
-    bool turnDevice(bool on);
 
 private slots:
     void handleInputMessages();
-	void updateHardware();
 };
 
 #endif // INCLUDE_FEATURE_SIMPLEPTTWORKER_H_
