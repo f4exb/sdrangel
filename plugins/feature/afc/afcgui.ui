@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
+    <width>340</width>
     <height>181</height>
    </rect>
   </property>
@@ -18,14 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>320</width>
+    <width>340</width>
     <height>100</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>320</width>
-    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -42,7 +36,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>301</width>
+     <width>311</width>
      <height>151</height>
     </rect>
    </property>
@@ -66,7 +60,7 @@
      <number>2</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="pttLayout">
+     <layout class="QHBoxLayout" name="mainLayout">
       <item>
        <widget class="ButtonSwitch" name="startStop">
         <property name="toolTip">
@@ -83,30 +77,17 @@
        </widget>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="ptt">
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>50</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>20</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
+       <widget class="ButtonSwitch" name="hasTargetFrequency">
         <property name="toolTip">
-         <string>Push To Talk</string>
+         <string>Adjust device frequency to match tracker frequency</string>
         </property>
         <property name="text">
-         <string>PTT</string>
+         <string>T</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="statusIndicator">
+       <widget class="ValueDial" name="targetFrequency" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>0</horstretch>
@@ -115,25 +96,48 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>24</width>
-          <height>24</height>
+          <width>32</width>
+          <height>16</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>Idle</string>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
         </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel { background-color: gray; border-radius: 12px; }</string>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Tracker frequency in Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="targetFrequencyUnits">
+        <property name="text">
+         <string>Hz</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="transverterTarget">
+        <property name="toolTip">
+         <string>Use transverter or device frequency for tracker frequency adjustment</string>
         </property>
         <property name="text">
-         <string/>
+         <string>X</string>
         </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="localDeviceLayout">
+     <layout class="QHBoxLayout" name="devicesLayout">
       <item>
        <widget class="QPushButton" name="devicesRefresh">
         <property name="maximumSize">
@@ -155,14 +159,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="rxDeviceLabel">
+       <widget class="QLabel" name="trackerLabel">
         <property name="text">
-         <string>Rx dev</string>
+         <string>Tracker</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="rxDevice">
+       <widget class="QComboBox" name="trackerDevice">
         <property name="minimumSize">
          <size>
           <width>55</width>
@@ -176,7 +180,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Receiver deviceset index</string>
+         <string>Tracker deviceset index</string>
         </property>
        </widget>
       </item>
@@ -194,14 +198,14 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="txDeviceLabel">
+       <widget class="QLabel" name="trackedLabel">
         <property name="text">
-         <string>Tx dev</string>
+         <string>Tracked</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="txDevice">
+       <widget class="QComboBox" name="trackedDevice">
         <property name="minimumSize">
          <size>
           <width>55</width>
@@ -215,7 +219,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Transmitter deviceset index</string>
+         <string>Tracked deviceset index</string>
         </property>
        </widget>
       </item>
@@ -224,32 +228,50 @@
     <item>
      <layout class="QHBoxLayout" name="DelaysLayout">
       <item>
-       <widget class="QLabel" name="rxtxDelayLabel">
-        <property name="text">
-         <string>Rx-Tx </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="rxtxDelay">
+       <widget class="QLabel" name="toleranceLabel">
         <property name="toolTip">
-         <string>Rx to Tx transition delay (ms)</string>
+         <string/>
         </property>
-        <property name="minimum">
-         <number>100</number>
-        </property>
-        <property name="maximum">
-         <number>5000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
+        <property name="text">
+         <string>Tol</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="rxtxDelayUnits">
+       <widget class="ValueDial" name="toleranceFrequency" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>Liberation Mono</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::StrongFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Frequency tolerance before device frequency is changed (Hz)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="toleranceUnits">
         <property name="text">
-         <string>ms</string>
+         <string>Hz</string>
         </property>
        </widget>
       </item>
@@ -267,35 +289,27 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="txrxDelayLabel">
+       <widget class="QLabel" name="statusIndicator">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
         <property name="toolTip">
+         <string>Idle</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel { background-color: gray; border-radius: 8px; }</string>
+        </property>
+        <property name="text">
          <string/>
-        </property>
-        <property name="text">
-         <string>Tx-Rx</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="txrxDelay">
-        <property name="toolTip">
-         <string>Tx to Rx transition delay (ms)</string>
-        </property>
-        <property name="minimum">
-         <number>100</number>
-        </property>
-        <property name="maximum">
-         <number>5000</number>
-        </property>
-        <property name="singleStep">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="txrxDelayUnits">
-        <property name="text">
-         <string>ms</string>
         </property>
        </widget>
       </item>
@@ -315,6 +329,12 @@
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ValueDial</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedial.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

@@ -37,7 +37,6 @@ AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_mutex(QMutex::Recursive)
 {
     qDebug("AFCWorker::AFCWorker");
-	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
 }
 
 AFCWorker::~AFCWorker()
@@ -90,15 +89,6 @@ bool AFCWorker::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (MsgPTT::match(cmd))
-    {
-        MsgPTT& cfg = (MsgPTT&) cmd;
-        qDebug() << "AFCWorker::handleMessage: MsgPTT";
-
-        sendPTT(cfg.getTx());
-
-        return true;
-    }
     else
     {
         return false;
@@ -110,101 +100,12 @@ void AFCWorker::applySettings(const AFCSettings& settings, bool force)
     qDebug() << "AFCWorker::applySettings:"
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
-            << " m_rxDeviceSetIndex: " << settings.m_rxDeviceSetIndex
-            << " m_txDeviceSetIndex: " << settings.m_txDeviceSetIndex
-            << " m_rx2TxDelayMs: " << settings.m_rx2TxDelayMs
-            << " m_tx2RxDelayMs: " << settings.m_tx2RxDelayMs
+            << " m_trackerDeviceSetIndex: " << settings.m_trackerDeviceSetIndex
+            << " m_trackedDeviceSetIndex: " << settings.m_trackedDeviceSetIndex
+            << " m_hasTargetFrequency: " << settings.m_hasTargetFrequency
+            << " m_transverterTarget: " << settings.m_transverterTarget
+            << " m_targetFrequency: " << settings.m_targetFrequency
+            << " m_freqTolerance: " << settings.m_freqTolerance
             << " force: " << force;
     m_settings = settings;
-}
-
-void AFCWorker::sendPTT(bool tx)
-{
-	if (!m_updateTimer.isActive())
-	{
-        bool switchedOff = false;
-        m_mutex.lock();
-
-        if (tx)
-        {
-            if (m_settings.m_rxDeviceSetIndex >= 0)
-            {
-                m_tx = false;
-                switchedOff = turnDevice(false);
-            }
-
-            if (m_settings.m_txDeviceSetIndex >= 0)
-            {
-                m_tx = true;
-                m_updateTimer.start(m_settings.m_rx2TxDelayMs);
-            }
-        }
-        else
-        {
-            if (m_settings.m_txDeviceSetIndex >= 0)
-            {
-                m_tx = true;
-                switchedOff = turnDevice(false);
-            }
-
-            if (m_settings.m_rxDeviceSetIndex >= 0)
-            {
-                m_tx = false;
-                m_updateTimer.start(m_settings.m_tx2RxDelayMs);
-            }
-        }
-
-        if (switchedOff && (m_msgQueueToGUI))
-        {
-            AFCReport::MsgRadioState *msg = AFCReport::MsgRadioState::create(AFCReport::RadioIdle);
-            m_msgQueueToGUI->push(msg);
-        }
-	}
-}
-
-void AFCWorker::updateHardware()
-{
-    SWGSDRangel::SWGSuccessResponse response;
-    SWGSDRangel::SWGErrorResponse error;
-    m_updateTimer.stop();
-    m_mutex.unlock();
-
-    if (turnDevice(true))
-    {
-        m_webAPIAdapterInterface->devicesetFocusPatch(
-            m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
-
-        if (m_msgQueueToGUI)
-        {
-            AFCReport::MsgRadioState *msg = AFCReport::MsgRadioState::create(
-                m_tx ? AFCReport::RadioTx : AFCReport::RadioRx
-            );
-            m_msgQueueToGUI->push(msg);
-        }
-    }
-}
-
-bool AFCWorker::turnDevice(bool on)
-{
-    SWGSDRangel::SWGDeviceState response;
-    SWGSDRangel::SWGErrorResponse error;
-    int httpCode;
-
-    if (on) {
-        httpCode = m_webAPIAdapterInterface->devicesetDeviceRunPost(
-            m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
-    } else {
-        httpCode = m_webAPIAdapterInterface->devicesetDeviceRunDelete(
-            m_tx ? m_settings.m_txDeviceSetIndex : m_settings.m_rxDeviceSetIndex, response, error);
-    }
-
-    if (httpCode/100 == 2)
-    {
-        return true;
-    }
-    else
-    {
-        qWarning("AFCWorker::turnDevice: error: %s", qPrintable(*error.getMessage()));
-        return false;
-    }
 }

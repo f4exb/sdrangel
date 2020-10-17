@@ -50,7 +50,7 @@ private:
 	AFCSettings m_settings;
 	bool m_doApplySettings;
 
-	AFC* m_simplePTT;
+	AFC* m_afc;
 	MessageQueue m_inputMessageQueue;
 	QTimer m_statusTimer;
 	int m_lastFeatureState;
@@ -62,7 +62,6 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
-	void applyPTT(bool tx);
 	void displaySettings();
     void updateDeviceSetLists();
 	bool handleMessage(const Message& message);
@@ -75,12 +74,13 @@ private slots:
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
+	void on_hasTargetFrequency_toggled(bool checked);
 	void on_devicesRefresh_clicked();
-	void on_rxDevice_currentIndexChanged(int index);
-	void on_txDevice_currentIndexChanged(int index);
-	void on_rxtxDelay_valueChanged(int value);
-	void on_txrxDelay_valueChanged(int value);
-	void on_ptt_toggled(bool checked);
+	void on_transverterTarget_toggled(bool checked);
+	void on_targetFrequency_changed(quint64 value);
+	void on_trackerDevice_currentIndexChanged(int index);
+	void on_trackedDevice_currentIndexChanged(int index);
+	void on_toleranceFrequency_changed(quint64 value);
 	void updateStatus();
 };
 

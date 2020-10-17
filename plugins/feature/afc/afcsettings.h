@@ -27,10 +27,12 @@ struct AFCSettings
 {
     QString m_title;
     quint32 m_rgbColor;
-    int m_rxDeviceSetIndex;
-    int m_txDeviceSetIndex;
-    unsigned int m_rx2TxDelayMs;
-    unsigned int m_tx2RxDelayMs;
+    int m_trackerDeviceSetIndex; //!< will take the first instance of freq tracker in the list of channels
+    int m_trackedDeviceSetIndex;
+    bool m_hasTargetFrequency;
+    bool m_transverterTarget;
+    quint64 m_targetFrequency;
+    quint64 m_freqTolerance;
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
