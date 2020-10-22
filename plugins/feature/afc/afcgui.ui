@@ -127,7 +127,7 @@
       <item>
        <widget class="ButtonSwitch" name="transverterTarget">
         <property name="toolTip">
-         <string>Use transverter or device frequency for tracker frequency adjustment</string>
+         <string>Use transverter frequency for tracker frequency adjustment</string>
         </property>
         <property name="text">
          <string>X</string>

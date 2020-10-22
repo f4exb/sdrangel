@@ -25,14 +25,17 @@
 #include "SWGFeatureActions.h"
 #include "SWGAFCReport.h"
 #include "SWGDeviceState.h"
+#include "SWGChannelSettings.h"
 
 #include "dsp/dspengine.h"
+#include "device/deviceset.h"
+#include "channel/channelapi.h"
+#include "maincore.h"
 
 #include "afcworker.h"
 #include "afc.h"
 
 MESSAGE_CLASS_DEFINITION(AFC::MsgConfigureAFC, Message)
-MESSAGE_CLASS_DEFINITION(AFC::MsgPTT, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgStartStop, Message)
 
 const QString AFC::m_featureIdURI = "sdrangel.feature.afc";
@@ -40,7 +43,8 @@ const QString AFC::m_featureId = "AFC";
 
 AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_ptt(false)
+    m_trackerDeviceSet(nullptr),
+    m_trackedDeviceSet(nullptr)
 {
     setObjectName(m_featureId);
     m_worker = new AFCWorker(webAPIAdapterInterface);
@@ -55,6 +59,7 @@ AFC::~AFC()
     }
 
     delete m_worker;
+    removeFeatureReferences();
 }
 
 void AFC::start()
@@ -90,17 +95,6 @@ bool AFC::handleMessage(const Message& cmd)
 
 		return true;
 	}
-    else if (MsgPTT::match(cmd))
-    {
-        MsgPTT& cfg = (MsgPTT&) cmd;
-        m_ptt = cfg.getTx();
-        qDebug() << "AFC::handleMessage: MsgPTT: tx:" << m_ptt;
-
-        AFCWorker::MsgPTT *msg = AFCWorker::MsgPTT::create(m_ptt);
-        m_worker->getInputMessageQueue()->push(msg);
-
-        return true;
-    }
     else if (MsgStartStop::match(cmd))
     {
         MsgStartStop& cfg = (MsgStartStop&) cmd;
@@ -114,10 +108,25 @@ bool AFC::handleMessage(const Message& cmd)
 
         return true;
     }
-	else
-	{
-		return false;
-	}
+    else if (Feature::MsgChannelSettings::match(cmd))
+    {
+        Feature::MsgChannelSettings& cfg = (Feature::MsgChannelSettings&) cmd;
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings = cfg.getSWGSettings();
+        QString *channelType  = swgChannelSettings->getChannelType();
+        qDebug() << "AFC::handleMessage: Feature::MsgChannelSettings: " << *channelType;
+
+        if (m_worker->isRunning())
+        {
+            m_worker->getInputMessageQueue()->push(&cfg);
+        }
+        else
+        {
+            delete swgChannelSettings;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QByteArray AFC::serialize() const
@@ -180,6 +189,14 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
     }
     if ((m_settings.m_freqTolerance != settings.m_freqTolerance) || force) {
         reverseAPIKeys.append("freqTolerance");
+    }
+
+    if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force) {
+        trackerDeviceChange(settings.m_trackerDeviceSetIndex);
+    }
+
+    if ((m_settings.m_trackedDeviceSetIndex != settings.m_trackedDeviceSetIndex) || force) {
+        trackedDeviceChange(settings.m_trackedDeviceSetIndex);
     }
 
     AFCWorker::MsgConfigureAFCWorker *msg = AFCWorker::MsgConfigureAFCWorker::create(
@@ -266,20 +283,6 @@ int AFC::webapiActionsPost(
 
     if (swgAFCActions)
     {
-        if (featureActionsKeys.contains("ptt"))
-        {
-            bool ptt = swgAFCActions->getPtt() != 0;
-
-            MsgPTT *msg = MsgPTT::create(ptt);
-            getInputMessageQueue()->push(msg);
-
-            if (getMessageQueueToGUI())
-            {
-                MsgPTT *msgToGUI = MsgPTT::create(ptt);
-                getMessageQueueToGUI()->push(msgToGUI);
-            }
-        }
-
         return 202;
     }
     else
@@ -368,7 +371,6 @@ void AFC::webapiUpdateFeatureSettings(
 
 void AFC::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 {
-    response.getAfcReport()->setPtt(m_ptt ? 1 : 0);
 }
 
 void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AFCSettings& settings, bool force)
@@ -446,4 +448,69 @@ void AFC::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void AFC::trackerDeviceChange(int deviceIndex)
+{
+    MainCore *mainCore = MainCore::instance();
+    m_trackerDeviceSet = mainCore->getDeviceSets()[deviceIndex];
+
+    for (int i = 0; i < m_trackerDeviceSet->getNumberOfChannels(); i++)
+    {
+        ChannelAPI *channel = m_trackerDeviceSet->getChannelAt(i);
+
+        if (channel->getURI() == "sdrangel.channel.freqtracker")
+        {
+            channel->addFeatureSettingsFeedback(this);
+            break;
+        }
+    }
+}
+
+void AFC::trackedDeviceChange(int deviceIndex)
+{
+    MainCore *mainCore = MainCore::instance();
+    m_trackedDeviceSet = mainCore->getDeviceSets()[deviceIndex];
+
+    for (int i = 0; i < m_trackedDeviceSet->getNumberOfChannels(); i++)
+    {
+        ChannelAPI *channel = m_trackedDeviceSet->getChannelAt(i);
+
+        if (channel->getURI() != "sdrangel.channel.freqtracker") {
+            channel->addFeatureSettingsFeedback(this);
+        }
+    }
+}
+
+void AFC::removeFeatureReferences()
+{
+    MainCore *mainCore = MainCore::instance();
+
+    if ((m_settings.m_trackerDeviceSetIndex >= 0) && (m_settings.m_trackerDeviceSetIndex < mainCore->getDeviceSets().size()))
+    {
+        DeviceSet *trackerDeviceSet = mainCore->getDeviceSets()[m_settings.m_trackerDeviceSetIndex];
+
+        if (trackerDeviceSet == m_trackerDeviceSet)
+        {
+            for (int i = 0; i < m_trackerDeviceSet->getNumberOfChannels(); i++)
+            {
+                ChannelAPI *channel = m_trackerDeviceSet->getChannelAt(i);
+                channel->removeFeatureSettingsFeedback(this);
+            }
+        }
+    }
+
+    if ((m_settings.m_trackedDeviceSetIndex >= 0) && (m_settings.m_trackedDeviceSetIndex < mainCore->getDeviceSets().size()))
+    {
+        DeviceSet *trackerDeviceSet = mainCore->getDeviceSets()[m_settings.m_trackedDeviceSetIndex];
+
+        if (trackerDeviceSet == m_trackedDeviceSet)
+        {
+            for (int i = 0; i < m_trackedDeviceSet->getNumberOfChannels(); i++)
+            {
+                ChannelAPI *channel = m_trackedDeviceSet->getChannelAt(i);
+                channel->removeFeatureSettingsFeedback(this);
+            }
+        }
+    }
 }

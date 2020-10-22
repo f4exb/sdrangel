@@ -19,6 +19,7 @@
 #define INCLUDE_FEATURE_AFCWORKER_H_
 
 #include <QObject>
+#include <QMap>
 #include <QTimer>
 
 #include "util/message.h"
@@ -27,6 +28,8 @@
 #include "afcsettings.h"
 
 class WebAPIAdapterInterface;
+class DeviceSet;
+class ChannelAPI;
 
 class AFCWorker : public QObject
 {
@@ -55,22 +58,23 @@ public:
         { }
     };
 
-    class MsgPTT : public Message {
+    class MsgTrackedDeviceChange : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        bool getTx() const { return m_tx; }
+        int getDeviceIndex() const { return m_deviceIndex; }
 
-        static MsgPTT* create(bool tx) {
-            return new MsgPTT(tx);
+        static MsgTrackedDeviceChange* create(int deviceIndex)
+        {
+            return new MsgTrackedDeviceChange(deviceIndex);
         }
 
     private:
-        bool m_tx;
+        int m_deviceIndex;
 
-        MsgPTT(bool tx) :
+        MsgTrackedDeviceChange(int deviceIndex) :
             Message(),
-            m_tx(tx)
+            m_deviceIndex(deviceIndex)
         { }
     };
 
@@ -84,17 +88,59 @@ public:
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
 
 private:
+    struct ChannelTracking
+    {
+        int m_channelOffset;
+        int m_trackerOffset;
+        int m_channelDirection;
+
+        ChannelTracking() :
+            m_channelOffset(0),
+            m_trackerOffset(0),
+            m_channelDirection(0)
+        {}
+
+        ChannelTracking(int channelOffset, int trackerOffset, int channelDirection) :
+            m_channelOffset(channelOffset),
+            m_trackerOffset(trackerOffset),
+            m_channelDirection(m_channelDirection)
+        {}
+
+        ChannelTracking(const ChannelTracking& other) :
+            m_channelOffset(other.m_channelOffset),
+            m_trackerOffset(other.m_trackerOffset),
+            m_channelDirection(other.m_channelDirection)
+        {}
+    };
+
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToGUI; //!< Queue to report state to GUI
     AFCSettings m_settings;
     bool m_running;
-    bool m_tx;
+    DeviceSet *m_trackerDeviceSet;
+    DeviceSet *m_trackedDeviceSet;
+    ChannelAPI *m_freqTracker;
+    uint64_t m_trackerDeviceFrequency;
+    int m_trackerChannelOffset;
+    QMap<ChannelAPI*, ChannelTracking> m_channelsMap;
 	QTimer m_updateTimer;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
     void applySettings(const AFCSettings& settings, bool force = false);
+    void initTrackerDeviceSet(int deviceSetIndex);
+    void initTrackedDeviceSet(int deviceSetIndex);
+    void processChannelSettings(
+        const ChannelAPI *channelAPI,
+        const QList<QString> &channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings
+    );
+    void updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset);
+    void updateTarget();
+    bool updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, int64_t frequency);
+    int getDeviceDirection(DeviceAPI *deviceAPI);
+    void getDeviceSettingsKey(DeviceAPI *deviceAPI, QString& settingsKey);
 
 private slots:
     void handleInputMessages();
