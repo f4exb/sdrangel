@@ -31,6 +31,8 @@
 #include "dsp/devicesamplesink.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "device/deviceapi.h"
+#include "feature/feature.h"
+#include "maincore.h"
 
 #include "localsourcebaseband.h"
 
@@ -305,6 +307,10 @@ void LocalSource::applySettings(const LocalSourceSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
+    if (m_featuresSettingsFeedback.size() > 0) {
+        featuresSendSettings(reverseAPIKeys, settings, force);
+    }
+
     m_settings = settings;
 }
 
@@ -438,10 +444,67 @@ void LocalSource::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
 void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
+
+    delete swgChannelSettings;
+}
+
+void LocalSource::featuresSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force)
+{
+    QList<Feature*>::iterator it = m_featuresSettingsFeedback.begin();
+    MainCore *mainCore = MainCore::instance();
+
+    for (; it != m_featuresSettingsFeedback.end(); ++it)
+    {
+        if (mainCore->existsFeature(*it))
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+            Feature::MsgChannelSettings *msg = Feature::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+
+            (*it)->getInputMessageQueue()->push(msg);
+        }
+        else
+        {
+            m_featuresSettingsFeedback.removeOne(*it);
+        }
+    }
+}
+
+void LocalSource::webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const LocalSourceSettings& settings,
+        bool force
+)
+{
     swgChannelSettings->setDirection(1); // single source (Tx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("LocalSource"));
+    swgChannelSettings->setChannelType(new QString(m_channelId));
     swgChannelSettings->setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
     SWGSDRangel::SWGLocalSourceSettings *swgLocalSourceSettings = swgChannelSettings->getLocalSourceSettings();
 
@@ -468,25 +531,6 @@ void LocalSource::webapiReverseSendSettings(QList<QString>& channelSettingsKeys,
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgLocalSourceSettings->setRgbColor(settings.m_streamIndex);
     }
-
-    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
-            .arg(settings.m_reverseAPIAddress)
-            .arg(settings.m_reverseAPIPort)
-            .arg(settings.m_reverseAPIDeviceIndex)
-            .arg(settings.m_reverseAPIChannelIndex);
-    m_networkRequest.setUrl(QUrl(channelSettingsURL));
-    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
-    buffer->write(swgChannelSettings->asJson().toUtf8());
-    buffer->seek(0);
-
-    // Always use PATCH to avoid passing reverse API settings
-    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
-    buffer->setParent(reply);
-
-    delete swgChannelSettings;
 }
 
 void LocalSource::networkManagerFinished(QNetworkReply *reply)

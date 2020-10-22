@@ -35,7 +35,9 @@
 #include "dsp/devicesamplemimo.h"
 #include "dsp/cwkeyer.h"
 #include "device/deviceapi.h"
+#include "feature/feature.h"
 #include "util/db.h"
+#include "maincore.h"
 
 #include "ammodbaseband.h"
 #include "ammod.h"
@@ -300,6 +302,10 @@ void AMMod::applySettings(const AMModSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
+    if (m_featuresSettingsFeedback.size() > 0) {
+        featuresSendSettings(reverseAPIKeys, settings, force);
+    }
+
     m_settings = settings;
 }
 
@@ -502,59 +508,7 @@ void AMMod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
 void AMMod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setDirection(1); // single source (Tx)
-    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
-    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("AMMod"));
-    swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
-    SWGSDRangel::SWGAMModSettings *swgAMModSettings = swgChannelSettings->getAmModSettings();
-
-    // transfer data that has been modified. When force is on transfer all data except reverse API data
-
-    if (channelSettingsKeys.contains("channelMute") || force) {
-        swgAMModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
-        swgAMModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
-    }
-    if (channelSettingsKeys.contains("modAFInput") || force) {
-        swgAMModSettings->setModAfInput((int) settings.m_modAFInput);
-    }
-    if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
-    }
-    if (channelSettingsKeys.contains("playLoop") || force) {
-        swgAMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
-    }
-    if (channelSettingsKeys.contains("rfBandwidth") || force) {
-        swgAMModSettings->setRfBandwidth(settings.m_rfBandwidth);
-    }
-    if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgAMModSettings->setRgbColor(settings.m_rgbColor);
-    }
-    if (channelSettingsKeys.contains("title") || force) {
-        swgAMModSettings->setTitle(new QString(settings.m_title));
-    }
-    if (channelSettingsKeys.contains("toneFrequency") || force) {
-        swgAMModSettings->setToneFrequency(settings.m_toneFrequency);
-    }
-    if (channelSettingsKeys.contains("volumeFactor") || force) {
-        swgAMModSettings->setVolumeFactor(settings.m_volumeFactor);
-    }
-    if (channelSettingsKeys.contains("modFactor") || force) {
-        swgAMModSettings->setModFactor(settings.m_modFactor);
-    }
-    if (channelSettingsKeys.contains("streamIndex") || force) {
-        swgAMModSettings->setStreamIndex(settings.m_streamIndex);
-    }
-
-    if (force)
-    {
-        const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
-        swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
-        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
-        m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
-    }
+    webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
             .arg(settings.m_reverseAPIAddress)
@@ -606,6 +560,96 @@ void AMMod::webapiReverseSendCWSettings(const CWKeyerSettings& cwKeyerSettings)
     buffer->setParent(reply);
 
     delete swgChannelSettings;
+}
+
+void AMMod::featuresSendSettings(QList<QString>& channelSettingsKeys, const AMModSettings& settings, bool force)
+{
+    QList<Feature*>::iterator it = m_featuresSettingsFeedback.begin();
+    MainCore *mainCore = MainCore::instance();
+
+    for (; it != m_featuresSettingsFeedback.end(); ++it)
+    {
+        if (mainCore->existsFeature(*it))
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+            Feature::MsgChannelSettings *msg = Feature::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+
+            (*it)->getInputMessageQueue()->push(msg);
+        }
+        else
+        {
+            m_featuresSettingsFeedback.removeOne(*it);
+        }
+    }
+}
+
+void AMMod::webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const AMModSettings& settings,
+        bool force
+)
+{
+    swgChannelSettings->setDirection(1); // single source (Tx)
+    swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
+    swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
+    swgChannelSettings->setChannelType(new QString(m_channelId));
+    swgChannelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
+    SWGSDRangel::SWGAMModSettings *swgAMModSettings = swgChannelSettings->getAmModSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (channelSettingsKeys.contains("channelMute") || force) {
+        swgAMModSettings->setChannelMute(settings.m_channelMute ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgAMModSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("modAFInput") || force) {
+        swgAMModSettings->setModAfInput((int) settings.m_modAFInput);
+    }
+    if (channelSettingsKeys.contains("audioDeviceName") || force) {
+        swgAMModSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+    }
+    if (channelSettingsKeys.contains("playLoop") || force) {
+        swgAMModSettings->setPlayLoop(settings.m_playLoop ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("rfBandwidth") || force) {
+        swgAMModSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("rgbColor") || force) {
+        swgAMModSettings->setRgbColor(settings.m_rgbColor);
+    }
+    if (channelSettingsKeys.contains("title") || force) {
+        swgAMModSettings->setTitle(new QString(settings.m_title));
+    }
+    if (channelSettingsKeys.contains("toneFrequency") || force) {
+        swgAMModSettings->setToneFrequency(settings.m_toneFrequency);
+    }
+    if (channelSettingsKeys.contains("volumeFactor") || force) {
+        swgAMModSettings->setVolumeFactor(settings.m_volumeFactor);
+    }
+    if (channelSettingsKeys.contains("modFactor") || force) {
+        swgAMModSettings->setModFactor(settings.m_modFactor);
+    }
+    if (channelSettingsKeys.contains("streamIndex") || force) {
+        swgAMModSettings->setStreamIndex(settings.m_streamIndex);
+    }
+
+    if (force)
+    {
+        const CWKeyerSettings& cwKeyerSettings = m_basebandSource->getCWKeyer().getSettings();
+        swgAMModSettings->setCwKeyer(new SWGSDRangel::SWGCWKeyerSettings());
+        SWGSDRangel::SWGCWKeyerSettings *apiCwKeyerSettings = swgAMModSettings->getCwKeyer();
+        m_basebandSource->getCWKeyer().webapiFormatChannelSettings(apiCwKeyerSettings, cwKeyerSettings);
+    }
 }
 
 void AMMod::networkManagerFinished(QNetworkReply *reply)

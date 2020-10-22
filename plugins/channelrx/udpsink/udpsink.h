@@ -145,6 +145,13 @@ protected:
 
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force);
+    void featuresSendSettings(QList<QString>& channelSettingsKeys, const UDPSinkSettings& settings, bool force);
+    void webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const UDPSinkSettings& settings,
+        bool force
+    );
 };
 
 #endif // INCLUDE_UDPSINK_H
