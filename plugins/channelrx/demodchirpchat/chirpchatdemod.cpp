@@ -27,13 +27,15 @@
 #include <QNetworkReply>
 #include <QBuffer>
 
-#include "dsp/dspcommands.h"
-#include "device/deviceapi.h"
-#include "util/db.h"
-
 #include "SWGChannelSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGChirpChatDemodReport.h"
+
+#include "dsp/dspcommands.h"
+#include "device/deviceapi.h"
+#include "feature/feature.h"
+#include "util/db.h"
+#include "maincore.h"
 
 #include "chirpchatdemodmsg.h"
 #include "chirpchatdemod.h"
@@ -413,6 +415,10 @@ void ChirpChatDemod::applySettings(const ChirpChatDemodSettings& settings, bool 
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
+    if (m_featuresSettingsFeedback.size() > 0) {
+        featuresSendSettings(reverseAPIKeys, settings, force);
+    }
+
     m_settings = settings;
 }
 
@@ -628,10 +634,67 @@ void ChirpChatDemod::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& re
 void ChirpChatDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const ChirpChatDemodSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setDirection(1); // single source (Tx)
+    webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
+
+    delete swgChannelSettings;
+}
+
+void ChirpChatDemod::featuresSendSettings(QList<QString>& channelSettingsKeys, const ChirpChatDemodSettings& settings, bool force)
+{
+    QList<Feature*>::iterator it = m_featuresSettingsFeedback.begin();
+    MainCore *mainCore = MainCore::instance();
+
+    for (; it != m_featuresSettingsFeedback.end(); ++it)
+    {
+        if (mainCore->existsFeature(*it))
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+            Feature::MsgChannelSettings *msg = Feature::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+
+            (*it)->getInputMessageQueue()->push(msg);
+        }
+        else
+        {
+            m_featuresSettingsFeedback.removeOne(*it);
+        }
+    }
+}
+
+void ChirpChatDemod::webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const ChirpChatDemodSettings& settings,
+        bool force
+)
+{
+    swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("ChirpChatDemod"));
+    swgChannelSettings->setChannelType(new QString(m_channelId));
     swgChannelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
     SWGSDRangel::SWGChirpChatDemodSettings *swgChirpChatDemodSettings = swgChannelSettings->getChirpChatDemodSettings();
 
@@ -694,25 +757,6 @@ void ChirpChatDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKe
     if (channelSettingsKeys.contains("title") || force) {
         swgChirpChatDemodSettings->setTitle(new QString(settings.m_title));
     }
-
-    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
-            .arg(settings.m_reverseAPIAddress)
-            .arg(settings.m_reverseAPIPort)
-            .arg(settings.m_reverseAPIDeviceIndex)
-            .arg(settings.m_reverseAPIChannelIndex);
-    m_networkRequest.setUrl(QUrl(channelSettingsURL));
-    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
-    buffer->write(swgChannelSettings->asJson().toUtf8());
-    buffer->seek(0);
-
-    // Always use PATCH to avoid passing reverse API settings
-    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
-    buffer->setParent(reply);
-
-    delete swgChannelSettings;
 }
 
 void ChirpChatDemod::networkManagerFinished(QNetworkReply *reply)

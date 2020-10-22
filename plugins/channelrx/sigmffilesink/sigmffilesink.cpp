@@ -35,6 +35,8 @@
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
+#include "feature/feature.h"
+#include "maincore.h"
 
 #include "sigmffilesinkmessages.h"
 #include "sigmffilesinkbaseband.h"
@@ -293,6 +295,10 @@ void SigMFFileSink::applySettings(const SigMFFileSinkSettings& settings, bool fo
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
+    if (m_featuresSettingsFeedback.size() > 0) {
+        featuresSendSettings(reverseAPIKeys, settings, force);
+    }
+
     m_settings = settings;
 }
 
@@ -522,10 +528,67 @@ void SigMFFileSink::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& res
 void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-    swgChannelSettings->setDirection(0); // single sink (Rx)
+    webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
+
+    delete swgChannelSettings;
+}
+
+void SigMFFileSink::featuresSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force)
+{
+    QList<Feature*>::iterator it = m_featuresSettingsFeedback.begin();
+    MainCore *mainCore = MainCore::instance();
+
+    for (; it != m_featuresSettingsFeedback.end(); ++it)
+    {
+        if (mainCore->existsFeature(*it))
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+            Feature::MsgChannelSettings *msg = Feature::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+
+            (*it)->getInputMessageQueue()->push(msg);
+        }
+        else
+        {
+            m_featuresSettingsFeedback.removeOne(*it);
+        }
+    }
+}
+
+void SigMFFileSink::webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const SigMFFileSinkSettings& settings,
+        bool force
+)
+{
+    swgChannelSettings->setDirection(0); // Single sink (Rx)
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
-    swgChannelSettings->setChannelType(new QString("SigMFFileSink"));
+    swgChannelSettings->setChannelType(new QString(m_channelId));
     swgChannelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
     SWGSDRangel::SWGSigMFFileSinkSettings *swgSigMFFileSinkSettings = swgChannelSettings->getSigMfFileSinkSettings();
 
@@ -564,25 +627,6 @@ void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKey
     if (channelSettingsKeys.contains("streamIndex")) {
         swgSigMFFileSinkSettings->setStreamIndex(settings.m_streamIndex);
     }
-
-    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
-            .arg(settings.m_reverseAPIAddress)
-            .arg(settings.m_reverseAPIPort)
-            .arg(settings.m_reverseAPIDeviceIndex)
-            .arg(settings.m_reverseAPIChannelIndex);
-    m_networkRequest.setUrl(QUrl(channelSettingsURL));
-    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
-    buffer->write(swgChannelSettings->asJson().toUtf8());
-    buffer->seek(0);
-
-    // Always use PATCH to avoid passing reverse API settings
-    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
-    buffer->setParent(reply);
-
-    delete swgChannelSettings;
 }
 
 void SigMFFileSink::networkManagerFinished(QNetworkReply *reply)

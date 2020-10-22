@@ -21,11 +21,13 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
+#include "SWGChannelSettings.h"
+
 #include "device/deviceapi.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/dspcommands.h"
-
-#include "SWGChannelSettings.h"
+#include "feature/feature.h"
+#include "maincore.h"
 
 #include "interferometerbaseband.h"
 #include "interferometer.h"
@@ -115,7 +117,6 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
         << "m_correlationType: " << settings.m_correlationType
         << "m_filterChainHash: " << settings.m_filterChainHash
         << "m_log2Decim: " << settings.m_log2Decim
-        << "m_correlationType: " << settings.m_correlationType
         << "m_phase: " << settings.m_phase
         << "m_useReverseAPI: " << settings.m_useReverseAPI
         << "m_reverseAPIAddress: " << settings.m_reverseAPIAddress
@@ -123,6 +124,24 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
         << "m_reverseAPIDeviceIndex: " << settings.m_reverseAPIDeviceIndex
         << "m_reverseAPIChannelIndex: " << settings.m_reverseAPIChannelIndex
         << "m_title: " << settings.m_title;
+
+    QList<QString> reverseAPIKeys;
+
+    if ((m_settings.m_correlationType != settings.m_correlationType) || force) {
+        reverseAPIKeys.append("correlationType");
+    }
+    if ((m_settings.m_filterChainHash != settings.m_filterChainHash) || force) {
+        reverseAPIKeys.append("filterChainHash");
+    }
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
+        reverseAPIKeys.append("log2Decim");
+    }
+    if ((m_settings.m_phase != settings.m_phase) || force) {
+        reverseAPIKeys.append("phase");
+    }
+    if ((m_settings.m_title != settings.m_title) || force) {
+        reverseAPIKeys.append("title");
+    }
 
     if ((m_settings.m_log2Decim != settings.m_log2Decim)
      || (m_settings.m_filterChainHash != settings.m_filterChainHash) || force)
@@ -141,6 +160,10 @@ void Interferometer::applySettings(const InterferometerSettings& settings, bool 
 
     if ((m_settings.m_phase != settings.m_phase) || force) {
         m_basebandSink->setPhase(settings.m_phase);
+    }
+
+    if (m_featuresSettingsFeedback.size() > 0) {
+        featuresSendSettings(reverseAPIKeys, settings, force);
     }
 
     m_settings = settings;
@@ -354,6 +377,63 @@ void Interferometer::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings
 void Interferometer::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force)
 {
     SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+    webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex)
+            .arg(settings.m_reverseAPIChannelIndex);
+    m_networkRequest.setUrl(QUrl(channelSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgChannelSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    reply->setParent(buffer);
+
+    delete swgChannelSettings;
+}
+
+void Interferometer::featuresSendSettings(QList<QString>& channelSettingsKeys, const InterferometerSettings& settings, bool force)
+{
+    QList<Feature*>::iterator it = m_featuresSettingsFeedback.begin();
+    MainCore *mainCore = MainCore::instance();
+
+    for (; it != m_featuresSettingsFeedback.end(); ++it)
+    {
+        if (mainCore->existsFeature(*it))
+        {
+            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+
+            Feature::MsgChannelSettings *msg = Feature::MsgChannelSettings::create(
+                this,
+                channelSettingsKeys,
+                swgChannelSettings,
+                force
+            );
+
+            (*it)->getInputMessageQueue()->push(msg);
+        }
+        else
+        {
+            m_featuresSettingsFeedback.removeOne(*it);
+        }
+    }
+}
+
+void Interferometer::webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const InterferometerSettings& settings,
+        bool force
+)
+{
     swgChannelSettings->setDirection(2); // MIMO sink
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
@@ -375,25 +455,6 @@ void Interferometer::webapiReverseSendSettings(QList<QString>& channelSettingsKe
     if (channelSettingsKeys.contains("filterChainHash") || force) {
         swgInterferometerSettings->setFilterChainHash(settings.m_filterChainHash);
     }
-
-    QString channelSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/channel/%4/settings")
-            .arg(settings.m_reverseAPIAddress)
-            .arg(settings.m_reverseAPIPort)
-            .arg(settings.m_reverseAPIDeviceIndex)
-            .arg(settings.m_reverseAPIChannelIndex);
-    m_networkRequest.setUrl(QUrl(channelSettingsURL));
-    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-
-    QBuffer *buffer = new QBuffer();
-    buffer->open((QBuffer::ReadWrite));
-    buffer->write(swgChannelSettings->asJson().toUtf8());
-    buffer->seek(0);
-
-    // Always use PATCH to avoid passing reverse API settings
-    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
-    reply->setParent(buffer);
-
-    delete swgChannelSettings;
 }
 
 void Interferometer::networkManagerFinished(QNetworkReply *reply)

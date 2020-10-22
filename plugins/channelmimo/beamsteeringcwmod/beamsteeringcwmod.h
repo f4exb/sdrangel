@@ -164,6 +164,13 @@ private:
     static void validateFilterChainHash(BeamSteeringCWModSettings& settings);
     void calculateFrequencyOffset();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force);
+    void featuresSendSettings(QList<QString>& channelSettingsKeys, const BeamSteeringCWModSettings& settings, bool force);
+    void webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const BeamSteeringCWModSettings& settings,
+        bool force
+    );
 
 private slots:
     void handleInputMessages();
