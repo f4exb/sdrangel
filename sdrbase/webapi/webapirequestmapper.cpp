@@ -25,6 +25,7 @@
 
 #include "httpdocrootsettings.h"
 #include "webapirequestmapper.h"
+#include "webapiutils.h"
 #include "SWGInstanceSummaryResponse.h"
 #include "SWGInstanceConfigResponse.h"
 #include "SWGInstanceDevicesResponse.h"
@@ -55,205 +56,6 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
-
-const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
-    {"sdrangel.channel.amdemod", "AMDemodSettings"},
-    {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
-    {"sdrangel.channeltx.modam", "AMModSettings"},
-    {"sdrangel.channeltx.modatv", "ATVModSettings"},
-    {"sdrangel.channel.bfm", "BFMDemodSettings"},
-    {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
-    {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
-    {"org.f4exb.sdrangelove.channel.chanalyzer", "ChannelAnalyzerSettings"}, // remap
-    {"sdrangel.channel.demodatv", "ATVDemodSettings"},
-    {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
-    {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
-    {"sdrangel.channel.filesink", "FileSinkSettings"},
-    {"sdrangel.channeltx.filesource", "FileSourceSettings"},
-    {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
-    {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
-    {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
-    {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
-    {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"}, // remap
-    {"sdrangel.channeltx.modnfm", "NFMModSettings"},
-    {"sdrangel.demod.localsink", "LocalSinkSettings"},
-    {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
-    {"sdrangel.channel.localsource", "LocalSourceSettings"},
-    {"sdrangel.channeltx.modpacket", "PacketModSettings"},
-    {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
-    {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
-    {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
-    {"sdrangel.channeltx.modssb", "SSBModSettings"},
-    {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
-    {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"}, // remap
-    {"sdrangel.channeltx.udpsource", "UDPSourceSettings"},
-    {"sdrangel.channeltx.udpsink", "UDPSourceSettings"}, // remap
-    {"sdrangel.channel.udpsink", "UDPSinkSettings"},
-    {"sdrangel.channel.udpsrc", "UDPSinkSettings"}, // remap
-    {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
-    {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
-    {"sdrangel.channeltx.modwfm", "WFMModSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
-    {"sdrangel.samplesource.airspy", "airspySettings"},
-    {"sdrangel.samplesource.airspyhf", "airspyHFSettings"},
-    {"sdrangel.samplesource.bladerf1input", "bladeRF1InputSettings"},
-    {"sdrangel.samplesource.bladerf", "bladeRF1InputSettings"}, // remap
-    {"sdrangel.samplesink.bladerf1output", "bladeRF1OutputSettings"},
-    {"sdrangel.samplesource.bladerf1output", "bladeRF1OutputSettings"}, // remap
-    {"sdrangel.samplesource.bladerfoutput", "bladeRF1OutputSettings"}, // remap
-    {"sdrangel.samplesource.bladerf2input", "bladeRF2InputSettings"},
-    {"sdrangel.samplesink.bladerf2output", "bladeRF2OutputSettings"},
-    {"sdrangel.samplesource.bladerf2output", "bladeRF2OutputSettings"}, // remap
-    {"sdrangel.samplesource.fcdpro", "fcdProSettings"},
-    {"sdrangel.samplesource.fcdproplus", "fcdProPlusSettings"},
-    {"sdrangel.samplesource.fileinput", "fileInputSettings"},
-    {"sdrangel.samplesource.filesource", "fileInputSettings"}, // remap
-    {"sdrangel.samplesource.hackrf", "hackRFInputSettings"},
-    {"sdrangel.samplesink.hackrf", "hackRFOutputSettings"},
-    {"sdrangel.samplesource.hackrfoutput", "hackRFOutputSettings"}, // remap
-    {"sdrangel.samplesource.kiwisdrsource", "kiwiSDRSettings"},
-    {"sdrangel.samplesource.limesdr", "limeSdrInputSettings"},
-    {"sdrangel.samplesink.limesdr", "limeSdrOutputSettings"},
-    {"sdrangel.samplesource.localinput", "localInputSettings"},
-    {"sdrangel.samplesink.localoutput", "localOutputSettings"},
-    {"sdrangel.samplesource.localoutput", "localOutputSettings"}, // remap
-    {"sdrangel.samplesource.perseus", "perseusSettings"},
-    {"sdrangel.samplesource.plutosdr", "plutoSdrInputSettings"},
-    {"sdrangel.samplesink.plutosdr", "plutoSdrOutputSettings"},
-    {"sdrangel.samplesource.rtlsdr", "rtlSdrSettings"},
-    {"sdrangel.samplesource.remoteinput", "remoteInputSettings"},
-    {"sdrangel.samplesink.remoteoutput", "remoteOutputSettings"},
-    {"sdrangel.samplesource.sdrplay", "sdrPlaySettings"},
-    {"sdrangel.samplesource.soapysdrinput", "soapySDRInputSettings"},
-    {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
-    {"sdrangel.samplesource.testsource", "testSourceSettings"},
-    {"sdrangel.samplesource.usrp", "usrpInputSettings"},
-    {"sdrangel.samplesink.usrp", "usrpOutputSettings"},
-    {"sdrangel.samplesource.xtrx", "XtrxInputSettings"},
-    {"sdrangel.samplesink.xtrx", "XtrxOutputSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
-    {"AMDemod", "AMDemodSettings"},
-    {"AMMod", "AMModSettings"},
-    {"ATVDemod", "ATVDemodSettings"},
-    {"ATVMod", "ATVModSettings"},
-    {"BFMDemod", "BFMDemodSettings"},
-    {"ChannelAnalyzer", "ChannelAnalyzerSettings"},
-    {"DATVDemod", "DATVDemodSettings"},
-    {"DSDDemod", "DSDDemodSettings"},
-    {"FileSink", "FileSinkSettings"},
-    {"FileSource", "FileSourceSettings"},
-    {"FreeDVDemod", "FreeDVDemodSettings"},
-    {"FreeDVMod", "FreeDVModSettings"},
-    {"FreqTracker", "FreqTrackerSettings"},
-    {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModSettings"},
-    {"NFMDemod", "NFMDemodSettings"},
-    {"NFMMod", "NFMModSettings"},
-    {"PacketMod", "PacketModSettings"},
-    {"LocalSink", "LocalSinkSettings"},
-    {"LocalSource", "LocalSourceSettings"},
-    {"RemoteSink", "RemoteSinkSettings"},
-    {"RemoteSource", "RemoteSourceSettings"},
-    {"SSBMod", "SSBModSettings"},
-    {"SSBDemod", "SSBDemodSettings"},
-    {"UDPSink", "UDPSourceSettings"},
-    {"UDPSource", "UDPSinkSettings"},
-    {"WFMDemod", "WFMDemodSettings"},
-    {"WFMMod", "WFMModSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToActionsKey = {
-    {"FileSink", "FileSinkActions"},
-    {"FileSource", "FileSourceActions"},
-    {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
-    {"PacketMod", "PacketModActions"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToSettingsKey = {
-    {"Airspy", "airspySettings"},
-    {"AirspyHF", "airspyHFSettings"},
-    {"BladeRF1", "bladeRF1InputSettings"},
-    {"BladeRF2", "bladeRF2InputSettings"},
-    {"FCDPro", "fcdProSettings"},
-    {"FCDPro+", "fcdProPlusSettings"},
-    {"FileInput", "fileInputSettings"},
-    {"HackRF", "hackRFInputSettings"},
-    {"KiwiSDR", "kiwiSDRSettings"},
-    {"LimeSDR", "limeSdrInputSettings"},
-    {"LocalInput", "localInputSettings"},
-    {"Perseus", "perseusSettings"},
-    {"PlutoSDR", "plutoSdrInputSettings"},
-    {"RTLSDR", "rtlSdrSettings"},
-    {"RemoteInput", "remoteInputSettings"},
-    {"SDRplay1", "sdrPlaySettings"},
-    {"SoapySDR", "soapySDRInputSettings"},
-    {"TestSource", "testSourceSettings"},
-    {"USRP", "usrpInputSettings"},
-    {"XTRX", "XtrxInputSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_sourceDeviceHwIdToActionsKey = {
-    {"Airspy", "airspyActions"},
-    {"AirspyHF", "airspyHFActions"},
-    {"BladeRF1", "bladeRF1InputActions"},
-    {"FCDPro", "fcdProActions"},
-    {"FCDPro+", "fcdProPlusActions"},
-    {"HackRF", "hackRFInputActions"},
-    {"KiwiSDR", "kiwiSDRActions"},
-    {"LimeSDR", "limeSdrInputActions"},
-    {"LocalInput", "localInputActions"},
-    {"Perseus", "perseusActions"},
-    {"PlutoSDR", "plutoSdrInputActions"},
-    {"RemoteInput", "remoteInputActions"},
-    {"RTLSDR", "rtlSdrActions"},
-    {"SDRplay1", "sdrPlayActions"},
-    {"SoapySDR", "soapySDRInputActions"},
-    {"TestSource", "testSourceActions"},
-    {"USRP", "usrpSourceActions"},
-    {"XTRX", "xtrxInputActions"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToSettingsKey = {
-    {"BladeRF1", "bladeRF1OutputSettings"},
-    {"BladeRF2", "bladeRF2OutputSettings"},
-    {"HackRF", "hackRFOutputSettings"},
-    {"LimeSDR", "limeSdrOutputSettings"},
-    {"LocalOutput", "localOutputSettings"},
-    {"PlutoSDR", "plutoSdrOutputSettings"},
-    {"RemoteOutput", "remoteOutputSettings"},
-    {"SoapySDR", "soapySDROutputSettings"},
-    {"USRP", "usrpOutputSettings"},
-    {"XTRX", "xtrxOutputSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_sinkDeviceHwIdToActionsKey = {
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToSettingsKey= {
-    {"BladeRF2", "bladeRF2MIMOSettings"},
-    {"TestMI", "testMISettings"},
-    {"TestMOSync", "testMOSyncSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToActionsKey= {
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToSettingsKey = {
-    {"SimplePTT", "SimplePTTSettings"},
-    {"RigCtlServer", "RigCtlServerSettings"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToActionsKey = {
-    {"SimplePTT", "SimplePTTActions"}
-};
-
-const QMap<QString, QString> WebAPIRequestMapper::m_featureURIToSettingsKey = {
-    {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
-    {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
-};
 
 WebAPIRequestMapper::WebAPIRequestMapper(QObject* parent) :
     HttpRequestHandler(parent),
@@ -3025,16 +2827,24 @@ bool WebAPIRequestMapper::validateDeviceSettings(
 
     if (deviceSettings.getDirection() == 0) // source
     {
-        if (m_sourceDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
-            deviceSettingsKey = m_sourceDeviceHwIdToSettingsKey[*deviceHwType];
+        if (WebAPIUtils::m_sourceDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceSettingsKey = WebAPIUtils::m_sourceDeviceHwIdToSettingsKey[*deviceHwType];
         } else {
             return false;
         }
     }
     else if (deviceSettings.getDirection() == 1) // sink
     {
-        if (m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
-            deviceSettingsKey = m_sinkDeviceHwIdToSettingsKey[*deviceHwType];
+        if (WebAPIUtils::m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceSettingsKey = WebAPIUtils::m_sinkDeviceHwIdToSettingsKey[*deviceHwType];
+        } else {
+            return false;
+        }
+    }
+    else if (deviceSettings.getDirection() == 2) // MIMO
+    {
+        if (WebAPIUtils::m_mimoDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceSettingsKey = WebAPIUtils::m_mimoDeviceHwIdToSettingsKey[*deviceHwType];
         } else {
             return false;
         }
@@ -3069,24 +2879,24 @@ bool WebAPIRequestMapper::validateDeviceActions(
 
     if (deviceActions.getDirection() == 0) // source
     {
-        if (m_sourceDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
-            deviceActionsKey = m_sourceDeviceHwIdToActionsKey[*deviceHwType];
+        if (WebAPIUtils::m_sourceDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceActionsKey = WebAPIUtils::m_sourceDeviceHwIdToActionsKey[*deviceHwType];
         } else {
             return false;
         }
     }
     else if (deviceActions.getDirection() == 1) // sink
     {
-        if (m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
-            deviceActionsKey = m_sinkDeviceHwIdToActionsKey[*deviceHwType];
+        if (WebAPIUtils::m_sinkDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceActionsKey = WebAPIUtils::m_sinkDeviceHwIdToActionsKey[*deviceHwType];
         } else {
             return false;
         }
     }
     else if (deviceActions.getDirection() == 2) // MIMO
     {
-        if (m_mimoDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
-            deviceActionsKey = m_mimoDeviceHwIdToActionsKey[*deviceHwType];
+        if (WebAPIUtils::m_mimoDeviceHwIdToSettingsKey.contains(*deviceHwType)) {
+            deviceActionsKey = WebAPIUtils::m_mimoDeviceHwIdToActionsKey[*deviceHwType];
         } else {
             return false;
         }
@@ -3118,8 +2928,8 @@ bool WebAPIRequestMapper::validateChannelSettings(
 
     QString *channelType = channelSettings.getChannelType();
 
-    if (m_channelTypeToSettingsKey.contains(*channelType)) {
-        return getChannelSettings(m_channelTypeToSettingsKey[*channelType], &channelSettings, jsonObject, channelSettingsKeys);
+    if (WebAPIUtils::m_channelTypeToSettingsKey.contains(*channelType)) {
+        return getChannelSettings(WebAPIUtils::m_channelTypeToSettingsKey[*channelType], &channelSettings, jsonObject, channelSettingsKeys);
     } else {
         return false;
     }
@@ -3144,8 +2954,8 @@ bool WebAPIRequestMapper::validateChannelActions(
 
     QString *channelType = channelActions.getChannelType();
 
-    if (m_channelTypeToActionsKey.contains(*channelType)) {
-        return getChannelActions(m_channelTypeToActionsKey[*channelType], &channelActions, jsonObject, channelActionsKeys);
+    if (WebAPIUtils::m_channelTypeToActionsKey.contains(*channelType)) {
+        return getChannelActions(WebAPIUtils::m_channelTypeToActionsKey[*channelType], &channelActions, jsonObject, channelActionsKeys);
     } else {
         return false;
     }
@@ -3164,8 +2974,8 @@ bool WebAPIRequestMapper::validateFeatureSettings(
 
     QString *featureType = featureSettings.getFeatureType();
 
-    if (m_featureTypeToSettingsKey.contains(*featureType)) {
-        return getFeatureSettings(m_featureTypeToSettingsKey[*featureType], &featureSettings, jsonObject, featureSettingsKeys);
+    if (WebAPIUtils::m_featureTypeToSettingsKey.contains(*featureType)) {
+        return getFeatureSettings(WebAPIUtils::m_featureTypeToSettingsKey[*featureType], &featureSettings, jsonObject, featureSettingsKeys);
     } else {
         return false;
     }
@@ -3184,8 +2994,8 @@ bool WebAPIRequestMapper::validateFeatureActions(
 
     QString *featureType = featureActions.getFeatureType();
 
-    if (m_featureTypeToActionsKey.contains(*featureType)) {
-        return getFeatureActions(m_featureTypeToActionsKey[*featureType], &featureActions, jsonObject, featureActionsKeys);
+    if (WebAPIUtils::m_featureTypeToActionsKey.contains(*featureType)) {
+        return getFeatureActions(WebAPIUtils::m_featureTypeToActionsKey[*featureType], &featureActions, jsonObject, featureActionsKeys);
     } else {
         return false;
     }
@@ -3643,12 +3453,12 @@ bool WebAPIRequestMapper::appendPresetFeatureKeys(
         feature->setFeatureIdUri(featureURI);
         featureKeys.m_keys.append("featureIdURI");
 
-        if (featureSettingsJson.contains("config") && m_featureURIToSettingsKey.contains(*featureURI))
+        if (featureSettingsJson.contains("config") && WebAPIUtils::m_featureURIToSettingsKey.contains(*featureURI))
         {
             SWGSDRangel::SWGFeatureSettings *featureSettings = new SWGSDRangel::SWGFeatureSettings();
             feature->setConfig(featureSettings);
             return getFeatureSettings(
-                m_channelURIToSettingsKey[*featureURI],
+                WebAPIUtils::m_channelURIToSettingsKey[*featureURI],
                 featureSettings,
                 featureSettingsJson["config"].toObject(),
                 featureKeys.m_featureKeys
@@ -3677,11 +3487,11 @@ bool WebAPIRequestMapper::appendPresetChannelKeys(
         channel->setChannelIdUri(channelURI);
         channelKeys.m_keys.append("channelIdURI");
 
-        if (channelSettingsJson.contains("config") && m_channelURIToSettingsKey.contains(*channelURI))
+        if (channelSettingsJson.contains("config") && WebAPIUtils::m_channelURIToSettingsKey.contains(*channelURI))
         {
             SWGSDRangel::SWGChannelSettings *channelSettings = new SWGSDRangel::SWGChannelSettings();
             channel->setConfig(channelSettings);
-            return getChannelSettings(m_channelURIToSettingsKey[*channelURI], channelSettings, channelSettingsJson["config"].toObject(), channelKeys.m_channelKeys);
+            return getChannelSettings(WebAPIUtils::m_channelURIToSettingsKey[*channelURI], channelSettings, channelSettingsJson["config"].toObject(), channelKeys.m_channelKeys);
         }
         else
         {
@@ -3933,11 +3743,11 @@ bool WebAPIRequestMapper::appendPresetDeviceKeys(
             devicelKeys.m_keys.append("deviceSequence");
         }
 
-        if (deviceSettngsJson.contains("config") && m_deviceIdToSettingsKey.contains(*deviceId))
+        if (deviceSettngsJson.contains("config") && WebAPIUtils::m_deviceIdToSettingsKey.contains(*deviceId))
         {
             SWGSDRangel::SWGDeviceSettings *deviceSettings = new SWGSDRangel::SWGDeviceSettings();
             device->setConfig(deviceSettings);
-            return getDeviceSettings(m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
+            return getDeviceSettings(WebAPIUtils::m_deviceIdToSettingsKey[*deviceId], deviceSettings, deviceSettngsJson["config"].toObject(), devicelKeys.m_deviceKeys);
         }
         else
         {

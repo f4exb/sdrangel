@@ -24,6 +24,8 @@
 
 #include "feature.h"
 
+MESSAGE_CLASS_DEFINITION(Feature::MsgChannelSettings, Message)
+
 Feature::Feature(const QString& name, WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_name(name),
     m_uid(UidCalculator::getNewObjectId()),

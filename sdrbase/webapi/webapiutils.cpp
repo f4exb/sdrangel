@@ -21,6 +21,224 @@
 
 #include "webapiutils.h"
 
+const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
+    {"sdrangel.channel.amdemod", "AMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
+    {"sdrangel.channeltx.modam", "AMModSettings"},
+    {"sdrangel.channeltx.modatv", "ATVModSettings"},
+    {"sdrangel.channel.bfm", "BFMDemodSettings"},
+    {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
+    {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
+    {"org.f4exb.sdrangelove.channel.chanalyzer", "ChannelAnalyzerSettings"}, // remap
+    {"sdrangel.channel.chirpchatdemod", "ChirpChatDemodSettings"},
+    {"sdrangel.channel.modchirpchat", "ChirpChatModSettings"},
+    {"sdrangel.channel.demodatv", "ATVDemodSettings"},
+    {"sdrangel.channel.demoddatv", "DATVDemodSettings"},
+    {"sdrangel.channel.dsddemod", "DSDDemodSettings"},
+    {"sdrangel.channel.filesink", "FileSinkSettings"},
+    {"sdrangel.channeltx.filesource", "FileSourceSettings"},
+    {"sdrangel.channel.freedvdemod", "FreeDVDemodSettings"},
+    {"sdrangel.channeltx.freedvmod", "FreeDVModSettings"},
+    {"sdrangel.channel.freqtracker", "FreqTrackerSettings"},
+    {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"}, // remap
+    {"sdrangel.channeltx.modnfm", "NFMModSettings"},
+    {"sdrangel.demod.localsink", "LocalSinkSettings"},
+    {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
+    {"sdrangel.channel.localsource", "LocalSourceSettings"},
+    {"sdrangel.channeltx.modpacket", "PacketModSettings"},
+    {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
+    {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
+    {"sdrangel.channeltx.remotesource", "RemoteSourceSettings"},
+    {"sdrangel.channeltx.modssb", "SSBModSettings"},
+    {"sdrangel.channel.ssbdemod", "SSBDemodSettings"},
+    {"de.maintech.sdrangelove.channel.ssb", "SSBDemodSettings"}, // remap
+    {"sdrangel.channeltx.udpsource", "UDPSourceSettings"},
+    {"sdrangel.channeltx.udpsink", "UDPSourceSettings"}, // remap
+    {"sdrangel.channel.udpsink", "UDPSinkSettings"},
+    {"sdrangel.channel.udpsrc", "UDPSinkSettings"}, // remap
+    {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
+    {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
+    {"sdrangel.channeltx.modwfm", "WFMModSettings"},
+    {"sdrangel.channel.beamsteeringcwmod", "BeamSteeringCWModSettings"},
+    {"sdrangel.channelmimo.interferometer", "InterferometerSettings"},
+    {"sdrangel.channel.sigmffilesink", "SigMFFileSinkSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
+    {"sdrangel.samplesource.airspy", "airspySettings"},
+    {"sdrangel.samplesource.airspyhf", "airspyHFSettings"},
+    {"sdrangel.samplesource.bladerf1input", "bladeRF1InputSettings"},
+    {"sdrangel.samplesource.bladerf", "bladeRF1InputSettings"}, // remap
+    {"sdrangel.samplesink.bladerf1output", "bladeRF1OutputSettings"},
+    {"sdrangel.samplesource.bladerf1output", "bladeRF1OutputSettings"}, // remap
+    {"sdrangel.samplesource.bladerfoutput", "bladeRF1OutputSettings"}, // remap
+    {"sdrangel.samplesource.bladerf2input", "bladeRF2InputSettings"},
+    {"sdrangel.samplesink.bladerf2output", "bladeRF2OutputSettings"},
+    {"sdrangel.samplesource.bladerf2output", "bladeRF2OutputSettings"}, // remap
+    {"sdrangel.samplemimo.bladerf2mimo", "bladeRF2MIMOSettings"},
+    {"sdrangel.samplesource.fcdpro", "fcdProSettings"},
+    {"sdrangel.samplesource.fcdproplus", "fcdProPlusSettings"},
+    {"sdrangel.samplesource.fileinput", "fileInputSettings"},
+    {"sdrangel.samplesource.filesource", "fileInputSettings"}, // remap
+    {"sdrangel.samplesource.hackrf", "hackRFInputSettings"},
+    {"sdrangel.samplesink.hackrf", "hackRFOutputSettings"},
+    {"sdrangel.samplesource.hackrfoutput", "hackRFOutputSettings"}, // remap
+    {"sdrangel.samplesource.kiwisdrsource", "kiwiSDRSettings"},
+    {"sdrangel.samplesource.limesdr", "limeSdrInputSettings"},
+    {"sdrangel.samplesink.limesdr", "limeSdrOutputSettings"},
+    {"sdrangel.samplesource.localinput", "localInputSettings"},
+    {"sdrangel.samplesink.localoutput", "localOutputSettings"},
+    {"sdrangel.samplesource.localoutput", "localOutputSettings"}, // remap
+    {"sdrangel.samplemimo.metismiso", "metisMISOSettings"},
+    {"sdrangel.samplesource.perseus", "perseusSettings"},
+    {"sdrangel.samplesource.plutosdr", "plutoSdrInputSettings"},
+    {"sdrangel.samplesink.plutosdr", "plutoSdrOutputSettings"},
+    {"sdrangel.samplesource.rtlsdr", "rtlSdrSettings"},
+    {"sdrangel.samplesource.remoteinput", "remoteInputSettings"},
+    {"sdrangel.samplesink.remoteoutput", "remoteOutputSettings"},
+    {"sdrangel.samplesource.sdrplay", "sdrPlaySettings"},
+    {"sdrangel.samplesource.sigmffileinput", "sigMFFileInputSettings"},
+    {"sdrangel.samplesource.soapysdrinput", "soapySDRInputSettings"},
+    {"sdrangel.samplesink.soapysdroutput", "soapySDROutputSettings"},
+    {"sdrangel.samplesource.testsource", "testSourceSettings"},
+    {"sdrangel.samplemimo.testmi", "testMISettings"},
+    {"sdrangel.samplemimo.testmosync", "testMOSyncSettings"},
+    {"sdrangel.samplesource.usrp", "usrpInputSettings"},
+    {"sdrangel.samplesink.usrp", "usrpOutputSettings"},
+    {"sdrangel.samplesource.xtrx", "xtrxInputSettings"},
+    {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
+    {"AMDemod", "AMDemodSettings"},
+    {"AMMod", "AMModSettings"},
+    {"ATVDemod", "ATVDemodSettings"},
+    {"ATVMod", "ATVModSettings"},
+    {"BFMDemod", "BFMDemodSettings"},
+    {"ChannelAnalyzer", "ChannelAnalyzerSettings"},
+    {"ChirpChatDemod", "ChirpChatDemodSettings"},
+    {"ChirpChatMod", "ChirpChatModSettings"},
+    {"DATVDemod", "DATVDemodSettings"},
+    {"DSDDemod", "DSDDemodSettings"},
+    {"FileSink", "FileSinkSettings"},
+    {"FileSource", "FileSourceSettings"},
+    {"FreeDVDemod", "FreeDVDemodSettings"},
+    {"FreeDVMod", "FreeDVModSettings"},
+    {"FreqTracker", "FreqTrackerSettings"},
+    {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModSettings"},
+    {"NFMDemod", "NFMDemodSettings"},
+    {"NFMMod", "NFMModSettings"},
+    {"PacketMod", "PacketModSettings"},
+    {"LocalSink", "LocalSinkSettings"},
+    {"LocalSource", "LocalSourceSettings"},
+    {"RemoteSink", "RemoteSinkSettings"},
+    {"RemoteSource", "RemoteSourceSettings"},
+    {"SSBMod", "SSBModSettings"},
+    {"SSBDemod", "SSBDemodSettings"},
+    {"UDPSink", "UDPSourceSettings"},
+    {"UDPSource", "UDPSinkSettings"},
+    {"WFMDemod", "WFMDemodSettings"},
+    {"WFMMod", "WFMModSettings"},
+    {"BeamSteeringCWMod", "BeamSteeringCWModSettings"},
+    {"Interferometer", "InterferometerSettings"},
+    {"SigMFFileSink", "SigMFFileSinkSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
+    {"FileSink", "FileSinkActions"},
+    {"FileSource", "FileSourceActions"},
+    {"SigMFFileSink", "SigMFFileSinkActions"},
+    {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModActions"},
+    {"PacketMod", "PacketModActions"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToSettingsKey = {
+    {"Airspy", "airspySettings"},
+    {"AirspyHF", "airspyHFSettings"},
+    {"BladeRF1", "bladeRF1InputSettings"},
+    {"BladeRF2", "bladeRF2InputSettings"},
+    {"FCDPro", "fcdProSettings"},
+    {"FCDPro+", "fcdProPlusSettings"},
+    {"FileInput", "fileInputSettings"},
+    {"HackRF", "hackRFInputSettings"},
+    {"KiwiSDR", "kiwiSDRSettings"},
+    {"LimeSDR", "limeSdrInputSettings"},
+    {"LocalInput", "localInputSettings"},
+    {"Perseus", "perseusSettings"},
+    {"PlutoSDR", "plutoSdrInputSettings"},
+    {"RTLSDR", "rtlSdrSettings"},
+    {"RemoteInput", "remoteInputSettings"},
+    {"SDRplay1", "sdrPlaySettings"},
+    {"SigMFFileInput", "sigMFFileInputSettings"},
+    {"SoapySDR", "soapySDRInputSettings"},
+    {"TestSource", "testSourceSettings"},
+    {"USRP", "usrpInputSettings"},
+    {"XTRX", "xtrxInputSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToActionsKey = {
+    {"Airspy", "airspyActions"},
+    {"AirspyHF", "airspyHFActions"},
+    {"BladeRF1", "bladeRF1InputActions"},
+    {"FCDPro", "fcdProActions"},
+    {"FCDPro+", "fcdProPlusActions"},
+    {"HackRF", "hackRFInputActions"},
+    {"KiwiSDR", "kiwiSDRActions"},
+    {"LimeSDR", "limeSdrInputActions"},
+    {"LocalInput", "localInputActions"},
+    {"Perseus", "perseusActions"},
+    {"PlutoSDR", "plutoSdrInputActions"},
+    {"RemoteInput", "remoteInputActions"},
+    {"RTLSDR", "rtlSdrActions"},
+    {"SDRplay1", "sdrPlayActions"},
+    {"SigMFFileInput", "sigMFFileActions"},
+    {"SoapySDR", "soapySDRInputActions"},
+    {"TestSource", "testSourceActions"},
+    {"USRP", "usrpSourceActions"},
+    {"XTRX", "xtrxInputActions"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_sinkDeviceHwIdToSettingsKey = {
+    {"BladeRF1", "bladeRF1OutputSettings"},
+    {"BladeRF2", "bladeRF2OutputSettings"},
+    {"HackRF", "hackRFOutputSettings"},
+    {"LimeSDR", "limeSdrOutputSettings"},
+    {"LocalOutput", "localOutputSettings"},
+    {"PlutoSDR", "plutoSdrOutputSettings"},
+    {"RemoteOutput", "remoteOutputSettings"},
+    {"SoapySDR", "soapySDROutputSettings"},
+    {"USRP", "usrpOutputSettings"},
+    {"XTRX", "xtrxOutputSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_sinkDeviceHwIdToActionsKey = {
+};
+
+const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToSettingsKey = {
+    {"BladeRF2", "bladeRF2MIMOSettings"},
+    {"MetisMISO", "metisMISOSettings"},
+    {"TestMI", "testMISettings"},
+    {"TestMOSync", "testMOSyncSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
+};
+
+const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
+    {"SimplePTT", "SimplePTTSettings"},
+    {"RigCtlServer", "RigCtlServerSettings"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
+    {"SimplePTT", "SimplePTTActions"}
+};
+
+const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
+    {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
+};
+
 // Get integer value from within JSON object
 bool WebAPIUtils::getObjectInt(const QJsonObject &json, const QString &key, int &value)
 {
@@ -108,6 +326,196 @@ bool WebAPIUtils::setSubObjectDouble(QJsonObject &json, const QString &key, doub
                 subObject[key] = value;
                 it.value() = subObject;
                 return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// look for value in key=value
+bool WebAPIUtils::extractValue(const QJsonObject &json, const QString &key, QJsonValue &value)
+{
+    // final
+    if (json.contains(key))
+    {
+        value = json[key];
+        return true;
+    }
+    else
+    {
+        for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                if (extractValue(jsonValue.toObject(), key, value)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// look for [...] in key=[...]
+bool WebAPIUtils::extractArray(const QJsonObject &json, const QString &key, QJsonArray &value)
+{
+    // final
+    if (json.contains(key))
+    {
+        if (json[key].isArray())
+        {
+            value = json[key].toArray();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                if (extractArray(jsonValue.toObject(), key, value)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// look for {...} in key={...}
+bool WebAPIUtils::extractObject(const QJsonObject &json, const QString &key, QJsonObject &value)
+{
+    // final
+    if (json.contains(key))
+    {
+        if (json[key].isObject())
+        {
+            value = json[key].toObject();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                if (extractObject(jsonValue.toObject(), key, value)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// set value in key=value
+bool WebAPIUtils::setValue(const QJsonObject &json, const QString &key, const QJsonValue &value)
+{
+    // final
+    if (json.contains(key))
+    {
+        json[key] = value;
+        return true;
+    }
+    else
+    {
+        for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                if (setValue(jsonValue.toObject(), key, value)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// set [...] in key=[...]
+bool WebAPIUtils::setArray(const QJsonObject &json, const QString &key, const QJsonArray &value)
+{
+    // final
+    if (json.contains(key))
+    {
+        if (json[key].isArray())
+        {
+            json[key] = value;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                if (setArray(jsonValue.toObject(), key, value)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// set {...} in key={...}
+bool WebAPIUtils::setObject(const QJsonObject &json, const QString &key, const QJsonObject &value)
+{
+    // final
+    if (json.contains(key))
+    {
+        if (json[key].isObject())
+        {
+            json[key] = value;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+        {
+            QJsonValue jsonValue = it.value();
+
+            if (jsonValue.isObject())
+            {
+                if (setObject(jsonValue.toObject(), key, value)) {
+                    return true;
+                }
             }
         }
     }

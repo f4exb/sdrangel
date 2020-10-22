@@ -28,3 +28,14 @@ ChannelAPI::ChannelAPI(const QString& name, StreamType streamType) :
     m_deviceAPI(0),
     m_uid(UidCalculator::getNewObjectId())
 { }
+
+void ChannelAPI::addFeatureSettingsFeedback(Feature *feature)
+{
+    m_featuresSettingsFeedback.removeOne(feature);
+    m_featuresSettingsFeedback.append(feature);
+}
+
+void ChannelAPI::removeFeatureSettingsFeedback(Feature *feature)
+{
+    m_featuresSettingsFeedback.removeOne(feature);
+}

@@ -26,10 +26,11 @@
 
 #include "afcsettings.h"
 
-class WebAPIAdapterInterface;
-class AFCWorker;
 class QNetworkAccessManager;
 class QNetworkReply;
+class WebAPIAdapterInterface;
+class DeviceSet;
+class AFCWorker;
 
 namespace SWGSDRangel {
     class SWGDeviceState;
@@ -58,25 +59,6 @@ public:
             Message(),
             m_settings(settings),
             m_force(force)
-        { }
-    };
-
-    class MsgPTT : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getTx() const { return m_tx; }
-
-        static MsgPTT* create(bool tx) {
-            return new MsgPTT(tx);
-        }
-
-    private:
-        bool m_tx;
-
-        MsgPTT(bool tx) :
-            Message(),
-            m_tx(tx)
         { }
     };
 
@@ -150,7 +132,8 @@ private:
     QThread m_thread;
     AFCWorker *m_worker;
     AFCSettings m_settings;
-    bool m_ptt;
+    DeviceSet *m_trackerDeviceSet;
+    DeviceSet *m_trackedDeviceSet;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -160,6 +143,9 @@ private:
     void applySettings(const AFCSettings& settings, bool force = false);
     void webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response);
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AFCSettings& settings, bool force);
+    void trackerDeviceChange(int deviceIndex);
+    void trackedDeviceChange(int deviceIndex);
+    void removeFeatureReferences();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

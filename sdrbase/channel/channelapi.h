@@ -22,11 +22,14 @@
 
 #include <QString>
 #include <QByteArray>
+#include <QList>
+
 #include <stdint.h>
 
 #include "export.h"
 
 class DeviceAPI;
+class Feature;
 
 namespace SWGSDRangel
 {
@@ -116,12 +119,18 @@ public:
     void setDeviceAPI(DeviceAPI *deviceAPI) { m_deviceAPI = deviceAPI; }
     uint64_t getUID() const { return m_uid; }
 
+    // Features support
+    void addFeatureSettingsFeedback(Feature *feature);
+    void removeFeatureSettingsFeedback(Feature *feature);
+
     // MIMO support
     StreamType getStreamType() const { return m_streamType; }
     virtual int getNbSinkStreams() const = 0;
     virtual int getNbSourceStreams() const = 0;
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const = 0;
 
+protected:
+    QList<Feature*> m_featuresSettingsFeedback; //!< list of features to report back settings changes in swagger API format
 
 private:
     StreamType m_streamType;
