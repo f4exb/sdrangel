@@ -142,6 +142,13 @@ private:
     void applySettings(const AMDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force);
+    void featuresSendSettings(QList<QString>& channelSettingsKeys, const AMDemodSettings& settings, bool force);
+    void webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const AMDemodSettings& settings,
+        bool force
+    );
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
