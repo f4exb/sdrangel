@@ -26,19 +26,23 @@
 #include "usrpoutputthread.h"
 #include "usrpoutputsettings.h"
 
-USRPOutputThread::USRPOutputThread(uhd::tx_streamer::sptr stream, SampleSourceFifo* sampleFifo, QObject* parent) :
+USRPOutputThread::USRPOutputThread(uhd::tx_streamer::sptr stream, size_t bufSamples, SampleSourceFifo* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_stream(stream),
+    m_bufSamples(bufSamples),
     m_sampleFifo(sampleFifo),
     m_log2Interp(0)
 {
-    std::fill(m_buf, m_buf + 2*DeviceUSRP::blockSize, 0);
+    // *2 as samples are I+Q
+    m_buf = new qint16[2*bufSamples];
+    std::fill(m_buf, m_buf + 2*bufSamples, 0);
 }
 
 USRPOutputThread::~USRPOutputThread()
 {
     stopWork();
+    delete m_buf;
 }
 
 void USRPOutputThread::startWork()
@@ -66,8 +70,15 @@ void USRPOutputThread::stopWork()
     m_running = false;
     wait();
 
-    // Get message indicating underflow, so it doesn't appear if we restart
-    m_stream->recv_async_msg(md);
+    try
+    {
+        // Get message indicating underflow, so it doesn't appear if we restart
+        m_stream->recv_async_msg(md);
+    }
+    catch (std::exception& e)
+    {
+        qDebug() << "USRPOutputThread::stopWork: exception: " << e.what();
+    }
 
     qDebug("USRPOutputThread::stopWork: stream stopped");
 }
@@ -90,15 +101,15 @@ void USRPOutputThread::run()
 
     while (m_running)
     {
-        callback(m_buf, DeviceUSRP::blockSize);
+        callback(m_buf, m_bufSamples);
 
         try
         {
-            const size_t samples_sent = m_stream->send(m_buf, DeviceUSRP::blockSize, md);
+            const size_t samples_sent = m_stream->send(m_buf, m_bufSamples, md);
             m_packets++;
-            if (samples_sent != DeviceUSRP::blockSize)
+            if (samples_sent != m_bufSamples)
             {
-                qDebug("USRPOutputThread::run written %ld/%d samples", samples_sent, DeviceUSRP::blockSize);
+                qDebug("USRPOutputThread::run written %ld/%d samples", samples_sent, m_bufSamples);
             }
         }
         catch (std::exception& e)

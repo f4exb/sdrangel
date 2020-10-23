@@ -51,6 +51,7 @@ USRPOutput::USRPOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_usrpOutputThread(nullptr),
+    m_bufSamples(0),
     m_deviceDescription("USRPOutput"),
     m_running(false),
     m_channelAcquired(false)
@@ -288,22 +289,28 @@ bool USRPOutput::acquireChannel()
     suspendRxBuddies();
     suspendTxBuddies();
 
-    try
+    if (m_streamId == nullptr)
     {
-        // set up the stream
-        std::string cpu_format("sc16");
-        std::string wire_format("sc16");
-        std::vector<size_t> channel_nums;
-        channel_nums.push_back(m_deviceShared.m_channel);
+        try
+        {
+            // set up the stream
+            std::string cpu_format("sc16");
+            std::string wire_format("sc16");
+            std::vector<size_t> channel_nums;
+            channel_nums.push_back(m_deviceShared.m_channel);
 
-        uhd::stream_args_t stream_args(cpu_format, wire_format);
-        stream_args.channels = channel_nums;
+            uhd::stream_args_t stream_args(cpu_format, wire_format);
+            stream_args.channels = channel_nums;
 
-        m_streamId = m_deviceShared.m_deviceParams->getDevice()->get_tx_stream(stream_args);
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "USRPOutput::acquireChannel: exception: " << e.what();
+            m_streamId = m_deviceShared.m_deviceParams->getDevice()->get_tx_stream(stream_args);
+
+            // Match our transmit buffer size to what UHD uses
+            m_bufSamples = m_streamId->get_max_num_samps();
+        }
+        catch (std::exception& e)
+        {
+            qDebug() << "USRPOutput::acquireChannel: exception: " << e.what();
+        }
     }
 
     resumeTxBuddies();
@@ -319,8 +326,14 @@ void USRPOutput::releaseChannel()
     suspendRxBuddies();
     suspendTxBuddies();
 
-    // destroy the stream - FIXME: Better way to do this?
-    m_streamId = nullptr;
+    // FIXME: Currently we do not try to destroy the stream, as there seems to be
+    // an issue when we re-acquire the stream, the output spectrum will not be correct
+    // The transmitter output will be disabled when we stop sending data to it anyway
+    if (false)
+    {
+        // destroy the stream
+        m_streamId = nullptr;
+    }
 
     resumeTxBuddies();
     resumeRxBuddies();
@@ -346,9 +359,7 @@ bool USRPOutput::start()
         return false;
     }
 
-    // start / stop streaming is done in the thread.
-
-    m_usrpOutputThread = new USRPOutputThread(m_streamId, &m_sampleSourceFifo);
+    m_usrpOutputThread = new USRPOutputThread(m_streamId, m_bufSamples, &m_sampleSourceFifo);
     qDebug("USRPOutput::start: thread created");
 
     applySettings(m_settings, true);
@@ -563,7 +574,7 @@ bool USRPOutput::handleMessage(const Message& message)
     {
         if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
         {
-            if (m_streamId != nullptr)
+            if ((m_streamId != nullptr) && m_channelAcquired)
             {
                 bool active;
                 quint32 underflows;
@@ -1023,8 +1034,8 @@ void USRPOutput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response
     bool active = false;
     quint32 underflows = 0;
     quint32 droppedPackets = 0;
-    
-    if (m_streamId != nullptr)
+
+    if ((m_streamId != nullptr) && m_channelAcquired)
     {
         m_usrpOutputThread->getStreamStatus(active, underflows, droppedPackets);
         success = true;

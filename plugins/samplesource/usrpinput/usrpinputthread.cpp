@@ -26,20 +26,35 @@
 #include "usrpinputsettings.h"
 #include "usrpinputthread.h"
 
-USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, SampleSinkFifo* sampleFifo, QObject* parent) :
+USRPInputThread::USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples, SampleSinkFifo* sampleFifo, QObject* parent) :
     QThread(parent),
     m_running(false),
     m_stream(stream),
-    m_convertBuffer(DeviceUSRP::blockSize),
+    m_bufSamples(bufSamples),
+    m_convertBuffer(bufSamples),
     m_sampleFifo(sampleFifo),
     m_log2Decim(0)
 {
-    std::fill(m_buf, m_buf + 2*DeviceUSRP::blockSize, 0);
+    // *2 as samples are I+Q
+    m_buf = new qint16[2*bufSamples];
+    std::fill(m_buf, m_buf + 2*bufSamples, 0);
 }
 
 USRPInputThread::~USRPInputThread()
 {
     stopWork();
+    delete m_buf;
+}
+
+void USRPInputThread::issueStreamCmd(bool start)
+{
+    uhd::stream_cmd_t stream_cmd(start ? uhd::stream_cmd_t::STREAM_MODE_START_CONTINUOUS : uhd::stream_cmd_t::STREAM_MODE_STOP_CONTINUOUS);
+    stream_cmd.num_samps = size_t(0);
+    stream_cmd.stream_now = true;
+    stream_cmd.time_spec = uhd::time_spec_t();
+
+    m_stream->issue_stream_cmd(stream_cmd);
+    qDebug() << "USRPInputThread::issueStreamCmd " << (start ? "start" : "stop");
 }
 
 void USRPInputThread::startWork()
@@ -48,12 +63,8 @@ void USRPInputThread::startWork()
 
     try
     {
-        uhd::stream_cmd_t stream_cmd(uhd::stream_cmd_t::STREAM_MODE_START_CONTINUOUS);
-        stream_cmd.num_samps  = size_t(0);
-        stream_cmd.stream_now = true;
-        stream_cmd.time_spec  = uhd::time_spec_t();
-
-        m_stream->issue_stream_cmd(stream_cmd);
+        // Start streaming
+        issueStreamCmd(true);
 
         // Reset stats
         m_packets = 0;
@@ -84,18 +95,20 @@ void USRPInputThread::stopWork()
     try
     {
         uhd::rx_metadata_t md;
-        uhd::stream_cmd_t stream_cmd(uhd::stream_cmd_t::STREAM_MODE_STOP_CONTINUOUS);
-        stream_cmd.stream_now = true;
-        m_stream->issue_stream_cmd(stream_cmd);
+
+        // Stop streaming
+        issueStreamCmd(false);
 
         // Clear out any data left in the stream, otherwise we'll get an
         // exception 'recv buffer smaller than vrt packet offset' when restarting
-        while (!md.end_of_burst)
+        md.end_of_burst = false;
+        md.error_code = uhd::rx_metadata_t::ERROR_CODE_NONE;
+        while (!md.end_of_burst && (md.error_code != uhd::rx_metadata_t::ERROR_CODE_TIMEOUT))
         {
             try
             {
-                //qDebug() << "USRPInputThread::stopWork: recing until end of burst";
-                m_stream->recv(m_buf, DeviceUSRP::blockSize, md);
+                md.reset();
+                m_stream->recv(m_buf, m_bufSamples, md);
             }
             catch (std::exception& e)
             {
@@ -127,27 +140,39 @@ void USRPInputThread::run()
     {
         while (m_running)
         {
-            const size_t samples_received = m_stream->recv(m_buf, DeviceUSRP::blockSize, md);
+            md.reset();
+            const size_t samples_received = m_stream->recv(m_buf, m_bufSamples, md);
 
             m_packets++;
-            if (samples_received != DeviceUSRP::blockSize)
+            if (samples_received != m_bufSamples)
             {
-                qDebug("USRPInputThread::run - received %ld/%d samples", samples_received, DeviceUSRP::blockSize);
+                qDebug("USRPInputThread::run - received %ld/%d samples", samples_received, m_bufSamples);
             }
             if (md.error_code ==  uhd::rx_metadata_t::ERROR_CODE_TIMEOUT)
             {
                 qDebug("USRPInputThread::run - timeout - ending thread");
                 m_timeouts++;
-                // It seems we can't recover after a timeout, so stop thread
-                m_running = false;
+                // Restart streaming
+                issueStreamCmd(false);
+                issueStreamCmd(true);
+                qDebug("USRPInputThread::run - timeout - restarting");
             }
             else if (md.error_code ==  uhd::rx_metadata_t::ERROR_CODE_OVERFLOW)
             {
                 qDebug("USRPInputThread::run - overflow");
                 m_overflows++;
             }
+            else if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_LATE_COMMAND)
+                qDebug("USRPInputThread::run - late command error");
+            else if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_BROKEN_CHAIN)
+                qDebug("USRPInputThread::run - broken chain error");
+            else if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_ALIGNMENT)
+                qDebug("USRPInputThread::run - alignment error");
+            else if (md.error_code == uhd::rx_metadata_t::ERROR_CODE_BAD_PACKET)
+                qDebug("USRPInputThread::run - bad packet error");
 
-            callbackIQ(m_buf, 2 * samples_received);
+            if (samples_received > 0)
+                callbackIQ(m_buf, 2 * samples_received);
         }
     }
     catch (std::exception& e)

@@ -226,6 +226,7 @@ private:
     DeviceUSRPShared m_deviceShared;
     bool m_channelAcquired;
     uhd::tx_streamer::sptr m_streamId;
+    size_t m_bufSamples;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
