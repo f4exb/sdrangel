@@ -136,7 +136,7 @@ private:
         const QList<QString> &channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings
     );
-    void updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset);
+    bool updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset);
     void updateTarget();
     bool updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, int64_t frequency);
     int getDeviceDirection(DeviceAPI *deviceAPI);
