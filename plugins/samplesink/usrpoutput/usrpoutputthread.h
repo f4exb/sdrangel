@@ -37,7 +37,7 @@ class USRPOutputThread : public QThread, public DeviceUSRPShared::ThreadInterfac
     Q_OBJECT
 
 public:
-    USRPOutputThread(uhd::tx_streamer::sptr stream, SampleSourceFifo* sampleFifo, QObject* parent = 0);
+    USRPOutputThread(uhd::tx_streamer::sptr stream, size_t bufSamples, SampleSourceFifo* sampleFifo, QObject* parent = 0);
     ~USRPOutputThread();
 
     virtual void startWork();
@@ -57,7 +57,8 @@ private:
     quint32 m_droppedPackets;
 
     uhd::tx_streamer::sptr m_stream;
-    qint16 m_buf[2*DeviceUSRP::blockSize]; //must hold I+Q values of each sample hence 2xcomplex size
+    qint16 *m_buf;
+    size_t m_bufSamples;
     SampleSourceFifo* m_sampleFifo;
 
     unsigned int m_log2Interp; // soft decimation

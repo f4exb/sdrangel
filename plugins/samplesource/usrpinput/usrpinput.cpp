@@ -51,6 +51,7 @@ USRPInput::USRPInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_usrpInputThread(nullptr),
+    m_bufSamples(0),
     m_deviceDescription("USRPInput"),
     m_running(false),
     m_channelAcquired(false)
@@ -91,7 +92,9 @@ void USRPInput::destroy()
 
 bool USRPInput::openDevice()
 {
-    if (!m_sampleFifo.setSize(96000 * 4))
+    // B210 supports up to 50MSa/s, so a fairly large FIFO is probably a good idea
+    // Should it be bigger still?
+    if (!m_sampleFifo.setSize(2000000))
     {
         qCritical("USRPInput::openDevice: could not allocate SampleFifo");
         return false;
@@ -325,6 +328,9 @@ bool USRPInput::acquireChannel()
         stream_args.channels = channel_nums;
 
         m_streamId = m_deviceShared.m_deviceParams->getDevice()->get_rx_stream(stream_args);
+
+        // Match our receive buffer size to what UHD uses
+        m_bufSamples = m_streamId->get_max_num_samps();
     }
     catch (std::exception& e)
     {
@@ -375,7 +381,7 @@ bool USRPInput::start()
 
     // start / stop streaming is done in the thread.
 
-    m_usrpInputThread = new USRPInputThread(m_streamId, &m_sampleFifo);
+    m_usrpInputThread = new USRPInputThread(m_streamId, m_bufSamples, &m_sampleFifo);
     qDebug("USRPInput::start: thread created");
 
     applySettings(m_settings, true);
