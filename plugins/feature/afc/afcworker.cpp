@@ -260,7 +260,7 @@ void AFCWorker::processChannelSettings(
             if (mainCore->existsChannel(it.key()))
             {
                 int channelOffset = it.value().m_channelOffset + m_trackerChannelOffset - it.value().m_trackerOffset;
-                updateChannelOffset(it.key(),it.value().m_channelDirection, channelOffset);
+                updateChannelOffset(it.key(), it.value().m_channelDirection, channelOffset);
             }
             else
             {
@@ -286,7 +286,7 @@ void AFCWorker::processChannelSettings(
     }
 }
 
-void AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset)
+bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset)
 {
     SWGSDRangel::SWGChannelSettings swgChannelSettings;
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -315,9 +315,13 @@ void AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int o
         errorResponse
     );
 
-    if (httpRC / 100 != 2) {
+    if (httpRC / 100 != 2)
+    {
         qDebug() << "AFCWorker::updateChannelOffset: error code" << httpRC << ":" << *errorResponse.getMessage();
+        return false;
     }
+
+    return true;
 }
 
 void AFCWorker::updateTarget()
@@ -364,6 +368,7 @@ void AFCWorker::updateTarget()
         QJsonObject *jsonObj = resDevice.asJsonObject();
         QJsonValue xverterFrequencyValue;
 
+        // adjust transverter
         if (WebAPIUtils::extractValue(*jsonObj, "transverterDeltaFrequency", xverterFrequencyValue))
         {
             double xverterFrequency = xverterFrequencyValue.toDouble();
@@ -373,6 +378,11 @@ void AFCWorker::updateTarget()
         {
             qDebug() << "AFCWorker::initTrackerDeviceSet: cannot find device transverter frequency";
             return;
+        }
+
+        // adjust tracker offset
+        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction)) {
+            m_trackerChannelOffset += correction;
         }
     }
     else // act on device
