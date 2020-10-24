@@ -78,6 +78,32 @@ public:
         { }
     };
 
+    class MsgDeviceTrack : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeviceTrack* create() {
+            return new MsgDeviceTrack();
+        }
+    protected:
+        MsgDeviceTrack() :
+            Message()
+        { }
+    };
+
+    class MsgDevicesApply : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDevicesApply* create() {
+            return new MsgDevicesApply();
+        }
+    protected:
+        MsgDevicesApply() :
+            Message()
+        { }
+    };
+
     AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface);
     ~AFCWorker();
     void reset();
@@ -136,7 +162,7 @@ private:
         const QList<QString> &channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings
     );
-    bool updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset);
+    bool updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset, unsigned int blockCount = 0);
     void updateTarget();
     bool updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, int64_t frequency);
     int getDeviceDirection(DeviceAPI *deviceAPI);

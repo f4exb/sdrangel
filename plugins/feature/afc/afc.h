@@ -81,6 +81,32 @@ public:
         { }
     };
 
+    class MsgDeviceTrack : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDeviceTrack* create() {
+            return new MsgDeviceTrack();
+        }
+    protected:
+        MsgDeviceTrack() :
+            Message()
+        { }
+    };
+
+    class MsgDevicesApply : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgDevicesApply* create() {
+            return new MsgDevicesApply();
+        }
+    protected:
+        MsgDevicesApply() :
+            Message()
+        { }
+    };
+
     AFC(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~AFC();
     virtual void destroy() { delete this; }

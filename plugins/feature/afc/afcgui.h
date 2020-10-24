@@ -75,12 +75,14 @@ private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
 	void on_hasTargetFrequency_toggled(bool checked);
-	void on_devicesRefresh_clicked();
-	void on_transverterTarget_toggled(bool checked);
 	void on_targetFrequency_changed(quint64 value);
+	void on_transverterTarget_toggled(bool checked);
+	void on_toleranceFrequency_changed(quint64 value);
+	void on_deviceTrack_clicked();
+	void on_devicesRefresh_clicked();
 	void on_trackerDevice_currentIndexChanged(int index);
 	void on_trackedDevice_currentIndexChanged(int index);
-	void on_toleranceFrequency_changed(quint64 value);
+	void on_devicesApply_clicked();
 	void updateStatus();
 };
 

@@ -137,96 +137,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="devicesLayout">
-      <item>
-       <widget class="QPushButton" name="devicesRefresh">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Refresh indexes of available device sets</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="trackerLabel">
-        <property name="text">
-         <string>Tracker</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="trackerDevice">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Tracker deviceset index</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="trackedLabel">
-        <property name="text">
-         <string>Tracked</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="trackedDevice">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Tracked deviceset index</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="DelaysLayout">
+     <layout class="QHBoxLayout" name="toleranceLayout">
       <item>
        <widget class="QLabel" name="toleranceLabel">
         <property name="toolTip">
@@ -276,6 +187,26 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="deviceTrack">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Force device tracking update</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/arrow_left.png</normaloff>:/arrow_left.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -312,6 +243,115 @@
          <string/>
         </property>
        </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="devicesLayout">
+      <item>
+       <widget class="QPushButton" name="devicesRefresh">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Refresh indexes of available device sets</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="trackerLabel">
+        <property name="text">
+         <string>Tracker</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="trackerDevice">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tracker deviceset index</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="trackedLabel">
+        <property name="text">
+         <string>Tracked</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="trackedDevice">
+        <property name="minimumSize">
+         <size>
+          <width>55</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Tracked deviceset index</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="devicesApply">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Reinitialization of device data</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/arrow_left.png</normaloff>:/arrow_left.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

@@ -36,6 +36,8 @@
 
 MESSAGE_CLASS_DEFINITION(AFCWorker::MsgConfigureAFCWorker, Message)
 MESSAGE_CLASS_DEFINITION(AFCWorker::MsgTrackedDeviceChange, Message)
+MESSAGE_CLASS_DEFINITION(AFCWorker::MsgDeviceTrack, Message)
+MESSAGE_CLASS_DEFINITION(AFCWorker::MsgDevicesApply, Message)
 
 AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_webAPIAdapterInterface(webAPIAdapterInterface),
@@ -101,13 +103,26 @@ bool AFCWorker::handleMessage(const Message& cmd)
     }
     else if (Feature::MsgChannelSettings::match(cmd))
     {
-        qDebug() << "AFCWorker::handleMessage: Feature::MsgChannelSettings";
         QMutexLocker mutexLocker(&m_mutex);
         Feature::MsgChannelSettings& cfg = (Feature::MsgChannelSettings&) cmd;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = cfg.getSWGSettings();
+        qDebug() << "AFCWorker::handleMessage: Feature::MsgChannelSettings:" << *swgChannelSettings->getChannelType();
         processChannelSettings(cfg.getChannelAPI(), cfg.getChannelSettingsKeys(), swgChannelSettings);
 
         delete swgChannelSettings;
+        return true;
+    }
+    else if (MsgDeviceTrack::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        updateTarget();
+        return true;
+    }
+    else if (MsgDevicesApply::match(cmd))
+    {
+        QMutexLocker mutexLocker(&m_mutex);
+        initTrackerDeviceSet(m_settings.m_trackerDeviceSetIndex);
+        initTrackedDeviceSet(m_settings.m_trackedDeviceSetIndex);
         return true;
     }
     else
@@ -286,7 +301,7 @@ void AFCWorker::processChannelSettings(
     }
 }
 
-bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset)
+bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset, unsigned int blockCount)
 {
     SWGSDRangel::SWGChannelSettings swgChannelSettings;
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -306,6 +321,7 @@ bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int o
         .arg(jsonSettingsStr);
     swgChannelSettings.fromJson(jsonStr);
 
+    channelAPI->setFeatureSettingsFeedbackBlockCount(1);
     int httpRC = m_webAPIAdapterInterface->devicesetChannelSettingsPutPatch(
         m_trackedDeviceSet->getIndex(),
         channelAPI->getIndexInDeviceSet(),
@@ -344,20 +360,20 @@ void AFCWorker::updateTarget()
         }
         else
         {
-            qDebug() << "AFCWorker::initTrackerDeviceSet: cannot find device frequency";
+            qDebug() << "AFCWorker::updateTarget: cannot find device frequency";
             return;
         }
     }
     else
     {
-        qDebug() << "AFCWorker::initTrackerDeviceSet: devicesetDeviceSettingsGet error" << rc << ":" << *error.getMessage();
+        qDebug() << "AFCWorker::updateTarget: devicesetDeviceSettingsGet error" << rc << ":" << *error.getMessage();
         return;
     }
 
     int64_t trackerFrequency = m_trackerDeviceFrequency + m_trackerChannelOffset;
     int64_t correction = m_settings.m_targetFrequency - trackerFrequency;
     int64_t tolerance = m_settings.m_freqTolerance;
-    qDebug() << "AFCWorker::initTrackerDeviceSet: correction:" << correction << "tolerance:" << tolerance;
+    qDebug() << "AFCWorker::updateTarget: correction:" << correction << "tolerance:" << tolerance;
 
     if ((correction > -tolerance) && (correction < tolerance)) {
         return;
@@ -376,12 +392,12 @@ void AFCWorker::updateTarget()
         }
         else
         {
-            qDebug() << "AFCWorker::initTrackerDeviceSet: cannot find device transverter frequency";
+            qDebug() << "AFCWorker::updateTarget: cannot find device transverter frequency";
             return;
         }
 
         // adjust tracker offset
-        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction)) {
+        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction, 1)) {
             m_trackerChannelOffset += correction;
         }
     }
@@ -397,7 +413,7 @@ void AFCWorker::updateTarget()
         }
         else
         {
-            qDebug() << "AFCWorker::initTrackerDeviceSet: cannot find device transverter frequency";
+            qDebug() << "AFCWorker::updateTarget: cannot find device transverter frequency";
             return;
         }
     }
@@ -415,6 +431,10 @@ bool AFCWorker::updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, 
     QString jsonSettingsStr = tr("\"%1\":%2").arg(key).arg(frequency);
     QString deviceSettingsKey;
     getDeviceSettingsKey(deviceAPI, deviceSettingsKey);
+    qDebug() << "AFCWorker::updateDeviceFrequency:"
+        << deviceAPI->getHardwareId()
+        << ":" << key
+        << ":" << frequency;
 
     QString jsonStr = tr("{ \"deviceHwType\": \"%1\", \"direction\": \"%2\", \"%3\": {%4}}")
         .arg(deviceAPI->getHardwareId())
@@ -422,7 +442,6 @@ bool AFCWorker::updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, 
         .arg(deviceSettingsKey)
         .arg(jsonSettingsStr);
     swgDeviceSettings.fromJson(jsonStr);
-    qDebug() << "AFCWorker::updateDeviceFrequency:" << jsonStr;
 
     int httpRC = m_webAPIAdapterInterface->devicesetDeviceSettingsPutPatch
     (
