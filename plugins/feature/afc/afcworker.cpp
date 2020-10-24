@@ -115,7 +115,7 @@ bool AFCWorker::handleMessage(const Message& cmd)
     else if (MsgDeviceTrack::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        updateTarget();
+        updateTarget(m_trackerChannelOffset);
         return true;
     }
     else if (MsgDevicesApply::match(cmd))
@@ -267,24 +267,30 @@ void AFCWorker::processChannelSettings(
 
     if (*swgChannelSettings->getChannelType() == "FreqTracker")
     {
-        m_trackerChannelOffset = swgChannelSettings->getFreqTrackerSettings()->getInputFrequencyOffset();
-        QMap<ChannelAPI*, ChannelTracking>::iterator it = m_channelsMap.begin();
+        int trackerChannelOffset = swgChannelSettings->getFreqTrackerSettings()->getInputFrequencyOffset();
 
-        for (; it != m_channelsMap.end(); ++it)
+        if (trackerChannelOffset != m_trackerChannelOffset)
         {
-            if (mainCore->existsChannel(it.key()))
-            {
-                int channelOffset = it.value().m_channelOffset + m_trackerChannelOffset - it.value().m_trackerOffset;
-                updateChannelOffset(it.key(), it.value().m_channelDirection, channelOffset);
-            }
-            else
-            {
-                m_channelsMap.erase(it);
-            }
-        }
+            QMap<ChannelAPI*, ChannelTracking>::iterator it = m_channelsMap.begin();
 
-        if (m_settings.m_hasTargetFrequency) {
-            updateTarget();
+            for (; it != m_channelsMap.end(); ++it)
+            {
+                if (mainCore->existsChannel(it.key()))
+                {
+                    int channelOffset = it.value().m_channelOffset + trackerChannelOffset - it.value().m_trackerOffset;
+                    updateChannelOffset(it.key(), it.value().m_channelDirection, channelOffset);
+                }
+                else
+                {
+                    m_channelsMap.erase(it);
+                }
+            }
+
+            if (m_settings.m_hasTargetFrequency) {
+                updateTarget(trackerChannelOffset);
+            }
+
+            m_trackerChannelOffset = trackerChannelOffset;
         }
     }
     else if (m_channelsMap.contains(const_cast<ChannelAPI*>(channelAPI)))
@@ -340,7 +346,7 @@ bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int o
     return true;
 }
 
-void AFCWorker::updateTarget()
+void AFCWorker::updateTarget(int& trackerChannelOffset)
 {
     SWGSDRangel::SWGDeviceSettings resDevice;
     SWGSDRangel::SWGChannelSettings resChannel;
@@ -370,7 +376,7 @@ void AFCWorker::updateTarget()
         return;
     }
 
-    int64_t trackerFrequency = m_trackerDeviceFrequency + m_trackerChannelOffset;
+    int64_t trackerFrequency = m_trackerDeviceFrequency + trackerChannelOffset;
     int64_t correction = m_settings.m_targetFrequency - trackerFrequency;
     int64_t tolerance = m_settings.m_freqTolerance;
     qDebug() << "AFCWorker::updateTarget: correction:" << correction << "tolerance:" << tolerance;
@@ -397,8 +403,8 @@ void AFCWorker::updateTarget()
         }
 
         // adjust tracker offset
-        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction, 1)) {
-            m_trackerChannelOffset += correction;
+        if (updateChannelOffset(m_freqTracker, 0, trackerChannelOffset + correction, 1)) {
+            trackerChannelOffset += correction;
         }
     }
     else // act on device
