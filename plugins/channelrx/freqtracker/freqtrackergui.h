@@ -28,9 +28,9 @@
 
 class PluginAPI;
 class DeviceUISet;
-
 class FreqTracker;
 class BasebandSampleSink;
+class SpectrumVis;
 
 namespace Ui {
 	class FreqTrackerGUI;
@@ -57,11 +57,13 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	ChannelMarker m_pllChannelMarker;
 	FreqTrackerSettings m_settings;
 	int m_basebandSampleRate;
 	bool m_doApplySettings;
 
 	FreqTracker* m_freqTracker;
+	SpectrumVis* m_spectrumVis;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;

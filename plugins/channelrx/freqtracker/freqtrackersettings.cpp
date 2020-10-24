@@ -23,7 +23,8 @@
 #include "freqtrackersettings.h"
 
 FreqTrackerSettings::FreqTrackerSettings() :
-    m_channelMarker(0)
+    m_channelMarker(0),
+    m_spectrumGUI(0)
 {
     resetToDefaults();
 }
@@ -57,6 +58,10 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_rfBandwidth/100);
     s.writeU32(3, m_log2Decim);
+
+    if (m_spectrumGUI) {
+        s.writeBlob(4, m_spectrumGUI->serialize());
+    }
     s.writeS32(5, m_squelch);
 
     if (m_channelMarker) {
@@ -105,7 +110,13 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         m_rfBandwidth = 100 * tmp;
         d.readU32(3, &utmp, 0);
         m_log2Decim = utmp > 6 ? 6 : utmp;
-        d.readS32(4, &tmp, 20);
+
+        if (m_spectrumGUI)
+        {
+            d.readBlob(4, &bytetmp);
+            m_spectrumGUI->deserialize(bytetmp);
+        }
+
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
         d.readBlob(6, &bytetmp);

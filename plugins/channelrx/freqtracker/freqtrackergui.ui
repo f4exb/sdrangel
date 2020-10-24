@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
+    <width>400</width>
     <height>327</height>
    </rect>
   </property>
@@ -18,14 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>360</width>
+    <width>400</width>
     <height>100</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>360</width>
-    <height>16777215</height>
    </size>
   </property>
   <property name="font">
@@ -45,7 +39,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>358</width>
+     <width>401</width>
      <height>140</height>
     </rect>
    </property>
@@ -686,7 +680,7 @@
     <rect>
      <x>0</x>
      <y>150</y>
-     <width>351</width>
+     <width>391</width>
      <height>171</height>
     </rect>
    </property>
