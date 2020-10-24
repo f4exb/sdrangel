@@ -36,6 +36,7 @@
 
 #include "freqtrackersettings.h"
 
+class SpectrumVis;
 class fftfilt;
 class MessageQueue;
 class QTimer;
@@ -48,6 +49,7 @@ public:
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
+    void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
     void applySettings(const FreqTrackerSettings& settings, bool force = false);
     void applyChannelSettings(int sinkSampleRate, int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void setMessageQueueToInput(MessageQueue *messageQueue) { m_messageQueueToInput = messageQueue;}
@@ -98,6 +100,11 @@ private:
     int m_channelSampleRate;
     int m_inputFrequencyOffset;
     uint32_t m_sinkSampleRate;
+
+	SpectrumVis* m_spectrumSink;
+	SampleVector m_sampleBuffer;
+    unsigned int m_sampleBufferCount;
+    unsigned int m_sampleBufferSize;
 
 	NCOF m_nco;
     PhaseLockComplex m_pll;

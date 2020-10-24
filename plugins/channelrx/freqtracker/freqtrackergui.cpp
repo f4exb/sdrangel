@@ -91,6 +91,8 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         m_basebandSampleRate = cfg.getSampleRate();
         int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
+        ui->glSpectrum->setSampleRate(sinkSampleRate);
+        m_pllChannelMarker.setBandwidth(sinkSampleRate/1000);
 
         if (sinkSampleRate > 1000) {
             ui->rfBW->setMaximum(sinkSampleRate/100);
@@ -151,6 +153,8 @@ void FreqTrackerGUI::on_log2Decim_currentIndexChanged(int index)
     m_settings.m_log2Decim = index < 0 ? 0 : index > 6 ? 6 : index;
     int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
     ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
+    ui->glSpectrum->setSampleRate(sinkSampleRate);
+    m_pllChannelMarker.setBandwidth(sinkSampleRate/1000);
 
     if (sinkSampleRate > 1000) {
         ui->rfBW->setMaximum(sinkSampleRate/100);
@@ -288,6 +292,7 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 	m_pluginAPI(pluginAPI),
 	m_deviceUISet(deviceUISet),
 	m_channelMarker(this),
+    m_pllChannelMarker(this),
     m_basebandSampleRate(0),
 	m_doApplySettings(true),
 	m_squelchOpen(false),
@@ -300,6 +305,8 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
 	m_freqTracker = reinterpret_cast<FreqTracker*>(rxChannel);
 	m_freqTracker->setMessageQueueToGUI(getInputMessageQueue());
+    m_spectrumVis = m_freqTracker->getSpectrumVis();
+	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
@@ -318,9 +325,22 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     setTitleColor(m_channelMarker.getColor());
     m_settings.setChannelMarker(&m_channelMarker);
+    m_settings.setSpectrumGUI(ui->spectrumGUI);
 
 	m_deviceUISet->addChannelMarker(&m_channelMarker);
 	m_deviceUISet->addRollupWidget(this);
+
+    ui->glSpectrum->setCenterFrequency(0);
+    m_pllChannelMarker.blockSignals(true);
+    m_pllChannelMarker.setColor(Qt::gray);
+    m_pllChannelMarker.setCenterFrequency(0);
+    m_pllChannelMarker.setBandwidth(35);
+    m_pllChannelMarker.setTitle("Tracker");
+    m_pllChannelMarker.setMovable(false);
+    m_pllChannelMarker.blockSignals(false);
+    m_pllChannelMarker.setVisible(true);
+    ui->glSpectrum->addChannelMarker(&m_pllChannelMarker);
+    ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	connect(&m_channelMarker, SIGNAL(changedByCursor()), this, SLOT(channelMarkerChangedByCursor()));
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
@@ -445,6 +465,7 @@ void FreqTrackerGUI::tick()
     int freq = m_freqTracker->getAvgDeltaFreq();
     QLocale loc;
     ui->trackingFrequencyText->setText(tr("%1 Hz").arg(loc.toString(freq)));
+    m_pllChannelMarker.setCenterFrequency(freq);
 
 	if (m_settings.m_tracking) {
         ui->tracking->setToolTip("Tracking on");
