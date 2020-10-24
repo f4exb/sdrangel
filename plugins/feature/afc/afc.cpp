@@ -37,6 +37,8 @@
 
 MESSAGE_CLASS_DEFINITION(AFC::MsgConfigureAFC, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(AFC::MsgDeviceTrack, Message)
+MESSAGE_CLASS_DEFINITION(AFC::MsgDevicesApply, Message)
 
 const QString AFC::m_featureIdURI = "sdrangel.feature.afc";
 const QString AFC::m_featureId = "AFC";
@@ -124,6 +126,26 @@ bool AFC::handleMessage(const Message& cmd)
             delete swgChannelSettings;
             return true;
         }
+    }
+    else if (MsgDeviceTrack::match(cmd))
+    {
+        if (m_worker->isRunning())
+        {
+            AFCWorker::MsgDeviceTrack *msg = AFCWorker::MsgDeviceTrack::create();
+            m_worker->getInputMessageQueue()->push(msg);
+        }
+
+        return true;
+    }
+    else if (MsgDevicesApply::match(cmd))
+    {
+        if (m_worker->isRunning())
+        {
+            AFCWorker::MsgDevicesApply *msg = AFCWorker::MsgDevicesApply::create();
+            m_worker->getInputMessageQueue()->push(msg);
+        }
+
+        return true;
     }
 
     return false;

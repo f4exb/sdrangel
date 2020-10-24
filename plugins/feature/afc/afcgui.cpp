@@ -303,12 +303,6 @@ void AFCGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void AFCGUI::on_devicesRefresh_clicked()
-{
-    updateDeviceSetLists();
-    displaySettings();
-}
-
 void AFCGUI::on_hasTargetFrequency_toggled(bool checked)
 {
     m_settings.m_hasTargetFrequency = checked;
@@ -325,6 +319,25 @@ void AFCGUI::on_transverterTarget_toggled(bool checked)
 {
     m_settings.m_transverterTarget = checked;
     applySettings();
+}
+
+
+void AFCGUI::on_toleranceFrequency_changed(quint64 value)
+{
+    m_settings.m_freqTolerance = value;
+    applySettings();
+}
+
+void AFCGUI::on_deviceTrack_clicked()
+{
+    AFC::MsgDeviceTrack *msg = AFC::MsgDeviceTrack::create();
+    m_afc->getInputMessageQueue()->push(msg);
+}
+
+void AFCGUI::on_devicesRefresh_clicked()
+{
+    updateDeviceSetLists();
+    displaySettings();
 }
 
 void AFCGUI::on_trackerDevice_currentIndexChanged(int index)
@@ -345,11 +358,9 @@ void AFCGUI::on_trackedDevice_currentIndexChanged(int index)
     }
 }
 
-
-void AFCGUI::on_toleranceFrequency_changed(quint64 value)
+void AFCGUI::on_devicesApply_clicked()
 {
-    m_settings.m_freqTolerance = value;
-    applySettings();
+
 }
 
 void AFCGUI::updateStatus()
