@@ -122,6 +122,7 @@ public:
     // Features support
     void addFeatureSettingsFeedback(Feature *feature);
     void removeFeatureSettingsFeedback(Feature *feature);
+    void setFeatureSettingsFeedbackBlockCount(unsigned int count) { m_featuresSettingsFeedbackBlockCount = count; }
 
     // MIMO support
     StreamType getStreamType() const { return m_streamType; }
@@ -131,6 +132,7 @@ public:
 
 protected:
     QList<Feature*> m_featuresSettingsFeedback; //!< list of features to report back settings changes in swagger API format
+    unsigned int m_featuresSettingsFeedbackBlockCount; //!< actually send feedback if 0. Decremented at each potential feedback
 
 private:
     StreamType m_streamType;
