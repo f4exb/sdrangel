@@ -21,6 +21,7 @@
 #include "channelapi.h"
 
 ChannelAPI::ChannelAPI(const QString& name, StreamType streamType) :
+    m_featuresSettingsFeedbackBlockCount(0),
     m_streamType(streamType),
     m_name(name),
     m_indexInDeviceSet(-1),
