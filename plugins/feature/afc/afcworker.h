@@ -163,7 +163,7 @@ private:
         SWGSDRangel::SWGChannelSettings *swgChannelSettings
     );
     bool updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset, unsigned int blockCount = 0);
-    void updateTarget();
+    void updateTarget(int& trackerChannelOffset);
     bool updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, int64_t frequency);
     int getDeviceDirection(DeviceAPI *deviceAPI);
     void getDeviceSettingsKey(DeviceAPI *deviceAPI, QString& settingsKey);

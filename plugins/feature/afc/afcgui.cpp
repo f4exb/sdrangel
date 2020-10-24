@@ -124,7 +124,7 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
     ui->targetFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
-    ui->targetFrequency->setValueRange(11, 0, 99999999999L);
+    ui->targetFrequency->setValueRange(10, 0, 9999999999L);
 
     ui->toleranceFrequency->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->toleranceFrequency->setValueRange(5, 0, 99999L);
