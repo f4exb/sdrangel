@@ -258,8 +258,13 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    if (m_featuresSettingsFeedback.size() > 0) {
-        featuresSendSettings(reverseAPIKeys, settings, force);
+    if (m_featuresSettingsFeedback.size() > 0)
+    {
+        if (m_featuresSettingsFeedbackBlockCount == 0) {
+            featuresSendSettings(reverseAPIKeys, settings, force);
+        } else {
+            m_featuresSettingsFeedbackBlockCount--;
+        }
     }
 
     m_settings = settings;
