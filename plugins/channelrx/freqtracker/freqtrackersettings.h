@@ -42,6 +42,7 @@ struct FreqTrackerSettings
     QString m_title;
     Serializable *m_channelMarker;
     Serializable *m_spectrumGUI;
+    int  m_spanLog2;
     float m_alphaEMA; //!< alpha factor for delta frequency EMA
     bool m_tracking;
     TrackerType m_trackerType;

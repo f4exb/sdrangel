@@ -91,8 +91,8 @@ bool FreqTrackerGUI::handleMessage(const Message& message)
         m_basebandSampleRate = cfg.getSampleRate();
         int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
         ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
-        ui->glSpectrum->setSampleRate(sinkSampleRate);
-        m_pllChannelMarker.setBandwidth(sinkSampleRate/1000);
+        displaySpectrumBandwidth(m_settings.m_spanLog2);
+        m_pllChannelMarker.setBandwidth(sinkSampleRate/500);
 
         if (sinkSampleRate > 1000) {
             ui->rfBW->setMaximum(sinkSampleRate/100);
@@ -153,8 +153,8 @@ void FreqTrackerGUI::on_log2Decim_currentIndexChanged(int index)
     m_settings.m_log2Decim = index < 0 ? 0 : index > 6 ? 6 : index;
     int sinkSampleRate = m_basebandSampleRate / (1<<m_settings.m_log2Decim);
     ui->channelSampleRateText->setText(tr("%1k").arg(QString::number(sinkSampleRate / 1000.0f, 'g', 5)));
-    ui->glSpectrum->setSampleRate(sinkSampleRate);
-    m_pllChannelMarker.setBandwidth(sinkSampleRate/1000);
+    displaySpectrumBandwidth(m_settings.m_spanLog2);
+    m_pllChannelMarker.setBandwidth(sinkSampleRate/500);
 
     if (sinkSampleRate > 1000) {
         ui->rfBW->setMaximum(sinkSampleRate/100);
@@ -233,6 +233,15 @@ void FreqTrackerGUI::on_squelchGate_valueChanged(int value)
     ui->squelchGateText->setText(QString("%1").arg(value * 10.0f, 0, 'f', 0));
     m_settings.m_squelchGate = value;
 	applySettings();
+}
+
+void FreqTrackerGUI::on_spanLog2_valueChanged(int value)
+{
+    if ((value < 0) || (value > 6)) {
+        return;
+    }
+
+    applySpectrumBandwidth(ui->spanLog2->value());
 }
 
 void FreqTrackerGUI::onWidgetRolled(QWidget* widget, bool rollDown)
@@ -332,9 +341,9 @@ FreqTrackerGUI::FreqTrackerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
 
     ui->glSpectrum->setCenterFrequency(0);
     m_pllChannelMarker.blockSignals(true);
-    m_pllChannelMarker.setColor(Qt::gray);
+    m_pllChannelMarker.setColor(Qt::white);
     m_pllChannelMarker.setCenterFrequency(0);
-    m_pllChannelMarker.setBandwidth(35);
+    m_pllChannelMarker.setBandwidth(70);
     m_pllChannelMarker.setTitle("Tracker");
     m_pllChannelMarker.setMovable(false);
     m_pllChannelMarker.blockSignals(false);
@@ -367,6 +376,13 @@ void FreqTrackerGUI::applySettings(bool force)
 	    FreqTracker::MsgConfigureFreqTracker* message = FreqTracker::MsgConfigureFreqTracker::create( m_settings, force);
 	    m_freqTracker->getInputMessageQueue()->push(message);
 	}
+}
+
+void FreqTrackerGUI::applySpectrumBandwidth(int spanLog2, bool force)
+{
+    displaySpectrumBandwidth(spanLog2);
+    m_settings.m_spanLog2 = spanLog2;
+    applySettings(force);
 }
 
 void FreqTrackerGUI::displaySettings()
@@ -407,9 +423,27 @@ void FreqTrackerGUI::displaySettings()
     ui->squelchGateText->setText(QString("%1").arg(m_settings.m_squelchGate * 10.0f, 0, 'f', 0));
     ui->squelchGate->setValue(m_settings.m_squelchGate);
 
+    displaySpectrumBandwidth(m_settings.m_spanLog2);
     displayStreamIndex();
 
     blockApplySettings(false);
+}
+
+void FreqTrackerGUI::displaySpectrumBandwidth(int spanLog2)
+{
+    int spectrumRate = (m_basebandSampleRate / (1<<m_settings.m_log2Decim)) / (1<<spanLog2);
+
+    qDebug() << "FreqTrackerGUI::displaySpectrumBandwidth:"
+            << " spanLog2: " << spanLog2
+            << " spectrumRate: " << spectrumRate;
+
+    QString spanStr = QString::number(spectrumRate/1000.0, 'f', 1);
+
+    ui->spanLog2->blockSignals(true);
+    ui->spanLog2->setValue(spanLog2);
+    ui->spanLog2->blockSignals(false);
+    ui->spanText->setText(tr("%1k").arg(spanStr));
+    ui->glSpectrum->setSampleRate(spectrumRate);
 }
 
 void FreqTrackerGUI::displayStreamIndex()

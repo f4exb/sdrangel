@@ -37,6 +37,7 @@ void FreqTrackerSettings::resetToDefaults()
     m_squelch = -40.0;
     m_rgbColor = QColor(200, 244, 66).rgb();
     m_title = "Frequency Tracker";
+    m_spanLog2 = 0;
     m_alphaEMA = 0.1;
     m_tracking = false;
     m_trackerType = TrackerFLL;
@@ -72,6 +73,7 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeFloat(8, m_alphaEMA);
     s.writeString(9, m_title);
     s.writeBool(10, m_tracking);
+    s.writeS32(11, m_spanLog2);
     s.writeS32(12, (int) m_trackerType);
     s.writeU32(13, m_pllPskOrder);
     s.writeBool(14, m_rrc);
@@ -130,6 +132,7 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         m_alphaEMA = ftmp < 0.01 ? 0.01 : ftmp > 1.0 ? 1.0 : ftmp;
         d.readString(9, &m_title, "Frequency Tracker");
         d.readBool(10, &m_tracking, false);
+        d.readS32(11, &m_spanLog2, 0);
         d.readS32(12, &tmp, 0);
         m_trackerType = tmp < 0 ? TrackerFLL : tmp > 2 ? TrackerPLL : (TrackerType) tmp;
         d.readU32(13, &utmp, 2);

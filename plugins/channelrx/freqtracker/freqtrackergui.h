@@ -73,7 +73,9 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+	void applySpectrumBandwidth(int spanLog2, bool force = false);
 	void displaySettings();
+	void displaySpectrumBandwidth(int spanLog2);
     void displayStreamIndex();
 	bool handleMessage(const Message& message);
 
@@ -92,6 +94,7 @@ private slots:
 	void on_rrcRolloff_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
     void on_squelchGate_valueChanged(int value);
+	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
