@@ -31,6 +31,9 @@ AFCSettings:
       descritpion: Frequency shift tolerance before tracker frequency is (re)adjusted
       type: integer
       format: int64
+    trackerAdjustPeriod:
+      description: Tracker channel frequency adjustment period in seconds
+      type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)
       type: integer
