@@ -22,6 +22,7 @@
 #include <cstring>
 #include <cmath>
 #include <regex>
+#include <thread>
 
 #include <uhd/types/device_addr.hpp>
 
