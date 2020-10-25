@@ -105,6 +105,8 @@ private:
 	SampleVector m_sampleBuffer;
     unsigned int m_sampleBufferCount;
     unsigned int m_sampleBufferSize;
+    Complex m_sum;
+  	int m_undersampleCount;
 
 	NCOF m_nco;
     PhaseLockComplex m_pll;
