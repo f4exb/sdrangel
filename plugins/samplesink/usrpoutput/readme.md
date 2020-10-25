@@ -105,6 +105,10 @@ Use this slider to adjust the global gain of the Tx chain. The allowable values 
 
 This is the Tx hardware filter bandwidth in kHz in the AD936x device for the given channel. Use the wheels to adjust the value. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
+<h3>Tx LO offset</h3>
+
+This adjusts the Tx local oscillator (LO) frequency from the centre frequency by the given amount in kHz, and the NCOs are used to digitally shift the signal to the set centre frequency. This can be used to push the Tx LO leakage (which for the AD396x is -50dBc) out of band. The shift should be less than half of the sample rate.
+
 <h3>12: Stream status indicator</h3>
 
 This label turns green when data has been transmitted to the device.
