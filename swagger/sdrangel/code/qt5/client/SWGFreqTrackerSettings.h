@@ -60,6 +60,9 @@ public:
     QString* getTitle();
     void setTitle(QString* title);
 
+    qint32 getSpanLog2();
+    void setSpanLog2(qint32 span_log2);
+
     float getAlphaEma();
     void setAlphaEma(float alpha_ema);
 
@@ -120,6 +123,9 @@ private:
 
     QString* title;
     bool m_title_isSet;
+
+    qint32 span_log2;
+    bool m_span_log2_isSet;
 
     float alpha_ema;
     bool m_alpha_ema_isSet;

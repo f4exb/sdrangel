@@ -40,6 +40,8 @@ SWGFreqTrackerSettings::SWGFreqTrackerSettings() {
     m_rgb_color_isSet = false;
     title = nullptr;
     m_title_isSet = false;
+    span_log2 = 0;
+    m_span_log2_isSet = false;
     alpha_ema = 0.0f;
     m_alpha_ema_isSet = false;
     tracking = 0;
@@ -86,6 +88,8 @@ SWGFreqTrackerSettings::init() {
     m_rgb_color_isSet = false;
     title = new QString("");
     m_title_isSet = false;
+    span_log2 = 0;
+    m_span_log2_isSet = false;
     alpha_ema = 0.0f;
     m_alpha_ema_isSet = false;
     tracking = 0;
@@ -133,6 +137,7 @@ SWGFreqTrackerSettings::cleanup() {
 
 
 
+
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
@@ -163,6 +168,8 @@ SWGFreqTrackerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&span_log2, pJson["spanLog2"], "qint32", "");
     
     ::SWGSDRangel::setValue(&alpha_ema, pJson["alphaEMA"], "float", "");
     
@@ -223,6 +230,9 @@ SWGFreqTrackerSettings::asJsonObject() {
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
+    }
+    if(m_span_log2_isSet){
+        obj->insert("spanLog2", QJsonValue(span_log2));
     }
     if(m_alpha_ema_isSet){
         obj->insert("alphaEMA", QJsonValue(alpha_ema));
@@ -325,6 +335,16 @@ void
 SWGFreqTrackerSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
+}
+
+qint32
+SWGFreqTrackerSettings::getSpanLog2() {
+    return span_log2;
+}
+void
+SWGFreqTrackerSettings::setSpanLog2(qint32 span_log2) {
+    this->span_log2 = span_log2;
+    this->m_span_log2_isSet = true;
 }
 
 float
@@ -478,6 +498,9 @@ SWGFreqTrackerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_span_log2_isSet){
             isObjectUpdated = true; break;
         }
         if(m_alpha_ema_isSet){
