@@ -69,3 +69,31 @@ void DeviceUSRP::enumOriginDevices(const QString& hardwareId, PluginInterface::O
         qDebug() << "DeviceUSRP::enumOriginDevices: exception: " << e.what();
     }
 }
+
+void DeviceUSRP::waitForLock(uhd::usrp::multi_usrp::sptr usrp, const QString& clockSource, int channel)
+{
+    int tries;
+    const int maxTries = 100;
+
+    // Wait for Ref lock
+    std::vector<std::string> sensor_names;
+    sensor_names = usrp->get_tx_sensor_names(channel);
+    if (clockSource == "external")
+    {
+        if (std::find(sensor_names.begin(), sensor_names.end(), "ref_locked") != sensor_names.end())
+        {
+            for (tries = 0; !usrp->get_mboard_sensor("ref_locked", 0).to_bool() && (tries < maxTries); tries++)
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            if (tries == maxTries)
+                qCritical("USRPInput::acquireChannel: Failed to lock ref");
+        }
+    }
+    // Wait for LO lock
+    if (std::find(sensor_names.begin(), sensor_names.end(), "lo_locked") != sensor_names.end())
+    {
+        for (tries = 0; !usrp->get_tx_sensor("lo_locked", channel).to_bool() && (tries < maxTries); tries++)
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        if (tries == maxTries)
+            qCritical("USRPInput::acquireChannel: Failed to lock LO");
+    }
+}

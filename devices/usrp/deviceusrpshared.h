@@ -36,31 +36,37 @@ public:
     public:
         int      getDevSampleRate() const { return m_devSampleRate; }
         uint64_t getCenterFrequency() const { return m_centerFrequency; }
+        int      getLOOffset() const { return m_loOffset; }
         bool getRxElseTx() const { return m_rxElseTx; }
 
         static MsgReportBuddyChange* create(
                 int devSampleRate,
                 uint64_t centerFrequency,
+                int loOffset,
                 bool rxElseTx)
         {
             return new MsgReportBuddyChange(
                     devSampleRate,
                     centerFrequency,
+                    loOffset,
                     rxElseTx);
         }
 
     private:
         int      m_devSampleRate;       //!< device/host sample rate
         uint64_t m_centerFrequency;     //!< Center frequency
+        int      m_loOffset;            //!< LO offset
         bool     m_rxElseTx;            //!< tells which side initiated the message
 
         MsgReportBuddyChange(
                 int devSampleRate,
                 uint64_t centerFrequency,
+                int loOffset,
                 bool rxElseTx) :
             Message(),
             m_devSampleRate(devSampleRate),
             m_centerFrequency(centerFrequency),
+            m_loOffset(loOffset),
             m_rxElseTx(rxElseTx)
         { }
     };
