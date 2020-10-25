@@ -19,6 +19,8 @@ FreqTrackerSettings:
       type: integer
     title:
       type: string
+    spanLog2:
+      type: integer
     alphaEMA:
       description: Alpha factor for delta frequency EMA
       type: number
