@@ -37,6 +37,7 @@ void AFCSettings::resetToDefaults()
     m_transverterTarget = false;
     m_targetFrequency = 0;
     m_freqTolerance = 1000;
+    m_trackerAdjustPeriod = 20;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -51,6 +52,7 @@ QByteArray AFCSettings::serialize() const
     s.writeString(1, m_title);
     s.writeU32(2, m_rgbColor);
     s.writeS32(3, m_trackerDeviceSetIndex);
+    s.writeU32(4, m_trackerAdjustPeriod);
     s.writeS32(5, m_trackedDeviceSetIndex);
     s.writeBool(6, m_hasTargetFrequency);
     s.writeBool(7, m_transverterTarget);
@@ -85,6 +87,7 @@ bool AFCSettings::deserialize(const QByteArray& data)
         d.readString(1, &m_title, "AFC");
         d.readU32(2, &m_rgbColor, QColor(255, 255, 0).rgb());
         d.readS32(3, &m_trackerDeviceSetIndex, -1);
+        d.readU32(4, &m_trackerAdjustPeriod, 20);
         d.readS32(5, &m_trackedDeviceSetIndex, -1);
         d.readBool(6, &m_hasTargetFrequency, false);
         d.readBool(7, &m_transverterTarget, false);
