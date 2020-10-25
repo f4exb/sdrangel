@@ -44,6 +44,8 @@ SWGAFCSettings::SWGAFCSettings() {
     m_target_frequency_isSet = false;
     freq_tolerance = 0L;
     m_freq_tolerance_isSet = false;
+    tracker_adjust_period = 0;
+    m_tracker_adjust_period_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -78,6 +80,8 @@ SWGAFCSettings::init() {
     m_target_frequency_isSet = false;
     freq_tolerance = 0L;
     m_freq_tolerance_isSet = false;
+    tracker_adjust_period = 0;
+    m_tracker_adjust_period_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -95,6 +99,7 @@ SWGAFCSettings::cleanup() {
     if(title != nullptr) { 
         delete title;
     }
+
 
 
 
@@ -137,6 +142,8 @@ SWGAFCSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&target_frequency, pJson["targetFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&freq_tolerance, pJson["freqTolerance"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&tracker_adjust_period, pJson["trackerAdjustPeriod"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -187,6 +194,9 @@ SWGAFCSettings::asJsonObject() {
     }
     if(m_freq_tolerance_isSet){
         obj->insert("freqTolerance", QJsonValue(freq_tolerance));
+    }
+    if(m_tracker_adjust_period_isSet){
+        obj->insert("trackerAdjustPeriod", QJsonValue(tracker_adjust_period));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -288,6 +298,16 @@ SWGAFCSettings::setFreqTolerance(qint64 freq_tolerance) {
 }
 
 qint32
+SWGAFCSettings::getTrackerAdjustPeriod() {
+    return tracker_adjust_period;
+}
+void
+SWGAFCSettings::setTrackerAdjustPeriod(qint32 tracker_adjust_period) {
+    this->tracker_adjust_period = tracker_adjust_period;
+    this->m_tracker_adjust_period_isSet = true;
+}
+
+qint32
 SWGAFCSettings::getUseReverseApi() {
     return use_reverse_api;
 }
@@ -364,6 +384,9 @@ SWGAFCSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_freq_tolerance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tracker_adjust_period_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){
