@@ -33,6 +33,7 @@ struct AFCSettings
     bool m_transverterTarget;
     quint64 m_targetFrequency;
     quint64 m_freqTolerance;
+    unsigned int m_trackerAdjustPeriod; //!< tracker channel frequency adjustment period in seconds
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;

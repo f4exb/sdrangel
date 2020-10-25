@@ -49,6 +49,11 @@ AFCWorker::AFCWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_mutex(QMutex::Recursive)
 {
     qDebug("AFCWorker::AFCWorker");
+	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateTarget()));
+
+    if (m_settings.m_hasTargetFrequency) {
+    	m_updateTimer.start(m_settings.m_trackerAdjustPeriod * 1000);
+    }
 }
 
 AFCWorker::~AFCWorker()
@@ -115,7 +120,7 @@ bool AFCWorker::handleMessage(const Message& cmd)
     else if (MsgDeviceTrack::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        updateTarget(m_trackerChannelOffset);
+        updateTarget();
         return true;
     }
     else if (MsgDevicesApply::match(cmd))
@@ -150,6 +155,19 @@ void AFCWorker::applySettings(const AFCSettings& settings, bool force)
 
     if ((settings.m_trackedDeviceSetIndex != m_settings.m_trackedDeviceSetIndex) || force) {
         initTrackedDeviceSet(settings.m_trackedDeviceSetIndex);
+    }
+
+    if ((settings.m_trackerAdjustPeriod != m_settings.m_trackerAdjustPeriod) || force) {
+        m_updateTimer.setInterval(settings.m_trackerAdjustPeriod * 1000);
+    }
+
+    if ((settings.m_hasTargetFrequency != m_settings.m_hasTargetFrequency) || force)
+    {
+        if (settings.m_hasTargetFrequency) {
+            m_updateTimer.start(m_settings.m_trackerAdjustPeriod * 1000);
+        } else {
+            m_updateTimer.stop();
+        }
     }
 
     m_settings = settings;
@@ -264,45 +282,44 @@ void AFCWorker::processChannelSettings(
     SWGSDRangel::SWGChannelSettings *swgChannelSettings)
 {
     MainCore *mainCore = MainCore::instance();
+    QJsonObject *jsonObj = swgChannelSettings->asJsonObject();
+    QJsonValue channelOffsetValue;
 
-    if (*swgChannelSettings->getChannelType() == "FreqTracker")
+    if (WebAPIUtils::extractValue(*jsonObj, "inputFrequencyOffset", channelOffsetValue))
     {
-        int trackerChannelOffset = swgChannelSettings->getFreqTrackerSettings()->getInputFrequencyOffset();
+        int channelOffset = channelOffsetValue.toInt();
 
-        if (trackerChannelOffset != m_trackerChannelOffset)
+        if (*swgChannelSettings->getChannelType() == "FreqTracker")
         {
-            QMap<ChannelAPI*, ChannelTracking>::iterator it = m_channelsMap.begin();
-
-            for (; it != m_channelsMap.end(); ++it)
+            if (channelOffset != m_trackerChannelOffset)
             {
-                if (mainCore->existsChannel(it.key()))
-                {
-                    int channelOffset = it.value().m_channelOffset + trackerChannelOffset - it.value().m_trackerOffset;
-                    updateChannelOffset(it.key(), it.value().m_channelDirection, channelOffset);
-                }
-                else
-                {
-                    m_channelsMap.erase(it);
-                }
-            }
+                qDebug("AFCWorker::processChannelSettings: FreqTracker offset change: %d", channelOffset);
+                QMap<ChannelAPI*, ChannelTracking>::iterator it = m_channelsMap.begin();
 
-            if (m_settings.m_hasTargetFrequency) {
-                updateTarget(trackerChannelOffset);
-            }
+                for (; it != m_channelsMap.end(); ++it)
+                {
+                    if (mainCore->existsChannel(it.key()))
+                    {
+                        int channelOffset = it.value().m_channelOffset + channelOffset - it.value().m_trackerOffset;
+                        updateChannelOffset(it.key(), it.value().m_channelDirection, channelOffset);
+                    }
+                    else
+                    {
+                        m_channelsMap.erase(it);
+                    }
+                }
 
-            m_trackerChannelOffset = trackerChannelOffset;
+                m_trackerChannelOffset = channelOffset;
+            }
         }
-    }
-    else if (m_channelsMap.contains(const_cast<ChannelAPI*>(channelAPI)))
-    {
-        QJsonObject *jsonObj = swgChannelSettings->asJsonObject();
-        QJsonValue channelOffsetValue;
-
-        if (WebAPIUtils::extractValue(*jsonObj, "inputFrequencyOffset", channelOffsetValue))
+        else if (m_channelsMap.contains(const_cast<ChannelAPI*>(channelAPI)))
         {
-            int channelOffset = channelOffsetValue.toInt();
-            m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_channelOffset = channelOffset;
-            m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_trackerOffset = m_trackerChannelOffset;
+            if (WebAPIUtils::extractValue(*jsonObj, "inputFrequencyOffset", channelOffsetValue))
+            {
+                int channelOffset = channelOffsetValue.toInt();
+                m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_channelOffset = channelOffset;
+                m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_trackerOffset = m_trackerChannelOffset;
+            }
         }
     }
 }
@@ -346,7 +363,7 @@ bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int o
     return true;
 }
 
-void AFCWorker::updateTarget(int& trackerChannelOffset)
+void AFCWorker::updateTarget()
 {
     SWGSDRangel::SWGDeviceSettings resDevice;
     SWGSDRangel::SWGChannelSettings resChannel;
@@ -376,7 +393,7 @@ void AFCWorker::updateTarget(int& trackerChannelOffset)
         return;
     }
 
-    int64_t trackerFrequency = m_trackerDeviceFrequency + trackerChannelOffset;
+    int64_t trackerFrequency = m_trackerDeviceFrequency + m_trackerChannelOffset;
     int64_t correction = m_settings.m_targetFrequency - trackerFrequency;
     int64_t tolerance = m_settings.m_freqTolerance;
     qDebug() << "AFCWorker::updateTarget: correction:" << correction << "tolerance:" << tolerance;
@@ -403,8 +420,8 @@ void AFCWorker::updateTarget(int& trackerChannelOffset)
         }
 
         // adjust tracker offset
-        if (updateChannelOffset(m_freqTracker, 0, trackerChannelOffset + correction, 1)) {
-            trackerChannelOffset += correction;
+        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction, 1)) {
+            m_trackerChannelOffset += correction;
         }
     }
     else // act on device

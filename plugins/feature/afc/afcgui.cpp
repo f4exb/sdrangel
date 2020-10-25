@@ -174,6 +174,8 @@ void AFCGUI::displaySettings()
     ui->transverterTarget->setChecked(m_settings.m_transverterTarget);
     ui->targetFrequency->setValue(m_settings.m_targetFrequency);
     ui->toleranceFrequency->setValue(m_settings.m_freqTolerance);
+    ui->targetPeriod->setValue(m_settings.m_trackerAdjustPeriod);
+    ui->targetPeriodText->setText(tr("%1").arg(m_settings.m_trackerAdjustPeriod));
     blockApplySettings(false);
 }
 
@@ -361,6 +363,13 @@ void AFCGUI::on_trackedDevice_currentIndexChanged(int index)
 void AFCGUI::on_devicesApply_clicked()
 {
 
+}
+
+void AFCGUI::on_targetPeriod_valueChanged(int value)
+{
+    m_settings.m_trackerAdjustPeriod = value;
+    ui->targetPeriodText->setText(tr("%1").arg(m_settings.m_trackerAdjustPeriod));
+    applySettings();
 }
 
 void AFCGUI::updateStatus()

@@ -184,6 +184,7 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
             << " m_transverterTarget: " << settings.m_transverterTarget
             << " m_targetFrequency: " << settings.m_targetFrequency
             << " m_freqTolerance: " << settings.m_freqTolerance
+            << " m_trackerAdjustPeriod:" << settings.m_trackerAdjustPeriod
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -211,6 +212,9 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
     }
     if ((m_settings.m_freqTolerance != settings.m_freqTolerance) || force) {
         reverseAPIKeys.append("freqTolerance");
+    }
+    if ((m_settings.m_trackerAdjustPeriod != settings.m_trackerAdjustPeriod) || force) {
+        reverseAPIKeys.append("trackerAdjustPeriod");
     }
 
     if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force) {
@@ -331,6 +335,7 @@ void AFC::webapiFormatFeatureSettings(
     response.getAfcSettings()->setTransverterTarget(settings.m_transverterTarget);
     response.getAfcSettings()->setTargetFrequency(settings.m_targetFrequency);
     response.getAfcSettings()->setFreqTolerance(settings.m_freqTolerance);
+    response.getAfcSettings()->setTrackerAdjustPeriod(settings.m_trackerAdjustPeriod);
 
     response.getAfcSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -373,6 +378,9 @@ void AFC::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("freqTolerance")) {
         settings.m_freqTolerance = response.getAfcSettings()->getFreqTolerance();
+    }
+    if (featureSettingsKeys.contains("trackerAdjustPeriod")) {
+        settings.m_trackerAdjustPeriod = response.getAfcSettings()->getTrackerAdjustPeriod();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getAfcSettings()->getUseReverseApi() != 0;
@@ -429,6 +437,9 @@ void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const A
     }
     if (channelSettingsKeys.contains("freqTolerance") || force) {
         swgAFCSettings->setFreqTolerance(settings.m_freqTolerance);
+    }
+    if (channelSettingsKeys.contains("trackerAdjustPeriod") || force) {
+        swgAFCSettings->setTrackerAdjustPeriod(settings.m_trackerAdjustPeriod);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")

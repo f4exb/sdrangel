@@ -83,6 +83,7 @@ private slots:
 	void on_trackerDevice_currentIndexChanged(int index);
 	void on_trackedDevice_currentIndexChanged(int index);
 	void on_devicesApply_clicked();
+	void on_targetPeriod_valueChanged(int value);
 	void updateStatus();
 };
 
