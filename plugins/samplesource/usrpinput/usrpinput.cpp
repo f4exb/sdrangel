@@ -316,25 +316,41 @@ bool USRPInput::acquireChannel()
     suspendRxBuddies();
     suspendTxBuddies();
 
-    try
+    if (m_streamId == nullptr)
     {
-        // set up the stream
-        std::string cpu_format("sc16");
-        std::string wire_format("sc16");
-        std::vector<size_t> channel_nums;
-        channel_nums.push_back(m_deviceShared.m_channel);
+        try
+        {
+            uhd::usrp::multi_usrp::sptr usrp = m_deviceShared.m_deviceParams->getDevice();
 
-        uhd::stream_args_t stream_args(cpu_format, wire_format);
-        stream_args.channels = channel_nums;
+            // Apply settings before creating stream
+            // However, don't set LPF to <10MHz at this stage, otherwise there is massive TX LO leakage
+            applySettings(m_settings, true, true);
+            usrp->set_rx_bandwidth(56000000, m_deviceShared.m_channel);
 
-        m_streamId = m_deviceShared.m_deviceParams->getDevice()->get_rx_stream(stream_args);
+            // set up the stream
+            std::string cpu_format("sc16");
+            std::string wire_format("sc16");
+            std::vector<size_t> channel_nums;
+            channel_nums.push_back(m_deviceShared.m_channel);
 
-        // Match our receive buffer size to what UHD uses
-        m_bufSamples = m_streamId->get_max_num_samps();
-    }
-    catch (std::exception& e)
-    {
-        qDebug() << "USRPInput::acquireChannel: exception: " << e.what();
+            uhd::stream_args_t stream_args(cpu_format, wire_format);
+            stream_args.channels = channel_nums;
+
+            m_streamId = m_deviceShared.m_deviceParams->getDevice()->get_rx_stream(stream_args);
+
+            // Match our receive buffer size to what UHD uses
+            m_bufSamples = m_streamId->get_max_num_samps();
+
+            // Wait for reference and LO to lock
+            DeviceUSRP::waitForLock(usrp, m_settings.m_clockSource, m_deviceShared.m_channel);
+
+            // Now we can set desired bandwidth
+            usrp->set_rx_bandwidth(m_settings.m_lpfBW, m_deviceShared.m_channel);
+        }
+        catch (std::exception& e)
+        {
+            qDebug() << "USRPInput::acquireChannel: exception: " << e.what();
+        }
     }
 
     resumeTxBuddies();
@@ -350,7 +366,7 @@ void USRPInput::releaseChannel()
     suspendRxBuddies();
     suspendTxBuddies();
 
-    // destroy the stream - FIXME: Better way to do this?
+    // destroy the stream
     m_streamId = nullptr;
 
     resumeTxBuddies();
@@ -363,7 +379,7 @@ void USRPInput::releaseChannel()
 
 void USRPInput::init()
 {
-    applySettings(m_settings, true);
+    applySettings(m_settings, false, true);
 }
 
 bool USRPInput::start()
@@ -383,8 +399,6 @@ bool USRPInput::start()
 
     m_usrpInputThread = new USRPInputThread(m_streamId, m_bufSamples, &m_sampleFifo);
     qDebug("USRPInput::start: thread created");
-
-    applySettings(m_settings, true);
 
     m_usrpInputThread->setLog2Decimation(m_settings.m_log2SoftDecim);
     m_usrpInputThread->startWork();
@@ -521,7 +535,7 @@ bool USRPInput::handleMessage(const Message& message)
         MsgConfigureUSRP& conf = (MsgConfigureUSRP&) message;
         qDebug() << "USRPInput::handleMessage: MsgConfigureUSRP";
 
-        if (!applySettings(conf.getSettings(), conf.getForce()))
+        if (!applySettings(conf.getSettings(), false, conf.getForce()))
         {
             qDebug("USRPInput::handleMessage config error");
         }
@@ -536,6 +550,7 @@ bool USRPInput::handleMessage(const Message& message)
         {
             m_settings.m_devSampleRate   = report.getDevSampleRate();
             m_settings.m_centerFrequency = report.getCenterFrequency();
+            m_settings.m_loOffset        = report.getLOOffset();
         }
         else if (m_running)
         {
@@ -556,7 +571,7 @@ bool USRPInput::handleMessage(const Message& message)
         if (getMessageQueueToGUI())
         {
             DeviceUSRPShared::MsgReportBuddyChange *reportToGUI = DeviceUSRPShared::MsgReportBuddyChange::create(
-                    m_settings.m_devSampleRate, m_settings.m_centerFrequency, true);
+                    m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, true);
             getMessageQueueToGUI()->push(reportToGUI);
         }
 
@@ -633,7 +648,7 @@ bool USRPInput::handleMessage(const Message& message)
     }
 }
 
-bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
+bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStream, bool force)
 {
     bool forwardChangeOwnDSP = false;
     bool forwardChangeRxDSP  = false;
@@ -655,7 +670,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
         {
             reverseAPIKeys.append("clockSource");
 
-            if (m_deviceShared.m_deviceParams->getDevice())
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 try
                 {
@@ -686,7 +701,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
             reverseAPIKeys.append("devSampleRate");
             forwardChangeAllDSP = true;
 
-            if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_rate(settings.m_devSampleRate, m_deviceShared.m_channel);
                 double actualSampleRate = m_deviceShared.m_deviceParams->getDevice()->get_rx_rate(m_deviceShared.m_channel);
@@ -698,6 +713,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
         }
 
         if ((m_settings.m_centerFrequency != settings.m_centerFrequency)
+            || (m_settings.m_loOffset != settings.m_loOffset)
             || (m_settings.m_transverterMode != settings.m_transverterMode)
             || (m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency)
             || force)
@@ -707,26 +723,34 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
             reverseAPIKeys.append("transverterDeltaFrequency");
             forwardChangeRxDSP = true;
 
-            if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
-                uhd::tune_request_t tune_request(deviceCenterFrequency);
-                m_deviceShared.m_deviceParams->getDevice()->set_rx_freq(tune_request, m_deviceShared.m_channel);
+                if (settings.m_loOffset != 0)
+                {
+                    uhd::tune_request_t tune_request(deviceCenterFrequency, settings.m_loOffset);
+                    m_deviceShared.m_deviceParams->getDevice()->set_rx_freq(tune_request, m_deviceShared.m_channel);
+                }
+                else
+                {
+                    uhd::tune_request_t tune_request(deviceCenterFrequency);
+                    m_deviceShared.m_deviceParams->getDevice()->set_rx_freq(tune_request, m_deviceShared.m_channel);
+                }
                 m_deviceShared.m_centerFrequency = deviceCenterFrequency; // for buddies
-                qDebug("USRPInput::applySettings: frequency set to %lld", deviceCenterFrequency);
+                qDebug("USRPInput::applySettings: frequency set to %lld with LO offset %d", deviceCenterFrequency, settings.m_loOffset);
             }
         }
 
         if ((m_settings.m_dcBlock != settings.m_dcBlock) || force)
         {
             reverseAPIKeys.append("dcBlock");
-            if (m_deviceShared.m_deviceParams->getDevice())
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_dc_offset(settings.m_dcBlock, m_deviceShared.m_channel);
         }
 
         if ((m_settings.m_iqCorrection != settings.m_iqCorrection) || force)
         {
             reverseAPIKeys.append("iqCorrection");
-            if (m_deviceShared.m_deviceParams->getDevice())
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_iq_balance(settings.m_iqCorrection, m_deviceShared.m_channel);
         }
 
@@ -734,7 +758,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
         {
             reverseAPIKeys.append("gainMode");
 
-            if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 if (settings.m_gainMode == USRPInputSettings::GAIN_AUTO)
                 {
@@ -754,7 +778,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
         {
             reverseAPIKeys.append("gain");
 
-            if ((settings.m_gainMode != USRPInputSettings::GAIN_AUTO) && m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
+            if ((settings.m_gainMode != USRPInputSettings::GAIN_AUTO) && m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_gain(settings.m_gain, m_deviceShared.m_channel);
                 qDebug() << "USRPInput::applySettings: Gain set to " << settings.m_gain << " for channel " << m_deviceShared.m_channel;
@@ -764,8 +788,13 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
         if ((m_settings.m_lpfBW != settings.m_lpfBW) || force)
         {
             reverseAPIKeys.append("lpfBW");
-            m_deviceShared.m_deviceParams->getDevice()->set_rx_bandwidth(settings.m_lpfBW, m_deviceShared.m_channel);
-            qDebug("USRPOutput::applySettings: LPF BW: %f for channel %d", settings.m_lpfBW, m_deviceShared.m_channel);
+
+            // Don't set bandwidth before get_rx_stream (See above)
+            if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
+            {
+                m_deviceShared.m_deviceParams->getDevice()->set_rx_bandwidth(settings.m_lpfBW, m_deviceShared.m_channel);
+                qDebug("USRPInput::applySettings: LPF BW: %f for channel %d", settings.m_lpfBW, m_deviceShared.m_channel);
+            }
         }
 
         if ((m_settings.m_log2SoftDecim != settings.m_log2SoftDecim) || force)
@@ -785,7 +814,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
         {
             reverseAPIKeys.append("antennaPath");
 
-            if (m_deviceShared.m_deviceParams->getDevice() && m_channelAcquired)
+            if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 m_deviceShared.m_deviceParams->getDevice()->set_rx_antenna(settings.m_antennaPath.toStdString(), m_deviceShared.m_channel);
                 qDebug("USRPInput::applySettings: set antenna path to %s on channel %d", qPrintable(settings.m_antennaPath), m_deviceShared.m_channel);
@@ -835,7 +864,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
             for (; itSource != sourceBuddies.end(); ++itSource)
             {
                 DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, true);
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, true);
                 (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
             }
 
@@ -846,7 +875,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
             for (; itSink != sinkBuddies.end(); ++itSink)
             {
                 DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, true);
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, true);
                 (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
             }
         }
@@ -867,7 +896,7 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool force)
             for (; itSource != sourceBuddies.end(); ++itSource)
             {
                 DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, true);
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, true);
                 (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
             }
         }

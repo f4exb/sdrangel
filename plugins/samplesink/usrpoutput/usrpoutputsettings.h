@@ -33,6 +33,7 @@ struct USRPOutputSettings
     // global settings to be saved
     uint64_t m_centerFrequency;
     int      m_devSampleRate;
+    int      m_loOffset;
     // channel settings
     uint32_t m_log2SoftInterp;
     float    m_lpfBW;        //!< Analog lowpass filter bandwidth (Hz)

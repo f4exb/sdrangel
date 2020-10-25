@@ -33,6 +33,8 @@ public:
     /** Enumeration of USRP hardware devices */
     static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 
+    /** Wait for ref clock and LO to lock */
+    static void waitForLock(uhd::usrp::multi_usrp::sptr usrp, const QString& clockSource, int channel);
 };
 
 #endif /* DEVICES_USRP_DEVICEUSRP_H_ */

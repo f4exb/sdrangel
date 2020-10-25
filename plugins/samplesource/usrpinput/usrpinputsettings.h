@@ -37,6 +37,7 @@ struct USRPInputSettings
     // global settings to be saved
     uint64_t m_centerFrequency;
     int      m_devSampleRate;
+    int      m_loOffset;
     // channel settings
     bool     m_dcBlock;
     bool     m_iqCorrection;

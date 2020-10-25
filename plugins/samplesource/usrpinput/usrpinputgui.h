@@ -89,6 +89,7 @@ private slots:
     void on_sampleRate_changed(quint64 value);
     void on_swDecim_currentIndexChanged(int index);
     void on_lpf_changed(quint64 value);
+    void on_loOffset_changed(qint64 value);
     void on_gainMode_currentIndexChanged(int index);
     void on_gain_valueChanged(int value);
     void on_antenna_currentIndexChanged(int index);

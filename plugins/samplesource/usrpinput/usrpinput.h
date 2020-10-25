@@ -239,7 +239,7 @@ private:
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const USRPInputSettings& settings, bool force = false);
+    bool applySettings(const USRPInputSettings& settings, bool preGetStream, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const USRPInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
