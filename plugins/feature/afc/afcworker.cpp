@@ -287,20 +287,20 @@ void AFCWorker::processChannelSettings(
 
     if (WebAPIUtils::extractValue(*jsonObj, "inputFrequencyOffset", channelOffsetValue))
     {
-        int channelOffset = channelOffsetValue.toInt();
-
         if (*swgChannelSettings->getChannelType() == "FreqTracker")
         {
-            if (channelOffset != m_trackerChannelOffset)
+            int trackerChannelOffset = channelOffsetValue.toInt();
+
+            if (trackerChannelOffset != m_trackerChannelOffset)
             {
-                qDebug("AFCWorker::processChannelSettings: FreqTracker offset change: %d", channelOffset);
+                qDebug("AFCWorker::processChannelSettings: FreqTracker offset change: %d", trackerChannelOffset);
                 QMap<ChannelAPI*, ChannelTracking>::iterator it = m_channelsMap.begin();
 
                 for (; it != m_channelsMap.end(); ++it)
                 {
                     if (mainCore->existsChannel(it.key()))
                     {
-                        int channelOffset = it.value().m_channelOffset + channelOffset - it.value().m_trackerOffset;
+                        int channelOffset = it.value().m_channelOffset + trackerChannelOffset - it.value().m_trackerOffset;
                         updateChannelOffset(it.key(), it.value().m_channelDirection, channelOffset);
                     }
                     else
@@ -309,17 +309,14 @@ void AFCWorker::processChannelSettings(
                     }
                 }
 
-                m_trackerChannelOffset = channelOffset;
+                m_trackerChannelOffset = trackerChannelOffset;
             }
         }
         else if (m_channelsMap.contains(const_cast<ChannelAPI*>(channelAPI)))
         {
-            if (WebAPIUtils::extractValue(*jsonObj, "inputFrequencyOffset", channelOffsetValue))
-            {
-                int channelOffset = channelOffsetValue.toInt();
-                m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_channelOffset = channelOffset;
-                m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_trackerOffset = m_trackerChannelOffset;
-            }
+            int channelOffset = channelOffsetValue.toInt();
+            m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_channelOffset = channelOffset;
+            m_channelsMap[const_cast<ChannelAPI*>(channelAPI)].m_trackerOffset = m_trackerChannelOffset;
         }
     }
 }
