@@ -163,9 +163,10 @@ bool USRPInputGUI::handleMessage(const Message& message)
     else if (DeviceUSRPShared::MsgReportBuddyChange::match(message))
     {
         DeviceUSRPShared::MsgReportBuddyChange& report = (DeviceUSRPShared::MsgReportBuddyChange&) message;
-        m_settings.m_devSampleRate = report.getDevSampleRate();
+        m_settings.m_masterClockRate = report.getMasterClockRate();
 
         if (report.getRxElseTx()) {
+            m_settings.m_devSampleRate   = report.getDevSampleRate();
             m_settings.m_centerFrequency = report.getCenterFrequency();
             m_settings.m_loOffset        = report.getLOOffset();
         }
@@ -287,11 +288,19 @@ void USRPInputGUI::handleInputMessages()
 void USRPInputGUI::updateSampleRate()
 {
     uint32_t sr = m_settings.m_devSampleRate;
+    int cr = m_settings.m_masterClockRate;
 
     if (sr < 100000000) {
         ui->sampleRateLabel->setText(tr("%1k").arg(QString::number(sr / 1000.0f, 'g', 5)));
     } else {
         ui->sampleRateLabel->setText(tr("%1M").arg(QString::number(sr / 1000000.0f, 'g', 5)));
+    }
+    if (cr < 0) {
+       ui->masterClockRateLabel->setText("-");
+    } else if (cr < 100000000) {
+        ui->masterClockRateLabel->setText(tr("%1k").arg(QString::number(cr / 1000.0f, 'g', 5)));
+    } else {
+        ui->masterClockRateLabel->setText(tr("%1M").arg(QString::number(cr / 1000000.0f, 'g', 5)));
     }
     // LO offset shouldn't be greater than half the sample rate
     ui->loOffset->setValueRange(false, 5, -(int32_t)sr/2/1000, (int32_t)sr/2/1000);

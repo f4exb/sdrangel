@@ -175,7 +175,7 @@ bool USRPOutput::openDevice()
         m_deviceShared.m_deviceParams = new DeviceUSRPParams();
         char serial[256];
         strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
-        m_deviceShared.m_deviceParams->open(serial);
+        m_deviceShared.m_deviceParams->open(serial, false);
         m_deviceShared.m_channel = requestedChannel; // acknowledge the requested channel
     }
 
@@ -533,31 +533,31 @@ bool USRPOutput::handleMessage(const Message& message)
     {
         DeviceUSRPShared::MsgReportBuddyChange& report = (DeviceUSRPShared::MsgReportBuddyChange&) message;
 
-        if (report.getRxElseTx() && m_running)
+        if (!report.getRxElseTx())
         {
-            double host_Hz;
-
-            host_Hz = m_deviceShared.m_deviceParams->getDevice()->get_tx_rate(m_deviceShared.m_channel);
-            m_settings.m_devSampleRate = roundf(host_Hz);
-
-            qDebug() << "USRPOutput::handleMessage: MsgReportBuddyChange:"
-                     << " m_devSampleRate: " << m_settings.m_devSampleRate;
-        }
-        else
-        {
+            // Tx buddy changed settings, we need to copy
             m_settings.m_devSampleRate   = report.getDevSampleRate();
             m_settings.m_centerFrequency = report.getCenterFrequency();
             m_settings.m_loOffset        = report.getLOOffset();
         }
+        // Master clock rate is common between all buddies
+        int masterClockRate = report.getMasterClockRate();
+        if (masterClockRate > 0)
+            m_settings.m_masterClockRate = masterClockRate;
+        qDebug() << "USRPOutput::handleMessage MsgReportBuddyChange";
+        qDebug() << "m_masterClockRate " << m_settings.m_masterClockRate;
 
         DSPSignalNotification *notif = new DSPSignalNotification(
                 m_settings.m_devSampleRate/(1<<m_settings.m_log2SoftInterp),
                 m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
 
-        DeviceUSRPShared::MsgReportBuddyChange *reportToGUI = DeviceUSRPShared::MsgReportBuddyChange::create(
-                m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, false);
-        getMessageQueueToGUI()->push(reportToGUI);
+        if (getMessageQueueToGUI())
+        {
+            DeviceUSRPShared::MsgReportBuddyChange *reportToGUI = DeviceUSRPShared::MsgReportBuddyChange::create(
+                    m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset,  m_settings.m_masterClockRate, false);
+            getMessageQueueToGUI()->push(reportToGUI);
+        }
 
         return true;
     }
@@ -617,6 +617,7 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
     bool ownThreadWasRunning = false;
+    bool checkRates          = false;
     QList<QString> reverseAPIKeys;
 
     try
@@ -665,10 +666,8 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
             if (m_deviceShared.m_deviceParams->getDevice() && (m_channelAcquired || preGetStream))
             {
                 m_deviceShared.m_deviceParams->getDevice()->set_tx_rate(settings.m_devSampleRate, m_deviceShared.m_channel);
-                double actualSampleRate = m_deviceShared.m_deviceParams->getDevice()->get_tx_rate(m_deviceShared.m_channel);
-                qDebug("USRPOutput::applySettings: set sample rate set to %d - actual rate %f", settings.m_devSampleRate,
-                        actualSampleRate);
-                m_deviceShared.m_deviceParams->m_sampleRate = m_settings.m_devSampleRate;
+                qDebug("USRPOutput::applySettings: set sample rate set to %d", settings.m_devSampleRate);
+                checkRates = true;
             }
         }
 
@@ -776,6 +775,17 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
 
         m_settings = settings;
 
+        if (checkRates)
+        {
+            // Check if requested rate could actually be met and what master clock rate we ended up with
+            double actualSampleRate = m_deviceShared.m_deviceParams->getDevice()->get_tx_rate(m_deviceShared.m_channel);
+            qDebug("USRPOutput::applySettings: actual sample rate %f", actualSampleRate);
+            double masterClockRate = m_deviceShared.m_deviceParams->getDevice()->get_master_clock_rate();
+            qDebug("USRPOutput::applySettings: master_clock_rate %f", masterClockRate);
+            m_settings.m_devSampleRate = actualSampleRate;
+            m_settings.m_masterClockRate = masterClockRate;
+        }
+
         // forward changes to buddies or oneself
 
         if (forwardChangeAllDSP)
@@ -795,7 +805,7 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
             for (; itSink != sinkBuddies.end(); ++itSink)
             {
                 DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, false);
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
                 (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
             }
 
@@ -806,8 +816,16 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
             for (; itSource != sourceBuddies.end(); ++itSource)
             {
                 DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, false);
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
                 (*itSource)->getSamplingDeviceInputMessageQueue()->push(report);
+            }
+
+            // send to GUI so it can see master clock rate and if actual rate differs
+            if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
+            {
+                DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
+                m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
             }
         }
         else if (forwardChangeTxDSP)
@@ -827,7 +845,7 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
             for (; itSink != sinkBuddies.end(); ++itSink)
             {
                 DeviceUSRPShared::MsgReportBuddyChange *report = DeviceUSRPShared::MsgReportBuddyChange::create(
-                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, false);
+                        m_settings.m_devSampleRate, m_settings.m_centerFrequency, m_settings.m_loOffset, m_settings.m_masterClockRate, false);
                 (*itSink)->getSamplingDeviceInputMessageQueue()->push(report);
             }
         }
@@ -854,6 +872,14 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
                 {
                     qDebug() << "USRPOutput::applySettings: could not get clock source";
                 }
+            }
+
+            // send to GUI in case requested clock isn't detected
+            if (m_deviceAPI->getSamplingDeviceGUIMessageQueue())
+            {
+                DeviceUSRPShared::MsgReportClockSourceChange *report = DeviceUSRPShared::MsgReportClockSourceChange::create(
+                        m_settings.m_clockSource);
+                m_deviceAPI->getSamplingDeviceGUIMessageQueue()->push(report);
             }
 
             // send to source buddies

@@ -27,6 +27,7 @@ USRPOutputSettings::USRPOutputSettings()
 
 void USRPOutputSettings::resetToDefaults()
 {
+    m_masterClockRate = -1; // Calculated by UHD
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 3000000;
     m_loOffset = 0;
