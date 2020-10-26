@@ -698,18 +698,30 @@ margin-bottom: 20px;
     var defs = {}
             defs.AFCActions = {
   "properties" : {
-    "ptt" : {
+    "deviceTrack" : {
       "type" : "integer",
-      "description" : "AFC action\n  * 0 - release\n  * 1 - engage\n"
+      "description" : "(Re)initialize tracker target frequency adjustment\n  * 0 - release\n  * 1 - engage\n"
+    },
+    "devicesApply" : {
+      "type" : "integer",
+      "description" : "(Re)initialize device sets tracking\n  * 0 - release\n  * 1 - engage\n"
     }
   },
   "description" : "AFC actions"
 };
             defs.AFCReport = {
   "properties" : {
-    "ptt" : {
+    "trackerChannelIndex" : {
       "type" : "integer",
-      "description" : "AFC status\n  * 0 - released\n  * 1 - engaged\n"
+      "description" : "Tracker index in device set"
+    },
+    "trackerDeviceFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "trackerChannelOffset" : {
+      "type" : "integer",
+      "description" : "Tracker channel offset from device center frequency"
     }
   },
   "description" : "AFC report"
@@ -744,8 +756,7 @@ margin-bottom: 20px;
       "description" : "Target frequency for the tracker"
     },
     "freqTolerance" : {
-      "type" : "integer",
-      "format" : "int64"
+      "type" : "integer"
     },
     "trackerAdjustPeriod" : {
       "type" : "integer",
@@ -44396,7 +44407,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-25T12:05:50.322+01:00
+              Generated 2020-10-26T05:57:18.284+01:00
             </div>
           </div>
       </div>

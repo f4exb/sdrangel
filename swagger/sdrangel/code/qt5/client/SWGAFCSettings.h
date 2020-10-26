@@ -63,8 +63,8 @@ public:
     qint64 getTargetFrequency();
     void setTargetFrequency(qint64 target_frequency);
 
-    qint64 getFreqTolerance();
-    void setFreqTolerance(qint64 freq_tolerance);
+    qint32 getFreqTolerance();
+    void setFreqTolerance(qint32 freq_tolerance);
 
     qint32 getTrackerAdjustPeriod();
     void setTrackerAdjustPeriod(qint32 tracker_adjust_period);
@@ -109,7 +109,7 @@ private:
     qint64 target_frequency;
     bool m_target_frequency_isSet;
 
-    qint64 freq_tolerance;
+    qint32 freq_tolerance;
     bool m_freq_tolerance_isSet;
 
     qint32 tracker_adjust_period;

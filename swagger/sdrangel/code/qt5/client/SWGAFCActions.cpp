@@ -28,8 +28,10 @@ SWGAFCActions::SWGAFCActions(QString* json) {
 }
 
 SWGAFCActions::SWGAFCActions() {
-    ptt = 0;
-    m_ptt_isSet = false;
+    device_track = 0;
+    m_device_track_isSet = false;
+    devices_apply = 0;
+    m_devices_apply_isSet = false;
 }
 
 SWGAFCActions::~SWGAFCActions() {
@@ -38,12 +40,15 @@ SWGAFCActions::~SWGAFCActions() {
 
 void
 SWGAFCActions::init() {
-    ptt = 0;
-    m_ptt_isSet = false;
+    device_track = 0;
+    m_device_track_isSet = false;
+    devices_apply = 0;
+    m_devices_apply_isSet = false;
 }
 
 void
 SWGAFCActions::cleanup() {
+
 
 }
 
@@ -58,7 +63,9 @@ SWGAFCActions::fromJson(QString &json) {
 
 void
 SWGAFCActions::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&ptt, pJson["ptt"], "qint32", "");
+    ::SWGSDRangel::setValue(&device_track, pJson["deviceTrack"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&devices_apply, pJson["devicesApply"], "qint32", "");
     
 }
 
@@ -76,21 +83,34 @@ SWGAFCActions::asJson ()
 QJsonObject*
 SWGAFCActions::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_ptt_isSet){
-        obj->insert("ptt", QJsonValue(ptt));
+    if(m_device_track_isSet){
+        obj->insert("deviceTrack", QJsonValue(device_track));
+    }
+    if(m_devices_apply_isSet){
+        obj->insert("devicesApply", QJsonValue(devices_apply));
     }
 
     return obj;
 }
 
 qint32
-SWGAFCActions::getPtt() {
-    return ptt;
+SWGAFCActions::getDeviceTrack() {
+    return device_track;
 }
 void
-SWGAFCActions::setPtt(qint32 ptt) {
-    this->ptt = ptt;
-    this->m_ptt_isSet = true;
+SWGAFCActions::setDeviceTrack(qint32 device_track) {
+    this->device_track = device_track;
+    this->m_device_track_isSet = true;
+}
+
+qint32
+SWGAFCActions::getDevicesApply() {
+    return devices_apply;
+}
+void
+SWGAFCActions::setDevicesApply(qint32 devices_apply) {
+    this->devices_apply = devices_apply;
+    this->m_devices_apply_isSet = true;
 }
 
 
@@ -98,7 +118,10 @@ bool
 SWGAFCActions::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_ptt_isSet){
+        if(m_device_track_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_devices_apply_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

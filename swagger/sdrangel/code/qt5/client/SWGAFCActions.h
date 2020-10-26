@@ -41,15 +41,21 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAFCActions* fromJson(QString &jsonString) override;
 
-    qint32 getPtt();
-    void setPtt(qint32 ptt);
+    qint32 getDeviceTrack();
+    void setDeviceTrack(qint32 device_track);
+
+    qint32 getDevicesApply();
+    void setDevicesApply(qint32 devices_apply);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 ptt;
-    bool m_ptt_isSet;
+    qint32 device_track;
+    bool m_device_track_isSet;
+
+    qint32 devices_apply;
+    bool m_devices_apply_isSet;
 
 };
 
