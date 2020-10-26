@@ -17,7 +17,7 @@
 
 #include "afcreport.h"
 
-MESSAGE_CLASS_DEFINITION(AFCReport::MsgRadioState, Message)
+MESSAGE_CLASS_DEFINITION(AFCReport::MsgUpdateTarget, Message)
 
 AFCReport::AFCReport()
 {}

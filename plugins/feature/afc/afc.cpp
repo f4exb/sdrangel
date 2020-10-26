@@ -46,7 +46,8 @@ const QString AFC::m_featureId = "AFC";
 AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),
     m_trackerDeviceSet(nullptr),
-    m_trackedDeviceSet(nullptr)
+    m_trackedDeviceSet(nullptr),
+    m_trackerIndexInDeviceSet(-1)
 {
     setObjectName(m_featureId);
     m_worker = new AFCWorker(webAPIAdapterInterface);
@@ -61,7 +62,8 @@ AFC::~AFC()
     }
 
     delete m_worker;
-    removeFeatureReferences();
+    removeTrackerFeatureReferences();
+    removeTrackedFeatureReferences();
 }
 
 void AFC::start()
@@ -217,11 +219,13 @@ void AFC::applySettings(const AFCSettings& settings, bool force)
         reverseAPIKeys.append("trackerAdjustPeriod");
     }
 
-    if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force) {
+    if ((m_settings.m_trackerDeviceSetIndex != settings.m_trackerDeviceSetIndex) || force)
+    {
         trackerDeviceChange(settings.m_trackerDeviceSetIndex);
     }
 
-    if ((m_settings.m_trackedDeviceSetIndex != settings.m_trackedDeviceSetIndex) || force) {
+    if ((m_settings.m_trackedDeviceSetIndex != settings.m_trackedDeviceSetIndex) || force)
+    {
         trackedDeviceChange(settings.m_trackedDeviceSetIndex);
     }
 
@@ -309,6 +313,28 @@ int AFC::webapiActionsPost(
 
     if (swgAFCActions)
     {
+        if (featureActionsKeys.contains("deviceTrack"))
+        {
+            bool deviceTrack = swgAFCActions->getDeviceTrack() != 0;
+
+            if (deviceTrack)
+            {
+                MsgDeviceTrack *msg = MsgDeviceTrack::create();
+                getInputMessageQueue()->push(msg);
+            }
+        }
+
+        if (featureActionsKeys.contains("devicesApply"))
+        {
+            bool devicesApply = swgAFCActions->getDevicesApply() != 0;
+
+            if (devicesApply)
+            {
+                MsgDevicesApply *msg = MsgDevicesApply::create();
+                getInputMessageQueue()->push(msg);
+            }
+        }
+
         return 202;
     }
     else
@@ -401,6 +427,9 @@ void AFC::webapiUpdateFeatureSettings(
 
 void AFC::webapiFormatFeatureReport(SWGSDRangel::SWGFeatureReport& response)
 {
+    response.getAfcReport()->setTrackerChannelIndex(m_trackerIndexInDeviceSet);
+    response.getAfcReport()->setTrackerDeviceFrequency(m_worker->getTrackerDeviceFrequency());
+    response.getAfcReport()->setTrackerChannelOffset(m_worker->getTrackerChannelOffset());
 }
 
 void AFC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const AFCSettings& settings, bool force)
@@ -509,15 +538,18 @@ void AFC::trackedDeviceChange(int deviceIndex)
     {
         ChannelAPI *channel = m_trackedDeviceSet->getChannelAt(i);
 
-        if (channel->getURI() != "sdrangel.channel.freqtracker") {
+        if (channel->getURI() != "sdrangel.channel.freqtracker")
+        {
             channel->addFeatureSettingsFeedback(this);
+            m_trackerIndexInDeviceSet = i;
         }
     }
 }
 
-void AFC::removeFeatureReferences()
+void AFC::removeTrackerFeatureReferences()
 {
     MainCore *mainCore = MainCore::instance();
+    m_trackerIndexInDeviceSet = -1;
 
     if ((m_settings.m_trackerDeviceSetIndex >= 0) && (m_settings.m_trackerDeviceSetIndex < mainCore->getDeviceSets().size()))
     {
@@ -532,6 +564,11 @@ void AFC::removeFeatureReferences()
             }
         }
     }
+}
+
+void AFC::removeTrackedFeatureReferences()
+{
+    MainCore *mainCore = MainCore::instance();
 
     if ((m_settings.m_trackedDeviceSetIndex >= 0) && (m_settings.m_trackedDeviceSetIndex < mainCore->getDeviceSets().size()))
     {

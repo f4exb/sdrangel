@@ -393,9 +393,10 @@ void AFCWorker::updateTarget()
     int64_t trackerFrequency = m_trackerDeviceFrequency + m_trackerChannelOffset;
     int64_t correction = m_settings.m_targetFrequency - trackerFrequency;
     int64_t tolerance = m_settings.m_freqTolerance;
-    qDebug() << "AFCWorker::updateTarget: correction:" << correction << "tolerance:" << tolerance;
 
-    if ((correction > -tolerance) && (correction < tolerance)) {
+    if ((correction > -tolerance) && (correction < tolerance))
+    {
+        reportUpdateTarget(correction, false);
         return;
     }
 
@@ -420,6 +421,8 @@ void AFCWorker::updateTarget()
         if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction, 1)) {
             m_trackerChannelOffset += correction;
         }
+
+        reportUpdateTarget(correction, true);
     }
     else // act on device
     {
@@ -436,6 +439,8 @@ void AFCWorker::updateTarget()
             qDebug() << "AFCWorker::updateTarget: cannot find device transverter frequency";
             return;
         }
+
+        reportUpdateTarget(correction, true);
     }
 }
 
@@ -513,5 +518,14 @@ void AFCWorker::getDeviceSettingsKey(DeviceAPI *deviceAPI, QString& settingsKey)
         if (WebAPIUtils::m_sourceDeviceHwIdToSettingsKey.contains(deviceHwId)) {
             settingsKey = WebAPIUtils::m_sourceDeviceHwIdToSettingsKey[deviceHwId];
         }
+    }
+}
+
+void AFCWorker::reportUpdateTarget(int correction, bool done)
+{
+    if (m_msgQueueToGUI)
+    {
+        AFCReport::MsgUpdateTarget *msg = AFCReport::MsgUpdateTarget::create(correction, done);
+        m_msgQueueToGUI->push(msg);
     }
 }

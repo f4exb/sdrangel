@@ -112,6 +112,8 @@ public:
     bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
+    uint64_t getTrackerDeviceFrequency() const { return m_trackerDeviceFrequency; }
+    int getTrackerChannelOffset() const { return m_trackerChannelOffset; }
 
 private:
     struct ChannelTracking
@@ -166,6 +168,7 @@ private:
     bool updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, int64_t frequency);
     int getDeviceDirection(DeviceAPI *deviceAPI);
     void getDeviceSettingsKey(DeviceAPI *deviceAPI, QString& settingsKey);
+    void reportUpdateTarget(int correction, bool done);
 
 private slots:
     void updateTarget();

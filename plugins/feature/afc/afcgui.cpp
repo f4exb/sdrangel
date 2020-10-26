@@ -79,15 +79,19 @@ bool AFCGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (AFCReport::MsgRadioState::match(message))
+    else if (AFCReport::MsgUpdateTarget::match(message))
     {
-        qDebug("AFCGUI::handleMessage: AFCReport::MsgRadioState");
-        const AFCReport::MsgRadioState& cfg = (AFCReport::MsgRadioState&) message;
-        AFCReport::RadioState state = cfg.getState();
-        ui->statusIndicator->setStyleSheet("QLabel { background-color: " +
-			m_statusColors[(int) state] + "; border-radius: 12px; }");
-        ui->statusIndicator->setToolTip(m_statusTooltips[(int) state]);
+        const AFCReport::MsgUpdateTarget& cfg = (AFCReport::MsgUpdateTarget&) message;
+        bool frequencyChanged = cfg.getFrequencyChanged();
 
+        if (cfg.getFrequencyChanged()) {
+            ui->statusIndicator->setStyleSheet("QLabel { background-color: rgb(232, 85, 85); border-radius: 8px; }"); // red
+        } else {
+            ui->statusIndicator->setStyleSheet("QLabel { background-color: rgb(85, 232, 85); border-radius: 8px; }"); // green
+        }
+
+        ui->statusIndicator->setToolTip(tr("%1 Hz").arg(cfg.getFrequencyAdjustment()));
+        m_autoTargetStatusTimer.start(500);
         return true;
     }
 
@@ -142,13 +146,9 @@ AFCGUI::AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
 
-	m_statusTooltips.push_back("Idle");  // 0 - all off
-	m_statusTooltips.push_back("Rx on"); // 1 - Rx on
-	m_statusTooltips.push_back("Tx on"); // 2 - Tx on
-
-	m_statusColors.push_back("gray");             // All off
-	m_statusColors.push_back("rgb(85, 232, 85)"); // Rx on (green)
-	m_statusColors.push_back("rgb(232, 85, 85)"); // Tx on (red)
+    connect(&m_autoTargetStatusTimer, SIGNAL(timeout()), this, SLOT(resetAutoTargetStatus()));
+    m_autoTargetStatusTimer.setSingleShot(true);
+    ui->statusIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
 
     updateDeviceSetLists();
     displaySettings();
@@ -399,6 +399,11 @@ void AFCGUI::updateStatus()
 
         m_lastFeatureState = state;
     }
+}
+
+void AFCGUI::resetAutoTargetStatus()
+{
+    ui->statusIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
 }
 
 void AFCGUI::applySettings(bool force)
