@@ -146,7 +146,7 @@ void USRPInputThread::run()
             m_packets++;
             if (samples_received != m_bufSamples)
             {
-                qDebug("USRPInputThread::run - received %ld/%d samples", samples_received, m_bufSamples);
+                qDebug("USRPInputThread::run - received %ld/%ld samples", samples_received, m_bufSamples);
             }
             if (md.error_code ==  uhd::rx_metadata_t::ERROR_CODE_TIMEOUT)
             {
