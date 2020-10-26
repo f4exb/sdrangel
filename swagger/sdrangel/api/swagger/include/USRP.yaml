@@ -6,6 +6,8 @@ USRPInputSettings:
       format: int64
     devSampleRate:
       type: integer
+    loOffset:
+      type: integer
     dcBlock:
       type: integer
     iqCorrection:
@@ -45,6 +47,8 @@ USRPOutputSettings:
       type: integer
       format: int64
     devSampleRate:
+      type: integer
+    loOffset:
       type: integer
     log2SoftInterp:
       type: integer

@@ -951,6 +951,9 @@ void USRPOutput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("devSampleRate")) {
         settings.m_devSampleRate = response.getUsrpOutputSettings()->getDevSampleRate();
     }
+    if (deviceSettingsKeys.contains("loOffset")) {
+        settings.m_loOffset = response.getUsrpOutputSettings()->getLoOffset();
+    }
     if (deviceSettingsKeys.contains("clockSource")) {
         settings.m_clockSource = *response.getUsrpOutputSettings()->getClockSource();
     }
@@ -998,6 +1001,7 @@ void USRPOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& resp
     response.getUsrpOutputSettings()->setAntennaPath(new QString(settings.m_antennaPath));
     response.getUsrpOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getUsrpOutputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getUsrpOutputSettings()->setLoOffset(settings.m_loOffset);
     response.getUsrpOutputSettings()->setClockSource(new QString(settings.m_clockSource));
     response.getUsrpOutputSettings()->setGain(settings.m_gain);
     response.getUsrpOutputSettings()->setLog2SoftInterp(settings.m_log2SoftInterp);
@@ -1082,6 +1086,9 @@ void USRPOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, c
     }
     if (deviceSettingsKeys.contains("devSampleRate") || force) {
         swgUsrpOutputSettings->setDevSampleRate(settings.m_devSampleRate);
+    }
+    if (deviceSettingsKeys.contains("loOffset") || force) {
+        swgUsrpOutputSettings->setLoOffset(settings.m_loOffset);
     }
     if (deviceSettingsKeys.contains("clockSource") || force) {
         swgUsrpOutputSettings->setClockSource(new QString(settings.m_clockSource));

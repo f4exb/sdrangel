@@ -1025,6 +1025,9 @@ void USRPInput::webapiUpdateDeviceSettings(
     if (deviceSettingsKeys.contains("centerFrequency")) {
         settings.m_centerFrequency = response.getUsrpInputSettings()->getCenterFrequency();
     }
+    if (deviceSettingsKeys.contains("loOffset")) {
+        settings.m_loOffset = response.getUsrpInputSettings()->getLoOffset();
+    }
     if (deviceSettingsKeys.contains("dcBlock")) {
         settings.m_dcBlock = response.getUsrpInputSettings()->getDcBlock() != 0;
     }
@@ -1075,6 +1078,7 @@ void USRPInput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& respo
     response.getUsrpInputSettings()->setCenterFrequency(settings.m_centerFrequency);
     response.getUsrpInputSettings()->setDcBlock(settings.m_dcBlock ? 1 : 0);
     response.getUsrpInputSettings()->setDevSampleRate(settings.m_devSampleRate);
+    response.getUsrpInputSettings()->setLoOffset(settings.m_loOffset);
     response.getUsrpInputSettings()->setClockSource(new QString(settings.m_clockSource));
     response.getUsrpInputSettings()->setGain(settings.m_gain);
     response.getUsrpInputSettings()->setGainMode((int) settings.m_gainMode);
@@ -1170,6 +1174,9 @@ void USRPInput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, co
     }
     if (deviceSettingsKeys.contains("centerFrequency") || force) {
         swgUsrpInputSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("loOffset") || force) {
+        swgUsrpInputSettings->setLoOffset(settings.m_loOffset);
     }
     if (deviceSettingsKeys.contains("dcBlock") || force) {
         swgUsrpInputSettings->setDcBlock(settings.m_dcBlock ? 1 : 0);
