@@ -28,23 +28,26 @@ public:
         RadioRx,
         RadioTx
     };
-    class MsgRadioState : public Message {
+    class MsgUpdateTarget : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        RadioState getState() const { return m_state; }
+        int getFrequencyAdjustment() const { return m_frequencyAdjustment; }
+        bool getFrequencyChanged() const { return m_frequencyChanged; }
 
-        static MsgRadioState* create(RadioState state)
+        static MsgUpdateTarget* create(int frequencyAdjustment, bool frequencyChanged)
         {
-            return new MsgRadioState(state);
+            return new MsgUpdateTarget(frequencyAdjustment, frequencyChanged);
         }
 
     private:
-        RadioState m_state;
+        int m_frequencyAdjustment;
+        bool m_frequencyChanged;
 
-        MsgRadioState(RadioState state) :
+        MsgUpdateTarget(int frequencyAdjustment, bool frequencyChanged) :
             Message(),
-            m_state(state)
+            m_frequencyAdjustment(frequencyAdjustment),
+            m_frequencyChanged(frequencyChanged)
         { }
     };
 

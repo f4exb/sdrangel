@@ -53,9 +53,8 @@ private:
 	AFC* m_afc;
 	MessageQueue m_inputMessageQueue;
 	QTimer m_statusTimer;
+	QTimer m_autoTargetStatusTimer;
 	int m_lastFeatureState;
-	std::vector<QString> m_statusColors;
-	std::vector<QString> m_statusTooltips;
 
 	explicit AFCGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
 	virtual ~AFCGUI();
@@ -85,6 +84,7 @@ private slots:
 	void on_devicesApply_clicked();
 	void on_targetPeriod_valueChanged(int value);
 	void updateStatus();
+	void resetAutoTargetStatus();
 };
 
 

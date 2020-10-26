@@ -160,6 +160,7 @@ private:
     AFCSettings m_settings;
     DeviceSet *m_trackerDeviceSet;
     DeviceSet *m_trackedDeviceSet;
+    int m_trackerIndexInDeviceSet;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -171,7 +172,8 @@ private:
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const AFCSettings& settings, bool force);
     void trackerDeviceChange(int deviceIndex);
     void trackedDeviceChange(int deviceIndex);
-    void removeFeatureReferences();
+    void removeTrackerFeatureReferences();
+    void removeTrackedFeatureReferences();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
