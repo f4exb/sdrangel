@@ -119,12 +119,14 @@ bool AFCWorker::handleMessage(const Message& cmd)
     }
     else if (MsgDeviceTrack::match(cmd))
     {
+        qDebug() << "AFCWorker::handleMessage: MsgDeviceTrack";
         QMutexLocker mutexLocker(&m_mutex);
         updateTarget();
         return true;
     }
     else if (MsgDevicesApply::match(cmd))
     {
+        qDebug() << "AFCWorker::handleMessage: MsgDevicesApply";
         QMutexLocker mutexLocker(&m_mutex);
         initTrackerDeviceSet(m_settings.m_trackerDeviceSetIndex);
         initTrackedDeviceSet(m_settings.m_trackedDeviceSetIndex);
@@ -294,6 +296,7 @@ void AFCWorker::processChannelSettings(
             if (trackerChannelOffset != m_trackerChannelOffset)
             {
                 qDebug("AFCWorker::processChannelSettings: FreqTracker offset change: %d", trackerChannelOffset);
+                m_trackerChannelOffset = trackerChannelOffset;
                 QMap<ChannelAPI*, ChannelTracking>::iterator it = m_channelsMap.begin();
 
                 for (; it != m_channelsMap.end(); ++it)
@@ -308,8 +311,6 @@ void AFCWorker::processChannelSettings(
                         m_channelsMap.erase(it);
                     }
                 }
-
-                m_trackerChannelOffset = trackerChannelOffset;
             }
         }
         else if (m_channelsMap.contains(const_cast<ChannelAPI*>(channelAPI)))
