@@ -47,11 +47,6 @@ struct DEVICES_API DeviceUSRPParams
     uhd::meta_range_t m_srRangeTx;              //!< Sample rate range
     uhd::gain_range_t m_gainRangeRx;            //!< Gain range for Rx
     uhd::gain_range_t m_gainRangeTx;            //!< Gain range for Tx
-    float        m_sampleRate;                  //!< Sample rate between host and device
-    int          m_log2OvSRRx;                  //!< log2 of Rx oversampling (0..5)
-    int          m_log2OvSRTx;                  //!< log2 of Tx oversampling (0..5)
-    float        m_rxFrequency;                 //!< Rx frequency
-    float        m_txFrequency;                 //!< Tx frequency
     QStringList  m_txAntennas;                  //!< List of Tx antenna names
     QStringList  m_rxAntennas;                  //!< List of Rx antenna names
     QStringList  m_rxGainNames;                 //!< List of Rx gain stages - Currently this seems limited to "PGA"
@@ -61,11 +56,6 @@ struct DEVICES_API DeviceUSRPParams
         m_dev(),
         m_nbRxChannels(0),
         m_nbTxChannels(0),
-        m_sampleRate(1e6),
-        m_log2OvSRRx(0),
-        m_log2OvSRTx(0),
-        m_rxFrequency(1e6),
-        m_txFrequency(1e6),
         m_lpfRangeRx(),
         m_lpfRangeTx(),
         m_loRangeRx(),
@@ -84,7 +74,7 @@ struct DEVICES_API DeviceUSRPParams
     /**
      * Opens and initialize the device and obtain information (# channels, ranges, ...)
      */
-    bool open(const char *deviceStr);
+    bool open(const char *deviceStr, bool channelNumOnly);
     void close();
     uhd::usrp::multi_usrp::sptr getDevice() { return m_dev; }
 

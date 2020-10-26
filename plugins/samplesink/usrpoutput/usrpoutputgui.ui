@@ -76,6 +76,16 @@
        <item>
         <layout class="QHBoxLayout" name="freqLeftBotLayout">
          <item>
+          <widget class="QLabel" name="masterClockRateLabel">
+           <property name="toolTip">
+            <string>Master clock rate (sample rate between FPGA and RFIC) (k or MS/s)</string>
+           </property>
+           <property name="text">
+            <string>00000k</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="sampleRateLabel">
            <property name="minimumSize">
             <size>

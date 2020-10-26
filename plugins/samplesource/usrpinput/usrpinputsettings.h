@@ -34,6 +34,7 @@ struct USRPInputSettings
         GAIN_MANUAL
     } GainMode;
 
+    int      m_masterClockRate;
     // global settings to be saved
     uint64_t m_centerFrequency;
     int      m_devSampleRate;
