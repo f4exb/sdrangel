@@ -109,7 +109,7 @@ void USRPOutputThread::run()
             m_packets++;
             if (samples_sent != m_bufSamples)
             {
-                qDebug("USRPOutputThread::run written %ld/%d samples", samples_sent, m_bufSamples);
+                qDebug("USRPOutputThread::run written %ld/%ld samples", samples_sent, m_bufSamples);
             }
         }
         catch (std::exception& e)
