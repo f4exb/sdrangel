@@ -362,7 +362,8 @@ void AFCGUI::on_trackedDevice_currentIndexChanged(int index)
 
 void AFCGUI::on_devicesApply_clicked()
 {
-
+    AFC::MsgDevicesApply *msg = AFC::MsgDevicesApply::create();
+    m_afc->getInputMessageQueue()->push(msg);
 }
 
 void AFCGUI::on_targetPeriod_valueChanged(int value)
