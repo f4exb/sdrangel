@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <complex.h>
+#include <cmath>
 
 #include <QTime>
 #include <QDebug>
@@ -107,7 +108,7 @@ void ADSBDemodSink::processOneSample(Complex &ci)
     }
     m_magsqCount++;
 
-    sample = std::sqrtf(magsq);
+    sample = sqrtf(magsq);
     m_sampleBuffer[m_sampleCount] = sample;
     m_sampleCount++;
 

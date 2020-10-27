@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QSerialPortInfo>
@@ -100,13 +101,13 @@ bool GS232ControllerGUI::handleMessage(const Message& message)
         GS232ControllerReport::MsgReportAzAl& azAl = (GS232ControllerReport::MsgReportAzAl&) message;
         if (azAl.getType() == GS232ControllerReport::AzAlType::TARGET)
         {
-            ui->azimuth->setValue(std::round(azAl.getAzimuth()));
-            ui->elevation->setValue(std::round(azAl.getElevation()));
+            ui->azimuth->setValue(round(azAl.getAzimuth()));
+            ui->elevation->setValue(round(azAl.getElevation()));
         }
         else
         {
-            ui->azimuthCurrentText->setText(QString("%1").arg(std::round(azAl.getAzimuth())));
-            ui->elevationCurrentText->setText(QString("%1").arg(std::round(azAl.getElevation())));
+            ui->azimuthCurrentText->setText(QString("%1").arg(round(azAl.getAzimuth())));
+            ui->elevationCurrentText->setText(QString("%1").arg(round(azAl.getElevation())));
         }
         return true;
     }
