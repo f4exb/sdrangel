@@ -13,6 +13,19 @@ Build-Depends: debhelper (>= 9),
  qtmultimedia5-dev,
  libqt5multimedia5-plugins,
  libqt5websockets5-dev,
+ libqt5serialport5,
+ libqt5quick5,
+ qtpositioning5,
+ qml-module-qtlocation,
+ qml-module-qtpositioning,
+ qml-module-qtquick-window2,
+ qml-module-qtquick-dialogs, 
+ qml-module-qtquick-controls,  
+ qml-module-qtquick-layouts,
+ libqt5serialport5-dev,
+ qtdeclarative5-dev,
+ qtpositioning5-dev,
+ qtlocation5-dev,
  libusb-1.0-0-dev,
  libboost-all-dev,
  libasound2-dev,
@@ -44,8 +57,9 @@ Description: SDR/Analyzer/Generator front-end for various hardware
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
    Analog: AM, ATV, NFM, WFM, SSB, broadcast FM
-   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa
+   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa, ADS-B
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM
+   Digital: Packet (AX.25), 802.15.4
 Homepage: https://github.com/f4exb/sdrangel
