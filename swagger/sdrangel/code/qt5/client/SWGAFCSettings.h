@@ -66,6 +66,9 @@ public:
     qint64 getFreqTolerance();
     void setFreqTolerance(qint64 freq_tolerance);
 
+    qint32 getTrackerAdjustPeriod();
+    void setTrackerAdjustPeriod(qint32 tracker_adjust_period);
+
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
 
@@ -108,6 +111,9 @@ private:
 
     qint64 freq_tolerance;
     bool m_freq_tolerance_isSet;
+
+    qint32 tracker_adjust_period;
+    bool m_tracker_adjust_period_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
