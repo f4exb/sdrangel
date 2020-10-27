@@ -41,15 +41,27 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGAFCReport* fromJson(QString &jsonString) override;
 
-    qint32 getPtt();
-    void setPtt(qint32 ptt);
+    qint32 getTrackerChannelIndex();
+    void setTrackerChannelIndex(qint32 tracker_channel_index);
+
+    qint64 getTrackerDeviceFrequency();
+    void setTrackerDeviceFrequency(qint64 tracker_device_frequency);
+
+    qint32 getTrackerChannelOffset();
+    void setTrackerChannelOffset(qint32 tracker_channel_offset);
 
 
     virtual bool isSet() override;
 
 private:
-    qint32 ptt;
-    bool m_ptt_isSet;
+    qint32 tracker_channel_index;
+    bool m_tracker_channel_index_isSet;
+
+    qint64 tracker_device_frequency;
+    bool m_tracker_device_frequency_isSet;
+
+    qint32 tracker_channel_offset;
+    bool m_tracker_channel_offset_isSet;
 
 };
 

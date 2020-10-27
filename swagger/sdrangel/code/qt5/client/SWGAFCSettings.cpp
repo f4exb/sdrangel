@@ -42,7 +42,7 @@ SWGAFCSettings::SWGAFCSettings() {
     m_transverter_target_isSet = false;
     target_frequency = 0L;
     m_target_frequency_isSet = false;
-    freq_tolerance = 0L;
+    freq_tolerance = 0;
     m_freq_tolerance_isSet = false;
     tracker_adjust_period = 0;
     m_tracker_adjust_period_isSet = false;
@@ -78,7 +78,7 @@ SWGAFCSettings::init() {
     m_transverter_target_isSet = false;
     target_frequency = 0L;
     m_target_frequency_isSet = false;
-    freq_tolerance = 0L;
+    freq_tolerance = 0;
     m_freq_tolerance_isSet = false;
     tracker_adjust_period = 0;
     m_tracker_adjust_period_isSet = false;
@@ -141,7 +141,7 @@ SWGAFCSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&target_frequency, pJson["targetFrequency"], "qint64", "");
     
-    ::SWGSDRangel::setValue(&freq_tolerance, pJson["freqTolerance"], "qint64", "");
+    ::SWGSDRangel::setValue(&freq_tolerance, pJson["freqTolerance"], "qint32", "");
     
     ::SWGSDRangel::setValue(&tracker_adjust_period, pJson["trackerAdjustPeriod"], "qint32", "");
     
@@ -287,12 +287,12 @@ SWGAFCSettings::setTargetFrequency(qint64 target_frequency) {
     this->m_target_frequency_isSet = true;
 }
 
-qint64
+qint32
 SWGAFCSettings::getFreqTolerance() {
     return freq_tolerance;
 }
 void
-SWGAFCSettings::setFreqTolerance(qint64 freq_tolerance) {
+SWGAFCSettings::setFreqTolerance(qint32 freq_tolerance) {
     this->freq_tolerance = freq_tolerance;
     this->m_freq_tolerance_isSet = true;
 }

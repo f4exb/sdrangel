@@ -30,7 +30,6 @@ AFCSettings:
     freqTolerance:
       descritpion: Frequency shift tolerance before tracker frequency is (re)adjusted
       type: integer
-      format: int64
     trackerAdjustPeriod:
       description: Tracker channel frequency adjustment period in seconds
       type: integer
@@ -49,19 +48,29 @@ AFCSettings:
 AFCReport:
   description: "AFC report"
   properties:
-    ptt:
+    trackerChannelIndex:
+      description: Tracker index in device set
       type: integer
-      description: >
-        AFC status
-          * 0 - released
-          * 1 - engaged
+    trackerDeviceFrequency:
+      descritpion: Center frequency of tracker device
+      type: integer
+      format: int64
+    trackerChannelOffset:
+      description: Tracker channel offset from device center frequency
+      type: integer
 
 AFCActions:
   description: "AFC actions"
   properties:
-    ptt:
+    deviceTrack:
       type: integer
       description: >
-        AFC action
+        (Re)initialize tracker target frequency adjustment
+          * 0 - release
+          * 1 - engage
+    devicesApply:
+      type: integer
+      description: >
+        (Re)initialize device sets tracking
           * 0 - release
           * 1 - engage

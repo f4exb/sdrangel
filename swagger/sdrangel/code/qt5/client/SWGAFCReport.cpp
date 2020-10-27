@@ -28,8 +28,12 @@ SWGAFCReport::SWGAFCReport(QString* json) {
 }
 
 SWGAFCReport::SWGAFCReport() {
-    ptt = 0;
-    m_ptt_isSet = false;
+    tracker_channel_index = 0;
+    m_tracker_channel_index_isSet = false;
+    tracker_device_frequency = 0L;
+    m_tracker_device_frequency_isSet = false;
+    tracker_channel_offset = 0;
+    m_tracker_channel_offset_isSet = false;
 }
 
 SWGAFCReport::~SWGAFCReport() {
@@ -38,12 +42,18 @@ SWGAFCReport::~SWGAFCReport() {
 
 void
 SWGAFCReport::init() {
-    ptt = 0;
-    m_ptt_isSet = false;
+    tracker_channel_index = 0;
+    m_tracker_channel_index_isSet = false;
+    tracker_device_frequency = 0L;
+    m_tracker_device_frequency_isSet = false;
+    tracker_channel_offset = 0;
+    m_tracker_channel_offset_isSet = false;
 }
 
 void
 SWGAFCReport::cleanup() {
+
+
 
 }
 
@@ -58,7 +68,11 @@ SWGAFCReport::fromJson(QString &json) {
 
 void
 SWGAFCReport::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&ptt, pJson["ptt"], "qint32", "");
+    ::SWGSDRangel::setValue(&tracker_channel_index, pJson["trackerChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tracker_device_frequency, pJson["trackerDeviceFrequency"], "qint64", "");
+    
+    ::SWGSDRangel::setValue(&tracker_channel_offset, pJson["trackerChannelOffset"], "qint32", "");
     
 }
 
@@ -76,21 +90,47 @@ SWGAFCReport::asJson ()
 QJsonObject*
 SWGAFCReport::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_ptt_isSet){
-        obj->insert("ptt", QJsonValue(ptt));
+    if(m_tracker_channel_index_isSet){
+        obj->insert("trackerChannelIndex", QJsonValue(tracker_channel_index));
+    }
+    if(m_tracker_device_frequency_isSet){
+        obj->insert("trackerDeviceFrequency", QJsonValue(tracker_device_frequency));
+    }
+    if(m_tracker_channel_offset_isSet){
+        obj->insert("trackerChannelOffset", QJsonValue(tracker_channel_offset));
     }
 
     return obj;
 }
 
 qint32
-SWGAFCReport::getPtt() {
-    return ptt;
+SWGAFCReport::getTrackerChannelIndex() {
+    return tracker_channel_index;
 }
 void
-SWGAFCReport::setPtt(qint32 ptt) {
-    this->ptt = ptt;
-    this->m_ptt_isSet = true;
+SWGAFCReport::setTrackerChannelIndex(qint32 tracker_channel_index) {
+    this->tracker_channel_index = tracker_channel_index;
+    this->m_tracker_channel_index_isSet = true;
+}
+
+qint64
+SWGAFCReport::getTrackerDeviceFrequency() {
+    return tracker_device_frequency;
+}
+void
+SWGAFCReport::setTrackerDeviceFrequency(qint64 tracker_device_frequency) {
+    this->tracker_device_frequency = tracker_device_frequency;
+    this->m_tracker_device_frequency_isSet = true;
+}
+
+qint32
+SWGAFCReport::getTrackerChannelOffset() {
+    return tracker_channel_offset;
+}
+void
+SWGAFCReport::setTrackerChannelOffset(qint32 tracker_channel_offset) {
+    this->tracker_channel_offset = tracker_channel_offset;
+    this->m_tracker_channel_offset_isSet = true;
 }
 
 
@@ -98,7 +138,13 @@ bool
 SWGAFCReport::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_ptt_isSet){
+        if(m_tracker_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tracker_device_frequency_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tracker_channel_offset_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);
