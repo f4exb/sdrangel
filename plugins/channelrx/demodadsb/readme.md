@@ -6,7 +6,7 @@ This plugin can be used to receive and display ADS-B aircraft information. This 
 
 <h2>Interface</h2>
 
-![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBdemod_plugin.png)
+![ADS-B Demodulator plugin GUI](../../../doc/img/ADSBDemod_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception value</h3>
 
@@ -44,7 +44,7 @@ Checking Feed enables feeding received ADS-B frames to aggregators such as ADS-B
 
 The table displays the decoded ADS-B data for each aircraft. The data is not all able to be transmitted in a single ADS-B frame, so the table displays an amalgamation of the latest received data of each type.
 
-![ADS-B Demodulator Data](../../../doc/img/ADSBdemod_plugin_table.png)
+![ADS-B Demodulator Data](../../../doc/img/ADSBDemod_plugin_table.png)
 
 * ICAO ID - 24-bit hexidecimal ICAO aircraft address. This is unique for each aircraft.
 * Flight No. - Airline flight number or callsign.
@@ -73,7 +73,7 @@ Double clicking on any other cell in the table will centre the map on the corres
 
 The map displays aircraft locations and data geographically.
 
-![ADS-B Demodulator Map](../../../doc/img/ADSBdemod_plugin_map.png)
+![ADS-B Demodulator Map](../../../doc/img/ADSBDemod_plugin_map.png)
 
 The initial antenna location is placed according to My Position set under the Preferences > My Position menu. The position is only updated when the ADS-B demodulator plugin is first opened.
 
@@ -83,4 +83,4 @@ To pan around the map, click the left mouse button and drag. To zoom in or out, 
 
 <h3>Attribution</h3>
 
-Icons are by Alice Design, Alex Ahineev, Verry Obito, Sean Maldjia, Tinashe Mugayi, Andreas Vögele and Angriawan Ditya Zulkarnain from the Noun Project https://thenounproject.com/
+Icons are by Alice Design, Alex Ahineev, Verry Obito, Sean Maldjia, Tinashe Mugayi, Andreas VÃ¶gele and Angriawan Ditya Zulkarnain from the Noun Project https://thenounproject.com/
