@@ -132,3 +132,10 @@ This label turns green when data is being received from the device.
   - **T**: turns red if stream experiences timeouts
   
 The stream warning indicators are reset when the acqusition is started.
+
+<h2>Dependendices</h2>
+
+On Ubuntu 20, the libuhd-dev package should be installed. The FPGA images then need to be downloaded with:
+
+sudo /usr/lib/uhd/utils/uhd_images_downloader.py
+
