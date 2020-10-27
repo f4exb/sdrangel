@@ -29,8 +29,10 @@ MyPositionDialog::MyPositionDialog(MainSettings& mainSettings, QWidget* parent) 
 	m_mainSettings(mainSettings)
 {
 	ui->setupUi(this);
+    ui->name->setText(m_mainSettings.getStationName());
     ui->latitudeSpinBox->setValue(m_mainSettings.getLatitude());
     ui->longitudeSpinBox->setValue(m_mainSettings.getLongitude());
+    ui->altitudeSpinBox->setValue(m_mainSettings.getAltitude());
 }
 
 MyPositionDialog::~MyPositionDialog()
@@ -40,7 +42,9 @@ MyPositionDialog::~MyPositionDialog()
 
 void MyPositionDialog::accept()
 {
+    m_mainSettings.setStationName(ui->name->text());
     m_mainSettings.setLatitude(ui->latitudeSpinBox->value());
     m_mainSettings.setLongitude(ui->longitudeSpinBox->value());
+    m_mainSettings.setAltitude(ui->altitudeSpinBox->value());
 	QDialog::accept();
 }

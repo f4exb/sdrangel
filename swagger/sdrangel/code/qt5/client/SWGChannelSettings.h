@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGADSBDemodSettings.h"
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
 #include "SWGATVDemodSettings.h"
@@ -80,6 +81,9 @@ public:
 
     qint32 getOriginatorChannelIndex();
     void setOriginatorChannelIndex(qint32 originator_channel_index);
+
+    SWGADSBDemodSettings* getAdsbDemodSettings();
+    void setAdsbDemodSettings(SWGADSBDemodSettings* adsb_demod_settings);
 
     SWGAMDemodSettings* getAmDemodSettings();
     void setAmDemodSettings(SWGAMDemodSettings* am_demod_settings);
@@ -177,6 +181,9 @@ private:
 
     qint32 originator_channel_index;
     bool m_originator_channel_index_isSet;
+
+    SWGADSBDemodSettings* adsb_demod_settings;
+    bool m_adsb_demod_settings_isSet;
 
     SWGAMDemodSettings* am_demod_settings;
     bool m_am_demod_settings_isSet;

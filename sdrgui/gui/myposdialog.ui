@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>324</width>
-    <height>147</height>
+    <height>190</height>
    </rect>
   </property>
   <property name="font">
@@ -26,22 +26,25 @@
       <string>My Station Position</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="latitudeLabel">
         <property name="text">
          <string>Latitude</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="longitudeLabel">
         <property name="text">
          <string>Longitude</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="longitudeSpinBox">
+        <property name="toolTip">
+         <string>Longitude in decimal degrees</string>
+        </property>
         <property name="decimals">
          <number>6</number>
         </property>
@@ -53,8 +56,11 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="latitudeSpinBox">
+        <property name="toolTip">
+         <string>Latitude in decimal degrees</string>
+        </property>
         <property name="decimals">
          <number>6</number>
         </property>
@@ -63,6 +69,37 @@
         </property>
         <property name="maximum">
          <double>90.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="altitudeSpinBox">
+        <property name="toolTip">
+         <string>Altitude in metres</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="altitudeLabel">
+        <property name="text">
+         <string>Altitude (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="name">
+        <property name="toolTip">
+         <string>Enter the name of your station</string>
+        </property>
+        <property name="text">
+         <string>Home</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="nameLabel">
+        <property name="text">
+         <string>Station name</string>
         </property>
        </widget>
       </item>
@@ -82,7 +119,10 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>buttonBox</tabstop>
+  <tabstop>name</tabstop>
+  <tabstop>latitudeSpinBox</tabstop>
+  <tabstop>longitudeSpinBox</tabstop>
+  <tabstop>altitudeSpinBox</tabstop>
  </tabstops>
  <resources/>
  <connections>

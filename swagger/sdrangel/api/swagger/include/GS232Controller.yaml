@@ -1,0 +1,36 @@
+GS232ControllerSettings:
+  description: "GS-232 Controller settings"
+  properties:
+    azimuth:
+      description: Target azimuth in degrees (0-450)
+      type: integer
+    elevation:
+      description: Target elevation in degrees (0-180)
+      type: integer
+    serialPort:
+      description: The serial port the GS-232 controller is connected to
+      type: string
+    baudRate:
+      description: The baud rate to use for the serial connection to the GS-232 controller
+      type: integer
+    track:
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    deviceIndex:
+      type: integer
+    channelIndex:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
