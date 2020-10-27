@@ -28,6 +28,7 @@
 #include "freqtrackersink.h"
 
 class DownChannelizer;
+class SpectrumVis;
 
 class FreqTrackerBaseband : public QObject
 {
@@ -61,6 +62,7 @@ public:
     void reset();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
+    void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumVis = spectrumSink; m_sink.setSpectrumSink(spectrumSink); }
     int getChannelSampleRate() const;
     void setBasebandSampleRate(int sampleRate);
     void setMessageQueueToInput(MessageQueue *messageQueue) { m_sink.setMessageQueueToInput(messageQueue); }
@@ -80,6 +82,7 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     FreqTrackerSettings m_settings;
     unsigned int m_basebandSampleRate;
+    SpectrumVis *m_spectrumVis;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

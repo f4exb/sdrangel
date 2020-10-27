@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAFCSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSimplePTTSettings.h"
@@ -57,6 +58,9 @@ public:
     SWGGS232ControllerSettings* getGs232ControllerSettings();
     void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
 
+    SWGAFCSettings* getAfcSettings();
+    void setAfcSettings(SWGAFCSettings* afc_settings);
+
     SWGSimplePTTSettings* getSimplePttSettings();
     void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
 
@@ -78,6 +82,9 @@ private:
 
     SWGGS232ControllerSettings* gs232_controller_settings;
     bool m_gs232_controller_settings_isSet;
+
+    SWGAFCSettings* afc_settings;
+    bool m_afc_settings_isSet;
 
     SWGSimplePTTSettings* simple_ptt_settings;
     bool m_simple_ptt_settings_isSet;

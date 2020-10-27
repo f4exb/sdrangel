@@ -34,6 +34,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
+    afc_actions = nullptr;
+    m_afc_actions_isSet = false;
     simple_ptt_actions = nullptr;
     m_simple_ptt_actions_isSet = false;
 }
@@ -50,6 +52,8 @@ SWGFeatureActions::init() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
+    afc_actions = new SWGAFCActions();
+    m_afc_actions_isSet = false;
     simple_ptt_actions = new SWGSimplePTTActions();
     m_simple_ptt_actions_isSet = false;
 }
@@ -61,6 +65,9 @@ SWGFeatureActions::cleanup() {
     }
 
 
+    if(afc_actions != nullptr) { 
+        delete afc_actions;
+    }
     if(simple_ptt_actions != nullptr) { 
         delete simple_ptt_actions;
     }
@@ -82,6 +89,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_feature_set_index, pJson["originatorFeatureSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_feature_index, pJson["originatorFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&afc_actions, pJson["AFCActions"], "SWGAFCActions", "SWGAFCActions");
     
     ::SWGSDRangel::setValue(&simple_ptt_actions, pJson["SimplePTTActions"], "SWGSimplePTTActions", "SWGSimplePTTActions");
     
@@ -109,6 +118,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if(m_originator_feature_index_isSet){
         obj->insert("originatorFeatureIndex", QJsonValue(originator_feature_index));
+    }
+    if((afc_actions != nullptr) && (afc_actions->isSet())){
+        toJsonValue(QString("AFCActions"), afc_actions, obj, QString("SWGAFCActions"));
     }
     if((simple_ptt_actions != nullptr) && (simple_ptt_actions->isSet())){
         toJsonValue(QString("SimplePTTActions"), simple_ptt_actions, obj, QString("SWGSimplePTTActions"));
@@ -147,6 +159,16 @@ SWGFeatureActions::setOriginatorFeatureIndex(qint32 originator_feature_index) {
     this->m_originator_feature_index_isSet = true;
 }
 
+SWGAFCActions*
+SWGFeatureActions::getAfcActions() {
+    return afc_actions;
+}
+void
+SWGFeatureActions::setAfcActions(SWGAFCActions* afc_actions) {
+    this->afc_actions = afc_actions;
+    this->m_afc_actions_isSet = true;
+}
+
 SWGSimplePTTActions*
 SWGFeatureActions::getSimplePttActions() {
     return simple_ptt_actions;
@@ -169,6 +191,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(afc_actions && afc_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_actions && simple_ptt_actions->isSet()){

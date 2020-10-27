@@ -41,6 +41,8 @@ struct FreqTrackerSettings
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
+    Serializable *m_spectrumGUI;
+    int  m_spanLog2;
     float m_alphaEMA; //!< alpha factor for delta frequency EMA
     bool m_tracking;
     TrackerType m_trackerType;
@@ -58,6 +60,7 @@ struct FreqTrackerSettings
     FreqTrackerSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

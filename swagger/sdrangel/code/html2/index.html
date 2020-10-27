@@ -777,6 +777,91 @@ margin-bottom: 20px;
   },
   "description" : "ADSBDemod"
 };
+            defs.AFCActions = {
+  "properties" : {
+    "deviceTrack" : {
+      "type" : "integer",
+      "description" : "(Re)initialize tracker target frequency adjustment\n  * 0 - release\n  * 1 - engage\n"
+    },
+    "devicesApply" : {
+      "type" : "integer",
+      "description" : "(Re)initialize device sets tracking\n  * 0 - release\n  * 1 - engage\n"
+    }
+  },
+  "description" : "AFC actions"
+};
+            defs.AFCReport = {
+  "properties" : {
+    "trackerChannelIndex" : {
+      "type" : "integer",
+      "description" : "Tracker index in device set"
+    },
+    "trackerDeviceFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "trackerChannelOffset" : {
+      "type" : "integer",
+      "description" : "Tracker channel offset from device center frequency"
+    }
+  },
+  "description" : "AFC report"
+};
+            defs.AFCSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "trackerDeviceSetIndex" : {
+      "type" : "integer",
+      "description" : "index of the device set of frequency tracker being used"
+    },
+    "trackedDeviceSetIndex" : {
+      "type" : "integer",
+      "description" : "index of the device set being tracked (channels and possibly device)"
+    },
+    "hasTargetFrequency" : {
+      "type" : "integer",
+      "description" : "Adjust device frequency to match tracker frequency\n  * 0 - disabled\n  * 1 - enabled\n"
+    },
+    "transverterTarget" : {
+      "type" : "integer",
+      "description" : "Use transverter or device frequency for tracker frequency adjustment\n  * 0 - device\n  * 1 - transverter\n"
+    },
+    "targetFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Target frequency for the tracker"
+    },
+    "freqTolerance" : {
+      "type" : "integer"
+    },
+    "trackerAdjustPeriod" : {
+      "type" : "integer",
+      "description" : "Tracker channel frequency adjustment period in seconds"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AFC settings"
+};
             defs.AMBEDevice = {
   "properties" : {
     "deviceRef" : {
@@ -3289,6 +3374,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the feature index from where the message comes from."
     },
+    "AFCActions" : {
+      "$ref" : "#/definitions/AFCActions"
+    },
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
     }
@@ -3314,6 +3402,9 @@ margin-bottom: 20px;
     "featureType" : {
       "type" : "string",
       "description" : "Feature type code"
+    },
+    "AFCReport" : {
+      "$ref" : "#/definitions/AFCReport"
     },
     "SimplePTTReport" : {
       "$ref" : "#/definitions/SimplePTTReport"
@@ -3389,6 +3480,9 @@ margin-bottom: 20px;
     },
     "GS232ControllerSettings" : {
       "$ref" : "#/definitions/GS232ControllerSettings"
+    },
+    "AFCSettings" : {
+      "$ref" : "#/definitions/AFCSettings"
     },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
@@ -3877,6 +3971,9 @@ margin-bottom: 20px;
     },
     "title" : {
       "type" : "string"
+    },
+    "spanLog2" : {
+      "type" : "integer"
     },
     "alphaEMA" : {
       "type" : "number",
@@ -40117,7 +40214,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-27T19:23:34.436+01:00
+              Generated 2020-10-27T23:03:34.026+01:00
             </div>
           </div>
       </div>

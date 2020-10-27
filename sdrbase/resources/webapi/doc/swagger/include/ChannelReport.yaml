@@ -11,6 +11,8 @@ ChannelReport:
     direction:
       description: 0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)
       type: integer
+    ADSBDemodReport:
+      $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodReport"
     AMDemodReport:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
     AMModReport:

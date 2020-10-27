@@ -22,6 +22,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/fftfilt.h"
+#include "dsp/spectrumvis.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
 #include "util/messagequeue.h"
@@ -33,6 +34,9 @@ FreqTrackerSink::FreqTrackerSink() :
         m_channelSampleRate(48000),
         m_inputFrequencyOffset(0),
         m_sinkSampleRate(48000),
+        m_spectrumSink(nullptr),
+        m_sampleBufferCount(0),
+      	m_undersampleCount(0),
         m_squelchOpen(false),
         m_squelchGate(0),
         m_magsqSum(0.0f),
@@ -52,6 +56,9 @@ FreqTrackerSink::FreqTrackerSink() :
     m_timer = &DSPEngine::instance()->getMasterTimer();
 #endif
 	m_magsq = 0.0;
+    m_sampleBufferSize = m_sinkSampleRate / 20; // 50 ms
+    m_sampleBuffer.resize(m_sampleBufferSize);
+    m_sum = Complex{0.0, 0.0};
 
     m_rrcFilter = new fftfilt(m_settings.m_rfBandwidth / m_sinkSampleRate, 2*1024);
     m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
@@ -102,6 +109,18 @@ void FreqTrackerSink::processOneSample(Complex &ci)
 {
     fftfilt::cmplx *sideband;
     int n_out;
+	int decim = 1<<m_settings.m_spanLog2;
+    m_sum += ci;
+
+    if (m_undersampleCount++ == decim)
+    {
+        Real avgr = m_sum.real() / decim;
+        Real avgi = m_sum.imag() / decim;
+        m_sampleBuffer[m_sampleBufferCount++] = Sample(avgr, avgi);
+        m_sum.real(0.0);
+        m_sum.imag(0.0);
+        m_undersampleCount = 0;
+    }
 
     if (m_settings.m_rrc)
     {
@@ -168,7 +187,15 @@ void FreqTrackerSink::processOneSample(Complex &ci)
                 m_pll.feed(re, im);
             }
         }
+
     }
+
+    if (m_spectrumSink && (m_sampleBufferCount == m_sampleBufferSize))
+    {
+        m_spectrumSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), false);
+        m_sampleBufferCount = 0;
+    }
+
 }
 
 Real FreqTrackerSink::getFrequency() const
@@ -215,6 +242,11 @@ void FreqTrackerSink::applyChannelSettings(int sinkSampleRate, int channelSample
     if (useInterpolator) {
         setInterpolator();
     }
+
+    m_sampleBufferSize = (m_sinkSampleRate/(1<<m_settings.m_spanLog2)) / 20; // 50 ms
+    m_sampleBuffer.resize(m_sampleBufferSize);
+    m_sampleBufferCount = 0;
+    m_undersampleCount = 0;
 }
 
 void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool force)
@@ -291,6 +323,14 @@ void FreqTrackerSink::applySettings(const FreqTrackerSettings& settings, bool fo
      || (m_settings.m_rfBandwidth != settings.m_rfBandwidth)
      || (m_settings.m_squelchGate != settings.m_squelchGate) || force) {
         useInterpolator = true;
+    }
+
+    if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)
+    {
+        m_sampleBufferSize = (m_sinkSampleRate/(1<<settings.m_spanLog2)) / 20; // 50 ms
+        m_sampleBuffer.resize(m_sampleBufferSize);
+        m_sampleBufferCount = 0;
+        m_undersampleCount = 0;
     }
 
     m_settings = settings;

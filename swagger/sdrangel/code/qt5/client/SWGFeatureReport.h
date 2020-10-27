@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAFCReport.h"
 #include "SWGSimplePTTReport.h"
 #include <QString>
 
@@ -46,6 +47,9 @@ public:
     QString* getFeatureType();
     void setFeatureType(QString* feature_type);
 
+    SWGAFCReport* getAfcReport();
+    void setAfcReport(SWGAFCReport* afc_report);
+
     SWGSimplePTTReport* getSimplePttReport();
     void setSimplePttReport(SWGSimplePTTReport* simple_ptt_report);
 
@@ -55,6 +59,9 @@ public:
 private:
     QString* feature_type;
     bool m_feature_type_isSet;
+
+    SWGAFCReport* afc_report;
+    bool m_afc_report_isSet;
 
     SWGSimplePTTReport* simple_ptt_report;
     bool m_simple_ptt_report_isSet;

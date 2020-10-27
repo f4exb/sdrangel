@@ -28,9 +28,9 @@
 
 class PluginAPI;
 class DeviceUISet;
-
 class FreqTracker;
 class BasebandSampleSink;
+class SpectrumVis;
 
 namespace Ui {
 	class FreqTrackerGUI;
@@ -57,11 +57,13 @@ private:
 	PluginAPI* m_pluginAPI;
 	DeviceUISet* m_deviceUISet;
 	ChannelMarker m_channelMarker;
+	ChannelMarker m_pllChannelMarker;
 	FreqTrackerSettings m_settings;
 	int m_basebandSampleRate;
 	bool m_doApplySettings;
 
 	FreqTracker* m_freqTracker;
+	SpectrumVis* m_spectrumVis;
 	bool m_squelchOpen;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
@@ -71,7 +73,9 @@ private:
 
     void blockApplySettings(bool block);
 	void applySettings(bool force = false);
+	void applySpectrumBandwidth(int spanLog2, bool force = false);
 	void displaySettings();
+	void displaySpectrumBandwidth(int spanLog2);
     void displayStreamIndex();
 	bool handleMessage(const Message& message);
 
@@ -90,6 +94,7 @@ private slots:
 	void on_rrcRolloff_valueChanged(int value);
 	void on_squelch_valueChanged(int value);
     void on_squelchGate_valueChanged(int value);
+	void on_spanLog2_valueChanged(int value);
 	void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

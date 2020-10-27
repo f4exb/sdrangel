@@ -7,5 +7,7 @@ FeatureReport:
     featureType:
       description: Feature type code
       type: string
+    AFCReport:
+      $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCReport"
     SimplePTTReport:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTReport"

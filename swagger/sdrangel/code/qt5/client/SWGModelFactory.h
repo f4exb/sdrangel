@@ -16,6 +16,9 @@
 
 #include "SWGADSBDemodReport.h"
 #include "SWGADSBDemodSettings.h"
+#include "SWGAFCActions.h"
+#include "SWGAFCReport.h"
+#include "SWGAFCSettings.h"
 #include "SWGAMBEDevice.h"
 #include "SWGAMBEDevices.h"
 #include "SWGAMDemodReport.h"
@@ -211,6 +214,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGADSBDemodSettings").compare(type) == 0) {
       return new SWGADSBDemodSettings();
+    }
+    if(QString("SWGAFCActions").compare(type) == 0) {
+      return new SWGAFCActions();
+    }
+    if(QString("SWGAFCReport").compare(type) == 0) {
+      return new SWGAFCReport();
+    }
+    if(QString("SWGAFCSettings").compare(type) == 0) {
+      return new SWGAFCSettings();
     }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
       return new SWGAMBEDevice();

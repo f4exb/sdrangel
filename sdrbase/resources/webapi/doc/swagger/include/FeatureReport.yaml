@@ -7,5 +7,7 @@ FeatureReport:
     featureType:
       description: Feature type code
       type: string
+    AFCReport:
+      $ref: "/doc/swagger/include/AFC.yaml#/AFCReport"
     SimplePTTReport:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTReport"

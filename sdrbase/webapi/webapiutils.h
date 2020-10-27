@@ -21,17 +21,38 @@
 
 #include <QJsonObject>
 #include <QString>
+#include <QMap>
 
 #include "export.h"
 
 class SDRBASE_API WebAPIUtils
 {
 public:
+    static const QMap<QString, QString> m_channelURIToSettingsKey;
+    static const QMap<QString, QString> m_deviceIdToSettingsKey;
+    static const QMap<QString, QString> m_channelTypeToSettingsKey;
+    static const QMap<QString, QString> m_sourceDeviceHwIdToSettingsKey;
+    static const QMap<QString, QString> m_sinkDeviceHwIdToSettingsKey;
+    static const QMap<QString, QString> m_mimoDeviceHwIdToSettingsKey;
+    static const QMap<QString, QString> m_channelTypeToActionsKey;
+    static const QMap<QString, QString> m_sourceDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_sinkDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_mimoDeviceHwIdToActionsKey;
+    static const QMap<QString, QString> m_featureTypeToSettingsKey;
+    static const QMap<QString, QString> m_featureTypeToActionsKey;
+    static const QMap<QString, QString> m_featureURIToSettingsKey;
+
     static bool getObjectInt(const QJsonObject &json, const QString &key, int &value);
     static bool getObjectString(const QJsonObject &json, const QString &key, QString &value);
     static bool getObjectObjects(const QJsonObject &json, const QString &key, QList<QJsonObject> &objects);
     static bool getSubObjectDouble(const QJsonObject &json, const QString &key, double &value);
     static bool setSubObjectDouble(QJsonObject &json, const QString &key, double value);
+    static bool extractValue(const QJsonObject &json, const QString &key, QJsonValue &value);
+    static bool extractArray(const QJsonObject &json, const QString &key, QJsonArray &value);
+    static bool extractObject(const QJsonObject &json, const QString &key, QJsonObject &value);
+    static bool setValue(const QJsonObject &json, const QString &key, const QJsonValue &value);
+    static bool setArray(const QJsonObject &json, const QString &key, const QJsonArray &value);
+    static bool setObject(const QJsonObject &json, const QString &key, const QJsonObject &value);
 };
 
 #endif

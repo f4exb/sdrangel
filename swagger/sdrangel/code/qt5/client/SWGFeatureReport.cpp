@@ -30,6 +30,8 @@ SWGFeatureReport::SWGFeatureReport(QString* json) {
 SWGFeatureReport::SWGFeatureReport() {
     feature_type = nullptr;
     m_feature_type_isSet = false;
+    afc_report = nullptr;
+    m_afc_report_isSet = false;
     simple_ptt_report = nullptr;
     m_simple_ptt_report_isSet = false;
 }
@@ -42,6 +44,8 @@ void
 SWGFeatureReport::init() {
     feature_type = new QString("");
     m_feature_type_isSet = false;
+    afc_report = new SWGAFCReport();
+    m_afc_report_isSet = false;
     simple_ptt_report = new SWGSimplePTTReport();
     m_simple_ptt_report_isSet = false;
 }
@@ -50,6 +54,9 @@ void
 SWGFeatureReport::cleanup() {
     if(feature_type != nullptr) { 
         delete feature_type;
+    }
+    if(afc_report != nullptr) { 
+        delete afc_report;
     }
     if(simple_ptt_report != nullptr) { 
         delete simple_ptt_report;
@@ -68,6 +75,8 @@ SWGFeatureReport::fromJson(QString &json) {
 void
 SWGFeatureReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&feature_type, pJson["featureType"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&afc_report, pJson["AFCReport"], "SWGAFCReport", "SWGAFCReport");
     
     ::SWGSDRangel::setValue(&simple_ptt_report, pJson["SimplePTTReport"], "SWGSimplePTTReport", "SWGSimplePTTReport");
     
@@ -90,6 +99,9 @@ SWGFeatureReport::asJsonObject() {
     if(feature_type != nullptr && *feature_type != QString("")){
         toJsonValue(QString("featureType"), feature_type, obj, QString("QString"));
     }
+    if((afc_report != nullptr) && (afc_report->isSet())){
+        toJsonValue(QString("AFCReport"), afc_report, obj, QString("SWGAFCReport"));
+    }
     if((simple_ptt_report != nullptr) && (simple_ptt_report->isSet())){
         toJsonValue(QString("SimplePTTReport"), simple_ptt_report, obj, QString("SWGSimplePTTReport"));
     }
@@ -105,6 +117,16 @@ void
 SWGFeatureReport::setFeatureType(QString* feature_type) {
     this->feature_type = feature_type;
     this->m_feature_type_isSet = true;
+}
+
+SWGAFCReport*
+SWGFeatureReport::getAfcReport() {
+    return afc_report;
+}
+void
+SWGFeatureReport::setAfcReport(SWGAFCReport* afc_report) {
+    this->afc_report = afc_report;
+    this->m_afc_report_isSet = true;
 }
 
 SWGSimplePTTReport*
@@ -123,6 +145,9 @@ SWGFeatureReport::isSet(){
     bool isObjectUpdated = false;
     do{
         if(feature_type && *feature_type != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(afc_report && afc_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_report && simple_ptt_report->isSet()){

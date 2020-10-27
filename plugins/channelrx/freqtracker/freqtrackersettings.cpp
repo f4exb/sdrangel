@@ -23,7 +23,8 @@
 #include "freqtrackersettings.h"
 
 FreqTrackerSettings::FreqTrackerSettings() :
-    m_channelMarker(0)
+    m_channelMarker(0),
+    m_spectrumGUI(0)
 {
     resetToDefaults();
 }
@@ -36,6 +37,7 @@ void FreqTrackerSettings::resetToDefaults()
     m_squelch = -40.0;
     m_rgbColor = QColor(200, 244, 66).rgb();
     m_title = "Frequency Tracker";
+    m_spanLog2 = 0;
     m_alphaEMA = 0.1;
     m_tracking = false;
     m_trackerType = TrackerFLL;
@@ -57,6 +59,10 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_rfBandwidth/100);
     s.writeU32(3, m_log2Decim);
+
+    if (m_spectrumGUI) {
+        s.writeBlob(4, m_spectrumGUI->serialize());
+    }
     s.writeS32(5, m_squelch);
 
     if (m_channelMarker) {
@@ -67,6 +73,7 @@ QByteArray FreqTrackerSettings::serialize() const
     s.writeFloat(8, m_alphaEMA);
     s.writeString(9, m_title);
     s.writeBool(10, m_tracking);
+    s.writeS32(11, m_spanLog2);
     s.writeS32(12, (int) m_trackerType);
     s.writeU32(13, m_pllPskOrder);
     s.writeBool(14, m_rrc);
@@ -105,7 +112,13 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         m_rfBandwidth = 100 * tmp;
         d.readU32(3, &utmp, 0);
         m_log2Decim = utmp > 6 ? 6 : utmp;
-        d.readS32(4, &tmp, 20);
+
+        if (m_spectrumGUI)
+        {
+            d.readBlob(4, &bytetmp);
+            m_spectrumGUI->deserialize(bytetmp);
+        }
+
         d.readS32(5, &tmp, -40);
         m_squelch = tmp;
         d.readBlob(6, &bytetmp);
@@ -119,6 +132,7 @@ bool FreqTrackerSettings::deserialize(const QByteArray& data)
         m_alphaEMA = ftmp < 0.01 ? 0.01 : ftmp > 1.0 ? 1.0 : ftmp;
         d.readString(9, &m_title, "Frequency Tracker");
         d.readBool(10, &m_tracking, false);
+        d.readS32(11, &m_spanLog2, 0);
         d.readS32(12, &tmp, 0);
         m_trackerType = tmp < 0 ? TrackerFLL : tmp > 2 ? TrackerPLL : (TrackerType) tmp;
         d.readU32(13, &utmp, 2);

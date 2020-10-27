@@ -1,0 +1,58 @@
+ADSBDemodSettings:
+  description: ADSBDemod
+  properties:
+    inputFrequencyOffset:
+      description: channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: channel RF bandwidth in Hz
+      type: number
+      format: float
+    correlationThreshold:
+      type: number
+      format: float
+    samplesPerBit:
+      type: integer
+    removeTimeout:
+      type: integer
+    beastEnabled:
+      type: integer
+    beastHost:
+      type: string
+    beastPort:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+ADSBDemodReport:
+  description: ADSBDemod
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+    targetAzimuth:
+      type: number
+      format: float
+    targetElevation:
+      type: number
+      format: float

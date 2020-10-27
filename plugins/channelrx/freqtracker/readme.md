@@ -96,6 +96,14 @@ This indicator lights in green when the squelch is open. When the squelch is clo
 
 This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 0.1 dB steps from 0.0 to -100.0 dB using the dial button.
 
-<h4>10: Squelch time gate</h4>
+<h3>10: Squelch time gate</h3>
 
 Number of milliseconds following squelch gate opening after which the signal is declared open. 0 means squelch is declared open with no delay and is suitable for burst signals. The value can be varied in steps of 10 ms from 0 to 990 ms.
+
+<h3>11: Spectrum display frequency span</h3>
+
+The channel signal is decimated by a power of two before being applied to the channel spectrum display. It is a kind of zoom on the center of the spectrum.
+
+<h3>12: Channel spectrum</h3>
+
+This is the spectrum display of the tracker channel. When the tracker is locked to the signal the center of the channel should fall almost in the middle of the signal spectrum (ideally in the middle when the tracker error is zero). Thus the locking can be followed dynamically and it can be more reliable than the lock indicator. A channel marker shows the tracker offset from the channel center frequency (tracker error). Its width is the tracker error tolerance and is &plusmn;1/1000th of the channel width.  Controls on the bottom of the panel are identical to the ones of the main spectrum display.

@@ -24,6 +24,7 @@
 #include <QMutex>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/spectrumvis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 
@@ -109,6 +110,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
+    SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     uint32_t getSampleRate() const { return m_basebandSink->getSampleRate(); }
 	double getMagSq() const { return m_basebandSink->getMagSq(); }
 	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
@@ -131,6 +133,7 @@ private:
     QThread *m_thread;
     FreqTrackerBaseband* m_basebandSink;
     FreqTrackerSettings m_settings;
+    SpectrumVis m_spectrumVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     static const int m_udpBlockSize;
     QNetworkAccessManager *m_networkManager;
@@ -139,6 +142,13 @@ private:
     void applySettings(const FreqTrackerSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
+    void featuresSendSettings(QList<QString>& channelSettingsKeys, const FreqTrackerSettings& settings, bool force);
+    void webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const FreqTrackerSettings& settings,
+        bool force
+    );
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

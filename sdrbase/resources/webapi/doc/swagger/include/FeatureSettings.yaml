@@ -13,6 +13,10 @@ FeatureSettings:
     originatorFeatureIndex:
       description: Optional for reverse API. This is the feature index from where the message comes from.
       type: integer
+    GS232ControllerSettings:
+      $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+    AFCSettings:
+      $ref: "/doc/swagger/include/AFC.yaml#/AFCSettings"
     SimplePTTSettings:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     RigCtlServerSettings:
