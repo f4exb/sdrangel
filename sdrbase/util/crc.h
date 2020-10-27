@@ -111,4 +111,11 @@ public:
     crc32c() : crc(32, 0x1EDC6F41, false, 0xffffffff, 0) {}
 };
 
+// ADS-B - https://mode-s.org/decode/adsb/introduction.html
+class SDRBASE_API crcadsb : public crc
+{
+public:
+    crcadsb() : crc(24, 0xfff409, true, 0, 0) {}
+};
+
 #endif

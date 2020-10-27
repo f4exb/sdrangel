@@ -696,6 +696,87 @@ margin-bottom: 20px;
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+            defs.ADSBDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    },
+    "targetAzimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "targetElevation" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "ADSBDemod"
+};
+            defs.ADSBDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz"
+    },
+    "correlationThreshold" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "samplesPerBit" : {
+      "type" : "integer"
+    },
+    "removeTimeout" : {
+      "type" : "integer"
+    },
+    "beastEnabled" : {
+      "type" : "integer"
+    },
+    "beastHost" : {
+      "type" : "string"
+    },
+    "beastPort" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "ADSBDemod"
+};
             defs.AMBEDevice = {
   "properties" : {
     "deviceRef" : {
@@ -2163,6 +2244,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "0 for Rx only, 1 for Tx only or 2 for any number and direction (default 0)"
     },
+    "ADSBDemodReport" : {
+      "$ref" : "#/definitions/ADSBDemodReport"
+    },
     "AMDemodReport" : {
       "$ref" : "#/definitions/AMDemodReport"
     },
@@ -2248,6 +2332,9 @@ margin-bottom: 20px;
     "originatorChannelIndex" : {
       "type" : "integer",
       "description" : "Optional for reverse API. This is the channel index from where the message comes from."
+    },
+    "ADSBDemodSettings" : {
+      "$ref" : "#/definitions/ADSBDemodSettings"
     },
     "AMDemodSettings" : {
       "$ref" : "#/definitions/AMDemodSettings"
@@ -3300,6 +3387,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the feature index from where the message comes from."
     },
+    "GS232ControllerSettings" : {
+      "$ref" : "#/definitions/GS232ControllerSettings"
+    },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
     },
@@ -4001,6 +4091,58 @@ margin-bottom: 20px;
     }
   },
   "description" : "GLSpectrumGUI settings"
+};
+            defs.GS232ControllerSettings = {
+  "properties" : {
+    "azimuth" : {
+      "type" : "integer",
+      "description" : "Target azimuth in degrees (0-450)"
+    },
+    "elevation" : {
+      "type" : "integer",
+      "description" : "Target elevation in degrees (0-180)"
+    },
+    "serialPort" : {
+      "type" : "string",
+      "description" : "The serial port the GS-232 controller is connected to"
+    },
+    "baudRate" : {
+      "type" : "integer",
+      "description" : "The baud rate to use for the serial connection to the GS-232 controller"
+    },
+    "track" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "deviceIndex" : {
+      "type" : "integer"
+    },
+    "channelIndex" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "GS-232 Controller settings"
 };
             defs.Gain = {
   "properties" : {
@@ -39969,7 +40111,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-11T08:49:12.690+02:00
+              Generated 2020-10-27T16:45:08.746+01:00
             </div>
           </div>
       </div>

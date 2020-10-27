@@ -57,6 +57,7 @@
 #include "SWGFeatureActions.h"
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelURIToSettingsKey = {
+    {"sdrangel.channel.adsbdemod", "ADSBDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.modam", "AMModSettings"},
@@ -136,6 +137,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_deviceIdToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_channelTypeToSettingsKey = {
+    {"ADSBDemod", "ADSBDemodSettings"},
     {"AMDemod", "AMDemodSettings"},
     {"AMMod", "AMModSettings"},
     {"ATVDemod", "ATVDemodSettings"},
@@ -242,6 +244,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_mimoDeviceHwIdToActionsKey= 
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToSettingsKey = {
+    {"GS232Controller", "GS232ControllerSettings"},
     {"SimplePTT", "SimplePTTSettings"},
     {"RigCtlServer", "RigCtlServerSettings"}
 };
@@ -251,6 +254,7 @@ const QMap<QString, QString> WebAPIRequestMapper::m_featureTypeToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIRequestMapper::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
     {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
 };
@@ -3715,7 +3719,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             appendSettingsSubKeys(settingsJsonObject, cwJson, "cwKeyer", channelSettingsKeys);
         }
 
-        if (channelSettingsKey == "AMDemodSettings")
+        if (channelSettingsKey == "ADSBDemodSettings")
+        {
+            channelSettings->setAdsbDemodSettings(new SWGSDRangel::SWGADSBDemodSettings());
+            channelSettings->getAdsbDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "AMDemodSettings")
         {
             channelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
             channelSettings->getAmDemodSettings()->fromJsonObject(settingsJsonObject);
@@ -4179,11 +4188,17 @@ bool WebAPIRequestMapper::getFeatureSettings(
         QJsonObject settingsJsonObject = featureSettingsJson[featureSettingsKey].toObject();
         featureSettingsKeys = settingsJsonObject.keys();
 
-        if (featureSettingsKey == "SimplePTTSettings")
+        if (featureSettingsKey == "GS232ControllerSettings")
+        {
+            featureSettings->setGs232ControllerSettings(new SWGSDRangel::SWGGS232ControllerSettings());
+            featureSettings->getGs232ControllerSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "SimplePTTSettings")
         {
             featureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
             featureSettings->getSimplePttSettings()->fromJsonObject(settingsJsonObject);
-        } else if (featureSettingsKey == "RigCtlServerSettings")
+        }
+        else if (featureSettingsKey == "RigCtlServerSettings")
         {
             featureSettings->setRigCtlServerSettings(new SWGSDRangel::SWGRigCtlServerSettings());
             featureSettings->getRigCtlServerSettings()->fromJsonObject(settingsJsonObject);
@@ -4328,6 +4343,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
 {
     channelSettings.cleanup();
     channelSettings.setChannelType(nullptr);
+    channelSettings.setAdsbDemodSettings(nullptr);
     channelSettings.setAmDemodSettings(nullptr);
     channelSettings.setAmModSettings(nullptr);
     channelSettings.setAtvModSettings(nullptr);
@@ -4351,6 +4367,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
 {
     channelReport.cleanup();
     channelReport.setChannelType(nullptr);
+    channelReport.setAdsbDemodReport(nullptr);
     channelReport.setAmDemodReport(nullptr);
     channelReport.setAmModReport(nullptr);
     channelReport.setAtvModReport(nullptr);

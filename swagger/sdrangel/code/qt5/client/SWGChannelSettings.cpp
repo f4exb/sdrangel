@@ -36,6 +36,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    adsb_demod_settings = nullptr;
+    m_adsb_demod_settings_isSet = false;
     am_demod_settings = nullptr;
     m_am_demod_settings_isSet = false;
     am_mod_settings = nullptr;
@@ -106,6 +108,8 @@ SWGChannelSettings::init() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    adsb_demod_settings = new SWGADSBDemodSettings();
+    m_adsb_demod_settings_isSet = false;
     am_demod_settings = new SWGAMDemodSettings();
     m_am_demod_settings_isSet = false;
     am_mod_settings = new SWGAMModSettings();
@@ -170,6 +174,9 @@ SWGChannelSettings::cleanup() {
 
 
 
+    if(adsb_demod_settings != nullptr) { 
+        delete adsb_demod_settings;
+    }
     if(am_demod_settings != nullptr) { 
         delete am_demod_settings;
     }
@@ -272,6 +279,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&originator_channel_index, pJson["originatorChannelIndex"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&adsb_demod_settings, pJson["ADSBDemodSettings"], "SWGADSBDemodSettings", "SWGADSBDemodSettings");
+    
     ::SWGSDRangel::setValue(&am_demod_settings, pJson["AMDemodSettings"], "SWGAMDemodSettings", "SWGAMDemodSettings");
     
     ::SWGSDRangel::setValue(&am_mod_settings, pJson["AMModSettings"], "SWGAMModSettings", "SWGAMModSettings");
@@ -353,6 +362,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if(m_originator_channel_index_isSet){
         obj->insert("originatorChannelIndex", QJsonValue(originator_channel_index));
+    }
+    if((adsb_demod_settings != nullptr) && (adsb_demod_settings->isSet())){
+        toJsonValue(QString("ADSBDemodSettings"), adsb_demod_settings, obj, QString("SWGADSBDemodSettings"));
     }
     if((am_demod_settings != nullptr) && (am_demod_settings->isSet())){
         toJsonValue(QString("AMDemodSettings"), am_demod_settings, obj, QString("SWGAMDemodSettings"));
@@ -477,6 +489,16 @@ void
 SWGChannelSettings::setOriginatorChannelIndex(qint32 originator_channel_index) {
     this->originator_channel_index = originator_channel_index;
     this->m_originator_channel_index_isSet = true;
+}
+
+SWGADSBDemodSettings*
+SWGChannelSettings::getAdsbDemodSettings() {
+    return adsb_demod_settings;
+}
+void
+SWGChannelSettings::setAdsbDemodSettings(SWGADSBDemodSettings* adsb_demod_settings) {
+    this->adsb_demod_settings = adsb_demod_settings;
+    this->m_adsb_demod_settings_isSet = true;
 }
 
 SWGAMDemodSettings*
@@ -764,6 +786,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(adsb_demod_settings && adsb_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(am_demod_settings && am_demod_settings->isSet()){

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGGS232ControllerSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSimplePTTSettings.h"
 #include <QString>
@@ -53,6 +54,9 @@ public:
     qint32 getOriginatorFeatureIndex();
     void setOriginatorFeatureIndex(qint32 originator_feature_index);
 
+    SWGGS232ControllerSettings* getGs232ControllerSettings();
+    void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
+
     SWGSimplePTTSettings* getSimplePttSettings();
     void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
 
@@ -71,6 +75,9 @@ private:
 
     qint32 originator_feature_index;
     bool m_originator_feature_index_isSet;
+
+    SWGGS232ControllerSettings* gs232_controller_settings;
+    bool m_gs232_controller_settings_isSet;
 
     SWGSimplePTTSettings* simple_ptt_settings;
     bool m_simple_ptt_settings_isSet;

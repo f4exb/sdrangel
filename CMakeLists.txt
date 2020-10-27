@@ -238,6 +238,9 @@ elseif (WIN32)
   set(UHD_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/uhd/lib/uhd.lib" CACHE INTERNAL "")
   set(UHD_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/uhd/bin" CACHE INTERNAL "")
 
+  set(OPENSSL_FOUND ON CACHE INTERNAL "")
+  set(OPENSSL_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/openssl" CACHE INTERNAL "")
+
   # ffmpeg
   set(FFMPEG_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/include" CACHE INTERNAL "")
   set(FFMPEG_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin" CACHE INTERNAL "")
@@ -331,11 +334,15 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5 COMPONENTS WebSockets REQUIRED)
 find_package(Qt5 COMPONENTS Multimedia REQUIRED)
 find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
+find_package(Qt5 COMPONENTS SerialPort)
 
-# for the server we don't need OpenGL components
+# for the server we don't need OpenGL/Qt Quick components
 if (BUILD_GUI)
     find_package(OpenGL REQUIRED)
     find_package(Qt5 COMPONENTS OpenGL REQUIRED)
+    find_package(Qt5 COMPONENTS Quick)
+    find_package(Qt5 COMPONENTS QuickWidgets)
+    find_package(Qt5 COMPONENTS Positioning)
 endif()
 
 # other requirements
@@ -588,6 +595,10 @@ endif()
 # install external libraries dependencies (Linux)
 if (LINUX AND ENABLE_EXTERNAL_LIBRARIES)
     install(DIRECTORY ${EXTERNAL_BUILD_LIBRARIES}/lib/ DESTINATION ${INSTALL_LIB_DIR})
+endif()
+if(WIN32)
+  include(DeployQt)
+  windeployqt(${CMAKE_PROJECT_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/sdrgui/resources)
 endif()
 
 # install documentation

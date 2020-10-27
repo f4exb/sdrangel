@@ -34,6 +34,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
+    gs232_controller_settings = nullptr;
+    m_gs232_controller_settings_isSet = false;
     simple_ptt_settings = nullptr;
     m_simple_ptt_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
@@ -52,6 +54,8 @@ SWGFeatureSettings::init() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
+    gs232_controller_settings = new SWGGS232ControllerSettings();
+    m_gs232_controller_settings_isSet = false;
     simple_ptt_settings = new SWGSimplePTTSettings();
     m_simple_ptt_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
@@ -65,6 +69,9 @@ SWGFeatureSettings::cleanup() {
     }
 
 
+    if(gs232_controller_settings != nullptr) { 
+        delete gs232_controller_settings;
+    }
     if(simple_ptt_settings != nullptr) { 
         delete simple_ptt_settings;
     }
@@ -89,6 +96,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_feature_set_index, pJson["originatorFeatureSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_feature_index, pJson["originatorFeatureIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&gs232_controller_settings, pJson["GS232ControllerSettings"], "SWGGS232ControllerSettings", "SWGGS232ControllerSettings");
     
     ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
     
@@ -118,6 +127,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if(m_originator_feature_index_isSet){
         obj->insert("originatorFeatureIndex", QJsonValue(originator_feature_index));
+    }
+    if((gs232_controller_settings != nullptr) && (gs232_controller_settings->isSet())){
+        toJsonValue(QString("GS232ControllerSettings"), gs232_controller_settings, obj, QString("SWGGS232ControllerSettings"));
     }
     if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
         toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
@@ -159,6 +171,16 @@ SWGFeatureSettings::setOriginatorFeatureIndex(qint32 originator_feature_index) {
     this->m_originator_feature_index_isSet = true;
 }
 
+SWGGS232ControllerSettings*
+SWGFeatureSettings::getGs232ControllerSettings() {
+    return gs232_controller_settings;
+}
+void
+SWGFeatureSettings::setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings) {
+    this->gs232_controller_settings = gs232_controller_settings;
+    this->m_gs232_controller_settings_isSet = true;
+}
+
 SWGSimplePTTSettings*
 SWGFeatureSettings::getSimplePttSettings() {
     return simple_ptt_settings;
@@ -191,6 +213,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_feature_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(gs232_controller_settings && gs232_controller_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_settings && simple_ptt_settings->isSet()){

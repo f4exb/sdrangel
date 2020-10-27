@@ -149,6 +149,7 @@ set(sdrbase_SOURCES
     settings/preset.cpp
     settings/mainsettings.cpp
 
+    util/azel.cpp
     util/crc.cpp
     util/CRC64.cpp
     util/db.cpp
@@ -314,6 +315,7 @@ set(sdrbase_HEADERS
     settings/preset.h
     settings/mainsettings.h
 
+    util/azel.h
     util/CRC64.h
     util/db.h
     util/doublebuffer.h
