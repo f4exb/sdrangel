@@ -67,7 +67,7 @@ bool DeviceUSRPParams::open(const char *deviceStr, bool channelNumOnly)
             m_srRangeTx = uhd::meta_range_t(std::min(txLow.start(), txHigh.start()), std::max(txLow.stop(), txHigh.stop()));
 
             // Need to restore automatic clock rate
-            uhd::property_tree::sptr properties = m_dev->get_tree();
+            uhd::property_tree::sptr properties = m_dev->get_device()->get_tree();
             if (properties->exists("/mboards/0/auto_tick_rate"))
             {
                 properties->access<bool>("/mboards/0/auto_tick_rate").set(true);
