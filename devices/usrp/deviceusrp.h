@@ -33,8 +33,8 @@ public:
     /** Enumeration of USRP hardware devices */
     static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 
-    /** Block size used for transferring IQ samples to and from the device. This perhaps needs tuning. */
-    static const unsigned int blockSize = (1<<15);
+    /** Wait for ref clock and LO to lock */
+    static void waitForLock(uhd::usrp::multi_usrp::sptr usrp, const QString& clockSource, int channel);
 };
 
 #endif /* DEVICES_USRP_DEVICEUSRP_H_ */

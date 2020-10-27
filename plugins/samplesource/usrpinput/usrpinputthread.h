@@ -36,7 +36,7 @@ class USRPInputThread : public QThread, public DeviceUSRPShared::ThreadInterface
     Q_OBJECT
 
 public:
-    USRPInputThread(uhd::rx_streamer::sptr stream, SampleSinkFifo* sampleFifo, QObject* parent = 0);
+    USRPInputThread(uhd::rx_streamer::sptr stream, size_t bufSamples, SampleSinkFifo* sampleFifo, QObject* parent = 0);
     ~USRPInputThread();
 
     virtual void startWork();
@@ -45,6 +45,7 @@ public:
     virtual bool isRunning() { return m_running; }
     void setLog2Decimation(unsigned int log2_decim);
     void getStreamStatus(bool& active, quint32& overflows, quint32& m_timeouts);
+    void issueStreamCmd(bool start);
 
 private:
     QMutex m_startWaitMutex;
@@ -56,13 +57,14 @@ private:
     quint32 m_timeouts;
 
     uhd::rx_streamer::sptr m_stream;
-    qint16 m_buf[2*DeviceUSRP::blockSize]; //must hold I+Q values of each sample hence 2xcomplex size
+    qint16 *m_buf;
+    size_t m_bufSamples;
     SampleVector m_convertBuffer;
     SampleSinkFifo* m_sampleFifo;
 
     unsigned int m_log2Decim; // soft decimation
 
-    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 12, true> m_decimatorsIQ;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
 
     void run();
     void callbackIQ(const qint16* buf, qint32 len);
