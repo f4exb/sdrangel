@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAFCActions.h"
 #include "SWGSimplePTTActions.h"
 #include <QString>
 
@@ -52,6 +53,9 @@ public:
     qint32 getOriginatorFeatureIndex();
     void setOriginatorFeatureIndex(qint32 originator_feature_index);
 
+    SWGAFCActions* getAfcActions();
+    void setAfcActions(SWGAFCActions* afc_actions);
+
     SWGSimplePTTActions* getSimplePttActions();
     void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
 
@@ -67,6 +71,9 @@ private:
 
     qint32 originator_feature_index;
     bool m_originator_feature_index_isSet;
+
+    SWGAFCActions* afc_actions;
+    bool m_afc_actions_isSet;
 
     SWGSimplePTTActions* simple_ptt_actions;
     bool m_simple_ptt_actions_isSet;

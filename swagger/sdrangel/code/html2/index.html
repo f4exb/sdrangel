@@ -696,6 +696,76 @@ margin-bottom: 20px;
   <script>
     // Script section to load models into a JS Var
     var defs = {}
+            defs.AFCActions = {
+  "properties" : {
+    "ptt" : {
+      "type" : "integer",
+      "description" : "AFC action\n  * 0 - release\n  * 1 - engage\n"
+    }
+  },
+  "description" : "AFC actions"
+};
+            defs.AFCReport = {
+  "properties" : {
+    "ptt" : {
+      "type" : "integer",
+      "description" : "AFC status\n  * 0 - released\n  * 1 - engaged\n"
+    }
+  },
+  "description" : "AFC report"
+};
+            defs.AFCSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "trackerDeviceSetIndex" : {
+      "type" : "integer",
+      "description" : "index of the device set of frequency tracker being used"
+    },
+    "trackedDeviceSetIndex" : {
+      "type" : "integer",
+      "description" : "index of the device set being tracked (channels and possibly device)"
+    },
+    "hasTargetFrequency" : {
+      "type" : "integer",
+      "description" : "Adjust device frequency to match tracker frequency\n  * 0 - disabled\n  * 1 - enabled\n"
+    },
+    "transverterTarget" : {
+      "type" : "integer",
+      "description" : "Use transverter or device frequency for tracker frequency adjustment\n  * 0 - device\n  * 1 - transverter\n"
+    },
+    "targetFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Target frequency for the tracker"
+    },
+    "freqTolerance" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AFC settings"
+};
             defs.AMBEDevice = {
   "properties" : {
     "deviceRef" : {
@@ -3202,6 +3272,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the feature index from where the message comes from."
     },
+    "AFCActions" : {
+      "$ref" : "#/definitions/AFCActions"
+    },
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
     }
@@ -3227,6 +3300,9 @@ margin-bottom: 20px;
     "featureType" : {
       "type" : "string",
       "description" : "Feature type code"
+    },
+    "AFCReport" : {
+      "$ref" : "#/definitions/AFCReport"
     },
     "SimplePTTReport" : {
       "$ref" : "#/definitions/SimplePTTReport"
@@ -3299,6 +3375,9 @@ margin-bottom: 20px;
     "originatorFeatureIndex" : {
       "type" : "integer",
       "description" : "Optional for reverse API. This is the feature index from where the message comes from."
+    },
+    "AFCSettings" : {
+      "$ref" : "#/definitions/AFCSettings"
     },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
@@ -39969,7 +40048,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-11T08:49:12.690+02:00
+              Generated 2020-10-27T06:01:09.347+01:00
             </div>
           </div>
       </div>

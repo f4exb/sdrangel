@@ -1,0 +1,64 @@
+AFCSettings:
+  description: "AFC settings"
+  properties:
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    trackerDeviceSetIndex:
+      description: index of the device set of frequency tracker being used
+      type: integer
+    trackedDeviceSetIndex:
+      description: index of the device set being tracked (channels and possibly device)
+      type: integer
+    hasTargetFrequency:
+      type: integer
+      description: >
+        Adjust device frequency to match tracker frequency
+          * 0 - disabled
+          * 1 - enabled
+    transverterTarget:
+      type: integer
+      description: >
+        Use transverter or device frequency for tracker frequency adjustment
+          * 0 - device
+          * 1 - transverter
+    targetFrequency:
+      description: Target frequency for the tracker
+      type: integer
+      format: int64
+    freqTolerance:
+      descritpion: Frequency shift tolerance before tracker frequency is (re)adjusted
+      type: integer
+      format: int64
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+AFCReport:
+  description: "AFC report"
+  properties:
+    ptt:
+      type: integer
+      description: >
+        AFC status
+          * 0 - released
+          * 1 - engaged
+
+AFCActions:
+  description: "AFC actions"
+  properties:
+    ptt:
+      type: integer
+      description: >
+        AFC action
+          * 0 - release
+          * 1 - engage

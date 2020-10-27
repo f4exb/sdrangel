@@ -14,6 +14,9 @@
 #define ModelFactory_H_
 
 
+#include "SWGAFCActions.h"
+#include "SWGAFCReport.h"
+#include "SWGAFCSettings.h"
 #include "SWGAMBEDevice.h"
 #include "SWGAMBEDevices.h"
 #include "SWGAMDemodReport.h"
@@ -203,6 +206,15 @@
 namespace SWGSDRangel {
 
   inline void* create(QString type) {
+    if(QString("SWGAFCActions").compare(type) == 0) {
+      return new SWGAFCActions();
+    }
+    if(QString("SWGAFCReport").compare(type) == 0) {
+      return new SWGAFCReport();
+    }
+    if(QString("SWGAFCSettings").compare(type) == 0) {
+      return new SWGAFCSettings();
+    }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
       return new SWGAMBEDevice();
     }
