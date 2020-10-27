@@ -230,7 +230,7 @@
       <widget class="QComboBox" name="antenna">
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
