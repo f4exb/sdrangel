@@ -76,6 +76,16 @@
        <item>
         <layout class="QHBoxLayout" name="freqLeftBotLayout">
          <item>
+          <widget class="QLabel" name="masterClockRateLabel">
+           <property name="toolTip">
+            <string>Master clock rate (sample rate between FPGA and RFIC) (k or MS/s)</string>
+           </property>
+           <property name="text">
+            <string>00000k</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="sampleRateLabel">
            <property name="minimumSize">
             <size>
@@ -220,7 +230,7 @@
       <widget class="QComboBox" name="antenna">
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
@@ -563,6 +573,55 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="loOffsetLabel">
+       <property name="text">
+        <string>LO</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ValueDialZ" name="loOffset" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>32</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <family>Liberation Mono</family>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="toolTip">
+        <string>LO frequency offset. This should not be greater than half the sample rate.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="loOffsetUnits">
+       <property name="text">
+        <string>kHz</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -682,6 +741,12 @@
    <class>ValueDial</class>
    <extends>QWidget</extends>
    <header>gui/valuedial.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

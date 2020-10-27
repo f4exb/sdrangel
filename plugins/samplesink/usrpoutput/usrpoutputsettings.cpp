@@ -27,10 +27,12 @@ USRPOutputSettings::USRPOutputSettings()
 
 void USRPOutputSettings::resetToDefaults()
 {
+    m_masterClockRate = -1; // Calculated by UHD
     m_centerFrequency = 435000*1000;
     m_devSampleRate = 3000000;
+    m_loOffset = 0;
     m_log2SoftInterp = 0;
-    m_lpfBW = 5.5e6f;
+    m_lpfBW = 10e6f;
     m_gain = 50;
     m_antennaPath = "TX/RX";
     m_clockSource = "internal";
@@ -58,6 +60,7 @@ QByteArray USRPOutputSettings::serialize() const
     s.writeString(10, m_reverseAPIAddress);
     s.writeU32(11, m_reverseAPIPort);
     s.writeU32(12, m_reverseAPIDeviceIndex);
+    s.writeS32(13, m_loOffset);
 
     return s.final();
 }
@@ -97,6 +100,7 @@ bool USRPOutputSettings::deserialize(const QByteArray& data)
 
         d.readU32(12, &uintval, 0);
         m_reverseAPIDeviceIndex = uintval > 99 ? 99 : uintval;
+        d.readS32(13, &m_loOffset, 0);
 
         return true;
     }

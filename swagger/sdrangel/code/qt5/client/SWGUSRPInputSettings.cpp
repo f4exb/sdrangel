@@ -32,6 +32,8 @@ SWGUSRPInputSettings::SWGUSRPInputSettings() {
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
+    lo_offset = 0;
+    m_lo_offset_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -72,6 +74,8 @@ SWGUSRPInputSettings::init() {
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
+    lo_offset = 0;
+    m_lo_offset_isSet = false;
     dc_block = 0;
     m_dc_block_isSet = false;
     iq_correction = 0;
@@ -110,6 +114,7 @@ SWGUSRPInputSettings::cleanup() {
 
 
 
+
     if(antenna_path != nullptr) { 
         delete antenna_path;
     }
@@ -142,6 +147,8 @@ SWGUSRPInputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&lo_offset, pJson["loOffset"], "qint32", "");
     
     ::SWGSDRangel::setValue(&dc_block, pJson["dcBlock"], "qint32", "");
     
@@ -192,6 +199,9 @@ SWGUSRPInputSettings::asJsonObject() {
     }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
+    }
+    if(m_lo_offset_isSet){
+        obj->insert("loOffset", QJsonValue(lo_offset));
     }
     if(m_dc_block_isSet){
         obj->insert("dcBlock", QJsonValue(dc_block));
@@ -257,6 +267,16 @@ void
 SWGUSRPInputSettings::setDevSampleRate(qint32 dev_sample_rate) {
     this->dev_sample_rate = dev_sample_rate;
     this->m_dev_sample_rate_isSet = true;
+}
+
+qint32
+SWGUSRPInputSettings::getLoOffset() {
+    return lo_offset;
+}
+void
+SWGUSRPInputSettings::setLoOffset(qint32 lo_offset) {
+    this->lo_offset = lo_offset;
+    this->m_lo_offset_isSet = true;
 }
 
 qint32
@@ -408,6 +428,9 @@ SWGUSRPInputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lo_offset_isSet){
             isObjectUpdated = true; break;
         }
         if(m_dc_block_isSet){

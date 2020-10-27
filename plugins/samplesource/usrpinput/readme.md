@@ -118,6 +118,10 @@ Check this button to enable IQ imbalance correction.
 
 This is the Rx hardware IF filter bandwidth in kHz for the given channel. Use the wheels to adjust the value. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
+<h3>Rx LO offset</h3>
+
+This adjusts the Rx local oscillator (LO) frequency from the centre frequency by the given amount in kHz, and the NCOs are used to digitally shift the signal to compensate. The shift should be less than half of the sample rate.
+
 <h3>15: Stream status indicator</h3>
 
 This label turns green when data is being received from the device.
@@ -128,3 +132,10 @@ This label turns green when data is being received from the device.
   - **T**: turns red if stream experiences timeouts
   
 The stream warning indicators are reset when the acqusition is started.
+
+<h2>Dependendices</h2>
+
+On Ubuntu 20, the libuhd-dev package should be installed. The FPGA images then need to be downloaded with:
+
+sudo /usr/lib/uhd/utils/uhd_images_downloader.py
+

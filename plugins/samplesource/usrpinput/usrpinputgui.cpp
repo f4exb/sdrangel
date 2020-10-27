@@ -61,6 +61,9 @@ USRPInputGUI::USRPInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, (uint32_t) minF, (uint32_t) maxF);
 
+    ui->loOffset->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
+    ui->loOffset->setValueRange(false, 5, (int32_t)-maxF/2/1000, (int32_t)maxF/2/1000); // LO offset shouldn't be greater than half the sample rate
+
     m_usrpInput->getLPRange(minF, maxF);
     ui->lpf->setColorMapper(ColorMapper(ColorMapper::GrayYellow));
     ui->lpf->setValueRange(5, (minF/1000)+1, maxF/1000);
@@ -160,10 +163,12 @@ bool USRPInputGUI::handleMessage(const Message& message)
     else if (DeviceUSRPShared::MsgReportBuddyChange::match(message))
     {
         DeviceUSRPShared::MsgReportBuddyChange& report = (DeviceUSRPShared::MsgReportBuddyChange&) message;
-        m_settings.m_devSampleRate = report.getDevSampleRate();
+        m_settings.m_masterClockRate = report.getMasterClockRate();
 
         if (report.getRxElseTx()) {
+            m_settings.m_devSampleRate   = report.getDevSampleRate();
             m_settings.m_centerFrequency = report.getCenterFrequency();
+            m_settings.m_loOffset        = report.getLOOffset();
         }
 
         blockApplySettings(true);
@@ -174,7 +179,7 @@ bool USRPInputGUI::handleMessage(const Message& message)
     }
     else if (DeviceUSRPShared::MsgReportClockSourceChange::match(message))
     {
-qDebug("USRPInputGUI::handleMessage MsgReportClockSourceChange");
+        qDebug("USRPInputGUI::handleMessage MsgReportClockSourceChange");
         DeviceUSRPShared::MsgReportClockSourceChange& report = (DeviceUSRPShared::MsgReportClockSourceChange&) message;
         m_settings.m_clockSource = report.getClockSource();
 
@@ -283,12 +288,22 @@ void USRPInputGUI::handleInputMessages()
 void USRPInputGUI::updateSampleRate()
 {
     uint32_t sr = m_settings.m_devSampleRate;
+    int cr = m_settings.m_masterClockRate;
 
     if (sr < 100000000) {
         ui->sampleRateLabel->setText(tr("%1k").arg(QString::number(sr / 1000.0f, 'g', 5)));
     } else {
         ui->sampleRateLabel->setText(tr("%1M").arg(QString::number(sr / 1000000.0f, 'g', 5)));
     }
+    if (cr < 0) {
+       ui->masterClockRateLabel->setText("-");
+    } else if (cr < 100000000) {
+        ui->masterClockRateLabel->setText(tr("%1k").arg(QString::number(cr / 1000.0f, 'g', 5)));
+    } else {
+        ui->masterClockRateLabel->setText(tr("%1M").arg(QString::number(cr / 1000000.0f, 'g', 5)));
+    }
+    // LO offset shouldn't be greater than half the sample rate
+    ui->loOffset->setValueRange(false, 5, -(int32_t)sr/2/1000, (int32_t)sr/2/1000);
 }
 
 void USRPInputGUI::updateSampleRateAndFrequency()
@@ -350,6 +365,7 @@ void USRPInputGUI::displaySettings()
     updateSampleRate();
 
     ui->lpf->setValue(m_settings.m_lpfBW / 1000);
+    ui->loOffset->setValue(m_settings.m_loOffset / 1000);
 
     ui->gain->setValue(m_settings.m_gain);
     ui->gainText->setText(tr("%1").arg(m_settings.m_gain));
@@ -524,6 +540,12 @@ void USRPInputGUI::on_swDecim_currentIndexChanged(int index)
 void USRPInputGUI::on_lpf_changed(quint64 value)
 {
     m_settings.m_lpfBW = value * 1000;
+    sendSettings();
+}
+
+void USRPInputGUI::on_loOffset_changed(qint64 value)
+{
+    m_settings.m_loOffset = value * 1000;
     sendSettings();
 }
 

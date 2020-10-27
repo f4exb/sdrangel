@@ -226,6 +226,7 @@ private:
     DeviceUSRPShared m_deviceShared;
     bool m_channelAcquired;
     uhd::tx_streamer::sptr m_streamId;
+    size_t m_bufSamples;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
@@ -237,7 +238,7 @@ private:
     void resumeRxBuddies();
     void suspendTxBuddies();
     void resumeTxBuddies();
-    bool applySettings(const USRPOutputSettings& settings, bool force = false);
+    bool applySettings(const USRPOutputSettings& settings, bool preGetStream, bool force = false);
     void webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response);
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const USRPOutputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);
