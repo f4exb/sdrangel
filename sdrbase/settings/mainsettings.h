@@ -71,10 +71,14 @@ public:
 	const QString& getSourceDeviceId() const { return m_preferences.getSourceDevice(); }
 	void setSourceDeviceId(const QString& deviceId) { m_preferences.setSourceDevice(deviceId); }
 
-	void setLatitude(float latitude) { m_preferences.setLatitude(latitude); }
+	void setStationName(const QString& name) { m_preferences.setStationName(name); }
+        void setLatitude(float latitude) { m_preferences.setLatitude(latitude); }
 	void setLongitude(float longitude) { m_preferences.setLongitude(longitude); }
+	void setAltitude(float altitude) { m_preferences.setAltitude(altitude); }
+        QString getStationName() const { return m_preferences.getStationName(); }
 	float getLatitude() const { return m_preferences.getLatitude(); }
 	float getLongitude() const { return m_preferences.getLongitude(); }
+	float getAltitude() const { return m_preferences.getAltitude(); }
 
     void setConsoleMinLogLevel(const QtMsgType& minLogLevel) { m_preferences.setConsoleMinLogLevel(minLogLevel); }
     void setFileMinLogLevel(const QtMsgType& minLogLevel) { m_preferences.setFileMinLogLevel(minLogLevel); }

@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGADSBDemodReport.h"
 #include "SWGAMDemodReport.h"
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
@@ -71,6 +72,9 @@ public:
 
     qint32 getDirection();
     void setDirection(qint32 direction);
+
+    SWGADSBDemodReport* getAdsbDemodReport();
+    void setAdsbDemodReport(SWGADSBDemodReport* adsb_demod_report);
 
     SWGAMDemodReport* getAmDemodReport();
     void setAmDemodReport(SWGAMDemodReport* am_demod_report);
@@ -153,6 +157,9 @@ private:
 
     qint32 direction;
     bool m_direction_isSet;
+
+    SWGADSBDemodReport* adsb_demod_report;
+    bool m_adsb_demod_report_isSet;
 
     SWGAMDemodReport* am_demod_report;
     bool m_am_demod_report_isSet;

@@ -23,10 +23,14 @@ public:
 	void setAudioDevice(const QString& value) { m_audioDevice = value; }
 	const QString& getAudioDevice() const { return m_audioDevice; }
 
-	void setLatitude(float latitude) { m_latitude = latitude; }
+	void setStationName(const QString& name) { m_stationName = name; }
+        void setLatitude(float latitude) { m_latitude = latitude; }
 	void setLongitude(float longitude) { m_longitude = longitude; }
+	void setAltitude(float altitude) { m_altitude = altitude; }
+        QString getStationName() const { return m_stationName; }
 	float getLatitude() const { return m_latitude; }
 	float getLongitude() const { return m_longitude; }
+	float getAltitude() const { return m_altitude; }
 
 	void setConsoleMinLogLevel(const QtMsgType& minLogLevel) { m_consoleMinLogLevel = minLogLevel; }
     void setFileMinLogLevel(const QtMsgType& minLogLevel) { m_fileMinLogLevel = minLogLevel; }
@@ -44,8 +48,10 @@ protected:
 	QString m_audioType;
 	QString m_audioDevice;
 
-	float m_latitude;
+	QString m_stationName;  //!< Name of the station (for drawing on the map)
+        float m_latitude;       //!< Position of the station
 	float m_longitude;
+        float m_altitude;       //!< Altitude in metres
 
 	QtMsgType m_consoleMinLogLevel;
     QtMsgType m_fileMinLogLevel;

@@ -11,6 +11,7 @@ endfunction (QUERY_QMAKE)
 
 query_qmake (QT_INSTALL_PLUGINS QT_PLUGINS_DIR)
 query_qmake (QT_INSTALL_IMPORTS QT_IMPORTS_DIR)
+query_qmake (QT_INSTALL_QML QT_QML_DIR)
 
 if(APPLE AND BUNDLE AND BUILD_GUI)
 
@@ -172,24 +173,6 @@ elseif(LINUX AND BUNDLE)
 
 elseif(WIN32 OR MINGW)
 
-  set(QT_PLUGINS_DIR_SET
-    "${QT_PLUGINS_DIR}/platforms"
-    "${QT_PLUGINS_DIR}/audio"
-    "${QT_PLUGINS_DIR}/imageformats"
-    "${QT_PLUGINS_DIR}/mediaservice"
-    "${QT_PLUGINS_DIR}/playlistformats"
-    "${QT_PLUGINS_DIR}/renderplugins"
-    "${QT_PLUGINS_DIR}/iconengines"
-  )
-
-  # Copy Qt Plugins; fixup_bundle doesn't do that
-  foreach(qt_plugin ${QT_PLUGINS_DIR_SET})
-    get_filename_component(qt_plugin_name "${qt_plugin}"  NAME)
-    add_custom_target(copy_qt_plugin_${qt_plugin_name} ALL
-      COMMAND ${CMAKE_COMMAND} -E copy_directory "${qt_plugin}" "${SDRANGEL_BINARY_BIN_DIR}/${qt_plugin_name}"
-    )
-  endforeach(qt_plugin)
-
   # unfortunately some libraries are dependencies of dll so we copy by hand
   # TODO check if we can use fixup_bundle() and have libraries on root path
 
@@ -221,6 +204,14 @@ elseif(WIN32 OR MINGW)
     endforeach(uhd_dll)
   endif()
 
+  file(GLOB OPENSSL_DLLS "${OPENSSL_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  foreach(openssl_dll ${OPENSSL_DLLS})
+    get_filename_component(openssl_dll_name "${openssl_dll}"  NAME)
+    add_custom_target(copy_openssl_${openssl_dll_name} ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${openssl_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+    )
+  endforeach(openssl_dll)
+
   # TODO we need a way to fixup_bundle() on the build bin/ directory without call install
   if(BUILD_GUI)
     install(CODE "
@@ -247,23 +238,9 @@ elseif(WIN32 OR MINGW)
       " COMPONENT Runtime)
     endif(BUILD_GUI)
 
-    # Copy Qt Plugins; fixup_bundle doesn't do that
-    install (
-      DIRECTORY ${QT_PLUGINS_DIR_SET}
-      DESTINATION "${INSTALL_BIN_DIR}"
-      CONFIGURATIONS Release MinSizeRel
-      COMPONENT runtime
-      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}"
-      PATTERN "*minimal*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-      PATTERN "*offscreen*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-      PATTERN "*quick*${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-      PATTERN "*_debug${CMAKE_SHARED_LIBRARY_SUFFIX}" EXCLUDE
-    )
-
     # unfortunately some libraries are dependencies of dll so we copy by hand
     # TODO check if we can use fixup_bundle() and have libraries on root path
     # inputkiwisdr.dll
-    install(FILES "${Qt5_DIR}/../../../bin/Qt5WebSockets${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
     # demoddatv.dll
     install(DIRECTORY "${FFMPEG_LIBRARIES}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -278,6 +255,9 @@ elseif(WIN32 OR MINGW)
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # uhd
     install(DIRECTORY "${UHD_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # OpenSSL
+    install(DIRECTORY "${OPENSSL_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
     install(CODE "

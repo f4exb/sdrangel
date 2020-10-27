@@ -17,6 +17,8 @@ ChannelSettings:
     originatorChannelIndex:
       description: Optional for reverse API. This is the channel index from where the message comes from.
       type: integer
+    ADSBDemodSettings:
+      $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodSettings"
     AMDemodSettings:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
     AMModSettings:

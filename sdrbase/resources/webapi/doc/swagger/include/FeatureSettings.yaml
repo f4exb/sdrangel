@@ -15,6 +15,8 @@ FeatureSettings:
       type: integer
     AFCSettings:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCSettings"
+    GS232ControllerSettings:
+      $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
     SimplePTTSettings:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     RigCtlServerSettings:

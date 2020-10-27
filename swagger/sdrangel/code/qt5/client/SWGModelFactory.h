@@ -14,6 +14,8 @@
 #define ModelFactory_H_
 
 
+#include "SWGADSBDemodReport.h"
+#include "SWGADSBDemodSettings.h"
 #include "SWGAFCActions.h"
 #include "SWGAFCReport.h"
 #include "SWGAFCSettings.h"
@@ -106,6 +108,7 @@
 #include "SWGFrequencyRange.h"
 #include "SWGGLScope.h"
 #include "SWGGLSpectrum.h"
+#include "SWGGS232ControllerSettings.h"
 #include "SWGGain.h"
 #include "SWGHackRFInputSettings.h"
 #include "SWGHackRFOutputSettings.h"
@@ -230,6 +233,12 @@
 namespace SWGSDRangel {
 
   inline void* create(QString type) {
+    if(QString("SWGADSBDemodReport").compare(type) == 0) {
+      return new SWGADSBDemodReport();
+    }
+    if(QString("SWGADSBDemodSettings").compare(type) == 0) {
+      return new SWGADSBDemodSettings();
+    }
     if(QString("SWGAFCActions").compare(type) == 0) {
       return new SWGAFCActions();
     }
@@ -505,6 +514,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGGLSpectrum").compare(type) == 0) {
       return new SWGGLSpectrum();
+    }
+    if(QString("SWGGS232ControllerSettings").compare(type) == 0) {
+      return new SWGGS232ControllerSettings();
     }
     if(QString("SWGGain").compare(type) == 0) {
       return new SWGGain();

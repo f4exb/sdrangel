@@ -22,6 +22,7 @@
 #include "webapiutils.h"
 
 const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
+    {"sdrangel.channel.adsbdemod", "ADSBDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.modam", "AMModSettings"},
@@ -111,6 +112,7 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
+    {"ADSBDemod", "ADSBDemodSettings"},
     {"AMDemod", "AMDemodSettings"},
     {"AMMod", "AMModSettings"},
     {"ATVDemod", "ATVDemodSettings"},
@@ -226,6 +228,7 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
+    {"GS232Controller", "GS232ControllerSettings"},
     {"SimplePTT", "SimplePTTSettings"},
     {"RigCtlServer", "RigCtlServerSettings"}
 };
@@ -235,6 +238,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
     {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
 };
