@@ -32,6 +32,8 @@ SWGUSRPOutputSettings::SWGUSRPOutputSettings() {
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
+    lo_offset = 0;
+    m_lo_offset_isSet = false;
     log2_soft_interp = 0;
     m_log2_soft_interp_isSet = false;
     lpf_bw = 0;
@@ -66,6 +68,8 @@ SWGUSRPOutputSettings::init() {
     m_center_frequency_isSet = false;
     dev_sample_rate = 0;
     m_dev_sample_rate_isSet = false;
+    lo_offset = 0;
+    m_lo_offset_isSet = false;
     log2_soft_interp = 0;
     m_log2_soft_interp_isSet = false;
     lpf_bw = 0;
@@ -92,6 +96,7 @@ SWGUSRPOutputSettings::init() {
 
 void
 SWGUSRPOutputSettings::cleanup() {
+
 
 
 
@@ -127,6 +132,8 @@ SWGUSRPOutputSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&center_frequency, pJson["centerFrequency"], "qint64", "");
     
     ::SWGSDRangel::setValue(&dev_sample_rate, pJson["devSampleRate"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&lo_offset, pJson["loOffset"], "qint32", "");
     
     ::SWGSDRangel::setValue(&log2_soft_interp, pJson["log2SoftInterp"], "qint32", "");
     
@@ -171,6 +178,9 @@ SWGUSRPOutputSettings::asJsonObject() {
     }
     if(m_dev_sample_rate_isSet){
         obj->insert("devSampleRate", QJsonValue(dev_sample_rate));
+    }
+    if(m_lo_offset_isSet){
+        obj->insert("loOffset", QJsonValue(lo_offset));
     }
     if(m_log2_soft_interp_isSet){
         obj->insert("log2SoftInterp", QJsonValue(log2_soft_interp));
@@ -227,6 +237,16 @@ void
 SWGUSRPOutputSettings::setDevSampleRate(qint32 dev_sample_rate) {
     this->dev_sample_rate = dev_sample_rate;
     this->m_dev_sample_rate_isSet = true;
+}
+
+qint32
+SWGUSRPOutputSettings::getLoOffset() {
+    return lo_offset;
+}
+void
+SWGUSRPOutputSettings::setLoOffset(qint32 lo_offset) {
+    this->lo_offset = lo_offset;
+    this->m_lo_offset_isSet = true;
 }
 
 qint32
@@ -348,6 +368,9 @@ SWGUSRPOutputSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_dev_sample_rate_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_lo_offset_isSet){
             isObjectUpdated = true; break;
         }
         if(m_log2_soft_interp_isSet){

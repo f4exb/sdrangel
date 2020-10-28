@@ -48,6 +48,9 @@ public:
     qint32 getDevSampleRate();
     void setDevSampleRate(qint32 dev_sample_rate);
 
+    qint32 getLoOffset();
+    void setLoOffset(qint32 lo_offset);
+
     qint32 getLog2SoftInterp();
     void setLog2SoftInterp(qint32 log2_soft_interp);
 
@@ -90,6 +93,9 @@ private:
 
     qint32 dev_sample_rate;
     bool m_dev_sample_rate_isSet;
+
+    qint32 lo_offset;
+    bool m_lo_offset_isSet;
 
     qint32 log2_soft_interp;
     bool m_log2_soft_interp_isSet;
