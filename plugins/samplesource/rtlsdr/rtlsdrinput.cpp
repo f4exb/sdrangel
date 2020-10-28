@@ -43,10 +43,10 @@ const quint64 RTLSDRInput::frequencyLowRangeMin = 0UL;
 const quint64 RTLSDRInput::frequencyLowRangeMax = 275000UL;
 const quint64 RTLSDRInput::frequencyHighRangeMin = 24000UL;
 const quint64 RTLSDRInput::frequencyHighRangeMax = 1900000UL;
-const int RTLSDRInput::sampleRateLowRangeMin = 230000U;
-const int RTLSDRInput::sampleRateLowRangeMax = 300000U;
-const int RTLSDRInput::sampleRateHighRangeMin = 950000U;
-const int RTLSDRInput::sampleRateHighRangeMax = 2400000U;
+const int RTLSDRInput::sampleRateLowRangeMin = 225001;
+const int RTLSDRInput::sampleRateLowRangeMax = 300000;
+const int RTLSDRInput::sampleRateHighRangeMin = 900001;
+const int RTLSDRInput::sampleRateHighRangeMax = 3200000;
 
 RTLSDRInput::RTLSDRInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
