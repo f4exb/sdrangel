@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>webapi/doc/html2/index.html</file>
         <file>webapi/doc/swagger/swagger.yaml</file>
+        <file>webapi/doc/swagger/include/ADSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/AFC.yaml</file>
         <file>webapi/doc/swagger/include/Airspy.yaml</file>
         <file>webapi/doc/swagger/include/AirspyHF.yaml</file>
@@ -41,6 +42,7 @@
         <file>webapi/doc/swagger/include/FreqTracker.yaml</file>
         <file>webapi/doc/swagger/include/GLScope.yaml</file>
         <file>webapi/doc/swagger/include/GLSpectrum.yaml</file>
+        <file>webapi/doc/swagger/include/GS232Controller.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
         <file>webapi/doc/swagger/include/Interferometer.yaml</file>
@@ -78,6 +80,7 @@
         <file>webapi/doc/swagger/include/TestMOSync.yaml</file>
         <file>webapi/doc/swagger/include/UDPSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSink.yaml</file>
+        <file>webapi/doc/swagger/include/User.yaml</file>
         <file>webapi/doc/swagger/include/USRP.yaml</file>
         <file>webapi/doc/swagger/include/WFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/WFMMod.yaml</file>
