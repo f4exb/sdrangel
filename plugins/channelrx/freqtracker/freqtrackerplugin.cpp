@@ -28,7 +28,7 @@
 const PluginDescriptor FreqTrackerPlugin::m_pluginDescriptor = {
     FreqTracker::m_channelId,
 	QString("Frequency Tracker"),
-	QString("4.19.0"),
+	QString("4.21.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

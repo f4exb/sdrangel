@@ -1,3 +1,14 @@
+sdrangel (4.21.0-1) unstable; urgency=medium
+
+   * New ADS-B demodulator and decoder. PR #671
+   * New GS-232 controller (feature). PR #671
+   * Improvements to USRP support. PR #670
+   * AFC feature plugin. Issue #634
+   * Added spectrum display to Frequency tracker. Issue #665
+   * Windows: distribute Qt ANGLE support libraries. Issue #660 and PR #671
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 28 Oct 2020 07:40:44 +0100
+
 sdrangel (4.20.0-1) unstable; urgency=medium
 
    * New IEEE 802.15.4 modulator. PR #654
