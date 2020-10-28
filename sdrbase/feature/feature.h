@@ -43,7 +43,7 @@ namespace SWGSDRangel
 class SDRBASE_API Feature : public QObject {
     Q_OBJECT
 public:
-    class MsgChannelSettings : public Message {
+    class SDRBASE_API MsgChannelSettings : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
