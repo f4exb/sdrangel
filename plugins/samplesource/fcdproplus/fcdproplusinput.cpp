@@ -81,18 +81,18 @@ bool FCDProPlusInput::openDevice()
 
     if (m_dev == 0)
     {
-        qCritical("FCDProPlusInput::start: could not open FCD");
+        qCritical("FCDProPlusInput::start: could not open FCDProPlus");
         return false;
     }
 
-	if (!openFCDAudio(fcd_traits<ProPlus>::qtDeviceName))
+	if (!openFCDAudio(fcd_traits<ProPlus>::alsaDeviceName))
 	{
-        qCritical("FCDProPlusInput::start: could not open FCD audio source");
+        qCritical("FCDProPlusInput::start: could not open FCDProPlus audio source, alsa: %s , qt: %s ", fcd_traits<ProPlus>::alsaDeviceName,fcd_traits<ProPlus>::qtDeviceName);
         return false;
 	}
     else
     {
-        qDebug("FCDProPlusInput::start: FCD audio source opened");
+        qDebug("FCDProPlusInput::start: FCDProPlus audio source opened, alsa: %s , qt: %s", fcd_traits<ProPlus>::alsaDeviceName,fcd_traits<ProPlus>::qtDeviceName);
     }
 
     return true;
