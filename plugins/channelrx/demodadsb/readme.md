@@ -34,7 +34,11 @@ Higher channel sample rates may help decode more frames, but will require more p
 
 <h3>6: Threshold</h3>
 
-This sets the correlation threshold between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Lower values should decode more frames, but will require more processing power.
+This sets the correlation power threshold in dB between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Thus it acts as a kind of squelch. Lower values should decode more frames amd will require more processing power but more often just to process garbage. It is a compromise and setting it correctly is kind of subtle. You may start at ~12 dB over the noise shown in channel power (2). You may also look at correlation values obtained with reliable signals in the "Correlation" column of the data table.
+
+In detail this threshold is used to test two conditions are met:
+  - the correlation on the "ones" chips is above threshold
+  - the correlation of the "zeros" chips is below threshold. As zeros chips are two times the ones chips in the correlation (done over 6 first symbols of preamble) the raw value of zeros correlation sum is halved before comparison.
 
 <h3>7: Feed</h3>
 
@@ -59,7 +63,7 @@ The table displays the decoded ADS-B data for each aircraft. The data is not all
 * Az/El - The azimuth and elevation angles to the aircraft from the receiving antenna in degrees. These values can be sent to a rotator controller to track the aircraft.
 * Updated - The local time at which the last ADS-B message was received.
 * RX Frames - A count of the number of ADS-B frames received from this aircraft.
-* Correlation - Displays the minimum, average and maximum of the preamable correlation for each recevied frame. These values can be used to help select a threshold setting.
+* Correlation - Displays the zeros chip correlation, average of current ones chip corelation and maximum of the preamable correlation power in dB for each recevied frame. These values can be used to help select a threshold setting.
 
 A suffix of L in the latitude and longitude columns, indicates the position is based on a local decode, using a single received frame and the position of the radio station. No suffix will be added for a global decode, which is based upon receving and odd and even frame.
 If an ADS-B frame has not been received from an aircraft for 60 seconds, the aircraft is removed from the table and map.

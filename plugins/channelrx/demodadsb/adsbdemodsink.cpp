@@ -42,13 +42,13 @@ ADSBDemodSink::ADSBDemodSink() :
         m_sampleIdx(0),
         m_sampleCount(0),
         m_skipCount(0),
+        m_correlationThresholdLinear(0.0),
         m_magsq(0.0f),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
         m_messageQueueToGUI(nullptr),
-        m_sampleBuffer(nullptr),
-        m_preamble(nullptr)
+        m_sampleBuffer(nullptr)
 {
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -57,7 +57,6 @@ ADSBDemodSink::ADSBDemodSink() :
 ADSBDemodSink::~ADSBDemodSink()
 {
     delete m_sampleBuffer;
-    delete m_preamble;
 }
 
 void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -108,7 +107,7 @@ void ADSBDemodSink::processOneSample(Complex &ci)
     }
     m_magsqCount++;
 
-    sample = sqrtf(magsq);
+    sample = magsq;
     m_sampleBuffer[m_sampleCount] = sample;
     m_sampleCount++;
 
@@ -118,12 +117,37 @@ void ADSBDemodSink::processOneSample(Complex &ci)
         int startIdx = m_sampleCount - m_totalSamples;
 
         // Correlate received signal with expected preamble
-        Real preambleCorrelation = 0.0f;
-        for (int i = 0; i < ADS_B_PREAMBLE_CHIPS*m_samplesPerChip; i++)
-            preambleCorrelation += m_preamble[i] * m_sampleBuffer[startIdx+i];
+        // chip+ indexes are 0, 2, 7, 9
+        // we correlate only over 6 symbols so that the number of zero chips is twice the
+        // number of one chips - empirically this is enough to get good correlation
+        Real premableCorrelationOnes = 0.0;
+        Real preambleCorrelationZeros = 0.0;
+
+        for (int i = 0; i < m_samplesPerChip; i++)
+        {
+            premableCorrelationOnes  += m_sampleBuffer[startIdx +  0*m_samplesPerChip + i];
+            preambleCorrelationZeros += m_sampleBuffer[startIdx +  1*m_samplesPerChip + i];
+
+            premableCorrelationOnes  += m_sampleBuffer[startIdx +  2*m_samplesPerChip + i];
+            preambleCorrelationZeros += m_sampleBuffer[startIdx +  3*m_samplesPerChip + i];
+
+            preambleCorrelationZeros += m_sampleBuffer[startIdx +  4*m_samplesPerChip + i];
+            preambleCorrelationZeros += m_sampleBuffer[startIdx +  5*m_samplesPerChip + i];
+
+            preambleCorrelationZeros += m_sampleBuffer[startIdx +  6*m_samplesPerChip + i];
+            premableCorrelationOnes  += m_sampleBuffer[startIdx +  7*m_samplesPerChip + i];
+
+            preambleCorrelationZeros += m_sampleBuffer[startIdx +  8*m_samplesPerChip + i];
+            premableCorrelationOnes  += m_sampleBuffer[startIdx +  9*m_samplesPerChip + i];
+
+            preambleCorrelationZeros += m_sampleBuffer[startIdx + 10*m_samplesPerChip + i];
+            preambleCorrelationZeros += m_sampleBuffer[startIdx + 11*m_samplesPerChip + i];
+        }
 
         // If the correlation is exactly 0, it's probably no signal
-        if ((preambleCorrelation > m_settings.m_correlationThreshold) && (preambleCorrelation != 0.0f))
+        if ((premableCorrelationOnes  > m_correlationThresholdLinear) &&
+            (preambleCorrelationZeros < 2.0*m_correlationThresholdLinear) &&
+            (premableCorrelationOnes != 0.0f))
         {
             // Skip over preamble
             startIdx += m_settings.m_samplesPerBit*ADS_B_PREAMBLE_BITS;
@@ -183,13 +207,19 @@ void ADSBDemodSink::processOneSample(Complex &ci)
                     // Pass to GUI
                     if (getMessageQueueToGUI())
                     {
-                        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(QByteArray((char*)data, sizeof(data)), preambleCorrelation);
+                        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
+                            QByteArray((char*)data, sizeof(data)),
+                            premableCorrelationOnes,
+                            preambleCorrelationZeros/2.0);
                         getMessageQueueToGUI()->push(msg);
                     }
                     // Pass to worker
                     if (getMessageQueueToWorker())
                     {
-                        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(QByteArray((char*)data, sizeof(data)), preambleCorrelation);
+                        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
+                            QByteArray((char*)data, sizeof(data)),
+                            premableCorrelationOnes,
+                            preambleCorrelationZeros/2.0);
                         getMessageQueueToWorker()->push(msg);
                     }
                 }
@@ -212,23 +242,11 @@ void ADSBDemodSink::init(int samplesPerBit)
 {
     if (m_sampleBuffer)
         delete m_sampleBuffer;
-    if (m_preamble)
-        delete m_preamble;
 
     m_totalSamples = samplesPerBit*(ADS_B_PREAMBLE_BITS+ADS_B_ES_BITS);
     m_samplesPerChip = samplesPerBit/ADS_B_CHIPS_PER_BIT;
 
     m_sampleBuffer = new Real[2*m_totalSamples];
-    m_preamble = new Real[ADS_B_PREAMBLE_CHIPS*m_samplesPerChip];
-    // Possibly don't look for first chip
-    const int preambleChips[] = {1, -1, 1, -1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, -1, -1};
-    for (int i = 0; i < ADS_B_PREAMBLE_CHIPS; i++)
-    {
-        for (int j = 0; j < m_samplesPerChip; j++)
-        {
-            m_preamble[i*m_samplesPerChip+j] = preambleChips[i];
-        }
-    }
 }
 
 void ADSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -270,9 +288,14 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, bool force)
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance =  (Real) m_channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * settings.m_samplesPerBit);
     }
+
     if ((settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force)
     {
         init(settings.m_samplesPerBit);
+    }
+
+    if ((settings.m_correlationThreshold != m_settings.m_correlationThreshold) || force) {
+        m_correlationThresholdLinear = CalcDb::powerFromdB(m_settings.m_correlationThreshold);
     }
 
     m_settings = settings;

@@ -337,16 +337,19 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Correlation threshold. Lower values will increase the number of frames that can be received, but require more processing.</string>
+         <string>Correlation threshold in dB. Lower values will increase the number of frames that can be received, but require more processing.</string>
         </property>
         <property name="minimum">
-         <number>-100</number>
+         <number>-990</number>
         </property>
         <property name="maximum">
-         <number>20</number>
+         <number>0</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
         </property>
         <property name="value">
-         <number>0</number>
+         <number>-500</number>
         </property>
        </widget>
       </item>
@@ -442,6 +445,11 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <family>Liberation Mono</family>
+    </font>
+   </property>
    <property name="windowTitle">
     <string>ADS-B Data</string>
    </property>
@@ -465,8 +473,7 @@
      <widget class="QTableWidget" name="adsbData">
       <property name="font">
        <font>
-        <family>Segoe UI</family>
-        <pointsize>9</pointsize>
+        <family>Liberation Mono</family>
        </font>
       </property>
       <property name="editTriggers">
@@ -477,83 +484,119 @@
         <string>ICAO ID</string>
        </property>
        <property name="toolTip">
-        <string extracomment="Double click to search for the aircraft on www.planespotters.net"/>
+        <string extracomment="Double click to search for the aircraft on www.planespotters.net">International Civil Aviation Organization identifier. Links to www.planespotters.net</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>Flight No.</string>
        </property>
+       <property name="toolTip">
+        <string>Commercial flight number. Links to www.flightradar24.com</string>
+       </property>
       </column>
       <column>
        <property name="text">
-        <string>Latitude (°)</string>
+        <string>Lat (°)</string>
        </property>
        <property name="toolTip">
-        <string extracomment="Double click to centre the map on this aircraft"/>
+        <string extracomment="Double click to centre the map on this aircraft">Latitude in degrees postive towards the North</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Longitude (°)</string>
+        <string>Lon (°)</string>
        </property>
        <property name="toolTip">
-        <string extracomment="Double click to centre the map on this aircraft"/>
+        <string extracomment="Double click to centre the map on this aircraft">Longitude in degrees. Positive towards the East</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Altitude (ft)</string>
+        <string>Alt (ft)</string>
+       </property>
+       <property name="toolTip">
+        <string>Altitude in feet</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Speed (kn)</string>
+        <string>Sp (kn)</string>
+       </property>
+       <property name="toolTip">
+        <string>Speed in knots</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Heading (°)</string>
+        <string>Hd (°)</string>
+       </property>
+       <property name="toolTip">
+        <string>Aircraft heading in degrees</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Climb (ft/min)</string>
+        <string>Climb</string>
+       </property>
+       <property name="toolTip">
+        <string>Climbing rate in feet per minute</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>Category</string>
        </property>
+       <property name="toolTip">
+        <string>Aircraft standard category</string>
+       </property>
       </column>
       <column>
        <property name="text">
         <string>Status</string>
        </property>
+       <property name="toolTip">
+        <string>Aircraft standard status</string>
+       </property>
       </column>
       <column>
        <property name="text">
-        <string>Range (km)</string>
+        <string>D (km)</string>
+       </property>
+       <property name="toolTip">
+        <string>Range or distance of aircraft to home location</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>Az/El (°)</string>
        </property>
+       <property name="toolTip">
+        <string>Aircraft azimuth and elevation from home point in degrees</string>
+       </property>
       </column>
       <column>
        <property name="text">
         <string>Updated</string>
        </property>
+       <property name="toolTip">
+        <string>Last time updated</string>
+       </property>
       </column>
       <column>
        <property name="text">
-        <string>RX Frames</string>
+        <string>Frames</string>
+       </property>
+       <property name="toolTip">
+        <string>Number of frames received</string>
        </property>
       </column>
       <column>
        <property name="text">
         <string>Correlation</string>
+       </property>
+       <property name="toolTip">
+        <string>Correlation power min/avg/max in dB</string>
        </property>
       </column>
      </widget>

@@ -30,9 +30,9 @@ struct ADSBDemodSettings
 {
     int32_t m_inputFrequencyOffset;
     Real m_rfBandwidth;
-    Real m_correlationThreshold;
+    Real m_correlationThreshold; //!< Correlation power threshold in dB
     int m_samplesPerBit;
-    int m_removeTimeout;                // Time in seconds before removing an aircraft, unless a new frame is received
+    int m_removeTimeout;                //!< Time in seconds before removing an aircraft, unless a new frame is received
     bool m_beastEnabled;
     QString m_beastHost;
     uint16_t m_beastPort;

@@ -82,10 +82,10 @@ private:
     int m_sampleCount;
     int m_skipCount;            // Samples to skip, because we've already received a frame
     Real *m_sampleBuffer;
-    Real *m_preamble;
 
     int m_totalSamples;         // These two values are derived from samplesPerBit
     int m_samplesPerChip;
+    double m_correlationThresholdLinear; //!< settings m_correlationThreshold is in dB. Linear value is calculated once.
 
     double m_magsq; //!< displayed averaged value
     double m_magsqSum;

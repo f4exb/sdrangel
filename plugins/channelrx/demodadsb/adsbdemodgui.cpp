@@ -264,7 +264,7 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
         m_adsbDemod->setTarget(aircraft->m_azimuth, aircraft->m_elevation);
 }
 
-void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, float correlation)
+void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, float correlationOnes, float correlationZeros)
 {
     const char idMap[] = "?ABCDEFGHIJKLMNOPQRSTUVWXYZ????? ???????????????0123456789??????";
     const QString categorySetA[] = {
@@ -350,12 +350,14 @@ void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, f
     aircraft->m_adsbFrameCount++;
     aircraft->m_adsbFrameCountItem->setText(QString("%1").arg(aircraft->m_adsbFrameCount));
 
-    if (correlation < aircraft->m_minCorrelation)
-        aircraft->m_minCorrelation = correlation;
-    if (correlation > aircraft->m_maxCorrelation)
-        aircraft->m_maxCorrelation = correlation;
-    aircraft->m_sumCorrelation += correlation;
-    aircraft->m_correlationItem->setText(QString("%1/%2/%3").arg(aircraft->m_minCorrelation, 3, 'f', 1).arg(aircraft->m_sumCorrelation / aircraft->m_adsbFrameCount, 3, 'f', 1).arg(aircraft->m_maxCorrelation, 3, 'f', 1));
+    aircraft->m_minCorrelation = correlationZeros;
+    if (correlationOnes > aircraft->m_maxCorrelation)
+        aircraft->m_maxCorrelation = correlationOnes;
+    aircraft->m_correlation = correlationOnes;
+    aircraft->m_correlationItem->setText(QString("%1/%2/%3")
+        .arg(CalcDb::dbPower(aircraft->m_minCorrelation), 3, 'f', 1)
+        .arg(CalcDb::dbPower(aircraft->m_correlation), 3, 'f', 1)
+        .arg(CalcDb::dbPower(aircraft->m_maxCorrelation), 3, 'f', 1));
 
 
     if ((tc >= 1) && ((tc <= 4)))
@@ -607,7 +609,10 @@ bool ADSBDemodGUI::handleMessage(const Message& message)
     if (ADSBDemodReport::MsgReportADSB::match(message))
     {
         ADSBDemodReport::MsgReportADSB& report = (ADSBDemodReport::MsgReportADSB&) message;
-        handleADSB(report.getData(), report.getDateTime(), report.getPreambleCorrelation());
+        handleADSB(
+            report.getData(), report.getDateTime(),
+            report.getPreambleCorrelationOnes(),
+            report.getPreambleCorrelationZeros());
         return true;
     }
     else if (ADSBDemod::MsgConfigureADSBDemod::match(message))
@@ -667,9 +672,9 @@ void ADSBDemodGUI::on_rfBW_valueChanged(int value)
 
 void ADSBDemodGUI::on_threshold_valueChanged(int value)
 {
-    Real threshold = ((Real)value)/10.0f;
-    ui->thresholdText->setText(QString("%1").arg(threshold, 0, 'f', 1));
-    m_settings.m_correlationThreshold = threshold;
+    Real thresholddB = ((Real)value)/10.0f;
+    ui->thresholdText->setText(QString("%1").arg(thresholddB, 0, 'f', 1));
+    m_settings.m_correlationThreshold = thresholddB;
     applySettings();
 }
 
@@ -856,7 +861,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
-    ui->adsbData->resizeColumnsToContents();
+    resizeTable();
 
     // Get station position
     Real stationLatitude = MainCore::instance()->getSettings().getLatitude();
@@ -1021,4 +1026,42 @@ void ADSBDemodGUI::tick()
                 ++i;
         }
     }
+}
+
+void ADSBDemodGUI::resizeTable()
+{
+    int row = ui->adsbData->rowCount();
+    ui->adsbData->setRowCount(row + 1);
+    ui->adsbData->setItem(row, ADSB_COL_ICAO, new QTableWidgetItem("ICAO ID"));
+    ui->adsbData->setItem(row, ADSB_COL_FLIGHT, new QTableWidgetItem("Flight No"));
+    ui->adsbData->setItem(row, ADSB_COL_LATITUDE, new QTableWidgetItem("-90.00000 L"));
+    ui->adsbData->setItem(row, ADSB_COL_LONGITUDE, new QTableWidgetItem("-180.00000 L"));
+    ui->adsbData->setItem(row, ADSB_COL_ALTITUDE, new QTableWidgetItem("Alt (ft)"));
+    ui->adsbData->setItem(row, ADSB_COL_SPEED, new QTableWidgetItem("Sp (kn)"));
+    ui->adsbData->setItem(row, ADSB_COL_HEADING, new QTableWidgetItem("Hd (o)"));
+    ui->adsbData->setItem(row, ADSB_COL_VERTICALRATE, new QTableWidgetItem("Climb"));
+    ui->adsbData->setItem(row, ADSB_COL_CATEGORY, new QTableWidgetItem("Category"));
+    ui->adsbData->setItem(row, ADSB_COL_STATUS, new QTableWidgetItem("No emergency"));
+    ui->adsbData->setItem(row, ADSB_COL_RANGE, new QTableWidgetItem("D (km)"));
+    ui->adsbData->setItem(row, ADSB_COL_AZEL, new QTableWidgetItem("Az/El (o)"));
+    ui->adsbData->setItem(row, ADSB_COL_TIME, new QTableWidgetItem("99:99:99"));
+    ui->adsbData->setItem(row, ADSB_COL_FRAMECOUNT, new QTableWidgetItem("Frames"));
+    ui->adsbData->setItem(row, ADSB_COL_CORRELATION, new QTableWidgetItem("-99.9/-99.9/=99.9"));
+    ui->adsbData->resizeColumnsToContents();
+    ui->adsbData->removeCellWidget(row, ADSB_COL_ICAO);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_FLIGHT);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_LATITUDE);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_LONGITUDE);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_ALTITUDE);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_SPEED);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_HEADING);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_VERTICALRATE);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_CATEGORY);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_STATUS);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_RANGE);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_AZEL);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_TIME);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_FRAMECOUNT);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_CORRELATION);
+    ui->adsbData->setRowCount(row);
 }
