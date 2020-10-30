@@ -88,7 +88,7 @@ bool ADSBDemodWorker::handleMessage(const Message& message)
     else if (ADSBDemodReport::MsgReportADSB::match(message))
     {
         ADSBDemodReport::MsgReportADSB& report = (ADSBDemodReport::MsgReportADSB&) message;
-        handleADSB(report.getData(), report.getDateTime(), report.getPreambleCorrelation());
+        handleADSB(report.getData(), report.getDateTime(), report.getPreambleCorrelationOnes());
         return true;
     }
     else

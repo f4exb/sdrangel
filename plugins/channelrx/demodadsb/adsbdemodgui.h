@@ -79,7 +79,7 @@ struct Aircraft {
     int m_adsbFrameCount;       // Number of ADS-B frames for this aircraft
     float m_minCorrelation;
     float m_maxCorrelation;
-    float m_sumCorrelation;
+    float m_correlation;
     bool m_isBeingTracked;      // Are we tracking this aircraft
 
     // GUI table items for above data
@@ -117,7 +117,7 @@ struct Aircraft {
         m_adsbFrameCount(0),
         m_minCorrelation(INFINITY),
         m_maxCorrelation(-INFINITY),
-        m_sumCorrelation(0.0f),
+        m_correlation(0.0f),
         m_isBeingTracked(false)
     {
         for (int i = 0; i < 2; i++)
@@ -247,7 +247,8 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void updatePosition(Aircraft *aircraft);
-    void handleADSB(const QByteArray data, const QDateTime dateTime, float correlation);
+    void handleADSB(const QByteArray data, const QDateTime dateTime, float correlationOnes, float correlationZeros);
+    void resizeTable();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

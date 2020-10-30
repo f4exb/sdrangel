@@ -34,7 +34,7 @@ void ADSBDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 2*1300000;
-    m_correlationThreshold = 0.0f;
+    m_correlationThreshold = -50.0f;
     m_samplesPerBit = 6;
     m_removeTimeout = 60;
     m_beastEnabled = false;
@@ -102,7 +102,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
         d.readReal(2, &m_rfBandwidth, 2*1300000);
-        d.readReal(3, &m_correlationThreshold, 1.0f);
+        d.readReal(3, &m_correlationThreshold, -50.0f);
         d.readS32(4, &m_samplesPerBit, 6);
         d.readS32(5, &m_removeTimeout, 60);
         d.readBool(6, &m_beastEnabled, false);

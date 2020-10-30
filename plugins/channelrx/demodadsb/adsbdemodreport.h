@@ -36,22 +36,25 @@ public:
     public:
         QByteArray getData() const { return m_data; }
         QDateTime getDateTime() const { return m_dateTime; }
-        float getPreambleCorrelation() const { return m_premableCorrelation; }
+        float getPreambleCorrelationOnes() const { return m_premableCorrelationOnes; }
+        float getPreambleCorrelationZeros() const { return m_premableCorrelationZeros; }
 
-        static MsgReportADSB* create(QByteArray data, float premableCorrelation)
+        static MsgReportADSB* create(QByteArray data, float premableCorrelationOnes, float premableCorrelationZeros)
         {
-            return new MsgReportADSB(data, premableCorrelation);
+            return new MsgReportADSB(data, premableCorrelationOnes, premableCorrelationZeros);
         }
 
     private:
         QByteArray m_data;
         QDateTime m_dateTime;
-        float m_premableCorrelation;
+        float m_premableCorrelationOnes;
+        float m_premableCorrelationZeros;
 
-        MsgReportADSB(QByteArray data, float premableCorrelation) :
+        MsgReportADSB(QByteArray data, float premableCorrelationOnes, float premableCorrelationZeros) :
             Message(),
             m_data(data),
-            m_premableCorrelation(premableCorrelation)
+            m_premableCorrelationOnes(premableCorrelationOnes),
+            m_premableCorrelationZeros(premableCorrelationZeros)
         {
             m_dateTime = QDateTime::currentDateTime();
         }
