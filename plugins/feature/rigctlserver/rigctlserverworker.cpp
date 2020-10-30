@@ -22,6 +22,8 @@
 #include <QEventLoop>
 #include <QTimer>
 
+#include <cmath>
+
 #include "SWGDeviceState.h"
 #include "SWGSuccessResponse.h"
 #include "SWGErrorResponse.h"
