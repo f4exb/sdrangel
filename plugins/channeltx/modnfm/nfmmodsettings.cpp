@@ -19,6 +19,7 @@
 #include <QDebug>
 
 #include "dsp/dspengine.h"
+#include "dsp/ctcssfrequencies.h"
 #include "util/simpleserializer.h"
 #include "settings/serializable.h"
 #include "nfmmodsettings.h"
@@ -27,14 +28,6 @@ const int NFMModSettings::m_rfBW[] = {
         3000, 4000, 5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
 };
 const int NFMModSettings::m_nbRfBW = 11;
-
-const float NFMModSettings::m_ctcssFreqs[] = {
-        67.0,  71.9,  74.4,  77.0,  79.7,  82.5,  85.4,  88.5,  91.5,  94.8,
-        97.4, 100.0, 103.5, 107.2, 110.9, 114.8, 118.8, 123.0, 127.3, 131.8,
-       136.5, 141.3, 146.2, 151.4, 156.7, 162.2, 167.9, 173.8, 179.9, 186.2,
-       192.8, 203.5
-};
-const int NFMModSettings::m_nbCTCSSFreqs = 32;
 
 
 NFMModSettings::NFMModSettings() :
@@ -215,27 +208,29 @@ int NFMModSettings::getRFBWIndex(int rfbw)
     return m_nbRfBW-1;
 }
 
+int NFMModSettings::getNbCTCSSFreq()
+{
+    return CTCSSFrequencies::m_nbFreqs;
+}
+
 float NFMModSettings::getCTCSSFreq(int index)
 {
-    if (index < 0) {
-        return m_ctcssFreqs[0];
-    } else if (index < m_nbCTCSSFreqs) {
-        return m_ctcssFreqs[index];
+    if (index < CTCSSFrequencies::m_nbFreqs) {
+        return CTCSSFrequencies::m_Freqs[index];
     } else {
-        return m_ctcssFreqs[m_nbCTCSSFreqs-1];
+        return CTCSSFrequencies::m_Freqs[0];
     }
 }
 
 int NFMModSettings::getCTCSSFreqIndex(float ctcssFreq)
 {
-    for (int i = 0; i < m_nbCTCSSFreqs; i++)
+    for (int i = 0; i < CTCSSFrequencies::m_nbFreqs; i++)
     {
-        if (ctcssFreq <= m_ctcssFreqs[i])
-        {
+        if (ctcssFreq <= CTCSSFrequencies::m_Freqs[i]) {
             return i;
         }
     }
 
-    return m_nbCTCSSFreqs-1;
+    return CTCSSFrequencies::m_nbFreqs - 1;
 }
 

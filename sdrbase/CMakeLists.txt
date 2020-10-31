@@ -79,6 +79,7 @@ set(sdrbase_SOURCES
     dsp/upchannelizer.cpp
     dsp/channelmarker.cpp
     dsp/ctcssdetector.cpp
+    dsp/ctcssfrequencies.cpp
     dsp/channelsamplesink.cpp
     dsp/channelsamplesource.cpp
     dsp/cwkeyer.cpp
@@ -219,6 +220,8 @@ set(sdrbase_HEADERS
     dsp/channelsamplesink.h
     dsp/channelsamplesource.h
     dsp/complex.h
+    dsp/ctcssdetector.h
+    dsp/ctcssfrequencies.h
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
     dsp/decimators.h

@@ -79,7 +79,7 @@ private:
     Real maxPower;
     Real *k;
     Real *coef;
-    Real *toneSet;
+    const float *toneSet;
     Real *u0;
     Real *u1;
     Real *power;

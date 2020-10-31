@@ -399,8 +399,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->tone->setChecked(false);
     ui->mic->setChecked(false);
 
-    for (int i=0; i< NFMModSettings::m_nbCTCSSFreqs; i++)
-    {
+    for (int i=0; i< NFMModSettings::getNbCTCSSFreq(); i++) {
         ui->ctcss->addItem(QString("%1").arg((double) NFMModSettings::getCTCSSFreq(i), 0, 'f', 1));
     }
 
