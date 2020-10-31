@@ -18,7 +18,10 @@
 
 #include "firfilter.h"
 
-void FirFilterGenerators::generateLowPassFilter(int nTaps, double sampleRate, double cutoff, std::vector<Real> &taps)
+namespace FirFilterGenerators
+{
+
+void generateLowPassFilter(int nTaps, double sampleRate, double cutoff, std::vector<Real> &taps)
 {
     if (!(nTaps & 1))
     {
@@ -49,4 +52,6 @@ void FirFilterGenerators::generateLowPassFilter(int nTaps, double sampleRate, do
         int n = i - (nTaps - 1) / 2;
         taps[i] *= 0.42 + 0.5 * cos((2.0 * M_PI * n) / nTaps) + 0.08 * cos((4.0 * M_PI * n) / nTaps);
     }
+}
+
 }

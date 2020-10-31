@@ -270,6 +270,7 @@ set(sdrbase_HEADERS
     dsp/inthalfbandfiltersti.h
     dsp/kissfft.h
     dsp/kissengine.h
+    dsp/firfilter.h
     dsp/mimochannel.h
     dsp/misc.h
     dsp/movingaverage.h

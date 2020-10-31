@@ -23,10 +23,9 @@
 #include "dsp/dsptypes.h"
 #include "export.h"
 
-class SDRBASE_API FirFilterGenerators
+namespace FirFilterGenerators
 {
-public:
-    static void generateLowPassFilter(int nTaps, double sampleRate, double cutoff, std::vector<Real> &taps);
+    SDRBASE_API void generateLowPassFilter(int nTaps, double sampleRate, double cutoff, std::vector<Real> &taps);
 };
 
 template <class Type>
