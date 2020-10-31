@@ -28,7 +28,9 @@ This is the bandwidth in MHz of the channel signal before demodulation.
 
 <h3>5: SR - Channel Sample Rate</h3>
 
-This specifies the channel sample rate the demodulator uses. Values of 4M-12MSa/s are supported, 2MSa/s steps. Ideally, this should be set to the same value as the baseband sample rate (the sample rate received from the radio). If it is different from the baseband sample rate, interpolation or decimation will be performed as needed to match the rates. However, interpolation currently requires a significant amount of processing power and may result in dropped samples.
+This specifies the channel sample rate the demodulator uses. Values of 2M-12MSa/s are supported, 2MSa/s steps. Ideally, this should be set to the same value as the baseband sample rate (the sample rate received from the radio). If it is different from the baseband sample rate, interpolation or decimation will be performed as needed to match the rates. However, interpolation currently requires a significant amount of processing power and may result in dropped samples.
+
+2 MSa/s should give decent decodes. Higher rates may be experienced with if your hardware allows it (radio device and processing power). However the higher the rate the more processing power required.
 
 Higher channel sample rates may help decode more frames, but will require more processing power.
 
