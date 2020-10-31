@@ -300,7 +300,7 @@ public:
     void setLevelMeter(QObject *levelMeter);
     int getEffectiveSampleRate() const;
     void getCameraNumbers(std::vector<int>& numbers);
-    void propagateMessageQueueToGUI();
+    void setMessageQueueToGUI(MessageQueue* queue) override;
 
     static const QString m_channelIdURI;
     static const QString m_channelId;

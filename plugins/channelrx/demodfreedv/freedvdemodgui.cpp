@@ -258,7 +258,6 @@ FreeDVDemodGUI::FreeDVDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     m_spectrumVis = m_freeDVDemod->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_freeDVDemod->setMessageQueueToGUI(getInputMessageQueue());
-    m_freeDVDemod->propagateMessageQueueToGUI();
 
 	resetToDefaults();
 

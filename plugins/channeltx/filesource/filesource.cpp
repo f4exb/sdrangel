@@ -616,9 +616,9 @@ void FileSource::getMagSqLevels(double& avg, double& peak, int& nbSamples) const
     m_basebandSource->getMagSqLevels(avg, peak, nbSamples);
 }
 
-void FileSource::propagateMessageQueueToGUI()
-{
-    m_basebandSource->setMessageQueueToGUI(getMessageQueueToGUI());
+void FileSource::setMessageQueueToGUI(MessageQueue* queue) {
+    BasebandSampleSource::setMessageQueueToGUI(queue);
+    m_basebandSource->setMessageQueueToGUI(queue);
 }
 
 double FileSource::getMagSq() const
