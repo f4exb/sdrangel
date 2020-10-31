@@ -37,8 +37,6 @@ struct NFMModSettings
 
     static const int m_nbRfBW;
     static const int m_rfBW[];
-    static const int m_nbCTCSSFreqs;
-    static const float m_ctcssFreqs[];
 
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
@@ -80,6 +78,7 @@ struct NFMModSettings
 
     static int getRFBW(int index);
     static int getRFBWIndex(int rfbw);
+    static int getNbCTCSSFreq();
     static float getCTCSSFreq(int index);
     static int getCTCSSFreqIndex(float ctcssFreq);
 };

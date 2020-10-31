@@ -70,7 +70,7 @@ Use the checkbox to toggle CTCSS activation. When activated it will look for a t
 
 <h3>11: CTCSS tone</h3>
 
-This is the tone squelch in Hz. It can be selected using the toolbox among the usual CTCSS values and `--` for none. When a value is given and the CTCSS is activated the squelch will open only for signals with this tone squelch.
+This is the tone squelch in Hz. It can be selected using the toolbox among [these CTCSS values](https://en.wikipedia.org/wiki/Continuous_Tone-Coded_Squelch_System) and `--` for none. When a value is given and the CTCSS is activated the squelch will open only for signals with this tone squelch.
 
 <h3>12: CTCSS tone value</h3>
 

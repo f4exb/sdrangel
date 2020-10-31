@@ -6,6 +6,7 @@
  */
 #include <math.h>
 #include "dsp/ctcssdetector.h"
+#include "ctcssfrequencies.h"
 
 #undef M_PI
 #define M_PI		3.14159265358979323846
@@ -18,47 +19,14 @@ CTCSSDetector::CTCSSDetector() :
 			toneDetected(false),
 			maxPower(0.0)
 {
-	nTones = 32;
+	nTones = CTCSSFrequencies::m_nbFreqs;
 	k = new Real[nTones];
 	coef = new Real[nTones];
 	toneSet = new Real[nTones];
 	u0 = new Real[nTones];
 	u1 = new Real[nTones];
 	power = new Real[nTones];
-
-	// The 32 EIA standard tones
-	toneSet[0]  = 67.0;
-	toneSet[1]  = 71.9;
-	toneSet[2]  = 74.4;
-	toneSet[3]  = 77.0;
-	toneSet[4]  = 79.7;
-	toneSet[5]  = 82.5;
-	toneSet[6]  = 85.4;
-	toneSet[7]  = 88.5;
-	toneSet[8]  = 91.5;
-	toneSet[9]  = 94.8;
-	toneSet[10]  = 97.4;
-	toneSet[11] = 100.0;
-	toneSet[12] = 103.5;
-	toneSet[13] = 107.2;
-	toneSet[14] = 110.9;
-	toneSet[15] = 114.8;
-	toneSet[16] = 118.8;
-	toneSet[17] = 123.0;
-	toneSet[18] = 127.3;
-	toneSet[19] = 131.8;
-	toneSet[20] = 136.5;
-	toneSet[21] = 141.3;
-	toneSet[22] = 146.2;
-	toneSet[23] = 151.4;
-	toneSet[24] = 156.7;
-	toneSet[25] = 162.2;
-	toneSet[26] = 167.9;
-	toneSet[27] = 173.8;
-	toneSet[28] = 179.9;
-	toneSet[29] = 186.2;
-	toneSet[30] = 192.8;
-	toneSet[31] = 203.5;
+	toneSet = CTCSSFrequencies::m_Freqs;
 }
 
 CTCSSDetector::CTCSSDetector(int _nTones, Real *tones) :
@@ -69,18 +37,14 @@ CTCSSDetector::CTCSSDetector(int _nTones, Real *tones) :
 			toneDetected(false),
 			maxPower(0.0)
 {
-	nTones = _nTones;
+	nTones = CTCSSFrequencies::m_nbFreqs;
 	k = new Real[nTones];
 	coef = new Real[nTones];
 	toneSet = new Real[nTones];
 	u0 = new Real[nTones];
 	u1 = new Real[nTones];
 	power = new Real[nTones];
-
-	for (int j = 0; j < nTones; ++j)
-	{
-		toneSet[j] = tones[j];
-	}
+	toneSet = CTCSSFrequencies::m_Freqs;
 }
 
 
