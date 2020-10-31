@@ -111,7 +111,10 @@ public:
 	int getBER() const { return m_basebandSink->getBER(); }
 	float getFrequencyOffset() const { return m_basebandSink->getFrequencyOffset(); }
 	bool isSync() const { return m_basebandSink->isSync(); }
-    void propagateMessageQueueToGUI() { m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI()); }
+    void setMessageQueueToGUI(MessageQueue* queue) override {
+        BasebandSampleSink::setMessageQueueToGUI(queue);
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
 
     virtual int webapiSettingsGet(
             SWGSDRangel::SWGChannelSettings& response,

@@ -114,7 +114,10 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
-    void propagateMessageQueueToGUI() {  m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI()); }
+    void setMessageQueueToGUI(MessageQueue* queue) override {
+        BasebandSampleSink::setMessageQueueToGUI(queue);
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
 
     void setTarget(float targetAzimuth, float targetElevation)
     {

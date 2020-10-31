@@ -91,7 +91,10 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-    void propagateMessageQueueToGUI() { m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI()); }
+    void setMessageQueueToGUI(MessageQueue* queue) override {
+        BasebandSampleSink::setMessageQueueToGUI(queue);
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
     uint32_t getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
     uint32_t getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
     double getMagSq() const { return m_basebandSink->getMagSq(); }

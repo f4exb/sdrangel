@@ -115,7 +115,10 @@ public:
 	void setSelectedCtcssIndex(int selectedCtcssIndex) { m_basebandSink->setSelectedCtcssIndex(selectedCtcssIndex); }
 	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
-    void propagateMessageQueueToGUI() {  m_basebandSink->setMessageQueueToGUI(getMessageQueueToGUI()); }
+    void setMessageQueueToGUI(MessageQueue* queue) override {
+        BasebandSampleSink::setMessageQueueToGUI(queue);
+        m_basebandSink->setMessageQueueToGUI(queue);
+    }
     int getAudioSampleRate() const { return m_basebandSink->getAudioSampleRate(); }
 
     uint32_t getNumberOfDeviceStreams() const;
