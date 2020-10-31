@@ -115,6 +115,7 @@ set(sdrbase_SOURCES
     dsp/filtermbe.cpp
     dsp/filerecord.cpp
     dsp/filerecordinterface.cpp
+    dsp/firfilter.cpp
     dsp/fmpreemphasis.cpp
     dsp/freqlockcomplex.cpp
     dsp/interpolator.cpp
@@ -122,7 +123,6 @@ set(sdrbase_SOURCES
     dsp/glspectrumsettings.cpp
     dsp/hbfilterchainconverter.cpp
     dsp/hbfiltertraits.cpp
-    dsp/lowpass.cpp
     dsp/mimochannel.cpp
     dsp/nco.cpp
     dsp/ncof.cpp
@@ -259,6 +259,7 @@ set(sdrbase_HEADERS
     dsp/filtermbe.h
     dsp/filerecord.h
     dsp/filerecordinterface.h
+    dsp/firfilter.h
     dsp/fmpreemphasis.h
     dsp/freqlockcomplex.h
     dsp/gfft.h
@@ -280,7 +281,6 @@ set(sdrbase_HEADERS
     dsp/inthalfbandfiltersti.h
     dsp/kissfft.h
     dsp/kissengine.h
-    dsp/lowpass.h
     dsp/mimochannel.h
     dsp/misc.h
     dsp/movingaverage.h

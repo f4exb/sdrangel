@@ -23,7 +23,7 @@
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/lowpass.h"
+#include "dsp/firfilter.h"
 #include "dsp/movingaverage.h"
 #include "dsp/fftfilt.h"
 #include "dsp/phaselock.h"
