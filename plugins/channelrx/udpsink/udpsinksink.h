@@ -27,7 +27,7 @@
 #include "dsp/phasediscri.h"
 #include "dsp/movingaverage.h"
 #include "dsp/agc.h"
-#include "dsp/bandpass.h"
+#include "dsp/firfilter.h"
 #include "util/udpsinkutil.h"
 #include "audio/audiofifo.h"
 
