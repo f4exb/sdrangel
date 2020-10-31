@@ -116,10 +116,10 @@ private:
 	int m_sampleCount;
 	int m_squelchCount;
 	int m_squelchGate;
+	int m_filterTaps;
 
 	Real m_squelchLevel;
 	bool m_squelchOpen;
-	bool m_afSquelchOpen;
 	double m_magsq; //!< displayed averaged value
 	double m_magsqSum;
 	double m_magsqPeak;
