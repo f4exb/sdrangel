@@ -23,7 +23,7 @@
 #include "dsp/channelsamplesource.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
-#include "dsp/bandpass.h"
+#include "dsp/firfilter.h"
 #include "util/movingaverage.h"
 
 #include "chirpchatmodsettings.h"
