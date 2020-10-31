@@ -30,6 +30,7 @@
 #include "dsp/movingaverage.h"
 #include "util/messagequeue.h"
 #include "util/azel.h"
+#include "util/movingaverage.h"
 
 #include "adsbdemodsettings.h"
 
@@ -237,6 +238,8 @@ private:
 
     AzEl m_azEl;                        // Position of station
     Aircraft *m_trackAircraft;          // Aircraft we want to track in Channel Report
+    MovingAverageUtil<float, double, 10> m_correlationOnesAvg;
+    MovingAverageUtil<float, double, 10> m_correlationZerosAvg;
 
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();

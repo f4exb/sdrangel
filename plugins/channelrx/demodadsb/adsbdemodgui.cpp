@@ -350,10 +350,12 @@ void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, f
     aircraft->m_adsbFrameCount++;
     aircraft->m_adsbFrameCountItem->setText(QString("%1").arg(aircraft->m_adsbFrameCount));
 
-    aircraft->m_minCorrelation = correlationZeros;
+    m_correlationZerosAvg(correlationZeros);
+    aircraft->m_minCorrelation = m_correlationZerosAvg.instantAverage();
     if (correlationOnes > aircraft->m_maxCorrelation)
         aircraft->m_maxCorrelation = correlationOnes;
-    aircraft->m_correlation = correlationOnes;
+    m_correlationOnesAvg(correlationOnes);
+    aircraft->m_correlation = m_correlationOnesAvg.instantAverage();
     aircraft->m_correlationItem->setText(QString("%1/%2/%3")
         .arg(CalcDb::dbPower(aircraft->m_minCorrelation), 3, 'f', 1)
         .arg(CalcDb::dbPower(aircraft->m_correlation), 3, 'f', 1)
@@ -756,7 +758,7 @@ void ADSBDemodGUI::on_adsbData_cellDoubleClicked(int row, int column)
 
 void ADSBDemodGUI::on_spb_currentIndexChanged(int value)
 {
-    m_settings.m_samplesPerBit = (value + 2) * 2;
+    m_settings.m_samplesPerBit = (value + 1) * 2;
     applySettings();
 }
 
@@ -937,7 +939,7 @@ void ADSBDemodGUI::displaySettings()
     ui->rfBWText->setText(QString("%1M").arg(m_settings.m_rfBandwidth / 1000000.0, 0, 'f', 1));
     ui->rfBW->setValue((int)m_settings.m_rfBandwidth);
 
-    ui->spb->setCurrentIndex(m_settings.m_samplesPerBit/2-2);
+    ui->spb->setCurrentIndex(m_settings.m_samplesPerBit/2-1);
 
     ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold, 0, 'f', 1));
     ui->threshold->setValue((int)(m_settings.m_correlationThreshold*10));
