@@ -1,3 +1,20 @@
+sdrangel (5.15.0-1) unstable; urgency=medium
+
+   * New ADS-B demodulator and decoder. PR #671
+   * New GS-232 controller (feature). PR #671
+   * Improvements to USRP support. PR #670
+   * AFC feature plugin. Issue #634
+   * Added spectrum display to Frequency tracker. Issue #665
+   * Windows: distribute Qt ANGLE support libraries. Issue #660 and PR #671
+   * ADS-B demod: optimization of sync word correlation. Issue #675
+   * ADS-B: added 2MS/s sample rate. Issue #675
+   * Refactored GUI queue access (from kasper93)
+   * Fix and refactor fir filter (from kasper93)
+   * NFMDemodSink: Fixes and minor refactoring
+   * NFM: augmented CTCSS tones. Implements #664
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 31 Oct 2020 22:59:40 +0200
+
 sdrangel (5.14.0-1) unstable; urgency=medium
 
    * New IEEE 802.15.4 modulator. PR #654
