@@ -65,26 +65,26 @@ TestSourceWorker::TestSourceWorker(SampleSinkFifo* sampleFifo, QObject* parent) 
     m_histoCounter(0)
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()), Qt::QueuedConnection);
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer.start(50);
 }
 
 TestSourceWorker::~TestSourceWorker()
 {
+    m_timer.stop();
+    disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 }
 
 void TestSourceWorker::startWork()
 {
     qDebug("TestSourceWorker::startWork");
     m_timer.setTimerType(Qt::PreciseTimer);
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
-    m_timer.start(50);
     m_running = true;
 }
 
 void TestSourceWorker::stopWork()
 {
     qDebug("TestSourceWorker::stopWork");
-    m_timer.stop();
-    disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_running = false;
 }
 
