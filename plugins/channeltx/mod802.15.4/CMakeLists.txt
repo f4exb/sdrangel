@@ -20,7 +20,6 @@ set(mod_ieee_802_15_4_HEADERS
 )
 
 include_directories(
-    ${Boost_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 

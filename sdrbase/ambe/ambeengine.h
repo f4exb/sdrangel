@@ -73,7 +73,7 @@ private:
         std::string device;
     };
 
-#ifndef __WINDOWS__
+#ifndef _WIN32
     static std::string get_driver(const std::string& tty);
     static void register_comport(std::vector<std::string>& comList, std::vector<std::string>& comList8250, const std::string& dir);
     static void probe_serial8250_comports(std::vector<std::string>& comList, std::vector<std::string> comList8250);

@@ -1,26 +1,17 @@
-#!/bin/sh
-
-if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-  JOBS=$(sysctl -n hw.ncpu)
-elif [ "${TRAVIS_OS_NAME}" == "linux" ] || [ ${CI_LINUX} = true ]; then
-  JOBS=$(nproc --all)
-else
-  JOBS=1
-fi
-
+#!/bin/sh -e
 
 if [ "${TRAVIS_OS_NAME}" == "linux" ] || [ ${CI_LINUX} = true ]; then
   debuild -i -us -uc -b
 else
-  mkdir build && cd build
-  cmake .. "${CMAKE_CUSTOM_OPTIONS}"
+  mkdir -p build;  cd build
+  cmake .. -GNinja ${CMAKE_CUSTOM_OPTIONS}
 
   case "${CMAKE_CUSTOM_OPTIONS}" in
     *BUNDLE=ON*)
-      make -j${JOBS} package
+      cmake --build . --target package
     ;;
     *)
-      make -j${JOBS}
+      cmake --build .
     ;;
-  esac
+    esac
 fi

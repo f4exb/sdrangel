@@ -231,7 +231,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/httpserver
   ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
   ${OPENGL_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
   )
 
 add_library(sdrgui SHARED
