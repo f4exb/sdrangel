@@ -1,10 +1,6 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.16.0)
 
-# force 64bit on windows because we have only that library
-# TODO discuss because, at this days, a dsp software should be 64bit
-# if(WIN32 AND NOT CMAKE_GENERATOR_PLATFORM AND NOT CMAKE_C_COMPILER AND NOT CMAKE_CXX_COMPILER)
-#   set(CMAKE_GENERATOR_PLATFORM "x64" CACHE INTERNAL "")
-# endif()
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 project(sdrangel)
 
@@ -192,39 +188,35 @@ elseif(APPLE)
     "${CMAKE_BINARY_DIR}/Info.plist" @ONLY)
 elseif (WIN32)
   # check compiler version
-  if(MSVC_VERSION GREATER 1910 AND MSVC_VERSION LESS 1919)
+  if(MSVC_VERSION GREATER 1920 AND MSVC_VERSION LESS 1929)
+    set(VS2019 ON)
+  elseif(MSVC_VERSION GREATER 1910 AND MSVC_VERSION LESS 1919)
     set(VS2017 ON)
   elseif(MSVC_VERSION GREATER 1899 AND MSVC_VERSION LESS 1910)
     set(VS2015 ON)
   endif()
 
-  if(NOT VS2015 AND NOT VS2017)
-    message(FATAL_ERROR "You must use Microsoft Visual Studio 2015 or 2017 as compiler")
+  if(NOT VS2015 AND NOT VS2017 AND NOT VS2019)
+    message(FATAL_ERROR "You must use Microsoft Visual Studio 2015, 2017 or 2019 as compiler")
   endif()
-
-  # used on code but not defined on VS2017
-  add_definitions(-D__WINDOWS__)
 
   # compile with full multicore
-  set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} /MP /w")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /w")
-
-  # find Qt folder
-  if(DEFINED QT_PATH)
-    set (QT_MISSING False)
+  if(MSVC)
+    add_compile_definitions(/MP)
   endif()
-  include(QtLocator)
 
   # in alternative we can use ExternalProject
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
-  set(BOOST_ROOT "${EXTERNAL_LIBRARY_FOLDER}/boost" CACHE INTERNAL "")
-  set(BOOST_LIBRARYDIR "${EXTERNAL_LIBRARY_FOLDER}/boost/lib64-msvc-14.1" CACHE INTERNAL "")
   set(FFTW3F_FOUND ON CACHE INTERNAL "")
   set(FFTW3F_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/include" CACHE INTERNAL "")
   set(FFTW3F_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/fftw-3/libfftw3f-3.lib" CACHE INTERNAL "")
   set(LIBUSB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/libusb/include" CACHE INTERNAL "")
   set(LIBUSB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll/libusb-1.0.lib" CACHE INTERNAL "")
-  set(OpenCV_DIR "${EXTERNAL_LIBRARY_FOLDER}/opencv" CACHE INTERNAL "")
+  if(VS2019)
+    set(OpenCV_DIR "${EXTERNAL_LIBRARY_FOLDER}/opencv4" CACHE INTERNAL "")
+  else()
+    set(OpenCV_DIR "${EXTERNAL_LIBRARY_FOLDER}/opencv" CACHE INTERNAL "")
+  endif()
   set(PKG_CONFIG_EXECUTABLE "${EXTERNAL_LIBRARY_FOLDER}/pkg-config-lite/bin/pkg-config.exe" CACHE INTERNAL "")
   set(SOAPYSUPPORT_DIR "${EXTERNAL_LIBRARY_FOLDER}/soapysdr-support" CACHE INTERNAL "")
 
@@ -260,7 +252,6 @@ elseif (WIN32)
 
   # used on fixup_bundle phase
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
-    "${Qt5_DIR}../../../bin"
     "${EXTERNAL_LIBRARY_FOLDER}/fftw-3"
     "${EXTERNAL_LIBRARY_FOLDER}/libusb/MS64/dll"
     "${EXTERNAL_LIBRARY_FOLDER}/ffmpeg/bin"
@@ -376,11 +367,7 @@ if(WIN32)
     set(OpenCV_ARCH "86")
   endif()
 
-  if(VS2015)
-    set(OpenCV_LIBS_BIN_DIR "${OpenCV_DIR}/x${OpenCV_ARCH}/vc14/bin" CACHE INTERNAL "")
-  elseif(VS2017)
-    set(OpenCV_LIBS_BIN_DIR "${OpenCV_DIR}/x${OpenCV_ARCH}/vc15/bin" CACHE INTERNAL "")
-  endif()
+  set(OpenCV_LIBS_BIN_DIR "${OpenCV_DIR}/x${OpenCV_ARCH}/${OpenCV_RUNTIME}/bin" CACHE INTERNAL "")
 
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
     "${WINDOWS_FIXUP_BUNDLE_LIB_DIRS}"

@@ -25,10 +25,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-include_directories(
-	${Boost_INCLUDE_DIRS}
-)
-
 add_library(chanalyzer SHARED
 	${chanalyzer_SOURCES}
 )

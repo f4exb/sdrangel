@@ -1,10 +1,13 @@
 #!/usr/bin/make -f
 %:
-	dh $@ --parallel
+	dh $@ --parallel --buildsystem=cmake+ninja
 
 # FORCE_SSE41 will be not accepted upstream
 override_dh_auto_configure:
 	dh_auto_configure -- -DFORCE_SSE41=ON -DENABLE_EXTERNAL_LIBRARIES=ON -DDEBUG_OUTPUT=ON
+
+override_dh_auto_test:
+	echo "Skipping test step"
 
 # permit the packaging with /usr/local/lib libraries (from `make install`)
 # you can also use `export DEB_DH_SHLIBDEPS_ARGS_ALL=--dpkg-shlibdeps-params=--ignore-missing-info`

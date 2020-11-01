@@ -27,7 +27,7 @@
 #include <libgen.h>
 #endif
 
-#if !defined(__WINDOWS__) && !defined(__APPLE__)
+#if !defined(_WIN32) && !defined(__APPLE__)
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <linux/serial.h>
@@ -51,7 +51,7 @@ AMBEEngine::~AMBEEngine()
     qDebug("AMBEEngine::~AMBEEngine: %lu controllers", m_controllers.size());
 }
 
-#if defined(__WINDOWS__)
+#if defined(_WIN32)
 void AMBEEngine::getComList()
 {
     m_comList.clear();
@@ -119,7 +119,7 @@ void AMBEEngine::getComList()
 }
 #endif // not Windows nor Apple
 
-#if !defined(__WINDOWS__) && !defined(__APPLE__)
+#if !defined(_WIN32) && !defined(__APPLE__)
 void AMBEEngine::register_comport(
     std::vector<std::string>& comList,
     std::vector<std::string>& comList8250,

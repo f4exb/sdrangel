@@ -374,7 +374,6 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/logging
     ${CMAKE_SOURCE_DIR}/qrtplib
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
-    ${Boost_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
 )
 
@@ -396,6 +395,7 @@ target_link_libraries(sdrbase
     ${sdrbase_SERIALDV_LIB}
     ${sdrbase_LIMERFE_LIB}
     ${sdrbase_LIBSIGMF_LIB}
+    Boost::headers
     Qt5::Core
     Qt5::Multimedia
     Qt5::WebSockets
