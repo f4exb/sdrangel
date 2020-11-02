@@ -1,3 +1,12 @@
+sdrangel (5.15.1-1) unstable; urgency=medium
+
+   * CTCSS detector: fixed crash on destructor. Fixes #680
+   * TestSource: fixed timer start/stop. Fixes issue #661
+   * Main Window: fixed sampling device changed. Fixes #668
+   * Scope MagSq trigger fix. Fixes #669
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 02 Nov 2020 23:27:48 +0100
+
 sdrangel (5.15.0-1) unstable; urgency=medium
 
    * New ADS-B demodulator and decoder. PR #671
