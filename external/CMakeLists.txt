@@ -18,6 +18,7 @@ set(BLADERF_TAG "2019.07")
 set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1.1.5")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
+set(MIRISDR_TAG "v1.1.2")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
 set(RTLSDR_TAG be1d1206bfb6e6c41f7d91b20b77e20f929fa6a7)
@@ -141,7 +142,22 @@ if(WIN32)
   install(FILES "${EXTERNAL_LIBRARY_FOLDER}/vcredist/${VCREDIST_FILE}" DESTINATION "${INSTALL_BIN_DIR}")
 endif(WIN32)
 
-if(NOT WIN32)
+if (AUTO_EXTERNAL_LIBRARIES)
+    find_package(Codec2)
+    find_package(CM256cc)
+    find_package(LibMbe)
+    find_package(SerialDV)
+    find_package(LibDSDcc)
+    find_package(LimeSuite)
+    find_package(LibBLADERF)
+    find_package(LibMiriSDR)
+    find_package(LibIIO)
+    find_package(LibAIRSPYHF)
+    find_package(LibPerseus)
+    find_package(LibRTLSDR)
+endif (AUTO_EXTERNAL_LIBRARIES)
+
+if (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
   # needs speexdsp
   ExternalProject_Add(codec2
     GIT_REPOSITORY https://github.com/drowe67/codec2.git
@@ -153,6 +169,7 @@ if(NOT WIN32)
   )
   ExternalProject_Get_Property(codec2 source_dir binary_dir)
   set(CODEC2_FOUND ON CACHE INTERNAL "")
+  set(CODEC2_EXTERNAL ON CACHE INTERNAL "")
   set(CODEC2_INCLUDE_DIR "${source_dir}/src" "${binary_dir}" CACHE INTERNAL "")
   if(WIN32)
     set(CODEC2_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/codec2.lib" CACHE INTERNAL "")
@@ -165,10 +182,10 @@ if(NOT WIN32)
     # some source include "codec2/comp.h" and some without codec2
     makeLink("${source_dir}/src" "${source_dir}/src/codec2" codec2)
   endif()
-endif()
+endif (NOT WIN32 AND (NOT CODEC2_FOUND OR CODEC2_EXTERNAL))
 
+if (NOT APPLE AND (NOT CM256CC_FOUND OR CM256CC_EXTERNAL))
 # needs boost
-if(NOT APPLE)
     ExternalProject_Add(cm256cc
         GIT_REPOSITORY https://github.com/f4exb/cm256cc.git
         GIT_TAG ${CM256CC_TAG}
@@ -184,6 +201,7 @@ if(NOT APPLE)
     )
     ExternalProject_Get_Property(cm256cc source_dir binary_dir)
     set(CM256CC_FOUND ON CACHE INTERNAL "")
+    set(CM256CC_EXTERNAL ON CACHE INTERNAL "")
     # we need cm256cc/library.h
     set(CM256CC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/cm256cc/src" CACHE INTERNAL "")
     if(WIN32)
@@ -197,94 +215,103 @@ if(NOT APPLE)
         FILES_MATCHING PATTERN "libcm256cc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
         set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
     endif()
-endif() # NOT APPLE
+endif (NOT APPLE AND (NOT CM256CC_FOUND OR CM256CC_EXTERNAL))
 
-set(USE_MBELIB OFF)
-ExternalProject_Add(mbelib
-    GIT_REPOSITORY https://github.com/szechyjs/mbelib.git
-    GIT_TAG ${MBELIB_TAG}
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
-    CMAKE_ARGS -DDISABLE_TEST=ON ${DEFAULT_OUTPUT_DIRECTORIES}
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)
-ExternalProject_Get_Property(mbelib source_dir binary_dir)
-set(USE_MBELIB ON)
-set(DSDCC_DEPENDS mbelib)
-set(LIBMBE_FOUND ON CACHE INTERNAL "")
-set(LIBMBE_INCLUDE_DIR "${source_dir}")
-if(WIN32)
-  set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/mbe.lib")
-  install(FILES "${SDRANGEL_BINARY_BIN_DIR}/mbe${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-elseif(LINUX)
-  set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
-elseif(APPLE)
-  set(LIBMBE_LIBRARIES "${binary_dir}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-  FILES_MATCHING PATTERN "libmbe*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
-endif()
-
-# Works on MacOS with a dummy serialDV
-ExternalProject_Add(serialdv
-    GIT_REPOSITORY https://github.com/f4exb/serialDV.git
-    GIT_TAG ${SERIALDV_TAG}
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/serialdv"
-    CMAKE_ARGS -DBUILD_TOOL=OFF ${DEFAULT_OUTPUT_DIRECTORIES}
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)
-ExternalProject_Get_Property(serialdv source_dir binary_dir)
-set(DSDCC_DEPENDS ${DSDCC_DEPENDS} serialdv)
-set(LIBSERIALDV_FOUND ON CACHE INTERNAL "")
-set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
-if(WIN32)
-    set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
-    makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
-    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-elseif(LINUX)
-    set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
-    # so we need a link
-    makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
-elseif(APPLE)
-    set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-    # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
-    # so we need a link
-    makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
+if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EXTERNAL))
+  set(USE_MBELIB OFF)
+  ExternalProject_Add(mbelib
+      GIT_REPOSITORY https://github.com/szechyjs/mbelib.git
+      GIT_TAG ${MBELIB_TAG}
+      PREFIX "${EXTERNAL_BUILD_LIBRARIES}/mbelib"
+      CMAKE_ARGS -DDISABLE_TEST=ON ${DEFAULT_OUTPUT_DIRECTORIES}
+      INSTALL_COMMAND ""
+      TEST_COMMAND ""
+  )
+  ExternalProject_Get_Property(mbelib source_dir binary_dir)
+  set(USE_MBELIB ON)
+  set(DSDCC_DEPENDS mbelib)
+  set(LIBMBE_FOUND ON CACHE INTERNAL "")
+  set(LIBMBE_EXTERNAL ON CACHE INTERNAL "")
+  set(LIBMBE_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
+  if(WIN32)
+    set(LIBMBE_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/mbe.lib" CACHE INTERNAL "")
+    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/mbe${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+  elseif(LINUX)
+    set(LIBMBE_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  elseif(APPLE)
+    set(LIBMBE_LIBRARIES "${binary_dir}/libmbe${CMAKE_SHARED_LIBRARY_SUFFIX}")
     install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-    FILES_MATCHING PATTERN "libserialdv*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    FILES_MATCHING PATTERN "libmbe*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
-endif()
+  endif()
+endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND (NOT LIBMBE_FOUND OR LIBMBE_EXTERNAL))
 
-ExternalProject_Add(dsdcc
-    GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
-    GIT_TAG ${DSDCC_TAG}
-    DEPENDS ${DSDCC_DEPENDS}
-    PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dsdcc"
-    CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
-      -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB}
-      -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR}
-      -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES}
-      -DLIBSERIALDV_INCLUDE_DIR=${LIBSERIALDV_INCLUDE_DIR}
-      -DLIBSERIALDV_LIBRARY=${LIBSERIALDV_LIBRARY}
-    INSTALL_COMMAND ""
-    TEST_COMMAND ""
-)
-ExternalProject_Get_Property(dsdcc source_dir binary_dir)
-set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
-set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src" CACHE INTERNAL "")
-if(WIN32)
-  set(LIBDSDCC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dsdcc.lib" CACHE INTERNAL "")
-  install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
-elseif(LINUX)
-  set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-elseif(APPLE)
-  set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
-  install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
-  FILES_MATCHING PATTERN "libdsdcc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
-endif()
+if (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
+  # Works on MacOS with a dummy serialDV
+  ExternalProject_Add(serialdv
+      GIT_REPOSITORY https://github.com/f4exb/serialDV.git
+      GIT_TAG ${SERIALDV_TAG}
+      PREFIX "${EXTERNAL_BUILD_LIBRARIES}/serialdv"
+      CMAKE_ARGS -DBUILD_TOOL=OFF ${DEFAULT_OUTPUT_DIRECTORIES}
+      INSTALL_COMMAND ""
+      TEST_COMMAND ""
+  )
+  ExternalProject_Get_Property(serialdv source_dir binary_dir)
+  set(DSDCC_DEPENDS ${DSDCC_DEPENDS} serialdv)
+  set(LIBSERIALDV_FOUND ON CACHE INTERNAL "")
+  set(LIBSERIALDV_EXTERNAL ON CACHE INTERNAL "")
+  set(LIBSERIALDV_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
+  if(WIN32)
+      set(LIBSERIALDV_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/serialdv.lib" CACHE INTERNAL "")
+      makeCopyDir("${source_dir}" "${source_dir}/dsp" serialdv)
+      install(FILES "${SDRANGEL_BINARY_BIN_DIR}/serialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+  elseif(LINUX)
+      set(LIBSERIALDV_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+      # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
+      # so we need a link
+      makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
+  elseif(APPLE)
+      set(LIBSERIALDV_LIBRARY "${binary_dir}/libserialdv${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+      # because sdrbase/dsp/dvserialworker.h use dsp/dvcontroller.h
+      # so we need a link
+      makeLink("${source_dir}" "${source_dir}/dsp" serialdv)
+      install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "libserialdv*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+      set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}")
+  endif()
+endif (NOT LIBSERIALDV_FOUND OR LIBSERIALDV_EXTERNAL)
+
+if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
+  ExternalProject_Add(dsdcc
+      GIT_REPOSITORY https://github.com/f4exb/dsdcc.git
+      GIT_TAG ${DSDCC_TAG}
+      DEPENDS ${DSDCC_DEPENDS}
+      PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dsdcc"
+      CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+        -DBUILD_TOOL=OFF -DUSE_MBELIB=${USE_MBELIB}
+        -DLIBMBE_INCLUDE_DIR=${LIBMBE_INCLUDE_DIR}
+        -DLIBMBE_LIBRARY=${LIBMBE_LIBRARIES}
+        -DLIBSERIALDV_INCLUDE_DIR=${LIBSERIALDV_INCLUDE_DIR}
+        -DLIBSERIALDV_LIBRARY=${LIBSERIALDV_LIBRARY}
+      INSTALL_COMMAND ""
+      TEST_COMMAND ""
+  )
+  ExternalProject_Get_Property(dsdcc source_dir binary_dir)
+  set(LIBDSDCC_FOUND ON CACHE INTERNAL "")
+  set(LIBDSDCC_EXTERNAL ON CACHE INTERNAL "")
+  set(LIBDSDCC_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dsdcc/src" CACHE INTERNAL "")
+  if(WIN32)
+    set(LIBDSDCC_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dsdcc.lib" CACHE INTERNAL "")
+    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+  elseif(LINUX)
+    set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+  elseif(APPLE)
+    set(LIBDSDCC_LIBRARIES "${binary_dir}/libdsdcc${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+    FILES_MATCHING PATTERN "libdsdcc*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+  endif()
+endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 
 # requirements needed by many packages on windows
 if(WIN32)
@@ -302,6 +329,7 @@ if(WIN32)
   ExternalProject_Get_Property(pthreads4w source_dir binary_dir)
   set(PTHREADS4W_DEPENDS pthreads4w)
   set(PTHREADS4W_FOUND ON CACHE INTERNAL "")
+  set(PTHREADS4W_EXTERNAL ON CACHE INTERNAL "")
   set(PTHREADS4W_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
   set(PTHREADS4W_LIBRARIES "${source_dir}/pthreadVC2.lib" CACHE INTERNAL "")
   makeCopy("${source_dir}/pthreadVC2${CMAKE_SHARED_LIBRARY_SUFFIX}" "${SDRANGEL_BINARY_BIN_DIR}/pthreadVC2${CMAKE_SHARED_LIBRARY_SUFFIX}" pthreads4w)
@@ -314,92 +342,126 @@ endif(WIN32)
 if (LINUX)
     # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it.
     # needs pkgconfig and libusb
-    ExternalProject_Add(limesuite
-        GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
-        GIT_TAG ${LIMESUITE_TAG}
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
-        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DLIME_SUITE_EXTVER=release -DENABLE_GUI=OFF -DENABLE_NOVENARF7=OFF -DENABLE_SOAPY_LMS7=OFF -DENABLE_OCTAVE=OFF -DENABLE_SIMD_FLAGS=SSE3
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    ExternalProject_Get_Property(limesuite source_dir)
-    set(LIMESUITE_FOUND ON CACHE INTERNAL "")
-    set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
-    set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
-    makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
+    if (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL)
+      ExternalProject_Add(limesuite
+          GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
+          GIT_TAG ${LIMESUITE_TAG}
+          PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
+          CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DLIME_SUITE_EXTVER=release -DENABLE_GUI=OFF -DENABLE_NOVENARF7=OFF -DENABLE_SOAPY_LMS7=OFF -DENABLE_OCTAVE=OFF -DENABLE_SIMD_FLAGS=SSE3
+          INSTALL_COMMAND ""
+          TEST_COMMAND ""
+      )
+      ExternalProject_Get_Property(limesuite source_dir)
+      set(LIMESUITE_FOUND ON CACHE INTERNAL "")
+      set(LIMESUITE_EXTERNAL ON CACHE INTERNAL "")
+      set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
+      set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
+      makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
+    endif (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL
 
     # apt install libbladerf-dev
     # needs pkgconfig and libusb
-    ExternalProject_Add(bladerf
-        GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
-        GIT_TAG ${BLADERF_TAG}
-        GIT_SUBMODULES
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/bladerf"
-        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
-        SOURCE_SUBDIR host/
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
-    set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
-    set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libbladeRF.so" CACHE INTERNAL "")
+    if (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL)
+      ExternalProject_Add(bladerf
+          GIT_REPOSITORY https://github.com/Nuand/bladeRF.git
+          GIT_TAG ${BLADERF_TAG}
+          GIT_SUBMODULES
+          PREFIX "${EXTERNAL_BUILD_LIBRARIES}/bladerf"
+          CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+          SOURCE_SUBDIR host/
+          INSTALL_COMMAND ""
+          TEST_COMMAND ""
+      )
+      set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
+      set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
+      set(LIBBLADERF_INCLUDE_DIRS "${EXTERNAL_BUILD_LIBRARIES}/bladerf/src/bladerf/host/libraries/libbladeRF/include" CACHE INTERNAL "")
+      set(LIBBLADERF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libbladeRF.so" CACHE INTERNAL "")
+    endif (NOT LIBBLADERF_FOUND OR LIBBLADERF_EXTERNAL)
 
     # apt install libiio-dev
     # needs pkgconfig, libusb, libxml2, lzma, xz, libiconv
-    ExternalProject_Add(libiio
-        GIT_REPOSITORY https://github.com/analogdevicesinc/libiio.git
-        GIT_TAG ${LIBIIO_TAG}
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
-        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DOSX_PACKAGE=OFF -DWITH_DOC=OFF
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    set(LIBIIO_FOUND ON CACHE INTERNAL "")
-    set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
-    set(LIBIIO_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libiio.so" CACHE INTERNAL "")
+    if (NOT LIBIIO_FOUND OR LIBIIO_EXTERNAL)
+      ExternalProject_Add(libiio
+          GIT_REPOSITORY https://github.com/analogdevicesinc/libiio.git
+          GIT_TAG ${LIBIIO_TAG}
+          PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
+          CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DOSX_PACKAGE=OFF -DWITH_DOC=OFF
+          INSTALL_COMMAND ""
+          TEST_COMMAND ""
+      )
+      set(LIBIIO_FOUND ON CACHE INTERNAL "")
+      set(LIBIIO_EXTERNAL ON CACHE INTERNAL "")
+      set(LIBIIO_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libiio/src/libiio" CACHE INTERNAL "")
+      set(LIBIIO_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libiio.so" CACHE INTERNAL "")
+    endif (NOT LIBIIO_FOUND OR LIBIIO_EXTERNAL)
 
     # apt install libairspyhf-dev (only on ubuntu 18.04)
     # needs libusb and pkgconfig
-    ExternalProject_Add(airspyhf
-        GIT_REPOSITORY https://github.com/airspy/airspyhf.git
-        GIT_TAG ${AIRSPYHF_TAG}
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspyhf"
-        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    ExternalProject_Get_Property(airspyhf source_dir)
-    set(LIBAIRSPYHF_FOUND ON CACHE INTERNAL "")
-    set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/.." CACHE INTERNAL "")
-    set(LIBAIRSPYHF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libairspyhf.so" CACHE INTERNAL "")
-    makeLink("${source_dir}/libairspyhf/src" "${source_dir}/../libairspyhf" airspyhf)
+    if (NOT LIBAIRSPYHF_FOUND OR LIBAIRSPYHF_EXTERNAL)
+      ExternalProject_Add(airspyhf
+          GIT_REPOSITORY https://github.com/airspy/airspyhf.git
+          GIT_TAG ${AIRSPYHF_TAG}
+          PREFIX "${EXTERNAL_BUILD_LIBRARIES}/airspyhf"
+          CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+          INSTALL_COMMAND ""
+          TEST_COMMAND ""
+      )
+      ExternalProject_Get_Property(airspyhf source_dir)
+      set(LIBAIRSPYHF_FOUND ON CACHE INTERNAL "")
+      set(LIBAIRSPYHF_EXTERNAL ON CACHE INTERNAL "")
+      set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/.." CACHE INTERNAL "")
+      set(LIBAIRSPYHF_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libairspyhf.so" CACHE INTERNAL "")
+      makeLink("${source_dir}/libairspyhf/src" "${source_dir}/../libairspyhf" airspyhf)
+    endif (NOT LIBAIRSPYHF_FOUND OR LIBAIRSPYHF_EXTERNAL)
 
     # needs pkgconfig, libusb, autoconf, automake and libtool
-    ExternalProject_Add(perseus
-        GIT_REPOSITORY https://github.com/f4exb/libperseus-sdr.git
-        GIT_TAG ${PERSEUS_TAG}
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/perseus"
-        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    set(LIBPERSEUS_FOUND ON CACHE INTERNAL "")
-    set(LIBPERSEUS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/perseus/src/perseus" CACHE INTERNAL "")
-    set(LIBPERSEUS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libperseus-sdr.so" CACHE INTERNAL "")
+    if (NOT LIBPERSEUS_FOUND OR LIBPERSEUS_EXTERNAL)
+      ExternalProject_Add(perseus
+          GIT_REPOSITORY https://github.com/f4exb/libperseus-sdr.git
+          GIT_TAG ${PERSEUS_TAG}
+          PREFIX "${EXTERNAL_BUILD_LIBRARIES}/perseus"
+          CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+          INSTALL_COMMAND ""
+          TEST_COMMAND ""
+      )
+      set(LIBPERSEUS_FOUND ON CACHE INTERNAL "")
+      set(LIBPERSEUS_EXTERNAL ON CACHE INTERNAL "")
+      set(LIBPERSEUS_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/perseus/src/perseus" CACHE INTERNAL "")
+      set(LIBPERSEUS_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libperseus-sdr.so" CACHE INTERNAL "")
+    endif (NOT LIBPERSEUS_FOUND OR LIBPERSEUS_EXTERNAL)
 
     # apt install librtlsdr-dev
     # needs pkgconfig and libusb
-    ExternalProject_Add(rtlsdr
-        GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
-        GIT_TAG ${RTLSDR_TAG}
-        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
-        CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DDETACH_KERNEL_DRIVER=ON -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
-        INSTALL_COMMAND ""
-        TEST_COMMAND ""
-    )
-    set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
-    set(LIBRTLSDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr/src/rtlsdr/include" CACHE INTERNAL "")
-    set(LIBRTLSDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/librtlsdr.so" CACHE INTERNAL "")
+    if (NOT LIBRTLSDR_FOUND OR LIBRTLSDR_EXTERNAL)
+      ExternalProject_Add(rtlsdr
+          GIT_REPOSITORY https://github.com/osmocom/rtl-sdr.git
+          GIT_TAG ${RTLSDR_TAG}
+          PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
+          CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES} -DDETACH_KERNEL_DRIVER=ON -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
+          INSTALL_COMMAND ""
+          TEST_COMMAND ""
+      )
+      set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
+      set(LIBRTLSDR_EXTERNAL ON CACHE INTERNAL "")
+      set(LIBRTLSDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr/src/rtlsdr/include" CACHE INTERNAL "")
+      set(LIBRTLSDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/librtlsdr.so" CACHE INTERNAL "")
+    endif (NOT LIBRTLSDR_FOUND OR LIBRTLSDR_EXTERNAL)
+
+    # needs pkgconfig and libusb
+    if (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL)
+      ExternalProject_Add(libmirisdr
+              GIT_REPOSITORY https://github.com/f4exb/libmirisdr-4.git
+              GIT_TAG ${MIRISDR_TAG}
+              PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr"
+              CMAKE_ARGS ${DEFAULT_OUTPUT_DIRECTORIES}
+              INSTALL_COMMAND ""
+              TEST_COMMAND ""
+              )
+      set(LIBMIRISDR_FOUND ON CACHE INTERNAL "")
+      set(LIBMIRISDR_EXTERNAL ON CACHE INTERNAL "")
+      set(LIBMIRISDR_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/libmirisdr/src/libmirisdr/include" CACHE INTERNAL "")
+      set(LIBMIRISDR_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libmirisdr.so" CACHE INTERNAL "")
+    endif (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL)
 
 endif(LINUX)
 
@@ -427,6 +489,7 @@ if(WIN32 OR APPLE)
     )
     ExternalProject_Get_Property(rtlsdr source_dir binary_dir)
     set(LIBRTLSDR_FOUND ON CACHE INTERNAL "")
+    set(LIBRTLSDR_EXTERNAL ON CACHE INTERNAL "")
     set(LIBRTLSDR_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
     if(WIN32)
       set(LIBRTLSDR_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/rtlsdr.lib" CACHE INTERNAL "")
@@ -460,6 +523,7 @@ if(WIN32 OR APPLE)
     )
     ExternalProject_Get_Property(limesuite source_dir binary_dir)
     set(LIMESUITE_FOUND ON CACHE INTERNAL "")
+    set(LIMESUITE_EXTERNAL ON CACHE INTERNAL "")
     set(LIMESUITE_INCLUDE_DIR "${source_dir}/src" CACHE INTERNAL "")
     if(WIN32)
       set(LIMESUITE_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/LimeSuite.lib" CACHE INTERNAL "")
@@ -487,6 +551,7 @@ if(WIN32 OR APPLE)
     )
     ExternalProject_Get_Property(soapysdr source_dir binary_dir)
     set(SOAPYSDR_FOUND ON CACHE INTERNAL "")
+    set(SOAPYSDR_EXTERNAL ON CACHE INTERNAL "")
     set(SOAPYSDR_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
     if(WIN32)
       set(SOAPYSDR_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/SoapySDR.lib" CACHE INTERNAL "")
@@ -522,6 +587,7 @@ if(WIN32 OR APPLE)
     add_dependencies(airspy pthreads4w)
     ExternalProject_Get_Property(airspy source_dir binary_dir)
     set(LIBAIRSPY_FOUND ON CACHE INTERNAL "")
+    set(LIBAIRSPY_EXTERNAL ON CACHE INTERNAL "")
     set(LIBAIRSPY_INCLUDE_DIR "${source_dir}/libairspy/src" CACHE INTERNAL "")
     if(WIN32)
       set(LIBAIRSPY_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/airspy.lib" CACHE INTERNAL "")
@@ -560,6 +626,7 @@ if(WIN32 OR APPLE)
     add_dependencies(airspyhf pthreads4w)
     ExternalProject_Get_Property(airspyhf source_dir binary_dir)
     set(LIBAIRSPYHF_FOUND ON CACHE INTERNAL "")
+    set(LIBAIRSPYHF_EXTERNAL ON CACHE INTERNAL "")
     set(LIBAIRSPYHF_INCLUDE_DIR "${source_dir}/libairspyhf/src" CACHE INTERNAL "")
     if(WIN32)
       set(LIBAIRSPYHF_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/airspyhf.lib" CACHE INTERNAL "")
@@ -604,6 +671,7 @@ if(WIN32 OR APPLE)
     add_dependencies(hackrf pthreads4w)
     ExternalProject_Get_Property(hackrf source_dir binary_dir)
     set(LIBHACKRF_FOUND ON CACHE INTERNAL "")
+    set(LIBHACKRF_EXTERNAL ON CACHE INTERNAL "")
     set(LIBHACKRF_INCLUDE_DIR "${source_dir}/host/libhackrf" CACHE INTERNAL "")
     if(WIN32)
       set(LIBHACKRF_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/hackrf.lib" CACHE INTERNAL "")
@@ -649,6 +717,7 @@ if(WIN32 OR APPLE)
     ExternalProject_Get_Property(libxml2 source_dir binary_dir)
     set(LIBXML2_DEPENDS libxml2)
     set(LIBXML2_FOUND ON CACHE INTERNAL "")
+    set(LIBXML2_EXTERNAL ON CACHE INTERNAL "")
     set(LIBXML2_INCLUDE_DIR "${source_dir}/include" CACHE INTERNAL "")
     if(WIN32)
       set(LIBXML2_LIBRARIES "${source_dir}/win32/bin.msvc/libxml2.lib" CACHE INTERNAL "")
@@ -683,6 +752,7 @@ if(WIN32 OR APPLE)
     add_dependencies(libiio pthreads4w)
     ExternalProject_Get_Property(libiio source_dir binary_dir)
     set(LIBIIO_FOUND ON CACHE INTERNAL "")
+    set(LIBIIO_EXTERNAL ON CACHE INTERNAL "")
     set(LIBIIO_INCLUDE_DIR "${source_dir}" CACHE INTERNAL "")
     if(WIN32)
       set(LIBIIO_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/libiio.lib" CACHE INTERNAL "")
@@ -725,6 +795,7 @@ if(WIN32 OR APPLE)
     add_dependencies(bladerf pthreads4w)
     ExternalProject_Get_Property(bladerf source_dir binary_dir)
     set(LIBBLADERF_FOUND ON CACHE INTERNAL "")
+    set(LIBBLADERF_EXTERNAL ON CACHE INTERNAL "")
     set(LIBBLADERF_INCLUDE_DIRS "${source_dir}/host/libraries/libbladeRF/include" CACHE INTERNAL "")
     if(WIN32)
       set(LIBBLADERF_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/bladeRF.lib" CACHE INTERNAL "")
