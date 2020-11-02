@@ -1061,6 +1061,8 @@ private:
                 condition = triggerCondition.m_projector.run(s) > m_levelPowerDB;
             } else if (triggerCondition.m_projector.getProjectionType() == Projector::ProjectionMagLin) {
                 condition = triggerCondition.m_projector.run(s) > m_levelPowerLin;
+            } else if (triggerCondition.m_projector.getProjectionType() == Projector::ProjectionMagSq) {
+                condition = triggerCondition.m_projector.run(s) > m_levelPowerLin;
             } else {
                 condition = triggerCondition.m_projector.run(s) > m_level;
             }
