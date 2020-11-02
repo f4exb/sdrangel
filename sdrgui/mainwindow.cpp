@@ -466,14 +466,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
 	    m_deviceWidgetTabs.removeLast();
-	    ui->tabInputsView->clear();
-
-	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
-	    {
-	        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
-	        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
-	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
-	    }
+        restoreDeviceTabs();
 
 	    DeviceAPI *sourceAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
@@ -505,14 +498,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
 	    m_deviceWidgetTabs.removeLast();
-	    ui->tabInputsView->clear();
-
-	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
-	    {
-	        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
-	        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
-	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
-	    }
+        restoreDeviceTabs();
 
 	    DeviceAPI *sinkAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
@@ -544,14 +530,7 @@ void MainWindow::removeLastDevice()
 	    ui->tabChannels->removeTab(ui->tabChannels->count() - 1);
 
 	    m_deviceWidgetTabs.removeLast();
-	    ui->tabInputsView->clear();
-
-	    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
-	    {
-	        qDebug("MainWindow::removeLastDevice: adding back tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
-	        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
-	        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
-	    }
+        restoreDeviceTabs();
 
 	    DeviceAPI *mimoAPI = m_deviceUIs.back()->m_deviceAPI;
 	    delete m_deviceUIs.back();
@@ -610,32 +589,25 @@ void MainWindow::addViewAction(QAction* action)
 
 void MainWindow::setDeviceGUI(int deviceTabIndex, QWidget* gui, const QString& deviceDisplayName, int deviceType)
 {
-    char tabNameCStr[16];
+    QString tabName;
 
     if (deviceType == 0) {
-        sprintf(tabNameCStr, "R%d", deviceTabIndex);
+        tabName = tr("R%1").arg(deviceTabIndex);
     } else if (deviceType == 1) {
-        sprintf(tabNameCStr, "T%d", deviceTabIndex);
+        tabName = tr("T%1").arg(deviceTabIndex);
     } else if (deviceType == 2) {
-        sprintf(tabNameCStr, "M%d", deviceTabIndex);
+        tabName = tr("M%1").arg(deviceTabIndex);
     }
 
     qDebug("MainWindow::setDeviceGUI: insert device type %d tab at %d", deviceType, deviceTabIndex);
 
     if (deviceTabIndex < m_deviceWidgetTabs.size()) {
-        m_deviceWidgetTabs[deviceTabIndex] = {gui, deviceDisplayName, QString(tabNameCStr)};
+        m_deviceWidgetTabs[deviceTabIndex] = {gui, deviceDisplayName, tabName};
     } else {
-        m_deviceWidgetTabs.append({gui, deviceDisplayName, QString(tabNameCStr)});
+        m_deviceWidgetTabs.append({gui, deviceDisplayName, tabName});
     }
 
-    ui->tabInputsView->clear();
-
-    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
-    {
-        qDebug("MainWindow::setDeviceGUI: adding tab for %s", m_deviceWidgetTabs[i].displayName.toStdString().c_str());
-        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
-        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
-    }
+    restoreDeviceTabs();
 
     ui->tabInputsView->setCurrentIndex(deviceTabIndex);
 }
@@ -1713,7 +1685,7 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
 
         // deletes old UI and input object
         deviceUI->m_deviceAPI->getSampleSource()->setMessageQueueToGUI(nullptr); // have source stop sending messages to the GUI
-        m_deviceUIs.back()->m_deviceGUI->destroy();
+        m_deviceUIs[tabIndex]->m_deviceGUI->destroy();
         deviceUI->m_deviceAPI->resetSamplingDeviceId();
         deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSourcePluginInstanceInput(deviceUI->m_deviceAPI->getSampleSource());
         deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -1820,7 +1792,7 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
 
         // deletes old UI and output object
         deviceUI->m_deviceAPI->getSampleSink()->setMessageQueueToGUI(nullptr); // have sink stop sending messages to the GUI
-        m_deviceUIs.back()->m_deviceGUI->destroy();
+        m_deviceUIs[tabIndex]->m_deviceGUI->destroy();
         deviceUI->m_deviceAPI->resetSamplingDeviceId();
         deviceUI->m_deviceAPI->getPluginInterface()->deleteSampleSinkPluginInstanceOutput(deviceUI->m_deviceAPI->getSampleSink());
         deviceUI->m_deviceAPI->clearBuddiesLists(); // clear old API buddies lists
@@ -2100,5 +2072,17 @@ void MainWindow::commandKeyPressed(Qt::Key key, Qt::KeyboardModifiers keyModifie
             Command* command_mod = const_cast<Command*>(command);
             command_mod->run(m_apiServer->getHost(), m_apiServer->getPort(), currentDeviceSetIndex);
         }
+    }
+}
+
+void MainWindow::restoreDeviceTabs()
+{
+    ui->tabInputsView->clear();
+
+    for (int i = 0; i < m_deviceWidgetTabs.size(); i++)
+    {
+        qDebug("MainWindow::restoreDeviceTabs: adding tab for %s", qPrintable(m_deviceWidgetTabs[i].displayName));
+        ui->tabInputsView->addTab(m_deviceWidgetTabs[i].gui, m_deviceWidgetTabs[i].tabName);
+        ui->tabInputsView->setTabToolTip(i, m_deviceWidgetTabs[i].displayName);
     }
 }

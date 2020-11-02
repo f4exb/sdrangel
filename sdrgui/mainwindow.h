@@ -147,6 +147,7 @@ private:
     void deleteFeature(int featureSetIndex, int featureIndex);
 
     bool handleMessage(const Message& cmd);
+	void restoreDeviceTabs();
 
 private slots:
 	void handleMessages();
