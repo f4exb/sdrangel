@@ -4,10 +4,10 @@ IF(MSVC)
     # look for user-registry pointing to qtcreator
     GET_FILENAME_COMPONENT(QT_BIN [HKEY_CURRENT_USER\\Software\\Classes\\Applications\\QtProject.QtCreator.pro\\shell\\Open\\Command] PATH)
 
-    # get root path so we can search for 5.3, 5.4, 5.5, etc
+    # get root path so we can search for 5.10, 5.11, 5.12, etc
     STRING(REPLACE "/Tools" ";" QT_BIN "${QT_BIN}")
     LIST(GET QT_BIN 0 QT_BIN)
-    FILE(GLOB QT_VERSIONS "${QT_BIN}/5.*")
+    FILE(GLOB QT_VERSIONS "${QT_BIN}/5.1*")
     LIST(SORT QT_VERSIONS)
 
     # assume the latest version will be last alphabetically
@@ -29,7 +29,7 @@ IF(MSVC)
         set(QT_MSVC 2015)
     else()
         MATH(EXPR QT_MSVC "2000 + (${MSVC_VERSION} - 600) / 100")
-    endif()    
+    endif()
 
     # check for 64-bit os
     # may need to be removed for older compilers as it wasn't always offered
