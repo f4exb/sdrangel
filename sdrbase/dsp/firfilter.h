@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include "dsp/dsptypes.h"
+#include "dsp/misc.h"
 #include "export.h"
 
 namespace FirFilterGenerators
@@ -74,22 +75,6 @@ protected:
         }
     }
 
-    void normalize(Real sum_fix = 0.0)
-    {
-        Real sum = 0;
-        size_t i;
-
-        for (i = 0; i < m_taps.size() - 1; ++i) {
-            sum += m_taps[i] * 2.0;
-        }
-
-        sum += m_taps[i] + sum_fix;
-
-        for (i = 0; i < m_taps.size(); ++i) {
-            m_taps[i] /= sum;
-        }
-    }
-
 protected:
     std::vector<Real> m_taps;
     std::vector<Type> m_samples;
@@ -104,7 +89,6 @@ public:
     {
         this->init(nTaps);
         FirFilterGenerators::generateLowPassFilter(nTaps, sampleRate, cutoff, this->m_taps);
-        this->normalize();
     }
 };
 
@@ -129,7 +113,6 @@ struct Bandpass : public FirFilter<T>
         }
 
         this->m_taps[this->m_taps.size() - 1] += 1;
-        this->normalize(-1.0);
     }
 };
 
@@ -146,6 +129,5 @@ struct Highpass : public FirFilter<T>
         }
 
         this->m_taps[this->m_taps.size() - 1] += 1;
-        this->normalize(-1.0);
     }
 };
