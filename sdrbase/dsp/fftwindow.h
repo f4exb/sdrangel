@@ -20,13 +20,9 @@
 #define INCLUDE_FFTWINDOW_H
 
 #include <vector>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include "dsp/dsptypes.h"
 #include "export.h"
-
-#undef M_PI
-#define M_PI		3.14159265358979323846
 
 class SDRBASE_API FFTWindow {
 public:

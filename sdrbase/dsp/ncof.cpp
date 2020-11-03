@@ -17,12 +17,8 @@
 
 #include <QtGlobal>
 #include <stdio.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include "dsp/ncof.h"
-
-#undef M_PI
-#define M_PI		3.14159265358979323846
 
 Real NCOF::m_table[NCOF::TableSize+1];
 bool NCOF::m_tableInitialized = false;
