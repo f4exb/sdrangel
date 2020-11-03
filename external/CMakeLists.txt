@@ -357,7 +357,7 @@ if (LINUX)
       set(LIMESUITE_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/limesuite/src/limesuite/src" CACHE INTERNAL "")
       set(LIMESUITE_LIBRARY "${EXTERNAL_BUILD_LIBRARIES}/lib/libLimeSuite.so" CACHE INTERNAL "")
       makeCopyFile("${source_dir}/src/limeRFE/limeRFE.h" "${source_dir}/src/lime/limeRFE.h" limesuite)
-    endif (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL
+    endif (NOT LIMESUITE_FOUND OR LIMESUITE_EXTERNAL)
 
     # apt install libbladerf-dev
     # needs pkgconfig and libusb
