@@ -22,7 +22,7 @@
 #include "dsp/dsptypes.h"
 #include "audiofilter.h"
 
-class AudioResampler
+class SDRBASE_API AudioResampler
 {
 public:
     AudioResampler();
