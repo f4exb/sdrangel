@@ -21,7 +21,7 @@ add_library(bladerf1device SHARED
     ${bladerf1device_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBBLADERF_EXTERNAL)
     add_dependencies(bladerf1device bladerf)
 endif()
 

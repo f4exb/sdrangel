@@ -50,7 +50,7 @@ add_library(${TARGET_NAME} SHARED
 	${perseus_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBPERSEUS_EXTERNAL)
     add_dependencies(${TARGET_NAME} perseus)
 endif()
 

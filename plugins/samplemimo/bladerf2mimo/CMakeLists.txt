@@ -49,6 +49,10 @@ add_library(${TARGET_NAME} SHARED
 	${bladerf2mimo_SOURCES}
 )
 
+if(LIBBLADERF_EXTERNAL)
+    add_dependencies(${TARGET_NAME} bladerf)
+endif()
+
 target_link_libraries(${TARGET_NAME}
     Qt5::Core
     ${TARGET_LIB}

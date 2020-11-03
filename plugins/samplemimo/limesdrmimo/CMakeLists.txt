@@ -49,6 +49,10 @@ add_library(${TARGET_NAME} SHARED
 	${limesdrmimo_SOURCES}
 )
 
+if(LIMESUITE_EXTERNAL)
+    add_dependencies(${TARGET_NAME} limesuite)
+endif()
+
 target_link_libraries(${TARGET_NAME}
     Qt5::Core
     ${TARGET_LIB}

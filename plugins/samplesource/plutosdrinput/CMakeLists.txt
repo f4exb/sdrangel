@@ -49,7 +49,7 @@ add_library(${TARGET_NAME} SHARED
 	${plutosdrinput_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBIIO_EXTERNAL)
     add_dependencies(${TARGET_NAME} libiio)
 endif()
 

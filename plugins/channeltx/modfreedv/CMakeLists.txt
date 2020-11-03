@@ -48,7 +48,7 @@ add_library(${TARGET_NAME} SHARED
 	${modfreedv_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(CODEC2_EXTERNAL)
     add_dependencies(${TARGET_NAME} codec2)
 endif()
 

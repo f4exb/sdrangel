@@ -29,7 +29,7 @@ target_link_libraries(hackrfdevice
     sdrbase
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES AND NOT LINUX)
+if(LIBHACKRF_EXTERNAL AND NOT LINUX)
     add_dependencies(hackrfdevice hackrf)
 endif()
 

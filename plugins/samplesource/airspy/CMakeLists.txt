@@ -47,7 +47,7 @@ add_library(${TARGET_NAME} SHARED
 	${airspy_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES AND NOT LINUX)
+if(LIBAIRSPY_EXTERNAL AND NOT LINUX)
     add_dependencies(${TARGET_NAME} airspy)
 endif()
 

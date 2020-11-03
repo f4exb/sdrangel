@@ -28,7 +28,7 @@ target_link_libraries(limesdrdevice
     sdrbase
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIMESUITE_EXTERNAL)
     add_dependencies(limesdrdevice limesuite)
 endif()
 

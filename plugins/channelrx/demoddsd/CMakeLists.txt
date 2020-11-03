@@ -57,7 +57,7 @@ add_library(${TARGET_NAME} SHARED
 	${dsddemod_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES)
+if(LIBDSDCC_EXTERNAL)
     add_dependencies(${TARGET_NAME} dsdcc)
 endif()
 

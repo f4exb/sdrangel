@@ -382,7 +382,11 @@ add_library(sdrbase SHARED
     ${sdrbase_SOURCES}
 )
 
-if(ENABLE_EXTERNAL_LIBRARIES AND LIBSERIALDV_FOUND)
+if(LIMESUITE_EXTERNAL)
+    add_dependencies(sdrbase limesuite)
+endif()
+
+if(LIBSERIALDV_EXTERNAL)
     add_dependencies(sdrbase serialdv)
 endif()
 
