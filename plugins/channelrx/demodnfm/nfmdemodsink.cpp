@@ -173,7 +173,7 @@ void NFMDemodSink::processOneSample(Complex &ci)
             }
         }
 
-        if (!m_settings.m_audioMute && (m_settings.m_ctcssOn && m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0))
+        if (!m_settings.m_audioMute && (!m_settings.m_ctcssOn || m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0))
         {
             Real audioSample = m_squelchDelayLine.readBack(m_squelchGate);
             Q_ASSERT(audioSample >= -1.0f && audioSample <= 1.0f);
