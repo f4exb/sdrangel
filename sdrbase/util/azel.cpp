@@ -17,7 +17,6 @@
 
 #include "azel.h"
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 // Calculate cartesian distance between two points

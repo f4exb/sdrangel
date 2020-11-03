@@ -19,8 +19,7 @@
 #ifndef INCLUDE_RAISEDCOSINE_H
 #define INCLUDE_RAISEDCOSINE_H
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include "dsp/dsptypes.h"
 
 // Raised-cosine low-pass filter for pulse shaping, without intersymbol interference (ISI)
