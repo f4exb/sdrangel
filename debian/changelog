@@ -1,3 +1,17 @@
+sdrangel (4.21.1-1) unstable; urgency=medium
+
+   * ADS-B demod: optimization of sync word correlation. Implements #675
+   * ADS-B: added 2MS/s sample rate
+   * Fix and refactor FIR filter (from kasper93)
+   * NFMDemodSink: Fixes and minor refactoring (from kasper93). Issue #674
+   * NFM: augmented CTCSS tones. Implements #664
+   * CTCSS detector: fixed crash on destructor. Fixes #680
+   * TestSource: fixed timer start/stop. Fixes issue #661
+   * Main Window: fixed sampling device changed. Fixes #668
+   * Scope MagSq trigger fix. Fixes #669
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 03 Nov 2020 12:11:25 +0100
+
 sdrangel (4.21.0-1) unstable; urgency=medium
 
    * New ADS-B demodulator and decoder. PR #671
