@@ -62,6 +62,11 @@ add_definitions("-DCOPYRIGHT=\"${COPYRIGHT}\"")
 set(IDENTIFIER "com.${COMPANY}.${APPLICATION_NAME}")
 add_definitions("-DIDENTIFIER=\"${IDENTIFIER}\"")
 
+add_compile_definitions(_USE_MATH_DEFINES)
+if(WIN32)
+  add_compile_definitions(NOMINMAX)
+endif()
+
 find_package(Git)
 if(GIT_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git/")
   execute_process(COMMAND "${GIT_EXECUTABLE}" describe --tags

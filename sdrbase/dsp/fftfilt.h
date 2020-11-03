@@ -6,11 +6,10 @@
 #define	_FFTFILT_H
 
 #include <complex>
+#include <cmath>
+
 #include "gfft.h"
 #include "export.h"
-
-#undef M_PI
-#define M_PI 3.14159265358979323846
 
 //----------------------------------------------------------------------
 

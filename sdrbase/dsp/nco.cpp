@@ -17,13 +17,10 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QtGlobal>
-#include <stdio.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <cstdio>
+#include <cmath>
 #include "dsp/nco.h"
 
-#undef M_PI
-#define M_PI		3.14159265358979323846
 
 Real NCO::m_table[NCO::TableSize];
 bool NCO::m_tableInitialized = false;
