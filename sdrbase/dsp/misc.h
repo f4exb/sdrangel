@@ -36,7 +36,8 @@ inline float cosc(float x)
 	return (fabs(x) < 1e-10) ? 0.0 : ((1.0 - cos(M_PI * x)) / (M_PI * x));
 }
 
-inline float clamp(float x, float min, float max)
+template<typename T>
+inline T clamp(T x, T min, T max)
 {
 	return (x < min) ? min : ((x > max) ? max : x);
 }
