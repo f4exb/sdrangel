@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "remotesourcegui.h"
+#include <QTime>
 
 #include "device/deviceapi.h"
 #include "device/deviceuiset.h"
@@ -25,6 +25,8 @@
 
 #include "remotesource.h"
 #include "ui_remotesourcegui.h"
+
+#include "remotesourcegui.h"
 
 RemoteSourceGUI* RemoteSourceGUI::create(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx)
 {

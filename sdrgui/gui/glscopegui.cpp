@@ -872,8 +872,7 @@ void GLScopeGUI::on_memoryLoad_clicked(bool checked)
 
 void GLScopeGUI::on_mem_valueChanged(int value)
 {
-    QString text;
-    text.sprintf("%02d", value);
+    QString text = QStringLiteral("%1").arg(value, 2, 10, QLatin1Char('0'));
     ui->memText->setText(text);
    	disableLiveMode(value > 0); // live / memory mode toggle
    	m_scopeVis->setMemoryIndex(value);
@@ -1013,8 +1012,7 @@ void GLScopeGUI::setTraceIndexDisplay()
 
 void GLScopeGUI::setTrigCountDisplay()
 {
-    QString text;
-    text.sprintf("%02d", ui->trigCount->value());
+    QString text = QStringLiteral("%1").arg(ui->trigCount->value(), 2, 10, QLatin1Char('0'));
     ui->trigCountText->setText(text);
 }
 

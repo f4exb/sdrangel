@@ -34,11 +34,11 @@ int SyncMessenger::sendWait(Message& message, unsigned long msPollTime)
 {
     m_message = &message;
 	m_mutex.lock();
-	m_complete.store(0);
+	m_complete.storeRelaxed(0);
 
 	emit messageSent();
 
-	while (!m_complete.load())
+	while (!m_complete.loadRelaxed())
 	{
 		m_waitCondition.wait(&m_mutex, msPollTime);
 	}
@@ -52,7 +52,7 @@ int SyncMessenger::sendWait(Message& message, unsigned long msPollTime)
 void SyncMessenger::done(int result)
 {
 	m_result = result;
-	m_complete.store(1);
+	m_complete.storeRelaxed(1);
 	m_waitCondition.wakeAll();
 }
 

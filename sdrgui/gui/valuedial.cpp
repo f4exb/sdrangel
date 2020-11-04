@@ -77,7 +77,7 @@ void ValueDial::setFont(const QFont &font)
     QWidget::setFont(font);
 
     QFontMetrics fm(font);
-    m_digitWidth = fm.width('0');
+    m_digitWidth = fm.horizontalAdvance('0');
     m_digitHeight = fm.ascent();
     if (m_digitWidth < m_digitHeight) {
         m_digitWidth = m_digitHeight;

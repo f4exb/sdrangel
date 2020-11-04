@@ -1251,7 +1251,7 @@ void GLSpectrum::applyChanges()
 	}
 
 	QFontMetrics fm(font());
-	int M = fm.width("-");
+	int M = fm.horizontalAdvance("-");
 
 	m_topMargin = fm.ascent() * 1.5;
 	m_bottomMargin = fm.ascent() * 1.5;
@@ -1261,7 +1261,7 @@ void GLSpectrum::applyChanges()
 	int frequencyScaleTop = 0;
 	int histogramTop = 0;
 	//int m_leftMargin;
-	m_rightMargin = fm.width("000");
+	m_rightMargin = fm.horizontalAdvance("000");
 
 	// displays both histogram and waterfall
 	if (m_displayWaterfall && (m_displayHistogram | m_displayMaxHold | m_displayCurrent))
@@ -1800,7 +1800,7 @@ void GLSpectrum::applyChanges()
 						shift = 0;
 					} else { // right half of scale
 						ftext = ftext + " ";
-						shift = - fm.width(ftext);
+						shift = - fm.horizontalAdvance(ftext);
 					}
 					painter.drawText(QPointF(m_leftMargin + m_frequencyScale.getPosFromValue(xc) + shift, 2*fm.height() + fm.ascent() / 2 - 1), ftext);
 				}

@@ -18,7 +18,7 @@
 #ifndef PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCGUI_H_
 #define PLUGINS_CHANNELTX_REMOTESRC_REMOTESRCGUI_H_
 
-#include <QTime>
+#include <QElapsedTimer>
 
 #include "dsp/channelmarker.h"
 #include "channel/channelgui.h"
@@ -69,7 +69,7 @@ private:
     uint32_t m_lastSampleCount;
     uint64_t m_lastTimestampUs;
     bool m_resetCounts;
-    QTime m_time;
+    QElapsedTimer m_time;
     uint32_t m_tickCount;
 
     explicit RemoteSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
