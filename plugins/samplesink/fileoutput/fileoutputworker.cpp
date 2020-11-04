@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 #include <algorithm>
 #include <QDebug>
 
@@ -39,7 +38,6 @@ FileOutputWorker::FileOutputWorker(std::ofstream *samplesStream, SampleSourceFif
     m_throttleToggle(false),
     m_buf(nullptr)
 {
-    assert(m_ofstream != nullptr);
 }
 
 FileOutputWorker::~FileOutputWorker()

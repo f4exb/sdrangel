@@ -24,8 +24,6 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 
-#include <cassert>
-
 template<typename T>
 class UDPSinkUtil
 {
@@ -37,7 +35,6 @@ public:
 		m_port(9999),
 		m_sampleBufferIndex(0)
 	{
-        assert(m_udpSamples > 0);
 		m_sampleBuffer = new T[m_udpSamples];
 		m_socket = new QUdpSocket(parent);
 	}
@@ -49,7 +46,6 @@ public:
         m_port(port),
         m_sampleBufferIndex(0)
     {
-        assert(m_udpSamples > 0);
         m_sampleBuffer = new T[m_udpSamples];
         m_socket = new QUdpSocket(parent);
     }
@@ -61,7 +57,6 @@ public:
 		m_port(port),
 		m_sampleBufferIndex(0)
 	{
-		assert(m_udpSamples > 0);
 		m_sampleBuffer = new T[m_udpSamples];
 		m_socket = new QUdpSocket(parent);
 	}
