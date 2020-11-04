@@ -37,7 +37,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	QCoreApplication::setApplicationName(APPLICATION_NAME);
     QCoreApplication::setApplicationVersion(SDRANGEL_VERSION);
 
-#if QT_VERSION >= 0x050600
+#if QT_VERSION >= QT_VERSION_CHECK(5, 6, 0)
 	QApplication::setAttribute(Qt::AA_EnableHighDpiScaling); // DPI support
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps); //HiDPI pixmaps
 #endif
@@ -102,7 +102,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
 	MainParser parser;
 	parser.parse(*qApp);
 
-#if QT_VERSION >= 0x050400
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
 	qInfo("%s %s Qt %s %db %s %s DSP Rx:%db Tx:%db PID %lld",
 	        qPrintable(qApp->applicationName()),
 	        qPrintable(qApp->applicationVersion()),

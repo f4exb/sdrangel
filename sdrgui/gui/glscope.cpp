@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QtGlobal>
 #include <QDebug>
 #include <QFontDatabase>
 #include <QMouseEvent>
@@ -135,7 +136,11 @@ void GLScope::newTraces(std::vector<float *> *traces, int traceIndex, std::vecto
 
         if (m_dataChanged.testAndSetOrdered(0, 1))
         {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             m_processingTraceIndex.storeRelaxed(traceIndex);
+#else
+            m_processingTraceIndex.store(traceIndex);
+#endif
             m_traces = &traces[traceIndex];
             m_projectionTypes = projectionTypes;
         }
@@ -834,8 +839,13 @@ void GLScope::paintGL()
 
     drawMarkers();
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     m_dataChanged.storeRelaxed(0);
     m_processingTraceIndex.storeRelaxed(-1);
+#else
+    m_dataChanged.store(0);
+    m_processingTraceIndex.store(-1);
+#endif
     m_mutex.unlock();
 }
 
@@ -2012,9 +2022,15 @@ void GLScope::drawTextOverlay(
 
 void GLScope::tick()
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     if (m_dataChanged.loadRelaxed()) {
         update();
     }
+#else
+    if (m_dataChanged.load()) {
+        update();
+    }
+#endif
 }
 
 void GLScope::connectTimer(const QTimer &timer)
