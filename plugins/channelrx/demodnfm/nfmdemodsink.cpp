@@ -176,7 +176,6 @@ void NFMDemodSink::processOneSample(Complex &ci)
         if (!m_settings.m_audioMute && (m_settings.m_ctcssOn && m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0))
         {
             Real audioSample = m_squelchDelayLine.readBack(m_squelchGate);
-            Q_ASSERT(audioSample >= -1.0f && audioSample <= 1.0f);
             audioSample = m_settings.m_highPass ? m_bandpass.filter(audioSample) : m_lowpass.filter(audioSample);
 
             audioSample *= m_settings.m_volume * std::numeric_limits<int16_t>::max();
@@ -262,6 +261,11 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
         m_interpolatorDistance =  (Real) m_channelSampleRate / (Real) m_audioSampleRate;
     }
 
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    {
+        m_phaseDiscri.setFMScaling(m_audioSampleRate / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
+    }
+
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
     {
         m_bandpass.create(m_filterTaps, m_audioSampleRate, 300.0, settings.m_afBandwidth);
@@ -323,6 +327,7 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
         m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
     }
 
+    m_phaseDiscri.setFMScaling(sampleRate / static_cast<float>(m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/2);
     m_interpolatorDistanceRemain = 0;
