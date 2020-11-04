@@ -25,6 +25,8 @@ function(windeployqt target bindir qmldir)
                 --dir "${bindir}"
                 --qmldir "${qmldir}"
                 --multimedia
+                --websockets
+                --opengl
                 \"$<TARGET_FILE:${target}>\"
         COMMENT "Deploying Qt..."
     )
@@ -38,6 +40,8 @@ function(windeployqt target bindir qmldir)
                 --dir "${bindir}/winqt"
                 --qmldir "${qmldir}"
                 --multimedia
+                --websockets
+                --opengl
                 \"$<TARGET_FILE:${target}>\"
         COMMENT "Deploying Qt..."
     )

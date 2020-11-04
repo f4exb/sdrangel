@@ -1,8 +1,3 @@
-if(WIN32)
-    # ${Boost_LIBRARY_DIRS} is empty on windows
-    link_directories(${BOOST_LIBRARYDIR})
-endif()
-
 project(usrpdevice)
 
 
@@ -20,7 +15,6 @@ set(usrpdevice_HEADERS
 
 include_directories(
     ${UHD_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
 )
 
 add_library(usrpdevice SHARED
@@ -30,10 +24,9 @@ add_library(usrpdevice SHARED
 set_target_properties(usrpdevice
     PROPERTIES DEFINE_SYMBOL "devices_EXPORTS")
 
-link_directories(${Boost_LIBRARY_DIRS})
-
 target_link_libraries(usrpdevice
     ${UHD_LIBRARIES}
+    Boost::disable_autolinking
     sdrbase
 )
 

@@ -18,7 +18,7 @@
 #include <string.h>
 #include <regex>
 
-#if defined(__WINDOWS__)
+#if defined(_WIN32)
 #include <Windows.h>
 #include <winbase.h>
 #include <tchar.h>
@@ -31,7 +31,7 @@
 
 #include "serialutil.h"
 
-#if defined(__WINDOWS__)
+#if defined(_WIN32)
 void SerialUtil::getComPorts(std::vector<std::string>& comPorts, const std::string& regexStr)
 {
     (void) regexStr;

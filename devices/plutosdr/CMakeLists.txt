@@ -19,7 +19,6 @@ set(plutosdrdevice_HEADERS
 include_directories(
     ${LIBIIO_INCLUDE_DIR}
     ${ICONV_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
 )
 
 add_library(plutosdrdevice SHARED
