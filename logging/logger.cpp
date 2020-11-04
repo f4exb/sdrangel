@@ -73,7 +73,7 @@ void Logger::msgHandler(const QtMsgType type, const QString &message, const QStr
 }
 
 
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     void Logger::msgHandler5(const QtMsgType type, const QMessageLogContext &context, const QString &message)
     {
       (void)(context); // suppress "unused parameter" warning
@@ -91,7 +91,7 @@ Logger::~Logger()
 {
     if (defaultLogger==this)
     {
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         qInstallMessageHandler(0);
 #else
         qInstallMsgHandler(0);
@@ -111,7 +111,7 @@ void Logger::write(const LogMessage* logMessage)
 void Logger::installMsgHandler()
 {
     defaultLogger=this;
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     qInstallMessageHandler(msgHandler5);
 #else
     qInstallMsgHandler(msgHandler4);

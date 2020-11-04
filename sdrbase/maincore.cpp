@@ -85,7 +85,7 @@ void MainCore::setLoggingOptions()
 
     if (m_settings.getUseLogFile())
     {
-#if QT_VERSION >= 0x050400
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
         QString appInfoStr(QString("%1 %2 Qt %3 %4b %5 %6 DSP Rx:%7b Tx:%8b PID %9")
                 .arg(QCoreApplication::applicationName())
                 .arg(QCoreApplication::applicationVersion())

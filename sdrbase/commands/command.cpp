@@ -67,7 +67,7 @@ Command::~Command()
 {
     if (m_currentProcess)
     {
-#if QT_VERSION < 0x051000
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
         disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #else
         disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
@@ -193,7 +193,7 @@ void Command::run(const QString& apiAddress, int apiPort, int deviceSetIndex)
     m_isInError = false;
     m_hasExited = false;
 
-#if QT_VERSION < 0x051000
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
     connect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #else
     connect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
@@ -266,7 +266,7 @@ void Command::processError(QProcess::ProcessError error)
     {
         m_log = m_currentProcess->readAllStandardOutput();
 
-#if QT_VERSION < 0x051000
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
         disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #else
         disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
@@ -288,7 +288,7 @@ void Command::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     m_hasExited = true;
     m_log = m_currentProcess->readAllStandardOutput();
 
-#if QT_VERSION < 0x051000
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
     disconnect(m_currentProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
 #else
     disconnect(m_currentProcess, SIGNAL(errorOccurred(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));

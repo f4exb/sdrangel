@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QtGlobal>
 #include <QDebug>
 #include <QMutexLocker>
 
@@ -619,15 +620,27 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
         // display only at trace end if trace time is less than 1 second
         if (traceTime < 1.0f)
         {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
             if (m_glScope->getProcessingTraceIndex().loadRelaxed() < 0) {
                 m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex(), &m_traces.m_projectionTypes);
             }
+#else
+            if (m_glScope->getProcessingTraceIndex().load() < 0) {
+                m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex(), &m_traces.m_projectionTypes);
+            }
+#endif
         }
 
         // switch to next buffer only if it is not being processed by the scope
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         if (m_glScope->getProcessingTraceIndex().loadRelaxed() != (((int) m_traces.currentBufferIndex() + 1) % 2)) {
             m_traces.switchBuffer();
         }
+#else
+        if (m_glScope->getProcessingTraceIndex().load() != (((int) m_traces.currentBufferIndex() + 1) % 2)) {
+            m_traces.switchBuffer();
+        }
+#endif
 
         return end - begin; // return remainder count
     }
