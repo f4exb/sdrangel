@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 #include <QDebug>
 
 #include "dsp/filerecord.h"
@@ -57,7 +56,6 @@ SigMFFileInputWorker::SigMFFileInputWorker(std::ifstream *samplesStream,
     m_throttleToggle(false),
     m_sigMFConverter(nullptr)
 {
-    assert(m_ifstream != 0);
 }
 
 SigMFFileInputWorker::~SigMFFileInputWorker()

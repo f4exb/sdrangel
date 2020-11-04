@@ -18,7 +18,6 @@
 #include <stdint.h>
 #include <sstream>
 #include <iostream>
-#include <cassert>
 
 #include <QDebug>
 #include <QMessageBox>

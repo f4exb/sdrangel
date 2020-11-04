@@ -16,7 +16,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
-#include <assert.h>
 #include "samplesourcefifodb.h"
 
 SampleSourceFifoDB::SampleSourceFifoDB(uint32_t size, QObject* parent) :
@@ -60,7 +59,7 @@ void SampleSourceFifoDB::init()
 void SampleSourceFifoDB::readAdvance(SampleVector::iterator& readUntil, unsigned int nbSamples)
 {
 //    QMutexLocker mutexLocker(&m_mutex);
-    assert(nbSamples <= m_size/2);
+    nbSamples = nbSamples > m_size/2 ? m_size/2 : nbSamples;
     emit dataWrite(nbSamples);
 
     m_ir = (m_ir + nbSamples) % m_size;
@@ -71,7 +70,7 @@ void SampleSourceFifoDB::readAdvance(SampleVector::iterator& readUntil, unsigned
 void SampleSourceFifoDB::readAdvance(SampleVector::const_iterator& readUntil, unsigned int nbSamples)
 {
 //    QMutexLocker mutexLocker(&m_mutex);
-    assert(nbSamples <= m_size/2);
+    nbSamples = nbSamples > m_size/2 ? m_size/2 : nbSamples;
     emit dataWrite(nbSamples);
 
     m_ir = (m_ir + nbSamples) % m_size;

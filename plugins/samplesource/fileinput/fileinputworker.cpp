@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <assert.h>
 #include <QDebug>
 
 #include "dsp/filerecord.h"
@@ -49,7 +48,6 @@ FileInputWorker::FileInputWorker(std::ifstream *samplesStream,
     m_throttlems(FILESOURCE_THROTTLE_MS),
     m_throttleToggle(false)
 {
-    assert(m_ifstream != nullptr);
 }
 
 FileInputWorker::~FileInputWorker()

@@ -21,7 +21,6 @@
 #include <QObject>
 #include <QMutex>
 #include <stdint.h>
-#include <assert.h>
 #include "export.h"
 #include "dsp/dsptypes.h"
 
