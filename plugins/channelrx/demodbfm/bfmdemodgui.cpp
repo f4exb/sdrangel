@@ -513,8 +513,7 @@ void BFMDemodGUI::tick()
     ui->channelPower->setText(QString::number(powDbAvg, 'f', 1));
 
 	Real pilotPowDb =  CalcDb::dbPower(m_bfmDemod->getPilotLevel());
-	QString pilotPowDbStr;
-	pilotPowDbStr.sprintf("%+02.1f", pilotPowDb);
+	QString pilotPowDbStr = QString("%1%2").arg(pilotPowDb < 0 ? '-' : '+').arg(pilotPowDb, 3, 'f', 1, QLatin1Char('0'));
 	ui->pilotPower->setText(pilotPowDbStr);
 
     if (m_bfmDemod->getAudioSampleRate() < 0)

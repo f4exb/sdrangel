@@ -619,13 +619,13 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
         // display only at trace end if trace time is less than 1 second
         if (traceTime < 1.0f)
         {
-            if (m_glScope->getProcessingTraceIndex().load() < 0) {
+            if (m_glScope->getProcessingTraceIndex().loadRelaxed() < 0) {
                 m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex(), &m_traces.m_projectionTypes);
             }
         }
 
         // switch to next buffer only if it is not being processed by the scope
-        if (m_glScope->getProcessingTraceIndex().load() != (((int) m_traces.currentBufferIndex() + 1) % 2)) {
+        if (m_glScope->getProcessingTraceIndex().loadRelaxed() != (((int) m_traces.currentBufferIndex() + 1) % 2)) {
             m_traces.switchBuffer();
         }
 

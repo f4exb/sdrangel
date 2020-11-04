@@ -135,7 +135,7 @@ void GLScope::newTraces(std::vector<float *> *traces, int traceIndex, std::vecto
 
         if (m_dataChanged.testAndSetOrdered(0, 1))
         {
-            m_processingTraceIndex.store(traceIndex);
+            m_processingTraceIndex.storeRelaxed(traceIndex);
             m_traces = &traces[traceIndex];
             m_projectionTypes = projectionTypes;
         }
@@ -834,8 +834,8 @@ void GLScope::paintGL()
 
     drawMarkers();
 
-    m_dataChanged.store(0);
-    m_processingTraceIndex.store(-1);
+    m_dataChanged.storeRelaxed(0);
+    m_processingTraceIndex.storeRelaxed(-1);
     m_mutex.unlock();
 }
 
@@ -1113,7 +1113,7 @@ void GLScope::applyConfig()
 void GLScope::setUniqueDisplays()
 {
     QFontMetrics fm(font());
-    int M = fm.width("-");
+    int M = fm.horizontalAdvance("-");
     int scopeHeight = height() - m_topMargin - m_botMargin;
     int scopeWidth = width() - m_leftMargin - m_rightMargin;
 
@@ -1297,7 +1297,7 @@ void GLScope::setUniqueDisplays()
 void GLScope::setVerticalDisplays()
 {
     QFontMetrics fm(font());
-    int M = fm.width("-");
+    int M = fm.horizontalAdvance("-");
     int scopeHeight = (height() - m_topMargin) / 2 - m_botMargin;
     int scopeWidth = width() - m_leftMargin - m_rightMargin;
 
@@ -1480,7 +1480,7 @@ void GLScope::setVerticalDisplays()
 void GLScope::setHorizontalDisplays()
 {
     QFontMetrics fm(font());
-    int M = fm.width("-");
+    int M = fm.horizontalAdvance("-");
     int scopeHeight = height() - m_topMargin - m_botMargin;
     int scopeWidth = (width() - m_rightMargin) / 2 - m_leftMargin;
 
@@ -1662,7 +1662,7 @@ void GLScope::setHorizontalDisplays()
 void GLScope::setPolarDisplays()
 {
     QFontMetrics fm(font());
-    int M = fm.width("-");
+    int M = fm.horizontalAdvance("-");
     int scopeHeight = height() - m_topMargin - m_botMargin;
     int scopeWidth = (width() - m_rightMargin) / 2 - m_leftMargin;
     int scopeDim = std::min(scopeWidth, scopeHeight);
@@ -2012,7 +2012,7 @@ void GLScope::drawTextOverlay(
 
 void GLScope::tick()
 {
-    if (m_dataChanged.load()) {
+    if (m_dataChanged.loadRelaxed()) {
         update();
     }
 }
