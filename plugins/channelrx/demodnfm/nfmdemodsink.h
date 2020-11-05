@@ -24,6 +24,7 @@
 #include "dsp/phasediscri.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
+#include "dsp/fftfilt.h"
 #include "dsp/firfilter.h"
 #include "dsp/afsquelch.h"
 #include "dsp/agc.h"
@@ -37,20 +38,19 @@
 class NFMDemodSink : public ChannelSampleSink {
 public:
     NFMDemodSink();
-	~NFMDemodSink();
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-	const Real *getCtcssToneSet(int& nbTones) const {
-		nbTones = m_ctcssDetector.getNTones();
-		return m_ctcssDetector.getToneSet();
-	}
+    const Real *getCtcssToneSet(int& nbTones) const {
+        nbTones = m_ctcssDetector.getNTones();
+        return m_ctcssDetector.getToneSet();
+    }
 
-	void setSelectedCtcssIndex(int selectedCtcssIndex) {
-		m_ctcssIndexSelected = selectedCtcssIndex;
-	}
+    void setSelectedCtcssIndex(int selectedCtcssIndex) {
+        m_ctcssIndexSelected = selectedCtcssIndex;
+    }
 
-	bool getSquelchOpen() const { return m_squelchOpen; }
+    bool getSquelchOpen() const { return m_squelchOpen; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -89,53 +89,56 @@ private:
         double m_magsqPeak;
     };
 
-	enum RateState {
-		RSInitialFill,
-		RSRunning
-	};
+    enum RateState {
+        RSInitialFill,
+        RSRunning
+    };
 
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
-	NFMDemodSettings m_settings;
+    NFMDemodSettings m_settings;
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
 
-	NCO m_nco;
-	Interpolator m_interpolator;
-	Real m_interpolatorDistance;
-	Real m_interpolatorDistanceRemain;
-	Lowpass<Real> m_ctcssLowpass;
-	Bandpass<Real> m_bandpass;
+    NCO m_nco;
+    Interpolator m_interpolator;
+    fftfilt m_rfFilter;
+    Real m_interpolatorDistance;
+    Real m_interpolatorDistanceRemain;
+    Lowpass<Real> m_ctcssLowpass;
+    Bandpass<Real> m_bandpass;
     Lowpass<Real> m_lowpass;
-	CTCSSDetector m_ctcssDetector;
-	int m_ctcssIndex; // 0 for nothing detected
-	int m_ctcssIndexSelected;
-	int m_sampleCount;
-	int m_squelchCount;
-	int m_squelchGate;
-	int m_filterTaps;
+    CTCSSDetector m_ctcssDetector;
+    int m_ctcssIndex; // 0 for nothing detected
+    int m_ctcssIndexSelected;
+    int m_sampleCount;
+    int m_squelchCount;
+    int m_squelchGate;
+    int m_filterTaps;
 
-	Real m_squelchLevel;
-	bool m_squelchOpen;
-	double m_magsq; //!< displayed averaged value
-	double m_magsqSum;
-	double m_magsqPeak;
+    Real m_squelchLevel;
+    bool m_squelchOpen;
+    bool m_afSquelchOpen;
+    double m_magsq; //!< displayed averaged value
+    double m_magsqSum;
+    double m_magsqPeak;
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
 
-	MovingAverageUtil<Real, double, 32> m_movingAverage;
-	AFSquelch m_afSquelch;
-	Real m_agcLevel; // AGC will aim to  this level
-	DoubleBufferFIFO<Real> m_squelchDelayLine;
+    MovingAverageUtil<Real, double, 32> m_movingAverage;
+    AFSquelch m_afSquelch;
+    DoubleBufferFIFO<Real> m_squelchDelayLine;
 
     PhaseDiscriminators m_phaseDiscri;
     MessageQueue *m_messageQueueToGUI;
 
     static const double afSqTones[];
     static const double afSqTones_lowrate[];
+    static const unsigned FFT_FILTER_LENGTH;
+    static const unsigned CTCSS_DETECTOR_RATE;
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }

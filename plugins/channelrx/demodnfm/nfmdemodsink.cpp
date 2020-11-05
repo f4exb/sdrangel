@@ -35,6 +35,8 @@
 
 const double NFMDemodSink::afSqTones[] = {1000.0, 6000.0}; // {1200.0, 8000.0};
 const double NFMDemodSink::afSqTones_lowrate[] = {1000.0, 3500.0};
+const unsigned NFMDemodSink::FFT_FILTER_LENGTH = 1024;
+const unsigned NFMDemodSink::CTCSS_DETECTOR_RATE = 6000;
 
 NFMDemodSink::NFMDemodSink() :
         m_channelSampleRate(48000),
@@ -42,13 +44,15 @@ NFMDemodSink::NFMDemodSink() :
         m_audioSampleRate(48000),
         m_audioBufferFill(0),
         m_audioFifo(48000),
+        m_rfFilter(FFT_FILTER_LENGTH),
         m_ctcssIndex(0),
         m_sampleCount(0),
         m_squelchCount(0),
         m_squelchGate(4800),
-        m_filterTaps(48000 / 48 + 1),
+        m_filterTaps((48000 / 48) | 1),
         m_squelchLevel(-990),
         m_squelchOpen(false),
+        m_afSquelchOpen(false),
         m_magsq(0.0f),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
@@ -57,55 +61,57 @@ NFMDemodSink::NFMDemodSink() :
         m_squelchDelayLine(24000),
         m_messageQueueToGUI(nullptr)
 {
-	m_agcLevel = 1.0;
     m_audioBuffer.resize(1<<16);
-    m_phaseDiscri.setFMScaling(0.5f);
 
-	applySettings(m_settings, true);
+    applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
-}
-
-NFMDemodSink::~NFMDemodSink()
-{
 }
 
 void NFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-	Complex ci;
+    for (SampleVector::const_iterator it = begin; it != end; ++it)
+    {
+        Complex c(it->real(), it->imag());
+        c *= m_nco.nextIQ();
 
-	for (SampleVector::const_iterator it = begin; it != end; ++it)
-	{
-		Complex c(it->real(), it->imag());
-		c *= m_nco.nextIQ();
-
-        if (m_interpolatorDistance < 1.0f) // interpolate
+        Complex ci;
+        fftfilt::cmplx *rf;
+        int rf_out = m_rfFilter.runFilt(c, &rf); // filter RF before demod
+        for (int i = 0 ; i < rf_out; i++)
         {
-            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+            if (m_interpolatorDistance == 1.0f)
             {
-                processOneSample(ci);
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
+                processOneSample(rf[i]);
             }
-        }
-        else // decimate
-        {
-            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            else if (m_interpolatorDistance < 1.0f) // interpolate
             {
-                processOneSample(ci);
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
+                while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, rf[i], &ci))
+                {
+                    processOneSample(ci);
+                    m_interpolatorDistanceRemain += m_interpolatorDistance;
+                }
+            }
+            else // decimate
+            {
+                if (m_interpolator.decimate(&m_interpolatorDistanceRemain, rf[i], &ci))
+                {
+                    processOneSample(ci);
+                    m_interpolatorDistanceRemain += m_interpolatorDistance;
+                }
             }
         }
     }
 
-	if (m_audioBufferFill > 0)
-	{
-		uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
+    if (m_audioBufferFill > 0)
+    {
+        uint res = m_audioFifo.write((const quint8*)&m_audioBuffer[0], m_audioBufferFill);
 
-		if (res != m_audioBufferFill) {
-			qDebug("NFMDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
-		}
+        if (res != m_audioBufferFill) {
+            qDebug("NFMDemodSink::feed: %u/%u tail samples written", res, m_audioBufferFill);
+        }
 
-		m_audioBufferFill = 0;
-	}
+        m_audioBufferFill = 0;
+    }
 }
 
 void NFMDemodSink::processOneSample(Complex &ci)
@@ -124,12 +130,12 @@ void NFMDemodSink::processOneSample(Complex &ci)
     m_magsqCount++;
     m_sampleCount++;
 
-    bool squelchOpen = false;
+    bool squelchOpen = m_afSquelchOpen && m_settings.m_deltaSquelch;
     if (m_settings.m_deltaSquelch)
     {
         if (m_afSquelch.analyze(demod))
         {
-            squelchOpen = m_afSquelch.evaluate();
+            m_afSquelchOpen = squelchOpen = m_afSquelch.evaluate();
 
             if (!squelchOpen) {
                 m_squelchDelayLine.zeroBack(m_audioSampleRate/10); // zero out evaluation period
@@ -164,12 +170,15 @@ void NFMDemodSink::processOneSample(Complex &ci)
     {
         if (m_settings.m_ctcssOn)
         {
-            Real ctcssSample = m_ctcssLowpass.filter(demod);
-            int factor = (m_audioSampleRate / 6000) - 1; // decimate -> 6k
-            if ((m_sampleCount & factor) == factor && m_ctcssDetector.analyze(&ctcssSample))
+            int factor = (m_audioSampleRate / CTCSS_DETECTOR_RATE) - 1; // decimate -> 6k
+            if ((m_sampleCount & factor) == factor)
             {
-                int maxToneIndex;
-                ctcssIndex = m_ctcssDetector.getDetectedTone(maxToneIndex) ?  maxToneIndex + 1 : 0;
+                Real ctcssSample = m_ctcssLowpass.filter(demod);
+                if (m_ctcssDetector.analyze(&ctcssSample))
+                {
+                    int maxToneIndex;
+                    ctcssIndex = m_ctcssDetector.getDetectedTone(maxToneIndex) ?  maxToneIndex + 1 : 0;
+                }
             }
         }
 
@@ -227,9 +236,13 @@ void NFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) channelSampleRate / (Real) m_audioSampleRate;
+        m_interpolator.create(16, channelSampleRate, m_settings.m_fmDeviation);
+        m_interpolatorDistance = Real(channelSampleRate) / Real(m_audioSampleRate);
+        m_interpolatorDistanceRemain = m_interpolatorDistance;
+
+        Real lowCut = -Real(m_settings.m_fmDeviation) / channelSampleRate;
+        Real hiCut  = Real(m_settings.m_fmDeviation) / channelSampleRate;
+        m_rfFilter.create_filter(lowCut, hiCut);
     }
 
     m_channelSampleRate = channelSampleRate;
@@ -256,14 +269,16 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
-        m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
-        m_interpolatorDistanceRemain = 0;
-        m_interpolatorDistance =  (Real) m_channelSampleRate / (Real) m_audioSampleRate;
+        m_interpolator.create(16, m_channelSampleRate, settings.m_fmDeviation);
+        m_interpolatorDistance = Real(m_channelSampleRate) / Real(m_audioSampleRate);
+        m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
-    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
-    {
-        m_phaseDiscri.setFMScaling((0.5f *m_audioSampleRate) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
+        Real lowCut = -Real(settings.m_fmDeviation) / m_channelSampleRate;
+        Real hiCut  = Real(settings.m_fmDeviation) / m_channelSampleRate;
+        m_rfFilter.create_filter(lowCut, hiCut);
+        m_phaseDiscri.setFMScaling(Real(m_audioSampleRate) / (2.0f * settings.m_fmDeviation));
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
@@ -313,24 +328,25 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
 
     qDebug("NFMDemodSink::applyAudioSampleRate: %u m_channelSampleRate: %d", sampleRate, m_channelSampleRate);
 
-    m_filterTaps = sampleRate / 48 + 1;
-    m_ctcssLowpass.create(m_filterTaps, sampleRate, 250.0);
+    m_filterTaps = (sampleRate / 48) | 1;
+    m_ctcssLowpass.create((CTCSS_DETECTOR_RATE / 48) | 1, CTCSS_DETECTOR_RATE, 250.0);
     m_bandpass.create(m_filterTaps, sampleRate, 300.0, m_settings.m_afBandwidth);
     m_lowpass.create(m_filterTaps, sampleRate, m_settings.m_afBandwidth);
     m_squelchGate = (sampleRate / 100) * m_settings.m_squelchGate; // gate is given in 10s of ms at 48000 Hz audio sample rate
     m_squelchCount = 0; // reset squelch open counter
-    m_ctcssDetector.setCoefficients(sampleRate/16, sampleRate/8.0f); // 0.5s / 2 Hz resolution
+    m_ctcssDetector.setCoefficients(sampleRate/16, CTCSS_DETECTOR_RATE); // 0.5s / 2 Hz resolution
 
     if (sampleRate < 16000) {
         m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones_lowrate); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
     } else {
         m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
     }
+    m_afSquelch.setThreshold(m_squelchLevel);
 
-    m_phaseDiscri.setFMScaling((0.5f * sampleRate) / static_cast<float>(m_settings.m_fmDeviation));
+    m_phaseDiscri.setFMScaling(Real(sampleRate) / (2.0f * m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/2);
-    m_interpolatorDistanceRemain = 0;
     m_interpolatorDistance = Real(m_channelSampleRate) / Real(sampleRate);
+    m_interpolatorDistanceRemain = m_interpolatorDistance;
     m_audioSampleRate = sampleRate;
 }

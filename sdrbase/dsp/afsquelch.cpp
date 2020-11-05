@@ -214,9 +214,9 @@ bool AFSquelch::evaluate()
 	}
 
 //    m_isOpen = ((minPower/maxPower < m_threshold) && (minIndex > maxIndex));
-
     if ((minPower/maxPower < m_threshold) && (minIndex > maxIndex)) // open condition
     {
+
         if (m_squelchCount < m_samplesAttack + m_samplesDecay)
         {
             m_squelchCount++;
