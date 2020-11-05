@@ -30,7 +30,7 @@ This is the bandwidth in khz of the modulating signal filtered before modulation
 
 <h3>7: Frequency deviation</h3>
 
-Adjusts the frequency deviation in 0.1 kHz steps from 0 to 25 kHz
+Adjusts the frequency deviation in 0.1 kHz steps from 0 to 30 kHz. This is the full deviation.
 
 <h3>8: Volume</h3>
 

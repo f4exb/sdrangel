@@ -24,7 +24,16 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>4: RF bandwidth</h3>
 
-This is the bandwidth in kHz of the channel signal before demodulation. It can be set in steps as 5, 6.25, 8.33, 10, 12.5, 15, 20, 25 and 40 kHz. The expected one side frequency deviation is 0.4 times the bandwidth.
+This is the bandwidth in kHz of the channel signal before demodulation. It can take these values with the corresponding nominal frequency deviation:
+
+  - **5** kHz: &plusmn; 1.25 kHz
+  - **6.25** kHz: &plusmn; 1.25 kHz
+  - **8.33** kHz: &plusmn; 1.67 kHz
+  - **11** kHz: &plusmn; 2.5 kHz (11F3)
+  - **16** kHz: &plusmn; 5 kHz (16F3)
+  - **20** kHz: &plusmn; 7 kHz
+  - **25** kHz: &plusmn; 9.5 kHz
+  - **40** kHz: &plusmn; 14 kHz
 
 &#9758; The demodulation is done at the channel sample rate which is guaranteed not to be lower than the requested audio sample rate but can possibly be equal to it. This means that for correct operation in any case you must ensure that the sample rate of the audio device is not lower than the Nyquist rate required to process this channel bandwidth.
 
@@ -36,7 +45,7 @@ This is the bandwidth of the audio signal in kHz (i.e. after demodulation). It c
 
 <h3>6: Volume</h3>
 
-This is the volume of the audio signal from 0.0 (mute) to 4.0 (maximum). It can be varied continuously in 0.1 steps using the dial button.
+This is the volume of the audio signal from 0% (mute) to 200% (maximum) of volume at nominal frequency deviation. It can be varied continuously 1% steps using the dial button.
 
 <h3>7: Delta/Level squelch</h3>
 

@@ -126,8 +126,8 @@ void NFMDemodGUI::on_afBW_valueChanged(int value)
 
 void NFMDemodGUI::on_volume_valueChanged(int value)
 {
-	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-	m_settings.m_volume = value / 10.0;
+	ui->volumeText->setText(QString("%1").arg(value));
+	m_settings.m_volume = value / 100.0;
 	applySettings();
 }
 
@@ -368,8 +368,8 @@ void NFMDemodGUI::displaySettings()
     ui->afBWText->setText(QString("%1 k").arg(m_settings.m_afBandwidth / 1000.0));
     ui->afBW->setValue(m_settings.m_afBandwidth / 1000.0);
 
-    ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
-    ui->volume->setValue(m_settings.m_volume * 10.0);
+    ui->volumeText->setText(QString("%1").arg(m_settings.m_volume*100.0, 0, 'f', 0));
+    ui->volume->setValue(m_settings.m_volume * 100.0);
 
     ui->squelchGateText->setText(QString("%1").arg(m_settings.m_squelchGate * 10.0f, 0, 'f', 0));
     ui->squelchGate->setValue(m_settings.m_squelchGate);
