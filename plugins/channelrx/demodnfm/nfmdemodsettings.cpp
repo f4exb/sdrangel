@@ -23,13 +23,15 @@
 
 #include "nfmdemodsettings.h"
 
+//  fixed      |Carson (3k)                      |Carson (6k)
+//             |      11F3   16F3                |
 const int NFMDemodSettings::m_rfBW[] = {
-    5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
+    5000, 6250, 8330, 11000, 16000, 20000, 25000, 40000
 };
-const int NFMDemodSettings::m_fmDev[] = { // corresponding single side FM deviations at 0.4 * BW
-    2000, 2500, 3330, 4000,  5000,  6000,  8000,  10000,  16000
+const int NFMDemodSettings::m_fmDev[] = {
+    2500, 2500, 3330, 5000,  10000, 14000, 19000, 28000
 };
-const int NFMDemodSettings::m_nbRfBW = 9;
+const int NFMDemodSettings::m_nbRfBW = 8;
 
 NFMDemodSettings::NFMDemodSettings() :
     m_channelMarker(0)

@@ -299,7 +299,7 @@
          <string>Modulation percentage</string>
         </property>
         <property name="maximum">
-         <number>250</number>
+         <number>300</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -828,26 +828,26 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ValueDialZ</class>
+   <extends>QWidget</extends>
+   <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>LevelMeterVU</class>
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>CWKeyerGUI</class>
    <extends>QWidget</extends>
    <header>gui/cwkeyergui.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ValueDialZ</class>
-   <extends>QWidget</extends>
-   <header>gui/valuedialz.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -7,6 +7,7 @@ sdrangel (5.15.2-1) unstable; urgency=medium
    * Define _USE_MATH_DEFINES and clean M_PI redefinitions. PR #682
    * NFM Demod: Refactored audio scaling. PR #682 + fix
    * NFM Demod: Fix CTCSS check logic: PR #682
+   * NFM: review frequency deviation
 
   -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 05 Nov 2020 06:54:15 +0100
 
