@@ -42,24 +42,17 @@ public:
 
         m_samples[m_ptr] = sample;
 
-        for (size_t i = 0; i < n_taps; ++i)
+        for (int i = 0; i < n_taps; ++i)
         {
-            acc += (m_samples[a++] + m_samples[b--]) * m_taps[i];
+            acc += (m_samples[a] + m_samples[b]) * m_taps[i];
 
-            if (a == n_samples) {
-                a = 0;
-            }
-
-            if (b == -1) {
-                b = n_samples - 1;
-            }
+            a = (a == n_samples - 1) ? 0             : a + 1;
+            b = (b == 0)             ? n_samples - 1 : b - 1;
         }
 
         acc += m_samples[a] * m_taps[n_taps];
 
-        if (++m_ptr == n_samples) {
-            m_ptr = 0;
-        }
+        m_ptr = (m_ptr == n_samples - 1) ? 0 : m_ptr + 1;
 
         return acc;
     }
