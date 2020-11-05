@@ -27,7 +27,8 @@ environment:
       CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
                              -DFORCE_SSE41=ON \
                              -DDEBUG_OUTPUT=ON \
-                             -DENABLE_EXTERNAL_LIBRARIES=ON"
+                             -DENABLE_EXTERNAL_LIBRARIES=ON \
+                             -DBUILD_SERVER=OFF"
 
 for:
   - matrix:
