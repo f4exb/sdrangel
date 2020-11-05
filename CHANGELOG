@@ -1,3 +1,15 @@
+sdrangel (5.15.2-1) unstable; urgency=medium
+
+   * KiwiSDR: fixed issue in local network. Fixes #435
+   * Migrate code to Qt 5.14.2
+   * Windows build: upgrade to VS2019
+   * Package builds: migrate to Ninja
+   * Define _USE_MATH_DEFINES and clean M_PI redefinitions. PR #682
+   * NFM Demod: Refactored audio scaling. PR #682 + fix
+   * NFM Demod: Fix CTCSS check logic: PR #682
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 05 Nov 2020 06:54:15 +0100
+
 sdrangel (5.15.1-1) unstable; urgency=medium
 
    * CTCSS detector: fixed crash on destructor. Fixes #680
