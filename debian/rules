@@ -4,7 +4,7 @@
 
 # FORCE_SSE41 will be not accepted upstream
 override_dh_auto_configure:
-	dh_auto_configure -- -DFORCE_SSE41=ON -DENABLE_EXTERNAL_LIBRARIES=ON -DDEBUG_OUTPUT=ON
+	dh_auto_configure -- -DFORCE_SSE41=ON -DENABLE_EXTERNAL_LIBRARIES=ON -DDEBUG_OUTPUT=ON -DBUILD_SERVER=OFF
 
 override_dh_auto_test:
 	echo "Skipping test step"
