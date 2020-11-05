@@ -14,7 +14,8 @@
     "--share=ipc",
     "--socket=pulseaudio",
     "--socket=x11",
-    "--socket=wayland"
+    "--socket=wayland",
+    "--env=QT_QPA_PLATFORM=xcb"
   ],
   "modules": [
     {
