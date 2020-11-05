@@ -59,7 +59,7 @@ NFMDemodSink::NFMDemodSink() :
 {
 	m_agcLevel = 1.0;
     m_audioBuffer.resize(1<<16);
-    m_phaseDiscri.setFMScaling(1.0f);
+    m_phaseDiscri.setFMScaling(0.5f);
 
 	applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -263,7 +263,7 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
-        m_phaseDiscri.setFMScaling(m_audioSampleRate / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
+        m_phaseDiscri.setFMScaling((0.5f *m_audioSampleRate) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
@@ -327,7 +327,7 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
         m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
     }
 
-    m_phaseDiscri.setFMScaling(sampleRate / static_cast<float>(m_settings.m_fmDeviation));
+    m_phaseDiscri.setFMScaling((0.5f * sampleRate) / static_cast<float>(m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/2);
     m_interpolatorDistanceRemain = 0;
