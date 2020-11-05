@@ -22,6 +22,7 @@ set(filesink_HEADERS
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${Boost_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
