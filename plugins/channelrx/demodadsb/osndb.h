@@ -63,7 +63,7 @@ struct AircraftInformation {
         int operatorICAOCol = 11;
         int registeredCol = 15;
 
-        qDebug() << "readOSNDB: " << filename;
+        qDebug() << "AircraftInformation::readOSNDB: " << filename;
 
         FILE *file;
         QByteArray utfFilename = filename.toUtf8();
@@ -106,19 +106,19 @@ struct AircraftInformation {
                     int icao = 0;
                     char *icaoString = NULL;
                     char *registration = NULL;
-                    int registrationLen = 0;
+                    size_t registrationLen = 0;
                     char *manufacturerName = NULL;
-                    int manufacturerNameLen = 0;
+                    size_t manufacturerNameLen = 0;
                     char *model = NULL;
-                    int modelLen = 0;
+                    size_t modelLen = 0;
                     char *owner = NULL;
-                    int ownerLen = 0;
+                    size_t ownerLen = 0;
                     char *operatorName = NULL;
-                    int operatorNameLen = 0;
+                    size_t operatorNameLen = 0;
                     char *operatorICAO = NULL;
-                    int operatorICAOLen = 0;
+                    size_t operatorICAOLen = 0;
                     char *registered = NULL;
-                    int registeredLen = 0;
+                    size_t registeredLen = 0;
 
                     p = strtok(row, ",");
                     idx = 0;
@@ -213,9 +213,9 @@ struct AircraftInformation {
             fclose(file);
         }
         else
-            qDebug() << "Failed to open " << filename;
+            qDebug() << "AircraftInformation::readOSNDB: Failed to open " << filename;
 
-        qDebug() << "readOSNDB - read " << cnt << " aircraft";
+        qDebug() << "AircraftInformation::readOSNDB: Read " << cnt << " aircraft";
 
         return aircraftInfo;
     }
@@ -265,7 +265,7 @@ struct AircraftInformation {
         int cnt = 0;
         QHash<int, AircraftInformation *> *aircraftInfo = nullptr;
 
-        qDebug() << "AircraftInformation::readFastOSNDB: " << filename;
+        qDebug() << "AircraftInformation::readFastDB: " << filename;
 
         FILE *file;
         QByteArray utfFilename = filename.toUtf8();

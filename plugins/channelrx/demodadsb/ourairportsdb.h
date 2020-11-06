@@ -25,6 +25,10 @@
 #include <QList>
 #include <QDebug>
 
+#include <stdio.h>
+#include <string.h>
+
+#include "csv.h"
 #include "adsbdemodsettings.h"
 
 #define AIRPORTS_URL "https://ourairports.com/data/airports.csv"
@@ -56,11 +60,11 @@ struct AirportInformation {
     }
 
     // Read OurAirport's airport CSV file
+    // See comments for readOSNDB
     static QHash<int, AirportInformation *> *readAirportsDB(const QString &filename)
     {
         int cnt = 0;
-        QHash<int, AirportInformation *> *airportInfo = new QHash<int, AirportInformation *>();
-        airportInfo->reserve(70000);
+        QHash<int, AirportInformation *> *airportInfo = nullptr;
 
         // Column numbers used for the data as of 2020/10/28
         int idCol = 0;
@@ -73,71 +77,130 @@ struct AirportInformation {
 
         qDebug() << "AirportInformation::readAirportsDB: " << filename;
 
-        QFile file(filename);
-        if (file.open(QIODevice::ReadOnly))
+        FILE *file;
+        QByteArray utfFilename = filename.toUtf8();
+        if ((file = fopen(utfFilename.constData(), "r")) != NULL)
         {
-            QList<QByteArray> colNames;
+            char row[2048];
             int idx;
 
-            // Read header
-            if (!file.atEnd())
+            if (fgets(row, sizeof(row), file))
             {
-                QByteArray row = file.readLine().trimmed();
-                colNames = row.split(',');
-                // Work out which columns the data is in, based on the headers
-                idx = colNames.indexOf("id");
-                if (idx >= 0)
-                     idCol = idx;
-                idx = colNames.indexOf("ident");
-                if (idx >= 0)
-                     identCol = idx;
-                idx = colNames.indexOf("type");
-                if (idx >= 0)
-                     typeCol = idx;
-                idx = colNames.indexOf("name");
-                if (idx >= 0)
-                     nameCol = idx;
-                idx = colNames.indexOf("latitude_deg");
-                if (idx >= 0)
-                     latitudeCol = idx;
-                idx = colNames.indexOf("longitude_deg");
-                if (idx >= 0)
-                     longitudeCol = idx;
-                idx = colNames.indexOf("elevation_ft");
-                if (idx >= 0)
-                     elevationCol = idx;
-            }
-            // Read data
-            while (!file.atEnd())
-            {
-                QByteArray row = file.readLine();
-                QList<QByteArray> cols = row.split(',');
+                airportInfo = new QHash<int, AirportInformation *>();
+                airportInfo->reserve(70000);
 
-                bool ok = false;
-                int id = trimQuotes(cols[idCol]).toInt(&ok, 10);
-                if (ok)
+                // Read header
+                int idx = 0;
+                char *p = strtok(row, ",");
+                while (p != NULL)
                 {
-                    QString ident = trimQuotes(cols[identCol]);
-                    QString type = trimQuotes(cols[typeCol]);
-                    QString name = trimQuotes(cols[nameCol]);
-                    float latitude = cols[latitudeCol].toFloat();
-                    float longitude = cols[longitudeCol].toFloat();
-                    float elevation = cols[elevationCol].toFloat();
+                    if (!strcmp(p, "id"))
+                        idCol = idx;
+                    else if (!strcmp(p, "ident"))
+                        identCol = idx;
+                    else if (!strcmp(p, "type"))
+                        typeCol = idx;
+                    else if (!strcmp(p, "name"))
+                        nameCol = idx;
+                    else if (!strcmp(p, "latitude_deg"))
+                        latitudeCol = idx;
+                    else if (!strcmp(p, "longitude_deg"))
+                        longitudeCol = idx;
+                    else if (!strcmp(p, "elevation_ft"))
+                        elevationCol = idx;
+                    p = strtok(NULL, ",");
+                    idx++;
+                }
+                // Read data
+                while (fgets(row, sizeof(row), file))
+                {
+                    int id = 0;
+                    char *idString = NULL;
+                    char *ident = NULL;
+                    size_t identLen = 0;
+                    char *type = NULL;
+                    size_t typeLen = 0;
+                    char *name = NULL;
+                    size_t nameLen = 0;
+                    float latitude = 0.0f;
+                    char *latitudeString = NULL;
+                    size_t latitudeLen = 0;
+                    float longitude = 0.0f;
+                    char *longitudeString = NULL;
+                    size_t longitudeLen = 0;
+                    float elevation = 0.0f;
+                    char *elevationString = NULL;
+                    size_t elevationLen = 0;
 
-                    if (type != "closed")
+                    p = strtok(row, ",");
+                    idx = 0;
+                    while (p != NULL)
+                    {
+                        // Read strings, stripping quotes
+                        if (idx == idCol)
+                        {
+                            idString = p;
+                            idString[strlen(idString)] = '\0';
+                            id = strtol(idString, NULL, 10);
+                        }
+                        else if (idx == identCol)
+                        {
+                            ident = p+1;
+                            identLen = strlen(ident)-1;
+                            ident[identLen] = '\0';
+                        }
+                        else if (idx == typeCol)
+                        {
+                            type = p+1;
+                            typeLen = strlen(type)-1;
+                            type[typeLen] = '\0';
+                        }
+                        else if (idx == nameCol)
+                        {
+                            name = p+1;
+                            nameLen = strlen(name)-1;
+                            name[nameLen] = '\0';
+                        }
+                        else if (idx == latitudeCol)
+                        {
+                            latitudeString = p;
+                            latitudeLen = strlen(latitudeString)-1;
+                            latitudeString[latitudeLen] = '\0';
+                            latitude = atof(latitudeString);
+                        }
+                        else if (idx == longitudeCol)
+                        {
+                            longitudeString = p;
+                            longitudeLen = strlen(longitudeString)-1;
+                            longitudeString[longitudeLen] = '\0';
+                            longitude = atof(longitudeString);
+                        }
+                        else if (idx == elevationCol)
+                        {
+                            elevationString = p;
+                            elevationLen = strlen(elevationString)-1;
+                            elevationString[elevationLen] = '\0';
+                            elevation = atof(elevationString);
+                        }
+                        p = strtok(NULL, ",");
+                        idx++;
+                    }
+
+                    // Only create the entry if we have some interesting data
+                    if (((latitude != 0.0f) || (longitude != 0.0f)) && (type && strcmp(type, "closed")))
                     {
                         AirportInformation *airport = new AirportInformation();
                         airport->m_id = id;
-                        airport->m_ident = ident;
-                        if (type == "small_airport")
+                        airport->m_ident = QString(ident);
+                        if (!strcmp(type, "small_airport"))
                             airport->m_type = ADSBDemodSettings::AirportType::Small;
-                        else if (type == "medium_airport")
+                        else if (!strcmp(type, "medium_airport"))
                             airport->m_type = ADSBDemodSettings::AirportType::Medium;
-                        else if (type == "large_airport")
+                        else if (!strcmp(type, "large_airport"))
                             airport->m_type = ADSBDemodSettings::AirportType::Large;
-                        else if (type == "heliport")
+                        else if (!strcmp(type, "heliport"))
                             airport->m_type = ADSBDemodSettings::AirportType::Heliport;
-                        airport->m_name = name;
+                        airport->m_name = QString(name);
                         airport->m_latitude = latitude;
                         airport->m_longitude = longitude;
                         airport->m_elevation = elevation;
@@ -146,12 +209,12 @@ struct AirportInformation {
                     }
                 }
             }
-            file.close();
+            fclose(file);
         }
         else
-            qDebug() << "Failed to open " << filename << " " << file.errorString();
+            qDebug() << "AirportInformation::readAirportsDB: Failed to open " << filename;
 
-        qDebug() << "AirportInformation::readAirportsDB: - read " << cnt << " airports";
+        qDebug() << "AirportInformation::readAirportsDB: Read " << cnt << " airports";
 
         return airportInfo;
     }
