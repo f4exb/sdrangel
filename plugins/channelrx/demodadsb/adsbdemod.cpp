@@ -17,6 +17,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_CHRONO_HEADER_ONLY
 #include <boost/chrono/chrono.hpp>
 
 #include <stdio.h>
