@@ -29,11 +29,13 @@ environment:
                              -DDEBUG_OUTPUT=ON \
                              -DENABLE_EXTERNAL_LIBRARIES=ON \
                              -DBUILD_SERVER=OFF"
+    - TARGET: ubuntu2004docker
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
 
 for:
   - matrix:
       only:
-        - APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+        - TARGET: 'vs2019gui'
     cache:
       - C:\ProgramData\chocolatey\bin
       - C:\ProgramData\chocolatey\lib
@@ -63,7 +65,7 @@ for:
         branch: master            # release from master branch only
   - matrix:
       only:
-        - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+        - TARGET: ubuntu2004prod
     cache:
       - $HOME/external/
     install:
@@ -117,3 +119,13 @@ for:
       on:
         APPVEYOR_REPO_TAG: true        # deploy on tag push only
         branch: master                 # release from master branch only
+  - matrix:
+      only:
+        - TARGET: ubuntu2004docker
+    before_build:
+      - git clone https://github.com/f4exb/sdrangel-docker.git
+      - cd sdrangel-docker
+    build_script:
+      - cd sdrangel
+      - ./build_vanilla.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
+      - ./build_server.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
