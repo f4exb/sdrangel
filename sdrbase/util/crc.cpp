@@ -34,27 +34,55 @@ void crc::calculate(uint32_t data, int data_bits)
 {
     uint32_t tmp;
     uint32_t mask;
+    uint32_t msb;
     int bit, i;
 
-    // Reverse data order.
     if (m_msb_first)
-        data = reverse (data, data_bits);
-
-    // Compute CRC.
-    tmp = m_crc;
-    for (i = 0; i < data_bits; i++) {
-        bit = ((data >> i) & 1) ^ (tmp & 1);
-        if (bit)
-            tmp = (tmp >> 1) ^ m_polynomial_rev;
-        else
-            tmp = tmp >> 1;
+    {
+        mask = (1 << m_poly_bits) - 1;
+        msb = 1 << (m_poly_bits - 1);
+        tmp = m_crc ^ (data << (m_poly_bits - 8));
+        for (i = 0; i < data_bits; i++)
+        {
+            if (tmp & msb)
+                tmp = (tmp << 1) ^ m_polynomial;
+            else
+                tmp = tmp << 1;
+            tmp = tmp & mask;
+        }
+        m_crc = tmp;
     }
-    m_crc = tmp;
+    else
+    {
+        tmp = m_crc;
+        for (i = 0; i < data_bits; i++) {
+            bit = ((data >> i) & 1) ^ (tmp & 1);
+            if (bit)
+                tmp = (tmp >> 1) ^ m_polynomial_rev;
+            else
+                tmp = tmp >> 1;
+        }
+        m_crc = tmp;
+    }
 }
 
 // Calculate CRC for specified array
 void crc::calculate(const uint8_t *data, int length)
 {
-    for(int i = 0; i < length; i++)
-        calculate(data[i], 8);
+    int i;
+    uint32_t mask1;
+    uint32_t mask2;
+
+    if (m_msb_first)
+    {
+        mask1 = (1 << m_poly_bits) - 1;
+        mask2 = 0xff << (m_poly_bits - 8);
+        for (i = 0; i < length; i++)
+            m_crc = mask1 & ((m_crc << 8) ^ m_lut[data[i] ^ ((m_crc & mask2) >> (m_poly_bits-8))]);
+    }
+    else
+    {
+        for (i = 0; i < length; i++)
+            m_crc = (m_crc >> 8) ^ m_lut[data[i] ^ (m_crc & 0xff)];
+    }
 }

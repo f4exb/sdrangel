@@ -19,7 +19,7 @@
 #ifndef INCLUDE_ADSBDEMODSINK_H
 #define INCLUDE_ADSBDEMODSINK_H
 
-#include <vector>
+#include <boost/chrono/chrono.hpp>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
@@ -27,6 +27,8 @@
 #include "util/movingaverage.h"
 
 #include "adsbdemodsettings.h"
+#include "adsbdemodstats.h"
+#include "adsbdemodsinkworker.h"
 
 class ADSBDemodSink : public ChannelSampleSink {
 public:
@@ -53,13 +55,14 @@ public:
         m_magsqCount = 0;
     }
 
-    void init(int samplesPerBit);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const ADSBDemodSettings& settings, bool force = false);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setMessageQueueToWorker(MessageQueue *messageQueue) { m_messageQueueToWorker = messageQueue; }
 
 private:
+    friend ADSBDemodSinkWorker;
+
     struct MagSqLevelsStore
     {
         MagSqLevelsStore() :
@@ -78,14 +81,26 @@ private:
     Interpolator m_interpolator;
     Real m_interpolatorDistance;
     Real m_interpolatorDistanceRemain;
-    int m_sampleIdx;
-    int m_sampleCount;
-    int m_skipCount;            // Samples to skip, because we've already received a frame
-    Real *m_sampleBuffer;
 
-    int m_totalSamples;         // These two values are derived from samplesPerBit
+    boost::chrono::steady_clock::time_point m_startPoint;
+    double m_feedTime;                  //!< Time spent in feed()
+
+    // Triple buffering for sharing sample data between two threads
+    // Top area of each buffer is not used by writer, as it's used by the reader
+    // for copying the last few samples of the previous buffer, so it can
+    // be processed contiguously
+    const int m_buffers = 3;
+    const int m_bufferSize = 200000;
+    Real *m_sampleBuffer[3];            //!< Each buffer is m_bufferSize samples
+    QSemaphore m_bufferWrite[3];        //!< Sempahore to control write access to the buffers
+    QSemaphore m_bufferRead[3];         //!< Sempahore to control read access from the buffers
+    ADSBDemodSinkWorker m_worker;       //!< Worker thread that does the actual demodulation
+    int m_writeBuffer;                  //!< Which of the 3 buffers we're writing in to
+    int m_writeIdx;                     //!< Index to to current write buffer
+
+    // These values are derived from samplesPerBit
+    int m_samplesPerFrame;              //!< Including preamble
     int m_samplesPerChip;
-    double m_correlationThresholdLinear; //!< settings m_correlationThreshold is in dB. Linear value is calculated once.
 
     double m_magsq; //!< displayed averaged value
     double m_magsqSum;
@@ -93,12 +108,17 @@ private:
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
 
-    MovingAverageUtil<Real, double, 32> m_movingAverage;
-
     MessageQueue *m_messageQueueToGUI;
     MessageQueue *m_messageQueueToWorker;
 
-    void processOneSample(Complex &ci);
+    void init(int samplesPerBit);
+    void stopWorker();
+    Real inline complexMagSq(Complex& ci)
+    {
+        double magsqRaw = ci.real()*ci.real() + ci.imag()*ci.imag();
+        return (Real)(magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED));
+    }
+    void processOneSample(Real magsq);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
     MessageQueue *getMessageQueueToWorker() { return m_messageQueueToWorker; }
 };

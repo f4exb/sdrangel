@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>1019</height>
+    <height>1046</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>340</width>
-     <height>101</height>
+     <height>141</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -327,6 +327,39 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="demodModeS">
+        <property name="toolTip">
+         <string>Demodulate all Mode-S frames, not just ADS-B</string>
+        </property>
+        <property name="text">
+         <string>S</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="correlateFullPreamble">
+        <property name="toolTip">
+         <string>Correlate against full preamble.</string>
+        </property>
+        <property name="text">
+         <string>FP</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="thresholdLabel">
         <property name="text">
          <string>Threshold</string>
@@ -342,10 +375,10 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Correlation threshold in dB. Lower values will increase the number of frames that can be received, but require more processing.</string>
+         <string>Correlation threshold in dB. Lower values will increase the number of frames that can be received, but require more processing and possibly result in invalid frames.</string>
         </property>
         <property name="minimum">
-         <number>-990</number>
+         <number>-450</number>
         </property>
         <property name="maximum">
          <number>0</number>
@@ -354,7 +387,7 @@
          <number>1</number>
         </property>
         <property name="value">
-         <number>-500</number>
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -376,58 +409,132 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="beastEnabled">
+       <widget class="QToolButton" name="getOSNDB">
         <property name="toolTip">
-         <string>Enable feeding of received ADS-B messages in Beast binary format to the specifed server</string>
+         <string>Download the latest Opensky-Network aircraft database (80MB)</string>
         </property>
         <property name="text">
-         <string>Feed</string>
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/aircraft.png</normaloff>:/icons/aircraft.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="hostLabel">
-        <property name="text">
-         <string>Server</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="host">
+       <widget class="QToolButton" name="getAirportDB">
         <property name="toolTip">
-         <string>Hostname of the server to feed</string>
+         <string>Download the latest OurAirports airport databases (10MB)</string>
         </property>
         <property name="text">
-         <string>feed.adsbexchange.com</string>
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/controltower.png</normaloff>:/icons/controltower.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="portLabel">
+       <widget class="QToolButton" name="displaySettings">
+        <property name="toolTip">
+         <string>Open display settings dialog</string>
+        </property>
         <property name="text">
-         <string>Port</string>
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="port">
-        <property name="minimumSize">
+       <widget class="QToolButton" name="flightPaths">
+        <property name="toolTip">
+         <string>Display flight paths</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/logarithmic.png</normaloff>:/logarithmic.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="feed">
+        <property name="toolTip">
+         <string>Enable feeding of received ADS-B messages to the specifed server. Right click for settings.</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="stats">
+        <property name="toolTip">
+         <string>Demodulator statistics</string>
+        </property>
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>60</width>
-          <height>0</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="devicesRefresh">
         <property name="toolTip">
-         <string>Port the server is listening on</string>
+         <string>Refresh device list</string>
         </property>
-        <property name="minimum">
-         <number>1024</number>
+        <property name="text">
+         <string>...</string>
         </property>
-        <property name="maximum">
-         <number>65535</number>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
         </property>
-        <property name="value">
-         <number>30005</number>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Device</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="device">
+        <property name="toolTip">
+         <string>Receive device set to set frequency on when selecting an ATC frequency on the map</string>
         </property>
        </widget>
       </item>
@@ -439,7 +546,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>114</y>
+     <y>140</y>
      <width>341</width>
      <height>291</height>
     </rect>
@@ -449,11 +556,6 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
-   </property>
-   <property name="font">
-    <font>
-     <family>Liberation Mono</family>
-    </font>
    </property>
    <property name="windowTitle">
     <string>ADS-B Data</string>
@@ -476,11 +578,6 @@
     </property>
     <item>
      <widget class="QTableWidget" name="adsbData">
-      <property name="font">
-       <font>
-        <family>Liberation Mono</family>
-       </font>
-      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
@@ -489,7 +586,7 @@
         <string>ICAO ID</string>
        </property>
        <property name="toolTip">
-        <string extracomment="Double click to search for the aircraft on www.planespotters.net">International Civil Aviation Organization identifier. Links to www.planespotters.net</string>
+        <string extracomment="Double click to search for the aircraft on www.planespotters.net">Aircraft International Civil Aviation Organization identifier. Links to www.planespotters.net</string>
        </property>
       </column>
       <column>
@@ -498,6 +595,70 @@
        </property>
        <property name="toolTip">
         <string>Commercial flight number. Links to www.flightradar24.com</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Aircraft</string>
+       </property>
+       <property name="toolTip">
+        <string>Aircraft model</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Airline</string>
+       </property>
+       <property name="toolTip">
+        <string>Airline logo</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Alt (ft)</string>
+       </property>
+       <property name="toolTip">
+        <string>Altitude in feet or metres</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Spd (kn)</string>
+       </property>
+       <property name="toolTip">
+        <string>Speed in knots or kilometres per hour</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Hd (°)</string>
+       </property>
+       <property name="toolTip">
+        <string>Aircraft heading in degrees</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>VR (ft/m)</string>
+       </property>
+       <property name="toolTip">
+        <string>Vertical climb rate in feet per minute or metres per second</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>D (km)</string>
+       </property>
+       <property name="toolTip">
+        <string>Range or distance of aircraft from home location</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Az/El (°)</string>
+       </property>
+       <property name="toolTip">
+        <string>Azimuth and elevation to aircraft from My Position. Double click to set as target.</string>
        </property>
       </column>
       <column>
@@ -518,39 +679,7 @@
       </column>
       <column>
        <property name="text">
-        <string>Alt (ft)</string>
-       </property>
-       <property name="toolTip">
-        <string>Altitude in feet</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Sp (kn)</string>
-       </property>
-       <property name="toolTip">
-        <string>Speed in knots</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Hd (°)</string>
-       </property>
-       <property name="toolTip">
-        <string>Aircraft heading in degrees</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Climb</string>
-       </property>
-       <property name="toolTip">
-        <string>Climbing rate in feet per minute</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Category</string>
+        <string>Cat</string>
        </property>
        <property name="toolTip">
         <string>Aircraft standard category</string>
@@ -561,23 +690,55 @@
         <string>Status</string>
        </property>
        <property name="toolTip">
-        <string>Aircraft standard status</string>
+        <string>Aircraft emergency status</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>D (km)</string>
+        <string>Reg</string>
        </property>
        <property name="toolTip">
-        <string>Range or distance of aircraft to home location</string>
+        <string>Aircraft registration</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Az/El (°)</string>
+        <string>Country</string>
        </property>
        <property name="toolTip">
-        <string>Aircraft azimuth and elevation from home point in degrees</string>
+        <string>Country of registration</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Registered</string>
+       </property>
+       <property name="toolTip">
+        <string>Date aircraft was registered</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Manufacturer</string>
+       </property>
+       <property name="toolTip">
+        <string>Aircraft manufacturer</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Owner</string>
+       </property>
+       <property name="toolTip">
+        <string>Owner of the aircraft</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Operator</string>
+       </property>
+       <property name="toolTip">
+        <string>Aircraft operator ICAO code</string>
        </property>
       </column>
       <column>
@@ -585,7 +746,7 @@
         <string>Updated</string>
        </property>
        <property name="toolTip">
-        <string>Last time updated</string>
+        <string>Time when the last ADS-B message from this aircraft was received.</string>
        </property>
       </column>
       <column>
@@ -593,7 +754,7 @@
         <string>Frames</string>
        </property>
        <property name="toolTip">
-        <string>Number of frames received</string>
+        <string>Number of ADS-B frames received from this aircraft</string>
        </property>
       </column>
       <column>
@@ -601,7 +762,7 @@
         <string>Correlation</string>
        </property>
        <property name="toolTip">
-        <string>Correlation power min/avg/max in dB</string>
+        <string>Correlation values for received frames. min/avg/max</string>
        </property>
       </column>
      </widget>
@@ -612,7 +773,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>420</y>
+     <y>450</y>
      <width>331</width>
      <height>581</height>
     </rect>
@@ -653,18 +814,18 @@
       <property name="minimumSize">
        <size>
         <width>100</width>
-        <height>400</height>
+        <height>500</height>
        </size>
       </property>
       <property name="toolTip">
-       <string>Aircraft location map</string>
+       <string>Aircraft map</string>
       </property>
       <property name="resizeMode">
        <enum>QQuickWidget::SizeRootObjectToView</enum>
       </property>
       <property name="source">
        <url>
-        <string>qrc:/map.qml</string>
+        <string/>
        </url>
       </property>
      </widget>
@@ -702,14 +863,10 @@
   <tabstop>rfBW</tabstop>
   <tabstop>spb</tabstop>
   <tabstop>threshold</tabstop>
-  <tabstop>beastEnabled</tabstop>
-  <tabstop>host</tabstop>
-  <tabstop>port</tabstop>
-  <tabstop>adsbData</tabstop>
-  <tabstop>map</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="icons.qrc"/>
  </resources>
  <connections/>
 </ui>

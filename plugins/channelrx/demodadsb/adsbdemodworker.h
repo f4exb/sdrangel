@@ -80,6 +80,9 @@ private:
 
 private slots:
     void handleInputMessages();
+    void connected();
+    void disconnected();
+    void errorOccurred(QAbstractSocket::SocketError socketError);
     void recv();
     void heartbeat();
 };
