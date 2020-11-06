@@ -34,27 +34,27 @@ This specifies the channel sample rate the demodulator uses. Values of 2M-12MSa/
 
 Higher channel sample rates may help decode more frames, but will require more processing power.
 
-<h3>: S - Demodulate all Mode-S frames</h3>
+<h3>6: S - Demodulate all Mode-S frames</h3>
 
 Checking the S button will enable demodulation of all Mode-S frames, not just ADS-B. Mode-S frames will not effect the data displayed in the table or map, but can be feed to aggregators.
 
-<h3>6: FP - Correlate Against Full Preamable</h3>
+<h3>7: FP - Correlate Against Full Preamable</h3>
 
 When the FP button is checked, the demodulator will correlated the received signal against all expected 8 bits of the ES1090 preamble. When unchecked, the correlation will only be against the first 6 bits. Only correlating the first 6 bits can reduce the processing requirements, but may result in more invalid frames.
 
-<h3>6: Threshold</h3>
+<h3>8: Threshold</h3>
 
 This sets the correlation threshold in dB between the received signal and expected 1090ES preamble, that is required to be exceeded before the demodulator will try to decode a frame. Lower values should decode more frames amd will require more processing power, but will more often decode invalid frames. You may also look at correlation values obtained with reliable signals in the "Correlation" column of the data table.
 
-<h3>Download Opensky-Network Aircraft Database</h3>
+<h3>9: Download Opensky-Network Aircraft Database</h3>
 
 Clicking this will download the Opensky-Network (https://opensky-network.org/) aircraft database. This database contains information about aircrafts, such as registration, aircraft model and owner details, that is not broadcast via ADS-B. Once downloaded, this additional information will be displayed in the table alongside the ADS-B data. The database should only need to be downloaded once, as it is saved to disk, and it is recommended to download it before enabling the demodulator.
 
-<h3>Download OurAirports Airport Databases</h3>
+<h3>10: Download OurAirports Airport Databases</h3>
 
 Clicking this will download the OurAirports (https://ourairports.com/) airport databases. These contains names and locations for airports allowing them to be drawn on the map, as well as their corresponding ATC frequencies, which can also be displayed next to the airport on the map, by clicking the airport name. The size of airports that will be displayed on the map, and whether heliports are displayed, can be set in the Display Settings dialog.
 
-<h3>Display Settings</h3>
+<h3>11: Display Settings</h3>
 
 Clicking the Display Settings button will open the Display Settings dialog, which allows you to choose:
 
@@ -65,11 +65,11 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * The timeout, in seconds, after which an aircraft will be removed from the table and map, if an ADS-B frame has not been received from it.
 * The font used for the table.
 
-<h3>Display Flight Paths</h3>
+<h3>12: Display Flight Paths</h3>
 
 Checking this button draws a line on the map showing aircraft's flight paths, as determined from received ADS-B frames.
 
-<h3>7: Feed</h3>
+<h3>13: Feed</h3>
 
 Checking Feed enables feeding received ADS-B frames to aggregators such as ADS-B Exchange: https://www.adsbexchange.com or ADSBHub
 : https://www.adsbhub.org. Right clicking on the Feed button opens the Feed Settings dialog.
@@ -81,11 +81,11 @@ The server hostname and port to send the frames to should be entered in the Serv
 
 The Beast binary and Hex formats are as detailed here: https://wiki.jetvision.de/wiki/Mode-S_Beast:Data_Output_Formats
 
-<h3>Refresh list of devices</h3>
+<h3>14: Refresh list of devices</h3>
 
 Use this button to refresh the list of devices.
 
-<h3>Select device set</h3>
+<h3>15: Select device set</h3>
 
 Specify the SDRangel device set that will be have its centre frequency set when an airport ATC frequency is clicked on the map. Typically, this device set would be a second SDR (as ATC frequencies are around 120MHz, so they can not be received simultaneously with 1090MHz for ADS-B) and have an AM Demodulator channel plugin.
 
