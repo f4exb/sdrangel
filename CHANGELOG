@@ -1,3 +1,15 @@
+sdrangel (4.21.2-1) unstable; urgency=medium
+
+   * Windows package: upgrade to VS 2019 and Qt 5.15.1. PR #683
+   * Package builds: migrate to Ninja. PR #683
+   * Define _USE_MATH_DEFINES and clean M_PI redefinitions. PR #682
+   * NFM Demod: Refactored audio scaling. PR #682 + fix
+   * NFM Demod: Fix CTCSS check logic: PR #682
+   * NFM: review frequency deviation
+   * KiwiSDR: fixed issue in local network. Fixes #435
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 06 Nov 2020 05:21:24 +0100
+
 sdrangel (4.21.1-1) unstable; urgency=medium
 
    * ADS-B demod: optimization of sync word correlation. Implements #675
