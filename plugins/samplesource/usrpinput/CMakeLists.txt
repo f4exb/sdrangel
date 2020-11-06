@@ -1,7 +1,3 @@
-if(WIN32)
-    link_directories(${BOOST_LIBRARYDIR})
-endif()
-
 project(usrpinput)
 
 set(usrpinput_SOURCES

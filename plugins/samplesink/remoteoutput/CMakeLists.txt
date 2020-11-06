@@ -34,8 +34,8 @@ set(remoteoutput_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
-    ${Boost_INCLUDE_DIRS}
     ${CM256CC_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)

@@ -17,16 +17,13 @@
 #ifndef LEANSDR_DVB_H
 #define LEANSDR_DVB_H
 
-#include <stdint.h>
+#include <cmath>
+#include <cstdint>
 
 #include "leansdr/convolutional.h"
 #include "leansdr/rs.h"
 #include "leansdr/sdr.h"
 #include "leansdr/viterbi.h"
-
-#ifndef M_PI
-#    define M_PI 3.14159265358979323846
-#endif
 
 namespace leansdr
 {

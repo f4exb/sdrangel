@@ -23,7 +23,7 @@
 namespace qtwebapp {
 
 /** Alias type definition, for compatibility to different Qt versions */
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     typedef qintptr tSocketDescriptor;
 #else
     typedef int tSocketDescriptor;

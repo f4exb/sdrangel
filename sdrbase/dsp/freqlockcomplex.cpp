@@ -22,8 +22,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "freqlockcomplex.h"
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 
 FreqLockComplex::FreqLockComplex() :
     m_a0(0.998),

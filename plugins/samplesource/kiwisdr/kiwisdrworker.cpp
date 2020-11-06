@@ -86,8 +86,7 @@ void KiwiSDRWorker::onBinaryMessageReceived(const QByteArray &message)
 	if (message[0] == 'M' && message[1] == 'S' && message[2] == 'G')
 	{
 		QStringList al = QString::fromUtf8(message).split(' ');
-		if (al[1] == "audio_init=0" &&
-			al[2] == "audio_rate=12000")
+		if (al.size() > 2 && al[2] == "audio_rate=12000")
 		{
 			m_webSocket.sendTextMessage("SET AR OK in=12000 out=48000");
 			m_webSocket.sendTextMessage("SERVER DE CLIENT KiwiAngel SND");

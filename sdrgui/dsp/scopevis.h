@@ -25,7 +25,7 @@
 
 #include <algorithm>
 #include <utility>
-#include <math.h>
+#include <cmath>
 
 #include <stdint.h>
 #include <vector>
@@ -37,8 +37,6 @@
 #include "util/message.h"
 #include "util/doublebuffer.h"
 
-#undef M_PI
-#define M_PI		3.14159265358979323846
 
 class GLScope;
 

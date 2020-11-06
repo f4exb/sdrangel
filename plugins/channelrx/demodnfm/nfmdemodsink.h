@@ -139,39 +139,6 @@ private:
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
-
-    inline float arctan2(Real y, Real x)
-    {
-        Real coeff_1 = M_PI / 4;
-        Real coeff_2 = 3 * coeff_1;
-        Real abs_y = fabs(y) + 1e-10;      // kludge to prevent 0/0 condition
-        Real angle;
-        if( x>= 0) {
-            Real r = (x - abs_y) / (x + abs_y);
-            angle = coeff_1 - coeff_1 * r;
-        } else {
-            Real r = (x + abs_y) / (abs_y - x);
-            angle = coeff_2 - coeff_1 * r;
-        }
-        if(y < 0) {
-            return(-angle);
-        } else {
-            return(angle);
-        }
-    }
-
-    inline Real angleDist(Real a, Real b)
-    {
-        Real dist = b - a;
-
-        while(dist <= M_PI)
-            dist += 2 * M_PI;
-        while(dist >= M_PI)
-            dist -= 2 * M_PI;
-
-        return dist;
-    }
-
 };
 
 #endif // INCLUDE_NFMDEMODSINK_H

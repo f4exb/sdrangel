@@ -22,8 +22,8 @@ set(atv_HEADERS
 )
 
 include_directories(
-    ${Boost_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${Boost_INCLUDE_DIRS}
 )
 
 add_library(demodatv SHARED

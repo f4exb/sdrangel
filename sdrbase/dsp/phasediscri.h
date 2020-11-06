@@ -19,10 +19,8 @@
 #ifndef INCLUDE_DSP_PHASEDISCRI_H_
 #define INCLUDE_DSP_PHASEDISCRI_H_
 
+#include <cmath>
 #include "dsp/dsptypes.h"
-
-#undef M_PI
-#define M_PI 3.14159265358979323846
 
 class PhaseDiscriminators
 {
@@ -167,8 +165,8 @@ private:
 
     }
 
-    #define PI_FLOAT     3.14159265f
-    #define PIBY2_FLOAT  1.5707963f
+    #define PI_FLOAT     float(M_PI)
+    #define PIBY2_FLOAT  float(M_PI_2)
     // |error| < 0.005
     float atan2_approximation2( float y, float x )
     {

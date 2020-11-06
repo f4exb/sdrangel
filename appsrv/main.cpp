@@ -70,7 +70,7 @@ static int runQtApplication(int argc, char* argv[], qtwebapp::LoggerWithFile *lo
     MainParser parser;
     parser.parse(a);
 
-#if QT_VERSION >= 0x050400
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
     qInfo("%s %s Qt %s %db %s %s DSP Rx:%db Tx:%db PID %lld",
           qPrintable(QCoreApplication::applicationName()),
           qPrintable(QCoreApplication::applicationVersion()),

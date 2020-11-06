@@ -52,6 +52,19 @@ void generateLowPassFilter(int nTaps, double sampleRate, double cutoff, std::vec
         int n = i - (nTaps - 1) / 2;
         taps[i] *= 0.42 + 0.5 * cos((2.0 * M_PI * n) / nTaps) + 0.08 * cos((4.0 * M_PI * n) / nTaps);
     }
+
+    Real sum = 0;
+    size_t i;
+
+    for (i = 0; i < taps.size() - 1; ++i) {
+        sum += taps[i] * 2.0;
+    }
+
+    sum += taps[i];
+
+    for (i = 0; i < taps.size(); ++i) {
+        taps[i] /= sum;
+    }
 }
 
 }

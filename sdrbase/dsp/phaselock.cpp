@@ -16,11 +16,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
+#include <cmath>
 #include "dsp/phaselock.h"
 
-#undef M_PI
-#define M_PI		3.14159265358979323846
 
 // Construct phase-locked loop.
 PhaseLock::PhaseLock(Real freq, Real bandwidth, Real minsignal)

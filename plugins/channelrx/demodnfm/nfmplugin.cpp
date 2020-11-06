@@ -12,7 +12,7 @@
 const PluginDescriptor NFMPlugin::m_pluginDescriptor = {
     NFMDemod::m_channelId,
 	QString("NFM Demodulator"),
-	QString("4.21.1"),
+	QString("4.21.2"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

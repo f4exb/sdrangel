@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QtGlobal>
+
 #include "util/syncmessenger.h"
 #include "util/message.h"
 
@@ -34,14 +36,23 @@ int SyncMessenger::sendWait(Message& message, unsigned long msPollTime)
 {
     m_message = &message;
 	m_mutex.lock();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+	m_complete.storeRelaxed(0);
+#else
 	m_complete.store(0);
+#endif
 
 	emit messageSent();
 
-	while (!m_complete.load())
-	{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+	while (!m_complete.loadRelaxed()) {
 		m_waitCondition.wait(&m_mutex, msPollTime);
 	}
+#else
+	while (!m_complete.load()) {
+		m_waitCondition.wait(&m_mutex, msPollTime);
+	}
+#endif
 
 	int result = m_result;
 	m_mutex.unlock();
@@ -52,7 +63,11 @@ int SyncMessenger::sendWait(Message& message, unsigned long msPollTime)
 void SyncMessenger::done(int result)
 {
 	m_result = result;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+	m_complete.storeRelaxed(1);
+#else
 	m_complete.store(1);
+#endif
 	m_waitCondition.wakeAll();
 }
 

@@ -15,7 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
+#include <cstdio>
 #include <complex.h>
 
 #include <QTime>
@@ -27,6 +27,7 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
+#include "dsp/misc.h"
 #include "device/deviceapi.h"
 
 #include "nfmdemodreport.h"
@@ -58,6 +59,7 @@ NFMDemodSink::NFMDemodSink() :
 {
 	m_agcLevel = 1.0;
     m_audioBuffer.resize(1<<16);
+    m_phaseDiscri.setFMScaling(0.5f);
 
 	applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -171,12 +173,13 @@ void NFMDemodSink::processOneSample(Complex &ci)
             }
         }
 
-        if (!m_settings.m_audioMute && (m_settings.m_ctcssOn && m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0))
+        if (!m_settings.m_audioMute && (!m_settings.m_ctcssOn || m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0))
         {
             Real audioSample = m_squelchDelayLine.readBack(m_squelchGate);
             audioSample = m_settings.m_highPass ? m_bandpass.filter(audioSample) : m_lowpass.filter(audioSample);
-            audioSample *= m_settings.m_volume * m_filterTaps;
-            sample = std::lrint(audioSample);
+
+            audioSample *= m_settings.m_volume * std::numeric_limits<int16_t>::max();
+            sample = clamp<float>(std::rint(audioSample), std::numeric_limits<int16_t>::lowest(), std::numeric_limits<int16_t>::max());
         }
     }
 
@@ -260,7 +263,7 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
     {
-        m_phaseDiscri.setFMScaling((8.0f*m_audioSampleRate) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
+        m_phaseDiscri.setFMScaling((0.5f *m_audioSampleRate) / static_cast<float>(settings.m_fmDeviation)); // integrate 4x factor
     }
 
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force)
@@ -324,7 +327,7 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
         m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
     }
 
-    m_phaseDiscri.setFMScaling((8.0f*sampleRate) / static_cast<float>(m_settings.m_fmDeviation)); // integrate 4x factor
+    m_phaseDiscri.setFMScaling((0.5f * sampleRate) / static_cast<float>(m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/2);
     m_interpolatorDistanceRemain = 0;

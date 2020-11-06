@@ -144,16 +144,14 @@ bool SDRPlayGui::handleMessage(const Message& message)
             ui->gainMixer->setChecked(msg.getMixerGain() != 0);
             ui->gainBaseband->setValue(msg.getBasebandGain());
 
-            QString gainText;
-            gainText.sprintf("%02d", msg.getBasebandGain());
+            QString gainText = QStringLiteral("%1").arg(msg.getBasebandGain(), 2, 10, QLatin1Char('0'));
             ui->gainBasebandText->setText(gainText);
     	}
     	else
     	{
     	    ui->gainTuner->setValue(msg.getTunerGain());
 
-            QString gainText;
-            gainText.sprintf("%03d", msg.getTunerGain());
+            QString gainText = QStringLiteral("%1").arg(msg.getTunerGain(), 3, 10, QLatin1Char('0'));
             ui->gainTunerText->setText(gainText);
     	}
 
@@ -241,8 +239,7 @@ void SDRPlayGui::displaySettings()
 
         int gain = m_settings.m_tunerGain;
         ui->gainTuner->setValue(gain);
-        QString gainText;
-        gainText.sprintf("%03d", gain);
+        QString gainText = QStringLiteral("%1").arg(gain, 3, 10, QLatin1Char('0'));
         ui->gainTunerText->setText(gainText);
         m_settings.m_tunerGain = gain;
     }
@@ -258,8 +255,7 @@ void SDRPlayGui::displaySettings()
 
         int gain = m_settings.m_basebandGain;
         ui->gainBaseband->setValue(gain);
-        QString gainText;
-        gainText.sprintf("%02d", gain);
+        QString gainText = QStringLiteral("%1").arg(gain, 2, 10, QLatin1Char('0'));
         ui->gainBasebandText->setText(gainText);
     }
 }
@@ -393,9 +389,7 @@ void SDRPlayGui::on_gainTunerOn_toggled(bool checked)
 void SDRPlayGui::on_gainTuner_valueChanged(int value)
 {
     int gain = value;
-	QString gainText;
-	gainText.sprintf("%03d", gain);
-    ui->gainTunerText->setText(gainText);
+    QString gainText = QStringLiteral("%1").arg(gain, 3, 10, QLatin1Char('0'));
     m_settings.m_tunerGain = gain;
 
     sendSettings();
@@ -429,8 +423,7 @@ void SDRPlayGui::on_gainBaseband_valueChanged(int value)
 {
 	m_settings.m_basebandGain = value;
 
-    QString gainText;
-    gainText.sprintf("%02d", value);
+    QString gainText = QStringLiteral("%1").arg(value, 2, 10, QLatin1Char('0'));
     ui->gainBasebandText->setText(gainText);
 
 	sendSettings();

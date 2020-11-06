@@ -670,19 +670,20 @@ void DATVDemodGUI::on_udpTS_clicked(bool checked)
 
 void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
 {
-    QString strMetaData="";
 
     if (objMetaData != nullptr)
     {
+        QString strMetaData = "";
+
         if (objMetaData->OK_TransportStream == true)
         {
-            strMetaData.sprintf("PID: %d - Width: %d - Height: %d\r\n%s%s\r\nCodec: %s\r\n",
-                objMetaData->PID,
-                objMetaData->Width,
-                objMetaData->Height,
-                objMetaData->Program.toStdString().c_str(),
-                objMetaData->Stream.toStdString().c_str(),
-                objMetaData->CodecDescription.toStdString().c_str());
+            strMetaData = tr("PID: %1 - Width: %2 - Height: %3\r\n%4%5\r\nCodec: %6\r\n")
+                .arg(objMetaData->PID)
+                .arg(objMetaData->Width)
+                .arg(objMetaData->Height)
+                .arg(objMetaData->Program)
+                .arg(objMetaData->Stream)
+                .arg(objMetaData->CodecDescription);
         }
 
         ui->streamInfo->setText(strMetaData);

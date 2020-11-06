@@ -102,7 +102,7 @@ int WebAPIAdapter::instanceSummary(
     response.setDspRxBits(SDR_RX_SAMP_SZ);
     response.setDspTxBits(SDR_TX_SAMP_SZ);
     response.setPid(qApp->applicationPid());
-#if QT_VERSION >= 0x050400
+#if QT_VERSION >= QT_VERSION_CHECK(5, 4, 0)
     *response.getArchitecture() = QString(QSysInfo::currentCpuArchitecture());
     *response.getOs() = QString(QSysInfo::prettyProductName());
 #endif
