@@ -1,7 +1,3 @@
-if(WIN32)
-    link_directories(${BOOST_LIBRARYDIR})
-endif()
-
 project(adsb)
 
 set(adsb_SOURCES
@@ -75,7 +71,12 @@ add_library(${TARGET_NAME} SHARED
     ${adsb_SOURCES}
 )
 
+if (NOT WIN32)
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
+
 target_link_libraries(${TARGET_NAME}
+    Boost::disable_autolinking
     Qt5::Core
     ${TARGET_LIB}
     sdrbase
