@@ -1605,7 +1605,8 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     menu = new QMenu(ui->adsbData);
     for (int i = 0; i < ui->adsbData->horizontalHeader()->count(); i++)
     {
-        menu->addAction(createCheckableItem(ui->adsbData->horizontalHeaderItem(i)->text(), i, true));
+        QString text = ui->adsbData->horizontalHeaderItem(i)->text();
+        menu->addAction(createCheckableItem(text, i, true));
     }
     ui->adsbData->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->adsbData->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(columnSelectMenu(QPoint)));
