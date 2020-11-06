@@ -1182,7 +1182,6 @@ void ADSBDemodGUI::on_getOSNDB_clicked(bool checked)
     {
         // Download Opensky network database to a file
         QUrl dbURL(QString(OSNDB_URL));
-        connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &ADSBDemodGUI::downloadFinished);
         m_progressDialog = new QProgressDialog(this);
         m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
         m_progressDialog->setCancelButton(nullptr);
@@ -1199,7 +1198,6 @@ void ADSBDemodGUI::on_getAirportDB_clicked(bool checked)
     {
         // Download Opensky network database to a file
         QUrl dbURL(QString(AIRPORTS_URL));
-        connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &ADSBDemodGUI::downloadFinished);
         m_progressDialog = new QProgressDialog(this);
         m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
         m_progressDialog->setCancelButton(nullptr);
@@ -1560,6 +1558,7 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
 
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
+    connect(&m_dlm, &HttpDownloadManager::downloadComplete, this, &ADSBDemodGUI::downloadFinished);
 
     m_adsbDemod = reinterpret_cast<ADSBDemod*>(rxChannel); //new ADSBDemod(m_deviceUISet->m_deviceSourceAPI);
     m_adsbDemod->setMessageQueueToGUI(getInputMessageQueue());

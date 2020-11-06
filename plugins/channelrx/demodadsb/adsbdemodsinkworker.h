@@ -27,8 +27,8 @@
 #include "adsbdemodstats.h"
 
 class ADSBDemodSink;
-class ADSBDemodSettings;
-class ADSBDemodStats;
+struct ADSBDemodSettings;
+struct ADSBDemodStats;
 
 class ADSBDemodSinkWorker : public QThread {
     Q_OBJECT
@@ -60,7 +60,7 @@ public:
     ADSBDemodSinkWorker(ADSBDemodSink *sink) :
         m_sink(sink),
         m_demodStats(),
-        m_correlationThresholdLinear(0.02),
+        m_correlationThresholdLinear(0.02f),
         m_crc()
     {
     }
