@@ -112,6 +112,7 @@ void ADSBDemod::start()
     m_worker->reset();
     m_worker->startWork();
     m_basebandSink->reset();
+    m_basebandSink->startWork();
     m_thread->start();
 
     ADSBDemodWorker::MsgConfigureADSBDemodWorker *msg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(m_settings, true);
@@ -121,6 +122,7 @@ void ADSBDemod::start()
 void ADSBDemod::stop()
 {
     qDebug() << "ADSBDemod::stop";
+    m_basebandSink->stopWork();
     m_worker->stopWork();
     m_thread->exit();
     m_thread->wait();

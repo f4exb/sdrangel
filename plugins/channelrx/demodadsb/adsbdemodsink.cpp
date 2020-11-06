@@ -55,7 +55,6 @@ ADSBDemodSink::ADSBDemodSink() :
 
 ADSBDemodSink::~ADSBDemodSink()
 {
-    stopWorker();
     for (int i = 0; i < m_buffers; i++)
         delete m_sampleBuffer[i];
 }
@@ -140,12 +139,20 @@ void ADSBDemodSink::processOneSample(Real magsq)
         boost::chrono::duration<double> sec = boost::chrono::steady_clock::now() - m_startPoint;
         m_feedTime += sec.count();
 
-        m_bufferWrite[m_writeBuffer].acquire();
+        if (m_worker.isRunning())
+            m_bufferWrite[m_writeBuffer].acquire();
 
         m_startPoint = boost::chrono::steady_clock::now();
 
         m_writeIdx = m_samplesPerFrame - 1; // Leave space for copying samples from previous buffer
     }
+}
+
+void ADSBDemodSink::startWorker()
+{
+    qDebug() << "ADSBDemodSink::startWorker";
+    if (!m_worker.isRunning())
+        m_worker.start();
 }
 
 void ADSBDemodSink::stopWorker()
@@ -161,14 +168,25 @@ void ADSBDemodSink::stopWorker()
                 m_bufferRead[i].release(1);
         }
         m_worker.wait();
+        // If this is called from ADSBDemod, we need to also
+        // make sure baseband sink thread isnt blocked in processOneSample
+        for (int i = 0; i < m_buffers; i++)
+        {
+            if (m_bufferWrite[i].available() == 0)
+                m_bufferWrite[i].release(1);
+        }
         qDebug() << "ADSBDemodSink::stopWorker: Worker stopped";
     }
 }
 
 void ADSBDemodSink::init(int samplesPerBit)
 {
-    // Stop worker as we're going to delete the buffers
-    stopWorker();
+    bool restart = m_worker.isRunning();
+    if (restart)
+    {
+        // Stop worker as we're going to delete the buffers
+        stopWorker();
+    }
     // Reset state of semaphores
     for (int i = 0; i < m_buffers; i++)
     {
@@ -192,7 +210,8 @@ void ADSBDemodSink::init(int samplesPerBit)
     for (int i = 0; i < m_buffers; i++)
         m_sampleBuffer[i] = new Real[m_bufferSize];
 
-    m_worker.start();
+    if (restart)
+        startWorker();
 }
 
 void ADSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

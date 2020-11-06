@@ -56,6 +56,16 @@ void ADSBDemodBaseband::reset()
     m_sampleFifo.reset();
 }
 
+void ADSBDemodBaseband::startWork()
+{
+    m_sink.startWorker();
+}
+
+void ADSBDemodBaseband::stopWork()
+{
+    m_sink.stopWorker();
+}
+
 void ADSBDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);

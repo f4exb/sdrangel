@@ -60,6 +60,8 @@ public:
     void applySettings(const ADSBDemodSettings& settings, bool force = false);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
     void setMessageQueueToWorker(MessageQueue *messageQueue) { m_messageQueueToWorker = messageQueue; }
+    void startWorker();
+    void stopWorker();
 
 private:
     friend ADSBDemodSinkWorker;
@@ -113,7 +115,6 @@ private:
     MessageQueue *m_messageQueueToWorker;
 
     void init(int samplesPerBit);
-    void stopWorker();
     Real inline complexMagSq(Complex& ci)
     {
         double magsqRaw = ci.real()*ci.real() + ci.imag()*ci.imag();
