@@ -19,6 +19,7 @@
 #ifndef INCLUDE_ADSBDEMODSINK_H
 #define INCLUDE_ADSBDEMODSINK_H
 
+#define BOOST_CHRONO_HEADER_ONLY
 #include <boost/chrono/chrono.hpp>
 
 #include "dsp/channelsamplesink.h"
