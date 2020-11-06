@@ -34,12 +34,13 @@ void ADSBDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 2*1300000;
-    m_correlationThreshold = -50.0f;
+    m_correlationThreshold = -20.0f;
     m_samplesPerBit = 4;
     m_removeTimeout = 60;
-    m_beastEnabled = false;
-    m_beastHost = "feed.adsbexchange.com";
-    m_beastPort = 30005;
+    m_feedEnabled = false;
+    m_feedHost = "feed.adsbexchange.com";
+    m_feedPort = 30005;
+    m_feedFormat = BeastBinary;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "ADS-B Demodulator";
     m_streamIndex = 0;
@@ -48,6 +49,22 @@ void ADSBDemodSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIDeviceIndex = 0;
     m_reverseAPIChannelIndex = 0;
+    m_airportRange = 100;
+    m_airportMinimumSize = AirportType::Medium;
+    m_displayHeliports = false;
+    m_flightPaths = true;
+    m_siUnits = false;
+    m_tableFontName = "Liberation Sans";
+    m_tableFontSize = 9;
+    m_displayDemodStats = true;
+    m_correlateFullPreamble = true;
+    m_demodModeS = false;
+    m_deviceIndex = -1;
+    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+    {
+        m_columnIndexes[i] = i;
+        m_columnSizes[i] = -1; // Autosize
+    }
 }
 
 QByteArray ADSBDemodSettings::serialize() const
@@ -58,9 +75,9 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeReal(3, m_correlationThreshold);
     s.writeS32(4, m_samplesPerBit);
     s.writeS32(5, m_removeTimeout);
-    s.writeBool(6, m_beastEnabled);
-    s.writeString(7, m_beastHost);
-    s.writeU32(8, m_beastPort);
+    s.writeBool(6, m_feedEnabled);
+    s.writeString(7, m_feedHost);
+    s.writeU32(8, m_feedPort);
 
     s.writeU32(9, m_rgbColor);
     if (m_channelMarker) {
@@ -73,6 +90,24 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeU32(15, m_reverseAPIDeviceIndex);
     s.writeU32(16, m_reverseAPIChannelIndex);
     s.writeS32(17, m_streamIndex);
+
+    s.writeFloat(18, m_airportRange);
+    s.writeS32(19, (int)m_airportMinimumSize);
+    s.writeBool(20, m_displayHeliports);
+    s.writeBool(21, m_flightPaths);
+    s.writeS32(22, m_deviceIndex);
+    s.writeBool(23, m_siUnits);
+    s.writeS32(24, (int)m_feedFormat);
+    s.writeString(25, m_tableFontName);
+    s.writeS32(26, m_tableFontSize);
+    s.writeBool(27, m_displayDemodStats);
+    s.writeBool(28, m_correlateFullPreamble);
+    s.writeBool(29, m_demodModeS);
+
+    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+        s.writeS32(100 + i, m_columnIndexes[i]);
+    for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+        s.writeS32(200 + i, m_columnSizes[i]);
 
     return s.final();
 }
@@ -102,16 +137,16 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readS32(1, &tmp, 0);
         m_inputFrequencyOffset = tmp;
         d.readReal(2, &m_rfBandwidth, 2*1300000);
-        d.readReal(3, &m_correlationThreshold, -50.0f);
+        d.readReal(3, &m_correlationThreshold, 0.0f);
         d.readS32(4, &m_samplesPerBit, 4);
         d.readS32(5, &m_removeTimeout, 60);
-        d.readBool(6, &m_beastEnabled, false);
-        d.readString(7, &m_beastHost, "feed.adsbexchange.com");
+        d.readBool(6, &m_feedEnabled, false);
+        d.readString(7, &m_feedHost, "feed.adsbexchange.com");
         d.readU32(8, &utmp, 0);
         if ((utmp > 1023) && (utmp < 65535)) {
-            m_beastPort = utmp;
+            m_feedPort = utmp;
         } else {
-            m_beastPort = 30005;
+            m_feedPort = 30005;
         }
 
         d.readU32(9, &m_rgbColor, QColor(255, 0, 0).rgb());
@@ -131,6 +166,24 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readU32(16, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(17, &m_streamIndex, 0);
+
+        d.readFloat(18, &m_airportRange, 100);
+        d.readS32(19, (int *)&m_airportMinimumSize, AirportType::Medium);
+        d.readBool(20, &m_displayHeliports, false);
+        d.readBool(21, &m_flightPaths, true);
+        d.readS32(22, &m_deviceIndex, -1);
+        d.readBool(23, &m_siUnits, false);
+        d.readS32(24, (int *) &m_feedFormat, BeastBinary);
+        d.readString(25, &m_tableFontName, "Liberation Sans");
+        d.readS32(26, &m_tableFontSize, 9);
+        d.readBool(27, &m_displayDemodStats, false);
+        d.readBool(28, &m_correlateFullPreamble, true);
+        d.readBool(29, &m_demodModeS, false);
+
+        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+            d.readS32(100 + i, &m_columnIndexes[i], i);
+        for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
+            d.readS32(200 + i, &m_columnSizes[i], -1);
 
         return true;
     }

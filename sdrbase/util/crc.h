@@ -34,10 +34,21 @@ public:
         m_init_value(init_value),
         m_final_xor(final_xor)
     {
-        int shift;
+        // Reverse polynomial for LSB first
+        if (!msb_first)
+        {
+            int shift;
 
-        shift = 32 - m_poly_bits;
-        m_polynomial_rev = reverse (m_polynomial << shift, 32);
+            shift = 32 - m_poly_bits;
+            m_polynomial_rev = reverse (m_polynomial << shift, 32);
+        }
+        // Create LUT
+        for (int i = 0; i < 256; i++)
+        {
+            m_crc = 0;
+            calculate(i, 8);
+            m_lut[i] = m_crc;
+        }
         init();
     }
 
@@ -57,10 +68,7 @@ public:
         uint32_t t;
 
         t = m_final_xor ^ m_crc;
-        if (m_msb_first)
-            return reverse(t, m_poly_bits);
-        else
-            return t;
+        return t;
     }
 
 private:
@@ -73,6 +81,7 @@ private:
     bool m_msb_first;
     uint32_t m_init_value;
     uint32_t m_final_xor;
+    uint32_t m_lut[256];
 };
 
 class SDRBASE_API crc16ansi : public crc
@@ -105,6 +114,8 @@ public:
     crc32() : crc(32, 0x04C11DB7, false, 0xffffffff, 0xffffffff) {}
 };
 
+// Should probably try to use SSE 4.2's CRC32C instruction if available
+// See _mm_crc32_u8 and _mm_crc32_u64 intrinsics
 class SDRBASE_API crc32c : public crc
 {
 public:

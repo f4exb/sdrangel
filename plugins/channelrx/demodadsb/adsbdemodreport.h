@@ -25,6 +25,7 @@
 
 #include "dsp/dsptypes.h"
 #include "util/message.h"
+#include "adsbdemodstats.h"
 
 class ADSBDemodReport : public QObject
 {
@@ -36,27 +37,45 @@ public:
     public:
         QByteArray getData() const { return m_data; }
         QDateTime getDateTime() const { return m_dateTime; }
-        float getPreambleCorrelationOnes() const { return m_premableCorrelationOnes; }
-        float getPreambleCorrelationZeros() const { return m_premableCorrelationZeros; }
+        float getPreambleCorrelation() const { return m_preambleCorrelation; }
 
-        static MsgReportADSB* create(QByteArray data, float premableCorrelationOnes, float premableCorrelationZeros)
+        static MsgReportADSB* create(QByteArray data, float preambleCorrelation)
         {
-            return new MsgReportADSB(data, premableCorrelationOnes, premableCorrelationZeros);
+            return new MsgReportADSB(data, preambleCorrelation);
         }
 
     private:
         QByteArray m_data;
         QDateTime m_dateTime;
-        float m_premableCorrelationOnes;
-        float m_premableCorrelationZeros;
+        float m_preambleCorrelation;
 
-        MsgReportADSB(QByteArray data, float premableCorrelationOnes, float premableCorrelationZeros) :
+        MsgReportADSB(QByteArray data, float preambleCorrelation) :
             Message(),
             m_data(data),
-            m_premableCorrelationOnes(premableCorrelationOnes),
-            m_premableCorrelationZeros(premableCorrelationZeros)
+            m_preambleCorrelation(preambleCorrelation)
         {
             m_dateTime = QDateTime::currentDateTime();
+        }
+    };
+
+    class MsgReportDemodStats : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        ADSBDemodStats getDemodStats() const { return m_demodStats; }
+
+        static MsgReportDemodStats* create(ADSBDemodStats demodStats)
+        {
+            return new MsgReportDemodStats(demodStats);
+        }
+
+    private:
+        ADSBDemodStats m_demodStats;
+
+        MsgReportDemodStats(ADSBDemodStats demodStats) :
+            Message(),
+            m_demodStats(demodStats)
+        {
         }
     };
 

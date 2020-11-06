@@ -26,6 +26,9 @@
 
 class Serializable;
 
+// Number of columns in the table
+#define ADSBDEMOD_COLUMNS 23
+
 struct ADSBDemodSettings
 {
     int32_t m_inputFrequencyOffset;
@@ -33,9 +36,13 @@ struct ADSBDemodSettings
     Real m_correlationThreshold; //!< Correlation power threshold in dB
     int m_samplesPerBit;
     int m_removeTimeout;                //!< Time in seconds before removing an aircraft, unless a new frame is received
-    bool m_beastEnabled;
-    QString m_beastHost;
-    uint16_t m_beastPort;
+    bool m_feedEnabled;
+    QString m_feedHost;
+    uint16_t m_feedPort;
+    enum FeedFormat {
+        BeastBinary,
+        BeastHex
+    } m_feedFormat;
 
     quint32 m_rgbColor;
     QString m_title;
@@ -45,8 +52,27 @@ struct ADSBDemodSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    int m_columnIndexes[ADSBDEMOD_COLUMNS];//!< How the columns are ordered in the table
+    int m_columnSizes[ADSBDEMOD_COLUMNS];  //!< Size of the coumns in the table
 
     Serializable *m_channelMarker;
+
+    float m_airportRange;               //!< How far away should we display airports (nm)
+    enum AirportType {
+        Small,
+        Medium,
+        Large,
+        Heliport
+    } m_airportMinimumSize;             //!< What's the minimum size airport that should be displayed
+    bool m_displayHeliports;            //!< Whether to display heliports on the map
+    bool m_flightPaths;                 //!< Whether to display flight paths
+    bool m_siUnits;                     //!< Uses m,kph rather than ft/knts
+    QString m_tableFontName;            //!< Font to use for table
+    int m_tableFontSize;
+    bool m_displayDemodStats;
+    bool m_correlateFullPreamble;
+    bool m_demodModeS;                  //!< Demodulate all Mode-S frames, not just ADS-B
+    int m_deviceIndex;                  //!< Device to set to ATC frequencies
 
     ADSBDemodSettings();
     void resetToDefaults();

@@ -68,6 +68,7 @@ set(sdrbase_SOURCES
 
     channel/channelapi.cpp
     channel/channelutils.cpp
+    channel/channelwebapiutils.cpp
     channel/remotedataqueue.cpp
     channel/remotedatareadqueue.cpp
 
@@ -155,6 +156,7 @@ set(sdrbase_SOURCES
     util/CRC64.cpp
     util/db.cpp
     util/fixedtraits.cpp
+    util/httpdownloadmanager.cpp
     util/lfsr.cpp
     util/message.cpp
     util/messagequeue.cpp
@@ -206,6 +208,7 @@ set(sdrbase_HEADERS
 
     channel/channelapi.h
     channel/channelutils.h
+    channel/channelwebapiutils.h
     channel/remotedataqueue.h
     channel/remotedatareadqueue.h
     channel/remotedatablock.h
@@ -325,6 +328,7 @@ set(sdrbase_HEADERS
     util/doublebuffer.h
     util/doublebufferfifo.h
     util/fixedtraits.h
+    util/httpdownloadmanager.h
     util/incrementalarray.h
     util/incrementalvector.h
     util/lfsr.h

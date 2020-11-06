@@ -19,3 +19,4 @@
 #include "adsbdemodreport.h"
 
 MESSAGE_CLASS_DEFINITION(ADSBDemodReport::MsgReportADSB, Message)
+MESSAGE_CLASS_DEFINITION(ADSBDemodReport::MsgReportDemodStats, Message)
