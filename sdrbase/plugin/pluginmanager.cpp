@@ -76,6 +76,10 @@ void PluginManager::loadPluginsPart(const QString& pluginsSubDir)
     PluginsPath << applicationDirPath + "/../Resources/lib/" + pluginsSubDir;
 #elif defined(_WIN32) || defined(WIN32)
     PluginsPath << applicationDirPath + "/" + pluginsSubDir;
+    // Give SoapySDR hint about modules location.
+    // By default it searches in `$applicationDir/../lib/SoapySDR/`, which on Windows
+    // is incorrect as both `bin` and `lib` dir are set to root application dir.
+    qputenv("SOAPY_SDR_ROOT", applicationDirPath.toLocal8Bit());
 #endif
 
     // NOTE: exit on the first folder found
