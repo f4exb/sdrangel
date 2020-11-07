@@ -19,6 +19,7 @@ enum {NONE, BLACKMAN, HAMMING, HANNING};
 public:
 	typedef std::complex<float> cmplx;
 
+	fftfilt(int len);
 	fftfilt(float f1, float f2, int len);
 	fftfilt(float f2, int len);
 	~fftfilt();

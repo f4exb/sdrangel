@@ -75,6 +75,14 @@ void fftfilt::init_filter()
 // f1 == 0 ==> low pass filter
 // f2 == 0 ==> high pass filter
 //------------------------------------------------------------------------------
+fftfilt::fftfilt(int len)
+{
+	flen	= len;
+	pass    = 0;
+	window  = 0;
+	init_filter();
+}
+
 fftfilt::fftfilt(float f1, float f2, int len)
 {
 	flen	= len;
