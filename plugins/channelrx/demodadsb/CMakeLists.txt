@@ -6,6 +6,7 @@ set(adsb_SOURCES
     adsbdemodwebapiadapter.cpp
     adsbplugin.cpp
     adsbdemodsink.cpp
+    adsbdemodsinkworker.cpp
     adsbdemodbaseband.cpp
     adsbdemodreport.cpp
     adsbdemodworker.cpp
@@ -17,14 +18,17 @@ set(adsb_HEADERS
     adsbdemodwebapiadapter.h
     adsbplugin.h
     adsbdemodsink.h
+    absddemodsinkworker.h
     adsbdemodbaseband.h
     adsbdemodreport.h
     adsbdemodworker.h
+    adsbdemodstats.h
     adsb.h
 )
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${Boost_INCLUDE_DIRS}
 )
 
 if(NOT SERVER_MODE)
@@ -32,10 +36,24 @@ if(NOT SERVER_MODE)
         ${adsb_SOURCES}
         adsbdemodgui.cpp
         adsbdemodgui.ui
+        adsbdemodfeeddialog.cpp
+        adsbdemodfeeddialog.ui
+        adsbdemoddisplaydialog.cpp
+        adsbdemoddisplaydialog.ui
+        csv.cpp
+        airlinelogos.qrc
+        flags.qrc
+        map.qrc
+        icons.qrc
     )
     set(adsb_HEADERS
         ${adsb_HEADERS}
         adsbdemodgui.h
+        adsbdemodfeeddialog.h
+        adsbdemoddisplaydialog.h
+        ourairports.h
+        osndb.h
+        csv.h
     )
 
     set(TARGET_NAME demodadsb)
@@ -53,7 +71,12 @@ add_library(${TARGET_NAME} SHARED
     ${adsb_SOURCES}
 )
 
+if (NOT WIN32)
+    link_directories(${Boost_LIBRARY_DIRS})
+endif()
+
 target_link_libraries(${TARGET_NAME}
+    Boost::disable_autolinking
     Qt5::Core
     ${TARGET_LIB}
     sdrbase
@@ -66,5 +89,5 @@ install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 if(WIN32)
   # Run deployqt for QtQuick etc
   include(DeployQt)
-  windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/../../../sdrgui/resources)
+  windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/map)
 endif()

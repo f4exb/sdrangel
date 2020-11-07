@@ -1,0 +1,19 @@
+<RCC>
+  <qresource prefix="/">
+    <file>map/map.qml</file>
+    <file>map/MapStation.qml</file>
+    <file>map/aircraft_2engine.png</file>
+    <file>map/aircraft_2enginesmall.png</file>
+    <file>map/aircraft_4engine.png</file>
+    <file>map/aircraft_helicopter.png</file>
+    <file>map/aircraft_light.png</file>
+    <file>map/aircraft_space.png</file>
+    <file>map/aircraft_drone.png</file>
+    <file>map/airport_large.png</file>
+    <file>map/airport_medium.png</file>
+    <file>map/airport_small.png</file>
+    <file>map/heliport.png</file>
+    <file>map/antenna.png</file>
+    <file>map/truck.png</file>
+  </qresource>
+</RCC>

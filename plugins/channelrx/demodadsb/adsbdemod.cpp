@@ -17,6 +17,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_CHRONO_HEADER_ONLY
+#include <boost/chrono/chrono.hpp>
+
 #include <stdio.h>
 #include <complex.h>
 
@@ -109,6 +112,7 @@ void ADSBDemod::start()
     m_worker->reset();
     m_worker->startWork();
     m_basebandSink->reset();
+    m_basebandSink->startWork();
     m_thread->start();
 
     ADSBDemodWorker::MsgConfigureADSBDemodWorker *msg = ADSBDemodWorker::MsgConfigureADSBDemodWorker::create(m_settings, true);
@@ -118,6 +122,7 @@ void ADSBDemod::start()
 void ADSBDemod::stop()
 {
     qDebug() << "ADSBDemod::stop";
+    m_basebandSink->stopWork();
     m_worker->stopWork();
     m_thread->exit();
     m_thread->wait();
@@ -288,13 +293,13 @@ void ADSBDemod::webapiUpdateChannelSettings(
         settings.m_removeTimeout = response.getAdsbDemodSettings()->getRemoveTimeout();
     }
     if (channelSettingsKeys.contains("beastEnabled")) {
-        settings.m_beastEnabled = response.getAdsbDemodSettings()->getBeastEnabled() != 0;
+        settings.m_feedEnabled = response.getAdsbDemodSettings()->getBeastEnabled() != 0;
     }
     if (channelSettingsKeys.contains("beastHost")) {
-        settings.m_beastHost = *response.getAdsbDemodSettings()->getBeastHost();
+        settings.m_feedHost = *response.getAdsbDemodSettings()->getBeastHost();
     }
     if (channelSettingsKeys.contains("beastPort")) {
-        settings.m_beastPort = response.getAdsbDemodSettings()->getBeastPort();
+        settings.m_feedPort = response.getAdsbDemodSettings()->getBeastPort();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getAdsbDemodSettings()->getRgbColor();
@@ -340,9 +345,9 @@ void ADSBDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getAdsbDemodSettings()->setCorrelationThreshold(settings.m_correlationThreshold);
     response.getAdsbDemodSettings()->setSamplesPerBit(settings.m_samplesPerBit);
     response.getAdsbDemodSettings()->setRemoveTimeout(settings.m_removeTimeout);
-    response.getAdsbDemodSettings()->setBeastEnabled(settings.m_beastEnabled ? 1 : 0);
-    response.getAdsbDemodSettings()->setBeastHost(new QString(settings.m_beastHost));
-    response.getAdsbDemodSettings()->setBeastPort(settings.m_beastPort);
+    response.getAdsbDemodSettings()->setBeastEnabled(settings.m_feedEnabled ? 1 : 0);
+    response.getAdsbDemodSettings()->setBeastHost(new QString(settings.m_feedHost));
+    response.getAdsbDemodSettings()->setBeastPort(settings.m_feedPort);
     response.getAdsbDemodSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getAdsbDemodSettings()->getTitle()) {
@@ -408,13 +413,13 @@ void ADSBDemod::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, c
         swgADSBDemodSettings->setRemoveTimeout(settings.m_removeTimeout);
     }
     if (channelSettingsKeys.contains("beastEnabled") || force) {
-        swgADSBDemodSettings->setBeastEnabled(settings.m_beastEnabled ? 1 : 0);
+        swgADSBDemodSettings->setBeastEnabled(settings.m_feedEnabled ? 1 : 0);
     }
     if (channelSettingsKeys.contains("beastHost") || force) {
-        swgADSBDemodSettings->setBeastHost(new QString(settings.m_beastHost));
+        swgADSBDemodSettings->setBeastHost(new QString(settings.m_feedHost));
     }
     if (channelSettingsKeys.contains("beastPort") || force) {
-        swgADSBDemodSettings->setBeastPort(settings.m_beastPort);
+        swgADSBDemodSettings->setBeastPort(settings.m_feedPort);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgADSBDemodSettings->setRgbColor(settings.m_rgbColor);

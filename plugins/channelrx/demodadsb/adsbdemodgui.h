@@ -20,9 +20,11 @@
 #define INCLUDE_ADSBDEMODGUI_H
 
 #include <QTableWidgetItem>
+#include <QMenu>
 #include <QGeoCoordinate>
 #include <QDateTime>
 #include <QAbstractListModel>
+#include <QProgressDialog>
 
 #include "channel/channelgui.h"
 #include "dsp/dsptypes.h"
@@ -31,17 +33,45 @@
 #include "util/messagequeue.h"
 #include "util/azel.h"
 #include "util/movingaverage.h"
+#include "util/httpdownloadmanager.h"
 
 #include "adsbdemodsettings.h"
+#include "ourairportsdb.h"
+#include "osndb.h"
 
 class PluginAPI;
 class DeviceUISet;
 class BasebandSampleSink;
 class ADSBDemod;
+class WebAPIAdapterInterface;
+class HttpDownloadManager;
+class ADSBDemodGUI;
 
 namespace Ui {
     class ADSBDemodGUI;
 }
+
+// Custom widget to allow formatted decimal numbers to be sorted numerically
+class CustomDoubleTableWidgetItem : public QTableWidgetItem
+{
+public:
+    CustomDoubleTableWidgetItem(const QString text = QString("")) :
+        QTableWidgetItem(text)
+    {
+    }
+
+    bool operator <(const QTableWidgetItem& other) const
+    {
+        // Treat "" as less than 0
+        QString thisText = text();
+        QString otherText = other.text();
+        if (thisText == "")
+            return true;
+        if (otherText == "")
+            return false;
+        return thisText.toDouble() < otherText.toDouble();
+    }
+};
 
 // Data about an aircraft extracted from an ADS-B frames
 struct Aircraft {
@@ -76,31 +106,49 @@ struct Aircraft {
     bool m_cprValid[2];
     Real m_cprLat[2];
     Real m_cprLong[2];
+    QDateTime m_cprTime[2];
 
     int m_adsbFrameCount;       // Number of ADS-B frames for this aircraft
     float m_minCorrelation;
     float m_maxCorrelation;
     float m_correlation;
-    bool m_isBeingTracked;      // Are we tracking this aircraft
+    MovingAverageUtil<float, double, 100> m_correlationAvg;
+
+    bool m_isTarget;            // Are we targetting this aircraft (sending az/el to rotator)
+    bool m_isHighlighted;       // Are we highlighting this aircraft in the table and map
+    bool m_showAll;
+
+    QVariantList m_coordinates; // Coordinates we've recorded the aircraft at
+
+    AircraftInformation *m_aircraftInfo; // Info about the aircraft from the database
+    ADSBDemodGUI *m_gui;
 
     // GUI table items for above data
     QTableWidgetItem *m_icaoItem;
     QTableWidgetItem *m_flightItem;
+    QTableWidgetItem *m_modelItem;
+    QTableWidgetItem *m_airlineItem;
     QTableWidgetItem *m_latitudeItem;
     QTableWidgetItem *m_longitudeItem;
     QTableWidgetItem *m_altitudeItem;
     QTableWidgetItem *m_speedItem;
     QTableWidgetItem *m_headingItem;
     QTableWidgetItem *m_verticalRateItem;
+    CustomDoubleTableWidgetItem *m_rangeItem;
+    QTableWidgetItem *m_azElItem;
     QTableWidgetItem *m_emitterCategoryItem;
     QTableWidgetItem *m_statusItem;
-    QTableWidgetItem *m_rangeItem;
-    QTableWidgetItem *m_azElItem;
+    QTableWidgetItem *m_registrationItem;
+    QTableWidgetItem *m_countryItem;
+    QTableWidgetItem *m_registeredItem;
+    QTableWidgetItem *m_manufacturerNameItem;
+    QTableWidgetItem *m_ownerItem;
+    QTableWidgetItem *m_operatorICAOItem;
     QTableWidgetItem *m_timeItem;
     QTableWidgetItem *m_adsbFrameCountItem;
     QTableWidgetItem *m_correlationItem;
 
-    Aircraft() :
+    Aircraft(ADSBDemodGUI *gui) :
         m_icao(0),
         m_latitude(0),
         m_longitude(0),
@@ -119,7 +167,11 @@ struct Aircraft {
         m_minCorrelation(INFINITY),
         m_maxCorrelation(-INFINITY),
         m_correlation(0.0f),
-        m_isBeingTracked(false)
+        m_isTarget(false),
+        m_isHighlighted(false),
+        m_showAll(false),
+        m_aircraftInfo(nullptr),
+        m_gui(gui)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -128,16 +180,24 @@ struct Aircraft {
         // These are deleted by QTableWidget
         m_icaoItem = new QTableWidgetItem();
         m_flightItem = new QTableWidgetItem();
-        m_latitudeItem = new QTableWidgetItem();
-        m_longitudeItem = new QTableWidgetItem();
+        m_modelItem = new QTableWidgetItem();
+        m_airlineItem = new QTableWidgetItem();
         m_altitudeItem = new QTableWidgetItem();
         m_speedItem = new QTableWidgetItem();
         m_headingItem = new QTableWidgetItem();
         m_verticalRateItem = new QTableWidgetItem();
+        m_rangeItem = new CustomDoubleTableWidgetItem();
+        m_azElItem = new QTableWidgetItem();
+        m_latitudeItem = new QTableWidgetItem();
+        m_longitudeItem = new QTableWidgetItem();
         m_emitterCategoryItem = new QTableWidgetItem();
         m_statusItem = new QTableWidgetItem();
-        m_rangeItem = new QTableWidgetItem();
-        m_azElItem = new QTableWidgetItem();
+        m_registrationItem = new QTableWidgetItem();
+        m_countryItem = new QTableWidgetItem();
+        m_registeredItem = new QTableWidgetItem();
+        m_manufacturerNameItem = new QTableWidgetItem();
+        m_ownerItem = new QTableWidgetItem();
+        m_operatorICAOItem = new QTableWidgetItem();
         m_timeItem = new QTableWidgetItem();
         m_adsbFrameCountItem = new QTableWidgetItem();
         m_correlationItem = new QTableWidgetItem();
@@ -155,7 +215,11 @@ public:
         headingRole = Qt::UserRole + 2,
         adsbDataRole = Qt::UserRole + 3,
         aircraftImageRole = Qt::UserRole + 4,
-        bubbleColourRole  = Qt::UserRole + 5
+        bubbleColourRole = Qt::UserRole + 5,
+        aircraftPathRole = Qt::UserRole + 6,
+        showAllRole = Qt::UserRole + 7,
+        highlightedRole = Qt::UserRole + 8,
+        targetRole = Qt::UserRole + 9
     };
 
     Q_INVOKABLE void addAircraft(Aircraft *aircraft) {
@@ -171,11 +235,30 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+    bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override {
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    }
+
     void aircraftUpdated(Aircraft *aircraft) {
         int row = m_aircrafts.indexOf(aircraft);
         if (row >= 0)
         {
             QModelIndex idx = index(row);
+            emit dataChanged(idx, idx);
+        }
+    }
+
+    void allAircraftUpdated() {
+        /*
+        // Not sure why this doesn't work - it should be more efficient
+        // than the following code
+        emit dataChanged(index(0), index(rowCount()));
+        */
+        for (int i = 0; i < m_aircrafts.count(); i++)
+        {
+            QModelIndex idx = index(i);
             emit dataChanged(idx, idx);
         }
     }
@@ -197,11 +280,136 @@ public:
         roles[adsbDataRole] = "adsbData";
         roles[aircraftImageRole] = "aircraftImage";
         roles[bubbleColourRole] = "bubbleColour";
+        roles[aircraftPathRole] = "aircraftPath";
+        roles[showAllRole] = "showAll";
+        roles[highlightedRole] = "highlighted";
+        roles[targetRole] = "target";
         return roles;
+    }
+
+    void setFlightPaths(bool flightPaths)
+    {
+        m_flightPaths = flightPaths;
+        allAircraftUpdated();
     }
 
 private:
     QList<Aircraft *> m_aircrafts;
+    bool m_flightPaths;
+};
+
+// Airport data model used by QML map item
+class AirportModel : public QAbstractListModel {
+    Q_OBJECT
+
+public:
+    using QAbstractListModel::QAbstractListModel;
+    enum MarkerRoles {
+        positionRole = Qt::UserRole + 1,
+        airportDataRole = Qt::UserRole + 2,
+        airportDataRowsRole = Qt::UserRole + 3,
+        airportImageRole = Qt::UserRole + 4,
+        bubbleColourRole = Qt::UserRole + 5,
+        showFreqRole  = Qt::UserRole + 6,
+        selectedFreqRole  = Qt::UserRole + 7
+    };
+
+    AirportModel(ADSBDemodGUI *gui) :
+        m_gui(gui)
+    {
+    }
+
+    Q_INVOKABLE void addAirport(AirportInformation *airport) {
+        QString text;
+        int rows;
+
+        beginInsertRows(QModelIndex(), rowCount(), rowCount());
+        m_airports.append(airport);
+        airportFreq(airport, text, rows);
+        m_airportDataFreq.append(text);
+        m_airportDataFreqRows.append(rows);
+        m_showFreq.append(false);
+        endInsertRows();
+    }
+
+    void removeAirport(AirportInformation *airport) {
+        int row = m_airports.indexOf(airport);
+        if (row >= 0)
+        {
+            beginRemoveRows(QModelIndex(), row, row);
+            m_airports.removeAt(row);
+            m_airportDataFreq.removeAt(row);
+            m_airportDataFreqRows.removeAt(row);
+            m_showFreq.removeAt(row);
+            endRemoveRows();
+        }
+    }
+
+    void removeAllAirports() {
+        beginRemoveRows(QModelIndex(), 0, m_airports.count());
+        m_airports.clear();
+        m_airportDataFreq.clear();
+        m_airportDataFreqRows.clear();
+        m_showFreq.clear();
+        endRemoveRows();
+    }
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override {
+        Q_UNUSED(parent)
+        return m_airports.count();
+    }
+
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
+
+    Qt::ItemFlags flags(const QModelIndex &index) const override {
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
+    }
+
+    void airportFreq(AirportInformation *airport, QString& text, int& rows) {
+        // Create the text to go in the bubble next to the airport
+        // Display name and frequencies
+        QStringList list;
+
+        list.append(QString("%1: %2").arg(airport->m_ident).arg(airport->m_name));
+        rows = 1;
+        for (int i = 0; i < airport->m_frequencies.size(); i++)
+        {
+            AirportInformation::FrequencyInformation *frequencyInfo = airport->m_frequencies[i];
+            list.append(QString("%1: %2 MHz").arg(frequencyInfo->m_type).arg(frequencyInfo->m_frequency));
+            rows++;
+        }
+        text = list.join("\n");
+    }
+
+    void airportUpdated(AirportInformation *airport) {
+        int row = m_airports.indexOf(airport);
+        if (row >= 0)
+        {
+            QModelIndex idx = index(row);
+            emit dataChanged(idx, idx);
+        }
+    }
+
+    QHash<int, QByteArray> roleNames() const {
+        QHash<int, QByteArray> roles;
+        roles[positionRole] = "position";
+        roles[airportDataRole] = "airportData";
+        roles[airportDataRowsRole] = "airportDataRows";
+        roles[airportImageRole] = "airportImage";
+        roles[bubbleColourRole] = "bubbleColour";
+        roles[showFreqRole] = "showFreq";
+        roles[selectedFreqRole] = "selectedFreq";
+        return roles;
+    }
+
+private:
+    ADSBDemodGUI *m_gui;
+    QList<AirportInformation *> m_airports;
+    QList<QString> m_airportDataFreq;
+    QList<int> m_airportDataFreqRows;
+    QList<bool> m_showFreq;
 };
 
 class ADSBDemodGUI : public ChannelGUI {
@@ -215,6 +423,10 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    void highlightAircraft(Aircraft *aircraft);
+    void targetAircraft(Aircraft *aircraft);
+    bool setFrequency(float frequency);
+    bool useSIUints() { return m_settings.m_siUnits; }
 
 public slots:
     void channelMarkerChangedByCursor();
@@ -233,13 +445,30 @@ private:
     uint32_t m_tickCount;
     MessageQueue m_inputMessageQueue;
 
-    QHash<int,Aircraft *> m_aircraft;  // Hashed on ICAO
+    QHash<int, Aircraft *> m_aircraft;  // Hashed on ICAO
+    QHash<int, AircraftInformation *> *m_aircraftInfo;
+    QHash<int, AirportInformation *> *m_airportInfo; // Hashed on id
     AircraftModel m_aircraftModel;
+    AirportModel m_airportModel;
+    QHash<QString, QIcon *> m_airlineIcons; // Hashed on airline ICAO
+    QHash<QString, QIcon *> m_flagIcons;    // Hashed on country
+    QHash<QString, QString> *m_prefixMap;   // Registration to country (flag name)
+    QHash<QString, QString> *m_militaryMap;   // Operator airforce to military (flag name)
 
     AzEl m_azEl;                        // Position of station
     Aircraft *m_trackAircraft;          // Aircraft we want to track in Channel Report
-    MovingAverageUtil<float, double, 10> m_correlationOnesAvg;
-    MovingAverageUtil<float, double, 10> m_correlationZerosAvg;
+    MovingAverageUtil<float, double, 10> m_correlationAvg;
+    Aircraft *m_highlightAircraft;      // Aircraft we want to highlight, when selected in table
+
+    float m_currentAirportRange;        // Current settings, so we only update if changed
+    ADSBDemodSettings::AirportType m_currentAirportMinimumSize;
+    bool m_currentDisplayHeliports;
+
+    QMenu *menu;                        // Column select context menu
+
+    WebAPIAdapterInterface *m_webAPIAdapterInterface;
+    HttpDownloadManager m_dlm;
+    QProgressDialog *m_progressDialog;
 
     explicit ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel, QWidget* parent = 0);
     virtual ~ADSBDemodGUI();
@@ -250,8 +479,22 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void updatePosition(Aircraft *aircraft);
-    void handleADSB(const QByteArray data, const QDateTime dateTime, float correlationOnes, float correlationZeros);
+    void handleADSB(const QByteArray data, const QDateTime dateTime, float correlation);
     void resizeTable();
+    QString getDataDir();
+    QString getAirportDBFilename();
+    QString getAirportFrequenciesDBFilename();
+    QString getOSNDBFilename();
+    QString getFastDBFilename();
+    void readAirportDB(const QString& filename);
+    void readAirportFrequenciesDB(const QString& filename);
+    bool readOSNDB(const QString& filename);
+    bool readFastDB(const QString& filename);
+    void updateAirports();
+    QIcon *getAirlineIcon(const QString &operatorICAO);
+    QIcon *getFlagIcon(const QString &country);
+    void updateDeviceSetList();
+    QAction *createCheckableItem(QString& text, int idx, bool checked);
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -260,15 +503,29 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int value);
     void on_threshold_valueChanged(int value);
+    void on_adsbData_cellClicked(int row, int column);
     void on_adsbData_cellDoubleClicked(int row, int column);
+    void adsbData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
+    void adsbData_sectionResized(int logicalIndex, int oldSize, int newSize);
+    void columnSelectMenu(QPoint pos);
+    void columnSelectMenuChecked(bool checked = false);
     void on_spb_currentIndexChanged(int value);
-    void on_beastEnabled_stateChanged(int state);
-    void on_host_editingFinished(QString value);
-    void on_port_valueChanged(int value);
+    void on_correlateFullPreamble_clicked(bool checked=false);
+    void on_demodModeS_clicked(bool checked=false);
+    void on_feed_clicked(bool checked=false);
+    void on_getOSNDB_clicked(bool checked = false);
+    void on_getAirportDB_clicked(bool checked = false);
+    void on_flightPaths_clicked(bool checked = false);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void tick();
+    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
+    void downloadFinished(const QString& filename, bool success);
+    void on_devicesRefresh_clicked();
+    void on_device_currentIndexChanged(int index);
+    void feedSelect();
+    void on_displaySettings_clicked(bool checked=false);
 signals:
     void homePositionChanged();
 };

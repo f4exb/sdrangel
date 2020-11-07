@@ -16,16 +16,11 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <complex.h>
-#include <cmath>
-
 #include <QTime>
 #include <QDebug>
 
 #include "util/stepfunctions.h"
 #include "util/db.h"
-#include "util/crc.h"
 #include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -34,219 +29,189 @@
 
 #include "adsbdemodreport.h"
 #include "adsbdemodsink.h"
+#include "adsbdemodsinkworker.h"
 #include "adsb.h"
 
 ADSBDemodSink::ADSBDemodSink() :
-        m_channelSampleRate(6000000),
-        m_channelFrequencyOffset(0),
-        m_sampleIdx(0),
-        m_sampleCount(0),
-        m_skipCount(0),
-        m_correlationThresholdLinear(0.0),
-        m_magsq(0.0f),
-        m_magsqSum(0.0f),
-        m_magsqPeak(0.0f),
-        m_magsqCount(0),
-        m_messageQueueToGUI(nullptr),
-        m_sampleBuffer(nullptr)
+    m_channelSampleRate(6000000),
+    m_channelFrequencyOffset(0),
+    m_feedTime(0.0),
+    m_sampleBuffer{nullptr, nullptr, nullptr},
+    m_worker(this),
+    m_writeBuffer(0),
+    m_writeIdx(0),
+    m_magsq(0.0f),
+    m_magsqSum(0.0f),
+    m_magsqPeak(0.0f),
+    m_magsqCount(0),
+    m_messageQueueToGUI(nullptr)
 {
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
+    for (int i = 0; i < m_buffers; i++)
+        m_bufferWrite[i].release(1);
+    m_bufferWrite[m_writeBuffer].acquire();
 }
 
 ADSBDemodSink::~ADSBDemodSink()
 {
-    delete m_sampleBuffer;
+    for (int i = 0; i < m_buffers; i++)
+        delete m_sampleBuffer[i];
 }
 
 void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-    Complex ci;
+    // Start timing how long we are in this function
+    m_startPoint = boost::chrono::steady_clock::now();
 
-    for (SampleVector::const_iterator it = begin; it != end; ++it)
+    // Optimise for common case, where no resampling or frequency offset
+    if ((m_interpolatorDistance == 1.0f) && (m_channelFrequencyOffset == 0))
     {
-        Complex c(it->real(), it->imag());
-        c *= m_nco.nextIQ();
+        for (SampleVector::const_iterator it = begin; it != end; ++it)
+        {
+            /*
+            // SampleVector is vector of qint32 or qint16
+            // Use integer mul to save one FP conversion and it has lower latency
+            qint64 r = (qint64)it->real();
+            qint64 i = (qint64)it->imag();
+            qint64 magsqRaw = r*r + i*i;
+            Real magsq = (Real)((double)magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED));
+            processOneSample(magsq);
+            */
+            Complex c(it->real(), it->imag());
+            Real magsq = complexMagSq(c);
+            processOneSample(magsq);
+        }
+    }
+    else
+    {
+        for (SampleVector::const_iterator it = begin; it != end; ++it)
+        {
+            Complex c(it->real(), it->imag());
+            Complex ci;
+            c *= m_nco.nextIQ();
 
-        if (m_interpolatorDistance == 1.0f)
-        {
-            processOneSample(c);
-        }
-        else if (m_interpolatorDistance < 1.0f) // interpolate
-        {
-            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+            if (m_interpolatorDistance == 1.0f)
             {
-                processOneSample(ci);
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
+                processOneSample(complexMagSq(c));
             }
-        }
-        else // decimate
-        {
-            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+            else if (m_interpolatorDistance < 1.0f) // interpolate
             {
-                processOneSample(ci);
-                m_interpolatorDistanceRemain += m_interpolatorDistance;
+                while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
+                {
+                    processOneSample(complexMagSq(ci));
+                    m_interpolatorDistanceRemain += m_interpolatorDistance;
+                }
+            }
+            else // decimate
+            {
+                if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
+                {
+                    processOneSample(complexMagSq(ci));
+                    m_interpolatorDistanceRemain += m_interpolatorDistance;
+                }
             }
         }
     }
 
+    // Calculate number of seconds in this function
+    boost::chrono::duration<double> sec = boost::chrono::steady_clock::now() - m_startPoint;
+    m_feedTime += sec.count();
 }
 
-void ADSBDemodSink::processOneSample(Complex &ci)
+void ADSBDemodSink::processOneSample(Real magsq)
 {
-    Real sample;
-
-    double magsqRaw = ci.real()*ci.real() + ci.imag()*ci.imag();
-    Real magsq = magsqRaw / (SDR_RX_SCALED*SDR_RX_SCALED);
-    m_movingAverage(magsq);
     m_magsqSum += magsq;
-
     if (magsq > m_magsqPeak)
-    {
         m_magsqPeak = magsq;
-    }
     m_magsqCount++;
-
-    sample = magsq;
-    m_sampleBuffer[m_sampleCount] = sample;
-    m_sampleCount++;
-
-    // Do we have enough data for a frame
-    if ((m_sampleCount >= m_totalSamples) && (m_skipCount == 0))
+    m_sampleBuffer[m_writeBuffer][m_writeIdx] = magsq;
+    m_writeIdx++;
+    if (m_writeIdx >= m_bufferSize)
     {
-        int startIdx = m_sampleCount - m_totalSamples;
+        m_bufferRead[m_writeBuffer].release();
 
-        // Correlate received signal with expected preamble
-        // chip+ indexes are 0, 2, 7, 9
-        // we correlate only over 6 symbols so that the number of zero chips is twice the
-        // number of one chips - empirically this is enough to get good correlation
-        Real premableCorrelationOnes = 0.0;
-        Real preambleCorrelationZeros = 0.0;
+        m_writeBuffer++;
+        if (m_writeBuffer >= m_buffers)
+            m_writeBuffer = 0;
 
-        for (int i = 0; i < m_samplesPerChip; i++)
-        {
-            premableCorrelationOnes  += m_sampleBuffer[startIdx +  0*m_samplesPerChip + i];
-            preambleCorrelationZeros += m_sampleBuffer[startIdx +  1*m_samplesPerChip + i];
+        // Don't include time spent waiting for a buffer
+        boost::chrono::duration<double> sec = boost::chrono::steady_clock::now() - m_startPoint;
+        m_feedTime += sec.count();
 
-            premableCorrelationOnes  += m_sampleBuffer[startIdx +  2*m_samplesPerChip + i];
-            preambleCorrelationZeros += m_sampleBuffer[startIdx +  3*m_samplesPerChip + i];
+        if (m_worker.isRunning())
+            m_bufferWrite[m_writeBuffer].acquire();
 
-            preambleCorrelationZeros += m_sampleBuffer[startIdx +  4*m_samplesPerChip + i];
-            preambleCorrelationZeros += m_sampleBuffer[startIdx +  5*m_samplesPerChip + i];
+        m_startPoint = boost::chrono::steady_clock::now();
 
-            preambleCorrelationZeros += m_sampleBuffer[startIdx +  6*m_samplesPerChip + i];
-            premableCorrelationOnes  += m_sampleBuffer[startIdx +  7*m_samplesPerChip + i];
-
-            preambleCorrelationZeros += m_sampleBuffer[startIdx +  8*m_samplesPerChip + i];
-            premableCorrelationOnes  += m_sampleBuffer[startIdx +  9*m_samplesPerChip + i];
-
-            preambleCorrelationZeros += m_sampleBuffer[startIdx + 10*m_samplesPerChip + i];
-            preambleCorrelationZeros += m_sampleBuffer[startIdx + 11*m_samplesPerChip + i];
-        }
-
-        // If the correlation is exactly 0, it's probably no signal
-        if ((premableCorrelationOnes  > m_correlationThresholdLinear) &&
-            (preambleCorrelationZeros < 2.0*m_correlationThresholdLinear) &&
-            (premableCorrelationOnes != 0.0f))
-        {
-            // Skip over preamble
-            startIdx += m_settings.m_samplesPerBit*ADS_B_PREAMBLE_BITS;
-
-            // Demodulate waveform to bytes
-            unsigned char data[ADS_B_ES_BYTES];
-            int byteIdx = 0;
-            int currentBit;
-            unsigned char currentByte = 0;
-            bool adsbOnly = true;
-            int df;
-
-            for (int bit = 0; bit < ADS_B_ES_BITS; bit++)
-            {
-                // PPM (Pulse position modulation) - Each bit spreads to two chips, 1->10, 0->01
-                // Determine if bit is 1 or 0, by seeing which chip has largest combined energy over the sampling period
-                Real oneSum = 0.0f;
-                Real zeroSum = 0.0f;
-                for (int i = 0; i < m_samplesPerChip; i++)
-                {
-                    oneSum += m_sampleBuffer[startIdx+i];
-                    zeroSum += m_sampleBuffer[startIdx+m_samplesPerChip+i];
-                }
-                currentBit = oneSum > zeroSum;
-                startIdx += m_settings.m_samplesPerBit;
-                // Convert bit to bytes - MSB first
-                currentByte |= currentBit << (7-(bit & 0x7));
-                if ((bit & 0x7) == 0x7)
-                {
-                    data[byteIdx++] = currentByte;
-                    currentByte = 0;
-                    // Don't try to demodulate any further, if this isn't an ADS-B frame
-                    // to help reduce processing overhead
-                    if (adsbOnly && (bit == 7))
-                    {
-                        df = ((data[0] >> 3) & ADS_B_DF_MASK);
-                        if ((df != 17) && (df != 18))
-                            break;
-                    }
-                }
-            }
-
-            // Is ADS-B?
-            df = ((data[0] >> 3) & ADS_B_DF_MASK);
-            if ((df == 17) || (df == 18))
-            {
-                crcadsb crc;
-                //int icao = (data[1] << 16) | (data[2] << 8) | data[3]; // ICAO aircraft address
-                int parity = (data[11] << 16) | (data[12] << 8) | data[13]; // Parity / CRC
-
-                crc.calculate(data, ADS_B_ES_BYTES-3);
-                if (parity == crc.get())
-                {
-                    // Got a valid frame
-                    // Don't try to re-demodulate the same frame
-                    m_skipCount = (ADS_B_ES_BITS+ADS_B_PREAMBLE_BITS)*ADS_B_CHIPS_PER_BIT*m_samplesPerChip;
-                    // Pass to GUI
-                    if (getMessageQueueToGUI())
-                    {
-                        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
-                            QByteArray((char*)data, sizeof(data)),
-                            premableCorrelationOnes,
-                            preambleCorrelationZeros/2.0);
-                        getMessageQueueToGUI()->push(msg);
-                    }
-                    // Pass to worker
-                    if (getMessageQueueToWorker())
-                    {
-                        ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
-                            QByteArray((char*)data, sizeof(data)),
-                            premableCorrelationOnes,
-                            preambleCorrelationZeros/2.0);
-                        getMessageQueueToWorker()->push(msg);
-                    }
-                }
-            }
-        }
+        m_writeIdx = m_samplesPerFrame - 1; // Leave space for copying samples from previous buffer
     }
-    if (m_skipCount > 0)
-        m_skipCount--;
-    if (m_sampleCount >= 2*m_totalSamples)
+}
+
+void ADSBDemodSink::startWorker()
+{
+    qDebug() << "ADSBDemodSink::startWorker";
+    if (!m_worker.isRunning())
+        m_worker.start();
+}
+
+void ADSBDemodSink::stopWorker()
+{
+    if (m_worker.isRunning())
     {
-        // Copy second half of buffer to first
-        memcpy(&m_sampleBuffer[0], &m_sampleBuffer[m_totalSamples], m_totalSamples*sizeof(Real));
-        m_sampleCount = m_totalSamples;
+        qDebug() << "ADSBDemodSink::stopWorker: Stopping worker";
+        m_worker.requestInterruption();
+        // Worker may be blocked waiting for a buffer
+        for (int i = 0; i < m_buffers; i++)
+        {
+            if (m_bufferRead[i].available() == 0)
+                m_bufferRead[i].release(1);
+        }
+        m_worker.wait();
+        // If this is called from ADSBDemod, we need to also
+        // make sure baseband sink thread isnt blocked in processOneSample
+        for (int i = 0; i < m_buffers; i++)
+        {
+            if (m_bufferWrite[i].available() == 0)
+                m_bufferWrite[i].release(1);
+        }
+        qDebug() << "ADSBDemodSink::stopWorker: Worker stopped";
     }
-    m_sampleIdx++;
-
 }
 
 void ADSBDemodSink::init(int samplesPerBit)
 {
-    if (m_sampleBuffer)
-        delete m_sampleBuffer;
+    bool restart = m_worker.isRunning();
+    if (restart)
+    {
+        // Stop worker as we're going to delete the buffers
+        stopWorker();
+    }
+    // Reset state of semaphores
+    for (int i = 0; i < m_buffers; i++)
+    {
+         m_bufferWrite[i].acquire(m_bufferWrite[i].available());
+         m_bufferWrite[i].release(1);
+         m_bufferRead[i].acquire(m_bufferRead[i].available());
+    }
+    m_writeBuffer = 0;
+    m_bufferWrite[m_writeBuffer].acquire();
 
-    m_totalSamples = samplesPerBit*(ADS_B_PREAMBLE_BITS+ADS_B_ES_BITS);
+    for (int i = 0; i < m_buffers; i++)
+    {
+        if (m_sampleBuffer[i])
+            delete m_sampleBuffer[i];
+    }
+
+    m_samplesPerFrame = samplesPerBit*(ADS_B_PREAMBLE_BITS+ADS_B_ES_BITS);
     m_samplesPerChip = samplesPerBit/ADS_B_CHIPS_PER_BIT;
+    m_writeIdx = m_samplesPerFrame - 1; // Leave space for copying samples from previous buffer
 
-    m_sampleBuffer = new Real[2*m_totalSamples];
+    for (int i = 0; i < m_buffers; i++)
+        m_sampleBuffer[i] = new Real[m_bufferSize];
+
+    if (restart)
+        startWorker();
 }
 
 void ADSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -278,6 +243,8 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, bool force)
             << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
             << " m_rfBandwidth: " << settings.m_rfBandwidth
             << " m_correlationThreshold: " << settings.m_correlationThreshold
+            << " m_correlateFullPreamble: " << settings.m_correlateFullPreamble
+            << " m_demodModeS: " << settings.m_demodModeS
             << " m_samplesPerBit: " << settings.m_samplesPerBit
             << " force: " << force;
 
@@ -294,9 +261,10 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, bool force)
         init(settings.m_samplesPerBit);
     }
 
-    if ((settings.m_correlationThreshold != m_settings.m_correlationThreshold) || force) {
-        m_correlationThresholdLinear = CalcDb::powerFromdB(m_settings.m_correlationThreshold);
-    }
+    // Forward to worker
+    ADSBDemodSinkWorker::MsgConfigureADSBDemodSinkWorker *msg = ADSBDemodSinkWorker::MsgConfigureADSBDemodSinkWorker::create(
+            settings, force);
+    m_worker.getInputMessageQueue()->push(msg);
 
     m_settings = settings;
 }
