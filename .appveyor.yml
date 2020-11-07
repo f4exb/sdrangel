@@ -131,5 +131,3 @@ for:
       - cd sdrangel
       - ./build_vanilla.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
       - ./build_server.sh -T ${APPVEYOR_PULL_REQUEST_HEAD_COMMIT:-${APPVEYOR_REPO_COMMIT}}
-    on_finish:
-      - sh: appveyor exit
