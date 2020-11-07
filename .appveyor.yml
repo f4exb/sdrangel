@@ -30,7 +30,8 @@ environment:
                              -DENABLE_EXTERNAL_LIBRARIES=ON \
                              -DBUILD_SERVER=OFF"
     - TARGET: ubuntu2004docker
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+      APPVEYOR_BUILD_WORKER_CLOUD: nasrock
+      APPVEYOR_BUILD_WORKER_IMAGE: Linux
 
 for:
   - matrix:
