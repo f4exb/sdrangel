@@ -25,6 +25,7 @@ option(SANITIZE_ADDRESS "Activate memory address sanitization" OFF)
 option(RX_SAMPLE_24BIT "Internal 24 bit Rx DSP" ON)
 option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
+option(HIDE_CONSOLE "Hide console when running GUI on Windows" ON)
 option(BUNDLE "Enable distribution bundle" OFF)
 option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
 option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
@@ -562,9 +563,10 @@ if (BUILD_GUI)
     logging
     )
 
-    if (MSVC)
-        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-    endif()
+  if(WIN32)
+    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+                            WIN32_EXECUTABLE ${HIDE_CONSOLE})
+  endif()
 endif()
 
 ############ build sdrangel server ################
