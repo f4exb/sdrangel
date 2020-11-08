@@ -481,6 +481,7 @@ if (LINUX)
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/rtlsdr"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DDETACH_KERNEL_DRIVER=ON -DINSTALL_UDEV_RULES=${RTLSDR_UDEV}
                 BUILD_BYPRODUCTS "${LIBRTLSDR_LIBRARIES}"
+                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr_shared
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
@@ -525,6 +526,7 @@ if (WIN32 OR APPLE)
                 -DTHREADS_PTHREADS_INCLUDE_DIR=${PTHREADS4W_INCLUDE_DIR}
                 -DTHREADS_PTHREADS_WIN32_LIBRARY=${PTHREADS4W_LIBRARIES}
                 BUILD_BYPRODUCTS "${LIBRTLSDR_LIBRARIES}"
+                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- rtlsdr_shared
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
@@ -593,6 +595,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_PYTHON3=OFF
                 -DENABLE_TESTS=OFF
                 BUILD_BYPRODUCTS "${SOAPYSDR_LIBRARY}"
+                BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> -- SoapySDR
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
                 )
