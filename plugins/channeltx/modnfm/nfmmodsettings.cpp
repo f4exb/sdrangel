@@ -24,10 +24,23 @@
 #include "settings/serializable.h"
 #include "nfmmodsettings.h"
 
-const int NFMModSettings::m_rfBW[] = {
-        3000, 4000, 5000, 6250, 8330, 10000, 12500, 15000, 20000, 25000, 40000
+// Standard channel spacings (kHz) using Carson rule
+// beta based ............  11F3   16F3  (36F9)
+//  5     6.25  7.5   8.33  12.5   25     40     Spacing
+//  0.43  0.43  0.43  0.43  0.83   1.67   1.0    Beta
+const int NFMModSettings::m_channelSpacings[] = {
+    5000, 6250, 7500, 8333, 12500, 25000, 40000
 };
-const int NFMModSettings::m_nbRfBW = 11;
+const int NFMModSettings::m_rfBW[] = {  // RF bandwidth (Hz)
+    4800, 6000, 7200, 8000, 11000, 16000, 36000
+};
+const int NFMModSettings::m_afBW[] = {  // audio bandwidth (Hz)
+    1700, 2100, 2500, 2800,  3000,  3000,  9000
+};
+const int NFMModSettings::m_fmDev[] = { // peak deviation (Hz) - full is double
+     731,  903, 1075, 1204,  2500,  5000,  9000
+};
+const int NFMModSettings::m_nbChannelSpacings = 7;
 
 
 NFMModSettings::NFMModSettings() :
@@ -41,8 +54,8 @@ void NFMModSettings::resetToDefaults()
 {
     m_afBandwidth = 3000;
     m_inputFrequencyOffset = 0;
-    m_rfBandwidth = 12500.0f;
-    m_fmDeviation = 3000.0f;
+    m_rfBandwidth = 16000.0f;
+    m_fmDeviation = 10000.0f; //!< full deviation
     m_toneFrequency = 1000.0f;
     m_volumeFactor = 1.0f;
     m_channelMute = false;
@@ -124,7 +137,7 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         m_inputFrequencyOffset = tmp;
         d.readReal(2, &m_rfBandwidth, 12500.0);
         d.readReal(3, &m_afBandwidth, 1000.0);
-        d.readReal(4, &m_fmDeviation, 3000.0);
+        d.readReal(4, &m_fmDeviation, 10000.0);
         d.readU32(5, &m_rgbColor);
         d.readReal(6, &m_toneFrequency, 1000.0);
         d.readReal(7, &m_volumeFactor, 1.0);
@@ -184,28 +197,96 @@ bool NFMModSettings::deserialize(const QByteArray& data)
     }
 }
 
+int NFMModSettings::getChannelSpacing(int index)
+{
+    if (index < 0) {
+        return m_channelSpacings[0];
+    } else if (index < m_nbChannelSpacings) {
+        return m_channelSpacings[index];
+    } else {
+        return m_channelSpacings[m_nbChannelSpacings-1];
+    }
+}
+
+int NFMModSettings::getChannelSpacingIndex(int channelSpacing)
+{
+    for (int i = 0; i < m_nbChannelSpacings; i++)
+    {
+        if (channelSpacing <= m_channelSpacings[i]) {
+            return i;
+        }
+    }
+
+    return m_nbChannelSpacings-1;
+}
+
 int NFMModSettings::getRFBW(int index)
 {
     if (index < 0) {
         return m_rfBW[0];
-    } else if (index < m_nbRfBW) {
+    } else if (index < m_nbChannelSpacings) {
         return m_rfBW[index];
     } else {
-        return m_rfBW[m_nbRfBW-1];
+        return m_rfBW[m_nbChannelSpacings-1];
     }
 }
 
 int NFMModSettings::getRFBWIndex(int rfbw)
 {
-    for (int i = 0; i < m_nbRfBW; i++)
+    for (int i = 0; i < m_nbChannelSpacings; i++)
     {
-        if (rfbw <= m_rfBW[i])
-        {
+        if (rfbw <= m_rfBW[i]) {
             return i;
         }
     }
 
-    return m_nbRfBW-1;
+    return m_nbChannelSpacings-1;
+}
+
+int NFMModSettings::getAFBW(int index)
+{
+    if (index < 0) {
+        return m_afBW[0];
+    } else if (index < m_nbChannelSpacings) {
+        return m_afBW[index];
+    } else {
+        return m_afBW[m_nbChannelSpacings-1];
+    }
+}
+
+int NFMModSettings::getAFBWIndex(int afbw)
+{
+    for (int i = 0; i < m_nbChannelSpacings; i++)
+    {
+        if (afbw <= m_afBW[i]) {
+            return i;
+        }
+    }
+
+    return m_nbChannelSpacings-1;
+}
+
+int NFMModSettings::getFMDev(int index)
+{
+    if (index < 0) {
+        return m_fmDev[0];
+    } else if (index < m_nbChannelSpacings) {
+        return m_fmDev[index];
+    } else {
+        return m_fmDev[m_nbChannelSpacings-1];
+    }
+}
+
+int NFMModSettings::getFMDevIndex(int fmDev)
+{
+    for (int i = 0; i < m_nbChannelSpacings; i++)
+    {
+        if (fmDev <= m_fmDev[i]) {
+            return i;
+        }
+    }
+
+    return m_nbChannelSpacings-1;
 }
 
 int NFMModSettings::getNbCTCSSFreq()

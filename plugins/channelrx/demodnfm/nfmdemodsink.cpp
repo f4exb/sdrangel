@@ -236,7 +236,7 @@ void NFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
 
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, m_settings.m_fmDeviation);
+        m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = Real(channelSampleRate) / Real(m_audioSampleRate);
         m_interpolatorDistanceRemain = m_interpolatorDistance;
 
@@ -269,7 +269,7 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
     {
-        m_interpolator.create(16, m_channelSampleRate, settings.m_fmDeviation);
+        m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = Real(m_channelSampleRate) / Real(m_audioSampleRate);
         m_interpolatorDistanceRemain = m_interpolatorDistance;
     }

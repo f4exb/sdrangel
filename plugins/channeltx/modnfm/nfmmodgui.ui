@@ -186,35 +186,22 @@
     <item>
      <layout class="QHBoxLayout" name="rfBandwidthLayout">
       <item>
-       <widget class="QLabel" name="rfBwLabel">
+       <widget class="QLabel" name="channelSpacingLabel">
         <property name="text">
-         <string>RFBW</string>
+         <string>CS</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="rfBW">
+       <widget class="QComboBox" name="channelSpacing">
         <property name="maximumSize">
          <size>
           <width>60</width>
           <height>16777215</height>
          </size>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="rfBWUnit">
-        <property name="minimumSize">
-         <size>
-          <width>10</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>k</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+        <property name="toolTip">
+         <string>Apply channel spacing settings</string>
         </property>
        </widget>
       </item>
@@ -235,19 +222,19 @@
       <item>
        <widget class="QSlider" name="afBW">
         <property name="toolTip">
-         <string>Audio bandwidth</string>
+         <string>Audio bandwidth (kHz)</string>
         </property>
         <property name="minimum">
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>20</number>
+         <number>200</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>3</number>
+         <number>30</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -258,12 +245,12 @@
        <widget class="QLabel" name="afBWText">
         <property name="minimumSize">
          <size>
-          <width>25</width>
+          <width>35</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>3k</string>
+         <string>20.0k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -274,6 +261,51 @@
     </item>
     <item>
      <layout class="QHBoxLayout" name="fmDeviationLayout">
+      <item>
+       <widget class="QLabel" name="rfBWLabel">
+        <property name="text">
+         <string>RFBW</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="rfBW">
+        <property name="toolTip">
+         <string>RF bandwidth (kHz)</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>480</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>160</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWText">
+        <property name="minimumSize">
+         <size>
+          <width>35</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>25.0k</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="fmDevLabel">
         <property name="text">
@@ -296,10 +328,10 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Modulation percentage</string>
+         <string>FM peak deviation (kHz)</string>
         </property>
         <property name="maximum">
-         <number>300</number>
+         <number>200</number>
         </property>
         <property name="pageStep">
          <number>1</number>
@@ -316,7 +348,7 @@
        <widget class="QLabel" name="fmDevText">
         <property name="minimumSize">
          <size>
-          <width>30</width>
+          <width>35</width>
           <height>0</height>
          </size>
         </property>

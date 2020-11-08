@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>302</width>
-    <height>178</height>
+    <height>182</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -204,14 +204,14 @@
     <item>
      <layout class="QHBoxLayout" name="rfBWLayout">
       <item>
-       <widget class="QLabel" name="rfBWLabel">
+       <widget class="QLabel" name="channelSpacingLabel">
         <property name="text">
-         <string>RFBW</string>
+         <string>CS</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="rfBW">
+       <widget class="QComboBox" name="channelSpacing">
         <property name="maximumSize">
          <size>
           <width>60</width>
@@ -219,23 +219,58 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>RF demodulator bandwidth (kHz)</string>
+         <string>Apply channel spacing settings</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="rfBWUnitText">
+       <widget class="QLabel" name="rfLabel">
+        <property name="text">
+         <string>RF</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="rfBW">
         <property name="minimumSize">
          <size>
-          <width>10</width>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>RF bandwidth (kHz)</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>400</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>110</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rfBWText">
+        <property name="minimumSize">
+         <size>
+          <width>35</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>k</string>
+         <string>20.0k</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -253,22 +288,9 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QLabel" name="afLabel">
         <property name="text">
-         <string>AFBW</string>
+         <string>AF</string>
         </property>
        </widget>
       </item>
@@ -287,13 +309,13 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>20</number>
+         <number>200</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>3</number>
+         <number>30</number>
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -304,12 +326,12 @@
        <widget class="QLabel" name="afBWText">
         <property name="minimumSize">
          <size>
-          <width>25</width>
+          <width>35</width>
           <height>0</height>
          </size>
         </property>
         <property name="text">
-         <string>3 k</string>
+         <string>20.0k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -321,56 +343,50 @@
     <item>
      <layout class="QHBoxLayout" name="squelchLayout">
       <item>
-       <widget class="QLabel" name="volumeLabel">
+       <widget class="QLabel" name="fmDevLabel">
         <property name="text">
-         <string>Vol</string>
+         <string>FMd</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QDial" name="volume">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>24</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Sound volume (%)</string>
-        </property>
-        <property name="maximum">
-         <number>200</number>
-        </property>
-        <property name="singleStep">
-         <number>1</number>
-        </property>
-        <property name="pageStep">
-         <number>1</number>
-        </property>
-        <property name="value">
-         <number>100</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="volumeText">
+       <widget class="QSlider" name="fmDev">
         <property name="minimumSize">
          <size>
           <width>0</width>
           <height>0</height>
          </size>
         </property>
-        <property name="maximumSize">
+        <property name="toolTip">
+         <string>FM peak deviation (kHz)</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>200</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>25</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fmDevText">
+        <property name="minimumSize">
          <size>
-          <width>30</width>
-          <height>16777215</height>
+          <width>35</width>
+          <height>0</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>Sound volume (%)</string>
-        </property>
         <property name="text">
-         <string>100</string>
+         <string>20.0k</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -378,22 +394,9 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QLabel" name="squelchLabel">
         <property name="text">
-         <string>Sq</string>
+         <string>  Sq</string>
         </property>
        </widget>
       </item>
@@ -565,17 +568,61 @@
        </widget>
       </item>
       <item>
-       <spacer name="ctcssSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QLabel" name="volumeLabel">
+        <property name="text">
+         <string>Vol</string>
         </property>
-        <property name="sizeHint" stdset="0">
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="volume">
+        <property name="maximumSize">
          <size>
-          <width>40</width>
-          <height>20</height>
+          <width>24</width>
+          <height>24</height>
          </size>
         </property>
-       </spacer>
+        <property name="toolTip">
+         <string>Sound volume (%)</string>
+        </property>
+        <property name="maximum">
+         <number>200</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>100</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="volumeText">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Sound volume (%)</string>
+        </property>
+        <property name="text">
+         <string>100</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="ButtonSwitch" name="highPassFilter">
