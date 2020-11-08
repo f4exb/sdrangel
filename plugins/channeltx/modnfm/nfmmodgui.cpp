@@ -137,24 +137,46 @@ void NFMModGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void NFMModGUI::on_rfBW_currentIndexChanged(int index)
+void NFMModGUI::on_channelSpacing_currentIndexChanged(int index)
 {
-	m_channelMarker.setBandwidth(NFMModSettings::getRFBW(index));
 	m_settings.m_rfBandwidth = NFMModSettings::getRFBW(index);
+    m_settings.m_afBandwidth = NFMModSettings::getAFBW(index);
+    m_settings.m_fmDeviation = 2.0 * NFMModSettings::getFMDev(index);
+    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+    ui->rfBW->blockSignals(true);
+    ui->afBW->blockSignals(true);
+    ui->fmDev->blockSignals(true);
+    ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
+    ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
+    ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0, 0, 'f', 1));
+    ui->afBW->setValue(m_settings.m_afBandwidth / 100.0);
+    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
+    ui->fmDev->setValue(m_settings.m_fmDeviation / 200.0);
+    ui->rfBW->blockSignals(false);
+    ui->afBW->blockSignals(false);
+    ui->fmDev->blockSignals(false);
+	applySettings();
+}
+
+void NFMModGUI::on_rfBW_valueChanged(int value)
+{
+	ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_rfBandwidth = value * 100.0;
+	m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
 	applySettings();
 }
 
 void NFMModGUI::on_afBW_valueChanged(int value)
 {
-	ui->afBWText->setText(QString("%1k").arg(value));
-	m_settings.m_afBandwidth = value * 1000.0;
+	ui->afBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
+	m_settings.m_afBandwidth = value * 100.0;
 	applySettings();
 }
 
 void NFMModGUI::on_fmDev_valueChanged(int value)
 {
 	ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
-	m_settings.m_fmDeviation = value * 100.0;
+	m_settings.m_fmDeviation = value * 200.0;
 	applySettings();
 }
 
@@ -352,15 +374,15 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 
-    blockApplySettings(true);
+    ui->channelSpacing->blockSignals(true);
+    ui->channelSpacing->clear();
 
-    ui->rfBW->clear();
-    for (int i = 0; i < NFMModSettings::m_nbRfBW; i++) {
-        ui->rfBW->addItem(QString("%1").arg(NFMModSettings::getRFBW(i) / 1000.0, 0, 'f', 2));
+    for (int i = 0; i < NFMModSettings::m_nbChannelSpacings; i++) {
+        ui->channelSpacing->addItem(QString("%1").arg(NFMModSettings::getChannelSpacing(i) / 1000.0, 0, 'f', 2));
     }
-    ui->rfBW->setCurrentIndex(6);
 
-    blockApplySettings(false);
+    ui->channelSpacing->setCurrentIndex(NFMModSettings::getChannelSpacingIndex(25000));
+    ui->channelSpacing->blockSignals(false);
 
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
@@ -439,7 +461,6 @@ void NFMModGUI::displaySettings()
     m_channelMarker.blockSignals(true);
     m_channelMarker.setCenterFrequency(m_settings.m_inputFrequencyOffset);
     m_channelMarker.setTitle(m_settings.m_title);
-    m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_channelMarker.blockSignals(false);
     m_channelMarker.setColor(m_settings.m_rgbColor); // activate signal on the last setting only
 
@@ -451,13 +472,14 @@ void NFMModGUI::displaySettings()
 
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
 
-    ui->rfBW->setCurrentIndex(NFMModSettings::getRFBWIndex(m_settings.m_rfBandwidth));
+    ui->rfBWText->setText(QString("%1k").arg(m_settings.m_rfBandwidth / 1000.0, 0, 'f', 1));
+    ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
 
-    ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0));
-    ui->afBW->setValue(m_settings.m_afBandwidth / 1000.0);
+    ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0, 0, 'f', 1));
+    ui->afBW->setValue(m_settings.m_afBandwidth / 100.0);
 
-    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 1000.0, 0, 'f', 1));
-    ui->fmDev->setValue(m_settings.m_fmDeviation / 100.0);
+    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
+    ui->fmDev->setValue(m_settings.m_fmDeviation / 200.0);
 
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volumeFactor, 0, 'f', 1));
     ui->volume->setValue(m_settings.m_volumeFactor * 10.0);

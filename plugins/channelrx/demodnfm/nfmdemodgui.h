@@ -64,8 +64,10 @@ private:
 
 private slots:
 	void on_deltaFrequency_changed(qint64 value);
-	void on_rfBW_currentIndexChanged(int index);
+	void on_channelSpacing_currentIndexChanged(int index);
+	void on_rfBW_valueChanged(int value);
 	void on_afBW_valueChanged(int value);
+	void on_fmDev_valueChanged(int value);
 	void on_volume_valueChanged(int value);
 	void on_squelchGate_valueChanged(int value);
 	void on_deltaSquelch_toggled(bool checked);

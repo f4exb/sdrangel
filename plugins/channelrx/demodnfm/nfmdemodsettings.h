@@ -24,14 +24,16 @@ class Serializable;
 
 struct NFMDemodSettings
 {
-    static const int m_nbRfBW;
+    static const int m_nbChannelSpacings;
+    static const int m_channelSpacings[];
     static const int m_rfBW[];
+    static const int m_afBW[];
     static const int m_fmDev[];
 
     int32_t m_inputFrequencyOffset;
     Real m_rfBandwidth;
     Real m_afBandwidth;
-    int  m_fmDeviation;
+    Real m_fmDeviation;
     int  m_squelchGate;
     bool m_deltaSquelch;
     Real m_squelch; //!< deci-Bels
@@ -58,9 +60,14 @@ struct NFMDemodSettings
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 
+    static int getChannelSpacing(int index);
+    static int getChannelSpacingIndex(int channelSpacing);
     static int getRFBW(int index);
-    static int getFMDev(int index);
     static int getRFBWIndex(int rfbw);
+    static int getAFBW(int index);
+    static int getAFBWIndex(int rfbw);
+    static int getFMDev(int index);
+    static int getFMDevIndex(int fmDev);
 };
 
 

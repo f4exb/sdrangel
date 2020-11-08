@@ -35,8 +35,11 @@ struct NFMModSettings
         NFMModInputCWTone
     } NFMModInputAF;
 
-    static const int m_nbRfBW;
+    static const int m_nbChannelSpacings;
+    static const int m_channelSpacings[];
     static const int m_rfBW[];
+    static const int m_afBW[];
+    static const int m_fmDev[];
 
     qint64 m_inputFrequencyOffset;
     Real m_rfBandwidth;
@@ -76,8 +79,14 @@ struct NFMModSettings
     const CWKeyerSettings& getCWKeyerSettings() const { return m_cwKeyerSettings; }
     void setCWKeyerSettings(const CWKeyerSettings& cwKeyerSettings) { m_cwKeyerSettings = cwKeyerSettings; }
 
+    static int getChannelSpacing(int index);
+    static int getChannelSpacingIndex(int channelSpacing);
     static int getRFBW(int index);
     static int getRFBWIndex(int rfbw);
+    static int getAFBW(int index);
+    static int getAFBWIndex(int afbw);
+    static int getFMDev(int index);
+    static int getFMDevIndex(int fmDev);
     static int getNbCTCSSFreq();
     static float getCTCSSFreq(int index);
     static int getCTCSSFreqIndex(float ctcssFreq);
