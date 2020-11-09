@@ -147,7 +147,7 @@ private:
     bool openDevice();
     void closeDevice();
     bool openAudioDevice(QString deviceName, int sampleRate);
-    void applySettings(const AudioInputSettings& settings, bool force);
+    void applySettings(const AudioInputSettings& settings, bool force, bool starting=false);
 
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const AudioInputSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

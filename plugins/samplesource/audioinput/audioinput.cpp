@@ -89,7 +89,7 @@ bool AudioInput::openAudioDevice(QString deviceName, qint32 sampleRate)
     {
         if (AudioInputSettings::getFullDeviceName(itAudio) == deviceName)
         {
-            // FIXME: getInputDeviceIndex needs a realm parameter (itAudio.realm()) - need to look on Linux to see if it uses default?
+            // FIXME: getInputDeviceIndex needs a realm parameter (itAudio.realm())
             int deviceIndex = audioDeviceManager->getInputDeviceIndex(itAudio.deviceName());
             m_audioInput.start(deviceIndex, sampleRate);
             m_audioInput.addFifo(&m_fifo);
@@ -116,13 +116,13 @@ bool AudioInput::start()
         return false;
     }
 
-    // Call before creating thread, so we don't immediately stop it
-    applySettings(m_settings, true);
+    applySettings(m_settings, true, true);
 
     m_thread = new AudioInputThread(&m_sampleFifo, &m_fifo);
     m_thread->setLog2Decimation(m_settings.m_log2Decim);
     m_thread->setIQMapping(m_settings.m_iqMapping);
     m_thread->startWork();
+
 
     qDebug("AudioInput::started");
     m_running = true;
@@ -233,7 +233,7 @@ bool AudioInput::handleMessage(const Message& message)
     }
 }
 
-void AudioInput::applySettings(const AudioInputSettings& settings, bool force)
+void AudioInput::applySettings(const AudioInputSettings& settings, bool force, bool starting)
 {
     bool forwardChange = false;
     QList<QString> reverseAPIKeys;
@@ -241,11 +241,16 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force)
     if ((m_settings.m_deviceName != settings.m_deviceName)
         || (m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
-        closeDevice();
-        if (openAudioDevice(settings.m_deviceName, settings.m_sampleRate))
-            qDebug() << "AudioInput::applySettings: opened device " << settings.m_deviceName << " with sample rate " << m_audioInput.getRate();
-        else
-            qCritical() << "AudioInput::applySettings: failed to open device " << settings.m_deviceName;
+        // Don't call openAudioDevice if called from start(), otherwise ::AudioInput
+        // will be created on wrong thread and we'll crash after ::AudioInput::stop calls delete
+        if (!starting)
+        {
+            closeDevice();
+            if (openAudioDevice(settings.m_deviceName, settings.m_sampleRate))
+                qDebug() << "AudioInput::applySettings: opened device " << settings.m_deviceName << " with sample rate " << m_audioInput.getRate();
+            else
+                qCritical() << "AudioInput::applySettings: failed to open device " << settings.m_deviceName;
+            }
     }
 
     if ((m_settings.m_deviceName != settings.m_deviceName) || force)
