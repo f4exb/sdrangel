@@ -3800,6 +3800,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
             deviceSettings->getAirspyHfSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "audioInputSettings")
+        {
+            deviceSettings->setAudioInputSettings(new SWGSDRangel::SWGAudioInputSettings());
+            deviceSettings->getAudioInputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "bladeRF1InputSettings")
         {
             deviceSettings->setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());
@@ -4109,6 +4114,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setDeviceHwType(nullptr);
     deviceSettings.setAirspySettings(nullptr);
     deviceSettings.setAirspyHfSettings(nullptr);
+    deviceSettings.setAudioInputSettings(nullptr);
     deviceSettings.setBladeRf1InputSettings(nullptr);
     deviceSettings.setBladeRf1OutputSettings(nullptr);
     deviceSettings.setFcdProPlusSettings(nullptr);

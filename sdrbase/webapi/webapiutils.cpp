@@ -68,6 +68,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
 const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.airspy", "airspySettings"},
     {"sdrangel.samplesource.airspyhf", "airspyHFSettings"},
+    {"sdrangel.samplesource.audio", "audioInputSettings"},
     {"sdrangel.samplesource.bladerf1input", "bladeRF1InputSettings"},
     {"sdrangel.samplesource.bladerf", "bladeRF1InputSettings"}, // remap
     {"sdrangel.samplesink.bladerf1output", "bladeRF1OutputSettings"},
@@ -156,6 +157,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
 const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToSettingsKey = {
     {"Airspy", "airspySettings"},
     {"AirspyHF", "airspyHFSettings"},
+    {"AudioInput", "audioInputSettings"},
     {"BladeRF1", "bladeRF1InputSettings"},
     {"BladeRF2", "bladeRF2InputSettings"},
     {"FCDPro", "fcdProSettings"},
@@ -180,6 +182,7 @@ const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToSettingsKey = {
 const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToActionsKey = {
     {"Airspy", "airspyActions"},
     {"AirspyHF", "airspyHFActions"},
+    {"AudioInput", "audioInputActions"},
     {"BladeRF1", "bladeRF1InputActions"},
     {"FCDPro", "fcdProActions"},
     {"FCDPro+", "fcdProPlusActions"},
