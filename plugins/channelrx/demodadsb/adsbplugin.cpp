@@ -30,7 +30,7 @@
 const PluginDescriptor ADSBPlugin::m_pluginDescriptor = {
     ADSBDemod::m_channelId,
     QString("ADS-B Demodulator"),
-    QString("4.21.1"),
+    QString("4.21.3"),
     QString("(c) Jon Beniston, M7RCE"),
     QString("https://github.com/f4exb/sdrangel"),
     true,

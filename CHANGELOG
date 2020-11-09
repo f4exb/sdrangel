@@ -1,3 +1,15 @@
+sdrangel (4.21.3-1) unstable; urgency=medium
+
+   * Package SoapySDR modules for Windows. PR #687
+   * CI: Add docker build. PR #673
+   * Add an option to hide console on Windows. PR #694
+   * ADS-B Demodulator updates. PR #688
+   * ADS-B Sync correlation threshold rework. Issue #696
+   * NFMDemod: rewirk filters. PR #690
+   * NFM: full control of RF, AF filters and FM deviation, Issue #691
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 09 Nov 2020 13:07:51 +0100
+
 sdrangel (4.21.2-1) unstable; urgency=medium
 
    * Windows package: upgrade to VS 2019 and Qt 5.15.1. PR #683
