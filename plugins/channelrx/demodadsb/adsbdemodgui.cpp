@@ -70,6 +70,7 @@
 #define ADSB_COL_TIME           20
 #define ADSB_COL_FRAMECOUNT     21
 #define ADSB_COL_CORRELATION    22
+#define ADSB_COL_RSSI           23
 
 const char *Aircraft::m_speedTypeNames[] = {
     "GS", "TAS", "IAS"
@@ -529,7 +530,11 @@ QIcon *ADSBDemodGUI::getFlagIcon(const QString &country)
     }
 }
 
-void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, float correlation)
+void ADSBDemodGUI::handleADSB(
+    const QByteArray data,
+    const QDateTime dateTime,
+    float correlation,
+    float correlationOnes)
 {
     const char idMap[] = "?ABCDEFGHIJKLMNOPQRSTUVWXYZ????? ???????????????0123456789??????";
     const QString categorySetA[] = {
@@ -621,6 +626,7 @@ void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, f
         ui->adsbData->setItem(row, ADSB_COL_TIME, aircraft->m_timeItem);
         ui->adsbData->setItem(row, ADSB_COL_FRAMECOUNT, aircraft->m_adsbFrameCountItem);
         ui->adsbData->setItem(row, ADSB_COL_CORRELATION, aircraft->m_correlationItem);
+        ui->adsbData->setItem(row, ADSB_COL_RSSI, aircraft->m_rssiItem);
         // Look aircraft up in database
         if (m_aircraftInfo != nullptr)
         {
@@ -709,7 +715,9 @@ void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, f
         .arg(CalcDb::dbPower(aircraft->m_minCorrelation), 3, 'f', 1)
         .arg(CalcDb::dbPower(aircraft->m_correlation), 3, 'f', 1)
         .arg(CalcDb::dbPower(aircraft->m_maxCorrelation), 3, 'f', 1));
-
+    m_correlationOnesAvg(correlationOnes);
+    aircraft->m_rssiItem->setText(QString("%1")
+        .arg(CalcDb::dbPower(m_correlationOnesAvg.instantAverage()), 3, 'f', 1));
     // ADS-B, non-transponder ADS-B or TIS-B rebroadcast of ADS-B (ADS-R)
     if ((df == 17) || ((df == 18) && ((ca == 0) || (ca == 1) || (ca == 6))))
     {
@@ -796,9 +804,13 @@ void ADSBDemodGUI::handleADSB(const QByteArray data, const QDateTime dateTime, f
                 latEven = dLatEven * ((j % 60) + aircraft->m_cprLat[0]);
                 if (latEven >= 270.0f)
                     latEven -= 360.0f;
+                else if (latEven <= -270.0f)
+                    latEven += 360.0f;
                 latOdd = dLatOdd * ((j % 59) + aircraft->m_cprLat[1]);
                 if (latOdd >= 270.0f)
                     latOdd -= 360.0f;
+                else if (latOdd <= -270.0f)
+                    latOdd += 360.0f;
                 if (aircraft->m_cprTime[0] >= aircraft->m_cprTime[1])
                     latitude = latEven;
                 else
@@ -980,8 +992,10 @@ bool ADSBDemodGUI::handleMessage(const Message& message)
     {
         ADSBDemodReport::MsgReportADSB& report = (ADSBDemodReport::MsgReportADSB&) message;
         handleADSB(
-            report.getData(), report.getDateTime(),
-            report.getPreambleCorrelation());
+            report.getData(),
+            report.getDateTime(),
+            report.getPreambleCorrelation(),
+            report.getCorrelationOnes());
         return true;
     }
     else if (ADSBDemodReport::MsgReportDemodStats::match(message))
@@ -1516,7 +1530,7 @@ void ADSBDemodGUI::on_displaySettings_clicked(bool checked)
     if (dialog.exec() == QDialog::Accepted)
     {
         bool unitsChanged = m_settings.m_siUnits != dialog.m_siUnits;
-        
+
         m_settings.m_removeTimeout = dialog.m_removeTimeout;
         m_settings.m_airportRange = dialog.m_airportRange;
         m_settings.m_airportMinimumSize = dialog.m_airportMinimumSize;
@@ -1867,6 +1881,7 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->setItem(row, ADSB_COL_TIME, new QTableWidgetItem("99:99:99"));
     ui->adsbData->setItem(row, ADSB_COL_FRAMECOUNT, new QTableWidgetItem("Frames"));
     ui->adsbData->setItem(row, ADSB_COL_CORRELATION, new QTableWidgetItem("0.001/0.001/0.001"));
+    ui->adsbData->setItem(row, ADSB_COL_RSSI, new QTableWidgetItem("-100.0"));
     ui->adsbData->resizeColumnsToContents();
     ui->adsbData->removeCellWidget(row, ADSB_COL_ICAO);
     ui->adsbData->removeCellWidget(row, ADSB_COL_FLIGHT);
@@ -1891,5 +1906,6 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->removeCellWidget(row, ADSB_COL_TIME);
     ui->adsbData->removeCellWidget(row, ADSB_COL_FRAMECOUNT);
     ui->adsbData->removeCellWidget(row, ADSB_COL_CORRELATION);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_RSSI);
     ui->adsbData->setRowCount(row);
 }

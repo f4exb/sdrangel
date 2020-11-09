@@ -147,6 +147,7 @@ struct Aircraft {
     QTableWidgetItem *m_timeItem;
     QTableWidgetItem *m_adsbFrameCountItem;
     QTableWidgetItem *m_correlationItem;
+    QTableWidgetItem *m_rssiItem;
 
     Aircraft(ADSBDemodGUI *gui) :
         m_icao(0),
@@ -201,6 +202,7 @@ struct Aircraft {
         m_timeItem = new QTableWidgetItem();
         m_adsbFrameCountItem = new QTableWidgetItem();
         m_correlationItem = new QTableWidgetItem();
+        m_rssiItem = new QTableWidgetItem();
     }
 };
 
@@ -458,6 +460,7 @@ private:
     AzEl m_azEl;                        // Position of station
     Aircraft *m_trackAircraft;          // Aircraft we want to track in Channel Report
     MovingAverageUtil<float, double, 10> m_correlationAvg;
+    MovingAverageUtil<float, double, 10> m_correlationOnesAvg;
     Aircraft *m_highlightAircraft;      // Aircraft we want to highlight, when selected in table
 
     float m_currentAirportRange;        // Current settings, so we only update if changed
@@ -479,7 +482,11 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void updatePosition(Aircraft *aircraft);
-    void handleADSB(const QByteArray data, const QDateTime dateTime, float correlation);
+    void handleADSB(
+        const QByteArray data,
+        const QDateTime dateTime,
+        float correlation,
+        float correlationOnes);
     void resizeTable();
     QString getDataDir();
     QString getAirportDBFilename();

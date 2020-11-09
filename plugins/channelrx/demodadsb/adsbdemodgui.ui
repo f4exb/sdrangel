@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
+    <width>384</width>
     <height>1046</height>
    </rect>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>340</width>
+     <width>381</width>
      <height>141</height>
     </rect>
    </property>
@@ -327,7 +327,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="demodModeS">
+       <widget class="ButtonSwitch" name="demodModeS">
         <property name="toolTip">
          <string>Demodulate all Mode-S frames, not just ADS-B</string>
         </property>
@@ -347,7 +347,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="correlateFullPreamble">
+       <widget class="ButtonSwitch" name="correlateFullPreamble">
         <property name="toolTip">
          <string>Correlate against full preamble.</string>
         </property>
@@ -378,16 +378,16 @@
          <string>Correlation threshold in dB. Lower values will increase the number of frames that can be received, but require more processing and possibly result in invalid frames.</string>
         </property>
         <property name="minimum">
-         <number>-450</number>
+         <number>0</number>
         </property>
         <property name="maximum">
-         <number>0</number>
+         <number>200</number>
         </property>
         <property name="pageStep">
          <number>1</number>
         </property>
         <property name="value">
-         <number>0</number>
+         <number>100</number>
         </property>
        </widget>
       </item>
@@ -400,7 +400,7 @@
          </size>
         </property>
         <property name="text">
-         <string>-15.0</string>
+         <string>20.0</string>
         </property>
        </widget>
       </item>
@@ -451,7 +451,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="flightPaths">
+       <widget class="ButtonSwitch" name="flightPaths">
         <property name="toolTip">
          <string>Display flight paths</string>
         </property>
@@ -471,7 +471,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="feed">
+       <widget class="ButtonSwitch" name="feed">
         <property name="toolTip">
          <string>Enable feeding of received ADS-B messages to the specifed server. Right click for settings.</string>
         </property>
@@ -547,7 +547,7 @@
     <rect>
      <x>0</x>
      <y>140</y>
-     <width>341</width>
+     <width>381</width>
      <height>291</height>
     </rect>
    </property>
@@ -765,6 +765,11 @@
         <string>Correlation values for received frames. min/avg/max</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>RSSI</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>
@@ -774,7 +779,7 @@
     <rect>
      <x>10</x>
      <y>450</y>
-     <width>331</width>
+     <width>361</width>
      <height>581</height>
     </rect>
    </property>
@@ -856,6 +861,11 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

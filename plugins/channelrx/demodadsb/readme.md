@@ -116,7 +116,8 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 * Owner - The owner of the aircraft. (DB)
 * Updated - The local time at which the last ADS-B message was received.
 * RX Frames - A count of the number of ADS-B frames received from this aircraft.
-* Correlation - Displays the minimun, average and maximum of the preamable correlation in dB for each recevied frame. These values can be used to help select a threshold setting.
+* Correlation - Displays the minimun, average and maximum of the preamable correlation in dB for each recevied frame. These values can be used to help select a threshold setting. This correlation value is the ratio between the presence and absence of the signal corresponding to the "ones" and the "zeros" of the sync word adjusted by the bits ratio. It can be interpreted as a SNR estimation.
+* RSSI - This Received Signal Strength Indicator is based on the signal power during correlation estimation. This is the power sum during the expected presence of the signal i.e. the "ones" of the sync word.
 
 If an ADS-B frame has not been received from an aircraft for 60 seconds, the aircraft is removed from the table and map. This timeout can be adjusted in the Display Settings dialog.
 

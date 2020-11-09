@@ -74,8 +74,7 @@ private:
     ADSBDemodSink *m_sink;
     ADSBDemodStats m_demodStats;
     Real m_correlationThresholdLinear;
-    Real m_correlationZerosScale;
-    Real m_correlationOnesScale;
+    Real m_correlationScale;
     crcadsb m_crc;                      //!< Have as member to avoid recomputing LUT
 };
 
