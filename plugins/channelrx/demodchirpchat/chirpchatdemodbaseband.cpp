@@ -21,45 +21,45 @@
 #include "dsp/dspcommands.h"
 #include "dsp/downchannelizer.h"
 
-#include "lorademodbaseband.h"
+#include "chirpchatdemodbaseband.h"
 
-MESSAGE_CLASS_DEFINITION(LoRaDemodBaseband::MsgConfigureLoRaDemodBaseband, Message)
+MESSAGE_CLASS_DEFINITION(ChirpChatDemodBaseband::MsgConfigureChirpChatDemodBaseband, Message)
 
-LoRaDemodBaseband::LoRaDemodBaseband() :
+ChirpChatDemodBaseband::ChirpChatDemodBaseband() :
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 
-    qDebug("LoRaDemodBaseband::LoRaDemodBaseband");
+    qDebug("ChirpChatDemodBaseband::ChirpChatDemodBaseband");
     QObject::connect(
         &m_sampleFifo,
         &SampleSinkFifo::dataReady,
         this,
-        &LoRaDemodBaseband::handleData,
+        &ChirpChatDemodBaseband::handleData,
         Qt::QueuedConnection
     );
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
-LoRaDemodBaseband::~LoRaDemodBaseband()
+ChirpChatDemodBaseband::~ChirpChatDemodBaseband()
 {
     delete m_channelizer;
 }
 
-void LoRaDemodBaseband::reset()
+void ChirpChatDemodBaseband::reset()
 {
     QMutexLocker mutexLocker(&m_mutex);
     m_sampleFifo.reset();
 }
 
-void LoRaDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
+void ChirpChatDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);
 }
 
-void LoRaDemodBaseband::handleData()
+void ChirpChatDemodBaseband::handleData()
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -86,7 +86,7 @@ void LoRaDemodBaseband::handleData()
     }
 }
 
-void LoRaDemodBaseband::handleInputMessages()
+void ChirpChatDemodBaseband::handleInputMessages()
 {
 	Message* message;
 
@@ -98,13 +98,13 @@ void LoRaDemodBaseband::handleInputMessages()
 	}
 }
 
-bool LoRaDemodBaseband::handleMessage(const Message& cmd)
+bool ChirpChatDemodBaseband::handleMessage(const Message& cmd)
 {
-    if (MsgConfigureLoRaDemodBaseband::match(cmd))
+    if (MsgConfigureChirpChatDemodBaseband::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureLoRaDemodBaseband& cfg = (MsgConfigureLoRaDemodBaseband&) cmd;
-        qDebug() << "LoRaDemodBaseband::handleMessage: MsgConfigureLoRaDemodBaseband";
+        MsgConfigureChirpChatDemodBaseband& cfg = (MsgConfigureChirpChatDemodBaseband&) cmd;
+        qDebug() << "ChirpChatDemodBaseband::handleMessage: MsgConfigureChirpChatDemodBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
 
@@ -114,12 +114,12 @@ bool LoRaDemodBaseband::handleMessage(const Message& cmd)
     {
         QMutexLocker mutexLocker(&m_mutex);
         DSPSignalNotification& notif = (DSPSignalNotification&) cmd;
-        qDebug() << "LoRaDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
+        qDebug() << "ChirpChatDemodBaseband::handleMessage: DSPSignalNotification: basebandSampleRate: " << notif.getSampleRate();
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(
             m_channelizer->getChannelSampleRate(),
-            LoRaDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
+            ChirpChatDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
             m_channelizer->getChannelFrequencyOffset()
         );
 
@@ -131,18 +131,18 @@ bool LoRaDemodBaseband::handleMessage(const Message& cmd)
     }
 }
 
-void LoRaDemodBaseband::applySettings(const LoRaDemodSettings& settings, bool force)
+void ChirpChatDemodBaseband::applySettings(const ChirpChatDemodSettings& settings, bool force)
 {
     if ((settings.m_bandwidthIndex != m_settings.m_bandwidthIndex)
-     || (settings.m_centerFrequency != m_settings.m_centerFrequency) || force)
+     || (settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
         m_channelizer->setChannelization(
-            LoRaDemodSettings::bandwidths[settings.m_bandwidthIndex],
-            settings.m_centerFrequency
+            ChirpChatDemodSettings::bandwidths[settings.m_bandwidthIndex]*ChirpChatDemodSettings::oversampling,
+            settings.m_inputFrequencyOffset
         );
         m_sink.applyChannelSettings(
             m_channelizer->getChannelSampleRate(),
-            LoRaDemodSettings::bandwidths[settings.m_bandwidthIndex],
+            ChirpChatDemodSettings::bandwidths[settings.m_bandwidthIndex],
             m_channelizer->getChannelFrequencyOffset()
         );
     }
@@ -152,18 +152,18 @@ void LoRaDemodBaseband::applySettings(const LoRaDemodSettings& settings, bool fo
     m_settings = settings;
 }
 
-int LoRaDemodBaseband::getChannelSampleRate() const
+int ChirpChatDemodBaseband::getChannelSampleRate() const
 {
     return m_channelizer->getChannelSampleRate();
 }
 
 
-void LoRaDemodBaseband::setBasebandSampleRate(int sampleRate)
+void ChirpChatDemodBaseband::setBasebandSampleRate(int sampleRate)
 {
     m_channelizer->setBasebandSampleRate(sampleRate);
     m_sink.applyChannelSettings(
         m_channelizer->getChannelSampleRate(),
-        LoRaDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
+        ChirpChatDemodSettings::bandwidths[m_settings.m_bandwidthIndex],
         m_channelizer->getChannelFrequencyOffset()
     );
 }

@@ -21,6 +21,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModReport"
     BFMDemodReport:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+    ChirpChatDemodReport:
+      $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
     DSDDemodReport:
       $ref: "/doc/swagger/include/DSDDemod.yaml#/DSDDemodReport"
     IEEE_802_15_4_ModReport:

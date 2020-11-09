@@ -29,6 +29,7 @@
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
+#include "SWGChirpChatDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSinkSettings.h"
@@ -102,6 +103,9 @@ public:
 
     SWGChannelAnalyzerSettings* getChannelAnalyzerSettings();
     void setChannelAnalyzerSettings(SWGChannelAnalyzerSettings* channel_analyzer_settings);
+
+    SWGChirpChatDemodSettings* getChirpChatDemodSettings();
+    void setChirpChatDemodSettings(SWGChirpChatDemodSettings* chirp_chat_demod_settings);
 
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
@@ -202,6 +206,9 @@ private:
 
     SWGChannelAnalyzerSettings* channel_analyzer_settings;
     bool m_channel_analyzer_settings_isSet;
+
+    SWGChirpChatDemodSettings* chirp_chat_demod_settings;
+    bool m_chirp_chat_demod_settings_isSet;
 
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;
