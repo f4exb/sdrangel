@@ -57,7 +57,7 @@ void ADSBDemodSinkWorker::run()
          << " samplesPerChip: " << samplesPerChip
          << " samplesPerBit: " << samplesPerBit
          << " correlateFullPreamble: " << m_settings.m_correlateFullPreamble
-         << " correlationZerosScale: " << m_correlationZerosScale
+         << " correlationScale: " << m_correlationScale
          << " correlationThreshold: " << m_settings.m_correlationThreshold;
 
     int readIdx = m_sink->m_samplesPerFrame - 1;
@@ -127,7 +127,7 @@ void ADSBDemodSinkWorker::run()
             }
         }
 
-        // Use the difference rather than absolute value, as we don't care how powerful the signal
+        // Use the ratio of ones power over zeros power, as we don't care how powerful the signal
         // is, just whether there is a good correlation with the preamble. The absolute value varies
         // too much with different radios, AGC settings and and the noise floor is not constant
         // (E.g: it's quite possible to receive multiple frames simultaneously, so we don't
@@ -135,11 +135,11 @@ void ADSBDemodSinkWorker::run()
         // a stronger signals 0 chip position. Similarly a strong signal in an adjacent
         // channel may casue AGC to reduce gain, reducing the ampltiude of an otherwise
         // strong signal, as well as the noise floor)
-        // The scale factors account for different values of samplesPerBit and the different
-        // number of zeros and ones in the preamble
+        // The threshold accounts for the different number of zeros and ones in the preamble
         // If the sum of ones is exactly 0, it's probably no signal
-        Real preambleCorrelation = (preambleCorrelationOnes * m_correlationZerosScale)
-                                   - (preambleCorrelationZeros * m_correlationOnesScale);
+
+        Real preambleCorrelation = preambleCorrelationOnes/preambleCorrelationZeros; // without one/zero ratio correction
+
         if ((preambleCorrelation > m_correlationThresholdLinear) && (preambleCorrelationOnes != 0.0f))
         {
             m_demodStats.m_correlatorMatches++;
@@ -203,7 +203,8 @@ void ADSBDemodSinkWorker::run()
                     {
                         ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                             QByteArray((char*)data, sizeof(data)),
-                            preambleCorrelation);
+                            preambleCorrelation * m_correlationScale,
+                            preambleCorrelationOnes / samplesPerChip);
                         m_sink->getMessageQueueToGUI()->push(msg);
                     }
                     // Pass to worker to feed to other servers
@@ -211,7 +212,8 @@ void ADSBDemodSinkWorker::run()
                     {
                         ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                             QByteArray((char*)data, sizeof(data)),
-                            preambleCorrelation);
+                            preambleCorrelation * m_correlationScale,
+                            preambleCorrelationOnes / samplesPerChip);
                         m_sink->getMessageQueueToWorker()->push(msg);
                     }
                 }
@@ -244,7 +246,8 @@ void ADSBDemodSinkWorker::run()
                         {
                             ADSBDemodReport::MsgReportADSB *msg = ADSBDemodReport::MsgReportADSB::create(
                                 QByteArray((char*)data, sizeof(data)),
-                                preambleCorrelation);
+                                preambleCorrelation * m_correlationScale,
+                                preambleCorrelationOnes / samplesPerChip);
                             m_sink->getMessageQueueToWorker()->push(msg);
                         }
                     }
@@ -325,21 +328,17 @@ void ADSBDemodSinkWorker::handleInputMessages()
             ADSBDemodSettings settings = cfg->getSettings();
             bool force = cfg->getForce();
 
+            if (settings.m_correlateFullPreamble) {
+                m_correlationScale = 3.0;
+            } else {
+                m_correlationScale = 2.0;
+            }
+
             if ((m_settings.m_correlationThreshold != settings.m_correlationThreshold) || force)
             {
                 m_correlationThresholdLinear = CalcDb::powerFromdB(settings.m_correlationThreshold);
+                m_correlationThresholdLinear /= m_correlationScale;
                 qDebug() << "m_correlationThresholdLinear: " << m_correlationThresholdLinear;
-            }
-
-            if (settings.m_correlateFullPreamble)
-            {
-                m_correlationOnesScale = 1.0f / settings.m_samplesPerBit;
-                m_correlationZerosScale = 2.0 * 1.0f / settings.m_samplesPerBit; // As 2x more 0s than 1s
-            }
-            else
-            {
-                m_correlationOnesScale = 1.0f / settings.m_samplesPerBit;
-                m_correlationZerosScale = 3.0 * 1.0f / settings.m_samplesPerBit; // As 3x more 0s than 1s
             }
 
             m_settings = settings;

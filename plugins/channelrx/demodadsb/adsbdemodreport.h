@@ -38,21 +38,32 @@ public:
         QByteArray getData() const { return m_data; }
         QDateTime getDateTime() const { return m_dateTime; }
         float getPreambleCorrelation() const { return m_preambleCorrelation; }
+        float getCorrelationOnes() const { return m_correlationOnes; }
 
-        static MsgReportADSB* create(QByteArray data, float preambleCorrelation)
+        static MsgReportADSB* create(
+            QByteArray data,
+            float preambleCorrelation,
+            float correlationOnes
+        )
         {
-            return new MsgReportADSB(data, preambleCorrelation);
+            return new MsgReportADSB(data, preambleCorrelation, correlationOnes);
         }
 
     private:
         QByteArray m_data;
         QDateTime m_dateTime;
         float m_preambleCorrelation;
+        float m_correlationOnes;
 
-        MsgReportADSB(QByteArray data, float preambleCorrelation) :
+        MsgReportADSB(
+            QByteArray data,
+            float preambleCorrelation,
+            float correlationOnes
+        ) :
             Message(),
             m_data(data),
-            m_preambleCorrelation(preambleCorrelation)
+            m_preambleCorrelation(preambleCorrelation),
+            m_correlationOnes(correlationOnes)
         {
             m_dateTime = QDateTime::currentDateTime();
         }

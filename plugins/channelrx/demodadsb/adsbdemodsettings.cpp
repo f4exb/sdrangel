@@ -34,7 +34,7 @@ void ADSBDemodSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
     m_rfBandwidth = 2*1300000;
-    m_correlationThreshold = -20.0f;
+    m_correlationThreshold = 10.0f; //<! ones/zero powers correlation threshold in dB
     m_samplesPerBit = 4;
     m_removeTimeout = 60;
     m_feedEnabled = false;
