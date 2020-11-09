@@ -3890,6 +3890,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
             deviceSettings->getSdrPlaySettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "sigMFFileInputSettings")
+        {
+            deviceSettings->setSigMfFileInputSettings(new SWGSDRangel::SWGSigMFFileInputSettings());
+            deviceSettings->getSigMfFileInputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "soapySDRInputSettings")
         {
             processSoapySDRSettings(deviceSettings, settingsJsonObject, deviceSettingsKeys, true);
@@ -3974,20 +3979,20 @@ bool WebAPIRequestMapper::getDeviceActions(
 
     if (deviceKeys.contains(deviceActionsKey) && deviceActionsJson[deviceActionsKey].isObject())
     {
-        // QJsonObject actionsJsonObject = deviceActionsJson[deviceActionsKey].toObject();
-        // deviceActionsKeys = actionsJsonObject.keys();
+        QJsonObject actionsJsonObject = deviceActionsJson[deviceActionsKey].toObject();
+        deviceActionsKeys = actionsJsonObject.keys();
 
-        // if (deviceActionsKey == "xtrxInputActions")
-        // {
-        //     deviceActions->setXtrxInputActions(new SWGSDRangel::SWGXtrxInputActions());
-        //     deviceActions->getXtrxInputActions()->fromJsonObject(actionsJsonObject);
-        // }
-        // else
-        // {
+        if (deviceActionsKey == "SigMFFileInputActions")
+        {
+            deviceActions->setSigMfFileInputActions(new SWGSDRangel::SWGSigMFFileInputActions());
+            deviceActions->getSigMfFileInputActions()->fromJsonObject(actionsJsonObject);
+        }
+        else
+        {
             return false;
-        // }
+        }
 
-        // return true;
+        return true;
     }
     else
     {

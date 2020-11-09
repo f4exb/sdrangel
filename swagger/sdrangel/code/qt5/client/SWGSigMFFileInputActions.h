@@ -11,68 +11,72 @@
  */
 
 /*
- * SWGDeviceActions.h
+ * SWGSigMFFileInputActions.h
  *
- * Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present.
+ * SigMFFileInput
  */
 
-#ifndef SWGDeviceActions_H_
-#define SWGDeviceActions_H_
+#ifndef SWGSigMFFileInputActions_H_
+#define SWGSigMFFileInputActions_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSigMFFileInputActions.h"
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDeviceActions: public SWGObject {
+class SWG_API SWGSigMFFileInputActions: public SWGObject {
 public:
-    SWGDeviceActions();
-    SWGDeviceActions(QString* json);
-    virtual ~SWGDeviceActions();
+    SWGSigMFFileInputActions();
+    SWGSigMFFileInputActions(QString* json);
+    virtual ~SWGSigMFFileInputActions();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDeviceActions* fromJson(QString &jsonString) override;
+    virtual SWGSigMFFileInputActions* fromJson(QString &jsonString) override;
 
-    QString* getDeviceHwType();
-    void setDeviceHwType(QString* device_hw_type);
+    qint32 getPlayTrack();
+    void setPlayTrack(qint32 play_track);
 
-    qint32 getDirection();
-    void setDirection(qint32 direction);
+    qint32 getPlayRecord();
+    void setPlayRecord(qint32 play_record);
 
-    qint32 getOriginatorIndex();
-    void setOriginatorIndex(qint32 originator_index);
+    qint32 getSeekTrack();
+    void setSeekTrack(qint32 seek_track);
 
-    SWGSigMFFileInputActions* getSigMfFileInputActions();
-    void setSigMfFileInputActions(SWGSigMFFileInputActions* sig_mf_file_input_actions);
+    qint32 getSeekTrackMillis();
+    void setSeekTrackMillis(qint32 seek_track_millis);
+
+    qint32 getSeekRecordMillis();
+    void setSeekRecordMillis(qint32 seek_record_millis);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* device_hw_type;
-    bool m_device_hw_type_isSet;
+    qint32 play_track;
+    bool m_play_track_isSet;
 
-    qint32 direction;
-    bool m_direction_isSet;
+    qint32 play_record;
+    bool m_play_record_isSet;
 
-    qint32 originator_index;
-    bool m_originator_index_isSet;
+    qint32 seek_track;
+    bool m_seek_track_isSet;
 
-    SWGSigMFFileInputActions* sig_mf_file_input_actions;
-    bool m_sig_mf_file_input_actions_isSet;
+    qint32 seek_track_millis;
+    bool m_seek_track_millis_isSet;
+
+    qint32 seek_record_millis;
+    bool m_seek_record_millis_isSet;
 
 };
 
 }
 
-#endif /* SWGDeviceActions_H_ */
+#endif /* SWGSigMFFileInputActions_H_ */

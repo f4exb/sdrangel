@@ -34,6 +34,8 @@ SWGDeviceActions::SWGDeviceActions() {
     m_direction_isSet = false;
     originator_index = 0;
     m_originator_index_isSet = false;
+    sig_mf_file_input_actions = nullptr;
+    m_sig_mf_file_input_actions_isSet = false;
 }
 
 SWGDeviceActions::~SWGDeviceActions() {
@@ -48,6 +50,8 @@ SWGDeviceActions::init() {
     m_direction_isSet = false;
     originator_index = 0;
     m_originator_index_isSet = false;
+    sig_mf_file_input_actions = new SWGSigMFFileInputActions();
+    m_sig_mf_file_input_actions_isSet = false;
 }
 
 void
@@ -57,6 +61,9 @@ SWGDeviceActions::cleanup() {
     }
 
 
+    if(sig_mf_file_input_actions != nullptr) { 
+        delete sig_mf_file_input_actions;
+    }
 }
 
 SWGDeviceActions*
@@ -75,6 +82,8 @@ SWGDeviceActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&direction, pJson["direction"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_index, pJson["originatorIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_input_actions, pJson["sigMFFileInputActions"], "SWGSigMFFileInputActions", "SWGSigMFFileInputActions");
     
 }
 
@@ -100,6 +109,9 @@ SWGDeviceActions::asJsonObject() {
     }
     if(m_originator_index_isSet){
         obj->insert("originatorIndex", QJsonValue(originator_index));
+    }
+    if((sig_mf_file_input_actions != nullptr) && (sig_mf_file_input_actions->isSet())){
+        toJsonValue(QString("sigMFFileInputActions"), sig_mf_file_input_actions, obj, QString("SWGSigMFFileInputActions"));
     }
 
     return obj;
@@ -135,6 +147,16 @@ SWGDeviceActions::setOriginatorIndex(qint32 originator_index) {
     this->m_originator_index_isSet = true;
 }
 
+SWGSigMFFileInputActions*
+SWGDeviceActions::getSigMfFileInputActions() {
+    return sig_mf_file_input_actions;
+}
+void
+SWGDeviceActions::setSigMfFileInputActions(SWGSigMFFileInputActions* sig_mf_file_input_actions) {
+    this->sig_mf_file_input_actions = sig_mf_file_input_actions;
+    this->m_sig_mf_file_input_actions_isSet = true;
+}
+
 
 bool
 SWGDeviceActions::isSet(){
@@ -147,6 +169,9 @@ SWGDeviceActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_input_actions && sig_mf_file_input_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

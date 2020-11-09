@@ -2181,6 +2181,39 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.Capture = {
+  "properties" : {
+    "tsms" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Timestamp in milliseconds since epoch of capture start"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Track center frequency in Hz"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "description" : "Track sample rate in S/s"
+    },
+    "sampleStart" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Start of track in nymber of samples"
+    },
+    "length" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Track length in number of samples"
+    },
+    "cumulativeTime" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Time in milliseconds of track start since beginning of record"
+    }
+  }
+};
             defs.Channel = {
   "required" : [ "deltaFrequency", "id", "index", "title", "uid" ],
   "properties" : {
@@ -3258,6 +3291,9 @@ margin-bottom: 20px;
     "originatorIndex" : {
       "type" : "integer",
       "description" : "Optional for reverse API. This is the device set index from where the message comes from."
+    },
+    "sigMFFileInputActions" : {
+      "$ref" : "#/definitions/SigMFFileInputActions"
     }
   },
   "description" : "Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present."
@@ -3382,6 +3418,9 @@ margin-bottom: 20px;
     },
     "sdrPlayReport" : {
       "$ref" : "#/definitions/SDRPlayReport"
+    },
+    "sigMFFileInputReport" : {
+      "$ref" : "#/definitions/SigMFFileInputReport"
     },
     "soapySDRInputReport" : {
       "$ref" : "#/definitions/SoapySDRReport"
@@ -3534,6 +3573,9 @@ margin-bottom: 20px;
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
+    },
+    "sigMFFileInputSettings" : {
+      "$ref" : "#/definitions/SigMFFileInputSettings"
     },
     "soapySDRInputSettings" : {
       "$ref" : "#/definitions/SoapySDRInputSettings"
@@ -7366,6 +7408,138 @@ margin-bottom: 20px;
     }
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
+};
+            defs.SigMFFileInputActions = {
+  "properties" : {
+    "playTrack" : {
+      "type" : "integer",
+      "description" : "Play IQ stream action\n  * 0 - stop playing\n  * 1 - start playing current track\n"
+    },
+    "playRecord" : {
+      "type" : "integer",
+      "description" : "Play IQ stream action\n  * 0 - stop playing\n  * 1 - start playing\n"
+    },
+    "seekTrack" : {
+      "type" : "integer",
+      "description" : "Move to beginning of track given its number. Must stop first."
+    },
+    "seekTrackMillis" : {
+      "type" : "integer",
+      "description" : "Move to this number / 1000 raio in track. Must stop first."
+    },
+    "seekRecordMillis" : {
+      "type" : "integer",
+      "description" : "Move to this number / 1000 raio in full record. Must stop first."
+    }
+  },
+  "description" : "SigMFFileInput"
+};
+            defs.SigMFFileInputReport = {
+  "properties" : {
+    "sampleSize" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bits"
+    },
+    "sampleBytes" : {
+      "type" : "integer",
+      "description" : "Record sample size in number of bytes"
+    },
+    "sampleFormat" : {
+      "type" : "integer",
+      "description" : "Sample format * 0 - integer * 1 - float\n"
+    },
+    "sampleSigned" : {
+      "type" : "integer",
+      "description" : "Sample signed status\n  * 0 - unsigned\n  * 1 - signed\n"
+    },
+    "sampleSwapIQ" : {
+      "type" : "integer",
+      "description" : "Sample I/Q swap\n  * 0 - I/Q\n  * 1 - Q/I\n"
+    },
+    "crcStatus" : {
+      "type" : "integer",
+      "description" : "CRC status\n  * 0 - no CRC available\n  * 1 - CRC (SHA512) OK\n  * 2 - CRC (SHA512) KO\n"
+    },
+    "totalBytesStatus" : {
+      "type" : "integer",
+      "description" : "Total number of bytes in data file vs meta data\n  * 0 - mismatch\n  * 1 - match\n"
+    },
+    "captures" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Capture"
+      }
+    },
+    "trackNumber" : {
+      "type" : "integer",
+      "description" : "Current track number"
+    },
+    "absoluteTimeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Absolute current time in milliseconds since epoch"
+    },
+    "elapsedRecordTimeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Elapsed record time in milliseconds"
+    },
+    "recordSamplesRatio" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Elapsed samples ratio to total samples"
+    },
+    "elapsedTrackimeMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Elapsed track time in milliseconds"
+    },
+    "trackSamplesRatio" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Elapsed samples ratio to track samples"
+    },
+    "recordDurationMs" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Record duration time in milliseconds"
+    }
+  },
+  "description" : "SigMFFileInput"
+};
+            defs.SigMFFileInputSettings = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string",
+      "description" : "The name (path) of the file being read without extension"
+    },
+    "accelerationFactor" : {
+      "type" : "integer",
+      "description" : "Playback acceleration (1 if normal speed)"
+    },
+    "trackLoop" : {
+      "type" : "integer",
+      "description" : "1 if playing track in a loop else 0"
+    },
+    "fullLoop" : {
+      "type" : "integer",
+      "description" : "1 if playing full file in a loop else 0"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "SigMFFileInput"
 };
             defs.SimplePTTActions = {
   "properties" : {
@@ -40625,7 +40799,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-09T22:06:31.158+01:00
+              Generated 2020-11-10T00:25:24.966+01:00
             </div>
           </div>
       </div>

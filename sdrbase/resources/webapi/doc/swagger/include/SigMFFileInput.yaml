@@ -1,0 +1,150 @@
+SigMFFileInputSettings:
+  description: SigMFFileInput
+  properties:
+    fileName:
+      description: The name (path) of the file being read without extension
+      type: string
+    accelerationFactor:
+      description: Playback acceleration (1 if normal speed)
+      type: integer
+    trackLoop:
+      description: 1 if playing track in a loop else 0
+      type: integer
+    fullLoop:
+      description: 1 if playing full file in a loop else 0
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+SigMFFileInputReport:
+  description: SigMFFileInput
+  properties:
+    sampleSize:
+      description: Record sample size in number of bits
+      type: integer
+    sampleBytes:
+      description: Record sample size in number of bytes
+      type: integer
+    sampleFormat:
+      type: integer
+      description: >
+        Sample format
+        * 0 - integer
+        * 1 - float
+    sampleSigned:
+      type: integer
+      description: >
+        Sample signed status
+          * 0 - unsigned
+          * 1 - signed
+    sampleSwapIQ:
+      type: integer
+      description: >
+        Sample I/Q swap
+          * 0 - I/Q
+          * 1 - Q/I
+    crcStatus:
+      type: integer
+      description: >
+        CRC status
+          * 0 - no CRC available
+          * 1 - CRC (SHA512) OK
+          * 2 - CRC (SHA512) KO
+    totalBytesStatus:
+      type: integer
+      description: >
+        Total number of bytes in data file vs meta data
+          * 0 - mismatch
+          * 1 - match
+    captures:
+      type: array
+      items:
+        $ref: "#/definitions/Capture"
+    trackNumber:
+      description: Current track number
+      type: integer
+    absoluteTimeMs:
+      description: Absolute current time in milliseconds since epoch
+      type: integer
+      format: int64
+    elapsedRecordTimeMs:
+      description: Elapsed record time in milliseconds
+      type: integer
+      format: int64
+    recordSamplesRatio:
+      description: Elapsed samples ratio to total samples
+      type: number
+      format: float
+    elapsedTrackimeMs:
+      description: Elapsed track time in milliseconds
+      type: integer
+      format: int64
+    trackSamplesRatio:
+      description: Elapsed samples ratio to track samples
+      type: number
+      format: float
+    recordDurationMs:
+      description: Record duration time in milliseconds
+      type: integer
+      format: int64
+
+SigMFFileInputActions:
+  description: SigMFFileInput
+  properties:
+    playTrack:
+      type: integer
+      description: >
+        Play IQ stream action
+          * 0 - stop playing
+          * 1 - start playing current track
+    playRecord:
+      type: integer
+      description: >
+        Play IQ stream action
+          * 0 - stop playing
+          * 1 - start playing
+    seekTrack:
+      type: integer
+      description: Move to beginning of track given its number. Must stop first.
+    seekTrackMillis:
+      type: integer
+      description: Move to this number / 1000 raio in track. Must stop first.
+    seekRecordMillis:
+      type: integer
+      description: Move to this number / 1000 raio in full record. Must stop first.
+
+definitions:
+
+  Capture:
+    descripion: Capture (track) information
+    properties:
+      tsms:
+        description: Timestamp in milliseconds since epoch of capture start
+        type: integer
+        format: int64
+      centerFrequency:
+        description: Track center frequency in Hz
+        type: integer
+        format: int64
+      sampleRate:
+        description: Track sample rate in S/s
+        type: integer
+      sampleStart:
+        description: Start of track in nymber of samples
+        type: integer
+        format: int64
+      length:
+        description: Track length in number of samples
+        type: integer
+        format: int64
+      cumulativeTime:
+        description: Time in milliseconds of track start since beginning of record
+        type: integer
+        format: int64

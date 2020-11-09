@@ -18,6 +18,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/Airspy.yaml#/AirspySettings"
     airspyHFSettings:
       $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
+    audioInputSettings:
+      $ref: "/doc/swagger/include/AudioInput.yaml#/AudioInputSettings"
     bladeRF1InputSettings:
       $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
     bladeRF2InputSettings:
@@ -62,6 +64,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
     sdrPlaySettings:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+    sigMFFileInputSettings:
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
     soapySDRInputSettings:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
     soapySDROutputSettings:

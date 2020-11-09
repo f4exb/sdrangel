@@ -49,6 +49,7 @@
 #include "SWGBladeRF2OutputReport.h"
 #include "SWGBladeRF2OutputSettings.h"
 #include "SWGCWKeyerSettings.h"
+#include "SWGCapture.h"
 #include "SWGChannel.h"
 #include "SWGChannelActions.h"
 #include "SWGChannelAnalyzerSettings.h"
@@ -182,6 +183,9 @@
 #include "SWGSSBModSettings.h"
 #include "SWGSampleRate.h"
 #include "SWGSamplingDevice.h"
+#include "SWGSigMFFileInputActions.h"
+#include "SWGSigMFFileInputReport.h"
+#include "SWGSigMFFileInputSettings.h"
 #include "SWGSimplePTTActions.h"
 #include "SWGSimplePTTReport.h"
 #include "SWGSimplePTTSettings.h"
@@ -318,6 +322,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGCWKeyerSettings").compare(type) == 0) {
       return new SWGCWKeyerSettings();
+    }
+    if(QString("SWGCapture").compare(type) == 0) {
+      return new SWGCapture();
     }
     if(QString("SWGChannel").compare(type) == 0) {
       return new SWGChannel();
@@ -717,6 +724,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();
+    }
+    if(QString("SWGSigMFFileInputActions").compare(type) == 0) {
+      return new SWGSigMFFileInputActions();
+    }
+    if(QString("SWGSigMFFileInputReport").compare(type) == 0) {
+      return new SWGSigMFFileInputReport();
+    }
+    if(QString("SWGSigMFFileInputSettings").compare(type) == 0) {
+      return new SWGSigMFFileInputSettings();
     }
     if(QString("SWGSimplePTTActions").compare(type) == 0) {
       return new SWGSimplePTTActions();

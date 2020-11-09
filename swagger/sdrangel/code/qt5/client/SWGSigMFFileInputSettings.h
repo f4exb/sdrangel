@@ -11,18 +11,17 @@
  */
 
 /*
- * SWGDeviceActions.h
+ * SWGSigMFFileInputSettings.h
  *
- * Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present.
+ * SigMFFileInput
  */
 
-#ifndef SWGDeviceActions_H_
-#define SWGDeviceActions_H_
+#ifndef SWGSigMFFileInputSettings_H_
+#define SWGSigMFFileInputSettings_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSigMFFileInputActions.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -30,49 +29,73 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDeviceActions: public SWGObject {
+class SWG_API SWGSigMFFileInputSettings: public SWGObject {
 public:
-    SWGDeviceActions();
-    SWGDeviceActions(QString* json);
-    virtual ~SWGDeviceActions();
+    SWGSigMFFileInputSettings();
+    SWGSigMFFileInputSettings(QString* json);
+    virtual ~SWGSigMFFileInputSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDeviceActions* fromJson(QString &jsonString) override;
+    virtual SWGSigMFFileInputSettings* fromJson(QString &jsonString) override;
 
-    QString* getDeviceHwType();
-    void setDeviceHwType(QString* device_hw_type);
+    QString* getFileName();
+    void setFileName(QString* file_name);
 
-    qint32 getDirection();
-    void setDirection(qint32 direction);
+    qint32 getAccelerationFactor();
+    void setAccelerationFactor(qint32 acceleration_factor);
 
-    qint32 getOriginatorIndex();
-    void setOriginatorIndex(qint32 originator_index);
+    qint32 getTrackLoop();
+    void setTrackLoop(qint32 track_loop);
 
-    SWGSigMFFileInputActions* getSigMfFileInputActions();
-    void setSigMfFileInputActions(SWGSigMFFileInputActions* sig_mf_file_input_actions);
+    qint32 getFullLoop();
+    void setFullLoop(qint32 full_loop);
+
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* device_hw_type;
-    bool m_device_hw_type_isSet;
+    QString* file_name;
+    bool m_file_name_isSet;
 
-    qint32 direction;
-    bool m_direction_isSet;
+    qint32 acceleration_factor;
+    bool m_acceleration_factor_isSet;
 
-    qint32 originator_index;
-    bool m_originator_index_isSet;
+    qint32 track_loop;
+    bool m_track_loop_isSet;
 
-    SWGSigMFFileInputActions* sig_mf_file_input_actions;
-    bool m_sig_mf_file_input_actions_isSet;
+    qint32 full_loop;
+    bool m_full_loop_isSet;
+
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
 
 };
 
 }
 
-#endif /* SWGDeviceActions_H_ */
+#endif /* SWGSigMFFileInputSettings_H_ */

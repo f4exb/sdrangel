@@ -14,3 +14,5 @@ DeviceActions:
     originatorIndex:
       description: Optional for reverse API. This is the device set index from where the message comes from.
       type: integer
+    sigMFFileInputActions:
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputActions"

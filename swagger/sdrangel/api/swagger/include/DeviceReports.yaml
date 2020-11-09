@@ -45,6 +45,8 @@ DeviceReport:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputReport"
     sdrPlayReport:
       $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+    sigMFFileInputReport:
+      $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
     soapySDRInputReport:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     soapySDROutputReport:

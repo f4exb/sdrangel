@@ -11,68 +11,78 @@
  */
 
 /*
- * SWGDeviceActions.h
+ * SWGCapture.h
  *
- * Base device actions. Only the device actions corresponding to the device specified in the deviceHwType field is or should be present.
+ * 
  */
 
-#ifndef SWGDeviceActions_H_
-#define SWGDeviceActions_H_
+#ifndef SWGCapture_H_
+#define SWGCapture_H_
 
 #include <QJsonObject>
 
 
-#include "SWGSigMFFileInputActions.h"
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGDeviceActions: public SWGObject {
+class SWG_API SWGCapture: public SWGObject {
 public:
-    SWGDeviceActions();
-    SWGDeviceActions(QString* json);
-    virtual ~SWGDeviceActions();
+    SWGCapture();
+    SWGCapture(QString* json);
+    virtual ~SWGCapture();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGDeviceActions* fromJson(QString &jsonString) override;
+    virtual SWGCapture* fromJson(QString &jsonString) override;
 
-    QString* getDeviceHwType();
-    void setDeviceHwType(QString* device_hw_type);
+    qint64 getTsms();
+    void setTsms(qint64 tsms);
 
-    qint32 getDirection();
-    void setDirection(qint32 direction);
+    qint64 getCenterFrequency();
+    void setCenterFrequency(qint64 center_frequency);
 
-    qint32 getOriginatorIndex();
-    void setOriginatorIndex(qint32 originator_index);
+    qint32 getSampleRate();
+    void setSampleRate(qint32 sample_rate);
 
-    SWGSigMFFileInputActions* getSigMfFileInputActions();
-    void setSigMfFileInputActions(SWGSigMFFileInputActions* sig_mf_file_input_actions);
+    qint64 getSampleStart();
+    void setSampleStart(qint64 sample_start);
+
+    qint64 getLength();
+    void setLength(qint64 length);
+
+    qint64 getCumulativeTime();
+    void setCumulativeTime(qint64 cumulative_time);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* device_hw_type;
-    bool m_device_hw_type_isSet;
+    qint64 tsms;
+    bool m_tsms_isSet;
 
-    qint32 direction;
-    bool m_direction_isSet;
+    qint64 center_frequency;
+    bool m_center_frequency_isSet;
 
-    qint32 originator_index;
-    bool m_originator_index_isSet;
+    qint32 sample_rate;
+    bool m_sample_rate_isSet;
 
-    SWGSigMFFileInputActions* sig_mf_file_input_actions;
-    bool m_sig_mf_file_input_actions_isSet;
+    qint64 sample_start;
+    bool m_sample_start_isSet;
+
+    qint64 length;
+    bool m_length_isSet;
+
+    qint64 cumulative_time;
+    bool m_cumulative_time_isSet;
 
 };
 
 }
 
-#endif /* SWGDeviceActions_H_ */
+#endif /* SWGCapture_H_ */

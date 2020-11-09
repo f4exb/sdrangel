@@ -45,6 +45,8 @@ DeviceReport:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
     sdrPlayReport:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+    sigMFFileInputReport:
+      $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
     soapySDRInputReport:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDRReport"
     soapySDROutputReport:
