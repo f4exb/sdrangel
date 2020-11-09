@@ -58,6 +58,8 @@
 #include "SWGChannelsDetail.h"
 #include "SWGChirpChatDemodReport.h"
 #include "SWGChirpChatDemodSettings.h"
+#include "SWGChirpChatModReport.h"
+#include "SWGChirpChatModSettings.h"
 #include "SWGCommand.h"
 #include "SWGComplex.h"
 #include "SWGDATVDemodSettings.h"
@@ -342,6 +344,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGChirpChatDemodSettings").compare(type) == 0) {
       return new SWGChirpChatDemodSettings();
+    }
+    if(QString("SWGChirpChatModReport").compare(type) == 0) {
+      return new SWGChirpChatModReport();
+    }
+    if(QString("SWGChirpChatModSettings").compare(type) == 0) {
+      return new SWGChirpChatModSettings();
     }
     if(QString("SWGCommand").compare(type) == 0) {
       return new SWGCommand();

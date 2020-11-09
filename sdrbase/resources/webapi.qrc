@@ -18,6 +18,7 @@
         <file>webapi/doc/swagger/include/ChannelSettings.yaml</file>
         <file>webapi/doc/swagger/include/ChannelReport.yaml</file>
         <file>webapi/doc/swagger/include/ChirpChatDemod.yaml</file>
+        <file>webapi/doc/swagger/include/ChirpChatMod.yaml</file>
         <file>webapi/doc/swagger/include/Command.yaml</file>
         <file>webapi/doc/swagger/include/CWKeyer.yaml</file>
         <file>webapi/doc/swagger/include/DATVDemod.yaml</file>

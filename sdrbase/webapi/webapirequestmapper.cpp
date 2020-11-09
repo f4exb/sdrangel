@@ -3564,6 +3564,12 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setChirpChatDemodSettings(new SWGSDRangel::SWGChirpChatDemodSettings());
             channelSettings->getChirpChatDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "ChirpChatModSettings")
+        {
+            channelSettings->setChirpChatModSettings(new SWGSDRangel::SWGChirpChatModSettings());
+            channelSettings->getChirpChatModSettings()->init(); // contains a list of strings
+            channelSettings->getChirpChatModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "DATVDemodSettings")
         {
             channelSettings->setDatvDemodSettings(new SWGSDRangel::SWGDATVDemodSettings());
