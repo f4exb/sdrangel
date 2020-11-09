@@ -1,0 +1,32 @@
+AudioInputSettings:
+  description: AudioInput
+  properties:
+    device:
+      description: The name of the audio device
+      type: string
+    devSampleRate:
+      description: Audio sample rate
+      type: integer
+    volume:
+      type: number
+      format: float
+    log2Decim:
+      description: Decimation factor
+      type: integer
+    iqMapping:
+      type: integer
+      description: >
+        Audio channel to IQ mapping
+          * 0 - I=L, Q=0
+          * 1 - I=R, Q=0
+          * 2 - I=L, Q=R
+          * 3 - I=R, Q=L
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer

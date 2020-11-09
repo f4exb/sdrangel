@@ -38,6 +38,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_airspy_settings_isSet = false;
     airspy_hf_settings = nullptr;
     m_airspy_hf_settings_isSet = false;
+    audio_input_settings = nullptr;
+    m_audio_input_settings_isSet = false;
     blade_rf1_input_settings = nullptr;
     m_blade_rf1_input_settings_isSet = false;
     blade_rf2_input_settings = nullptr;
@@ -114,6 +116,8 @@ SWGDeviceSettings::init() {
     m_airspy_settings_isSet = false;
     airspy_hf_settings = new SWGAirspyHFSettings();
     m_airspy_hf_settings_isSet = false;
+    audio_input_settings = new SWGAudioInputSettings();
+    m_audio_input_settings_isSet = false;
     blade_rf1_input_settings = new SWGBladeRF1InputSettings();
     m_blade_rf1_input_settings_isSet = false;
     blade_rf2_input_settings = new SWGBladeRF2InputSettings();
@@ -186,6 +190,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(airspy_hf_settings != nullptr) { 
         delete airspy_hf_settings;
+    }
+    if(audio_input_settings != nullptr) { 
+        delete audio_input_settings;
     }
     if(blade_rf1_input_settings != nullptr) { 
         delete blade_rf1_input_settings;
@@ -297,6 +304,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&airspy_hf_settings, pJson["airspyHFSettings"], "SWGAirspyHFSettings", "SWGAirspyHFSettings");
     
+    ::SWGSDRangel::setValue(&audio_input_settings, pJson["audioInputSettings"], "SWGAudioInputSettings", "SWGAudioInputSettings");
+    
     ::SWGSDRangel::setValue(&blade_rf1_input_settings, pJson["bladeRF1InputSettings"], "SWGBladeRF1InputSettings", "SWGBladeRF1InputSettings");
     
     ::SWGSDRangel::setValue(&blade_rf2_input_settings, pJson["bladeRF2InputSettings"], "SWGBladeRF2InputSettings", "SWGBladeRF2InputSettings");
@@ -385,6 +394,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((airspy_hf_settings != nullptr) && (airspy_hf_settings->isSet())){
         toJsonValue(QString("airspyHFSettings"), airspy_hf_settings, obj, QString("SWGAirspyHFSettings"));
+    }
+    if((audio_input_settings != nullptr) && (audio_input_settings->isSet())){
+        toJsonValue(QString("audioInputSettings"), audio_input_settings, obj, QString("SWGAudioInputSettings"));
     }
     if((blade_rf1_input_settings != nullptr) && (blade_rf1_input_settings->isSet())){
         toJsonValue(QString("bladeRF1InputSettings"), blade_rf1_input_settings, obj, QString("SWGBladeRF1InputSettings"));
@@ -525,6 +537,16 @@ void
 SWGDeviceSettings::setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings) {
     this->airspy_hf_settings = airspy_hf_settings;
     this->m_airspy_hf_settings_isSet = true;
+}
+
+SWGAudioInputSettings*
+SWGDeviceSettings::getAudioInputSettings() {
+    return audio_input_settings;
+}
+void
+SWGDeviceSettings::setAudioInputSettings(SWGAudioInputSettings* audio_input_settings) {
+    this->audio_input_settings = audio_input_settings;
+    this->m_audio_input_settings_isSet = true;
 }
 
 SWGBladeRF1InputSettings*
@@ -835,6 +857,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(airspy_hf_settings && airspy_hf_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(audio_input_settings && audio_input_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(blade_rf1_input_settings && blade_rf1_input_settings->isSet()){

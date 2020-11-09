@@ -1575,6 +1575,44 @@ margin-bottom: 20px;
   },
   "description" : "Audio input device"
 };
+            defs.AudioInputSettings = {
+  "properties" : {
+    "device" : {
+      "type" : "string",
+      "description" : "The name of the audio device"
+    },
+    "devSampleRate" : {
+      "type" : "integer",
+      "description" : "Audio sample rate"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "log2Decim" : {
+      "type" : "integer",
+      "description" : "Decimation factor"
+    },
+    "iqMapping" : {
+      "type" : "integer",
+      "description" : "Audio channel to IQ mapping\n  * 0 - I=L, Q=0\n  * 1 - I=R, Q=0\n  * 2 - I=L, Q=R\n  * 3 - I=R, Q=L\n"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AudioInput"
+};
             defs.AudioOutputDevice = {
   "properties" : {
     "name" : {
@@ -3057,6 +3095,9 @@ margin-bottom: 20px;
     },
     "airspyHFSettings" : {
       "$ref" : "#/definitions/AirspyHFSettings"
+    },
+    "audioInputSettings" : {
+      "$ref" : "#/definitions/AudioInputSettings"
     },
     "bladeRF1InputSettings" : {
       "$ref" : "#/definitions/BladeRF1InputSettings"
@@ -40214,7 +40255,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-10-27T23:03:34.026+01:00
+              Generated 2020-11-09T16:43:08.421+01:00
             </div>
           </div>
       </div>

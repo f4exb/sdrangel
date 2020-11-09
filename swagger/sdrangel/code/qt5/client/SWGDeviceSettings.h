@@ -24,6 +24,7 @@
 
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspySettings.h"
+#include "SWGAudioInputSettings.h"
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
 #include "SWGBladeRF2InputSettings.h"
@@ -87,6 +88,9 @@ public:
 
     SWGAirspyHFSettings* getAirspyHfSettings();
     void setAirspyHfSettings(SWGAirspyHFSettings* airspy_hf_settings);
+
+    SWGAudioInputSettings* getAudioInputSettings();
+    void setAudioInputSettings(SWGAudioInputSettings* audio_input_settings);
 
     SWGBladeRF1InputSettings* getBladeRf1InputSettings();
     void setBladeRf1InputSettings(SWGBladeRF1InputSettings* blade_rf1_input_settings);
@@ -193,6 +197,9 @@ private:
 
     SWGAirspyHFSettings* airspy_hf_settings;
     bool m_airspy_hf_settings_isSet;
+
+    SWGAudioInputSettings* audio_input_settings;
+    bool m_audio_input_settings_isSet;
 
     SWGBladeRF1InputSettings* blade_rf1_input_settings;
     bool m_blade_rf1_input_settings_isSet;
