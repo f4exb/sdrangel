@@ -116,12 +116,13 @@ bool AudioInput::start()
         return false;
     }
 
+    // Call before creating thread, so we don't immediately stop it
+    applySettings(m_settings, true);
+
     m_thread = new AudioInputThread(&m_sampleFifo, &m_fifo);
     m_thread->setLog2Decimation(m_settings.m_log2Decim);
     m_thread->setIQMapping(m_settings.m_iqMapping);
     m_thread->startWork();
-
-    applySettings(m_settings, true);
 
     qDebug("AudioInput::started");
     m_running = true;
@@ -249,18 +250,18 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force)
 
     if ((m_settings.m_deviceName != settings.m_deviceName) || force)
     {
-        //reverseAPIKeys.append("device");
+        reverseAPIKeys.append("device");
     }
 
     if ((m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
-        //reverseAPIKeys.append("sampleRate");
+        reverseAPIKeys.append("sampleRate");
         forwardChange = true;
     }
 
     if ((m_settings.m_volume != settings.m_volume) || force)
     {
-        //reverseAPIKeys.append("volume");
+        reverseAPIKeys.append("volume");
         m_audioInput.setVolume(settings.m_volume);
         qDebug() << "AudioInput::applySettings: set volume to " << settings.m_volume;
     }
@@ -279,7 +280,7 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force)
 
     if ((m_settings.m_iqMapping != settings.m_iqMapping) || force)
     {
-        //reverseAPIKeys.append("iqMapping");
+        reverseAPIKeys.append("iqMapping");
         if (m_thread)
             m_thread->setIQMapping(settings.m_iqMapping);
     }
