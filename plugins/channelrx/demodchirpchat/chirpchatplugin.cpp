@@ -27,7 +27,7 @@
 const PluginDescriptor ChirpChatPlugin::m_pluginDescriptor = {
     ChirpChatDemod::m_channelId,
 	QString("ChirpChat Demodulator"),
-	QString("5.13.0"),
+	QString("6.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
 	true,

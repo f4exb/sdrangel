@@ -15,7 +15,7 @@ Transmissions from the RN2483 module with the Distance Enhancement feature (spre
 
 Modulation characteristics from LoRa have been augmented with more bandwidths and FFT bin collations (DE factor). Plain TTY and ASCII have also been added and there are plans to add some more complex typically amateur radio MFSK based modes like JT65.
 
-Note: this plugin is available in version 5 only (since 5.2.0).
+Note: this plugin is officially supported since version 6.
 
 <h2>Interface</h2>
 

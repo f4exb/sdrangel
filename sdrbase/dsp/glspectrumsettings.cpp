@@ -50,6 +50,8 @@ void GLSpectrumSettings::resetToDefaults()
 	m_averagingMode = AvgModeNone;
 	m_averagingIndex = 0;
 	m_linear = false;
+    m_ssb = false;
+    m_usb = true;
 }
 
 QByteArray GLSpectrumSettings::serialize() const
@@ -77,6 +79,8 @@ QByteArray GLSpectrumSettings::serialize() const
 	s.writeS32(19, (int) m_averagingMode);
 	s.writeS32(20, (qint32) getAveragingValue(m_averagingIndex, m_averagingMode));
 	s.writeBool(21, m_linear);
+    s.writeBool(24, m_ssb);
+    s.writeBool(25, m_usb);
 
 	return s.final();
 }
@@ -119,6 +123,8 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		m_averagingIndex = getAveragingIndex(tmp, m_averagingMode);
 	    m_averagingNb = getAveragingValue(m_averagingIndex, m_averagingMode);
 	    d.readBool(21, &m_linear, false);
+        d.readBool(24, &m_ssb, false);
+        d.readBool(25, &m_usb, true);
 
 		return true;
 	}

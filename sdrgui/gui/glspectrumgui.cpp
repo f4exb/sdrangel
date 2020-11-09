@@ -486,6 +486,11 @@ void GLSpectrumGUI::setAveragingToolitp()
     }
 }
 
+void GLSpectrumGUI::setFFTSize(int log2FFTSize)
+{
+    ui->fftSize->setCurrentIndex(log2FFTSize < 7 ? 0 : log2FFTSize > 12 ? 5 : log2FFTSize - 7); // 128 to 4096 in powers of 2
+}
+
 bool GLSpectrumGUI::handleMessage(const Message& message)
 {
     if (GLSpectrum::MsgReportSampleRate::match(message))
