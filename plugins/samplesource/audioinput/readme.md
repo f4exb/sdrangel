@@ -20,7 +20,7 @@ Device start / stop button.
 
 The audio device to use.
 
-<h3>3: Refresh devices<h3>
+<h3>3: Refresh devices</h3>
 
 Refresh the list of audio devices.
 
