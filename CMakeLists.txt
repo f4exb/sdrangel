@@ -27,8 +27,8 @@ option(BUILD_SERVER "Build Server" ON)
 option(BUILD_GUI "Build GUI" ON)
 option(HIDE_CONSOLE "Hide console when running GUI on Windows" ON)
 option(BUNDLE "Enable distribution bundle" OFF)
-option(FORCE_SSSE3 "Compile with SSSE3 instruction only" OFF)
-option(FORCE_SSE41 "Compile with SSE4.1 instruction only" OFF)
+set(ARCH_OPT "native" CACHE STRING "Specify instruction set to use. Will be passed directly as `-march` or `/arch:` argument on supported compilers. \
+                                   'native' option will figure out host machine compatibilities and set flags accordingly (even with MSVC).")
 option(ENABLE_AIRSPY "Enable AirSpy support" ON)
 option(ENABLE_AIRSPYHF "Enable AirSpyHF support" ON)
 option(ENABLE_BLADERF "Enable bladeRF support" ON)
@@ -208,11 +208,6 @@ elseif (WIN32)
     message(FATAL_ERROR "You must use Microsoft Visual Studio 2015, 2017 or 2019 as compiler")
   endif()
 
-  # compile with full multicore
-  if(MSVC)
-    add_compile_options(/MP)
-  endif()
-
   # in alternative we can use ExternalProject
   set(EXTERNAL_LIBRARY_FOLDER "${CMAKE_SOURCE_DIR}/external/windows")
   set(FFTW3F_FOUND ON CACHE INTERNAL "")
@@ -281,43 +276,9 @@ set(CMAKE_INSTALL_NAME_DIR
 # enable 24 bit receiving path
 if (RX_SAMPLE_24BIT)
     message(STATUS "Compiling for 24 bit Rx DSP chain")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSDR_RX_SAMPLE_24BIT")
+    add_compile_definitions(SDR_RX_SAMPLE_24BIT)
 else()
     message(STATUS "Compiling for 16 bit Rx DSP chain")
-endif()
-
-if (SANITIZE_ADDRESS)
-    message(STATUS "Activate address sanitization")
-    if(MSVC)
-      set(ASAN_LIB_ARCH ${MSVC_CXX_ARCHITECTURE_ID})
-      string(TOLOWER ${ASAN_LIB_ARCH} ASAN_LIB_ARCH)
-      if(ASAN_LIB_ARCH STREQUAL "x86")
-        set(ASAN_LIB_ARCH "i386")
-      elseif(ASAN_LIB_ARCH STREQUAL "x64")
-        set(ASAN_LIB_ARCH "x86_64")
-      endif()
-      add_compile_options(/fsanitize=address)
-      link_libraries(clang_rt.asan_dynamic-${ASAN_LIB_ARCH} clang_rt.asan_dynamic_runtime_thunk-${ASAN_LIB_ARCH})
-      add_link_options(/wholearchive:clang_rt.asan_dynamic_runtime_thunk-${ASAN_LIB_ARCH}.lib)
-    else()
-      add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g)
-      add_link_options(-fsanitize=address)
-    endif()
-endif()
-
-# set compiler
-include(FindCompiler)
-
-if (C_CLANG OR C_GCC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
-elseif (C_MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -MP ${EXTRA_FLAGS}")
-endif()
-
-if (C_CLANG)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=1")
-elseif (C_GCC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
 endif()
 
 # find cpu flags (and set compiler)
