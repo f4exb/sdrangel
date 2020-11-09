@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_LORADEMODBASEBAND_H
-#define INCLUDE_LORADEMODBASEBAND_H
+#ifndef INCLUDE_CHIRPCHATDEMODBASEBAND_H
+#define INCLUDE_CHIRPCHATDEMODBASEBAND_H
 
 #include <QObject>
 #include <QMutex>
@@ -25,60 +25,64 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 
-#include "lorademodsink.h"
+#include "chirpchatdemodsink.h"
 
 class DownChannelizer;
 
-class LoRaDemodBaseband : public QObject
+class ChirpChatDemodBaseband : public QObject
 {
     Q_OBJECT
 public:
-    class MsgConfigureLoRaDemodBaseband : public Message {
+    class MsgConfigureChirpChatDemodBaseband : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const LoRaDemodSettings& getSettings() const { return m_settings; }
+        const ChirpChatDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureLoRaDemodBaseband* create(const LoRaDemodSettings& settings, bool force)
+        static MsgConfigureChirpChatDemodBaseband* create(const ChirpChatDemodSettings& settings, bool force)
         {
-            return new MsgConfigureLoRaDemodBaseband(settings, force);
+            return new MsgConfigureChirpChatDemodBaseband(settings, force);
         }
 
     private:
-        LoRaDemodSettings m_settings;
+        ChirpChatDemodSettings m_settings;
         bool m_force;
 
-        MsgConfigureLoRaDemodBaseband(const LoRaDemodSettings& settings, bool force) :
+        MsgConfigureChirpChatDemodBaseband(const ChirpChatDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
         { }
     };
 
-    LoRaDemodBaseband();
-    ~LoRaDemodBaseband();
+    ChirpChatDemodBaseband();
+    ~ChirpChatDemodBaseband();
     void reset();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
+    bool getDemodActive() const { return m_sink.getDemodActive(); }
+    double getCurrentNoiseLevel() const { return m_sink.getCurrentNoiseLevel(); }
+    double getTotalPower() const { return m_sink.getTotalPower(); }
     void setBasebandSampleRate(int sampleRate);
+    void setDecoderMessageQueue(MessageQueue *messageQueue) { m_sink.setDecoderMessageQueue(messageQueue); }
     void setSpectrumSink(BasebandSampleSink* spectrumSink) { m_sink.setSpectrumSink(spectrumSink); }
 
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
-    LoRaDemodSink m_sink;
+    ChirpChatDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    LoRaDemodSettings m_settings;
+    ChirpChatDemodSettings m_settings;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void applySettings(const LoRaDemodSettings& settings, bool force = false);
+    void applySettings(const ChirpChatDemodSettings& settings, bool force = false);
 
 private slots:
     void handleInputMessages();
     void handleData(); //!< Handle data when samples have to be processed
 };
 
-#endif // INCLUDE_LORADEMODBASEBAND_H
+#endif // INCLUDE_CHIRPCHATDEMODBASEBAND_H

@@ -72,7 +72,7 @@ public:
 	    m_socket->moveToThread(thread);
 	}
 
-	void setAddress(QString& address) { m_address.setAddress(address); }
+	void setAddress(const QString& address) { m_address.setAddress(address); }
 	void setPort(unsigned int port) { m_port = port; }
 
 	void setDestination(const QString& address, int port)
@@ -123,6 +123,14 @@ public:
 	    }
 
 	    memcpy(&m_sampleBuffer[m_sampleBufferIndex], &samples[samplesIndex], nbSamples*sizeof(T)); // copy remainder of input to buffer
+	}
+
+	/**
+	 * Write a bunch of samples unbuffered
+	 */
+	void writeUnbuffered(const T *samples, int nbSamples)
+	{
+		m_socket->writeDatagram((const char*)samples, (qint64 ) nbSamples, m_address, m_port); // send given samples
 	}
 
 private:

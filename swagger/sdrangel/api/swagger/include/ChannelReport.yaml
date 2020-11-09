@@ -21,6 +21,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/ATVMod.yaml#/ATVModReport"
     BFMDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodReport"
+    ChirpChatDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodReport"
     DSDDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/DSDDemod.yaml#/DSDDemodReport"
     IEEE_802_15_4_ModReport:

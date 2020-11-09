@@ -27,6 +27,7 @@
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
 #include "SWGBFMDemodReport.h"
+#include "SWGChirpChatDemodReport.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGFileSinkReport.h"
 #include "SWGFileSourceReport.h"
@@ -84,6 +85,9 @@ public:
 
     SWGBFMDemodReport* getBfmDemodReport();
     void setBfmDemodReport(SWGBFMDemodReport* bfm_demod_report);
+
+    SWGChirpChatDemodReport* getChirpChatDemodReport();
+    void setChirpChatDemodReport(SWGChirpChatDemodReport* chirp_chat_demod_report);
 
     SWGDSDDemodReport* getDsdDemodReport();
     void setDsdDemodReport(SWGDSDDemodReport* dsd_demod_report);
@@ -160,6 +164,9 @@ private:
 
     SWGBFMDemodReport* bfm_demod_report;
     bool m_bfm_demod_report_isSet;
+
+    SWGChirpChatDemodReport* chirp_chat_demod_report;
+    bool m_chirp_chat_demod_report_isSet;
 
     SWGDSDDemodReport* dsd_demod_report;
     bool m_dsd_demod_report_isSet;
