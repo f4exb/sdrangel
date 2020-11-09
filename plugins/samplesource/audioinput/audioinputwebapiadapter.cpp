@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,56 +16,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_AUDIO_AUDIOINPUT_H_
-#define SDRBASE_AUDIO_AUDIOINPUT_H_
+#include "SWGDeviceSettings.h"
+#include "audioinput.h"
+#include "audioinputwebapiadapter.h"
 
-#include <QMutex>
-#include <QIODevice>
-#include <QAudioFormat>
-#include <list>
-#include <vector>
-#include "export.h"
+AudioInputWebAPIAdapter::AudioInputWebAPIAdapter()
+{}
 
-class QAudioInput;
-class AudioFifo;
-class AudioOutputPipe;
+AudioInputWebAPIAdapter::~AudioInputWebAPIAdapter()
+{}
 
+int AudioInputWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGDeviceSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
+    response.getAirspyHfSettings()->init();
+    AudioInputSource::AudioInput::webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
 
-class SDRBASE_API AudioInput : public QIODevice {
-public:
-	AudioInput();
-	virtual ~AudioInput();
-
-	bool start(int device, int rate);
-	void stop();
-
-    void addFifo(AudioFifo* audioFifo);
-	void removeFifo(AudioFifo* audioFifo);
-    int getNbFifos() const { return m_audioFifos.size(); }
-
-	uint getRate() const { return m_audioFormat.sampleRate(); }
-	void setOnExit(bool onExit) { m_onExit = onExit; }
-	void setVolume(float volume);
-
-private:
-	QMutex m_mutex;
-	QAudioInput* m_audioInput;
-	uint m_audioUsageCount;
-	bool m_onExit;
-	float m_volume;
-
-	std::list<AudioFifo*> m_audioFifos;
-	std::vector<qint32> m_mixBuffer;
-
-	QAudioFormat m_audioFormat;
-
-	//virtual bool open(OpenMode mode);
-	virtual qint64 readData(char* data, qint64 maxLen);
-	virtual qint64 writeData(const char* data, qint64 len);
-
-	friend class AudioOutputPipe;
-};
-
-
-
-#endif /* SDRBASE_AUDIO_AUDIOINPUT_H_ */
+int AudioInputWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response, // query + response
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    AudioInputSource::AudioInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
+    return 200;
+}

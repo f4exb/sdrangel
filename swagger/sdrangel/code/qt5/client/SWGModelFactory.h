@@ -36,6 +36,7 @@
 #include "SWGArgValue.h"
 #include "SWGAudioDevices.h"
 #include "SWGAudioInputDevice.h"
+#include "SWGAudioInputSettings.h"
 #include "SWGAudioOutputDevice.h"
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
@@ -278,6 +279,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAudioInputDevice").compare(type) == 0) {
       return new SWGAudioInputDevice();
+    }
+    if(QString("SWGAudioInputSettings").compare(type) == 0) {
+      return new SWGAudioInputSettings();
     }
     if(QString("SWGAudioOutputDevice").compare(type) == 0) {
       return new SWGAudioOutputDevice();

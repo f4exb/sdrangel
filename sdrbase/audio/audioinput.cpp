@@ -189,3 +189,9 @@ qint64 AudioInput::writeData(const char *data, qint64 len)
 	return len;
 }
 
+void AudioInput::setVolume(float volume)
+{
+    m_volume = volume;
+    if (m_audioInput != nullptr)
+         m_audioInput->setVolume(m_volume);
+}

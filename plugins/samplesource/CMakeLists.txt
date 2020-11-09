@@ -62,4 +62,5 @@ if(ENABLE_USRP AND UHD_FOUND)
     add_subdirectory(usrpinput)
 endif()
 
+add_subdirectory(audioinput)
 add_subdirectory(kiwisdr)
