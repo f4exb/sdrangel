@@ -52,7 +52,7 @@ struct AudioInputSettings {
         return deviceInfo.deviceName();
 #else
         QString realm = deviceInfo.realm();
-        if (realm != "" && realm != "default")
+        if (realm != "" && realm != "default" && realm != "alsa")
             return deviceInfo.deviceName() + " " + realm;
         else
             return deviceInfo.deviceName();
