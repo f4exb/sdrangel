@@ -44,7 +44,7 @@ public:
 
 	uint getRate() const { return m_audioFormat.sampleRate(); }
 	void setOnExit(bool onExit) { m_onExit = onExit; }
-	void setVolume(float volume) { m_volume = volume; }
+	void setVolume(float volume);
 
 private:
 	QMutex m_mutex;
