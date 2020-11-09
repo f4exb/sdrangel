@@ -1,3 +1,12 @@
+sdrangel (5.15.3-1) unstable; urgency=medium
+
+   * ADS-B Demodulator updates. PR #688
+   * ADS-B Sync correlation threshold rework. Issue #696
+   * NFMDemod: rewirk filters. PR #690
+   * NFM: full control of RF, AF filters and FM deviation, Issue #691
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 09 Nov 2020 09:02:20 +0100
+
 sdrangel (5.15.2-1) unstable; urgency=medium
 
    * KiwiSDR: fixed issue in local network. Fixes #435
