@@ -58,6 +58,10 @@ if(ENABLE_SOAPYSDR AND SOAPYSDR_FOUND)
     add_subdirectory(soapysdrinput)
 endif()
 
+if(LIBSIGMF_FOUND)
+    add_subdirectory(sigmffileinput)
+endif()
+
 if(ENABLE_USRP AND UHD_FOUND)
     add_subdirectory(usrpinput)
 endif()

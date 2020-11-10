@@ -7,7 +7,7 @@ project(sdrangel)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 # disable only when needed
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -360,6 +360,11 @@ find_package(Boost REQUIRED)
 find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
 find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
+find_package(LibSigMF) # SigMF recording files support
+
+if (LIBSIGMF_FOUND)
+    add_definitions(-DHAS_LIBSIGMF)
+endif (LIBSIGMF_FOUND)
 
 # macOS compatibility
 if(APPLE)

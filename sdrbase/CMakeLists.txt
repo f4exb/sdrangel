@@ -44,6 +44,19 @@ if (LIMESUITE_FOUND)
     set(sdrbase_LIMERFE_LIB ${LIMESUITE_LIBRARY})
 endif (LIMESUITE_FOUND)
 
+if (LIBSIGMF_FOUND)
+    set(sdrbase_SOURCES
+        ${sdrbase_SOURCES}
+        dsp/sigmffilerecord.cpp
+    )
+    set(sdrbase_HEADERS
+        ${sdrbase_HEADERS}
+        dsp/sigmffilerecord.h
+    )
+    include_directories(${LIBSIGMF_INCLUDE_DIR})
+    set(sdrbase_LIBSIGMF_LIB ${LIBSIGMF_LIBRARIES})
+endif (LIBSIGMF_FOUND)
+
 # serialdv now required
 add_definitions(-DDSD_USE_SERIALDV)
 include_directories(${LIBSERIALDV_INCLUDE_DIR})
@@ -123,6 +136,7 @@ set(sdrbase_SOURCES
     dsp/samplesimplefifo.cpp
     dsp/samplesourcefifo.cpp
     dsp/samplesourcefifodb.cpp
+    dsp/sigmffilerecord.cpp
     dsp/basebandsamplesink.cpp
     dsp/basebandsamplesource.cpp
     dsp/nullsink.cpp
@@ -291,6 +305,8 @@ set(sdrbase_HEADERS
     dsp/samplesimplefifo.h
     dsp/samplesourcefifo.h
     dsp/samplesourcefifodb.h
+    dsp/sigmf_forward.h
+    dsp/sigmffilerecord.h
     dsp/basebandsamplesink.h
     dsp/basebandsamplesource.h
     dsp/nullsink.h
@@ -385,6 +401,7 @@ target_link_libraries(sdrbase
     ${sdrbase_FFTW3F_LIB}
     ${sdrbase_SERIALDV_LIB}
     ${sdrbase_LIMERFE_LIB}
+    ${sdrbase_LIBSIGMF_LIB}
     Qt5::Core
     Qt5::Multimedia
     Qt5::WebSockets
