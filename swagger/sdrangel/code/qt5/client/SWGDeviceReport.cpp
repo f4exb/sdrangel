@@ -44,12 +44,14 @@ SWGDeviceReport::SWGDeviceReport() {
     m_blade_rf2_mimo_report_isSet = false;
     file_input_report = nullptr;
     m_file_input_report_isSet = false;
-    lime_sdr_input_report = nullptr;
-    m_lime_sdr_input_report_isSet = false;
     kiwi_sdr_report = nullptr;
     m_kiwi_sdr_report_isSet = false;
+    lime_sdr_input_report = nullptr;
+    m_lime_sdr_input_report_isSet = false;
     lime_sdr_output_report = nullptr;
     m_lime_sdr_output_report_isSet = false;
+    lime_sdr_mimo_report = nullptr;
+    m_lime_sdr_mimo_report_isSet = false;
     local_input_report = nullptr;
     m_local_input_report_isSet = false;
     local_output_report = nullptr;
@@ -106,12 +108,14 @@ SWGDeviceReport::init() {
     m_blade_rf2_mimo_report_isSet = false;
     file_input_report = new SWGFileInputReport();
     m_file_input_report_isSet = false;
-    lime_sdr_input_report = new SWGLimeSdrInputReport();
-    m_lime_sdr_input_report_isSet = false;
     kiwi_sdr_report = new SWGKiwiSDRReport();
     m_kiwi_sdr_report_isSet = false;
+    lime_sdr_input_report = new SWGLimeSdrInputReport();
+    m_lime_sdr_input_report_isSet = false;
     lime_sdr_output_report = new SWGLimeSdrOutputReport();
     m_lime_sdr_output_report_isSet = false;
+    lime_sdr_mimo_report = new SWGLimeSdrMIMOReport();
+    m_lime_sdr_mimo_report_isSet = false;
     local_input_report = new SWGLocalInputReport();
     m_local_input_report_isSet = false;
     local_output_report = new SWGLocalOutputReport();
@@ -170,14 +174,17 @@ SWGDeviceReport::cleanup() {
     if(file_input_report != nullptr) { 
         delete file_input_report;
     }
-    if(lime_sdr_input_report != nullptr) { 
-        delete lime_sdr_input_report;
-    }
     if(kiwi_sdr_report != nullptr) { 
         delete kiwi_sdr_report;
     }
+    if(lime_sdr_input_report != nullptr) { 
+        delete lime_sdr_input_report;
+    }
     if(lime_sdr_output_report != nullptr) { 
         delete lime_sdr_output_report;
+    }
+    if(lime_sdr_mimo_report != nullptr) { 
+        delete lime_sdr_mimo_report;
     }
     if(local_input_report != nullptr) { 
         delete local_input_report;
@@ -256,11 +263,13 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&file_input_report, pJson["fileInputReport"], "SWGFileInputReport", "SWGFileInputReport");
     
-    ::SWGSDRangel::setValue(&lime_sdr_input_report, pJson["limeSdrInputReport"], "SWGLimeSdrInputReport", "SWGLimeSdrInputReport");
-    
     ::SWGSDRangel::setValue(&kiwi_sdr_report, pJson["kiwiSDRReport"], "SWGKiwiSDRReport", "SWGKiwiSDRReport");
     
+    ::SWGSDRangel::setValue(&lime_sdr_input_report, pJson["limeSdrInputReport"], "SWGLimeSdrInputReport", "SWGLimeSdrInputReport");
+    
     ::SWGSDRangel::setValue(&lime_sdr_output_report, pJson["limeSdrOutputReport"], "SWGLimeSdrOutputReport", "SWGLimeSdrOutputReport");
+    
+    ::SWGSDRangel::setValue(&lime_sdr_mimo_report, pJson["limeSdrMIMOReport"], "SWGLimeSdrMIMOReport", "SWGLimeSdrMIMOReport");
     
     ::SWGSDRangel::setValue(&local_input_report, pJson["localInputReport"], "SWGLocalInputReport", "SWGLocalInputReport");
     
@@ -334,14 +343,17 @@ SWGDeviceReport::asJsonObject() {
     if((file_input_report != nullptr) && (file_input_report->isSet())){
         toJsonValue(QString("fileInputReport"), file_input_report, obj, QString("SWGFileInputReport"));
     }
-    if((lime_sdr_input_report != nullptr) && (lime_sdr_input_report->isSet())){
-        toJsonValue(QString("limeSdrInputReport"), lime_sdr_input_report, obj, QString("SWGLimeSdrInputReport"));
-    }
     if((kiwi_sdr_report != nullptr) && (kiwi_sdr_report->isSet())){
         toJsonValue(QString("kiwiSDRReport"), kiwi_sdr_report, obj, QString("SWGKiwiSDRReport"));
     }
+    if((lime_sdr_input_report != nullptr) && (lime_sdr_input_report->isSet())){
+        toJsonValue(QString("limeSdrInputReport"), lime_sdr_input_report, obj, QString("SWGLimeSdrInputReport"));
+    }
     if((lime_sdr_output_report != nullptr) && (lime_sdr_output_report->isSet())){
         toJsonValue(QString("limeSdrOutputReport"), lime_sdr_output_report, obj, QString("SWGLimeSdrOutputReport"));
+    }
+    if((lime_sdr_mimo_report != nullptr) && (lime_sdr_mimo_report->isSet())){
+        toJsonValue(QString("limeSdrMIMOReport"), lime_sdr_mimo_report, obj, QString("SWGLimeSdrMIMOReport"));
     }
     if((local_input_report != nullptr) && (local_input_report->isSet())){
         toJsonValue(QString("localInputReport"), local_input_report, obj, QString("SWGLocalInputReport"));
@@ -475,16 +487,6 @@ SWGDeviceReport::setFileInputReport(SWGFileInputReport* file_input_report) {
     this->m_file_input_report_isSet = true;
 }
 
-SWGLimeSdrInputReport*
-SWGDeviceReport::getLimeSdrInputReport() {
-    return lime_sdr_input_report;
-}
-void
-SWGDeviceReport::setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report) {
-    this->lime_sdr_input_report = lime_sdr_input_report;
-    this->m_lime_sdr_input_report_isSet = true;
-}
-
 SWGKiwiSDRReport*
 SWGDeviceReport::getKiwiSdrReport() {
     return kiwi_sdr_report;
@@ -495,6 +497,16 @@ SWGDeviceReport::setKiwiSdrReport(SWGKiwiSDRReport* kiwi_sdr_report) {
     this->m_kiwi_sdr_report_isSet = true;
 }
 
+SWGLimeSdrInputReport*
+SWGDeviceReport::getLimeSdrInputReport() {
+    return lime_sdr_input_report;
+}
+void
+SWGDeviceReport::setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report) {
+    this->lime_sdr_input_report = lime_sdr_input_report;
+    this->m_lime_sdr_input_report_isSet = true;
+}
+
 SWGLimeSdrOutputReport*
 SWGDeviceReport::getLimeSdrOutputReport() {
     return lime_sdr_output_report;
@@ -503,6 +515,16 @@ void
 SWGDeviceReport::setLimeSdrOutputReport(SWGLimeSdrOutputReport* lime_sdr_output_report) {
     this->lime_sdr_output_report = lime_sdr_output_report;
     this->m_lime_sdr_output_report_isSet = true;
+}
+
+SWGLimeSdrMIMOReport*
+SWGDeviceReport::getLimeSdrMimoReport() {
+    return lime_sdr_mimo_report;
+}
+void
+SWGDeviceReport::setLimeSdrMimoReport(SWGLimeSdrMIMOReport* lime_sdr_mimo_report) {
+    this->lime_sdr_mimo_report = lime_sdr_mimo_report;
+    this->m_lime_sdr_mimo_report_isSet = true;
 }
 
 SWGLocalInputReport*
@@ -694,13 +716,16 @@ SWGDeviceReport::isSet(){
         if(file_input_report && file_input_report->isSet()){
             isObjectUpdated = true; break;
         }
-        if(lime_sdr_input_report && lime_sdr_input_report->isSet()){
-            isObjectUpdated = true; break;
-        }
         if(kiwi_sdr_report && kiwi_sdr_report->isSet()){
             isObjectUpdated = true; break;
         }
+        if(lime_sdr_input_report && lime_sdr_input_report->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(lime_sdr_output_report && lime_sdr_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_sdr_mimo_report && lime_sdr_mimo_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(local_input_report && local_input_report->isSet()){

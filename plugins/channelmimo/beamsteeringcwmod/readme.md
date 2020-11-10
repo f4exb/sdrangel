@@ -2,8 +2,6 @@
 
 <h2>Introduction</h2>
 
-This is a v5 only plugin.
-
 This MIMO transmission only (MO) plugin can be used to drive a 2 channel MO device in order to produce a continuous wave signal (CW) with a control of hte phase between the two streams. When the MO device is connected to a two antenna system the resulting beam can be steered in direction using the phase difference. Control is made directly in angle units.
 
 ; This was designed more as a proof of concept of multiple output plugin rather than something really useful.

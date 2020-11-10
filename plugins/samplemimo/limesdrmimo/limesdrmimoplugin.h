@@ -1,0 +1,56 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef _LIMESDRMIMO_LIMESDRMIMOPLUGIN_H
+#define _LIMESDRMIMO_LIMESDRMIMOPLUGIN_H
+
+#include <QObject>
+#include "plugin/plugininterface.h"
+
+class PluginAPI;
+
+#define LIMESDRMIMO_DEVICE_TYPE_ID "sdrangel.samplemimo.limesdrmimo"
+
+class LimeSDRMIMOPlugin : public QObject, public PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID LIMESDRMIMO_DEVICE_TYPE_ID)
+
+public:
+	explicit LimeSDRMIMOPlugin(QObject* parent = nullptr);
+
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
+
+	virtual void enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices);
+	virtual SamplingDevices enumSampleMIMO(const OriginDevices& originDevices);
+
+	virtual DeviceGUI* createSampleMIMOPluginInstanceGUI(
+	        const QString& sourceId,
+	        QWidget **widget,
+	        DeviceUISet *deviceUISet);
+	virtual DeviceSampleMIMO* createSampleMIMOPluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
+    virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
+
+	static const QString m_hardwareID;
+    static const QString m_deviceTypeID;
+
+private:
+	static const PluginDescriptor m_pluginDescriptor;
+};
+
+#endif // _LIMESDRMIMO_LIMESDRMIMOPLUGIN_H

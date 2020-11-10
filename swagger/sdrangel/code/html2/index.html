@@ -3469,14 +3469,17 @@ margin-bottom: 20px;
     "fileInputReport" : {
       "$ref" : "#/definitions/FileInputReport"
     },
-    "limeSdrInputReport" : {
-      "$ref" : "#/definitions/LimeSdrInputReport"
-    },
     "kiwiSDRReport" : {
       "$ref" : "#/definitions/KiwiSDRReport"
     },
+    "limeSdrInputReport" : {
+      "$ref" : "#/definitions/LimeSdrInputReport"
+    },
     "limeSdrOutputReport" : {
       "$ref" : "#/definitions/LimeSdrOutputReport"
+    },
+    "limeSdrMIMOReport" : {
+      "$ref" : "#/definitions/LimeSdrMIMOReport"
     },
     "localInputReport" : {
       "$ref" : "#/definitions/LocalInputReport"
@@ -5458,6 +5461,82 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    }
+  },
+  "description" : "LimeSDR"
+};
+            defs.LimeSdrMIMOReport = {
+  "properties" : {
+    "hwTimestamp" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "Hardware timestamp"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "format" : "int8"
+    },
+    "successRx" : {
+      "type" : "integer",
+      "description" : "1 if Rx info was successfullt retrieved else 0"
+    },
+    "streamActiveRx" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSizeRx" : {
+      "type" : "integer"
+    },
+    "fifoFillRx" : {
+      "type" : "integer"
+    },
+    "underrunCountRx" : {
+      "type" : "integer"
+    },
+    "overrunCountRx" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCountRx" : {
+      "type" : "integer"
+    },
+    "linkRateRx" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "successTx" : {
+      "type" : "integer",
+      "description" : "1 if Tx info was successfullt retrieved else 0"
+    },
+    "streamActiveTx" : {
+      "type" : "integer",
+      "description" : "1 if active else 0"
+    },
+    "fifoSizeTx" : {
+      "type" : "integer"
+    },
+    "fifoFillTx" : {
+      "type" : "integer"
+    },
+    "underrunCountTx" : {
+      "type" : "integer"
+    },
+    "overrunCountTx" : {
+      "type" : "integer"
+    },
+    "droppedPacketsCountTx" : {
+      "type" : "integer"
+    },
+    "linkRateTx" : {
+      "type" : "number",
+      "format" : "float"
     }
   },
   "description" : "LimeSDR"
@@ -41375,7 +41454,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T22:27:11.499+01:00
+              Generated 2020-11-10T23:21:43.607+01:00
             </div>
           </div>
       </div>

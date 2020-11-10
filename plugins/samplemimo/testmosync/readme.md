@@ -2,8 +2,6 @@
 
 <h2>Introduction</h2>
 
-This is a v5 only plugin.
-
 This MO (Multiple Output) sample sink plugin sends its samples to a spectrum display. It features the synchronous pulling of samples from two baseband channels provided by a MIMO channel plugin (thus its "MO" part). Streams 0 and 1 are connected to streams 0 and 1 of the MIMO channel respectively.
 
 <h2>Build</h2>

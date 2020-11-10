@@ -23,12 +23,14 @@ DeviceReport:
       $ref: "/doc/swagger/include/BladeRF2.yaml#/BladeRF2MIMOReport"
     fileInputReport:
       $ref: "/doc/swagger/include/FileInput.yaml#/FileInputReport"
-    limeSdrInputReport:
-      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
     kiwiSDRReport:
       $ref: "/doc/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+    limeSdrInputReport:
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
     limeSdrOutputReport:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+    limeSdrMIMOReport:
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
     localInputReport:
       $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputReport"
     localOutputReport:

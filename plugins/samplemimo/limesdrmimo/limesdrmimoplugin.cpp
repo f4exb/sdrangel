@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -19,16 +19,18 @@
 
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
+#include "limesdr/devicelimesdr.h"
 
 #ifndef SERVER_MODE
-#include "testmosyncgui.h"
+#include "limesdrmimogui.h"
 #endif
-#include "testmosync.h"
-#include "testmosyncplugin.h"
+#include "limesdrmimo.h"
+#include "limesdrmimoplugin.h"
+#include "limesdrmimowebapiadapter.h"
 
-const PluginDescriptor TestMOSyncPlugin::m_pluginDescriptor = {
-    QString("TestMOSync"),
-	QString("Test Synchronous Multiple Output"),
+const PluginDescriptor LimeSDRMIMOPlugin::m_pluginDescriptor = {
+    QString("LimeSDR"),
+	QString("LimeSDR MIMO"),
 	QString("6.0.0"),
 	QString("(c) Edouard Griffiths, F4EXB"),
 	QString("https://github.com/f4exb/sdrangel"),
@@ -36,69 +38,63 @@ const PluginDescriptor TestMOSyncPlugin::m_pluginDescriptor = {
 	QString("https://github.com/f4exb/sdrangel")
 };
 
-const QString TestMOSyncPlugin::m_hardwareID = "TestMOSync";
-const QString TestMOSyncPlugin::m_deviceTypeID = TESTMOSYNC_DEVICE_TYPE_ID;
+const QString LimeSDRMIMOPlugin::m_hardwareID = "LimeSDR";
+const QString LimeSDRMIMOPlugin::m_deviceTypeID = LIMESDRMIMO_DEVICE_TYPE_ID;
 
-TestMOSyncPlugin::TestMOSyncPlugin(QObject* parent) :
+LimeSDRMIMOPlugin::LimeSDRMIMOPlugin(QObject* parent) :
 	QObject(parent)
 {
 }
 
-const PluginDescriptor& TestMOSyncPlugin::getPluginDescriptor() const
+const PluginDescriptor& LimeSDRMIMOPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void TestMOSyncPlugin::initPlugin(PluginAPI* pluginAPI)
+void LimeSDRMIMOPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	pluginAPI->registerSampleMIMO(m_deviceTypeID, this);
 }
 
-void TestMOSyncPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
+void LimeSDRMIMOPlugin::enumOriginDevices(QStringList& listedHwIds, OriginDevices& originDevices)
 {
     if (listedHwIds.contains(m_hardwareID)) { // check if it was done
         return;
     }
 
-    originDevices.append(OriginDevice(
-        "TestMOSync",         // Displayable name
-        m_hardwareID,     // Hardware ID
-        QString(),        // Serial
-        0,                // Sequence
-        0,                // Number of Rx streams
-        2                 // Number of Tx streams
-    ));
-
+    DeviceLimeSDR::enumOriginDevices(m_hardwareID, originDevices);
     listedHwIds.append(m_hardwareID);
 }
 
-PluginInterface::SamplingDevices TestMOSyncPlugin::enumSampleMIMO(const OriginDevices& originDevices)
+PluginInterface::SamplingDevices LimeSDRMIMOPlugin::enumSampleMIMO(const OriginDevices& originDevices)
 {
-	SamplingDevices result;
+    SamplingDevices result;
 
-    for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
+	for (OriginDevices::const_iterator it = originDevices.begin(); it != originDevices.end(); ++it)
     {
         if (it->hardwareId == m_hardwareID)
         {
+            QString displayedName = it->displayableName;
+            displayedName.replace(QString(":$1]"), QString("]"));
             result.append(SamplingDevice(
-                "TestMOSync",
+                displayedName,
                 m_hardwareID,
                 m_deviceTypeID,
                 it->serial,
                 it->sequence,
-                PluginInterface::SamplingDevice::BuiltInDevice,
+                PluginInterface::SamplingDevice::PhysicalDevice,
                 PluginInterface::SamplingDevice::StreamMIMO,
-                1,    // MIMO is always considered as a single device
+                1,
                 0
             ));
         }
     }
 
-	return result;
+    return result;
 }
 
 #ifdef SERVER_MODE
-DeviceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
@@ -106,17 +102,17 @@ DeviceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
     (void) sourceId;
     (void) widget;
     (void) deviceUISet;
-    return 0;
+    return nullptr;
 }
 #else
-DeviceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
+DeviceGUI* LimeSDRMIMOPlugin::createSampleMIMOPluginInstanceGUI(
         const QString& sourceId,
         QWidget **widget,
         DeviceUISet *deviceUISet)
 {
 	if (sourceId == m_deviceTypeID)
     {
-		TestMOSyncGui* gui = new TestMOSyncGui(deviceUISet);
+		LimeSDRMIMOGUI* gui = new LimeSDRMIMOGUI(deviceUISet);
 		*widget = gui;
 		return gui;
 	}
@@ -127,12 +123,12 @@ DeviceGUI* TestMOSyncPlugin::createSampleMIMOPluginInstanceGUI(
 }
 #endif
 
-DeviceSampleMIMO *TestMOSyncPlugin::createSampleMIMOPluginInstance(const QString& mimoId, DeviceAPI *deviceAPI)
+DeviceSampleMIMO *LimeSDRMIMOPlugin::createSampleMIMOPluginInstance(const QString& mimoId, DeviceAPI *deviceAPI)
 {
     if (mimoId == m_deviceTypeID)
     {
-        TestMOSync* output = new TestMOSync(deviceAPI);
-        return output;
+        LimeSDRMIMO* input = new LimeSDRMIMO(deviceAPI);
+        return input;
     }
     else
     {
@@ -140,7 +136,7 @@ DeviceSampleMIMO *TestMOSyncPlugin::createSampleMIMOPluginInstance(const QString
     }
 }
 
-DeviceWebAPIAdapter *TestMOSyncPlugin::createDeviceWebAPIAdapter() const
+DeviceWebAPIAdapter *LimeSDRMIMOPlugin::createDeviceWebAPIAdapter() const
 {
-    return nullptr;
+    return new LimeSDRMIMOWebAPIAdapter();
 }

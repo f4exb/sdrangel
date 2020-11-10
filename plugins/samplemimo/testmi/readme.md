@@ -2,8 +2,6 @@
 
 <h2>Introduction</h2>
 
-This is a v5 only plugin.
-
 This input sample source plugin is an internal continuous wave generator that can be used to carry out test of software internals.
 
 <h2>Build</h2>

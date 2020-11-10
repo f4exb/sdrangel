@@ -23,12 +23,14 @@ DeviceReport:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF2.yaml#/BladeRF2MIMOReport"
     fileInputReport:
       $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputReport"
-    limeSdrInputReport:
-      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
     kiwiSDRReport:
       $ref: "http://swgserver:8081/api/swagger/include/KiwiSDR.yaml#/KiwiSDRReport"
+    limeSdrInputReport:
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputReport"
     limeSdrOutputReport:
       $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputReport"
+    limeSdrMIMOReport:
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOReport"
     localInputReport:
       $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputReport"
     localOutputReport:

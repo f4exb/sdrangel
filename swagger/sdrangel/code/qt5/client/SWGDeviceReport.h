@@ -30,6 +30,7 @@
 #include "SWGFileInputReport.h"
 #include "SWGKiwiSDRReport.h"
 #include "SWGLimeSdrInputReport.h"
+#include "SWGLimeSdrMIMOReport.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLocalInputReport.h"
 #include "SWGLocalOutputReport.h"
@@ -90,14 +91,17 @@ public:
     SWGFileInputReport* getFileInputReport();
     void setFileInputReport(SWGFileInputReport* file_input_report);
 
-    SWGLimeSdrInputReport* getLimeSdrInputReport();
-    void setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report);
-
     SWGKiwiSDRReport* getKiwiSdrReport();
     void setKiwiSdrReport(SWGKiwiSDRReport* kiwi_sdr_report);
 
+    SWGLimeSdrInputReport* getLimeSdrInputReport();
+    void setLimeSdrInputReport(SWGLimeSdrInputReport* lime_sdr_input_report);
+
     SWGLimeSdrOutputReport* getLimeSdrOutputReport();
     void setLimeSdrOutputReport(SWGLimeSdrOutputReport* lime_sdr_output_report);
+
+    SWGLimeSdrMIMOReport* getLimeSdrMimoReport();
+    void setLimeSdrMimoReport(SWGLimeSdrMIMOReport* lime_sdr_mimo_report);
 
     SWGLocalInputReport* getLocalInputReport();
     void setLocalInputReport(SWGLocalInputReport* local_input_report);
@@ -175,14 +179,17 @@ private:
     SWGFileInputReport* file_input_report;
     bool m_file_input_report_isSet;
 
-    SWGLimeSdrInputReport* lime_sdr_input_report;
-    bool m_lime_sdr_input_report_isSet;
-
     SWGKiwiSDRReport* kiwi_sdr_report;
     bool m_kiwi_sdr_report_isSet;
 
+    SWGLimeSdrInputReport* lime_sdr_input_report;
+    bool m_lime_sdr_input_report_isSet;
+
     SWGLimeSdrOutputReport* lime_sdr_output_report;
     bool m_lime_sdr_output_report_isSet;
+
+    SWGLimeSdrMIMOReport* lime_sdr_mimo_report;
+    bool m_lime_sdr_mimo_report_isSet;
 
     SWGLocalInputReport* local_input_report;
     bool m_local_input_report_isSet;

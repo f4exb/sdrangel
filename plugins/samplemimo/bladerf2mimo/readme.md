@@ -2,8 +2,6 @@
 
 <h2>Introduction</h2>
 
-This is a v5 only plugin.
-
 This MIMO plugin sends and receives its samples to/from a [BladeRF2 device](https://www.nuand.com/bladerf-2). It handles both input (Rx) and output (Tx) streams synchronously. There is no option to synchronize Rx with Tx streams.
 
 <h2>Build</h2>

@@ -396,3 +396,58 @@ LimeSdrOutputReport:
     gpioPins:
       type: integer
       format: int8
+
+LimeSdrMIMOReport:
+  description: LimeSDR
+  properties:
+    hwTimestamp:
+      description: Hardware timestamp
+      type: integer
+      format: int64
+    temperature:
+      type: number
+      format: float
+    gpioDir:
+      type: integer
+      format: int8
+    gpioPins:
+      type: integer
+      format: int8
+    successRx:
+      description: 1 if Rx info was successfullt retrieved else 0
+      type: integer
+    streamActiveRx:
+      description: 1 if active else 0
+      type: integer
+    fifoSizeRx:
+      type: integer
+    fifoFillRx:
+      type: integer
+    underrunCountRx:
+      type: integer
+    overrunCountRx:
+      type: integer
+    droppedPacketsCountRx:
+      type: integer
+    linkRateRx:
+      type: number
+      format: float
+    successTx:
+      description: 1 if Tx info was successfullt retrieved else 0
+      type: integer
+    streamActiveTx:
+      description: 1 if active else 0
+      type: integer
+    fifoSizeTx:
+      type: integer
+    fifoFillTx:
+      type: integer
+    underrunCountTx:
+      type: integer
+    overrunCountTx:
+      type: integer
+    droppedPacketsCountTx:
+      type: integer
+    linkRateTx:
+      type: number
+      format: float
