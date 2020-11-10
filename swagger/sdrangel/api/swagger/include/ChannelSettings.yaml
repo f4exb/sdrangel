@@ -27,6 +27,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
     ATVModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ATVMod.yaml#/ATVModSettings"
+    BeamSteeringCWModSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/BeamSteeringCWMod.yaml#/BeamSteeringCWModSettings"
     BFMDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
     ChannelAnalyzerSettings:

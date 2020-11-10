@@ -27,6 +27,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
     ATVModSettings:
       $ref: "/doc/swagger/include/ATVMod.yaml#/ATVModSettings"
+    BeamSteeringCWModSettings:
+      $ref: "/doc/swagger/include/BeamSteeringCWMod.yaml#/BeamSteeringCWModSettings"
     BFMDemodSettings:
       $ref: "/doc/swagger/include/BFMDemod.yaml#/BFMDemodSettings"
     ChannelAnalyzerSettings:

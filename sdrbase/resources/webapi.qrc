@@ -10,6 +10,7 @@
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
         <file>webapi/doc/swagger/include/ATVDemod.yaml</file>
         <file>webapi/doc/swagger/include/ATVMod.yaml</file>
+        <file>webapi/doc/swagger/include/BeamSteeringCWMod.yaml</file>
         <file>webapi/doc/swagger/include/BFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF1.yaml</file>
         <file>webapi/doc/swagger/include/BladeRF2.yaml</file>

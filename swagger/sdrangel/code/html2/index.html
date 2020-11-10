@@ -1772,6 +1772,42 @@ margin-bottom: 20px;
   },
   "description" : "A bandwidth expressed in Hertz (Hz)"
 };
+            defs.BeamSteeringCWModSettings = {
+  "properties" : {
+    "steerDegrees" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "filterChainHash" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "BeamSteeringCWMod"
+};
             defs.BladeRF1InputSettings = {
   "properties" : {
     "centerFrequency" : {
@@ -2547,6 +2583,9 @@ margin-bottom: 20px;
     },
     "ATVModSettings" : {
       "$ref" : "#/definitions/ATVModSettings"
+    },
+    "BeamSteeringCWModSettings" : {
+      "$ref" : "#/definitions/BeamSteeringCWModSettings"
     },
     "BFMDemodSettings" : {
       "$ref" : "#/definitions/BFMDemodSettings"
@@ -41110,7 +41149,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T19:50:40.958+01:00
+              Generated 2020-11-10T21:31:22.328+01:00
             </div>
           </div>
       </div>

@@ -28,6 +28,7 @@
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
+#include "SWGBeamSteeringCWModSettings.h"
 #include "SWGChannelAnalyzerSettings.h"
 #include "SWGChirpChatDemodSettings.h"
 #include "SWGChirpChatModSettings.h"
@@ -100,6 +101,9 @@ public:
 
     SWGATVModSettings* getAtvModSettings();
     void setAtvModSettings(SWGATVModSettings* atv_mod_settings);
+
+    SWGBeamSteeringCWModSettings* getBeamSteeringCwModSettings();
+    void setBeamSteeringCwModSettings(SWGBeamSteeringCWModSettings* beam_steering_cw_mod_settings);
 
     SWGBFMDemodSettings* getBfmDemodSettings();
     void setBfmDemodSettings(SWGBFMDemodSettings* bfm_demod_settings);
@@ -212,6 +216,9 @@ private:
 
     SWGATVModSettings* atv_mod_settings;
     bool m_atv_mod_settings_isSet;
+
+    SWGBeamSteeringCWModSettings* beam_steering_cw_mod_settings;
+    bool m_beam_steering_cw_mod_settings_isSet;
 
     SWGBFMDemodSettings* bfm_demod_settings;
     bool m_bfm_demod_settings_isSet;

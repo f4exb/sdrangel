@@ -3550,6 +3550,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setAtvModSettings(new SWGSDRangel::SWGATVModSettings());
             channelSettings->getAtvModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "BeamSteeringCWModSettings")
+        {
+            channelSettings->setBeamSteeringCwModSettings(new SWGSDRangel::SWGBeamSteeringCWModSettings());
+            channelSettings->getBeamSteeringCwModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "BFMDemodSettings")
         {
             channelSettings->setBfmDemodSettings(new SWGSDRangel::SWGBFMDemodSettings());

@@ -41,6 +41,7 @@
 #include "SWGBFMDemodReport.h"
 #include "SWGBFMDemodSettings.h"
 #include "SWGBandwidth.h"
+#include "SWGBeamSteeringCWModSettings.h"
 #include "SWGBladeRF1InputSettings.h"
 #include "SWGBladeRF1OutputSettings.h"
 #include "SWGBladeRF2InputReport.h"
@@ -306,6 +307,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGBandwidth").compare(type) == 0) {
       return new SWGBandwidth();
+    }
+    if(QString("SWGBeamSteeringCWModSettings").compare(type) == 0) {
+      return new SWGBeamSteeringCWModSettings();
     }
     if(QString("SWGBladeRF1InputSettings").compare(type) == 0) {
       return new SWGBladeRF1InputSettings();
