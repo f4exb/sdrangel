@@ -5,3 +5,4 @@ if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
 endif()
 
 add_subdirectory(testmi)
+add_subdirectory(testmosync)
