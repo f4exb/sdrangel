@@ -51,6 +51,7 @@
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGTestMISettings.h"
+#include "SWGTestMOSyncSettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGUSRPInputSettings.h"
 #include "SWGUSRPOutputSettings.h"
@@ -172,6 +173,9 @@ public:
     SWGTestMISettings* getTestMiSettings();
     void setTestMiSettings(SWGTestMISettings* test_mi_settings);
 
+    SWGTestMOSyncSettings* getTestMoSyncSettings();
+    void setTestMoSyncSettings(SWGTestMOSyncSettings* test_mo_sync_settings);
+
     SWGTestSourceSettings* getTestSourceSettings();
     void setTestSourceSettings(SWGTestSourceSettings* test_source_settings);
 
@@ -286,6 +290,9 @@ private:
 
     SWGTestMISettings* test_mi_settings;
     bool m_test_mi_settings_isSet;
+
+    SWGTestMOSyncSettings* test_mo_sync_settings;
+    bool m_test_mo_sync_settings_isSet;
 
     SWGTestSourceSettings* test_source_settings;
     bool m_test_source_settings_isSet;

@@ -92,6 +92,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_soapy_sdr_output_settings_isSet = false;
     test_mi_settings = nullptr;
     m_test_mi_settings_isSet = false;
+    test_mo_sync_settings = nullptr;
+    m_test_mo_sync_settings_isSet = false;
     test_source_settings = nullptr;
     m_test_source_settings_isSet = false;
     usrp_input_settings = nullptr;
@@ -174,6 +176,8 @@ SWGDeviceSettings::init() {
     m_soapy_sdr_output_settings_isSet = false;
     test_mi_settings = new SWGTestMISettings();
     m_test_mi_settings_isSet = false;
+    test_mo_sync_settings = new SWGTestMOSyncSettings();
+    m_test_mo_sync_settings_isSet = false;
     test_source_settings = new SWGTestSourceSettings();
     m_test_source_settings_isSet = false;
     usrp_input_settings = new SWGUSRPInputSettings();
@@ -280,6 +284,9 @@ SWGDeviceSettings::cleanup() {
     if(test_mi_settings != nullptr) { 
         delete test_mi_settings;
     }
+    if(test_mo_sync_settings != nullptr) { 
+        delete test_mo_sync_settings;
+    }
     if(test_source_settings != nullptr) { 
         delete test_source_settings;
     }
@@ -371,6 +378,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&soapy_sdr_output_settings, pJson["soapySDROutputSettings"], "SWGSoapySDROutputSettings", "SWGSoapySDROutputSettings");
     
     ::SWGSDRangel::setValue(&test_mi_settings, pJson["testMISettings"], "SWGTestMISettings", "SWGTestMISettings");
+    
+    ::SWGSDRangel::setValue(&test_mo_sync_settings, pJson["testMOSyncSettings"], "SWGTestMOSyncSettings", "SWGTestMOSyncSettings");
     
     ::SWGSDRangel::setValue(&test_source_settings, pJson["testSourceSettings"], "SWGTestSourceSettings", "SWGTestSourceSettings");
     
@@ -493,6 +502,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((test_mi_settings != nullptr) && (test_mi_settings->isSet())){
         toJsonValue(QString("testMISettings"), test_mi_settings, obj, QString("SWGTestMISettings"));
+    }
+    if((test_mo_sync_settings != nullptr) && (test_mo_sync_settings->isSet())){
+        toJsonValue(QString("testMOSyncSettings"), test_mo_sync_settings, obj, QString("SWGTestMOSyncSettings"));
     }
     if((test_source_settings != nullptr) && (test_source_settings->isSet())){
         toJsonValue(QString("testSourceSettings"), test_source_settings, obj, QString("SWGTestSourceSettings"));
@@ -833,6 +845,16 @@ SWGDeviceSettings::setTestMiSettings(SWGTestMISettings* test_mi_settings) {
     this->m_test_mi_settings_isSet = true;
 }
 
+SWGTestMOSyncSettings*
+SWGDeviceSettings::getTestMoSyncSettings() {
+    return test_mo_sync_settings;
+}
+void
+SWGDeviceSettings::setTestMoSyncSettings(SWGTestMOSyncSettings* test_mo_sync_settings) {
+    this->test_mo_sync_settings = test_mo_sync_settings;
+    this->m_test_mo_sync_settings_isSet = true;
+}
+
 SWGTestSourceSettings*
 SWGDeviceSettings::getTestSourceSettings() {
     return test_source_settings;
@@ -982,6 +1004,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(test_mi_settings && test_mi_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(test_mo_sync_settings && test_mo_sync_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(test_source_settings && test_source_settings->isSet()){

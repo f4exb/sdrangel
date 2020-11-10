@@ -3933,6 +3933,15 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
             deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "testMOSyncSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setTestMoSyncSettings(new SWGSDRangel::SWGTestMOSyncSettings());
+            deviceSettings->getTestMoSyncSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "usrpInputSettings")
         {
             deviceSettings->setUsrpInputSettings(new SWGSDRangel::SWGUSRPInputSettings());

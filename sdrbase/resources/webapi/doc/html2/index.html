@@ -3633,6 +3633,9 @@ margin-bottom: 20px;
     "testMISettings" : {
       "$ref" : "#/definitions/TestMISettings"
     },
+    "testMOSyncSettings" : {
+      "$ref" : "#/definitions/TestMOSyncSettings"
+    },
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
     },
@@ -8131,6 +8134,26 @@ margin-bottom: 20px;
     }
   },
   "description" : "TestMISettings"
+};
+            defs.TestMOSyncSettings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "fcPosTx" : {
+      "type" : "integer",
+      "description" : "See BladeRF2MIMO::fcPos_t"
+    }
+  },
+  "description" : "TestMOSync"
 };
             defs.TestMiStreamSettings = {
   "properties" : {
@@ -41087,7 +41110,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T17:44:38.740+01:00
+              Generated 2020-11-10T19:50:40.958+01:00
             </div>
           </div>
       </div>

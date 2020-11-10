@@ -72,6 +72,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
     testMISettings:
       $ref: "/doc/swagger/include/TestMI.yaml#/TestMISettings"
+    testMOSyncSettings:
+      $ref: "/doc/swagger/include/TestMOSync.yaml#/TestMOSyncSettings"
     testSourceSettings:
       $ref: "/doc/swagger/include/TestSource.yaml#/TestSourceSettings"
     usrpInputSettings:
