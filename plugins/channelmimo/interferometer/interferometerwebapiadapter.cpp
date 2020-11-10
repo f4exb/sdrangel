@@ -18,54 +18,42 @@
 #include <QString>
 
 #include "SWGChannelSettings.h"
-#include "chanalyzerwebapiadapter.h"
+#include "interferometerwebapiadapter.h"
 
-ChannelAnalyzerWebAPIAdapter::ChannelAnalyzerWebAPIAdapter()
+InterferometerWebAPIAdapter::InterferometerWebAPIAdapter()
 {
     m_settings.setScopeGUI(&m_glScopeSettings);
     m_settings.setSpectrumGUI(&m_glSpectrumSettings);
 }
 
-ChannelAnalyzerWebAPIAdapter::~ChannelAnalyzerWebAPIAdapter()
+InterferometerWebAPIAdapter::~InterferometerWebAPIAdapter()
 {}
 
-int ChannelAnalyzerWebAPIAdapter::webapiSettingsGet(
+int InterferometerWebAPIAdapter::webapiSettingsGet(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
-    response.getChannelAnalyzerSettings()->init();
+    response.setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
+    response.getInterferometerSettings()->init();
     webapiFormatChannelSettings(response, m_settings, m_glScopeSettings, m_glSpectrumSettings);
     return 200;
 }
 
-void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
+void InterferometerWebAPIAdapter::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
-        const ChannelAnalyzerSettings& settings,
+        const InterferometerSettings& settings,
         const GLScopeSettings& scopeSettings,
         const GLSpectrumSettings& spectrumSettings)
 {
-    response.getChannelAnalyzerSettings()->setFrequency(settings.m_inputFrequencyOffset);
-    response.getChannelAnalyzerSettings()->setDownSample(settings.m_rationalDownSample ? 1 : 0);
-    response.getChannelAnalyzerSettings()->setDownSampleRate(settings.m_rationalDownSamplerRate);
-    response.getChannelAnalyzerSettings()->setBandwidth(settings.m_bandwidth);
-    response.getChannelAnalyzerSettings()->setLowCutoff(settings.m_lowCutoff);
-    response.getChannelAnalyzerSettings()->setSpanLog2(settings.m_log2Decim);
-    response.getChannelAnalyzerSettings()->setSsb(settings.m_ssb ? 1 : 0);
-    response.getChannelAnalyzerSettings()->setPll(settings.m_pll ? 1 : 0);
-    response.getChannelAnalyzerSettings()->setFll(settings.m_fll ? 1 : 0);
-    response.getChannelAnalyzerSettings()->setRrc(settings.m_rrc ? 1 : 0);
-    response.getChannelAnalyzerSettings()->setRrcRolloff(settings.m_rrcRolloff);
-    response.getChannelAnalyzerSettings()->setPllPskOrder(settings.m_pllPskOrder);
-    response.getChannelAnalyzerSettings()->setInputType((int) settings.m_inputType);
-    response.getChannelAnalyzerSettings()->setRgbColor(settings.m_rgbColor);
-    response.getChannelAnalyzerSettings()->setTitle(new QString(settings.m_title));
+    response.getInterferometerSettings()->setCorrelationType((int) settings.m_correlationType);
+    response.getInterferometerSettings()->setRgbColor(settings.m_rgbColor);
+    response.getInterferometerSettings()->setTitle(new QString(settings.m_title));
 
     // scope
     SWGSDRangel::SWGGLScope *swgScope = new SWGSDRangel::SWGGLScope();
     swgScope->init();
-    response.getChannelAnalyzerSettings()->setScopeConfig(swgScope);
+    response.getInterferometerSettings()->setScopeConfig(swgScope);
     swgScope->setDisplayMode(scopeSettings.m_displayMode);
     swgScope->setGridIntensity(scopeSettings.m_gridIntensity);
     swgScope->setTime(scopeSettings.m_time);
@@ -130,9 +118,9 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
     // spectrum
     SWGSDRangel::SWGGLSpectrum *swgSpectrum = new SWGSDRangel::SWGGLSpectrum();
     swgSpectrum->init();
-    response.getChannelAnalyzerSettings()->setSpectrumConfig(swgSpectrum);
+    response.getInterferometerSettings()->setSpectrumConfig(swgSpectrum);
     swgSpectrum->setAveragingMode((int) spectrumSettings.m_averagingMode);
-    swgSpectrum->setAveragingValue(spectrumSettings.m_averagingValue);
+    swgSpectrum->setAveragingValue(GLSpectrumSettings::getAveragingValue(spectrumSettings.m_averagingIndex, spectrumSettings.m_averagingMode));
     swgSpectrum->setDecay(spectrumSettings.m_decay);
     swgSpectrum->setDecayDivisor(spectrumSettings.m_decayDivisor);
     swgSpectrum->setDisplayCurrent(spectrumSettings.m_displayCurrent ? 1 : 0);
@@ -146,7 +134,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
     swgSpectrum->setFftSize(spectrumSettings.m_fftSize);
 }
 
-int ChannelAnalyzerWebAPIAdapter::webapiSettingsPutPatch(
+int InterferometerWebAPIAdapter::webapiSettingsPutPatch(
         bool force,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response,
@@ -158,86 +146,50 @@ int ChannelAnalyzerWebAPIAdapter::webapiSettingsPutPatch(
     return 200;
 }
 
-void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
-        ChannelAnalyzerSettings& settings,
+void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
+        InterferometerSettings& settings,
         GLScopeSettings& scopeSettings,
         GLSpectrumSettings& spectrumSettings,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
-    if (channelSettingsKeys.contains("bandwidth")) {
-        settings.m_bandwidth = response.getChannelAnalyzerSettings()->getBandwidth();
-    }
-    if (channelSettingsKeys.contains("downSample")) {
-        settings.m_rationalDownSample = response.getChannelAnalyzerSettings()->getDownSample() != 0;
-    }
-    if (channelSettingsKeys.contains("downSampleRate")) {
-        settings.m_rationalDownSamplerRate = response.getChannelAnalyzerSettings()->getDownSampleRate();
-    }
-    if (channelSettingsKeys.contains("fll")) {
-        settings.m_fll = response.getChannelAnalyzerSettings()->getFll() != 0;
-    }
-    if (channelSettingsKeys.contains("frequency")) {
-        settings.m_inputFrequencyOffset = response.getChannelAnalyzerSettings()->getFrequency();
-    }
-    if (channelSettingsKeys.contains("inputType")) {
-        settings.m_inputType = (ChannelAnalyzerSettings::InputType) response.getChannelAnalyzerSettings()->getInputType();
-    }
-    if (channelSettingsKeys.contains("lowCutoff")) {
-        settings.m_lowCutoff = response.getChannelAnalyzerSettings()->getLowCutoff();
-    }
-    if (channelSettingsKeys.contains("pll")) {
-        settings.m_pll = response.getChannelAnalyzerSettings()->getPll() != 0;
-    }
-    if (channelSettingsKeys.contains("pllPskOrder")) {
-        settings.m_pllPskOrder = response.getChannelAnalyzerSettings()->getPllPskOrder();
+    if (channelSettingsKeys.contains("correlationType")) {
+        settings.m_correlationType = (InterferometerSettings::CorrelationType) response.getInterferometerSettings()->getCorrelationType();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getChannelAnalyzerSettings()->getRgbColor();
-    }
-    if (channelSettingsKeys.contains("rrc")) {
-        settings.m_rrc = response.getChannelAnalyzerSettings()->getRrc() != 0;
-    }
-    if (channelSettingsKeys.contains("rrcRolloff")) {
-        settings.m_rrcRolloff = response.getChannelAnalyzerSettings()->getRrcRolloff();
-    }
-    if (channelSettingsKeys.contains("spanLog2")) {
-        settings.m_log2Decim = response.getChannelAnalyzerSettings()->getSpanLog2();
-    }
-    if (channelSettingsKeys.contains("ssb")) {
-        settings.m_ssb = response.getChannelAnalyzerSettings()->getSsb() != 0;
+        settings.m_rgbColor = response.getInterferometerSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getChannelAnalyzerSettings()->getTitle();
+        settings.m_title = *response.getInterferometerSettings()->getTitle();
     }
     // scope
     if (channelSettingsKeys.contains("scopeConfig"))
     {
         if (channelSettingsKeys.contains("scopeConfig.displayMode")) {
-            scopeSettings.m_displayMode = (GLScopeSettings::DisplayMode) response.getChannelAnalyzerSettings()->getScopeConfig()->getDisplayMode();
+            scopeSettings.m_displayMode = (GLScopeSettings::DisplayMode) response.getInterferometerSettings()->getScopeConfig()->getDisplayMode();
         }
         if (channelSettingsKeys.contains("scopeConfig.gridIntensity")) {
-            scopeSettings.m_gridIntensity = response.getChannelAnalyzerSettings()->getScopeConfig()->getGridIntensity();
+            scopeSettings.m_gridIntensity = response.getInterferometerSettings()->getScopeConfig()->getGridIntensity();
         }
         if (channelSettingsKeys.contains("scopeConfig.time")) {
-            scopeSettings.m_time = response.getChannelAnalyzerSettings()->getScopeConfig()->getTime();
+            scopeSettings.m_time = response.getInterferometerSettings()->getScopeConfig()->getTime();
         }
         if (channelSettingsKeys.contains("scopeConfig.timeOfs")) {
-            scopeSettings.m_timeOfs = response.getChannelAnalyzerSettings()->getScopeConfig()->getTimeOfs();
+            scopeSettings.m_timeOfs = response.getInterferometerSettings()->getScopeConfig()->getTimeOfs();
         }
         if (channelSettingsKeys.contains("scopeConfig.traceIntensity")) {
-            scopeSettings.m_traceIntensity = response.getChannelAnalyzerSettings()->getScopeConfig()->getTraceIntensity();
+            scopeSettings.m_traceIntensity = response.getInterferometerSettings()->getScopeConfig()->getTraceIntensity();
         }
         if (channelSettingsKeys.contains("scopeConfig.traceLen")) {
-            scopeSettings.m_traceLen = response.getChannelAnalyzerSettings()->getScopeConfig()->getTraceLen();
+            scopeSettings.m_traceLen = response.getInterferometerSettings()->getScopeConfig()->getTraceLen();
         }
         if (channelSettingsKeys.contains("scopeConfig.trigPre")) {
-            scopeSettings.m_trigPre = response.getChannelAnalyzerSettings()->getScopeConfig()->getTrigPre();
+            scopeSettings.m_trigPre = response.getInterferometerSettings()->getScopeConfig()->getTrigPre();
         }
         // traces
         if (channelSettingsKeys.contains("scopeConfig.tracesData"))
         {
-            QList<SWGSDRangel::SWGTraceData *> *tracesData = response.getChannelAnalyzerSettings()->getScopeConfig()->getTracesData();
+            QList<SWGSDRangel::SWGTraceData *> *tracesData = response.getInterferometerSettings()->getScopeConfig()->getTracesData();
             scopeSettings.m_tracesData.clear();
 
             for (int i = 0; i < 10; i++) // no more than 10 traces anyway
@@ -308,7 +260,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
         // triggers
         if (channelSettingsKeys.contains("scopeConfig.triggersData"))
         {
-            QList<SWGSDRangel::SWGTriggerData *> *triggersData = response.getChannelAnalyzerSettings()->getScopeConfig()->getTriggersData();
+            QList<SWGSDRangel::SWGTriggerData *> *triggersData = response.getInterferometerSettings()->getScopeConfig()->getTriggersData();
             scopeSettings.m_triggersData.clear();
 
             for (int i = 0; i < 10; i++) // no more than 10 triggers anyway
@@ -377,53 +329,55 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("spectrumConfig"))
     {
         if (channelSettingsKeys.contains("spectrumConfig.averagingMode")) {
-            spectrumSettings.m_averagingMode = (GLSpectrumSettings::AveragingMode) response.getChannelAnalyzerSettings()->getSpectrumConfig()->getAveragingMode();
+            spectrumSettings.m_averagingMode = (GLSpectrumSettings::AveragingMode) response.getInterferometerSettings()->getSpectrumConfig()->getAveragingMode();
         }
-        if (channelSettingsKeys.contains("spectrumConfig.averagingValue")) {
-            spectrumSettings.m_averagingValue = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getAveragingValue();
+        if (channelSettingsKeys.contains("spectrumConfig.averagingValue"))
+        {
+            spectrumSettings.m_averagingValue = response.getInterferometerSettings()->getSpectrumConfig()->getAveragingValue();
+            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
         }
         if (channelSettingsKeys.contains("spectrumConfig.decay")) {
-            spectrumSettings.m_decay = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDecay();
+            spectrumSettings.m_decay = response.getInterferometerSettings()->getSpectrumConfig()->getDecay();
         }
         if (channelSettingsKeys.contains("spectrumConfig.decayDivisor")) {
-            spectrumSettings.m_decayDivisor = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDecayDivisor();
+            spectrumSettings.m_decayDivisor = response.getInterferometerSettings()->getSpectrumConfig()->getDecayDivisor();
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayCurrent")) {
-            spectrumSettings.m_displayCurrent = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayCurrent() != 0;
+            spectrumSettings.m_displayCurrent = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayCurrent() != 0;
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayGrid")) {
-            spectrumSettings.m_displayGrid = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayGrid() != 0;
+            spectrumSettings.m_displayGrid = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayGrid() != 0;
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayGridIntensity")) {
-            spectrumSettings.m_displayGridIntensity = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayGridIntensity();
+            spectrumSettings.m_displayGridIntensity = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayGridIntensity();
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayHistogram")) {
-            spectrumSettings.m_displayHistogram = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayHistogram() != 0;
+            spectrumSettings.m_displayHistogram = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayHistogram() != 0;
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayMaxHold")) {
-            spectrumSettings.m_displayMaxHold = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayMaxHold() != 0;
+            spectrumSettings.m_displayMaxHold = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayMaxHold() != 0;
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayTraceIntensity")) {
-            spectrumSettings.m_displayTraceIntensity = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayTraceIntensity();
+            spectrumSettings.m_displayTraceIntensity = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayTraceIntensity();
         }
         if (channelSettingsKeys.contains("spectrumConfig.displayWaterfall")) {
-            spectrumSettings.m_displayWaterfall = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDisplayWaterfall() != 0;
+            spectrumSettings.m_displayWaterfall = response.getInterferometerSettings()->getSpectrumConfig()->getDisplayWaterfall() != 0;
         }
         if (channelSettingsKeys.contains("spectrumConfig.fftOverlap")) {
-            spectrumSettings.m_fftOverlap = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getFftOverlap();
+            spectrumSettings.m_fftOverlap = response.getInterferometerSettings()->getSpectrumConfig()->getFftOverlap();
         }
         if (channelSettingsKeys.contains("spectrumConfig.fftSize")) {
-            spectrumSettings.m_fftSize = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getFftSize();
+            spectrumSettings.m_fftSize = response.getInterferometerSettings()->getSpectrumConfig()->getFftSize();
         }
     }
 }
 
-int ChannelAnalyzerWebAPIAdapter::qColorToInt(const QColor& color)
+int InterferometerWebAPIAdapter::qColorToInt(const QColor& color)
 {
     return 256*256*color.blue() + 256*color.green() + color.red();
 }
 
-QColor ChannelAnalyzerWebAPIAdapter::intToQColor(int intColor)
+QColor InterferometerWebAPIAdapter::intToQColor(int intColor)
 {
     int r = intColor % 256;
     int bg = intColor / 256;

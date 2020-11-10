@@ -98,7 +98,7 @@ private slots:
 	void on_histogram_toggled(bool checked);
 	void on_maxHold_toggled(bool checked);
 	void on_current_toggled(bool checked);
-	void on_invert_toggled(bool checked);
+	void on_invertWaterfall_toggled(bool checked);
 	void on_grid_toggled(bool checked);
 	void on_clearSpectrum_clicked(bool checked);
     void on_freeze_toggled(bool checked);
