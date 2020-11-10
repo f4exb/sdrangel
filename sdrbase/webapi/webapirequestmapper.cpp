@@ -3645,6 +3645,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setRemoteSourceSettings(new SWGSDRangel::SWGRemoteSourceSettings());
             channelSettings->getRemoteSourceSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "SigMFFileSinkSettings")
+        {
+            channelSettings->setSigMfFileSinkSettings(new SWGSDRangel::SWGSigMFFileSinkSettings());
+            channelSettings->getSigMfFileSinkSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "SSBDemodSettings")
         {
             channelSettings->setSsbDemodSettings(new SWGSDRangel::SWGSSBDemodSettings());

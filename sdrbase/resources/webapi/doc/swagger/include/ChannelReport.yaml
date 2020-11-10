@@ -49,6 +49,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
     PacketModReport:
       $ref: "/doc/swagger/include/PacketMod.yaml#/PacketModReport"
+    SigMFFileSinkReport:
+      $ref: "/doc/swagger/include/SigMFFileSink.yaml#/SigMFFileSinkReport"
     SSBModReport:
       $ref: "/doc/swagger/include/SSBMod.yaml#/SSBModReport"
     UDPSourceReport:

@@ -84,6 +84,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_remote_sink_settings_isSet = false;
     remote_source_settings = nullptr;
     m_remote_source_settings_isSet = false;
+    sig_mf_file_sink_settings = nullptr;
+    m_sig_mf_file_sink_settings_isSet = false;
     ssb_mod_settings = nullptr;
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = nullptr;
@@ -160,6 +162,8 @@ SWGChannelSettings::init() {
     m_remote_sink_settings_isSet = false;
     remote_source_settings = new SWGRemoteSourceSettings();
     m_remote_source_settings_isSet = false;
+    sig_mf_file_sink_settings = new SWGSigMFFileSinkSettings();
+    m_sig_mf_file_sink_settings_isSet = false;
     ssb_mod_settings = new SWGSSBModSettings();
     m_ssb_mod_settings_isSet = false;
     ssb_demod_settings = new SWGSSBDemodSettings();
@@ -254,6 +258,9 @@ SWGChannelSettings::cleanup() {
     if(remote_source_settings != nullptr) { 
         delete remote_source_settings;
     }
+    if(sig_mf_file_sink_settings != nullptr) { 
+        delete sig_mf_file_sink_settings;
+    }
     if(ssb_mod_settings != nullptr) { 
         delete ssb_mod_settings;
     }
@@ -340,6 +347,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_sink_settings, pJson["RemoteSinkSettings"], "SWGRemoteSinkSettings", "SWGRemoteSinkSettings");
     
     ::SWGSDRangel::setValue(&remote_source_settings, pJson["RemoteSourceSettings"], "SWGRemoteSourceSettings", "SWGRemoteSourceSettings");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_sink_settings, pJson["SigMFFileSinkSettings"], "SWGSigMFFileSinkSettings", "SWGSigMFFileSinkSettings");
     
     ::SWGSDRangel::setValue(&ssb_mod_settings, pJson["SSBModSettings"], "SWGSSBModSettings", "SWGSSBModSettings");
     
@@ -452,6 +461,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((remote_source_settings != nullptr) && (remote_source_settings->isSet())){
         toJsonValue(QString("RemoteSourceSettings"), remote_source_settings, obj, QString("SWGRemoteSourceSettings"));
+    }
+    if((sig_mf_file_sink_settings != nullptr) && (sig_mf_file_sink_settings->isSet())){
+        toJsonValue(QString("SigMFFileSinkSettings"), sig_mf_file_sink_settings, obj, QString("SWGSigMFFileSinkSettings"));
     }
     if((ssb_mod_settings != nullptr) && (ssb_mod_settings->isSet())){
         toJsonValue(QString("SSBModSettings"), ssb_mod_settings, obj, QString("SWGSSBModSettings"));
@@ -755,6 +767,16 @@ SWGChannelSettings::setRemoteSourceSettings(SWGRemoteSourceSettings* remote_sour
     this->m_remote_source_settings_isSet = true;
 }
 
+SWGSigMFFileSinkSettings*
+SWGChannelSettings::getSigMfFileSinkSettings() {
+    return sig_mf_file_sink_settings;
+}
+void
+SWGChannelSettings::setSigMfFileSinkSettings(SWGSigMFFileSinkSettings* sig_mf_file_sink_settings) {
+    this->sig_mf_file_sink_settings = sig_mf_file_sink_settings;
+    this->m_sig_mf_file_sink_settings_isSet = true;
+}
+
 SWGSSBModSettings*
 SWGChannelSettings::getSsbModSettings() {
     return ssb_mod_settings;
@@ -902,6 +924,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(remote_source_settings && remote_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_sink_settings && sig_mf_file_sink_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(ssb_mod_settings && ssb_mod_settings->isSet()){

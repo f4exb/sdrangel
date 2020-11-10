@@ -42,6 +42,7 @@
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
+#include "SWGSigMFFileSinkReport.h"
 #include "SWGUDPSinkReport.h"
 #include "SWGUDPSourceReport.h"
 #include "SWGWFMDemodReport.h"
@@ -129,6 +130,9 @@ public:
     SWGPacketModReport* getPacketModReport();
     void setPacketModReport(SWGPacketModReport* packet_mod_report);
 
+    SWGSigMFFileSinkReport* getSigMfFileSinkReport();
+    void setSigMfFileSinkReport(SWGSigMFFileSinkReport* sig_mf_file_sink_report);
+
     SWGSSBModReport* getSsbModReport();
     void setSsbModReport(SWGSSBModReport* ssb_mod_report);
 
@@ -210,6 +214,9 @@ private:
 
     SWGPacketModReport* packet_mod_report;
     bool m_packet_mod_report_isSet;
+
+    SWGSigMFFileSinkReport* sig_mf_file_sink_report;
+    bool m_sig_mf_file_sink_report_isSet;
 
     SWGSSBModReport* ssb_mod_report;
     bool m_ssb_mod_report_isSet;

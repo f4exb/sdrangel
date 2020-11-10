@@ -186,6 +186,9 @@
 #include "SWGSigMFFileInputActions.h"
 #include "SWGSigMFFileInputReport.h"
 #include "SWGSigMFFileInputSettings.h"
+#include "SWGSigMFFileSinkActions.h"
+#include "SWGSigMFFileSinkReport.h"
+#include "SWGSigMFFileSinkSettings.h"
 #include "SWGSimplePTTActions.h"
 #include "SWGSimplePTTReport.h"
 #include "SWGSimplePTTSettings.h"
@@ -733,6 +736,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSigMFFileInputSettings").compare(type) == 0) {
       return new SWGSigMFFileInputSettings();
+    }
+    if(QString("SWGSigMFFileSinkActions").compare(type) == 0) {
+      return new SWGSigMFFileSinkActions();
+    }
+    if(QString("SWGSigMFFileSinkReport").compare(type) == 0) {
+      return new SWGSigMFFileSinkReport();
+    }
+    if(QString("SWGSigMFFileSinkSettings").compare(type) == 0) {
+      return new SWGSigMFFileSinkSettings();
     }
     if(QString("SWGSimplePTTActions").compare(type) == 0) {
       return new SWGSimplePTTActions();

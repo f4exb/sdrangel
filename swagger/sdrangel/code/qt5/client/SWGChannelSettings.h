@@ -48,6 +48,7 @@
 #include "SWGRemoteSourceSettings.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModSettings.h"
+#include "SWGSigMFFileSinkSettings.h"
 #include "SWGUDPSinkSettings.h"
 #include "SWGUDPSourceSettings.h"
 #include "SWGWFMDemodSettings.h"
@@ -156,6 +157,9 @@ public:
     SWGRemoteSourceSettings* getRemoteSourceSettings();
     void setRemoteSourceSettings(SWGRemoteSourceSettings* remote_source_settings);
 
+    SWGSigMFFileSinkSettings* getSigMfFileSinkSettings();
+    void setSigMfFileSinkSettings(SWGSigMFFileSinkSettings* sig_mf_file_sink_settings);
+
     SWGSSBModSettings* getSsbModSettings();
     void setSsbModSettings(SWGSSBModSettings* ssb_mod_settings);
 
@@ -261,6 +265,9 @@ private:
 
     SWGRemoteSourceSettings* remote_source_settings;
     bool m_remote_source_settings_isSet;
+
+    SWGSigMFFileSinkSettings* sig_mf_file_sink_settings;
+    bool m_sig_mf_file_sink_settings_isSet;
 
     SWGSSBModSettings* ssb_mod_settings;
     bool m_ssb_mod_settings_isSet;

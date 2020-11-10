@@ -44,6 +44,8 @@ SWGChannelActions::SWGChannelActions() {
     m_ieee_802_15_4_mod_actions_isSet = false;
     packet_mod_actions = nullptr;
     m_packet_mod_actions_isSet = false;
+    sig_mf_file_sink_actions = nullptr;
+    m_sig_mf_file_sink_actions_isSet = false;
 }
 
 SWGChannelActions::~SWGChannelActions() {
@@ -68,6 +70,8 @@ SWGChannelActions::init() {
     m_ieee_802_15_4_mod_actions_isSet = false;
     packet_mod_actions = new SWGPacketModActions();
     m_packet_mod_actions_isSet = false;
+    sig_mf_file_sink_actions = new SWGSigMFFileSinkActions();
+    m_sig_mf_file_sink_actions_isSet = false;
 }
 
 void
@@ -89,6 +93,9 @@ SWGChannelActions::cleanup() {
     }
     if(packet_mod_actions != nullptr) { 
         delete packet_mod_actions;
+    }
+    if(sig_mf_file_sink_actions != nullptr) { 
+        delete sig_mf_file_sink_actions;
     }
 }
 
@@ -118,6 +125,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ieee_802_15_4_mod_actions, pJson["IEEE_802_15_4_ModActions"], "SWGIEEE_802_15_4_ModActions", "SWGIEEE_802_15_4_ModActions");
     
     ::SWGSDRangel::setValue(&packet_mod_actions, pJson["PacketModActions"], "SWGPacketModActions", "SWGPacketModActions");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_sink_actions, pJson["SigMFFileSinkActions"], "SWGSigMFFileSinkActions", "SWGSigMFFileSinkActions");
     
 }
 
@@ -158,6 +167,9 @@ SWGChannelActions::asJsonObject() {
     }
     if((packet_mod_actions != nullptr) && (packet_mod_actions->isSet())){
         toJsonValue(QString("PacketModActions"), packet_mod_actions, obj, QString("SWGPacketModActions"));
+    }
+    if((sig_mf_file_sink_actions != nullptr) && (sig_mf_file_sink_actions->isSet())){
+        toJsonValue(QString("SigMFFileSinkActions"), sig_mf_file_sink_actions, obj, QString("SWGSigMFFileSinkActions"));
     }
 
     return obj;
@@ -243,6 +255,16 @@ SWGChannelActions::setPacketModActions(SWGPacketModActions* packet_mod_actions) 
     this->m_packet_mod_actions_isSet = true;
 }
 
+SWGSigMFFileSinkActions*
+SWGChannelActions::getSigMfFileSinkActions() {
+    return sig_mf_file_sink_actions;
+}
+void
+SWGChannelActions::setSigMfFileSinkActions(SWGSigMFFileSinkActions* sig_mf_file_sink_actions) {
+    this->sig_mf_file_sink_actions = sig_mf_file_sink_actions;
+    this->m_sig_mf_file_sink_actions_isSet = true;
+}
+
 
 bool
 SWGChannelActions::isSet(){
@@ -270,6 +292,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(packet_mod_actions && packet_mod_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_sink_actions && sig_mf_file_sink_actions->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

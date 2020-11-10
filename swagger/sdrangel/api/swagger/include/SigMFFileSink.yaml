@@ -1,0 +1,95 @@
+SigMFFileSinkSettings:
+  description: SigMFFileSink
+  properties:
+    inputFrequencyOffset:
+      type: integer
+    fileRecordName:
+      type: string
+      description: full path of the meta file
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    log2Decim:
+      type: integer
+    spectrumSquelchMode:
+      type: integer
+      description: >
+        Spectrum squelch system
+        * 0 - deactivated
+        * 1 - activated
+    spectrumSquelch:
+      type: number
+      format: float
+      description: Squelch level in power dB
+    preRecordTime:
+      type: integer
+      description: Number of seconds to record before recording is triggered (manual or squelch)
+    squelchPostRecordTime:
+      type: integer
+      description: Number of seconds to record after spectrum squelch cloeses
+    squelchRecordingEnable:
+      type: integer
+      description: >
+        Automatic recording triggered by spectrum squalch
+        * 0 - disabled
+        * 1 - enabled
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+SigMFFileSinkReport:
+  description: SigMFFileSink
+  properties:
+    spectrumSquelch:
+      type: integer
+      description: >
+        Spectrum squelch status
+        * 0 - closed
+        * 1 - open
+    spectrumMax:
+      type: number
+      format: float
+      description: Current spectrum max in squared magnitude (power)
+    sinkSampleRate:
+      type: integer
+    channelSampleRate:
+      type: integer
+    recording:
+      type: integer
+      description: >
+        Recording status
+        * 0 - not recording
+        * 1 - recording
+    recordTimeMs:
+      type: integer
+      description: Record total time in milliseconds
+    recordSize:
+      type: integer
+      format: int64
+      description: Record data size in bytes
+    recordCaptures:
+      type: integer
+      description: Number of record captures not including current if recording
+
+SigMFFileSinkActions:
+  description: SigMFFileSink
+  properties:
+    record:
+      type: integer
+      description: >
+        Record action
+          * 0 - stop recording
+          * 1 - start recording
+

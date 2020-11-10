@@ -70,6 +70,8 @@ SWGChannelReport::SWGChannelReport() {
     m_remote_source_report_isSet = false;
     packet_mod_report = nullptr;
     m_packet_mod_report_isSet = false;
+    sig_mf_file_sink_report = nullptr;
+    m_sig_mf_file_sink_report_isSet = false;
     ssb_mod_report = nullptr;
     m_ssb_mod_report_isSet = false;
     udp_source_report = nullptr;
@@ -130,6 +132,8 @@ SWGChannelReport::init() {
     m_remote_source_report_isSet = false;
     packet_mod_report = new SWGPacketModReport();
     m_packet_mod_report_isSet = false;
+    sig_mf_file_sink_report = new SWGSigMFFileSinkReport();
+    m_sig_mf_file_sink_report_isSet = false;
     ssb_mod_report = new SWGSSBModReport();
     m_ssb_mod_report_isSet = false;
     udp_source_report = new SWGUDPSourceReport();
@@ -205,6 +209,9 @@ SWGChannelReport::cleanup() {
     if(packet_mod_report != nullptr) { 
         delete packet_mod_report;
     }
+    if(sig_mf_file_sink_report != nullptr) { 
+        delete sig_mf_file_sink_report;
+    }
     if(ssb_mod_report != nullptr) { 
         delete ssb_mod_report;
     }
@@ -274,6 +281,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_source_report, pJson["RemoteSourceReport"], "SWGRemoteSourceReport", "SWGRemoteSourceReport");
     
     ::SWGSDRangel::setValue(&packet_mod_report, pJson["PacketModReport"], "SWGPacketModReport", "SWGPacketModReport");
+    
+    ::SWGSDRangel::setValue(&sig_mf_file_sink_report, pJson["SigMFFileSinkReport"], "SWGSigMFFileSinkReport", "SWGSigMFFileSinkReport");
     
     ::SWGSDRangel::setValue(&ssb_mod_report, pJson["SSBModReport"], "SWGSSBModReport", "SWGSSBModReport");
     
@@ -363,6 +372,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((packet_mod_report != nullptr) && (packet_mod_report->isSet())){
         toJsonValue(QString("PacketModReport"), packet_mod_report, obj, QString("SWGPacketModReport"));
+    }
+    if((sig_mf_file_sink_report != nullptr) && (sig_mf_file_sink_report->isSet())){
+        toJsonValue(QString("SigMFFileSinkReport"), sig_mf_file_sink_report, obj, QString("SWGSigMFFileSinkReport"));
     }
     if((ssb_mod_report != nullptr) && (ssb_mod_report->isSet())){
         toJsonValue(QString("SSBModReport"), ssb_mod_report, obj, QString("SWGSSBModReport"));
@@ -593,6 +605,16 @@ SWGChannelReport::setPacketModReport(SWGPacketModReport* packet_mod_report) {
     this->m_packet_mod_report_isSet = true;
 }
 
+SWGSigMFFileSinkReport*
+SWGChannelReport::getSigMfFileSinkReport() {
+    return sig_mf_file_sink_report;
+}
+void
+SWGChannelReport::setSigMfFileSinkReport(SWGSigMFFileSinkReport* sig_mf_file_sink_report) {
+    this->sig_mf_file_sink_report = sig_mf_file_sink_report;
+    this->m_sig_mf_file_sink_report_isSet = true;
+}
+
 SWGSSBModReport*
 SWGChannelReport::getSsbModReport() {
     return ssb_mod_report;
@@ -709,6 +731,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(packet_mod_report && packet_mod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sig_mf_file_sink_report && sig_mf_file_sink_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(ssb_mod_report && ssb_mod_report->isSet()){
