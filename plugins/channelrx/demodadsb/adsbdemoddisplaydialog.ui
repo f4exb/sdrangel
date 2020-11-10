@@ -89,14 +89,14 @@
       <item row="3" column="0">
        <widget class="QLabel" name="airportRangeLabel">
         <property name="text">
-         <string>Airport display range (nm)</string>
+         <string>Airport display distance (km)</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
        <widget class="QSpinBox" name="airportRange">
         <property name="toolTip">
-         <string>Displays airports within the specified range in nautical miles from My Position</string>
+         <string>Displays airports within the specified distance in kilometres from My Position</string>
         </property>
         <property name="maximum">
          <number>20000</number>

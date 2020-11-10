@@ -57,7 +57,7 @@ struct ADSBDemodSettings
 
     Serializable *m_channelMarker;
 
-    float m_airportRange;               //!< How far away should we display airports (nm)
+    float m_airportRange;               //!< How far away should we display airports (km)
     enum AirportType {
         Small,
         Medium,

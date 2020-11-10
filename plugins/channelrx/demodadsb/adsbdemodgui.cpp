@@ -432,8 +432,12 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
         int idx = value.toInt();
         if ((idx >= 0) && (idx < m_airports[row]->m_frequencies.size()))
             m_gui->setFrequency(m_airports[row]->m_frequencies[idx]->m_frequency * 1000000);
-        else
-            qDebug() << "AirportModel::setData unexpected idx " << idx << " frequencies.size() " << m_airports[row]->m_frequencies.size();
+        else if (idx == m_airports[row]->m_frequencies.size())
+        {
+            // Set airport as target
+            m_gui->target(m_azimuth[row], m_elevation[row]);
+            emit dataChanged(index, index);
+        }
         return true;
     }
     return true;
@@ -1456,15 +1460,18 @@ void ADSBDemodGUI::updateAirports()
 {
     m_airportModel.removeAllAirports();
     QHash<int, AirportInformation *>::iterator i = m_airportInfo->begin();
+    AzEl azEl = m_azEl;
+
     while (i != m_airportInfo->end())
     {
         AirportInformation *airportInfo = i.value();
-        // Calculate range to airport from My Position - One degree = 60 nautical miles
-        float latDiff = std::fabs(airportInfo->m_latitude - m_azEl.getLocationSpherical().m_latitude) * 60.0f;
-        float longDiff = std::fabs(airportInfo->m_longitude - m_azEl.getLocationSpherical().m_longitude) * 60.0f;
-        float range = sqrt(latDiff*latDiff+longDiff*longDiff);
+
+        // Calculate distance and az/el to airport from My Position
+        azEl.setTarget(airportInfo->m_latitude, airportInfo->m_longitude, feetToMetres(airportInfo->m_elevation));
+        azEl.calculate();
+
         // Only display airport if in range
-        if (range <= m_settings.m_airportRange)
+        if (azEl.getDistance() <= m_settings.m_airportRange*1000.0f)
         {
             // Only display the airport if it's large enough
             if (airportInfo->m_type >= m_settings.m_airportMinimumSize)
@@ -1472,7 +1479,7 @@ void ADSBDemodGUI::updateAirports()
                 // Only display heliports if enabled
                 if (m_settings.m_displayHeliports || (airportInfo->m_type != ADSBDemodSettings::AirportType::Heliport))
                 {
-                    m_airportModel.addAirport(airportInfo);
+                    m_airportModel.addAirport(airportInfo, azEl.getAzimuth(), azEl.getElevation(), azEl.getDistance());
                 }
             }
         }
@@ -1482,6 +1489,19 @@ void ADSBDemodGUI::updateAirports()
     m_currentAirportRange = m_currentAirportRange;
     m_currentAirportMinimumSize = m_settings.m_airportMinimumSize;
     m_currentDisplayHeliports = m_settings.m_displayHeliports;
+}
+
+// Set a static target, such as an airport
+void ADSBDemodGUI::target(float az, float el)
+{
+    if (m_trackAircraft)
+    {
+        // Restore colour of current target
+        m_trackAircraft->m_isTarget = false;
+        m_aircraftModel.aircraftUpdated(m_trackAircraft);
+        m_trackAircraft = nullptr;
+    }
+    m_adsbDemod->setTarget(az, el);
 }
 
 void ADSBDemodGUI::targetAircraft(Aircraft *aircraft)

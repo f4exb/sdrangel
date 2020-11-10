@@ -61,7 +61,7 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * The units for altitude, speed and vertical climb rate. These can be either ft (feet), kn (knots) and ft/min (feet per minute), or m (metres), kph (kilometers per hour) and m/s (metres per second).
 * The minimum size airport that will be displayed on the map: small, medium or large. Use small to display GA airfields, medium for regional airports and large for international airports.
 * Whether or not to display heliports.
-* The range (in nautical miles) from My Position at which airports will be displayed on the map.
+* The distance (in kilometres), from the location set under Preferences > My Position, at which airports will be displayed on the map.
 * The timeout, in seconds, after which an aircraft will be removed from the table and map, if an ADS-B frame has not been received from it.
 * The font used for the table.
 
@@ -99,18 +99,18 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 * Flight No. - Airline flight number or callsign. (ADS-B)
 * Aircraft - The aircraft model. (DB)
 * Airline - The logo of the operator of the aircraft (or owner if no operator known). (DB)
-* Altitude - Altitude in feet or metres. (ADS-B)
-* Speed - Speed (either ground speed, indicated airspeed, or true airspeed) in knots or kph. (ADS-B)
-* Heading - The direction the aircraft is heading, in degrees. (ADS-B)
-* VR - The vertical climb rate (or descent rate if negative) in feet/minute or m/s. (ADS-B)
-* Range - The range (distance) to the aircraft from the receiving antenna in kilometres. The location of the receiving antenna is set under the Preferences > My Position menu.
+* Altitude (Alt) - Altitude in feet or metres. (ADS-B)
+* Speed (Spd) - Speed (either ground speed, indicated airspeed, or true airspeed) in knots or kph. (ADS-B)
+* Heading (Hd) - The direction the aircraft is heading, in degrees. (ADS-B)
+* Vertical rate (VR) - The vertical climb rate (or descent rate if negative) in feet/minute or m/s. (ADS-B)
+* Distance (D) - The distance to the aircraft from the receiving antenna in kilometres. The location of the receiving antenna is set under the Preferences > My Position menu.
 * Az/El - The azimuth and elevation angles to the aircraft from the receiving antenna in degrees. These values can be sent to a rotator controller Feature plugin to track the aircraft.
-* Latitude - Vertical position coordinate, in decimal degrees. (ADS-B)
-* Longitude - Horizontal position coordinate, in decimal degrees. (ADS-B)
-* Category - The vehicle category, such as Light, Large, Heavy or Rotorcraft. (ADS-B)
+* Latitude (Lat) - Vertical position coordinate, in decimal degrees. (ADS-B)
+* Longitude (Lon) - Horizontal position coordinate, in decimal degrees. (ADS-B)
+* Category (Cat) - The vehicle category, such as Light, Large, Heavy or Rotorcraft. (ADS-B)
 * Status - The status of the flight, including if there is an emergency. (ADS-B)
 * Squawk - The squawk code (Mode-A transponder code). (ADS-B)
-* Registration - The registration number of the aircraft. (DB)
+* Registration (Reg) - The registration number of the aircraft. (DB)
 * Country - The flag of the country the aircraft is registered in. (DB)
 * Registered - The date when the aircraft was registered. (DB)
 * Manufacturer - The manufacturer of the aircraft. (DB)
@@ -122,14 +122,14 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 
 If an ADS-B frame has not been received from an aircraft for 60 seconds, the aircraft is removed from the table and map. This timeout can be adjusted in the Display Settings dialog.
 
-Single clicking in a cell will highlight the row and the corresponding aircraft information box on the map will be coloured orange, rather than blue.
-Right clicking on the header will open a menu allowing you to select which columns are visible.
-To reorder the columns, left click and drag left or right a column header.
-Left click on a header to sort the table by the data in that column.
-Double clicking in an ICAO ID cell will open a Web browser and search for the corresponding aircraft on https://www.planespotters.net/
-Double clicking in an Flight No cell will open a Web browser and search for the corresponding flight on https://www.flightradar24.com/
-Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aicraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
-Double clicking on any other cell in the table will centre the map on the corresponding aircraft.
+* Single clicking in a cell will highlight the row and the corresponding aircraft information box on the map will be coloured orange, rather than blue.
+* Right clicking on the header will open a menu allowing you to select which columns are visible.
+* To reorder the columns, left click and drag left or right a column header.
+* Left click on a header to sort the table by the data in that column.
+* Double clicking in an ICAO ID cell will open a Web browser and search for the corresponding aircraft on https://www.planespotters.net/
+* Double clicking in an Flight No cell will open a Web browser and search for the corresponding flight on https://www.flightradar24.com/
+* Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aicraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
+* Double clicking on any other cell in the table will centre the map on the corresponding aircraft.
 
 <h3>Map</h3>
 
@@ -141,10 +141,11 @@ The initial antenna location is placed according to My Position set under the Pr
 
 Aircraft are only placed upon the map when a position can be calculated, which can require several frames to be received.
 
-To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
-Left clicking on an aicraft will highlight the corresponding row in the table for the aircraft and the information box on the map will be coloured orange, rather than blue.
-Left clicking the information box next to an aircraft will reveal more information. If can be closed by clicking it again.
-Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded.). This information box can be closed by left clicking on the airport identifier. Left clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set.
+* To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
+* Left clicking on an aicraft will highlight the corresponding row in the table for the aircraft and the information box on the map will be coloured orange, rather than blue.
+* Double clicking on an aircraft will set it as the active target and the information box will be coloured green.
+* Left clicking the information box next to an aircraft will reveal more information. It can be closed by clicking it again.
+* Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded.). This information box can be closed by left clicking on the airport identifier. Double clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set (15). The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
 
 <h3>Attribution</h3>
 

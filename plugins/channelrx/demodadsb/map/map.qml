@@ -161,11 +161,17 @@ Item {
                                     var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
                                     if (freqIdx == 0) {
                                         showFreq = false
-                                    } else {
-                                        selectedFreq = freqIdx - 1
                                     }
                                 } else {
-                                    showFreq = true
+                                   showFreq = true
+                                }
+                            }
+                            onDoubleClicked: (mouse) => {
+                                if (showFreq) {
+                                    var freqIdx = Math.floor((mouse.y-5)/((height-10)/airportDataRows))
+                                    if (freqIdx != 0) {
+                                        selectedFreq = freqIdx - 1
+                                    }
                                 }
                             }
                         }

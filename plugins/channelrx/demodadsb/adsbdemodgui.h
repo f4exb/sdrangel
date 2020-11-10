@@ -324,16 +324,18 @@ public:
     {
     }
 
-    Q_INVOKABLE void addAirport(AirportInformation *airport) {
+    Q_INVOKABLE void addAirport(AirportInformation *airport, float az, float el, float distance) {
         QString text;
         int rows;
 
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         m_airports.append(airport);
-        airportFreq(airport, text, rows);
+        airportFreq(airport, az, el, distance, text, rows);
         m_airportDataFreq.append(text);
         m_airportDataFreqRows.append(rows);
         m_showFreq.append(false);
+        m_azimuth.append(az);
+        m_elevation.append(el);
         endInsertRows();
     }
 
@@ -346,6 +348,8 @@ public:
             m_airportDataFreq.removeAt(row);
             m_airportDataFreqRows.removeAt(row);
             m_showFreq.removeAt(row);
+            m_azimuth.removeAt(row);
+            m_elevation.removeAt(row);
             endRemoveRows();
         }
     }
@@ -356,6 +360,8 @@ public:
         m_airportDataFreq.clear();
         m_airportDataFreqRows.clear();
         m_showFreq.clear();
+        m_azimuth.clear();
+        m_elevation.clear();
         endRemoveRows();
     }
 
@@ -372,7 +378,7 @@ public:
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
-    void airportFreq(AirportInformation *airport, QString& text, int& rows) {
+    void airportFreq(AirportInformation *airport, float az, float el, float distance, QString& text, int& rows) {
         // Create the text to go in the bubble next to the airport
         // Display name and frequencies
         QStringList list;
@@ -385,6 +391,9 @@ public:
             list.append(QString("%1: %2 MHz").arg(frequencyInfo->m_type).arg(frequencyInfo->m_frequency));
             rows++;
         }
+        list.append(QString("Az/El: %1/%2").arg((int)std::round(az)).arg((int)std::round(el)));
+        list.append(QString("Distance: %1 km").arg(distance/1000.0f, 0, 'f', 1));
+        rows += 2;
         text = list.join("\n");
     }
 
@@ -415,6 +424,8 @@ private:
     QList<QString> m_airportDataFreq;
     QList<int> m_airportDataFreqRows;
     QList<bool> m_showFreq;
+    QList<float> m_azimuth;
+    QList<float> m_elevation;
 };
 
 class ADSBDemodGUI : public ChannelGUI {
@@ -430,6 +441,7 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void highlightAircraft(Aircraft *aircraft);
     void targetAircraft(Aircraft *aircraft);
+    void target(float az, float el);
     bool setFrequency(float frequency);
     bool useSIUints() { return m_settings.m_siUnits; }
 
