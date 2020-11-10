@@ -49,6 +49,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/FreeDVMod.yaml#/FreeDVModSettings"
     FreqTrackerSettings:
       $ref: "/doc/swagger/include/FreqTracker.yaml#/FreqTrackerSettings"
+    InterferometerSettings:
+      $ref: "/doc/swagger/include/Interferometer.yaml#/InterferometerSettings"
     IEEE_802_15_4_ModSettings:
       $ref: "/doc/swagger/include/IEEE_802_15_4_Mod.yaml#/IEEE_802_15_4_ModSettings"
     NFMDemodSettings:

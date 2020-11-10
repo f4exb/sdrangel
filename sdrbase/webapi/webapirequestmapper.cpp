@@ -3610,6 +3610,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setIeee802154ModSettings(new SWGSDRangel::SWGIEEE_802_15_4_ModSettings());
             channelSettings->getIeee802154ModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "InterferometerSettings")
+        {
+            channelSettings->setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
+            channelSettings->getInterferometerSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "NFMDemodSettings")
         {
             channelSettings->setNfmDemodSettings(new SWGSDRangel::SWGNFMDemodSettings());

@@ -1,0 +1,29 @@
+InterferometerSettings:
+  description: Interferometer
+  properties:
+    correlationType:
+      description: see InterferometerSettings::CorrelationType
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    log2Decim:
+      type: integer
+    filterChainHash:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    spectrumConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    scopeConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLScope.yaml#/GLScope"
