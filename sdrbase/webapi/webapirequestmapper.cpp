@@ -3835,10 +3835,19 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
             deviceSettings->getBladeRf2InputSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "bladeRF2InputSettings")
+        else if (deviceSettingsKey == "bladeRF2OutputSettings")
         {
             deviceSettings->setBladeRf2OutputSettings(new SWGSDRangel::SWGBladeRF2OutputSettings());
             deviceSettings->getBladeRf2OutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "bladeRF2MIMOSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setBladeRf2MimoSettings(new SWGSDRangel::SWGBladeRF2MIMOSettings());
+            deviceSettings->getBladeRf2MimoSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "fcdProSettings")
         {
@@ -3879,6 +3888,15 @@ bool WebAPIRequestMapper::getDeviceSettings(
         {
             deviceSettings->setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
             deviceSettings->getLimeSdrOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "limeSdrMIMOSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setLimeSdrMimoSettings(new SWGSDRangel::SWGLimeSdrMIMOSettings());
+            deviceSettings->getLimeSdrMimoSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "perseusSettings")
         {

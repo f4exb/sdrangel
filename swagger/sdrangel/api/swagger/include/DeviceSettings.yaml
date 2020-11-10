@@ -46,6 +46,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
     limeSdrOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+    limeSdrMIMOSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
     localInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
     localOutputSettings:

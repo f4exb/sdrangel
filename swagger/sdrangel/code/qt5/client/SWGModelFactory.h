@@ -130,6 +130,7 @@
 #include "SWGLimeRFESettings.h"
 #include "SWGLimeSdrInputReport.h"
 #include "SWGLimeSdrInputSettings.h"
+#include "SWGLimeSdrMIMOSettings.h"
 #include "SWGLimeSdrOutputReport.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocalInputReport.h"
@@ -574,6 +575,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGLimeSdrInputSettings").compare(type) == 0) {
       return new SWGLimeSdrInputSettings();
+    }
+    if(QString("SWGLimeSdrMIMOSettings").compare(type) == 0) {
+      return new SWGLimeSdrMIMOSettings();
     }
     if(QString("SWGLimeSdrOutputReport").compare(type) == 0) {
       return new SWGLimeSdrOutputReport();

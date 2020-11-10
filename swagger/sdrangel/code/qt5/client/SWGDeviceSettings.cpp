@@ -66,6 +66,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_lime_sdr_input_settings_isSet = false;
     lime_sdr_output_settings = nullptr;
     m_lime_sdr_output_settings_isSet = false;
+    lime_sdr_mimo_settings = nullptr;
+    m_lime_sdr_mimo_settings_isSet = false;
     local_input_settings = nullptr;
     m_local_input_settings_isSet = false;
     local_output_settings = nullptr;
@@ -150,6 +152,8 @@ SWGDeviceSettings::init() {
     m_lime_sdr_input_settings_isSet = false;
     lime_sdr_output_settings = new SWGLimeSdrOutputSettings();
     m_lime_sdr_output_settings_isSet = false;
+    lime_sdr_mimo_settings = new SWGLimeSdrMIMOSettings();
+    m_lime_sdr_mimo_settings_isSet = false;
     local_input_settings = new SWGLocalInputSettings();
     m_local_input_settings_isSet = false;
     local_output_settings = new SWGLocalOutputSettings();
@@ -244,6 +248,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(lime_sdr_output_settings != nullptr) { 
         delete lime_sdr_output_settings;
+    }
+    if(lime_sdr_mimo_settings != nullptr) { 
+        delete lime_sdr_mimo_settings;
     }
     if(local_input_settings != nullptr) { 
         delete local_input_settings;
@@ -352,6 +359,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&lime_sdr_input_settings, pJson["limeSdrInputSettings"], "SWGLimeSdrInputSettings", "SWGLimeSdrInputSettings");
     
     ::SWGSDRangel::setValue(&lime_sdr_output_settings, pJson["limeSdrOutputSettings"], "SWGLimeSdrOutputSettings", "SWGLimeSdrOutputSettings");
+    
+    ::SWGSDRangel::setValue(&lime_sdr_mimo_settings, pJson["limeSdrMIMOSettings"], "SWGLimeSdrMIMOSettings", "SWGLimeSdrMIMOSettings");
     
     ::SWGSDRangel::setValue(&local_input_settings, pJson["localInputSettings"], "SWGLocalInputSettings", "SWGLocalInputSettings");
     
@@ -463,6 +472,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((lime_sdr_output_settings != nullptr) && (lime_sdr_output_settings->isSet())){
         toJsonValue(QString("limeSdrOutputSettings"), lime_sdr_output_settings, obj, QString("SWGLimeSdrOutputSettings"));
+    }
+    if((lime_sdr_mimo_settings != nullptr) && (lime_sdr_mimo_settings->isSet())){
+        toJsonValue(QString("limeSdrMIMOSettings"), lime_sdr_mimo_settings, obj, QString("SWGLimeSdrMIMOSettings"));
     }
     if((local_input_settings != nullptr) && (local_input_settings->isSet())){
         toJsonValue(QString("localInputSettings"), local_input_settings, obj, QString("SWGLocalInputSettings"));
@@ -715,6 +727,16 @@ SWGDeviceSettings::setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_o
     this->m_lime_sdr_output_settings_isSet = true;
 }
 
+SWGLimeSdrMIMOSettings*
+SWGDeviceSettings::getLimeSdrMimoSettings() {
+    return lime_sdr_mimo_settings;
+}
+void
+SWGDeviceSettings::setLimeSdrMimoSettings(SWGLimeSdrMIMOSettings* lime_sdr_mimo_settings) {
+    this->lime_sdr_mimo_settings = lime_sdr_mimo_settings;
+    this->m_lime_sdr_mimo_settings_isSet = true;
+}
+
 SWGLocalInputSettings*
 SWGDeviceSettings::getLocalInputSettings() {
     return local_input_settings;
@@ -965,6 +987,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(lime_sdr_output_settings && lime_sdr_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(lime_sdr_mimo_settings && lime_sdr_mimo_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(local_input_settings && local_input_settings->isSet()){

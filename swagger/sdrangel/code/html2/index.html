@@ -3633,6 +3633,9 @@ margin-bottom: 20px;
     "limeSdrOutputSettings" : {
       "$ref" : "#/definitions/LimeSdrOutputSettings"
     },
+    "limeSdrMIMOSettings" : {
+      "$ref" : "#/definitions/LimeSdrMIMOSettings"
+    },
     "localInputSettings" : {
       "$ref" : "#/definitions/LocalInputSettings"
     },
@@ -5455,6 +5458,229 @@ margin-bottom: 20px;
     },
     "reverseAPIDeviceIndex" : {
       "type" : "integer"
+    }
+  },
+  "description" : "LimeSDR"
+};
+            defs.LimeSdrMIMOSettings = {
+  "properties" : {
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "format" : "int8",
+      "description" : "GPIO pin direction LSB first; 0 input, 1 output"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "format" : "int8",
+      "description" : "GPIO pins to write; LSB first"
+    },
+    "extClock" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if external clock source else 0"
+    },
+    "extClockFreq" : {
+      "type" : "integer",
+      "description" : "Frequency (Hz) of external clock source"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "rxCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "log2HardDecim" : {
+      "type" : "integer"
+    },
+    "log2SoftDecim" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "iqCorrection" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "rxTransverterMode" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "rxTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "iqOrder" : {
+      "type" : "integer",
+      "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
+    },
+    "ncoEnableRx" : {
+      "type" : "integer",
+      "description" : "Boolean 1 to enable TSP NCO and mixing else 0"
+    },
+    "ncoFrequencyRx" : {
+      "type" : "integer",
+      "description" : "Rx Actual NCO frequency (the resulting frequency with mixing is displayed)"
+    },
+    "lpfBWRx0" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Rx[0] LMS analog lowpass filter bandwidth (Hz)"
+    },
+    "lpfFIREnableRx0" : {
+      "type" : "integer",
+      "description" : "Boolean 1 to enable Rx[0] LMS digital lowpass FIR filters else 0"
+    },
+    "lpfFIRBWRx0" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Rx[0] LMS digital lowpass FIR filters bandwidth (Hz)"
+    },
+    "gainRx0" : {
+      "type" : "integer",
+      "description" : "Rx[0] Optimally distributed gain (dB)"
+    },
+    "antennaPathRx0" : {
+      "type" : "integer",
+      "description" : "Rx[0] Antenna connection (PathRxRFE):\n  * 0 - None\n  * 1 - LNA High\n  * 2 - LNA low\n  * 3 - LNA Wide\n  * 4 - LB TX1\n  * 5 - LB TX2\n"
+    },
+    "gainModeRx0" : {
+      "type" : "integer",
+      "description" : "Rx[0] Gain mode:\n  * 0 - auto\n  * 1 - manual\n"
+    },
+    "lnaGainRx0" : {
+      "type" : "integer",
+      "description" : "Rx[0] Manual LNA gain"
+    },
+    "tiaGainRx0" : {
+      "type" : "integer",
+      "description" : "Rx[0] Manual TIA gain"
+    },
+    "pgaGainRx0" : {
+      "type" : "integer",
+      "description" : "Rx[0] Manual PGA gain"
+    },
+    "lpfBWRx1" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Rx[1] LMS analog lowpass filter bandwidth (Hz)"
+    },
+    "lpfFIREnableRx1" : {
+      "type" : "integer",
+      "description" : "Boolean 1 to enable Rx[1] LMS digital lowpass FIR filters else 0"
+    },
+    "lpfFIRBWRx1" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Rx[1] LMS digital lowpass FIR filters bandwidth (Hz)"
+    },
+    "gainRx1" : {
+      "type" : "integer",
+      "description" : "Rx[1] Optimally distributed gain (dB)"
+    },
+    "antennaPathRx1" : {
+      "type" : "integer",
+      "description" : "Rx[1] Antenna connection (PathRxRFE):\n  * 0 - None\n  * 1 - LNA High\n  * 2 - LNA low\n  * 3 - LNA Wide\n  * 4 - LB TX1\n  * 5 - LB TX2\n"
+    },
+    "gainModeRx1" : {
+      "type" : "integer",
+      "description" : "Rx[1] Gain mode:\n  * 0 - auto\n  * 1 - manual\n"
+    },
+    "lnaGainRx1" : {
+      "type" : "integer",
+      "description" : "Rx[1] Manual LNA gain"
+    },
+    "tiaGainRx1" : {
+      "type" : "integer",
+      "description" : "Rx[1] Manual TIA gain"
+    },
+    "pgaGainRx1" : {
+      "type" : "integer",
+      "description" : "Rx[1] Manual PGA gain"
+    },
+    "txCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "log2HardInterp" : {
+      "type" : "integer"
+    },
+    "log2SoftInterp" : {
+      "type" : "integer"
+    },
+    "txTransverterMode" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
+    "txTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "ncoEnableTx" : {
+      "type" : "integer",
+      "description" : "Boolean 1 to enable TSP NCO and mixing else 0"
+    },
+    "ncoFrequencyTx" : {
+      "type" : "integer",
+      "description" : "Tx Actual NCO frequency (the resulting frequency with mixing is displayed)"
+    },
+    "lpfBWTx0" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Tx[0] LMS analog lowpass filter bandwidth (Hz)"
+    },
+    "lpfFIREnableTx0" : {
+      "type" : "integer",
+      "description" : "Boolean 1 to enable Tx[0] LMS digital lowpass FIR filters else 0"
+    },
+    "lpfFIRBWTx0" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Tx[0] LMS digital lowpass FIR filters bandwidth (Hz)"
+    },
+    "gainTx0" : {
+      "type" : "integer",
+      "description" : "Tx[0] Optimally distributed gain (dB)"
+    },
+    "antennaPathTx0" : {
+      "type" : "integer",
+      "description" : "Tx[0] Antenna connection (PathTxRFE):\n  * 0 - None\n  * 1 - RF connector 1\n  * 2 - RF connector 2\n"
+    },
+    "lpfBWTx1" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Tx[1] LMS analog lowpass filter bandwidth (Hz)"
+    },
+    "lpfFIREnableTx1" : {
+      "type" : "integer",
+      "description" : "Boolean 1 to enable Tx[1] LMS digital lowpass FIR filters else 0"
+    },
+    "lpfFIRBWTx1" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Tx[1] LMS digital lowpass FIR filters bandwidth (Hz)"
+    },
+    "gainTx1" : {
+      "type" : "integer",
+      "description" : "Tx[1] Optimally distributed gain (dB)"
+    },
+    "antennaPathTx1" : {
+      "type" : "integer",
+      "description" : "Tx[1] Antenna connection (PathTxRFE):\n  * 0 - None\n  * 1 - RF connector 1\n  * 2 - RF connector 2\n"
     }
   },
   "description" : "LimeSDR"
@@ -41149,7 +41375,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T21:31:22.328+01:00
+              Generated 2020-11-10T22:27:11.499+01:00
             </div>
           </div>
       </div>

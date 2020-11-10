@@ -46,6 +46,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrInputSettings"
     limeSdrOutputSettings:
       $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrOutputSettings"
+    limeSdrMIMOSettings:
+      $ref: "/doc/swagger/include/LimeSdr.yaml#/LimeSdrMIMOSettings"
     localInputSettings:
       $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputSettings"
     localOutputSettings:

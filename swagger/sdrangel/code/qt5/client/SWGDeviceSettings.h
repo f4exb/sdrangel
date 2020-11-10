@@ -37,6 +37,7 @@
 #include "SWGHackRFOutputSettings.h"
 #include "SWGKiwiSDRSettings.h"
 #include "SWGLimeSdrInputSettings.h"
+#include "SWGLimeSdrMIMOSettings.h"
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocalInputSettings.h"
 #include "SWGLocalOutputSettings.h"
@@ -133,6 +134,9 @@ public:
 
     SWGLimeSdrOutputSettings* getLimeSdrOutputSettings();
     void setLimeSdrOutputSettings(SWGLimeSdrOutputSettings* lime_sdr_output_settings);
+
+    SWGLimeSdrMIMOSettings* getLimeSdrMimoSettings();
+    void setLimeSdrMimoSettings(SWGLimeSdrMIMOSettings* lime_sdr_mimo_settings);
 
     SWGLocalInputSettings* getLocalInputSettings();
     void setLocalInputSettings(SWGLocalInputSettings* local_input_settings);
@@ -251,6 +255,9 @@ private:
 
     SWGLimeSdrOutputSettings* lime_sdr_output_settings;
     bool m_lime_sdr_output_settings_isSet;
+
+    SWGLimeSdrMIMOSettings* lime_sdr_mimo_settings;
+    bool m_lime_sdr_mimo_settings_isSet;
 
     SWGLocalInputSettings* local_input_settings;
     bool m_local_input_settings_isSet;
