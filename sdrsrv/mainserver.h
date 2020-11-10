@@ -59,6 +59,7 @@ public:
 
     void addSourceDevice();
     void addSinkDevice();
+    void addMIMODevice();
     void removeLastDevice();
     void changeSampleSource(int deviceSetIndex, int selectedDeviceIndex);
     void changeSampleSink(int deviceSetIndex, int selectedDeviceIndex);
@@ -68,9 +69,6 @@ public:
     void addFeature(int featureSetIndex, int featureIndex);
     void deleteFeature(int featureSetIndex, int featureIndex);
 
-    const QString& getAPIHost() const { return m_apiHost; }
-    int getAPIPort() const { return m_apiPort; }
-
 signals:
     void finished();
 
@@ -78,9 +76,6 @@ private:
     static MainServer *m_instance;
     MainCore *m_mainCore;
     DSPEngine* m_dspEngine;
-    int m_lastEngineState;
-	QString m_apiHost;
-	int m_apiPort;
 
     MessageQueue m_inputMessageQueue;
 

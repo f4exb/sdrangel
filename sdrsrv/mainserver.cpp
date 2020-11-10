@@ -72,8 +72,6 @@ MainServer::MainServer(qtwebapp::LoggerWithFile *logger, const MainParser& parse
     m_apiAdapter = new WebAPIAdapter();
     m_requestMapper = new WebAPIRequestMapper(this);
     m_requestMapper->setAdapter(m_apiAdapter);
-    m_apiHost = parser.getServerAddress();
-    m_apiPort = parser.getServerPort();
     m_apiServer = new WebAPIServer(parser.getServerAddress(), parser.getServerPort(), m_requestMapper);
     m_apiServer->start();
 
@@ -164,6 +162,8 @@ bool MainServer::handleMessage(const Message& cmd)
             addSinkDevice();
         } else if (direction == 0) { // Single stream Rx
             addSourceDevice();
+        }  else if (direction == 2) { // MIMO
+            addMIMODevice();
         }
 
         return true;
@@ -341,6 +341,49 @@ void MainServer::addSourceDevice()
     DeviceSampleSource *source = deviceAPI->getPluginInterface()->createSampleSourcePluginInstance(
             deviceAPI->getSamplingDeviceId(), deviceAPI);
     deviceAPI->setSampleSource(source);
+}
+
+void MainServer::addMIMODevice()
+{
+    DSPDeviceMIMOEngine *dspDeviceMIMOEngine = m_dspEngine->addDeviceMIMOEngine();
+    dspDeviceMIMOEngine->start();
+
+    uint dspDeviceMIMOEngineUID =  dspDeviceMIMOEngine->getUID();
+    char uidCStr[16];
+    sprintf(uidCStr, "UID:%d", dspDeviceMIMOEngineUID);
+
+    int deviceTabIndex = m_mainCore->m_deviceSets.size();
+    m_mainCore->m_deviceSets.push_back(new DeviceSet(deviceTabIndex, 2));
+    m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
+    m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
+
+    char tabNameCStr[16];
+    sprintf(tabNameCStr, "M%d", deviceTabIndex);
+
+    DeviceAPI *deviceAPI = new DeviceAPI(DeviceAPI::StreamMIMO, deviceTabIndex, nullptr, nullptr, dspDeviceMIMOEngine);
+
+    // create a test MIMO by default
+    int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+    const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
+    deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+    deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+    deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+    deviceAPI->setHardwareId(samplingDevice->hardwareId);
+    deviceAPI->setSamplingDeviceId(samplingDevice->id);
+    deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+    deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+    deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
+
+    QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
+
+    if (userArgs.size() > 0) {
+        deviceAPI->setHardwareUserArguments(userArgs);
+    }
+
+    DeviceSampleMIMO *mimo = deviceAPI->getPluginInterface()->createSampleMIMOPluginInstance(
+            deviceAPI->getSamplingDeviceId(), deviceAPI);
+    m_mainCore->m_deviceSets.back()->m_deviceAPI->setSampleMIMO(mimo);
 }
 
 void MainServer::removeLastDevice()
@@ -578,6 +621,21 @@ void MainServer::changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex)
         deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
         deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(selectedDeviceIndex));
+
+        if (deviceSet->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
+        {
+            qDebug("MainServer::changeSampleMIMO: non existent device replaced by Test MIMO");
+            int testMIMODeviceIndex = DeviceEnumerator::instance()->getTestMIMODeviceIndex();
+            const PluginInterface::SamplingDevice *samplingDevice = DeviceEnumerator::instance()->getMIMOSamplingDevice(testMIMODeviceIndex);
+            deviceSet->m_deviceAPI->setSamplingDeviceSequence(samplingDevice->sequence);
+            deviceSet->m_deviceAPI->setDeviceNbItems(samplingDevice->deviceNbItems);
+            deviceSet->m_deviceAPI->setDeviceItemIndex(samplingDevice->deviceItemIndex);
+            deviceSet->m_deviceAPI->setHardwareId(samplingDevice->hardwareId);
+            deviceSet->m_deviceAPI->setSamplingDeviceId(samplingDevice->id);
+            deviceSet->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
+            deviceSet->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
+            deviceSet->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(testMIMODeviceIndex));
+        }
 
         QString userArgs = m_mainCore->m_settings.getDeviceUserArgs().findUserArgs(samplingDevice->hardwareId, samplingDevice->sequence);
 
