@@ -51,6 +51,7 @@ if (LIBSIGMF_FOUND)
     )
     set(sdrbase_HEADERS
         ${sdrbase_HEADERS}
+        dsp/sigmf_forward.h
         dsp/sigmffilerecord.h
     )
     include_directories(${LIBSIGMF_INCLUDE_DIR})
@@ -136,7 +137,6 @@ set(sdrbase_SOURCES
     dsp/samplesimplefifo.cpp
     dsp/samplesourcefifo.cpp
     dsp/samplesourcefifodb.cpp
-    dsp/sigmffilerecord.cpp
     dsp/basebandsamplesink.cpp
     dsp/basebandsamplesource.cpp
     dsp/nullsink.cpp
@@ -305,8 +305,6 @@ set(sdrbase_HEADERS
     dsp/samplesimplefifo.h
     dsp/samplesourcefifo.h
     dsp/samplesourcefifodb.h
-    dsp/sigmf_forward.h
-    dsp/sigmffilerecord.h
     dsp/basebandsamplesink.h
     dsp/basebandsamplesource.h
     dsp/nullsink.h

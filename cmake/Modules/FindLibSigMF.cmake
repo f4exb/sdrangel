@@ -27,7 +27,7 @@ if (NOT LIBSIGMF_FOUND)
         set(LIBSIGMF_FOUND TRUE CACHE INTERNAL "libsigmf found")
         message(STATUS "Found libsigmf: ${LIBSIGMF_INCLUDE_DIR}, ${LIBSIGMF_LIBRARIES}")
     else (LIBSIGMF_INCLUDE_DIR AND LIBSIGMF_LIBRARIES)
-        set(LIBSIGMF_FOUND FALSE CACHE INTERNAL "libdsdcc found")
+        set(LIBSIGMF_FOUND FALSE CACHE INTERNAL "libsigmf found")
         message(STATUS "libsigmf not found.")
     endif (LIBSIGMF_INCLUDE_DIR AND LIBSIGMF_LIBRARIES)
 
