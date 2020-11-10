@@ -73,6 +73,7 @@ struct ADSBDemodSettings
     bool m_correlateFullPreamble;
     bool m_demodModeS;                  //!< Demodulate all Mode-S frames, not just ADS-B
     int m_deviceIndex;                  //!< Device to set to ATC frequencies
+    bool m_autoResizeTableColumns;
 
     ADSBDemodSettings();
     void resetToDefaults();

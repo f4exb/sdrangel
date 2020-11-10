@@ -64,6 +64,8 @@ Clicking the Display Settings button will open the Display Settings dialog, whic
 * The distance (in kilometres), from the location set under Preferences > My Position, at which airports will be displayed on the map.
 * The timeout, in seconds, after which an aircraft will be removed from the table and map, if an ADS-B frame has not been received from it.
 * The font used for the table.
+* Whether demodulator statistics are displayed (primarily an option for developers).
+* Whether the columns in the table are automatically resized after an aircraft is added to it. If unchecked, columns can be resized manually and should be saved with presets.
 
 <h3>12: Display Flight Paths</h3>
 

@@ -703,6 +703,8 @@ void ADSBDemodGUI::handleADSB(
                 }
             }
         }
+        if (m_settings.m_autoResizeTableColumns)
+            ui->adsbData->resizeColumnsToContents();
         ui->adsbData->setSortingEnabled(true);
     }
     aircraft->m_time = dateTime;
@@ -1604,7 +1606,7 @@ void ADSBDemodGUI::on_displaySettings_clicked(bool checked)
     ADSBDemodDisplayDialog dialog(m_settings.m_removeTimeout, m_settings.m_airportRange, m_settings.m_airportMinimumSize,
                                 m_settings.m_displayHeliports, m_settings.m_siUnits,
                                 m_settings.m_tableFontName, m_settings.m_tableFontSize,
-                                m_settings.m_displayDemodStats);
+                                m_settings.m_displayDemodStats, m_settings.m_autoResizeTableColumns);
     if (dialog.exec() == QDialog::Accepted)
     {
         bool unitsChanged = m_settings.m_siUnits != dialog.m_siUnits;
@@ -1617,6 +1619,7 @@ void ADSBDemodGUI::on_displaySettings_clicked(bool checked)
         m_settings.m_tableFontName = dialog.m_fontName;
         m_settings.m_tableFontSize = dialog.m_fontSize;
         m_settings.m_displayDemodStats = dialog.m_displayDemodStats;
+        m_settings.m_autoResizeTableColumns = dialog.m_autoResizeTableColumns;
 
         if (unitsChanged)
             m_aircraftModel.allAircraftUpdated();
@@ -1947,7 +1950,7 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->setItem(row, ADSB_COL_RANGE, new QTableWidgetItem("D (km)"));
     ui->adsbData->setItem(row, ADSB_COL_AZEL, new QTableWidgetItem("Az/El (o)"));
     ui->adsbData->setItem(row, ADSB_COL_LATITUDE, new QTableWidgetItem("-90.00000"));
-    ui->adsbData->setItem(row, ADSB_COL_LONGITUDE, new QTableWidgetItem("-180.00000"));
+    ui->adsbData->setItem(row, ADSB_COL_LONGITUDE, new QTableWidgetItem("-180.000000"));
     ui->adsbData->setItem(row, ADSB_COL_CATEGORY, new QTableWidgetItem("Heavy"));
     ui->adsbData->setItem(row, ADSB_COL_STATUS, new QTableWidgetItem("No emergency"));
     ui->adsbData->setItem(row, ADSB_COL_SQUAWK, new QTableWidgetItem("Squawk"));
