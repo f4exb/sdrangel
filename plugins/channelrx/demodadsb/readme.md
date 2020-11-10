@@ -109,6 +109,7 @@ The table displays the decoded ADS-B data for each aircraft along side data avai
 * Longitude - Horizontal position coordinate, in decimal degrees. (ADS-B)
 * Category - The vehicle category, such as Light, Large, Heavy or Rotorcraft. (ADS-B)
 * Status - The status of the flight, including if there is an emergency. (ADS-B)
+* Squawk - The squawk code (Mode-A transponder code). (ADS-B)
 * Registration - The registration number of the aircraft. (DB)
 * Country - The flag of the country the aircraft is registered in. (DB)
 * Registered - The date when the aircraft was registered. (DB)

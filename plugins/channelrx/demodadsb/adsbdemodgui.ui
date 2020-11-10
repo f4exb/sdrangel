@@ -695,6 +695,14 @@
       </column>
       <column>
        <property name="text">
+        <string>Squawk</string>
+       </property>
+       <property name="toolTip">
+        <string>Mode-A transponder code</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
         <string>Reg</string>
        </property>
        <property name="toolTip">
@@ -845,6 +853,11 @@
    <header location="global">QtQuickWidgets/QQuickWidget</header>
   </customwidget>
   <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
@@ -861,11 +874,6 @@
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

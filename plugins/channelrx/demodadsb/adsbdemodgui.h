@@ -91,6 +91,7 @@ struct Aircraft {
     int m_verticalRate;         // Vertical climb rate in ft/min
     QString m_emitterCategory;  // Aircraft type
     QString m_status;           // Aircraft status
+    int m_squawk;               // Mode-A code
     Real m_range;               // Distance from station to aircraft
     Real m_azimuth;             // Azimuth from station to aircraft
     Real m_elevation;           // Elevation from station to aicraft;
@@ -138,6 +139,7 @@ struct Aircraft {
     QTableWidgetItem *m_azElItem;
     QTableWidgetItem *m_emitterCategoryItem;
     QTableWidgetItem *m_statusItem;
+    QTableWidgetItem *m_squawkItem;
     QTableWidgetItem *m_registrationItem;
     QTableWidgetItem *m_countryItem;
     QTableWidgetItem *m_registeredItem;
@@ -193,6 +195,7 @@ struct Aircraft {
         m_longitudeItem = new QTableWidgetItem();
         m_emitterCategoryItem = new QTableWidgetItem();
         m_statusItem = new QTableWidgetItem();
+        m_squawkItem = new QTableWidgetItem();
         m_registrationItem = new QTableWidgetItem();
         m_countryItem = new QTableWidgetItem();
         m_registeredItem = new QTableWidgetItem();

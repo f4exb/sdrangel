@@ -61,16 +61,17 @@
 #define ADSB_COL_LONGITUDE      11
 #define ADSB_COL_CATEGORY       12
 #define ADSB_COL_STATUS         13
-#define ADSB_COL_REGISTRATION   14
-#define ADSB_COL_COUNTRY        15
-#define ADSB_COL_REGISTERED     16
-#define ADSB_COL_MANUFACTURER   17
-#define ADSB_COL_OWNER          18
-#define ADSB_COL_OPERATOR_ICAO  19
-#define ADSB_COL_TIME           20
-#define ADSB_COL_FRAMECOUNT     21
-#define ADSB_COL_CORRELATION    22
-#define ADSB_COL_RSSI           23
+#define ADSB_COL_SQUAWK         14
+#define ADSB_COL_REGISTRATION   15
+#define ADSB_COL_COUNTRY        16
+#define ADSB_COL_REGISTERED     17
+#define ADSB_COL_MANUFACTURER   18
+#define ADSB_COL_OWNER          19
+#define ADSB_COL_OPERATOR_ICAO  20
+#define ADSB_COL_TIME           21
+#define ADSB_COL_FRAMECOUNT     22
+#define ADSB_COL_CORRELATION    23
+#define ADSB_COL_RSSI           24
 
 const char *Aircraft::m_speedTypeNames[] = {
     "GS", "TAS", "IAS"
@@ -617,6 +618,7 @@ void ADSBDemodGUI::handleADSB(
         ui->adsbData->setItem(row, ADSB_COL_LONGITUDE, aircraft->m_longitudeItem);
         ui->adsbData->setItem(row, ADSB_COL_CATEGORY, aircraft->m_emitterCategoryItem);
         ui->adsbData->setItem(row, ADSB_COL_STATUS, aircraft->m_statusItem);
+        ui->adsbData->setItem(row, ADSB_COL_SQUAWK, aircraft->m_squawkItem);
         ui->adsbData->setItem(row, ADSB_COL_REGISTRATION, aircraft->m_registrationItem);
         ui->adsbData->setItem(row, ADSB_COL_COUNTRY, aircraft->m_countryItem);
         ui->adsbData->setItem(row, ADSB_COL_REGISTERED, aircraft->m_registeredItem);
@@ -957,12 +959,27 @@ void ADSBDemodGUI::handleADSB(
         {
             // Aircraft status
             int st = data[4] & 0x7;   // Subtype
-            int es = (data[5] >> 5) & 0x7; // Emergency state
             if (st == 1)
+            {
+                int es = (data[5] >> 5) & 0x7; // Emergency state
+                int modeA =  ((data[5] << 8) & 0x1f00) | (data[6] & 0xff); // Mode-A code (squawk)
                 aircraft->m_status = emergencyStatus[es];
-            else
-                aircraft->m_status = QString("");
-            aircraft->m_statusItem->setText(aircraft->m_status);
+                aircraft->m_statusItem->setText(aircraft->m_status);
+                int a, b, c, d;
+                c = ((modeA >> 12) & 1) | ((modeA >> (10-1)) & 0x2) | ((modeA >> (8-2)) & 0x4);
+                a = ((modeA >> 11) & 1) | ((modeA >> (9-1)) & 0x2) | ((modeA >> (7-2)) & 0x4);
+                b = ((modeA >> 5) & 1) | ((modeA >> (3-1)) & 0x2) | ((modeA << (1)) & 0x4);
+                d = ((modeA >> 4) & 1) | ((modeA >> (2-1)) & 0x2) | ((modeA << (2)) & 0x4);
+                aircraft->m_squawk = a*1000 + b*100 + c*10 + d;
+                if (modeA & 0x40)
+                    aircraft->m_squawkItem->setText(QString("%1 IDENT").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
+                else
+                    aircraft->m_squawkItem->setText(QString("%1").arg(aircraft->m_squawk, 4, 10, QLatin1Char('0')));
+            }
+            else if (st == 2)
+            {
+                // TCAS/ACAS RA Broadcast
+            }
         }
         else if (tc == 29)
         {
@@ -1872,6 +1889,7 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->setItem(row, ADSB_COL_LONGITUDE, new QTableWidgetItem("-180.00000"));
     ui->adsbData->setItem(row, ADSB_COL_CATEGORY, new QTableWidgetItem("Heavy"));
     ui->adsbData->setItem(row, ADSB_COL_STATUS, new QTableWidgetItem("No emergency"));
+    ui->adsbData->setItem(row, ADSB_COL_SQUAWK, new QTableWidgetItem("Squawk"));
     ui->adsbData->setItem(row, ADSB_COL_REGISTRATION, new QTableWidgetItem("G-12345"));
     ui->adsbData->setItem(row, ADSB_COL_COUNTRY, new QTableWidgetItem("Country"));
     ui->adsbData->setItem(row, ADSB_COL_REGISTERED, new QTableWidgetItem("Registered"));
@@ -1897,6 +1915,7 @@ void ADSBDemodGUI::resizeTable()
     ui->adsbData->removeCellWidget(row, ADSB_COL_LONGITUDE);
     ui->adsbData->removeCellWidget(row, ADSB_COL_CATEGORY);
     ui->adsbData->removeCellWidget(row, ADSB_COL_STATUS);
+    ui->adsbData->removeCellWidget(row, ADSB_COL_SQUAWK);
     ui->adsbData->removeCellWidget(row, ADSB_COL_REGISTRATION);
     ui->adsbData->removeCellWidget(row, ADSB_COL_COUNTRY);
     ui->adsbData->removeCellWidget(row, ADSB_COL_REGISTERED);
