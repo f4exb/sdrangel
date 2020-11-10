@@ -25,6 +25,7 @@
 #include "SWGAirspyHFReport.h"
 #include "SWGAirspyReport.h"
 #include "SWGBladeRF2InputReport.h"
+#include "SWGBladeRF2MIMOReport.h"
 #include "SWGBladeRF2OutputReport.h"
 #include "SWGFileInputReport.h"
 #include "SWGKiwiSDRReport.h"
@@ -82,6 +83,9 @@ public:
 
     SWGBladeRF2OutputReport* getBladeRf2OutputReport();
     void setBladeRf2OutputReport(SWGBladeRF2OutputReport* blade_rf2_output_report);
+
+    SWGBladeRF2MIMOReport* getBladeRf2MimoReport();
+    void setBladeRf2MimoReport(SWGBladeRF2MIMOReport* blade_rf2_mimo_report);
 
     SWGFileInputReport* getFileInputReport();
     void setFileInputReport(SWGFileInputReport* file_input_report);
@@ -164,6 +168,9 @@ private:
 
     SWGBladeRF2OutputReport* blade_rf2_output_report;
     bool m_blade_rf2_output_report_isSet;
+
+    SWGBladeRF2MIMOReport* blade_rf2_mimo_report;
+    bool m_blade_rf2_mimo_report_isSet;
 
     SWGFileInputReport* file_input_report;
     bool m_file_input_report_isSet;

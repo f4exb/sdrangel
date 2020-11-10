@@ -45,6 +45,7 @@
 #include "SWGBladeRF1OutputSettings.h"
 #include "SWGBladeRF2InputReport.h"
 #include "SWGBladeRF2InputSettings.h"
+#include "SWGBladeRF2MIMOReport.h"
 #include "SWGBladeRF2MIMOSettings.h"
 #include "SWGBladeRF2OutputReport.h"
 #include "SWGBladeRF2OutputSettings.h"
@@ -316,6 +317,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGBladeRF2InputSettings").compare(type) == 0) {
       return new SWGBladeRF2InputSettings();
+    }
+    if(QString("SWGBladeRF2MIMOReport").compare(type) == 0) {
+      return new SWGBladeRF2MIMOReport();
     }
     if(QString("SWGBladeRF2MIMOSettings").compare(type) == 0) {
       return new SWGBladeRF2MIMOSettings();

@@ -1966,6 +1966,41 @@ margin-bottom: 20px;
   },
   "description" : "BladeRF2"
 };
+            defs.BladeRF2MIMOReport = {
+  "properties" : {
+    "frequencyRangeRx" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRangeRx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRangeRx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRangeRx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "gainModesRx" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/NamedEnum"
+      }
+    },
+    "frequencyRangeTx" : {
+      "$ref" : "#/definitions/FrequencyRange"
+    },
+    "sampleRateRangeTx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "bandwidthRangeTx" : {
+      "$ref" : "#/definitions/Range"
+    },
+    "globalGainRangeTx" : {
+      "$ref" : "#/definitions/Range"
+    }
+  },
+  "description" : "BladeRF2"
+};
             defs.BladeRF2MIMOSettings = {
   "properties" : {
     "devSampleRate" : {
@@ -2055,9 +2090,6 @@ margin-bottom: 20px;
     "txTransverterDeltaFrequency" : {
       "type" : "integer",
       "format" : "int64"
-    },
-    "fileRecordName" : {
-      "type" : "string"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -3391,6 +3423,9 @@ margin-bottom: 20px;
     },
     "bladeRF2OutputReport" : {
       "$ref" : "#/definitions/BladeRF2OutputReport"
+    },
+    "bladeRF2MIMOReport" : {
+      "$ref" : "#/definitions/BladeRF2MIMOReport"
     },
     "fileInputReport" : {
       "$ref" : "#/definitions/FileInputReport"
@@ -41052,7 +41087,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T15:35:08.828+01:00
+              Generated 2020-11-10T17:44:38.740+01:00
             </div>
           </div>
       </div>

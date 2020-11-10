@@ -175,8 +175,6 @@ BladeRF2MIMOSettings:
     txTransverterDeltaFrequency:
       type: integer
       format: int64
-    fileRecordName:
-      type: string
     useReverseAPI:
       description: boolean
       type: integer
@@ -186,3 +184,27 @@ BladeRF2MIMOSettings:
       type: integer
     reverseAPIDeviceIndex:
       type: integer
+
+BladeRF2MIMOReport:
+  description: BladeRF2
+  properties:
+    frequencyRangeRx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
+    sampleRateRangeRx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
+    bandwidthRangeRx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
+    globalGainRangeRx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
+    gainModesRx:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/NamedEnum"
+    frequencyRangeTx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/FrequencyRange"
+    sampleRateRangeTx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
+    bandwidthRangeTx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"
+    globalGainRangeTx:
+      $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Range"

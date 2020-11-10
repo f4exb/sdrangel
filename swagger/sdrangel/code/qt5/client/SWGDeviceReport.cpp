@@ -40,6 +40,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_blade_rf2_input_report_isSet = false;
     blade_rf2_output_report = nullptr;
     m_blade_rf2_output_report_isSet = false;
+    blade_rf2_mimo_report = nullptr;
+    m_blade_rf2_mimo_report_isSet = false;
     file_input_report = nullptr;
     m_file_input_report_isSet = false;
     lime_sdr_input_report = nullptr;
@@ -100,6 +102,8 @@ SWGDeviceReport::init() {
     m_blade_rf2_input_report_isSet = false;
     blade_rf2_output_report = new SWGBladeRF2OutputReport();
     m_blade_rf2_output_report_isSet = false;
+    blade_rf2_mimo_report = new SWGBladeRF2MIMOReport();
+    m_blade_rf2_mimo_report_isSet = false;
     file_input_report = new SWGFileInputReport();
     m_file_input_report_isSet = false;
     lime_sdr_input_report = new SWGLimeSdrInputReport();
@@ -159,6 +163,9 @@ SWGDeviceReport::cleanup() {
     }
     if(blade_rf2_output_report != nullptr) { 
         delete blade_rf2_output_report;
+    }
+    if(blade_rf2_mimo_report != nullptr) { 
+        delete blade_rf2_mimo_report;
     }
     if(file_input_report != nullptr) { 
         delete file_input_report;
@@ -245,6 +252,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&blade_rf2_output_report, pJson["bladeRF2OutputReport"], "SWGBladeRF2OutputReport", "SWGBladeRF2OutputReport");
     
+    ::SWGSDRangel::setValue(&blade_rf2_mimo_report, pJson["bladeRF2MIMOReport"], "SWGBladeRF2MIMOReport", "SWGBladeRF2MIMOReport");
+    
     ::SWGSDRangel::setValue(&file_input_report, pJson["fileInputReport"], "SWGFileInputReport", "SWGFileInputReport");
     
     ::SWGSDRangel::setValue(&lime_sdr_input_report, pJson["limeSdrInputReport"], "SWGLimeSdrInputReport", "SWGLimeSdrInputReport");
@@ -318,6 +327,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((blade_rf2_output_report != nullptr) && (blade_rf2_output_report->isSet())){
         toJsonValue(QString("bladeRF2OutputReport"), blade_rf2_output_report, obj, QString("SWGBladeRF2OutputReport"));
+    }
+    if((blade_rf2_mimo_report != nullptr) && (blade_rf2_mimo_report->isSet())){
+        toJsonValue(QString("bladeRF2MIMOReport"), blade_rf2_mimo_report, obj, QString("SWGBladeRF2MIMOReport"));
     }
     if((file_input_report != nullptr) && (file_input_report->isSet())){
         toJsonValue(QString("fileInputReport"), file_input_report, obj, QString("SWGFileInputReport"));
@@ -441,6 +453,16 @@ void
 SWGDeviceReport::setBladeRf2OutputReport(SWGBladeRF2OutputReport* blade_rf2_output_report) {
     this->blade_rf2_output_report = blade_rf2_output_report;
     this->m_blade_rf2_output_report_isSet = true;
+}
+
+SWGBladeRF2MIMOReport*
+SWGDeviceReport::getBladeRf2MimoReport() {
+    return blade_rf2_mimo_report;
+}
+void
+SWGDeviceReport::setBladeRf2MimoReport(SWGBladeRF2MIMOReport* blade_rf2_mimo_report) {
+    this->blade_rf2_mimo_report = blade_rf2_mimo_report;
+    this->m_blade_rf2_mimo_report_isSet = true;
 }
 
 SWGFileInputReport*
@@ -664,6 +686,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(blade_rf2_output_report && blade_rf2_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(blade_rf2_mimo_report && blade_rf2_mimo_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_input_report && file_input_report->isSet()){

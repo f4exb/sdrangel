@@ -43,6 +43,7 @@
         <file>webapi/doc/swagger/include/GS232Controller.yaml</file>
         <file>webapi/doc/swagger/include/HackRF.yaml</file>
         <file>webapi/doc/swagger/include/IEEE_802_15_4_Mod.yaml</file>
+        <file>webapi/doc/swagger/include/Interferometer.yaml</file>
         <file>webapi/doc/swagger/include/LimeRFE.yaml</file>
         <file>webapi/doc/swagger/include/LimeSdr.yaml</file>
         <file>webapi/doc/swagger/include/KiwiSDR.yaml</file>
@@ -70,6 +71,7 @@
         <file>webapi/doc/swagger/include/SSBDemod.yaml</file>
         <file>webapi/doc/swagger/include/SSBMod.yaml</file>
         <file>webapi/doc/swagger/include/Structs.yaml</file>
+        <file>webapi/doc/swagger/include/TestMI.yaml</file>
         <file>webapi/doc/swagger/include/TestSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSource.yaml</file>
         <file>webapi/doc/swagger/include/UDPSink.yaml</file>
