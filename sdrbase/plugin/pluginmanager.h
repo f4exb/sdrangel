@@ -90,6 +90,7 @@ public:
 	const PluginInterface *getFeaturePluginInterface(const QString& featureIdURI) const;
 
 	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
+    static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
 	static const QString& getFileOutputDeviceId() { return m_fileOutputDeviceTypeID; }
 
 private:
@@ -146,6 +147,10 @@ private:
     static const QString m_remoteOutputDeviceTypeID; //!< Remote output plugin ID
     static const QString m_fileOutputHardwareID;     //!< FileOutput sink hardware ID
     static const QString m_fileOutputDeviceTypeID;   //!< FileOutput sink plugin ID
+
+    // "Local" sample MIMO device IDs
+    static const QString m_testMIMOHardwareID;       //!< Test MIMO hardware ID
+    static const QString m_testMIMODeviceTypeID;     //!< Test MIMO plugin ID
 
 	void loadPluginsDir(const QDir& dir);
 };

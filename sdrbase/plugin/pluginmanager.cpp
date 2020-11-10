@@ -44,6 +44,9 @@ const QString PluginManager::m_remoteOutputDeviceTypeID = "sdrangel.samplesink.r
 const QString PluginManager::m_fileOutputHardwareID = "FileOutput";
 const QString PluginManager::m_fileOutputDeviceTypeID = "sdrangel.samplesink.fileoutput";
 
+const QString PluginManager::m_testMIMOHardwareID = "TestMI";
+const QString PluginManager::m_testMIMODeviceTypeID = "sdrangel.samplemimo.testmi";
+
 PluginManager::PluginManager(QObject* parent) :
 	QObject(parent),
     m_pluginAPI(this)

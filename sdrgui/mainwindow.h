@@ -74,8 +74,6 @@ public:
     std::vector<DeviceUISet*>& getDeviceUISets() { return m_deviceUIs; }
     void commandKeysConnect(QObject *object, const char *slot);
     void commandKeysDisconnect(QObject *object, const char *slot);
-    const QString& getAPIHost() const { return m_apiHost; }
-	int getAPIPort() const { return m_apiPort; }
 
 private:
     enum {
@@ -137,6 +135,7 @@ private:
 
 	void addSourceDevice(int deviceIndex);
 	void addSinkDevice();
+	void addMIMODevice();
     void removeLastDevice();
     void addFeatureSet();
     void removeFeatureSet(int tabIndex);
@@ -144,6 +143,7 @@ private:
     void deleteChannel(int deviceSetIndex, int channelIndex);
     void sampleSourceChanged(int tabIndex, int newDeviceIndex);
 	void sampleSinkChanged(int tabIndex, int newDeviceIndex);
+	void sampleMIMOChanged(int tabIndex, int newDeviceIndex);
     void deleteFeature(int featureSetIndex, int featureIndex);
 
     bool handleMessage(const Message& cmd);
