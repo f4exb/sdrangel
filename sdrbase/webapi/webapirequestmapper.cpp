@@ -3919,6 +3919,15 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
             deviceSettings->getTestSourceSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "testMISettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setTestMiSettings(new SWGSDRangel::SWGTestMISettings());
+            deviceSettings->getTestMiSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "usrpInputSettings")
         {
             deviceSettings->setUsrpInputSettings(new SWGSDRangel::SWGUSRPInputSettings());

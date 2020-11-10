@@ -70,6 +70,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDRInputSettings"
     soapySDROutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SoapySDR.yaml#/SoapySDROutputSettings"
+    testMISettings:
+      $ref: "http://swgserver:8081/api/swagger/include/TestMI.yaml#/TestMISettings"
     testSourceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/TestSource.yaml#/TestSourceSettings"
     usrpInputSettings:

@@ -50,6 +50,7 @@
 #include "SWGSigMFFileInputSettings.h"
 #include "SWGSoapySDRInputSettings.h"
 #include "SWGSoapySDROutputSettings.h"
+#include "SWGTestMISettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGUSRPInputSettings.h"
 #include "SWGUSRPOutputSettings.h"
@@ -168,6 +169,9 @@ public:
     SWGSoapySDROutputSettings* getSoapySdrOutputSettings();
     void setSoapySdrOutputSettings(SWGSoapySDROutputSettings* soapy_sdr_output_settings);
 
+    SWGTestMISettings* getTestMiSettings();
+    void setTestMiSettings(SWGTestMISettings* test_mi_settings);
+
     SWGTestSourceSettings* getTestSourceSettings();
     void setTestSourceSettings(SWGTestSourceSettings* test_source_settings);
 
@@ -279,6 +283,9 @@ private:
 
     SWGSoapySDROutputSettings* soapy_sdr_output_settings;
     bool m_soapy_sdr_output_settings_isSet;
+
+    SWGTestMISettings* test_mi_settings;
+    bool m_test_mi_settings_isSet;
 
     SWGTestSourceSettings* test_source_settings;
     bool m_test_source_settings_isSet;

@@ -198,6 +198,8 @@
 #include "SWGSoapySDROutputSettings.h"
 #include "SWGSoapySDRReport.h"
 #include "SWGSuccessResponse.h"
+#include "SWGTestMISettings.h"
+#include "SWGTestMiStreamSettings.h"
 #include "SWGTestSourceSettings.h"
 #include "SWGTraceData.h"
 #include "SWGTriggerData.h"
@@ -772,6 +774,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();
+    }
+    if(QString("SWGTestMISettings").compare(type) == 0) {
+      return new SWGTestMISettings();
+    }
+    if(QString("SWGTestMiStreamSettings").compare(type) == 0) {
+      return new SWGTestMiStreamSettings();
     }
     if(QString("SWGTestSourceSettings").compare(type) == 0) {
       return new SWGTestSourceSettings();

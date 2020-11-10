@@ -3592,6 +3592,9 @@ margin-bottom: 20px;
     "soapySDROutputSettings" : {
       "$ref" : "#/definitions/SoapySDROutputSettings"
     },
+    "testMISettings" : {
+      "$ref" : "#/definitions/TestMISettings"
+    },
     "testSourceSettings" : {
       "$ref" : "#/definitions/TestSourceSettings"
     },
@@ -8022,6 +8025,93 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.TestMISettings = {
+  "properties" : {
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "streams" : {
+      "type" : "array",
+      "description" : "Settings for each of the streams",
+      "items" : {
+        "$ref" : "#/definitions/TestMiStreamSettings"
+      }
+    }
+  },
+  "description" : "TestMISettings"
+};
+            defs.TestMiStreamSettings = {
+  "properties" : {
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "Index of the stream to which the settings apply"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "frequencyShift" : {
+      "type" : "integer"
+    },
+    "sampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "sampleSizeIndex" : {
+      "type" : "integer"
+    },
+    "amplitudeBits" : {
+      "type" : "integer"
+    },
+    "autoCorrOptions" : {
+      "type" : "integer"
+    },
+    "modulation" : {
+      "type" : "integer"
+    },
+    "modulationTone" : {
+      "type" : "integer"
+    },
+    "amModulation" : {
+      "type" : "integer"
+    },
+    "fmDeviation" : {
+      "type" : "integer"
+    },
+    "dcFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "iFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "qFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "phaseImbalance" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "TestMiStreamSettings"
 };
             defs.TestSourceSettings = {
   "properties" : {
@@ -40916,7 +41006,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T09:45:26.359+01:00
+              Generated 2020-11-10T14:08:40.270+01:00
             </div>
           </div>
       </div>
