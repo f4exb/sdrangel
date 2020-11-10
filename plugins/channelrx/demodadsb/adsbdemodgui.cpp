@@ -26,6 +26,7 @@
 #include <QQmlContext>
 #include <QDesktopServices>
 #include <QUrl>
+#include <QMessageBox>
 #include <QDebug>
 
 #include "ui_adsbdemodgui.h"
@@ -1215,14 +1216,18 @@ void ADSBDemodGUI::on_getOSNDB_clicked(bool checked)
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
     {
-        // Download Opensky network database to a file
-        QUrl dbURL(QString(OSNDB_URL));
-        m_progressDialog = new QProgressDialog(this);
-        m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
-        m_progressDialog->setCancelButton(nullptr);
-        m_progressDialog->setLabelText(QString("Downloading %1.").arg(OSNDB_URL));
-        QNetworkReply *reply = m_dlm.download(dbURL, getOSNDBFilename());
-        connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
+        QString osnDBFilename = getOSNDBFilename();
+        if (confirmDownload(osnDBFilename))
+        {
+            // Download Opensky network database to a file
+            QUrl dbURL(QString(OSNDB_URL));
+            m_progressDialog = new QProgressDialog(this);
+            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
+            m_progressDialog->setCancelButton(nullptr);
+            m_progressDialog->setLabelText(QString("Downloading %1.").arg(OSNDB_URL));
+            QNetworkReply *reply = m_dlm.download(dbURL, osnDBFilename);
+            connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
+        }
     }
 }
 
@@ -1231,14 +1236,18 @@ void ADSBDemodGUI::on_getAirportDB_clicked(bool checked)
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
     {
-        // Download Opensky network database to a file
-        QUrl dbURL(QString(AIRPORTS_URL));
-        m_progressDialog = new QProgressDialog(this);
-        m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
-        m_progressDialog->setCancelButton(nullptr);
-        m_progressDialog->setLabelText(QString("Downloading %1.").arg(AIRPORTS_URL));
-        QNetworkReply *reply = m_dlm.download(dbURL, getAirportDBFilename());
-        connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
+        QString airportDBFile = getAirportDBFilename();
+        if (confirmDownload(airportDBFile))
+        {
+            // Download Opensky network database to a file
+            QUrl dbURL(QString(AIRPORTS_URL));
+            m_progressDialog = new QProgressDialog(this);
+            m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
+            m_progressDialog->setCancelButton(nullptr);
+            m_progressDialog->setLabelText(QString("Downloading %1.").arg(AIRPORTS_URL));
+            QNetworkReply *reply = m_dlm.download(dbURL, airportDBFile);
+            connect(reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(updateDownloadProgress(qint64,qint64)));
+        }
     }
 }
 
@@ -1274,6 +1283,38 @@ QString ADSBDemodGUI::getOSNDBFilename()
 QString ADSBDemodGUI::getFastDBFilename()
 {
     return getDataDir() + "/aircraftDatabaseFast.csv";
+}
+
+qint64 ADSBDemodGUI::fileAgeInDays(QString filename)
+{
+    QFile file(filename);
+    if (file.exists())
+    {
+        QDateTime modified = file.fileTime(QFileDevice::FileModificationTime);
+        if (modified.isValid())
+            return modified.daysTo(QDateTime::currentDateTime());
+        else
+            return -1;
+    }
+    return -1;
+}
+
+bool ADSBDemodGUI::confirmDownload(QString filename)
+{
+    qint64 age = fileAgeInDays(filename);
+    if ((age == -1) || (age > 100))
+        return true;
+    else
+    {
+        QMessageBox::StandardButton reply;
+        if (age == 0)
+            reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded today. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
+        else if (age == 1)
+            reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded yesterday. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
+        else
+            reply = QMessageBox::question(this, "Confirm download", QString("This file was last downloaded %1 days ago. Are you sure you wish to redownload this file?").arg(age), QMessageBox::Yes|QMessageBox::No);
+        return reply == QMessageBox::Yes;
+    }
 }
 
 bool ADSBDemodGUI::readOSNDB(const QString& filename)
