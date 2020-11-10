@@ -488,7 +488,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
         }
 
         // set center frequency anyway
-        if (m_deviceSourceEngine->getSource() != 0) // Server flavor
+        if (m_deviceSourceEngine->getSource())
         {
             m_deviceSourceEngine->getSource()->setCenterFrequency(centerFrequency);
         }
@@ -510,7 +510,7 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
             qDebug("DeviceAPI::loadSamplingDeviceSettings: deserializing sink %s[%d]: %s",
                 qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-            if (m_deviceSinkEngine->getSink() != 0) // Server flavor
+            if (m_deviceSinkEngine->getSink())
             {
                 m_deviceSinkEngine->getSink()->deserialize(*sinkConfig);
                 m_deviceSinkEngine->getSink()->setCenterFrequency(centerFrequency);
@@ -539,10 +539,11 @@ void DeviceAPI::loadSamplingDeviceSettings(const Preset* preset)
             qDebug("DeviceAPI::loadSamplingDeviceSettings: deserializing MIMO %s[%d]: %s",
                 qPrintable(m_samplingDeviceId), m_samplingDeviceSequence, qPrintable(m_samplingDeviceSerial));
 
-            if (m_deviceSinkEngine->getSink() != 0) // Server flavor
+            if (m_deviceMIMOEngine->getMIMO())
             {
-                m_deviceSinkEngine->getSink()->deserialize(*mimoConfig);
-                m_deviceSinkEngine->getSink()->setCenterFrequency(centerFrequency);
+                m_deviceMIMOEngine->getMIMO()->deserialize(*mimoConfig);
+                m_deviceMIMOEngine->getMIMO()->setSourceCenterFrequency(centerFrequency, 0);
+                m_deviceMIMOEngine->getMIMO()->setSinkCenterFrequency(centerFrequency, 0);
             }
             else
             {
