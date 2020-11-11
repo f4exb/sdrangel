@@ -166,16 +166,6 @@ UDPSinkGUI::UDPSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandS
 	ui->glSpectrum->setSampleRate(ui->sampleRate->text().toInt());
 	ui->glSpectrum->setDisplayWaterfall(true);
 	ui->glSpectrum->setDisplayMaxHold(true);
-	m_spectrumVis->configure(
-        64, // FFT size
-        0, // Ref level (dB)
-        100, // Power range (dB)
-        10, // overlapping %
-        0,  // number of averaging samples
-        SpectrumVis::AvgModeNone,  // no averaging
-        FFTWindow::BlackmanHarris,
-        false // logarithmic scale
-    );
 
 	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));

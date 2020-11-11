@@ -72,31 +72,6 @@ SpectrumVis::~SpectrumVis()
     fftFactory->releaseEngine(m_settings.m_fftSize, false, m_fftEngineSequence);
 }
 
-void SpectrumVis::configure(
-    int fftSize,
-    float refLevel,
-    float powerRange,
-    int overlapPercent,
-    unsigned int averagingNb,
-    AvgMode averagingMode,
-    FFTWindow::Function window,
-    bool linear)
-{
-    GLSpectrumSettings settings = m_settings;
-    settings.m_fftSize = fftSize;
-    settings.m_refLevel = refLevel;
-    settings.m_powerRange = powerRange;
-    settings.m_fftOverlap = overlapPercent;
-    settings.m_averagingMode = (GLSpectrumSettings::AveragingMode) averagingMode;
-    settings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(averagingNb, settings.m_averagingMode);
-    settings.m_fftWindow = window;
-    settings.m_linear = linear;
-
-    MsgConfigureSpectrumVis* cmd = MsgConfigureSpectrumVis::create(settings, false);
-
-	getInputMessageQueue()->push(cmd);
-}
-
 void SpectrumVis::setScalef(Real scalef)
 {
     MsgConfigureScalingFactor* cmd = new MsgConfigureScalingFactor(scalef);
