@@ -147,3 +147,176 @@ XtrxOutputReport:
     gpsLock:
       description: 1 if GPSDO is locked else 0
       type: integer
+
+XtrxMIMOSettings:
+  description: XTRX
+  properties:
+    extClock:
+      description: Boolean 1 if external clock source else 0
+      type: integer
+    extClockFreq:
+      description: Frequency (Hz) of external clock source
+      type: integer
+    gpioDir:
+      description: 8 bit GPIO pin direction LSB first 0 input, 1 output
+      type: integer
+    gpioPins:
+      description: 8 bit GPIO pins to write LSB first
+      type: integer
+    useReverseAPI:
+      description: Boolean 1 use 0 do not use reverse API
+      type: integer
+    reverseAPIAddress:
+      description: IPv4 address
+      type: string
+    reverseAPIPort:
+      description: Network port from 1024 to 65535
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    rxDevSampleRate:
+      type: integer
+    log2HardDecim:
+      description: 0 is automatic then 1 to 6 is log2 of hardware decimation
+      type: integer
+    log2SoftDecim:
+      description: log2 of software decimation factor from 0 to 6
+      type: integer
+    rxCenterFrequency:
+      type: integer
+      format: int64
+    dcBlock:
+      description: Software DC blocking (1 for yes, 0 for no)
+      type: integer
+    iqCorrection:
+      description: Software IQ imbalance correction (1 for yes, 0 for no)
+      type: integer
+    ncoEnableRx:
+      description: Enable TSP NCO Rx on both channels and mixing (1 for yes, 0 for no)
+      type: integer
+    ncoFrequencyRx:
+      description: Rx frequency shift from LO for both channels
+      type: integer
+    antennaPathRx:
+      type: integer
+      description: >
+        Antenna selected (enum value from XTRXMIMOSettings::RxAntenna):
+            * 0 - RXANT_LO low range
+            * 1 - RXANT_WI wide range
+            * 2 - RXANT_HI high range
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
+    lpfBWRx0:
+      description: LMS analog lowpass filter bandwidth (Hz) for Rx channel 0
+      type: integer
+    gainRx0:
+      description: Optimally distributed gain (dB) for Rx channel 0
+      type: integer
+    gainModeRx0:
+      type: integer
+      description: >
+        Gain mode (XTRXMIMOSettings::GainMode) for Rx channel 0:
+            * 0 - GAIN_AUTO automatic
+            * 1 - GAIN_MANUAL manual
+    lnaGainRx0:
+      description: Manual LNA gain (dB) for Rx channel 0
+      type: integer
+    tiaGainRx0:
+      description: Manual TIA gain (dB) for Rx channel 0
+      type: integer
+    pgaGainRx0:
+      description: Manual PGA gain (dB) for Rx channel 0
+      type: integer
+    pwrmodeRx0:
+      type: integer
+    lpfBWRx1:
+      description: LMS analog lowpass filter bandwidth (Hz) for Rx channel 1
+      type: integer
+    gainRx1:
+      description: Optimally distributed gain (dB) for Rx channel 1
+      type: integer
+    gainModeRx1:
+      type: integer
+      description: >
+        Gain mode (XTRXMIMOSettings::GainMode) for Rx channel 1:
+            * 0 - GAIN_AUTO automatic
+            * 1 - GAIN_MANUAL manual
+    lnaGainRx1:
+      description: Manual LNA gain (dB) for Rx channel 1
+      type: integer
+    tiaGainRx1:
+      description: Manual TIA gain (dB) for Rx channel 1
+      type: integer
+    pgaGainRx1:
+      description: Manual PGA gain (dB) for Rx channel 1
+      type: integer
+    pwrmodeRx1:
+      type: integer
+    txDevSampleRate:
+      type: integer
+    log2HardInterp:
+      description: 0 is automatic then 1 to 6 is log2 of hardware interpolation
+      type: integer
+    log2SoftInterp:
+      description: log2 of software interpolation factor from 0 to 6
+      type: integer
+    txCenterFrequency:
+      type: integer
+      format: int64
+    ncoEnableTx:
+      description: Enable TSP NCO Tx on both channels and mixing (1 for yes, 0 for no)
+      type: integer
+    ncoFrequencyTx:
+      description: Tx frequency shift from LO for both channels
+      type: integer
+    antennaPathTx:
+      type: integer
+      description: >
+        Antenna selected (enum value from XTRXMIMOSettings::TxAntenna):
+            * 0 - TXANT_HI high range
+            * 1 - TXANT_WI wide range
+    lpfBWTx0:
+      description: LMS analog lowpass filter bandwidth (Hz) for Tx channel 0
+      type: integer
+    gainTx0:
+      description: Optimally distributed gain (dB) for Tx channel 0
+      type: integer
+    pwrmodeTx0:
+      type: integer
+    lpfBWTx1:
+      description: LMS analog lowpass filter bandwidth (Hz) for Tx channel 1
+      type: integer
+    gainTx1:
+      description: Optimally distributed gain (dB) for Tx channel 1
+      type: integer
+    pwrmodeTx1:
+      type: integer
+
+XtrxMIMOReport:
+  description: XTRX
+  properties:
+    success:
+      description: 1 if info was successfully retrieved else 0
+      type: integer
+    fifoSize:
+      type: integer
+    fifoFillRx:
+      type: integer
+    fifoFillTx:
+      type: integer
+    temperature:
+      type: number
+      format: float
+    gpsLock:
+      description: 1 if GPSDO is locked else 0
+      type: integer
+    actualInputRate:
+      type: integer
+    actualOutputRate:
+      type: integer
+    clockGenRate:
+      type: integer

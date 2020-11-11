@@ -108,7 +108,8 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.usrp", "usrpInputSettings"},
     {"sdrangel.samplesink.usrp", "usrpOutputSettings"},
     {"sdrangel.samplesource.xtrx", "xtrxInputSettings"},
-    {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"}
+    {"sdrangel.samplesink.xtrx", "xtrxOutputSettings"},
+    {"sdrangel.samplemimo.xtrxmimo", "xtrxMIMOSettings"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
@@ -222,7 +223,8 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToSettingsKey = {
     {"BladeRF2", "bladeRF2MIMOSettings"},
     {"MetisMISO", "metisMISOSettings"},
     {"TestMI", "testMISettings"},
-    {"TestMOSync", "testMOSyncSettings"}
+    {"TestMOSync", "testMOSyncSettings"},
+    {"XTRX", "xtrxMIMOSettings"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {

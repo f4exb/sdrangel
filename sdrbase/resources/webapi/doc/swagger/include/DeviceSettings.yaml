@@ -86,3 +86,5 @@ DeviceSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputSettings"
     xtrxOutputSettings:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputSettings"
+    xtrxMIMOSettings:
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOSettings"

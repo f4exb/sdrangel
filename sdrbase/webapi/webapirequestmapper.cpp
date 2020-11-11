@@ -3975,15 +3975,24 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setUsrpOutputSettings(new SWGSDRangel::SWGUSRPOutputSettings());
             deviceSettings->getUsrpOutputSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "XtrxInputSettings")
+        else if (deviceSettingsKey == "xtrxInputSettings")
         {
             deviceSettings->setXtrxInputSettings(new SWGSDRangel::SWGXtrxInputSettings());
             deviceSettings->getXtrxInputSettings()->fromJsonObject(settingsJsonObject);
         }
-        else if (deviceSettingsKey == "XtrxOutputSettings")
+        else if (deviceSettingsKey == "xtrxOutputSettings")
         {
             deviceSettings->setXtrxOutputSettings(new SWGSDRangel::SWGXtrxOutputSettings());
             deviceSettings->getXtrxOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (deviceSettingsKey == "XtrxMIMOSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setXtrxMimoSettings(new SWGSDRangel::SWGXtrxMIMOSettings());
+            deviceSettings->getXtrxMimoSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (deviceSettingsKey == "remoteInputSettings")
         {

@@ -46,6 +46,7 @@
 #include "SWGUSRPInputReport.h"
 #include "SWGUSRPOutputReport.h"
 #include "SWGXtrxInputReport.h"
+#include "SWGXtrxMIMOReport.h"
 #include "SWGXtrxOutputReport.h"
 #include <QString>
 
@@ -151,6 +152,9 @@ public:
     SWGXtrxOutputReport* getXtrxOutputReport();
     void setXtrxOutputReport(SWGXtrxOutputReport* xtrx_output_report);
 
+    SWGXtrxMIMOReport* getXtrxMimoReport();
+    void setXtrxMimoReport(SWGXtrxMIMOReport* xtrx_mimo_report);
+
 
     virtual bool isSet() override;
 
@@ -238,6 +242,9 @@ private:
 
     SWGXtrxOutputReport* xtrx_output_report;
     bool m_xtrx_output_report_isSet;
+
+    SWGXtrxMIMOReport* xtrx_mimo_report;
+    bool m_xtrx_mimo_report_isSet;
 
 };
 

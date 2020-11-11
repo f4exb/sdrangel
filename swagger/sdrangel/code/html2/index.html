@@ -3528,6 +3528,9 @@ margin-bottom: 20px;
     },
     "xtrxOutputReport" : {
       "$ref" : "#/definitions/XtrxOutputReport"
+    },
+    "xtrxMIMOReport" : {
+      "$ref" : "#/definitions/XtrxMIMOReport"
     }
   },
   "description" : "Base device report. Only the device report corresponding to the device specified in the deviceHwType is or should be present."
@@ -3695,6 +3698,9 @@ margin-bottom: 20px;
     },
     "xtrxOutputSettings" : {
       "$ref" : "#/definitions/XtrxOutputSettings"
+    },
+    "xtrxMIMOSettings" : {
+      "$ref" : "#/definitions/XtrxMIMOSettings"
     }
   },
   "description" : "Base device settings. Only the device settings corresponding to the device specified in the deviceHwType field is or should be present."
@@ -9455,6 +9461,219 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "XTRX"
+};
+            defs.XtrxMIMOReport = {
+  "properties" : {
+    "success" : {
+      "type" : "integer",
+      "description" : "1 if info was successfully retrieved else 0"
+    },
+    "fifoSize" : {
+      "type" : "integer"
+    },
+    "fifoFillRx" : {
+      "type" : "integer"
+    },
+    "fifoFillTx" : {
+      "type" : "integer"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "gpsLock" : {
+      "type" : "integer",
+      "description" : "1 if GPSDO is locked else 0"
+    },
+    "actualInputRate" : {
+      "type" : "integer"
+    },
+    "actualOutputRate" : {
+      "type" : "integer"
+    },
+    "clockGenRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "XTRX"
+};
+            defs.XtrxMIMOSettings = {
+  "properties" : {
+    "extClock" : {
+      "type" : "integer",
+      "description" : "Boolean 1 if external clock source else 0"
+    },
+    "extClockFreq" : {
+      "type" : "integer",
+      "description" : "Frequency (Hz) of external clock source"
+    },
+    "gpioDir" : {
+      "type" : "integer",
+      "description" : "8 bit GPIO pin direction LSB first 0 input, 1 output"
+    },
+    "gpioPins" : {
+      "type" : "integer",
+      "description" : "8 bit GPIO pins to write LSB first"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Boolean 1 use 0 do not use reverse API"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string",
+      "description" : "IPv4 address"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer",
+      "description" : "Network port from 1024 to 65535"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "rxDevSampleRate" : {
+      "type" : "integer"
+    },
+    "log2HardDecim" : {
+      "type" : "integer",
+      "description" : "0 is automatic then 1 to 6 is log2 of hardware decimation"
+    },
+    "log2SoftDecim" : {
+      "type" : "integer",
+      "description" : "log2 of software decimation factor from 0 to 6"
+    },
+    "rxCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "dcBlock" : {
+      "type" : "integer",
+      "description" : "Software DC blocking (1 for yes, 0 for no)"
+    },
+    "iqCorrection" : {
+      "type" : "integer",
+      "description" : "Software IQ imbalance correction (1 for yes, 0 for no)"
+    },
+    "ncoEnableRx" : {
+      "type" : "integer",
+      "description" : "Enable TSP NCO Rx on both channels and mixing (1 for yes, 0 for no)"
+    },
+    "ncoFrequencyRx" : {
+      "type" : "integer",
+      "description" : "Rx frequency shift from LO for both channels"
+    },
+    "antennaPathRx" : {
+      "type" : "integer",
+      "description" : "Antenna selected (enum value from XTRXMIMOSettings::RxAntenna):\n    * 0 - RXANT_LO low range\n    * 1 - RXANT_WI wide range\n    * 2 - RXANT_HI high range\n"
+    },
+    "iqOrder" : {
+      "type" : "integer",
+      "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
+    },
+    "lpfBWRx0" : {
+      "type" : "integer",
+      "description" : "LMS analog lowpass filter bandwidth (Hz) for Rx channel 0"
+    },
+    "gainRx0" : {
+      "type" : "integer",
+      "description" : "Optimally distributed gain (dB) for Rx channel 0"
+    },
+    "gainModeRx0" : {
+      "type" : "integer",
+      "description" : "Gain mode (XTRXMIMOSettings::GainMode) for Rx channel 0:\n    * 0 - GAIN_AUTO automatic\n    * 1 - GAIN_MANUAL manual\n"
+    },
+    "lnaGainRx0" : {
+      "type" : "integer",
+      "description" : "Manual LNA gain (dB) for Rx channel 0"
+    },
+    "tiaGainRx0" : {
+      "type" : "integer",
+      "description" : "Manual TIA gain (dB) for Rx channel 0"
+    },
+    "pgaGainRx0" : {
+      "type" : "integer",
+      "description" : "Manual PGA gain (dB) for Rx channel 0"
+    },
+    "pwrmodeRx0" : {
+      "type" : "integer"
+    },
+    "lpfBWRx1" : {
+      "type" : "integer",
+      "description" : "LMS analog lowpass filter bandwidth (Hz) for Rx channel 1"
+    },
+    "gainRx1" : {
+      "type" : "integer",
+      "description" : "Optimally distributed gain (dB) for Rx channel 1"
+    },
+    "gainModeRx1" : {
+      "type" : "integer",
+      "description" : "Gain mode (XTRXMIMOSettings::GainMode) for Rx channel 1:\n    * 0 - GAIN_AUTO automatic\n    * 1 - GAIN_MANUAL manual\n"
+    },
+    "lnaGainRx1" : {
+      "type" : "integer",
+      "description" : "Manual LNA gain (dB) for Rx channel 1"
+    },
+    "tiaGainRx1" : {
+      "type" : "integer",
+      "description" : "Manual TIA gain (dB) for Rx channel 1"
+    },
+    "pgaGainRx1" : {
+      "type" : "integer",
+      "description" : "Manual PGA gain (dB) for Rx channel 1"
+    },
+    "pwrmodeRx1" : {
+      "type" : "integer"
+    },
+    "txDevSampleRate" : {
+      "type" : "integer"
+    },
+    "log2HardInterp" : {
+      "type" : "integer",
+      "description" : "0 is automatic then 1 to 6 is log2 of hardware interpolation"
+    },
+    "log2SoftInterp" : {
+      "type" : "integer",
+      "description" : "log2 of software interpolation factor from 0 to 6"
+    },
+    "txCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "ncoEnableTx" : {
+      "type" : "integer",
+      "description" : "Enable TSP NCO Tx on both channels and mixing (1 for yes, 0 for no)"
+    },
+    "ncoFrequencyTx" : {
+      "type" : "integer",
+      "description" : "Tx frequency shift from LO for both channels"
+    },
+    "antennaPathTx" : {
+      "type" : "integer",
+      "description" : "Antenna selected (enum value from XTRXMIMOSettings::TxAntenna):\n    * 0 - TXANT_HI high range\n    * 1 - TXANT_WI wide range\n"
+    },
+    "lpfBWTx0" : {
+      "type" : "integer",
+      "description" : "LMS analog lowpass filter bandwidth (Hz) for Tx channel 0"
+    },
+    "gainTx0" : {
+      "type" : "integer",
+      "description" : "Optimally distributed gain (dB) for Tx channel 0"
+    },
+    "pwrmodeTx0" : {
+      "type" : "integer"
+    },
+    "lpfBWTx1" : {
+      "type" : "integer",
+      "description" : "LMS analog lowpass filter bandwidth (Hz) for Tx channel 1"
+    },
+    "gainTx1" : {
+      "type" : "integer",
+      "description" : "Optimally distributed gain (dB) for Tx channel 1"
+    },
+    "pwrmodeTx1" : {
       "type" : "integer"
     }
   },
@@ -41454,7 +41673,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-10T23:21:43.607+01:00
+              Generated 2020-11-11T03:29:01.094+01:00
             </div>
           </div>
       </div>

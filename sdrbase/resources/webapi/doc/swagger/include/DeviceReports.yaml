@@ -63,3 +63,5 @@ DeviceReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxInputReport"
     xtrxOutputReport:
       $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxOutputReport"
+    xtrxMIMOReport:
+      $ref: "/doc/swagger/include/Xtrx.yaml#/XtrxMIMOReport"
