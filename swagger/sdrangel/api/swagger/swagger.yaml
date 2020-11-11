@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   description: >
-    This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1, USRP and FunCube
+    This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube
 
       ---
       Limitations and specifcities:
@@ -15,7 +15,7 @@ info:
 
       ---
 
-  version: "4.15.0"
+  version: "6.0.0"
   title: SDRangel
   contact:
     url: "https://github.com/f4exb/sdrangel"
@@ -1016,7 +1016,7 @@ paths:
         "200":
           description: On success return details on the main spectrum
           schema:
-            $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+            $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
         "404":
           description: Invalid index
           schema:
@@ -1041,12 +1041,12 @@ paths:
           description: Spectrum settings to apply
           required: true
           schema:
-            $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+            $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
       responses:
         "200":
           description: On success returns new settings values
           schema:
-            $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+            $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
         "404":
           description: Invalid device set index or device not found
           schema:
@@ -1071,12 +1071,12 @@ paths:
           description: Spectrum settings to apply
           required: true
           schema:
-            $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+            $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
       responses:
         "200":
           description: On success returns new settings values
           schema:
-            $ref: "http://localhost:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+            $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
         "404":
           description: Invalid device set index or device not found
           schema:
@@ -2527,11 +2527,16 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/FeatureSet"
+
   SpectrumServer:
     description: "Spectrum server state"
     properties:
       run:
         description: "Boolean: 1: websocket spectrum server running 0: not running"
+        type: integer
+      listeningAddress:
+        type: string
+      listeningPort:
         type: integer
       clients:
         description: "List of clients"
