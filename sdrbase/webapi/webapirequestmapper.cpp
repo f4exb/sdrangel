@@ -3898,6 +3898,15 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setLimeSdrMimoSettings(new SWGSDRangel::SWGLimeSdrMIMOSettings());
             deviceSettings->getLimeSdrMimoSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "metisMISOSettings")
+        {
+            if (deviceSettingsKeys.contains("streams") && settingsJsonObject["streams"].isArray()) {
+                appendSettingsArrayKeys(settingsJsonObject, "streams", deviceSettingsKeys);
+            }
+
+            deviceSettings->setMetisMisoSettings(new SWGSDRangel::SWGMetisMISOSettings());
+            deviceSettings->getMetisMisoSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "perseusSettings")
         {
             deviceSettings->setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());

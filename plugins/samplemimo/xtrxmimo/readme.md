@@ -2,8 +2,6 @@
 
 <h2>Introduction</h2>
 
-This is a v5 only plugin.
-
 This MIMO plugin sends and receives its samples to/from a [XTRX device](https://xtrx.io). It handles both input (Rx) and output (Tx) streams synchronously. There is no option to synchronize Rx with Tx streams.
 
 &#9888; There are USB errors when first starting with XTRX after plugging it in. The only way to work around this is to restart SDRangel application.

@@ -52,6 +52,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalInput.yaml#/LocalInputSettings"
     localOutputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
+    metisMISOSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/MetisMISO.yaml#/MetisMISOSettings"
     perseusSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Perseus.yaml#/PerseusSettings"
     plutoSdrInputSettings:

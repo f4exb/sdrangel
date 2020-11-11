@@ -41,6 +41,7 @@
 #include "SWGLimeSdrOutputSettings.h"
 #include "SWGLocalInputSettings.h"
 #include "SWGLocalOutputSettings.h"
+#include "SWGMetisMISOSettings.h"
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputSettings.h"
 #include "SWGPlutoSdrOutputSettings.h"
@@ -144,6 +145,9 @@ public:
 
     SWGLocalOutputSettings* getLocalOutputSettings();
     void setLocalOutputSettings(SWGLocalOutputSettings* local_output_settings);
+
+    SWGMetisMISOSettings* getMetisMisoSettings();
+    void setMetisMisoSettings(SWGMetisMISOSettings* metis_miso_settings);
 
     SWGPerseusSettings* getPerseusSettings();
     void setPerseusSettings(SWGPerseusSettings* perseus_settings);
@@ -268,6 +272,9 @@ private:
 
     SWGLocalOutputSettings* local_output_settings;
     bool m_local_output_settings_isSet;
+
+    SWGMetisMISOSettings* metis_miso_settings;
+    bool m_metis_miso_settings_isSet;
 
     SWGPerseusSettings* perseus_settings;
     bool m_perseus_settings_isSet;

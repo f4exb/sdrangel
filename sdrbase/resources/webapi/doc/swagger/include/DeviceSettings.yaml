@@ -52,6 +52,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/LocalInput.yaml#/LocalInputSettings"
     localOutputSettings:
       $ref: "/doc/swagger/include/LocalOutput.yaml#/LocalOutputSettings"
+    metisMISOSettings:
+      $ref: "/doc/swagger/include/MetisMISO.yaml#/MetisMISOSettings"
     perseusSettings:
       $ref: "/doc/swagger/include/Perseus.yaml#/PerseusSettings"
     plutoSdrInputSettings:
