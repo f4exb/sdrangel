@@ -39,3 +39,5 @@ endif()
 if(ENABLE_USRP AND UHD_FOUND)
     add_subdirectory(usrp)
 endif()
+
+add_subdirectory(metis)
