@@ -763,23 +763,104 @@ void ADSBDemodGUI::handleADSB(
             aircraft->m_flight = QString(callsign);
             aircraft->m_flightItem->setText(aircraft->m_flight);
         }
-        else if ((tc >= 5) && (tc <= 8))
+        else if (((tc >= 5) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
         {
-            // Surface position
-        }
-        else if (((tc >= 9) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
-        {
-            // Airbourne position (9-18 baro, 20-22 GNSS)
-            int ss = (data[4] >> 1) & 0x3; // Surveillance status
-            int nicsb = data[4] & 1; // NIC supplement-B
-            int alt = ((data[5] & 0xff) << 4) | ((data[6] >> 4) & 0xf); // Altitude
-            int n = ((alt >> 1) & 0x7f0) | (alt & 0xf);
-            int alt_ft = n * ((alt & 0x10) ? 25 : 100) - 1000;
+            if ((tc >= 5) && (tc <= 8))
+            {
+                // Surface position
 
-            aircraft->m_altitude = alt_ft;
-            aircraft->m_altitudeValid = true;
-            // setData rather than setText so it sorts numerically
-            aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? feetToMetresInt(aircraft->m_altitude) : aircraft->m_altitude);
+                // Set altitude to 0, if we're on the surface
+                // Actual altitude may of course depend on airport elevation
+                aircraft->m_altitudeValid = true;
+                aircraft->m_altitudeItem->setData(Qt::DisplayRole, 0);
+
+                int movement = ((data[4] & 0x7) << 4) | ((data[5] >> 4) & 0xf);
+                if (movement == 0)
+                {
+                    // No information available
+                    aircraft->m_speedValid = false;
+                    aircraft->m_speedItem->setData(Qt::DisplayRole, "");
+                }
+                else if (movement == 1)
+                {
+                    // Aircraft stopped
+                    aircraft->m_speedValid = true;
+                    aircraft->m_speedItem->setData(Qt::DisplayRole, 0);
+                }
+                else if ((movement >= 2) && (movement <= 123))
+                {
+                    float base, step; // In knts
+                    int adjust;
+                    if ((movement >= 2) && (movement <= 8))
+                    {
+                        base = 0.125f;
+                        step = 0.125f;
+                        adjust = 2;
+                    }
+                    else if ((movement >= 9) && (movement <= 12))
+                    {
+                        base = 1.0f;
+                        step = 0.25f;
+                        adjust = 9;
+                    }
+                    else if ((movement >= 13) && (movement <= 38))
+                    {
+                        base = 2.0f;
+                        step = 0.5f;
+                        adjust = 13;
+                    }
+                    else if ((movement >= 39) && (movement <= 93))
+                    {
+                        base = 15.0f;
+                        step = 1.0f;
+                        adjust = 39;
+                    }
+                    else if ((movement >= 94) && (movement <= 108))
+                    {
+                        base = 70.0f;
+                        step = 2.0f;
+                        adjust = 94;
+                    }
+                    else
+                    {
+                        base = 100.0f;
+                        step = 5.0f;
+                        adjust = 109;
+                    }
+                    float speed = base + (movement - adjust) * step;
+                    aircraft->m_speedType = Aircraft::GS;
+                    aircraft->m_speedValid = true;
+                    aircraft->m_speedItem->setData(Qt::DisplayRole,  m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
+                }
+                else if (movement == 124)
+                {
+                    aircraft->m_speedValid = true;
+                    aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? 324 : 175); // Actually greater than this
+                }
+
+                int groundTrackStatus = (data[5] >> 3) & 1;
+                int groundTrackValue = ((data[5] & 0x7) << 4) | ((data[6] >> 4) & 0xf);
+                if (groundTrackStatus)
+                {
+                    aircraft->m_heading = std::round((groundTrackValue * 360.0/128.0));
+                    aircraft->m_headingValid = true;
+                    aircraft->m_headingItem->setData(Qt::DisplayRole, aircraft->m_heading);
+                }
+            }
+            else if (((tc >= 9) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
+            {
+                // Airbourne position (9-18 baro, 20-22 GNSS)
+                int ss = (data[4] >> 1) & 0x3; // Surveillance status
+                int nicsb = data[4] & 1; // NIC supplement-B - Or single antenna flag
+                int alt = ((data[5] & 0xff) << 4) | ((data[6] >> 4) & 0xf); // Altitude
+                int n = ((alt >> 1) & 0x7f0) | (alt & 0xf);
+                int alt_ft = n * ((alt & 0x10) ? 25 : 100) - 1000;
+
+                aircraft->m_altitude = alt_ft;
+                aircraft->m_altitudeValid = true;
+                // setData rather than setText so it sorts numerically
+                aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? feetToMetresInt(aircraft->m_altitude) : aircraft->m_altitude);
+            }
 
             int t = (data[6] >> 3) & 1; // Time synchronisation to UTC
             int f = (data[6] >> 2) & 1; // CPR odd/even frame - should alternate every 0.2s
