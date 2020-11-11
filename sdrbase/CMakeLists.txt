@@ -270,6 +270,7 @@ set(sdrbase_HEADERS
     dsp/freqlockcomplex.h
     dsp/gfft.h
     dsp/glscopesettings.h
+    dsp/glspectruminterface.h
     dsp/glspectrumsettings.h
     dsp/hbfilterchainconverter.h
     dsp/iirfilter.h

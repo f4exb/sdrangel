@@ -2,8 +2,6 @@
 
 <h2>Introduction</h2>
 
-This is a v5 only plugin.
-
 This plugin is mainly intended to be used to process samples to/from a [Red Pitaya board](https://www.redpitaya.com/) with [Pavel's HPSDR compatible applications](http://pavel-demin.github.io/red-pitaya-notes/). More precisely:
 
   - [SDR transceiver compatible with HPSDR](http://pavel-demin.github.io/red-pitaya-notes/sdr-transceiver-hpsdr/)
