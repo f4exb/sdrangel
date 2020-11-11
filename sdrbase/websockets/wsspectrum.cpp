@@ -117,7 +117,9 @@ void WSSpectrum::newSpectrum(
     int fftSize,
     uint64_t centerFrequency,
     int bandwidth,
-    bool linear
+    bool linear,
+    bool ssb,
+    bool usb
 )
 {
     if (m_timer.elapsed() < 200) { // Max 5 frames per second
@@ -137,7 +139,9 @@ void WSSpectrum::newSpectrum(
         nowMs,
         centerFrequency,
         bandwidth,
-        linear
+        linear,
+        ssb,
+        usb
     );
     //qDebug() << "WSSpectrum::newSpectrum: " << payload.size() << " bytes in " << elapsed << " ms";
     emit payloadToSend(payload);
@@ -159,7 +163,9 @@ void WSSpectrum::buildPayload(
     uint64_t timestampMs,
     uint64_t centerFrequency,
     int bandwidth,
-    bool linear
+    bool linear,
+    bool ssb,
+    bool usb
 )
 {
     QBuffer buffer(&bytes);
@@ -169,8 +175,8 @@ void WSSpectrum::buildPayload(
     buffer.write((char*) &timestampMs, sizeof(uint64_t));        // 16
     buffer.write((char*) &fftSize, sizeof(int));                 // 24
     buffer.write((char*) &bandwidth, sizeof(int));               // 28
-    int linearInt = linear ? 1 : 0;
-    buffer.write((char*) &linearInt, sizeof(int));               // 32
+    int indicators = (linear ? 1 : 0) + (ssb ? 2 : 0) + (usb ? 4 : 0);
+    buffer.write((char*) &indicators, sizeof(int));              // 32
     buffer.write((char*) spectrum.data(), fftSize*sizeof(Real)); // 36
     buffer.close();
 }

@@ -42,7 +42,7 @@ void GLSpectrumSettings::resetToDefaults()
 	m_waterfallShare = 0.66;
 	m_displayCurrent = true;
 	m_displayWaterfall = true;
-	m_invertedWaterfall = true;
+	m_invertedWaterfall = false;
 	m_displayMaxHold = false;
 	m_displayHistogram = false;
 	m_displayGrid = false;
@@ -109,7 +109,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
 		d.readBool(6, &m_displayWaterfall, true);
-		d.readBool(7, &m_invertedWaterfall, true);
+		d.readBool(7, &m_invertedWaterfall, false);
 		d.readBool(8, &m_displayMaxHold, false);
 		d.readBool(9, &m_displayHistogram, false);
 		d.readS32(10, &m_decay, 1);

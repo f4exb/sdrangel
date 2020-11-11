@@ -49,7 +49,9 @@ public:
         int fftSize,
         uint64_t centerFrequency,
         int bandwidth,
-        bool linear
+        bool linear,
+        bool ssb = false,
+        bool usb = true
     );
 
 signals:
@@ -77,7 +79,9 @@ private:
         uint64_t timestampMs,
         uint64_t centerFrequency,
         int bandwidth,
-        bool linear
+        bool linear,
+        bool ssb,
+        bool usb
     );
 };
 
