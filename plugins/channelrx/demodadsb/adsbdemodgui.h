@@ -509,8 +509,8 @@ private:
     QString getAirportFrequenciesDBFilename();
     QString getOSNDBFilename();
     QString getFastDBFilename();
-    qint64 ADSBDemodGUI::fileAgeInDays(QString filename);
-    bool ADSBDemodGUI::confirmDownload(QString filename);
+    qint64 fileAgeInDays(QString filename);
+    bool confirmDownload(QString filename);
     void readAirportDB(const QString& filename);
     void readAirportFrequenciesDB(const QString& filename);
     bool readOSNDB(const QString& filename);
