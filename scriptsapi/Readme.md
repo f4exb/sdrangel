@@ -3,6 +3,7 @@
 These scripts are designed to work in Python 3 preferably with version 3.6 or higher. Dependencies are installed with pip in a virtual environment. The sequence of operations is the following:
 
 ```
+sudo apt-get install virtualenv gcc g++ gfortran python3-dev
 virtualenv -p /usr/bin/python3 venv # Create virtual environment
 . ./venv/bin/activate               # Activate virtual environment
 pip install -r requirements.txt     # Install requirements
@@ -189,3 +190,103 @@ If you have presets defined you may also use presets instead of having to set up
     }
 ]
 ```
+
+<h2>superscanner.py</h2>
+
+Connects to spectrum server to monitor PSD and detect local PSD hotspots to pilot channel(s). Thus channels can follow band activity. This effectively implements a "scanner" feature with parallel tracking of any number of channels. It is FFT based so can effectively track spectrum hotspots simultaneously. Therefore the "super" superlative.
+
+It requires SDRangel version 5.6 or above. On SDRangel instance baseband spectrum should be set in log mode and the spectrum server activated with an accessible address and a port that matches the port given to `superscanner.py`. Please refer to SDRangel documentation for details.
+
+The script runs in daemon mode and is stopped using `Ctl-C`.
+
+<h3>Options</h3>
+
+  - `-a` or `--address` SDRangel web base address. Default: `127.0.0.1`
+  - `-p` or `--api-port` SDRangel API port. Default: `8091`
+  - `-w` or `--ws-port` SDRangel websocket spectrum server port. Default: `8887`
+  - `-c` or `--config-file` JSON configuration file. Mandatory. See next for format details
+  - `-j` or `--psd-in` JSON file containing PSD floor information previously saved with the `-J` option
+  - `-J` or `--psd-out` Write PSD floor information to JSON file
+  - `-n` or `--nb-passes` Number of passes for PSD floor estimation. Default: `10`
+  - `-f` or `--psd-level` Use a fixed PSD floor value therefore do not perform PSD floor estimaton
+  - `-X` or `--psd-exclude-higher` Level above which to exclude bin scan during PSD floor estimation
+  - `-x` or `--psd-exclude-lower` Level below which to exclude bin scan during PSD floor estimation
+  - `-G` or `--psd-graph` Show PSD floor graphs. Requires `matplotlib`
+  - `-N` or `--hotspots-noise` Number of hotspots above which detection is considered as noise. Default `8`
+  - `-m` or `--margin` Margin in dB above PSD floor to detect acivity. Default: `3`
+  - `-g` or `--group-tolerance` Radius (1D) tolerance in points (bins) for hotspot aggregation. Default `1`
+  - `-r` or `--freq-round` Frequency rounding value in Hz. Default: `1` (no rounding)
+  - `-o` or `--freq-offset` Frequency rounding offset in Hz. Default: `0` (no offset)
+
+Command examples:
+  - `python ./superscanner.py -a 127.0.0.1 -p 8889 -w 8886 -c 446M.json -g 10 -r 12500 -o 6250 -J psd_pmr.json`
+  - `python ./superscanner.py -a 192.168.0.3 -j psd.json -c 145M.json -g 10 -r 2500`
+
+<h3>Configuration file</h3>
+
+This file drives how channels in the connected SDRangel instance are managed.
+
+```json
+{
+    "deviceset_index": 0,           // SDRangel instance deviceset index addressed - required
+    "freqrange_inclusions": [
+        [145170000, 145900000]      // List of frequency ranges in Hz to include in processing - optional
+    ],
+    "freqrange_exclusions": [       // List of frequency ranges in Hz to exclude from processing - optional
+        [145000000, 145170000],
+        [145290000, 145335000],
+        [145800000, 146000000]
+    ],
+    "channel_info": [               // List of controlled channels - required
+        {                           // Channel information - at least one required
+            "index": 0,             // Index of channel in deviceset - required
+            "fc_pos": "usb",        // Center frequency position in hotspot - optional: default center
+                                    // lsb: center frequency at end of hotspot (higer frequency)
+                                    // usb: center frequency at beginning of hotspot (lower frequency)
+                                    // canter: center frequency at mid-point of hotspot (center frequency)
+            "fc_shift": -300        // Center frequency constant shift from computed frequency - optional
+        },
+        {
+            "index": 2
+        },
+        {
+            "index": 3
+        }
+    ]
+}
+```
+
+<h3>Run with supervisord</h3>
+
+Refer to supervisord documentation.
+
+Esample of `superscanner.conf` file to put in your `/etc//etc/supervisor/conf.d/` folder (add it in the `[incude]` section of `/etc/supervisor/supervisord.conf`). Environment variable `PYTHONUNBUFFERED=1` is important for the log tail to work correctly.
+
+```
+[program:superscanner]
+command = /opt/build/sdrangel/scriptsapi/venv/bin/python /opt/build/sdrangel/scriptsapi/superscanner.py -a 192.168.0.24 -c /home/f4exb/145M_scan.config.json -g 4 -r 3125 -f -65
+process_name = superscanner
+user = f4exb
+stopsignal = INT
+autostart = false
+autorestart = false
+environment =
+    USER=f4exb,
+    PATH="/home/f4exb/bin:/home/f4exb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games",
+    HOME="/home/f4exb",
+    PYTHONUNBUFFERED=1
+stdout_logfile = /home/f4exb/log/superscanner.log
+stdout_logfile_maxbytes = 10MB
+stdout_logfile_backups = 3
+redirect_stderr=true
+```
+
+<h2>sdrangel.py</h2>
+
+Holds constants related to SDRangel software required by other scripts
+
+<h2>Unit tests</h2>
+
+Run as `python <file>` in the virtual environment
+
+  - `test_superscanner.py` is testing `superscanner.py`
