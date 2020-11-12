@@ -82,7 +82,6 @@ struct AirportInformation {
         if ((file = fopen(utfFilename.constData(), "r")) != NULL)
         {
             char row[2048];
-            int idx;
 
             if (fgets(row, sizeof(row), file))
             {
