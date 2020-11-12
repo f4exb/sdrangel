@@ -100,7 +100,7 @@ void MainParser::parse(const QCoreApplication& app)
     {
         bool ok;
         int maj = versionParts.at(0).toInt(&ok);
-        m_mimoSupport = ok && (maj > 3);
+        m_mimoSupport = ok && (maj > 4);
     }
     else
     {

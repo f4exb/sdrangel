@@ -1,3 +1,23 @@
+sdrangel (6.0.0-1) unstable; urgency=medium
+
+   * Merge back v5 branch and upgrade version to v6
+   * ChirpChat modulator/demodulator replacing LoRa. Issues #309 and #471
+   * SigMF file support. Issues #542 and #544
+   * Test multiple input source. Issue #701
+   * Simple interferometer. Issue #421
+   * BladeRF2 MIMO support. Issue #419
+   * Minimal beam steering source channel. Issue #431
+   * Test multiple output source. Issue #434
+   * LimeSDR MIMO support. Issue #462
+   * XTRX MIMO support. Issue #507
+   * RedPitaya / HPSDR Metis support. Issue #344
+   * Stream spectrum data for remote clients. Issue #224
+   * NFM demod: more updates. Issue #703
+   * ADS-B enhancements (2). PR #704
+   * Audio input plugin. PR #699
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 12 Nov 2020 21:26:29 +0100
+
 sdrangel (4.21.3-1) unstable; urgency=medium
 
    * Package SoapySDR modules for Windows. PR #687
