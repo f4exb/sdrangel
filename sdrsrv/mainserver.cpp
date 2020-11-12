@@ -25,6 +25,7 @@
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
 #include "dsp/dspdevicemimoengine.h"
+#include "dsp/spectrumvis.h"
 #include "device/deviceapi.h"
 #include "device/deviceset.h"
 #include "device/deviceenumerator.h"
@@ -162,7 +163,7 @@ bool MainServer::handleMessage(const Message& cmd)
             addSinkDevice();
         } else if (direction == 0) { // Single stream Rx
             addSourceDevice();
-        }  else if (direction == 2) { // MIMO
+        } else if (direction == 2) { // MIMO
             addMIMODevice();
         }
 
@@ -266,6 +267,7 @@ void MainServer::addSinkDevice()
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
+    dspDeviceSinkEngine->addSpectrumSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "T%d", deviceTabIndex);
@@ -312,6 +314,7 @@ void MainServer::addSourceDevice()
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = nullptr;
+    dspDeviceSourceEngine->addSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "R%d", deviceTabIndex);
@@ -357,6 +360,7 @@ void MainServer::addMIMODevice()
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSinkEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceMIMOEngine = dspDeviceMIMOEngine;
+    dspDeviceMIMOEngine->addSpectrumSink(m_mainCore->m_deviceSets.back()->m_spectrumVis);
 
     char tabNameCStr[16];
     sprintf(tabNameCStr, "M%d", deviceTabIndex);

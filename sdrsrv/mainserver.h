@@ -69,6 +69,8 @@ public:
     void addFeature(int featureSetIndex, int featureIndex);
     void deleteFeature(int featureSetIndex, int featureIndex);
 
+    friend class WebAPIAdapter;
+
 signals:
     void finished();
 

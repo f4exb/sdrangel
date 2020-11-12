@@ -19,6 +19,7 @@
 
 #include "dsp/dspdevicesourceengine.h"
 #include "dsp/dspdevicesinkengine.h"
+#include "dsp/spectrumvis.h"
 #include "plugin/pluginapi.h"
 #include "plugin/plugininterface.h"
 #include "settings/preset.h"
@@ -32,16 +33,22 @@
 
 DeviceSet::DeviceSet(int tabIndex, int deviceType)
 {
-    (void) deviceType;
     m_deviceAPI = nullptr;
     m_deviceSourceEngine = nullptr;
     m_deviceSinkEngine = nullptr;
     m_deviceMIMOEngine = nullptr;
     m_deviceTabIndex = tabIndex;
+
+    if ((deviceType == 0) || (deviceType == 2)) { // Single Rx or MIMO
+        m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF);
+    } else if (deviceType == 1) { // Single Tx
+        m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF);
+    }
 }
 
 DeviceSet::~DeviceSet()
 {
+    delete m_spectrumVis;
 }
 
 
@@ -452,6 +459,35 @@ bool DeviceSet::compareChannels(const ChannelAPI *channelA, const ChannelAPI *ch
     {
         return false;
     }
+}
+
+int DeviceSet::webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const
+{
+    return m_spectrumVis->webapiSpectrumSettingsGet(response, errorMessage);
+}
+
+int DeviceSet::webapiSpectrumSettingsPutPatch(
+    bool force,
+    const QStringList& spectrumSettingsKeys,
+    SWGSDRangel::SWGGLSpectrum& response, // query + response
+    QString& errorMessage)
+{
+    return m_spectrumVis->webapiSpectrumSettingsPutPatch(force, spectrumSettingsKeys, response, errorMessage);
+}
+
+int DeviceSet::webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const
+{
+    return m_spectrumVis->webapiSpectrumServerGet(response, errorMessage);
+}
+
+int DeviceSet::webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
+{
+    return m_spectrumVis->webapiSpectrumServerPost(response, errorMessage);
+}
+
+int DeviceSet::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage)
+{
+    return m_spectrumVis->webapiSpectrumServerDelete(response, errorMessage);
 }
 
 void DeviceSet::addChannelInstance(ChannelAPI *channelAPI)

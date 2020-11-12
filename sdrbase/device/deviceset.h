@@ -29,6 +29,13 @@ class DSPDeviceMIMOEngine;
 class PluginAPI;
 class ChannelAPI;
 class Preset;
+class SpectrumVis;
+
+namespace SWGSDRangel {
+    class SWGGLSpectrum;
+    class SWGSpectrumServer;
+    class SWGSuccessResponse;
+};
 
 class SDRBASE_API DeviceSet
 {
@@ -37,6 +44,7 @@ public:
     DSPDeviceSourceEngine *m_deviceSourceEngine;
     DSPDeviceSinkEngine *m_deviceSinkEngine;
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
+    SpectrumVis *m_spectrumVis;
 
     DeviceSet(int tabIndex, int deviceType);
     ~DeviceSet();
@@ -61,6 +69,17 @@ public:
     void removeChannelInstanceAt(int index);
     void removeChannelInstance(ChannelAPI *channelAPI);
     void clearChannels();
+
+    // REST API
+    int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
+    int webapiSpectrumSettingsPutPatch(
+            bool force,
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response, // query + response
+            QString& errorMessage);
+    int webapiSpectrumServerGet(SWGSDRangel::SWGSpectrumServer& response, QString& errorMessage) const;
+    int webapiSpectrumServerPost(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
+    int webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& response, QString& errorMessage);
 
 private:
     typedef QList<ChannelAPI*> ChannelInstanceRegistrations;

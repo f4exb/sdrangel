@@ -17,8 +17,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_WEBAPI_WEBAPIADAPTERGUI_H_
-#define SDRBASE_WEBAPI_WEBAPIADAPTERGUI_H_
+#ifndef SDRBASE_WEBAPI_WEBAPIADAPTER_H_
+#define SDRBASE_WEBAPI_WEBAPIADAPTER_H_
 
 #include <QtGlobal>
 
@@ -218,6 +218,33 @@ public:
             SWGSDRangel::SWGSuccessResponse& response,
             SWGSDRangel::SWGErrorResponse& error);
 
+    virtual int devicesetSpectrumSettingsGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumSettingsPutPatch(
+            int deviceSetIndex,
+            bool force, //!< true to force settings = put else patch
+            const QStringList& spectrumSettingsKeys,
+            SWGSDRangel::SWGGLSpectrum& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerGet(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSpectrumServer& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerPost(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
+    virtual int devicesetSpectrumServerDelete(
+            int deviceSetIndex,
+            SWGSDRangel::SWGSuccessResponse& response,
+            SWGSDRangel::SWGErrorResponse& error);
+
     virtual int devicesetDevicePut(
             int deviceSetIndex,
             SWGSDRangel::SWGDeviceListItem& query,
@@ -401,4 +428,4 @@ private:
     static void getMsgTypeString(const QtMsgType& msgType, QString& level);
 };
 
-#endif /* SDRBASE_WEBAPI_WEBAPIADAPTERGUI_H_ */
+#endif /* SDRGUI_WEBAPI_WEBAPIADAPTERGUI_H_ */

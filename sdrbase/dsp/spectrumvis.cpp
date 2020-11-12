@@ -67,7 +67,6 @@ SpectrumVis::SpectrumVis(Real scalef) :
 {
 	setObjectName("SpectrumVis");
     applySettings(m_settings, true);
-    //m_wsSpectrum.openSocket(); // FIXME: conditional
 }
 
 SpectrumVis::~SpectrumVis()
@@ -150,7 +149,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
                 m_settings.m_fftSize,
                 m_centerFrequency,
                 m_sampleRate,
-                m_settings.m_linear
+                m_settings.m_linear,
+                m_settings.m_ssb,
+                m_settings.m_usb
             );
         }
     }
@@ -183,7 +184,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
                 m_settings.m_fftSize,
                 m_centerFrequency,
                 m_sampleRate,
-                m_settings.m_linear
+                m_settings.m_linear,
+                m_settings.m_ssb,
+                m_settings.m_usb
             );
         }
 
@@ -227,7 +230,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
                     m_settings.m_fftSize,
                     m_centerFrequency,
                     m_sampleRate,
-                    m_settings.m_linear
+                    m_settings.m_linear,
+                    m_settings.m_ssb,
+                    m_settings.m_usb
                 );
             }
         }
@@ -270,7 +275,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
                     m_settings.m_fftSize,
                     m_centerFrequency,
                     m_sampleRate,
-                    m_settings.m_linear
+                    m_settings.m_linear,
+                    m_settings.m_ssb,
+                    m_settings.m_usb
                 );
             }
         }
@@ -370,7 +377,9 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         m_settings.m_fftSize,
                         m_centerFrequency,
                         m_sampleRate,
-                        m_settings.m_linear
+                        m_settings.m_linear,
+                        m_settings.m_ssb,
+                        m_settings.m_usb
                     );
                 }
 			}
@@ -424,7 +433,9 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         m_settings.m_fftSize,
                         m_centerFrequency,
                         m_sampleRate,
-                        m_settings.m_linear
+                        m_settings.m_linear,
+                        m_settings.m_ssb,
+                        m_settings.m_usb
                     );
                 }
 
@@ -498,7 +509,9 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                             m_settings.m_fftSize,
                             m_centerFrequency,
                             m_sampleRate,
-                            m_settings.m_linear
+                            m_settings.m_linear,
+                            m_settings.m_ssb,
+                            m_settings.m_usb
                         );
                     }
                 }
@@ -571,7 +584,9 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                             m_settings.m_fftSize,
                             m_centerFrequency,
                             m_sampleRate,
-                            m_settings.m_linear
+                            m_settings.m_linear,
+                            m_settings.m_ssb,
+                            m_settings.m_usb
                         );
                     }
                 }
@@ -696,6 +711,8 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
         << " m_refLevel: " << settings.m_refLevel
         << " m_powerRange: " << settings.m_powerRange
         << " m_linear: " << settings.m_linear
+        << " m_ssb: " << settings.m_ssb
+        << " m_usb: " << settings.m_usb
         << " m_wsSpectrumAddress: " << settings.m_wsSpectrumAddress
         << " m_wsSpectrumPort: " << settings.m_wsSpectrumPort
         << " force: " << force;
