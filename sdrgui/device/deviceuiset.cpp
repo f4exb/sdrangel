@@ -39,18 +39,8 @@
 DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet, int deviceType, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
-
-    if ((deviceType == 0) || (deviceType == 2)) // Single Rx or MIMO
-    {
-        m_spectrumVis = new SpectrumVis(SDR_RX_SCALEF);
-        m_spectrumVis->setGLSpectrum(m_spectrum);
-    }
-    else if (deviceType == 1) // Single Tx
-    {
-        m_spectrumVis = new SpectrumVis(SDR_TX_SCALEF);
-        m_spectrumVis->setGLSpectrum(m_spectrum);
-    }
-
+    m_spectrumVis = deviceSet->m_spectrumVis;
+    m_spectrumVis->setGLSpectrum(m_spectrum);
     m_spectrum->connectTimer(timer);
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
@@ -77,7 +67,6 @@ DeviceUISet::~DeviceUISet()
 {
     delete m_channelWindow;
     delete m_spectrumGUI;
-    delete m_spectrumVis;
     delete m_spectrum;
 }
 
