@@ -247,14 +247,14 @@ void AudioDialogX::on_decimationFactor_currentIndexChanged(int index)
 
 void AudioDialogX::on_outputUDPChannelCodec_currentIndexChanged(int index)
 {
-    m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) index;
+    m_outputDeviceInfo.udpChannelCodec = (AudioOutputDevice::UDPChannelCodec) index;
     updateOutputSDPString();
     check();
 }
 
 void AudioDialogX::on_outputUDPChannelMode_currentIndexChanged(int index)
 {
-    m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) index;
+    m_outputDeviceInfo.udpChannelMode = (AudioOutputDevice::UDPChannelMode) index;
     updateOutputSDPString();
     check();
 }
@@ -290,38 +290,38 @@ void AudioDialogX::updateOutputDeviceInfo()
     m_outputDeviceInfo.udpPort = m_outputUDPPort;
     m_outputDeviceInfo.copyToUDP = ui->outputUDPCopy->isChecked();
     m_outputDeviceInfo.udpUseRTP = ui->outputUDPUseRTP->isChecked();
-    m_outputDeviceInfo.udpChannelMode = (AudioOutput::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
-    m_outputDeviceInfo.udpChannelCodec = (AudioOutput::UDPChannelCodec) ui->outputUDPChannelCodec->currentIndex();
+    m_outputDeviceInfo.udpChannelMode = (AudioOutputDevice::UDPChannelMode) ui->outputUDPChannelMode->currentIndex();
+    m_outputDeviceInfo.udpChannelCodec = (AudioOutputDevice::UDPChannelCodec) ui->outputUDPChannelCodec->currentIndex();
     m_outputDeviceInfo.udpDecimationFactor = ui->decimationFactor->currentIndex() + 1;
 }
 
 void AudioDialogX::updateOutputSDPString()
 {
     QString format;
-    int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
+    int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutputDevice::UDPChannelStereo ? 2 : 1;
     uint32_t effectiveSampleRate = m_outputDeviceInfo.sampleRate / (m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor);
 
     switch (m_outputDeviceInfo.udpChannelCodec)
     {
-    case AudioOutput::UDPCodecALaw:
+    case AudioOutputDevice::UDPCodecALaw:
         format = "PCMA";
         break;
-    case AudioOutput::UDPCodecULaw:
+    case AudioOutputDevice::UDPCodecULaw:
         format = "PCMU";
         break;
-    case AudioOutput::UDPCodecG722:
+    case AudioOutputDevice::UDPCodecG722:
         format = "G722";
         effectiveSampleRate /= 2; // codec does a decimation by 2
         break;
-    case AudioOutput::UDPCodecL8:
+    case AudioOutputDevice::UDPCodecL8:
         format = "L8";
         break;
-    case AudioOutput::UDPCodecOpus:
+    case AudioOutputDevice::UDPCodecOpus:
         format = "opus";
         nChannels = 2; // always 2 even for mono
         effectiveSampleRate = 48000; // always 48000 regardless of input rate
         break;
-    case AudioOutput::UDPCodecL16:
+    case AudioOutputDevice::UDPCodecL16:
     default:
         format = "L16";
         break;
@@ -332,28 +332,28 @@ void AudioDialogX::updateOutputSDPString()
 
 void AudioDialogX::check()
 {
-    int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo ? 2 : 1;
+    int nChannels = m_outputDeviceInfo.udpChannelMode == AudioOutputDevice::UDPChannelStereo ? 2 : 1;
     uint32_t decimationFactor = m_outputDeviceInfo.udpDecimationFactor == 0 ? 1 : m_outputDeviceInfo.udpDecimationFactor;
 
-    if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecALaw)
+    if (m_outputDeviceInfo.udpChannelCodec == AudioOutputDevice::UDPCodecALaw)
     {
         if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 8000)) {
             QMessageBox::information(this, tr("Message"), tr("PCMA must be 8000 Hz single channel"));
         }
     }
-    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecULaw)
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutputDevice::UDPCodecULaw)
     {
         if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 8000)) {
             QMessageBox::information(this, tr("Message"), tr("PCMU must be 8000 Hz single channel"));
         }
     }
-    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecG722)
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutputDevice::UDPCodecG722)
     {
         if ((nChannels != 1) || (m_outputDeviceInfo.sampleRate/decimationFactor != 16000)) {
             QMessageBox::information(this, tr("Message"), tr("G722 must be 16000 Hz single channel"));
         }
     }
-    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutput::UDPCodecOpus)
+    else if (m_outputDeviceInfo.udpChannelCodec == AudioOutputDevice::UDPCodecOpus)
     {
         int effectiveSampleRate = m_outputDeviceInfo.sampleRate/decimationFactor;
         if ((effectiveSampleRate != 48000) && (effectiveSampleRate != 24000) && (effectiveSampleRate != 16000) && (effectiveSampleRate != 12000)) {

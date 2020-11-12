@@ -16,8 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AUDIOOUTPUT_H
-#define INCLUDE_AUDIOOUTPUT_H
+#ifndef INCLUDE_AUDIOOUTPUTDEVICE_H
+#define INCLUDE_AUDIOOUTPUTDEVICE_H
 
 #include <QMutex>
 #include <QIODevice>
@@ -32,7 +32,7 @@ class AudioFifo;
 class AudioOutputPipe;
 class AudioNetSink;
 
-class SDRBASE_API AudioOutput : QIODevice {
+class SDRBASE_API AudioOutputDevice : QIODevice {
 public:
     enum UDPChannelMode
     {
@@ -52,8 +52,8 @@ public:
 		UDPCodecOpus   //!< Opus compression
     };
 
-	AudioOutput();
-	virtual ~AudioOutput();
+	AudioOutputDevice();
+	virtual ~AudioOutputDevice();
 
 	bool start(int device, int rate);
 	void stop();
@@ -94,4 +94,4 @@ private:
 	friend class AudioOutputPipe;
 };
 
-#endif // INCLUDE_AUDIOOUTPUT_H
+#endif // INCLUDE_AUDIOOUTPUTDEVICE_H

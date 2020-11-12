@@ -75,7 +75,7 @@ set(sdrbase_SOURCES
     audio/audiofilter.cpp
     audio/audiog722.cpp
     audio/audioopus.cpp
-    audio/audiooutput.cpp
+    audio/audiooutputdevice.cpp
     audio/audioinputdevice.cpp
     audio/audionetsink.cpp
     audio/audioresampler.cpp
@@ -214,7 +214,7 @@ set(sdrbase_HEADERS
     audio/audiofifo.h
     audio/audiofilter.h
     audio/audiog722.h
-    audio/audiooutput.h
+    audio/audiooutputdevice.h
     audio/audioopus.h
     audio/audioinputdevice.h
     audio/audionetsink.h

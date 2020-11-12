@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include <complex.h>
 
-#include "audio/audiooutput.h"
-
 #include "atvdemodsink.h"
 
 const int ATVDemodSink::m_ssbFftLen = 1024;

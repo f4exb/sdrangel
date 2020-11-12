@@ -67,8 +67,8 @@ QDataStream& operator>>(QDataStream& ds, AudioDeviceManager::OutputDeviceInfo& i
         >> intChannelMode
         >> intChannelCodec
         >> info.udpDecimationFactor;
-    info.udpChannelMode = (AudioOutput::UDPChannelMode) intChannelMode;
-    info.udpChannelCodec = (AudioOutput::UDPChannelCodec) intChannelCodec;
+    info.udpChannelMode = (AudioOutputDevice::UDPChannelMode) intChannelMode;
+    info.udpChannelCodec = (AudioOutputDevice::UDPChannelCodec) intChannelCodec;
     return ds;
 }
 
@@ -94,7 +94,7 @@ AudioDeviceManager::AudioDeviceManager()
 
 AudioDeviceManager::~AudioDeviceManager()
 {
-    QMap<int, AudioOutput*>::iterator it = m_audioOutputs.begin();
+    QMap<int, AudioOutputDevice*>::iterator it = m_audioOutputs.begin();
 
     for (; it != m_audioOutputs.end(); ++it) {
         delete(*it);
@@ -254,7 +254,7 @@ void AudioDeviceManager::addAudioSink(AudioFifo* audioFifo, MessageQueue *sample
     qDebug("AudioDeviceManager::addAudioSink: %d: %p", outputDeviceIndex, audioFifo);
 
     if (m_audioOutputs.find(outputDeviceIndex) == m_audioOutputs.end()) {
-        m_audioOutputs[outputDeviceIndex] = new AudioOutput();
+        m_audioOutputs[outputDeviceIndex] = new AudioOutputDevice();
     }
 
     if ((m_audioOutputs[outputDeviceIndex]->getNbFifos() == 0) &&
@@ -370,8 +370,8 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
     quint16 udpPort;
     bool copyAudioToUDP;
     bool udpUseRTP;
-    AudioOutput::UDPChannelMode udpChannelMode;
-    AudioOutput::UDPChannelCodec udpChannelCodec;
+    AudioOutputDevice::UDPChannelMode udpChannelMode;
+    AudioOutputDevice::UDPChannelCodec udpChannelCodec;
     uint32_t decimationFactor;
     QString deviceName;
 
@@ -384,8 +384,8 @@ void AudioDeviceManager::startAudioOutput(int outputDeviceIndex)
             udpPort = m_defaultUDPPort;
             copyAudioToUDP = false;
             udpUseRTP = false;
-            udpChannelMode = AudioOutput::UDPChannelLeft;
-            udpChannelCodec = AudioOutput::UDPCodecL16;
+            udpChannelMode = AudioOutputDevice::UDPChannelLeft;
+            udpChannelCodec = AudioOutputDevice::UDPCodecL16;
             decimationFactor = 1;
         }
         else
@@ -617,7 +617,7 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
         return;
     }
 
-    AudioOutput *audioOutput = m_audioOutputs[outputDeviceIndex];
+    AudioOutputDevice *audioOutput = m_audioOutputs[outputDeviceIndex];
 
     if (oldDeviceInfo.sampleRate != deviceInfo.sampleRate)
     {
@@ -639,7 +639,7 @@ void AudioDeviceManager::setOutputDeviceInfo(int outputDeviceIndex, const Output
     audioOutput->setUdpDestination(deviceInfo.udpAddress, deviceInfo.udpPort);
     audioOutput->setUdpUseRTP(deviceInfo.udpUseRTP);
     audioOutput->setUdpChannelMode(deviceInfo.udpChannelMode);
-    audioOutput->setUdpChannelFormat(deviceInfo.udpChannelCodec, deviceInfo.udpChannelMode == AudioOutput::UDPChannelStereo, deviceInfo.sampleRate);
+    audioOutput->setUdpChannelFormat(deviceInfo.udpChannelCodec, deviceInfo.udpChannelMode == AudioOutputDevice::UDPChannelStereo, deviceInfo.sampleRate);
     audioOutput->setUdpDecimation(deviceInfo.udpDecimationFactor);
 
     qDebug("AudioDeviceManager::setOutputDeviceInfo: index: %d device: %s updated",

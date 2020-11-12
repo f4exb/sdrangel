@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "audio/audiodevicemanager.h"
-#include "audio/audiooutput.h"
+#include "audio/audiooutputdevice.h"
 #include "export.h"
 #include "ambe/ambeengine.h"
 

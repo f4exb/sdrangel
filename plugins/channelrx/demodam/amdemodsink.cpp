@@ -19,7 +19,7 @@
 
 #include <complex.h>
 
-#include "audio/audiooutput.h"
+#include "audio/audiooutputdevice.h"
 #include "dsp/fftfilt.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"

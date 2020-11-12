@@ -23,7 +23,7 @@
 
 #include "util/stepfunctions.h"
 #include "util/db.h"
-#include "audio/audiooutput.h"
+#include "audio/audiooutputdevice.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"

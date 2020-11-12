@@ -550,10 +550,10 @@ int WebAPIAdapter::instanceAudioOutputPatch(
         outputDeviceInfo.udpUseRTP = response.getUdpUsesRtp() == 0 ? 0 : 1;
     }
     if (audioOutputKeys.contains("udpChannelMode")) {
-        outputDeviceInfo.udpChannelMode = static_cast<AudioOutput::UDPChannelMode>(response.getUdpChannelMode());
+        outputDeviceInfo.udpChannelMode = static_cast<AudioOutputDevice::UDPChannelMode>(response.getUdpChannelMode());
     }
     if (audioOutputKeys.contains("udpChannelCodec")) {
-        outputDeviceInfo.udpChannelCodec = static_cast<AudioOutput::UDPChannelCodec>(response.getUdpChannelCodec());
+        outputDeviceInfo.udpChannelCodec = static_cast<AudioOutputDevice::UDPChannelCodec>(response.getUdpChannelCodec());
     }
     if (audioOutputKeys.contains("udpDecimationFactor")) {
         outputDeviceInfo.udpDecimationFactor = response.getUdpDecimationFactor();

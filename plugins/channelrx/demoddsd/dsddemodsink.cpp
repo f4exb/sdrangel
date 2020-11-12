@@ -33,7 +33,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/basebandsamplesink.h"
-#include "audio/audiooutput.h"
+#include "audio/audiooutputdevice.h"
 #include "util/db.h"
 
 #include "dsddemodsink.h"

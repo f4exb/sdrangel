@@ -22,7 +22,7 @@
 #include <QDebug>
 #include <QObject>
 
-#include "audio/audiooutput.h"
+#include "audio/audiooutputdevice.h"
 #include "dsp/dspengine.h"
 #include "device/deviceapi.h"
 

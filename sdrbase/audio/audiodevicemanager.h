@@ -25,7 +25,7 @@
 #include <QAudioDeviceInfo>
 
 #include "audio/audioinputdevice.h"
-#include "audio/audiooutput.h"
+#include "audio/audiooutputdevice.h"
 #include "export.h"
 
 class QDataStream;
@@ -60,8 +60,8 @@ public:
             udpPort(m_defaultUDPPort),
             copyToUDP(false),
             udpUseRTP(false),
-            udpChannelMode(AudioOutput::UDPChannelLeft),
-            udpChannelCodec(AudioOutput::UDPCodecL16),
+            udpChannelMode(AudioOutputDevice::UDPChannelLeft),
+            udpChannelCodec(AudioOutputDevice::UDPCodecL16),
             udpDecimationFactor(1)
         {}
         void resetToDefaults() {
@@ -70,8 +70,8 @@ public:
             udpPort = m_defaultUDPPort;
             copyToUDP = false;
             udpUseRTP = false;
-            udpChannelMode = AudioOutput::UDPChannelLeft;
-            udpChannelCodec = AudioOutput::UDPCodecL16;
+            udpChannelMode = AudioOutputDevice::UDPChannelLeft;
+            udpChannelCodec = AudioOutputDevice::UDPCodecL16;
             udpDecimationFactor = 1;
         }
         int sampleRate;
@@ -79,8 +79,8 @@ public:
         quint16 udpPort;
         bool copyToUDP;
         bool udpUseRTP;
-        AudioOutput::UDPChannelMode udpChannelMode;
-        AudioOutput::UDPChannelCodec udpChannelCodec;
+        AudioOutputDevice::UDPChannelMode udpChannelMode;
+        AudioOutputDevice::UDPChannelCodec udpChannelCodec;
         uint32_t udpDecimationFactor;
         friend QDataStream& operator<<(QDataStream& ds, const OutputDeviceInfo& info);
         friend QDataStream& operator>>(QDataStream& ds, OutputDeviceInfo& info);
@@ -127,7 +127,7 @@ private:
     QMap<AudioFifo*, int> m_audioSinkFifos; //< audio sink FIFO to audio output device index-1 map
     QMap<AudioFifo*, MessageQueue*> m_audioFifoToSinkMessageQueues; //!< audio sink FIFO to attached sink message queue
     QMap<int, QList<MessageQueue*> > m_outputDeviceSinkMessageQueues; //!< sink message queues attached to device
-    QMap<int, AudioOutput*> m_audioOutputs; //!< audio device index to audio output map (index -1 is default device)
+    QMap<int, AudioOutputDevice*> m_audioOutputs; //!< audio device index to audio output map (index -1 is default device)
     QMap<QString, OutputDeviceInfo> m_audioOutputInfos; //!< audio device name to audio output info
 
     QMap<AudioFifo*, int> m_audioSourceFifos; //< audio source FIFO to audio input device index-1 map

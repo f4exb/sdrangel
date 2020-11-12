@@ -33,7 +33,6 @@
 #include "SWGChannelReport.h"
 #include "SWGFreqTrackerReport.h"
 
-#include "audio/audiooutput.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/fftfilt.h"

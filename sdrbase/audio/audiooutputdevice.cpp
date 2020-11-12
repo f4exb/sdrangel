@@ -20,11 +20,11 @@
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
 #include <QAudioOutput>
-#include "audiooutput.h"
+#include "audiooutputdevice.h"
 #include "audiofifo.h"
 #include "audionetsink.h"
 
-AudioOutput::AudioOutput() :
+AudioOutputDevice::AudioOutputDevice() :
 	m_mutex(QMutex::Recursive),
 	m_audioOutput(0),
 	m_audioNetSink(0),
@@ -37,7 +37,7 @@ AudioOutput::AudioOutput() :
 {
 }
 
-AudioOutput::~AudioOutput()
+AudioOutputDevice::~AudioOutputDevice()
 {
 //	stop();
 //
@@ -51,7 +51,7 @@ AudioOutput::~AudioOutput()
 //	m_audioFifos.clear();
 }
 
-bool AudioOutput::start(int device, int rate)
+bool AudioOutputDevice::start(int device, int rate)
 {
 
 //	if (m_audioUsageCount == 0)
@@ -62,7 +62,7 @@ bool AudioOutput::start(int device, int rate)
         if (device < 0)
         {
             devInfo = QAudioDeviceInfo::defaultOutputDevice();
-            qWarning("AudioOutput::start: using system default device %s", qPrintable(devInfo.defaultOutputDevice().deviceName()));
+            qWarning("AudioOutputDevice::start: using system default device %s", qPrintable(devInfo.defaultOutputDevice().deviceName()));
         }
         else
         {
@@ -71,12 +71,12 @@ bool AudioOutput::start(int device, int rate)
             if (device < devicesInfo.size())
             {
                 devInfo = devicesInfo[device];
-                qWarning("AudioOutput::start: using audio device #%d: %s", device, qPrintable(devInfo.deviceName()));
+                qWarning("AudioOutputDevice::start: using audio device #%d: %s", device, qPrintable(devInfo.deviceName()));
             }
             else
             {
                 devInfo = QAudioDeviceInfo::defaultOutputDevice();
-                qWarning("AudioOutput::start: audio device #%d does not exist. Using system default device %s", device, qPrintable(devInfo.defaultOutputDevice().deviceName()));
+                qWarning("AudioOutputDevice::start: audio device #%d does not exist. Using system default device %s", device, qPrintable(devInfo.defaultOutputDevice().deviceName()));
             }
         }
 
@@ -99,16 +99,16 @@ bool AudioOutput::start(int device, int rate)
                << " codec: "  << m_audioFormat.codec().toStdString()
                << " byteOrder: " <<  (m_audioFormat.byteOrder() == QAudioFormat::BigEndian ? "BE" : "LE")
                << " sampleType: " << (int) m_audioFormat.sampleType();
-            qWarning("AudioOutput::start: format %d Hz 2xS16LE audio/pcm not supported. Using: %s", rate, os.str().c_str());
+            qWarning("AudioOutputDevice::start: format %d Hz 2xS16LE audio/pcm not supported. Using: %s", rate, os.str().c_str());
         }
         else
         {
-            qInfo("AudioOutput::start: audio format OK");
+            qInfo("AudioOutputDevice::start: audio format OK");
         }
 
         if (m_audioFormat.sampleSize() != 16)
         {
-            qWarning("AudioOutput::start: Audio device '%s' failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
+            qWarning("AudioOutputDevice::start: Audio device '%s' failed", qPrintable(devInfo.defaultOutputDevice().deviceName()));
             return false;
         }
 
@@ -121,7 +121,7 @@ bool AudioOutput::start(int device, int rate)
 
         if (m_audioOutput->state() != QAudio::ActiveState)
         {
-            qWarning("AudioOutput::start: cannot start");
+            qWarning("AudioOutputDevice::start: cannot start");
         }
 //	}
 //
@@ -130,9 +130,9 @@ bool AudioOutput::start(int device, int rate)
 	return true;
 }
 
-void AudioOutput::stop()
+void AudioOutputDevice::stop()
 {
-    qDebug("AudioOutput::stop");
+    qDebug("AudioOutputDevice::stop");
 
     QMutexLocker mutexLocker(&m_mutex);
     m_audioOutput->stop();
@@ -157,14 +157,14 @@ void AudioOutput::stop()
 //    }
 }
 
-void AudioOutput::addFifo(AudioFifo* audioFifo)
+void AudioOutputDevice::addFifo(AudioFifo* audioFifo)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	m_audioFifos.push_back(audioFifo);
 }
 
-void AudioOutput::removeFifo(AudioFifo* audioFifo)
+void AudioOutputDevice::removeFifo(AudioFifo* audioFifo)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -172,37 +172,37 @@ void AudioOutput::removeFifo(AudioFifo* audioFifo)
 }
 
 /*
-bool AudioOutput::open(OpenMode mode)
+bool AudioOutputDevice::open(OpenMode mode)
 {
 	Q_UNUSED(mode);
 	return false;
 }*/
 
-void AudioOutput::setUdpDestination(const QString& address, uint16_t port)
+void AudioOutputDevice::setUdpDestination(const QString& address, uint16_t port)
 {
     if (m_audioNetSink) {
         m_audioNetSink->setDestination(address, port);
     }
 }
 
-void AudioOutput::setUdpCopyToUDP(bool copyToUDP)
+void AudioOutputDevice::setUdpCopyToUDP(bool copyToUDP)
 {
     m_copyAudioToUdp = copyToUDP;
 }
 
-void AudioOutput::setUdpUseRTP(bool useRTP)
+void AudioOutputDevice::setUdpUseRTP(bool useRTP)
 {
     if (m_audioNetSink) {
         m_audioNetSink->selectType(useRTP ? AudioNetSink::SinkRTP : AudioNetSink::SinkUDP);
     }
 }
 
-void AudioOutput::setUdpChannelMode(UDPChannelMode udpChannelMode)
+void AudioOutputDevice::setUdpChannelMode(UDPChannelMode udpChannelMode)
 {
     m_udpChannelMode = udpChannelMode;
 }
 
-void AudioOutput::setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate)
+void AudioOutputDevice::setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate)
 {
     m_udpChannelCodec = udpChannelCodec;
 
@@ -211,16 +211,16 @@ void AudioOutput::setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool ster
     }
 }
 
-void AudioOutput::setUdpDecimation(uint32_t decimation)
+void AudioOutputDevice::setUdpDecimation(uint32_t decimation)
 {
 	if (m_audioNetSink) {
 		m_audioNetSink->setDecimation(decimation);
 	}
 }
 
-qint64 AudioOutput::readData(char* data, qint64 maxLen)
+qint64 AudioOutputDevice::readData(char* data, qint64 maxLen)
 {
-    //qDebug("AudioOutput::readData: %lld", maxLen);
+    //qDebug("AudioOutputDevice::readData: %lld", maxLen);
 
     // Study this mutex on OSX, for now deadlocks possible
     // Removed as it may indeed cause lockups and is in fact useless.
@@ -258,7 +258,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 
 //		if (samples != framesPerBuffer)
 //		{
-//            qDebug("AudioOutput::readData: read %d samples vs %d requested", samples, framesPerBuffer);
+//            qDebug("AudioOutputDevice::readData: read %d samples vs %d requested", samples, framesPerBuffer);
 //		}
 
 		for (unsigned int i = 0; i < samples; i++)
@@ -335,7 +335,7 @@ qint64 AudioOutput::readData(char* data, qint64 maxLen)
 	return samplesPerBuffer * 4;
 }
 
-qint64 AudioOutput::writeData(const char* data, qint64 len)
+qint64 AudioOutputDevice::writeData(const char* data, qint64 len)
 {
 	Q_UNUSED(data);
 	Q_UNUSED(len);
