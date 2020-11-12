@@ -474,6 +474,26 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
         m_adsbDemod->setTarget(aircraft->m_azimuth, aircraft->m_elevation);
 }
 
+// Called when we have lat & long from local decode and we need to check if it is in a valid range (<180nm/333km)
+// or 1/4 of that for surface positions
+bool ADSBDemodGUI::updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition)
+{
+    // Calculate range to aircraft from station
+    m_azEl.setTarget(latitude, longitude, feetToMetres(aircraft->m_altitude));
+    m_azEl.calculate();
+
+    // Don't use the full 333km, as there may be some error in station position
+    if (m_azEl.getDistance() < (surfacePosition ? 80000 : 320000))
+    {
+        aircraft->m_latitude = latitude;
+        aircraft->m_longitude = longitude;
+        updatePosition(aircraft);
+        return true;
+    }
+    else
+        return false;
+}
+
 // Try to find an airline logo based on ICAO
 QIcon *ADSBDemodGUI::getAirlineIcon(const QString &operatorICAO)
 {
@@ -727,6 +747,7 @@ void ADSBDemodGUI::handleADSB(
     m_correlationOnesAvg(correlationOnes);
     aircraft->m_rssiItem->setText(QString("%1")
         .arg(CalcDb::dbPower(m_correlationOnesAvg.instantAverage()), 3, 'f', 1));
+
     // ADS-B, non-transponder ADS-B or TIS-B rebroadcast of ADS-B (ADS-R)
     if ((df == 17) || ((df == 18) && ((ca == 0) || (ca == 1) || (ca == 6))))
     {
@@ -765,7 +786,8 @@ void ADSBDemodGUI::handleADSB(
         }
         else if (((tc >= 5) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
         {
-            if ((tc >= 5) && (tc <= 8))
+            bool surfacePosition = (tc >= 5) && (tc <= 8);
+            if (surfacePosition)
             {
                 // Surface position
 
@@ -879,7 +901,8 @@ void ADSBDemodGUI::handleADSB(
             // We also need to check that both frames aren't greater than 10s apart in time (C.2.6.7), otherwise position may be out by ~10deg
             // We could compare global + local methods to see if the positions are sensible
             if (aircraft->m_cprValid[0] && aircraft->m_cprValid[1]
-               && (std::abs(aircraft->m_cprTime[0].toSecsSinceEpoch() - aircraft->m_cprTime[1].toSecsSinceEpoch()) < 10))
+               && (std::abs(aircraft->m_cprTime[0].toSecsSinceEpoch() - aircraft->m_cprTime[1].toSecsSinceEpoch()) < 10)
+               && !surfacePosition)
             {
                 // Global decode using odd and even frames (C.2.6)
 
@@ -891,84 +914,99 @@ void ADSBDemodGUI::handleADSB(
                 int ni, m;
 
                 int j = std::floor(59.0f*aircraft->m_cprLat[0] - 60.0f*aircraft->m_cprLat[1] + 0.5);
-                latEven = dLatEven * ((j % 60) + aircraft->m_cprLat[0]);
+                latEven = dLatEven * (modulus(j, 60) + aircraft->m_cprLat[0]);
+                // Southern hemisphere is in range 270-360, so adjust to -90-0
                 if (latEven >= 270.0f)
                     latEven -= 360.0f;
-                else if (latEven <= -270.0f)
-                    latEven += 360.0f;
-                latOdd = dLatOdd * ((j % 59) + aircraft->m_cprLat[1]);
+                latOdd = dLatOdd * (modulus(j, 59) + aircraft->m_cprLat[1]);
                 if (latOdd >= 270.0f)
                     latOdd -= 360.0f;
-                else if (latOdd <= -270.0f)
-                    latOdd += 360.0f;
                 if (aircraft->m_cprTime[0] >= aircraft->m_cprTime[1])
                     latitude = latEven;
                 else
                     latitude = latOdd;
-
-                // Check if both frames in same latitude zone
-                int latEvenNL = cprNL(latEven);
-                int latOddNL = cprNL(latOdd);
-                if (latEvenNL == latOddNL)
+                if ((latitude <= 90.0) && (latitude >= -90.0))
                 {
-                    // Calculate longitude
-                    if (!f)
+                    // Check if both frames in same latitude zone
+                    int latEvenNL = cprNL(latEven);
+                    int latOddNL = cprNL(latOdd);
+                    if (latEvenNL == latOddNL)
                     {
-                        ni = cprN(latEven, 0);
-                        m = std::floor(aircraft->m_cprLong[0] * (latEvenNL - 1) - aircraft->m_cprLong[1] * latEvenNL + 0.5f);
-                        longitude = (360.0f/ni) * (modulus(m, ni) + aircraft->m_cprLong[0]);
+                        // Calculate longitude
+                        if (!f)
+                        {
+                            ni = cprN(latEven, 0);
+                            m = std::floor(aircraft->m_cprLong[0] * (latEvenNL - 1) - aircraft->m_cprLong[1] * latEvenNL + 0.5f);
+                            longitude = (360.0f/ni) * (modulus(m, ni) + aircraft->m_cprLong[0]);
+                        }
+                        else
+                        {
+                            ni = cprN(latOdd, 1);
+                            m = std::floor(aircraft->m_cprLong[0] * (latOddNL - 1) - aircraft->m_cprLong[1] * latOddNL + 0.5f);
+                            longitude = (360.0f/ni) * (modulus(m, ni) + aircraft->m_cprLong[1]);
+                        }
+                        if (longitude > 180.0f)
+                            longitude -= 360.0f;
+                        aircraft->m_latitude = latitude;
+                        aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
+                        aircraft->m_longitude = longitude;
+                        aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
+                        aircraft->m_coordinates.push_back(QVariant::fromValue(*new QGeoCoordinate(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude)));
+                        updatePosition(aircraft);
                     }
-                    else
-                    {
-                        ni = cprN(latOdd, 1);
-                        m = std::floor(aircraft->m_cprLong[0] * (latOddNL - 1) - aircraft->m_cprLong[1] * latOddNL + 0.5f);
-                        longitude = (360.0f/ni) * (modulus(m, ni) + aircraft->m_cprLong[1]);
-                    }
-                    if (longitude > 180.0f)
-                        longitude -= 360.0f;
-                    aircraft->m_latitude = latitude;
-                    aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
-                    aircraft->m_longitude = longitude;
-                    aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
-                    aircraft->m_coordinates.push_back(QVariant::fromValue(*new QGeoCoordinate(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude)));
-                    updatePosition(aircraft);
+                }
+                else
+                {
+                    qDebug() << "ADSBDemodGUI::handleADSB: Invalid latitude " << latitude << " for " << hex << aircraft->m_icao
+                        << " m_cprLat[0] " << aircraft->m_cprLat[0]
+                        << " m_cprLat[1] " << aircraft->m_cprLat[1];
+                    aircraft->m_cprValid[0] = false;
+                    aircraft->m_cprValid[1] = false;
                 }
             }
             else
             {
                 // Local decode using a single aircraft position + location of receiver
-                // Only valid if within 180nm (C.2.6.4)
+                // Only valid if airbourne within 180nm/333km (C.2.6.4) or 45nm for surface
 
                 // Caclulate latitude
-                const double dLatEven = 360.0/60.0;
-                const double dLatOdd = 360.0/59.0;
+                const double maxDeg = surfacePosition ? 90.0 : 360.0;
+                const double dLatEven = maxDeg/60.0;
+                const double dLatOdd = maxDeg/59.0;
                 double dLat = f ? dLatOdd : dLatEven;
+                double latitude, longitude;
+
                 int j = std::floor(m_azEl.getLocationSpherical().m_latitude/dLat) + std::floor(modulus(m_azEl.getLocationSpherical().m_latitude, dLat)/dLat - aircraft->m_cprLat[f] + 0.5);
-                aircraft->m_latitude = dLat * (j + aircraft->m_cprLat[f]);
-                aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
+                latitude = dLat * (j + aircraft->m_cprLat[f]);
 
                 // Caclulate longitude
                 double dLong;
-                int latNL = cprNL(aircraft->m_latitude);
+                int latNL = cprNL(latitude);
                 if (f == 0)
                 {
                     if (latNL > 0)
-                        dLong = 360.0 / latNL;
+                        dLong = maxDeg / latNL;
                     else
-                        dLong = 360.0;
+                        dLong = maxDeg;
                 }
                 else
                 {
                     if ((latNL - 1) > 0)
-                        dLong = 360.0 / (latNL - 1);
+                        dLong = maxDeg / (latNL - 1);
                     else
-                        dLong = 360.0;
+                        dLong = maxDeg;
                 }
                 int m = std::floor(m_azEl.getLocationSpherical().m_longitude/dLong) + std::floor(modulus(m_azEl.getLocationSpherical().m_longitude, dLong)/dLong - aircraft->m_cprLong[f] + 0.5);
-                aircraft->m_longitude = dLong * (m + aircraft->m_cprLong[f]);
-                aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
-                aircraft->m_coordinates.push_back(QVariant::fromValue(*new QGeoCoordinate(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude)));
-                updatePosition(aircraft);
+                longitude =  dLong * (m + aircraft->m_cprLong[f]);
+
+                if (updateLocalPosition(aircraft, latitude, longitude, surfacePosition))
+                {
+                    aircraft->m_latitude = latitude;
+                    aircraft->m_latitudeItem->setData(Qt::DisplayRole, aircraft->m_latitude);
+                    aircraft->m_longitude = longitude;
+                    aircraft->m_longitudeItem->setData(Qt::DisplayRole, aircraft->m_longitude);
+                    aircraft->m_coordinates.push_back(QVariant::fromValue(*new QGeoCoordinate(aircraft->m_latitude, aircraft->m_longitude, aircraft->m_altitude)));
+                }
             }
         }
         else if (tc == 19)

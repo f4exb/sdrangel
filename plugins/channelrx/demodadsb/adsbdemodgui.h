@@ -497,6 +497,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void updatePosition(Aircraft *aircraft);
+    bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
     void handleADSB(
         const QByteArray data,
         const QDateTime dateTime,
