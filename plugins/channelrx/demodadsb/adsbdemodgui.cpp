@@ -1214,6 +1214,21 @@ void ADSBDemodGUI::on_threshold_valueChanged(int value)
     applySettings();
 }
 
+void ADSBDemodGUI::on_phaseSteps_valueChanged(int value)
+{
+    ui->phaseStepsText->setText(QString("%1").arg(value));
+    m_settings.m_interpolatorPhaseSteps = value;
+    applySettings();
+}
+
+void ADSBDemodGUI::on_tapsPerPhase_valueChanged(int value)
+{
+    Real tapsPerPhase = ((Real)value)/10.0f;
+    ui->tapsPerPhaseText->setText(QString("%1").arg(tapsPerPhase, 0, 'f', 1));
+    m_settings.m_interpolatorTapsPerPhase = tapsPerPhase;
+    applySettings();
+}
+
 void ADSBDemodGUI::on_feed_clicked(bool checked)
 {
     m_settings.m_feedEnabled = checked;
@@ -1927,6 +1942,18 @@ void ADSBDemodGUI::displaySettings()
     ui->thresholdText->setText(QString("%1").arg(m_settings.m_correlationThreshold, 0, 'f', 1));
     ui->threshold->setValue((int)(m_settings.m_correlationThreshold*10.0f));
 
+    ui->phaseStepsText->setText(QString("%1").arg(m_settings.m_interpolatorPhaseSteps));
+    ui->phaseSteps->setValue(m_settings.m_interpolatorPhaseSteps);
+    ui->tapsPerPhaseText->setText(QString("%1").arg(m_settings.m_interpolatorTapsPerPhase, 0, 'f', 1));
+    ui->tapsPerPhase->setValue((int)(m_settings.m_interpolatorTapsPerPhase*10.0f));
+    // Enable these controls only for developers
+    if (1)
+    {
+        ui->phaseStepsText->setVisible(false);
+        ui->phaseSteps->setVisible(false);
+        ui->tapsPerPhaseText->setVisible(false);
+        ui->tapsPerPhase->setVisible(false);
+    }
     ui->feed->setChecked(m_settings.m_feedEnabled);
 
     ui->flightPaths->setChecked(m_settings.m_flightPaths);

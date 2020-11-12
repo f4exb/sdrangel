@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
+    <width>435</width>
     <height>1046</height>
    </rect>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>381</width>
+     <width>431</width>
      <height>141</height>
     </rect>
    </property>
@@ -168,6 +168,13 @@
     <item>
      <layout class="QHBoxLayout" name="levelMeterLayout">
       <item>
+       <widget class="Line" name="line_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="channelPowerMeterUnits">
         <property name="text">
          <string>dB</string>
@@ -204,9 +211,16 @@
     <item>
      <layout class="QHBoxLayout" name="rfBWLayout">
       <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="rfBWLabel">
         <property name="text">
-         <string>RFBW</string>
+         <string>BW</string>
         </property>
        </widget>
       </item>
@@ -259,6 +273,85 @@
        <widget class="Line" name="line_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="phaseSteps">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Interpolator phase steps</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>16</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="phaseStepsText">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>12</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="tapsPerPhase">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Interpolator taps per phase</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>60</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>45</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tapsPerPhaseText">
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>4.5</string>
         </property>
        </widget>
       </item>
@@ -547,7 +640,7 @@
     <rect>
      <x>0</x>
      <y>140</y>
-     <width>381</width>
+     <width>431</width>
      <height>291</height>
     </rect>
    </property>
@@ -787,7 +880,7 @@
     <rect>
      <x>10</x>
      <y>450</y>
-     <width>361</width>
+     <width>421</width>
      <height>581</height>
     </rect>
    </property>
@@ -879,8 +972,21 @@
  <tabstops>
   <tabstop>deltaFrequency</tabstop>
   <tabstop>rfBW</tabstop>
+  <tabstop>phaseSteps</tabstop>
+  <tabstop>tapsPerPhase</tabstop>
   <tabstop>spb</tabstop>
+  <tabstop>demodModeS</tabstop>
+  <tabstop>correlateFullPreamble</tabstop>
   <tabstop>threshold</tabstop>
+  <tabstop>getOSNDB</tabstop>
+  <tabstop>getAirportDB</tabstop>
+  <tabstop>displaySettings</tabstop>
+  <tabstop>flightPaths</tabstop>
+  <tabstop>feed</tabstop>
+  <tabstop>devicesRefresh</tabstop>
+  <tabstop>device</tabstop>
+  <tabstop>adsbData</tabstop>
+  <tabstop>map</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

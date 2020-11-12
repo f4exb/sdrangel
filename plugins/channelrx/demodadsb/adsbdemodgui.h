@@ -528,6 +528,8 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int value);
     void on_threshold_valueChanged(int value);
+    void on_phaseSteps_valueChanged(int value);
+    void on_tapsPerPhase_valueChanged(int value);
     void on_adsbData_cellClicked(int row, int column);
     void on_adsbData_cellDoubleClicked(int row, int column);
     void adsbData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
