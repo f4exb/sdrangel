@@ -107,8 +107,10 @@ void NFMDemodGUI::on_deltaFrequency_changed(qint64 value)
     applySettings();
 }
 
-void NFMDemodGUI::on_channelSpacing_currentIndexChanged(int index)
+void NFMDemodGUI::on_channelSpacingApply_clicked()
 {
+    int index = ui->channelSpacing->currentIndex();
+    qDebug("NFMDemodGUI::on_channelSpacing_currentIndexChanged: %d", index);
 	m_settings.m_rfBandwidth = NFMDemodSettings::getRFBW(index);
     m_settings.m_afBandwidth = NFMDemodSettings::getAFBW(index);
     m_settings.m_fmDeviation = 2.0 * NFMDemodSettings::getFMDev(index);
@@ -120,7 +122,7 @@ void NFMDemodGUI::on_channelSpacing_currentIndexChanged(int index)
     ui->rfBW->setValue(m_settings.m_rfBandwidth / 100.0);
     ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0, 0, 'f', 1));
     ui->afBW->setValue(m_settings.m_afBandwidth / 100.0);
-    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
+    ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
     ui->fmDev->setValue(m_settings.m_fmDeviation / 200.0);
     ui->rfBW->blockSignals(false);
     ui->afBW->blockSignals(false);
@@ -133,6 +135,12 @@ void NFMDemodGUI::on_rfBW_valueChanged(int value)
 	ui->rfBWText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_rfBandwidth = value * 100.0;
 	m_channelMarker.setBandwidth(m_settings.m_rfBandwidth);
+
+    ui->channelSpacing->blockSignals(true);
+    ui->channelSpacing->setCurrentIndex(NFMDemodSettings::getChannelSpacingIndex(m_settings.m_rfBandwidth));
+    ui->channelSpacing->update();
+    ui->channelSpacing->blockSignals(false);
+
 	applySettings();
 }
 
@@ -145,7 +153,7 @@ void NFMDemodGUI::on_afBW_valueChanged(int value)
 
 void NFMDemodGUI::on_fmDev_valueChanged(int value)
 {
-	ui->fmDevText->setText(QString("%1k").arg(value / 10.0, 0, 'f', 1));
+	ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(value / 10.0, 0, 'f', 1));
 	m_settings.m_fmDeviation = value * 200.0;
 	applySettings();
 }
@@ -397,8 +405,12 @@ void NFMDemodGUI::displaySettings()
     ui->afBWText->setText(QString("%1k").arg(m_settings.m_afBandwidth / 1000.0, 0, 'f', 1));
     ui->afBW->setValue(m_settings.m_afBandwidth / 100.0);
 
-    ui->fmDevText->setText(QString("%1k").arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
+    ui->fmDevText->setText(QString("%1%2k").arg(QChar(0xB1, 0x00)).arg(m_settings.m_fmDeviation / 2000.0, 0, 'f', 1));
     ui->fmDev->setValue(m_settings.m_fmDeviation / 200.0);
+
+    ui->channelSpacing->blockSignals(true);
+    ui->channelSpacing->setCurrentIndex(NFMDemodSettings::getChannelSpacingIndex(m_settings.m_rfBandwidth));
+    ui->channelSpacing->blockSignals(false);
 
     ui->volumeText->setText(QString("%1").arg(m_settings.m_volume*100.0, 0, 'f', 0));
     ui->volume->setValue(m_settings.m_volume * 100.0);

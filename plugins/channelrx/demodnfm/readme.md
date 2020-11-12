@@ -24,7 +24,7 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
 
 <h3>4: Channel spacing presets</h3>
 
-This selector will apply RF bandwidth, AF bandwidth and FM deviation settings according to the channel spacing scheme as follows:
+Clicking on the "CS" button will apply RF bandwidth, AF bandwidth and FM deviation settings according to the channel spacing scheme selected in the combo box as follows:
 
 <table>
     <tr>
@@ -91,6 +91,8 @@ This selector will apply RF bandwidth, AF bandwidth and FM deviation settings ac
   - For spacing higher than 25 kHz values are derived from an old 36F9 standard.
 
 When you are lost with the RF, AF bandwidths and FM deviation settings you can always come back to these standards and generally get good results.
+
+When changing the RF bandwidth the channel spacing selection in the combo box is adjusted to fit within this bandwidth.
 
 &#9758; The demodulation is done at the channel sample rate which is guaranteed not to be lower than the requested audio sample rate but can possibly be equal to it. This means that for correct operation in any case you must ensure that the sample rate of the audio device is not lower than the Nyquist rate required to process this channel bandwidth.
 

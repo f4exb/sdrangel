@@ -89,7 +89,7 @@ private slots:
     void handleSourceMessages();
 
     void on_deltaFrequency_changed(qint64 value);
-    void on_channelSpacing_currentIndexChanged(int index);
+    void on_channelSpacingApply_clicked();
     void on_rfBW_valueChanged(int value);
     void on_afBW_valueChanged(int value);
     void on_fmDev_valueChanged(int value);
