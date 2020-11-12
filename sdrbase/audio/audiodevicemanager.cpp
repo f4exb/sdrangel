@@ -312,7 +312,7 @@ void AudioDeviceManager::addAudioSource(AudioFifo* audioFifo, MessageQueue *samp
     qDebug("AudioDeviceManager::addAudioSource: %d: %p", inputDeviceIndex, audioFifo);
 
     if (m_audioInputs.find(inputDeviceIndex) == m_audioInputs.end()) {
-        m_audioInputs[inputDeviceIndex] = new AudioInput();
+        m_audioInputs[inputDeviceIndex] = new AudioInputDevice();
     }
 
     if ((m_audioInputs[inputDeviceIndex]->getNbFifos() == 0) &&
@@ -570,7 +570,7 @@ void AudioDeviceManager::setInputDeviceInfo(int inputDeviceIndex, const InputDev
         return;
     }
 
-    AudioInput *audioInput = m_audioInputs[inputDeviceIndex];
+    AudioInputDevice *audioInput = m_audioInputs[inputDeviceIndex];
 
     if (oldDeviceInfo.sampleRate != deviceInfo.sampleRate)
     {

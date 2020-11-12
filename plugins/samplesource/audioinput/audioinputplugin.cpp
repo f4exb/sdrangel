@@ -31,7 +31,7 @@
 const PluginDescriptor AudioInputPlugin::m_pluginDescriptor = {
     QString("AudioInput"),
     QString("Audio Input"),
-    QString("4.22.0"),
+    QString("6.0.0"),
     QString("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
@@ -136,7 +136,7 @@ DeviceSampleSource *AudioInputPlugin::createSampleSourcePluginInstance(const QSt
 {
     if (sourceId == m_deviceTypeID)
     {
-        AudioInputSource::AudioInput* input = new AudioInputSource::AudioInput(deviceAPI);
+        AudioInput* input = new AudioInput(deviceAPI);
         return input;
     }
     else

@@ -33,7 +33,7 @@ int AudioInputWebAPIAdapter::webapiSettingsGet(
     (void) errorMessage;
     response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
     response.getAirspyHfSettings()->init();
-    AudioInputSource::AudioInput::webapiFormatDeviceSettings(response, m_settings);
+    AudioInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
 
@@ -44,6 +44,6 @@ int AudioInputWebAPIAdapter::webapiSettingsPutPatch(
         QString& errorMessage)
 {
     (void) errorMessage;
-    AudioInputSource::AudioInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
+    AudioInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;
 }

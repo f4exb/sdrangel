@@ -33,10 +33,8 @@
 #include "audioinput.h"
 #include "audioinputthread.h"
 
-MESSAGE_CLASS_DEFINITION(AudioInputSource::AudioInput::MsgConfigureAudioInput, Message)
-MESSAGE_CLASS_DEFINITION(AudioInputSource::AudioInput::MsgStartStop, Message)
-
-namespace AudioInputSource {
+MESSAGE_CLASS_DEFINITION(AudioInput::MsgConfigureAudioInput, Message)
+MESSAGE_CLASS_DEFINITION(AudioInput::MsgStartStop, Message)
 
 AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
@@ -520,6 +518,4 @@ void AudioInput::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
 }

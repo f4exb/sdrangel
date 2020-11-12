@@ -19,10 +19,10 @@
 #include <QAudioFormat>
 #include <QAudioDeviceInfo>
 #include <QAudioInput>
-#include "audio/audioinput.h"
+#include "audio/audioinputdevice.h"
 #include "audio/audiofifo.h"
 
-AudioInput::AudioInput() :
+AudioInputDevice::AudioInputDevice() :
 	m_mutex(QMutex::Recursive),
 	m_audioInput(0),
 	m_audioUsageCount(0),
@@ -32,7 +32,7 @@ AudioInput::AudioInput() :
 {
 }
 
-AudioInput::~AudioInput()
+AudioInputDevice::~AudioInputDevice()
 {
 	stop();
 
@@ -46,7 +46,7 @@ AudioInput::~AudioInput()
 	m_audioFifos.clear();
 }
 
-bool AudioInput::start(int device, int rate)
+bool AudioInputDevice::start(int device, int rate)
 {
 	if (m_audioUsageCount == 0)
 	{
@@ -56,7 +56,7 @@ bool AudioInput::start(int device, int rate)
         if (device < 0)
         {
             devInfo = QAudioDeviceInfo::defaultInputDevice();
-            qWarning("AudioInput::start: using default device %s", qPrintable(devInfo.defaultInputDevice().deviceName()));
+            qWarning("AudioInputDevice::start: using default device %s", qPrintable(devInfo.defaultInputDevice().deviceName()));
         }
         else
         {
@@ -65,12 +65,12 @@ bool AudioInput::start(int device, int rate)
             if (device < devicesInfo.size())
             {
                 devInfo = devicesInfo[device];
-                qWarning("AudioInput::start: using audio device #%d: %s", device, qPrintable(devInfo.deviceName()));
+                qWarning("AudioInputDevice::start: using audio device #%d: %s", device, qPrintable(devInfo.deviceName()));
             }
             else
             {
                 devInfo = QAudioDeviceInfo::defaultInputDevice();
-                qWarning("AudioInput::start: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.deviceName()));
+                qWarning("AudioInputDevice::start: audio device #%d does not exist. Using default device %s", device, qPrintable(devInfo.deviceName()));
             }
         }
 
@@ -86,17 +86,17 @@ bool AudioInput::start(int device, int rate)
         if (!devInfo.isFormatSupported(m_audioFormat))
         {
             m_audioFormat = devInfo.nearestFormat(m_audioFormat);
-            qWarning("AudioInput::start: %d Hz S16_LE audio format not supported. Nearest is sampleRate: %d channelCount: %d sampleSize: %d sampleType: %d",
+            qWarning("AudioInputDevice::start: %d Hz S16_LE audio format not supported. Nearest is sampleRate: %d channelCount: %d sampleSize: %d sampleType: %d",
                     rate, m_audioFormat.sampleRate(), m_audioFormat.channelCount(), m_audioFormat.sampleSize(), (int) m_audioFormat.sampleType());
         }
         else
         {
-            qInfo("AudioInput::start: audio format OK");
+            qInfo("AudioInputDevice::start: audio format OK");
         }
 
         if (m_audioFormat.sampleSize() != 16)
         {
-            qWarning("AudioInput::start: Audio device '%s' failed", qPrintable(devInfo.defaultInputDevice().deviceName()));
+            qWarning("AudioInputDevice::start: Audio device '%s' failed", qPrintable(devInfo.defaultInputDevice().deviceName()));
             return false;
         }
 
@@ -109,7 +109,7 @@ bool AudioInput::start(int device, int rate)
 
         if (m_audioInput->state() != QAudio::ActiveState)
         {
-            qWarning("AudioInput::start: cannot start");
+            qWarning("AudioInputDevice::start: cannot start");
         }
 	}
 
@@ -118,9 +118,9 @@ bool AudioInput::start(int device, int rate)
 	return true;
 }
 
-void AudioInput::stop()
+void AudioInputDevice::stop()
 {
-    qDebug("AudioInput::stop");
+    qDebug("AudioInputDevice::stop");
 
     if (m_audioUsageCount > 0)
     {
@@ -128,7 +128,7 @@ void AudioInput::stop()
 
         if (m_audioUsageCount == 0)
         {
-            qDebug("AudioInput::stop: effectively close QIODevice");
+            qDebug("AudioInputDevice::stop: effectively close QIODevice");
             QMutexLocker mutexLocker(&m_mutex);
             QIODevice::close();
 
@@ -139,28 +139,28 @@ void AudioInput::stop()
     }
 }
 
-void AudioInput::addFifo(AudioFifo* audioFifo)
+void AudioInputDevice::addFifo(AudioFifo* audioFifo)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	m_audioFifos.push_back(audioFifo);
 }
 
-void AudioInput::removeFifo(AudioFifo* audioFifo)
+void AudioInputDevice::removeFifo(AudioFifo* audioFifo)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
 	m_audioFifos.remove(audioFifo);
 }
 
-qint64 AudioInput::readData(char* data, qint64 maxLen)
+qint64 AudioInputDevice::readData(char* data, qint64 maxLen)
 {
 	Q_UNUSED(data);
 	Q_UNUSED(maxLen);
 	return 0;
 }
 
-qint64 AudioInput::writeData(const char *data, qint64 len)
+qint64 AudioInputDevice::writeData(const char *data, qint64 len)
 {
     // Study this mutex on OSX, for now deadlocks possible
     // Removed as it may indeed cause lockups and is in fact useless.
@@ -172,12 +172,12 @@ qint64 AudioInput::writeData(const char *data, qint64 len)
     		|| (m_audioFormat.sampleType() != QAudioFormat::SignedInt)
 			|| (m_audioFormat.byteOrder() != QAudioFormat::LittleEndian))
     {
-    	qCritical("AudioInput::writeData: invalid format not S16LE");
+    	qCritical("AudioInputDevice::writeData: invalid format not S16LE");
     	return 0;
     }
 
     if (m_audioFormat.channelCount() != 2) {
-    	qCritical("AudioInput::writeData: invalid format not stereo");
+    	qCritical("AudioInputDevice::writeData: invalid format not stereo");
     	return 0;
     }
 
@@ -189,7 +189,7 @@ qint64 AudioInput::writeData(const char *data, qint64 len)
 	return len;
 }
 
-void AudioInput::setVolume(float volume)
+void AudioInputDevice::setVolume(float volume)
 {
     m_volume = volume;
     if (m_audioInput != nullptr)

@@ -24,7 +24,7 @@
 #include <QMap>
 #include <QAudioDeviceInfo>
 
-#include "audio/audioinput.h"
+#include "audio/audioinputdevice.h"
 #include "audio/audiooutput.h"
 #include "export.h"
 
@@ -133,7 +133,7 @@ private:
     QMap<AudioFifo*, int> m_audioSourceFifos; //< audio source FIFO to audio input device index-1 map
     QMap<AudioFifo*, MessageQueue*> m_audioFifoToSourceMessageQueues; //!< audio source FIFO to attached source message queue
     QMap<int, QList<MessageQueue*> > m_inputDeviceSourceMessageQueues; //!< sink message queues attached to device
-    QMap<int, AudioInput*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
+    QMap<int, AudioInputDevice*> m_audioInputs; //!< audio device index to audio input map (index -1 is default device)
     QMap<QString, InputDeviceInfo> m_audioInputInfos; //!< audio device name to audio input device info
 
     bool m_defaultOutputStarted; //!< True if the default audio output (-1) has already been started

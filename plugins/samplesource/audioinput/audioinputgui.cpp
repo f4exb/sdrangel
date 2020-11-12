@@ -39,7 +39,7 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_settings(),
     m_sampleSource(NULL)
 {
-    m_sampleSource = (AudioInputSource::AudioInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
+    m_sampleSource = (AudioInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
     ui->setupUi(this);
 
@@ -94,18 +94,18 @@ bool AudioInputGui::deserialize(const QByteArray& data)
 
 bool AudioInputGui::handleMessage(const Message& message)
 {
-    if (AudioInputSource::AudioInput::MsgConfigureAudioInput::match(message))
+    if (AudioInput::MsgConfigureAudioInput::match(message))
     {
-        const AudioInputSource::AudioInput::MsgConfigureAudioInput& cfg = (AudioInputSource::AudioInput::MsgConfigureAudioInput&) message;
+        const AudioInput::MsgConfigureAudioInput& cfg = (AudioInput::MsgConfigureAudioInput&) message;
         m_settings = cfg.getSettings();
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
         return true;
     }
-    else if (AudioInputSource::AudioInput::MsgStartStop::match(message))
+    else if (AudioInput::MsgStartStop::match(message))
     {
-        AudioInputSource::AudioInput::MsgStartStop& notif = (AudioInputSource::AudioInput::MsgStartStop&) message;
+        AudioInput::MsgStartStop& notif = (AudioInput::MsgStartStop&) message;
         blockApplySettings(true);
         ui->startStop->setChecked(notif.getStartStop());
         blockApplySettings(false);
@@ -262,7 +262,7 @@ void AudioInputGui::on_startStop_toggled(bool checked)
 {
     if (m_doApplySettings)
     {
-        AudioInputSource::AudioInput::MsgStartStop *message = AudioInputSource::AudioInput::MsgStartStop::create(checked);
+        AudioInput::MsgStartStop *message = AudioInput::MsgStartStop::create(checked);
         m_sampleSource->getInputMessageQueue()->push(message);
     }
 }
@@ -277,7 +277,7 @@ void AudioInputGui::updateHardware()
 {
     if (m_doApplySettings)
     {
-        AudioInputSource::AudioInput::MsgConfigureAudioInput* message = AudioInputSource::AudioInput::MsgConfigureAudioInput::create(m_settings, m_forceSettings);
+        AudioInput::MsgConfigureAudioInput* message = AudioInput::MsgConfigureAudioInput::create(m_settings, m_forceSettings);
         m_sampleSource->getInputMessageQueue()->push(message);
         m_forceSettings = false;
         m_updateTimer.stop();

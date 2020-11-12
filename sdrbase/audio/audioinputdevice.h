@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_AUDIO_AUDIOINPUT_H_
-#define SDRBASE_AUDIO_AUDIOINPUT_H_
+#ifndef SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
+#define SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_
 
 #include <QMutex>
 #include <QIODevice>
@@ -30,10 +30,10 @@ class AudioFifo;
 class AudioOutputPipe;
 
 
-class SDRBASE_API AudioInput : public QIODevice {
+class SDRBASE_API AudioInputDevice : public QIODevice {
 public:
-	AudioInput();
-	virtual ~AudioInput();
+	AudioInputDevice();
+	virtual ~AudioInputDevice();
 
 	bool start(int device, int rate);
 	void stop();
@@ -67,4 +67,4 @@ private:
 
 
 
-#endif /* SDRBASE_AUDIO_AUDIOINPUT_H_ */
+#endif /* SDRBASE_AUDIO_AUDIOINPUTDEVICE_H_ */

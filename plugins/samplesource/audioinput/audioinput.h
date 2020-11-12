@@ -26,7 +26,7 @@
 #include <QNetworkRequest>
 
 #include "dsp/devicesamplesource.h"
-#include "audio/audioinput.h"
+#include "audio/audioinputdevice.h"
 #include "audio/audiofifo.h"
 
 #include "audioinputsettings.h"
@@ -35,9 +35,6 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
 class AudioInputThread;
-
-// AudioInput is used in sdrbase/audio/audioinput.h
-namespace AudioInputSource {
 
 class AudioInput : public DeviceSampleSource {
     Q_OBJECT
@@ -134,7 +131,7 @@ public:
 
 private:
     DeviceAPI *m_deviceAPI;
-    ::AudioInput m_audioInput;
+    AudioInputDevice m_audioInput;
     AudioFifo m_fifo;
     QMutex m_mutex;
     AudioInputSettings m_settings;
@@ -155,7 +152,5 @@ private:
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
 };
-
-}
 
 #endif // INCLUDE_AUDIOINPUT_H
