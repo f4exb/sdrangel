@@ -957,7 +957,7 @@ void ADSBDemodGUI::handleADSB(
                 }
                 else
                 {
-                    qDebug() << "ADSBDemodGUI::handleADSB: Invalid latitude " << latitude << " for " << Qt::hex << aircraft->m_icao
+                    qDebug() << "ADSBDemodGUI::handleADSB: Invalid latitude " << latitude << " for " << QString("%1").arg(aircraft->m_icao, 1, 16)
                         << " m_cprLat[0] " << aircraft->m_cprLat[0]
                         << " m_cprLat[1] " << aircraft->m_cprLat[1];
                     aircraft->m_cprValid[0] = false;
