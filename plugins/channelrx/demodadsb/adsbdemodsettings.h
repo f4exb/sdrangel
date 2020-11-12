@@ -57,7 +57,7 @@ struct ADSBDemodSettings
 
     Serializable *m_channelMarker;
 
-    float m_airportRange;               //!< How far away should we display airports (nm)
+    float m_airportRange;               //!< How far away should we display airports (km)
     enum AirportType {
         Small,
         Medium,
@@ -73,6 +73,9 @@ struct ADSBDemodSettings
     bool m_correlateFullPreamble;
     bool m_demodModeS;                  //!< Demodulate all Mode-S frames, not just ADS-B
     int m_deviceIndex;                  //!< Device to set to ATC frequencies
+    bool m_autoResizeTableColumns;
+    int m_interpolatorPhaseSteps;
+    float m_interpolatorTapsPerPhase;
 
     ADSBDemodSettings();
     void resetToDefaults();

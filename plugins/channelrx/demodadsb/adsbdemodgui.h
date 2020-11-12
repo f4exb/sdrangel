@@ -91,6 +91,7 @@ struct Aircraft {
     int m_verticalRate;         // Vertical climb rate in ft/min
     QString m_emitterCategory;  // Aircraft type
     QString m_status;           // Aircraft status
+    int m_squawk;               // Mode-A code
     Real m_range;               // Distance from station to aircraft
     Real m_azimuth;             // Azimuth from station to aircraft
     Real m_elevation;           // Elevation from station to aicraft;
@@ -138,6 +139,7 @@ struct Aircraft {
     QTableWidgetItem *m_azElItem;
     QTableWidgetItem *m_emitterCategoryItem;
     QTableWidgetItem *m_statusItem;
+    QTableWidgetItem *m_squawkItem;
     QTableWidgetItem *m_registrationItem;
     QTableWidgetItem *m_countryItem;
     QTableWidgetItem *m_registeredItem;
@@ -193,6 +195,7 @@ struct Aircraft {
         m_longitudeItem = new QTableWidgetItem();
         m_emitterCategoryItem = new QTableWidgetItem();
         m_statusItem = new QTableWidgetItem();
+        m_squawkItem = new QTableWidgetItem();
         m_registrationItem = new QTableWidgetItem();
         m_countryItem = new QTableWidgetItem();
         m_registeredItem = new QTableWidgetItem();
@@ -321,16 +324,18 @@ public:
     {
     }
 
-    Q_INVOKABLE void addAirport(AirportInformation *airport) {
+    Q_INVOKABLE void addAirport(AirportInformation *airport, float az, float el, float distance) {
         QString text;
         int rows;
 
         beginInsertRows(QModelIndex(), rowCount(), rowCount());
         m_airports.append(airport);
-        airportFreq(airport, text, rows);
+        airportFreq(airport, az, el, distance, text, rows);
         m_airportDataFreq.append(text);
         m_airportDataFreqRows.append(rows);
         m_showFreq.append(false);
+        m_azimuth.append(az);
+        m_elevation.append(el);
         endInsertRows();
     }
 
@@ -343,6 +348,8 @@ public:
             m_airportDataFreq.removeAt(row);
             m_airportDataFreqRows.removeAt(row);
             m_showFreq.removeAt(row);
+            m_azimuth.removeAt(row);
+            m_elevation.removeAt(row);
             endRemoveRows();
         }
     }
@@ -353,6 +360,8 @@ public:
         m_airportDataFreq.clear();
         m_airportDataFreqRows.clear();
         m_showFreq.clear();
+        m_azimuth.clear();
+        m_elevation.clear();
         endRemoveRows();
     }
 
@@ -369,7 +378,7 @@ public:
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
-    void airportFreq(AirportInformation *airport, QString& text, int& rows) {
+    void airportFreq(AirportInformation *airport, float az, float el, float distance, QString& text, int& rows) {
         // Create the text to go in the bubble next to the airport
         // Display name and frequencies
         QStringList list;
@@ -382,6 +391,9 @@ public:
             list.append(QString("%1: %2 MHz").arg(frequencyInfo->m_type).arg(frequencyInfo->m_frequency));
             rows++;
         }
+        list.append(QString("Az/El: %1/%2").arg((int)std::round(az)).arg((int)std::round(el)));
+        list.append(QString("Distance: %1 km").arg(distance/1000.0f, 0, 'f', 1));
+        rows += 2;
         text = list.join("\n");
     }
 
@@ -412,6 +424,8 @@ private:
     QList<QString> m_airportDataFreq;
     QList<int> m_airportDataFreqRows;
     QList<bool> m_showFreq;
+    QList<float> m_azimuth;
+    QList<float> m_elevation;
 };
 
 class ADSBDemodGUI : public ChannelGUI {
@@ -427,6 +441,7 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void highlightAircraft(Aircraft *aircraft);
     void targetAircraft(Aircraft *aircraft);
+    void target(float az, float el);
     bool setFrequency(float frequency);
     bool useSIUints() { return m_settings.m_siUnits; }
 
@@ -482,6 +497,7 @@ private:
     void displayStreamIndex();
     bool handleMessage(const Message& message);
     void updatePosition(Aircraft *aircraft);
+    bool updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition);
     void handleADSB(
         const QByteArray data,
         const QDateTime dateTime,
@@ -493,6 +509,8 @@ private:
     QString getAirportFrequenciesDBFilename();
     QString getOSNDBFilename();
     QString getFastDBFilename();
+    qint64 fileAgeInDays(QString filename);
+    bool confirmDownload(QString filename);
     void readAirportDB(const QString& filename);
     void readAirportFrequenciesDB(const QString& filename);
     bool readOSNDB(const QString& filename);
@@ -510,6 +528,8 @@ private slots:
     void on_deltaFrequency_changed(qint64 value);
     void on_rfBW_valueChanged(int value);
     void on_threshold_valueChanged(int value);
+    void on_phaseSteps_valueChanged(int value);
+    void on_tapsPerPhase_valueChanged(int value);
     void on_adsbData_cellClicked(int row, int column);
     void on_adsbData_cellDoubleClicked(int row, int column);
     void adsbData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);

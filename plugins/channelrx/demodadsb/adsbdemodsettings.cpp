@@ -60,6 +60,9 @@ void ADSBDemodSettings::resetToDefaults()
     m_correlateFullPreamble = true;
     m_demodModeS = false;
     m_deviceIndex = -1;
+    m_autoResizeTableColumns = false;
+    m_interpolatorPhaseSteps = 4;      // Higher than these two values will struggle to run in real-time
+    m_interpolatorTapsPerPhase = 3.5f; // without gaining much improvement in PER
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
     {
         m_columnIndexes[i] = i;
@@ -103,6 +106,9 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(27, m_displayDemodStats);
     s.writeBool(28, m_correlateFullPreamble);
     s.writeBool(29, m_demodModeS);
+    s.writeBool(30, m_autoResizeTableColumns);
+    s.writeS32(31, m_interpolatorPhaseSteps);
+    s.writeFloat(32, m_interpolatorTapsPerPhase);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -179,6 +185,9 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(27, &m_displayDemodStats, false);
         d.readBool(28, &m_correlateFullPreamble, true);
         d.readBool(29, &m_demodModeS, false);
+        d.readBool(30, &m_autoResizeTableColumns, false);
+        d.readS32(31, &m_interpolatorPhaseSteps, 4);
+        d.readFloat(32, &m_interpolatorTapsPerPhase, 3.5f);
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

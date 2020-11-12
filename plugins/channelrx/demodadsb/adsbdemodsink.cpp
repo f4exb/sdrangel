@@ -83,33 +83,41 @@ void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
             processOneSample(magsq);
         }
     }
-    else
+    else if (m_interpolatorDistance == 1.0f) // just apply offset
     {
         for (SampleVector::const_iterator it = begin; it != end; ++it)
         {
             Complex c(it->real(), it->imag());
             Complex ci;
             c *= m_nco.nextIQ();
-
-            if (m_interpolatorDistance == 1.0f)
+            processOneSample(complexMagSq(c));
+        }
+    }
+    else if (m_interpolatorDistance < 1.0f) // interpolate
+    {
+        for (SampleVector::const_iterator it = begin; it != end; ++it)
+        {
+            Complex c(it->real(), it->imag());
+            Complex ci;
+            c *= m_nco.nextIQ();
+            while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                processOneSample(complexMagSq(c));
+                processOneSample(complexMagSq(ci));
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
-            else if (m_interpolatorDistance < 1.0f) // interpolate
+        }
+    }
+    else // decimate
+    {
+        for (SampleVector::const_iterator it = begin; it != end; ++it)
+        {
+            Complex c(it->real(), it->imag());
+            Complex ci;
+            c *= m_nco.nextIQ();
+            if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
             {
-                while (!m_interpolator.interpolate(&m_interpolatorDistanceRemain, c, &ci))
-                {
-                    processOneSample(complexMagSq(ci));
-                    m_interpolatorDistanceRemain += m_interpolatorDistance;
-                }
-            }
-            else // decimate
-            {
-                if (m_interpolator.decimate(&m_interpolatorDistanceRemain, c, &ci))
-                {
-                    processOneSample(complexMagSq(ci));
-                    m_interpolatorDistanceRemain += m_interpolatorDistance;
-                }
+                processOneSample(complexMagSq(ci));
+                m_interpolatorDistanceRemain += m_interpolatorDistance;
             }
         }
     }
@@ -228,7 +236,7 @@ void ADSBDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequ
 
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
+        m_interpolator.create(m_settings.m_interpolatorPhaseSteps, channelSampleRate, m_settings.m_rfBandwidth / 2.2,  m_settings.m_interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance = (Real) channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * m_settings.m_samplesPerBit);
     }
@@ -249,9 +257,12 @@ void ADSBDemodSink::applySettings(const ADSBDemodSettings& settings, bool force)
             << " force: " << force;
 
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth)
-        || (settings.m_samplesPerBit != m_settings.m_samplesPerBit) || force)
+        || (settings.m_samplesPerBit != m_settings.m_samplesPerBit)
+        || (settings.m_interpolatorPhaseSteps != m_settings.m_interpolatorPhaseSteps)
+        || (settings.m_interpolatorTapsPerPhase != m_settings.m_interpolatorTapsPerPhase)
+        || force)
     {
-        m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
+        m_interpolator.create(m_settings.m_interpolatorPhaseSteps, m_channelSampleRate, settings.m_rfBandwidth / 2.2,  m_settings.m_interpolatorTapsPerPhase);
         m_interpolatorDistanceRemain = 0;
         m_interpolatorDistance =  (Real) m_channelSampleRate / (Real) (ADS_B_BITS_PER_SECOND * settings.m_samplesPerBit);
     }
