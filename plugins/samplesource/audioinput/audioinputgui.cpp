@@ -37,7 +37,8 @@ AudioInputGui::AudioInputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_deviceUISet(deviceUISet),
     m_forceSettings(true),
     m_settings(),
-    m_sampleSource(NULL)
+    m_sampleSource(nullptr),
+    m_centerFrequency(0)
 {
     m_sampleSource = (AudioInput*) m_deviceUISet->m_deviceAPI->getSampleSource();
 
@@ -130,6 +131,7 @@ void AudioInputGui::handleInputMessages()
         {
             DSPSignalNotification* notif = (DSPSignalNotification*) message;
             m_sampleRate = notif->getSampleRate();
+            m_centerFrequency = notif->getCenterFrequency();
             qDebug("AudioInputGui::handleInputMessages: DSPSignalNotification: SampleRate: %d", notif->getSampleRate());
             updateSampleRateAndFrequency();
 
@@ -160,7 +162,7 @@ void AudioInputGui::updateSampleRateAndFrequency()
 */
     {
         m_deviceUISet->getSpectrum()->setSampleRate(m_sampleRate);
-        m_deviceUISet->getSpectrum()->setCenterFrequency(0);
+        m_deviceUISet->getSpectrum()->setCenterFrequency(m_centerFrequency);
         m_deviceUISet->getSpectrum()->setSsbSpectrum(false);
         m_deviceUISet->getSpectrum()->setLsbDisplay(false);
     }

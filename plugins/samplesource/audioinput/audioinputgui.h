@@ -57,6 +57,7 @@ private:
     QTimer m_updateTimer;
     DeviceSampleSource* m_sampleSource;
     int m_sampleRate;
+    qint64 m_centerFrequency;
 
     MessageQueue m_inputMessageQueue;
 

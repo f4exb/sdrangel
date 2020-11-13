@@ -287,6 +287,7 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
     if ((m_settings.m_iqMapping != settings.m_iqMapping) || force)
     {
         reverseAPIKeys.append("iqMapping");
+        forwardChange = true;
 
         if (m_worker) {
             m_worker->setIQMapping(settings.m_iqMapping);
@@ -306,7 +307,11 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
 
     if (forwardChange)
     {
-        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate/(1<<m_settings.m_log2Decim), 0);
+        qint64 dF =
+            ((m_settings.m_iqMapping == AudioInputSettings::IQMapping::L) ||
+            (m_settings.m_iqMapping == AudioInputSettings::IQMapping::R)) ?
+                m_settings.m_sampleRate / 4 : 0;
+        DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate/(1<<m_settings.m_log2Decim), dF);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }

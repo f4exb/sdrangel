@@ -211,6 +211,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QLabel" name="decimLabel">
+       <property name="text">
+        <string>Dec</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="decim">
        <property name="maximumSize">
         <size>
@@ -241,13 +248,6 @@
          <string>8</string>
         </property>
        </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="decimLabel">
-       <property name="text">
-        <string>Dec</string>
-       </property>
       </widget>
      </item>
     </layout>
@@ -336,12 +336,12 @@
        </property>
        <item>
         <property name="text">
-         <string>I=L, Q=0</string>
+         <string>Mono L</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>I=R, Q=0</string>
+         <string>Mono R</string>
         </property>
        </item>
        <item>

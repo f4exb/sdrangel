@@ -38,9 +38,9 @@ A control to set the input volume. This is not supported by all input audio devi
 
 <h3>7: Channel Map</h3>
 
-This controls how the left and right stereo audio channels map on to the IQ channels.
+This controls how the left and right audio channels map on to the IQ channels.
 
-* I=L, Q=0 - The left audio channel is driven to the I channel. The Q channel is set to 0.
-* I=R, Q=0 - The right audio channel is driven to the I channel. The Q channel is set to 0.
-* I=L, Q=R - The left audio channel is driven to the I channel. The right audio channel is driven to the Q channel.
-* I=R, Q=L - The right audio channel is driven to the I channel. The left audio channel is driven to the Q channel.
+* Mono L - Real samples are taken from the left audio channel and are heterodyned by the fourth of the sample rate (fs/4) to obtain complex samples. Therefore the spectrum of the complex baseband is centered at the fourth of the sample rate (fs/4). As per Nyquist rule only a bandwidth of half of the sample rate (fs/2) is available for real signals. Frequencies outside the [0, fs/2] interval are artefacts and can be eliminated by decimating by a factor of 2.
+* Mono R - Same as above but takes the right audio channel for the real signal.
+* I=L, Q=R - The left audio channel is driven to the I channel. The right audio channel is driven to the Q channel for a complex (analytic signal)input.
+* I=R, Q=L - The right audio channel is driven to the I channel. The left audio channel is driven to the Q channel for a complex (analytic signal)input.

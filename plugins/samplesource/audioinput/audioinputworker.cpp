@@ -33,7 +33,8 @@ AudioInputWorker::AudioInputWorker(SampleSinkFifo* sampleFifo, AudioFifo *fifo, 
     m_log2Decim(0),
     m_iqMapping(AudioInputSettings::IQMapping::L),
     m_convertBuffer(m_convBufSamples),
-    m_sampleFifo(sampleFifo)
+    m_sampleFifo(sampleFifo),
+    m_quNCOPhase(0)
 {
 }
 
@@ -56,20 +57,40 @@ void AudioInputWorker::stopWork()
 void AudioInputWorker::workIQ(unsigned int nbRead)
 {
     // Map between left and right audio channels and IQ channels
-    if (m_iqMapping == AudioInputSettings::IQMapping::L)
-    {
-        for (uint32_t i = 0; i < nbRead; i++)
-            m_buf[i*2+1] = 0;
-    }
-    else if (m_iqMapping == AudioInputSettings::IQMapping::R)
+    if ((m_iqMapping == AudioInputSettings::IQMapping::L) || // mono
+        (m_iqMapping == AudioInputSettings::IQMapping::R))
     {
         for (uint32_t i = 0; i < nbRead; i++)
         {
-            m_buf[i*2] = m_buf[i*2+1];
-            m_buf[i*2+1] = 0;
+            qint16 r = m_buf[i*2 + (m_iqMapping == AudioInputSettings::IQMapping::R ? 1 : 0)]; // real sample
+
+            if (m_quNCOPhase == 0) // 0
+            {
+                m_buf[i*2]   = r;  // 1
+                m_buf[i*2+1] = 0;  // 0
+                m_quNCOPhase = 1;  // next phase
+            }
+            else if (m_quNCOPhase == 1) // -pi/2
+            {
+                m_buf[i*2]   = 0;  // 0
+                m_buf[i*2+1] = -r; // -1
+                m_quNCOPhase = 2;  // next phase
+            }
+            else if (m_quNCOPhase == 2) // pi or -pi
+            {
+                m_buf[i*2]   = -r; // -1
+                m_buf[i*2+1] = 0;  // 0
+                m_quNCOPhase = 3;  // next phase
+            }
+            else if (m_quNCOPhase == 3) // pi/2
+            {
+                m_buf[i*2]   = 0;  // 0
+                m_buf[i*2+1] = r;  // 1
+                m_quNCOPhase = 0;  // next phase
+            }
         }
     }
-    else if (m_iqMapping == AudioInputSettings::IQMapping::LR)
+    else if (m_iqMapping == AudioInputSettings::IQMapping::LR) // stereo - reverse
     {
         for (uint32_t i = 0; i < nbRead; i++)
         {
@@ -79,30 +100,35 @@ void AudioInputWorker::workIQ(unsigned int nbRead)
         }
     }
 
+    decimate(m_buf, nbRead);
+}
+
+void AudioInputWorker::decimate(qint16 *buf, unsigned int nbRead)
+{
     SampleVector::iterator it = m_convertBuffer.begin();
 
     switch (m_log2Decim)
     {
     case 0:
-        m_decimatorsIQ.decimate1(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate1(&it, buf, 2*nbRead);
         break;
     case 1:
-        m_decimatorsIQ.decimate2_cen(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate2_cen(&it, buf, 2*nbRead);
         break;
     case 2:
-        m_decimatorsIQ.decimate4_cen(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate4_cen(&it, buf, 2*nbRead);
         break;
     case 3:
-        m_decimatorsIQ.decimate8_cen(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate8_cen(&it, buf, 2*nbRead);
         break;
     case 4:
-        m_decimatorsIQ.decimate16_cen(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate16_cen(&it, buf, 2*nbRead);
         break;
     case 5:
-        m_decimatorsIQ.decimate32_cen(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate32_cen(&it, buf, 2*nbRead);
         break;
     case 6:
-        m_decimatorsIQ.decimate64_cen(&it, m_buf, 2*nbRead);
+        m_decimatorsIQ.decimate64_cen(&it, buf, 2*nbRead);
         break;
     default:
         break;
