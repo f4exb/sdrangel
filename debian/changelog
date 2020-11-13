@@ -1,3 +1,9 @@
+sdrangel (6.0.1-1) unstable; urgency=medium
+
+   * Audio Input: reworked threading model and mono handling. Issue #706
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 13 Nov 2020 22:19:29 +0100
+
 sdrangel (6.0.0-1) unstable; urgency=medium
 
    * Merge back v5 branch and upgrade version to v6

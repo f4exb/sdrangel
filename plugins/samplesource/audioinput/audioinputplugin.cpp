@@ -31,7 +31,7 @@
 const PluginDescriptor AudioInputPlugin::m_pluginDescriptor = {
     QString("AudioInput"),
     QString("Audio Input"),
-    QString("6.0.0"),
+    QString("6.0.1"),
     QString("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
     QString("https://github.com/f4exb/sdrangel"),
     true,
