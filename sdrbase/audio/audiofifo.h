@@ -60,6 +60,9 @@ private:
 	uint32_t m_tail;
 
 	bool create(uint32_t numSamples);
+
+signals:
+	void dataReady();
 };
 
 #endif // INCLUDE_AUDIOFIFO_H

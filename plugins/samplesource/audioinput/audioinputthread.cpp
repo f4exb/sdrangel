@@ -46,6 +46,7 @@ AudioInputThread::~AudioInputThread()
 
 void AudioInputThread::startWork()
 {
+    connect(m_fifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
     m_startWaitMutex.lock();
 
     start();
@@ -60,6 +61,7 @@ void AudioInputThread::startWork()
 
 void AudioInputThread::stopWork()
 {
+    disconnect(m_fifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
     m_running = false;
     wait();
 }
@@ -71,19 +73,15 @@ void AudioInputThread::run()
 
     while (m_running)
     {
-        workIQ(m_convBufSamples);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     qDebug("AudioInputThread::run: running loop stopped");
     m_running = false;
 }
 
-void AudioInputThread::workIQ(unsigned int samples)
+void AudioInputThread::workIQ(unsigned int nbRead)
 {
-    // Most of the time, this returns 0, because of the low sample rate.
-    // Could be more efficient in this case to have blocking wait?
-    uint32_t nbRead = m_fifo->read((unsigned char *) m_buf, samples);
-
     // Map between left and right audio channels and IQ channels
     if (m_iqMapping == AudioInputSettings::IQMapping::L)
     {
@@ -138,4 +136,13 @@ void AudioInputThread::workIQ(unsigned int samples)
     }
 
     m_sampleFifo->write(m_convertBuffer.begin(), it);
+}
+
+void AudioInputThread::handleAudio()
+{
+    uint32_t nbRead;
+
+    while ((nbRead = m_fifo->read((unsigned char *) m_buf, m_convBufSamples)) != 0) {
+        workIQ(nbRead);
+    }
 }

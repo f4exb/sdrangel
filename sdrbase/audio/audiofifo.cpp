@@ -97,6 +97,7 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples)
 	}
 
 	m_mutex.unlock();
+	emit dataReady();
 	return total;
 }
 

@@ -57,7 +57,10 @@ private:
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
 
     void run();
-    void workIQ(unsigned int samples);
+    void workIQ(unsigned int nbRead);
+
+private slots:
+    void handleAudio();
 };
 
 #endif // INCLUDE_AUDIOINPUTTHREAD_H
