@@ -24,6 +24,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QNetworkRequest>
+#include <QThread>
 
 #include "dsp/devicesamplesource.h"
 #include "audio/audioinputdevice.h"
@@ -34,7 +35,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class DeviceAPI;
-class AudioInputThread;
+class AudioInputWorker;
 
 class AudioInput : public DeviceSampleSource {
     Q_OBJECT
@@ -135,7 +136,8 @@ private:
     AudioFifo m_fifo;
     QMutex m_mutex;
     AudioInputSettings m_settings;
-    AudioInputThread* m_thread;
+    AudioInputWorker* m_worker;
+    QThread m_workerThread;
     QString m_deviceDescription;
     bool m_running;
     QNetworkAccessManager *m_networkManager;

@@ -16,12 +16,10 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_AUDIOINPUTTHREAD_H
-#define INCLUDE_AUDIOINPUTTHREAD_H
+#ifndef INCLUDE_AUDIOINPUTWORKER_H
+#define INCLUDE_AUDIOINPUTWORKER_H
 
-#include <QThread>
-#include <QMutex>
-#include <QWaitCondition>
+#include <QObject>
 
 #include "dsp/samplesinkfifo.h"
 #include "dsp/decimators.h"
@@ -29,12 +27,12 @@
 
 class AudioFifo;
 
-class AudioInputThread : public QThread {
+class AudioInputWorker : public QObject {
     Q_OBJECT
 
 public:
-    AudioInputThread(SampleSinkFifo* sampleFifo, AudioFifo *fifo, QObject* parent = nullptr);
-    ~AudioInputThread();
+    AudioInputWorker(SampleSinkFifo* sampleFifo, AudioFifo *fifo, QObject* parent = nullptr);
+    ~AudioInputWorker();
 
     void startWork();
     void stopWork();
@@ -45,8 +43,6 @@ public:
 private:
     AudioFifo* m_fifo;
 
-    QMutex m_startWaitMutex;
-    QWaitCondition m_startWaiter;
     bool m_running;
     unsigned int m_log2Decim;
     AudioInputSettings::IQMapping m_iqMapping;
@@ -56,11 +52,10 @@ private:
     SampleSinkFifo* m_sampleFifo;
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimatorsIQ;
 
-    void run();
     void workIQ(unsigned int nbRead);
 
 private slots:
     void handleAudio();
 };
 
-#endif // INCLUDE_AUDIOINPUTTHREAD_H
+#endif // INCLUDE_AUDIOINPUTWORKER_H

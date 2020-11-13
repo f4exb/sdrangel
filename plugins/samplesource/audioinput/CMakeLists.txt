@@ -5,7 +5,7 @@ set(audioinput_SOURCES
     audioinputplugin.cpp
     audioinputsettings.cpp
     audioinputwebapiadapter.cpp
-    audioinputthread.cpp
+    audioinputworker.cpp
 )
 
 set(audioinput_HEADERS
@@ -13,7 +13,7 @@ set(audioinput_HEADERS
     audioinputplugin.h
     audioinputsettings.h
     audioinputwebapiadapter.h
-    audioinputthread.h
+    audioinputworker.h
 )
 
 include_directories(

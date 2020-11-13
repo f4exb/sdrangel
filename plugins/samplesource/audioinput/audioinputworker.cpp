@@ -20,16 +20,14 @@
 #include <QDebug>
 #include <stdio.h>
 #include <errno.h>
-#include <chrono>
-#include <thread>
 
 #include "dsp/samplesinkfifo.h"
 #include "audio/audiofifo.h"
 
-#include "audioinputthread.h"
+#include "audioinputworker.h"
 
-AudioInputThread::AudioInputThread(SampleSinkFifo* sampleFifo, AudioFifo *fifo, QObject* parent) :
-    QThread(parent),
+AudioInputWorker::AudioInputWorker(SampleSinkFifo* sampleFifo, AudioFifo *fifo, QObject* parent) :
+    QObject(parent),
     m_fifo(fifo),
     m_running(false),
     m_log2Decim(0),
@@ -37,50 +35,25 @@ AudioInputThread::AudioInputThread(SampleSinkFifo* sampleFifo, AudioFifo *fifo, 
     m_convertBuffer(m_convBufSamples),
     m_sampleFifo(sampleFifo)
 {
-    start();
 }
 
-AudioInputThread::~AudioInputThread()
+AudioInputWorker::~AudioInputWorker()
 {
 }
 
-void AudioInputThread::startWork()
+void AudioInputWorker::startWork()
 {
     connect(m_fifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
-    m_startWaitMutex.lock();
-
-    start();
-
-    while(!m_running)
-    {
-        m_startWaiter.wait(&m_startWaitMutex, 100);
-    }
-
-    m_startWaitMutex.unlock();
+    m_running = true;
 }
 
-void AudioInputThread::stopWork()
+void AudioInputWorker::stopWork()
 {
     disconnect(m_fifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
     m_running = false;
-    wait();
 }
 
-void AudioInputThread::run()
-{
-    m_running = true;
-    qDebug("AudioInputThread::run: start running loop");
-
-    while (m_running)
-    {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
-    qDebug("AudioInputThread::run: running loop stopped");
-    m_running = false;
-}
-
-void AudioInputThread::workIQ(unsigned int nbRead)
+void AudioInputWorker::workIQ(unsigned int nbRead)
 {
     // Map between left and right audio channels and IQ channels
     if (m_iqMapping == AudioInputSettings::IQMapping::L)
@@ -138,7 +111,7 @@ void AudioInputThread::workIQ(unsigned int nbRead)
     m_sampleFifo->write(m_convertBuffer.begin(), it);
 }
 
-void AudioInputThread::handleAudio()
+void AudioInputWorker::handleAudio()
 {
     uint32_t nbRead;
 
