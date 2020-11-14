@@ -59,7 +59,9 @@ ChannelGUI* NFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
-    return 0;
+	(void) deviceUISet;
+	(void) rxChannel;
+    return nullptr;
 }
 #else
 ChannelGUI* NFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const

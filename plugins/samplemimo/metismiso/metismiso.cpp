@@ -207,7 +207,7 @@ void MetisMISO::setSourceCenterFrequency(qint64 centerFrequency, int index)
 
     if (index < MetisMISOSettings::m_maxReceivers)
     {
-        settings.m_rxCenterFrequencies[index];
+        settings.m_rxCenterFrequencies[index] = centerFrequency;
 
         MsgConfigureMetisMISO* message = MsgConfigureMetisMISO::create(settings, false);
         m_inputMessageQueue.push(message);

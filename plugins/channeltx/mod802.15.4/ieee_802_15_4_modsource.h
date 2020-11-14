@@ -47,7 +47,7 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples);
+    virtual void prefetch(unsigned int nbSamples) { (void) nbSamples; }
 
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
@@ -60,7 +60,7 @@ public:
     void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
     void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
-    
+
     uint8_t *hexToBin(uint8_t *p, QString data);
     void addTXFrame(QString data);
 
@@ -76,7 +76,7 @@ private:
     double *m_sinLUT;
 
     int m_chips[2];                     // Chips. Odd/even for O-QPSK
-    bool m_chipOdd;   
+    bool m_chipOdd;
     int m_diffBit;                      // Output of differential coder
     RaisedCosine<Real> m_pulseShapeI;   // Pulse shaping filters
     RaisedCosine<Real> m_pulseShapeQ;
@@ -107,10 +107,10 @@ private:
     int m_chipsPerSymbol;               // Number of chips per symbol
     int m_bitsPerSymbol;                // Number of bits per symbol
     int m_chipRate;
-    
+
     int m_symbol;
     int m_chipIdx;
-    
+
     Real m_pow;                         // In dB
     Real m_powRamp;                     // In dB
     enum IEEE_802_15_4_ModState {
@@ -128,7 +128,7 @@ private:
     std::ofstream m_basebandFile;       // For debug output of baseband waveform
 
     bool chipsValid();                  // Are there any chips to transmit
-    int getSymbol();                    
+    int getSymbol();
     int getChip();
     void initTX();
     void createHalfSine(int sampleRate, int chipRate);

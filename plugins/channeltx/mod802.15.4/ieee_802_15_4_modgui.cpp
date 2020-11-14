@@ -205,7 +205,7 @@ void IEEE_802_15_4_ModGUI::on_channelMute_toggled(bool checked)
     applySettings();
 }
 
-void IEEE_802_15_4_ModGUI::on_txButton_clicked(bool checked)
+void IEEE_802_15_4_ModGUI::on_txButton_clicked()
 {
     transmit();
 }

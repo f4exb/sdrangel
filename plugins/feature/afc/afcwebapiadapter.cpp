@@ -43,6 +43,7 @@ int AFCWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGFeatureSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     AFC::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
 

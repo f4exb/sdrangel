@@ -44,6 +44,7 @@ int FileSinkWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     FileSink::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

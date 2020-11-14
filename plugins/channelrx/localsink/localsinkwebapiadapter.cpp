@@ -43,6 +43,7 @@ int LocalSinkWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     LocalSink::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

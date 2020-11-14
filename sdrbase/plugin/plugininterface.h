@@ -322,6 +322,7 @@ public:
 
     virtual bool deserializeGlobalSettings(const QByteArray& data)
     {
+        (void) data;
         return true;
     }
 
@@ -335,11 +336,14 @@ public:
 
     virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
     {
+        (void) featureUISet;
+        (void) feature;
         return nullptr;
     }
 
     virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const
     {
+        (void) webAPIAdapterInterface;
         return nullptr;
     }
 };

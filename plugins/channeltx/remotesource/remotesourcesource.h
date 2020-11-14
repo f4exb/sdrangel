@@ -41,7 +41,7 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples) {}
+    virtual void prefetch(unsigned int nbSamples) { (void) nbSamples; }
 
     void start();
     void stop();

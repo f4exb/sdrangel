@@ -1753,6 +1753,7 @@ int LimeSDRMIMO::webapiRunGet(
     SWGSDRangel::SWGDeviceState& response,
     QString& errorMessage)
 {
+    (void) subsystemIndex;
     (void) errorMessage;
     m_deviceAPI->getDeviceEngineStateStr(*response.getState());
     return 200;

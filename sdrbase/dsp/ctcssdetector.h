@@ -31,7 +31,6 @@
 class SDRBASE_API CTCSSDetector {
 public:
     CTCSSDetector();
-    CTCSSDetector(int _nTones, Real *tones); //!< allows user defined CTCSS tone set
     virtual ~CTCSSDetector();
 
     // setup the basic parameters and coefficients

@@ -43,6 +43,7 @@ int ATVModWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     ATVMod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

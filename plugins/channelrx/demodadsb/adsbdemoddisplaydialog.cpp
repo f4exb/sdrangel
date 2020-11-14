@@ -56,7 +56,7 @@ void ADSBDemodDisplayDialog::accept()
     QDialog::accept();
 }
 
-void ADSBDemodDisplayDialog::on_font_clicked(bool checked)
+void ADSBDemodDisplayDialog::on_font_clicked()
 {
     bool ok;
     QFont font = QFontDialog::getFont(&ok, QFont(m_fontName, m_fontSize), this);

@@ -131,7 +131,7 @@ private:
         ChannelTracking(int channelOffset, int trackerOffset, int channelDirection) :
             m_channelOffset(channelOffset),
             m_trackerOffset(trackerOffset),
-            m_channelDirection(m_channelDirection)
+            m_channelDirection(channelDirection)
         {}
 
         ChannelTracking(const ChannelTracking& other) :
@@ -161,10 +161,9 @@ private:
     void initTrackedDeviceSet(int deviceSetIndex);
     void processChannelSettings(
         const ChannelAPI *channelAPI,
-        const QList<QString> &channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings
     );
-    bool updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset, unsigned int blockCount = 0);
+    bool updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset);
     bool updateDeviceFrequency(DeviceSet *deviceSet, const QString& key, int64_t frequency);
     int getDeviceDirection(DeviceAPI *deviceAPI);
     void getDeviceSettingsKey(DeviceAPI *deviceAPI, QString& settingsKey);

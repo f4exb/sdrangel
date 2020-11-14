@@ -38,14 +38,17 @@ std::complex<float> s2cNorm(const Sample& s)
 }
 
 Sample sFirst(const Sample& a, const Sample& b) {
+    (void) b;
     return a;
 }
 
 Sample sSecond(const Sample& a, const Sample& b) {
+    (void) a;
     return b;
 }
 
 Sample sSecondInv(const Sample& a, const Sample& b) {
+    (void) a;
     return Sample{-b.real(), -b.imag()};
 }
 

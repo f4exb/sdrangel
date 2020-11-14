@@ -77,7 +77,9 @@ ChannelGUI* LocalSourcePlugin::createTxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSource *txChannel) const
 {
-    return 0;
+	(void) deviceUISet;
+	(void) txChannel;
+    return nullptr;
 }
 #else
 ChannelGUI* LocalSourcePlugin::createTxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSource *txChannel) const

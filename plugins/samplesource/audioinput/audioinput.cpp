@@ -40,7 +40,8 @@ AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_deviceDescription("AudioInput"),
-    m_running(false)
+    m_running(false),
+    m_centerFrequency(0)
 {
     m_fifo.setSize(20*AudioInputWorker::m_convBufSamples);
     openDevice();
@@ -189,11 +190,7 @@ int AudioInput::getSampleRate() const
 
 quint64 AudioInput::getCenterFrequency() const
 {
-    return 0;
-}
-
-void AudioInput::setCenterFrequency(qint64 centerFrequency)
-{
+    return m_centerFrequency;
 }
 
 bool AudioInput::handleMessage(const Message& message)
@@ -312,6 +309,8 @@ void AudioInput::applySettings(const AudioInputSettings& settings, bool force, b
             (m_settings.m_iqMapping == AudioInputSettings::IQMapping::R)) ?
                 m_settings.m_sampleRate / 4 : 0;
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate/(1<<m_settings.m_log2Decim), dF);
+        m_sampleRate = notif->getSampleRate();
+        m_centerFrequency = notif->getCenterFrequency();
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
 }

@@ -29,7 +29,7 @@ public:
     {
     }
 
-    QValidator::State validate(QString &s, int &i) const
+    QValidator::State validate(QString &s) const
     {
         if (s.isEmpty() || s == "-") {
             return QValidator::Intermediate;

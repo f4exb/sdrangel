@@ -137,6 +137,7 @@ int WebAPIAdapter::instanceConfigGet(
         SWGSDRangel::SWGInstanceConfigResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) error;
     response.init();
     WebAPIAdapterBase webAPIAdapterBase;
     webAPIAdapterBase.setPluginManager(m_mainCore->getPluginManager());
@@ -187,6 +188,8 @@ int WebAPIAdapter::instanceConfigPutPatch(
         SWGSDRangel::SWGSuccessResponse& response,
         SWGSDRangel::SWGErrorResponse& error)
 {
+    (void) response;
+    (void) error;
     WebAPIAdapterBase webAPIAdapterBase;
     webAPIAdapterBase.setPluginManager(m_mainCore->getPluginManager());
 

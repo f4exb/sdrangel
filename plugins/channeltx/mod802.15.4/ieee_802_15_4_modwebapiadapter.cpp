@@ -44,6 +44,7 @@ int IEEE_802_15_4_ModWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     IEEE_802_15_4_Mod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

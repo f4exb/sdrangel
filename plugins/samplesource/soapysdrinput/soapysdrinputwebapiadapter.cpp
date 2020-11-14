@@ -45,6 +45,7 @@ int SoapySDRInputWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     SoapySDRInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;

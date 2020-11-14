@@ -43,6 +43,7 @@ int RemoteSourceWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     RemoteSource::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

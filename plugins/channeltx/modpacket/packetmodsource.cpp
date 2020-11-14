@@ -91,10 +91,6 @@ void PacketModSource::pullOne(Sample& sample)
     sample.m_imag = (FixReal) (ci.imag() * SDR_TX_SCALEF);
 }
 
-void PacketModSource::prefetch(unsigned int nbSamples)
-{
-}
-
 void PacketModSource::sampleToSpectrum(Real sample)
 {
     if (m_spectrumSink)

@@ -44,6 +44,7 @@ int SigMFFileSinkWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     SigMFFileSink::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

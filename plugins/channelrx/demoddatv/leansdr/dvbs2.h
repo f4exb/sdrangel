@@ -1782,6 +1782,7 @@ struct s2_deinterleaver : runnable
                                     hard_sb accs[/*bps*/], int nacc,
                                     bool msb_first)
     {
+        (void) nacc;
         if (msb_first)
         {
             for (int b = 0; b < bps; ++b)
@@ -1847,6 +1848,7 @@ struct s2_deinterleaver : runnable
     static inline void pack_qpsk_symbol(const llr_ss &ps,
                                         hard_sb *acc, int nacc)
     {
+        (void) nacc;
         // TBD Must match LLR law, see softsymb_harden.
         uint8_t s = llr_harden(ps.bits[0]) | (llr_harden(ps.bits[1]) << 1);
         *acc = (*acc << 2) | s;

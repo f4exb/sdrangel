@@ -64,9 +64,8 @@ void AMBEDevicesDialog::refreshInUseList()
     }
 }
 
-void AMBEDevicesDialog::on_importSerial_clicked(bool checked)
+void AMBEDevicesDialog::on_importSerial_clicked()
 {
-    (void) checked;
     QListWidgetItem *serialItem = ui->ambeSerialDevices->currentItem();
 
     if (!serialItem)
@@ -96,9 +95,8 @@ void AMBEDevicesDialog::on_importSerial_clicked(bool checked)
     }
 }
 
-void AMBEDevicesDialog::on_importAllSerial_clicked(bool checked)
+void AMBEDevicesDialog::on_importAllSerial_clicked()
 {
-    (void) checked;
     int count = 0;
 
     for (int i = 0; i < ui->ambeSerialDevices->count(); i++)
@@ -120,9 +118,8 @@ void AMBEDevicesDialog::on_importAllSerial_clicked(bool checked)
     ui->statusText->setText(tr("%1 devices added").arg(count));
 }
 
-void AMBEDevicesDialog::on_removeAmbeDevice_clicked(bool checked)
+void AMBEDevicesDialog::on_removeAmbeDevice_clicked()
 {
-    (void) checked;
     QListWidgetItem *deviceItem = ui->ambeDeviceRefs->currentItem();
 
     if (!deviceItem)
@@ -137,13 +134,13 @@ void AMBEDevicesDialog::on_removeAmbeDevice_clicked(bool checked)
     refreshInUseList();
 }
 
-void AMBEDevicesDialog::on_refreshAmbeList_clicked(bool checked)
+void AMBEDevicesDialog::on_refreshAmbeList_clicked()
 {
     refreshInUseList();
     ui->statusText->setText("In use refreshed");
 }
 
-void AMBEDevicesDialog::on_clearAmbeList_clicked(bool checked)
+void AMBEDevicesDialog::on_clearAmbeList_clicked()
 {
     if (ui->ambeDeviceRefs->count() == 0)
     {
@@ -156,7 +153,7 @@ void AMBEDevicesDialog::on_clearAmbeList_clicked(bool checked)
     ui->statusText->setText("All items released");
 }
 
-void AMBEDevicesDialog::on_importAddress_clicked(bool checked)
+void AMBEDevicesDialog::on_importAddress_clicked()
 {
     QString addressAndPort = ui->ambeAddressText->text();
 

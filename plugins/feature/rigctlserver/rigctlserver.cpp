@@ -212,6 +212,7 @@ int RigCtlServer::webapiRun(bool run,
     SWGSDRangel::SWGDeviceState& response,
     QString& errorMessage)
 {
+    (void) errorMessage;
     getFeatureStateStr(*response.getState());
     MsgStartStop *msg = MsgStartStop::create(run);
     getInputMessageQueue()->push(msg);

@@ -76,6 +76,8 @@ ChannelGUI* BeamSteeringCWModPlugin::createMIMOChannelGUI(
         DeviceUISet *deviceUISet,
         MIMOChannel *mimoChannel) const
 {
+    (void) deviceUISet;
+    (void) mimoChannel;
     return nullptr;
 }
 #else

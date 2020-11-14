@@ -49,6 +49,7 @@ int NFMModWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     NFMMod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

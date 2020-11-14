@@ -327,10 +327,6 @@ unsigned short ChirpChatModSource::encodeSymbol(unsigned short symbol)
     // return deWidth*baseSymbol + (deWidth/2) - 1;
 }
 
-void ChirpChatModSource::processOneSample(Complex& ci)
-{
-}
-
 void ChirpChatModSource::calculateLevel(Real& sample)
 {
     if (m_levelCalcCount < m_levelNbSamples)

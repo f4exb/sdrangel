@@ -49,6 +49,7 @@ int AMModWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     AMMod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

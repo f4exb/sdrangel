@@ -42,6 +42,7 @@ int ChirpChatDemodWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     ChirpChatDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
     ChirpChatDemod::webapiFormatChannelSettings(response, m_settings);

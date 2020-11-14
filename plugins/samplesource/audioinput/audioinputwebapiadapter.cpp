@@ -43,6 +43,7 @@ int AudioInputWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     AudioInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;

@@ -45,6 +45,7 @@ int KiwiSDRWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     KiwiSDRInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;

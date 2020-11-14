@@ -76,6 +76,8 @@ ChannelGUI* FileSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
+	(void) deviceUISet;
+	(void) rxChannel;
     return nullptr;
 }
 #else

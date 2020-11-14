@@ -682,12 +682,12 @@ void MainServer::deleteChannel(int deviceSetIndex, int channelIndex)
     }
 }
 
-void MainServer::addFeature(int featureSetIndex, int featureIndex)
+void MainServer::addFeature(int featureSetIndex, int selectedFeatureIndex)
 {
     if (featureSetIndex >= 0)
     {
         FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
-        featureSet->addFeature(featureSetIndex, m_mainCore->m_pluginManager->getPluginAPI(), m_apiAdapter);
+        featureSet->addFeature(selectedFeatureIndex, m_mainCore->m_pluginManager->getPluginAPI(), m_apiAdapter);
     }
 }
 

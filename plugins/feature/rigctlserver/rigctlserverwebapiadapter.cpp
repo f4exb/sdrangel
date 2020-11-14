@@ -44,6 +44,7 @@ int RigCtlServerWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGFeatureSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     RigCtlServer::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
 

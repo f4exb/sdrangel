@@ -125,9 +125,8 @@ void DeviceUserArgsDialog::reject()
     QDialog::reject();
 }
 
-void DeviceUserArgsDialog::on_importDevice_clicked(bool checked)
+void DeviceUserArgsDialog::on_importDevice_clicked()
 {
-    (void) checked;
     QTreeWidgetItem *deviceItem = ui->deviceTree->currentItem();
 
     if (deviceItem)
@@ -139,9 +138,8 @@ void DeviceUserArgsDialog::on_importDevice_clicked(bool checked)
     }
 }
 
-void DeviceUserArgsDialog::on_deleteArgs_clicked(bool checked)
+void DeviceUserArgsDialog::on_deleteArgs_clicked()
 {
-    (void) checked;
     QTreeWidgetItem *deviceItem = ui->argsTree->currentItem();
 
     if (deviceItem)
@@ -188,7 +186,7 @@ void DeviceUserArgsDialog::on_addDeviceSeqEdit_editingFinished()
     }
 }
 
-void DeviceUserArgsDialog::on_addDevice_clicked(bool checked)
+void DeviceUserArgsDialog::on_addDevice_clicked()
 {
     m_deviceUserArgsCopy.addDeviceArgs(m_xDeviceHardwareId, m_xDeviceSequence, "", true);
     displayArgsByDevice();

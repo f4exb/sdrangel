@@ -28,7 +28,7 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples) {} // prefetching of samples is not implemented
+    virtual void prefetch(unsigned int nbSamples) { (void) nbSamples; } // prefetching of samples is not implemented
 
     void reset();
     void setPhase(float phase);

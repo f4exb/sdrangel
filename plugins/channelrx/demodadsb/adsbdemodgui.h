@@ -242,7 +242,9 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const override {
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        (void) index;
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
@@ -374,7 +376,9 @@ public:
 
     bool setData(const QModelIndex &index, const QVariant& value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const override {
+    Qt::ItemFlags flags(const QModelIndex &index) const override
+    {
+        (void) index;
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
     }
 
@@ -537,12 +541,12 @@ private slots:
     void columnSelectMenu(QPoint pos);
     void columnSelectMenuChecked(bool checked = false);
     void on_spb_currentIndexChanged(int value);
-    void on_correlateFullPreamble_clicked(bool checked=false);
-    void on_demodModeS_clicked(bool checked=false);
-    void on_feed_clicked(bool checked=false);
-    void on_getOSNDB_clicked(bool checked = false);
-    void on_getAirportDB_clicked(bool checked = false);
-    void on_flightPaths_clicked(bool checked = false);
+    void on_correlateFullPreamble_clicked(bool checked);
+    void on_demodModeS_clicked(bool checked);
+    void on_feed_clicked(bool checked);
+    void on_getOSNDB_clicked();
+    void on_getAirportDB_clicked();
+    void on_flightPaths_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
@@ -552,7 +556,7 @@ private slots:
     void on_devicesRefresh_clicked();
     void on_device_currentIndexChanged(int index);
     void feedSelect();
-    void on_displaySettings_clicked(bool checked=false);
+    void on_displaySettings_clicked();
 signals:
     void homePositionChanged();
 };

@@ -66,7 +66,7 @@ public:
     void changeSampleMIMO(int deviceSetIndex, int selectedDeviceIndex);
     void addChannel(int deviceSetIndex, int selectedChannelIndex);
     void deleteChannel(int deviceSetIndex, int channelIndex);
-    void addFeature(int featureSetIndex, int featureIndex);
+    void addFeature(int featureSetIndex, int selectedFeatureIndex);
     void deleteFeature(int featureSetIndex, int featureIndex);
 
     friend class WebAPIAdapter;

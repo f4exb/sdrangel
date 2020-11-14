@@ -1238,6 +1238,7 @@ void ADSBDemodGUI::on_feed_clicked(bool checked)
 
 void ADSBDemodGUI::on_adsbData_cellClicked(int row, int column)
 {
+    (void) column;
     // Get ICAO of aircraft in row clicked
     int icao = ui->adsbData->item(row, 0)->text().toInt(nullptr, 16);
     if (m_aircraft.contains(icao))
@@ -1292,12 +1293,14 @@ void ADSBDemodGUI::on_adsbData_cellDoubleClicked(int row, int column)
 // Columns in table reordered
 void ADSBDemodGUI::adsbData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
+    (void) oldVisualIndex;
     m_settings.m_columnIndexes[logicalIndex] = newVisualIndex;
 }
 
 // Column in table resized (when hidden size is 0)
 void ADSBDemodGUI::adsbData_sectionResized(int logicalIndex, int oldSize, int newSize)
 {
+    (void) oldSize;
     m_settings.m_columnSizes[logicalIndex] = newSize;
 }
 
@@ -1310,6 +1313,7 @@ void ADSBDemodGUI::columnSelectMenu(QPoint pos)
 // Hide/show column when menu selected
 void ADSBDemodGUI::columnSelectMenuChecked(bool checked)
 {
+    (void) checked;
     QAction* action = qobject_cast<QAction*>(sender());
     if (action != nullptr)
     {
@@ -1347,7 +1351,7 @@ void ADSBDemodGUI::on_demodModeS_clicked(bool checked)
     applySettings();
 }
 
-void ADSBDemodGUI::on_getOSNDB_clicked(bool checked)
+void ADSBDemodGUI::on_getOSNDB_clicked()
 {
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
@@ -1367,7 +1371,7 @@ void ADSBDemodGUI::on_getOSNDB_clicked(bool checked)
     }
 }
 
-void ADSBDemodGUI::on_getAirportDB_clicked(bool checked)
+void ADSBDemodGUI::on_getAirportDB_clicked()
 {
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
@@ -1735,7 +1739,7 @@ void ADSBDemodGUI::feedSelect()
 }
 
 // Show display settings dialog
-void ADSBDemodGUI::on_displaySettings_clicked(bool checked)
+void ADSBDemodGUI::on_displaySettings_clicked()
 {
     ADSBDemodDisplayDialog dialog(m_settings.m_removeTimeout, m_settings.m_airportRange, m_settings.m_airportMinimumSize,
                                 m_settings.m_displayHeliports, m_settings.m_siUnits,

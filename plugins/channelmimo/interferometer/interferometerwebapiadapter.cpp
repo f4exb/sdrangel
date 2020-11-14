@@ -140,7 +140,7 @@ int InterferometerWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
-    (void) force;
+    (void) force; // no action
     (void) errorMessage;
     webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_glSpectrumSettings, channelSettingsKeys, response);
     return 200;

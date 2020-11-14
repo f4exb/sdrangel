@@ -36,22 +36,6 @@ CTCSSDetector::CTCSSDetector() :
 	m_power = new Real[CTCSSFrequencies::m_nbFreqs];
 }
 
-CTCSSDetector::CTCSSDetector(int _nTones, Real *tones) :
-			m_N(0),
-			m_sampleRate(0),
-			m_samplesProcessed(0),
-			m_maxPowerIndex(0),
-			m_toneDetected(false),
-			m_maxPower(0.0)
-{
-	m_k = new Real[CTCSSFrequencies::m_nbFreqs];
-	m_coef = new Real[CTCSSFrequencies::m_nbFreqs];
-	m_u0 = new Real[CTCSSFrequencies::m_nbFreqs];
-	m_u1 = new Real[CTCSSFrequencies::m_nbFreqs];
-	m_power = new Real[CTCSSFrequencies::m_nbFreqs];
-}
-
-
 CTCSSDetector::~CTCSSDetector()
 {
 	delete[] m_k;

@@ -67,13 +67,13 @@ private:
 private slots:
 	void accept();
 	void reject();
-    void on_importDevice_clicked(bool checked);
-    void on_deleteArgs_clicked(bool checked);
+    void on_importDevice_clicked();
+    void on_deleteArgs_clicked();
     void on_argsTree_currentItemChanged(QTreeWidgetItem* currentItem, QTreeWidgetItem* previousItem);
     void on_argStringEdit_editingFinished();
     void on_addDeviceHwIDEdit_editingFinished();
     void on_addDeviceSeqEdit_editingFinished();
-    void on_addDevice_clicked(bool checked);
+    void on_addDevice_clicked();
 };
 
 #endif // SDRGUI_GUI_DEVICEUSERARGSDIALOG_H

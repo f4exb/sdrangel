@@ -32,6 +32,7 @@ inline void softword_set(hard_sb *p, int b, bool v)
 inline void softword_clear(hard_sb *p) { *p = 0; }
 inline bool softword_weight(const bool &l)
 {
+    (void) l;
     return true;
 }
 inline void softbit_set(bool *p, bool v) { *p = v; }
@@ -66,6 +67,8 @@ inline void softwords_flip(hard_sb p[], int b)
 }
 uint8_t *softbytes_harden(hard_sb p[], int nbytes, uint8_t storage[])
 {
+    (void) nbytes;
+    (void) storage;
     return p;
 }
 

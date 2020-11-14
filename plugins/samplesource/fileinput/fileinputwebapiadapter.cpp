@@ -45,6 +45,7 @@ int FileInputWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     FileInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;

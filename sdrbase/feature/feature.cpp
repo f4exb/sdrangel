@@ -50,6 +50,7 @@ int Feature::webapiRunGet(
 	SWGSDRangel::SWGDeviceState& response,
 	QString& errorMessage) const
 {
+	(void) errorMessage;
 	getFeatureStateStr(*response.getState());
 	return 200;
 }

@@ -76,7 +76,9 @@ ChannelGUI* SigMFFileSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
-    return 0;
+	(void) deviceUISet;
+	(void) rxChannel;
+    return nullptr;
 }
 #else
 ChannelGUI* SigMFFileSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const

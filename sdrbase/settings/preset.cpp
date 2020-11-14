@@ -243,7 +243,7 @@ const QByteArray* Preset::findDeviceConfig(
 
     for (; it != m_deviceConfigs.end(); ++it)
 	{
-        if ((it->m_deviceId == deviceId) && (it->m_deviceSerial == deviceSerial) && (it->m_deviceSerial == deviceSerial)) {
+        if ((it->m_deviceId == deviceId) && (it->m_deviceSerial == deviceSerial) && (it->m_deviceSequence == deviceSequence)) {
             return &it->m_config;
         }
     }

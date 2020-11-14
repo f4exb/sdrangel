@@ -172,7 +172,7 @@ void PacketModGUI::on_channelMute_toggled(bool checked)
     applySettings();
 }
 
-void PacketModGUI::on_txButton_clicked(bool checked)
+void PacketModGUI::on_txButton_clicked()
 {
     transmit();
 }
@@ -206,7 +206,7 @@ void PacketModGUI::on_packet_editingFinished()
     applySettings();
 }
 
-void PacketModGUI::on_insertPosition_clicked(bool checked)
+void PacketModGUI::on_insertPosition_clicked()
 {
     float latitude = MainCore::instance()->getSettings().getLatitude();
     float longitude = MainCore::instance()->getSettings().getLongitude();

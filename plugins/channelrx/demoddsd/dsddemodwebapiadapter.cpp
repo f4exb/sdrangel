@@ -43,6 +43,7 @@ int DSDDemodWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     DSDDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

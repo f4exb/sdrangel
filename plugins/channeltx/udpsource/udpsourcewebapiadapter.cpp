@@ -43,6 +43,7 @@ int UDPSourceWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     UDPSource::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

@@ -376,12 +376,14 @@ void GS232ControllerGUI::on_channel_currentIndexChanged(int index)
 
 void GS232ControllerGUI::on_serialPort_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_serialPort = ui->serialPort->currentText();
     applySettings();
 }
 
 void GS232ControllerGUI::on_baudRate_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_baudRate = ui->baudRate->currentText().toInt();
     applySettings();
 }

@@ -43,6 +43,7 @@ int RemoteSinkWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     RemoteSink::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

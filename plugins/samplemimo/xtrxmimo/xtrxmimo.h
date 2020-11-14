@@ -286,8 +286,8 @@ private:
     void applyGainLNA(unsigned int channel, double gain);
     void applyGainTIA(unsigned int channel, double gain);
     void applyGainPGA(unsigned int channel, double gain);
-    void setRxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz, int loPpmTenths);
-    void setTxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz, int loPpmTenths);
+    void setRxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz);
+    void setTxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz);
 
     void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const XTRXMIMOSettings& settings, bool force);
     void webapiReverseSendStartStop(bool start);

@@ -44,6 +44,7 @@ int PacketModWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     PacketMod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

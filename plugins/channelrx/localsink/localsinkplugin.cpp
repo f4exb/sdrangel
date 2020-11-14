@@ -77,7 +77,9 @@ ChannelGUI* LocalSinkPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
-    return 0;
+	(void) deviceUISet;
+	(void) rxChannel;
+    return nullptr;
 }
 #else
 ChannelGUI* LocalSinkPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const

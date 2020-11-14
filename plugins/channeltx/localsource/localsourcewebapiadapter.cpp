@@ -43,6 +43,7 @@ int LocalSourceWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     LocalSource::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

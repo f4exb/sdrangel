@@ -112,7 +112,7 @@ bool AFCWorker::handleMessage(const Message& cmd)
         Feature::MsgChannelSettings& cfg = (Feature::MsgChannelSettings&) cmd;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = cfg.getSWGSettings();
         qDebug() << "AFCWorker::handleMessage: Feature::MsgChannelSettings:" << *swgChannelSettings->getChannelType();
-        processChannelSettings(cfg.getChannelAPI(), cfg.getChannelSettingsKeys(), swgChannelSettings);
+        processChannelSettings(cfg.getChannelAPI(), swgChannelSettings);
 
         delete swgChannelSettings;
         return true;
@@ -280,7 +280,6 @@ void AFCWorker::initTrackedDeviceSet(int deviceSetIndex)
 
 void AFCWorker::processChannelSettings(
     const ChannelAPI *channelAPI,
-    const QList<QString> &channelSettingsKeys,
     SWGSDRangel::SWGChannelSettings *swgChannelSettings)
 {
     MainCore *mainCore = MainCore::instance();
@@ -322,7 +321,7 @@ void AFCWorker::processChannelSettings(
     }
 }
 
-bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset, unsigned int blockCount)
+bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int offset)
 {
     SWGSDRangel::SWGChannelSettings swgChannelSettings;
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -419,7 +418,7 @@ void AFCWorker::updateTarget()
         }
 
         // adjust tracker offset
-        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction, 1)) {
+        if (updateChannelOffset(m_freqTracker, 0, m_trackerChannelOffset + correction)) {
             m_trackerChannelOffset += correction;
         }
 

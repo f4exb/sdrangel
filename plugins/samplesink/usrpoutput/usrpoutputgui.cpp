@@ -528,12 +528,14 @@ void USRPOutputGUI::on_gain_valueChanged(int value)
 
 void USRPOutputGUI::on_antenna_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_antennaPath = ui->antenna->currentText();
     sendSettings();
 }
 
 void USRPOutputGUI::on_clockSource_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_clockSource = ui->clockSource->currentText();
     sendSettings();
 }

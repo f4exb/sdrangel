@@ -43,6 +43,7 @@ int SimplePTTWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGFeatureSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     SimplePTT::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
 

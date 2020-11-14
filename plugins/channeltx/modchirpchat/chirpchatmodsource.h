@@ -36,7 +36,7 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples) {}
+    virtual void prefetch(unsigned int nbSamples) { (void) nbSamples; }
 
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
@@ -104,7 +104,6 @@ private:
     void initSF(unsigned int sf); //!< Init tables, FFTs, depending on spread factor
     void initTest(unsigned int sf, unsigned int deBits);
     void reset();
-    void processOneSample(Complex& ci);
     void calculateLevel(Real& sample);
     void modulateSample();
     unsigned short encodeSymbol(unsigned short symbol); //!< Encodes symbol with possible DE bits spacing

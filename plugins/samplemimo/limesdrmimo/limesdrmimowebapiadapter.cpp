@@ -43,9 +43,9 @@ int LimeSDRMIMOWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
-    (void) errorMessage;
     (void) force;
     (void) deviceSettingsKeys;
     (void) response;
+    (void) errorMessage;
     return 501;
 }

@@ -40,7 +40,7 @@ public:
 
     virtual void pull(SampleVector::iterator begin, unsigned int nbSamples);
     virtual void pullOne(Sample& sample);
-    virtual void prefetch(unsigned int nbSamples) {}
+    virtual void prefetch(unsigned int nbSamples) { (void) nbSamples; }
 
     /** Set center frequency given in Hz */
     void setCenterFrequency(uint64_t centerFrequency) { m_centerFrequency = centerFrequency; }

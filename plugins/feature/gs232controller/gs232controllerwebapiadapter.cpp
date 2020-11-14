@@ -44,6 +44,7 @@ int GS232ControllerWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGFeatureSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     GS232Controller::webapiUpdateFeatureSettings(m_settings, featureSettingsKeys, response);
 

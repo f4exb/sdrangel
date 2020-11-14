@@ -43,6 +43,7 @@ int AMDemodWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     AMDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

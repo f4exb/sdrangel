@@ -43,6 +43,7 @@ int FreeDVDemodWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     FreeDVDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

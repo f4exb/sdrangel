@@ -983,7 +983,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
                     m_settings.m_rxDevSampleRate,
                     DeviceSampleSource::FrequencyShiftScheme::FSHIFT_STD,
                     false);
-            setRxDeviceCenterFrequency(m_deviceShared.m_dev->getDevice(), deviceCenterFrequency, 0);
+            setRxDeviceCenterFrequency(m_deviceShared.m_dev->getDevice(), deviceCenterFrequency);
         }
     }
 
@@ -1083,7 +1083,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
                 DeviceSampleSink::FC_POS_CENTER,
                 m_settings.m_txDevSampleRate,
                 false);
-            setTxDeviceCenterFrequency(m_deviceShared.m_dev->getDevice(), deviceCenterFrequency, 0);
+            setTxDeviceCenterFrequency(m_deviceShared.m_dev->getDevice(), deviceCenterFrequency);
         }
     }
 
@@ -1271,14 +1271,14 @@ void XTRXMIMO::getLPRange(float& minF, float& maxF, float& stepF) const
            minF, maxF, stepF);
 }
 
-void XTRXMIMO::setRxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz, int loPpmTenths)
+void XTRXMIMO::setRxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz)
 {
     if (dev)
     {
         if (xtrx_tune(dev,
                 XTRX_TUNE_RX_FDD,
                 freq_hz,
-                0) < 0) {
+                nullptr) < 0) {
             qCritical("XTRXMIMO::setRxDeviceCenterFrequency: could not set Rx frequency to %llu", freq_hz);
         } else {
             qDebug("XTRXMIMO::setRxDeviceCenterFrequency: Rx frequency set to %llu", freq_hz);
@@ -1286,14 +1286,14 @@ void XTRXMIMO::setRxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz, int lo
     }
 }
 
-void XTRXMIMO::setTxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz, int loPpmTenths)
+void XTRXMIMO::setTxDeviceCenterFrequency(xtrx_dev *dev, quint64 freq_hz)
 {
     if (dev)
     {
         if (xtrx_tune(dev,
                 XTRX_TUNE_TX_FDD,
                 freq_hz,
-                0) < 0) {
+                nullptr) < 0) {
             qCritical("XTRXMIMO::setTxDeviceCenterFrequency: could not set Tx frequency to %llu", freq_hz);
         } else {
             qDebug("XTRXMIMO::setTxDeviceCenterFrequency: Tx frequency set to %llu", freq_hz);

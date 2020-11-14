@@ -96,7 +96,7 @@ private slots:
     void on_rfBW_valueChanged(int index);
     void on_gain_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
-    void on_txButton_clicked(bool checked);
+    void on_txButton_clicked();
     void on_frame_editingFinished();
     void on_frame_returnPressed();
     void on_repeat_toggled(bool checked);

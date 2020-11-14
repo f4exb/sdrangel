@@ -45,12 +45,12 @@ private:
     AMBEEngine* m_ambeEngine;
 
 private slots:
-    void on_importSerial_clicked(bool checked);
-    void on_importAllSerial_clicked(bool checked);
-    void on_removeAmbeDevice_clicked(bool checked);
-    void on_refreshAmbeList_clicked(bool checked);
-    void on_clearAmbeList_clicked(bool checked);
-    void on_importAddress_clicked(bool checked);
+    void on_importSerial_clicked();
+    void on_importAllSerial_clicked();
+    void on_removeAmbeDevice_clicked();
+    void on_refreshAmbeList_clicked();
+    void on_clearAmbeList_clicked();
+    void on_importAddress_clicked();
 };
 
 #endif // SDRGUI_GUI_AMBEDEVICESDIALOG_H_

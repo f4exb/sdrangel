@@ -98,7 +98,7 @@ public:
     virtual int getSampleRate() const;
     virtual void setSampleRate(int sampleRate) { (void) sampleRate; }
     virtual quint64 getCenterFrequency() const;
-    virtual void setCenterFrequency(qint64 centerFrequency);
+    virtual void setCenterFrequency(qint64 centerFrequency) { (void) centerFrequency; }
 
     virtual bool handleMessage(const Message& message);
 
@@ -140,6 +140,8 @@ private:
     QThread m_workerThread;
     QString m_deviceDescription;
     bool m_running;
+    int m_sampleRate;
+    qint64 m_centerFrequency;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

@@ -45,6 +45,7 @@ int TestMIWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     TestMI::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;

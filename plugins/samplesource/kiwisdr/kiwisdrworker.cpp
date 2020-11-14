@@ -55,6 +55,7 @@ void KiwiSDRWorker::onDisconnected()
 
 void KiwiSDRWorker::onSocketError(QAbstractSocket::SocketError error)
 {
+	(void) error;
     m_status = 3;
 	emit updateStatus(3);
 }

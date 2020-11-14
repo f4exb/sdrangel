@@ -87,12 +87,12 @@ private slots:
     void on_fmDev_valueChanged(int value);
     void on_gain_valueChanged(int value);
     void on_channelMute_toggled(bool checked);
-    void on_txButton_clicked(bool checked);
+    void on_txButton_clicked();
     void on_callsign_editingFinished();
     void on_to_currentTextChanged(const QString &text);
     void on_via_currentTextChanged(const QString &text);
     void on_packet_editingFinished();
-    void on_insertPosition_clicked(bool checked);
+    void on_insertPosition_clicked();
     void on_packet_returnPressed();
     void on_repeat_toggled(bool checked);
     void on_preEmphasis_toggled(bool checked);

@@ -78,7 +78,9 @@ ChannelGUI* BFMPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
-    return 0;
+	(void) deviceUISet;
+	(void) rxChannel;
+    return nullptr;
 }
 #else
 ChannelGUI* BFMPlugin::createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const

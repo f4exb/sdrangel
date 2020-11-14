@@ -43,6 +43,7 @@ int BFMDemodWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     BFMDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 

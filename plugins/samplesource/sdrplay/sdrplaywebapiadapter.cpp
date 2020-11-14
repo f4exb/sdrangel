@@ -45,6 +45,7 @@ int SDRPlayWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGDeviceSettings& response, // query + response
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     SDRPlayInput::webapiUpdateDeviceSettings(m_settings, deviceSettingsKeys, response);
     return 200;

@@ -155,6 +155,7 @@ const QString& TestMOSync::getDeviceDescription() const
 
 int TestMOSync::getSourceSampleRate(int index) const
 {
+    (void) index;
     return 0;
 }
 

@@ -225,6 +225,7 @@ void AudioInputGui::displaySettings()
 
 void AudioInputGui::on_device_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_deviceName = ui->device->currentText();
     refreshSampleRates(m_settings.m_deviceName);
     sendSettings();
@@ -232,6 +233,7 @@ void AudioInputGui::on_device_currentIndexChanged(int index)
 
 void AudioInputGui::on_sampleRate_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_sampleRate = ui->sampleRate->currentText().toInt();
     sendSettings();
 }

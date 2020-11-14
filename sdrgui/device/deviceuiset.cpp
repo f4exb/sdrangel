@@ -36,7 +36,7 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet, int deviceType, QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet, QTimer& timer)
 {
     m_spectrum = new GLSpectrum;
     m_spectrumVis = deviceSet->m_spectrumVis;

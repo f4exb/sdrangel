@@ -93,10 +93,6 @@ void IEEE_802_15_4_ModSource::pullOne(Sample& sample)
     sample.m_imag = (FixReal) (ci.imag() * SDR_TX_SCALEF);
 }
 
-void IEEE_802_15_4_ModSource::prefetch(unsigned int nbSamples)
-{
-}
-
 void IEEE_802_15_4_ModSource::sampleToSpectrum(Complex sample)
 {
     if (m_spectrumSink && (m_settings.m_spectrumRate > 0))

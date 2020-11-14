@@ -43,6 +43,7 @@ int UDPSinkWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force; // no action
     (void) errorMessage;
     UDPSink::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
