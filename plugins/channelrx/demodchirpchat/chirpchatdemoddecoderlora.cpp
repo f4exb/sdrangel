@@ -38,9 +38,6 @@ void ChirpChatDemodDecoderLoRa::decodeHeader(
     // Actual header is always represented with 5 8-bit codewords : static headerCodewords = 5
     // These 8-bit codewords are encoded with Hamming(4,8) FEC : static headerParityBits = 4
 
-    const unsigned int numSymbols = roundUp(inSymbols.size(), 4 + nbParityBits);
-    const unsigned int numCodewords = (numSymbols / (4 + nbParityBits))*nbSymbolBits;
-
     std::vector<uint16_t> symbols(headerSymbols);
     std::copy(inSymbols.begin(), inSymbols.begin() + headerSymbols, symbols.begin());
 

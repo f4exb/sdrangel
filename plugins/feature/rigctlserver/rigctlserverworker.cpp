@@ -647,11 +647,6 @@ bool RigCtlServerWorker::changeModem(const char *newMode, const char *newModemId
     channelSettingsKeys.append("inputFrequencyOffset");
     QString jsonSettingsStr = tr("\"inputFrequencyOffset\":%1").arg(currentOffset);
 
-    if (!strncmp(newMode, "LSB", 3))
-    {
-        int bw = newModemBw < 0 ? -3000 : -newModemBw;
-    }
-
     if (lsb || (newModemBw >= 0))
     {
         int bw = lsb ? (newModemBw < 0 ? -3000 : -newModemBw) : newModemBw;

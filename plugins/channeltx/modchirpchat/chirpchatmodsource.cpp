@@ -54,7 +54,6 @@ void ChirpChatModSource::initSF(unsigned int sf)
 
     float halfAngle = M_PI/ChirpChatModSettings::oversampling;
     float phase = -halfAngle;
-    double accumulator = 0;
 
     if (m_phaseIncrements) {
         delete[] m_phaseIncrements;

@@ -132,7 +132,6 @@ void ATVDemodSink::demod(Complex& c)
 
     //********** demodulation **********
 
-    float fftScale = 1.0f;
     const float& fltI = m_settings.m_fftFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex].real() : c.real();
     const float& fltQ = m_settings.m_fftFiltering ? m_DSBFilterBuffer[m_DSBFilterBufferIndex].imag() : c.imag();
     double magSq;

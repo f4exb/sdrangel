@@ -169,7 +169,6 @@ void WSSpectrum::newSpectrum(
 
     qint64 elapsed = m_timer.restart();
     uint64_t nowMs = TimeUtil::nowms();
-    QWebSocket *pSender = qobject_cast<QWebSocket *>(sender());
     QByteArray payload;
 
     buildPayload(

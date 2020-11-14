@@ -43,7 +43,6 @@ AudioOpus::~AudioOpus()
 void AudioOpus::setEncoder(int32_t fs, int nChannels)
 {
     int error;
-    bool newInstance = true;
     QMutexLocker mutexLocker(&m_mutex);
 
     if (m_encoderState) {

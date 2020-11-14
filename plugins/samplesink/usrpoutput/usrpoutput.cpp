@@ -616,7 +616,6 @@ bool USRPOutput::applySettings(const USRPOutputSettings& settings, bool preGetSt
     bool forwardChangeTxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
-    bool ownThreadWasRunning = false;
     bool checkRates          = false;
     QList<QString> reverseAPIKeys;
 

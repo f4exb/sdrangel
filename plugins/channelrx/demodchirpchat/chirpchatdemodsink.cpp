@@ -132,7 +132,6 @@ void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow:
 
 void ChirpChatDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
-	int newangle;
 	Complex ci;
 
 	for (SampleVector::const_iterator it = begin; it < end; ++it)

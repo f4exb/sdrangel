@@ -82,7 +82,6 @@ bool AFCGUI::handleMessage(const Message& message)
     else if (AFCReport::MsgUpdateTarget::match(message))
     {
         const AFCReport::MsgUpdateTarget& cfg = (AFCReport::MsgUpdateTarget&) message;
-        bool frequencyChanged = cfg.getFrequencyChanged();
 
         if (cfg.getFrequencyChanged()) {
             ui->statusIndicator->setStyleSheet("QLabel { background-color: rgb(232, 85, 85); border-radius: 8px; }"); // red

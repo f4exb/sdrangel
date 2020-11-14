@@ -2844,8 +2844,6 @@ int WebAPIAdapter::featuresetFeaturePost(
 {
     if ((featureSetIndex >= 0) && (featureSetIndex < (int) m_mainCore->m_featureSets.size()))
     {
-        FeatureSet *featureSet = m_mainCore->m_featureSets[featureSetIndex];
-
         PluginAPI::FeatureRegistrations *featureRegistrations = m_mainCore->m_pluginManager->getFeatureRegistrations();
         int nbRegistrations = featureRegistrations->size();
         int index = 0;

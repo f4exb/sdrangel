@@ -1978,8 +1978,6 @@ void GLSpectrum::mouseMoveEvent(QMouseEvent* event)
 void GLSpectrum::mousePressEvent(QMouseEvent* event)
 {
     const QPointF& ep = event->localPos();
-    float waterfallShiftY = m_topMargin + m_frequencyScaleHeight + (m_waterfallHeight == 0 ? 0 : m_waterfallHeight + m_bottomMargin);
-    float histogramShiftY = m_topMargin + m_frequencyScaleHeight + (m_histogramHeight == 0 ? 0 : m_histogramHeight + m_bottomMargin);
 
     if (event->button() == Qt::RightButton)
     {

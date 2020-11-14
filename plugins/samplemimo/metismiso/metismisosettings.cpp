@@ -128,7 +128,6 @@ bool MetisMISOSettings::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
-        int intval;
         uint32_t utmp;
 
         d.readU32(1, &m_nbReceivers, 1);

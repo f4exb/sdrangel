@@ -118,7 +118,7 @@ void AzEl::calcAzimuth()
     double aCos = std::cos(aLat);
     double aSin = std::sin(aLat);
 
-    double bx = (bRot.m_cart.m_x * aCos) - (bRot.m_cart.m_z * aSin);
+    //double bx = (bRot.m_cart.m_x * aCos) - (bRot.m_cart.m_z * aSin);
     double by = bRot.m_cart.m_y;
     double bz = (bRot.m_cart.m_x * aSin) + (bRot.m_cart.m_z * aCos);
 

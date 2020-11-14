@@ -66,9 +66,6 @@ bool FeatureSetPreset::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
 	{
-        bool tmpBool;
-        int tmp;
-
 		d.readString(1, &m_group, "default");
 		d.readString(2, &m_description, "no name");
 

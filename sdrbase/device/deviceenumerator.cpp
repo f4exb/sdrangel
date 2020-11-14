@@ -40,7 +40,6 @@ void DeviceEnumerator::addNonDiscoverableDevices(PluginManager *pluginManager, c
     QList<DeviceUserArgs::Args>::const_iterator argsIt = args.begin();
     unsigned int rxIndex = m_rxEnumeration.size();
     unsigned int txIndex = m_txEnumeration.size();
-    unsigned int mimoIndex = m_mimoEnumeration.size();
 
     for (; argsIt != args.end(); ++argsIt)
     {

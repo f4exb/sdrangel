@@ -747,7 +747,6 @@ bool XTRXOutput::applySettings(const XTRXOutputSettings& settings, bool force, b
     bool forwardChangeTxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
-    bool txThreadWasRunning = false;
     bool doLPCalibration = false;
     bool doChangeSampleRate = false;
     bool doChangeFreq = false;

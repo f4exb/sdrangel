@@ -74,7 +74,6 @@ bool SimplePTTSettings::deserialize(const QByteArray& data)
     if(d.getVersion() == 1)
     {
         QByteArray bytetmp;
-        qint32 tmp;
         uint32_t utmp;
         QString strtmp;
 

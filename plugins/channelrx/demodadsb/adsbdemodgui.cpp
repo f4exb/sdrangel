@@ -849,7 +849,6 @@ void ADSBDemodGUI::handleADSB(
                         step = 5.0f;
                         adjust = 109;
                     }
-                    float speed = base + (movement - adjust) * step;
                     aircraft->m_speedType = Aircraft::GS;
                     aircraft->m_speedValid = true;
                     aircraft->m_speedItem->setData(Qt::DisplayRole,  m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
@@ -872,8 +871,6 @@ void ADSBDemodGUI::handleADSB(
             else if (((tc >= 9) && (tc <= 18)) || ((tc >= 20) && (tc <= 22)))
             {
                 // Airbourne position (9-18 baro, 20-22 GNSS)
-                int ss = (data[4] >> 1) & 0x3; // Surveillance status
-                int nicsb = data[4] & 1; // NIC supplement-B - Or single antenna flag
                 int alt = ((data[5] & 0xff) << 4) | ((data[6] >> 4) & 0xf); // Altitude
                 int n = ((alt >> 1) & 0x7f0) | (alt & 0xf);
                 int alt_ft = n * ((alt & 0x10) ? 25 : 100) - 1000;
@@ -884,7 +881,6 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? feetToMetresInt(aircraft->m_altitude) : aircraft->m_altitude);
             }
 
-            int t = (data[6] >> 3) & 1; // Time synchronisation to UTC
             int f = (data[6] >> 2) & 1; // CPR odd/even frame - should alternate every 0.2s
             int lat_cpr = ((data[6] & 3) << 15) | ((data[7] & 0xff) << 7) | ((data[8] >> 1) & 0x7f);
             int lon_cpr = ((data[8] & 1) << 16) | ((data[9] & 0xff) << 8) | (data[10] & 0xff);
@@ -1013,8 +1009,6 @@ void ADSBDemodGUI::handleADSB(
         {
             // Airbourne velocity
             int st = data[4] & 0x7;   // Subtype
-            int ic = (data[5] >> 7) & 1; // Intent change flag
-            int nac = (data[5] >> 3) & 0x3; // Velocity uncertainty
             if ((st == 1) || (st == 2))
             {
                 // Ground speed
@@ -1069,7 +1063,6 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_speedValid = true;
                 aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : aircraft->m_speed);
             }
-            int vrsrc = (data[8] >> 4) & 1; // Vertical rate source
             int s_vr = (data[8] >> 3) & 1; // Vertical rate sign
             int vr = ((data[8] & 0x7) << 6) | ((data[9] >> 2) & 0x3f); // Vertical rate
             aircraft->m_verticalRate = (vr-1)*64*(s_vr?-1:1);
@@ -1078,8 +1071,6 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_verticalRateItem->setData(Qt::DisplayRole, feetPerMinToMetresPerSecondInt(aircraft->m_verticalRate));
             else
                 aircraft->m_verticalRateItem->setData(Qt::DisplayRole, aircraft->m_verticalRate);
-            int s_dif = (data[10] >> 7) & 1; // Diff from baro alt, sign
-            int dif = data[10] & 0x7f; // Diff from baro alt
         }
         else if (tc == 28)
         {
@@ -1587,8 +1578,6 @@ void ADSBDemodGUI::updateDeviceSetList()
     for (; it != deviceUISets.end(); ++it, deviceIndex++)
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
-        DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
-        DSPDeviceMIMOEngine *deviceMIMOEngine = (*it)->m_deviceMIMOEngine;
 
         if (deviceSourceEngine) {
             ui->device->addItem(QString("R%1").arg(deviceIndex), deviceIndex);

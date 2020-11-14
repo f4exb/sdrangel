@@ -969,8 +969,6 @@ void DATVDemodSink::InitDATVS2Framework()
     **/
     // FILTERING
 
-    int decim = 1;
-
     //******** -> if ( m_objCfg.resample )
 
 

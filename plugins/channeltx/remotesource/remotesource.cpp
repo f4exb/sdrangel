@@ -168,7 +168,6 @@ void RemoteSource::applySettings(const RemoteSourceSettings& settings, bool forc
             << " m_reverseAPIPort: " << settings.m_reverseAPIPort
             << " force: " << force;
 
-    bool change = false;
     QList<QString> reverseAPIKeys;
 
     if ((m_settings.m_dataAddress != settings.m_dataAddress) || force) {

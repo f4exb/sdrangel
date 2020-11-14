@@ -110,7 +110,6 @@ void AudioCompressorSnd::CompressorState::sf_advancecomp(
 	float dry = 1.0f - wet;
 
 	// metering values (not used in core algorithm, but used to output a meter if desired)
-	float metergain = 1.0f; // gets overwritten immediately because gain will always be negative
 	float meterfalloff = 0.325f; // seconds
 	float meterrelease = 1.0f - expf(-1.0f / ((float)rate * meterfalloff));
 

@@ -212,8 +212,6 @@ void GS232ControllerGUI::updateDeviceSetList()
     for (; it != deviceUISets.end(); ++it, deviceIndex++)
     {
         DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
-        DSPDeviceSinkEngine *deviceSinkEngine = (*it)->m_deviceSinkEngine;
-        DSPDeviceMIMOEngine *deviceMIMOEngine = (*it)->m_deviceMIMOEngine;
 
         if (deviceSourceEngine) {
             ui->device->addItem(QString("R%1").arg(deviceIndex), deviceIndex);

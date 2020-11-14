@@ -200,6 +200,7 @@ bool ATVMod::handleMessage(const Message& cmd)
         ATVModBaseband::MsgConfigureCameraData *rep = ATVModBaseband::MsgConfigureCameraData::create(
             cfg.getIndex(), cfg.getManualFPS(), cfg.getManualFPSEnable()
         );
+        m_basebandSource->getInputMessageQueue()->push(rep);
 
         return true;
     }

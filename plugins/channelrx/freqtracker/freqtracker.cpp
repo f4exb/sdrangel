@@ -191,8 +191,6 @@ void FreqTracker::applySettings(const FreqTrackerSettings& settings, bool force)
     }
 
     QList<QString> reverseAPIKeys;
-    bool updateChannelizer = false;
-    bool updateInterpolator = false;
 
     if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");

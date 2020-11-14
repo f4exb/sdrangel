@@ -651,7 +651,6 @@ bool USRPInput::applySettings(const USRPInputSettings& settings, bool preGetStre
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
-    bool ownThreadWasRunning = false;
     bool reapplySomeSettings = false;
     bool checkRates          = false;
     QList<QString> reverseAPIKeys;
@@ -1156,7 +1155,6 @@ int USRPInput::webapiRun(
 void USRPInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
 {
     bool success = false;
-    double temp = 0.0;
     bool active = false;
     quint32 overflows = 0;
     quint32 timeouts = 0;

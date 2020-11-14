@@ -919,7 +919,6 @@ struct s2_frame_receiver : runnable
             if (psymbols)
                 *psymbols++ = p * scale_symbols;
 #endif
-            uint8_t symb = track_symbol(&ss, p, qpsk, 1);
             if (psampled_pls)
                 *psampled_pls++ = p;
             int bit = (p.im < 0); // suboptimal
@@ -1173,7 +1172,6 @@ struct s2_frame_receiver : runnable
             for (int i = c->nsymbols; i--;)
             {
                 complex<int8_t> p = c->symbols[i];
-                float re = p.re * cosf(angle) - p.im * sinf(angle);
                 float im = p.re * sinf(angle) + p.im * cosf(angle);
                 int bit;
                 if (im > 1)
@@ -1424,7 +1422,6 @@ struct s2_interleaver : runnable
         // so we need tos split bytes at boundaries.
         for (; nslots; nslots -= 4)
         {
-            const hard_sb *pi;
             hard_sb accs[BPS]; // One accumulator per column
             hard_ss *ps;
             // Slot 0 (mod 4): 88+2
@@ -1506,8 +1503,6 @@ struct s2_interleaver : runnable
     static void interleave4050(const hard_sb *pin, int nslots,
                                plslot<hard_ss> *pout)
     {
-        const hard_sb *pin0 = pin;
-        int rows = 4050;
         hard_sb accs[4]; // One accumulator per column
         int nacc = 0;    // Bits in each column accumulator
         for (; nslots; --nslots, ++pout)
@@ -2048,8 +2043,6 @@ struct s2_fecenc : runnable
     {
         while (in.readable() >= 1 && out.writable() >= 1)
         {
-            bbframe *pin = in.rd();
-            fecframe<hard_sb> *pout = out.wr();
             run_frame(in.rd(), out.wr());
             in.read(1);
             out.written(1);
@@ -2066,7 +2059,6 @@ struct s2_fecenc : runnable
         bbscrambling.transform(pin->bytes, fi->Kbch / 8, pbytes);
         { // BCH
             size_t msgbytes = fi->Kbch / 8;
-            size_t cwbytes = fi->kldpc / 8;
             bch_interface *bch = s2bch.bchs[pin->pls.sf][mcinfo->rate];
             bch->encode(pbytes, msgbytes, pbytes + msgbytes);
         }
@@ -2120,7 +2112,6 @@ struct s2_fecdec : runnable
                 // LDPC decode
                 size_t cwbits = pin->pls.framebits();
                 size_t msgbits = fi->kldpc;
-                size_t chkbits = cwbits - msgbits;
                 s2_ldpc_engine *ldpc = s2ldpc.ldpcs[pin->pls.sf][mcinfo->rate];
                 int ncorr = ldpc->decode_bitflip(fi->ldpc, pin->bytes, msgbits, cwbits, bitflips);
                 if (sch->debug2)
@@ -2131,8 +2122,6 @@ struct s2_fecdec : runnable
             {
                 // BCH decode
                 size_t cwbytes = fi->kldpc / 8;
-                size_t msgbytes = fi->Kbch / 8;
-                size_t chkbytes = cwbytes - msgbytes;
                 // Decode with suitable BCH decoder for this MODCOD
                 bch_interface *bch = s2bch.bchs[pin->pls.sf][mcinfo->rate];
                 int ncorr = bch->decode(hardbytes, cwbytes);

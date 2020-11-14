@@ -561,7 +561,6 @@ void IEEE_802_15_4_ModSource::addTXFrame(QString data)
     uint8_t *pLength;
     crc16itut crc;
     uint16_t crcValue;
-    int len;
 
     // Create PHY frame
     p = m_bits;

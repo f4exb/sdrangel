@@ -77,7 +77,6 @@ bool USRPOutputSettings::deserialize(const QByteArray& data)
 
     if (d.getVersion() == 1)
     {
-        int intval;
         uint32_t uintval;
 
         d.readS32(1, &m_devSampleRate, 5000000);

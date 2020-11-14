@@ -433,8 +433,6 @@ bool XTRXMIMO::handleMessage(const Message& message)
 bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
 {
     QList<QString> reverseAPIKeys;
-    bool rxThreadWasRunning = false;
-    bool txThreadWasRunning = false;
     bool doRxLPCalibration = false;
     bool doRxChangeSampleRate = false;
     bool doRxChangeFreq = false;
@@ -1077,7 +1075,7 @@ bool XTRXMIMO::applySettings(const XTRXMIMOSettings& settings, bool force)
         if (m_deviceShared.m_dev->getDevice())
         {
             qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
-                settings.m_txCenterFrequency,
+                txXlatedDeviceCenterFrequency,
                 0,
                 settings.m_log2SoftInterp,
                 DeviceSampleSink::FC_POS_CENTER,

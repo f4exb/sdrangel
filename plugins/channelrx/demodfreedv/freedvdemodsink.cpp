@@ -185,11 +185,6 @@ void FreeDVDemodSink::feed(const SampleVector::const_iterator& begin, const Samp
     }
 
 	Complex ci;
-	fftfilt::cmplx *sideband;
-	int n_out;
-
-	int decim = 1<<(m_spanLog2 - 1);
-	unsigned char decim_mask = decim - 1; // counter LSB bit mask for decimation by 2^(m_scaleLog2 - 1)
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
 	{

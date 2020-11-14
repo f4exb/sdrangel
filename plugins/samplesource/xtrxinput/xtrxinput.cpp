@@ -819,7 +819,6 @@ bool XTRXInput::applySettings(const XTRXInputSettings& settings, bool force, boo
     bool forwardChangeRxDSP  = false;
     bool forwardChangeAllDSP = false;
     bool forwardClockSource  = false;
-    bool rxThreadWasRunning = false;
     bool doLPCalibration = false;
     bool doChangeSampleRate = false;
     bool doChangeFreq = false;

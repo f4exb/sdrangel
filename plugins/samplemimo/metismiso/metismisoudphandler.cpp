@@ -388,7 +388,7 @@ void MetisMISOUDPHandler::fillBuffer(unsigned char *buffer, int& bufferIndex, in
 
 int MetisMISOUDPHandler::getCommandValue(int commandIndex)
 {
-    int c1 = 0, c2 = 0, c3 = 0, c4 = 0;
+    int c1 = 0, c3 = 0, c4 = 0;
 
     if (commandIndex == 0)
     {
@@ -483,7 +483,6 @@ bool MetisMISOUDPHandler::getRxIQInversion(int index)
 void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
 {
     int b = 0;
-    int b_max;
     int r;
     int sampleI, sampleQ, sampleMic;
 

@@ -114,7 +114,6 @@ void PacketModSource::modulateSample()
 {
     Real audioMod;
     Real linearRampGain;
-    Real emphasis;
 
     if ((m_state == idle) || (m_state == wait))
     {

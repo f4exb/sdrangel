@@ -62,8 +62,6 @@ void ADSBDemodSinkWorker::run()
 
     int readIdx = m_sink->m_samplesPerFrame - 1;
 
-    int cnt = 0;
-
     while (true)
     {
         int startIdx = readIdx;

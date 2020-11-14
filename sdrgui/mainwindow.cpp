@@ -1066,7 +1066,6 @@ bool MainWindow::handleMessage(const Message& cmd)
     {
         MainCore::MsgSetDevice& notif = (MainCore::MsgSetDevice&) cmd;
         ui->tabInputsView->setCurrentIndex(notif.getDeviceSetIndex());
-        DeviceUISet *deviceUI = m_deviceUIs[notif.getDeviceSetIndex()];
         ui->inputViewDock->setSelectedDeviceIndex(notif.getDeviceSetIndex(), notif.getDeviceIndex());
         samplingDeviceChanged(notif.getDeviceType(), notif.getDeviceSetIndex(), notif.getDeviceIndex());
 
@@ -1752,7 +1751,6 @@ void MainWindow::samplingDeviceChanged(int deviceType, int tabIndex, int newDevi
 {
     qDebug("MainWindow::samplingDeviceChanged: deviceType: %d tabIndex: %d newDeviceIndex: %d",
         deviceType, tabIndex, newDeviceIndex);
-    const PluginInterface::SamplingDevice *samplingDevice;
 
     if (deviceType == 0) {
         sampleSourceChanged(tabIndex, newDeviceIndex);
