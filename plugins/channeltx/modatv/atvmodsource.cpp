@@ -136,11 +136,11 @@ ATVModSource::ATVModSource() :
 
     m_SSBFilter = new fftfilt(0, m_settings.m_rfBandwidth / (float) m_channelSampleRate, m_ssbFftLen); // arbitrary cutoff
     m_SSBFilterBuffer = new Complex[m_ssbFftLen/2]; // filter returns data exactly half of its size
-    memset(m_SSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen>>1));
+    std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer + (m_ssbFftLen>>1), Complex{0, 0});
 
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_rfBandwidth) / (float) m_channelSampleRate, 2*m_ssbFftLen); // arbitrary cutoff
     m_DSBFilterBuffer = new Complex[m_ssbFftLen];
-    memset(m_DSBFilterBuffer, 0, sizeof(Complex)*(m_ssbFftLen));
+    std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer + m_ssbFftLen, Complex{0, 0});
 
     m_interpolatorDistanceRemain = 0.0f;
     m_interpolatorDistance = 1.0f;

@@ -548,7 +548,13 @@ struct s2_frame_receiver : runnable
     {
         diffcorr = 0;
         coarse_count = 0;
-        memset(hist, 0, sizeof(hist));
+
+        for (int i = 0; i < 3; i++)
+        {
+            hist[i].p = 0;
+            hist[i].c = 0;
+        }
+
         state = COARSE_FREQ;
     }
 
@@ -907,7 +913,12 @@ struct s2_frame_receiver : runnable
 
         // Read SOF
 
-        memset(hist, 0, sizeof(hist));
+        for (int i = 0; i < 3; i++)
+        {
+            hist[i].p = 0;
+            hist[i].c = 0;
+        }
+
         complex<float> sof_corr = 0;
         uint32_t sofbits = 0;
         for (int s = 0; s < sof.LENGTH; ++s)

@@ -1080,7 +1080,12 @@ struct cstln_receiver : runnable
         ss_out = _ss_out ? new pipewriter<float>(*_ss_out) : NULL;
         mer_out = _mer_out ? new pipewriter<float>(*_mer_out) : NULL;
         cstln_out = _cstln_out ? new pipewriter<cf32>(*_cstln_out) : NULL;
-        memset(hist, 0, sizeof(hist));
+
+        for (int i = 0; i < 3; i++)
+        {
+            hist[i].p = 0;
+            hist[i].c = 0;
+        }
     }
 
     void set_omega(float _omega, float tol = 10e-6)

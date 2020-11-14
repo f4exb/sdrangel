@@ -187,7 +187,8 @@ void UDPSourceUDPHandler::readSample(Sample &s)
     }
     else
     {
-        memcpy(&s, &m_udpBuf[m_readFrameIndex][m_readIndex], sizeof(Sample));
+        Sample *u = (Sample *) &m_udpBuf[m_readFrameIndex][m_readIndex];
+        s = *u;
         advanceReadPointer((int) sizeof(Sample));
     }
 }

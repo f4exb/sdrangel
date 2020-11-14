@@ -59,11 +59,11 @@ void fftfilt::init_filter()
 	output		= new cmplx[flen2];
 	ovlbuf		= new cmplx[flen2];
 
-	memset(filter, 0, flen * sizeof(cmplx));
-    memset(filterOpp, 0, flen * sizeof(cmplx));
-	memset(data, 0, flen * sizeof(cmplx));
-	memset(output, 0, flen2 * sizeof(cmplx));
-	memset(ovlbuf, 0, flen2 * sizeof(cmplx));
+	std::fill(filter, filter + flen, cmplx{0, 0});
+    std::fill(filterOpp, filterOpp + flen, cmplx{0, 0});
+	std::fill(data, data + flen , cmplx{0, 0});
+	std::fill(output, output + flen2, cmplx{0, 0});
+	std::fill(ovlbuf, ovlbuf + flen2, cmplx{0, 0});
 
 	inptr = 0;
 }
@@ -115,7 +115,7 @@ fftfilt::~fftfilt()
 void fftfilt::create_filter(float f1, float f2)
 {
 	// initialize the filter to zero
-	memset(filter, 0, flen * sizeof(cmplx));
+	std::fill(filter, filter + flen, cmplx{0, 0});
 
 	// create the filter shape coefficients by fft
 	bool b_lowpass, b_highpass;
@@ -156,7 +156,7 @@ void fftfilt::create_filter(float f1, float f2)
 void fftfilt::create_dsb_filter(float f2)
 {
 	// initialize the filter to zero
-	memset(filter, 0, flen * sizeof(cmplx));
+	std::fill(filter, filter + flen, cmplx{0, 0});
 
 	for (int i = 0; i < flen2; i++) {
 		filter[i] = fsinc(f2, i, flen2);
@@ -183,7 +183,7 @@ void fftfilt::create_asym_filter(float fopp, float fin)
 {
     // in band
     // initialize the filter to zero
-    memset(filter, 0, flen * sizeof(cmplx));
+    std::fill(filter, filter + flen, cmplx{0, 0});
 
     for (int i = 0; i < flen2; i++) {
         filter[i] = fsinc(fin, i, flen2);
@@ -205,7 +205,7 @@ void fftfilt::create_asym_filter(float fopp, float fin)
 
     // opposite band
     // initialize the filter to zero
-    memset(filterOpp, 0, flen * sizeof(cmplx));
+    std::fill(filterOpp, filterOpp + flen, cmplx{0, 0});
 
     for (int i = 0; i < flen2; i++) {
         filterOpp[i] = fsinc(fopp, i, flen2);
@@ -282,7 +282,7 @@ int fftfilt::runFilt(const cmplx & in, cmplx **out)
 		output[i] = ovlbuf[i] + data[i];
 		ovlbuf[i] = data[flen2 + i];
 	}
-	memset (data, 0, flen * sizeof(cmplx));
+	std::fill(data, data + flen , cmplx{0, 0});
 
 	*out = output;
 	return flen2;
@@ -325,7 +325,7 @@ int fftfilt::runSSB(const cmplx & in, cmplx **out, bool usb, bool getDC)
 		output[i] = ovlbuf[i] + data[i];
 		ovlbuf[i] = data[i+flen2];
 	}
-	memset (data, 0, flen * sizeof(cmplx));
+	std::fill(data, data + flen , cmplx{0, 0});
 
 	*out = output;
 	return flen2;
@@ -358,7 +358,7 @@ int fftfilt::runDSB(const cmplx & in, cmplx **out, bool getDC)
 		ovlbuf[i] = data[i+flen2];
 	}
 
-	memset (data, 0, flen * sizeof(cmplx));
+	std::fill(data, data + flen , cmplx{0, 0});
 
 	*out = output;
 	return flen2;
@@ -402,7 +402,7 @@ int fftfilt::runAsym(const cmplx & in, cmplx **out, bool usb)
         ovlbuf[i] = data[i+flen2];
     }
 
-    memset (data, 0, flen * sizeof(cmplx));
+    std::fill(data, data + flen , cmplx{0, 0});
 
     *out = output;
     return flen2;
