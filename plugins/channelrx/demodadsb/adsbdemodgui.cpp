@@ -811,44 +811,44 @@ void ADSBDemodGUI::handleADSB(
                 }
                 else if ((movement >= 2) && (movement <= 123))
                 {
-                    float base, step; // In knts
-                    int adjust;
-                    if ((movement >= 2) && (movement <= 8))
-                    {
-                        base = 0.125f;
-                        step = 0.125f;
-                        adjust = 2;
-                    }
-                    else if ((movement >= 9) && (movement <= 12))
-                    {
-                        base = 1.0f;
-                        step = 0.25f;
-                        adjust = 9;
-                    }
-                    else if ((movement >= 13) && (movement <= 38))
-                    {
-                        base = 2.0f;
-                        step = 0.5f;
-                        adjust = 13;
-                    }
-                    else if ((movement >= 39) && (movement <= 93))
-                    {
-                        base = 15.0f;
-                        step = 1.0f;
-                        adjust = 39;
-                    }
-                    else if ((movement >= 94) && (movement <= 108))
-                    {
-                        base = 70.0f;
-                        step = 2.0f;
-                        adjust = 94;
-                    }
-                    else
-                    {
-                        base = 100.0f;
-                        step = 5.0f;
-                        adjust = 109;
-                    }
+                    // float base, step; // In knts
+                    // int adjust;
+                    // if ((movement >= 2) && (movement <= 8))
+                    // {
+                    //     base = 0.125f;
+                    //     step = 0.125f;
+                    //     adjust = 2;
+                    // }
+                    // else if ((movement >= 9) && (movement <= 12))
+                    // {
+                    //     base = 1.0f;
+                    //     step = 0.25f;
+                    //     adjust = 9;
+                    // }
+                    // else if ((movement >= 13) && (movement <= 38))
+                    // {
+                    //     base = 2.0f;
+                    //     step = 0.5f;
+                    //     adjust = 13;
+                    // }
+                    // else if ((movement >= 39) && (movement <= 93))
+                    // {
+                    //     base = 15.0f;
+                    //     step = 1.0f;
+                    //     adjust = 39;
+                    // }
+                    // else if ((movement >= 94) && (movement <= 108))
+                    // {
+                    //     base = 70.0f;
+                    //     step = 2.0f;
+                    //     adjust = 94;
+                    // }
+                    // else
+                    // {
+                    //     base = 100.0f;
+                    //     step = 5.0f;
+                    //     adjust = 109;
+                    // }
                     aircraft->m_speedType = Aircraft::GS;
                     aircraft->m_speedValid = true;
                     aircraft->m_speedItem->setData(Qt::DisplayRole,  m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : (int)std::round(aircraft->m_speed));

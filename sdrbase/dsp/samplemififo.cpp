@@ -157,7 +157,6 @@ void SampleMIFifo::readSync(
     }
 
     QMutexLocker mutexLocker(&m_mutex);
-    std::vector<SampleVector>::iterator dataIt = m_data.begin();
     vpart1Begin.resize(m_nbStreams);
     vpart1End.resize(m_nbStreams);
     vpart2Begin.resize(m_nbStreams);
@@ -197,7 +196,6 @@ void SampleMIFifo::readSync(
     }
 
     QMutexLocker mutexLocker(&m_mutex);
-    std::vector<SampleVector>::iterator dataIt = m_data.begin();
     vpart1Begin.resize(m_nbStreams);
     vpart1End.resize(m_nbStreams);
     vpart2Begin.resize(m_nbStreams);

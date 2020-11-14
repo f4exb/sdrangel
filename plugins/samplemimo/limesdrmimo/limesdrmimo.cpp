@@ -802,7 +802,7 @@ bool LimeSDRMIMO::applySettings(const LimeSDRMIMOSettings& settings, bool force)
     }
 
     if ((m_settings.m_ncoFrequencyRx != settings.m_ncoFrequencyRx) ||
-        (m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force)
+        (m_settings.m_ncoEnableRx != settings.m_ncoEnableRx) || force || forceRxNCOFrequency)
     {
         forwardChangeRxDSP = true;
         applyRxNCOFrequency(0, settings.m_ncoEnableRx, settings.m_ncoFrequencyRx);

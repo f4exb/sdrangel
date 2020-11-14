@@ -382,6 +382,10 @@ void XTRXOutput::stop()
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
+
+        for (; it != sinkBuddies.end(); ++it) {
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(nullptr);
+        }
     }
     else if (nbOriginalChannels == 2) // Reduce from MO to SO by deleting and re-creating the thread
     {
@@ -398,6 +402,11 @@ void XTRXOutput::stop()
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
         const std::vector<DeviceAPI*>& sinkBuddies = m_deviceAPI->getSinkBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sinkBuddies.begin();
+
+        for (; it != sinkBuddies.end(); ++it) {
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_sink->setThread(nullptr);
+        }
+
         applySettings(m_settings, true);
         xtrxOutputThread->startWork();
     }

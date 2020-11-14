@@ -392,6 +392,10 @@ void XTRXInput::stop()
         // remove old thread address from buddies (reset in all buddies)
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(nullptr);
+        }
     }
     else if (nbOriginalChannels == 2) // Reduce from MI to SI by deleting and re-creating the thread
     {
@@ -409,6 +413,11 @@ void XTRXInput::stop()
         // remove old thread address from buddies (reset in all buddies). The address being held only in the owning source.
         const std::vector<DeviceAPI*>& sourceBuddies = m_deviceAPI->getSourceBuddies();
         std::vector<DeviceAPI*>::const_iterator it = sourceBuddies.begin();
+
+        for (; it != sourceBuddies.end(); ++it) {
+            ((DeviceXTRXShared*) (*it)->getBuddySharedPtr())->m_source->setThread(nullptr);
+        }
+
         applySettings(m_settings, true);
         xtrxInputThread->startWork();
     }
