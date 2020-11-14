@@ -134,9 +134,9 @@ void GLSpectrumGUI::displaySettings()
 
 	ui->fftWindow->setCurrentIndex(m_settings.m_fftWindow);
 
-	for (int i = 0; i < 6; i++)
+	for (unsigned int i = 0; i < 6; i++)
 	{
-		if (m_settings.m_fftSize == (1 << (i + 7)))
+		if (m_settings.m_fftSize == (1U << (i + 7)))
 		{
 			ui->fftSize->setCurrentIndex(i);
 			break;

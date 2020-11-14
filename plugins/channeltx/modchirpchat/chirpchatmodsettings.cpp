@@ -157,7 +157,7 @@ QByteArray ChirpChatModSettings::serialize() const
     s.writeS32(7, m_deBits);
     s.writeBool(8, m_channelMute);
     s.writeU32(9, m_syncWord);
-    s.writeS32(10, m_preambleChirps);
+    s.writeU32(10, m_preambleChirps);
     s.writeS32(11, m_quietMillis);
     s.writeBool(12, m_useReverseAPI);
     s.writeString(13, m_reverseAPIAddress);
@@ -226,7 +226,7 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
         d.readBool(8, &m_channelMute, false);
         d.readU32(9, &utmp, 0x34);
         m_syncWord = utmp > 255 ? 0 : utmp;
-        d.readS32(10, &m_preambleChirps, 8);
+        d.readU32(10, &m_preambleChirps, 8);
         d.readS32(11, &m_quietMillis, 1000);
         d.readBool(11, &m_useReverseAPI, false);
         d.readString(12, &m_reverseAPIAddress, "127.0.0.1");

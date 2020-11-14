@@ -60,7 +60,7 @@ QByteArray GLSpectrumSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
-	s.writeS32(1, m_fftSize);
+	s.writeU32(1, m_fftSize);
 	s.writeS32(2, m_fftOverlap);
 	s.writeS32(3, (int) m_fftWindow);
 	s.writeReal(4, m_refLevel);
@@ -102,7 +102,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 
 	if (d.getVersion() == 1)
     {
-		d.readS32(1, &m_fftSize, 1024);
+		d.readU32(1, &m_fftSize, 1024);
 		d.readS32(2, &m_fftOverlap, 0);
         d.readS32(3, &tmp, (int) FFTWindow::Hanning);
 		m_fftWindow = (FFTWindow::Function) tmp;

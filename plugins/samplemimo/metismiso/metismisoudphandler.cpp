@@ -263,8 +263,7 @@ void MetisMISOUDPHandler::dataReadyRead()
     quint16 metisPort;
     unsigned char receiveBuffer[1032];
     qint64 length;
-
-    long sequence;
+    unsigned long sequence;
 
     if ((length = m_socket.readDatagram((char*) &receiveBuffer, (qint64) sizeof(receiveBuffer), &metisAddress, &metisPort)) != 1032)
     {
@@ -483,7 +482,7 @@ bool MetisMISOUDPHandler::getRxIQInversion(int index)
 void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
 {
     int b = 0;
-    int r;
+    unsigned int r;
     int sampleI, sampleQ, sampleMic;
 
 

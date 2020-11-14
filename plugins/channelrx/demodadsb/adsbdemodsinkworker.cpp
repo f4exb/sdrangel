@@ -186,7 +186,7 @@ void ADSBDemodSinkWorker::run()
             if ((df == 17) || (df == 18))
             {
                 m_crc.init();
-                int parity = (data[11] << 16) | (data[12] << 8) | data[13]; // Parity / CRC
+                unsigned int parity = (data[11] << 16) | (data[12] << 8) | data[13]; // Parity / CRC
 
                 m_crc.calculate(data, ADS_B_ES_BYTES-3);
                 if (parity == m_crc.get())

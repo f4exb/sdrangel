@@ -638,7 +638,7 @@ void MainWindow::addFeatureSet()
     ui->tabFeatures->addTab(m_featureUIs.back()->m_featureWindow, QString("F%1").arg(tabIndex));
 }
 
-void MainWindow::removeFeatureSet(int tabIndex)
+void MainWindow::removeFeatureSet(unsigned int tabIndex)
 {
     if (tabIndex < m_featureUIs.size())
     {

@@ -39,9 +39,9 @@ public:
     InterferometerSettings::CorrelationType getCorrType() const { return m_corrType; }
     bool performCorr( //!< Returns true if results were produced
         const SampleVector& data0,
-        int size0,
+        unsigned int size0,
         const SampleVector& data1,
-        int size1
+        unsigned int size1
     );
     int getFullFFTSize() const { return 2*m_fftSize; }
     void setPhase(int phase);
@@ -57,35 +57,35 @@ signals:
 private:
     bool performOpCorr( //!< Returns true if results were produced
         const SampleVector& data0,
-        int size0,
+        unsigned int size0,
         const SampleVector& data1,
-        int size1,
+        unsigned int size1,
         Sample sampleOp(const Sample& a, const Sample& b)
     );
     bool performIFFTCorr( //!< Returns true if results were produced
         const SampleVector& data0,
-        int size0,
+        unsigned int size0,
         const SampleVector& data1,
-        int size1,
+        unsigned int size1,
         bool star = false
     );
     bool performIFFT2Corr( //!< Returns true if results were produced
         const SampleVector& data0,
-        int size0,
+        unsigned int size0,
         const SampleVector& data1,
-        int size1
+        unsigned int size1
     );
     bool performFFTProd( //!< Returns true if results were produced
         const SampleVector& data0,
-        int size0,
+        unsigned int size0,
         const SampleVector& data1,
-        int size1
+        unsigned int size1
     );
     void adjustSCorrSize(int size);
     void adjustTCorrSize(int size);
 
     InterferometerSettings::CorrelationType m_corrType;
-    int m_fftSize;                   //!< FFT length
+    unsigned int m_fftSize;          //!< FFT length
     FFTEngine *m_fft[2];             //!< FFT engines (double FFT)
     FFTEngine *m_invFFT;             //!< Inverse FFT engine (double FFT)
     FFTEngine *m_fft2[2];            //!< FFT engines

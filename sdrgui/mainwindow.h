@@ -138,7 +138,7 @@ private:
 	void addMIMODevice();
     void removeLastDevice();
     void addFeatureSet();
-    void removeFeatureSet(int tabIndex);
+    void removeFeatureSet(unsigned int tabIndex);
     void removeAllFeatureSets();
     void deleteChannel(int deviceSetIndex, int channelIndex);
     void sampleSourceChanged(int tabIndex, int newDeviceIndex);

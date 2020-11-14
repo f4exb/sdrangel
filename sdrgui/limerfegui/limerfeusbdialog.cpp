@@ -651,9 +651,9 @@ void LimeRFEUSBDialog::syncRxTx()
 
 void LimeRFEUSBDialog::stopStartRx(bool start)
 {
-    int rxDeviceSetSequence = ui->deviceSetRx->currentIndex();
+    unsigned int rxDeviceSetSequence = ui->deviceSetRx->currentIndex();
 
-    if ((rxDeviceSetSequence < 0) || (rxDeviceSetSequence >= m_sourceEngines.size())) {
+    if (rxDeviceSetSequence >= m_sourceEngines.size()) {
         return;
     }
 
@@ -677,9 +677,9 @@ void LimeRFEUSBDialog::stopStartRx(bool start)
 
 void LimeRFEUSBDialog::stopStartTx(bool start)
 {
-    int txDeviceSetSequence = ui->deviceSetTx->currentIndex();
+    unsigned int txDeviceSetSequence = ui->deviceSetTx->currentIndex();
 
-    if ((txDeviceSetSequence < 0) || (txDeviceSetSequence >= m_sinkEngines.size())) {
+    if (txDeviceSetSequence >= m_sinkEngines.size()) {
         return;
     }
 

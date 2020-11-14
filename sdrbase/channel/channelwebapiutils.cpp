@@ -35,7 +35,7 @@
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
 
-bool ChannelWebAPIUtils::getCenterFrequency(int deviceIndex, double &frequencyInHz)
+bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz)
 {
     SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -44,7 +44,7 @@ bool ChannelWebAPIUtils::getCenterFrequency(int deviceIndex, double &frequencyIn
 
     // Get current device settings
     std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if ((deviceIndex >= 0) && (deviceIndex < deviceSets.size()))
+    if (deviceIndex < deviceSets.size())
     {
         deviceSet = deviceSets[deviceIndex];
         if (deviceSet->m_deviceSourceEngine)
@@ -91,7 +91,7 @@ bool ChannelWebAPIUtils::getCenterFrequency(int deviceIndex, double &frequencyIn
     return WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
 }
 
-bool ChannelWebAPIUtils::setCenterFrequency(int deviceIndex, double frequencyInHz)
+bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double frequencyInHz)
 {
     SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
     SWGSDRangel::SWGErrorResponse errorResponse;
@@ -100,7 +100,7 @@ bool ChannelWebAPIUtils::setCenterFrequency(int deviceIndex, double frequencyInH
 
     // Get current device settings
     std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if ((deviceIndex >= 0) && (deviceIndex < deviceSets.size()))
+    if (deviceIndex < deviceSets.size())
     {
         deviceSet = deviceSets[deviceIndex];
         if (deviceSet->m_deviceSourceEngine)

@@ -81,7 +81,7 @@ PluginInterface::SamplingDevices XTRXInputPlugin::enumSampleSources(const Origin
     {
         if (it->hardwareId == m_hardwareID)
         {
-            for (unsigned int j = 0; j < it->nbRxStreams; j++)
+            for (int j = 0; j < it->nbRxStreams; j++)
             {
                 qDebug("XTRXInputPlugin::enumSampleSources: device #%d channel %u: %s", it->sequence, j, qPrintable(it->serial));
                 QString displayedName = it->displayableName;

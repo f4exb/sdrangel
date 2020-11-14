@@ -1088,7 +1088,7 @@ void ATVModSource::reportVideoFileSourceStreamTiming()
     }
 }
 
-void ATVModSource::configureCameraIndex(int index)
+void ATVModSource::configureCameraIndex(unsigned int index)
 {
     if (index < m_cameras.size())
     {

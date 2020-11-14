@@ -62,7 +62,7 @@ void ChirpChatModSource::initSF(unsigned int sf)
     m_phaseIncrements = new double[2*m_fftLength*ChirpChatModSettings::oversampling];
     phase = -halfAngle;
 
-    for (int i = 0; i < m_fftLength*ChirpChatModSettings::oversampling; i++)
+    for (unsigned int i = 0; i < m_fftLength*ChirpChatModSettings::oversampling; i++)
     {
         m_phaseIncrements[i] = phase;
         phase += (2*halfAngle) / (m_fftLength*ChirpChatModSettings::oversampling);

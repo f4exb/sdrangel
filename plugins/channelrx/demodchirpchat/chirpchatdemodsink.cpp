@@ -117,7 +117,7 @@ void ChirpChatDemodSink::initSF(unsigned int sf, unsigned int deBits, FFTWindow:
     float phase = -halfAngle;
     double accumulator = 0;
 
-    for (int i = 0; i < m_fftLength; i++)
+    for (unsigned int i = 0; i < m_fftLength; i++)
     {
         accumulator = fmod(accumulator + phase, 2*M_PI);
         m_downChirps[i] = Complex(std::conj(std::polar(1.0, accumulator)));
@@ -191,7 +191,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                 m_argMaxHistoryCounter = 0;
                 bool preambleFound = true;
 
-                for (int i = 1; i < m_requiredPreambleChirps; i++)
+                for (unsigned int i = 1; i < m_requiredPreambleChirps; i++)
                 {
                     int delta = m_argMaxHistory[i] - m_argMaxHistory[i-1];
                     // qDebug("ChirpChatDemodSink::processSample: search: delta: %d / %d", delta, m_deLength);
@@ -314,7 +314,7 @@ void ChirpChatDemodSink::processSample(const Complex& ci)
                     int zadj;
                     int sfdSkip = m_sfdSkip;
 
-                    for (int i = 0; i < m_chirpCount - 1 - (m_settings.hasSyncWord() ? 2 : 0); i++)
+                    for (unsigned int i = 0; i < m_chirpCount - 1 - (m_settings.hasSyncWord() ? 2 : 0); i++)
                     {
                         sadj += m_preambleHistory[i] > m_nbSymbols/2 ? m_preambleHistory[i] - m_nbSymbols : m_preambleHistory[i];
                         nadj++;

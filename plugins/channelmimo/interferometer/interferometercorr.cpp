@@ -160,9 +160,9 @@ InterferometerCorrelator::~InterferometerCorrelator()
 
 bool InterferometerCorrelator::performCorr(
     const SampleVector& data0,
-    int size0,
+    unsigned int size0,
     const SampleVector& data1,
-    int size1
+    unsigned int size1
 )
 {
     bool results = false;
@@ -308,9 +308,9 @@ bool InterferometerCorrelator::performCorr(
 
 bool InterferometerCorrelator::performOpCorr(
     const SampleVector& data0,
-    int size0,
+    unsigned int size0,
     const SampleVector& data1,
-    int size1,
+    unsigned int size1,
     Sample sampleOp(const Sample& a, const Sample& b)
 )
 {
@@ -333,9 +333,9 @@ bool InterferometerCorrelator::performOpCorr(
 
 bool InterferometerCorrelator::performIFFTCorr(
     const SampleVector& data0,
-    int size0,
+    unsigned int size0,
     const SampleVector& data1,
-    int size1,
+    unsigned int size1,
     bool star
 )
 {
@@ -457,9 +457,9 @@ bool InterferometerCorrelator::performIFFTCorr(
 
 bool InterferometerCorrelator::performIFFT2Corr(
     const SampleVector& data0,
-    int size0,
+    unsigned int size0,
     const SampleVector& data1,
-    int size1
+    unsigned int size1
 )
 {
     unsigned int size = std::min(size0, size1);
@@ -566,9 +566,9 @@ bool InterferometerCorrelator::performIFFT2Corr(
 
 bool InterferometerCorrelator::performFFTProd(
     const SampleVector& data0,
-    int size0,
+    unsigned int size0,
     const SampleVector& data1,
-    int size1
+    unsigned int size1
 )
 {
     unsigned int size = std::min(size0, size1);

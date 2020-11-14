@@ -72,8 +72,8 @@ private:
 	int m_bandwidth;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
-	int m_chirp;
-	int m_chirp0;
+	unsigned int m_chirp;
+	unsigned int m_chirp0;
 
     static const unsigned int m_requiredPreambleChirps = 4; //!< Number of chirps required to estimate preamble
     static const unsigned int m_maxSFDSearchChirps = 8;     //!< Maximum number of chirps when looking for SFD after preamble detection

@@ -690,7 +690,7 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    int fftSize = settings.m_fftSize > MAX_FFT_SIZE ?
+    unsigned int fftSize = settings.m_fftSize > MAX_FFT_SIZE ?
         MAX_FFT_SIZE :
         settings.m_fftSize < 64 ?
             64 :

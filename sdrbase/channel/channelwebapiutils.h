@@ -23,8 +23,8 @@
 class SDRBASE_API ChannelWebAPIUtils
 {
 public:
-    static bool getCenterFrequency(int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(int deviceIndex, double frequencyInHz);
+    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
+    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
 };
 
 #endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_

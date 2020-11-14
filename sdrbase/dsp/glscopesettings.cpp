@@ -135,7 +135,7 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         m_tracesData.clear();
         float r, g, b;
 
-        for (int iTrace = 0; iTrace < nbTracesSaved; iTrace++)
+        for (unsigned int iTrace = 0; iTrace < nbTracesSaved; iTrace++)
         {
             if (20 + 16*iTrace > 200) {
                 break;
@@ -171,7 +171,7 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         d.readU32(200, &nbTriggersSaved, 1);
         m_triggersData.clear();
 
-        for (int iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
+        for (unsigned int iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
         {
             m_triggersData.push_back(TriggerData());
 

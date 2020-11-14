@@ -68,7 +68,7 @@ public:
     void openVideo(const QString& fileName);
     void seekVideoFileStream(int seekPercentage);
     void reportVideoFileSourceStreamTiming();
-    void configureCameraIndex(int index);
+    void configureCameraIndex(unsigned int index);
     void configureCameraData(uint32_t index, float mnaualFPS, bool manualFPSEnable);
 
     static void getBaseValues(int outputSampleRate, int linesPerSecond, int& sampleRateUnits, uint32_t& nbPointsPerRateUnit);
@@ -164,7 +164,7 @@ private:
     int      m_nbLines2;         //!< same number as above (non interlaced) or Euclidean half the number above (interlaced)
     int      m_nbLinesField1;    //!< In interlaced mode: number of lines in field1 transition included
     uint32_t m_nbImageLines2;    //!< half the number of effective image lines
-    uint32_t m_nbImageLines;     //!< number of effective image lines
+    int      m_nbImageLines;     //!< number of effective image lines
     uint32_t m_imageLineStart1;  //!< start index of line for field 1
     uint32_t m_imageLineStart2;  //!< start index of line for field 2
     int      m_nbHorizPoints;    //!< number of line points per horizontal line

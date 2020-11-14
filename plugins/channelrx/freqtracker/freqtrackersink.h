@@ -98,7 +98,7 @@ private:
 
     int m_channelSampleRate;
     int m_inputFrequencyOffset;
-    uint32_t m_sinkSampleRate;
+    int m_sinkSampleRate;
 
 	SpectrumVis* m_spectrumSink;
 	SampleVector m_sampleBuffer;

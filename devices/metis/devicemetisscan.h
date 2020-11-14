@@ -54,7 +54,7 @@ public:
 
     void scan();
     int getNbDevices() const { return m_scans.size(); }
-    const DeviceScan* getDeviceAt(unsigned int index) const;
+    const DeviceScan* getDeviceAt(int index) const;
     void getSerials(QList<QString>& serials) const;
     void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 

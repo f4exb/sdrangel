@@ -811,13 +811,13 @@ void DSPDeviceMIMOEngine::handleSetMIMO(DeviceSampleMIMO* mimo)
         return;
     }
 
-    for (int i = 0; i < m_deviceSampleMIMO->getNbSinkFifos(); i++)
+    for (unsigned int i = 0; i < m_deviceSampleMIMO->getNbSinkFifos(); i++)
     {
         m_basebandSampleSinks.push_back(BasebandSampleSinks());
         m_sourcesCorrections.push_back(SourceCorrection());
     }
 
-    for (int i = 0; i < m_deviceSampleMIMO->getNbSourceFifos(); i++)
+    for (unsigned int i = 0; i < m_deviceSampleMIMO->getNbSourceFifos(); i++)
     {
         m_basebandSampleSources.push_back(BasebandSampleSources());
         m_sourceSampleBuffers.push_back(IncrementalVector<Sample>());
@@ -1018,7 +1018,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
         MIMOChannel *channel = msg->getChannel();
         m_mimoChannels.push_back(channel);
 
-        for (int isource = 0; isource < m_deviceSampleMIMO->getNbSourceStreams(); isource++)
+        for (unsigned int isource = 0; isource < m_deviceSampleMIMO->getNbSourceStreams(); isource++)
         {
             DSPMIMOSignalNotification notif(
                 m_deviceSampleMIMO->getSourceSampleRate(isource),
@@ -1029,7 +1029,7 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
             channel->handleMessage(notif);
         }
 
-        for (int isink = 0; isink < m_deviceSampleMIMO->getNbSinkStreams(); isink++)
+        for (unsigned int isink = 0; isink < m_deviceSampleMIMO->getNbSinkStreams(); isink++)
         {
             DSPMIMOSignalNotification notif(
                 m_deviceSampleMIMO->getSinkSampleRate(isink),

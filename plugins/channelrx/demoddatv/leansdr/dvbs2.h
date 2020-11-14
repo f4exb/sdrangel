@@ -171,7 +171,7 @@ struct s2_bbscrambling
     s2_bbscrambling()
     {
         uint16_t st = 0x00a9; // 000 0000 1010 1001  (Fig 5 reversed)
-        for (int i = 0; i < sizeof(pattern); ++i)
+        for (unsigned int i = 0; i < sizeof(pattern); ++i)
         {
             uint8_t out = 0;
             for (int n = 8; n--;)

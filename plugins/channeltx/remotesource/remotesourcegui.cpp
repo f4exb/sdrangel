@@ -78,7 +78,7 @@ bool RemoteSourceGUI::handleMessage(const Message& message)
     {
         const RemoteSource::MsgReportStreamData& report = (RemoteSource::MsgReportStreamData&) message;
 
-        uint32_t remoteSampleRate = report.get_sampleRate();
+        int remoteSampleRate = report.get_sampleRate();
 
         if (remoteSampleRate != m_remoteSampleRate)
         {

@@ -24,11 +24,11 @@ void DeviceMetisScan::scan()
 {
     m_scans.clear();
 
-    if (m_udpSocket.bind(QHostAddress::AnyIPv4, 10001, QUdpSocket::ShareAddress)) 
+    if (m_udpSocket.bind(QHostAddress::AnyIPv4, 10001, QUdpSocket::ShareAddress))
     {
         connect(&m_udpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    } 
-    else 
+    }
+    else
     {
         qDebug() << "DeviceMetisScan::scan: cannot bind socket";
         return;
@@ -40,7 +40,7 @@ void DeviceMetisScan::scan()
     buffer[2] = (unsigned char) 0x02;
     std::fill(&buffer[3], &buffer[63], 0);
 
-    if (m_udpSocket.writeDatagram((const char*) buffer, sizeof(buffer), QHostAddress::Broadcast, 1024) < 0) 
+    if (m_udpSocket.writeDatagram((const char*) buffer, sizeof(buffer), QHostAddress::Broadcast, 1024) < 0)
     {
         qDebug() << "DeviceMetisScan::scan: discovery writeDatagram failed " << m_udpSocket.errorString();
         return;
@@ -59,7 +59,7 @@ void DeviceMetisScan::scan()
     qDebug() << "DeviceMetisScan::scan: start 0.5 second timeout loop";
     // Execute the event loop here and wait for the timeout to trigger
     // which in turn will trigger event loop quit.
-    loop.exec();    
+    loop.exec();
 
     disconnect(&m_udpSocket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     m_udpSocket.close();
@@ -81,11 +81,11 @@ void DeviceMetisScan::enumOriginDevices(const QString& hardwareId, PluginInterfa
             i, // sequence
             8, // Nb Rx
             1  // Nb Tx
-        ));        
+        ));
     }
 }
 
-const DeviceMetisScan::DeviceScan* DeviceMetisScan::getDeviceAt(unsigned int index) const
+const DeviceMetisScan::DeviceScan* DeviceMetisScan::getDeviceAt(int index) const
 {
     if (index < m_scans.size()) {
         return &m_scans.at(index);
@@ -97,7 +97,7 @@ const DeviceMetisScan::DeviceScan* DeviceMetisScan::getDeviceAt(unsigned int ind
 void DeviceMetisScan::getSerials(QList<QString>& serials) const
 {
     for (int i = 0; i < m_scans.size(); i++) {
-        serials.append(m_scans.at(i).m_serial); 
+        serials.append(m_scans.at(i).m_serial);
     }
 }
 
@@ -107,17 +107,17 @@ void DeviceMetisScan::readyRead()
     quint16 metisPort;
     unsigned char buffer[1024];
 
-    if (m_udpSocket.readDatagram((char*) &buffer, (qint64) sizeof(buffer), &metisAddress, &metisPort) < 0) 
+    if (m_udpSocket.readDatagram((char*) &buffer, (qint64) sizeof(buffer), &metisAddress, &metisPort) < 0)
     {
         qDebug() << "DeviceMetisScan::readyRead: readDatagram failed " << m_udpSocket.errorString();
         return;
     }
 
-    QString metisIP = QString("%1:%2").arg(metisAddress.toString()).arg(metisPort); 
+    QString metisIP = QString("%1:%2").arg(metisAddress.toString()).arg(metisPort);
 
-    if (buffer[0] == 0xEF && buffer[1] == 0xFE) 
+    if (buffer[0] == 0xEF && buffer[1] == 0xFE)
     {
-        switch(buffer[2]) 
+        switch(buffer[2])
         {
             case 3:  // reply
                 // should not happen on this port
@@ -138,8 +138,8 @@ void DeviceMetisScan::readyRead()
             case 1:  // a data packet
                 break;
         }
-    } 
-    else 
+    }
+    else
     {
         qDebug() << "DeviceMetisScan::readyRead: received invalid response to discovery";
     }

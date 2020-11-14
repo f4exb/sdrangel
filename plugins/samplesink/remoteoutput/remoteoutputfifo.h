@@ -44,9 +44,9 @@ signals:
 private:
     std::vector<RemoteDataBlock> m_data;
     int m_size;
-    unsigned int m_readHead;   //!< index of last data block processed
-    unsigned int m_servedHead; //!< index of last data block served
-    unsigned int m_writeHead;  //!< index of next data block to serve
+    int m_readHead;   //!< index of last data block processed
+    int m_servedHead; //!< index of last data block served
+    int m_writeHead;  //!< index of next data block to serve
     QMutex m_mutex;
 
     unsigned int calculateRemainder();

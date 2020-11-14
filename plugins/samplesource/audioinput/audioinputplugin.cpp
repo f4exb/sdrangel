@@ -83,7 +83,7 @@ PluginInterface::SamplingDevices AudioInputPlugin::enumSampleSources(const Origi
     {
         if (it->hardwareId == m_hardwareID)
         {
-            for (unsigned int j = 0; j < it->nbRxStreams; j++)
+            for (int j = 0; j < it->nbRxStreams; j++)
             {
                 result.append(SamplingDevice(
                     it->displayableName,

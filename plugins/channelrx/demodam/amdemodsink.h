@@ -95,7 +95,7 @@ private:
 	Real m_interpolatorDistanceRemain;
 
 	Real m_squelchLevel;
-	uint32_t m_squelchCount;
+	int m_squelchCount;
 	bool m_squelchOpen;
 	DoubleBufferFIFO<Real> m_squelchDelayLine;
 	double m_magsq;

@@ -40,7 +40,7 @@ struct bitvect
     bitvect(T val)
     {
         v[0] = val;
-        for (int i = 1; i < NW; ++i)
+        for (unsigned int i = 1; i < NW; ++i)
             v[i] = 0;
     }
 
@@ -139,7 +139,7 @@ bitvect<T, N> shiftdivmod(const Tm *m, size_t nm, const bitvect<T, N> &p,
                           T init = 0)
 {
     bitvect<T, N> res;
-    for (int i = 0; i < res.NW; ++i)
+    for (unsigned int i = 0; i < res.NW; ++i)
         res.v[i] = init;
     const Tm bitmask = (Tm)1 << (sizeof(Tm) * 8 - 1);
     for (; nm--; ++m)

@@ -413,13 +413,13 @@ public:
     std::vector<DeviceSet*>& getDeviceSets() { return m_deviceSets; }
     std::vector<FeatureSet*>& getFeatureeSets() { return m_featureSets; }
     void setLoggingOptions();
-    ChannelAPI *getChannel(int deviceSetIndex, int channelIndex);
-    Feature *getFeature(int featureSetIndex, int featureIndex);
+    ChannelAPI *getChannel(unsigned int deviceSetIndex, int channelIndex);
+    Feature *getFeature(unsigned int featureSetIndex, int featureIndex);
     bool existsChannel(ChannelAPI *channel) const { return m_channelsMap.contains(channel); }
     bool existsFeature(Feature *feature) const { return m_featuresMap.contains(feature); }
     // slave mode
     void appendFeatureSet();
-    void removeFeatureSet(int index);
+    void removeFeatureSet(unsigned int index);
     void removeLastFeatureSet();
     void appendDeviceSet(int deviceType);
     void removeLastDeviceSet();

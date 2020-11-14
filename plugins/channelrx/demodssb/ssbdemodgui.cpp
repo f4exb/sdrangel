@@ -197,7 +197,7 @@ void SSBDemodGUI::on_audioMute_toggled(bool checked)
 
 void SSBDemodGUI::on_spanLog2_valueChanged(int value)
 {
-    unsigned int s2max = spanLog2Max();
+    int s2max = spanLog2Max();
 
     if ((value < 0) || (value > s2max-1)) {
         return;

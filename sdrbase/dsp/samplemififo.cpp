@@ -296,7 +296,7 @@ void SampleMIFifo::writeAsync(const SampleVector::const_iterator& begin, unsigne
     }
 
     QMutexLocker mutexLocker(&m_mutex);
-    int spaceLeft = m_size - m_vFill[stream];
+    unsigned int spaceLeft = m_size < m_vFill[stream] ? 0 : m_size - m_vFill[stream];
 
     if (size > m_size)
     {

@@ -385,7 +385,7 @@ void FreqTrackerSink::tick()
     {
         if ((m_settings.m_tracking) && getSquelchOpen())
         {
-            uint32_t decayDivider = 200.0 * m_settings.m_alphaEMA;
+            int decayDivider = 200.0 * m_settings.m_alphaEMA;
             int decayAmount = m_sinkSampleRate < decayDivider ? 1 : m_sinkSampleRate / decayDivider;
             int trim = m_sinkSampleRate / 1000;
 

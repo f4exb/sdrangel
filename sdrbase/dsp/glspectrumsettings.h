@@ -36,7 +36,7 @@ public:
         AvgModeMax
     };
 
-	int m_fftSize;
+	unsigned int m_fftSize;
 	int m_fftOverlap;
 	FFTWindow::Function m_fftWindow;
 	Real m_refLevel;

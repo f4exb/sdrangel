@@ -35,14 +35,14 @@ public:
     Type filter(Type sample)
     {
         Type acc = 0;
-        int n_samples = m_samples.size();
-        int n_taps = m_taps.size() - 1;
-        int a = m_ptr;
-        int b = a == 0 ? n_samples - 1 : a - 1;
+        unsigned int n_samples = m_samples.size();
+        unsigned int n_taps = m_taps.size() - 1;
+        unsigned int a = m_ptr;
+        unsigned int b = a == 0 ? n_samples - 1 : a - 1;
 
         m_samples[m_ptr] = sample;
 
-        for (int i = 0; i < n_taps; ++i)
+        for (unsigned int i = 0; i < n_taps; ++i)
         {
             acc += (m_samples[a] + m_samples[b]) * m_taps[i];
 
