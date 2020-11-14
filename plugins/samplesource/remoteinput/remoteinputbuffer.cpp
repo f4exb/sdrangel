@@ -28,7 +28,6 @@
 RemoteInputBuffer::RemoteInputBuffer() :
         m_decoderSlots(nullptr),
         m_frames(nullptr),
-        m_decoderIndexHead(m_nbDecoderSlots/2),
         m_curNbBlocks(0),
         m_minNbBlocks(256),
         m_curOriginalBlocks(0),
@@ -47,6 +46,7 @@ RemoteInputBuffer::RemoteInputBuffer() :
 {
 	m_currentMeta.init();
     setNbDecoderSlots(16);
+    m_decoderIndexHead = m_nbDecoderSlots/2;
 	m_tvOut_sec = 0;
 	m_tvOut_usec = 0;
 	m_readNbBytes = 1;

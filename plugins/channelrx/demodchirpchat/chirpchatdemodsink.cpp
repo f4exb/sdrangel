@@ -477,7 +477,7 @@ unsigned int ChirpChatDemodSink::argmax(
 {
     magsqMax = 0.0;
     magsqTotal = 0.0;
-    unsigned int imax;
+    unsigned int imax = 0;
     double magSum = 0.0;
 
     for (unsigned int i = 0; i < fftMult*fftLength; i++)
