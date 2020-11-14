@@ -18,11 +18,11 @@
 #include <boost/endian/conversion.hpp>
 #include "kiwisdrworker.h"
 
-KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo)
-	: QObject(),
+KiwiSDRWorker::KiwiSDRWorker(SampleSinkFifo* sampleFifo) :
+	QObject(),
 	m_timer(this),
-	m_sampleFifo(sampleFifo),
 	m_samplesBuf(),
+	m_sampleFifo(sampleFifo),
 	m_centerFrequency(1450000),
 	m_gain(20),
 	m_useAGC(true),

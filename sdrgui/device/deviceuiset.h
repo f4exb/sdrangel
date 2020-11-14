@@ -109,14 +109,14 @@ private:
         int m_channelType;
 
         ChannelInstanceRegistration() :
-            m_gui(nullptr),
             m_channelAPI(nullptr),
+            m_gui(nullptr),
             m_channelType(0)
         { }
 
         ChannelInstanceRegistration(ChannelAPI *channelAPI, ChannelGUI* channelGUI, int channelType) :
-            m_gui(channelGUI),
             m_channelAPI(channelAPI),
+            m_gui(channelGUI),
             m_channelType(channelType)
         { }
 

@@ -51,10 +51,10 @@ USRPOutput::USRPOutput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_usrpOutputThread(nullptr),
-    m_bufSamples(0),
     m_deviceDescription("USRPOutput"),
     m_running(false),
-    m_channelAcquired(false)
+    m_channelAcquired(false),
+    m_bufSamples(0)
 {
     m_deviceAPI->setNbSinkStreams(1);
     m_sampleSourceFifo.resize(SampleSourceFifo::getSizePolicy(m_settings.m_devSampleRate));

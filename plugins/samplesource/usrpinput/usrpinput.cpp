@@ -51,10 +51,10 @@ USRPInput::USRPInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
     m_usrpInputThread(nullptr),
-    m_bufSamples(0),
     m_deviceDescription("USRPInput"),
     m_running(false),
-    m_channelAcquired(false)
+    m_channelAcquired(false),
+    m_bufSamples(0)
 {
     m_streamId = nullptr;
     suspendRxBuddies();

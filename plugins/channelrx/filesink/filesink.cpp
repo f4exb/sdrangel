@@ -50,9 +50,9 @@ const QString FileSink::m_channelId = "FileSink";
 FileSink::FileSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
         m_deviceAPI(deviceAPI),
+        m_spectrumVis(SDR_RX_SCALEF),
         m_centerFrequency(0),
         m_frequencyOffset(0),
-        m_spectrumVis(SDR_RX_SCALEF),
         m_basebandSampleRate(48000)
 {
     setObjectName(m_channelId);

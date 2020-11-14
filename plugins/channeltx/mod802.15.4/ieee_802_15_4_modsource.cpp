@@ -25,24 +25,24 @@
 
 IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_channelSampleRate(3000000),
-    m_spectrumRate(0),
     m_channelFrequencyOffset(0),
+    m_spectrumRate(0),
+    m_sinLUT(nullptr),
+    m_scrambler(0x108, 0x1fe, 0),
+    m_spectrumSink(nullptr),
+    m_scopeSink(nullptr),
     m_magsq(0.0),
     m_levelCalcCount(0),
     m_peakLevel(0.0f),
     m_levelSum(0.0f),
-    m_bitCount(0),
-    m_byteIdx(0),
-    m_bitIdx(0),
-    m_state(idle),
     m_sampleIdx(0),
     m_chipsPerSymbol(15),
     m_bitsPerSymbol(1),
     m_chipRate(300000),
-    m_sinLUT(nullptr),
-    m_spectrumSink(nullptr),
-    m_scopeSink(nullptr),
-    m_scrambler(0x108, 0x1fe, 0)
+    m_state(idle),
+    m_byteIdx(0),
+    m_bitIdx(0),
+    m_bitCount(0)
 {
     m_lowpass.create(301, m_channelSampleRate, 22000.0 / 2.0);
     m_pulseShapeI.create(1, 6, m_channelSampleRate/300000, true);

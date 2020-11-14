@@ -28,8 +28,8 @@ class SDRBASE_API crc
 public:
     // Create and initialise CRC with specified polynomial and parameters
     crc(int poly_bits, uint32_t polynomial, bool msb_first, uint32_t init_value, uint32_t final_xor) :
-        m_poly_bits(poly_bits),
         m_polynomial(polynomial),
+        m_poly_bits(poly_bits),
         m_msb_first(msb_first),
         m_init_value(init_value),
         m_final_xor(final_xor)

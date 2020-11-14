@@ -33,9 +33,9 @@ FCDProThread::FCDProThread(SampleSinkFifo* sampleFifo, AudioFifo *fcdFIFO, QObje
 	m_running(false),
 	m_log2Decim(0),
 	m_fcPos(2),
+    m_iqOrder(true),
 	m_convertBuffer(fcd_traits<Pro>::convBufSize), // nb samples
-	m_sampleFifo(sampleFifo),
-    m_iqOrder(true)
+	m_sampleFifo(sampleFifo)
 {
 	start();
 }

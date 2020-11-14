@@ -60,9 +60,9 @@ XTRXMIMOGUI::XTRXMIMOGUI(DeviceUISet *deviceUISet, QWidget* parent) :
     m_txDeviceCenterFrequency(435000*1000),
     m_lastRxEngineState(DeviceAPI::StNotStarted),
     m_lastTxEngineState(DeviceAPI::StNotStarted),
-    m_sampleRateMode(true),
     m_statusCounter(0),
-    m_deviceStatusCounter(0)
+    m_deviceStatusCounter(0),
+    m_sampleRateMode(true)
 {
     qDebug("XTRXMIMOGUI::XTRXMIMOGUI");
     ui->setupUi(this);

@@ -24,11 +24,11 @@
 #include "filesinksink.h"
 
 FileSinkSink::FileSinkSink() :
-    m_spectrumSink(nullptr),
-    m_msgQueueToGUI(nullptr),
     m_nbCaptures(0),
     m_preRecordBuffer(48000),
     m_preRecordFill(0),
+    m_spectrumSink(nullptr),
+    m_msgQueueToGUI(nullptr),
     m_recordEnabled(false),
     m_record(false),
     m_squelchOpen(false),

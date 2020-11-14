@@ -30,10 +30,10 @@ MESSAGE_CLASS_DEFINITION(FileSinkBaseband::MsgConfigureFileSinkBaseband, Message
 MESSAGE_CLASS_DEFINITION(FileSinkBaseband::MsgConfigureFileSinkWork, Message)
 
 FileSinkBaseband::FileSinkBaseband() :
-    m_running(false),
     m_specMax(0),
     m_squelchLevel(0),
     m_squelchOpen(false),
+    m_running(false),
     m_mutex(QMutex::Recursive)
 {
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));

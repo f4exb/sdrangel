@@ -25,12 +25,12 @@ ChirpChatModSource::ChirpChatModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_phaseIncrements(nullptr),
+    m_repeatCount(0),
+    m_active(false),
     m_modPhasor(0.0f),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
-	m_levelSum(0.0f),
-    m_repeatCount(0),
-    m_active(false)
+	m_levelSum(0.0f)
 {
 	m_magsq = 0.0;
 

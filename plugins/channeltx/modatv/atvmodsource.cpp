@@ -115,6 +115,7 @@ ATVModSource::ATVModSource() :
     m_tvSampleRate(1000000),
     m_horizontalCount(0),
     m_lineCount(0),
+    m_imageLine(0),
 	m_imageOK(false),
 	m_videoFPSq(1.0f),
     m_videoFPSCount(0.0f),
@@ -129,8 +130,7 @@ ATVModSource::ATVModSource() :
     m_DSBFilter(nullptr),
     m_DSBFilterBuffer(nullptr),
     m_DSBFilterBufferIndex(0),
-    m_messageQueueToGUI(nullptr),
-    m_imageLine(0)
+    m_messageQueueToGUI(nullptr)
 {
     scanCameras();
 

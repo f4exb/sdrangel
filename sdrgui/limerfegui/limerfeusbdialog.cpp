@@ -30,9 +30,9 @@
 #include "ui_limerfeusbdialog.h"
 
 LimeRFEUSBDialog::LimeRFEUSBDialog(LimeRFEUSBCalib& limeRFEUSBCalib, MainWindow* mainWindow) :
-    m_limeRFEUSBCalib(limeRFEUSBCalib),
     QDialog(mainWindow),
     ui(new Ui::LimeRFEUSBDialog),
+    m_limeRFEUSBCalib(limeRFEUSBCalib),
     m_rxTxToggle(false),
     m_currentPowerCorrection(0.0),
     m_avgPower(false),

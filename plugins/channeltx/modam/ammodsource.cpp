@@ -24,13 +24,13 @@ const int AMModSource::m_levelNbSamples = 480; // every 10ms
 AMModSource::AMModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
+    m_audioSampleRate(48000),
     m_audioFifo(4800),
     m_feedbackAudioFifo(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr),
-    m_audioSampleRate(48000)
+    m_ifstream(nullptr)
 {
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;

@@ -1771,10 +1771,10 @@ ADSBDemodGUI::ADSBDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseb
     m_basicSettingsShown(false),
     m_doApplySettings(true),
     m_tickCount(0),
-    m_trackAircraft(nullptr),
-    m_highlightAircraft(nullptr),
     m_aircraftInfo(nullptr),
     m_airportModel(this),
+    m_trackAircraft(nullptr),
+    m_highlightAircraft(nullptr),
     m_progressDialog(nullptr)
 {
     ui->setupUi(this);

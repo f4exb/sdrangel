@@ -25,14 +25,14 @@ WFMModSource::WFMModSource() :
     m_channelSampleRate(384000),
     m_channelFrequencyOffset(0),
     m_modPhasor(0.0f),
+    m_audioSampleRate(48000),
     m_audioFifo(4800),
+    m_feedbackAudioSampleRate(48000),
     m_feedbackAudioFifo(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr),
-    m_audioSampleRate(48000),
-    m_feedbackAudioSampleRate(48000)
+    m_ifstream(nullptr)
 {
     m_rfFilter = new fftfilt(-62500.0 / 384000.0, 62500.0 / 384000.0, m_rfFilterFFTLength);
     m_rfFilterBuffer = new Complex[m_rfFilterFFTLength];

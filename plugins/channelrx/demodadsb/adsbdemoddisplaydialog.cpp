@@ -25,9 +25,9 @@ ADSBDemodDisplayDialog::ADSBDemodDisplayDialog(
         bool displayHeliports, bool siUnits, QString fontName, int fontSize, bool displayDemodStats,
         bool autoResizeTableColumns, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::ADSBDemodDisplayDialog),
     m_fontName(fontName),
-    m_fontSize(fontSize)
+    m_fontSize(fontSize),
+    ui(new Ui::ADSBDemodDisplayDialog)
 {
     ui->setupUi(this);
     ui->timeout->setValue(removeTimeout);

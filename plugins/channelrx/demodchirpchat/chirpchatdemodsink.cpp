@@ -32,13 +32,13 @@
 ChirpChatDemodSink::ChirpChatDemodSink() :
     m_decodeMsg(nullptr),
     m_decoderMsgQueue(nullptr),
-    m_spectrumSink(nullptr),
-    m_spectrumBuffer(nullptr),
+    m_fftSequence(-1),
+    m_fftSFDSequence(-1),
     m_downChirps(nullptr),
     m_upChirps(nullptr),
     m_spectrumLine(nullptr),
-    m_fftSequence(-1),
-    m_fftSFDSequence(-1)
+    m_spectrumSink(nullptr),
+    m_spectrumBuffer(nullptr)
 {
     m_demodActive = false;
 	m_bandwidth = ChirpChatDemodSettings::bandwidths[0];
