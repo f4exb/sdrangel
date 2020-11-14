@@ -349,7 +349,7 @@ void LimeRFEController::settingsToState(const LimeRFESettings& settings)
         }
     }
 
-    m_rfeBoardState.attValue = settings.m_attenuationFactor < 0 ? 0 : settings.m_attenuationFactor > 7 ? 7 : settings.m_attenuationFactor;
+    m_rfeBoardState.attValue = settings.m_attenuationFactor > 7 ? 7 : settings.m_attenuationFactor;
     m_rfeBoardState.notchOnOff = settings.m_amfmNotch;
     m_rfeBoardState.enableSWR = settings.m_swrEnable ? RFE_SWR_ENABLE : RFE_SWR_DISABLE;
 

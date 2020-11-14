@@ -100,7 +100,7 @@ bool BeamSteeringCWModSettings::deserialize(const QByteArray& data)
         m_log2Interp = tmp > 6 ? 6 : tmp;
         d.readU32(13, &m_filterChainHash, 0);
         d.readS32(14, &stmp, 0);
-        m_channelOutput = tmp < 0 ? 0 : tmp > 2 ? 2 : tmp;
+        m_channelOutput = stmp < 0 ? 0 : stmp > 2 ? 2 : stmp;
 
         return true;
     }

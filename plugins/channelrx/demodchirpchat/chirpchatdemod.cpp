@@ -517,7 +517,7 @@ void ChirpChatDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("udpPort"))
     {
         uint16_t port = response.getChirpChatDemodSettings()->getUdpPort();
-        settings.m_udpPort = port < 1024 ? 1024 : port > 65535 ? 65535 : port;
+        settings.m_udpPort = port < 1024 ? 1024 : port;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getChirpChatDemodSettings()->getRgbColor();

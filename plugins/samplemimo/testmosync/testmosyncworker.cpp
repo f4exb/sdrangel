@@ -104,7 +104,7 @@ void TestMOSyncWorker::setSamplerate(int samplerate)
 
 void TestMOSyncWorker::setLog2Interpolation(unsigned int log2Interpolation)
 {
-    if ((log2Interpolation < 0) || (log2Interpolation > 6)) {
+    if (log2Interpolation > 6) {
         return;
     }
 
