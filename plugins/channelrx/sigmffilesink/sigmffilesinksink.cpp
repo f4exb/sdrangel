@@ -25,10 +25,10 @@
 #include "sigmffilesinksink.h"
 
 SigMFFileSinkSink::SigMFFileSinkSink() :
-    m_spectrumSink(nullptr),
-    m_msgQueueToGUI(nullptr),
     m_preRecordBuffer(48000),
     m_preRecordFill(0),
+    m_spectrumSink(nullptr),
+    m_msgQueueToGUI(nullptr),
     m_recordEnabled(false),
     m_record(false),
     m_squelchOpen(false),
@@ -192,7 +192,7 @@ void SigMFFileSinkSink::applyChannelSettings(
 
         for (int i = 0; i < 7; i++) // find log2 beween 0 and 6
         {
-            if (decim & 1 == 1)
+            if ((decim & 1) == 1)
             {
                 qDebug() << "SigMFFileSinkSink::applyChannelSettings: log2decim: " << i;
                 m_decimator.setLog2Decim(i);

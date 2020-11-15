@@ -391,7 +391,7 @@ void SigMFFileInput::analyzeDataType(const std::string& dataTypeString, SigMFFil
     }
 }
 
-uint64_t SigMFFileInput::getTrackSampleStart(int trackIndex)
+uint64_t SigMFFileInput::getTrackSampleStart(unsigned int trackIndex)
 {
     if (trackIndex < m_captureStarts.size()) {
         return m_captureStarts[trackIndex];
@@ -1094,7 +1094,6 @@ void SigMFFileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& resp
 
     unsigned int sampleRate =  m_captures[m_currentTrackIndex].m_sampleRate;
     uint64_t trackSamplesCount = totalSamplesCount - m_captures[m_currentTrackIndex].m_sampleStart;
-    uint64_t trackCumulativeTime = m_captures[m_currentTrackIndex].m_cumulativeTime;
     uint64_t startingTimeStampMs = m_captures[m_currentTrackIndex].m_tsms;
 
     uint64_t t = (trackSamplesCount*1000)/sampleRate;

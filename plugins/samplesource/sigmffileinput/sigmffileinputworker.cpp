@@ -111,7 +111,7 @@ void SigMFFileInputWorker::setTrackIndex(int trackIndex)
 {
     m_currentTrackIndex = trackIndex;
     m_samplesCount = m_captures->at(m_currentTrackIndex).m_sampleStart;
-    unsigned int sampleRate = m_captures->at(m_currentTrackIndex).m_sampleRate;
+    int sampleRate = m_captures->at(m_currentTrackIndex).m_sampleRate;
 
     if (sampleRate != m_samplerate)
     {
@@ -222,7 +222,7 @@ void SigMFFileInputWorker::tick()
              && (m_samplesCount > m_captures->at(m_currentTrackIndex+1).m_sampleStart))
             {
                 m_currentTrackIndex++;
-                unsigned int sampleRate = m_captures->at(m_currentTrackIndex).m_sampleRate;
+                int sampleRate = m_captures->at(m_currentTrackIndex).m_sampleRate;
 
                 if (sampleRate != m_samplerate)
                 {

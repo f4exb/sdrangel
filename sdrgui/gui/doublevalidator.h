@@ -29,6 +29,7 @@ public:
     {
     }
 
+    using QDoubleValidator::validate;
     QValidator::State validate(QString &s) const
     {
         if (s.isEmpty() || s == "-") {

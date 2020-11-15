@@ -350,7 +350,6 @@ QString SigMFFileInputGUI::displayScaled(uint64_t value, int precision)
 void SigMFFileInputGUI::addCaptures(const QList<SigMFFileCapture>& captures)
 {
     ui->captureTable->setRowCount(captures.size());
-    QList<SigMFFileCapture>::const_iterator it = captures.begin();
 
     for (int i = 0; i < captures.size(); i++)
     {
@@ -392,7 +391,7 @@ void SigMFFileInputGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void SigMFFileInputGUI::on_infoDetails_clicked(bool checked)
+void SigMFFileInputGUI::on_infoDetails_clicked()
 {
     RecordInfoDialog infoDialog(m_recordInfo, this);
     infoDialog.exec();

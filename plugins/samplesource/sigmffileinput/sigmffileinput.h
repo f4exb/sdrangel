@@ -484,7 +484,7 @@ private:
         sigmf::Annotation<core::DescrT> >* metaRecord
     );
     static void analyzeDataType(const std::string& dataTypeString, SigMFFileDataType& dataType);
-    uint64_t getTrackSampleStart(int trackIndex);
+    uint64_t getTrackSampleStart(unsigned int trackIndex);
     int getTrackIndex(uint64_t sampleIndex);
 	void seekFileStream(uint64_t sampleIndex);
 	void seekTrackMillis(int seekMillis);

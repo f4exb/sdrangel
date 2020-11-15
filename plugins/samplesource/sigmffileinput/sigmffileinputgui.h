@@ -98,7 +98,7 @@ private:
 private slots:
     void handleInputMessages();
 	void on_startStop_toggled(bool checked);
-    void on_infoDetails_clicked(bool checked);
+    void on_infoDetails_clicked();
     void on_captureTable_itemSelectionChanged();
     void on_trackNavTimeSlider_valueChanged(int value);
 	void on_playTrack_toggled(bool checked);
