@@ -1,3 +1,10 @@
+sdrangel (6.0.2-1) unstable; urgency=medium
+
+   * GLSpectrum: fixed settings and waterfall share serialization. Reinstate #609
+   * Fixed main cmake and correct warnings. Implements #663
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 15 Nov 2020 20:58:44 +0100
+
 sdrangel (6.0.1-1) unstable; urgency=medium
 
    * Audio Input: reworked threading model and mono handling. Issue #706
