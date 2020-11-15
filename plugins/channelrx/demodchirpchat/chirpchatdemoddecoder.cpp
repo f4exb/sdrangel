@@ -95,5 +95,7 @@ void ChirpChatDemodDecoder::decodeSymbols(const std::vector<unsigned short>& sym
             );
         }
         break;
+    default:
+        break;
     }
 }

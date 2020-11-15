@@ -305,8 +305,11 @@ if (SANITIZE_ADDRESS)
     endif()
 endif()
 
+# set compiler
+include(FindCompiler)
+
 if (C_CLANG OR C_GCC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wvla -ffast-math -ftree-vectorize ${EXTRA_FLAGS}")
 elseif (C_MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w -MP ${EXTRA_FLAGS}")
 endif()
@@ -316,9 +319,6 @@ if (C_CLANG)
 elseif (C_GCC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1")
 endif()
-
-# set compiler
-include(FindCompiler)
 
 # find cpu flags (and set compiler)
 include(FindCPUflags)

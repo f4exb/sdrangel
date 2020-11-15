@@ -17,6 +17,8 @@
 #ifndef LEANSDR_DISCRMATH_H
 #define LEANSDR_DISCRMATH_H
 
+#pragma GCC diagnostic ignored "-Wshift-negative-value"
+
 #include  <cstddef>
 
 namespace leansdr

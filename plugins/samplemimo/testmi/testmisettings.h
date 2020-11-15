@@ -77,6 +77,7 @@ struct TestMISettings {
 	void resetToDefaults();
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
+    TestMISettings& operator=(const TestMISettings&) = default;
 };
 
 

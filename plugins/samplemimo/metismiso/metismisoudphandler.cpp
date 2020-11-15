@@ -468,7 +468,7 @@ quint64 MetisMISOUDPHandler::getRxCenterFrequency(int index)
 
 quint64 MetisMISOUDPHandler::getTxCenterFrequency()
 {
-    qint64 requiredTxFrequency =  m_settings.m_txCenterFrequency;
+    qint64 requiredTxFrequency =  m_settings.m_txCenterFrequency
         - (m_settings.m_txTransverterMode ? m_settings.m_txTransverterDeltaFrequency : 0);
     requiredTxFrequency = requiredTxFrequency < 0 ? 0 : requiredTxFrequency;
     return requiredTxFrequency;

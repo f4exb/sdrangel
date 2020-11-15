@@ -235,51 +235,44 @@ const struct modcod_info
     // EN 302 307, section 5.4.4, Table 10
     float g1, g2, g3;
 } modcod_infos[32] = {
-    {
-        0,
-    },
+    {0, 0, cstln_base::BPSK, FEC12, 0.0, 0.0, 0.0, 0.0},
     // 1 - 11
-    {360, 4, cstln_base::QPSK, FEC14, -2.35},
-    {360, 4, cstln_base::QPSK, FEC13, -1.24},
-    {360, 4, cstln_base::QPSK, FEC25, -0.30},
-    {360, 4, cstln_base::QPSK, FEC12, 1.00},
-    {360, 4, cstln_base::QPSK, FEC35, 2.23},
-    {360, 4, cstln_base::QPSK, FEC23, 3.10},
-    {360, 4, cstln_base::QPSK, FEC34, 4.03},
-    {360, 4, cstln_base::QPSK, FEC45, 4.68},
-    {360, 4, cstln_base::QPSK, FEC56, 5.18},
-    {360, 4, cstln_base::QPSK, FEC89, 6.20},
-    {360, 4, cstln_base::QPSK, FEC910, 6.42},
+    {360, 4, cstln_base::QPSK, FEC14, -2.35, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC13, -1.24, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC25, -0.30, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC12, 1.00, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC35, 2.23, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC23, 3.10, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC34, 4.03, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC45, 4.68, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC56, 5.18, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC89, 6.20, 0.0, 0.0, 0.0},
+    {360, 4, cstln_base::QPSK, FEC910, 6.42, 0.0, 0.0, 0.0},
     // 12 - 17
-    {240, 8, cstln_base::PSK8, FEC35, 5.50},
-    {240, 8, cstln_base::PSK8, FEC23, 6.62},
-    {240, 8, cstln_base::PSK8, FEC34, 7.91},
-    {240, 8, cstln_base::PSK8, FEC56, 9.35},
-    {240, 8, cstln_base::PSK8, FEC89, 10.69},
-    {240, 8, cstln_base::PSK8, FEC910, 10.98},
+    {240, 8, cstln_base::PSK8, FEC35, 5.50, 0.0, 0.0, 0.0},
+    {240, 8, cstln_base::PSK8, FEC23, 6.62, 0.0, 0.0, 0.0},
+    {240, 8, cstln_base::PSK8, FEC34, 7.91, 0.0, 0.0, 0.0},
+    {240, 8, cstln_base::PSK8, FEC56, 9.35, 0.0, 0.0, 0.0},
+    {240, 8, cstln_base::PSK8, FEC89, 10.69, 0.0, 0.0, 0.0},
+    {240, 8, cstln_base::PSK8, FEC910, 10.98, 0.0, 0.0, 0.0},
     // 18 - 23
-    {180, 16, cstln_base::APSK16, FEC23, 8.97, 3.15},
-    {180, 16, cstln_base::APSK16, FEC34, 10.21, 2.85},
-    {180, 16, cstln_base::APSK16, FEC45, 11.03, 2.75},
-    {180, 16, cstln_base::APSK16, FEC56, 11.61, 2.70},
-    {180, 16, cstln_base::APSK16, FEC89, 12.89, 2.60},
-    {180, 16, cstln_base::APSK16, FEC910, 13.13, 2.57},
+    {180, 16, cstln_base::APSK16, FEC23, 8.97, 3.15, 0.0, 0.0},
+    {180, 16, cstln_base::APSK16, FEC34, 10.21, 2.85, 0.0, 0.0},
+    {180, 16, cstln_base::APSK16, FEC45, 11.03, 2.75, 0.0, 0.0},
+    {180, 16, cstln_base::APSK16, FEC56, 11.61, 2.70, 0.0, 0.0},
+    {180, 16, cstln_base::APSK16, FEC89, 12.89, 2.60, 0.0, 0.0},
+    {180, 16, cstln_base::APSK16, FEC910, 13.13, 2.57, 0.0, 0.0},
     // 24 - 28
-    {144, 32, cstln_base::APSK32, FEC34, 12.73, 2.84, 5.27},
-    {144, 32, cstln_base::APSK32, FEC45, 13.64, 2.72, 4.87},
-    {144, 32, cstln_base::APSK32, FEC56, 14.28, 2.64, 4.64},
-    {144, 32, cstln_base::APSK32, FEC89, 15.69, 2.54, 4.33},
-    {144, 32, cstln_base::APSK32, FEC910, 16.05, 2.53, 4.30},
+    {144, 32, cstln_base::APSK32, FEC34, 12.73, 2.84, 5.27, 0.0},
+    {144, 32, cstln_base::APSK32, FEC45, 13.64, 2.72, 4.87, 0.0},
+    {144, 32, cstln_base::APSK32, FEC56, 14.28, 2.64, 4.64, 0.0},
+    {144, 32, cstln_base::APSK32, FEC89, 15.69, 2.54, 4.33, 0.0},
+    {144, 32, cstln_base::APSK32, FEC910, 16.05, 2.53, 4.30, 0.0},
     // 29 - 31
-    {
-        0,
-    },
-    {
-        0,
-    },
-    {
-        0,
-    }};
+    {0, 0, cstln_base::BPSK, FEC12, 0.0, 0.0, 0.0, 0.0},
+    {0, 0, cstln_base::BPSK, FEC12, 0.0, 0.0, 0.0, 0.0},
+    {0, 0, cstln_base::BPSK, FEC12, 0.0, 0.0, 0.0, 0.0}
+};
 
 // Assert that a MODCOD number is valid
 const modcod_info *check_modcod(int m)
@@ -621,7 +614,7 @@ struct s2_frame_receiver : runnable
 
         int nsymbols = MAX_SYMBOLS_PER_FRAME; // TBD Adjust after PLS decoding
 
-        sampler_state ss = {in.rd(), mu, phase16, freqw16};
+        sampler_state ss = {in.rd(), mu, phase16, freqw16, nullptr};
         sampler->update_freq(ss.fw16 / omega0);
 
         if (!in_power)
@@ -1889,10 +1882,10 @@ static const struct fec_info
         // Normal frames - must respect enum code_rate order
         {32208, 32400, 12, &ldpc_nf_fec12},  // FEC12 (was [FEC12] = {...} and so on. Does not compile with MSVC)
         {43040, 43200, 10, &ldpc_nf_fec23},  // FEC23
-        {0},                                 // FEC46
+        {0, 0, 0, nullptr},                  // FEC46
         {48408, 48600, 12, &ldpc_nf_fec34},  // FEC34
         {53840, 54000, 10, &ldpc_nf_fec56},  // FEC56
-        {0},                                 // FEC78
+        {0, 0, 0, nullptr},                  // FEC78
         {51648, 51840, 12, &ldpc_nf_fec45},  // FEC45
         {57472, 57600, 8, &ldpc_nf_fec89},   // FEC89
         {58192, 58320, 8, &ldpc_nf_fec910},  // FEC910
@@ -1905,13 +1898,13 @@ static const struct fec_info
         // Short frames - must respect enum code_rate order
         {7032, 7200, 12, &ldpc_sf_fec12},    // FEC12 (was [FEC12] = {...} and so on. Does not compile with MSVC)
         {10632, 10800, 12, &ldpc_sf_fec23},  // FEC23
-        {},                                  // FEC46
+        {0, 0, 0, nullptr},                  // FEC46
         {11712, 11880, 12, &ldpc_sf_fec34},  // FEC34
         {13152, 13320, 12, &ldpc_sf_fec56},  // FEC56
-        {},                                  // FEC78
+        {0, 0, 0, nullptr},                  // FEC78
         {12432, 12600, 12, &ldpc_sf_fec45},  // FEC45
         {14232, 14400, 12, &ldpc_sf_fec89},  // FEC89
-        {},                                  // FEC910
+        {0, 0, 0, nullptr},                  // FEC910
         {3072, 3240, 12, &ldpc_sf_fec14},    // FEC14
         {5232, 5400, 12, &ldpc_sf_fec13},    // FEC13
         {6312, 6480, 12, &ldpc_sf_fec25},    // FEC25
