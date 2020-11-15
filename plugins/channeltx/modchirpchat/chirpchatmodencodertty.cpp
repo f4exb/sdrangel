@@ -96,8 +96,8 @@ void ChirpChatModEncoderTTY::encodeString(const QString& str, std::vector<unsign
     for (; it != asciiStr.end(); ++it)
     {
         char asciiChar = *it & 0x7F;
-        int ttyLetter = asciiToTTYLetters[asciiChar];
-        int ttyFigure = asciiToTTYFigures[asciiChar];
+        int ttyLetter = asciiToTTYLetters[(int) asciiChar];
+        int ttyFigure = asciiToTTYFigures[(int) asciiChar];
 
         if (ttyLetter < 0)
         {
