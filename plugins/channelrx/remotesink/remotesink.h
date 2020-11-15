@@ -65,6 +65,7 @@ public:
     virtual ~RemoteSink();
     virtual void destroy() { delete this; }
 
+    using BasebandSampleSink::feed;
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
     virtual void start();
     virtual void stop();

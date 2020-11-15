@@ -71,7 +71,8 @@ public:
 	Real getPllDeltaPhase() const { return m_basebandSink->getPllDeltaPhase(); }
     Real getPllPhase() const { return m_basebandSink->getPllPhase(); }
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    using BasebandSampleSink::feed;
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);

@@ -49,7 +49,8 @@ public:
     virtual QByteArray serialize() const { return QByteArray(); }
     virtual bool deserialize(const QByteArray& data) { (void) data; return false; }
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
+    using BasebandSampleSink::feed;
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);

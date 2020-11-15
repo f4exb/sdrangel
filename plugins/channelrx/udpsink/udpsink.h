@@ -72,7 +72,8 @@ public:
 	double getInMagSq() const { return m_basebandSink->getInMagSq(); }
 	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    using BasebandSampleSink::feed;
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);

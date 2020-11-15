@@ -14,6 +14,7 @@ public:
     SpectrumScopeComboVis(SpectrumVis* spectrumVis, ScopeVis* scopeVis);
 	virtual ~SpectrumScopeComboVis();
 
+	using BasebandSampleSink::feed;
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();

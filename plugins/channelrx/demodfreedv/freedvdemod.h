@@ -79,7 +79,8 @@ public:
 	virtual void destroy() { delete this; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
 
-	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    using BasebandSampleSink::feed;
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
 	virtual void start();
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);

@@ -67,7 +67,8 @@ public:
     virtual ~ADSBDemod();
     virtual void destroy() { delete this; }
 
-    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positive);
+    using BasebandSampleSink::feed;
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
     virtual void start();
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);

@@ -21,11 +21,15 @@
 #define INCLUDE_FILERECORD_INTERFACE_H
 
 #include <QString>
+#include <QObject>
 
-#include "dsp/basebandsamplesink.h"
+#include "dsp/dsptypes.h"
+#include "util/message.h"
+#include "util/messagequeue.h"
 #include "export.h"
 
-class SDRBASE_API FileRecordInterface : public BasebandSampleSink {
+class SDRBASE_API FileRecordInterface : public QObject {
+    Q_OBJECT
 public:
     enum RecordType
     {
@@ -42,6 +46,10 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) = 0;
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
+	MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
+    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+
     virtual void setFileName(const QString &filename) = 0;
     virtual void startRecording() = 0;
     virtual void stopRecording() = 0;
@@ -49,6 +57,14 @@ public:
 
     static QString genUniqueFileName(unsigned int deviceUID, int istream = -1);
     static RecordType guessTypeFromFileName(const QString& fileName, QString& fileBase);
+
+protected:
+	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
+
+protected slots:
+	void handleInputMessages();
+
 };
 
 

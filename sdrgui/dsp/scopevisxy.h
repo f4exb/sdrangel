@@ -34,6 +34,7 @@ public:
 	ScopeVisXY(TVScreen *tvScreen);
 	virtual ~ScopeVisXY();
 
+	using BasebandSampleSink::feed;
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
 	virtual void start();
 	virtual void stop();

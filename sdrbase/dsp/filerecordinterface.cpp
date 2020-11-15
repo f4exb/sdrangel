@@ -21,9 +21,10 @@
 
 #include "filerecordinterface.h"
 
-FileRecordInterface::FileRecordInterface() :
-    BasebandSampleSink()
-{}
+FileRecordInterface::FileRecordInterface()
+{
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+}
 
 FileRecordInterface::~FileRecordInterface()
 {}
@@ -71,4 +72,17 @@ FileRecordInterface::RecordType FileRecordInterface::guessTypeFromFileName(const
         fileBase = fileName;
         return RecordTypeUndefined;
     }
+}
+
+void FileRecordInterface::handleInputMessages()
+{
+	Message* message;
+
+	while ((message = m_inputMessageQueue.pop()) != 0)
+	{
+		if (handleMessage(*message))
+		{
+			delete message;
+		}
+	}
 }
