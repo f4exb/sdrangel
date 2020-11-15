@@ -75,7 +75,6 @@ void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 	m_glSpectrum = glSpectrum;
 	m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
-    applyGLSpectrumSettings();
 }
 
 void GLSpectrumGUI::resetToDefaults()
@@ -190,6 +189,7 @@ void GLSpectrumGUI::applyGLSpectrumSettings()
     m_glSpectrum->setDisplayGrid(m_settings.m_displayGrid);
     m_glSpectrum->setDisplayGridIntensity(m_settings.m_displayGridIntensity);
     m_glSpectrum->setDisplayTraceIntensity(m_settings.m_displayTraceIntensity);
+    m_glSpectrum->setWaterfallShare(m_settings.m_waterfallShare);
 
     if ((m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)) {
         m_glSpectrum->setTimingRate(getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
@@ -526,6 +526,19 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         ui->wsSpectrum->blockSignals(true);
         ui->wsSpectrum->doToggle(notif.getOpenClose());
         ui->wsSpectrum->blockSignals(false);
+        return true;
+    }
+    else if (GLSpectrum::MsgReportWaterfallShare::match(message))
+    {
+        const GLSpectrum::MsgReportWaterfallShare& report = (const GLSpectrum::MsgReportWaterfallShare&) message;
+        m_settings.m_waterfallShare = report.getWaterfallShare();
+    }
+    else if (SpectrumVis::MsgStartStop::match(message))
+    {
+        const SpectrumVis::MsgStartStop& msg = (SpectrumVis::MsgStartStop&) message;
+        ui->freeze->blockSignals(true);
+        ui->freeze->doToggle(!msg.getStartStop()); // this is a freeze so stop is true
+        ui->freeze->blockSignals(false);
         return true;
     }
 
