@@ -421,13 +421,7 @@ add_subdirectory(logging)
 add_subdirectory(qrtplib)
 add_subdirectory(swagger)
 add_subdirectory(devices)
-
-# strange symbol dependency
-#  mainbench.obj : error LNK2001: unresolved external
-#  symbol "public: static float const decimation_scale<12>::scaleIn" (?scaleIn@?$decimation_scale@$0M@@@2MB)
-if(NOT WIN32)
-  add_subdirectory(sdrbench)
-endif()
+add_subdirectory(sdrbench)
 
 if (BUILD_GUI)
     add_subdirectory(sdrgui)
@@ -494,21 +488,19 @@ else()
 endif()
 
 ############ build sdrangel benchmark ################
-if(NOT WIN32)
-  set(sdrangelbench_SOURCES
-    appbench/main.cpp
-  )
+set(sdrangelbench_SOURCES
+  appbench/main.cpp
+)
 
-  add_executable(sdrangelbench
-    ${sdrangelbench_SOURCES}
-  )
+add_executable(sdrangelbench
+  ${sdrangelbench_SOURCES}
+)
 
-  target_link_libraries(sdrangelbench
-    Qt5::Multimedia
-    sdrbench
-    logging
-  )
-endif()
+target_link_libraries(sdrangelbench
+  Qt5::Multimedia
+  sdrbench
+  logging
+)
 ############ build sdrangel gui ################
 if (BUILD_GUI)
     set(sdrangel_SOURCES
@@ -554,9 +546,7 @@ if (BUILD_SERVER)
 endif()
 
 ############ install ##################
-if(NOT WIN32)
-  install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
-endif()
+install(TARGETS sdrangelbench DESTINATION ${INSTALL_BIN_DIR})
 if (BUILD_GUI)
       install(TARGETS ${CMAKE_PROJECT_NAME} DESTINATION ${INSTALL_BIN_DIR})
 endif()

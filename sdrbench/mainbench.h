@@ -29,6 +29,7 @@
 #include "dsp/decimatorsfi.h"
 #include "dsp/decimatorsff.h"
 #include "parserbench.h"
+#include "export.h"
 
 namespace qtwebapp {
     class LoggerWithFile;
@@ -38,8 +39,8 @@ class MainBench: public QObject {
     Q_OBJECT
 
 public:
-    explicit MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser, QObject *parent = 0);
-    ~MainBench();
+    SDRBASE_API explicit MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser, QObject *parent = 0);
+    SDRBASE_API ~MainBench();
 
 public slots:
     void run();

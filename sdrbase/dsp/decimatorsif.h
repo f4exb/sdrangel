@@ -26,30 +26,8 @@
 template<uint InputBits>
 struct decimation_scale
 {
-    static const float scaleIn;
+    static constexpr float scaleIn = 1.0f / (1 << (InputBits - 1));
 };
-
-template<uint InputBits>
-const float decimation_scale<InputBits>::scaleIn = 1.0;
-
-template<>
-struct decimation_scale<8>
-{
-    static const float scaleIn;
-};
-
-template<>
-struct decimation_scale<12>
-{
-    static const float scaleIn;
-};
-
-template<>
-struct decimation_scale<16>
-{
-    static const float scaleIn;
-};
-
 
 template<typename T, uint InputBits, bool IQOrder>
 class DecimatorsIF {

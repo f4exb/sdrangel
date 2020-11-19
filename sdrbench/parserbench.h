@@ -22,6 +22,8 @@
 #include <QCommandLineParser>
 #include <stdint.h>
 
+#include "export.h"
+
 class ParserBench
 {
 public:
@@ -36,10 +38,10 @@ public:
         TestAMBE
     } TestType;
 
-    ParserBench();
-    ~ParserBench();
+    SDRBASE_API ParserBench();
+    SDRBASE_API ~ParserBench();
 
-    void parse(const QCoreApplication& app);
+    SDRBASE_API void parse(const QCoreApplication& app);
 
     const QString& getTestStr() const { return m_testStr; }
     TestType getTestType() const;
