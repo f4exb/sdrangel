@@ -21,20 +21,22 @@
 #include <QSysInfo>
 #include <QTimer>
 
-#include <signal.h>
-#include <unistd.h>
 #include <vector>
 
 #include "loggerwithfile.h"
 #include "mainbench.h"
 #include "dsp/dsptypes.h"
 
+#ifndef _WIN32
+
+#include <signal.h>
+#include <unistd.h>
+
 void handler(int sig) {
     fprintf(stderr, "quit the application by signal(%d).\n", sig);
     QCoreApplication::quit();
 }
 
-#ifndef _WIN32
 void catchUnixSignals(const std::vector<int>& quitSignals) {
     sigset_t blocking_mask;
     sigemptyset(&blocking_mask);

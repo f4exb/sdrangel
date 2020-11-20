@@ -99,7 +99,6 @@ set(sdrbase_SOURCES
     dsp/channelsamplesource.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
-    dsp/decimatorsif.cpp
     dsp/decimatorsff.cpp
     dsp/decimatorsfi.cpp
     dsp/decimatorc.cpp

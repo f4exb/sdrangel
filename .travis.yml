@@ -85,4 +85,4 @@ script:
   - bash -c pwd
   - bash cmake/ci/build_sdrangel.sh
 env:
-  - CMAKE_CUSTOM_OPTIONS="-DFORCE_SSE41=ON -DBUNDLE=ON -DENABLE_PACK_MIRSDRAPI=ON"
+  - CMAKE_CUSTOM_OPTIONS="-DARCH_OPT=nehalem -DBUNDLE=ON -DENABLE_PACK_MIRSDRAPI=ON"
