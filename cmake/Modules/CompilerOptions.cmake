@@ -1,13 +1,12 @@
 include_guard(GLOBAL)
 
-include(DetectCompiler)
 include(DetectArchitecture)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-if (C_CLANG OR C_GCC)
-  add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize)
-elseif (C_MSVC)
+if(MSVC)
   add_compile_options(/MP)
+else()
+  add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize)
 endif()
 
 if (SANITIZE_ADDRESS)
