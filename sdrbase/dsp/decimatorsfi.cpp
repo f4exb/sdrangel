@@ -18,7 +18,7 @@
 #include "decimatorsfi.h"
 
 template<>
-void DecimatorsFI<true>::decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<true>::decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -33,7 +33,7 @@ void DecimatorsFI<true>::decimate1(SampleVector::iterator* it, const float* buf,
 }
 
 template<>
-void DecimatorsFI<false>::decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<false>::decimate1(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -48,7 +48,7 @@ void DecimatorsFI<false>::decimate1(SampleVector::iterator* it, const float* buf
 }
 
 template<>
-void DecimatorsFI<true>::decimate2_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<true>::decimate2_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -69,7 +69,7 @@ void DecimatorsFI<true>::decimate2_inf(SampleVector::iterator* it, const float* 
 }
 
 template<>
-void DecimatorsFI<false>::decimate2_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<false>::decimate2_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -90,7 +90,7 @@ void DecimatorsFI<false>::decimate2_inf(SampleVector::iterator* it, const float*
 }
 
 template<>
-void DecimatorsFI<true>::decimate2_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<true>::decimate2_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -111,7 +111,7 @@ void DecimatorsFI<true>::decimate2_sup(SampleVector::iterator* it, const float* 
 }
 
 template<>
-void DecimatorsFI<false>::decimate2_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<false>::decimate2_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -132,7 +132,7 @@ void DecimatorsFI<false>::decimate2_sup(SampleVector::iterator* it, const float*
 }
 
 template<>
-void DecimatorsFI<true>::decimate4_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<true>::decimate4_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -149,7 +149,7 @@ void DecimatorsFI<true>::decimate4_inf(SampleVector::iterator* it, const float* 
 }
 
 template<>
-void DecimatorsFI<false>::decimate4_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<false>::decimate4_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -166,7 +166,7 @@ void DecimatorsFI<false>::decimate4_inf(SampleVector::iterator* it, const float*
 }
 
 template<>
-void DecimatorsFI<true>::decimate4_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<true>::decimate4_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     // Sup (USB):
     //            x  y   x  y   x   y  x   y  / x -> 1,-2,-5,6 / y -> -0,-3,4,7
@@ -189,7 +189,7 @@ void DecimatorsFI<true>::decimate4_sup(SampleVector::iterator* it, const float* 
 }
 
 template<>
-void DecimatorsFI<false>::decimate4_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFI<false>::decimate4_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     // Sup (USB):
     //            x  y   x  y   x   y  x   y  / x -> 1,-2,-5,6 / y -> -0,-3,4,7

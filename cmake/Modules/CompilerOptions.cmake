@@ -2,9 +2,7 @@ include_guard(GLOBAL)
 
 include(DetectArchitecture)
 
-if(MSVC)
-  add_compile_options(/MP)
-else()
+if(NOT MSVC)
   add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize)
 endif()
 

@@ -18,7 +18,7 @@
 #include "decimatorsff.h"
 
 template<>
-void DecimatorsFF<true>::decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFF<true>::decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 
@@ -33,7 +33,7 @@ void DecimatorsFF<true>::decimate1(FSampleVector::iterator* it, const float* buf
 }
 
 template<>
-void DecimatorsFF<false>::decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+SDRBASE_API void DecimatorsFF<false>::decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
 {
     float xreal, yimag;
 

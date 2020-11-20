@@ -24,7 +24,7 @@
 
 #include "export.h"
 
-class ParserBench
+class SDRBENCH_API ParserBench
 {
 public:
     typedef enum
@@ -38,10 +38,10 @@ public:
         TestAMBE
     } TestType;
 
-    SDRBASE_API ParserBench();
-    SDRBASE_API ~ParserBench();
+    ParserBench();
+    ~ParserBench();
 
-    SDRBASE_API void parse(const QCoreApplication& app);
+    void parse(const QCoreApplication& app);
 
     const QString& getTestStr() const { return m_testStr; }
     TestType getTestType() const;

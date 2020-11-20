@@ -35,12 +35,12 @@ namespace qtwebapp {
     class LoggerWithFile;
 }
 
-class MainBench: public QObject {
+class SDRBENCH_API MainBench: public QObject {
     Q_OBJECT
 
 public:
-    SDRBASE_API explicit MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser, QObject *parent = 0);
-    SDRBASE_API ~MainBench();
+    explicit MainBench(qtwebapp::LoggerWithFile *logger, const ParserBench& parser, QObject *parent = 0);
+    ~MainBench();
 
 public slots:
     void run();
