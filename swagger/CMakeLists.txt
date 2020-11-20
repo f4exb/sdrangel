@@ -17,7 +17,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-if (C_GCC OR C_CLANG)
+if (NOT MSVC)
     set_target_properties(swagger PROPERTIES COMPILE_FLAGS "-Wno-conversion-null -Wno-unused-variable -Wno-unused-parameter")
 endif()
 
