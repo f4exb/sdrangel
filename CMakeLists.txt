@@ -281,8 +281,8 @@ else()
     message(STATUS "Compiling for 16 bit Rx DSP chain")
 endif()
 
-# find cpu flags (and set compiler)
-include(FindCPUflags)
+# Set compiler options based on target architecture and selected extensions
+include(CompilerOptions)
 
 # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOMOC ON)
