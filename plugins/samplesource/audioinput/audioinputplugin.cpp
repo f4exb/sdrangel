@@ -38,8 +38,8 @@ const PluginDescriptor AudioInputPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString AudioInputPlugin::m_hardwareID = "AudioInput";
-const QString AudioInputPlugin::m_deviceTypeID = AUDIOINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "AudioInput";
+static constexpr const char* const m_deviceTypeID = AUDIOINPUT_DEVICE_TYPE_ID;
 
 AudioInputPlugin::AudioInputPlugin(QObject* parent) :
     QObject(parent)

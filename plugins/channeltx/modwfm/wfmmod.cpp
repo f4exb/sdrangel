@@ -48,8 +48,8 @@ MESSAGE_CLASS_DEFINITION(WFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(WFMMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString WFMMod::m_channelIdURI = "sdrangel.channeltx.modwfm";
-const QString WFMMod::m_channelId = "WFMMod";
+const char* const WFMMod::m_channelIdURI = "sdrangel.channeltx.modwfm";
+const char* const WFMMod::m_channelId = "WFMMod";
 
 WFMMod::WFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

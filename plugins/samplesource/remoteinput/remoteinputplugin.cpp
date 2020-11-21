@@ -38,8 +38,8 @@ const PluginDescriptor RemoteInputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString RemoteInputPlugin::m_hardwareID = "RemoteInput";
-const QString RemoteInputPlugin::m_deviceTypeID = REMOTEINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "RemoteInput";
+static constexpr const char* const m_deviceTypeID = REMOTEINPUT_DEVICE_TYPE_ID;
 
 RemoteInputPlugin::RemoteInputPlugin(QObject* parent) :
 	QObject(parent)

@@ -38,8 +38,8 @@ const PluginDescriptor XTRXMIMOPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString XTRXMIMOPlugin::m_hardwareID = "XTRX";
-const QString XTRXMIMOPlugin::m_deviceTypeID = XTRXMIMO_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "XTRX";
+static constexpr const char* const m_deviceTypeID = XTRXMIMO_DEVICE_TYPE_ID;
 
 XTRXMIMOPlugin::XTRXMIMOPlugin(QObject* parent) :
 	QObject(parent)

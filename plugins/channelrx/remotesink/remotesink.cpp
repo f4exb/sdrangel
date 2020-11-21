@@ -43,8 +43,8 @@
 
 MESSAGE_CLASS_DEFINITION(RemoteSink::MsgConfigureRemoteSink, Message)
 
-const QString RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
-const QString RemoteSink::m_channelId = "RemoteSink";
+const char* const RemoteSink::m_channelIdURI = "sdrangel.channel.remotesink";
+const char* const RemoteSink::m_channelId = "RemoteSink";
 
 RemoteSink::RemoteSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

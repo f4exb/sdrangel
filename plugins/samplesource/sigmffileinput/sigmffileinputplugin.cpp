@@ -38,8 +38,8 @@ const PluginDescriptor SigMFFileInputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString SigMFFileInputPlugin::m_hardwareID = "SigMFFileInput";
-const QString SigMFFileInputPlugin::m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "SigMFFileInput";
+static constexpr const char* const m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
 
 SigMFFileInputPlugin::SigMFFileInputPlugin(QObject* parent) :
 	QObject(parent)

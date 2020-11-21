@@ -38,8 +38,8 @@ const PluginDescriptor FileInputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString FileInputPlugin::m_hardwareID = "FileInput";
-const QString FileInputPlugin::m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "FileInput";
+static constexpr const char* const m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
 
 FileInputPlugin::FileInputPlugin(QObject* parent) :
 	QObject(parent)

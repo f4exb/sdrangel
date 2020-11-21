@@ -22,8 +22,8 @@ const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString RTLSDRPlugin::m_hardwareID = "RTLSDR";
-const QString RTLSDRPlugin::m_deviceTypeID = RTLSDR_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "RTLSDR";
+static constexpr const char* const m_deviceTypeID = RTLSDR_DEVICE_TYPE_ID;
 
 RTLSDRPlugin::RTLSDRPlugin(QObject* parent) :
 	QObject(parent)

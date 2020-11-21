@@ -40,8 +40,8 @@ const PluginDescriptor HackRFInputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString HackRFInputPlugin::m_hardwareID = "HackRF";
-const QString HackRFInputPlugin::m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "HackRF";
+static constexpr const char* const m_deviceTypeID = HACKRF_DEVICE_TYPE_ID;
 
 HackRFInputPlugin::HackRFInputPlugin(QObject* parent) :
 	QObject(parent)

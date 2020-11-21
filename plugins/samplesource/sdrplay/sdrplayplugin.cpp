@@ -38,8 +38,8 @@ const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString SDRPlayPlugin::m_hardwareID = "SDRplay1";
-const QString SDRPlayPlugin::m_deviceTypeID = SDRPLAY_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "SDRplay1";
+static constexpr const char* const m_deviceTypeID = SDRPLAY_DEVICE_TYPE_ID;
 
 SDRPlayPlugin::SDRPlayPlugin(QObject* parent) :
     QObject(parent)

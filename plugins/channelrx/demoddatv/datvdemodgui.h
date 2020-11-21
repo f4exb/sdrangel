@@ -52,7 +52,7 @@ public:
 
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
 
-    static const QString m_strChannelID;
+    static const char* const m_strChannelID;
 
 private slots:
     void channelMarkerChangedByCursor();

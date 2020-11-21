@@ -37,8 +37,8 @@ const PluginDescriptor BladeRF2MIMOPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString BladeRF2MIMOPlugin::m_hardwareID = "BladeRF2";
-const QString BladeRF2MIMOPlugin::m_deviceTypeID = BLADERF2MIMO_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "BladeRF2";
+static constexpr const char* const m_deviceTypeID = BLADERF2MIMO_DEVICE_TYPE_ID;
 
 BladeRF2MIMOPlugin::BladeRF2MIMOPlugin(QObject* parent) :
 	QObject(parent)

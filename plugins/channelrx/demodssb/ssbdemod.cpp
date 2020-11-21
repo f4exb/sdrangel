@@ -44,8 +44,8 @@
 
 MESSAGE_CLASS_DEFINITION(SSBDemod::MsgConfigureSSBDemod, Message)
 
-const QString SSBDemod::m_channelIdURI = "sdrangel.channel.ssbdemod";
-const QString SSBDemod::m_channelId = "SSBDemod";
+const char* const SSBDemod::m_channelIdURI = "sdrangel.channel.ssbdemod";
+const char* const SSBDemod::m_channelId = "SSBDemod";
 
 SSBDemod::SSBDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

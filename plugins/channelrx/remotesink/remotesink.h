@@ -71,8 +71,8 @@ public:
     virtual void stop();
     virtual bool handleMessage(const Message& cmd);
 
-    virtual void getIdentifier(QString& id) { id = m_channelId; }
-    virtual const QString& getURI() const { return m_channelIdURI; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = "Remote Sink"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
 
@@ -111,8 +111,8 @@ public:
     uint32_t getNumberOfDeviceStreams() const;
     int getBasebandSampleRate() const { return m_basebandSampleRate; }
 
-    static const QString m_channelIdURI;
-    static const QString m_channelId;
+    static const char* const m_channelIdURI;
+    static const char* const m_channelId;
 
 signals:
     void dataBlockAvailable(RemoteDataBlock *dataBlock);

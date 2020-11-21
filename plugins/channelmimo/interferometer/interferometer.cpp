@@ -35,8 +35,8 @@
 MESSAGE_CLASS_DEFINITION(Interferometer::MsgConfigureInterferometer, Message)
 MESSAGE_CLASS_DEFINITION(Interferometer::MsgBasebandNotification, Message)
 
-const QString Interferometer::m_channelIdURI = "sdrangel.channel.interferometer";
-const QString Interferometer::m_channelId = "Interferometer";
+const char* const Interferometer::m_channelIdURI = "sdrangel.channel.interferometer";
+const char* const Interferometer::m_channelId = "Interferometer";
 const int Interferometer::m_fftSize = 4096;
 
 Interferometer::Interferometer(DeviceAPI *deviceAPI) :

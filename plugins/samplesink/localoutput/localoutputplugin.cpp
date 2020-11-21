@@ -38,8 +38,8 @@ const PluginDescriptor LocalOutputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString LocalOutputPlugin::m_hardwareID = "LocalOutput";
-const QString LocalOutputPlugin::m_deviceTypeID = LOCALOUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "LocalOutput";
+static constexpr const char* const m_deviceTypeID = LOCALOUTPUT_DEVICE_TYPE_ID;
 
 LocalOutputPlugin::LocalOutputPlugin(QObject* parent) :
 	QObject(parent)

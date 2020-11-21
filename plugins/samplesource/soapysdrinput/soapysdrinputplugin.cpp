@@ -39,8 +39,8 @@ const PluginDescriptor SoapySDRInputPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString SoapySDRInputPlugin::m_hardwareID = "SoapySDR";
-const QString SoapySDRInputPlugin::m_deviceTypeID = SOAPYSDRINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "SoapySDR";
+static constexpr const char* const m_deviceTypeID = SOAPYSDRINPUT_DEVICE_TYPE_ID;
 
 SoapySDRInputPlugin::SoapySDRInputPlugin(QObject* parent) :
     QObject(parent)

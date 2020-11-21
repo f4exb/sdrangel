@@ -45,8 +45,8 @@
 
 MESSAGE_CLASS_DEFINITION(DSDDemod::MsgConfigureDSDDemod, Message)
 
-const QString DSDDemod::m_channelIdURI = "sdrangel.channel.dsddemod";
-const QString DSDDemod::m_channelId = "DSDDemod";
+const char* const DSDDemod::m_channelIdURI = "sdrangel.channel.dsddemod";
+const char* const DSDDemod::m_channelId = "DSDDemod";
 const int DSDDemod::m_udpBlockSize = 512;
 
 DSDDemod::DSDDemod(DeviceAPI *deviceAPI) :

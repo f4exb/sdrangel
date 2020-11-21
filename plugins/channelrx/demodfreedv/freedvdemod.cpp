@@ -39,8 +39,8 @@
 MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgConfigureFreeDVDemod, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVDemod::MsgResyncFreeDVDemod, Message)
 
-const QString FreeDVDemod::m_channelIdURI = "sdrangel.channel.freedvdemod";
-const QString FreeDVDemod::m_channelId = "FreeDVDemod";
+const char* const FreeDVDemod::m_channelIdURI = "sdrangel.channel.freedvdemod";
+const char* const FreeDVDemod::m_channelId = "FreeDVDemod";
 
 FreeDVDemod::FreeDVDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

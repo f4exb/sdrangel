@@ -39,8 +39,8 @@ const PluginDescriptor Blderf1InputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString Blderf1InputPlugin::m_hardwareID = "BladeRF1";
-const QString Blderf1InputPlugin::m_deviceTypeID = BLADERF1INPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "BladeRF1";
+static constexpr const char* const m_deviceTypeID = BLADERF1INPUT_DEVICE_TYPE_ID;
 
 Blderf1InputPlugin::Blderf1InputPlugin(QObject* parent) :
 	QObject(parent)

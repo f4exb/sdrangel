@@ -38,8 +38,8 @@ const PluginDescriptor TestMIPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString TestMIPlugin::m_hardwareID = "TestMI";
-const QString TestMIPlugin::m_deviceTypeID = TESTMI_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "TestMI";
+static constexpr const char* const m_deviceTypeID = TESTMI_DEVICE_TYPE_ID;
 
 TestMIPlugin::TestMIPlugin(QObject* parent) :
 	QObject(parent)

@@ -35,8 +35,8 @@
 MESSAGE_CLASS_DEFINITION(RigCtlServer::MsgConfigureRigCtlServer, Message)
 MESSAGE_CLASS_DEFINITION(RigCtlServer::MsgStartStop, Message)
 
-const QString RigCtlServer::m_featureIdURI = "sdrangel.feature.rigctlserver";
-const QString RigCtlServer::m_featureId = "RigCtlServer";
+const char* const RigCtlServer::m_featureIdURI = "sdrangel.feature.rigctlserver";
+const char* const RigCtlServer::m_featureId = "RigCtlServer";
 
 RigCtlServer::RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),

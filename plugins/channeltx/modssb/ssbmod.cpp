@@ -49,8 +49,8 @@ MESSAGE_CLASS_DEFINITION(SSBMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(SSBMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString SSBMod::m_channelIdURI = "sdrangel.channeltx.modssb";
-const QString SSBMod::m_channelId = "SSBMod";
+const char* const SSBMod::m_channelIdURI = "sdrangel.channeltx.modssb";
+const char* const SSBMod::m_channelId = "SSBMod";
 
 SSBMod::SSBMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

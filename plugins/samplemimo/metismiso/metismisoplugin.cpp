@@ -39,8 +39,8 @@ const PluginDescriptor MetisMISOPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString MetisMISOPlugin::m_hardwareID = "MetisMISO";
-const QString MetisMISOPlugin::m_deviceTypeID = METISMISO_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "MetisMISO";
+static constexpr const char* const m_deviceTypeID = METISMISO_DEVICE_TYPE_ID;
 
 MetisMISOPlugin::MetisMISOPlugin(QObject* parent) :
 	QObject(parent)

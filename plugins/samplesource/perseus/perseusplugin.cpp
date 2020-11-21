@@ -40,8 +40,8 @@ const PluginDescriptor PerseusPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString PerseusPlugin::m_hardwareID = "Perseus";
-const QString PerseusPlugin::m_deviceTypeID = PERSEUS_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "Perseus";
+static constexpr const char* const m_deviceTypeID = PERSEUS_DEVICE_TYPE_ID;
 const int PerseusPlugin::m_maxDevices = 32;
 
 PerseusPlugin::PerseusPlugin(QObject* parent) :

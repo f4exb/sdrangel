@@ -42,8 +42,8 @@ const PluginDescriptor LimeSDROutputPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString LimeSDROutputPlugin::m_hardwareID = "LimeSDR";
-const QString LimeSDROutputPlugin::m_deviceTypeID = LIMESDROUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "LimeSDR";
+static constexpr const char* const m_deviceTypeID = LIMESDROUTPUT_DEVICE_TYPE_ID;
 
 LimeSDROutputPlugin::LimeSDROutputPlugin(QObject* parent) :
     QObject(parent)

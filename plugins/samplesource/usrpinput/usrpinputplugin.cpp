@@ -42,8 +42,8 @@ const PluginDescriptor USRPInputPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString USRPInputPlugin::m_hardwareID = "USRP";
-const QString USRPInputPlugin::m_deviceTypeID = USRP_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "USRP";
+static constexpr const char* const m_deviceTypeID = USRP_DEVICE_TYPE_ID;
 
 USRPInputPlugin::USRPInputPlugin(QObject* parent) :
     QObject(parent)

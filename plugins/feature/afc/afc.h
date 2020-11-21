@@ -112,8 +112,8 @@ public:
     virtual void destroy() { delete this; }
     virtual bool handleMessage(const Message& cmd);
 
-    virtual const QString& getURI() const { return m_featureIdURI; }
-    virtual void getIdentifier(QString& id) const { id = m_featureId; }
+    virtual const QString& getURI() const { return getName(); }
+    virtual void getIdentifier(QString& id) const { id = objectName(); }
     virtual void getTitle(QString& title) const { title = m_settings.m_title; }
 
     virtual QByteArray serialize() const;
@@ -151,8 +151,8 @@ public:
             const QStringList& featureSettingsKeys,
             SWGSDRangel::SWGFeatureSettings& response);
 
-    static const QString m_featureIdURI;
-    static const QString m_featureId;
+    static const char* const m_featureIdURI;
+    static const char* const m_featureId;
 
 private:
     QThread m_thread;

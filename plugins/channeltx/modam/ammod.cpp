@@ -49,8 +49,8 @@ MESSAGE_CLASS_DEFINITION(AMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(AMMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString AMMod::m_channelIdURI = "sdrangel.channeltx.modam";
-const QString AMMod::m_channelId ="AMMod";
+const char* const AMMod::m_channelIdURI = "sdrangel.channeltx.modam";
+const char* const AMMod::m_channelId ="AMMod";
 
 AMMod::AMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

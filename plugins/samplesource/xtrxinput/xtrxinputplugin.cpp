@@ -45,8 +45,8 @@ const PluginDescriptor XTRXInputPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString XTRXInputPlugin::m_hardwareID = "XTRX";
-const QString XTRXInputPlugin::m_deviceTypeID = XTRX_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "XTRX";
+static constexpr const char* const m_deviceTypeID = XTRX_DEVICE_TYPE_ID;
 
 XTRXInputPlugin::XTRXInputPlugin(QObject* parent) :
     QObject(parent)

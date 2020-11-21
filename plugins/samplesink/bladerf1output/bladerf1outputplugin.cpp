@@ -39,8 +39,8 @@ const PluginDescriptor Bladerf1OutputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString Bladerf1OutputPlugin::m_hardwareID = "BladeRF1";
-const QString Bladerf1OutputPlugin::m_deviceTypeID = BLADERF1OUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "BladeRF1";
+static constexpr const char* const m_deviceTypeID = BLADERF1OUTPUT_DEVICE_TYPE_ID;
 
 Bladerf1OutputPlugin::Bladerf1OutputPlugin(QObject* parent) :
 	QObject(parent)

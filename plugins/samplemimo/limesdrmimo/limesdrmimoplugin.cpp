@@ -38,8 +38,8 @@ const PluginDescriptor LimeSDRMIMOPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString LimeSDRMIMOPlugin::m_hardwareID = "LimeSDR";
-const QString LimeSDRMIMOPlugin::m_deviceTypeID = LIMESDRMIMO_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "LimeSDR";
+static constexpr const char* const m_deviceTypeID = LIMESDRMIMO_DEVICE_TYPE_ID;
 
 LimeSDRMIMOPlugin::LimeSDRMIMOPlugin(QObject* parent) :
 	QObject(parent)

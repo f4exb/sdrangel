@@ -39,8 +39,8 @@ const PluginDescriptor AirspyHFPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString AirspyHFPlugin::m_hardwareID = "AirspyHF";
-const QString AirspyHFPlugin::m_deviceTypeID = AIRSPYHF_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "AirspyHF";
+static constexpr const char* const m_deviceTypeID = AIRSPYHF_DEVICE_TYPE_ID;
 const int AirspyHFPlugin::m_maxDevices = 32;
 
 AirspyHFPlugin::AirspyHFPlugin(QObject* parent) :

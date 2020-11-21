@@ -37,8 +37,8 @@ const PluginDescriptor FileOutputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString FileOutputPlugin::m_hardwareID = "FileOutput";
-const QString FileOutputPlugin::m_deviceTypeID = FILEOUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "FileOutput";
+static constexpr const char* const m_deviceTypeID = FILEOUTPUT_DEVICE_TYPE_ID;
 
 FileOutputPlugin::FileOutputPlugin(QObject* parent) :
 	QObject(parent)

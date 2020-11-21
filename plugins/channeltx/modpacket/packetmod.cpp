@@ -49,8 +49,8 @@
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgConfigurePacketMod, Message)
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketMod, Message)
 
-const QString PacketMod::m_channelIdURI = "sdrangel.channeltx.modpacket";
-const QString PacketMod::m_channelId = "PacketMod";
+const char* const PacketMod::m_channelIdURI = "sdrangel.channeltx.modpacket";
+const char* const PacketMod::m_channelId = "PacketMod";
 
 PacketMod::PacketMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

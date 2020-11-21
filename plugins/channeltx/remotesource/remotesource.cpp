@@ -40,8 +40,8 @@ MESSAGE_CLASS_DEFINITION(RemoteSource::MsgConfigureRemoteSource, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgQueryStreamData, Message)
 MESSAGE_CLASS_DEFINITION(RemoteSource::MsgReportStreamData, Message)
 
-const QString RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
-const QString RemoteSource::m_channelId ="RemoteSource";
+const char* const RemoteSource::m_channelIdURI = "sdrangel.channeltx.remotesource";
+const char* const RemoteSource::m_channelId ="RemoteSource";
 
 RemoteSource::RemoteSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

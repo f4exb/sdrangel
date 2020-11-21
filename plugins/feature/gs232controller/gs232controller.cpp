@@ -35,8 +35,8 @@
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgConfigureGS232Controller, Message)
 MESSAGE_CLASS_DEFINITION(GS232Controller::MsgStartStop, Message)
 
-const QString GS232Controller::m_featureIdURI = "sdrangel.feature.gs232controller";
-const QString GS232Controller::m_featureId = "GS232Controller";
+const char* const GS232Controller::m_featureIdURI = "sdrangel.feature.gs232controller";
+const char* const GS232Controller::m_featureId = "GS232Controller";
 
 GS232Controller::GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),

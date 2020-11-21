@@ -37,8 +37,8 @@ const PluginDescriptor TestSinkPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString TestSinkPlugin::m_hardwareID = "TestSink";
-const QString TestSinkPlugin::m_deviceTypeID = TESTSINK_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "TestSink";
+static constexpr const char* const m_deviceTypeID = TESTSINK_DEVICE_TYPE_ID;
 
 TestSinkPlugin::TestSinkPlugin(QObject* parent) :
 	QObject(parent)

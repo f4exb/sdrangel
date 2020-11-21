@@ -44,8 +44,8 @@
 MESSAGE_CLASS_DEFINITION(ChirpChatMod::MsgConfigureChirpChatMod, Message)
 MESSAGE_CLASS_DEFINITION(ChirpChatMod::MsgReportPayloadTime, Message)
 
-const QString ChirpChatMod::m_channelIdURI = "sdrangel.channeltx.modchirpchat";
-const QString ChirpChatMod::m_channelId = "ChirpChatMod";
+const char* const ChirpChatMod::m_channelIdURI = "sdrangel.channeltx.modchirpchat";
+const char* const ChirpChatMod::m_channelId = "ChirpChatMod";
 
 ChirpChatMod::ChirpChatMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

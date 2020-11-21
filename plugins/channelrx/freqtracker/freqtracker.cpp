@@ -47,8 +47,8 @@
 
 MESSAGE_CLASS_DEFINITION(FreqTracker::MsgConfigureFreqTracker, Message)
 
-const QString FreqTracker::m_channelIdURI = "sdrangel.channel.freqtracker";
-const QString FreqTracker::m_channelId = "FreqTracker";
+const char* const FreqTracker::m_channelIdURI = "sdrangel.channel.freqtracker";
+const char* const FreqTracker::m_channelId = "FreqTracker";
 const int FreqTracker::m_udpBlockSize = 512;
 
 FreqTracker::FreqTracker(DeviceAPI *deviceAPI) :

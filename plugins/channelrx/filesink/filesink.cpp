@@ -44,8 +44,8 @@
 
 MESSAGE_CLASS_DEFINITION(FileSink::MsgConfigureFileSink, Message)
 
-const QString FileSink::m_channelIdURI = "sdrangel.channel.filesink";
-const QString FileSink::m_channelId = "FileSink";
+const char* const FileSink::m_channelIdURI = "sdrangel.channel.filesink";
+const char* const FileSink::m_channelId = "FileSink";
 
 FileSink::FileSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

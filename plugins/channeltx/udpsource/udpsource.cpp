@@ -37,8 +37,8 @@
 MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureUDPSource, Message)
 MESSAGE_CLASS_DEFINITION(UDPSource::MsgConfigureChannelizer, Message)
 
-const QString UDPSource::m_channelIdURI = "sdrangel.channeltx.udpsource";
-const QString UDPSource::m_channelId = "UDPSource";
+const char* const UDPSource::m_channelIdURI = "sdrangel.channeltx.udpsource";
+const char* const UDPSource::m_channelId = "UDPSource";
 
 UDPSource::UDPSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

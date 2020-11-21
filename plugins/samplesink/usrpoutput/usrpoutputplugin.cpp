@@ -42,8 +42,8 @@ const PluginDescriptor USRPOutputPlugin::m_pluginDescriptor = {
     QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString USRPOutputPlugin::m_hardwareID = "USRP";
-const QString USRPOutputPlugin::m_deviceTypeID = USRPOUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "USRP";
+static constexpr const char* const m_deviceTypeID = USRPOUTPUT_DEVICE_TYPE_ID;
 
 USRPOutputPlugin::USRPOutputPlugin(QObject* parent) :
     QObject(parent)

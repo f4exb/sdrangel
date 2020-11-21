@@ -38,8 +38,8 @@ const PluginDescriptor RemoteOutputPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString RemoteOutputPlugin::m_hardwareID = "RemoteOutput";
-const QString RemoteOutputPlugin::m_deviceTypeID = REMOTEOUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "RemoteOutput";
+static constexpr const char* const m_deviceTypeID = REMOTEOUTPUT_DEVICE_TYPE_ID;
 
 RemoteOutputPlugin::RemoteOutputPlugin(QObject* parent) :
 	QObject(parent)

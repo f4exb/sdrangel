@@ -36,8 +36,8 @@ const PluginDescriptor TestMOSyncPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString TestMOSyncPlugin::m_hardwareID = "TestMOSync";
-const QString TestMOSyncPlugin::m_deviceTypeID = TESTMOSYNC_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "TestMOSync";
+static constexpr const char* const m_deviceTypeID = TESTMOSYNC_DEVICE_TYPE_ID;
 
 TestMOSyncPlugin::TestMOSyncPlugin(QObject* parent) :
 	QObject(parent)
