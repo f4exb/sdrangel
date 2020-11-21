@@ -2,7 +2,6 @@ include_guard(GLOBAL)
 
 include(DetectArchitecture)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 if(MSVC)
   add_compile_options(/MP)
 else()
