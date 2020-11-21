@@ -71,6 +71,7 @@ public:
 	void setUdpChannelMode(UDPChannelMode udpChannelMode);
 	void setUdpChannelFormat(UDPChannelCodec udpChannelCodec, bool stereo, int sampleRate);
 	void setUdpDecimation(uint32_t decimation);
+	void setVolume(float volume);
 
 private:
 	QMutex m_mutex;
@@ -81,6 +82,7 @@ private:
 	UDPChannelCodec m_udpChannelCodec;
 	uint m_audioUsageCount;
 	bool m_onExit;
+	float m_volume;
 
 	std::list<AudioFifo*> m_audioFifos;
 	std::vector<qint32> m_mixBuffer;

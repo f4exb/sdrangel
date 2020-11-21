@@ -33,6 +33,7 @@ AudioOutputDevice::AudioOutputDevice() :
 	m_udpChannelCodec(UDPCodecL16),
 	m_audioUsageCount(0),
 	m_onExit(false),
+	m_volume(1.0),
 	m_audioFifos()
 {
 }
@@ -114,6 +115,7 @@ bool AudioOutputDevice::start(int device, int rate)
 
         m_audioOutput = new QAudioOutput(devInfo, m_audioFormat);
         m_audioNetSink = new AudioNetSink(0, m_audioFormat.sampleRate(), false);
+		m_audioOutput->setVolume(m_volume);
 
         QIODevice::open(QIODevice::ReadOnly);
 
@@ -340,4 +342,13 @@ qint64 AudioOutputDevice::writeData(const char* data, qint64 len)
 	Q_UNUSED(data);
 	Q_UNUSED(len);
 	return 0;
+}
+
+void AudioOutputDevice::setVolume(float volume)
+{
+    m_volume = volume;
+
+    if (m_audioOutput) {
+        m_audioOutput->setVolume(m_volume);
+	}
 }
