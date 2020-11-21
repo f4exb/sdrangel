@@ -30,13 +30,13 @@
 #include "metismisowebapiadapter.h"
 
 const PluginDescriptor MetisMISOPlugin::m_pluginDescriptor = {
-    QString("MetisMISO"),
-	QString("Metis MISO"),
-	QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("MetisMISO"),
+	QStringLiteral("Metis MISO"),
+	QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString MetisMISOPlugin::m_hardwareID = "MetisMISO";

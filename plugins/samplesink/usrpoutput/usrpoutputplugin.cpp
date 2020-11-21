@@ -33,13 +33,13 @@
 #include "usrpoutputwebapiadapter.h"
 
 const PluginDescriptor USRPOutputPlugin::m_pluginDescriptor = {
-    QString("USRP"),
-    QString("URSP Output"),
-    QString("4.21.0"),
-    QString("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("USRP"),
+    QStringLiteral("URSP Output"),
+    QStringLiteral("4.21.0"),
+    QStringLiteral("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString USRPOutputPlugin::m_hardwareID = "USRP";

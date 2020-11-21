@@ -28,13 +28,13 @@
 #include "interferometerplugin.h"
 
 const PluginDescriptor InterferometerPlugin::m_pluginDescriptor = {
-    QString(Interferometer::m_channelId),
-    QString("Interferometer"),
-    QString("6.0.0"),
-    QString("(c) Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    Interferometer::m_channelId,
+    QStringLiteral("Interferometer"),
+    QStringLiteral("6.0.0"),
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 InterferometerPlugin::InterferometerPlugin(QObject* parent) :

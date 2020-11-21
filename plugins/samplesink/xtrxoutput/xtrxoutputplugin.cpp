@@ -34,13 +34,13 @@
 #include "xtrxoutputwebapiadapter.h"
 
 const PluginDescriptor XTRXOutputPlugin::m_pluginDescriptor = {
-    QString("XTRX"),
-    QString("XTRX Output"),
-    QString("4.19.0"),
-    QString("(c) Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("XTRX"),
+    QStringLiteral("XTRX Output"),
+    QStringLiteral("4.19.0"),
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString XTRXOutputPlugin::m_hardwareID = "XTRX";

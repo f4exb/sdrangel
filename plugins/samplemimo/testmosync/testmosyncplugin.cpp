@@ -27,13 +27,13 @@
 #include "testmosyncplugin.h"
 
 const PluginDescriptor TestMOSyncPlugin::m_pluginDescriptor = {
-    QString("TestMOSync"),
-	QString("Test Synchronous Multiple Output"),
-	QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("TestMOSync"),
+	QStringLiteral("Test Synchronous Multiple Output"),
+	QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString TestMOSyncPlugin::m_hardwareID = "TestMOSync";

@@ -29,13 +29,13 @@
 #include "plutosdroutputwebapiadapter.h"
 
 const PluginDescriptor PlutoSDROutputPlugin::m_pluginDescriptor = {
-    QString("PlutoSDR"),
-	QString("PlutoSDR Output"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("PlutoSDR"),
+	QStringLiteral("PlutoSDR Output"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString PlutoSDROutputPlugin::m_hardwareID = "PlutoSDR";

@@ -29,13 +29,13 @@
 #include "fcdtraits.h"
 
 const PluginDescriptor FCDProPlugin::m_pluginDescriptor = {
-    QString("FCDPro"),
-	QString(fcd_traits<Pro>::pluginDisplayedName),
-	QString(fcd_traits<Pro>::pluginVersion),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("FCDPro"),
+	fcd_traits<Pro>::pluginDisplayedName,
+	fcd_traits<Pro>::pluginVersion,
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 FCDProPlugin::FCDProPlugin(QObject* parent) :

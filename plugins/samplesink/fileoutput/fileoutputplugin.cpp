@@ -28,13 +28,13 @@
 #include "fileoutputplugin.h"
 
 const PluginDescriptor FileOutputPlugin::m_pluginDescriptor = {
-    QString("FileOutput"),
-	QString("File output"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("FileOutput"),
+	QStringLiteral("File output"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString FileOutputPlugin::m_hardwareID = "FileOutput";

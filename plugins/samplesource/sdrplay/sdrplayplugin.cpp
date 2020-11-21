@@ -29,13 +29,13 @@
 #include "sdrplaywebapiadapter.h"
 
 const PluginDescriptor SDRPlayPlugin::m_pluginDescriptor = {
-    QString("SDRPlay"),
-    QString("SDRPlay RSP1 Input"),
-    QString("4.19.0"),
-    QString("(c) Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("SDRPlay"),
+    QStringLiteral("SDRPlay RSP1 Input"),
+    QStringLiteral("4.19.0"),
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString SDRPlayPlugin::m_hardwareID = "SDRplay1";

@@ -28,13 +28,13 @@
 #include "testsinkplugin.h"
 
 const PluginDescriptor TestSinkPlugin::m_pluginDescriptor = {
-    QString("TestSink"),
-	QString("Test Sink Output"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("TestSink"),
+	QStringLiteral("Test Sink Output"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString TestSinkPlugin::m_hardwareID = "TestSink";

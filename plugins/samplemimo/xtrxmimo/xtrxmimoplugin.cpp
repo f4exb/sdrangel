@@ -29,13 +29,13 @@
 #include "xtrxmimowebapiadapter.h"
 
 const PluginDescriptor XTRXMIMOPlugin::m_pluginDescriptor = {
-    QString("XTRX"),
-	QString("XTRX MIMO"),
-	QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("XTRX"),
+	QStringLiteral("XTRX MIMO"),
+	QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 const QString XTRXMIMOPlugin::m_hardwareID = "XTRX";

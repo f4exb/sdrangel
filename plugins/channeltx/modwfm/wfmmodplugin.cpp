@@ -27,12 +27,12 @@
 
 const PluginDescriptor WFMModPlugin::m_pluginDescriptor = {
     WFMMod::m_channelId,
-    QString("WFM Modulator"),
-    QString("4.19.0"),
-    QString("(c) Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("WFM Modulator"),
+    QStringLiteral("4.19.0"),
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 WFMModPlugin::WFMModPlugin(QObject* parent) :
