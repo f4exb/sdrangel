@@ -39,6 +39,7 @@ MESSAGE_CLASS_DEFINITION(AudioInput::MsgStartStop, Message)
 AudioInput::AudioInput(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_settings(),
+    m_worker(nullptr),
     m_deviceDescription("AudioInput"),
     m_running(false),
     m_centerFrequency(0)
