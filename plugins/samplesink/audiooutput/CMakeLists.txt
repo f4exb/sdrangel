@@ -4,7 +4,7 @@ set(audiooutput_SOURCES
     audiooutput.cpp
     audiooutputplugin.cpp
     audiooutputsettings.cpp
-    # audiooutputwebapiadapter.cpp
+    audiooutputwebapiadapter.cpp
     audiooutputworker.cpp
 )
 
@@ -12,7 +12,7 @@ set(audiooutput_HEADERS
     audiooutput.h
     audiooutputplugin.h
     audiooutputsettings.h
-    # audiooutputwebapiadapter.h
+    audiooutputwebapiadapter.h
     audiooutputworker.h
 )
 
