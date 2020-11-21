@@ -26,9 +26,9 @@ if (CODEC2_FOUND)
     add_subdirectory(demodfreedv)
 endif(CODEC2_FOUND)
 
-if (LIBSIGMF_FOUND)
+if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_subdirectory(sigmffilesink)
-endif(LIBSIGMF_FOUND)
+endif()
 
 if(NOT SERVER_MODE)
     add_subdirectory(chanalyzer)

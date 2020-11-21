@@ -44,7 +44,7 @@ if (LIMESUITE_FOUND)
     set(sdrbase_LIMERFE_LIB ${LIMESUITE_LIBRARY})
 endif (LIMESUITE_FOUND)
 
-if (LIBSIGMF_FOUND)
+if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(sdrbase_SOURCES
         ${sdrbase_SOURCES}
         dsp/sigmffilerecord.cpp
@@ -56,7 +56,7 @@ if (LIBSIGMF_FOUND)
     )
     include_directories(${LIBSIGMF_INCLUDE_DIR})
     set(sdrbase_LIBSIGMF_LIB ${LIBSIGMF_LIBRARIES})
-endif (LIBSIGMF_FOUND)
+endif()
 
 # serialdv now required
 add_definitions(-DDSD_USE_SERIALDV)

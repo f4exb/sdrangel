@@ -323,9 +323,9 @@ find_package(LibUSB REQUIRED)  # used by so many packages
 find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
 find_package(LibSigMF) # SigMF recording files support
 
-if (LIBSIGMF_FOUND)
+if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_definitions(-DHAS_LIBSIGMF)
-endif (LIBSIGMF_FOUND)
+endif()
 
 # macOS compatibility
 if(APPLE)
