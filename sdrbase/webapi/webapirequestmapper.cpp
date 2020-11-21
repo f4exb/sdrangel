@@ -4096,6 +4096,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setAudioInputSettings(new SWGSDRangel::SWGAudioInputSettings());
             deviceSettings->getAudioInputSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "audioOutputSettings")
+        {
+            deviceSettings->setAudioOutputSettings(new SWGSDRangel::SWGAudioOutputSettings());
+            deviceSettings->getAudioOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "bladeRF1InputSettings")
         {
             deviceSettings->setBladeRf1InputSettings(new SWGSDRangel::SWGBladeRF1InputSettings());

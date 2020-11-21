@@ -25,7 +25,7 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 AudioFifo::AudioFifo() :
-	m_fifo(0),
+	m_fifo(nullptr),
 	m_sampleSize(sizeof(AudioSample))
 {
 	m_size = 0;
@@ -35,7 +35,7 @@ AudioFifo::AudioFifo() :
 }
 
 AudioFifo::AudioFifo(uint32_t numSamples) :
-	m_fifo(0),
+	m_fifo(nullptr),
     m_sampleSize(sizeof(AudioSample))
 {
 	QMutexLocker mutexLocker(&m_mutex);
@@ -47,10 +47,10 @@ AudioFifo::~AudioFifo()
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
-	if (m_fifo != 0)
+	if (m_fifo)
 	{
 		delete[] m_fifo;
-		m_fifo = 0;
+		m_fifo = nullptr;
 	}
 
 	m_size = 0;
@@ -69,7 +69,7 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples)
 	uint32_t remaining;
 	uint32_t copyLen;
 
-	if (m_fifo == 0) {
+	if (!m_fifo) {
 		return 0;
 	}
 
@@ -83,6 +83,11 @@ uint AudioFifo::write(const quint8* data, uint32_t numSamples)
 		if (isFull())
 		{
 			m_mutex.unlock();
+
+			if (total - remaining > 0) {
+				emit dataReady();
+			}
+
 			return total - remaining; // written so far
 		}
 
@@ -107,7 +112,7 @@ uint AudioFifo::read(quint8* data, uint32_t numSamples)
 	uint32_t remaining;
 	uint32_t copyLen;
 
-	if (m_fifo == 0) {
+	if (!m_fifo) {
 		return 0;
 	}
 
@@ -165,10 +170,10 @@ void AudioFifo::clear()
 
 bool AudioFifo::create(uint32_t numSamples)
 {
-	if(m_fifo != 0)
+	if (m_fifo)
 	{
 		delete[] m_fifo;
-		m_fifo = 0;
+		m_fifo = nullptr;
 	}
 
 	m_fill = 0;

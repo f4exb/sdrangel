@@ -3,6 +3,7 @@ project(samplesink)
 add_subdirectory(testsink)
 add_subdirectory(fileoutput)
 add_subdirectory(localoutput)
+add_subdirectory(audiooutput)
 
 if(CM256CC_FOUND)
     add_subdirectory(remoteoutput)

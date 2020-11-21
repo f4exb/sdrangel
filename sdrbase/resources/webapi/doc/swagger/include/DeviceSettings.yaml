@@ -20,6 +20,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
     audioInputSettings:
       $ref: "/doc/swagger/include/AudioInput.yaml#/AudioInputSettings"
+    audioOutputSettings:
+      $ref: "/doc/swagger/include/AudioOutput.yaml#/AudioOutputSettings"
     bladeRF1InputSettings:
       $ref: "/doc/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
     bladeRF2InputSettings:

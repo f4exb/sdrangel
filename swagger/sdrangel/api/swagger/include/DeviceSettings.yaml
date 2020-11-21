@@ -20,6 +20,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AirspyHF.yaml#/AirspyHFSettings"
     audioInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AudioInput.yaml#/AudioInputSettings"
+    audioOutputSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AudioOutput.yaml#/AudioOutputSettings"
     bladeRF1InputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/BladeRF1.yaml#/BladeRF1InputSettings"
     bladeRF2InputSettings:

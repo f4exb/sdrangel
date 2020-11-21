@@ -1666,6 +1666,36 @@ margin-bottom: 20px;
   },
   "description" : "Audio output device"
 };
+            defs.AudioOutputSettings = {
+  "properties" : {
+    "deviceName" : {
+      "type" : "string",
+      "description" : "The name of the audio device"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "iqMapping" : {
+      "type" : "integer",
+      "description" : "Audio channel to IQ mapping\n  * 0 - I=L, Q=R\n  * 1 - I=R, Q=L\n"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AudioOutput"
+};
             defs.BFMDemodReport = {
   "properties" : {
     "channelPowerDB" : {
@@ -3599,6 +3629,9 @@ margin-bottom: 20px;
     },
     "audioInputSettings" : {
       "$ref" : "#/definitions/AudioInputSettings"
+    },
+    "audioOutputSettings" : {
+      "$ref" : "#/definitions/AudioOutputSettings"
     },
     "bladeRF1InputSettings" : {
       "$ref" : "#/definitions/BladeRF1InputSettings"
@@ -44596,7 +44629,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-11T13:32:52.276+01:00
+              Generated 2020-11-21T10:29:19.215+01:00
             </div>
           </div>
       </div>

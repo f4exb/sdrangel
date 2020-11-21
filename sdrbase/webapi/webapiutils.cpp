@@ -68,7 +68,8 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
 const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
     {"sdrangel.samplesource.airspy", "airspySettings"},
     {"sdrangel.samplesource.airspyhf", "airspyHFSettings"},
-    {"sdrangel.samplesource.audio", "audioInputSettings"},
+    {"sdrangel.samplesource.audioinput", "audioInputSettings"},
+    {"sdrangel.samplesink.audiooutput", "audioOutputSettings"},
     {"sdrangel.samplesource.bladerf1input", "bladeRF1InputSettings"},
     {"sdrangel.samplesource.bladerf", "bladeRF1InputSettings"}, // remap
     {"sdrangel.samplesink.bladerf1output", "bladeRF1OutputSettings"},
@@ -204,6 +205,7 @@ const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_sinkDeviceHwIdToSettingsKey = {
+    {"AudioOutput", "AudioOutputSettings"},
     {"BladeRF1", "bladeRF1OutputSettings"},
     {"BladeRF2", "bladeRF2OutputSettings"},
     {"HackRF", "hackRFOutputSettings"},
