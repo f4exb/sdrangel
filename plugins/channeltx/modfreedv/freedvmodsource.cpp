@@ -35,7 +35,7 @@ FreeDVModSource::FreeDVModSource() :
 	m_SSBFilterBuffer(0),
 	m_SSBFilterBufferIndex(0),
     m_audioSampleRate(48000),
-    m_audioFifo(4800),
+    m_audioFifo(12000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
@@ -46,14 +46,17 @@ FreeDVModSource::FreeDVModSource() :
 	m_iModem(0),
 	m_speechIn(nullptr),
 	m_modOut(0),
-	m_scaleFactor(SDR_TX_SCALEF)
+	m_scaleFactor(SDR_TX_SCALEF),
+    m_mutex(QMutex::Recursive)
 {
     m_SSBFilter = new fftfilt(m_lowCutoff / m_audioSampleRate, m_hiCutoff / m_audioSampleRate, m_ssbFftLen);
     m_SSBFilterBuffer = new Complex[m_ssbFftLen>>1]; // filter returns data exactly half of its size
     std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
 
-	m_audioBuffer.resize(1<<14);
+	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
+	m_audioReadBuffer.resize(24000);
+	m_audioReadBufferFill = 0;
 
     m_sum.real(0.0f);
     m_sum.imag(0.0f);
@@ -131,15 +134,40 @@ void FreeDVModSource::prefetch(unsigned int nbSamples)
 
 void FreeDVModSource::pullAudio(unsigned int nbSamples)
 {
+    QMutexLocker mlock(&m_mutex);
     unsigned int nbSamplesAudio = nbSamples * ((Real) m_audioSampleRate / (Real) m_modemSampleRate);
 
-    if (nbSamplesAudio > m_audioBuffer.size())
-    {
+    if (nbSamplesAudio > m_audioBuffer.size()) {
         m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio);
+    std::copy(&m_audioReadBuffer[0], &m_audioReadBuffer[nbSamplesAudio], &m_audioBuffer[0]);
     m_audioBufferFill = 0;
+
+    if (m_audioReadBufferFill > nbSamplesAudio) // copy back remaining samples at the start of the read buffer
+    {
+        std::copy(&m_audioReadBuffer[nbSamplesAudio], &m_audioReadBuffer[m_audioReadBufferFill], &m_audioReadBuffer[0]);
+        m_audioReadBufferFill = m_audioReadBufferFill - nbSamplesAudio; // adjust current read buffer fill pointer
+    }
+}
+
+qint16 FreeDVModSource::getAudioSample()
+{
+    qint16 sample;
+
+    if (m_audioBufferFill < m_audioBuffer.size())
+    {
+        sample = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2.0f);
+        m_audioBufferFill++;
+    }
+    else
+    {
+        unsigned int size = m_audioBuffer.size();
+        qDebug("FreeDVModSource::getAudioSample: starve audio samples: size: %u", size);
+        sample = (m_audioBuffer[size-1].l + m_audioBuffer[size-1].r) * (m_settings.m_volumeFactor / 2.0f);
+    }
+
+    return sample;
 }
 
 void FreeDVModSource::modulateSample()
@@ -148,7 +176,6 @@ void FreeDVModSource::modulateSample()
     if (!m_settings.m_gaugeInputElseModem) {
         calculateLevel(m_modSample);
     }
-    m_audioBufferFill++;
 }
 
 void FreeDVModSource::pullAF(Complex& sample)
@@ -231,13 +258,11 @@ void FreeDVModSource::pullAF(Complex& sample)
         case FreeDVModSettings::FreeDVModInputAudio:
             for (int i = 0; i < m_nSpeechSamples; i++)
             {
-                qint16 audioSample = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2.0f);
-                m_audioBufferFill++;
+                qint16 audioSample = getAudioSample();
 
                 while (!m_audioResampler.downSample(audioSample, m_speechIn[i]))
                 {
-                    audioSample = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) * (m_settings.m_volumeFactor / 2.0f);
-                    m_audioBufferFill++;
+                    audioSample = getAudioSample();
                 }
 
                 if (m_settings.m_gaugeInputElseModem) {
@@ -518,5 +543,27 @@ void FreeDVModSource::applySettings(const FreeDVModSettings& settings, bool forc
         m_toneNco.setFreq(settings.m_toneFrequency, m_channelSampleRate);
     }
 
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        if (settings.m_modAFInput == FreeDVModSettings::FreeDVModInputAudio) {
+            connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        } else {
+            disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        }
+    }
+
     m_settings = settings;
+}
+
+void FreeDVModSource::handleAudio()
+{
+    QMutexLocker mlock(&m_mutex);
+    unsigned int nbRead;
+
+    while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)
+    {
+        if (m_audioReadBufferFill + nbRead + 4096 < m_audioReadBuffer.size()) {
+            m_audioReadBufferFill += nbRead;
+        }
+    }
 }

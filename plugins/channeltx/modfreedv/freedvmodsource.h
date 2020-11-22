@@ -18,6 +18,7 @@
 #ifndef INCLUDE_FREEDVMODSOURCE_H
 #define INCLUDE_FREEDVMODSOURCE_H
 
+#include <QObject>
 #include <QMutex>
 
 #include <iostream>
@@ -37,8 +38,9 @@
 
 class BasebandSampleSink;
 
-class FreeDVModSource : public ChannelSampleSource
+class FreeDVModSource : public QObject, public ChannelSampleSource
 {
+    Q_OBJECT
 public:
     FreeDVModSource();
     virtual ~FreeDVModSource();
@@ -102,7 +104,9 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    unsigned int m_audioBufferFill;
+    AudioVector m_audioReadBuffer;
+    unsigned int m_audioReadBufferFill;
     AudioFifo m_audioFifo;
 
     quint32 m_levelCalcCount;
@@ -124,15 +128,21 @@ private:
     float m_scaleFactor; //!< divide by this amount to scale from int16 to float in [-1.0, 1.0] interval
     AudioResampler m_audioResampler;
 
+    QMutex m_mutex;
+
     static const int m_levelNbSamples;
 
     void processOneSample(Complex& ci);
     void pullAF(Complex& sample);
     void pullAudio(unsigned int nbSamples);
+    qint16 getAudioSample();
     void pushFeedback(Real sample);
     void calculateLevel(Complex& sample);
     void calculateLevel(qint16& sample);
     void modulateSample();
+
+private slots:
+    void handleAudio();
 };
 
 
