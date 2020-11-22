@@ -18,6 +18,7 @@
 #ifndef INCLUDE_SSBMODSOURCE_H
 #define INCLUDE_SSBMODSOURCE_H
 
+#include <QObject>
 #include <QMutex>
 
 #include <iostream>
@@ -36,8 +37,9 @@
 
 class BasebandSampleSink;
 
-class SSBModSource : public ChannelSampleSource
+class SSBModSource : public QObject, public ChannelSampleSource
 {
+    Q_OBJECT
 public:
     SSBModSource();
     virtual ~SSBModSource();
@@ -104,7 +106,9 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    unsigned int m_audioBufferFill;
+    AudioVector m_audioReadBuffer;
+    unsigned int m_audioReadBufferFill;
     AudioFifo m_audioFifo;
 
     int m_feedbackAudioSampleRate;
@@ -124,6 +128,8 @@ private:
     AudioCompressorSnd m_audioCompressor;
     int m_agcStepLength;
 
+    QMutex m_mutex;
+
     static const int m_levelNbSamples;
 
     void processOneSample(Complex& ci);
@@ -132,6 +138,9 @@ private:
     void pushFeedback(Complex sample);
     void calculateLevel(Complex& sample);
     void modulateSample();
+
+private slots:
+    void handleAudio();
 };
 
 #endif // INCLUDE_SSBMODSOURCE_H

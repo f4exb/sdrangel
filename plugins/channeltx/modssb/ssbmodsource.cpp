@@ -27,12 +27,13 @@ SSBModSource::SSBModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_audioSampleRate(48000),
-    m_audioFifo(4800),
+    m_audioFifo(12000),
     m_feedbackAudioFifo(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr)
+    m_ifstream(nullptr),
+    m_mutex(QMutex::Recursive)
 {
     m_SSBFilter = new fftfilt(m_settings.m_lowCutoff / m_audioSampleRate, m_settings.m_bandwidth / m_audioSampleRate, m_ssbFftLen);
     m_DSBFilter = new fftfilt((2.0f * m_settings.m_bandwidth) / m_audioSampleRate, 2 * m_ssbFftLen);
@@ -41,8 +42,10 @@ SSBModSource::SSBModSource() :
     std::fill(m_SSBFilterBuffer, m_SSBFilterBuffer+(m_ssbFftLen>>1), Complex{0,0});
     std::fill(m_DSBFilterBuffer, m_DSBFilterBuffer+m_ssbFftLen, Complex{0,0});
 
-	m_audioBuffer.resize(1<<14);
+	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
+	m_audioReadBuffer.resize(24000);
+	m_audioReadBufferFill = 0;
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
@@ -134,13 +137,20 @@ void SSBModSource::prefetch(unsigned int nbSamples)
 
 void SSBModSource::pullAudio(unsigned int nbSamplesAudio)
 {
-    if (nbSamplesAudio > m_audioBuffer.size())
-    {
+    QMutexLocker mlock(&m_mutex);
+
+    if (nbSamplesAudio > m_audioBuffer.size()) {
         m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio);
+    std::copy(&m_audioReadBuffer[0], &m_audioReadBuffer[nbSamplesAudio], &m_audioBuffer[0]);
     m_audioBufferFill = 0;
+
+    if (m_audioReadBufferFill > nbSamplesAudio) // copy back remaining samples at the start of the read buffer
+    {
+        std::copy(&m_audioReadBuffer[nbSamplesAudio], &m_audioReadBuffer[m_audioReadBufferFill], &m_audioReadBuffer[0]);
+        m_audioReadBufferFill = m_audioReadBufferFill - nbSamplesAudio; // adjust current read buffer fill pointer
+    }
 }
 
 void SSBModSource::modulateSample()
@@ -620,6 +630,15 @@ void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
         }
     }
 
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        if (settings.m_modAFInput == SSBModSettings::SSBModInputAudio) {
+            connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        } else {
+            disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        }
+    }
+
     m_settings = settings;
     m_settings.m_bandwidth = band;
     m_settings.m_lowCutoff = lowCutoff;
@@ -647,4 +666,17 @@ void SSBModSource::applyChannelSettings(int channelSampleRate, int channelFreque
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
+}
+
+void SSBModSource::handleAudio()
+{
+    QMutexLocker mlock(&m_mutex);
+    unsigned int nbRead;
+
+    while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)
+    {
+        if (m_audioReadBufferFill + nbRead + 4096 < m_audioReadBuffer.size()) {
+            m_audioReadBufferFill += nbRead;
+        }
+    }
 }
