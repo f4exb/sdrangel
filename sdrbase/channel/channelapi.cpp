@@ -20,10 +20,11 @@
 #include "util/uid.h"
 #include "channelapi.h"
 
-ChannelAPI::ChannelAPI(const QString& name, StreamType streamType) :
+ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
     m_featuresSettingsFeedbackBlockCount(0),
     m_streamType(streamType),
-    m_name(name),
+    m_name(uri),
+    m_uri(uri),
     m_indexInDeviceSet(-1),
     m_deviceSetIndex(0),
     m_deviceAPI(0),

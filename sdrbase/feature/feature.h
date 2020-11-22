@@ -93,7 +93,7 @@ public:
     virtual void destroy() = 0;
 	virtual bool handleMessage(const Message& cmd) = 0; //!< Processing of a message. Returns true if message has actually been processed
 
-    virtual const QString& getURI() const = 0;
+    const QString& getURI() const { return m_uri; }
     virtual void getIdentifier(QString& id) const = 0;
     virtual void getTitle(QString& title) const = 0;
     virtual void setName(const QString& name) { m_name = name; }
@@ -195,7 +195,8 @@ protected slots:
 	void handleInputMessages();
 
 private:
-    QString m_name;
+    QString m_name; //!< Unique identifier in a device set used for sorting may change depending on relative position in device set
+    QString m_uri;  //!< Unique non modifiable identifier attached to channel type
     uint64_t m_uid;
     int m_indexInFeatureSet;
 };

@@ -42,7 +42,6 @@ public:
 
     virtual void destroy() { delete this; }
     virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_centerFrequency; }
 

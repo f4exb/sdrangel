@@ -26,9 +26,10 @@
 
 MESSAGE_CLASS_DEFINITION(Feature::MsgChannelSettings, Message)
 
-Feature::Feature(const QString& name, WebAPIAdapterInterface *webAPIAdapterInterface) :
+Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
 	m_webAPIAdapterInterface(webAPIAdapterInterface),
-    m_name(name),
+    m_name(uri),
+	m_uri(uri),
     m_uid(UidCalculator::getNewObjectId())
 {
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));

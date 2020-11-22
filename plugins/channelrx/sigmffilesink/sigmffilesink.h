@@ -73,7 +73,6 @@ public:
     virtual bool handleMessage(const Message& cmd);
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
-    virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = "SigMF File Sink"; }
     virtual qint64 getCenterFrequency() const { return m_frequencyOffset; }
 
