@@ -25,15 +25,18 @@ AMModSource::AMModSource() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_audioSampleRate(48000),
-    m_audioFifo(4800),
+    m_audioFifo(12000),
     m_feedbackAudioFifo(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr)
+    m_ifstream(nullptr),
+    m_mutex(QMutex::Recursive)
 {
-	m_audioBuffer.resize(1<<14);
+	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
+	m_audioReadBuffer.resize(24000);
+	m_audioReadBufferFill = 0;
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
@@ -107,13 +110,20 @@ void AMModSource::prefetch(unsigned int nbSamples)
 
 void AMModSource::pullAudio(unsigned int nbSamples)
 {
+    QMutexLocker mlock(&m_mutex);
 
     if (nbSamples > m_audioBuffer.size()) {
         m_audioBuffer.resize(nbSamples);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamples);
+    std::copy(&m_audioReadBuffer[0], &m_audioReadBuffer[nbSamples], &m_audioBuffer[0]);
     m_audioBufferFill = 0;
+
+    if (m_audioReadBufferFill > nbSamples) // copy back remaining samples at the start of the read buffer
+    {
+        std::copy(&m_audioReadBuffer[nbSamples], &m_audioReadBuffer[m_audioReadBufferFill], &m_audioReadBuffer[0]);
+        m_audioReadBufferFill = m_audioReadBufferFill - nbSamples; // adjust current read buffer fill pointer
+    }
 }
 
 void AMModSource::modulateSample()
@@ -314,6 +324,15 @@ void AMModSource::applySettings(const AMModSettings& settings, bool force)
         m_toneNco.setFreq(settings.m_toneFrequency, m_audioSampleRate);
     }
 
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        if (settings.m_modAFInput == AMModSettings::AMModInputAudio) {
+            connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        } else {
+            disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        }
+    }
+
     m_settings = settings;
 }
 
@@ -339,4 +358,17 @@ void AMModSource::applyChannelSettings(int channelSampleRate, int channelFrequen
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
+}
+
+void AMModSource::handleAudio()
+{
+    QMutexLocker mlock(&m_mutex);
+    unsigned int nbRead;
+
+    while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)
+    {
+        if (m_audioReadBufferFill + nbRead + 4096 < m_audioReadBuffer.size()) {
+            m_audioReadBufferFill += nbRead;
+        }
+    }
 }

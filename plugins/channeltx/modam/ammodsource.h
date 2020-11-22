@@ -18,6 +18,7 @@
 #ifndef INCLUDE_AMMODSOURCE_H
 #define INCLUDE_AMMODSOURCE_H
 
+#include <QObject>
 #include <QMutex>
 
 #include <iostream>
@@ -33,8 +34,9 @@
 
 #include "ammodsettings.h"
 
-class AMModSource : public ChannelSampleSource
+class AMModSource : public QObject,  public ChannelSampleSource
 {
+    Q_OBJECT
 public:
     AMModSource();
     virtual ~AMModSource();
@@ -85,7 +87,9 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    unsigned int m_audioBufferFill;
+    AudioVector m_audioReadBuffer;
+    unsigned int m_audioReadBufferFill;
     AudioFifo m_audioFifo;
 
     int m_feedbackAudioSampleRate;
@@ -102,6 +106,8 @@ private:
     std::ifstream *m_ifstream;
     CWKeyer m_cwKeyer;
 
+    QMutex m_mutex;
+
     static const int m_levelNbSamples;
 
     void processOneSample(Complex& ci);
@@ -110,6 +116,9 @@ private:
     void pushFeedback(Real sample);
     void calculateLevel(Real& sample);
     void modulateSample();
+
+private slots:
+    void handleAudio();
 };
 
 
