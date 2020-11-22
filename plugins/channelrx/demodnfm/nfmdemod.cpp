@@ -43,8 +43,8 @@
 
 MESSAGE_CLASS_DEFINITION(NFMDemod::MsgConfigureNFMDemod, Message)
 
-const QString NFMDemod::m_channelIdURI = "sdrangel.channel.nfmdemod";
-const QString NFMDemod::m_channelId = "NFMDemod";
+const char* const NFMDemod::m_channelIdURI = "sdrangel.channel.nfmdemod";
+const char* const NFMDemod::m_channelId = "NFMDemod";
 
 const int NFMDemod::m_udpBlockSize = 512;
 

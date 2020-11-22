@@ -23,8 +23,8 @@
 
 #include "datvdemod.h"
 
-const QString DATVDemod::m_channelIdURI = "sdrangel.channel.demoddatv";
-const QString DATVDemod::m_channelId = "DATVDemod";
+const char* const DATVDemod::m_channelIdURI = "sdrangel.channel.demoddatv";
+const char* const DATVDemod::m_channelId = "DATVDemod";
 
 MESSAGE_CLASS_DEFINITION(DATVDemod::MsgConfigureDATVDemod, Message)
 

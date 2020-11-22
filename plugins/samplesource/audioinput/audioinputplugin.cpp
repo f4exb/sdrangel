@@ -29,17 +29,17 @@
 #endif
 
 const PluginDescriptor AudioInputPlugin::m_pluginDescriptor = {
-    QString("AudioInput"),
-    QString("Audio Input"),
-    QString("6.0.1"),
-    QString("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("AudioInput"),
+    QStringLiteral("Audio Input"),
+    QStringLiteral("6.0.1"),
+    QStringLiteral("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString AudioInputPlugin::m_hardwareID = "AudioInput";
-const QString AudioInputPlugin::m_deviceTypeID = AUDIOINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "AudioInput";
+static constexpr const char* const m_deviceTypeID = AUDIOINPUT_DEVICE_TYPE_ID;
 
 AudioInputPlugin::AudioInputPlugin(QObject* parent) :
     QObject(parent)

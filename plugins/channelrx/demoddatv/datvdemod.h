@@ -41,8 +41,8 @@ public:
     virtual ~DATVDemod();
 
     virtual void destroy() { delete this; }
-    virtual void getIdentifier(QString& id) { id = m_channelId; }
-    virtual const QString& getURI() const { return m_channelIdURI; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_centerFrequency; }
 
@@ -80,8 +80,8 @@ public:
     int getModcodCodeRate() const { return m_basebandSink->getModcodCodeRate(); }
     bool isCstlnSetByModcod() const { return m_basebandSink->isCstlnSetByModcod(); }
 
-    static const QString m_channelIdURI;
-    static const QString m_channelId;
+    static const char* const m_channelIdURI;
+    static const char* const m_channelId;
 
     class MsgConfigureDATVDemod : public Message {
         MESSAGE_CLASS_DECLARATION

@@ -48,8 +48,8 @@ MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(FreeDVMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString FreeDVMod::m_channelIdURI = "sdrangel.channeltx.freedvmod";
-const QString FreeDVMod::m_channelId = "FreeDVMod";
+const char* const FreeDVMod::m_channelIdURI = "sdrangel.channeltx.freedvmod";
+const char* const FreeDVMod::m_channelId = "FreeDVMod";
 
 FreeDVMod::FreeDVMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

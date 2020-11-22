@@ -29,17 +29,17 @@
 #include "localinputwebapiadapter.h"
 
 const PluginDescriptor LocalInputPlugin::m_pluginDescriptor = {
-    QString("LocalInput"),
-	QString("Local device input"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("LocalInput"),
+	QStringLiteral("Local device input"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString LocalInputPlugin::m_hardwareID = "LocalInput";
-const QString LocalInputPlugin::m_deviceTypeID = LOCALINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "LocalInput";
+static constexpr const char* const m_deviceTypeID = LOCALINPUT_DEVICE_TYPE_ID;
 
 LocalInputPlugin::LocalInputPlugin(QObject* parent) :
 	QObject(parent)

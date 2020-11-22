@@ -35,8 +35,8 @@ MESSAGE_CLASS_DEFINITION(SimplePTT::MsgConfigureSimplePTT, Message)
 MESSAGE_CLASS_DEFINITION(SimplePTT::MsgPTT, Message)
 MESSAGE_CLASS_DEFINITION(SimplePTT::MsgStartStop, Message)
 
-const QString SimplePTT::m_featureIdURI = "sdrangel.feature.simpleptt";
-const QString SimplePTT::m_featureId = "SimplePTT";
+const char* const SimplePTT::m_featureIdURI = "sdrangel.feature.simpleptt";
+const char* const SimplePTT::m_featureId = "SimplePTT";
 
 SimplePTT::SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),

@@ -28,17 +28,17 @@
 #include "bladerf2mimowebapiadapter.h"
 
 const PluginDescriptor BladeRF2MIMOPlugin::m_pluginDescriptor = {
-    QString("BladeRF2"),
-	QString("BladeRF2 MIMO"),
-	QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("BladeRF2"),
+	QStringLiteral("BladeRF2 MIMO"),
+	QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString BladeRF2MIMOPlugin::m_hardwareID = "BladeRF2";
-const QString BladeRF2MIMOPlugin::m_deviceTypeID = BLADERF2MIMO_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "BladeRF2";
+static constexpr const char* const m_deviceTypeID = BLADERF2MIMO_DEVICE_TYPE_ID;
 
 BladeRF2MIMOPlugin::BladeRF2MIMOPlugin(QObject* parent) :
 	QObject(parent)

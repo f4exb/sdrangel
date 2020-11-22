@@ -29,17 +29,17 @@
 #include "limesdrmimowebapiadapter.h"
 
 const PluginDescriptor LimeSDRMIMOPlugin::m_pluginDescriptor = {
-    QString("LimeSDR"),
-	QString("LimeSDR MIMO"),
-	QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("LimeSDR"),
+	QStringLiteral("LimeSDR MIMO"),
+	QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString LimeSDRMIMOPlugin::m_hardwareID = "LimeSDR";
-const QString LimeSDRMIMOPlugin::m_deviceTypeID = LIMESDRMIMO_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "LimeSDR";
+static constexpr const char* const m_deviceTypeID = LIMESDRMIMO_DEVICE_TYPE_ID;
 
 LimeSDRMIMOPlugin::LimeSDRMIMOPlugin(QObject* parent) :
 	QObject(parent)

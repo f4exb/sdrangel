@@ -27,8 +27,8 @@
 
 MESSAGE_CLASS_DEFINITION(ChannelAnalyzer::MsgConfigureChannelAnalyzer, Message)
 
-const QString ChannelAnalyzer::m_channelIdURI = "sdrangel.channel.chanalyzer";
-const QString ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
+const char* const ChannelAnalyzer::m_channelIdURI = "sdrangel.channel.chanalyzer";
+const char* const ChannelAnalyzer::m_channelId = "ChannelAnalyzer";
 
 ChannelAnalyzer::ChannelAnalyzer(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

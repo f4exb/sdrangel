@@ -46,8 +46,8 @@
 
 MESSAGE_CLASS_DEFINITION(ADSBDemod::MsgConfigureADSBDemod, Message)
 
-const QString ADSBDemod::m_channelIdURI = "sdrangel.channel.adsbdemod";
-const QString ADSBDemod::m_channelId = "ADSBDemod";
+const char* const ADSBDemod::m_channelIdURI = "sdrangel.channel.adsbdemod";
+const char* const ADSBDemod::m_channelId = "ADSBDemod";
 
 ADSBDemod::ADSBDemod(DeviceAPI *devieAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

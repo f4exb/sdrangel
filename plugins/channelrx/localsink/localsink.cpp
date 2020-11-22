@@ -42,8 +42,8 @@
 MESSAGE_CLASS_DEFINITION(LocalSink::MsgConfigureLocalSink, Message)
 MESSAGE_CLASS_DEFINITION(LocalSink::MsgBasebandSampleRateNotification, Message)
 
-const QString LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
-const QString LocalSink::m_channelId = "LocalSink";
+const char* const LocalSink::m_channelIdURI = "sdrangel.channel.localsink";
+const char* const LocalSink::m_channelId = "LocalSink";
 
 LocalSink::LocalSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

@@ -27,13 +27,13 @@
 #include "beamsteeringcwmodplugin.h"
 
 const PluginDescriptor BeamSteeringCWModPlugin::m_pluginDescriptor = {
-    QString(BeamSteeringCWMod::m_channelId),
-    QString("BeamSteeringCWMod"),
-    QString("6.0.0"),
-    QString("(c) Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    BeamSteeringCWMod::m_channelId,
+    QStringLiteral("BeamSteeringCWMod"),
+    QStringLiteral("6.0.0"),
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 BeamSteeringCWModPlugin::BeamSteeringCWModPlugin(QObject* parent) :

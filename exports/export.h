@@ -127,4 +127,17 @@
 #  define SWG_API
 #endif
 
+/* the 'SDRBENCH_API' controls the import/export of 'sdrbench' symbols
+ */
+#if !defined(sdrangel_STATIC)
+#  ifdef sdrbench_EXPORTS
+#    define SDRBENCH_API __SDR_EXPORT
+#  else
+#    define SDRBENCH_API __SDR_IMPORT
+#  endif
+#else
+#  define SDRBENCH_API
+#endif
+
+
 #endif /* __SDRANGEL_EXPORT_H */

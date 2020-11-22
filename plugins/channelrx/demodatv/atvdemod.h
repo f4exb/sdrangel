@@ -70,8 +70,8 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& cmd);
 
-    virtual void getIdentifier(QString& id) { id = m_channelId; }
-    virtual const QString& getURI() const { return m_channelIdURI; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = objectName(); }
     virtual qint64 getCenterFrequency() const { return m_settings.m_inputFrequencyOffset; }
 
@@ -94,8 +94,8 @@ public:
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_basebandSink->setVideoTabIndex(videoTabIndex); }
 
-    static const QString m_channelIdURI;
-    static const QString m_channelId;
+    static const char* const m_channelIdURI;
+    static const char* const m_channelId;
 
 private:
     DeviceAPI* m_deviceAPI;

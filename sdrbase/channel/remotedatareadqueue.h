@@ -30,7 +30,7 @@
 #include "export.h"
 
 class RemoteDataBlock;
-class Sample;
+struct Sample;
 
 class SDRBASE_API RemoteDataReadQueue
 {

@@ -29,17 +29,17 @@
 #include "testmiwebapiadapter.h"
 
 const PluginDescriptor TestMIPlugin::m_pluginDescriptor = {
-    QString("TestMI"),
-	QString("Test Multiple Input"),
-	QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("TestMI"),
+	QStringLiteral("Test Multiple Input"),
+	QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString TestMIPlugin::m_hardwareID = "TestMI";
-const QString TestMIPlugin::m_deviceTypeID = TESTMI_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "TestMI";
+static constexpr const char* const m_deviceTypeID = TESTMI_DEVICE_TYPE_ID;
 
 TestMIPlugin::TestMIPlugin(QObject* parent) :
 	QObject(parent)

@@ -29,17 +29,17 @@
 #include "sigmffileinputwebapiadapter.h"
 
 const PluginDescriptor SigMFFileInputPlugin::m_pluginDescriptor = {
-    QString("SigMFFileInput"),
-	QString("File device input (SigMF)"),
-    QString("6.0.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("SigMFFileInput"),
+	QStringLiteral("File device input (SigMF)"),
+    QStringLiteral("6.0.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString SigMFFileInputPlugin::m_hardwareID = "SigMFFileInput";
-const QString SigMFFileInputPlugin::m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "SigMFFileInput";
+static constexpr const char* const m_deviceTypeID = FILEINPUT_DEVICE_TYPE_ID;
 
 SigMFFileInputPlugin::SigMFFileInputPlugin(QObject* parent) :
 	QObject(parent)

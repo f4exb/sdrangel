@@ -29,17 +29,17 @@
 #include "testsourcewebapiadapter.h"
 
 const PluginDescriptor TestSourcePlugin::m_pluginDescriptor = {
-    QString("TestSource"),
-	QString("Test Source input"),
-	QString("4.21.1"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("TestSource"),
+	QStringLiteral("Test Source input"),
+	QStringLiteral("4.21.1"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString TestSourcePlugin::m_hardwareID = "TestSource";
-const QString TestSourcePlugin::m_deviceTypeID = TESTSOURCE_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "TestSource";
+static constexpr const char* const m_deviceTypeID = TESTSOURCE_DEVICE_TYPE_ID;
 
 TestSourcePlugin::TestSourcePlugin(QObject* parent) :
 	QObject(parent)

@@ -43,8 +43,8 @@
 
 MESSAGE_CLASS_DEFINITION(BFMDemod::MsgConfigureBFMDemod, Message)
 
-const QString BFMDemod::m_channelIdURI = "sdrangel.channel.bfm";
-const QString BFMDemod::m_channelId = "BFMDemod";
+const char* const BFMDemod::m_channelIdURI = "sdrangel.channel.bfm";
+const char* const BFMDemod::m_channelId = "BFMDemod";
 const int BFMDemod::m_udpBlockSize = 512;
 
 BFMDemod::BFMDemod(DeviceAPI *deviceAPI) :

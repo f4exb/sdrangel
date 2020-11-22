@@ -23,7 +23,7 @@
 #include <QMutex>
 #include "export.h"
 
-class OpusEncoder;
+struct OpusEncoder;
 
 class SDRBASE_API AudioOpus
 {

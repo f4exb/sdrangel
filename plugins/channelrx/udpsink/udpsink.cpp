@@ -40,8 +40,8 @@
 
 MESSAGE_CLASS_DEFINITION(UDPSink::MsgConfigureUDPSink, Message)
 
-const QString UDPSink::m_channelIdURI = "sdrangel.channel.udpsink";
-const QString UDPSink::m_channelId = "UDPSink";
+const char* const UDPSink::m_channelIdURI = "sdrangel.channel.udpsink";
+const char* const UDPSink::m_channelId = "UDPSink";
 
 UDPSink::UDPSink(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

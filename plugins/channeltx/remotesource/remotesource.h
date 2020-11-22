@@ -164,8 +164,8 @@ public:
     virtual void pull(SampleVector::iterator& begin, unsigned int nbSamples);
     virtual bool handleMessage(const Message& cmd);
 
-    virtual void getIdentifier(QString& id) { id = m_channelId; }
-    virtual const QString& getURI() const { return m_channelIdURI; }
+    virtual void getIdentifier(QString& id) { id = objectName(); }
+    virtual const QString& getURI() const { return getName(); }
     virtual void getTitle(QString& title) { title = m_settings.m_title; }
     virtual qint64 getCenterFrequency() const { return 0; }
 
@@ -207,8 +207,8 @@ public:
 
     uint32_t getNumberOfDeviceStreams() const;
 
-    static const QString m_channelIdURI;
-    static const QString m_channelId;
+    static const char* const m_channelIdURI;
+    static const char* const m_channelId;
 
 private:
     DeviceAPI* m_deviceAPI;

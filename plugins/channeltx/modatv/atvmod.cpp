@@ -51,8 +51,8 @@ MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureVideoFileSourceStreamTiming, Messag
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraIndex, Message)
 MESSAGE_CLASS_DEFINITION(ATVMod::MsgConfigureCameraData, Message)
 
-const QString ATVMod::m_channelIdURI = "sdrangel.channeltx.modatv";
-const QString ATVMod::m_channelId = "ATVMod";
+const char* const ATVMod::m_channelIdURI = "sdrangel.channeltx.modatv";
+const char* const ATVMod::m_channelId = "ATVMod";
 
 ATVMod::ATVMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

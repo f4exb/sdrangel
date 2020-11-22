@@ -44,8 +44,8 @@ MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgConfigureChirpChatDemod, Message)
 MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgReportDecodeBytes, Message)
 MESSAGE_CLASS_DEFINITION(ChirpChatDemod::MsgReportDecodeString, Message)
 
-const QString ChirpChatDemod::m_channelIdURI = "sdrangel.channel.chirpchatdemod";
-const QString ChirpChatDemod::m_channelId = "ChirpChatDemod";
+const char* const ChirpChatDemod::m_channelIdURI = "sdrangel.channel.chirpchatdemod";
+const char* const ChirpChatDemod::m_channelId = "ChirpChatDemod";
 
 ChirpChatDemod::ChirpChatDemod(DeviceAPI* deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

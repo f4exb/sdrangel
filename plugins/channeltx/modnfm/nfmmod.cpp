@@ -50,8 +50,8 @@ MESSAGE_CLASS_DEFINITION(NFMMod::MsgConfigureFileSourceStreamTiming, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamData, Message)
 MESSAGE_CLASS_DEFINITION(NFMMod::MsgReportFileSourceStreamTiming, Message)
 
-const QString NFMMod::m_channelIdURI = "sdrangel.channeltx.modnfm";
-const QString NFMMod::m_channelId = "NFMMod";
+const char* const NFMMod::m_channelIdURI = "sdrangel.channeltx.modnfm";
+const char* const NFMMod::m_channelId = "NFMMod";
 
 NFMMod::NFMMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

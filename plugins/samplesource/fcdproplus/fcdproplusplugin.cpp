@@ -29,16 +29,16 @@
 #include "fcdtraits.h"
 
 const PluginDescriptor FCDProPlusPlugin::m_pluginDescriptor = {
-    QString("FCDProPlus"),
-	QString(fcd_traits<ProPlus>::pluginDisplayedName),
-	QString(fcd_traits<ProPlus>::pluginVersion),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("FCDProPlus"),
+	fcd_traits<ProPlus>::pluginDisplayedName,
+	fcd_traits<ProPlus>::pluginVersion,
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString FCDProPlusPlugin::m_deviceTypeID = FCDPROPLUS_DEVICE_TYPE_ID;
+static constexpr const char* const m_deviceTypeID = FCDPROPLUS_DEVICE_TYPE_ID;
 
 FCDProPlusPlugin::FCDProPlusPlugin(QObject* parent) :
 	QObject(parent)

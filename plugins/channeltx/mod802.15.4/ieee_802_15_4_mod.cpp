@@ -49,8 +49,8 @@
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgConfigureIEEE_802_15_4_Mod, Message)
 MESSAGE_CLASS_DEFINITION(IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod, Message)
 
-const QString IEEE_802_15_4_Mod::m_channelIdURI = "sdrangel.channeltx.mod802.15.4";
-const QString IEEE_802_15_4_Mod::m_channelId = "IEEE_802_15_4_Mod";
+const char* const IEEE_802_15_4_Mod::m_channelIdURI = "sdrangel.channeltx.mod802.15.4";
+const char* const IEEE_802_15_4_Mod::m_channelId = "IEEE_802_15_4_Mod";
 
 IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

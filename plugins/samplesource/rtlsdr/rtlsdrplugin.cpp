@@ -13,17 +13,17 @@
 #include "rtlsdrwebapiadapter.h"
 
 const PluginDescriptor RTLSDRPlugin::m_pluginDescriptor = {
-    QString("RTLSDR"),
-	QString("RTL-SDR Input"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("RTLSDR"),
+	QStringLiteral("RTL-SDR Input"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString RTLSDRPlugin::m_hardwareID = "RTLSDR";
-const QString RTLSDRPlugin::m_deviceTypeID = RTLSDR_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "RTLSDR";
+static constexpr const char* const m_deviceTypeID = RTLSDR_DEVICE_TYPE_ID;
 
 RTLSDRPlugin::RTLSDRPlugin(QObject* parent) :
 	QObject(parent)

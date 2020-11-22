@@ -29,11 +29,11 @@ class DecimatorsFF
 {
 public:
     SDRBASE_API void decimate1(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    SDRBASE_API void decimate2_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    SDRBASE_API void decimate2_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    void decimate2_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    void decimate2_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate2_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    SDRBASE_API void decimate4_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
-    SDRBASE_API void decimate4_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    void decimate4_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    void decimate4_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate4_cen(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate8_inf(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate8_sup(FSampleVector::iterator* it, const float* buf, qint32 nbIAndQ);

@@ -30,17 +30,17 @@
 #include "kiwisdrwebapiadapter.h"
 
 const PluginDescriptor KiwiSDRPlugin::m_pluginDescriptor = {
-    QString("KiwiSDR"),
-	QString("KiwiSDR input"),
-	QString("4.21.2"),
-	QString("(c) Vort (c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("KiwiSDR"),
+	QStringLiteral("KiwiSDR input"),
+	QStringLiteral("4.21.2"),
+	QStringLiteral("(c) Vort (c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString KiwiSDRPlugin::m_hardwareID = "KiwiSDR";
-const QString KiwiSDRPlugin::m_deviceTypeID = KIWISDR_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "KiwiSDR";
+static constexpr const char* const m_deviceTypeID = KIWISDR_DEVICE_TYPE_ID;
 
 KiwiSDRPlugin::KiwiSDRPlugin(QObject* parent) :
 	QObject(parent)

@@ -29,17 +29,17 @@
 #include "localoutputwebapiadapter.h"
 
 const PluginDescriptor LocalOutputPlugin::m_pluginDescriptor = {
-    QString("LocalOutput"),
-	QString("Local device output"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("LocalOutput"),
+	QStringLiteral("Local device output"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString LocalOutputPlugin::m_hardwareID = "LocalOutput";
-const QString LocalOutputPlugin::m_deviceTypeID = LOCALOUTPUT_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "LocalOutput";
+static constexpr const char* const m_deviceTypeID = LOCALOUTPUT_DEVICE_TYPE_ID;
 
 LocalOutputPlugin::LocalOutputPlugin(QObject* parent) :
 	QObject(parent)

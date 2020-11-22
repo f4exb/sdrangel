@@ -41,8 +41,8 @@
 
 MESSAGE_CLASS_DEFINITION(AMDemod::MsgConfigureAMDemod, Message)
 
-const QString AMDemod::m_channelIdURI = "sdrangel.channel.amdemod";
-const QString AMDemod::m_channelId = "AMDemod";
+const char* const AMDemod::m_channelIdURI = "sdrangel.channel.amdemod";
+const char* const AMDemod::m_channelId = "AMDemod";
 const int AMDemod::m_udpBlockSize = 512;
 
 AMDemod::AMDemod(DeviceAPI *deviceAPI) :

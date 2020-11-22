@@ -29,12 +29,12 @@
 
 const PluginDescriptor DSDDemodPlugin::m_pluginDescriptor = {
     DSDDemod::m_channelId,
-	QString("DSD Demodulator"),
-    QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+	QStringLiteral("DSD Demodulator"),
+    QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 DSDDemodPlugin::DSDDemodPlugin(QObject* parent) :

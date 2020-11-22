@@ -46,8 +46,8 @@ MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceStreamTiming, Message
 MESSAGE_CLASS_DEFINITION(FileSource::MsgConfigureFileSourceSeek, Message)
 MESSAGE_CLASS_DEFINITION(FileSource::MsgReportFileSourceAcquisition, Message)
 
-const QString FileSource::m_channelIdURI = "sdrangel.channeltx.filesource";
-const QString FileSource::m_channelId ="FileSource";
+const char* const FileSource::m_channelIdURI = "sdrangel.channeltx.filesource";
+const char* const FileSource::m_channelId ="FileSource";
 
 FileSource::FileSource(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

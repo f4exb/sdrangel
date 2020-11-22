@@ -39,8 +39,8 @@
 MESSAGE_CLASS_DEFINITION(LocalSource::MsgConfigureLocalSource, Message)
 MESSAGE_CLASS_DEFINITION(LocalSource::MsgBasebandSampleRateNotification, Message)
 
-const QString LocalSource::m_channelIdURI = "sdrangel.channel.localsource";
-const QString LocalSource::m_channelId = "LocalSource";
+const char* const LocalSource::m_channelIdURI = "sdrangel.channel.localsource";
+const char* const LocalSource::m_channelId = "LocalSource";
 
 LocalSource::LocalSource(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),

@@ -35,8 +35,8 @@
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWMod::MsgConfigureBeamSteeringCWMod, Message)
 MESSAGE_CLASS_DEFINITION(BeamSteeringCWMod::MsgBasebandNotification, Message)
 
-const QString BeamSteeringCWMod::m_channelIdURI = "sdrangel.channel.beamsteeringcwmod";
-const QString BeamSteeringCWMod::m_channelId = "BeamSteeringCWMod";
+const char* const BeamSteeringCWMod::m_channelIdURI = "sdrangel.channel.beamsteeringcwmod";
+const char* const BeamSteeringCWMod::m_channelId = "BeamSteeringCWMod";
 
 BeamSteeringCWMod::BeamSteeringCWMod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),

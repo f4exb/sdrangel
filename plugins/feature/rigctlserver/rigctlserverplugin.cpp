@@ -29,12 +29,12 @@
 
 const PluginDescriptor RigCtlServerPlugin::m_pluginDescriptor = {
     RigCtlServer::m_featureId,
-	QString("RigCtl Server"),
-	QString("4.19.0"),
-	QString("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+	QStringLiteral("RigCtl Server"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Jon Beniston, M7RCE and Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 RigCtlServerPlugin::RigCtlServerPlugin(QObject* parent) :

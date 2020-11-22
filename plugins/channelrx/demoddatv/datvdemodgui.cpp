@@ -36,7 +36,7 @@
 #include "datvdemodreport.h"
 #include "datvdemodgui.h"
 
-const QString DATVDemodGUI::m_strChannelID = "sdrangel.channel.demoddatv";
+const char* const DATVDemodGUI::m_strChannelID = "sdrangel.channel.demoddatv";
 
 DATVDemodGUI* DATVDemodGUI::create(PluginAPI* objPluginAPI,
         DeviceUISet *deviceUISet,

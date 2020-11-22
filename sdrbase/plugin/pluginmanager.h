@@ -33,7 +33,7 @@ class QPluginLoader;
 class Message;
 class MessageQueue;
 class DeviceAPI;
-class DeviceUserArgs;
+struct DeviceUserArgs;
 class WebAPIAdapterInterface;
 
 class SDRBASE_API PluginManager : public QObject {

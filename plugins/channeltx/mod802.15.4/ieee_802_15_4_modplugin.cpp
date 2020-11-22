@@ -28,12 +28,12 @@
 
 const PluginDescriptor IEEE_802_15_4_ModPlugin::m_pluginDescriptor = {
     IEEE_802_15_4_Mod::m_channelId,
-    QString("802.15.4 Modulator"),
-    QString("4.20.0"),
-    QString("(c) Jon Beniston, M7RCE"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("802.15.4 Modulator"),
+    QStringLiteral("4.20.0"),
+    QStringLiteral("(c) Jon Beniston, M7RCE"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 IEEE_802_15_4_ModPlugin::IEEE_802_15_4_ModPlugin(QObject* parent) :

@@ -40,8 +40,8 @@ MESSAGE_CLASS_DEFINITION(AFC::MsgStartStop, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgDeviceTrack, Message)
 MESSAGE_CLASS_DEFINITION(AFC::MsgDevicesApply, Message)
 
-const QString AFC::m_featureIdURI = "sdrangel.feature.afc";
-const QString AFC::m_featureId = "AFC";
+const char* const AFC::m_featureIdURI = "sdrangel.feature.afc";
+const char* const AFC::m_featureId = "AFC";
 
 AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     Feature(m_featureIdURI, webAPIAdapterInterface),

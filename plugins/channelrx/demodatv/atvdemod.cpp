@@ -29,8 +29,8 @@
 
 MESSAGE_CLASS_DEFINITION(ATVDemod::MsgConfigureATVDemod, Message)
 
-const QString ATVDemod::m_channelIdURI = "sdrangel.channel.demodatv";
-const QString ATVDemod::m_channelId = "ATVDemod";
+const char* const ATVDemod::m_channelIdURI = "sdrangel.channel.demodatv";
+const char* const ATVDemod::m_channelId = "ATVDemod";
 
 ATVDemod::ATVDemod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),

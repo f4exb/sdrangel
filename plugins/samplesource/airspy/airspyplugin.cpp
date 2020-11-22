@@ -32,17 +32,17 @@
 const int AirspyPlugin::m_maxDevices = 32;
 
 const PluginDescriptor AirspyPlugin::m_pluginDescriptor = {
-    QString("Airspy"),
-	QString("Airspy Input"),
-	QString("4.19.0"),
-	QString("(c) Edouard Griffiths, F4EXB"),
-	QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("Airspy"),
+	QStringLiteral("Airspy Input"),
+	QStringLiteral("4.19.0"),
+	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
-	QString("https://github.com/f4exb/sdrangel")
+	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-const QString AirspyPlugin::m_hardwareID = "Airspy";
-const QString AirspyPlugin::m_deviceTypeID = AIRSPY_DEVICE_TYPE_ID;
+static constexpr const char* const m_hardwareID = "Airspy";
+static constexpr const char* const m_deviceTypeID = AIRSPY_DEVICE_TYPE_ID;
 
 AirspyPlugin::AirspyPlugin(QObject* parent) :
 	QObject(parent)

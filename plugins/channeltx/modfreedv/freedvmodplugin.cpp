@@ -27,12 +27,12 @@
 
 const PluginDescriptor FreeDVModPlugin::m_pluginDescriptor = {
     FreeDVMod::m_channelId,
-    QString("FreeDV Modulator"),
-    QString("4.19.0"),
-    QString("(c) Edouard Griffiths, F4EXB"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("FreeDV Modulator"),
+    QStringLiteral("4.19.0"),
+    QStringLiteral("(c) Edouard Griffiths, F4EXB"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 FreeDVModPlugin::FreeDVModPlugin(QObject* parent) :
