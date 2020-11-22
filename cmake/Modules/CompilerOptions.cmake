@@ -2,6 +2,15 @@ include_guard(GLOBAL)
 
 include(DetectArchitecture)
 
+if(WIN32)
+  add_compile_definitions(
+    NOMINMAX
+    _USE_MATH_DEFINES
+    _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES
+    _CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES_COUNT
+  )
+endif()
+
 if(NOT MSVC)
   add_compile_options(-Wall -Wextra -Wvla -Woverloaded-virtual -ffast-math -ftree-vectorize)
 endif()
