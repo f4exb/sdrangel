@@ -1,3 +1,14 @@
+sdrangel (6.1.0-1) unstable; urgency=medium
+
+   * Fixes for clang-cl build and LTO optimization. PR #717
+   * Cmake arch detection and compilation options rework. PR #714 and #715
+   * Audio output plugin. Issue #496
+   * Fixed Rest API UDPSinkSettings key mismapping. Issue #713
+   * Compile SigMF plugins only with GCC. Issue #712
+   * Modulators audio input rework. Issue #495 and more
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 22 Nov 2020 19:06:29 +0100
+
 sdrangel (6.0.2-1) unstable; urgency=medium
 
    * GLSpectrum: fixed settings and waterfall share serialization. Reinstate #609
