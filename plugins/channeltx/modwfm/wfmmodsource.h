@@ -18,6 +18,7 @@
 #ifndef INCLUDE_WFMMODSOURCE_H
 #define INCLUDE_WFMMODSOURCE_H
 
+#include <QObject>
 #include <QMutex>
 
 #include <iostream>
@@ -34,8 +35,9 @@
 
 #include "wfmmodsettings.h"
 
-class WFMModSource : public ChannelSampleSource
+class WFMModSource : public QObject, public ChannelSampleSource
 {
+    Q_OBJECT
 public:
     WFMModSource();
     virtual ~WFMModSource();
@@ -93,7 +95,9 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    unsigned int m_audioBufferFill;
+    AudioVector m_audioReadBuffer;
+    unsigned int m_audioReadBufferFill;
     AudioFifo m_audioFifo;
 
     int m_feedbackAudioSampleRate;
@@ -110,6 +114,8 @@ private:
     std::ifstream *m_ifstream;
     CWKeyer m_cwKeyer;
 
+    QMutex m_mutex;
+
     static const int m_levelNbSamples;
 
     void processOneSample(Complex& ci);
@@ -118,6 +124,9 @@ private:
     void pushFeedback(Complex sample);
     void calculateLevel(const Real& sample);
     void modulateAudio();
+
+private slots:
+    void handleAudio();
 };
 
 #endif // INCLUDE_WFMMODSOURCE_H
