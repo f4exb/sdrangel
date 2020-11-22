@@ -18,6 +18,7 @@
 #ifndef INCLUDE_NFMMODSOURCE_H
 #define INCLUDE_NFMMODSOURCE_H
 
+#include <QObject>
 #include <QMutex>
 
 #include <iostream>
@@ -35,8 +36,9 @@
 
 #include "nfmmodsettings.h"
 
-class NFMModSource : public ChannelSampleSource
+class NFMModSource : public QObject, public ChannelSampleSource
 {
+    Q_OBJECT
 public:
     NFMModSource();
     virtual ~NFMModSource();
@@ -93,7 +95,9 @@ private:
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
-    uint m_audioBufferFill;
+    unsigned int m_audioBufferFill;
+    AudioVector m_audioReadBuffer;
+    unsigned int m_audioReadBufferFill;
     AudioFifo m_audioFifo;
 
     int m_feedbackAudioSampleRate;
@@ -110,6 +114,8 @@ private:
     std::ifstream *m_ifstream;
     CWKeyer m_cwKeyer;
 
+    QMutex m_mutex;
+
     static const int m_levelNbSamples;
     static const float m_preemphasis;
 
@@ -119,6 +125,9 @@ private:
     void pushFeedback(Real sample);
     void calculateLevel(Real& sample);
     void modulateSample();
+
+private slots:
+    void handleAudio();
 };
 
 

@@ -28,15 +28,18 @@ NFMModSource::NFMModSource() :
     m_modPhasor(0.0f),
     m_preemphasisFilter(m_preemphasis*48000),
     m_audioSampleRate(48000),
-    m_audioFifo(4800),
+    m_audioFifo(12000),
     m_feedbackAudioFifo(48000),
 	m_levelCalcCount(0),
 	m_peakLevel(0.0f),
 	m_levelSum(0.0f),
-    m_ifstream(nullptr)
+    m_ifstream(nullptr),
+    m_mutex(QMutex::Recursive)
 {
-	m_audioBuffer.resize(1<<14);
+	m_audioBuffer.resize(24000);
 	m_audioBufferFill = 0;
+	m_audioReadBuffer.resize(24000);
+	m_audioReadBufferFill = 0;
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
@@ -111,13 +114,20 @@ void NFMModSource::prefetch(unsigned int nbSamples)
 
 void NFMModSource::pullAudio(unsigned int nbSamplesAudio)
 {
-    if (nbSamplesAudio > m_audioBuffer.size())
-    {
+    QMutexLocker mlock(&m_mutex);
+
+    if (nbSamplesAudio > m_audioBuffer.size()) {
         m_audioBuffer.resize(nbSamplesAudio);
     }
 
-    m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioBuffer[0]), nbSamplesAudio);
+    std::copy(&m_audioReadBuffer[0], &m_audioReadBuffer[nbSamplesAudio], &m_audioBuffer[0]);
     m_audioBufferFill = 0;
+
+    if (m_audioReadBufferFill > nbSamplesAudio) // copy back remaining samples at the start of the read buffer
+    {
+        std::copy(&m_audioReadBuffer[nbSamplesAudio], &m_audioReadBuffer[m_audioReadBufferFill], &m_audioReadBuffer[0]);
+        m_audioReadBufferFill = m_audioReadBufferFill - nbSamplesAudio; // adjust current read buffer fill pointer
+    }
 }
 
 void NFMModSource::modulateSample()
@@ -132,7 +142,6 @@ void NFMModSource::modulateSample()
     }
 
     calculateLevel(t);
-    m_audioBufferFill++;
 
     if (m_settings.m_ctcssOn) {
         m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * (0.85f * m_bandpass.filter(t) + 0.15f * 0.625f * m_ctcssNco.next()) * 1.33f;
@@ -186,7 +195,18 @@ void NFMModSource::pullAF(Real& sample)
         }
         break;
     case NFMModSettings::NFMModInputAudio:
-        sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
+        if (m_audioBufferFill < m_audioBuffer.size())
+        {
+            sample = ((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r) / 65536.0f) * m_settings.m_volumeFactor;
+            m_audioBufferFill++;
+        }
+        else
+        {
+            unsigned int size = m_audioBuffer.size();
+            qDebug("NFMModSource::pullAF: starve audio samples: size: %u", size);
+            sample = ((m_audioBuffer[size-1].l + m_audioBuffer[size-1].r) / 65536.0f) * m_settings.m_volumeFactor;
+        }
+
         break;
     case NFMModSettings::NFMModInputCWTone:
         Real fadeFactor;
@@ -339,6 +359,15 @@ void NFMModSource::applySettings(const NFMModSettings& settings, bool force)
         m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(settings.m_ctcssIndex), m_audioSampleRate);
     }
 
+    if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)
+    {
+        if (settings.m_modAFInput == NFMModSettings::NFMModInputAudio) {
+            connect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        } else {
+            disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
+        }
+    }
+
     m_settings = settings;
 }
 
@@ -364,4 +393,17 @@ void NFMModSource::applyChannelSettings(int channelSampleRate, int channelFreque
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
+}
+
+void NFMModSource::handleAudio()
+{
+    QMutexLocker mlock(&m_mutex);
+    unsigned int nbRead;
+
+    while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)
+    {
+        if (m_audioReadBufferFill + nbRead + 4096 < m_audioReadBuffer.size()) {
+            m_audioReadBufferFill += nbRead;
+        }
+    }
 }
