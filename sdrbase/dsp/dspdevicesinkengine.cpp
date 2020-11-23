@@ -222,12 +222,11 @@ void DSPDeviceSinkEngine::workSamples(SampleVector& data, unsigned int iBegin, u
                 data.begin() + iBegin,
                 data.begin() + iBegin,
                 [this](Sample& a, const Sample& b) -> Sample {
-                    int den = m_sumIndex + 1; // at each stage scale sum by n/n+1 and input by 1/n+1
-                    int nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
-                    return Sample{
-                        a.real()/den + nom*(b.real()/den),
-                        a.imag()/den + nom*(b.imag()/den)
-                    };
+                    FixReal den = m_sumIndex + 1; // at each stage scale sum by n/n+1 and input by 1/n+1
+                    FixReal nom = m_sumIndex;     // so that final sum is scaled by N (number of channels)
+					FixReal x = a.real()/den + nom*(b.real()/den);
+					FixReal y = a.imag()/den + nom*(b.imag()/den);
+                    return Sample{x, y};
                 }
             );
         }

@@ -583,7 +583,9 @@ void MetisMISOUDPHandler::processIQBuffer(unsigned char* buffer)
                 {
                     if (m_settings.m_log2Decim == 0) // no decimation - direct conversion
                     {
-                        m_convertBuffer[r][m_sampleCount] = getRxIQInversion(r) ? Sample{sampleQ, sampleI} : Sample{sampleI, sampleQ};
+                        m_convertBuffer[r][m_sampleCount] = getRxIQInversion(r)
+                            ? Sample{(FixReal) sampleQ, (FixReal) sampleI}
+                            : Sample{(FixReal) sampleI, (FixReal) sampleQ};
                         samplesAdded = 1;
                     }
                     else

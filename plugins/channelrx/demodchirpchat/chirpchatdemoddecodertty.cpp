@@ -48,7 +48,7 @@ void ChirpChatDemodDecoderTTY::decodeSymbols(const std::vector<unsigned short>& 
         }
         else
         {
-            char asciiChar = -1;
+            signed char asciiChar = -1;
 
             if (ttyState == TTYLetters) {
                 asciiChar = ttyLetters[(int) ttyChar];
