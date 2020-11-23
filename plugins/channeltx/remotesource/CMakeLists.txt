@@ -1,10 +1,5 @@
 project(remotesource)
 
-if (ARCHITECTURE_ARM64)
-    message(STATUS "Compiling RemoteSource for ARM64 with USE_NEON definition")
-    add_compile_definitions(USE_NEON)
-endif()
-
 set(remotesource_SOURCES
     remotesource.cpp
     remotesourcebaseband.cpp

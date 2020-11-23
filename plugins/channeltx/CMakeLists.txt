@@ -11,9 +11,9 @@ add_subdirectory(udpsource)
 add_subdirectory(localsource)
 add_subdirectory(filesource)
 
-if(CM256CC_FOUND)
+if (CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remotesource)
-endif(CM256CC_FOUND)
+endif()
 
 if (OpenCV_FOUND)
     add_subdirectory(modatv)

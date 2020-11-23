@@ -1,10 +1,5 @@
 project(remoteinput)
 
-if (ARCHITECTURE_ARM64)
-    message(STATUS "Compiling RemoteInput for ARM64 with USE_NEON definition")
-    add_compile_definitions(USE_NEON)
-endif()
-
 set(remoteinput_SOURCES
     remoteinputbuffer.cpp
     remoteinputudphandler.cpp

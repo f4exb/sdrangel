@@ -4,9 +4,9 @@ add_subdirectory(fileinput)
 add_subdirectory(testsource)
 add_subdirectory(localinput)
 
-if(CM256CC_FOUND)
+if (CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remoteinput)
-endif(CM256CC_FOUND)
+endif()
 
 if(ENABLE_AIRSPY AND LIBAIRSPY_FOUND)
     add_subdirectory(airspy)

@@ -196,8 +196,14 @@ if (ARCHITECTURE_ARM)
   endif()
 endif()
 
+# Extensions detection for ARM
+check_symbol_exists("__ARM_NEON" "" HAS_NEON)
+if (HAS_NEON)
+  message(STATUS "ARM Neon extensions enabled")
+  add_compile_definitions(USE_NEON)
+endif()
+
 # This is quite basic detection, can be extended if needed
-detect_extensions(ARM_NEON)
 detect_extensions(AVX512F)
 detect_extensions(AVX2 HAS_AVX512F)
 detect_extensions(AVX HAS_AVX2)

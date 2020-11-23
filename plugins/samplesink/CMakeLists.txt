@@ -5,9 +5,9 @@ add_subdirectory(fileoutput)
 add_subdirectory(localoutput)
 add_subdirectory(audiooutput)
 
-if(CM256CC_FOUND)
+if (CM256CC_FOUND AND (HAS_SSE3 OR HAS_NEON))
     add_subdirectory(remoteoutput)
-endif(CM256CC_FOUND)
+endif()
 
 if(ENABLE_BLADERF AND LIBBLADERF_FOUND)
     add_subdirectory(bladerf1output)
