@@ -1,14 +1,5 @@
 project(remoteoutput)
 
-if (HAS_SSSE3)
-    message(STATUS "RemoteFEC: use SSSE3 SIMD" )
-elseif (HAS_NEON)
-    message(STATUS "RemoteFEC: use Neon SIMD" )
-else()
-    message(STATUS "RemoteFEC: Unsupported architecture")
-    return()
-endif()
-
 set(remoteoutput_SOURCES
 	remoteoutput.cpp
 	remoteoutputplugin.cpp

@@ -1,14 +1,5 @@
 project(remotesink)
 
-if (HAS_SSSE3)
-    message(STATUS "RemoteSink: use SSSE3 SIMD" )
-elseif (HAS_NEON)
-    message(STATUS "RemoteSink: use Neon SIMD" )
-else()
-    message(STATUS "RemoteSink: Unsupported architecture")
-    return()
-endif()
-
 set(remotesink_SOURCES
     remotesink.cpp
     remotesinkbaseband.cpp

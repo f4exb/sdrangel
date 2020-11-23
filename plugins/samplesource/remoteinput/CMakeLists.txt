@@ -1,14 +1,5 @@
 project(remoteinput)
 
-if (HAS_SSSE3)
-    message(STATUS "RemoteInput: use SSSE3 SIMD" )
-elseif (HAS_NEON)
-    message(STATUS "RemoteInput: use Neon SIMD" )
-else()
-    message(STATUS "RemoteInput: Unsupported architecture")
-    return()
-endif()
-
 set(remoteinput_SOURCES
     remoteinputbuffer.cpp
     remoteinputudphandler.cpp

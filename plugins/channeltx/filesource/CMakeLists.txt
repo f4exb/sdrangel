@@ -1,14 +1,5 @@
 project(filesource)
 
-if (HAS_SSSE3)
-    message(STATUS "RemoteSource: use SSSE3 SIMD" )
-elseif (HAS_NEON)
-    message(STATUS "RemoteSource: use Neon SIMD" )
-else()
-    message(STATUS "RemoteSource: Unsupported architecture")
-    return()
-endif()
-
 set(filesource_SOURCES
     filesource.cpp
     filesourcebaseband.cpp
