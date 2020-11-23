@@ -1,5 +1,10 @@
 project(remotesource)
 
+if (ARCHITECTURE_ARM64)
+    message(STATUS "Compiling RemoteSource for ARM64 with USE_NEON definition")
+    add_compile_definitions(USE_NEON)
+endif()
+
 set(remotesource_SOURCES
     remotesource.cpp
     remotesourcebaseband.cpp
@@ -31,7 +36,6 @@ if(NOT SERVER_MODE)
     set(remotesource_SOURCES
         ${remotesource_SOURCES}
         remotesourcegui.cpp
-
         remotesourcegui.ui
     )
     set(remotesource_HEADERS
@@ -59,13 +63,13 @@ if(CM256CC_EXTERNAL)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
-        Qt5::Network
+    Qt5::Core
+    ${TARGET_LIB}
+    Qt5::Network
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
-        ${CM256CC_LIBRARIES}
+    swagger
+    ${CM256CC_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

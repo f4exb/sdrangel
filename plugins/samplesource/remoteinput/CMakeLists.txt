@@ -1,5 +1,10 @@
 project(remoteinput)
 
+if (ARCHITECTURE_ARM64)
+    message(STATUS "Compiling RemoteInput for ARM64 with USE_NEON definition")
+    add_compile_definitions(USE_NEON)
+endif()
+
 set(remoteinput_SOURCES
     remoteinputbuffer.cpp
     remoteinputudphandler.cpp
@@ -28,7 +33,6 @@ if(NOT SERVER_MODE)
     set(remoteinput_SOURCES
         ${remoteinput_SOURCES}
         remoteinputgui.cpp
-
         remoteinputgui.ui
     )
     set(remoteinput_HEADERS
@@ -56,12 +60,12 @@ if(CM256CC_EXTERNAL)
 endif()
 
 target_link_libraries(${TARGET_NAME}
-        Qt5::Core
-        ${TARGET_LIB}
+    Qt5::Core
+    ${TARGET_LIB}
 	sdrbase
 	${TARGET_LIB_GUI}
-        swagger
-        ${CM256CC_LIBRARIES}
+    swagger
+    ${CM256CC_LIBRARIES}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

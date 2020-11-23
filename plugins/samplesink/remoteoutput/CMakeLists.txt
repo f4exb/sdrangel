@@ -1,5 +1,10 @@
 project(remoteoutput)
 
+if (ARCHITECTURE_ARM64)
+    message(STATUS "Compiling RemoteOutput for ARM64 with USE_NEON definition")
+    add_compile_definitions(USE_NEON)
+endif()
+
 set(remoteoutput_SOURCES
 	remoteoutput.cpp
 	remoteoutputplugin.cpp

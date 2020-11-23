@@ -1,5 +1,10 @@
 project(remotesink)
 
+if (ARCHITECTURE_ARM64)
+    message(STATUS "Compiling RemoteSink for ARM64 with USE_NEON definition")
+    add_compile_definitions(USE_NEON)
+endif()
+
 set(remotesink_SOURCES
     remotesink.cpp
     remotesinkbaseband.cpp
