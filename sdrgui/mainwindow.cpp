@@ -162,6 +162,11 @@ MainWindow::MainWindow(qtwebapp::LoggerWithFile *logger, const MainParser& parse
 	ui->menu_Window->addAction(ui->channelDock->toggleViewAction());
     ui->menu_Window->addAction(ui->featureDock->toggleViewAction());
 
+    ui->spectraDisplayDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
+    ui->spectraDisplayDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
+    ui->presetDock->setStyleSheet("QAbstractButton#qt_dockwidget_closebutton{qproperty-toolTip: \"Close\";}");
+    ui->presetDock->setStyleSheet("QAbstractButton#qt_dockwidget_floatbutton{qproperty-toolTip: \"Dock/undock\";}");
+
     ui->tabInputsView->setStyleSheet("QWidget { background: rgb(50,50,50); } "
             "QToolButton::checked { background: rgb(128,70,0); } "
             "QComboBox::item:selected { color: rgb(255,140,0); } "

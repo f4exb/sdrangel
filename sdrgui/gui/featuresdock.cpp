@@ -50,11 +50,13 @@ FeaturesDock::FeaturesDock(QWidget *parent, Qt::WindowFlags flags) :
     m_normalButton = new QPushButton();
     QIcon normalIcon = style()->standardIcon(QStyle::SP_TitleBarNormalButton, 0, this);
     m_normalButton->setIcon(normalIcon);
+    m_normalButton->setToolTip("Dock/undock");
     m_normalButton->setFixedSize(12, 12);
 
     m_closeButton = new QPushButton();
     QIcon closeIcon = style()->standardIcon(QStyle::SP_TitleBarCloseButton, 0, this);
     m_closeButton->setIcon(closeIcon);
+    m_closeButton->setToolTip("Close");
     m_closeButton->setFixedSize(12, 12);
 
     m_titleBarLayout->addWidget(m_addFeatureButton);
