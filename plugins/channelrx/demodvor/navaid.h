@@ -246,7 +246,6 @@ struct NavAid {
                     size_t nameLen = 0;
                     char *frequencyString = NULL;
                     int frequency;
-                    size_t frequencyLen = 0;
                     float latitude = 0.0f;
                     char *latitudeString = NULL;
                     size_t latitudeLen = 0;

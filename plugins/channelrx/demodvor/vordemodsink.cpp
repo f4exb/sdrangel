@@ -32,25 +32,25 @@
 
 VORDemodSink::VORDemodSink(const VORDemodSettings& settings, int subChannel,
                 MessageQueue *messageQueueToGUI) :
+        m_channelFrequencyOffset(0),
+        m_outOfBand(true),
         m_channelSampleRate(VORDEMOD_CHANNEL_SAMPLE_RATE),
         m_audioSampleRate(48000),
-        m_channelFrequencyOffset(0),
         m_squelchCount(0),
         m_squelchOpen(false),
         m_squelchDelayLine(9600),
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
+        m_messageQueueToGUI(messageQueueToGUI),
         m_volumeAGC(0.003),
         m_audioFifo(48000),
-        m_movingAverageIdent(5000),
-        m_bitTime(0),
-        m_prevBit(0),
-        m_varGoertzel(30, VORDEMOD_CHANNEL_SAMPLE_RATE),
-        m_refGoertzel(30, VORDEMOD_CHANNEL_SAMPLE_RATE),
         m_refPrev(0.0f),
-        m_outOfBand(true),
-        m_messageQueueToGUI(messageQueueToGUI)
+        m_movingAverageIdent(5000),
+        m_prevBit(0),
+        m_bitTime(0),
+        m_varGoertzel(30, VORDEMOD_CHANNEL_SAMPLE_RATE),
+        m_refGoertzel(30, VORDEMOD_CHANNEL_SAMPLE_RATE)
 {
     m_audioBuffer.resize(1<<14);
     m_audioBufferFill = 0;
@@ -139,14 +139,14 @@ void VORDemodSink::processOneAudioSample(Complex &ci)
     }
     else
     {
-        if (m_squelchCount < m_audioSampleRate / 10) {
+        if (m_squelchCount < (unsigned int)m_audioSampleRate / 10) {
             m_squelchCount++;
         }
     }
 
     qint16 sample;
 
-    m_squelchOpen = (m_squelchCount >= m_audioSampleRate / 20);
+    m_squelchOpen = (m_squelchCount >= (unsigned int)m_audioSampleRate / 20);
 
     if (m_squelchOpen && !m_settings.m_audioMute && !m_settings.m_subChannelSettings.value(m_subChannelId)->m_audioMute)
     {
@@ -313,7 +313,7 @@ void VORDemodSink::processOneSample(Complex &ci)
         {
             if (m_ident != "")
             {
-                qDebug() << m_ident << " " << Morse::toString(m_ident.simplified());
+                qDebug() << m_ident << " " << Morse::toString(m_ident);
                 if (getMessageQueueToGUI())
                 {
                     VORDemodReport::MsgReportIdent *msg = VORDemodReport::MsgReportIdent::create(m_subChannelId, m_ident);

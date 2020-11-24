@@ -581,16 +581,17 @@ void VORDemodGUI::resizeTable()
 {
     // Fill table with a row of dummy data that will size the columns nicely
     // Trailing spaces are for sort arrow
+    QString morse("---- ---- ----");
     int row = ui->vorData->rowCount();
     ui->vorData->setRowCount(row + 1);
     ui->vorData->setItem(row, VOR_COL_NAME, new QTableWidgetItem("White Sulphur Springs"));
     ui->vorData->setItem(row, VOR_COL_FREQUENCY, new QTableWidgetItem("Freq (MHz) "));
     ui->vorData->setItem(row, VOR_COL_OFFSET, new QTableWidgetItem("Offset (kHz) "));
     ui->vorData->setItem(row, VOR_COL_IDENT, new QTableWidgetItem("Ident "));
-    ui->vorData->setItem(row, VOR_COL_MORSE, new QTableWidgetItem(Morse::toSpacedUnicode(QString("---- ---- ----"))));
-    ui->vorData->setItem(row, VOR_COL_RADIAL, new QTableWidgetItem("Radial (°) "));
+    ui->vorData->setItem(row, VOR_COL_MORSE, new QTableWidgetItem(Morse::toSpacedUnicode(morse)));
+    ui->vorData->setItem(row, VOR_COL_RADIAL, new QTableWidgetItem("Radial (o) "));
     ui->vorData->setItem(row, VOR_COL_RX_IDENT, new QTableWidgetItem("RX Ident "));
-    ui->vorData->setItem(row, VOR_COL_RX_MORSE, new QTableWidgetItem(Morse::toSpacedUnicode(QString("---- ---- ----"))));
+    ui->vorData->setItem(row, VOR_COL_RX_MORSE, new QTableWidgetItem(Morse::toSpacedUnicode(morse)));
     ui->vorData->setItem(row, VOR_COL_VAR_MAG, new QTableWidgetItem("Var (dB) "));
     ui->vorData->setItem(row, VOR_COL_REF_MAG, new QTableWidgetItem("Ref (dB) "));
     ui->vorData->setItem(row, VOR_COL_MUTE, new QTableWidgetItem("Mute"));
@@ -601,12 +602,16 @@ void VORDemodGUI::resizeTable()
 // Columns in table reordered
 void VORDemodGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
+    (void) oldVisualIndex;
+
     m_settings.m_columnIndexes[logicalIndex] = newVisualIndex;
 }
 
 // Column in table resized (when hidden size is 0)
 void VORDemodGUI::vorData_sectionResized(int logicalIndex, int oldSize, int newSize)
 {
+    (void) oldSize;
+
     m_settings.m_columnSizes[logicalIndex] = newSize;
 }
 
@@ -619,6 +624,8 @@ void VORDemodGUI::columnSelectMenu(QPoint pos)
 // Hide/show column when menu selected
 void VORDemodGUI::columnSelectMenuChecked(bool checked)
 {
+    (void) checked;
+
     QAction* action = qobject_cast<QAction*>(sender());
     if (action != nullptr)
     {
@@ -999,7 +1006,7 @@ void VORDemodGUI::downloadFinished(const QString& filename, bool success)
                 QUrl dbURL(urlString);
                 m_progressDialog->setLabelText(QString("Downloading %1.").arg(urlString));
                 m_progressDialog->setValue(m_countryIndex);
-                QNetworkReply *reply = m_dlm.download(dbURL, vorDBFile);
+                m_dlm.download(dbURL, vorDBFile);
             }
             else
             {
@@ -1028,6 +1035,8 @@ void VORDemodGUI::downloadFinished(const QString& filename, bool success)
 
 void VORDemodGUI::on_getOurAirportsVORDB_clicked(bool checked)
 {
+    (void) checked;
+
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
     {
@@ -1049,6 +1058,8 @@ void VORDemodGUI::on_getOurAirportsVORDB_clicked(bool checked)
 
 void VORDemodGUI::on_getOpenAIPVORDB_clicked(bool checked)
 {
+    (void) checked;
+
     // Don't try to download while already in progress
     if (m_progressDialog == nullptr)
     {
@@ -1066,7 +1077,7 @@ void VORDemodGUI::on_getOpenAIPVORDB_clicked(bool checked)
             m_progressDialog->setMaximum(sizeof(countryCodes)/sizeof(countryCodes[0]));
             m_progressDialog->setValue(0);
             m_progressDialog->setLabelText(QString("Downloading %1.").arg(urlString));
-            QNetworkReply *reply = m_dlm.download(dbURL, vorDBFile);
+            m_dlm.download(dbURL, vorDBFile);
         }
     }
 }
@@ -1393,7 +1404,6 @@ void VORDemodGUI::tick()
         {
             // Move antenna icon to estimated position
             QQuickItem *item = ui->map->rootObject();
-            QObject *object = item->findChild<QObject*>("map");
             QObject *stationObject = item->findChild<QObject*>("station");
             if(stationObject != NULL)
             {

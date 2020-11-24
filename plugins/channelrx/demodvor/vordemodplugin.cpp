@@ -75,6 +75,8 @@ ChannelGUI* VORDemodPlugin::createRxChannelGUI(
         DeviceUISet *deviceUISet,
         BasebandSampleSink *rxChannel) const
 {
+    (void) deviceUISet;
+    (void) rxChannel;
     return 0;
 }
 #else
