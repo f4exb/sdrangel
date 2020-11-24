@@ -28,12 +28,12 @@
 
 const PluginDescriptor VORDemodPlugin::m_pluginDescriptor = {
     VORDemod::m_channelId,
-    QString("VOR Demodulator"),
-    QString("6.1.0"),
-    QString("(c) Jon Beniston, M7RCE"),
-    QString("https://github.com/f4exb/sdrangel"),
+    QStringLiteral("VOR Demodulator"),
+    QStringLiteral("6.1.0"),
+    QStringLiteral("(c) Jon Beniston, M7RCE"),
+    QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
-    QString("https://github.com/f4exb/sdrangel")
+    QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
 VORDemodPlugin::VORDemodPlugin(QObject* parent) :
