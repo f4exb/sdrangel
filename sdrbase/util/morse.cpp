@@ -180,7 +180,7 @@ QString Morse::toSpacedUnicodeMorse(QString &string)
 // Converts a Morse sequence to an ASCII character. -1 if no mapping found.
 int Morse::toASCII(QString &morse)
 {
-    for (int i = 0; i < COUNT_OF(m_asciiToMorse); i++)
+    for (unsigned int i = 0; i < COUNT_OF(m_asciiToMorse); i++)
     {
         if (morse == m_asciiToMorse[i].morse)
             return m_asciiToMorse[i].ascii;

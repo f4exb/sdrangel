@@ -2570,6 +2570,9 @@ margin-bottom: 20px;
     "UDPSinkReport" : {
       "$ref" : "#/definitions/UDPSinkReport"
     },
+    "VORDemodReport" : {
+      "$ref" : "#/definitions/VORDemodReport"
+    },
     "WFMDemodReport" : {
       "$ref" : "#/definitions/WFMDemodReport"
     },
@@ -2691,6 +2694,9 @@ margin-bottom: 20px;
     },
     "UDPSinkSettings" : {
       "$ref" : "#/definitions/UDPSinkSettings"
+    },
+    "VORDemodSettings" : {
+      "$ref" : "#/definitions/VORDemodSettings"
     },
     "WFMDemodSettings" : {
       "$ref" : "#/definitions/WFMDemodSettings"
@@ -9427,6 +9433,77 @@ margin-bottom: 20px;
     }
   },
   "description" : "USRP"
+};
+            defs.VORDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "VORDemod"
+};
+            defs.VORDemodSettings = {
+  "properties" : {
+    "squelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power squelch threshold in decibels"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "identThreshold" : {
+      "type" : "integer",
+      "description" : "Morse code ident threshold (linear SNR)"
+    },
+    "magDecAdjust" : {
+      "type" : "integer",
+      "description" : "Adjust radial lines on map for magnetic declination of VOR"
+    }
+  },
+  "description" : "VORDemod"
 };
             defs.WFMDemodReport = {
   "properties" : {
@@ -44629,7 +44706,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-21T10:29:19.215+01:00
+              Generated 2020-11-24T20:20:00.458+01:00
             </div>
           </div>
       </div>

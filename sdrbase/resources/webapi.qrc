@@ -83,6 +83,7 @@
         <file>webapi/doc/swagger/include/UDPSink.yaml</file>
         <file>webapi/doc/swagger/include/User.yaml</file>
         <file>webapi/doc/swagger/include/USRP.yaml</file>
+        <file>webapi/doc/swagger/include/VORDemod.yaml</file>
         <file>webapi/doc/swagger/include/WFMDemod.yaml</file>
         <file>webapi/doc/swagger/include/WFMMod.yaml</file>
         <file>webapi/doc/swagger/include/Xtrx.yaml</file>

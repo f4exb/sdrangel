@@ -44,6 +44,7 @@ int VORDemodWebAPIAdapter::webapiSettingsPutPatch(
         SWGSDRangel::SWGChannelSettings& response,
         QString& errorMessage)
 {
+    (void) force;
     (void) errorMessage;
     VORDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
