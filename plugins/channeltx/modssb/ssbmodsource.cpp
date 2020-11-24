@@ -18,6 +18,7 @@
 #include <QDebug>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/misc.h"
 #include "ssbmodsource.h"
 
 const int SSBModSource::m_ssbFftLen = 1024;
@@ -63,8 +64,8 @@ SSBModSource::SSBModSource() :
 
     m_audioCompressor.initSimple(
         m_audioSampleRate,
-        50,    // pregain (dB)
-        -30,   // threshold (dB)
+        -10,   // pregain (dB)    -3
+        -60,   // threshold (dB)  -50
         20,    // knee (dB)
         12,    // ratio (dB)
         0.003, // attack (s)
@@ -162,7 +163,6 @@ void SSBModSource::modulateSample()
     }
 
     calculateLevel(m_modSample);
-    m_audioBufferFill++;
 }
 
 void SSBModSource::pullAF(Complex& sample)
@@ -246,8 +246,7 @@ void SSBModSource::pullAF(Complex& sample)
 
                 	if (m_settings.m_agc)
                 	{
-                        real = m_audioCompressor.compress(real);
-                        ci.real(real);
+                        ci.real(clamp<float>(m_audioCompressor.compress(real), -1.0f, 1.0f));
                         ci.imag(0.0f);
                         ci *= m_settings.m_volumeFactor;
                 	}
@@ -283,8 +282,8 @@ void SSBModSource::pullAF(Complex& sample)
         {
             if (m_settings.m_agc)
             {
-                ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f));
-                ci.real(m_audioCompressor.compress(ci.real()));
+                float sample = (m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f;
+                ci.real(clamp<float>(m_audioCompressor.compress(sample), -1.0f, 1.0f));
                 ci.imag(0.0f);
                 ci *= m_settings.m_volumeFactor;
             }
@@ -293,6 +292,16 @@ void SSBModSource::pullAF(Complex& sample)
                 ci.real(((m_audioBuffer[m_audioBufferFill].l + m_audioBuffer[m_audioBufferFill].r)  / 65536.0f) * m_settings.m_volumeFactor);
                 ci.imag(0.0f);
             }
+        }
+
+        if (m_audioBufferFill < m_audioBuffer.size() - 1)
+        {
+            m_audioBufferFill++;
+        }
+        else
+        {
+            qDebug("SSBModSource::pullAF: starve audio samples: size: %lu", m_audioBuffer.size());
+            m_audioBufferFill = m_audioBuffer.size() - 1;
         }
 
         break;
