@@ -42,8 +42,8 @@
 
 MESSAGE_CLASS_DEFINITION(VORDemod::MsgConfigureVORDemod, Message)
 
-const QString VORDemod::m_channelIdURI = "sdrangel.channel.vordemod";
-const QString VORDemod::m_channelId = "VORDemod";
+const char * const VORDemod::m_channelIdURI = "sdrangel.channel.vordemod";
+const char * const VORDemod::m_channelId = "VORDemod";
 
 VORDemod::VORDemod(DeviceAPI *deviceAPI) :
         ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSink),
