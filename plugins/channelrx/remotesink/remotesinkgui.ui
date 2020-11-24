@@ -271,7 +271,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Local data listener address</string>
+         <string>Remote data listener address</string>
         </property>
         <property name="inputMask">
          <string>000.000.000.000</string>
@@ -297,7 +297,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Local data listener port</string>
+         <string>Remote data listener port</string>
         </property>
         <property name="inputMask">
          <string>00000</string>
@@ -329,7 +329,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Set local data listener address and port</string>
+         <string>Set remote data listener address and port</string>
         </property>
         <property name="text">
          <string>Set</string>

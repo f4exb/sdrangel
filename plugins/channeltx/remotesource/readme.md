@@ -4,8 +4,6 @@
 
 This plugin receives I/Q samples from UDP and copies them to the baseband to be transmitted by the sink output device. It uses SDRangel remote format and possible FEC protection.
 
-It is present only in Linux binary releases.
-
 <h2>Build</h2>
 
 The plugin will be built only if the [CM256cc library](https://github.com/f4exb/cm256cc) is installed in your system. For CM256cc library you will have to specify the include and library paths on the cmake command line. Say if you install cm256cc in `/opt/install/cm256cc` you will have to add `-DCM256CC_DIR=/opt/install/cm256cc` to the cmake commands.
