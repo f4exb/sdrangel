@@ -15,30 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#include "vordemodreport.h"
 
-#include <QString>
-#include <QHash>
-
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
-{
-    char *p = *pp;
-
-    if (p[0] == '\0')
-        return nullptr;
-
-    char *start = p;
-
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
-
-    return start;
-}
-
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
-
-#endif /* INCLUDE_CSV_H */
+MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportFreqOffset, Message)
+MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportRadial, Message)
+MESSAGE_CLASS_DEFINITION(VORDemodReport::MsgReportIdent, Message)

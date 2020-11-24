@@ -34,6 +34,7 @@
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
 #include "util/db.h"
+#include "util/units.h"
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "gui/crightclickenabler.h"
@@ -141,36 +142,6 @@ static int cprN(double lat, int odd)
         return 1;
 }
 
-static Real feetToMetres(Real feet)
-{
-    return feet * 0.3048f;
-}
-
-static int feetToMetresInt(Real feet)
-{
-    return (int)std::round(feetToMetres(feet));
-}
-
-static Real knotsToKPH(Real knots)
-{
-    return knots * 1.852f;
-}
-
-static int knotsToKPHInt(Real knots)
-{
-    return (int)std::round(knotsToKPH(knots));
-}
-
-static Real feetPerMinToMetresPerSecond(Real fpm)
-{
-    return fpm * 0.00508f;
-}
-
-static int feetPerMinToMetresPerSecondInt(Real fpm)
-{
-    return (int)std::round(feetPerMinToMetresPerSecond(fpm));
-}
-
 // Can't use std::fmod, as that works differently for negative numbers (See C.2.6.2)
 static Real modulus(double x, double y)
 {
@@ -188,7 +159,7 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
         QGeoCoordinate coords;
         coords.setLatitude(m_aircrafts[row]->m_latitude);
         coords.setLongitude(m_aircrafts[row]->m_longitude);
-        coords.setAltitude(feetToMetres(m_aircrafts[row]->m_altitude));
+        coords.setAltitude(Units::feetToMetres(m_aircrafts[row]->m_altitude));
         return QVariant::fromValue(coords);
     }
     else if (role == AircraftModel::headingRole)
@@ -220,14 +191,14 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
             if (m_aircrafts[row]->m_altitudeValid)
             {
                 if (m_aircrafts[row]->m_gui->useSIUints())
-                    list.append(QString("Altitude: %1 (m)").arg(feetToMetresInt(m_aircrafts[row]->m_altitude)));
+                    list.append(QString("Altitude: %1 (m)").arg(Units::feetToIntegerMetres(m_aircrafts[row]->m_altitude)));
                 else
                     list.append(QString("Altitude: %1 (ft)").arg(m_aircrafts[row]->m_altitude));
             }
             if (m_aircrafts[row]->m_speedValid)
             {
                 if (m_aircrafts[row]->m_gui->useSIUints())
-                    list.append(QString("%1: %2 (kph)").arg(m_aircrafts[row]->m_speedTypeNames[m_aircrafts[row]->m_speedType]).arg(knotsToKPHInt(m_aircrafts[row]->m_speed)));
+                    list.append(QString("%1: %2 (kph)").arg(m_aircrafts[row]->m_speedTypeNames[m_aircrafts[row]->m_speedType]).arg(Units::knotsToIntegerKPH(m_aircrafts[row]->m_speed)));
                 else
                     list.append(QString("%1: %2 (kn)").arg(m_aircrafts[row]->m_speedTypeNames[m_aircrafts[row]->m_speedType]).arg(m_aircrafts[row]->m_speed));
             }
@@ -239,7 +210,7 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
 
                 if (m_aircrafts[row]->m_gui->useSIUints())
                 {
-                    rate = feetPerMinToMetresPerSecondInt(m_aircrafts[row]->m_verticalRate);
+                    rate = Units::feetPerMinToIntegerMetresPerSecond(m_aircrafts[row]->m_verticalRate);
                     units = QString("m/s");
                 }
                 else
@@ -372,7 +343,7 @@ QVariant AirportModel::data(const QModelIndex &index, int role) const
         QGeoCoordinate coords;
         coords.setLatitude(m_airports[row]->m_latitude);
         coords.setLongitude(m_airports[row]->m_longitude);
-        coords.setAltitude(feetToMetres(m_airports[row]->m_elevation));
+        coords.setAltitude(Units::feetToMetres(m_airports[row]->m_elevation));
         return QVariant::fromValue(coords);
     }
     else if (role == AirportModel::airportDataRole)
@@ -463,7 +434,7 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
         m_aircraftModel.addAircraft(aircraft);
     }
     // Calculate range, azimuth and elevation to aircraft from station
-    m_azEl.setTarget(aircraft->m_latitude, aircraft->m_longitude, feetToMetres(aircraft->m_altitude));
+    m_azEl.setTarget(aircraft->m_latitude, aircraft->m_longitude, Units::feetToMetres(aircraft->m_altitude));
     m_azEl.calculate();
     aircraft->m_range = m_azEl.getDistance();
     aircraft->m_azimuth = m_azEl.getAzimuth();
@@ -479,7 +450,7 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
 bool ADSBDemodGUI::updateLocalPosition(Aircraft *aircraft, double latitude, double longitude, bool surfacePosition)
 {
     // Calculate range to aircraft from station
-    m_azEl.setTarget(latitude, longitude, feetToMetres(aircraft->m_altitude));
+    m_azEl.setTarget(latitude, longitude, Units::feetToMetres(aircraft->m_altitude));
     m_azEl.calculate();
 
     // Don't use the full 333km, as there may be some error in station position
@@ -851,7 +822,7 @@ void ADSBDemodGUI::handleADSB(
                     // }
                     aircraft->m_speedType = Aircraft::GS;
                     aircraft->m_speedValid = true;
-                    aircraft->m_speedItem->setData(Qt::DisplayRole,  m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
+                    aircraft->m_speedItem->setData(Qt::DisplayRole,  m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : (int)std::round(aircraft->m_speed));
                 }
                 else if (movement == 124)
                 {
@@ -878,7 +849,7 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_altitude = alt_ft;
                 aircraft->m_altitudeValid = true;
                 // setData rather than setText so it sorts numerically
-                aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? feetToMetresInt(aircraft->m_altitude) : aircraft->m_altitude);
+                aircraft->m_altitudeItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::feetToIntegerMetres(aircraft->m_altitude) : aircraft->m_altitude);
             }
 
             int f = (data[6] >> 2) & 1; // CPR odd/even frame - should alternate every 0.2s
@@ -1041,7 +1012,7 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_speedType = Aircraft::GS;
                 aircraft->m_speedValid = true;
                 aircraft->m_headingItem->setData(Qt::DisplayRole, aircraft->m_heading);
-                aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : aircraft->m_speed);
+                aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : aircraft->m_speed);
             }
             else
             {
@@ -1061,14 +1032,14 @@ void ADSBDemodGUI::handleADSB(
                 aircraft->m_speed = as;
                 aircraft->m_speedType = as_t ? Aircraft::IAS : Aircraft::TAS;
                 aircraft->m_speedValid = true;
-                aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? knotsToKPHInt(aircraft->m_speed) : aircraft->m_speed);
+                aircraft->m_speedItem->setData(Qt::DisplayRole, m_settings.m_siUnits ? Units::knotsToIntegerKPH(aircraft->m_speed) : aircraft->m_speed);
             }
             int s_vr = (data[8] >> 3) & 1; // Vertical rate sign
             int vr = ((data[8] & 0x7) << 6) | ((data[9] >> 2) & 0x3f); // Vertical rate
             aircraft->m_verticalRate = (vr-1)*64*(s_vr?-1:1);
             aircraft->m_verticalRateValid = true;
             if (m_settings.m_siUnits)
-                aircraft->m_verticalRateItem->setData(Qt::DisplayRole, feetPerMinToMetresPerSecondInt(aircraft->m_verticalRate));
+                aircraft->m_verticalRateItem->setData(Qt::DisplayRole, Units::feetPerMinToIntegerMetresPerSecond(aircraft->m_verticalRate));
             else
                 aircraft->m_verticalRateItem->setData(Qt::DisplayRole, aircraft->m_verticalRate);
         }
@@ -1637,7 +1608,7 @@ void ADSBDemodGUI::updateAirports()
         AirportInformation *airportInfo = i.value();
 
         // Calculate distance and az/el to airport from My Position
-        azEl.setTarget(airportInfo->m_latitude, airportInfo->m_longitude, feetToMetres(airportInfo->m_elevation));
+        azEl.setTarget(airportInfo->m_latitude, airportInfo->m_longitude, Units::feetToMetres(airportInfo->m_elevation));
         azEl.calculate();
 
         // Only display airport if in range

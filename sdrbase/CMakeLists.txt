@@ -122,6 +122,7 @@ set(sdrbase_SOURCES
     dsp/interpolator.cpp
     dsp/glscopesettings.cpp
     dsp/glspectrumsettings.cpp
+    dsp/goertzel.cpp
     dsp/hbfilterchainconverter.cpp
     dsp/hbfiltertraits.cpp
     dsp/mimochannel.cpp
@@ -173,6 +174,7 @@ set(sdrbase_SOURCES
     util/lfsr.cpp
     util/message.cpp
     util/messagequeue.cpp
+    util/morse.cpp
     util/prettyprint.cpp
     util/rtpsink.cpp
     util/syncmessenger.cpp
@@ -181,6 +183,7 @@ set(sdrbase_SOURCES
     util/serialutil.cpp
     #util/spinlock.cpp
     util/uid.cpp
+    util/units.cpp
     util/timeutil.cpp
 
     plugin/plugininterface.cpp
@@ -271,6 +274,7 @@ set(sdrbase_HEADERS
     dsp/glscopesettings.h
     dsp/glspectruminterface.h
     dsp/glspectrumsettings.h
+    dsp/goertzel.h
     dsp/hbfilterchainconverter.h
     dsp/iirfilter.h
     dsp/interpolator.h
@@ -348,6 +352,7 @@ set(sdrbase_HEADERS
     util/lfsr.h
     util/message.h
     util/messagequeue.h
+    util/morse.h
     util/movingaverage.h
     util/prettyprint.h
     util/rtpsink.h
@@ -357,6 +362,7 @@ set(sdrbase_HEADERS
     util/serialutil.h
     #util/spinlock.h
     util/uid.h
+    util/units.h
     util/timeutil.h
 
     webapi/webapiadapter.h

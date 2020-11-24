@@ -13,6 +13,7 @@ add_subdirectory(localsink)
 add_subdirectory(filesink)
 add_subdirectory(freqtracker)
 add_subdirectory(demodchirpchat)
+add_subdirectory(demodvor)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)

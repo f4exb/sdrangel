@@ -15,30 +15,32 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#ifndef INCLUDE_GOERTZEL_H
+#define INCLUDE_GOERTZEL_H
 
-#include <QString>
-#include <QHash>
+#include <complex>
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+#include "export.h"
+
+// Goertzel filter for calculting discrete Fourier transform for a single frequency
+// Implementation supports non-integer multiples of fundamental frequency, see:
+// https://asp-eurasipjournals.springeropen.com/track/pdf/10.1186/1687-6180-2012-56.pdf
+class SDRBASE_API Goertzel
 {
-    char *p = *pp;
+public:
+    Goertzel(double frequency, int sampleRate);
+    void reset();
+    void filter(double sample);
+    std::complex<double> goertzel(double lastSample);
+    double mag();
+    double phase();
+    int size() { return m_sampleCount; }
 
-    if (p[0] == '\0')
-        return nullptr;
+private:
+    double m_s0, m_s1, m_s2;
+    double m_a, m_b;
+    std::complex<double> m_c, m_z;
+    int m_sampleCount;
+};
 
-    char *start = p;
-
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
-
-    return start;
-}
-
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
-
-#endif /* INCLUDE_CSV_H */
+#endif // INCLUDE_GOERTZEL_H

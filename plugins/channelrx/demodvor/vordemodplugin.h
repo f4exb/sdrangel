@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2016 Edouard Griffiths, F4EXB                                   //
 // Copyright (C) 2020 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -15,30 +16,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#ifndef INCLUDE_VORDEMODPLUGIN_H
+#define INCLUDE_VORDEMODPLUGIN_H
 
-#include <QString>
-#include <QHash>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
-{
-    char *p = *pp;
+class DeviceUISet;
+class BasebandSampleSink;
 
-    if (p[0] == '\0')
-        return nullptr;
+class VORDemodPlugin : public QObject, PluginInterface {
+    Q_OBJECT
+    Q_INTERFACES(PluginInterface)
+    Q_PLUGIN_METADATA(IID "sdrangel.channel.vordemod")
 
-    char *start = p;
+public:
+    explicit VORDemodPlugin(QObject* parent = NULL);
 
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
+    const PluginDescriptor& getPluginDescriptor() const;
+    void initPlugin(PluginAPI* pluginAPI);
 
-    return start;
-}
+    virtual void createRxChannel(DeviceAPI *deviceAPI, BasebandSampleSink **bs, ChannelAPI **cs) const;
+    virtual ChannelGUI* createRxChannelGUI(DeviceUISet *deviceUISet, BasebandSampleSink *rxChannel) const;
+    virtual ChannelWebAPIAdapter* createChannelWebAPIAdapter() const;
 
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
+private:
+    static const PluginDescriptor m_pluginDescriptor;
 
-#endif /* INCLUDE_CSV_H */
+    PluginAPI* m_pluginAPI;
+};
+
+#endif // INCLUDE_VORDEMODPLUGIN_H

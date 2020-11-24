@@ -15,30 +15,68 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#ifndef INCLUDE_UNITS_H
+#define INCLUDE_UNITS_H
 
-#include <QString>
-#include <QHash>
+#include <cmath>
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+#include "export.h"
+
+// Unit conversions
+class SDRBASE_API Units
 {
-    char *p = *pp;
+public:
 
-    if (p[0] == '\0')
-        return nullptr;
+    static inline float feetToMetres(float feet)
+    {
+        return feet * 0.3048f;
+    }
 
-    char *start = p;
+    static inline int feetToIntegerMetres(float feet)
+    {
+        return (int)std::round(feetToMetres(feet));
+    }
 
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
+    static inline float nauticalMilesToMetres(float nauticalMiles)
+    {
+        return nauticalMiles * 1855.0f;
+    }
 
-    return start;
-}
+    static inline int nauticalMilesToIntegerMetres(float nauticalMiles)
+    {
+        return (int)std::round(nauticalMilesToMetres(nauticalMiles));
+    }
 
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
+    static float knotsToKPH(float knots)
+    {
+        return knots * 1.852f;
+    }
 
-#endif /* INCLUDE_CSV_H */
+    static int knotsToIntegerKPH(float knots)
+    {
+        return (int)std::round(knotsToKPH(knots));
+    }
+
+    static float feetPerMinToMetresPerSecond(float fpm)
+    {
+        return fpm * 0.00508f;
+    }
+
+    static int feetPerMinToIntegerMetresPerSecond(float fpm)
+    {
+        return (int)std::round(feetPerMinToMetresPerSecond(fpm));
+    }
+
+    static float degreesToRadians(float degrees)
+    {
+        return degrees * ((float)M_PI) / 180.0f;
+    }
+
+    static float radiansToDegress(float radians)
+    {
+        return radians * 180.0f / ((float)M_PI);
+    }
+
+};
+
+#endif // INCLUDE_UNITS_H
