@@ -15,30 +15,57 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#include "goertzel.h"
 
-#include <QString>
-#include <QHash>
-
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+Goertzel::Goertzel(double frequency, int sampleRate) :
+    m_s0(0.0),
+    m_s1(0.0),
+    m_s2(0.0),
+    m_z(0.0),
+    m_sampleCount(0)
 {
-    char *p = *pp;
-
-    if (p[0] == '\0')
-        return nullptr;
-
-    char *start = p;
-
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
-
-    return start;
+    m_a = 2.0 * M_PI * frequency / sampleRate;
+    m_b = 2.0 * cos(m_a);
+    m_c = std::complex<double>(cos(-m_a), sin(-m_a));
 }
 
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
+void Goertzel::reset()
+{
+    m_s0 = 0.0;
+    m_s1 = 0.0;
+    m_s2 = 0.0;
+    m_z = 0.0;
+    m_sampleCount = 0;
+}
 
-#endif /* INCLUDE_CSV_H */
+void Goertzel::filter(double sample)
+{
+    m_s0 = m_b * m_s1 - m_s2 + sample;
+    m_s2 = m_s1;
+    m_s1 = m_s0;
+    m_sampleCount++;
+}
+
+std::complex<double> Goertzel::goertzel(double lastSample)
+{
+    m_s0 = m_b * m_s1 - m_s2 + lastSample;
+    m_sampleCount++;
+
+    std::complex<double> y = m_s0 - m_s1 * m_c;
+    double x = -m_a * (m_sampleCount - 1.0);
+    std::complex<double> d(cos(x), sin(x));
+
+    double scale = m_sampleCount / 2.0;
+    m_z = y * d / scale;
+    return m_z;
+}
+
+double Goertzel::mag()
+{
+    return std::abs(m_z);
+}
+
+double Goertzel::phase()
+{
+    return std::arg(m_z);
+}

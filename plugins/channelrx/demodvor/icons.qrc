@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/demodvor/">
+    <file>icons/compass.png</file>
+    <file>icons/vor.png</file>
+  </qresource>
+</RCC>

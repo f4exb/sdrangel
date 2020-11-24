@@ -15,30 +15,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#ifndef INCLUDE_MORSE_H
+#define INCLUDE_MORSE_H
 
 #include <QString>
-#include <QHash>
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+#include "export.h"
+
+// Morse (ITU) code utils for converting between strings and Morse code and vice-versa
+class SDRBASE_API Morse
 {
-    char *p = *pp;
+public:
+    static QString toMorse(char asciiChar);
+    static QString toMorse(QString &string);
+    static QString toUnicode(QString &morse);
+    static QString toSpacedUnicode(QString &morse);
+    static QString toUnicodeMorse(QString &string);
+    static QString toSpacedUnicodeMorse(QString &string);
+    static int toASCII(QString &morse);
+    static QString toString(QString &morse);
 
-    if (p[0] == '\0')
-        return nullptr;
+private:
+    struct ASCIIToMorse {
+        char ascii;
+        const char *morse;
+    };
 
-    char *start = p;
+    const static ASCIIToMorse m_asciiToMorse[];
+};
 
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
-
-    return start;
-}
-
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
-
-#endif /* INCLUDE_CSV_H */
+#endif // INCLUDE_MORSE_H

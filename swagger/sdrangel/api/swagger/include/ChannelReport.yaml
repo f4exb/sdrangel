@@ -57,6 +57,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/UDPSource.yaml#/UDPSourceReport"
     UDPSinkReport:
       $ref: "http://swgserver:8081/api/swagger/include/UDPSink.yaml#/UDPSinkReport"
+    VORDemodReport:
+      $ref: "http://swgserver:8081/api/swagger/include/VORDemod.yaml#/VORDemodReport"
     WFMDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/WFMDemod.yaml#/WFMDemodReport"
     WFMModReport:

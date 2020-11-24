@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 // Copyright (C) 2020 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -15,30 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#ifndef INCLUDE_VORDEMOD_WEBAPIADAPTER_H
+#define INCLUDE_VORDEMOD_WEBAPIADAPTER_H
 
-#include <QString>
-#include <QHash>
+#include "channel/channelwebapiadapter.h"
+#include "vordemodsettings.h"
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
-{
-    char *p = *pp;
+/**
+ * Standalone API adapter only for the settings
+ */
+class VORDemodWebAPIAdapter : public ChannelWebAPIAdapter {
+public:
+    VORDemodWebAPIAdapter();
+    virtual ~VORDemodWebAPIAdapter();
 
-    if (p[0] == '\0')
-        return nullptr;
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
 
-    char *start = p;
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
 
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
 
-    return start;
-}
+private:
+    VORDemodSettings m_settings;
+};
 
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
-
-#endif /* INCLUDE_CSV_H */
+#endif // INCLUDE_VORDEMOD_WEBAPIADAPTER_H

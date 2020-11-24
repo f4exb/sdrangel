@@ -22,6 +22,7 @@
 #include "webapiutils.h"
 
 const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
+    {"sdrangel.channel.adsbdemod", "ADSBDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.modam", "AMModSettings"},
@@ -57,6 +58,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channeltx.udpsink", "UDPSinkSettings"}, // remap
     {"sdrangel.channel.udpsink", "UDPSinkSettings"},
     {"sdrangel.channel.udpsrc", "UDPSourceSettings"}, // remap
+    {"sdrangel.channel.vordemod", "VORDemodSettings"},
     {"sdrangel.channel.wfmdemod", "WFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.wfm", "WFMDemodSettings"}, // remap
     {"sdrangel.channeltx.modwfm", "WFMModSettings"},
@@ -114,6 +116,7 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
+    {"ADSBDemod", "ADSBDemodSettings"},
     {"AMDemod", "AMDemodSettings"},
     {"AMMod", "AMModSettings"},
     {"ATVDemod", "ATVDemodSettings"},
@@ -141,6 +144,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"SSBDemod", "SSBDemodSettings"},
     {"UDPSink", "UDPSinkSettings"},
     {"UDPSource", "UDPSourceSettings"},
+    {"VORDemod", "VORDemodSettings"},
     {"WFMDemod", "WFMDemodSettings"},
     {"WFMMod", "WFMModSettings"},
     {"BeamSteeringCWMod", "BeamSteeringCWModSettings"},

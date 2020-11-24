@@ -1,4 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2019 Edouard Griffiths, F4EXB.                                  //
 // Copyright (C) 2020 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -15,30 +16,36 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_CSV_H
-#define INCLUDE_CSV_H
+#include "SWGChannelSettings.h"
+#include "vordemod.h"
+#include "vordemodwebapiadapter.h"
 
-#include <QString>
-#include <QHash>
+VORDemodWebAPIAdapter::VORDemodWebAPIAdapter()
+{}
 
-// Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+VORDemodWebAPIAdapter::~VORDemodWebAPIAdapter()
+{}
+
+int VORDemodWebAPIAdapter::webapiSettingsGet(
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
 {
-    char *p = *pp;
+    (void) errorMessage;
+    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
+    response.getVorDemodSettings()->init();
+    VORDemod::webapiFormatChannelSettings(response, m_settings);
 
-    if (p[0] == '\0')
-        return nullptr;
-
-    char *start = p;
-
-    while ((*p != ',') && (*p != '\n'))
-        p++;
-    *p++ = '\0';
-    *pp = p;
-
-    return start;
+    return 200;
 }
 
-QHash<QString, QString> *csvHash(const QString& filename, int reserve=0);
+int VORDemodWebAPIAdapter::webapiSettingsPutPatch(
+        bool force,
+        const QStringList& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings& response,
+        QString& errorMessage)
+{
+    (void) errorMessage;
+    VORDemod::webapiUpdateChannelSettings(m_settings, channelSettingsKeys, response);
 
-#endif /* INCLUDE_CSV_H */
+    return 200;
+}
