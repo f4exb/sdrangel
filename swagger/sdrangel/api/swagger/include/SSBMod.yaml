@@ -32,6 +32,10 @@ SSBModSettings:
       type: integer
     agc:
       type: integer
+    cmpPreGainDB:
+      type: integer
+    cmpThresholdDB:
+      type: integer
     rgbColor:
       type: integer
     title:

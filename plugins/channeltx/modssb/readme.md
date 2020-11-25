@@ -113,25 +113,43 @@ Use this button to toggle audio compression on or off.
 
 <h3>13: Input source control</h3>
 
-![Modulator input source control GUI](../../../doc/img/ModControls.png)
+![Modulator input source control GUI](../../../doc/img/SSBModulator_plugin_cmp.png)
 
-<h4>13.1: Tone input select</h4>
+<h4>13.1: Audio compressor</h4>
+
+Activate/deactivate it for file and audio input only.
+
+<h4>13.2: Audio compressor input gain</h4>
+
+Gain in dB before compression
+
+<h4>13.3: Audio compressor threshold</h4>
+
+Threshold in dB above which compression applies a.k.a. "knee" point. The lower the value the harder is the compression and consequently higher the distorsion.
+
+<h4>13.4: Tone input select</h4>
 
 Switches to the tone input. You must switch it off to make other inputs available.
 
-<h4>13.2: Morse keyer input select</h4>
+<h4>13.5: Morse keyer input select</h4>
 
 Switches to the Morse keyer input. You must switch it off to make other inputs available.
 
-<h4>13.3: Tone frequency (kHz)</h4>
+<h4>13.6: Tone frequency (kHz)</h4>
 
 Adjusts the tone frequency from 0.1 to 2.5 kHz in 0.01 kHz steps
 
-<h4>13.4: Audio input select and select audio input device</h4>
+<h4>13.7: Audio input select and select audio input device</h4>
 
 Left click to switch to the audio input. You must switch it off to make other inputs available.
 
 Right click to select audio input device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+
+<h4>13.8: Audio feedback</h4>
+
+Left click to activate audio feedback.
+
+Right click to select audio output device for audio feedback. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
 <h3>14: CW (Morse) text</h3>
 

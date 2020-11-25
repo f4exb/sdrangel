@@ -292,6 +292,20 @@ void SSBModGUI::on_agc_toggled(bool checked)
     applySettings();
 }
 
+void SSBModGUI::on_cmpPreGain_valueChanged(int value)
+{
+    m_settings.m_cmpPreGainDB = value;
+    ui->cmpPreGainText->setText(QString("%1").arg(value));
+    applySettings();
+}
+
+void SSBModGUI::on_cmpThreshold_valueChanged(int value)
+{
+    m_settings.m_cmpThresholdDB = value;
+    ui->cmpThresholdText->setText(QString("%1").arg(value));
+    applySettings();
+}
+
 void SSBModGUI::on_navTimeSlider_valueChanged(int value)
 {
     if (m_enableNavTime && ((value >= 0) && (value <= 100)))
@@ -633,6 +647,8 @@ void SSBModGUI::displaySettings()
     blockApplySettings(true);
 
     ui->agc->setChecked(m_settings.m_agc);
+    ui->cmpPreGainText->setText(QString("%1").arg(m_settings.m_cmpPreGainDB));
+    ui->cmpThresholdText->setText(QString("%1").arg(m_settings.m_cmpThresholdDB));
     ui->audioBinaural->setChecked(m_settings.m_audioBinaural);
     ui->audioFlipChannels->setChecked(m_settings.m_audioFlipChannels);
     ui->audioMute->setChecked(m_settings.m_audioMute);

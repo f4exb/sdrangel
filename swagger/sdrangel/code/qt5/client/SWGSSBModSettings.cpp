@@ -54,6 +54,10 @@ SWGSSBModSettings::SWGSSBModSettings() {
     m_play_loop_isSet = false;
     agc = 0;
     m_agc_isSet = false;
+    cmp_pre_gain_db = 0;
+    m_cmp_pre_gain_db_isSet = false;
+    cmp_threshold_db = 0;
+    m_cmp_threshold_db_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -110,6 +114,10 @@ SWGSSBModSettings::init() {
     m_play_loop_isSet = false;
     agc = 0;
     m_agc_isSet = false;
+    cmp_pre_gain_db = 0;
+    m_cmp_pre_gain_db_isSet = false;
+    cmp_threshold_db = 0;
+    m_cmp_threshold_db_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -136,6 +144,8 @@ SWGSSBModSettings::init() {
 
 void
 SWGSSBModSettings::cleanup() {
+
+
 
 
 
@@ -206,6 +216,10 @@ SWGSSBModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&play_loop, pJson["playLoop"], "qint32", "");
     
     ::SWGSDRangel::setValue(&agc, pJson["agc"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cmp_pre_gain_db, pJson["cmpPreGainDB"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&cmp_threshold_db, pJson["cmpThresholdDB"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -283,6 +297,12 @@ SWGSSBModSettings::asJsonObject() {
     }
     if(m_agc_isSet){
         obj->insert("agc", QJsonValue(agc));
+    }
+    if(m_cmp_pre_gain_db_isSet){
+        obj->insert("cmpPreGainDB", QJsonValue(cmp_pre_gain_db));
+    }
+    if(m_cmp_threshold_db_isSet){
+        obj->insert("cmpThresholdDB", QJsonValue(cmp_threshold_db));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -452,6 +472,26 @@ SWGSSBModSettings::setAgc(qint32 agc) {
 }
 
 qint32
+SWGSSBModSettings::getCmpPreGainDb() {
+    return cmp_pre_gain_db;
+}
+void
+SWGSSBModSettings::setCmpPreGainDb(qint32 cmp_pre_gain_db) {
+    this->cmp_pre_gain_db = cmp_pre_gain_db;
+    this->m_cmp_pre_gain_db_isSet = true;
+}
+
+qint32
+SWGSSBModSettings::getCmpThresholdDb() {
+    return cmp_threshold_db;
+}
+void
+SWGSSBModSettings::setCmpThresholdDb(qint32 cmp_threshold_db) {
+    this->cmp_threshold_db = cmp_threshold_db;
+    this->m_cmp_threshold_db_isSet = true;
+}
+
+qint32
 SWGSSBModSettings::getRgbColor() {
     return rgb_color;
 }
@@ -603,6 +643,12 @@ SWGSSBModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_agc_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cmp_pre_gain_db_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_cmp_threshold_db_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

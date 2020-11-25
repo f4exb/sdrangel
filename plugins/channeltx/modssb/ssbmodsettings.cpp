@@ -59,6 +59,8 @@ void SSBModSettings::resetToDefaults()
     m_audioMute = false;
     m_playLoop = false;
     m_agc = false;
+    m_cmpPreGainDB = -10;
+    m_cmpThresholdDB = -60;
     m_rgbColor = QColor(0, 255, 0).rgb();
     m_title = "SSB Modulator";
     m_modAFInput = SSBModInputAF::SSBModInputNone;
@@ -100,6 +102,8 @@ QByteArray SSBModSettings::serialize() const
     s.writeBool(10, m_audioFlipChannels);
     s.writeBool(11, m_dsb);
     s.writeBool(12, m_agc);
+    s.writeS32(13, m_cmpPreGainDB);
+    s.writeS32(14, m_cmpThresholdDB);
 
     if (m_channelMarker) {
         s.writeBlob(18, m_channelMarker->serialize());
@@ -169,7 +173,8 @@ bool SSBModSettings::deserialize(const QByteArray& data)
         d.readBool(10, &m_audioFlipChannels, false);
         d.readBool(11, &m_dsb, false);
         d.readBool(12, &m_agc, false);
-        d.readS32(13, &tmp, 7);
+        d.readS32(13, &m_cmpPreGainDB, -10);
+        d.readS32(14, &m_cmpThresholdDB, -60);
 
         if (m_channelMarker) {
             d.readBlob(18, &bytetmp);

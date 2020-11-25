@@ -82,6 +82,12 @@ public:
     qint32 getAgc();
     void setAgc(qint32 agc);
 
+    qint32 getCmpPreGainDb();
+    void setCmpPreGainDb(qint32 cmp_pre_gain_db);
+
+    qint32 getCmpThresholdDb();
+    void setCmpThresholdDb(qint32 cmp_threshold_db);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -157,6 +163,12 @@ private:
 
     qint32 agc;
     bool m_agc_isSet;
+
+    qint32 cmp_pre_gain_db;
+    bool m_cmp_pre_gain_db_isSet;
+
+    qint32 cmp_threshold_db;
+    bool m_cmp_threshold_db_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

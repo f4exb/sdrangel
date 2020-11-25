@@ -64,8 +64,8 @@ SSBModSource::SSBModSource() :
 
     m_audioCompressor.initSimple(
         m_audioSampleRate,
-        -10,   // pregain (dB)    -3
-        -60,   // threshold (dB)  -50
+        m_settings.m_cmpPreGainDB,   // pregain (dB)
+        m_settings.m_cmpThresholdDB, // threshold (dB)
         20,    // knee (dB)
         12,    // ratio (dB)
         0.003, // attack (s)
@@ -646,6 +646,20 @@ void SSBModSource::applySettings(const SSBModSettings& settings, bool force)
         } else {
             disconnect(&m_audioFifo, SIGNAL(dataReady()), this, SLOT(handleAudio()));
         }
+    }
+
+    if ((settings.m_cmpThresholdDB != m_settings.m_cmpThresholdDB) ||
+        (settings.m_cmpPreGainDB != m_settings.m_cmpPreGainDB) || force)
+    {
+        m_audioCompressor.initSimple(
+            m_audioSampleRate,
+            settings.m_cmpPreGainDB,   // pregain (dB)
+            settings.m_cmpThresholdDB, // threshold (dB)
+            20,    // knee (dB)
+            12,    // ratio (dB)
+            0.003, // attack (s)
+            0.25   // release (s)
+        );
     }
 
     m_settings = settings;

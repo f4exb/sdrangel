@@ -262,6 +262,12 @@ void SSBMod::applySettings(const SSBModSettings& settings, bool force)
     if ((settings.m_agc != m_settings.m_agc) || force) {
         reverseAPIKeys.append("agc");
     }
+    if ((settings.m_cmpPreGainDB != m_settings.m_cmpPreGainDB) || force) {
+        reverseAPIKeys.append("cmpPreGainDB");
+    }
+    if ((settings.m_cmpThresholdDB != m_settings.m_cmpThresholdDB) || force) {
+        reverseAPIKeys.append("cmpThresholdDB");
+    }
     if ((settings.m_rgbColor != m_settings.m_rgbColor) || force) {
         reverseAPIKeys.append("rgbColor");
     }
@@ -449,6 +455,12 @@ void SSBMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("agc")) {
         settings.m_agc = response.getSsbModSettings()->getAgc() != 0;
     }
+    if (channelSettingsKeys.contains("cmpPreGainDB")) {
+        settings.m_cmpPreGainDB = response.getSsbModSettings()->getCmpPreGainDb();
+    }
+    if (channelSettingsKeys.contains("cmpThresholdDB")) {
+        settings.m_cmpThresholdDB = response.getSsbModSettings()->getCmpThresholdDb();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getSsbModSettings()->getRgbColor();
     }
@@ -507,6 +519,8 @@ void SSBMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
     response.getSsbModSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
     response.getSsbModSettings()->setPlayLoop(settings.m_playLoop ? 1 : 0);
     response.getSsbModSettings()->setAgc(settings.m_agc ? 1 : 0);
+    response.getSsbModSettings()->setCmpPreGainDb(settings.m_cmpPreGainDB);
+    response.getSsbModSettings()->setCmpThresholdDb(settings.m_cmpThresholdDB);
     response.getSsbModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getSsbModSettings()->getTitle()) {
@@ -686,6 +700,12 @@ void SSBMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("agc") || force) {
         swgSSBModSettings->setAgc(settings.m_agc ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("cmpPreGainDB") || force) {
+        swgSSBModSettings->setCmpPreGainDb(settings.m_cmpPreGainDB);
+    }
+    if (channelSettingsKeys.contains("cmpThresholdDB") || force) {
+        swgSSBModSettings->setCmpThresholdDb(settings.m_cmpThresholdDB);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgSSBModSettings->setRgbColor(settings.m_rgbColor);

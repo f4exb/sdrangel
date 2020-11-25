@@ -53,6 +53,8 @@ struct SSBModSettings
     bool m_audioMute;
     bool m_playLoop;
     bool m_agc;
+    int m_cmpPreGainDB;
+    int m_cmpThresholdDB;
     quint32 m_rgbColor;
 
     QString m_title;
