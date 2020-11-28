@@ -34,18 +34,9 @@
 
 #include <vector>
 
-// Highest frequency is the FM subcarrier at up to ~11kHz
-// However, old VORs can have 0.005% frequency offset, which is 6kHz
-#define VORDEMOD_CHANNEL_BANDWIDTH 18000
-// Sample rate needs to be at least twice the above
-// Also need to consider impact frequency resolution of Goertzel filters
-// May as well make it a common audio rate, to possibly avoid decimation
-#define VORDEMOD_CHANNEL_SAMPLE_RATE 48000
-
 class VORDemodSCSink : public ChannelSampleSink {
 public:
-    VORDemodSCSink(const VORDemodSCSettings& settings, int subChannel,
-                MessageQueue *messageQueueToGUI);
+    VORDemodSCSink();
     ~VORDemodSCSink();
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
@@ -78,11 +69,7 @@ public:
         m_magsqCount = 0;
     }
 
-    int m_subChannelId; // The id for the VOR this demod sink was created for
-    int m_vorFrequencyHz; // The VORs frequency
-    int m_frequencyOffset;  // Different between sample source center frequeny and VOR center frequency
     int m_channelFrequencyOffset;
-    bool m_outOfBand;
 
 private:
     struct MagSqLevelsStore

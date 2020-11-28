@@ -31,55 +31,24 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getSubChannelId() const { return m_subChannelId; }
         float getRadial() const { return m_radial; }
         float getRefMag() const { return m_refMag; }
         float getVarMag() const { return m_varMag; }
 
-        static MsgReportRadial* create(int subChannelId, float radial, float refMag, float varMag)
-        {
-            return new MsgReportRadial(subChannelId, radial, refMag, varMag);
+        static MsgReportRadial* create(float radial, float refMag, float varMag) {
+            return new MsgReportRadial(radial, refMag, varMag);
         }
 
     private:
-        int m_subChannelId;
         float m_radial;
         float m_refMag;
         float m_varMag;
 
-        MsgReportRadial(int subChannelId, float radial, float refMag, float varMag) :
+        MsgReportRadial(float radial, float refMag, float varMag) :
             Message(),
-            m_subChannelId(subChannelId),
             m_radial(radial),
             m_refMag(refMag),
             m_varMag(varMag)
-        {
-        }
-    };
-
-    class MsgReportFreqOffset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSubChannelId() const { return m_subChannelId; }
-        int getFreqOffset() const { return m_freqOffset; }
-        bool getOutOfBand() const { return m_outOfBand; }
-
-        static MsgReportFreqOffset* create(int subChannelId, int freqOffset, bool outOfBand)
-        {
-            return new MsgReportFreqOffset(subChannelId, freqOffset, outOfBand);
-        }
-
-    private:
-        int m_subChannelId;
-        int m_freqOffset;
-        bool m_outOfBand;
-
-        MsgReportFreqOffset(int subChannelId, int freqOffset, bool outOfBand) :
-            Message(),
-            m_subChannelId(subChannelId),
-            m_freqOffset(freqOffset),
-            m_outOfBand(outOfBand)
         {
         }
     };
@@ -88,21 +57,18 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        int getSubChannelId() const { return m_subChannelId; }
         QString getIdent() const { return m_ident; }
 
-        static MsgReportIdent* create(int subChannelId, QString ident)
+        static MsgReportIdent* create(QString ident)
         {
-            return new MsgReportIdent(subChannelId, ident);
+            return new MsgReportIdent(ident);
         }
 
     private:
-        int m_subChannelId;
         QString m_ident;
 
-        MsgReportIdent(int subChannelId, QString ident) :
+        MsgReportIdent(QString ident) :
             Message(),
-            m_subChannelId(subChannelId),
             m_ident(ident)
         {
         }

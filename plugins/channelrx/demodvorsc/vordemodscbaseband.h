@@ -64,68 +64,24 @@ public:
     void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
-        avg = 0.0;
-        peak = 0.0;
-        nbSamples = 0;
-        for (int i = 0; i < m_sinks.size(); i++)
-        {
-            double avg1, peak1;
-            int nbSamples1;
-            m_sinks[i]->getMagSqLevels(avg1, peak1, nbSamples1);
-            if (avg1 > avg)
-            {
-                avg = avg1;
-                nbSamples = nbSamples1;
-            }
-            avg += avg1;
-            if (peak1 > peak)
-                peak = peak1;
-        }
-    }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) {
-        m_messageQueueToGUI = messageQueue;
-        for (int i = 0; i < m_sinks.size(); i++)
-            m_sinks[i]->setMessageQueueToGUI(messageQueue);
-    }
-    bool getSquelchOpen() const {
-        for (int i = 0; i < m_sinks.size(); i++)
-        {
-            if (m_sinks[i]->getSquelchOpen())
-                return true;
-        }
-        return false;
-    }
-    int getAudioSampleRate() const {
-        if (m_sinks.size() > 0)
-            return m_sinks[0]->getAudioSampleRate();
-        else
-            return 48000;
-    }
-    void setBasebandSampleRate(int sampleRate);
-    double getMagSq() const {
-        if (m_sinks.size() > 0)
-            return m_sinks[0]->getMagSq();
-        else
-            return 0.0;
-    }
+    void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
+    bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
+    int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
+    double getMagSq() const { return m_sink.getMagSq();  }
     bool isRunning() const { return m_running; }
 
 private:
     SampleSinkFifo m_sampleFifo;
-    QList<DownChannelizer *> m_channelizers;
-    QList<VORDemodSCSink *> m_sinks;
-    AudioFifo m_audioFifoBug; // FIXME: Removing this results in audio stopping when demod is closed
+    DownChannelizer * m_channelizer;
+    VORDemodSCSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     VORDemodSCSettings m_settings;
+    MessageQueue *m_messageQueueToGUI;
     bool m_running;
     QMutex m_mutex;
-    MessageQueue *m_messageQueueToGUI;
-    int m_basebandSampleRate;
-    int m_centerFrequency;
 
     bool handleMessage(const Message& cmd);
-    void calculateOffset(VORDemodSCSink *sink);
     void applySettings(const VORDemodSCSettings& settings, bool force = false);
 
 private slots:

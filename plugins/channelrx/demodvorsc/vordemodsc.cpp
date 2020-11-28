@@ -196,10 +196,6 @@ void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
         reverseAPIKeys.append("identThreshold");
     }
 
-    if ((m_settings.m_magDecAdjust != settings.m_magDecAdjust) || force) {
-        reverseAPIKeys.append("magDecAdjust");
-    }
-
     VORDemodSCBaseband::MsgConfigureVORDemodBaseband *msg = VORDemodSCBaseband::MsgConfigureVORDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
 
@@ -323,9 +319,6 @@ void VORDemodSC::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("identThreshold")) {
         settings.m_identThreshold = response.getVorDemodSettings()->getIdentThreshold();
     }
-    if (channelSettingsKeys.contains("magDecAdjust")) {
-        settings.m_magDecAdjust = response.getVorDemodSettings()->getMagDecAdjust() != 0;
-    }
 }
 
 int VORDemodSC::webapiReportGet(
@@ -372,7 +365,6 @@ void VORDemodSC::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& re
     response.getVorDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
     response.getVorDemodSettings()->setIdentThreshold(settings.m_identThreshold);
-    response.getVorDemodSettings()->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
 }
 
 void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -478,9 +470,6 @@ void VORDemodSC::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("identThreshold") || force) {
         swgVORDemodSettings->setAudioMute(settings.m_identThreshold);
-    }
-    if (channelSettingsKeys.contains("magDecAdjust") || force) {
-        swgVORDemodSettings->setAudioMute(settings.m_magDecAdjust ? 1 : 0);
     }
 }
 

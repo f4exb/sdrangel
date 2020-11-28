@@ -24,17 +24,9 @@
 
 class Serializable;
 
-// Number of columns in the table
-#define VORDEMOD_COLUMNS 11
-
-struct VORDemodSubChannelSettings {
-    int m_id;                           //!< Unique VOR identifier (from database)
-    int m_frequency;                    //!< Frequency the VOR is on
-    bool m_audioMute;                   //!< Mute the audio from this VOR
-};
-
 struct VORDemodSCSettings
 {
+    qint32 m_inputFrequencyOffset;
     Real m_squelch;
     Real m_volume;
     bool m_audioMute;
@@ -52,12 +44,14 @@ struct VORDemodSCSettings
     Real m_identThreshold;              //!< Linear SNR threshold for Morse demodulator
     Real m_refThresholdDB;              //!< Threshold in dB for valid VOR reference signal
     Real m_varThresholdDB;              //!< Threshold in dB for valid VOR variable signal
-    bool m_magDecAdjust;                //!< Adjust for magnetic declination when drawing radials on the map
 
-    int m_columnIndexes[VORDEMOD_COLUMNS];//!< How the columns are ordered in the table
-    int m_columnSizes[VORDEMOD_COLUMNS];  //!< Size of the coumns in the table
-
-    QHash<int, VORDemodSubChannelSettings *> m_subChannelSettings;
+    // Highest frequency is the FM subcarrier at up to ~11kHz
+    // However, old VORs can have 0.005% frequency offset, which is 6kHz
+    static const int VORDEMOD_CHANNEL_BANDWIDTH = 18000;
+    // Sample rate needs to be at least twice the above
+    // Also need to consider impact frequency resolution of Goertzel filters
+    // May as well make it a common audio rate, to possibly avoid decimation
+    static const int VORDEMOD_CHANNEL_SAMPLE_RATE = 48000;
 
     VORDemodSCSettings();
     void resetToDefaults();

@@ -20,7 +20,6 @@ set(vorsc_HEADERS
     vordemodscreport.h
 )
 
-
 include_directories(
         ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
@@ -30,18 +29,14 @@ if(NOT SERVER_MODE)
         ${vorsc_SOURCES}
         vordemodscgui.cpp
         vordemodscgui.ui
-        map.qrc
-        icons.qrc
     )
     set(vorsc_HEADERS
         ${vorsc_HEADERS}
         vordemodscgui.h
-        navaid.h
-        ../demodadsb/csv.h
     )
 
     set(TARGET_NAME demodvorsc)
-    set(TARGET_LIB "Qt5::Widgets" Qt5::Quick Qt5::QuickWidgets Qt5::Positioning)
+    set(TARGET_LIB "Qt5::Widgets")
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()

@@ -17,6 +17,5 @@
 
 #include "vordemodscreport.h"
 
-MESSAGE_CLASS_DEFINITION(VORDemodSCReport::MsgReportFreqOffset, Message)
 MESSAGE_CLASS_DEFINITION(VORDemodSCReport::MsgReportRadial, Message)
 MESSAGE_CLASS_DEFINITION(VORDemodSCReport::MsgReportIdent, Message)
