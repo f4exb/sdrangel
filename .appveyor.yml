@@ -29,10 +29,10 @@ environment:
                              -DDEBUG_OUTPUT=ON \
                              -DENABLE_EXTERNAL_LIBRARIES=ON \
                              -DBUILD_SERVER=OFF"
-    - TARGET: ubuntu2004docker
-      APPVEYOR_BUILD_WORKER_CLOUD: nasrock
-      APPVEYOR_BUILD_WORKER_IMAGE: Linux
-      APPVEYOR_CONSOLE_DISABLE_PTY: true
+    # - TARGET: ubuntu2004docker
+    #   APPVEYOR_BUILD_WORKER_CLOUD: nasrock
+    #   APPVEYOR_BUILD_WORKER_IMAGE: Linux
+    #   APPVEYOR_CONSOLE_DISABLE_PTY: true
 
 for:
   - matrix:
