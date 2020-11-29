@@ -2573,6 +2573,9 @@ margin-bottom: 20px;
     "VORDemodReport" : {
       "$ref" : "#/definitions/VORDemodReport"
     },
+    "VORDemodSCReport" : {
+      "$ref" : "#/definitions/VORDemodSCReport"
+    },
     "WFMDemodReport" : {
       "$ref" : "#/definitions/WFMDemodReport"
     },
@@ -2697,6 +2700,9 @@ margin-bottom: 20px;
     },
     "VORDemodSettings" : {
       "$ref" : "#/definitions/VORDemodSettings"
+    },
+    "VORDemodSCSettings" : {
+      "$ref" : "#/definitions/VORDemodSCSettings"
     },
     "WFMDemodSettings" : {
       "$ref" : "#/definitions/WFMDemodSettings"
@@ -9456,6 +9462,104 @@ margin-bottom: 20px;
     }
   },
   "description" : "VORDemod"
+};
+            defs.VORDemodSCReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "squelch" : {
+      "type" : "integer",
+      "description" : "squelch status (1 if open else 0)"
+    },
+    "audioSampleRate" : {
+      "type" : "integer"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "radial" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current detected radial"
+    },
+    "refMag" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current reference signal magnitude"
+    },
+    "varMag" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "current variable signal magnitude"
+    },
+    "morseIdent" : {
+      "type" : "string",
+      "description" : "current identification morse code transcript"
+    }
+  },
+  "description" : "VORDemodSC"
+};
+            defs.VORDemodSCSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "navId" : {
+      "type" : "integer",
+      "description" : "VOR unique identifier when set by VOR localizer feature"
+    },
+    "squelch" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power squelch threshold in decibels"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "identThreshold" : {
+      "type" : "integer",
+      "description" : "Morse code ident threshold (linear SNR)"
+    }
+  },
+  "description" : "VORDemodSC"
 };
             defs.VORDemodSettings = {
   "properties" : {
@@ -44712,7 +44816,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-25T13:34:12.214+01:00
+              Generated 2020-11-29T08:58:14.732+01:00
             </div>
           </div>
       </div>

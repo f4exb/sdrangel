@@ -65,7 +65,7 @@ public:
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
+    void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     double getMagSq() const { return m_sink.getMagSq();  }

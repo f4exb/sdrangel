@@ -222,6 +222,8 @@
 #include "SWGUSRPOutputReport.h"
 #include "SWGUSRPOutputSettings.h"
 #include "SWGVORDemodReport.h"
+#include "SWGVORDemodSCReport.h"
+#include "SWGVORDemodSCSettings.h"
 #include "SWGVORDemodSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
@@ -860,6 +862,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGVORDemodReport").compare(type) == 0) {
       return new SWGVORDemodReport();
+    }
+    if(QString("SWGVORDemodSCReport").compare(type) == 0) {
+      return new SWGVORDemodSCReport();
+    }
+    if(QString("SWGVORDemodSCSettings").compare(type) == 0) {
+      return new SWGVORDemodSCSettings();
     }
     if(QString("SWGVORDemodSettings").compare(type) == 0) {
       return new SWGVORDemodSettings();

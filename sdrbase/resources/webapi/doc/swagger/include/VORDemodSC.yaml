@@ -1,0 +1,72 @@
+VORDemodSCSettings:
+  description: VORDemodSC
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    navId:
+      description: VOR unique identifier when set by VOR localizer feature
+      type: integer
+    squelch:
+      description: power squelch threshold in decibels
+      type: number
+      format: float
+    volume:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    audioDeviceName:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    identThreshold:
+      description: Morse code ident threshold (linear SNR)
+      type: integer
+
+VORDemodSCReport:
+  description: VORDemodSC
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    audioSampleRate:
+      type: integer
+    volume:
+      type: number
+      format: float
+    radial:
+      description: current detected radial
+      type: number
+      format: float
+    refMag:
+      description: current reference signal magnitude
+      type: number
+      format: float
+    varMag:
+      description: current variable signal magnitude
+      type: number
+      format: float
+    morseIdent:
+      description: current identification morse code transcript
+      type: string

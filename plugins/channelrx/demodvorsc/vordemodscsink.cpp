@@ -249,10 +249,10 @@ void VORDemodSCSink::processOneSample(Complex &ci)
 
         // qDebug() << "Ref phase: " << phaseDeg << " var phase " << varPhase;
 
-        if (getMessageQueueToGUI())
+        if (getMessageQueueToChannel())
         {
             VORDemodSCReport::MsgReportRadial *msg = VORDemodSCReport::MsgReportRadial::create(phaseDifference, refMag, varMag);
-            getMessageQueueToGUI()->push(msg);
+            getMessageQueueToChannel()->push(msg);
         }
 
         m_refGoertzel.reset();
@@ -303,11 +303,13 @@ void VORDemodSCSink::processOneSample(Complex &ci)
             if (m_ident != "")
             {
                 qDebug() << m_ident << " " << Morse::toString(m_ident);
-                if (getMessageQueueToGUI())
+
+                if (getMessageQueueToChannel())
                 {
                     VORDemodSCReport::MsgReportIdent *msg = VORDemodSCReport::MsgReportIdent::create(m_ident);
-                    getMessageQueueToGUI()->push(msg);
+                    getMessageQueueToChannel()->push(msg);
                 }
+
                 m_ident = "";
             }
         }
@@ -342,11 +344,13 @@ void VORDemodSCSink::processOneSample(Complex &ci)
             if (m_ident != "")
             {
                 qDebug() << m_ident << " " << Morse::toString(m_ident);
-                if (getMessageQueueToGUI())
+
+                if (getMessageQueueToChannel())
                 {
                     VORDemodSCReport::MsgReportIdent *msg = VORDemodSCReport::MsgReportIdent::create(m_ident);
-                    getMessageQueueToGUI()->push(msg);
+                    getMessageQueueToChannel()->push(msg);
                 }
+
                 m_ident = "";
             }
             m_bitTime = 0;

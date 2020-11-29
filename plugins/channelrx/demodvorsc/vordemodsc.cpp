@@ -16,8 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include "vordemodsc.h"
-
 #include <QTime>
 #include <QDebug>
 #include <QNetworkAccessManager>
@@ -40,6 +38,9 @@
 #include "util/db.h"
 #include "maincore.h"
 
+#include "vordemodscreport.h"
+#include "vordemodsc.h"
+
 MESSAGE_CLASS_DEFINITION(VORDemodSC::MsgConfigureVORDemod, Message)
 
 const char * const VORDemodSC::m_channelIdURI = "sdrangel.channel.vordemodsc";
@@ -53,6 +54,7 @@ VORDemodSC::VORDemodSC(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new VORDemodSCBaseband();
+    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
@@ -141,6 +143,48 @@ bool VORDemodSC::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (VORDemodSCReport::MsgReportRadial::match(cmd))
+    {
+        VORDemodSCReport::MsgReportRadial& report = (VORDemodSCReport::MsgReportRadial&) cmd;
+        m_radial = report.getRadial();
+        m_refMag = report.getRefMag();
+        m_varMag = report.getVarMag();
+
+        if (m_guiMessageQueue)
+        {
+            VORDemodSCReport::MsgReportRadial *msg = new VORDemodSCReport::MsgReportRadial(report);
+            m_guiMessageQueue->push(msg);
+        }
+
+        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+        QList<MessageQueue*> *reportMessageQueues = messagePipes.getMessageQueues(this, "report");
+
+        if (reportMessageQueues) {
+            sendChannelReport(reportMessageQueues);
+        }
+
+        return true;
+    }
+    else if (VORDemodSCReport::MsgReportIdent::match(cmd))
+    {
+        VORDemodSCReport::MsgReportIdent& report = (VORDemodSCReport::MsgReportIdent&) cmd;
+        m_morseIdent = report.getIdent();
+
+        if (m_guiMessageQueue)
+        {
+            VORDemodSCReport::MsgReportIdent *msg = new VORDemodSCReport::MsgReportIdent(report);
+            m_guiMessageQueue->push(msg);
+        }
+
+        MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+        QList<MessageQueue*> *reportMessageQueues = messagePipes.getMessageQueues(this, "report");
+
+        if (reportMessageQueues) {
+            sendChannelReport(reportMessageQueues);
+        }
+
+        return true;
+    }
     else
     {
         return false;
@@ -150,6 +194,8 @@ bool VORDemodSC::handleMessage(const Message& cmd)
 void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
 {
     qDebug() << "VORDemodSC::applySettings:"
+            << " m_inputFrequencyOffset: " << settings.m_inputFrequencyOffset
+            << " m_navId: " << settings.m_navId
             << " m_volume: " << settings.m_volume
             << " m_squelch: " << settings.m_squelch
             << " m_audioMute: " << settings.m_audioMute
@@ -164,6 +210,12 @@ void VORDemodSC::applySettings(const VORDemodSCSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
 
+    if ((m_settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+        reverseAPIKeys.append("inputFrequencyOffset");
+    }
+    if ((m_settings.m_navId != settings.m_navId) || force) {
+        reverseAPIKeys.append("navId");
+    }
     if ((m_settings.m_squelch != settings.m_squelch) || force) {
         reverseAPIKeys.append("squelch");
     }
@@ -243,8 +295,8 @@ int VORDemodSC::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    response.getVorDemodSettings()->init();
+    response.setVorDemodScSettings(new SWGSDRangel::SWGVORDemodSCSettings());
+    response.getVorDemodScSettings()->init();
     webapiFormatChannelSettings(response, m_settings);
     return 200;
 }
@@ -279,45 +331,51 @@ void VORDemodSC::webapiUpdateChannelSettings(
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
+    if (channelSettingsKeys.contains("inputFrequencyOffset")) {
+        settings.m_inputFrequencyOffset = response.getVorDemodScSettings()->getInputFrequencyOffset();
+    }
+    if (channelSettingsKeys.contains("navId")) {
+        settings.m_navId = response.getVorDemodScSettings()->getNavId();
+    }
     if (channelSettingsKeys.contains("audioMute")) {
-        settings.m_audioMute = response.getVorDemodSettings()->getAudioMute() != 0;
+        settings.m_audioMute = response.getVorDemodScSettings()->getAudioMute() != 0;
     }
     if (channelSettingsKeys.contains("rgbColor")) {
-        settings.m_rgbColor = response.getVorDemodSettings()->getRgbColor();
+        settings.m_rgbColor = response.getVorDemodScSettings()->getRgbColor();
     }
     if (channelSettingsKeys.contains("squelch")) {
-        settings.m_squelch = response.getVorDemodSettings()->getSquelch();
+        settings.m_squelch = response.getVorDemodScSettings()->getSquelch();
     }
     if (channelSettingsKeys.contains("title")) {
-        settings.m_title = *response.getVorDemodSettings()->getTitle();
+        settings.m_title = *response.getVorDemodScSettings()->getTitle();
     }
     if (channelSettingsKeys.contains("volume")) {
-        settings.m_volume = response.getVorDemodSettings()->getVolume();
+        settings.m_volume = response.getVorDemodScSettings()->getVolume();
     }
     if (channelSettingsKeys.contains("audioDeviceName")) {
-        settings.m_audioDeviceName = *response.getVorDemodSettings()->getAudioDeviceName();
+        settings.m_audioDeviceName = *response.getVorDemodScSettings()->getAudioDeviceName();
     }
 
     if (channelSettingsKeys.contains("streamIndex")) {
-        settings.m_streamIndex = response.getVorDemodSettings()->getStreamIndex();
+        settings.m_streamIndex = response.getVorDemodScSettings()->getStreamIndex();
     }
     if (channelSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getVorDemodSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getVorDemodScSettings()->getUseReverseApi() != 0;
     }
     if (channelSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getVorDemodSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getVorDemodScSettings()->getReverseApiAddress();
     }
     if (channelSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getVorDemodSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getVorDemodScSettings()->getReverseApiPort();
     }
     if (channelSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getVorDemodSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getVorDemodScSettings()->getReverseApiDeviceIndex();
     }
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
-        settings.m_reverseAPIChannelIndex = response.getVorDemodSettings()->getReverseApiChannelIndex();
+        settings.m_reverseAPIChannelIndex = response.getVorDemodScSettings()->getReverseApiChannelIndex();
     }
     if (channelSettingsKeys.contains("identThreshold")) {
-        settings.m_identThreshold = response.getVorDemodSettings()->getIdentThreshold();
+        settings.m_identThreshold = response.getVorDemodScSettings()->getIdentThreshold();
     }
 }
 
@@ -326,45 +384,47 @@ int VORDemodSC::webapiReportGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setVorDemodReport(new SWGSDRangel::SWGVORDemodReport());
-    response.getVorDemodReport()->init();
+    response.setVorDemodScReport(new SWGSDRangel::SWGVORDemodSCReport());
+    response.getVorDemodScReport()->init();
     webapiFormatChannelReport(response);
     return 200;
 }
 
 void VORDemodSC::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& response, const VORDemodSCSettings& settings)
 {
-    response.getVorDemodSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
-    response.getVorDemodSettings()->setRgbColor(settings.m_rgbColor);
-    response.getVorDemodSettings()->setSquelch(settings.m_squelch);
-    response.getVorDemodSettings()->setVolume(settings.m_volume);
+    response.getVorDemodScSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    response.getVorDemodScSettings()->setNavId(settings.m_navId);
+    response.getVorDemodScSettings()->setAudioMute(settings.m_audioMute ? 1 : 0);
+    response.getVorDemodScSettings()->setRgbColor(settings.m_rgbColor);
+    response.getVorDemodScSettings()->setSquelch(settings.m_squelch);
+    response.getVorDemodScSettings()->setVolume(settings.m_volume);
 
-    if (response.getVorDemodSettings()->getTitle()) {
-        *response.getVorDemodSettings()->getTitle() = settings.m_title;
+    if (response.getVorDemodScSettings()->getTitle()) {
+        *response.getVorDemodScSettings()->getTitle() = settings.m_title;
     } else {
-        response.getVorDemodSettings()->setTitle(new QString(settings.m_title));
+        response.getVorDemodScSettings()->setTitle(new QString(settings.m_title));
     }
 
-    if (response.getVorDemodSettings()->getAudioDeviceName()) {
-        *response.getVorDemodSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
+    if (response.getVorDemodScSettings()->getAudioDeviceName()) {
+        *response.getVorDemodScSettings()->getAudioDeviceName() = settings.m_audioDeviceName;
     } else {
-        response.getVorDemodSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        response.getVorDemodScSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
-    response.getVorDemodSettings()->setStreamIndex(settings.m_streamIndex);
-    response.getVorDemodSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getVorDemodScSettings()->setStreamIndex(settings.m_streamIndex);
+    response.getVorDemodScSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getVorDemodSettings()->getReverseApiAddress()) {
-        *response.getVorDemodSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getVorDemodScSettings()->getReverseApiAddress()) {
+        *response.getVorDemodScSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getVorDemodSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getVorDemodScSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getVorDemodSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getVorDemodSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
-    response.getVorDemodSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
+    response.getVorDemodScSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getVorDemodScSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getVorDemodScSettings()->setReverseApiChannelIndex(settings.m_reverseAPIChannelIndex);
 
-    response.getVorDemodSettings()->setIdentThreshold(settings.m_identThreshold);
+    response.getVorDemodScSettings()->setIdentThreshold(settings.m_identThreshold);
 }
 
 void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response)
@@ -373,9 +433,18 @@ void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     int nbMagsqSamples;
     getMagSqLevels(magsqAvg, magsqPeak, nbMagsqSamples);
 
-    response.getVorDemodReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
-    response.getVorDemodReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
-    response.getVorDemodReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getVorDemodScReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
+    response.getVorDemodScReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
+    response.getVorDemodScReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getVorDemodScReport()->setRadial(m_radial);
+    response.getVorDemodScReport()->setRefMag(m_refMag);
+    response.getVorDemodScReport()->setVarMag(m_varMag);
+
+    if (response.getVorDemodScReport()->getMorseIdent()) {
+        *response.getVorDemodScReport()->getMorseIdent() = m_morseIdent;
+    } else {
+        response.getVorDemodScReport()->setMorseIdent(new QString(m_morseIdent));
+    }
 }
 
 void VORDemodSC::webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force)
@@ -431,6 +500,19 @@ void VORDemodSC::featuresSendSettings(QList<QString>& channelSettingsKeys, const
     }
 }
 
+void VORDemodSC::sendChannelReport(QList<MessageQueue*> *messageQueues)
+{
+    SWGSDRangel::SWGChannelReport *swgChannelReport = new SWGSDRangel::SWGChannelReport();
+    webapiFormatChannelReport(*swgChannelReport);
+    QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+    for (; it != messageQueues->end(); ++it)
+    {
+        MainCore::MsgChannelReport *msg = MainCore::MsgChannelReport::create(this, swgChannelReport);
+        (*it)->push(msg);
+    }
+}
+
 void VORDemodSC::webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
@@ -442,34 +524,40 @@ void VORDemodSC::webapiFormatChannelSettings(
     swgChannelSettings->setOriginatorChannelIndex(getIndexInDeviceSet());
     swgChannelSettings->setOriginatorDeviceSetIndex(getDeviceSetIndex());
     swgChannelSettings->setChannelType(new QString("VORDemodSC"));
-    swgChannelSettings->setVorDemodSettings(new SWGSDRangel::SWGVORDemodSettings());
-    SWGSDRangel::SWGVORDemodSettings *swgVORDemodSettings = swgChannelSettings->getVorDemodSettings();
+    swgChannelSettings->setVorDemodScSettings(new SWGSDRangel::SWGVORDemodSCSettings());
+    SWGSDRangel::SWGVORDemodSCSettings *swgVORDemodSCSettings = swgChannelSettings->getVorDemodScSettings();
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (channelSettingsKeys.contains("inputFrequencyOffset") || force) {
+        swgVORDemodSCSettings->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
+    }
+    if (channelSettingsKeys.contains("navId") || force) {
+        swgVORDemodSCSettings->setNavId(settings.m_navId);
+    }
     if (channelSettingsKeys.contains("audioMute") || force) {
-        swgVORDemodSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
+        swgVORDemodSCSettings->setAudioMute(settings.m_audioMute ? 1 : 0);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
-        swgVORDemodSettings->setRgbColor(settings.m_rgbColor);
+        swgVORDemodSCSettings->setRgbColor(settings.m_rgbColor);
     }
     if (channelSettingsKeys.contains("squelch") || force) {
-        swgVORDemodSettings->setSquelch(settings.m_squelch);
+        swgVORDemodSCSettings->setSquelch(settings.m_squelch);
     }
     if (channelSettingsKeys.contains("title") || force) {
-        swgVORDemodSettings->setTitle(new QString(settings.m_title));
+        swgVORDemodSCSettings->setTitle(new QString(settings.m_title));
     }
     if (channelSettingsKeys.contains("volume") || force) {
-        swgVORDemodSettings->setVolume(settings.m_volume);
+        swgVORDemodSCSettings->setVolume(settings.m_volume);
     }
     if (channelSettingsKeys.contains("audioDeviceName") || force) {
-        swgVORDemodSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
+        swgVORDemodSCSettings->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
-        swgVORDemodSettings->setStreamIndex(settings.m_streamIndex);
+        swgVORDemodSCSettings->setStreamIndex(settings.m_streamIndex);
     }
     if (channelSettingsKeys.contains("identThreshold") || force) {
-        swgVORDemodSettings->setAudioMute(settings.m_identThreshold);
+        swgVORDemodSCSettings->setAudioMute(settings.m_identThreshold);
     }
 }
 

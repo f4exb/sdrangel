@@ -43,7 +43,7 @@ public:
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const VORDemodSCSettings& settings, bool force = false);
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
+    void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
     void applyAudioSampleRate(int sampleRate);
 
     int getAudioSampleRate() const { return m_audioSampleRate; }
@@ -101,6 +101,7 @@ private:
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
 
+    MessageQueue *m_messageQueueToChannel;
     MessageQueue *m_messageQueueToGUI;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
@@ -137,7 +138,7 @@ private:
 
     void processOneSample(Complex &ci);
     void processOneAudioSample(Complex &ci);
-    MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }
+    MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
 };
 
 #endif // INCLUDE_VORDEMODSCSINK_H

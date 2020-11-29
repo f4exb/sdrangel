@@ -80,6 +80,8 @@ SWGChannelReport::SWGChannelReport() {
     m_udp_sink_report_isSet = false;
     vor_demod_report = nullptr;
     m_vor_demod_report_isSet = false;
+    vor_demod_sc_report = nullptr;
+    m_vor_demod_sc_report_isSet = false;
     wfm_demod_report = nullptr;
     m_wfm_demod_report_isSet = false;
     wfm_mod_report = nullptr;
@@ -144,6 +146,8 @@ SWGChannelReport::init() {
     m_udp_sink_report_isSet = false;
     vor_demod_report = new SWGVORDemodReport();
     m_vor_demod_report_isSet = false;
+    vor_demod_sc_report = new SWGVORDemodSCReport();
+    m_vor_demod_sc_report_isSet = false;
     wfm_demod_report = new SWGWFMDemodReport();
     m_wfm_demod_report_isSet = false;
     wfm_mod_report = new SWGWFMModReport();
@@ -228,6 +232,9 @@ SWGChannelReport::cleanup() {
     if(vor_demod_report != nullptr) { 
         delete vor_demod_report;
     }
+    if(vor_demod_sc_report != nullptr) { 
+        delete vor_demod_sc_report;
+    }
     if(wfm_demod_report != nullptr) { 
         delete wfm_demod_report;
     }
@@ -298,6 +305,8 @@ SWGChannelReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_sink_report, pJson["UDPSinkReport"], "SWGUDPSinkReport", "SWGUDPSinkReport");
     
     ::SWGSDRangel::setValue(&vor_demod_report, pJson["VORDemodReport"], "SWGVORDemodReport", "SWGVORDemodReport");
+    
+    ::SWGSDRangel::setValue(&vor_demod_sc_report, pJson["VORDemodSCReport"], "SWGVORDemodSCReport", "SWGVORDemodSCReport");
     
     ::SWGSDRangel::setValue(&wfm_demod_report, pJson["WFMDemodReport"], "SWGWFMDemodReport", "SWGWFMDemodReport");
     
@@ -396,6 +405,9 @@ SWGChannelReport::asJsonObject() {
     }
     if((vor_demod_report != nullptr) && (vor_demod_report->isSet())){
         toJsonValue(QString("VORDemodReport"), vor_demod_report, obj, QString("SWGVORDemodReport"));
+    }
+    if((vor_demod_sc_report != nullptr) && (vor_demod_sc_report->isSet())){
+        toJsonValue(QString("VORDemodSCReport"), vor_demod_sc_report, obj, QString("SWGVORDemodSCReport"));
     }
     if((wfm_demod_report != nullptr) && (wfm_demod_report->isSet())){
         toJsonValue(QString("WFMDemodReport"), wfm_demod_report, obj, QString("SWGWFMDemodReport"));
@@ -667,6 +679,16 @@ SWGChannelReport::setVorDemodReport(SWGVORDemodReport* vor_demod_report) {
     this->m_vor_demod_report_isSet = true;
 }
 
+SWGVORDemodSCReport*
+SWGChannelReport::getVorDemodScReport() {
+    return vor_demod_sc_report;
+}
+void
+SWGChannelReport::setVorDemodScReport(SWGVORDemodSCReport* vor_demod_sc_report) {
+    this->vor_demod_sc_report = vor_demod_sc_report;
+    this->m_vor_demod_sc_report_isSet = true;
+}
+
 SWGWFMDemodReport*
 SWGChannelReport::getWfmDemodReport() {
     return wfm_demod_report;
@@ -768,6 +790,9 @@ SWGChannelReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(vor_demod_report && vor_demod_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(vor_demod_sc_report && vor_demod_sc_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(wfm_demod_report && wfm_demod_report->isSet()){

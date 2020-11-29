@@ -27,6 +27,7 @@ class Serializable;
 struct VORDemodSCSettings
 {
     qint32 m_inputFrequencyOffset;
+    int m_navId; //!< VOR unique identifier when set by VOR localizer feature
     Real m_squelch;
     Real m_volume;
     bool m_audioMute;

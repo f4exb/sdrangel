@@ -32,6 +32,7 @@ VORDemodSCSettings::VORDemodSCSettings() :
 void VORDemodSCSettings::resetToDefaults()
 {
     m_inputFrequencyOffset = 0;
+    m_navId = -1;
     m_squelch = -60.0;
     m_volume = 2.0;
     m_audioMute = false;

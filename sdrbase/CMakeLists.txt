@@ -160,6 +160,8 @@ set(sdrbase_SOURCES
 
     limerfe/limerfeusbcalib.cpp
 
+    pipes/messagepipes.cpp
+
     settings/featuresetpreset.cpp
     settings/preferences.cpp
     settings/preset.cpp
@@ -330,6 +332,8 @@ set(sdrbase_HEADERS
     feature/featureutils.h
 
     limerfe/limerfeusbcalib.h
+
+    pipes/messagepipes.h
 
     plugin/plugininterface.h
     plugin/pluginapi.h

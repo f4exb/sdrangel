@@ -120,10 +120,6 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
-    void setMessageQueueToGUI(MessageQueue* queue) override {
-        BasebandSampleSink::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
-    }
 
     uint32_t getNumberOfDeviceStreams() const;
 
@@ -138,6 +134,11 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
 
+    float m_radial; //!< current detected radial
+    float m_refMag; //!< current reference signal magnitude
+    float m_varMag; //!< current variable signal magnitude
+    QString m_morseIdent; //!< identification morse code transcript
+
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
@@ -145,6 +146,7 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force);
     void featuresSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force);
+    void sendChannelReport(QList<MessageQueue*> *messageQueues);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,

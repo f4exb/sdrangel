@@ -26,6 +26,7 @@
 #include "export.h"
 #include "settings/mainsettings.h"
 #include "util/message.h"
+#include "pipes/messagepipes.h"
 
 class DeviceSet;
 class FeatureSet;
@@ -36,6 +37,11 @@ class MessageQueue;
 
 namespace qtwebapp {
     class LoggerWithFile;
+}
+
+namespace SWGSDRangel
+{
+    class SWGChannelReport;
 }
 
 class SDRBASE_API MainCore
@@ -402,6 +408,34 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgChannelReport : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const ChannelAPI *getChannelAPI() const { return m_channelAPI; }
+        SWGSDRangel::SWGChannelReport *getSWGReport() const { return m_swgReport; }
+
+        static MsgChannelReport* create(
+            const ChannelAPI *channelAPI,
+            SWGSDRangel::SWGChannelReport *swgReport)
+        {
+            return new MsgChannelReport(channelAPI, swgReport);
+        }
+
+    private:
+        const ChannelAPI *m_channelAPI;
+        SWGSDRangel::SWGChannelReport *m_swgReport;
+
+        MsgChannelReport(
+            const ChannelAPI *channelAPI,
+            SWGSDRangel::SWGChannelReport *swgReport
+        ) :
+            Message(),
+            m_channelAPI(channelAPI),
+            m_swgReport(swgReport)
+        { }
+    };
+
 	MainCore();
 	~MainCore();
 	static MainCore *instance();
@@ -433,6 +467,8 @@ public:
     void removeFeatureInstanceAt(FeatureSet *featureSet, int featureIndex);
     void removeFeatureInstance(Feature *feature);
     void clearFeatures(FeatureSet *featureSet);
+    // pipes
+    MessagePipes& getMessagePipes() { return m_messagePipes; }
 
     friend class MainServer;
     friend class MainWindow;
@@ -451,6 +487,7 @@ private:
     QMap<ChannelAPI*, DeviceSet*> m_channelsMap; //!< Channel to device set map
     QMap<Feature*, FeatureSet*> m_featuresMap;   //!< Feature to feature set map
     PluginManager* m_pluginManager;
+    MessagePipes m_messagePipes;
 
     void debugMaps();
 };
