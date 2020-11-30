@@ -170,6 +170,7 @@ set(sdrbase_SOURCES
     util/azel.cpp
     util/crc.cpp
     util/CRC64.cpp
+    util/csv.cpp
     util/db.cpp
     util/fixedtraits.cpp
     util/httpdownloadmanager.cpp
@@ -346,6 +347,7 @@ set(sdrbase_HEADERS
 
     util/azel.h
     util/CRC64.h
+    util/csv.h
     util/db.h
     util/doublebuffer.h
     util/doublebufferfifo.h

@@ -21,3 +21,5 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     RigCtlServerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+    VORLocalizerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/VORLocalizer.yaml#/VORLocalizerSettings"

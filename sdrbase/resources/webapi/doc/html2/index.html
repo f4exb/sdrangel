@@ -4094,6 +4094,9 @@ margin-bottom: 20px;
     },
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
+    },
+    "VORLocalizerSettings" : {
+      "$ref" : "#/definitions/VORLocalizerSettings"
     }
   },
   "description" : "Base feature settings. Only the feature settings corresponding to the feature specified in the featureType field is or should be present."
@@ -9614,6 +9617,37 @@ margin-bottom: 20px;
     }
   },
   "description" : "VORDemod"
+};
+            defs.VORLocalizerSettings = {
+  "properties" : {
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureSetIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIFeatureIndex" : {
+      "type" : "integer"
+    },
+    "magDecAdjust" : {
+      "type" : "integer",
+      "description" : "Adjust radial lines on map for magnetic declination of VOR"
+    }
+  },
+  "description" : "VORLocalizer"
 };
             defs.WFMDemodReport = {
   "properties" : {
@@ -44816,7 +44850,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-29T08:58:14.732+01:00
+              Generated 2020-11-29T21:00:18.945+01:00
             </div>
           </div>
       </div>

@@ -21,3 +21,5 @@ FeatureSettings:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     RigCtlServerSettings:
       $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+    VORLocalizerSettings:
+      $ref: "/doc/swagger/include/VORLocalizer.yaml#/VORLocalizerSettings"

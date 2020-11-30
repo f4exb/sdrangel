@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="/demodvor/">
+    <file>map/map.qml</file>
+    <file>map/MapStation.qml</file>
+    <file>map/antenna.png</file>
+    <file>map/VOR.png</file>
+    <file>map/VOR-DME.png</file>
+    <file>map/VORTAC.png</file>
+  </qresource>
+</RCC>

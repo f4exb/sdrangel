@@ -225,6 +225,7 @@
 #include "SWGVORDemodSCReport.h"
 #include "SWGVORDemodSCSettings.h"
 #include "SWGVORDemodSettings.h"
+#include "SWGVORLocalizerSettings.h"
 #include "SWGWFMDemodReport.h"
 #include "SWGWFMDemodSettings.h"
 #include "SWGWFMModReport.h"
@@ -871,6 +872,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGVORDemodSettings").compare(type) == 0) {
       return new SWGVORDemodSettings();
+    }
+    if(QString("SWGVORLocalizerSettings").compare(type) == 0) {
+      return new SWGVORLocalizerSettings();
     }
     if(QString("SWGWFMDemodReport").compare(type) == 0) {
       return new SWGWFMDemodReport();

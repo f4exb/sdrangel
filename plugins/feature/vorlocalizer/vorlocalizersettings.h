@@ -1,0 +1,77 @@
+///////////////////////////////////////////////////////////////////////////////////
+// Copyright (C) 2017 Edouard Griffiths, F4EXB.                                  //
+// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+//                                                                               //
+// This program is free software; you can redistribute it and/or modify          //
+// it under the terms of the GNU General Public License as published by          //
+// the Free Software Foundation as version 3 of the License, or                  //
+// (at your option) any later version.                                           //
+//                                                                               //
+// This program is distributed in the hope that it will be useful,               //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of                //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  //
+// GNU General Public License V3 for more details.                               //
+//                                                                               //
+// You should have received a copy of the GNU General Public License             //
+// along with this program. If not, see <http://www.gnu.org/licenses/>.          //
+///////////////////////////////////////////////////////////////////////////////////
+
+#ifndef INCLUDE_VORLOCALIZERSETTINGS_H
+#define INCLUDE_VORLOCALIZERSETTINGS_H
+
+#include <QByteArray>
+#include <QHash>
+
+class Serializable;
+
+// Number of columns in the table
+
+struct VORLocalizerSubChannelSettings {
+    int m_id;                           //!< Unique VOR identifier (from database)
+    int m_frequency;                    //!< Frequency the VOR is on
+    bool m_audioMute;                   //!< Mute the audio from this VOR
+};
+
+struct VORLocalizerSettings
+{
+    struct VORDemodChannels
+    {
+        int m_deviceSetIndex;
+        int m_channelIndex;
+    };
+
+    quint32 m_rgbColor;
+    QString m_title;
+    bool m_magDecAdjust;                //!< Adjust for magnetic declination when drawing radials on the map
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIFeatureSetIndex;
+    uint16_t m_reverseAPIFeatureIndex;
+
+
+    static const int VORDEMOD_COLUMNS  = 11;
+    static const int VOR_COL_NAME      =  0;
+    static const int VOR_COL_FREQUENCY =  1;
+    static const int VOR_COL_OFFSET    =  2;
+    static const int VOR_COL_IDENT     =  3;
+    static const int VOR_COL_MORSE     =  4;
+    static const int VOR_COL_RX_IDENT  =  5;
+    static const int VOR_COL_RX_MORSE  =  6;
+    static const int VOR_COL_RADIAL    =  7;
+    static const int VOR_COL_REF_MAG   =  8;
+    static const int VOR_COL_VAR_MAG   =  9;
+    static const int VOR_COL_MUTE      = 10;
+
+    int m_columnIndexes[VORDEMOD_COLUMNS];//!< How the columns are ordered in the table
+    int m_columnSizes[VORDEMOD_COLUMNS];  //!< Size of the coumns in the table
+
+    QHash<int, VORLocalizerSubChannelSettings *> m_subChannelSettings;
+
+    VORLocalizerSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+};
+
+#endif /* INCLUDE_VORLOCALIZERSETTINGS_H */

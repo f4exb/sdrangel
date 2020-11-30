@@ -42,6 +42,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_simple_ptt_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
     m_rig_ctl_server_settings_isSet = false;
+    vor_localizer_settings = nullptr;
+    m_vor_localizer_settings_isSet = false;
 }
 
 SWGFeatureSettings::~SWGFeatureSettings() {
@@ -64,6 +66,8 @@ SWGFeatureSettings::init() {
     m_simple_ptt_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
     m_rig_ctl_server_settings_isSet = false;
+    vor_localizer_settings = new SWGVORLocalizerSettings();
+    m_vor_localizer_settings_isSet = false;
 }
 
 void
@@ -84,6 +88,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(rig_ctl_server_settings != nullptr) { 
         delete rig_ctl_server_settings;
+    }
+    if(vor_localizer_settings != nullptr) { 
+        delete vor_localizer_settings;
     }
 }
 
@@ -111,6 +118,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_settings, pJson["RigCtlServerSettings"], "SWGRigCtlServerSettings", "SWGRigCtlServerSettings");
+    
+    ::SWGSDRangel::setValue(&vor_localizer_settings, pJson["VORLocalizerSettings"], "SWGVORLocalizerSettings", "SWGVORLocalizerSettings");
     
 }
 
@@ -148,6 +157,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((rig_ctl_server_settings != nullptr) && (rig_ctl_server_settings->isSet())){
         toJsonValue(QString("RigCtlServerSettings"), rig_ctl_server_settings, obj, QString("SWGRigCtlServerSettings"));
+    }
+    if((vor_localizer_settings != nullptr) && (vor_localizer_settings->isSet())){
+        toJsonValue(QString("VORLocalizerSettings"), vor_localizer_settings, obj, QString("SWGVORLocalizerSettings"));
     }
 
     return obj;
@@ -223,6 +235,16 @@ SWGFeatureSettings::setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_ser
     this->m_rig_ctl_server_settings_isSet = true;
 }
 
+SWGVORLocalizerSettings*
+SWGFeatureSettings::getVorLocalizerSettings() {
+    return vor_localizer_settings;
+}
+void
+SWGFeatureSettings::setVorLocalizerSettings(SWGVORLocalizerSettings* vor_localizer_settings) {
+    this->vor_localizer_settings = vor_localizer_settings;
+    this->m_vor_localizer_settings_isSet = true;
+}
+
 
 bool
 SWGFeatureSettings::isSet(){
@@ -247,6 +269,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rig_ctl_server_settings && rig_ctl_server_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(vor_localizer_settings && vor_localizer_settings->isSet()){
             isObjectUpdated = true; break;
         }
     }while(false);

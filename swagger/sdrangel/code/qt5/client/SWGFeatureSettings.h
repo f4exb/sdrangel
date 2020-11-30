@@ -26,6 +26,7 @@
 #include "SWGGS232ControllerSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSimplePTTSettings.h"
+#include "SWGVORLocalizerSettings.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -67,6 +68,9 @@ public:
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
 
+    SWGVORLocalizerSettings* getVorLocalizerSettings();
+    void setVorLocalizerSettings(SWGVORLocalizerSettings* vor_localizer_settings);
+
 
     virtual bool isSet() override;
 
@@ -91,6 +95,9 @@ private:
 
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;
+
+    SWGVORLocalizerSettings* vor_localizer_settings;
+    bool m_vor_localizer_settings_isSet;
 
 };
 
