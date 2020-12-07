@@ -14,36 +14,60 @@ Note that for aircraft, there is typically a direct line-of-sight to the VOR. Th
 
 <h2>Using it for localization</h2>
 
-Several instances of this plugin can be created to monitor multiple VORs and collate information in the VOR Localizer feature plugin. The VOR Localizer can also perform a round robin on multiple VORs with just one VOR demodulator. Please refer to ... for more information about this feature plugin
+Several instances of this plugin can be created to monitor multiple VORs and collate information in the VOR Localizer feature plugin. The VOR Localizer can also perform a round robin on multiple VORs with just one VOR demodulator. Please refer to [VOR Localizer](../../feature/vorlocalizer/readme.md) for more information about this feature plugin
 
 <h2>Interface</h2>
 
-![VOR Demodulator plugin GUI](../../../doc/img/VORDemod_plugin.png)
+![VOR Demodulator plugin GUI](../../../doc/img/VORDemodSC_plugin.png)
 
-<h3>1: Level meter in dB</h3>
+<h3>1: Frequency shift from center frequency of reception value</h3>
+
+Use the wheels to adjust the frequency shift in Hz from the center frequency of reception. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2. Left click on a digit sets the cursor position at this digit.
+
+<h3>2: Level meter in dB</h3>
 
   - top bar (green): average value
   - bottom bar (blue green): instantaneous peak value
   - tip vertical bar (bright green): peak hold value
 
-<h3>2: Channel power</h3>
+<h3>3: Channel power</h3>
 
 Average total power in dB relative to a +/- 1.0 amplitude signal received in the pass band.
 
-<h3>3: Audio mute and audio output select</h3>
+<h3>4: Audio mute and audio output select</h3>
 
 Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
 
 If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
 
-<h3>6: Morse ident threshold</h3>
+<h3>5: Morse ident threshold</h3>
 
 This is the Morse code ident threshold, expressed as a linear signal to noise (SNR) ratio. This is effectively the signal level required for the Morse demodulator to detect a dot or dash. Setting this to low values will allow the Morse demodulator to detect weak signals, but it also increases the likelyhood that noise will incorrectly be interpreted as a signal, resulting in invalid idents being reported.
 
-<h3>7: Squelch threshold</h3>
+<h3>6: Squelch threshold</h3>
 
 This is the squelch threshold in dB. The average total power received in the signal bandwidth before demodulation is compared to this value and the squelch input is open above this value. It can be varied continuously in 0.1 dB steps from 0.0 to -100.0 dB using the dial button.
 
-<h3>8: Volume</h3>
+<h3>7: Volume</h3>
 
 This is the volume of the audio signal from 0.0 (mute) to 10.0 (maximum). It can be varied continuously in 0.1 steps using the dial button.
+
+<h3>8: Radial dircetion</h3>
+
+Demodulated radial direction in degrees (unadjusted for magnetic declination). If there is a low confidence the value is correct (due to a weak signal), it will be displayed in red.
+
+<h3>9: Reference signal power in dB</h3>
+
+Magnitude of the received 30Hz FM reference signal in dB
+
+<h3>10. Variable signal power in dB</h3>
+
+Mangitude of the received 30Hz AM variable signal in dB
+
+<h3>11. VOR identifier code (decoded)</h3>
+
+Demodulated identifier. If an identifier is received that is not 2 or 3 characters, it will be displayed in yellow else in white.
+
+<h3>12. VOR identifier code (Morse)</h3>
+
+Demodulated Morse code identifier. Colour coding is the ame as for the decoded identifier.

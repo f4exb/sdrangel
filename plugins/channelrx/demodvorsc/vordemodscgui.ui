@@ -144,30 +144,6 @@
         </property>
        </spacer>
       </item>
-      <item>
-       <layout class="QHBoxLayout" name="channelPowerLayout_2">
-        <item>
-         <widget class="QLabel" name="channelPower_2">
-          <property name="toolTip">
-           <string>Channel power</string>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::RightToLeft</enum>
-          </property>
-          <property name="text">
-           <string>0.0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="channelPowerUnits_2">
-          <property name="text">
-           <string> dB</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
     </item>
     <item>
