@@ -62,7 +62,7 @@ public:
 
     QTableWidgetItem *m_nameItem;
     QTableWidgetItem *m_frequencyItem;
-    QTableWidgetItem *m_offsetItem;
+    QTableWidgetItem *m_navIdItem;
     QTableWidgetItem *m_identItem;
     QTableWidgetItem *m_morseItem;
     QTableWidgetItem *m_radialItem;
@@ -269,7 +269,9 @@ private slots:
     void on_startStop_toggled(bool checked);
     void on_getOurAirportsVORDB_clicked();
     void on_getOpenAIPVORDB_clicked();
-    void on_magDecAdjust_clicked(bool checked);
+    void on_magDecAdjust_toggled(bool checked);
+    void on_rrTime_valueChanged(int value);
+    void on_centerShift_valueChanged(int value);
     void on_channelsRefresh_clicked();
     void vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void vorData_sectionResized(int logicalIndex, int oldSize, int newSize);

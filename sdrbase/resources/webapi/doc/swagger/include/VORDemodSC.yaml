@@ -55,18 +55,39 @@ VORDemodSCReport:
     volume:
       type: number
       format: float
+    navId:
+      description: VOR unique identifier when set by VOR localizer feature
+      type: integer
     radial:
-      description: current detected radial
+      description: current detected radial (degrees)
       type: number
       format: float
     refMag:
-      description: current reference signal magnitude
+      description: current reference signal magnitude (dB)
       type: number
       format: float
     varMag:
-      description: current variable signal magnitude
+      description: current variable signal magnitude (dB)
       type: number
       format: float
+    validRadial:
+      type: integer
+      description: >
+        Radial validity estimation
+          * 0 - Radial is invalid
+          * 1 - Radial is valid
+    validRefMag:
+      type: integer
+      description: >
+        Reference signal magnitude validity
+          * 0 - Magnitude below threshold
+          * 1 - Magnitude above threshold
+    validVarMag:
+      type: integer
+      description: >
+        Variable signal magnitude validity
+          * 0 - Magnitude below threshold
+          * 1 - Magnitude above threshold
     morseIdent:
       description: current identification morse code transcript
       type: string

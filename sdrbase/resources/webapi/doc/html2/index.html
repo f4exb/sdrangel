@@ -9484,20 +9484,36 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float"
     },
+    "navId" : {
+      "type" : "integer",
+      "description" : "VOR unique identifier when set by VOR localizer feature"
+    },
     "radial" : {
       "type" : "number",
       "format" : "float",
-      "description" : "current detected radial"
+      "description" : "current detected radial (degrees)"
     },
     "refMag" : {
       "type" : "number",
       "format" : "float",
-      "description" : "current reference signal magnitude"
+      "description" : "current reference signal magnitude (dB)"
     },
     "varMag" : {
       "type" : "number",
       "format" : "float",
-      "description" : "current variable signal magnitude"
+      "description" : "current variable signal magnitude (dB)"
+    },
+    "validRadial" : {
+      "type" : "integer",
+      "description" : "Radial validity estimation\n  * 0 - Radial is invalid\n  * 1 - Radial is valid\n"
+    },
+    "validRefMag" : {
+      "type" : "integer",
+      "description" : "Reference signal magnitude validity\n  * 0 - Magnitude below threshold\n  * 1 - Magnitude above threshold\n"
+    },
+    "validVarMag" : {
+      "type" : "integer",
+      "description" : "Variable signal magnitude validity\n  * 0 - Magnitude below threshold\n  * 1 - Magnitude above threshold\n"
     },
     "morseIdent" : {
       "type" : "string",
@@ -9645,6 +9661,14 @@ margin-bottom: 20px;
     "magDecAdjust" : {
       "type" : "integer",
       "description" : "Adjust radial lines on map for magnetic declination of VOR"
+    },
+    "rrTime" : {
+      "type" : "integer",
+      "description" : "Round robin turn time in seconds"
+    },
+    "centerShift" : {
+      "type" : "integer",
+      "description" : "Shift of center frequency in Hz"
     }
   },
   "description" : "VORLocalizer"
@@ -44850,7 +44874,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-11-29T21:00:18.945+01:00
+              Generated 2020-12-06T23:43:21.772+01:00
             </div>
           </div>
       </div>

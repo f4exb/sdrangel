@@ -436,9 +436,17 @@ void VORDemodSC::webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& respon
     response.getVorDemodScReport()->setChannelPowerDb(CalcDb::dbPower(magsqAvg));
     response.getVorDemodScReport()->setSquelch(m_basebandSink->getSquelchOpen() ? 1 : 0);
     response.getVorDemodScReport()->setAudioSampleRate(m_basebandSink->getAudioSampleRate());
+    response.getVorDemodScReport()->setNavId(m_settings.m_navId);
     response.getVorDemodScReport()->setRadial(m_radial);
     response.getVorDemodScReport()->setRefMag(m_refMag);
     response.getVorDemodScReport()->setVarMag(m_varMag);
+    float refMagDB = std::round(20.0*std::log10(m_refMag));
+    float varMagDB = std::round(20.0*std::log10(m_varMag));
+    bool validRefMag = refMagDB > m_settings.m_refThresholdDB;
+    bool validVarMag = varMagDB > m_settings.m_varThresholdDB;
+    response.getVorDemodScReport()->setValidRadial(validRefMag && validVarMag ? 1 : 0);
+    response.getVorDemodScReport()->setValidRefMag(validRefMag ? 1 : 0);
+    response.getVorDemodScReport()->setValidVarMag(validVarMag ? 1 : 0);
 
     if (response.getVorDemodScReport()->getMorseIdent()) {
         *response.getVorDemodScReport()->getMorseIdent() = m_morseIdent;
@@ -502,12 +510,15 @@ void VORDemodSC::featuresSendSettings(QList<QString>& channelSettingsKeys, const
 
 void VORDemodSC::sendChannelReport(QList<MessageQueue*> *messageQueues)
 {
-    SWGSDRangel::SWGChannelReport *swgChannelReport = new SWGSDRangel::SWGChannelReport();
-    webapiFormatChannelReport(*swgChannelReport);
     QList<MessageQueue*>::iterator it = messageQueues->begin();
 
     for (; it != messageQueues->end(); ++it)
     {
+        SWGSDRangel::SWGChannelReport *swgChannelReport = new SWGSDRangel::SWGChannelReport();
+        swgChannelReport->setDirection(0);
+        swgChannelReport->setChannelType(new QString(m_channelId));
+        swgChannelReport->setVorDemodScReport(new SWGSDRangel::SWGVORDemodSCReport());
+        webapiFormatChannelReport(*swgChannelReport);
         MainCore::MsgChannelReport *msg = MainCore::MsgChannelReport::create(this, swgChannelReport);
         (*it)->push(msg);
     }

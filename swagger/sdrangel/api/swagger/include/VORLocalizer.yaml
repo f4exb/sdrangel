@@ -19,3 +19,9 @@ VORLocalizerSettings:
     magDecAdjust:
       description: Adjust radial lines on map for magnetic declination of VOR
       type: integer
+    rrTime:
+      description: Round robin turn time in seconds
+      type: integer
+    centerShift:
+      description: Shift of center frequency in Hz
+      type: integer

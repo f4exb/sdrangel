@@ -23,6 +23,7 @@
 
 #include "feature/feature.h"
 #include "util/message.h"
+#include "util/average.h"
 
 #include "vorlocalizersettings.h"
 
@@ -170,10 +171,30 @@ public:
     static const char* const m_featureId;
 
 private:
+    struct VORChannelReport
+    {
+        float m_radial; //!< current detected radial
+        float m_refMag; //!< current reference signal magnitude
+        float m_varMag; //!< current variable signal magnitude
+        AverageUtil<float, double> m_radialAvg;
+        AverageUtil<float, double> m_refMagAvg;
+        AverageUtil<float, double> m_varMagAvg;
+        bool m_validRadial;
+        bool m_validRefMag;
+        bool m_validVarMag;
+        QString m_morseIdent; //!< identification morse code transcript
+
+        VORChannelReport() = default;
+        VORChannelReport(const VORChannelReport&) = default;
+        VORChannelReport& operator=(const VORChannelReport&) = default;
+    };
+
     QThread m_thread;
     VorLocalizerWorker *m_worker;
     VORLocalizerSettings m_settings;
-    bool m_ptt;
+    QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> m_availableChannels;
+    QHash<int, VORChannelReport> m_vorChannelReports;
+    QHash<int, bool> m_vorSinglePlans;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -181,10 +202,13 @@ private:
     void start();
     void stop();
     void applySettings(const VORLocalizerSettings& settings, bool force = false);
+    void updateChannels();
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const VORLocalizerSettings& settings, bool force);
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelMessageQueue(MessageQueue* messageQueue);
+
 };
 
 #endif // INCLUDE_FEATURE_VORLOCALIZER_H_

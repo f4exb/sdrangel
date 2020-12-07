@@ -28,6 +28,7 @@
 
 class WebAPIAdapterInterface;
 class ChannelAPI;
+class Feature;
 
 class VorLocalizerWorker : public QObject
 {
@@ -77,42 +78,98 @@ public:
     void stopWork();
     bool isRunning() const { return m_running; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_msgQueueToGUI = messageQueue; }
+    void setMessageQueueToFeature(MessageQueue *messageQueue) { m_msgQueueToFeature = messageQueue; }
+    void setAvailableChannels(QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *avaialbleChannels) {
+        m_availableChannels = avaialbleChannels;
+    }
 
 private:
-    struct VORChannel
+    struct VORRange
     {
-        int m_subChannelId; //!< Unique VOR identifier (from database)
-        int m_frequency;    //!< Frequency the VOR is on
-        bool m_audioMute;   //!< Mute the audio from this VOR
+        std::vector<int> m_vorIndices;
+        int m_frequencyRange;
+
+        VORRange() = default;
+        VORRange(const VORRange&) = default;
+        VORRange& operator=(const VORRange&) = default;
     };
 
-    struct AvailableChannel
+    struct RRDevice
     {
-        int m_deviceSetIndex;
-        int m_channelIndex;
+        int m_deviceIndex;
+        int m_frequency;
+
+        RRDevice() = default;
+        RRDevice(const RRDevice&) = default;
+        RRDevice& operator=(const RRDevice&) = default;
+    };
+
+    struct RRChannel
+    {
         ChannelAPI *m_channelAPI;
+        int m_channelIndex;
+        int m_frequencyShift;
+        int m_navId;
+
+        RRChannel() = default;
+        RRChannel(const RRChannel&) = default;
+        RRChannel& operator=(const RRChannel&) = default;
+    };
+
+    struct RRTurnPlan
+    {
+        RRDevice m_device;
+        int m_bandwidth;
+        std::vector<RRChannel> m_channels;
+
+        RRTurnPlan() = default;
+        RRTurnPlan(const RRTurnPlan&) = default;
+        RRTurnPlan& operator=(const RRTurnPlan&) = default;
+    };
+
+    struct ChannelAllocation
+    {
+        int m_navId;
+        int m_deviceIndex;
+        int m_channelIndex;
+
+        ChannelAllocation() = default;
+        ChannelAllocation(const ChannelAllocation&) = default;
+        ChannelAllocation& operator=(const ChannelAllocation&) = default;
     };
 
     WebAPIAdapterInterface *m_webAPIAdapterInterface;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
-    MessageQueue *m_msgQueueToGUI; //!< Queue to report state to GUI
+    MessageQueue *m_msgQueueToFeature; //!< Queue to report state to GUI
     VORLocalizerSettings m_settings;
-    QList<VORChannel> m_vorChannels;
-    QList<AvailableChannel> m_availableChannels;
+    QList<VORLocalizerSettings::VORChannel> m_vorChannels;
+    QHash<int, ChannelAllocation> m_channelAllocations;
+    QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *m_availableChannels;
     bool m_running;
 	QTimer m_updateTimer;
     QMutex m_mutex;
+    QTimer m_rrTimer;
+    std::vector<std::vector<RRTurnPlan>> m_rrPlans; //!< Round robin plans for each device
+    std::vector<int> m_rrTurnCounters; //!< Round robin turn count for each device
 
     bool handleMessage(const Message& cmd);
     void applySettings(const VORLocalizerSettings& settings, bool force = false);
-    void updateChannels();
     void removeVORChannel(int navId);
-    void addVORChannel(const VORLocalizerSubChannelSettings *subChannelSettings);
+    void addVORChannel(const VORLocalizerSubChannelSettings& subChannelSettings);
+    void updateChannels(); //!< (re)allocate channels to service VORs
+    void allocateChannel(ChannelAPI *channel, int vorFrequency, int vorNavId, int channelShift);
+    void setDeviceFrequency(int deviceIndex, double targetFrequency);
+    void setChannelShift(int deviceIndex, int channelIndex, double targetOffset, int vorNavId);
+    void setAudioMute(int vorNavId, bool audioMute);
+    static void generateIndexCombinations(int length, int subLength, std::vector<std::vector<int>>& indexCombinations);
+    static void getVORRanges(const QList<VORLocalizerSettings::VORChannel>& vors, int subLength, std::vector<VORRange>& vorRanges);
+    static void filterVORRanges(std::vector<VORRange>& vorRanges, int thresholdBW);
+    static void getChannelsByDevice(const QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel> *availableChannels, std::vector<RRTurnPlan>& m_deviceChannels);
 
 private slots:
     void handleInputMessages();
 	void updateHardware();
+    void rrNextTurn();
 };
 
 #endif // INCLUDE_FEATURE_VORLOCALIZERWORKER_H_

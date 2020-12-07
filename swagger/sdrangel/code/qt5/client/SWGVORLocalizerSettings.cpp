@@ -44,6 +44,10 @@ SWGVORLocalizerSettings::SWGVORLocalizerSettings() {
     m_reverse_api_feature_index_isSet = false;
     mag_dec_adjust = 0;
     m_mag_dec_adjust_isSet = false;
+    rr_time = 0;
+    m_rr_time_isSet = false;
+    center_shift = 0;
+    m_center_shift_isSet = false;
 }
 
 SWGVORLocalizerSettings::~SWGVORLocalizerSettings() {
@@ -68,6 +72,10 @@ SWGVORLocalizerSettings::init() {
     m_reverse_api_feature_index_isSet = false;
     mag_dec_adjust = 0;
     m_mag_dec_adjust_isSet = false;
+    rr_time = 0;
+    m_rr_time_isSet = false;
+    center_shift = 0;
+    m_center_shift_isSet = false;
 }
 
 void
@@ -80,6 +88,8 @@ SWGVORLocalizerSettings::cleanup() {
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
+
+
 
 
 
@@ -112,6 +122,10 @@ SWGVORLocalizerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&reverse_api_feature_index, pJson["reverseAPIFeatureIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&mag_dec_adjust, pJson["magDecAdjust"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&rr_time, pJson["rrTime"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&center_shift, pJson["centerShift"], "qint32", "");
     
 }
 
@@ -152,6 +166,12 @@ SWGVORLocalizerSettings::asJsonObject() {
     }
     if(m_mag_dec_adjust_isSet){
         obj->insert("magDecAdjust", QJsonValue(mag_dec_adjust));
+    }
+    if(m_rr_time_isSet){
+        obj->insert("rrTime", QJsonValue(rr_time));
+    }
+    if(m_center_shift_isSet){
+        obj->insert("centerShift", QJsonValue(center_shift));
     }
 
     return obj;
@@ -237,6 +257,26 @@ SWGVORLocalizerSettings::setMagDecAdjust(qint32 mag_dec_adjust) {
     this->m_mag_dec_adjust_isSet = true;
 }
 
+qint32
+SWGVORLocalizerSettings::getRrTime() {
+    return rr_time;
+}
+void
+SWGVORLocalizerSettings::setRrTime(qint32 rr_time) {
+    this->rr_time = rr_time;
+    this->m_rr_time_isSet = true;
+}
+
+qint32
+SWGVORLocalizerSettings::getCenterShift() {
+    return center_shift;
+}
+void
+SWGVORLocalizerSettings::setCenterShift(qint32 center_shift) {
+    this->center_shift = center_shift;
+    this->m_center_shift_isSet = true;
+}
+
 
 bool
 SWGVORLocalizerSettings::isSet(){
@@ -264,6 +304,12 @@ SWGVORLocalizerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_mag_dec_adjust_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_rr_time_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_center_shift_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

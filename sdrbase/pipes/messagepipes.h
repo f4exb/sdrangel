@@ -45,7 +45,7 @@ public:
     MessagePipes& operator=(const MessagePipes&) = delete;
     ~MessagePipes();
 
-    void registerChannelToFeature(const ChannelAPI *source, const Feature *feature, const QString& type);
+    MessageQueue *registerChannelToFeature(const ChannelAPI *source, const Feature *feature, const QString& type);
     QList<MessageQueue*>* getMessageQueues(const ChannelAPI *source, const QString& type);
 
 private:

@@ -17,7 +17,7 @@
 
 #include "vorlocalizerreport.h"
 
-MESSAGE_CLASS_DEFINITION(VORLocalizerReport::MsgReportFreqOffset, Message)
 MESSAGE_CLASS_DEFINITION(VORLocalizerReport::MsgReportRadial, Message)
 MESSAGE_CLASS_DEFINITION(VORLocalizerReport::MsgReportIdent, Message)
 MESSAGE_CLASS_DEFINITION(VORLocalizerReport::MsgReportChannels, Message)
+MESSAGE_CLASS_DEFINITION(VORLocalizerReport::MsgReportServiceddVORs, Message)

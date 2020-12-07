@@ -66,6 +66,12 @@ public:
     qint32 getMagDecAdjust();
     void setMagDecAdjust(qint32 mag_dec_adjust);
 
+    qint32 getRrTime();
+    void setRrTime(qint32 rr_time);
+
+    qint32 getCenterShift();
+    void setCenterShift(qint32 center_shift);
+
 
     virtual bool isSet() override;
 
@@ -93,6 +99,12 @@ private:
 
     qint32 mag_dec_adjust;
     bool m_mag_dec_adjust_isSet;
+
+    qint32 rr_time;
+    bool m_rr_time_isSet;
+
+    qint32 center_shift;
+    bool m_center_shift_isSet;
 
 };
 

@@ -302,7 +302,7 @@ void VORDemodSCSink::processOneSample(Complex &ci)
         {
             if (m_ident != "")
             {
-                qDebug() << m_ident << " " << Morse::toString(m_ident);
+                qDebug() << "VORDemodSCSink::processOneSample:" << m_ident << " " << Morse::toString(m_ident);
 
                 if (getMessageQueueToChannel())
                 {
@@ -343,7 +343,7 @@ void VORDemodSCSink::processOneSample(Complex &ci)
             m_ident = m_ident.simplified();
             if (m_ident != "")
             {
-                qDebug() << m_ident << " " << Morse::toString(m_ident);
+                qDebug() << "VORDemodSCSink::processOneSample:" << m_ident << " " << Morse::toString(m_ident);
 
                 if (getMessageQueueToChannel())
                 {

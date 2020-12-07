@@ -20,6 +20,7 @@
 #define INCLUDE_VORLOCALIZERREPORT_H
 
 #include <QObject>
+#include <QHash>
 
 #include "util/message.h"
 
@@ -90,33 +91,6 @@ public:
         }
     };
 
-    class MsgReportFreqOffset : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        int getSubChannelId() const { return m_subChannelId; }
-        int getFreqOffset() const { return m_freqOffset; }
-        bool getOutOfBand() const { return m_outOfBand; }
-
-        static MsgReportFreqOffset* create(int subChannelId, int freqOffset, bool outOfBand)
-        {
-            return new MsgReportFreqOffset(subChannelId, freqOffset, outOfBand);
-        }
-
-    private:
-        int m_subChannelId;
-        int m_freqOffset;
-        bool m_outOfBand;
-
-        MsgReportFreqOffset(int subChannelId, int freqOffset, bool outOfBand) :
-            Message(),
-            m_subChannelId(subChannelId),
-            m_freqOffset(freqOffset),
-            m_outOfBand(outOfBand)
-        {
-        }
-    };
-
     class MsgReportIdent : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -160,6 +134,26 @@ public:
         std::vector<Channel> m_channels;
 
         MsgReportChannels() :
+            Message()
+        {}
+    };
+
+    class MsgReportServiceddVORs : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        std::vector<int>& getNavIds() { return m_navIds; }
+        QHash<int, bool>& getSinglePlans() { return m_singlePlans; }
+
+        static MsgReportServiceddVORs* create() {
+            return new MsgReportServiceddVORs();
+        }
+
+    private:
+        std::vector<int> m_navIds;
+        QHash<int, bool> m_singlePlans;
+
+        MsgReportServiceddVORs() :
             Message()
         {}
     };

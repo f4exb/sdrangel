@@ -46,7 +46,7 @@ MessagePipes::~MessagePipes()
 	}
 }
 
-void MessagePipes::registerChannelToFeature(const ChannelAPI *source, const Feature *feature, const QString& type)
+MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, const Feature *feature, const QString& type)
 {
 	int typeId;
 
@@ -68,8 +68,11 @@ void MessagePipes::registerChannelToFeature(const ChannelAPI *source, const Feat
 		m_featureRegistrations.insert(regKey, QList<const Feature*>());
 	}
 
-	m_messageRegistrations[regKey].append(new MessageQueue());
+	MessageQueue *messageQueue = new MessageQueue();
+	m_messageRegistrations[regKey].append(messageQueue);
 	m_featureRegistrations[regKey].append(feature);
+
+	return messageQueue;
 }
 
 QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)

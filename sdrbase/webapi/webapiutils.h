@@ -47,6 +47,8 @@ public:
     static bool getObjectObjects(const QJsonObject &json, const QString &key, QList<QJsonObject> &objects);
     static bool getSubObjectDouble(const QJsonObject &json, const QString &key, double &value);
     static bool setSubObjectDouble(QJsonObject &json, const QString &key, double value);
+    static bool getSubObjectInt(const QJsonObject &json, const QString &key, int &value);
+    static bool setSubObjectInt(QJsonObject &json, const QString &key, int value);
     static bool extractValue(const QJsonObject &json, const QString &key, QJsonValue &value);
     static bool extractArray(const QJsonObject &json, const QString &key, QJsonArray &value);
     static bool extractObject(const QJsonObject &json, const QString &key, QJsonObject &value);

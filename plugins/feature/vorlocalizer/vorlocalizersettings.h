@@ -23,6 +23,7 @@
 #include <QHash>
 
 class Serializable;
+class ChannelAPI;
 
 // Number of columns in the table
 
@@ -34,15 +35,38 @@ struct VORLocalizerSubChannelSettings {
 
 struct VORLocalizerSettings
 {
-    struct VORDemodChannels
+    struct VORChannel
+    {
+        int m_subChannelId; //!< Unique VOR identifier (from database)
+        int m_frequency;    //!< Frequency the VOR is on
+        bool m_audioMute;   //!< Mute the audio from this VOR
+
+        VORChannel() = default;
+        VORChannel(const VORChannel&) = default;
+        VORChannel& operator=(const VORChannel&) = default;
+
+        bool operator<(const VORChannel& other) const;
+    };
+
+    struct AvailableChannel
     {
         int m_deviceSetIndex;
         int m_channelIndex;
+        ChannelAPI *m_channelAPI;
+        quint64 m_deviceCenterFrequency;
+        int m_basebandSampleRate;
+        int m_navId;
+
+        AvailableChannel() = default;
+        AvailableChannel(const AvailableChannel&) = default;
+        AvailableChannel& operator=(const AvailableChannel&) = default;
     };
 
     quint32 m_rgbColor;
     QString m_title;
     bool m_magDecAdjust;                //!< Adjust for magnetic declination when drawing radials on the map
+    int m_rrTime;                       //!< Round robin turn time in seconds
+    int m_centerShift;                  //!< Center frequency shift to apply to move away from DC
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;
     uint16_t m_reverseAPIPort;
@@ -53,7 +77,7 @@ struct VORLocalizerSettings
     static const int VORDEMOD_COLUMNS  = 11;
     static const int VOR_COL_NAME      =  0;
     static const int VOR_COL_FREQUENCY =  1;
-    static const int VOR_COL_OFFSET    =  2;
+    static const int VOR_COL_NAVID     =  2;
     static const int VOR_COL_IDENT     =  3;
     static const int VOR_COL_MORSE     =  4;
     static const int VOR_COL_RX_IDENT  =  5;
@@ -66,7 +90,7 @@ struct VORLocalizerSettings
     int m_columnIndexes[VORDEMOD_COLUMNS];//!< How the columns are ordered in the table
     int m_columnSizes[VORDEMOD_COLUMNS];  //!< Size of the coumns in the table
 
-    QHash<int, VORLocalizerSubChannelSettings *> m_subChannelSettings;
+    QHash<int, VORLocalizerSubChannelSettings> m_subChannelSettings;
 
     VORLocalizerSettings();
     void resetToDefaults();

@@ -33,6 +33,8 @@ void VORLocalizerSettings::resetToDefaults()
     m_rgbColor = QColor(255, 255, 0).rgb();
     m_title = "VOR Localizer";
     m_magDecAdjust = true;
+    m_rrTime = 20;
+    m_centerShift = 20000;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
     m_reverseAPIPort = 8888;
@@ -54,6 +56,8 @@ QByteArray VORLocalizerSettings::serialize() const
     s.writeU32(7, m_rgbColor);
     s.writeString(9, m_title);
     s.writeBool(10, m_magDecAdjust);
+    s.writeS32(11, m_rrTime);
+    s.writeS32(12, m_centerShift);
     s.writeBool(14, m_useReverseAPI);
     s.writeString(15, m_reverseAPIAddress);
     s.writeU32(16, m_reverseAPIPort);
@@ -91,6 +95,8 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
         d.readU32(7, &m_rgbColor);
         d.readString(9, &m_title, "VOR Localizer");
         d.readBool(10, &m_magDecAdjust, true);
+        d.readS32(11, &m_rrTime, 20);
+        d.readS32(12, &m_centerShift, 20000);
         d.readBool(14, &m_useReverseAPI, false);
         d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(16, &utmp, 0);
@@ -123,4 +129,14 @@ bool VORLocalizerSettings::deserialize(const QByteArray& data)
     }
 }
 
+bool VORLocalizerSettings::VORChannel::operator<(const VORChannel& other) const
+{
+    if (m_frequency != other.m_frequency) {
+        return m_frequency < other.m_frequency;
+    }
+    if (m_subChannelId != other.m_subChannelId) {
+        return m_subChannelId < other.m_subChannelId;
+    }
 
+    return false;
+}

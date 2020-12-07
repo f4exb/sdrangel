@@ -120,7 +120,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="magDecAdjust">
+       <widget class="ButtonSwitch" name="magDecAdjust">
         <property name="toolTip">
          <string>Draw radials adjusted for magnetic declination</string>
         </property>
@@ -136,6 +136,124 @@
         </property>
         <property name="checked">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rrTimeLabel">
+        <property name="text">
+         <string>RR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="rrTime">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Round robin turn time (s)</string>
+        </property>
+        <property name="minimum">
+         <number>10</number>
+        </property>
+        <property name="maximum">
+         <number>60</number>
+        </property>
+        <property name="singleStep">
+         <number>5</number>
+        </property>
+        <property name="pageStep">
+         <number>5</number>
+        </property>
+        <property name="value">
+         <number>20</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="rrTimeText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Sound volume (%)</string>
+        </property>
+        <property name="text">
+         <string>20s</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="centerShiftLabel">
+        <property name="text">
+         <string>Sh</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDial" name="centerShift">
+        <property name="maximumSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Center frequency shift (kHz)</string>
+        </property>
+        <property name="minimum">
+         <number>-40</number>
+        </property>
+        <property name="maximum">
+         <number>40</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="centerShiftText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>20k</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -159,7 +277,7 @@
       <item>
        <widget class="QLabel" name="channelsLabel">
         <property name="text">
-         <string>VORs</string>
+         <string>Chan</string>
         </property>
        </widget>
       </item>
@@ -264,7 +382,7 @@
       </column>
       <column>
        <property name="text">
-        <string>Offset (kHz)</string>
+        <string>Nav Id</string>
        </property>
        <property name="toolTip">
         <string>Offset of the VOR's frequency from the current center frequency. Red indicates out of range.</string>

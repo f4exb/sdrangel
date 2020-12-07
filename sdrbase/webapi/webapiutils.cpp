@@ -344,6 +344,51 @@ bool WebAPIUtils::setSubObjectDouble(QJsonObject &json, const QString &key, doub
     return false;
 }
 
+// Get integer value from within nested JSON object
+bool WebAPIUtils::getSubObjectInt(const QJsonObject &json, const QString &key, int &value)
+{
+    for (QJsonObject::const_iterator  it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key))
+            {
+                value = subObject[key].toInt();
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Set integer value withing nested JSON object
+bool WebAPIUtils::setSubObjectInt(QJsonObject &json, const QString &key, int value)
+{
+    for (QJsonObject::iterator  it = json.begin(); it != json.end(); it++)
+    {
+        QJsonValue jsonValue = it.value();
+
+        if (jsonValue.isObject())
+        {
+            QJsonObject subObject = jsonValue.toObject();
+
+            if (subObject.contains(key))
+            {
+                subObject[key] = value;
+                it.value() = subObject;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 // look for value in key=value
 bool WebAPIUtils::extractValue(const QJsonObject &json, const QString &key, QJsonValue &value)
 {

@@ -25,9 +25,16 @@
 #include "SWGFeatureActions.h"
 #include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
+#include "SWGChannelReport.h"
 
 #include "dsp/dspengine.h"
+#include "dsp/dspdevicesourceengine.h"
+#include "dsp/devicesamplesource.h"
+#include "device/deviceset.h"
+#include "channel/channelapi.h"
+#include "maincore.h"
 
+#include "vorlocalizerreport.h"
 #include "vorlocalizerworker.h"
 #include "vorlocalizer.h"
 
@@ -41,8 +48,7 @@ const char* const VORLocalizer::m_featureIdURI = "sdrangel.feature.vorlocalizer"
 const char* const VORLocalizer::m_featureId = "VORLocalizer";
 
 VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_ptt(false)
+    Feature(m_featureIdURI, webAPIAdapterInterface)
 {
     setObjectName(m_featureId);
     m_worker = new VorLocalizerWorker(webAPIAdapterInterface);
@@ -64,7 +70,8 @@ void VORLocalizer::start()
 	qDebug("VORLocalizer::start");
 
     m_worker->reset();
-    m_worker->setMessageQueueToGUI(getMessageQueueToGUI());
+    m_worker->setMessageQueueToFeature(getInputMessageQueue());
+    m_worker->setAvailableChannels(&m_availableChannels);
     bool ok = m_worker->startWork();
     m_state = ok ? StRunning : StError;
     m_thread.start();
@@ -108,11 +115,129 @@ bool VORLocalizer::handleMessage(const Message& cmd)
     else if (MsgRefreshChannels::match(cmd))
     {
         qDebug() << "VORLocalizer::handleMessage: MsgRefreshChannels";
-        VorLocalizerWorker::MsgRefreshChannels *msg = VorLocalizerWorker::MsgRefreshChannels::create();
-        m_worker->getInputMessageQueue()->push(msg);
+        updateChannels();
+
         return true;
     }
-	else
+	else if (MainCore::MsgChannelReport::match(cmd))
+    {
+        MainCore::MsgChannelReport& report = (MainCore::MsgChannelReport&) cmd;
+        SWGSDRangel::SWGChannelReport* swgChannelReport = report.getSWGReport();
+        QString *channelType  = swgChannelReport->getChannelType();
+
+        if (*channelType == "VORDemodSC")
+        {
+            SWGSDRangel::SWGVORDemodSCReport *swgVORDemodSCReport = swgChannelReport->getVorDemodScReport();
+            int navId = swgVORDemodSCReport->getNavId();
+
+            if (navId < 0) { // disregard message for unallocated channels
+                return true;
+            }
+
+            bool singlePlan = (m_vorSinglePlans.contains(navId)) ? m_vorSinglePlans[navId] : false;
+
+            // qDebug() << "VORLocalizer::handleMessage: MainCore::MsgChannelReport(VORDemodSC): "
+            //     << "navId:" << navId
+            //     << "singlePlanProvided" << m_vorSinglePlans.contains(navId)
+            //     << "singlePlan:" << singlePlan;
+
+            if (m_vorChannelReports.contains(navId))
+            {
+                m_vorChannelReports[navId].m_radial = swgVORDemodSCReport->getRadial();
+                m_vorChannelReports[navId].m_refMag = swgVORDemodSCReport->getRefMag();
+                m_vorChannelReports[navId].m_varMag = swgVORDemodSCReport->getVarMag();
+                m_vorChannelReports[navId].m_validRadial = swgVORDemodSCReport->getValidRadial() != 0;
+                m_vorChannelReports[navId].m_validRefMag = swgVORDemodSCReport->getValidRefMag() != 0;
+                m_vorChannelReports[navId].m_validVarMag = swgVORDemodSCReport->getValidVarMag() != 0;
+                m_vorChannelReports[navId].m_morseIdent = *swgVORDemodSCReport->getMorseIdent();
+            }
+            else
+            {
+                m_vorChannelReports[navId] = VORChannelReport{
+                    swgVORDemodSCReport->getRadial(),
+                    swgVORDemodSCReport->getRefMag(),
+                    swgVORDemodSCReport->getVarMag(),
+                    AverageUtil<float, double>(),
+                    AverageUtil<float, double>(),
+                    AverageUtil<float, double>(),
+                    swgVORDemodSCReport->getValidRadial() != 0,
+                    swgVORDemodSCReport->getValidRefMag() != 0,
+                    swgVORDemodSCReport->getValidVarMag() != 0,
+                    *swgVORDemodSCReport->getMorseIdent()
+                };
+            }
+
+            if (m_vorChannelReports[navId].m_validRadial) {
+                m_vorChannelReports[navId].m_radialAvg(swgVORDemodSCReport->getRadial());
+            }
+            if (m_vorChannelReports[navId].m_validRefMag) {
+                m_vorChannelReports[navId].m_refMagAvg(swgVORDemodSCReport->getRefMag());
+            }
+            if (m_vorChannelReports[navId].m_validVarMag) {
+                m_vorChannelReports[navId].m_varMagAvg(swgVORDemodSCReport->getVarMag());
+            }
+
+            if (getMessageQueueToGUI())
+            {
+                float radial = ((m_vorChannelReports[navId].m_radialAvg.getNumSamples() == 0) || singlePlan) ?
+                    m_vorChannelReports[navId].m_radial :
+                    m_vorChannelReports[navId].m_radialAvg.instantAverage();
+                float refMag = ((m_vorChannelReports[navId].m_refMagAvg.getNumSamples() == 0) || singlePlan) ?
+                    m_vorChannelReports[navId].m_refMag :
+                    m_vorChannelReports[navId].m_refMagAvg.instantAverage();
+                float varMag = ((m_vorChannelReports[navId].m_varMagAvg.getNumSamples() == 0) || singlePlan) ?
+                    m_vorChannelReports[navId].m_varMag :
+                    m_vorChannelReports[navId].m_varMagAvg.instantAverage();
+                bool validRadial = singlePlan ? m_vorChannelReports[navId].m_validRadial :
+                    m_vorChannelReports[navId].m_radialAvg.getNumSamples() != 0 || m_vorChannelReports[navId].m_validRadial;
+                bool validRefMag = singlePlan ? m_vorChannelReports[navId].m_validRefMag :
+                    m_vorChannelReports[navId].m_refMagAvg.getNumSamples() != 0 || m_vorChannelReports[navId].m_validRefMag;
+                bool validVarMag = singlePlan ? m_vorChannelReports[navId].m_validVarMag :
+                    m_vorChannelReports[navId].m_varMagAvg.getNumSamples() != 0 || m_vorChannelReports[navId].m_validVarMag;
+                VORLocalizerReport::MsgReportRadial *msgRadial = VORLocalizerReport::MsgReportRadial::create(
+                    navId,
+                    radial,
+                    refMag,
+                    varMag,
+                    validRadial,
+                    validRefMag,
+                    validVarMag
+                );
+                getMessageQueueToGUI()->push(msgRadial);
+                VORLocalizerReport::MsgReportIdent *msgIdent = VORLocalizerReport::MsgReportIdent::create(
+                    navId,
+                    m_vorChannelReports[navId].m_morseIdent
+                );
+                getMessageQueueToGUI()->push(msgIdent);
+            }
+        }
+
+        return true;
+    }
+    else if (VORLocalizerReport::MsgReportServiceddVORs::match(cmd))
+    {
+        qDebug() << "VORLocalizer::handleMessage: MsgReportServiceddVORs:";
+        VORLocalizerReport::MsgReportServiceddVORs& report = (VORLocalizerReport::MsgReportServiceddVORs&) cmd;
+        std::vector<int>& vorNavIds = report.getNavIds();
+        m_vorSinglePlans = report.getSinglePlans();
+
+        for (std::vector<int>::const_iterator it = vorNavIds.begin(); it != vorNavIds.end(); ++it)
+        {
+            m_vorChannelReports[*it].m_radialAvg.reset();
+            m_vorChannelReports[*it].m_refMagAvg.reset();
+            m_vorChannelReports[*it].m_varMagAvg.reset();
+        }
+
+        if (getMessageQueueToGUI())
+        {
+            VORLocalizerReport::MsgReportServiceddVORs *msgToGUI = VORLocalizerReport::MsgReportServiceddVORs::create();
+            msgToGUI->getNavIds() = vorNavIds;
+            getMessageQueueToGUI()->push(msgToGUI);
+        }
+
+        return true;
+    }
+    else
 	{
 		return false;
 	}
@@ -146,6 +271,8 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_magDecAdjust: " << settings.m_magDecAdjust
+            << " m_rrTime: " << settings.m_rrTime
+            << " m_centerShift: " << settings.m_centerShift
             << " force: " << force;
 
     QList<QString> reverseAPIKeys;
@@ -158,6 +285,12 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
     }
     if ((m_settings.m_magDecAdjust != settings.m_magDecAdjust) || force) {
         reverseAPIKeys.append("magDecAdjust");
+    }
+    if ((m_settings.m_rrTime != settings.m_rrTime) || force) {
+        reverseAPIKeys.append("rrTime");
+    }
+    if ((m_settings.m_centerShift != settings.m_centerShift) || force) {
+        reverseAPIKeys.append("centerShift");
     }
 
     VorLocalizerWorker::MsgConfigureVORLocalizerWorker *msg = VorLocalizerWorker::MsgConfigureVORLocalizerWorker::create(
@@ -176,6 +309,75 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
     }
 
     m_settings = settings;
+}
+
+void VORLocalizer::updateChannels()
+{
+    MainCore *mainCore = MainCore::instance();
+    MessagePipes& messagePipes = mainCore->getMessagePipes();
+    std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
+    std::vector<DeviceSet*>::const_iterator it = deviceSets.begin();
+    m_availableChannels.clear();
+
+    int deviceIndex = 0;
+
+    for (; it != deviceSets.end(); ++it, deviceIndex++)
+    {
+        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
+
+        if (deviceSourceEngine)
+        {
+            DeviceSampleSource *deviceSource = deviceSourceEngine->getSource();
+            quint64 deviceCenterFrequency = deviceSource->getCenterFrequency();
+            int basebandSampleRate = deviceSource->getSampleRate();
+
+            for (int chi = 0; chi < (*it)->getNumberOfChannels(); chi++)
+            {
+                ChannelAPI *channel = (*it)->getChannelAt(chi);
+
+                if (channel->getURI() == "sdrangel.channel.vordemodsc")
+                {
+                    if (!m_availableChannels.contains(channel))
+                    {
+                        MessageQueue *messageQueue = messagePipes.registerChannelToFeature(channel, this, "report");
+                        QObject::connect(
+                            messageQueue,
+                            &MessageQueue::messageEnqueued,
+                            this,
+                            [=](){ this->handleChannelMessageQueue(messageQueue); },
+                            Qt::QueuedConnection
+                        );
+                    }
+
+                    VORLocalizerSettings::AvailableChannel availableChannel =
+                        VORLocalizerSettings::AvailableChannel{deviceIndex, chi, channel, deviceCenterFrequency, basebandSampleRate, -1};
+                    m_availableChannels[channel] = availableChannel;
+                }
+            }
+        }
+    }
+
+    if (getMessageQueueToGUI())
+    {
+        VORLocalizerReport::MsgReportChannels *msgToGUI = VORLocalizerReport::MsgReportChannels::create();
+        std::vector<VORLocalizerReport::MsgReportChannels::Channel>& msgChannels = msgToGUI->getChannels();
+        QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel>::iterator it = m_availableChannels.begin();
+
+        for (; it != m_availableChannels.end(); ++it)
+        {
+            VORLocalizerReport::MsgReportChannels::Channel msgChannel =
+                VORLocalizerReport::MsgReportChannels::Channel{
+                    it->m_deviceSetIndex,
+                    it->m_channelIndex
+                };
+            msgChannels.push_back(msgChannel);
+        }
+
+        getMessageQueueToGUI()->push(msgToGUI);
+    }
+
+    VorLocalizerWorker::MsgRefreshChannels *msgToWorker = VorLocalizerWorker::MsgRefreshChannels::create();
+    m_worker->getInputMessageQueue()->push(msgToWorker);
 }
 
 int VORLocalizer::webapiRun(bool run,
@@ -237,6 +439,8 @@ void VORLocalizer::webapiFormatFeatureSettings(
 
     response.getVorLocalizerSettings()->setRgbColor(settings.m_rgbColor);
     response.getVorLocalizerSettings()->setMagDecAdjust(settings.m_magDecAdjust);
+    response.getVorLocalizerSettings()->setRrTime(settings.m_rrTime);
+    response.getVorLocalizerSettings()->setCenterShift(settings.m_centerShift);
 
     response.getVorLocalizerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -264,6 +468,12 @@ void VORLocalizer::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("magDecAdjust")) {
         settings.m_magDecAdjust = response.getVorLocalizerSettings()->getMagDecAdjust();
+    }
+    if (featureSettingsKeys.contains("rrTime")) {
+        settings.m_rrTime = response.getVorLocalizerSettings()->getRrTime();
+    }
+    if (featureSettingsKeys.contains("centerShift")) {
+        settings.m_centerShift = response.getVorLocalizerSettings()->getCenterShift();
     }
     if (featureSettingsKeys.contains("useReverseAPI")) {
         settings.m_useReverseAPI = response.getVorLocalizerSettings()->getUseReverseApi() != 0;
@@ -301,6 +511,12 @@ void VORLocalizer::webapiReverseSendSettings(QList<QString>& channelSettingsKeys
     }
     if (channelSettingsKeys.contains("magDecAdjust") || force) {
         swgVORLocalizerSettings->setMagDecAdjust(settings.m_magDecAdjust);
+    }
+    if (channelSettingsKeys.contains("rrTime") || force) {
+        swgVORLocalizerSettings->setRrTime(settings.m_rrTime);
+    }
+    if (channelSettingsKeys.contains("centerShift") || force) {
+        swgVORLocalizerSettings->setCenterShift(settings.m_centerShift);
     }
 
     QString channelSettingsURL = QString("http://%1:%2/sdrangel/featureset/%3/feature/%4/settings")
@@ -342,4 +558,16 @@ void VORLocalizer::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void VORLocalizer::handleChannelMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
 }

@@ -54,6 +54,9 @@ public:
     float getVolume();
     void setVolume(float volume);
 
+    qint32 getNavId();
+    void setNavId(qint32 nav_id);
+
     float getRadial();
     void setRadial(float radial);
 
@@ -62,6 +65,15 @@ public:
 
     float getVarMag();
     void setVarMag(float var_mag);
+
+    qint32 getValidRadial();
+    void setValidRadial(qint32 valid_radial);
+
+    qint32 getValidRefMag();
+    void setValidRefMag(qint32 valid_ref_mag);
+
+    qint32 getValidVarMag();
+    void setValidVarMag(qint32 valid_var_mag);
 
     QString* getMorseIdent();
     void setMorseIdent(QString* morse_ident);
@@ -82,6 +94,9 @@ private:
     float volume;
     bool m_volume_isSet;
 
+    qint32 nav_id;
+    bool m_nav_id_isSet;
+
     float radial;
     bool m_radial_isSet;
 
@@ -90,6 +105,15 @@ private:
 
     float var_mag;
     bool m_var_mag_isSet;
+
+    qint32 valid_radial;
+    bool m_valid_radial_isSet;
+
+    qint32 valid_ref_mag;
+    bool m_valid_ref_mag_isSet;
+
+    qint32 valid_var_mag;
+    bool m_valid_var_mag_isSet;
 
     QString* morse_ident;
     bool m_morse_ident_isSet;

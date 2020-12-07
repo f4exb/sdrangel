@@ -333,8 +333,10 @@ static bool calcIntersectionPoint(float lat1, float lon1, float bearing1, float 
     double cosLat1 = cos(lat1Rad);
     double cosLat2 = cos(lat2Rad);
     double delta12 = 2.0 * asin(sqrt(sindlat*sindlat+cosLat1*cosLat2*sindlon*sindlon));
-    if (abs(delta12) < std::numeric_limits<float>::epsilon())
+
+    if (abs(delta12) < std::numeric_limits<float>::epsilon()) {
         return false;
+    }
 
     double sinLat1 = sin(lat1Rad);
     double sinLat2 = sin(lat2Rad);
@@ -342,8 +344,8 @@ static bool calcIntersectionPoint(float lat1, float lon1, float bearing1, float 
     double cosDelta12 = cos(delta12);
     double thetaA = acos((sinLat2-sinLat1*cosDelta12)/(sinDelta12*cosLat1));
     double thetaB = acos((sinLat1-sinLat2*cosDelta12)/(sinDelta12*cosLat2));
-
     double theta12, theta21;
+
     if (sin(lon2Rad-lon1Rad) > 0.0)
     {
         theta12 = thetaA;
@@ -354,14 +356,19 @@ static bool calcIntersectionPoint(float lat1, float lon1, float bearing1, float 
         theta12 = 2.0*M_PI-thetaA;
         theta21 = thetaB;
     }
+
     double alpha1 = theta13 - theta12;
     double alpha2 = theta21 - theta23;
     double sinAlpha1 = sin(alpha1);
     double sinAlpha2 = sin(alpha2);
-    if ((sinAlpha1 == 0.0) && (sinAlpha2 == 0.0))
+
+    if ((sinAlpha1 == 0.0) && (sinAlpha2 == 0.0)) {
         return false;
-    if (sinAlpha1*sinAlpha2 < 0.0)
+    }
+    if (sinAlpha1*sinAlpha2 < 0.0) {
         return false;
+    }
+
     double cosAlpha1 = cos(alpha1);
     double cosAlpha2 = cos(alpha2);
     double cosAlpha3 = -cosAlpha1*cosAlpha2+sinAlpha1*sinAlpha2*cos(delta12);
@@ -382,7 +389,7 @@ VORGUI::VORGUI(NavAid *navAid, VORLocalizerGUI *gui) :
     // These are deleted by QTableWidget
     m_nameItem = new QTableWidgetItem();
     m_frequencyItem = new QTableWidgetItem();
-    m_offsetItem = new QTableWidgetItem();
+    m_navIdItem = new QTableWidgetItem();
     m_radialItem = new QTableWidgetItem();
     m_identItem = new QTableWidgetItem();
     m_morseItem = new QTableWidgetItem();
@@ -412,15 +419,18 @@ VORGUI::VORGUI(NavAid *navAid, VORLocalizerGUI *gui) :
 
 void VORGUI::on_audioMute_toggled(bool checked)
 {
-    m_gui->m_settings.m_subChannelSettings.value(m_navAid->m_id)->m_audioMute = checked;
+    m_gui->m_settings.m_subChannelSettings[m_navAid->m_id].m_audioMute = checked;
     m_gui->applySettings();
 }
 
 QVariant VORModel::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
-    if ((row < 0) || (row >= m_vors.count()))
+
+    if ((row < 0) || (row >= m_vors.count())) {
         return QVariant();
+    }
+
     if (role == VORModel::positionRole)
     {
         // Coordinates to display the VOR icon at
@@ -436,15 +446,22 @@ QVariant VORModel::data(const QModelIndex &index, int role) const
         QStringList list;
         list.append(QString("Name: %1").arg(m_vors[row]->m_name));
         list.append(QString("Frequency: %1 MHz").arg(m_vors[row]->m_frequencykHz / 1000.0f, 0, 'f', 1));
-        if (m_vors[row]->m_channel != "")
+
+        if (m_vors[row]->m_channel != "") {
             list.append(QString("Channel: %1").arg(m_vors[row]->m_channel));
+        }
+
         list.append(QString("Ident: %1 %2").arg(m_vors[row]->m_ident).arg(Morse::toSpacedUnicodeMorse(m_vors[row]->m_ident)));
         list.append(QString("Range: %1 nm").arg(m_vors[row]->m_range));
-        if (m_vors[row]->m_alignedTrueNorth)
+
+        if (m_vors[row]->m_alignedTrueNorth) {
             list.append(QString("Magnetic declination: Aligned to true North"));
-        else if (m_vors[row]->m_magneticDeclination != 0.0f)
+        } else if (m_vors[row]->m_magneticDeclination != 0.0f) {
             list.append(QString("Magnetic declination: %1%2").arg(std::round(m_vors[row]->m_magneticDeclination)).arg(QChar(0x00b0)));
+        }
+
         QString data = list.join("\n");
+
         return QVariant::fromValue(data);
     }
     else if (role == VORModel::vorImageRole)
@@ -455,10 +472,11 @@ QVariant VORModel::data(const QModelIndex &index, int role) const
     else if (role == VORModel::bubbleColourRole)
     {
         // Select a background colour for the text bubble next to the VOR
-        if (m_selected[row])
+        if (m_selected[row]) {
             return QVariant::fromValue(QColor("lightgreen"));
-        else
+        } else {
             return QVariant::fromValue(QColor("lightblue"));
+        }
     }
     else if (role == VORModel::vorRadialRole)
     {
@@ -471,10 +489,13 @@ QVariant VORModel::data(const QModelIndex &index, int role) const
 
            float endLat, endLong;
            float bearing;
-           if (m_gui->m_settings.m_magDecAdjust && !m_vors[row]->m_alignedTrueNorth)
+
+           if (m_gui->m_settings.m_magDecAdjust && !m_vors[row]->m_alignedTrueNorth) {
                bearing = m_radials[row] - m_vors[row]->m_magneticDeclination;
-           else
+           } else {
                bearing = m_radials[row];
+           }
+
            calcRadialEndPoint(m_vors[row]->m_latitude, m_vors[row]->m_longitude, m_vors[row]->getRangeMetres(), bearing, endLat, endLong);
            list.push_back(QVariant::fromValue(*new QGeoCoordinate(endLat, endLong, Units::feetToMetres(m_vors[row]->m_elevation))));
 
@@ -484,36 +505,49 @@ QVariant VORModel::data(const QModelIndex &index, int role) const
            return QVariantList();
     }
     else if (role == VORModel::selectedRole)
+    {
         return QVariant::fromValue(m_selected[row]);
+    }
+
     return QVariant();
 }
 
 bool VORModel::setData(const QModelIndex &index, const QVariant& value, int role)
 {
     int row = index.row();
-    if ((row < 0) || (row >= m_vors.count()))
+
+    if ((row < 0) || (row >= m_vors.count())) {
         return false;
+    }
+
     if (role == VORModel::selectedRole)
     {
         bool selected = value.toBool();
         VORGUI *vorGUI;
-        if (selected == true)
+
+        if (selected)
         {
             vorGUI = new VORGUI(m_vors[row], m_gui);
             m_vorGUIs[row] = vorGUI;
         }
         else
+        {
             vorGUI = m_vorGUIs[row];
+        }
+
         m_gui->selectVOR(vorGUI, selected);
         m_selected[row] = selected;
         emit dataChanged(index, index);
+
         if (!selected)
         {
             delete vorGUI;
             m_vorGUIs[row] = nullptr;
         }
+
         return true;
     }
+
     return true;
 }
 
@@ -533,28 +567,33 @@ bool VORModel::findIntersection(float &lat, float &lon)
                 {
                     lat1 = m_vors[i]->m_latitude;
                     lon1 = m_vors[i]->m_longitude;
-                    if (m_gui->m_settings.m_magDecAdjust && !m_vors[i]->m_alignedTrueNorth)
+
+                    if (m_gui->m_settings.m_magDecAdjust && !m_vors[i]->m_alignedTrueNorth) {
                         bearing1 = m_radials[i] - m_vors[i]->m_magneticDeclination;
-                    else
+                    } else {
                         bearing1 = m_radials[i];
+                    }
+
                     valid1 = true;
                 }
                 else
                 {
                     lat2 = m_vors[i]->m_latitude;
                     lon2 = m_vors[i]->m_longitude;
-                    if (m_gui->m_settings.m_magDecAdjust && !m_vors[i]->m_alignedTrueNorth)
+
+                    if (m_gui->m_settings.m_magDecAdjust && !m_vors[i]->m_alignedTrueNorth) {
                         bearing2 = m_radials[i] - m_vors[i]->m_magneticDeclination;
-                    else
+                    } else {
                         bearing2 = m_radials[i];
+                    }
+
                     valid2 = true;
                     break;
                 }
             }
         }
 
-        if (valid1 && valid2)
-        {
+        if (valid1 && valid2) {
             return calcIntersectionPoint(lat1, lon1, bearing1, lat2, lon2, bearing2, lat, lon);
         }
     }
@@ -571,7 +610,7 @@ void VORLocalizerGUI::resizeTable()
     ui->vorData->setRowCount(row + 1);
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAME, new QTableWidgetItem("White Sulphur Springs"));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_FREQUENCY, new QTableWidgetItem("Freq (MHz) "));
-    ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_OFFSET, new QTableWidgetItem("Offset (kHz) "));
+    ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAVID, new QTableWidgetItem("99999999"));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_IDENT, new QTableWidgetItem("Ident "));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_MORSE, new QTableWidgetItem(Morse::toSpacedUnicode(morse)));
     ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RADIAL, new QTableWidgetItem("Radial (o) "));
@@ -588,7 +627,6 @@ void VORLocalizerGUI::resizeTable()
 void VORLocalizerGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex)
 {
     (void) oldVisualIndex;
-
     m_settings.m_columnIndexes[logicalIndex] = newVisualIndex;
 }
 
@@ -596,7 +634,6 @@ void VORLocalizerGUI::vorData_sectionMoved(int logicalIndex, int oldVisualIndex,
 void VORLocalizerGUI::vorData_sectionResized(int logicalIndex, int oldSize, int newSize)
 {
     (void) oldSize;
-
     m_settings.m_columnSizes[logicalIndex] = newSize;
 }
 
@@ -610,9 +647,9 @@ void VORLocalizerGUI::columnSelectMenu(QPoint pos)
 void VORLocalizerGUI::columnSelectMenuChecked(bool checked)
 {
     (void) checked;
-
     QAction* action = qobject_cast<QAction*>(sender());
-    if (action != nullptr)
+
+    if (action)
     {
         int idx = action->data().toInt(nullptr);
         ui->vorData->setColumnHidden(idx, !action->isChecked());
@@ -627,6 +664,7 @@ QAction *VORLocalizerGUI::createCheckableItem(QString &text, int idx, bool check
     action->setChecked(checked);
     action->setData(QVariant(idx));
     connect(action, SIGNAL(triggered()), this, SLOT(columnSelectMenuChecked()));
+
     return action;
 }
 
@@ -646,7 +684,7 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         ui->vorData->setRowCount(row + 1);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAME, vorGUI->m_nameItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_FREQUENCY, vorGUI->m_frequencyItem);
-        ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_OFFSET, vorGUI->m_offsetItem);
+        ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_NAVID, vorGUI->m_navIdItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_IDENT, vorGUI->m_identItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_MORSE, vorGUI->m_morseItem);
         ui->vorData->setItem(row, VORLocalizerSettings::VOR_COL_RADIAL, vorGUI->m_radialItem);
@@ -662,11 +700,11 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         ui->vorData->setSortingEnabled(true);
 
         // Add to settings to create corresponding demodulator
-        VORLocalizerSubChannelSettings *subChannelSettings = new VORLocalizerSubChannelSettings();
-        subChannelSettings->m_id = navId;
-        subChannelSettings->m_frequency = vorGUI->m_navAid->m_frequencykHz * 1000;
-        subChannelSettings->m_audioMute = false;
-        m_settings.m_subChannelSettings.insert(navId, subChannelSettings);
+        m_settings.m_subChannelSettings.insert(navId, VORLocalizerSubChannelSettings{
+            navId,
+            vorGUI->m_navAid->m_frequencykHz * 1000,
+            false
+        });
 
         applySettings();
     }
@@ -678,9 +716,7 @@ void VORLocalizerGUI::selectVOR(VORGUI *vorGUI, bool selected)
         m_selectedVORs.remove(navId);
         ui->vorData->removeRow(vorGUI->m_nameItem->row());
         // Remove from settings to remove corresponding demodulator
-        VORLocalizerSubChannelSettings *subChannelSettings = m_settings.m_subChannelSettings.value(navId);
         m_settings.m_subChannelSettings.remove(navId);
-        delete subChannelSettings;
 
         applySettings();
     }
@@ -701,10 +737,10 @@ void VORLocalizerGUI::updateVORs()
         azEl.calculate();
 
         // Only display VOR if in range
-        if (azEl.getDistance() <= 200000)
-        {
+        if (azEl.getDistance() <= 200000) {
             m_vorModel.addVOR(vor);
         }
+
         ++i;
     }
 }
@@ -734,11 +770,14 @@ QByteArray VORLocalizerGUI::serialize() const
 
 bool VORLocalizerGUI::deserialize(const QByteArray& data)
 {
-    if(m_settings.deserialize(data)) {
+    if (m_settings.deserialize(data))
+    {
         displaySettings();
         applySettings(true);
         return true;
-    } else {
+    }
+    else
+    {
         resetToDefaults();
         return false;
     }
@@ -775,49 +814,35 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         Real refMagDB = std::round(20.0*std::log10(report.getRefMag()));
 
         bool validRadial = report.getValidRadial();
-
         vorGUI->m_radialItem->setData(Qt::DisplayRole, std::round(report.getRadial()));
-        if (validRadial)
+        vorGUI->m_navIdItem->setData(Qt::DisplayRole, subChannelId);
+
+        if (validRadial) {
             vorGUI->m_radialItem->setForeground(QBrush(Qt::white));
-        else
+        } else {
             vorGUI->m_radialItem->setForeground(QBrush(Qt::red));
+        }
 
         vorGUI->m_refMagItem->setData(Qt::DisplayRole, refMagDB);
-        if (report.getValidRefMag())
+
+        if (report.getValidRefMag()) {
             vorGUI->m_refMagItem->setForeground(QBrush(Qt::white));
-        else
+        } else {
             vorGUI->m_refMagItem->setForeground(QBrush(Qt::red));
+        }
 
         vorGUI->m_varMagItem->setData(Qt::DisplayRole, varMagDB);
-        if (report.getValidVarMag())
+
+        if (report.getValidVarMag()) {
             vorGUI->m_varMagItem->setForeground(QBrush(Qt::white));
-        else
+        } else {
             vorGUI->m_varMagItem->setForeground(QBrush(Qt::red));
+        }
 
         // Update radial on map
         m_vorModel.setRadial(subChannelId, validRadial, report.getRadial());
 
         return true;
-    }
-    else if (VORLocalizerReport::MsgReportFreqOffset::match(message))
-    {
-        VORLocalizerReport::MsgReportFreqOffset& report = (VORLocalizerReport::MsgReportFreqOffset&) message;
-        int subChannelId = report.getSubChannelId();
-
-        VORGUI *vorGUI = m_selectedVORs.value(subChannelId);
-
-        vorGUI->m_offsetItem->setData(Qt::DisplayRole, report.getFreqOffset() / 1000.0);
-        if (report.getOutOfBand())
-        {
-            vorGUI->m_offsetItem->setForeground(QBrush(Qt::red));
-            // Clear other fields as data is now invalid
-            vorGUI->m_radialItem->setText("");
-            vorGUI->m_refMagItem->setText("");
-            vorGUI->m_varMagItem->setText("");
-            m_vorModel.setRadial(subChannelId, false, -1.0f);
-        }
-        else
-            vorGUI->m_offsetItem->setForeground(QBrush(Qt::white));
     }
     else if (VORLocalizerReport::MsgReportIdent::match(message))
     {
@@ -835,6 +860,7 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         {
             vorGUI->m_rxIdentItem->setText(identString);
             vorGUI->m_rxMorseItem->setText(Morse::toSpacedUnicode(ident));
+
             if (vorGUI->m_navAid->m_ident == identString)
             {
                 // Set colour to green if matching expected ident
@@ -868,10 +894,28 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
         ui->channels->clear();
 
         for (; it != channels.end(); ++it) {
-            ui->channels->addItem(tr("%1:%2").arg(it->m_deviceSetIndex).arg(it->m_channelIndex));
+            ui->channels->addItem(tr("R%1:%2").arg(it->m_deviceSetIndex).arg(it->m_channelIndex));
         }
 
         return true;
+    }
+    else if (VORLocalizerReport::MsgReportServiceddVORs::match(message))
+    {
+        VORLocalizerReport::MsgReportServiceddVORs& report = (VORLocalizerReport::MsgReportServiceddVORs&) message;
+        std::vector<int>& servicedVORNavIds = report.getNavIds();
+
+        for (auto vorGUI : m_selectedVORs) {
+            vorGUI->m_frequencyItem->setForeground(QBrush(Qt::white));
+        }
+
+        for (auto navId : servicedVORNavIds)
+        {
+            if (m_selectedVORs.contains(navId))
+            {
+                VORGUI *vorGUI = m_selectedVORs[navId];
+                vorGUI->m_frequencyItem->setForeground(QBrush(Qt::green));
+            }
+        }
     }
 
     return false;
@@ -883,8 +927,7 @@ void VORLocalizerGUI::handleInputMessages()
 
     while ((message = getInputMessageQueue()->pop()) != 0)
     {
-        if (handleMessage(*message))
-        {
+        if (handleMessage(*message)) {
             delete message;
         }
     }
@@ -893,31 +936,41 @@ void VORLocalizerGUI::handleInputMessages()
 qint64 VORLocalizerGUI::fileAgeInDays(QString filename)
 {
     QFile file(filename);
+
     if (file.exists())
     {
         QDateTime modified = file.fileTime(QFileDevice::FileModificationTime);
-        if (modified.isValid())
+
+        if (modified.isValid()) {
             return modified.daysTo(QDateTime::currentDateTime());
-        else
+        } else {
             return -1;
+        }
     }
+
     return -1;
 }
 
 bool VORLocalizerGUI::confirmDownload(QString filename)
 {
     qint64 age = fileAgeInDays(filename);
+
     if ((age == -1) || (age > 100))
+    {
         return true;
+    }
     else
     {
         QMessageBox::StandardButton reply;
-        if (age == 0)
+
+        if (age == 0) {
             reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded today. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        else if (age == 1)
+        } else if (age == 1) {
             reply = QMessageBox::question(this, "Confirm download", "This file was last downloaded yesterday. Are you sure you wish to redownload it?", QMessageBox::Yes|QMessageBox::No);
-        else
+        } else {
             reply = QMessageBox::question(this, "Confirm download", QString("This file was last downloaded %1 days ago. Are you sure you wish to redownload this file?").arg(age), QMessageBox::Yes|QMessageBox::No);
+        }
+
         return reply == QMessageBox::Yes;
     }
 }
@@ -932,18 +985,20 @@ QString VORLocalizerGUI::getDataDir()
 
 QString VORLocalizerGUI::getOpenAIPVORDBFilename(int i)
 {
-    if (countryCodes[i] != nullptr)
+    if (countryCodes[i] != nullptr) {
         return getDataDir() + "/" + countryCodes[i] + "_nav.aip";
-    else
+    } else {
         return "";
+    }
 }
 
 QString VORLocalizerGUI::getOpenAIPVORDBURL(int i)
 {
-    if (countryCodes[i] != nullptr)
+    if (countryCodes[i] != nullptr) {
         return QString(OPENAIP_NAVAIDS_URL).arg(countryCodes[i]);
-    else
+    } else {
         return "";
+    }
 }
 
 QString VORLocalizerGUI::getVORDBFilename()
@@ -964,14 +1019,18 @@ void VORLocalizerGUI::downloadFinished(const QString& filename, bool success)
         if (filename == getVORDBFilename())
         {
             m_vors = NavAid::readNavAidsDB(filename);
-            if (m_vors != nullptr)
+
+            if (m_vors != nullptr) {
                 updateVORs();
+            }
+
             m_progressDialog->close();
             m_progressDialog = nullptr;
         }
         else if (filename == getOpenAIPVORDBFilename(m_countryIndex))
         {
             m_countryIndex++;
+
             if (countryCodes[m_countryIndex] != nullptr)
             {
                 QString vorDBFile = getOpenAIPVORDBFilename(m_countryIndex);
@@ -984,8 +1043,11 @@ void VORLocalizerGUI::downloadFinished(const QString& filename, bool success)
             else
             {
                 readNavAids();
-                if (m_vors != nullptr)
+
+                if (m_vors) {
                     updateVORs();
+                }
+
                 m_progressDialog->close();
                 m_progressDialog = nullptr;
             }
@@ -1021,6 +1083,7 @@ void VORLocalizerGUI::on_getOurAirportsVORDB_clicked()
     if (m_progressDialog == nullptr)
     {
         QString vorDBFile = getVORDBFilename();
+
         if (confirmDownload(vorDBFile))
         {
             // Download OurAirports navaid database to disk
@@ -1039,10 +1102,11 @@ void VORLocalizerGUI::on_getOurAirportsVORDB_clicked()
 void VORLocalizerGUI::on_getOpenAIPVORDB_clicked()
 {
     // Don't try to download while already in progress
-    if (m_progressDialog == nullptr)
+    if (!m_progressDialog)
     {
         m_countryIndex = 0;
         QString vorDBFile = getOpenAIPVORDBFilename(m_countryIndex);
+
         if (confirmDownload(vorDBFile))
         {
             // Download OpenAIP XML to disk
@@ -1071,10 +1135,24 @@ void VORLocalizerGUI::readNavAids()
     }
 }
 
-void VORLocalizerGUI::on_magDecAdjust_clicked(bool checked)
+void VORLocalizerGUI::on_magDecAdjust_toggled(bool checked)
 {
     m_settings.m_magDecAdjust = checked;
     m_vorModel.allVORUpdated();
+    applySettings();
+}
+
+void VORLocalizerGUI::on_rrTime_valueChanged(int value)
+{
+    m_settings.m_rrTime = value;
+    ui->rrTimeText->setText(tr("%1s").arg(m_settings.m_rrTime));
+    applySettings();
+}
+
+void VORLocalizerGUI::on_centerShift_valueChanged(int value)
+{
+    m_settings.m_centerShift = value * 1000;
+    ui->centerShiftText->setText(tr("%1k").arg(value));
     applySettings();
 }
 
@@ -1170,6 +1248,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     // Centre map at My Position
     QQuickItem *item = ui->map->rootObject();
     QObject *object = item->findChild<QObject*>("map");
+
     if (object)
     {
         QGeoCoordinate coords = object->property("center").value<QGeoCoordinate>();
@@ -1177,8 +1256,10 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
         coords.setLongitude(stationLongitude);
         object->setProperty("center", QVariant::fromValue(coords));
     }
+
     // Move antenna icon to My Position to start with
     QObject *stationObject = item->findChild<QObject*>("station");
+
     if (stationObject)
     {
         QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
@@ -1191,6 +1272,7 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 
     // Read in VOR information if it exists
     bool useOurAirports = false;
+
     if (useOurAirports)
     {
         m_vors = NavAid::readNavAidsDB(getVORDBFilename());
@@ -1201,7 +1283,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
         readNavAids();
         ui->getOurAirportsVORDB->setVisible(false);
     }
-    if (m_vors != nullptr) {
+
+    if (m_vors) {
         updateVORs();
     }
 
@@ -1213,11 +1296,13 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     ui->vorData->setSortingEnabled(true);
     // Add context menu to allow hiding/showing of columns
     menu = new QMenu(ui->vorData);
+
     for (int i = 0; i < ui->vorData->horizontalHeader()->count(); i++)
     {
         QString text = ui->vorData->horizontalHeaderItem(i)->text();
         menu->addAction(createCheckableItem(text, i, true));
     }
+
     ui->vorData->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->vorData->horizontalHeader(), SIGNAL(customContextMenuRequested(QPoint)), SLOT(columnSelectMenu(QPoint)));
     // Get signals when columns change
@@ -1273,6 +1358,11 @@ void VORLocalizerGUI::displaySettings()
         header->moveSection(header->visualIndex(i), m_settings.m_columnIndexes[i]);
     }
 
+    ui->rrTimeText->setText(tr("%1s").arg(m_settings.m_rrTime));
+    ui->rrTime->setValue(m_settings.m_rrTime);
+    ui->centerShiftText->setText(tr("%1k").arg(m_settings.m_centerShift/1000));
+    ui->centerShift->setValue(m_settings.m_centerShift/1000);
+
     blockApplySettings(false);
 }
 
@@ -1325,6 +1415,7 @@ void VORLocalizerGUI::tick()
             // Move antenna icon to estimated position
             QQuickItem *item = ui->map->rootObject();
             QObject *stationObject = item->findChild<QObject*>("station");
+
             if(stationObject != NULL)
             {
                 QGeoCoordinate coords = stationObject->property("coordinate").value<QGeoCoordinate>();
