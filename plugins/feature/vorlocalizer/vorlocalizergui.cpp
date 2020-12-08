@@ -916,6 +916,11 @@ bool VORLocalizerGUI::handleMessage(const Message& message)
                 vorGUI->m_frequencyItem->setForeground(QBrush(Qt::green));
             }
         }
+
+        ui->rrTurnTimeProgress->setMaximum(m_settings.m_rrTime);
+        ui->rrTurnTimeProgress->setValue(0);
+        ui->rrTurnTimeProgress->setToolTip(tr("Round robin turn %1s").arg(0));
+        m_rrSecondsCount = 0;
     }
 
     return false;
@@ -1215,7 +1220,8 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
     m_progressDialog(nullptr),
     m_vorModel(this),
     m_vors(nullptr),
-    m_lastFeatureState(0)
+    m_lastFeatureState(0),
+    m_rrSecondsCount(0)
 {
     ui->setupUi(this);
 
@@ -1312,6 +1318,10 @@ VORLocalizerGUI::VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISe
 	connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
 	m_statusTimer.start(1000);
 
+    ui->rrTurnTimeProgress->setMaximum(m_settings.m_rrTime);
+    ui->rrTurnTimeProgress->setValue(0);
+    ui->rrTurnTimeProgress->setToolTip(tr("Round robin turn time %1s").arg(0));
+
     displaySettings();
     applySettings(true);
 }
@@ -1362,6 +1372,7 @@ void VORLocalizerGUI::displaySettings()
     ui->rrTime->setValue(m_settings.m_rrTime);
     ui->centerShiftText->setText(tr("%1k").arg(m_settings.m_centerShift/1000));
     ui->centerShift->setValue(m_settings.m_centerShift/1000);
+    ui->forceRRAveraging->setChecked(m_settings.m_forceRRAveraging);
 
     blockApplySettings(false);
 }
@@ -1405,8 +1416,8 @@ void VORLocalizerGUI::updateStatus()
 
 void VORLocalizerGUI::tick()
 {
-    // Try to determine position, based on intersection of two radials
-    if (m_tickCount % 50)
+    // Try to determine position, based on intersection of two radials - every second
+    if (++m_tickCount == 20)
     {
         float lat, lon;
 
@@ -1425,7 +1436,11 @@ void VORLocalizerGUI::tick()
                 stationObject->setProperty("stationName", QVariant::fromValue(MainCore::instance()->getSettings().getStationName()));
             }
         }
-    }
 
-    m_tickCount++;
+        m_rrSecondsCount++;
+        ui->rrTurnTimeProgress->setMaximum(m_settings.m_rrTime);
+        ui->rrTurnTimeProgress->setValue(m_rrSecondsCount <= m_settings.m_rrTime ? m_rrSecondsCount : m_settings.m_rrTime);
+        ui->rrTurnTimeProgress->setToolTip(tr("Round robin turn time %1s").arg(m_rrSecondsCount));
+        m_tickCount = 0;
+    }
 }

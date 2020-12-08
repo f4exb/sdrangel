@@ -69,6 +69,9 @@ public:
     qint32 getRrTime();
     void setRrTime(qint32 rr_time);
 
+    qint32 getForceRrAveraging();
+    void setForceRrAveraging(qint32 force_rr_averaging);
+
     qint32 getCenterShift();
     void setCenterShift(qint32 center_shift);
 
@@ -102,6 +105,9 @@ private:
 
     qint32 rr_time;
     bool m_rr_time_isSet;
+
+    qint32 force_rr_averaging;
+    bool m_force_rr_averaging_isSet;
 
     qint32 center_shift;
     bool m_center_shift_isSet;

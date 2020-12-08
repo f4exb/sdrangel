@@ -22,6 +22,12 @@ VORLocalizerSettings:
     rrTime:
       description: Round robin turn time in seconds
       type: integer
+    forceRRAveraging:
+      type: integer
+      description: >
+        Force radial and signal magnitudes averaging over the round robin turn
+          * 0 - Do not force averaging
+          * 1 - Force averaging
     centerShift:
       description: Shift of center frequency in Hz
       type: integer

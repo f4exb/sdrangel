@@ -66,6 +66,7 @@ struct VORLocalizerSettings
     QString m_title;
     bool m_magDecAdjust;                //!< Adjust for magnetic declination when drawing radials on the map
     int m_rrTime;                       //!< Round robin turn time in seconds
+    bool m_forceRRAveraging;            //!< Force radial and signal magnitude averaging over RR turn
     int m_centerShift;                  //!< Center frequency shift to apply to move away from DC
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

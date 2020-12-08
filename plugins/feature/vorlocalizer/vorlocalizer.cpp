@@ -134,7 +134,9 @@ bool VORLocalizer::handleMessage(const Message& cmd)
                 return true;
             }
 
-            bool singlePlan = (m_vorSinglePlans.contains(navId)) ? m_vorSinglePlans[navId] : false;
+            bool singlePlan = (m_vorSinglePlans.contains(navId)) && !m_settings.m_forceRRAveraging ?
+                m_vorSinglePlans[navId] :
+                false;
 
             // qDebug() << "VORLocalizer::handleMessage: MainCore::MsgChannelReport(VORDemodSC): "
             //     << "navId:" << navId
@@ -289,6 +291,9 @@ void VORLocalizer::applySettings(const VORLocalizerSettings& settings, bool forc
     if ((m_settings.m_rrTime != settings.m_rrTime) || force) {
         reverseAPIKeys.append("rrTime");
     }
+    if ((m_settings.m_forceRRAveraging != settings.m_forceRRAveraging) || force) {
+        reverseAPIKeys.append("forceRRAveraging");
+    }
     if ((m_settings.m_centerShift != settings.m_centerShift) || force) {
         reverseAPIKeys.append("centerShift");
     }
@@ -440,6 +445,7 @@ void VORLocalizer::webapiFormatFeatureSettings(
     response.getVorLocalizerSettings()->setRgbColor(settings.m_rgbColor);
     response.getVorLocalizerSettings()->setMagDecAdjust(settings.m_magDecAdjust);
     response.getVorLocalizerSettings()->setRrTime(settings.m_rrTime);
+    response.getVorLocalizerSettings()->setForceRrAveraging(settings.m_forceRRAveraging ? 1 : 0);
     response.getVorLocalizerSettings()->setCenterShift(settings.m_centerShift);
 
     response.getVorLocalizerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
@@ -471,6 +477,9 @@ void VORLocalizer::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("rrTime")) {
         settings.m_rrTime = response.getVorLocalizerSettings()->getRrTime();
+    }
+    if (featureSettingsKeys.contains("forceRRAveraging")) {
+        settings.m_forceRRAveraging = response.getVorLocalizerSettings()->getForceRrAveraging() != 0;
     }
     if (featureSettingsKeys.contains("centerShift")) {
         settings.m_centerShift = response.getVorLocalizerSettings()->getCenterShift();
@@ -514,6 +523,9 @@ void VORLocalizer::webapiReverseSendSettings(QList<QString>& channelSettingsKeys
     }
     if (channelSettingsKeys.contains("rrTime") || force) {
         swgVORLocalizerSettings->setRrTime(settings.m_rrTime);
+    }
+    if (channelSettingsKeys.contains("forceRRAveraging") || force) {
+        swgVORLocalizerSettings->setForceRrAveraging(settings.m_forceRRAveraging ? 1 : 0);
     }
     if (channelSettingsKeys.contains("centerShift") || force) {
         swgVORLocalizerSettings->setCenterShift(settings.m_centerShift);

@@ -237,6 +237,7 @@ private:
     QIcon m_muteIcon;
 	QTimer m_statusTimer;
 	int m_lastFeatureState;
+    int m_rrSecondsCount;
 
     explicit VORLocalizerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~VORLocalizerGUI();

@@ -46,6 +46,8 @@ SWGVORLocalizerSettings::SWGVORLocalizerSettings() {
     m_mag_dec_adjust_isSet = false;
     rr_time = 0;
     m_rr_time_isSet = false;
+    force_rr_averaging = 0;
+    m_force_rr_averaging_isSet = false;
     center_shift = 0;
     m_center_shift_isSet = false;
 }
@@ -74,6 +76,8 @@ SWGVORLocalizerSettings::init() {
     m_mag_dec_adjust_isSet = false;
     rr_time = 0;
     m_rr_time_isSet = false;
+    force_rr_averaging = 0;
+    m_force_rr_averaging_isSet = false;
     center_shift = 0;
     m_center_shift_isSet = false;
 }
@@ -88,6 +92,7 @@ SWGVORLocalizerSettings::cleanup() {
     if(reverse_api_address != nullptr) { 
         delete reverse_api_address;
     }
+
 
 
 
@@ -124,6 +129,8 @@ SWGVORLocalizerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&mag_dec_adjust, pJson["magDecAdjust"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rr_time, pJson["rrTime"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&force_rr_averaging, pJson["forceRRAveraging"], "qint32", "");
     
     ::SWGSDRangel::setValue(&center_shift, pJson["centerShift"], "qint32", "");
     
@@ -169,6 +176,9 @@ SWGVORLocalizerSettings::asJsonObject() {
     }
     if(m_rr_time_isSet){
         obj->insert("rrTime", QJsonValue(rr_time));
+    }
+    if(m_force_rr_averaging_isSet){
+        obj->insert("forceRRAveraging", QJsonValue(force_rr_averaging));
     }
     if(m_center_shift_isSet){
         obj->insert("centerShift", QJsonValue(center_shift));
@@ -268,6 +278,16 @@ SWGVORLocalizerSettings::setRrTime(qint32 rr_time) {
 }
 
 qint32
+SWGVORLocalizerSettings::getForceRrAveraging() {
+    return force_rr_averaging;
+}
+void
+SWGVORLocalizerSettings::setForceRrAveraging(qint32 force_rr_averaging) {
+    this->force_rr_averaging = force_rr_averaging;
+    this->m_force_rr_averaging_isSet = true;
+}
+
+qint32
 SWGVORLocalizerSettings::getCenterShift() {
     return center_shift;
 }
@@ -307,6 +327,9 @@ SWGVORLocalizerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_rr_time_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_force_rr_averaging_isSet){
             isObjectUpdated = true; break;
         }
         if(m_center_shift_isSet){

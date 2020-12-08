@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
+    <width>462</width>
     <height>893</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>352</width>
+    <width>462</width>
     <height>0</height>
    </size>
   </property>
@@ -42,7 +42,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>390</width>
+     <width>461</width>
      <height>61</height>
     </rect>
    </property>
@@ -178,14 +178,8 @@
        <widget class="QLabel" name="rrTimeText">
         <property name="minimumSize">
          <size>
-          <width>30</width>
+          <width>26</width>
           <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
          </size>
         </property>
         <property name="toolTip">
@@ -200,9 +194,34 @@
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QProgressBar" name="rrTurnTimeProgress">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QProgressBar{border: 2px solid rgb(79, 79, 79); text-align: center;}
+QToolTip{background-color: white; color: black;}</string>
+        </property>
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="forceRRAveraging">
+        <property name="toolTip">
+         <string>Force radials and signals magnitudes averaging over round robin turn</string>
+        </property>
+        <property name="text">
+         <string>A</string>
         </property>
        </widget>
       </item>
@@ -245,7 +264,7 @@
        <widget class="QLabel" name="centerShiftText">
         <property name="minimumSize">
          <size>
-          <width>30</width>
+          <width>26</width>
           <height>0</height>
          </size>
         </property>
@@ -330,7 +349,7 @@
     <rect>
      <x>0</x>
      <y>110</y>
-     <width>391</width>
+     <width>461</width>
      <height>140</height>
     </rect>
    </property>
@@ -461,7 +480,7 @@
     <rect>
      <x>0</x>
      <y>260</y>
-     <width>391</width>
+     <width>461</width>
      <height>581</height>
     </rect>
    </property>

@@ -31,13 +31,21 @@ When checked, radials on the map will drawn adjusted for magnetic declination. F
 
 <h3>4: Round robin turn time</h3>
 
-Available VOR demodulator channels are allocated to service the selected VORs on the map and displayed in the VOR table (B). There could be less available channels than the number of VORs to service in which case the channel(s) of the same device can be used to service VORs in turn in a round robin fashion. This sets the time in seconds dedicated to each turn. More details on channels allocation agorithm is given in (6).
+Available VOR demodulator channels are allocated to service the selected VORs on the map and displayed in the VOR table (B). There could be less available channels than the number of VORs to service in which case the channel(s) of the same device can be used to service VORs in turn in a round robin fashion. This sets the time in seconds dedicated to each turn. More details on channels allocation agorithm is given in (7).
 
-<h3>5: Center frequency shift</h3>
+<h3>5: Round robin turn time progress</h3>
+
+Shows the round robin turn time progress
+
+<h3>6: Force averaging over round robin turn time</h3>
+
+Averaging of radial direction and signal magnitudes normally take place only if there is more than one round robin turn for a device. This forces averaging even if only one round robin turn exists i.e. the channels for this device are active continuously. Such an averaging may help in getting a better position fix.
+
+<h3>7: Center frequency shift</h3>
 
 The center frequency of the device may be shifted from its value computed from VOR allocation. This can help moving the channel center away from the device DC if necessary.
 
-<h3>6: List of VOR demodulator channels in the system</h3>
+<h3>8: List of VOR demodulator channels in the system</h3>
 
 This combo is not used to select anything but just to show the VOR demodulators that have been detected and that will be used to service the list of selected VORs int the (B) table.
 
@@ -47,7 +55,7 @@ Channels may be used in round robin turns if their number is not enough to cover
 
 When there is more than one turn for a device valid radial directions are averaged and the resulting average is used during the round robin loop. Averaging also takes place for reference and variable signal levels.
 
-<h3>7: Refresh VOR demodulators list and allocation</h3>
+<h3>9: Refresh VOR demodulators list and allocation</h3>
 
 Use this button to (re)scan the available VOR demodulators in the SDRangel instance and (re)run the round robin allocation.
 
