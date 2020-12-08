@@ -1,3 +1,10 @@
+sdrangel (6.3.0-1) unstable; urgency=medium
+
+   * Single channel VOR demodulator plugin. Issue #729
+   * VOR localizer feature plugin. Issue #729
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 08 Dec 2020 07:30:36 +0100
+
 sdrangel (6.2.0-1) unstable; urgency=medium
 
    * New VOR demodulator plugin. PR #723
