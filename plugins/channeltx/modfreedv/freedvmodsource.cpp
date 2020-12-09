@@ -32,7 +32,7 @@ FreeDVModSource::FreeDVModSource() :
     m_lowCutoff(0.0),
     m_hiCutoff(6000.0),
     m_SSBFilter(nullptr),
-	m_SSBFilterBuffer(0),
+	m_SSBFilterBuffer(nullptr),
 	m_SSBFilterBufferIndex(0),
     m_audioSampleRate(48000),
     m_audioFifo(12000),
@@ -45,7 +45,7 @@ FreeDVModSource::FreeDVModSource() :
 	m_iSpeech(0),
 	m_iModem(0),
 	m_speechIn(nullptr),
-	m_modOut(0),
+	m_modOut(nullptr),
 	m_scaleFactor(SDR_TX_SCALEF),
     m_mutex(QMutex::Recursive)
 {
@@ -82,6 +82,7 @@ FreeDVModSource::~FreeDVModSource()
 
 void FreeDVModSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
 {
+    QMutexLocker mlock(&m_mutex);
     std::for_each(
         begin,
         begin + nbSamples,
@@ -427,6 +428,7 @@ void FreeDVModSource::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
     m_hiCutoff = FreeDVModSettings::getHiCutoff(mode);
     m_lowCutoff = FreeDVModSettings::getLowCutoff(mode);
     int modemSampleRate = FreeDVModSettings::getModSampleRate(mode);
+    QMutexLocker mlock(&m_mutex);
 
     m_SSBFilter->create_filter(m_lowCutoff / modemSampleRate, m_hiCutoff / modemSampleRate);
 
@@ -493,10 +495,6 @@ void FreeDVModSource::applyFreeDVMode(FreeDVModSettings::FreeDVMode mode)
         freedv_set_tx_bpf(m_freeDV, 1);
         freedv_set_ext_vco(m_freeDV, 0);
 
-        freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
-
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
         int nNomModemSamples = freedv_get_n_nom_modem_samples(m_freeDV);
         int Fs = freedv_get_modem_sample_rate(m_freeDV);
@@ -557,7 +555,6 @@ void FreeDVModSource::applySettings(const FreeDVModSettings& settings, bool forc
 
 void FreeDVModSource::handleAudio()
 {
-    QMutexLocker mlock(&m_mutex);
     unsigned int nbRead;
 
     while ((nbRead = m_audioFifo.read(reinterpret_cast<quint8*>(&m_audioReadBuffer[m_audioReadBufferFill]), 4096)) != 0)

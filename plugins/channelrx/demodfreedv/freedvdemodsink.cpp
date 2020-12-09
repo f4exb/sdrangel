@@ -141,16 +141,17 @@ FreeDVDemodSink::FreeDVDemodSink() :
         m_agcActive(false),
         m_squelchDelayLine(2*48000),
         m_audioActive(false),
-        m_spectrumSink(0),
+        m_spectrumSink(nullptr),
         m_audioFifo(24000),
-        m_freeDV(0),
+        m_freeDV(nullptr),
         m_nSpeechSamples(0),
         m_nMaxModemSamples(0),
         m_iSpeech(0),
         m_iModem(0),
-        m_speechOut(0),
-        m_modIn(0),
-        m_levelInNbSamples(480) // 10ms @ 48 kS/s
+        m_speechOut(nullptr),
+        m_modIn(nullptr),
+        m_levelInNbSamples(480), // 10ms @ 48 kS/s
+        m_mutex(QMutex::Recursive)
 {
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
@@ -184,6 +185,7 @@ void FreeDVDemodSink::feed(const SampleVector::const_iterator& begin, const Samp
         return;
     }
 
+    QMutexLocker mlock(&m_mutex);
 	Complex ci;
 
 	for(SampleVector::const_iterator it = begin; it < end; ++it)
@@ -393,6 +395,7 @@ void FreeDVDemodSink::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
     m_hiCutoff = FreeDVDemodSettings::getHiCutoff(mode);
     m_lowCutoff = FreeDVDemodSettings::getLowCutoff(mode);
     uint32_t modemSampleRate = FreeDVDemodSettings::getModSampleRate(mode);
+    QMutexLocker mlock(&m_mutex);
 
     SSBFilter->create_filter(m_lowCutoff / (float) modemSampleRate, m_hiCutoff / (float) modemSampleRate);
 
@@ -456,10 +459,6 @@ void FreeDVDemodSink::applyFreeDVMode(FreeDVDemodSettings::FreeDVMode mode)
         freedv_set_clip(m_freeDV, 0);
         freedv_set_ext_vco(m_freeDV, 0);
         freedv_set_sync(m_freeDV, FREEDV_SYNC_MANUAL);
-
-        freedv_set_callback_txt(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_protocol(m_freeDV, nullptr, nullptr, nullptr);
-        freedv_set_callback_data(m_freeDV, nullptr, nullptr, nullptr);
 
         int nSpeechSamples = freedv_get_n_speech_samples(m_freeDV);
         int nMaxModemSamples = freedv_get_n_max_modem_samples(m_freeDV);
@@ -563,5 +562,6 @@ void FreeDVDemodSink::getSNRLevels(double& avg, double& peak, int& nbSamples)
 
 void FreeDVDemodSink::resyncFreeDV()
 {
+    QMutexLocker mlock(&m_mutex);
     freedv_set_sync(m_freeDV, FREEDV_SYNC_UNSYNC);
 }
