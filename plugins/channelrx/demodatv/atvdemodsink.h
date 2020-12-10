@@ -45,7 +45,11 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
   	void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
-    void setTVScreen(TVScreenAnalog *tvScreen) { m_registeredTVScreen = tvScreen; } //!< set by the GUI
+    void setTVScreen(TVScreenAnalog *tvScreen) //!< set by the GUI
+    {
+        m_registeredTVScreen = tvScreen;
+        m_tvScreenBuffer = m_registeredTVScreen->getBackBuffer();
+    }
     double getMagSq() const { return m_magSqAverage; } //!< Beware this is scaled to 2^30
     bool getBFOLocked();
     void setVideoTabIndex(int videoTabIndex) { m_videoTabIndex = videoTabIndex; }
