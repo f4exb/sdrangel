@@ -113,7 +113,7 @@ private:
 
     //*************** ATV PARAMETERS  ***************
     TVScreenAnalog *m_registeredTVScreen;
-	std::shared_ptr<TVScreenAnalogBuffer> m_tvScreenBuffer;
+	TVScreenAnalogBuffer *m_tvScreenBuffer;
 
     //int m_intNumberSamplePerLine;
     int m_numberSamplesPerHTop;        //!< number of samples per horizontal synchronization pulse (pulse in ultra-black) - integer value

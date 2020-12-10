@@ -65,24 +65,47 @@ static const char* fragmentShaderSource =
 "}\n";
 
 TVScreenAnalog::TVScreenAnalog(QWidget *parent)
-	: QGLWidget(parent)
+	: QGLWidget(parent),
+	m_shader(nullptr),
+	m_imageTexture(nullptr),
+	m_lineShiftsTexture(nullptr)
 {
 	m_isDataChanged = false;
-	m_frontBuffer = std::make_shared<TVScreenAnalogBuffer>(5, 1);
-	m_backBuffer = std::make_shared<TVScreenAnalogBuffer>(5, 1);
+	m_frontBuffer = new TVScreenAnalogBuffer(5, 1);
+	m_backBuffer = new TVScreenAnalogBuffer(5, 1);
 
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(tick()));
 	m_updateTimer.start(40); // capped at 25 FPS
 }
 
-void TVScreenAnalog::cleanup()
+TVScreenAnalog::~TVScreenAnalog()
 {
-	m_shader = nullptr;
-	m_imageTexture = nullptr;
-	m_lineShiftsTexture = nullptr;
+	delete m_backBuffer;
+	delete m_frontBuffer;
 }
 
-std::shared_ptr<TVScreenAnalogBuffer> TVScreenAnalog::getBackBuffer()
+void TVScreenAnalog::cleanup()
+{
+	if (m_shader)
+	{
+		delete m_shader;
+		m_shader = nullptr;
+	}
+
+	if (m_imageTexture)
+	{
+		delete m_imageTexture;
+		m_imageTexture = nullptr;
+	}
+
+	if (m_lineShiftsTexture)
+	{
+		delete m_lineShiftsTexture;
+		m_lineShiftsTexture = nullptr;
+	}
+}
+
+TVScreenAnalogBuffer *TVScreenAnalog::getBackBuffer()
 {
 	return m_backBuffer;
 }
@@ -95,8 +118,10 @@ void TVScreenAnalog::resizeTVScreen(int intCols, int intRows)
 	QMutexLocker lock(&m_buffersMutex);
 	if (m_frontBuffer->getWidth() != colsAdj || m_frontBuffer->getHeight() != intRows)
 	{
-		m_frontBuffer = std::make_shared<TVScreenAnalogBuffer>(colsAdj, intRows);
-		m_backBuffer = std::make_shared<TVScreenAnalogBuffer>(colsAdj, intRows);
+		delete m_backBuffer;
+		delete m_frontBuffer;
+		m_frontBuffer = new TVScreenAnalogBuffer(colsAdj, intRows);
+		m_backBuffer = new TVScreenAnalogBuffer(colsAdj, intRows);
 	}
 }
 
@@ -112,29 +137,29 @@ void TVScreenAnalog::initializeGL()
 	connect(QOpenGLContext::currentContext(), &QOpenGLContext::aboutToBeDestroyed,
 		this, &TVScreenAnalog::cleanup); // TODO: when migrating to QOpenGLWidget
 
-	m_shader = std::make_shared<QOpenGLShaderProgram>(this);
+	m_shader = new QOpenGLShaderProgram(this);
+
 	if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Vertex, vertexShaderSource))
 	{
 		qWarning()
 			<< "TVScreenAnalog::initializeGL: error in vertex shader:"
 			<< m_shader->log();
-		m_shader = nullptr;
 		return;
 	}
+
 	if (!m_shader->addShaderFromSourceCode(QOpenGLShader::Fragment, fragmentShaderSource))
 	{
 		qWarning()
 			<< "TVScreenAnalog::initializeGL: error in fragment shader:"
 			<< m_shader->log();
-		m_shader = nullptr;
 		return;
 	}
+
 	if (!m_shader->link())
 	{
 		qWarning()
 			<< "TVScreenAnalog::initializeGL: error linking shader:"
 			<< m_shader->log();
-		m_shader = nullptr;
 		return;
 	}
 
@@ -148,10 +173,10 @@ void TVScreenAnalog::initializeGL()
 	m_texelHeightLoc = m_shader->uniformLocation("tlh");
 }
 
-void TVScreenAnalog::initializeTextures(std::shared_ptr<TVScreenAnalogBuffer> buffer)
+void TVScreenAnalog::initializeTextures(TVScreenAnalogBuffer *buffer)
 {
-	m_imageTexture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
-	m_lineShiftsTexture = std::make_shared<QOpenGLTexture>(QOpenGLTexture::Target2D);
+	m_imageTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
+	m_lineShiftsTexture = new QOpenGLTexture(QOpenGLTexture::Target2D);
 	m_imageTexture->setSize(buffer->getWidth(), buffer->getHeight());
 	m_lineShiftsTexture->setSize(1, buffer->getHeight());
 	m_imageTexture->setFormat(QOpenGLTexture::RGBA8_UNorm);
@@ -171,7 +196,7 @@ void TVScreenAnalog::initializeTextures(std::shared_ptr<TVScreenAnalogBuffer> bu
 	m_lineShiftsTexture->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::ClampToEdge);
 }
 
-std::shared_ptr<TVScreenAnalogBuffer> TVScreenAnalog::swapBuffers()
+TVScreenAnalogBuffer *TVScreenAnalog::swapBuffers()
 {
 	QMutexLocker lock(&m_buffersMutex);
 	std::swap(m_frontBuffer, m_backBuffer);
@@ -198,7 +223,7 @@ void TVScreenAnalog::paintGL()
 		return;
 	}
 
-	std::shared_ptr<TVScreenAnalogBuffer> buffer = m_frontBuffer;
+	TVScreenAnalogBuffer *buffer = m_frontBuffer;
 
 	if (!m_imageTexture ||
 		m_imageTexture->width() != buffer->getWidth() ||

@@ -25,9 +25,6 @@
 
 #include "export.h"
 
-#include <memory>
-#include <algorithm>
-
 #include <QMutex>
 #include <QTimer>
 #include <QGLWidget>
@@ -129,22 +126,23 @@ class SDRGUI_API TVScreenAnalog : public QGLWidget, protected QOpenGLFunctions
 	int m_texCoordAttribIndex;
 
 	QMutex m_buffersMutex;
-	std::shared_ptr<TVScreenAnalogBuffer> m_frontBuffer;
-	std::shared_ptr<TVScreenAnalogBuffer> m_backBuffer;
+	TVScreenAnalogBuffer *m_frontBuffer;
+	TVScreenAnalogBuffer *m_backBuffer;
 
-	std::shared_ptr<QOpenGLShaderProgram> m_shader;
-	std::shared_ptr<QOpenGLTexture> m_imageTexture;
-	std::shared_ptr<QOpenGLTexture> m_lineShiftsTexture;
+	QOpenGLShaderProgram *m_shader;
+	QOpenGLTexture *m_imageTexture;
+	QOpenGLTexture *m_lineShiftsTexture;
 
 public:
 	TVScreenAnalog(QWidget *parent);
+	~TVScreenAnalog();
 
-	std::shared_ptr<TVScreenAnalogBuffer> getBackBuffer();
-	std::shared_ptr<TVScreenAnalogBuffer> swapBuffers();
+	TVScreenAnalogBuffer *getBackBuffer();
+	TVScreenAnalogBuffer *swapBuffers();
 	void resizeTVScreen(int intCols, int intRows);
 
 private:
-	void initializeTextures(std::shared_ptr<TVScreenAnalogBuffer> buffer);
+	void initializeTextures(TVScreenAnalogBuffer *buffer);
 	void initializeGL() override;
 	void paintGL() override;
 	void resizeGL(int width, int height);
