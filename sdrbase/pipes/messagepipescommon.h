@@ -44,7 +44,7 @@ public:
     };
 
     /** Send this message to stakeholders when the garbage collector finds that a channel was deleted */
-    class MsgReportChannelDeleted : public Message {
+    class SDRBASE_API MsgReportChannelDeleted : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
