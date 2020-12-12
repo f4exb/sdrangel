@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2015 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -17,26 +17,28 @@
 
 #include <QGlobalStatic>
 
+#include "messagepipesgcworker.h"
 #include "messagepipes.h"
 
-bool MessagePipes::ChannelRegistrationKey::operator<(const ChannelRegistrationKey& other) const
-{
-	if (m_channel !=  other.m_channel) {
-		return m_channel < other.m_channel;
-	} else {
-		return m_typeId < other.m_typeId;
-	}
-}
-
 MessagePipes::MessagePipes() :
-	m_typeCount(0)
-{}
+	m_typeCount(0),
+	m_c2fMutex(QMutex::Recursive)
+{
+	m_gcWorker = new MessagePipesGCWorker();
+	m_gcWorker->setC2FRegistrations(&m_c2fMutex, &m_c2fQueues, &m_c2fFEatures);
+	m_gcWorker->moveToThread(&m_gcThread);
+	startGC();
+}
 
 MessagePipes::~MessagePipes()
 {
-	QMap<ChannelRegistrationKey, QList<MessageQueue*>>::iterator mit = m_messageRegistrations.begin();
+	if (m_gcWorker->isRunning()) {
+		stopGC();
+	}
 
-	for (; mit != m_messageRegistrations.end(); ++mit)
+	QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>>::iterator mit = m_c2fQueues.begin();
+
+	for (; mit != m_c2fQueues.end(); ++mit)
 	{
 		QList<MessageQueue*>::iterator lit = mit->begin();
 
@@ -46,9 +48,10 @@ MessagePipes::~MessagePipes()
 	}
 }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, const Feature *feature, const QString& type)
+MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
 {
 	int typeId;
+	QMutexLocker mlock(&m_c2fMutex);
 
 	if (m_typeIds.contains(type))
 	{
@@ -60,19 +63,41 @@ MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, c
 		m_typeIds.insert(type, typeId);
 	}
 
-	const ChannelRegistrationKey regKey = ChannelRegistrationKey{source, typeId};
+	const MessagePipesCommon::ChannelRegistrationKey regKey = MessagePipesCommon::ChannelRegistrationKey{source, typeId};
+	MessageQueue *messageQueue;
 
-	if (m_messageRegistrations.contains(regKey))
+	if (m_c2fFEatures[regKey].contains(feature))
 	{
-		m_messageRegistrations.insert(regKey, QList<MessageQueue*>());
-		m_featureRegistrations.insert(regKey, QList<const Feature*>());
+		int i = m_c2fFEatures[regKey].indexOf(feature);
+		messageQueue = m_c2fQueues[regKey][i];
+	}
+	else
+	{
+		messageQueue = new MessageQueue();
+		m_c2fQueues[regKey].append(messageQueue);
+		m_c2fFEatures[regKey].append(feature);
 	}
 
-	MessageQueue *messageQueue = new MessageQueue();
-	m_messageRegistrations[regKey].append(messageQueue);
-	m_featureRegistrations[regKey].append(feature);
-
 	return messageQueue;
+}
+
+void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+{
+	if (m_typeIds.contains(type))
+	{
+		int typeId = m_typeIds.value(type);
+		const MessagePipesCommon::ChannelRegistrationKey regKey = MessagePipesCommon::ChannelRegistrationKey{source, typeId};
+
+		if (m_c2fFEatures.contains(regKey) && m_c2fFEatures[regKey].contains(feature))
+		{
+			QMutexLocker mlock(&m_c2fMutex);
+			int i = m_c2fFEatures[regKey].indexOf(feature);
+			m_c2fFEatures[regKey].removeAt(i);
+			MessageQueue *messageQueue = m_c2fQueues[regKey][i];
+			delete messageQueue;
+			m_c2fQueues[regKey].removeAt(i);
+		}
+	}
 }
 
 QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
@@ -81,11 +106,28 @@ QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, c
 		return nullptr;
 	}
 
-	const ChannelRegistrationKey regKey = ChannelRegistrationKey{source, m_typeIds.value(type)};
+	QMutexLocker mlock(&m_c2fMutex);
+	const MessagePipesCommon::ChannelRegistrationKey regKey = MessagePipesCommon::ChannelRegistrationKey{source, m_typeIds.value(type)};
 
-	if (m_messageRegistrations.contains(regKey)) {
-		return &m_messageRegistrations[regKey];
+	if (m_c2fQueues.contains(regKey)) {
+		return &m_c2fQueues[regKey];
 	} else {
 		return nullptr;
 	}
+}
+
+void MessagePipes::startGC()
+{
+	qDebug("MessagePipes::startGC");
+
+    m_gcWorker->startWork();
+    m_gcThread.start();
+}
+
+void MessagePipes::stopGC()
+{
+    qDebug("MessagePipes::stopGC");
+	m_gcWorker->stopWork();
+	m_gcThread.quit();
+	m_gcThread.wait();
 }

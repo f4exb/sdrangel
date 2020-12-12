@@ -218,7 +218,7 @@ bool VORLocalizer::handleMessage(const Message& cmd)
     }
     else if (VORLocalizerReport::MsgReportServiceddVORs::match(cmd))
     {
-        qDebug() << "VORLocalizer::handleMessage: MsgReportServiceddVORs:";
+        qDebug() << "VORLocalizer::handleMessage: MsgReportServiceddVORs";
         VORLocalizerReport::MsgReportServiceddVORs& report = (VORLocalizerReport::MsgReportServiceddVORs&) cmd;
         std::vector<int>& vorNavIds = report.getNavIds();
         m_vorSinglePlans = report.getSinglePlans();
@@ -236,6 +236,18 @@ bool VORLocalizer::handleMessage(const Message& cmd)
             msgToGUI->getNavIds() = vorNavIds;
             getMessageQueueToGUI()->push(msgToGUI);
         }
+
+        return true;
+    }
+    else if (MessagePipesCommon::MsgReportChannelDeleted::match(cmd))
+    {
+        qDebug() << "VORLocalizer::handleMessage: MsgReportChannelDeleted";
+        MessagePipesCommon::MsgReportChannelDeleted& report = (MessagePipesCommon::MsgReportChannelDeleted&) cmd;
+        const MessagePipesCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
+        const ChannelAPI *channel = channelKey.m_channel;
+        m_availableChannels.remove(const_cast<ChannelAPI*>(channel));
+        updateChannels();
+        MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "report");
 
         return true;
     }
@@ -366,6 +378,7 @@ void VORLocalizer::updateChannels()
     {
         VORLocalizerReport::MsgReportChannels *msgToGUI = VORLocalizerReport::MsgReportChannels::create();
         std::vector<VORLocalizerReport::MsgReportChannels::Channel>& msgChannels = msgToGUI->getChannels();
+        // TODO: check https://github.com/microsoft/vscode-cpptools/issues/6222
         QHash<ChannelAPI*, VORLocalizerSettings::AvailableChannel>::iterator it = m_availableChannels.begin();
 
         for (; it != m_availableChannels.end(); ++it)

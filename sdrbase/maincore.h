@@ -449,8 +449,8 @@ public:
     void setLoggingOptions();
     ChannelAPI *getChannel(unsigned int deviceSetIndex, int channelIndex);
     Feature *getFeature(unsigned int featureSetIndex, int featureIndex);
-    bool existsChannel(ChannelAPI *channel) const { return m_channelsMap.contains(channel); }
-    bool existsFeature(Feature *feature) const { return m_featuresMap.contains(feature); }
+    bool existsChannel(const ChannelAPI *channel) const { return m_channelsMap.contains(const_cast<ChannelAPI*>(channel)); }
+    bool existsFeature(const Feature *feature) const { return m_featuresMap.contains(const_cast<Feature*>(feature)); }
     // slave mode
     void appendFeatureSet();
     void removeFeatureSet(unsigned int index);

@@ -161,6 +161,8 @@ set(sdrbase_SOURCES
     limerfe/limerfeusbcalib.cpp
 
     pipes/messagepipes.cpp
+    pipes/messagepipescommon.cpp
+    pipes/messagepipesgcworker.cpp
 
     settings/featuresetpreset.cpp
     settings/preferences.cpp
@@ -335,6 +337,8 @@ set(sdrbase_HEADERS
     limerfe/limerfeusbcalib.h
 
     pipes/messagepipes.h
+    pipes/messagepipescommon.h
+    pipes/messagepipesgcworker.h
 
     plugin/plugininterface.h
     plugin/pluginapi.h

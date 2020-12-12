@@ -15,48 +15,49 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPES_H_
-#define SDRBASE_PIPES_MESSAGEPIPES_H_
+#ifndef SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
+#define SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
 
 #include <QObject>
-#include <QHash>
-#include <QMap>
-#include <QMutex>
-#include <QThread>
+#include <QTimer>
 
 #include "export.h"
-#include "util/messagequeue.h"
 
 #include "messagepipescommon.h"
 
-class ChannelAPI;
-class Feature;
-class MessagePipesGCWorker;
+class QMutex;
 
-class SDRBASE_API MessagePipes : public QObject
+class SDRBASE_API MessagePipesGCWorker : public QObject
 {
     Q_OBJECT
 public:
-    MessagePipes();
-    MessagePipes(const MessagePipes&) = delete;
-    MessagePipes& operator=(const MessagePipes&) = delete;
-    ~MessagePipes();
+    MessagePipesGCWorker();
+    ~MessagePipesGCWorker();
 
-    MessageQueue *registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    void unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    QList<MessageQueue*>* getMessageQueues(const ChannelAPI *source, const QString& type);
+    void setC2FRegistrations(
+        QMutex *c2fMutex,
+        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *c2fQueues,
+        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *c2fFeatures
+    )
+    {
+        m_c2fMutex = c2fMutex;
+        m_c2fQueues = c2fQueues;
+        m_c2fFeatures = c2fFeatures;
+    }
+
+    void startWork();
+    void stopWork();
+    bool isRunning() const { return m_running; }
 
 private:
-    QHash<QString, int> m_typeIds;
-    int m_typeCount;
-    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> m_c2fQueues;
-    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> m_c2fFEatures;
-    QMutex m_c2fMutex;
-    QThread m_gcThread; //!< Garbage collector thread
-    MessagePipesGCWorker *m_gcWorker; //!< Garbage collector
+    bool m_running;
+    QMutex *m_c2fMutex;
+    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *m_c2fQueues ;
+    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *m_c2fFeatures;
+    QTimer m_gcTimer;
 
-	void startGC(); //!< Start garbage collector
-	void stopGC();  //!< Stop garbage collector
+private slots:
+    void processGC(); //!< Collect garbage
 };
 
-#endif // SDRBASE_PIPES_MESSAGEPIPES_H_
+#endif

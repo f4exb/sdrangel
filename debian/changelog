@@ -1,3 +1,12 @@
+sdrangel (6.3.1-1) unstable; urgency=medium
+
+   * Implemented garbage collector for message pipes. Applies to VORLocalizer.
+   * FreeDV: removed useless set callback functions. Use mutex appropriately. Issue #728
+   * ATV demod: initialize m_tvScreenBuffer when setting m_registeredTVScreen. Issue #728
+   * TVScreenAnalog: removed usage of std::shared_ptr. Issue #728
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 12 Dec 2020 14:45:22 +0100
+
 sdrangel (6.3.0-1) unstable; urgency=medium
 
    * Single channel VOR demodulator plugin. Issue #729
