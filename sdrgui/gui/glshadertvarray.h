@@ -26,7 +26,6 @@
 #include <QOpenGLFunctions_3_0>
 #include <QOpenGLTexture>
 #include <QOpenGLShaderProgram>
-#include <QOpenGLContext>
 #include <QMatrix4x4>
 #include <QVector4D>
 #include <QDebug>
@@ -46,8 +45,8 @@ public:
     void setColor(bool blnColor) { m_blnColor = blnColor; }
     void setAlphaBlend(bool blnAlphaBlend) { m_blnAlphaBlend = blnAlphaBlend; }
     void setAlphaReset() { m_blnAlphaReset = true; }
-    void InitializeGL(int intCols, int intRows);
-    void Cleanup();
+    void initializeGL(int intCols, int intRows);
+    void cleanup();
     QRgb *GetRowBuffer(int intRow);
     void RenderPixels(unsigned char *chrData);
     void ResetPixels();
@@ -60,8 +59,8 @@ public:
 protected:
 
     QOpenGLShaderProgram *m_objProgram;
-    int m_objMatrixLoc;
-    int m_objTextureLoc;
+    int m_matrixLoc;
+    int m_textureLoc;
     //int m_objColorLoc;
     static const QString m_strVertexShaderSourceArray;
     static const QString m_strFragmentShaderSourceColored;

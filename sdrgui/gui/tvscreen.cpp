@@ -36,7 +36,7 @@ TVScreen::TVScreen(bool blnColor, QWidget* parent) :
     connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
     m_objTimer.start(40); // capped at 25 FPS
 
-    m_chrLastData = NULL;
+    m_chrLastData = nullptr;
     m_blnConfigChanged = false;
     m_blnDataChanged = false;
     m_blnGLContextInitialized = false;
@@ -50,7 +50,6 @@ TVScreen::TVScreen(bool blnColor, QWidget* parent) :
 
 TVScreen::~TVScreen()
 {
-    cleanup();
 }
 
 void TVScreen::setColor(bool blnColor)
@@ -62,7 +61,7 @@ QRgb* TVScreen::getRowBuffer(int intRow)
 {
     if (!m_blnGLContextInitialized)
     {
-        return NULL;
+        return nullptr;
     }
 
     return m_objGLShaderArray.GetRowBuffer(intRow);
@@ -127,7 +126,7 @@ void TVScreen::initializeGL()
 
     QSurface *objSurface = objGlCurrentContext->surface();
 
-    if (objSurface == NULL)
+    if (objSurface == nullptr)
     {
         qCritical() << "TVScreen::initializeGL: no surface attached";
         return;
@@ -172,7 +171,7 @@ void TVScreen::paintGL()
 
     if ((m_intAskedCols != 0) && (m_intAskedRows != 0))
     {
-        m_objGLShaderArray.InitializeGL(m_intAskedCols, m_intAskedRows);
+        m_objGLShaderArray.initializeGL(m_intAskedCols, m_intAskedRows);
         m_intAskedCols = 0;
         m_intAskedRows = 0;
     }
@@ -206,7 +205,7 @@ void TVScreen::cleanup()
 {
     if (m_blnGLContextInitialized)
     {
-        m_objGLShaderArray.Cleanup();
+        m_objGLShaderArray.cleanup();
     }
 }
 

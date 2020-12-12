@@ -112,7 +112,7 @@ TVScreenAnalogBuffer *TVScreenAnalog::getBackBuffer()
 
 void TVScreenAnalog::resizeTVScreen(int intCols, int intRows)
 {
-	qDebug("TVScreen::resizeTVScreen: cols: %d, rows: %d", intCols, intRows);
+	qDebug("TVScreenAnalog::resizeTVScreen: cols: %d, rows: %d", intCols, intRows);
 
 	int colsAdj = intCols + 4;
 	QMutexLocker lock(&m_buffersMutex);

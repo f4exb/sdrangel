@@ -16,6 +16,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QOpenGLContext>
 #include <gui/glshadertvarray.h>
 
 const QString GLShaderTVArray::m_strVertexShaderSourceArray = QString(
@@ -39,24 +40,24 @@ GLShaderTVArray::GLShaderTVArray(bool blnColor) : m_blnColor(blnColor)
 {
 	m_blnAlphaBlend = false;
     m_blnAlphaReset = false;
-    m_objProgram = 0;
-    m_objImage = 0;
-    m_objTexture = 0;
+    m_objProgram = nullptr;
+    m_objImage = nullptr;
+    m_objTexture = nullptr;
     m_intCols = 0;
     m_intRows = 0;
     m_blnInitialized = false;
-    m_objCurrentRow = 0;
+    m_objCurrentRow = nullptr;
 
-    m_objTextureLoc = 0;
-    m_objMatrixLoc = 0;
+    m_textureLoc = 0;
+    m_matrixLoc = 0;
 }
 
 GLShaderTVArray::~GLShaderTVArray()
 {
-    Cleanup();
+    cleanup();
 }
 
-void GLShaderTVArray::InitializeGL(int intCols, int intRows)
+void GLShaderTVArray::initializeGL(int intCols, int intRows)
 {
     QMatrix4x4 objQMatrix;
 
@@ -65,9 +66,9 @@ void GLShaderTVArray::InitializeGL(int intCols, int intRows)
     m_intCols = 0;
     m_intRows = 0;
 
-    m_objCurrentRow = 0;
+    m_objCurrentRow = nullptr;
 
-    if (m_objProgram == 0)
+    if (!m_objProgram)
     {
         m_objProgram = new QOpenGLShaderProgram();
 
@@ -95,18 +96,18 @@ void GLShaderTVArray::InitializeGL(int intCols, int intRows)
         }
 
         m_objProgram->bind();
-        m_objProgram->setUniformValue(m_objMatrixLoc, objQMatrix);
-        m_objProgram->setUniformValue(m_objTextureLoc, 0);
+        m_objProgram->setUniformValue(m_matrixLoc, objQMatrix);
+        m_objProgram->setUniformValue(m_textureLoc, 0);
         m_objProgram->release();
     }
 
-    m_objMatrixLoc = m_objProgram->uniformLocation("uMatrix");
-    m_objTextureLoc = m_objProgram->uniformLocation("uTexture");
+    m_matrixLoc = m_objProgram->uniformLocation("uMatrix");
+    m_textureLoc = m_objProgram->uniformLocation("uTexture");
 
-    if (m_objTexture != 0)
+    if (m_objTexture)
     {
         delete m_objTexture;
-        m_objTexture = 0;
+        m_objTexture = nullptr;
     }
 
     //Image container
@@ -133,7 +134,7 @@ QRgb * GLShaderTVArray::GetRowBuffer(int intRow)
         return 0;
     }
 
-    if (m_objImage == 0)
+    if (!m_objImage)
     {
         return 0;
     }
@@ -170,13 +171,11 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
     QRgb *ptrLine;
     int intVal;
 
-    if (!m_blnInitialized)
-    {
+    if (!m_blnInitialized) {
         return;
     }
 
-    if (m_objImage == 0)
-    {
+    if (m_objImage) {
         return;
     }
 
@@ -210,18 +209,22 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
     m_objProgram->bind();
 
-    m_objProgram->setUniformValue(m_objMatrixLoc, objQMatrix);
-    m_objProgram->setUniformValue(m_objTextureLoc, 0);
+    m_objProgram->setUniformValue(m_matrixLoc, objQMatrix);
+    m_objProgram->setUniformValue(m_textureLoc, 0);
 
-    if (m_blnAlphaReset) {
+    if (m_blnAlphaReset)
+    {
         ptrF->glClear(GL_COLOR_BUFFER_BIT);
         m_blnAlphaReset = false;
     }
 
-    if (m_blnAlphaBlend) {
+    if (m_blnAlphaBlend)
+    {
         ptrF->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         ptrF->glEnable(GL_BLEND);
-    } else {
+    }
+    else
+    {
     	ptrF->glDisable(GL_BLEND);
     }
 
@@ -250,45 +253,43 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
 
 void GLShaderTVArray::ResetPixels()
 {
-    if (m_objImage != 0)
-    {
+    if (m_objImage) {
         m_objImage->fill(0);
     }
 }
 
 void GLShaderTVArray::ResetPixels(int alpha)
 {
-    if (m_objImage != 0)
-    {
+    if (m_objImage) {
         m_objImage->fill(qRgba(0, 0, 0, alpha));
     }
 }
 
-void GLShaderTVArray::Cleanup()
+void GLShaderTVArray::cleanup()
 {
     m_blnInitialized = false;
 
     m_intCols = 0;
     m_intRows = 0;
 
-    m_objCurrentRow = 0;
+    m_objCurrentRow = nullptr;
 
     if (m_objProgram)
     {
         delete m_objProgram;
-        m_objProgram = 0;
+        m_objProgram = nullptr;
     }
 
-    if (m_objTexture != 0)
+    if (m_objTexture)
     {
         delete m_objTexture;
-        m_objTexture = 0;
+        m_objTexture = nullptr;
     }
 
-    if (m_objImage != 0)
+    if (m_objImage)
     {
         delete m_objImage;
-        m_objImage = 0;
+        m_objImage = nullptr;
     }
 }
 
@@ -305,7 +306,7 @@ bool GLShaderTVArray::SelectRow(int intLine)
         }
         else
         {
-            m_objCurrentRow = 0;
+            m_objCurrentRow = nullptr;
         }
     }
 
@@ -318,7 +319,7 @@ bool GLShaderTVArray::SetDataColor(int intCol, QRgb objColor)
 
     if (m_blnInitialized)
     {
-        if ((intCol < m_intCols) && (intCol >= 0) && (m_objCurrentRow != 0))
+        if ((intCol < m_intCols) && (intCol >= 0) && (m_objCurrentRow))
         {
             m_objCurrentRow[intCol] = objColor;
             blnRslt = true;
