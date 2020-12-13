@@ -1,3 +1,10 @@
+sdrangel (6.3.3-1) unstable; urgency=medium
+
+   * AFC: use message pipes for channel settings feedback. Updated channel plugins.
+   * Message pipes: implemented message queues recycling when features disappear.
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 13 Dec 2020 18:59:52 +0100
+
 sdrangel (6.3.2-1) unstable; urgency=medium
 
    * Fixed MSVC compilation of message pipes.
