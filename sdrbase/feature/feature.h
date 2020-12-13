@@ -25,11 +25,11 @@
 #include <QByteArray>
 
 #include "export.h"
-#include "util/message.h"
 #include "util/messagequeue.h"
 
 class WebAPIAdapterInterface;
 class ChannelAPI;
+class Message;
 
 namespace SWGSDRangel
 {
@@ -43,44 +43,6 @@ namespace SWGSDRangel
 class SDRBASE_API Feature : public QObject {
     Q_OBJECT
 public:
-    class SDRBASE_API MsgChannelSettings : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        const ChannelAPI *getChannelAPI() const { return m_channelAPI; }
-        const QList<QString>& getChannelSettingsKeys() const { return m_channelSettingsKeys; }
-        SWGSDRangel::SWGChannelSettings *getSWGSettings() const { return m_swgSettings; }
-        bool getForce() const { return m_force; }
-
-        static MsgChannelSettings* create(
-            const ChannelAPI *channelAPI,
-            const QList<QString>& channelSettingsKey,
-            SWGSDRangel::SWGChannelSettings *swgSettings,
-            bool force)
-        {
-            return new MsgChannelSettings(channelAPI, channelSettingsKey, swgSettings, force);
-        }
-
-    private:
-        const ChannelAPI *m_channelAPI;
-        QList<QString> m_channelSettingsKeys;
-        SWGSDRangel::SWGChannelSettings *m_swgSettings;
-        bool m_force;
-
-        MsgChannelSettings(
-            const ChannelAPI *channelAPI,
-            const QList<QString>& channelSettingsKeys,
-            SWGSDRangel::SWGChannelSettings *swgSettings,
-            bool force
-        ) :
-            Message(),
-            m_channelAPI(channelAPI),
-            m_channelSettingsKeys(channelSettingsKeys),
-            m_swgSettings(swgSettings),
-            m_force(force)
-        { }
-    };
-
     enum FeatureState {
 		StNotStarted,  //!< feature is before initialization
 		StIdle,        //!< feature is idle

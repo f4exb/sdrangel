@@ -46,6 +46,7 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgApplySettings, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgAddFeature, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeature, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelReport, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelSettings, Message)
 
 MainCore::MainCore()
 {

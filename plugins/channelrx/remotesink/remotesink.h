@@ -133,7 +133,12 @@ private:
     static void validateFilterChainHash(RemoteSinkSettings& settings);
     void calculateFrequencyOffset();
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
-    void featuresSendSettings(QList<QString>& channelSettingsKeys, const RemoteSinkSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const RemoteSinkSettings& settings,
+        bool force
+    );
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,

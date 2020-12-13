@@ -113,12 +113,12 @@ bool AFC::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (Feature::MsgChannelSettings::match(cmd))
+    else if (MainCore::MsgChannelSettings::match(cmd))
     {
-        Feature::MsgChannelSettings& cfg = (Feature::MsgChannelSettings&) cmd;
+        MainCore::MsgChannelSettings& cfg = (MainCore::MsgChannelSettings&) cmd;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = cfg.getSWGSettings();
         QString *channelType  = swgChannelSettings->getChannelType();
-        qDebug() << "AFC::handleMessage: Feature::MsgChannelSettings: " << *channelType;
+        qDebug() << "AFC::handleMessage: MainCore::MsgChannelSettings: " << *channelType;
 
         if (m_worker->isRunning())
         {
@@ -129,6 +129,16 @@ bool AFC::handleMessage(const Message& cmd)
             delete swgChannelSettings;
             return true;
         }
+    }
+    else if (MessagePipesCommon::MsgReportChannelDeleted::match(cmd))
+    {
+        qDebug() << "AFC::handleMessage: MessagePipesCommon::MsgReportChannelDeleted";
+        MessagePipesCommon::MsgReportChannelDeleted& report = (MessagePipesCommon::MsgReportChannelDeleted&) cmd;
+        const MessagePipesCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
+        const ChannelAPI *channel = channelKey.m_channel;
+        MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "settings");
+
+        return true;
     }
     else if (MsgDeviceTrack::match(cmd))
     {
@@ -532,7 +542,14 @@ void AFC::trackerDeviceChange(int deviceIndex)
 
         if (channel->getURI() == "sdrangel.channel.freqtracker")
         {
-            channel->addFeatureSettingsFeedback(this);
+            MessageQueue *messageQueue = mainCore->getMessagePipes().registerChannelToFeature(channel, this, "settings");
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
             m_trackerChannelAPI = channel;
             break;
         }
@@ -550,7 +567,14 @@ void AFC::trackedDeviceChange(int deviceIndex)
 
         if (channel->getURI() != "sdrangel.channel.freqtracker")
         {
-            channel->addFeatureSettingsFeedback(this);
+            MessageQueue *messageQueue = mainCore->getMessagePipes().registerChannelToFeature(channel, this, "settings");
+            QObject::connect(
+                messageQueue,
+                &MessageQueue::messageEnqueued,
+                this,
+                [=](){ this->handleChannelMessageQueue(messageQueue); },
+                Qt::QueuedConnection
+            );
             m_trackerIndexInDeviceSet = i;
         }
     }
@@ -561,7 +585,7 @@ void AFC::removeTrackerFeatureReference()
     if (m_trackerChannelAPI)
     {
         if (MainCore::instance()->existsChannel(m_trackerChannelAPI)) {
-            m_trackerChannelAPI->removeFeatureSettingsFeedback(this);
+            MainCore::instance()->getMessagePipes().unregisterChannelToFeature(m_trackerChannelAPI, this, "settings");
         }
     }
 }
@@ -573,9 +597,21 @@ void AFC::removeTrackedFeatureReferences()
         ChannelAPI *channel = *it;
 
         if (MainCore::instance()->existsChannel(channel)) {
-            channel->removeFeatureSettingsFeedback(this);
+            MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "settings");
         }
     }
 
     m_trackedChannelAPIs.clear();
+}
+
+void AFC::handleChannelMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
 }

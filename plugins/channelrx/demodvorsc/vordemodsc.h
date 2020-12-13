@@ -145,7 +145,12 @@ private:
     void applySettings(const VORDemodSCSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force);
-    void featuresSendSettings(QList<QString>& channelSettingsKeys, const VORDemodSCSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const VORDemodSCSettings& settings,
+        bool force
+    );
     void sendChannelReport(QList<MessageQueue*> *messageQueues);
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,

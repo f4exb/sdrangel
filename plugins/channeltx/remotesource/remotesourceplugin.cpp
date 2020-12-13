@@ -28,7 +28,7 @@
 const PluginDescriptor RemoteSourcePlugin::m_pluginDescriptor = {
     RemoteSource::m_channelId,
     QStringLiteral("Remote channel source"),
-    QStringLiteral("4.19.0"),
+    QStringLiteral("6.3.3"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

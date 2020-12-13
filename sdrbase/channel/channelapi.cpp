@@ -21,7 +21,6 @@
 #include "channelapi.h"
 
 ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
-    m_featuresSettingsFeedbackBlockCount(0),
     m_streamType(streamType),
     m_name(uri),
     m_uri(uri),
@@ -30,14 +29,3 @@ ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
     m_deviceAPI(0),
     m_uid(UidCalculator::getNewObjectId())
 { }
-
-void ChannelAPI::addFeatureSettingsFeedback(Feature *feature)
-{
-    m_featuresSettingsFeedback.removeOne(feature);
-    m_featuresSettingsFeedback.append(feature);
-}
-
-void ChannelAPI::removeFeatureSettingsFeedback(Feature *feature)
-{
-    m_featuresSettingsFeedback.removeOne(feature);
-}

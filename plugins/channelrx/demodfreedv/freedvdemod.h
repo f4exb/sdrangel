@@ -159,7 +159,12 @@ private:
 	void applySettings(const FreeDVDemodSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);
-    void featuresSendSettings(QList<QString>& channelSettingsKeys, const FreeDVDemodSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const FreeDVDemodSettings& settings,
+        bool force
+    );
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,

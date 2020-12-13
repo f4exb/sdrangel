@@ -151,7 +151,12 @@ private:
     DeviceSampleSink *getLocalDevice(uint32_t index);
 
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force);
-    void featuresSendSettings(QList<QString>& channelSettingsKeys, const LocalSourceSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const LocalSourceSettings& settings,
+        bool force
+    );
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,

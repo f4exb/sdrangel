@@ -30,7 +30,7 @@
 const PluginDescriptor LocalSourcePlugin::m_pluginDescriptor = {
     LocalSource::m_channelId,
     QStringLiteral("Local channel source"),
-    QStringLiteral("4.19.0"),
+    QStringLiteral("6.3.3"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

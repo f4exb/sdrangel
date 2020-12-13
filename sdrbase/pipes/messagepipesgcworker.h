@@ -52,8 +52,9 @@ public:
 private:
     bool m_running;
     QMutex *m_c2fMutex;
-    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *m_c2fQueues ;
+    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *m_c2fQueues;
     QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *m_c2fFeatures;
+    QList<MessageQueue*> m_c2fQueuesToDelete;
     QTimer m_gcTimer;
 
 private slots:

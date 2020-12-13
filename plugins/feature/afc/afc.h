@@ -178,6 +178,7 @@ private:
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void handleChannelMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_AFC_H_

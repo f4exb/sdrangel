@@ -106,12 +106,12 @@ bool AFCWorker::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (Feature::MsgChannelSettings::match(cmd))
+    else if (MainCore::MsgChannelSettings::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);
-        Feature::MsgChannelSettings& cfg = (Feature::MsgChannelSettings&) cmd;
+        MainCore::MsgChannelSettings& cfg = (MainCore::MsgChannelSettings&) cmd;
         SWGSDRangel::SWGChannelSettings *swgChannelSettings = cfg.getSWGSettings();
-        qDebug() << "AFCWorker::handleMessage: Feature::MsgChannelSettings:" << *swgChannelSettings->getChannelType();
+        qDebug() << "AFCWorker::handleMessage: MainCore::MsgChannelSettings:" << *swgChannelSettings->getChannelType();
         processChannelSettings(cfg.getChannelAPI(), swgChannelSettings);
 
         delete swgChannelSettings;
@@ -341,7 +341,6 @@ bool AFCWorker::updateChannelOffset(ChannelAPI *channelAPI, int direction, int o
         .arg(jsonSettingsStr);
     swgChannelSettings.fromJson(jsonStr);
 
-    channelAPI->setFeatureSettingsFeedbackBlockCount(1);
     int httpRC = m_webAPIAdapterInterface->devicesetChannelSettingsPutPatch(
         m_trackedDeviceSet->getIndex(),
         channelAPI->getIndexInDeviceSet(),

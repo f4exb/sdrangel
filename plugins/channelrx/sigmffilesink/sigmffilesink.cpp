@@ -295,8 +295,10 @@ void SigMFFileSink::applySettings(const SigMFFileSinkSettings& settings, bool fo
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    if (m_featuresSettingsFeedback.size() > 0) {
-        featuresSendSettings(reverseAPIKeys, settings, force);
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(this, "settings");
+
+    if (messageQueues) {
+        sendChannelSettings(messageQueues, reverseAPIKeys, settings, force);
     }
 
     m_settings = settings;
@@ -550,31 +552,25 @@ void SigMFFileSink::webapiReverseSendSettings(QList<QString>& channelSettingsKey
     delete swgChannelSettings;
 }
 
-void SigMFFileSink::featuresSendSettings(QList<QString>& channelSettingsKeys, const SigMFFileSinkSettings& settings, bool force)
+void SigMFFileSink::sendChannelSettings(
+    QList<MessageQueue*> *messageQueues,
+    QList<QString>& channelSettingsKeys,
+    const SigMFFileSinkSettings& settings,
+    bool force)
 {
-    QList<Feature*>::iterator it = m_featuresSettingsFeedback.begin();
-    MainCore *mainCore = MainCore::instance();
+    QList<MessageQueue*>::iterator it = messageQueues->begin();
 
-    for (; it != m_featuresSettingsFeedback.end(); ++it)
+    for (; it != messageQueues->end(); ++it)
     {
-        if (mainCore->existsFeature(*it))
-        {
-            SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
-            webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
-
-            Feature::MsgChannelSettings *msg = Feature::MsgChannelSettings::create(
-                this,
-                channelSettingsKeys,
-                swgChannelSettings,
-                force
-            );
-
-            (*it)->getInputMessageQueue()->push(msg);
-        }
-        else
-        {
-            m_featuresSettingsFeedback.removeOne(*it);
-        }
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings = new SWGSDRangel::SWGChannelSettings();
+        webapiFormatChannelSettings(channelSettingsKeys, swgChannelSettings, settings, force);
+        MainCore::MsgChannelSettings *msg = MainCore::MsgChannelSettings::create(
+            this,
+            channelSettingsKeys,
+            swgChannelSettings,
+            force
+        );
+        (*it)->push(msg);
     }
 }
 

@@ -158,7 +158,12 @@ private:
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
     void webapiFormatRDSReport(SWGSDRangel::SWGRDSReport *report);
     void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const BFMDemodSettings& settings, bool force);
-    void featuresSendSettings(QList<QString>& channelSettingsKeys, const BFMDemodSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const BFMDemodSettings& settings,
+        bool force
+    );
     void webapiFormatChannelSettings(
         QList<QString>& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings *swgChannelSettings,
