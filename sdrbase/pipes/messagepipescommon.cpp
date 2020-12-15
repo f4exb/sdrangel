@@ -18,12 +18,3 @@
 #include "messagepipescommon.h"
 
 MESSAGE_CLASS_DEFINITION(MessagePipesCommon::MsgReportChannelDeleted, Message)
-
-bool MessagePipesCommon::ChannelRegistrationKey::operator<(const ChannelRegistrationKey& other) const
-{
-	if (m_channel !=  other.m_channel) {
-		return m_channel < other.m_channel;
-	} else {
-		return m_typeId < other.m_typeId;
-	}
-}

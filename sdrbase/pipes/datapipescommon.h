@@ -15,45 +15,49 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPES_H_
-#define SDRBASE_PIPES_MESSAGEPIPES_H_
+#ifndef SDRBASE_PIPES_DATAPIPESCOMON_H_
+#define SDRBASE_PIPES_DATAPIPESCOMON_H_
 
-#include <QObject>
 #include <QHash>
 #include <QMap>
 #include <QMutex>
-#include <QThread>
 
 #include "export.h"
+#include "util/message.h"
 
-#include "messagepipescommon.h"
-#include "elementpipesregistrations.h"
+#include "elementpipescommon.h"
 
 class ChannelAPI;
 class Feature;
-class MessagePipesGCWorker;
-class MessageQueue;
+class DataFifo;
 
-class SDRBASE_API MessagePipes : public QObject
+class SDRBASE_API DataPipesCommon
 {
-    Q_OBJECT
 public:
-    MessagePipes();
-    MessagePipes(const MessagePipes&) = delete;
-    MessagePipes& operator=(const MessagePipes&) = delete;
-    ~MessagePipes();
+    typedef ElementPipesCommon::RegistrationKey<ChannelAPI> ChannelRegistrationKey;
 
-    MessageQueue *registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    void unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    QList<MessageQueue*>* getMessageQueues(const ChannelAPI *source, const QString& type);
+    /** Send this message to stakeholders when the garbage collector finds that a channel was deleted */
+    class SDRBASE_API MsgReportChannelDeleted : public Message {
+        MESSAGE_CLASS_DECLARATION
 
-private:
-    ElementPipesRegistrations<ChannelAPI, Feature, MessageQueue> m_registrations;
-    QThread m_gcThread; //!< Garbage collector thread
-    MessagePipesGCWorker *m_gcWorker; //!< Garbage collector
+    public:
+        const DataFifo *getFifo() const { return m_fifo; }
+        const ChannelRegistrationKey& getChannelRegistrationKey() const { return m_channelRegistrationKey; }
 
-	void startGC(); //!< Start garbage collector
-	void stopGC();  //!< Stop garbage collector
+        static MsgReportChannelDeleted* create(const DataFifo *fifo, const ChannelRegistrationKey& channelRegistrationKey) {
+            return new MsgReportChannelDeleted(fifo, channelRegistrationKey);
+        }
+
+    private:
+        const DataFifo *m_fifo;
+        ChannelRegistrationKey m_channelRegistrationKey;
+
+        MsgReportChannelDeleted(const DataFifo *fifo, const ChannelRegistrationKey& channelRegistrationKey) :
+            Message(),
+            m_fifo(fifo),
+            m_channelRegistrationKey(channelRegistrationKey)
+        { }
+    };
 };
 
-#endif // SDRBASE_PIPES_MESSAGEPIPES_H_
+#endif // SDRBASE_PIPES_DATAPIPESCOMON_H_

@@ -29,7 +29,6 @@
 #include "export.h"
 
 class DeviceAPI;
-class Feature;
 
 namespace SWGSDRangel
 {

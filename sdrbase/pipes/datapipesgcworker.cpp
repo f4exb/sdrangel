@@ -15,58 +15,52 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QGlobalStatic>
+#include "feature/feature.h"
+#include "dsp/datafifo.h"
+#include "maincore.h"
+#include "datapipescommon.h"
+#include "datapipesgcworker.h"
 
-#include "util/messagequeue.h"
-
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
-
-MessagePipes::MessagePipes()
+bool DataPipesGCWorker::DataPipesGC::existsProducer(const ChannelAPI *channel)
 {
-	m_gcWorker = new MessagePipesGCWorker();
-	m_gcWorker->setC2FRegistrations(
-		m_registrations.getMutex(),
-		m_registrations.getElements(),
-		m_registrations.getConsumers()
-	);
-	m_gcWorker->moveToThread(&m_gcThread);
-	startGC();
+    return MainCore::instance()->existsChannel(channel);
 }
 
-MessagePipes::~MessagePipes()
+bool DataPipesGCWorker::DataPipesGC::existsConsumer(const Feature *feature)
 {
-	if (m_gcWorker->isRunning()) {
-		stopGC();
-	}
+    return MainCore::instance()->existsFeature(feature);
 }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+void DataPipesGCWorker::DataPipesGC::sendMessageToConsumer(const DataFifo *fifo,  DataPipesCommon::ChannelRegistrationKey channelKey, Feature *feature)
 {
-	return m_registrations.registerProducerToConsumer(source, feature, type);
+    DataPipesCommon::MsgReportChannelDeleted *msg = DataPipesCommon::MsgReportChannelDeleted::create(
+        fifo, channelKey);
+    feature->getInputMessageQueue()->push(msg);
 }
 
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+DataPipesGCWorker::DataPipesGCWorker() :
+    m_running(false)
+{}
+
+DataPipesGCWorker::~DataPipesGCWorker()
+{}
+
+void DataPipesGCWorker::startWork()
 {
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
+    connect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
+    m_gcTimer.start(10000); // collect garbage every 10s
+    m_running = true;
 }
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
+void DataPipesGCWorker::stopWork()
 {
-	return m_registrations.getElements(source, type);
+    m_running = false;
+    m_gcTimer.stop();
+    disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
 }
 
-void MessagePipes::startGC()
+void DataPipesGCWorker::processGC()
 {
-	qDebug("MessagePipes::startGC");
-    m_gcWorker->startWork();
-    m_gcThread.start();
-}
-
-void MessagePipes::stopGC()
-{
-    qDebug("MessagePipes::stopGC");
-	m_gcWorker->stopWork();
-	m_gcThread.quit();
-	m_gcThread.wait();
+    // qDebug("MessagePipesGCWorker::processGC");
+    m_dataPipesGC.processGC();
 }

@@ -24,6 +24,7 @@
 
 #include "export.h"
 #include "util/message.h"
+#include "elementpipescommon.h"
 
 class ChannelAPI;
 class Feature;
@@ -32,16 +33,7 @@ class MessageQueue;
 class SDRBASE_API MessagePipesCommon
 {
 public:
-    struct ChannelRegistrationKey
-    {
-        const ChannelAPI *m_channel;
-        int m_typeId;
-
-        ChannelRegistrationKey() = default;
-        ChannelRegistrationKey(const ChannelRegistrationKey&) = default;
-        ChannelRegistrationKey& operator=(const ChannelRegistrationKey&) = default;
-        bool operator<(const ChannelRegistrationKey& other) const;
-    };
+    typedef ElementPipesCommon::RegistrationKey<ChannelAPI> ChannelRegistrationKey;
 
     /** Send this message to stakeholders when the garbage collector finds that a channel was deleted */
     class SDRBASE_API MsgReportChannelDeleted : public Message {

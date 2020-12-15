@@ -135,7 +135,7 @@ bool AFC::handleMessage(const Message& cmd)
         qDebug() << "AFC::handleMessage: MessagePipesCommon::MsgReportChannelDeleted";
         MessagePipesCommon::MsgReportChannelDeleted& report = (MessagePipesCommon::MsgReportChannelDeleted&) cmd;
         const MessagePipesCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
-        const ChannelAPI *channel = channelKey.m_channel;
+        const ChannelAPI *channel = channelKey.m_key;
         MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "settings");
 
         return true;

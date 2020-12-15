@@ -15,58 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QGlobalStatic>
+#ifndef SDRBASE_PIPES_ELEMNTPIPESCOMMON_H_
+#define SDRBASE_PIPES_ELEMNTPIPESCOMMON_H_
 
-#include "util/messagequeue.h"
+namespace ElementPipesCommon {
 
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
-
-MessagePipes::MessagePipes()
+template<typename T>
+struct RegistrationKey
 {
-	m_gcWorker = new MessagePipesGCWorker();
-	m_gcWorker->setC2FRegistrations(
-		m_registrations.getMutex(),
-		m_registrations.getElements(),
-		m_registrations.getConsumers()
-	);
-	m_gcWorker->moveToThread(&m_gcThread);
-	startGC();
-}
+    const T *m_key;
+    int m_typeId;
 
-MessagePipes::~MessagePipes()
-{
-	if (m_gcWorker->isRunning()) {
-		stopGC();
-	}
-}
+    RegistrationKey() = default;
+    RegistrationKey(const RegistrationKey&) = default;
+    RegistrationKey& operator=(const RegistrationKey&) = default;
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	return m_registrations.registerProducerToConsumer(source, feature, type);
-}
+    bool operator<(const RegistrationKey& other) const
+    {
+        if (m_key !=  other.m_key) {
+            return m_key < other.m_key;
+        } else {
+            return m_typeId < other.m_typeId;
+        }
+    }
+};
 
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
-}
+} // ElementPipesCommon
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
-{
-	return m_registrations.getElements(source, type);
-}
-
-void MessagePipes::startGC()
-{
-	qDebug("MessagePipes::startGC");
-    m_gcWorker->startWork();
-    m_gcThread.start();
-}
-
-void MessagePipes::stopGC()
-{
-    qDebug("MessagePipes::stopGC");
-	m_gcWorker->stopWork();
-	m_gcThread.quit();
-	m_gcThread.wait();
-}
+#endif // SDRBASE_PIPES_ELEMNTPIPESCOMMON_H_

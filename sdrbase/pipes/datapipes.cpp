@@ -15,16 +15,14 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QGlobalStatic>
+#include "dsp/datafifo.h"
 
-#include "util/messagequeue.h"
+#include "datapipesgcworker.h"
+#include "datapipes.h"
 
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
-
-MessagePipes::MessagePipes()
+DataPipes::DataPipes()
 {
-	m_gcWorker = new MessagePipesGCWorker();
+	m_gcWorker = new DataPipesGCWorker();
 	m_gcWorker->setC2FRegistrations(
 		m_registrations.getMutex(),
 		m_registrations.getElements(),
@@ -34,38 +32,39 @@ MessagePipes::MessagePipes()
 	startGC();
 }
 
-MessagePipes::~MessagePipes()
+DataPipes::~DataPipes()
 {
 	if (m_gcWorker->isRunning()) {
 		stopGC();
 	}
 }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+DataFifo *DataPipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
 {
 	return m_registrations.registerProducerToConsumer(source, feature, type);
 }
 
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+void DataPipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
 {
 	m_registrations.unregisterProducerToConsumer(source, feature, type);
 }
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
+QList<DataFifo*>* DataPipes::getFifos(const ChannelAPI *source, const QString& type)
 {
 	return m_registrations.getElements(source, type);
 }
 
-void MessagePipes::startGC()
+void DataPipes::startGC()
 {
-	qDebug("MessagePipes::startGC");
+	qDebug("DataPipes::startGC");
+
     m_gcWorker->startWork();
     m_gcThread.start();
 }
 
-void MessagePipes::stopGC()
+void DataPipes::stopGC()
 {
-    qDebug("MessagePipes::stopGC");
+    qDebug("DataPipes::stopGC");
 	m_gcWorker->stopWork();
 	m_gcThread.quit();
 	m_gcThread.wait();

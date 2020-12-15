@@ -15,58 +15,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QGlobalStatic>
+#include "datapipescommon.h"
 
-#include "util/messagequeue.h"
-
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
-
-MessagePipes::MessagePipes()
-{
-	m_gcWorker = new MessagePipesGCWorker();
-	m_gcWorker->setC2FRegistrations(
-		m_registrations.getMutex(),
-		m_registrations.getElements(),
-		m_registrations.getConsumers()
-	);
-	m_gcWorker->moveToThread(&m_gcThread);
-	startGC();
-}
-
-MessagePipes::~MessagePipes()
-{
-	if (m_gcWorker->isRunning()) {
-		stopGC();
-	}
-}
-
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	return m_registrations.registerProducerToConsumer(source, feature, type);
-}
-
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
-}
-
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
-{
-	return m_registrations.getElements(source, type);
-}
-
-void MessagePipes::startGC()
-{
-	qDebug("MessagePipes::startGC");
-    m_gcWorker->startWork();
-    m_gcThread.start();
-}
-
-void MessagePipes::stopGC()
-{
-    qDebug("MessagePipes::stopGC");
-	m_gcWorker->stopWork();
-	m_gcThread.quit();
-	m_gcThread.wait();
-}
+MESSAGE_CLASS_DEFINITION(DataPipesCommon::MsgReportChannelDeleted, Message)

@@ -16,15 +16,33 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "feature/feature.h"
+#include "util/messagequeue.h"
 #include "maincore.h"
 #include "messagepipescommon.h"
 #include "messagepipesgcworker.h"
 
+bool MessagePipesGCWorker::MessagePipesGC::existsProducer(const ChannelAPI *channel)
+{
+    return MainCore::instance()->existsChannel(channel);
+}
+
+bool MessagePipesGCWorker::MessagePipesGC::existsConsumer(const Feature *feature)
+{
+    return MainCore::instance()->existsFeature(feature);
+}
+
+void MessagePipesGCWorker::MessagePipesGC::sendMessageToConsumer(
+    const MessageQueue *messageQueue,
+    MessagePipesCommon::ChannelRegistrationKey channelKey,
+    Feature *feature)
+{
+    MessagePipesCommon::MsgReportChannelDeleted *msg = MessagePipesCommon::MsgReportChannelDeleted::create(
+        messageQueue, channelKey);
+    feature->getInputMessageQueue()->push(msg);
+}
+
 MessagePipesGCWorker::MessagePipesGCWorker() :
-    m_running(false),
-    m_c2fMutex(nullptr),
-    m_c2fQueues(nullptr),
-    m_c2fFeatures(nullptr)
+    m_running(false)
 {}
 
 MessagePipesGCWorker::~MessagePipesGCWorker()
@@ -47,78 +65,5 @@ void MessagePipesGCWorker::stopWork()
 void MessagePipesGCWorker::processGC()
 {
     // qDebug("MessagePipesGCWorker::processGC");
-    if (m_c2fMutex)
-    {
-        QMutexLocker mlock(m_c2fMutex);
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>>::iterator fIt = m_c2fFeatures->begin();
-
-        // remove queues to be deleted from last run
-        for (QList<MessageQueue*>::iterator dqIt = m_c2fQueuesToDelete.begin(); dqIt != m_c2fQueuesToDelete.end(); ++dqIt) {
-            delete *dqIt;
-        }
-
-        m_c2fQueuesToDelete.clear();
-
-        // remove keys with empty features
-        fIt = m_c2fFeatures->begin();
-
-        while (fIt != m_c2fFeatures->end())
-        {
-            if (fIt.value().size() == 0) {
-                fIt = m_c2fFeatures->erase(fIt);
-            } else {
-                ++fIt;
-            }
-        }
-
-        // remove keys with empty message queues
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>>::iterator qIt = m_c2fQueues->begin();
-
-        while (qIt != m_c2fQueues->end())
-        {
-            if (qIt.value().size() == 0) {
-                qIt = m_c2fQueues->erase(qIt);
-            } else {
-                ++qIt;
-            }
-        }
-
-        // check deleted channels and features
-        for (;fIt != m_c2fFeatures->end(); ++fIt)
-        {
-            MessagePipesCommon::ChannelRegistrationKey channelKey = fIt.key();
-            const ChannelAPI *channel = channelKey.m_channel;
-
-            if (MainCore::instance()->existsChannel(channel)) // look for deleted features
-            {
-                QList<Feature*>& features = fIt.value();
-                int i = 0;
-
-                while (i < features.size())
-                {
-                    if (MainCore::instance()->existsFeature(features[i])) {
-                        i++;
-                    }
-                    else
-                    {
-                        features.removeAt(i);
-                        MessageQueue *messageQueue = m_c2fQueues->operator[](channelKey)[i];
-                        m_c2fQueuesToDelete.append(messageQueue);
-                        m_c2fQueues->operator[](channelKey).removeAt(i);
-                    }
-                }
-            }
-            else // channel was destroyed
-            {
-                QList<Feature*>& features = fIt.value();
-
-                for (int i = 0; i < features.size(); i++)
-                {
-                    MessagePipesCommon::MsgReportChannelDeleted *msg = MessagePipesCommon::MsgReportChannelDeleted::create(
-                        m_c2fQueues->operator[](channelKey)[i], channelKey);
-                    features[i]->getInputMessageQueue()->push(msg);
-                }
-            }
-        }
-    }
+    m_messagePipesGC.processGC();
 }

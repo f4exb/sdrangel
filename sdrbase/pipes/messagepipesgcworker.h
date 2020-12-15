@@ -24,6 +24,7 @@
 #include "export.h"
 
 #include "messagepipescommon.h"
+#include "elementpipesgc.h"
 
 class QMutex;
 
@@ -40,9 +41,7 @@ public:
         QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *c2fFeatures
     )
     {
-        m_c2fMutex = c2fMutex;
-        m_c2fQueues = c2fQueues;
-        m_c2fFeatures = c2fFeatures;
+        m_messagePipesGC.setRegistrations(c2fMutex, c2fQueues, c2fFeatures);
     }
 
     void startWork();
@@ -50,11 +49,16 @@ public:
     bool isRunning() const { return m_running; }
 
 private:
+    class MessagePipesGC : public ElementPipesGC<ChannelAPI, Feature, MessageQueue>
+    {
+    private:
+        virtual bool existsProducer(const ChannelAPI *channelAPI);
+        virtual bool existsConsumer(const Feature *feature);
+        virtual void sendMessageToConsumer(const MessageQueue *messageQueue,  MessagePipesCommon::ChannelRegistrationKey key, Feature *feature);
+    };
+
+    MessagePipesGC m_messagePipesGC;
     bool m_running;
-    QMutex *m_c2fMutex;
-    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *m_c2fQueues;
-    QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *m_c2fFeatures;
-    QList<MessageQueue*> m_c2fQueuesToDelete;
     QTimer m_gcTimer;
 
 private slots:

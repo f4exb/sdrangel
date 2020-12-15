@@ -15,58 +15,55 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QGlobalStatic>
+#ifndef SDRBASE_PIPES_DATAPIPESGCWORKER_H_
+#define SDRBASE_PIPES_DATAPIPESGCWORKER_H_
 
-#include "util/messagequeue.h"
+#include <QObject>
+#include <QTimer>
 
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
+#include "export.h"
 
-MessagePipes::MessagePipes()
+#include "elementpipesgc.h"
+#include "datapipescommon.h"
+
+class QMutex;
+class DataFifo;
+
+class SDRBASE_API DataPipesGCWorker : public QObject
 {
-	m_gcWorker = new MessagePipesGCWorker();
-	m_gcWorker->setC2FRegistrations(
-		m_registrations.getMutex(),
-		m_registrations.getElements(),
-		m_registrations.getConsumers()
-	);
-	m_gcWorker->moveToThread(&m_gcThread);
-	startGC();
-}
+    Q_OBJECT
+public:
+    DataPipesGCWorker();
+    ~DataPipesGCWorker();
 
-MessagePipes::~MessagePipes()
-{
-	if (m_gcWorker->isRunning()) {
-		stopGC();
-	}
-}
+    void setC2FRegistrations(
+        QMutex *c2fMutex,
+        QMap<DataPipesCommon::ChannelRegistrationKey, QList<DataFifo*>> *c2fFifos,
+        QMap<DataPipesCommon::ChannelRegistrationKey, QList<Feature*>> *c2fFeatures
+    )
+    {
+        m_dataPipesGC.setRegistrations(c2fMutex, c2fFifos, c2fFeatures);
+    }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	return m_registrations.registerProducerToConsumer(source, feature, type);
-}
+    void startWork();
+    void stopWork();
+    bool isRunning() const { return m_running; }
 
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
-}
+private:
+    class DataPipesGC : public ElementPipesGC<ChannelAPI, Feature, DataFifo>
+    {
+    private:
+        virtual bool existsProducer(const ChannelAPI *channelAPI);
+        virtual bool existsConsumer(const Feature *feature);
+        virtual void sendMessageToConsumer(const DataFifo *fifo,  DataPipesCommon::ChannelRegistrationKey key, Feature *feature);
+    };
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
-{
-	return m_registrations.getElements(source, type);
-}
+    DataPipesGC m_dataPipesGC;
+    bool m_running;
+    QTimer m_gcTimer;
 
-void MessagePipes::startGC()
-{
-	qDebug("MessagePipes::startGC");
-    m_gcWorker->startWork();
-    m_gcThread.start();
-}
+private slots:
+    void processGC(); //!< Collect garbage
+};
 
-void MessagePipes::stopGC()
-{
-    qDebug("MessagePipes::stopGC");
-	m_gcWorker->stopWork();
-	m_gcThread.quit();
-	m_gcThread.wait();
-}
+#endif // SDRBASE_PIPES_DATAPIPESGCWORKER_H_

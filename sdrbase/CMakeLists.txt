@@ -99,6 +99,7 @@ set(sdrbase_SOURCES
     dsp/channelsamplesource.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
+    dsp/datafifo.cpp
     dsp/decimatorsff.cpp
     dsp/decimatorsfi.cpp
     dsp/decimatorc.cpp
@@ -160,6 +161,9 @@ set(sdrbase_SOURCES
 
     limerfe/limerfeusbcalib.cpp
 
+    pipes/datapipes.cpp
+    pipes/datapipescommon.cpp
+    pipes/datapipesgcworker.cpp
     pipes/messagepipes.cpp
     pipes/messagepipescommon.cpp
     pipes/messagepipesgcworker.cpp
@@ -248,6 +252,7 @@ set(sdrbase_HEADERS
     dsp/ctcssfrequencies.h
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
+    dsp/datafifo.h
     dsp/decimators.h
     dsp/decimatorsif.h
     dsp/decimatorsff.h
@@ -336,6 +341,11 @@ set(sdrbase_HEADERS
 
     limerfe/limerfeusbcalib.h
 
+    pipes/datapipes.h
+    pipes/datapipescommon.h
+    pipes/datapipesgcworker.h
+    pipes/elementpipescommon.h
+    pipes/elementpipesgc.h
     pipes/messagepipes.h
     pipes/messagepipescommon.h
     pipes/messagepipesgcworker.h

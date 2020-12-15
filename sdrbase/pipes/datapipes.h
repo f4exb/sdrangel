@@ -15,58 +15,45 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#include <QGlobalStatic>
+#ifndef SDRBASE_PIPES_DATAPIPES_H_
+#define SDRBASE_PIPES_DATAPIPES_H_
 
-#include "util/messagequeue.h"
+#include <QObject>
+#include <QHash>
+#include <QMap>
+#include <QMutex>
+#include <QThread>
 
-#include "messagepipesgcworker.h"
-#include "messagepipes.h"
+#include "export.h"
 
-MessagePipes::MessagePipes()
+#include "datapipescommon.h"
+#include "elementpipesregistrations.h"
+
+class ChannelAPI;
+class Feature;
+class DataPipesGCWorker;
+class DataFifo;
+
+class SDRBASE_API DataPipes : public QObject
 {
-	m_gcWorker = new MessagePipesGCWorker();
-	m_gcWorker->setC2FRegistrations(
-		m_registrations.getMutex(),
-		m_registrations.getElements(),
-		m_registrations.getConsumers()
-	);
-	m_gcWorker->moveToThread(&m_gcThread);
-	startGC();
-}
+    Q_OBJECT
+public:
+    DataPipes();
+    DataPipes(const DataPipes&) = delete;
+    DataPipes& operator=(const DataPipes&) = delete;
+    ~DataPipes();
 
-MessagePipes::~MessagePipes()
-{
-	if (m_gcWorker->isRunning()) {
-		stopGC();
-	}
-}
+    DataFifo *registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
+    void unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
+    QList<DataFifo*>* getFifos(const ChannelAPI *source, const QString& type);
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	return m_registrations.registerProducerToConsumer(source, feature, type);
-}
+private:
+    ElementPipesRegistrations<ChannelAPI, Feature, DataFifo> m_registrations;
+    QThread m_gcThread; //!< Garbage collector thread
+    DataPipesGCWorker *m_gcWorker; //!< Garbage collector
 
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
-{
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
-}
+	void startGC(); //!< Start garbage collector
+	void stopGC();  //!< Stop garbage collector
+};
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
-{
-	return m_registrations.getElements(source, type);
-}
-
-void MessagePipes::startGC()
-{
-	qDebug("MessagePipes::startGC");
-    m_gcWorker->startWork();
-    m_gcThread.start();
-}
-
-void MessagePipes::stopGC()
-{
-    qDebug("MessagePipes::stopGC");
-	m_gcWorker->stopWork();
-	m_gcThread.quit();
-	m_gcThread.wait();
-}
+#endif // SDRBASE_PIPES_DATAPIPES_H_
