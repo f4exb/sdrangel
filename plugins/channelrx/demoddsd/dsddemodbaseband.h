@@ -28,6 +28,7 @@
 #include "dsddemodsink.h"
 
 class DownChannelizer;
+class ChannelAPI;
 
 class DSDDemodBaseband : public QObject
 {
@@ -71,6 +72,7 @@ public:
 	void configureMyPosition(float myLatitude, float myLongitude) { m_sink.configureMyPosition(myLatitude, myLongitude); }
    	const DSDDecoder& getDecoder() const { return m_sink.getDecoder(); }
     const char *updateAndGetStatusText() { return m_sink.updateAndGetStatusText(); }
+    void setChannel(ChannelAPI *channel);
 
 private:
     SampleSinkFifo m_sampleFifo;

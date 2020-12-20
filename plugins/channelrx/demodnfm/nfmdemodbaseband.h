@@ -28,6 +28,7 @@
 #include "nfmdemodsink.h"
 
 class DownChannelizer;
+class ChannelAPI;
 
 class NFMDemodBaseband : public QObject
 {
@@ -69,6 +70,7 @@ public:
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     int getAudioSampleRate() const { return m_sink.getAudioSampleRate(); }
     void setBasebandSampleRate(int sampleRate);
+    void setChannel(ChannelAPI *channel);
 
 private:
     SampleSinkFifo m_sampleFifo;

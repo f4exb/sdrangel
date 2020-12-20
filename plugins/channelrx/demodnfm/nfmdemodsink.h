@@ -18,7 +18,7 @@
 #ifndef INCLUDE_NFMDEMODSINK_H
 #define INCLUDE_NFMDEMODSINK_H
 
-#include <vector>
+#include <QVector>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/phasediscri.h"
@@ -34,6 +34,8 @@
 #include "audio/audiofifo.h"
 
 #include "nfmdemodsettings.h"
+
+class ChannelAPI;
 
 class NFMDemodSink : public ChannelSampleSink {
 public:
@@ -77,6 +79,7 @@ public:
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void applyAudioSampleRate(unsigned int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 private:
     struct MagSqLevelsStore
@@ -97,11 +100,14 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     NFMDemodSettings m_settings;
+    ChannelAPI *m_channel;
 
     int m_audioSampleRate;
     AudioVector m_audioBuffer;
     uint m_audioBufferFill;
     AudioFifo m_audioFifo;
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
     NCO m_nco;
     Interpolator m_interpolator;

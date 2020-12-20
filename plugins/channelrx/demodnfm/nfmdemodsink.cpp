@@ -23,12 +23,15 @@
 
 #include "util/stepfunctions.h"
 #include "util/db.h"
+#include "util/messagequeue.h"
 #include "audio/audiooutputdevice.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "dsp/misc.h"
+#include "dsp/datafifo.h"
 #include "device/deviceapi.h"
+#include "maincore.h"
 
 #include "nfmdemodreport.h"
 #include "nfmdemodsink.h"
@@ -62,6 +65,8 @@ NFMDemodSink::NFMDemodSink() :
         m_messageQueueToGUI(nullptr)
 {
     m_audioBuffer.resize(1<<16);
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -219,6 +224,25 @@ void NFMDemodSink::processOneSample(Complex &ci)
 
         m_audioBufferFill = 0;
     }
+
+    m_demodBuffer[m_demodBufferFill] = sample;
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 
@@ -343,4 +367,17 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
     m_interpolatorDistance = Real(m_channelSampleRate) / Real(sampleRate);
     m_interpolatorDistanceRemain = m_interpolatorDistance;
     m_audioSampleRate = sampleRate;
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }

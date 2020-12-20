@@ -18,6 +18,8 @@
 #ifndef INCLUDE_DSDDEMODSINK_H
 #define INCLUDE_DSDDEMODSINK_H
 
+#include <QVector>
+
 #include "dsp/channelsamplesink.h"
 #include "dsp/phasediscri.h"
 #include "dsp/nco.h"
@@ -33,6 +35,7 @@
 #include "dsddecoder.h"
 
 class BasebandSampleSink;
+class ChannelAPI;
 
 class DSDDemodSink : public ChannelSampleSink {
 public:
@@ -47,6 +50,7 @@ public:
     AudioFifo *getAudioFifo1() { return &m_audioFifo1; }
     AudioFifo *getAudioFifo2() { return &m_audioFifo2; }
     int getAudioSampleRate() const { return m_audioSampleRate; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 	void setScopeXYSink(BasebandSampleSink* scopeSink) { m_scopeXY = scopeSink; }
 	void configureMyPosition(float myLatitude, float myLongitude);
@@ -105,7 +109,10 @@ private:
     int m_channelSampleRate;
 	int m_channelFrequencyOffset;
 	DSDDemodSettings m_settings;
+    ChannelAPI *m_channel;
     int m_audioSampleRate;
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
 	NCO m_nco;
 	Interpolator m_interpolator;

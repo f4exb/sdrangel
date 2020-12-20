@@ -33,8 +33,11 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/datafifo.h"
 #include "audio/audiooutputdevice.h"
 #include "util/db.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
 
 #include "dsddemodsink.h"
 
@@ -59,6 +62,8 @@ DSDDemodSink::DSDDemodSink() :
 {
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
 	m_sampleBuffer = new FixReal[1<<17]; // 128 kS
 	m_sampleBufferIndex = 0;
@@ -169,6 +174,25 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
             }
 
             m_dsdDecoder.pushSample(sampleDSD);
+
+            m_demodBuffer[m_demodBufferFill] = sampleDSD;
+            ++m_demodBufferFill;
+
+            if (m_demodBufferFill >= m_demodBuffer.size())
+            {
+                QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+                if (dataFifos)
+                {
+                    QList<DataFifo*>::iterator it = dataFifos->begin();
+
+                    for (; it != dataFifos->end(); ++it) {
+                        (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+                    }
+                }
+
+                m_demodBufferFill = 0;
+            }
 
             if (m_settings.m_enableCosineFiltering) { // show actual input to FSK demod
             	sample = m_dsdDecoder.getFilteredSample() * m_scaleFromShort;
@@ -297,6 +321,19 @@ void DSDDemodSink::applyAudioSampleRate(int sampleRate)
 
     m_dsdDecoder.setUpsampling(upsampling);
     m_audioSampleRate = sampleRate;
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 void DSDDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)

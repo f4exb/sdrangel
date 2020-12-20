@@ -61,6 +61,11 @@ void DSDDemodBaseband::reset()
     m_sampleFifo.reset();
 }
 
+void DSDDemodBaseband::setChannel(ChannelAPI *channel)
+{
+    m_sink.setChannel(channel);
+}
+
 void DSDDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);
