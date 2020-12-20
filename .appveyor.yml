@@ -18,7 +18,7 @@ environment:
                              -DDEBUG_OUTPUT=ON \
                              -DENABLE_MIRISDR=OFF \
                              -DBUILD_SERVER=OFF \
-                             -DCMAKE_PREFIX_PATH=C:\\Qt\\5.15.1\\msvc2019_64;C:\\Libraries\\boost_1_73_0"
+                             -DCMAKE_PREFIX_PATH=C:\\Qt\\5.15.2\\msvc2019_64;C:\\Libraries\\boost_1_73_0"
       CMAKE_GENERATOR: Ninja
     - TARGET: ubuntu2004prod
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
