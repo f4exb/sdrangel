@@ -1,9 +1,7 @@
 DemodAnalyzerSettings:
   description: DemodAnalyzer
   properties:
-    deviceIndex:
-      type: integer
-    channelIndex:
+    log2Decim:
       type: integer
     title:
       type: string

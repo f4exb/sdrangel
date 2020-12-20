@@ -28,10 +28,8 @@ SWGDemodAnalyzerSettings::SWGDemodAnalyzerSettings(QString* json) {
 }
 
 SWGDemodAnalyzerSettings::SWGDemodAnalyzerSettings() {
-    device_index = 0;
-    m_device_index_isSet = false;
-    channel_index = 0;
-    m_channel_index_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -58,10 +56,8 @@ SWGDemodAnalyzerSettings::~SWGDemodAnalyzerSettings() {
 
 void
 SWGDemodAnalyzerSettings::init() {
-    device_index = 0;
-    m_device_index_isSet = false;
-    channel_index = 0;
-    m_channel_index_isSet = false;
+    log2_decim = 0;
+    m_log2_decim_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -84,7 +80,6 @@ SWGDemodAnalyzerSettings::init() {
 
 void
 SWGDemodAnalyzerSettings::cleanup() {
-
 
     if(title != nullptr) { 
         delete title;
@@ -116,9 +111,7 @@ SWGDemodAnalyzerSettings::fromJson(QString &json) {
 
 void
 SWGDemodAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&device_index, pJson["deviceIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&channel_index, pJson["channelIndex"], "qint32", "");
+    ::SWGSDRangel::setValue(&log2_decim, pJson["log2Decim"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -154,11 +147,8 @@ SWGDemodAnalyzerSettings::asJson ()
 QJsonObject*
 SWGDemodAnalyzerSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_device_index_isSet){
-        obj->insert("deviceIndex", QJsonValue(device_index));
-    }
-    if(m_channel_index_isSet){
-        obj->insert("channelIndex", QJsonValue(channel_index));
+    if(m_log2_decim_isSet){
+        obj->insert("log2Decim", QJsonValue(log2_decim));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -192,23 +182,13 @@ SWGDemodAnalyzerSettings::asJsonObject() {
 }
 
 qint32
-SWGDemodAnalyzerSettings::getDeviceIndex() {
-    return device_index;
+SWGDemodAnalyzerSettings::getLog2Decim() {
+    return log2_decim;
 }
 void
-SWGDemodAnalyzerSettings::setDeviceIndex(qint32 device_index) {
-    this->device_index = device_index;
-    this->m_device_index_isSet = true;
-}
-
-qint32
-SWGDemodAnalyzerSettings::getChannelIndex() {
-    return channel_index;
-}
-void
-SWGDemodAnalyzerSettings::setChannelIndex(qint32 channel_index) {
-    this->channel_index = channel_index;
-    this->m_channel_index_isSet = true;
+SWGDemodAnalyzerSettings::setLog2Decim(qint32 log2_decim) {
+    this->log2_decim = log2_decim;
+    this->m_log2_decim_isSet = true;
 }
 
 QString*
@@ -306,10 +286,7 @@ bool
 SWGDemodAnalyzerSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_device_index_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_channel_index_isSet){
+        if(m_log2_decim_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

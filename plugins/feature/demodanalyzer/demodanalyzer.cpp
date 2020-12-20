@@ -402,6 +402,7 @@ void DemodAnalyzer::webapiFormatFeatureSettings(
         response.getDemodAnalyzerSettings()->setTitle(new QString(settings.m_title));
     }
 
+    response.getDemodAnalyzerSettings()->setLog2Decim(settings.m_log2Decim);
     response.getDemodAnalyzerSettings()->setRgbColor(settings.m_rgbColor);
     response.getDemodAnalyzerSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
@@ -421,6 +422,9 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     const QStringList& featureSettingsKeys,
     SWGSDRangel::SWGFeatureSettings& response)
 {
+    if (featureSettingsKeys.contains("log2Decim")) {
+        settings.m_log2Decim = response.getDemodAnalyzerSettings()->getLog2Decim();
+    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getDemodAnalyzerSettings()->getTitle();
     }
@@ -455,6 +459,9 @@ void DemodAnalyzer::webapiReverseSendSettings(QList<QString>& featureSettingsKey
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (featureSettingsKeys.contains("log2Decim") || force) {
+        swgDemodAnalyzerSettings->setLog2Decim(settings.m_log2Decim);
+    }
     if (featureSettingsKeys.contains("title") || force) {
         swgDemodAnalyzerSettings->setTitle(new QString(settings.m_title));
     }

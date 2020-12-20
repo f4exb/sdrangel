@@ -44,11 +44,8 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGDemodAnalyzerSettings* fromJson(QString &jsonString) override;
 
-    qint32 getDeviceIndex();
-    void setDeviceIndex(qint32 device_index);
-
-    qint32 getChannelIndex();
-    void setChannelIndex(qint32 channel_index);
+    qint32 getLog2Decim();
+    void setLog2Decim(qint32 log2_decim);
 
     QString* getTitle();
     void setTitle(QString* title);
@@ -81,11 +78,8 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 device_index;
-    bool m_device_index_isSet;
-
-    qint32 channel_index;
-    bool m_channel_index_isSet;
+    qint32 log2_decim;
+    bool m_log2_decim_isSet;
 
     QString* title;
     bool m_title_isSet;
