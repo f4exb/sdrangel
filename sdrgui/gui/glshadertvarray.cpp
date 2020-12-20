@@ -17,7 +17,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QOpenGLContext>
-#include <gui/glshadertvarray.h>
+
+#include "gui/glshadertvarray.h"
 
 const QString GLShaderTVArray::m_strVertexShaderSourceArray = QString(
         "uniform highp mat4 uMatrix;\n"
@@ -129,19 +130,16 @@ void GLShaderTVArray::initializeGL(int intCols, int intRows)
 
 QRgb * GLShaderTVArray::GetRowBuffer(int intRow)
 {
-    if (!m_blnInitialized)
-    {
-        return 0;
+    if (!m_blnInitialized) {
+        return nullptr;
     }
 
-    if (!m_objImage)
-    {
-        return 0;
+    if (!m_objImage) {
+        return nullptr;
     }
 
-    if (intRow > m_intRows)
-    {
-        return 0;
+    if (intRow > m_intRows) {
+        return nullptr;
     }
 
     return (QRgb *) m_objImage->scanLine(intRow);
@@ -175,7 +173,7 @@ void GLShaderTVArray::RenderPixels(unsigned char *chrData)
         return;
     }
 
-    if (m_objImage) {
+    if (!m_objImage) {
         return;
     }
 
@@ -319,7 +317,7 @@ bool GLShaderTVArray::SetDataColor(int intCol, QRgb objColor)
 
     if (m_blnInitialized)
     {
-        if ((intCol < m_intCols) && (intCol >= 0) && (m_objCurrentRow))
+        if ((intCol < m_intCols) && (intCol >= 0) && m_objCurrentRow)
         {
             m_objCurrentRow[intCol] = objColor;
             blnRslt = true;
