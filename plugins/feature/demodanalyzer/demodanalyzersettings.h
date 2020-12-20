@@ -15,55 +15,53 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
-#define SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
+#ifndef INCLUDE_FEATURE_DEMODANALYZERSETTINGS_H_
+#define INCLUDE_FEATURE_DEMODANALYZERSETTINGS_H_
 
-#include <QObject>
-#include <QTimer>
+#include <QByteArray>
+#include <QString>
 
-#include "export.h"
+#include "util/message.h"
 
-#include "messagepipescommon.h"
-#include "elementpipesgc.h"
+class Serializable;
+class ChannelAPI;
 
-class QMutex;
-
-class SDRBASE_API MessagePipesGCWorker : public QObject
+struct DemodAnalyzerSettings
 {
-    Q_OBJECT
-public:
-    MessagePipesGCWorker();
-    ~MessagePipesGCWorker();
-
-    void setC2FRegistrations(
-        QMutex *c2fMutex,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *c2fQueues,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *c2fFeatures
-    )
+    struct AvailableChannel
     {
-        m_messagePipesGC.setRegistrations(c2fMutex, c2fQueues, c2fFeatures);
-    }
+        bool m_tx;
+        int m_deviceSetIndex;
+        int m_channelIndex;
+        ChannelAPI *m_channelAPI;
+        QString m_id;
 
-    void startWork();
-    void stopWork();
-    void addMessageQueueToDelete(MessageQueue *messageQueue);
-    bool isRunning() const { return m_running; }
-
-private:
-    class MessagePipesGC : public ElementPipesGC<ChannelAPI, Feature, MessageQueue>
-    {
-    private:
-        virtual bool existsProducer(const ChannelAPI *channelAPI);
-        virtual bool existsConsumer(const Feature *feature);
-        virtual void sendMessageToConsumer(const MessageQueue *messageQueue,  MessagePipesCommon::ChannelRegistrationKey key, Feature *feature);
+        AvailableChannel() = default;
+        AvailableChannel(const AvailableChannel&) = default;
+        AvailableChannel& operator=(const AvailableChannel&) = default;
     };
 
-    MessagePipesGC m_messagePipesGC;
-    bool m_running;
-    QTimer m_gcTimer;
+    int m_deviceIndex;
+    int m_channelIndex;
+    QString m_title;
+    quint32 m_rgbColor;
+    bool m_useReverseAPI;
+    QString m_reverseAPIAddress;
+    uint16_t m_reverseAPIPort;
+    uint16_t m_reverseAPIFeatureSetIndex;
+    uint16_t m_reverseAPIFeatureIndex;
+    Serializable *m_spectrumGUI;
+    Serializable *m_scopeGUI;
 
-private slots:
-    void processGC(); //!< Collect garbage
+    DemodAnalyzerSettings();
+    void resetToDefaults();
+    QByteArray serialize() const;
+    bool deserialize(const QByteArray& data);
+    void setSpectrumGUI(Serializable *spectrumGUI) { m_spectrumGUI = spectrumGUI; }
+    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
+
+    static const QStringList m_channelTypes;
+    static const QStringList m_channelURIs;
 };
 
-#endif
+#endif // INCLUDE_FEATURE_DEMODANALYZERSETTINGS_H_

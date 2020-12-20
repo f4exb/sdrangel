@@ -82,8 +82,10 @@ public:
         return element;
     }
 
-    void unregisterProducerToConsumer(const Producer *producer, Consumer *consumer, const QString& type)
+    Element *unregisterProducerToConsumer(const Producer *producer, Consumer *consumer, const QString& type)
     {
+        Element *element = nullptr;
+
         if (m_typeIds.contains(type))
         {
             int typeId = m_typeIds.value(type);
@@ -95,11 +97,13 @@ public:
                 QMutexLocker mlock(&m_mutex);
                 int i = m_consumers[regKey].indexOf(consumer);
                 m_consumers[regKey].removeAt(i);
-                Element *element = m_elements[regKey][i];
-                delete element;
+                element = m_elements[regKey][i];
+                // delete element; // will be deferred to GC
                 m_elements[regKey].removeAt(i);
             }
         }
+
+        return element;
     }
 
     QList<Element*>* getElements(const Producer *producer, const QString& type)

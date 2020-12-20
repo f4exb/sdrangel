@@ -64,7 +64,6 @@ public:
 		QByteArray::iterator* part1Begin, QByteArray::iterator* part1End,
 		QByteArray::iterator* part2Begin, QByteArray::iterator* part2End);
 	unsigned int readCommit(unsigned int count);
-    static unsigned int getSizePolicy(unsigned int sampleRate);
 
 signals:
 	void dataReady();

@@ -3401,6 +3401,45 @@ margin-bottom: 20px;
   },
   "description" : "List of DV serial devices available in the system"
 };
+            defs.DemodAnalyzerSettings = {
+  "properties" : {
+    "deviceIndex" : {
+      "type" : "integer"
+    },
+    "channelIndex" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API\n  * 1 - yes\n  * 0 - no\n"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "spectrumConfig" : {
+      "$ref" : "#/definitions/GLSpectrum"
+    },
+    "scopeConfig" : {
+      "$ref" : "#/definitions/GLScope"
+    }
+  },
+  "description" : "DemodAnalyzer"
+};
             defs.DeviceActions = {
   "required" : [ "deviceHwType", "direction" ],
   "discriminator" : "deviceHwType",
@@ -4083,17 +4122,20 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the feature index from where the message comes from."
     },
-    "GS232ControllerSettings" : {
-      "$ref" : "#/definitions/GS232ControllerSettings"
-    },
     "AFCSettings" : {
       "$ref" : "#/definitions/AFCSettings"
     },
-    "SimplePTTSettings" : {
-      "$ref" : "#/definitions/SimplePTTSettings"
+    "DemodAnalyzerSettings" : {
+      "$ref" : "#/definitions/DemodAnalyzerSettings"
+    },
+    "GS232ControllerSettings" : {
+      "$ref" : "#/definitions/GS232ControllerSettings"
     },
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
+    },
+    "SimplePTTSettings" : {
+      "$ref" : "#/definitions/SimplePTTSettings"
     },
     "VORLocalizerSettings" : {
       "$ref" : "#/definitions/VORLocalizerSettings"
@@ -44878,7 +44920,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-12-08T00:22:13.522+01:00
+              Generated 2020-12-16T13:53:51.605+01:00
             </div>
           </div>
       </div>

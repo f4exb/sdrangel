@@ -34,14 +34,16 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
-    gs232_controller_settings = nullptr;
-    m_gs232_controller_settings_isSet = false;
     afc_settings = nullptr;
     m_afc_settings_isSet = false;
-    simple_ptt_settings = nullptr;
-    m_simple_ptt_settings_isSet = false;
+    demod_analyzer_settings = nullptr;
+    m_demod_analyzer_settings_isSet = false;
+    gs232_controller_settings = nullptr;
+    m_gs232_controller_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
     m_rig_ctl_server_settings_isSet = false;
+    simple_ptt_settings = nullptr;
+    m_simple_ptt_settings_isSet = false;
     vor_localizer_settings = nullptr;
     m_vor_localizer_settings_isSet = false;
 }
@@ -58,14 +60,16 @@ SWGFeatureSettings::init() {
     m_originator_feature_set_index_isSet = false;
     originator_feature_index = 0;
     m_originator_feature_index_isSet = false;
-    gs232_controller_settings = new SWGGS232ControllerSettings();
-    m_gs232_controller_settings_isSet = false;
     afc_settings = new SWGAFCSettings();
     m_afc_settings_isSet = false;
-    simple_ptt_settings = new SWGSimplePTTSettings();
-    m_simple_ptt_settings_isSet = false;
+    demod_analyzer_settings = new SWGDemodAnalyzerSettings();
+    m_demod_analyzer_settings_isSet = false;
+    gs232_controller_settings = new SWGGS232ControllerSettings();
+    m_gs232_controller_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
     m_rig_ctl_server_settings_isSet = false;
+    simple_ptt_settings = new SWGSimplePTTSettings();
+    m_simple_ptt_settings_isSet = false;
     vor_localizer_settings = new SWGVORLocalizerSettings();
     m_vor_localizer_settings_isSet = false;
 }
@@ -77,17 +81,20 @@ SWGFeatureSettings::cleanup() {
     }
 
 
-    if(gs232_controller_settings != nullptr) { 
-        delete gs232_controller_settings;
-    }
     if(afc_settings != nullptr) { 
         delete afc_settings;
     }
-    if(simple_ptt_settings != nullptr) { 
-        delete simple_ptt_settings;
+    if(demod_analyzer_settings != nullptr) { 
+        delete demod_analyzer_settings;
+    }
+    if(gs232_controller_settings != nullptr) { 
+        delete gs232_controller_settings;
     }
     if(rig_ctl_server_settings != nullptr) { 
         delete rig_ctl_server_settings;
+    }
+    if(simple_ptt_settings != nullptr) { 
+        delete simple_ptt_settings;
     }
     if(vor_localizer_settings != nullptr) { 
         delete vor_localizer_settings;
@@ -111,13 +118,15 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&originator_feature_index, pJson["originatorFeatureIndex"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&gs232_controller_settings, pJson["GS232ControllerSettings"], "SWGGS232ControllerSettings", "SWGGS232ControllerSettings");
-    
     ::SWGSDRangel::setValue(&afc_settings, pJson["AFCSettings"], "SWGAFCSettings", "SWGAFCSettings");
     
-    ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
+    ::SWGSDRangel::setValue(&demod_analyzer_settings, pJson["DemodAnalyzerSettings"], "SWGDemodAnalyzerSettings", "SWGDemodAnalyzerSettings");
+    
+    ::SWGSDRangel::setValue(&gs232_controller_settings, pJson["GS232ControllerSettings"], "SWGGS232ControllerSettings", "SWGGS232ControllerSettings");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_settings, pJson["RigCtlServerSettings"], "SWGRigCtlServerSettings", "SWGRigCtlServerSettings");
+    
+    ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
     
     ::SWGSDRangel::setValue(&vor_localizer_settings, pJson["VORLocalizerSettings"], "SWGVORLocalizerSettings", "SWGVORLocalizerSettings");
     
@@ -146,17 +155,20 @@ SWGFeatureSettings::asJsonObject() {
     if(m_originator_feature_index_isSet){
         obj->insert("originatorFeatureIndex", QJsonValue(originator_feature_index));
     }
-    if((gs232_controller_settings != nullptr) && (gs232_controller_settings->isSet())){
-        toJsonValue(QString("GS232ControllerSettings"), gs232_controller_settings, obj, QString("SWGGS232ControllerSettings"));
-    }
     if((afc_settings != nullptr) && (afc_settings->isSet())){
         toJsonValue(QString("AFCSettings"), afc_settings, obj, QString("SWGAFCSettings"));
     }
-    if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
-        toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
+    if((demod_analyzer_settings != nullptr) && (demod_analyzer_settings->isSet())){
+        toJsonValue(QString("DemodAnalyzerSettings"), demod_analyzer_settings, obj, QString("SWGDemodAnalyzerSettings"));
+    }
+    if((gs232_controller_settings != nullptr) && (gs232_controller_settings->isSet())){
+        toJsonValue(QString("GS232ControllerSettings"), gs232_controller_settings, obj, QString("SWGGS232ControllerSettings"));
     }
     if((rig_ctl_server_settings != nullptr) && (rig_ctl_server_settings->isSet())){
         toJsonValue(QString("RigCtlServerSettings"), rig_ctl_server_settings, obj, QString("SWGRigCtlServerSettings"));
+    }
+    if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
+        toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
     }
     if((vor_localizer_settings != nullptr) && (vor_localizer_settings->isSet())){
         toJsonValue(QString("VORLocalizerSettings"), vor_localizer_settings, obj, QString("SWGVORLocalizerSettings"));
@@ -195,16 +207,6 @@ SWGFeatureSettings::setOriginatorFeatureIndex(qint32 originator_feature_index) {
     this->m_originator_feature_index_isSet = true;
 }
 
-SWGGS232ControllerSettings*
-SWGFeatureSettings::getGs232ControllerSettings() {
-    return gs232_controller_settings;
-}
-void
-SWGFeatureSettings::setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings) {
-    this->gs232_controller_settings = gs232_controller_settings;
-    this->m_gs232_controller_settings_isSet = true;
-}
-
 SWGAFCSettings*
 SWGFeatureSettings::getAfcSettings() {
     return afc_settings;
@@ -215,14 +217,24 @@ SWGFeatureSettings::setAfcSettings(SWGAFCSettings* afc_settings) {
     this->m_afc_settings_isSet = true;
 }
 
-SWGSimplePTTSettings*
-SWGFeatureSettings::getSimplePttSettings() {
-    return simple_ptt_settings;
+SWGDemodAnalyzerSettings*
+SWGFeatureSettings::getDemodAnalyzerSettings() {
+    return demod_analyzer_settings;
 }
 void
-SWGFeatureSettings::setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings) {
-    this->simple_ptt_settings = simple_ptt_settings;
-    this->m_simple_ptt_settings_isSet = true;
+SWGFeatureSettings::setDemodAnalyzerSettings(SWGDemodAnalyzerSettings* demod_analyzer_settings) {
+    this->demod_analyzer_settings = demod_analyzer_settings;
+    this->m_demod_analyzer_settings_isSet = true;
+}
+
+SWGGS232ControllerSettings*
+SWGFeatureSettings::getGs232ControllerSettings() {
+    return gs232_controller_settings;
+}
+void
+SWGFeatureSettings::setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings) {
+    this->gs232_controller_settings = gs232_controller_settings;
+    this->m_gs232_controller_settings_isSet = true;
 }
 
 SWGRigCtlServerSettings*
@@ -233,6 +245,16 @@ void
 SWGFeatureSettings::setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings) {
     this->rig_ctl_server_settings = rig_ctl_server_settings;
     this->m_rig_ctl_server_settings_isSet = true;
+}
+
+SWGSimplePTTSettings*
+SWGFeatureSettings::getSimplePttSettings() {
+    return simple_ptt_settings;
+}
+void
+SWGFeatureSettings::setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings) {
+    this->simple_ptt_settings = simple_ptt_settings;
+    this->m_simple_ptt_settings_isSet = true;
 }
 
 SWGVORLocalizerSettings*
@@ -259,16 +281,19 @@ SWGFeatureSettings::isSet(){
         if(m_originator_feature_index_isSet){
             isObjectUpdated = true; break;
         }
-        if(gs232_controller_settings && gs232_controller_settings->isSet()){
-            isObjectUpdated = true; break;
-        }
         if(afc_settings && afc_settings->isSet()){
             isObjectUpdated = true; break;
         }
-        if(simple_ptt_settings && simple_ptt_settings->isSet()){
+        if(demod_analyzer_settings && demod_analyzer_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(gs232_controller_settings && gs232_controller_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(rig_ctl_server_settings && rig_ctl_server_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(simple_ptt_settings && simple_ptt_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(vor_localizer_settings && vor_localizer_settings->isSet()){

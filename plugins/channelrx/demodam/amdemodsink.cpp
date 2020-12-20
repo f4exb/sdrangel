@@ -21,8 +21,11 @@
 
 #include "audio/audiooutputdevice.h"
 #include "dsp/fftfilt.h"
+#include "dsp/datafifo.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
 
 #include "amdemodsink.h"
 
@@ -42,6 +45,8 @@ AMDemodSink::AMDemodSink() :
 {
 	m_audioBuffer.resize(1<<14);
 	m_audioBufferFill = 0;
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
 	m_magsq = 0.0;
 
@@ -219,6 +224,25 @@ void AMDemodSink::processOneSample(Complex &ci)
 
         m_audioBufferFill = 0;
     }
+
+    m_demodBuffer[m_demodBufferFill] = sample;
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void AMDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -322,6 +346,19 @@ void AMDemodSink::applyAudioSampleRate(int sampleRate)
 
     m_syncAMAGC.resize(sampleRate/4, sampleRate/8, 0.1);
     m_pll.setSampleRate(sampleRate);
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 
     m_audioSampleRate = sampleRate;
 }

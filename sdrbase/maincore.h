@@ -27,6 +27,7 @@
 #include "settings/mainsettings.h"
 #include "util/message.h"
 #include "pipes/messagepipes.h"
+#include "pipes/datapipes.h"
 
 class DeviceSet;
 class FeatureSet;
@@ -437,6 +438,28 @@ public:
         { }
     };
 
+    class SDRBASE_API MsgChannelDemodReport : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const ChannelAPI *getChannelAPI() const { return m_channelAPI; }
+        int getSampleRate() const { return m_sampleRate; }
+
+        static MsgChannelDemodReport* create(const ChannelAPI *channelAPI, int sampleRate) {
+            return new MsgChannelDemodReport(channelAPI, sampleRate);
+        }
+
+    private:
+        const ChannelAPI *m_channelAPI;
+        int m_sampleRate;
+
+        MsgChannelDemodReport(const ChannelAPI *channelAPI, int sampleRate) :
+            Message(),
+            m_channelAPI(channelAPI),
+            m_sampleRate(sampleRate)
+        { }
+    };
+
     class SDRBASE_API MsgChannelSettings : public Message {
         MESSAGE_CLASS_DECLARATION
 
@@ -508,6 +531,7 @@ public:
     void clearFeatures(FeatureSet *featureSet);
     // pipes
     MessagePipes& getMessagePipes() { return m_messagePipes; }
+    DataPipes& getDataPipes() { return m_dataPipes; }
 
     friend class MainServer;
     friend class MainWindow;
@@ -527,6 +551,7 @@ private:
     QMap<Feature*, FeatureSet*> m_featuresMap;   //!< Feature to feature set map
     PluginManager* m_pluginManager;
     MessagePipes m_messagePipes;
+    DataPipes m_dataPipes;
 
     void debugMaps();
 };

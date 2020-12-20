@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,45 +15,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_DATAPIPES_H_
-#define SDRBASE_PIPES_DATAPIPES_H_
+#ifndef INCLUDE_DEMODANALYZER_WEBAPIADAPTER_H
+#define INCLUDE_DEMODANALYZER_WEBAPIADAPTER_H
 
-#include <QObject>
-#include <QHash>
-#include <QMap>
-#include <QMutex>
-#include <QThread>
+#include "feature/featurewebapiadapter.h"
+#include "demodanalyzersettings.h"
 
-#include "export.h"
-
-#include "datapipescommon.h"
-#include "elementpipesregistrations.h"
-
-class ChannelAPI;
-class Feature;
-class DataPipesGCWorker;
-class DataFifo;
-
-class SDRBASE_API DataPipes : public QObject
-{
-    Q_OBJECT
+/**
+ * Standalone API adapter only for the settings
+ */
+class DemodAnalyzerWebAPIAdapter : public FeatureWebAPIAdapter {
 public:
-    DataPipes();
-    DataPipes(const DataPipes&) = delete;
-    DataPipes& operator=(const DataPipes&) = delete;
-    ~DataPipes();
+    DemodAnalyzerWebAPIAdapter();
+    virtual ~DemodAnalyzerWebAPIAdapter();
 
-    DataFifo *registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    DataFifo *unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    QList<DataFifo*>* getFifos(const ChannelAPI *source, const QString& type);
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
 
 private:
-    ElementPipesRegistrations<ChannelAPI, Feature, DataFifo> m_registrations;
-    QThread m_gcThread; //!< Garbage collector thread
-    DataPipesGCWorker *m_gcWorker; //!< Garbage collector
-
-	void startGC(); //!< Start garbage collector
-	void stopGC();  //!< Stop garbage collector
+    DemodAnalyzerSettings m_settings;
 };
 
-#endif // SDRBASE_PIPES_DATAPIPES_H_
+#endif // INCLUDE_DEMODANALYZER_WEBAPIADAPTER_H

@@ -44,9 +44,11 @@ DataFifo *DataPipes::registerChannelToFeature(const ChannelAPI *source, Feature 
 	return m_registrations.registerProducerToConsumer(source, feature, type);
 }
 
-void DataPipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+DataFifo *DataPipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
 {
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
+	DataFifo *dataFifo = m_registrations.unregisterProducerToConsumer(source, feature, type);
+	m_gcWorker->addDataFifoToDelete(dataFifo);
+	return dataFifo;
 }
 
 QList<DataFifo*>* DataPipes::getFifos(const ChannelAPI *source, const QString& type)

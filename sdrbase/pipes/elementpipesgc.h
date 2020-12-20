@@ -48,6 +48,11 @@ public:
         m_consumers = consumers;
     }
 
+    void addElementToDelete(Element *element)
+    {
+        m_elementsToDelete.append(element);
+    }
+
     void processGC()
     {
         if (m_mutex)

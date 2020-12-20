@@ -59,6 +59,15 @@ void DataPipesGCWorker::stopWork()
     disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
 }
 
+void DataPipesGCWorker::addDataFifoToDelete(DataFifo *dataFifo)
+{
+    if (dataFifo)
+    {
+        m_gcTimer.start(10000); // restart GC to make sure deletion is postponed
+        m_dataPipesGC.addElementToDelete(dataFifo);
+    }
+}
+
 void DataPipesGCWorker::processGC()
 {
     // qDebug("MessagePipesGCWorker::processGC");

@@ -23,6 +23,7 @@
 
 
 #include "SWGAFCSettings.h"
+#include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSimplePTTSettings.h"
@@ -56,17 +57,20 @@ public:
     qint32 getOriginatorFeatureIndex();
     void setOriginatorFeatureIndex(qint32 originator_feature_index);
 
-    SWGGS232ControllerSettings* getGs232ControllerSettings();
-    void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
-
     SWGAFCSettings* getAfcSettings();
     void setAfcSettings(SWGAFCSettings* afc_settings);
 
-    SWGSimplePTTSettings* getSimplePttSettings();
-    void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
+    SWGDemodAnalyzerSettings* getDemodAnalyzerSettings();
+    void setDemodAnalyzerSettings(SWGDemodAnalyzerSettings* demod_analyzer_settings);
+
+    SWGGS232ControllerSettings* getGs232ControllerSettings();
+    void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
 
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
+
+    SWGSimplePTTSettings* getSimplePttSettings();
+    void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
 
     SWGVORLocalizerSettings* getVorLocalizerSettings();
     void setVorLocalizerSettings(SWGVORLocalizerSettings* vor_localizer_settings);
@@ -84,17 +88,20 @@ private:
     qint32 originator_feature_index;
     bool m_originator_feature_index_isSet;
 
-    SWGGS232ControllerSettings* gs232_controller_settings;
-    bool m_gs232_controller_settings_isSet;
-
     SWGAFCSettings* afc_settings;
     bool m_afc_settings_isSet;
 
-    SWGSimplePTTSettings* simple_ptt_settings;
-    bool m_simple_ptt_settings_isSet;
+    SWGDemodAnalyzerSettings* demod_analyzer_settings;
+    bool m_demod_analyzer_settings_isSet;
+
+    SWGGS232ControllerSettings* gs232_controller_settings;
+    bool m_gs232_controller_settings_isSet;
 
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;
+
+    SWGSimplePTTSettings* simple_ptt_settings;
+    bool m_simple_ptt_settings_isSet;
 
     SWGVORLocalizerSettings* vor_localizer_settings;
     bool m_vor_localizer_settings_isSet;

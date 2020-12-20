@@ -15,55 +15,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
-#define SDRBASE_PIPES_MESSAGEPIPESGCWORKER_H_
+#ifndef INCLUDE_FEATURE_DEMODANALYZERPLUGIN_H
+#define INCLUDE_FEATURE_DEMODANALYZERPLUGIN_H
 
 #include <QObject>
-#include <QTimer>
+#include "plugin/plugininterface.h"
 
-#include "export.h"
+class FeatureGUI;
+class WebAPIAdapterInterface;
 
-#include "messagepipescommon.h"
-#include "elementpipesgc.h"
+class DemodAnalyzerPlugin : public QObject, PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID "sdrangel.feature.demodanalyzer")
 
-class QMutex;
-
-class SDRBASE_API MessagePipesGCWorker : public QObject
-{
-    Q_OBJECT
 public:
-    MessagePipesGCWorker();
-    ~MessagePipesGCWorker();
+	explicit DemodAnalyzerPlugin(QObject* parent = nullptr);
 
-    void setC2FRegistrations(
-        QMutex *c2fMutex,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<MessageQueue*>> *c2fQueues,
-        QMap<MessagePipesCommon::ChannelRegistrationKey, QList<Feature*>> *c2fFeatures
-    )
-    {
-        m_messagePipesGC.setRegistrations(c2fMutex, c2fQueues, c2fFeatures);
-    }
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
 
-    void startWork();
-    void stopWork();
-    void addMessageQueueToDelete(MessageQueue *messageQueue);
-    bool isRunning() const { return m_running; }
+	virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
+	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
+	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
 
 private:
-    class MessagePipesGC : public ElementPipesGC<ChannelAPI, Feature, MessageQueue>
-    {
-    private:
-        virtual bool existsProducer(const ChannelAPI *channelAPI);
-        virtual bool existsConsumer(const Feature *feature);
-        virtual void sendMessageToConsumer(const MessageQueue *messageQueue,  MessagePipesCommon::ChannelRegistrationKey key, Feature *feature);
-    };
+	static const PluginDescriptor m_pluginDescriptor;
 
-    MessagePipesGC m_messagePipesGC;
-    bool m_running;
-    QTimer m_gcTimer;
-
-private slots:
-    void processGC(); //!< Collect garbage
+	PluginAPI* m_pluginAPI;
 };
 
-#endif
+#endif // INCLUDE_FEATURE_DEMODANALYZERPLUGIN_H

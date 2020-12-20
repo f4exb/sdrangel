@@ -17,6 +17,10 @@
 
 #include <QDebug>
 
+#include "dsp/datafifo.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
+
 #include "ammodsource.h"
 
 const int AMModSource::m_levelNbSamples = 480; // every 10ms
@@ -37,9 +41,11 @@ AMModSource::AMModSource() :
 	m_audioBufferFill = 0;
 	m_audioReadBuffer.resize(24000);
 	m_audioReadBufferFill = 0;
-
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
+    m_demodBufferEnabled = false;
 
 	m_magsq = 0.0;
 
@@ -100,6 +106,25 @@ void AMModSource::pullOne(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+
+    m_demodBuffer[m_demodBufferFill] = ci.real() + ci.imag();
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void AMModSource::prefetch(unsigned int nbSamples)
@@ -289,6 +314,20 @@ void AMModSource::applyAudioSampleRate(int sampleRate)
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
     m_cwKeyer.reset();
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
+
     m_audioSampleRate = sampleRate;
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
 }

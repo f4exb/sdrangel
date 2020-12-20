@@ -1,0 +1,29 @@
+DemodAnalyzerSettings:
+  description: DemodAnalyzer
+  properties:
+    deviceIndex:
+      type: integer
+    channelIndex:
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      type: integer
+      description: >
+        Synchronize with reverse API
+          * 1 - yes
+          * 0 - no
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+    spectrumConfig:
+      $ref: "/doc/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+    scopeConfig:
+      $ref: "/doc/swagger/include/GLScope.yaml#/GLScope"

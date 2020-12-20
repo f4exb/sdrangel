@@ -247,7 +247,8 @@ bool VORLocalizer::handleMessage(const Message& cmd)
         const ChannelAPI *channel = channelKey.m_key;
         m_availableChannels.remove(const_cast<ChannelAPI*>(channel));
         updateChannels();
-        MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "report");
+        MessageQueue *messageQueue = MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "report");
+        disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
 
         return true;
     }

@@ -53,6 +53,7 @@ AMDemod::AMDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new AMDemodBaseband();
+    m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
 	applySettings(m_settings, true);

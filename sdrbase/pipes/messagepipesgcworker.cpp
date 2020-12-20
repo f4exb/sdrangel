@@ -62,6 +62,15 @@ void MessagePipesGCWorker::stopWork()
     disconnect(&m_gcTimer, SIGNAL(timeout()), this, SLOT(processGC()));
 }
 
+void MessagePipesGCWorker::addMessageQueueToDelete(MessageQueue *messageQueue)
+{
+    if (messageQueue)
+    {
+        m_gcTimer.start(10000); // restart GC to make sure deletion is postponed
+        m_messagePipesGC.addElementToDelete(messageQueue);
+    }
+}
+
 void MessagePipesGCWorker::processGC()
 {
     // qDebug("MessagePipesGCWorker::processGC");

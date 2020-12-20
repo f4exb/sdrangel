@@ -77,7 +77,7 @@ bool DataFifo::setSize(int size)
 {
 	create(size);
 
-	return m_data.size() == (unsigned int)size;
+	return m_data.size() == size;
 }
 
 unsigned int DataFifo::write(const quint8* data, unsigned int count)
@@ -279,9 +279,4 @@ unsigned int DataFifo::readCommit(unsigned int count)
 	m_fill -= count;
 
 	return count;
-}
-
-unsigned int DataFifo::getSizePolicy(unsigned int sampleRate)
-{
-    return (sampleRate/100)*64; // .64s
 }

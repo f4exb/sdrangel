@@ -20,15 +20,15 @@
 #include "plugin/pluginapi.h"
 
 #ifndef SERVER_MODE
-#include "afcgui.h"
+#include "demodanalyzergui.h"
 #endif
-#include "afc.h"
-#include "afcplugin.h"
-#include "afcwebapiadapter.h"
+#include "demodanalyzer.h"
+#include "demodanalyzerplugin.h"
+#include "demodanalyzerwebapiadapter.h"
 
-const PluginDescriptor AFCPlugin::m_pluginDescriptor = {
-    AFC::m_featureId,
-	QStringLiteral("AFC"),
+const PluginDescriptor DemodAnalyzerPlugin::m_pluginDescriptor = {
+    DemodAnalyzer::m_featureId,
+	QStringLiteral("Demod Analyzer"),
 	QStringLiteral("6.4.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
@@ -36,45 +36,45 @@ const PluginDescriptor AFCPlugin::m_pluginDescriptor = {
 	QStringLiteral("https://github.com/f4exb/sdrangel")
 };
 
-AFCPlugin::AFCPlugin(QObject* parent) :
+DemodAnalyzerPlugin::DemodAnalyzerPlugin(QObject* parent) :
 	QObject(parent),
 	m_pluginAPI(nullptr)
 {
 }
 
-const PluginDescriptor& AFCPlugin::getPluginDescriptor() const
+const PluginDescriptor& DemodAnalyzerPlugin::getPluginDescriptor() const
 {
 	return m_pluginDescriptor;
 }
 
-void AFCPlugin::initPlugin(PluginAPI* pluginAPI)
+void DemodAnalyzerPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	// register AFC feature
-	m_pluginAPI->registerFeature(AFC::m_featureIdURI, AFC::m_featureId, this);
+	// register RigCtl Server feature
+	m_pluginAPI->registerFeature(DemodAnalyzer::m_featureIdURI, DemodAnalyzer::m_featureId, this);
 }
 
 #ifdef SERVER_MODE
-FeatureGUI* AFCPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+FeatureGUI* DemodAnalyzerPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
 	(void) featureUISet;
 	(void) feature;
     return nullptr;
 }
 #else
-FeatureGUI* AFCPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
+FeatureGUI* DemodAnalyzerPlugin::createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const
 {
-	return AFCGUI::create(m_pluginAPI, featureUISet, feature);
+	return DemodAnalyzerGUI::create(m_pluginAPI, featureUISet, feature);
 }
 #endif
 
-Feature* AFCPlugin::createFeature(WebAPIAdapterInterface* webAPIAdapterInterface) const
+Feature* DemodAnalyzerPlugin::createFeature(WebAPIAdapterInterface* webAPIAdapterInterface) const
 {
-    return new AFC(webAPIAdapterInterface);
+    return new DemodAnalyzer(webAPIAdapterInterface);
 }
 
-FeatureWebAPIAdapter* AFCPlugin::createFeatureWebAPIAdapter() const
+FeatureWebAPIAdapter* DemodAnalyzerPlugin::createFeatureWebAPIAdapter() const
 {
-	return new AFCWebAPIAdapter();
+	return new DemodAnalyzerWebAPIAdapter();
 }

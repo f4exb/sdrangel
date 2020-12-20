@@ -34,6 +34,8 @@
 
 #include "ammodsettings.h"
 
+class ChannelAPI;
+
 class AMModSource : public QObject,  public ChannelSampleSource
 {
     Q_OBJECT
@@ -48,6 +50,7 @@ public:
     void setInputFileStream(std::ifstream *ifstream) { m_ifstream = ifstream; }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     AudioFifo *getFeedbackAudioFifo() { return &m_feedbackAudioFifo; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
     void applyAudioSampleRate(int sampleRate);
     void applyFeedbackAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
@@ -67,6 +70,7 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     AMModSettings m_settings;
+    ChannelAPI *m_channel;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -96,6 +100,9 @@ private:
     AudioVector m_feedbackAudioBuffer;
     uint m_feedbackAudioBufferFill;
     AudioFifo m_feedbackAudioFifo;
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
+    bool m_demodBufferEnabled;
 
     quint32 m_levelCalcCount;
     qreal m_rmsLevel;

@@ -584,8 +584,11 @@ void AFC::removeTrackerFeatureReference()
 {
     if (m_trackerChannelAPI)
     {
-        if (MainCore::instance()->existsChannel(m_trackerChannelAPI)) {
-            MainCore::instance()->getMessagePipes().unregisterChannelToFeature(m_trackerChannelAPI, this, "settings");
+        if (MainCore::instance()->existsChannel(m_trackerChannelAPI))
+        {
+            MessageQueue *messageQueue
+                = MainCore::instance()->getMessagePipes().unregisterChannelToFeature(m_trackerChannelAPI, this, "settings");
+            disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));
         }
     }
 }

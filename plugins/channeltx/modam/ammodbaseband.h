@@ -28,6 +28,7 @@
 #include "ammodsource.h"
 
 class UpChannelizer;
+class ChannelAPI;
 
 class AMModBaseband : public QObject
 {
@@ -69,6 +70,7 @@ public:
     void setInputFileStream(std::ifstream *ifstream) { m_source.setInputFileStream(ifstream); }
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
     AudioFifo *getFeedbackAudioFifo() { return m_source.getFeedbackAudioFifo(); }
+    void setChannel(ChannelAPI *channel);
 
 signals:
 	/**

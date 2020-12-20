@@ -44,7 +44,7 @@ public:
     ~MessagePipes();
 
     MessageQueue *registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
-    void unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
+    MessageQueue *unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type);
     QList<MessageQueue*>* getMessageQueues(const ChannelAPI *source, const QString& type);
 
 private:

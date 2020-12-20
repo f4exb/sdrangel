@@ -47,6 +47,7 @@ public:
 
     void startWork();
     void stopWork();
+    void addDataFifoToDelete(DataFifo *dataFifo);
     bool isRunning() const { return m_running; }
 
 private:

@@ -79,6 +79,11 @@ void AMDemodBaseband::stopWork()
     m_running = false;
 }
 
+void AMDemodBaseband::setChannel(ChannelAPI *channel)
+{
+    m_sink.setChannel(channel);
+}
+
 void AMDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);

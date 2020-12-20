@@ -28,6 +28,7 @@
 #include "amdemodsink.h"
 
 class DownChannelizer;
+class ChannelAPI;
 
 class AMDemodBaseband : public QObject
 {
@@ -71,6 +72,7 @@ public:
     double getMagSq() const { return m_sink.getMagSq(); }
     bool getPllLocked() const { return m_sink.getPllLocked(); }
     Real getPllFrequency() const { return m_sink.getPllFrequency(); }
+    void setChannel(ChannelAPI *channel);
     bool isRunning() const { return m_running; }
 
 private:

@@ -46,9 +46,11 @@ MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, F
 	return m_registrations.registerProducerToConsumer(source, feature, type);
 }
 
-void MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+MessageQueue *MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
 {
-	m_registrations.unregisterProducerToConsumer(source, feature, type);
+	MessageQueue *messageQueue = m_registrations.unregisterProducerToConsumer(source, feature, type);
+	m_gcWorker->addMessageQueueToDelete(messageQueue);
+	return messageQueue;
 }
 
 QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)

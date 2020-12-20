@@ -18,6 +18,8 @@
 #ifndef INCLUDE_AMDEMODSINK_H
 #define INCLUDE_AMDEMODSINK_H
 
+#include <QVector>
+
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
@@ -31,6 +33,7 @@
 #include "amdemodsettings.h"
 
 class fftfilt;
+class ChannelAPI;
 
 class AMDemodSink : public ChannelSampleSink {
 public:
@@ -49,6 +52,7 @@ public:
 	bool getPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
 	Real getPllFrequency() const { return m_pll.getFreq(); }
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -87,6 +91,7 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     AMDemodSettings m_settings;
+    ChannelAPI *m_channel;
     int m_audioSampleRate;
 
 	NCO m_nco;
@@ -119,6 +124,8 @@ private:
 	AudioVector m_audioBuffer;
 	AudioFifo m_audioFifo;
 	uint32_t m_audioBufferFill;
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
     void processOneSample(Complex &ci);
 };
