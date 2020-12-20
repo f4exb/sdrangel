@@ -96,9 +96,10 @@ bool DemodAnalyzerGUI::handleMessage(const Message& message)
         DemodAnalyzer::MsgReportSampleRate& report = (DemodAnalyzer::MsgReportSampleRate&) message;
         int sampleRate = report.getSampleRate();
         qDebug("DemodAnalyzerGUI::handleMessage: DemodAnalyzer::MsgReportSampleRate: %d", sampleRate);
-        ui->glSpectrum->setSampleRate(sampleRate);
-        m_scopeVis->setLiveRate(sampleRate);
-        displaySampleRate(sampleRate);
+        ui->glSpectrum->setSampleRate(sampleRate/(1<<m_settings.m_log2Decim));
+        m_scopeVis->setLiveRate(sampleRate/(1<<m_settings.m_log2Decim));
+        displaySampleRate(sampleRate/(1<<m_settings.m_log2Decim));
+        m_sampleRate = sampleRate;
 
         return true;
     }
@@ -129,6 +130,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	ui(new Ui::DemodAnalyzerGUI),
 	m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
+    m_sampleRate(48000),
 	m_doApplySettings(true),
     m_lastFeatureState(0),
     m_selectedChannel(nullptr)
@@ -157,9 +159,9 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
     ui->glSpectrum->setCenterFrequency(0);
-    ui->glSpectrum->setSampleRate(48000);
-    m_scopeVis->setLiveRate(48000);
-    displaySampleRate(48000);
+    ui->glSpectrum->setSampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
+    m_scopeVis->setLiveRate(m_sampleRate/(1<<m_settings.m_log2Decim));
+    displaySampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
 
 	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
@@ -192,6 +194,7 @@ void DemodAnalyzerGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
     blockApplySettings(true);
+    ui->log2Decim->setCurrentIndex(m_settings.m_log2Decim);
     blockApplySettings(false);
 }
 
@@ -306,6 +309,19 @@ void DemodAnalyzerGUI::on_channelApply_clicked()
     if (ui->channels->count() > 0) {
         on_channels_currentIndexChanged(ui->channels->currentIndex());
     }
+}
+
+void DemodAnalyzerGUI::on_log2Decim_currentIndexChanged(int index)
+{
+    if ((index < 0) || (index > 6)) {
+        return;
+    }
+
+    m_settings.m_log2Decim = index;
+    ui->glSpectrum->setSampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
+    m_scopeVis->setLiveRate(m_sampleRate/(1<<m_settings.m_log2Decim));
+    displaySampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
+    applySettings();
 }
 
 void DemodAnalyzerGUI::tick()

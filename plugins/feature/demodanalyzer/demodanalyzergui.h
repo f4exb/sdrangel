@@ -54,6 +54,7 @@ private:
 	PluginAPI* m_pluginAPI;
 	FeatureUISet* m_featureUISet;
 	DemodAnalyzerSettings m_settings;
+	int m_sampleRate;
 	bool m_doApplySettings;
 
 	DemodAnalyzer* m_demodAnalyzer;
@@ -88,6 +89,7 @@ private slots:
 	void on_devicesRefresh_clicked();
 	void on_channels_currentIndexChanged(int index);
 	void on_channelApply_clicked();
+	void on_log2Decim_currentIndexChanged(int index);
 	void updateStatus();
 	void tick();
 };

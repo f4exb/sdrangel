@@ -41,8 +41,7 @@ struct DemodAnalyzerSettings
         AvailableChannel& operator=(const AvailableChannel&) = default;
     };
 
-    int m_deviceIndex;
-    int m_channelIndex;
+    int m_log2Decim;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;

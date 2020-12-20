@@ -69,6 +69,7 @@ void DemodAnalyzerWorker::feedPart(const QByteArray::const_iterator& begin, cons
     if (countSamples > m_sampleBufferSize)
     {
         m_sampleBuffer.resize(countSamples);
+        m_convBuffer.resize(2*countSamples);
         m_sampleBufferSize = countSamples;
     }
 
@@ -77,13 +78,56 @@ void DemodAnalyzerWorker::feedPart(const QByteArray::const_iterator& begin, cons
         double re = s[i] / (double) std::numeric_limits<int16_t>::max();
         m_magsq = re*re;
         m_channelPowerAvg(m_magsq);
-        m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
-        m_sampleBuffer[i].setImag(0);
+
+        if (m_settings.m_log2Decim == 0)
+        {
+            m_sampleBuffer[i].setReal(re * SDR_RX_SCALEF);
+            m_sampleBuffer[i].setImag(0);
+        }
+        else
+        {
+            m_convBuffer[2*i] = s[i];
+            m_convBuffer[2*i+1] = 0;
+
+            if (i == countSamples - 1) {
+                decimate(countSamples);
+            }
+        }
     }
 
 	if (m_sampleSink) {
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.begin() + countSamples, false);
+		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.begin() + countSamples/(1<<m_settings.m_log2Decim), false);
 	}
+}
+
+void DemodAnalyzerWorker::decimate(int countSamples)
+{
+    qint16 *buf = m_convBuffer.data();
+    SampleVector::iterator it = m_sampleBuffer.begin();
+
+    switch (m_settings.m_log2Decim)
+    {
+    case 1:
+        m_decimators.decimate2_cen(&it, buf, countSamples*2);
+        break;
+    case 2:
+        m_decimators.decimate4_cen(&it, buf, countSamples*2);
+        break;
+    case 3:
+        m_decimators.decimate8_cen(&it, buf, countSamples*2);
+        break;
+    case 4:
+        m_decimators.decimate16_cen(&it, buf, countSamples*2);
+        break;
+    case 5:
+        m_decimators.decimate32_cen(&it, buf, countSamples*2);
+        break;
+    case 6:
+        m_decimators.decimate64_cen(&it, buf, countSamples*2);
+        break;
+    default:
+        break;
+    }
 }
 
 void DemodAnalyzerWorker::handleInputMessages()
@@ -148,8 +192,7 @@ void DemodAnalyzerWorker::applySettings(const DemodAnalyzerSettings& settings, b
     qDebug() << "DemodAnalyzerWorker::applySettings:"
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
-            << " m_deviceIndex: " << settings.m_deviceIndex
-            << " m_channelIndex: " << settings.m_channelIndex
+            << " m_log2Decim: " << settings.m_log2Decim
             << " force: " << force;
 
     m_settings = settings;

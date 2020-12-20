@@ -18,11 +18,14 @@
 #ifndef INCLUDE_DEMODALYZERWORKER_H
 #define INCLUDE_DEMODALYZERWORKER_H
 
+#include <vector>
+
 #include <QObject>
 #include <QMutex>
 #include <QByteArray>
 
 #include "dsp/dsptypes.h"
+#include "dsp/decimators.h"
 #include "util/movingaverage.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
@@ -110,6 +113,8 @@ private:
     DemodAnalyzerSettings m_settings;
 	double m_magsq;
 	SampleVector m_sampleBuffer;
+    std::vector<qint16> m_convBuffer;
+    Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimators;
     int m_sampleBufferSize;
 	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
     BasebandSampleSink* m_sampleSink;
@@ -117,6 +122,7 @@ private:
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
+    void decimate(int countSamples);
 
 private slots:
     void handleInputMessages();

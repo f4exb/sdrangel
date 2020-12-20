@@ -205,8 +205,7 @@ bool DemodAnalyzer::deserialize(const QByteArray& data)
 void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool force)
 {
     qDebug() << "DemodAnalyzer::applySettings:"
-            << " m_deviceIndex: " << settings.m_deviceIndex
-            << " m_channelIndex: " << settings.m_channelIndex
+            << " m_channelIndex: " << settings.m_log2Decim
             << " m_title: " << settings.m_title
             << " m_rgbColor: " << settings.m_rgbColor
             << " m_useReverseAPI: " << settings.m_useReverseAPI
@@ -218,11 +217,8 @@ void DemodAnalyzer::applySettings(const DemodAnalyzerSettings& settings, bool fo
 
     QList<QString> reverseAPIKeys;
 
-    if ((m_settings.m_deviceIndex != settings.m_deviceIndex) || force) {
-        reverseAPIKeys.append("deviceIndex");
-    }
-    if ((m_settings.m_channelIndex != settings.m_channelIndex) || force) {
-        reverseAPIKeys.append("channelIndex");
+    if ((m_settings.m_log2Decim != settings.m_log2Decim) || force) {
+        reverseAPIKeys.append("log2Decim");
     }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
@@ -400,9 +396,6 @@ void DemodAnalyzer::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const DemodAnalyzerSettings& settings)
 {
-    response.getDemodAnalyzerSettings()->setDeviceIndex(settings.m_deviceIndex);
-    response.getDemodAnalyzerSettings()->setChannelIndex(settings.m_channelIndex);
-
     if (response.getDemodAnalyzerSettings()->getTitle()) {
         *response.getDemodAnalyzerSettings()->getTitle() = settings.m_title;
     } else {
@@ -428,12 +421,6 @@ void DemodAnalyzer::webapiUpdateFeatureSettings(
     const QStringList& featureSettingsKeys,
     SWGSDRangel::SWGFeatureSettings& response)
 {
-    if (featureSettingsKeys.contains("deviceIndex")) {
-        settings.m_deviceIndex = response.getDemodAnalyzerSettings()->getDeviceIndex();
-    }
-    if (featureSettingsKeys.contains("channelIndex")) {
-        settings.m_channelIndex = response.getDemodAnalyzerSettings()->getChannelIndex();
-    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getDemodAnalyzerSettings()->getTitle();
     }
@@ -468,12 +455,6 @@ void DemodAnalyzer::webapiReverseSendSettings(QList<QString>& featureSettingsKey
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
-    if (featureSettingsKeys.contains("deviceIndex") || force) {
-        swgDemodAnalyzerSettings->setDeviceIndex(settings.m_deviceIndex);
-    }
-    if (featureSettingsKeys.contains("channelIndex") || force) {
-        swgDemodAnalyzerSettings->setChannelIndex(settings.m_channelIndex);
-    }
     if (featureSettingsKeys.contains("title") || force) {
         swgDemodAnalyzerSettings->setTitle(new QString(settings.m_title));
     }

@@ -122,7 +122,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Reinitialization of device data</string>
+         <string>(Re) apply channel selection</string>
         </property>
         <property name="text">
          <string/>
@@ -131,6 +131,54 @@
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/checkmark.png</normaloff>:/checkmark.png</iconset>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="log2Decim">
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Channel decimation</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>32</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>64</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

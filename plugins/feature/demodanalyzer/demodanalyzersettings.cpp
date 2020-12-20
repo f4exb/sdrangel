@@ -24,12 +24,16 @@
 
 const QStringList DemodAnalyzerSettings::m_channelTypes = {
     QStringLiteral("AMDemod"),
-    QStringLiteral("AMMod")
+    QStringLiteral("AMMod"),
+    QStringLiteral("DSDDemod"),
+    QStringLiteral("NFMDemod"),
 };
 
 const QStringList DemodAnalyzerSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.amdemod"),
-    QStringLiteral("sdrangel.channeltx.modam")
+    QStringLiteral("sdrangel.channeltx.modam"),
+    QStringLiteral("sdrangel.channel.dsddemod"),
+    QStringLiteral("sdrangel.channel.nfmdemod"),
 };
 
 DemodAnalyzerSettings::DemodAnalyzerSettings() :
@@ -41,8 +45,7 @@ DemodAnalyzerSettings::DemodAnalyzerSettings() :
 
 void DemodAnalyzerSettings::resetToDefaults()
 {
-    m_deviceIndex = -1;
-    m_channelIndex = -1;
+    m_log2Decim = 0;
     m_title = "Demod Analyzer";
     m_rgbColor = QColor(128, 128, 128).rgb();
     m_useReverseAPI = false;
@@ -58,8 +61,7 @@ QByteArray DemodAnalyzerSettings::serialize() const
 
     s.writeBlob(1, m_spectrumGUI->serialize());
     s.writeBlob(2, m_scopeGUI->serialize());
-    s.writeS32(3, m_deviceIndex);
-    s.writeS32(4, m_channelIndex);
+    s.writeS32(3, m_log2Decim);
     s.writeString(5, m_title);
     s.writeU32(6, m_rgbColor);
     s.writeBool(7, m_useReverseAPI);
@@ -99,9 +101,8 @@ bool DemodAnalyzerSettings::deserialize(const QByteArray& data)
             m_scopeGUI->deserialize(bytetmp);
         }
 
-        d.readS32(3, &m_deviceIndex, -1);
-        d.readS32(4, &m_channelIndex, -1);
-        d.readString(5, &m_title, "RigCtl Server");
+        d.readS32(3, &m_log2Decim, 0);
+        d.readString(5, &m_title, "Demod Analyzer");
         d.readU32(6, &m_rgbColor, QColor(128, 128, 128).rgb());
         d.readBool(7, &m_useReverseAPI, false);
         d.readString(8, &m_reverseAPIAddress, "127.0.0.1");
