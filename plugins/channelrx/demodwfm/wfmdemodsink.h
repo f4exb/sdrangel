@@ -18,7 +18,7 @@
 #ifndef INCLUDE_WFMDEMODSINK_H
 #define INCLUDE_WFMDEMODSINK_H
 
-#include <vector>
+#include <QVector>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/nco.h"
@@ -31,6 +31,8 @@
 #include "util/message.h"
 
 #include "wfmdemodsettings.h"
+
+class ChannelAPI;
 
 class WFMDemodSink : public ChannelSampleSink {
 public:
@@ -67,6 +69,7 @@ public:
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     void applyAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 private:
     struct MagSqLevelsStore
@@ -87,6 +90,7 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     WFMDemodSettings m_settings;
+    ChannelAPI *m_channel;
 
     int m_audioSampleRate;
 
@@ -114,6 +118,9 @@ private:
 	AudioFifo m_audioFifo;
 	SampleVector m_sampleBuffer;
 	PhaseDiscriminators m_phaseDiscri;
+
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
     static const unsigned int m_rfFilterFftLength;
 };

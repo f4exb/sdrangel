@@ -20,8 +20,11 @@
 #include <QDebug>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/datafifo.h"
 #include "packetmodsource.h"
 #include "util/crc.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
 
 PacketModSource::PacketModSource() :
     m_channelSampleRate(48000),
@@ -46,6 +49,10 @@ PacketModSource::PacketModSource() :
     qDebug() << "PacketModSource::PacketModSource creating BPF : " << m_channelSampleRate;
     m_bandpass.create(301, m_channelSampleRate, 800.0, 2600.0);
     m_pulseShape.create(0.5, 6, m_channelSampleRate/9600);
+
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
+
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 }
@@ -266,6 +273,25 @@ void PacketModSource::modulateSample()
         Real s = std::real(m_modSample);
         calculateLevel(s);
     }
+
+    m_demodBuffer[m_demodBufferFill] = audioMod * std::numeric_limits<int16_t>::max();
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void PacketModSource::calculateLevel(Real& sample)
@@ -383,6 +409,19 @@ void PacketModSource::applyChannelSettings(int channelSampleRate, int channelFre
     qDebug() << "m_samplesPerSymbol: " << m_samplesPerSymbol << " (" << m_channelSampleRate << "/" << m_settings.m_baud << ")";
     // Precalculate FM sensensity to save doing it in the loop
     m_phaseSensitivity = 2.0f * M_PI * m_settings.m_fmDeviation / (double)m_channelSampleRate;
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, m_channelSampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 static uint8_t *ax25_address(uint8_t *p, QString address, uint8_t crrl)

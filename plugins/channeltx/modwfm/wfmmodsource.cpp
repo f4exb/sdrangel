@@ -16,6 +16,10 @@
 
 #include <QDebug>
 
+#include "dsp/datafifo.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
+
 #include "wfmmodsource.h"
 
 const int WFMModSource::m_rfFilterFFTLength = 1024;
@@ -46,6 +50,8 @@ WFMModSource::WFMModSource() :
 	m_magsq = 0.0;
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -140,6 +146,25 @@ void WFMModSource::pullOne(Sample& sample)
 
 	sample.m_real = (FixReal) ci.real();
 	sample.m_imag = (FixReal) ci.imag();
+
+    m_demodBuffer[m_demodBufferFill] = t * std::numeric_limits<int16_t>::max();
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void WFMModSource::modulateAudio()
@@ -237,13 +262,13 @@ void WFMModSource::pullAF(Real& sample)
         if (m_cwKeyer.getSample())
         {
             m_cwKeyer.getCWSmoother().getFadeSample(true, fadeFactor);
-            sample = m_cwToneNco.next() * m_settings.m_volumeFactor * fadeFactor;
+            sample = m_cwToneNco.next() * m_settings.m_volumeFactor * fadeFactor * 0.99f;
         }
         else
         {
             if (m_cwKeyer.getCWSmoother().getFadeSample(false, fadeFactor))
             {
-                sample = m_cwToneNco.next() * m_settings.m_volumeFactor * fadeFactor;
+                sample = m_cwToneNco.next() * m_settings.m_volumeFactor * fadeFactor * 0.99f;
             }
             else
             {
@@ -339,6 +364,19 @@ void WFMModSource::applyAudioSampleRate(int sampleRate)
     m_cwKeyer.reset();
     m_audioSampleRate = sampleRate;
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 void WFMModSource::applyFeedbackAudioSampleRate(int sampleRate)

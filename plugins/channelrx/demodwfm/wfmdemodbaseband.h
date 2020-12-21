@@ -28,6 +28,7 @@
 #include "wfmdemodsink.h"
 
 class DownChannelizer;
+class ChannelAPI;
 
 class WFMDemodBaseband : public QObject
 {
@@ -69,6 +70,7 @@ public:
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
     int getSquelchState() const { return m_sink.getSquelchState(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
+    void setChannel(ChannelAPI *channel);
 
 private:
     SampleSinkFifo m_sampleFifo;

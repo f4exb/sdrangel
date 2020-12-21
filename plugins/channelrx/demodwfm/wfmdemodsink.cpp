@@ -25,7 +25,10 @@
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
+#include "dsp/datafifo.h"
 #include "util/db.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
 
 #include "wfmdemodsink.h"
 
@@ -35,6 +38,7 @@ WFMDemodSink::WFMDemodSink() :
     m_channelSampleRate(384000),
     m_channelFrequencyOffset(0),
     m_audioSampleRate(48000),
+    m_squelchState(0),
     m_squelchOpen(false),
     m_magsq(0.0f),
     m_magsqSum(0.0f),
@@ -47,6 +51,9 @@ WFMDemodSink::WFMDemodSink() :
 
 	m_audioBuffer.resize(16384);
 	m_audioBufferFill = 0;
+
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
 	applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -130,6 +137,24 @@ void WFMDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 				}
 
 				m_interpolatorDistanceRemain += m_interpolatorDistance;
+                m_demodBuffer[m_demodBufferFill] = sample;
+                ++m_demodBufferFill;
+
+                if (m_demodBufferFill >= m_demodBuffer.size())
+                {
+                    QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+                    if (dataFifos)
+                    {
+                        QList<DataFifo*>::iterator it = dataFifos->begin();
+
+                        for (; it != dataFifos->end(); ++it) {
+                            (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+                        }
+                    }
+
+                    m_demodBufferFill = 0;
+                }
 			}
 		}
 	}
@@ -162,6 +187,19 @@ void WFMDemodSink::applyAudioSampleRate(int sampleRate)
     m_interpolatorDistanceRemain = (Real) m_channelSampleRate / sampleRate;
     m_interpolatorDistance =  (Real) m_channelSampleRate / (Real) sampleRate;
     m_audioSampleRate = sampleRate;
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 void WFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -186,8 +224,8 @@ void WFMDemodSink::applyChannelSettings(int channelSampleRate, int channelFreque
         Real lowCut = -(m_settings.m_rfBandwidth / 2.0) / channelSampleRate;
         Real hiCut  = (m_settings.m_rfBandwidth / 2.0) / channelSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
-        m_fmExcursion = m_settings.m_rfBandwidth / (Real) channelSampleRate;
-        m_phaseDiscri.setFMScaling(1.0f/m_fmExcursion);
+        //m_fmExcursion = m_settings.m_rfBandwidth / (Real) channelSampleRate;
+        m_phaseDiscri.setFMScaling((float) channelSampleRate / ((float) 2*m_fmExcursion));
         qDebug("WFMDemod::applySettings: m_fmExcursion: %f", m_fmExcursion);
     }
 
@@ -224,8 +262,10 @@ void WFMDemodSink::applySettings(const WFMDemodSettings& settings, bool force)
         Real lowCut = -(settings.m_rfBandwidth / 2.0) / m_channelSampleRate;
         Real hiCut  = (settings.m_rfBandwidth / 2.0) / m_channelSampleRate;
         m_rfFilter->create_filter(lowCut, hiCut);
-        m_fmExcursion = settings.m_rfBandwidth / (Real) m_channelSampleRate;
-        m_phaseDiscri.setFMScaling(1.0f/m_fmExcursion);
+        m_fmExcursion = (settings.m_rfBandwidth / 2) - m_settings.m_afBandwidth;
+        m_fmExcursion = m_fmExcursion < 2500 ? 2500 : m_fmExcursion;
+        //m_fmExcursion = settings.m_rfBandwidth / (Real) m_channelSampleRate;
+        m_phaseDiscri.setFMScaling((float) m_channelSampleRate / ((float) 2*m_fmExcursion));
         qDebug("WFMDemodSink::applySettings: m_fmExcursion: %f", m_fmExcursion);
     }
 

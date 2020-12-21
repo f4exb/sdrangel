@@ -59,6 +59,7 @@ WFMDemod::WFMDemod(DeviceAPI* deviceAPI) :
 
     m_thread = new QThread(this);
     m_basebandSink = new WFMDemodBaseband();
+    m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(m_thread);
 
 	applySettings(m_settings, true);

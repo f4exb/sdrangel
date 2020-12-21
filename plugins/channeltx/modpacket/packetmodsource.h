@@ -21,6 +21,7 @@
 
 #include <QMutex>
 #include <QDebug>
+#include <QVector>
 
 #include <iostream>
 #include <fstream>
@@ -44,6 +45,7 @@
 #define AX25_NO_L3      0xf0
 
 class BasebandSampleSink;
+class ChannelAPI;
 
 class PacketModSource : public ChannelSampleSource
 {
@@ -66,12 +68,14 @@ public:
     void applySettings(const PacketModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void addTXPacket(QString callsign, QString to, QString via, QString data);
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     int m_spectrumRate;
     PacketModSettings m_settings;
+    ChannelAPI *m_channel;
 
     NCO m_carrierNco;
     Real m_audioPhase;
@@ -125,6 +129,9 @@ private:
     LFSR m_scrambler;                   // Scrambler
 
     std::ofstream m_audioFile;          // For debug output of baseband waveform
+
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
     bool bitsValid();                   // Are there and bits to transmit
     int getBit();                       // Get bit from m_bits

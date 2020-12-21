@@ -25,8 +25,11 @@
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/datafifo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
 
 #include "ssbdemodsink.h"
 
@@ -61,6 +64,9 @@ SSBDemodSink::SSBDemodSink() :
 	m_audioBufferFill = 0;
 	m_undersampleCount = 0;
 	m_sum = 0;
+
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
 	m_usb = true;
 	m_magsq = 0.0f;
@@ -194,6 +200,25 @@ void SSBDemodSink::processOneSample(Complex &ci)
                 m_audioBuffer[m_audioBufferFill].l = sample;
                 m_audioBuffer[m_audioBufferFill].r = sample;
             }
+
+            m_demodBuffer[m_demodBufferFill] = (z.real() + z.imag()) * 0.7;
+            ++m_demodBufferFill;
+
+            if (m_demodBufferFill >= m_demodBuffer.size())
+            {
+                QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+                if (dataFifos)
+                {
+                    QList<DataFifo*>::iterator it = dataFifos->begin();
+
+                    for (; it != dataFifos->end(); ++it) {
+                        (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+                    }
+                }
+
+                m_demodBufferFill = 0;
+            }
         }
 
         ++m_audioBufferFill;
@@ -279,6 +304,19 @@ void SSBDemodSink::applyAudioSampleRate(int sampleRate)
 
     m_audioFifo.setSize(sampleRate);
     m_audioSampleRate = sampleRate;
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 void SSBDemodSink::applySettings(const SSBDemodSettings& settings, bool force)

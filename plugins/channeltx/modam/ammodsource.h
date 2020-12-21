@@ -85,7 +85,6 @@ private:
     Interpolator m_feedbackInterpolator;
     Real m_feedbackInterpolatorDistance;
     Real m_feedbackInterpolatorDistanceRemain;
-    bool m_feedbackInterpolatorConsumed;
 
     double m_magsq;
     MovingAverageUtil<double, double, 16> m_movingAverage;

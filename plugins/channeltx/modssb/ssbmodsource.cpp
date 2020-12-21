@@ -19,6 +19,10 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/misc.h"
+#include "dsp/datafifo.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
+
 #include "ssbmodsource.h"
 
 const int SSBModSource::m_ssbFftLen = 1024;
@@ -50,6 +54,9 @@ SSBModSource::SSBModSource() :
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
+
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
     m_sum.real(0.0f);
     m_sum.imag(0.0f);
@@ -163,6 +170,26 @@ void SSBModSource::modulateSample()
     }
 
     calculateLevel(m_modSample);
+
+    // take projection on real axis
+    m_demodBuffer[m_demodBufferFill] = m_modSample.real() * std::numeric_limits<int16_t>::max();
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void SSBModSource::pullAF(Complex& sample)
@@ -574,6 +601,19 @@ void SSBModSource::applyAudioSampleRate(int sampleRate)
     m_audioSampleRate = sampleRate;
 
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 void SSBModSource::applyFeedbackAudioSampleRate(int sampleRate)

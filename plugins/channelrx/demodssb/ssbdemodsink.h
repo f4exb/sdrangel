@@ -18,7 +18,7 @@
 #ifndef INCLUDE_SSBDEMODSINK_H
 #define INCLUDE_SSBDEMODSINK_H
 
-#include <vector>
+#include <QVector>
 
 #include "dsp/channelsamplesink.h"
 #include "dsp/ncof.h"
@@ -31,6 +31,7 @@
 #include "ssbdemodsettings.h"
 
 class BasebandSampleSink;
+class ChannelAPI;
 
 class SSBDemodSink : public ChannelSampleSink {
 public:
@@ -47,6 +48,7 @@ public:
     AudioFifo *getAudioFifo() { return &m_audioFifo; }
     double getMagSq() const { return m_magsq; }
 	bool getAudioActive() const { return m_audioActive; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples)
     {
@@ -78,6 +80,7 @@ private:
     };
 
     SSBDemodSettings m_settings;
+    ChannelAPI *m_channel;
 
 	Real m_Bandwidth;
 	Real m_LowCutoff;
@@ -120,6 +123,9 @@ private:
 	uint m_audioBufferFill;
 	AudioFifo m_audioFifo;
 	quint32 m_audioSampleRate;
+
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
 	static const int m_ssbFftLen;
 	static const int m_agcTarget;

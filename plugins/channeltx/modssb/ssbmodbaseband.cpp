@@ -63,6 +63,11 @@ void SSBModBaseband::reset()
     m_sampleFifo.reset();
 }
 
+void SSBModBaseband::setChannel(ChannelAPI *channel)
+{
+    m_source.setChannel(channel);
+}
+
 void SSBModBaseband::pull(const SampleVector::iterator& begin, unsigned int nbSamples)
 {
     unsigned int part1Begin, part1End, part2Begin, part2End;

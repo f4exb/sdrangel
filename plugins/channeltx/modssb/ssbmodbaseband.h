@@ -30,6 +30,7 @@
 class UpChannelizer;
 class BasebandSampleSink;
 class SpectrumVis;
+class ChannelAPI;
 
 class SSBModBaseband : public QObject
 {
@@ -72,6 +73,7 @@ public:
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
     AudioFifo *getFeedbackAudioFifo() { return m_source.getFeedbackAudioFifo(); }
     void setSpectrumSink(SpectrumVis *sampleSink) { m_spectrumVis = sampleSink; m_source.setSpectrumSink((BasebandSampleSink *) sampleSink); }
+    void setChannel(ChannelAPI *channel);
 
 signals:
 	/**

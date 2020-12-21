@@ -62,6 +62,11 @@ void NFMModBaseband::reset()
     m_sampleFifo.reset();
 }
 
+void NFMModBaseband::setChannel(ChannelAPI *channel)
+{
+    m_source.setChannel(channel);
+}
+
 void NFMModBaseband::pull(const SampleVector::iterator& begin, unsigned int nbSamples)
 {
     unsigned int part1Begin, part1End, part2Begin, part2End;

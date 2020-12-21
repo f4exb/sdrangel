@@ -28,6 +28,7 @@
 #include "wfmmodsource.h"
 
 class UpChannelizer;
+class ChannelAPI;
 
 class WFMModBaseband : public QObject
 {
@@ -68,6 +69,7 @@ public:
     int getChannelSampleRate() const;
     void setInputFileStream(std::ifstream *ifstream) { m_source.setInputFileStream(ifstream); }
     AudioFifo *getAudioFifo() { return m_source.getAudioFifo(); }
+    void setChannel(ChannelAPI *channel);
 
 signals:
 	/**

@@ -28,6 +28,7 @@
 #include "ssbdemodsink.h"
 
 class DownChannelizer;
+class ChannelAPI;
 
 class SSBDemodBaseband : public QObject
 {
@@ -69,6 +70,7 @@ public:
     bool getAudioActive() const { return m_sink.getAudioActive(); }
     void setBasebandSampleRate(int sampleRate);
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
+    void setChannel(ChannelAPI *channel);
 
 private:
     SampleSinkFifo m_sampleFifo;

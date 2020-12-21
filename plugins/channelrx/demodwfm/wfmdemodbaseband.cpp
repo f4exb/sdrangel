@@ -58,6 +58,11 @@ void WFMDemodBaseband::reset()
     m_sampleFifo.reset();
 }
 
+void WFMDemodBaseband::setChannel(ChannelAPI *channel)
+{
+    m_sink.setChannel(channel);
+}
+
 void WFMDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);

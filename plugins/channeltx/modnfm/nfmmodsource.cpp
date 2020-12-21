@@ -17,6 +17,10 @@
 
 #include <QDebug>
 
+#include "dsp/datafifo.h"
+#include "util/messagequeue.h"
+#include "maincore.h"
+
 #include "nfmmodsource.h"
 
 const int NFMModSource::m_levelNbSamples = 480; // every 10ms
@@ -43,6 +47,9 @@ NFMModSource::NFMModSource() :
 
 	m_feedbackAudioBuffer.resize(1<<14);
 	m_feedbackAudioBufferFill = 0;
+
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
 	m_magsq = 0.0;
 
@@ -132,7 +139,7 @@ void NFMModSource::pullAudio(unsigned int nbSamplesAudio)
 
 void NFMModSource::modulateSample()
 {
-	Real t0, t;
+	Real t0, t1, t;
 
     pullAF(t0);
     m_preemphasisFilter.process(t0, t);
@@ -144,10 +151,12 @@ void NFMModSource::modulateSample()
     calculateLevel(t);
 
     if (m_settings.m_ctcssOn) {
-        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * (0.85f * m_bandpass.filter(t) + 0.15f * 0.625f * m_ctcssNco.next()) * 1.33f;
+        t1 = (0.85f * m_bandpass.filter(t) + 0.15f * 0.625f * m_ctcssNco.next()) * 1.2f;
     } else {
-        m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * m_bandpass.filter(t) * 1.33f;
+        t1 = m_bandpass.filter(t) * 1.2f;
     }
+
+    m_modPhasor += (m_settings.m_fmDeviation / (float) m_audioSampleRate) * t1;
 
     // limit phasor range to ]-pi,pi]
     if (m_modPhasor > M_PI) {
@@ -156,6 +165,25 @@ void NFMModSource::modulateSample()
 
     m_modSample.real(cos(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF); // -1 dB
     m_modSample.imag(sin(m_modPhasor) * 0.891235351562f * SDR_TX_SCALEF);
+
+    m_demodBuffer[m_demodBufferFill] = t1 * std::numeric_limits<int16_t>::max();
+    ++m_demodBufferFill;
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void NFMModSource::pullAF(Real& sample)
@@ -321,6 +349,19 @@ void NFMModSource::applyAudioSampleRate(int sampleRate)
     m_preemphasisFilter.configure(m_preemphasis*sampleRate);
     m_audioSampleRate = sampleRate;
     applyFeedbackAudioSampleRate(m_feedbackAudioSampleRate);
+
+    QList<MessageQueue*> *messageQueues = MainCore::instance()->getMessagePipes().getMessageQueues(m_channel, "reportdemod");
+
+    if (messageQueues)
+    {
+        QList<MessageQueue*>::iterator it = messageQueues->begin();
+
+        for (; it != messageQueues->end(); ++it)
+        {
+            MainCore::MsgChannelDemodReport *msg = MainCore::MsgChannelDemodReport::create(m_channel, sampleRate);
+            (*it)->push(msg);
+        }
+    }
 }
 
 void NFMModSource::applyFeedbackAudioSampleRate(int sampleRate)

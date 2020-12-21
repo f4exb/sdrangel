@@ -20,6 +20,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QVector>
 
 #include <iostream>
 #include <fstream>
@@ -35,6 +36,8 @@
 #include "audio/audiofifo.h"
 
 #include "nfmmodsettings.h"
+
+class ChannelAPI;
 
 class NFMModSource : public QObject, public ChannelSampleSource
 {
@@ -54,6 +57,7 @@ public:
     void applyFeedbackAudioSampleRate(int sampleRate);
     int getAudioSampleRate() const { return m_audioSampleRate; }
     int getFeedbackAudioSampleRate() const { return m_feedbackAudioSampleRate; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
     CWKeyer& getCWKeyer() { return m_cwKeyer; }
     double getMagSq() const { return m_magsq; }
     void getLevels(qreal& rmsLevel, qreal& peakLevel, int& numSamples) const
@@ -69,6 +73,7 @@ private:
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
     NFMModSettings m_settings;
+    ChannelAPI *m_channel;
 
     NCO m_carrierNco;
     NCOF m_toneNco;
@@ -85,6 +90,9 @@ private:
     Real m_feedbackInterpolatorDistance;
     Real m_feedbackInterpolatorDistanceRemain;
     bool m_feedbackInterpolatorConsumed;
+
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
     Lowpass<Real> m_lowpass;
     Bandpass<Real> m_bandpass;
