@@ -1,3 +1,11 @@
+sdrangel (6.4.0-1) unstable; urgency=medium
+
+   * New demodulation analyzer feature plugin. Implements #695
+   * GLShaderTVArray: fixed regression introduced by commit a08e18b
+   * Appveyor MSVC build: follow upgrade to Qt 5.15.2
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 21 Dec 2020 09:35:39 +0100
+
 sdrangel (6.3.3-1) unstable; urgency=medium
 
    * AFC: use message pipes for channel settings feedback. Updated channel plugins.
