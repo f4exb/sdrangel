@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <vector>
-#include <boost/circular_buffer.hpp>
 #include "dsp/dsptypes.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/projector.h"
