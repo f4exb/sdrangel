@@ -59,7 +59,7 @@ public:
         }
         else
         {
-            typeId++;
+            typeId = m_typeCount++;
             m_typeIds.insert(type, typeId);
         }
 
