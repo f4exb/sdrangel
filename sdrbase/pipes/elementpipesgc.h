@@ -121,7 +121,8 @@ public:
                     QList<Consumer*>& consumers = cIt.value();
 
                     for (int i = 0; i < consumers.size(); i++) {
-                        sendMessageToConsumer(m_elements->operator[](producerKey)[i], producerKey, consumers[i]);
+                        if (existsConsumer(consumers[i]))
+                            sendMessageToConsumer(m_elements->operator[](producerKey)[i], producerKey, consumers[i]);
                     }
                 }
             }
