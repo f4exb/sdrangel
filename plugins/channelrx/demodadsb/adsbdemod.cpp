@@ -34,12 +34,14 @@
 #include "SWGADSBDemodSettings.h"
 #include "SWGChannelReport.h"
 #include "SWGADSBDemodReport.h"
+#include "SWGTargetAzimuthElevation.h"
 
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplemimo.h"
 #include "device/deviceapi.h"
 #include "util/db.h"
+#include "maincore.h"
 
 #include "adsbdemod.h"
 #include "adsbdemodworker.h"
@@ -470,4 +472,28 @@ void ADSBDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
+}
+
+void ADSBDemod::setTarget(const QString& name, float targetAzimuth, float targetElevation)
+{
+    m_targetAzimuth = targetAzimuth;
+    m_targetElevation = targetElevation;
+    m_targetAzElValid = true;
+
+    // Send to Rotator Controllers
+    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(this, "target");
+    if (mapMessageQueues)
+    {
+        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+
+        for (; it != mapMessageQueues->end(); ++it)
+        {
+            SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = new SWGSDRangel::SWGTargetAzimuthElevation();
+            swgTarget->setName(new QString(name));
+            swgTarget->setAzimuth(targetAzimuth);
+            swgTarget->setElevation(targetElevation);
+            (*it)->push(MainCore::MsgTargetAzimuthElevation::create(this, swgTarget));
+        }
+    }
 }

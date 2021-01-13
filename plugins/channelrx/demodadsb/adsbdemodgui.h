@@ -34,6 +34,7 @@
 #include "util/azel.h"
 #include "util/movingaverage.h"
 #include "util/httpdownloadmanager.h"
+#include "maincore.h"
 
 #include "adsbdemodsettings.h"
 #include "ourairportsdb.h"
@@ -207,6 +208,19 @@ struct Aircraft {
         m_correlationItem = new QTableWidgetItem();
         m_rssiItem = new QTableWidgetItem();
     }
+
+    QString getImage();
+    QString getText(bool all=false);
+
+    // Name to use when selected as a target
+    QString targetName()
+    {
+        if (!m_flight.isEmpty())
+            return QString("Flight: %1").arg(m_flight);
+        else
+            return QString("ICAO: %1").arg(m_icao, 0, 16);
+    }
+
 };
 
 // Aircraft data model used by QML map item
@@ -300,9 +314,16 @@ public:
         allAircraftUpdated();
     }
 
+    void setAllFlightPaths(bool allFlightPaths)
+    {
+        m_allFlightPaths = allFlightPaths;
+        allAircraftUpdated();
+    }
+
 private:
     QList<Aircraft *> m_aircrafts;
     bool m_flightPaths;
+    bool m_allFlightPaths;
 };
 
 // Airport data model used by QML map item
@@ -445,7 +466,7 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     void highlightAircraft(Aircraft *aircraft);
     void targetAircraft(Aircraft *aircraft);
-    void target(float az, float el);
+    void target(const QString& name, float az, float el);
     bool setFrequency(float frequency);
     bool useSIUints() { return m_settings.m_siUnits; }
 
@@ -547,6 +568,7 @@ private slots:
     void on_getOSNDB_clicked();
     void on_getAirportDB_clicked();
     void on_flightPaths_clicked(bool checked);
+    void on_allFlightPaths_clicked(bool checked);
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();

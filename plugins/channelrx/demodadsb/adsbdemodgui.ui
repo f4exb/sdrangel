@@ -546,7 +546,7 @@
       <item>
        <widget class="ButtonSwitch" name="flightPaths">
         <property name="toolTip">
-         <string>Display flight paths</string>
+         <string>Display flight path for selected aircraft</string>
         </property>
         <property name="text">
          <string>^</string>
@@ -554,6 +554,26 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/logarithmic.png</normaloff>:/logarithmic.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="allFlightPaths">
+        <property name="toolTip">
+         <string>Display flight paths for all aircraft</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/icons/allflightpaths.png</normaloff>:/icons/allflightpaths.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -946,15 +966,15 @@
    <header location="global">QtQuickWidgets/QQuickWidget</header>
   </customwidget>
   <customwidget>
-   <class>ButtonSwitch</class>
-   <extends>QToolButton</extends>
-   <header>gui/buttonswitch.h</header>
-  </customwidget>
-  <customwidget>
    <class>RollupWidget</class>
    <extends>QWidget</extends>
    <header>gui/rollupwidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
   </customwidget>
   <customwidget>
    <class>LevelMeterSignalDB</class>

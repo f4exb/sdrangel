@@ -66,6 +66,7 @@ struct ADSBDemodSettings
     } m_airportMinimumSize;             //!< What's the minimum size airport that should be displayed
     bool m_displayHeliports;            //!< Whether to display heliports on the map
     bool m_flightPaths;                 //!< Whether to display flight paths
+    bool m_allFlightPaths;              //!< Whether to display flight paths for all aircraft
     bool m_siUnits;                     //!< Uses m,kph rather than ft/knts
     QString m_tableFontName;            //!< Font to use for table
     int m_tableFontSize;
