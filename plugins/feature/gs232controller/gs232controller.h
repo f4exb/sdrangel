@@ -142,7 +142,6 @@ private:
     QThread m_thread;
     GS232ControllerWorker *m_worker;
     GS232ControllerSettings m_settings;
-    //QHash<PipeEndPoint*, AvailablePipeSource> m_availablePipes;
     QList<AvailablePipeSource> m_availablePipes;
     PipeEndPoint *m_selectedPipe;
     QTimer m_updatePipesTimer;
@@ -158,7 +157,6 @@ private:
 private slots:
     void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
-    //void handlePipeMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLER_H_

@@ -25,7 +25,6 @@
 #include "util/message.h"
 
 class Serializable;
-class PipeEndPoint;
 
 struct GS232ControllerSettings
 {
