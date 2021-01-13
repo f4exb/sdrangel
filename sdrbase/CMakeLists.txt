@@ -176,6 +176,8 @@ set(sdrbase_SOURCES
     settings/mainsettings.cpp
 
     util/ax25.cpp
+    util/aprs.cpp
+    util/astronomy.cpp
     util/azel.cpp
     util/crc.cpp
     util/CRC64.cpp
@@ -366,6 +368,8 @@ set(sdrbase_HEADERS
     settings/mainsettings.h
 
     util/ax25.h
+    util/aprs.h
+    util/astronomy.h
     util/azel.h
     util/CRC64.h
     util/csv.h

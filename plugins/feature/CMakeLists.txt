@@ -10,6 +10,8 @@ if (Qt5Quick_FOUND AND Qt5QuickWidgets_FOUND AND Qt5Positioning_FOUND)
 endif()
 
 add_subdirectory(afc)
+add_subdirectory(aprs)
 add_subdirectory(demodanalyzer)
 add_subdirectory(rigctlserver)
 add_subdirectory(simpleptt)
+add_subdirectory(startracker)
