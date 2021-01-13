@@ -48,6 +48,9 @@ MESSAGE_CLASS_DEFINITION(MainCore::MsgDeleteFeature, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelReport, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelSettings, Message)
 MESSAGE_CLASS_DEFINITION(MainCore::MsgChannelDemodReport, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgMapItem, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgPacket, Message)
+MESSAGE_CLASS_DEFINITION(MainCore::MsgTargetAzimuthElevation, Message)
 
 MainCore::MainCore()
 {

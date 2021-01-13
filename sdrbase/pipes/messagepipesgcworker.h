@@ -50,10 +50,10 @@ public:
     bool isRunning() const { return m_running; }
 
 private:
-    class MessagePipesGC : public ElementPipesGC<ChannelAPI, Feature, MessageQueue>
+    class MessagePipesGC : public ElementPipesGC<PipeEndPoint, Feature, MessageQueue>
     {
     private:
-        virtual bool existsProducer(const ChannelAPI *channelAPI);
+        virtual bool existsProducer(const PipeEndPoint *pipeEndPoint);
         virtual bool existsConsumer(const Feature *feature);
         virtual void sendMessageToConsumer(const MessageQueue *messageQueue,  MessagePipesCommon::ChannelRegistrationKey key, Feature *feature);
     };

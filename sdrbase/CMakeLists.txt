@@ -167,6 +167,7 @@ set(sdrbase_SOURCES
     pipes/messagepipes.cpp
     pipes/messagepipescommon.cpp
     pipes/messagepipesgcworker.cpp
+    pipes/pipeendpoint.cpp
 
     settings/featuresetpreset.cpp
     settings/preferences.cpp
@@ -349,6 +350,7 @@ set(sdrbase_HEADERS
     pipes/messagepipes.h
     pipes/messagepipescommon.h
     pipes/messagepipesgcworker.h
+    pipes/pipeendpoint.h
 
     plugin/plugininterface.h
     plugin/pluginapi.h

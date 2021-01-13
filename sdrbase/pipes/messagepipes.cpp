@@ -21,6 +21,7 @@
 
 #include "messagepipesgcworker.h"
 #include "messagepipes.h"
+#include "pipeendpoint.h"
 
 MessagePipes::MessagePipes()
 {
@@ -41,19 +42,19 @@ MessagePipes::~MessagePipes()
 	}
 }
 
-MessageQueue *MessagePipes::registerChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+MessageQueue *MessagePipes::registerChannelToFeature(const PipeEndPoint *source, Feature *feature, const QString& type)
 {
 	return m_registrations.registerProducerToConsumer(source, feature, type);
 }
 
-MessageQueue *MessagePipes::unregisterChannelToFeature(const ChannelAPI *source, Feature *feature, const QString& type)
+MessageQueue *MessagePipes::unregisterChannelToFeature(const PipeEndPoint *source, Feature *feature, const QString& type)
 {
 	MessageQueue *messageQueue = m_registrations.unregisterProducerToConsumer(source, feature, type);
 	m_gcWorker->addMessageQueueToDelete(messageQueue);
 	return messageQueue;
 }
 
-QList<MessageQueue*>* MessagePipes::getMessageQueues(const ChannelAPI *source, const QString& type)
+QList<MessageQueue*>* MessagePipes::getMessageQueues(const PipeEndPoint *source, const QString& type)
 {
 	return m_registrations.getElements(source, type);
 }

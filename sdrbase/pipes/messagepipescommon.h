@@ -26,14 +26,14 @@
 #include "util/message.h"
 #include "elementpipescommon.h"
 
-class ChannelAPI;
+class PipeEndPoint;
 class Feature;
 class MessageQueue;
 
 class SDRBASE_API MessagePipesCommon
 {
 public:
-    typedef ElementPipesCommon::RegistrationKey<ChannelAPI> ChannelRegistrationKey;
+    typedef ElementPipesCommon::RegistrationKey<PipeEndPoint> ChannelRegistrationKey;
 
     /** Send this message to stakeholders when the garbage collector finds that a channel was deleted */
     class SDRBASE_API MsgReportChannelDeleted : public Message {

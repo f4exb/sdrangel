@@ -23,6 +23,7 @@
 #include "SWGDeviceState.h"
 
 #include "feature.h"
+#include "maincore.h"
 
 Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
 	m_webAPIAdapterInterface(webAPIAdapterInterface),
@@ -43,6 +44,18 @@ void Feature::handleInputMessages()
 			delete message;
 		}
 	}
+}
+
+void Feature::handlePipeMessageQueue(MessageQueue* messageQueue)
+{
+    Message* message;
+
+    while ((message = messageQueue->pop()) != nullptr)
+    {
+        if (handleMessage(*message)) {
+            delete message;
+        }
+    }
 }
 
 int Feature::webapiRunGet(
