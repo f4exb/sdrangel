@@ -21,6 +21,7 @@
 
 #include <QThread>
 #include <QNetworkRequest>
+#include <QTimer>
 
 #include "feature/feature.h"
 #include "util/message.h"
@@ -81,6 +82,25 @@ public:
         { }
     };
 
+    class MsgReportWorker : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        QString getMessage() { return m_message; }
+
+        static MsgReportWorker* create(QString message) {
+            return new MsgReportWorker(message);
+        }
+
+    private:
+        QString m_message;
+
+        MsgReportWorker(QString message) :
+            Message(),
+            m_message(message)
+        {}
+    };
+
     GS232Controller(WebAPIAdapterInterface *webAPIAdapterInterface);
     virtual ~GS232Controller();
     virtual void destroy() { delete this; }
@@ -122,7 +142,10 @@ private:
     QThread m_thread;
     GS232ControllerWorker *m_worker;
     GS232ControllerSettings m_settings;
-    bool m_ptt;
+    //QHash<PipeEndPoint*, AvailablePipeSource> m_availablePipes;
+    QList<AvailablePipeSource> m_availablePipes;
+    PipeEndPoint *m_selectedPipe;
+    QTimer m_updatePipesTimer;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
@@ -133,7 +156,9 @@ private:
     void webapiReverseSendSettings(QList<QString>& featureSettingsKeys, const GS232ControllerSettings& settings, bool force);
 
 private slots:
+    void updatePipes();
     void networkManagerFinished(QNetworkReply *reply);
+    //void handlePipeMessageQueue(MessageQueue* messageQueue);
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLER_H_

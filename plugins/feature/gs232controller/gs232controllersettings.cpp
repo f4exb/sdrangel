@@ -23,7 +23,15 @@
 
 #include "gs232controllersettings.h"
 
-MESSAGE_CLASS_DEFINITION(GS232ControllerSettings::MsgChannelIndexChange, Message)
+const QStringList GS232ControllerSettings::m_pipeTypes = {
+    QStringLiteral("ADSBDemod"),
+    QStringLiteral("StarTracker")
+};
+
+const QStringList GS232ControllerSettings::m_pipeURIs = {
+    QStringLiteral("sdrangel.channel.adsbdemod"),
+    QStringLiteral("sdrangel.feature.startracker")
+};
 
 GS232ControllerSettings::GS232ControllerSettings()
 {
@@ -37,8 +45,7 @@ void GS232ControllerSettings::resetToDefaults()
     m_serialPort = "";
     m_baudRate = 9600;
     m_track = false;
-    m_deviceIndex = -1;
-    m_channelIndex = -1;
+    m_target = "";
     m_title = "GS-232 Rotator Controller";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -46,6 +53,8 @@ void GS232ControllerSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_azimuthOffset = 0;
+    m_elevationOffset = 0;
 }
 
 QByteArray GS232ControllerSettings::serialize() const
@@ -57,8 +66,7 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeString(3, m_serialPort);
     s.writeS32(4, m_baudRate);
     s.writeBool(5, m_track);
-    s.writeS32(6, m_deviceIndex);
-    s.writeS32(7, m_channelIndex);
+    s.writeString(6, m_target);
     s.writeString(8, m_title);
     s.writeU32(9, m_rgbColor);
     s.writeBool(10, m_useReverseAPI);
@@ -66,6 +74,8 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIFeatureSetIndex);
     s.writeU32(14, m_reverseAPIFeatureIndex);
+    s.writeS32(15, m_azimuthOffset);
+    s.writeS32(16, m_elevationOffset);
 
     return s.final();
 }
@@ -91,8 +101,7 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_serialPort, "");
         d.readS32(4, &m_baudRate, 9600);
         d.readBool(5, &m_track, false);
-        d.readS32(6, &m_deviceIndex, -1);
-        d.readS32(7, &m_channelIndex, -1);
+        d.readString(6, &m_target, "");
         d.readString(8, &m_title, "GS-232 Rotator Controller");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(10, &m_useReverseAPI, false);
@@ -109,6 +118,8 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(14, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+        d.readS32(15, &m_azimuthOffset, 0);
+        d.readS32(16, &m_elevationOffset, 0);
 
         return true;
     }

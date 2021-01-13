@@ -28,8 +28,6 @@
 
 #include "gs232controllersettings.h"
 
-class WebAPIAdapterInterface;
-
 class GS232ControllerWorker : public QObject
 {
     Q_OBJECT
@@ -57,7 +55,7 @@ public:
         { }
     };
 
-    GS232ControllerWorker(WebAPIAdapterInterface *webAPIAdapterInterface);
+    GS232ControllerWorker();
     ~GS232ControllerWorker();
     void reset();
     bool startWork();
@@ -69,7 +67,6 @@ public:
 
 private:
 
-    WebAPIAdapterInterface *m_webAPIAdapterInterface;
     MessageQueue m_inputMessageQueue;  //!< Queue for asynchronous inbound communication
     MessageQueue *m_msgQueueToFeature; //!< Queue to report channel change to main feature object
     MessageQueue *m_msgQueueToGUI;
@@ -82,8 +79,8 @@ private:
     bool handleMessage(const Message& cmd);
     void applySettings(const GS232ControllerSettings& settings, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
-    void setAzimuth(int azimuth);
-    void setAzimuthElevation(int azimuth, int elevation);
+    void setAzimuth(int azimuth, int azimuthOffset);
+    void setAzimuthElevation(int azimuth, int elevation, int azimuthOffset, int elevationOffset);
 
 private slots:
     void handleInputMessages();
