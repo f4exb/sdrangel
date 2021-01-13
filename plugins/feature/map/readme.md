@@ -24,6 +24,10 @@ To centre the map on an object or location, enter:
 
 When checked, names of objects are displayed in a bubble next to each object.
 
+<h3>4: Delete</h3>
+
+When clicked, all items will be deleted from the map.
+
 <h3>Map</h3>
 
 The map displays objects reported by other SDRangel channels and features.
