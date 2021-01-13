@@ -299,7 +299,7 @@ bool APRSGUI::handleMessage(const Message& message)
                         {
                             for (int j = 0; j < 8; j++)
                                 telemetryStation->m_telemetryBitSense[j] = aprs->m_telemetryBitSense[j];
-                            telemetryStation->m_hasTelemetryBitSense;
+                            telemetryStation->m_hasTelemetryBitSense = true;
                             telemetryStation->m_telemetryProjectName = aprs->m_telemetryProjectName;
                         }
                         if (ui->stationSelect->currentText() == aprs->m_addressee)
@@ -972,6 +972,7 @@ void APRSGUI::on_stationFilter_currentIndexChanged(int index)
 
 void APRSGUI::on_stationSelect_currentIndexChanged(int index)
 {
+    (void) index;
     QString stationCallsign = ui->stationSelect->currentText();
 
     APRSStation *station = m_stations.value(stationCallsign);
@@ -1189,11 +1190,13 @@ void APRSGUI::plotWeather()
 
 void APRSGUI::on_weatherTimeSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotWeather();
 }
 
 void APRSGUI::on_weatherPlotSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotWeather();
 }
 
@@ -1399,11 +1402,13 @@ void APRSGUI::plotMotion()
 
 void APRSGUI::on_motionTimeSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotMotion();
 }
 
 void APRSGUI::on_motionPlotSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotMotion();
 }
 
@@ -1479,11 +1484,13 @@ void APRSGUI::plotTelemetry()
 
 void APRSGUI::on_telemetryTimeSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotTelemetry();
 }
 
 void APRSGUI::on_telemetryPlotSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotTelemetry();
 }
 

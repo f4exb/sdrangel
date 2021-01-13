@@ -159,6 +159,7 @@ int Map::webapiRun(bool run,
     SWGSDRangel::SWGDeviceState& response,
     QString& errorMessage)
 {
+    (void) run;
     (void) errorMessage;
     getFeatureStateStr(*response.getState());
     return 202;

@@ -21,8 +21,8 @@
 StarTrackerSettingsDialog::StarTrackerSettingsDialog(StarTrackerSettings *settings,
         QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::StarTrackerSettingsDialog),
-    m_settings(settings)
+    m_settings(settings),
+    ui(new Ui::StarTrackerSettingsDialog)
 {
     ui->setupUi(this);
     ui->epoch->setCurrentIndex(settings->m_jnow ? 1 : 0);

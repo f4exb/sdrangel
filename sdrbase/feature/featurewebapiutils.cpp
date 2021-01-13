@@ -42,7 +42,7 @@ bool FeatureWebAPIUtils::mapFind(const QString& target, int featureSetIndex, int
         int httpRC = feature->webapiActionsPost(featureActionKeys, query, errorMessage);
         if (httpRC/100 != 2)
         {
-            qWarning("FeatureWebAPIUtils::mapFind: error %d: %s", httpRC, errorMessage);
+            qWarning() << "FeatureWebAPIUtils::mapFind: error " << httpRC << ":" << errorMessage;
             return false;
         }
 
@@ -65,7 +65,7 @@ Feature* FeatureWebAPIUtils::getFeature(int featureSetIndex, int featureIndex, c
     if (featureSetIndex != -1)
     {
         // Find feature with specific index
-        if (featureSetIndex < featureSets.size())
+        if (featureSetIndex < (int)featureSets.size())
         {
             featureSet = featureSets[featureSetIndex];
             if (featureIndex < featureSet->getNumberOfFeatures())

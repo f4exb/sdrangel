@@ -39,11 +39,11 @@ bool AX25Packet::decode(QByteArray packet)
     // Address - ASCII shifted right one bit
     for (i = 0; i < 6; i++)
         destAddress[i] = (packet[i] >> 1) & 0x7f;
-    destAddress[6] = NULL;
+    destAddress[6] = '\0';
     destSSID = packet[6];
     for (i = 0; i < 6; i++)
         sourceAddress[i] = (packet[7+i] >> 1) & 0x7f;
-    sourceAddress[6] = NULL;
+    sourceAddress[6] = '\0';
     sourceSSID = packet[13];
 
     // From = source address
@@ -66,7 +66,7 @@ bool AX25Packet::decode(QByteArray packet)
         i++;
         for (j = 0; j < 6; j++)
             repeaterAddress[j] = (packet[i+j] >> 1) & 0x7f;
-        repeaterAddress[j] = NULL;
+        repeaterAddress[j] = '\0';
         i += 6;
         repeaterSSID = packet[i];
         ssid = (repeaterSSID >> 1) & 0xf;

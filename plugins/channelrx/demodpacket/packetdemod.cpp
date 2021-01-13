@@ -187,7 +187,7 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
 
     QList<QString> reverseAPIKeys;
 
-    if ((settings.m_inputFrequencyOffset != settings.m_inputFrequencyOffset) || force) {
+    if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
     if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {

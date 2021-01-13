@@ -175,7 +175,6 @@ void PacketDemodGUI::packetReceived(QByteArray packet)
         QTableWidgetItem *pidItem = new QTableWidgetItem();
         QTableWidgetItem *dataASCIIItem = new QTableWidgetItem();
         QTableWidgetItem *dataHexItem = new QTableWidgetItem();
-        QTableWidgetItem *dataAPRSItem = new QTableWidgetItem();
         ui->packets->setItem(row, PACKET_COL_FROM, fromItem);
         ui->packets->setItem(row, PACKET_COL_TO, toItem);
         ui->packets->setItem(row, PACKET_COL_VIA, viaItem);
@@ -260,6 +259,7 @@ void PacketDemodGUI::on_deltaFrequency_changed(qint64 value)
 
 void PacketDemodGUI::on_mode_currentIndexChanged(int value)
 {
+    (void) value;
     QString mode = ui->mode->currentText();
     // TODO: Support 9600 FSK
 }

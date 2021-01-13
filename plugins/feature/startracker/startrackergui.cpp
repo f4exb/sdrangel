@@ -456,6 +456,7 @@ void StarTrackerGUI::applySettings(bool force)
 
 void StarTrackerGUI::on_useMyPosition_clicked(bool checked)
 {
+    (void) checked;
     double stationLatitude = MainCore::instance()->getSettings().getLatitude();
     double stationLongitude = MainCore::instance()->getSettings().getLongitude();
     double stationAltitude = MainCore::instance()->getSettings().getAltitude();
@@ -495,6 +496,7 @@ void StarTrackerGUI::on_dateTimeSelect_currentTextChanged(const QString &text)
 
 void StarTrackerGUI::on_dateTime_dateTimeChanged(const QDateTime &datetime)
 {
+    (void) datetime;
     if (ui->dateTimeSelect->currentIndex() == 1)
     {
         m_settings.m_dateTime = ui->dateTime->dateTime().toString(Qt::ISODateWithMs);

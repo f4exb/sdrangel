@@ -22,6 +22,7 @@
 
 #include <QMap>
 #include <QTimer>
+#include <QDateTime>
 
 #include "export.h"
 #include "settings/mainsettings.h"

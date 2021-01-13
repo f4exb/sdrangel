@@ -287,11 +287,7 @@ void Astronomy::moonPosition(AzAlt& aa, RADec& rd, double latitude, double longi
     double ecl = Units::degreesToRadians(23.4393 - 3.563E-7 * d); // Obliquity of the ecliptic - tilt of Earth's axis of rotation
 
     // Orbital elements for the Sun
-    double Ns = 0.0;
-    double is = 0.0;
     double ws = Units::degreesToRadians(282.9404 + 4.70935E-5 * d);
-    double as = 1.0;                                                       //  (AU)
-    double es = 0.016709 - 1.151E-9 * d;   // ecs
     double Ms = Units::degreesToRadians(356.0470 + 0.9856002585 * d);
 
     // Orbital elements for the Moon
@@ -416,7 +412,7 @@ double Astronomy::refractionSaemundsson(double alt, double pressure, double temp
 {
     double pt = (pressure/1010.0) * (283.0/(273.0+temperature));
 
-    return (1.02 / tan(Units::degreesToRadians(alt+10.3/(alt+5.11))) + 0.0019279) / 60.0;
+    return pt * (1.02 / tan(Units::degreesToRadians(alt+10.3/(alt+5.11))) + 0.0019279) / 60.0;
 }
 
 // Calculated adjustment to altitude angle from true to apparent due to atmospheric refraction using

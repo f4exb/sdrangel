@@ -221,6 +221,8 @@ int APRS::webapiRun(bool run,
     SWGSDRangel::SWGDeviceState& response,
     QString& errorMessage)
 {
+    (void) run;
+    (void) response;
     (void) errorMessage;
     //getFeatureStateStr(*response.getState());
     //MsgStartStopIGate *msg = MsgStartStopIGate::create(run);

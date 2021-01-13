@@ -47,7 +47,6 @@ bool APRSPacket::decode(AX25Packet packet)
 
             // First byte of information field is data type ID
             char dataType = packet.m_dataASCII[0].toLatin1();
-            bool timestamp = false;
             int idx = 1;
             switch (dataType)
             {
@@ -914,7 +913,6 @@ bool APRSPacket::parseMessage(QString& info, int& idx)
     }
     else if (m_message.startsWith("BITS."))
     {
-        bool done = false;
         QString s("");
         int i = 5;
         for (int j = 0; j < 8; j++)
