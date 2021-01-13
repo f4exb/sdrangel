@@ -21,6 +21,7 @@ Build-Depends: debhelper (>= 9),
  qml-module-qtquick-controls,  
  qml-module-qtquick-layouts,
  libqt5serialport5-dev,
+ libqt5charts5-dev,
  qtdeclarative5-dev,
  qtpositioning5-dev,
  qtlocation5-dev,
@@ -55,7 +56,7 @@ Description: SDR/Analyzer/Generator front-end for various hardware
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
    Analog: AM, ATV, NFM, WFM, SSB, broadcast FM
-   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa, ADS-B
+   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa, ADS-B, Packet (AX.25/APRS)
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM
