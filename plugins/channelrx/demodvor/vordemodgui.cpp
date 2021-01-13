@@ -384,8 +384,8 @@ static bool calcIntersectionPoint(float lat1, float lon1, float bearing1, float 
     double lat3Rad = asin(sinLat1*cos(delta13)+cosLat1*sin(delta13)*cos(theta13));
     double lon3Rad = lon1Rad + atan2(sin(theta13)*sin(delta13)*cosLat1, cos(delta13)-sinLat1*sin(lat3Rad));
 
-    intersectLat = Units::radiansToDegress(lat3Rad);
-    intersectLon = Units::radiansToDegress(lon3Rad);
+    intersectLat = Units::radiansToDegrees(lat3Rad);
+    intersectLon = Units::radiansToDegrees(lon3Rad);
 
     return true;
 }

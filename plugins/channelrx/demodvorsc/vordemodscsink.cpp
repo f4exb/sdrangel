@@ -211,7 +211,7 @@ void VORDemodSCSink::processOneSample(Complex &ci)
     if (m_varGoertzel.size() == VORDemodSCSettings::VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
     {
         m_varGoertzel.goertzel(mag);
-        varPhase = Units::radiansToDegress(m_varGoertzel.phase());
+        varPhase = Units::radiansToDegrees(m_varGoertzel.phase());
         varMag = m_varGoertzel.mag();
         m_varGoertzel.reset();
     }
@@ -234,7 +234,7 @@ void VORDemodSCSink::processOneSample(Complex &ci)
     if (m_refGoertzel.size() == VORDemodSCSettings::VORDEMOD_CHANNEL_SAMPLE_RATE - 1)
     {
         m_refGoertzel.goertzel(phi);
-        float phaseDeg = Units::radiansToDegress(m_refGoertzel.phase());
+        float phaseDeg = Units::radiansToDegrees(m_refGoertzel.phase());
         double refMag = m_refGoertzel.mag();
         int groupDelay = (301-1)/2;
         float filterPhaseShift = 360.0*30.0*groupDelay/VORDemodSCSettings::VORDEMOD_CHANNEL_SAMPLE_RATE;
