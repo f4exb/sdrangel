@@ -3916,6 +3916,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setLocalSourceSettings(new SWGSDRangel::SWGLocalSourceSettings());
             channelSettings->getLocalSourceSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "PacketDemodSettings")
+        {
+            channelSettings->setPacketDemodSettings(new SWGSDRangel::SWGPacketDemodSettings());
+            channelSettings->getPacketDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "PacketModSettings")
         {
             channelSettings->setPacketModSettings(new SWGSDRangel::SWGPacketModSettings());
@@ -4370,15 +4375,30 @@ bool WebAPIRequestMapper::getFeatureSettings(
         QJsonObject settingsJsonObject = featureSettingsJson[featureSettingsKey].toObject();
         featureSettingsKeys = settingsJsonObject.keys();
 
-        if (featureSettingsKey == "GS232ControllerSettings")
+        if (featureSettingsKey == "APRSSettings")
+        {
+            featureSettings->setAprsSettings(new SWGSDRangel::SWGAPRSSettings());
+            featureSettings->getAprsSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "GS232ControllerSettings")
         {
             featureSettings->setGs232ControllerSettings(new SWGSDRangel::SWGGS232ControllerSettings());
             featureSettings->getGs232ControllerSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "MapSettings")
+        {
+            featureSettings->setMapSettings(new SWGSDRangel::SWGMapSettings());
+            featureSettings->getMapSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (featureSettingsKey == "SimplePTTSettings")
         {
             featureSettings->setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
             featureSettings->getSimplePttSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "StarTrackerSettings")
+        {
+            featureSettings->setStarTrackerSettings(new SWGSDRangel::SWGStarTrackerSettings());
+            featureSettings->getStarTrackerSettings()->fromJsonObject(settingsJsonObject);
         }
         else if (featureSettingsKey == "RigCtlServerSettings")
         {
@@ -4412,7 +4432,12 @@ bool WebAPIRequestMapper::getFeatureActions(
         QJsonObject actionsJsonObject = featureActionsJson[featureActionsKey].toObject();
         featureActionsKeys = actionsJsonObject.keys();
 
-        if (featureActionsKey == "SimplePTTActions")
+        if (featureActionsKey == "MapActions")
+        {
+            featureActions->setMapActions(new SWGSDRangel::SWGMapActions());
+            featureActions->getMapActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (featureActionsKey == "SimplePTTActions")
         {
             featureActions->setSimplePttActions(new SWGSDRangel::SWGSimplePTTActions());
             featureActions->getSimplePttActions()->fromJsonObject(actionsJsonObject);
@@ -4540,6 +4565,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setIeee802154ModSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
+    channelSettings.setPacketDemodSettings(nullptr);
     channelSettings.setPacketModSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
     channelSettings.setRemoteSourceSettings(nullptr);
@@ -4602,7 +4628,12 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
 {
     featureSettings.cleanup();
     featureSettings.setFeatureType(nullptr);
+    featureSettings.setAprsSettings(nullptr);
+    featureSettings.setGs232ControllerSettings(nullptr);
+    featureSettings.setMapSettings(nullptr);
     featureSettings.setSimplePttSettings(nullptr);
+    featureSettings.setStarTrackerSettings(nullptr);
+    featureSettings.setRigCtlServerSettings(nullptr);
 }
 
 void WebAPIRequestMapper::resetFeatureReport(SWGSDRangel::SWGFeatureReport& featureReport)
@@ -4616,6 +4647,7 @@ void WebAPIRequestMapper::resetFeatureActions(SWGSDRangel::SWGFeatureActions& fe
 {
     featureActions.cleanup();
     featureActions.setFeatureType(nullptr);
+    featureActions.setMapActions(nullptr);
     featureActions.setSimplePttActions(nullptr);
 }
 

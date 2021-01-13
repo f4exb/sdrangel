@@ -82,6 +82,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_local_sink_settings_isSet = false;
     local_source_settings = nullptr;
     m_local_source_settings_isSet = false;
+    packet_demod_settings = nullptr;
+    m_packet_demod_settings_isSet = false;
     packet_mod_settings = nullptr;
     m_packet_mod_settings_isSet = false;
     remote_sink_settings = nullptr;
@@ -168,6 +170,8 @@ SWGChannelSettings::init() {
     m_local_sink_settings_isSet = false;
     local_source_settings = new SWGLocalSourceSettings();
     m_local_source_settings_isSet = false;
+    packet_demod_settings = new SWGPacketDemodSettings();
+    m_packet_demod_settings_isSet = false;
     packet_mod_settings = new SWGPacketModSettings();
     m_packet_mod_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
@@ -271,6 +275,9 @@ SWGChannelSettings::cleanup() {
     if(local_source_settings != nullptr) { 
         delete local_source_settings;
     }
+    if(packet_demod_settings != nullptr) { 
+        delete packet_demod_settings;
+    }
     if(packet_mod_settings != nullptr) { 
         delete packet_mod_settings;
     }
@@ -373,6 +380,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&local_sink_settings, pJson["LocalSinkSettings"], "SWGLocalSinkSettings", "SWGLocalSinkSettings");
     
     ::SWGSDRangel::setValue(&local_source_settings, pJson["LocalSourceSettings"], "SWGLocalSourceSettings", "SWGLocalSourceSettings");
+    
+    ::SWGSDRangel::setValue(&packet_demod_settings, pJson["PacketDemodSettings"], "SWGPacketDemodSettings", "SWGPacketDemodSettings");
     
     ::SWGSDRangel::setValue(&packet_mod_settings, pJson["PacketModSettings"], "SWGPacketModSettings", "SWGPacketModSettings");
     
@@ -494,6 +503,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((local_source_settings != nullptr) && (local_source_settings->isSet())){
         toJsonValue(QString("LocalSourceSettings"), local_source_settings, obj, QString("SWGLocalSourceSettings"));
+    }
+    if((packet_demod_settings != nullptr) && (packet_demod_settings->isSet())){
+        toJsonValue(QString("PacketDemodSettings"), packet_demod_settings, obj, QString("SWGPacketDemodSettings"));
     }
     if((packet_mod_settings != nullptr) && (packet_mod_settings->isSet())){
         toJsonValue(QString("PacketModSettings"), packet_mod_settings, obj, QString("SWGPacketModSettings"));
@@ -805,6 +817,16 @@ SWGChannelSettings::setLocalSourceSettings(SWGLocalSourceSettings* local_source_
     this->m_local_source_settings_isSet = true;
 }
 
+SWGPacketDemodSettings*
+SWGChannelSettings::getPacketDemodSettings() {
+    return packet_demod_settings;
+}
+void
+SWGChannelSettings::setPacketDemodSettings(SWGPacketDemodSettings* packet_demod_settings) {
+    this->packet_demod_settings = packet_demod_settings;
+    this->m_packet_demod_settings_isSet = true;
+}
+
 SWGPacketModSettings*
 SWGChannelSettings::getPacketModSettings() {
     return packet_mod_settings;
@@ -1009,6 +1031,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(local_source_settings && local_source_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(packet_demod_settings && packet_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(packet_mod_settings && packet_mod_settings->isSet()){

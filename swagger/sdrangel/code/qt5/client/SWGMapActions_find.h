@@ -11,20 +11,17 @@
  */
 
 /*
- * SWGFeatureActions.h
+ * SWGMapActions_find.h
  *
- * Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present.
+ * A request to centre the map on an item.
  */
 
-#ifndef SWGFeatureActions_H_
-#define SWGFeatureActions_H_
+#ifndef SWGMapActions_find_H_
+#define SWGMapActions_find_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAFCActions.h"
-#include "SWGMapActions.h"
-#include "SWGSimplePTTActions.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -32,61 +29,31 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFeatureActions: public SWGObject {
+class SWG_API SWGMapActions_find: public SWGObject {
 public:
-    SWGFeatureActions();
-    SWGFeatureActions(QString* json);
-    virtual ~SWGFeatureActions();
+    SWGMapActions_find();
+    SWGMapActions_find(QString* json);
+    virtual ~SWGMapActions_find();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFeatureActions* fromJson(QString &jsonString) override;
+    virtual SWGMapActions_find* fromJson(QString &jsonString) override;
 
-    QString* getFeatureType();
-    void setFeatureType(QString* feature_type);
-
-    qint32 getOriginatorFeatureSetIndex();
-    void setOriginatorFeatureSetIndex(qint32 originator_feature_set_index);
-
-    qint32 getOriginatorFeatureIndex();
-    void setOriginatorFeatureIndex(qint32 originator_feature_index);
-
-    SWGAFCActions* getAfcActions();
-    void setAfcActions(SWGAFCActions* afc_actions);
-
-    SWGMapActions* getMapActions();
-    void setMapActions(SWGMapActions* map_actions);
-
-    SWGSimplePTTActions* getSimplePttActions();
-    void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
+    QString* getId();
+    void setId(QString* id);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* feature_type;
-    bool m_feature_type_isSet;
-
-    qint32 originator_feature_set_index;
-    bool m_originator_feature_set_index_isSet;
-
-    qint32 originator_feature_index;
-    bool m_originator_feature_index_isSet;
-
-    SWGAFCActions* afc_actions;
-    bool m_afc_actions_isSet;
-
-    SWGMapActions* map_actions;
-    bool m_map_actions_isSet;
-
-    SWGSimplePTTActions* simple_ptt_actions;
-    bool m_simple_ptt_actions_isSet;
+    QString* id;
+    bool m_id_isSet;
 
 };
 
 }
 
-#endif /* SWGFeatureActions_H_ */
+#endif /* SWGMapActions_find_H_ */

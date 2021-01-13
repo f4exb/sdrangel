@@ -2744,7 +2744,7 @@ definitions:
       - longitude
     properties:
       latitude:
-        description: "Lautitude in decimal degrees positive to the north"
+        description: "Latitude in decimal degrees positive to the north"
         type: number
         format: float
       longitude:
@@ -2817,6 +2817,25 @@ definitions:
       deviceRef:
         description: "Serial device name or server address"
         type: string
+
+  MapItem:
+      $ref: "/doc/swagger/include/Map.yaml#/MapItem"
+
+  # This isn't in GS232Controller, as it may eventually be used by other controllers or features
+  TargetAzimuthElevation:
+    description: "A target azimuth and elevation"
+    properties:
+      name:
+        descrption: "The name of the target"
+        type: string
+      azimuth:
+        descrption: "The azimuth angle in degrees to the target"
+        type: number
+        format: float
+      elevation:
+        descrption: "The elevation angle in degrees to the target"
+        type: number
+        format: float
 
   Presets:
     description: "Settings presets"

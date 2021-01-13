@@ -11,20 +11,17 @@
  */
 
 /*
- * SWGFeatureActions.h
+ * SWGTargetAzimuthElevation.h
  *
- * Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present.
+ * A target azimuth and elevation
  */
 
-#ifndef SWGFeatureActions_H_
-#define SWGFeatureActions_H_
+#ifndef SWGTargetAzimuthElevation_H_
+#define SWGTargetAzimuthElevation_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAFCActions.h"
-#include "SWGMapActions.h"
-#include "SWGSimplePTTActions.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -32,61 +29,43 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFeatureActions: public SWGObject {
+class SWG_API SWGTargetAzimuthElevation: public SWGObject {
 public:
-    SWGFeatureActions();
-    SWGFeatureActions(QString* json);
-    virtual ~SWGFeatureActions();
+    SWGTargetAzimuthElevation();
+    SWGTargetAzimuthElevation(QString* json);
+    virtual ~SWGTargetAzimuthElevation();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFeatureActions* fromJson(QString &jsonString) override;
+    virtual SWGTargetAzimuthElevation* fromJson(QString &jsonString) override;
 
-    QString* getFeatureType();
-    void setFeatureType(QString* feature_type);
+    QString* getName();
+    void setName(QString* name);
 
-    qint32 getOriginatorFeatureSetIndex();
-    void setOriginatorFeatureSetIndex(qint32 originator_feature_set_index);
+    float getAzimuth();
+    void setAzimuth(float azimuth);
 
-    qint32 getOriginatorFeatureIndex();
-    void setOriginatorFeatureIndex(qint32 originator_feature_index);
-
-    SWGAFCActions* getAfcActions();
-    void setAfcActions(SWGAFCActions* afc_actions);
-
-    SWGMapActions* getMapActions();
-    void setMapActions(SWGMapActions* map_actions);
-
-    SWGSimplePTTActions* getSimplePttActions();
-    void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
+    float getElevation();
+    void setElevation(float elevation);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* feature_type;
-    bool m_feature_type_isSet;
+    QString* name;
+    bool m_name_isSet;
 
-    qint32 originator_feature_set_index;
-    bool m_originator_feature_set_index_isSet;
+    float azimuth;
+    bool m_azimuth_isSet;
 
-    qint32 originator_feature_index;
-    bool m_originator_feature_index_isSet;
-
-    SWGAFCActions* afc_actions;
-    bool m_afc_actions_isSet;
-
-    SWGMapActions* map_actions;
-    bool m_map_actions_isSet;
-
-    SWGSimplePTTActions* simple_ptt_actions;
-    bool m_simple_ptt_actions_isSet;
+    float elevation;
+    bool m_elevation_isSet;
 
 };
 
 }
 
-#endif /* SWGFeatureActions_H_ */
+#endif /* SWGTargetAzimuthElevation_H_ */

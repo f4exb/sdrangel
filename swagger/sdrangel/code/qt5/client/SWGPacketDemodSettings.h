@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGGS232ControllerSettings.h
+ * SWGPacketDemodSettings.h
  *
- * GS-232 Controller settings
+ * PacketDemod
  */
 
-#ifndef SWGGS232ControllerSettings_H_
-#define SWGGS232ControllerSettings_H_
+#ifndef SWGPacketDemodSettings_H_
+#define SWGPacketDemodSettings_H_
 
 #include <QJsonObject>
 
@@ -29,48 +29,39 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGS232ControllerSettings: public SWGObject {
+class SWG_API SWGPacketDemodSettings: public SWGObject {
 public:
-    SWGGS232ControllerSettings();
-    SWGGS232ControllerSettings(QString* json);
-    virtual ~SWGGS232ControllerSettings();
+    SWGPacketDemodSettings();
+    SWGPacketDemodSettings(QString* json);
+    virtual ~SWGPacketDemodSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGS232ControllerSettings* fromJson(QString &jsonString) override;
+    virtual SWGPacketDemodSettings* fromJson(QString &jsonString) override;
 
-    qint32 getAzimuth();
-    void setAzimuth(qint32 azimuth);
+    qint64 getInputFrequencyOffset();
+    void setInputFrequencyOffset(qint64 input_frequency_offset);
 
-    qint32 getElevation();
-    void setElevation(qint32 elevation);
+    QString* getMode();
+    void setMode(QString* mode);
 
-    QString* getSerialPort();
-    void setSerialPort(QString* serial_port);
+    float getRfBandwidth();
+    void setRfBandwidth(float rf_bandwidth);
 
-    qint32 getBaudRate();
-    void setBaudRate(qint32 baud_rate);
+    float getFmDeviation();
+    void setFmDeviation(float fm_deviation);
 
-    qint32 getTrack();
-    void setTrack(qint32 track);
-
-    QString* getTarget();
-    void setTarget(QString* target);
-
-    qint32 getAzimuthOffset();
-    void setAzimuthOffset(qint32 azimuth_offset);
-
-    qint32 getElevationOffset();
-    void setElevationOffset(qint32 elevation_offset);
+    qint32 getRgbColor();
+    void setRgbColor(qint32 rgb_color);
 
     QString* getTitle();
     void setTitle(QString* title);
 
-    qint32 getRgbColor();
-    void setRgbColor(qint32 rgb_color);
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
 
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
@@ -91,35 +82,26 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 azimuth;
-    bool m_azimuth_isSet;
+    qint64 input_frequency_offset;
+    bool m_input_frequency_offset_isSet;
 
-    qint32 elevation;
-    bool m_elevation_isSet;
+    QString* mode;
+    bool m_mode_isSet;
 
-    QString* serial_port;
-    bool m_serial_port_isSet;
+    float rf_bandwidth;
+    bool m_rf_bandwidth_isSet;
 
-    qint32 baud_rate;
-    bool m_baud_rate_isSet;
+    float fm_deviation;
+    bool m_fm_deviation_isSet;
 
-    qint32 track;
-    bool m_track_isSet;
-
-    QString* target;
-    bool m_target_isSet;
-
-    qint32 azimuth_offset;
-    bool m_azimuth_offset_isSet;
-
-    qint32 elevation_offset;
-    bool m_elevation_offset_isSet;
+    qint32 rgb_color;
+    bool m_rgb_color_isSet;
 
     QString* title;
     bool m_title_isSet;
 
-    qint32 rgb_color;
-    bool m_rgb_color_isSet;
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
@@ -140,4 +122,4 @@ private:
 
 }
 
-#endif /* SWGGS232ControllerSettings_H_ */
+#endif /* SWGPacketDemodSettings_H_ */

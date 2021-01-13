@@ -14,14 +14,20 @@ GS232ControllerSettings:
       description: The baud rate to use for the serial connection to the GS-232 controller
       type: integer
     track:
+      description: Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)
+      type: integer
+    target:
+      description: "Identifier of the channel or feature plugin providing target azimuth and elevation (E.g. R0:0 ADSBDemod)"
+      type: string
+    azimuthOffset:
+      description: Azimuth offset in degrees
+      type: integer
+    elevationOffset:
+      description: Elevation offset in degrees
       type: integer
     title:
       type: string
     rgbColor:
-      type: integer
-    deviceIndex:
-      type: integer
-    channelIndex:
       type: integer
     useReverseAPI:
       description: Synchronize with reverse API (1 for yes, 0 for no)

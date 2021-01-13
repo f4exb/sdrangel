@@ -1,0 +1,35 @@
+PacketDemodSettings:
+  description: PacketDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    mode:
+      type: string
+      description: >
+        Transmission mode
+          * "1200 AFSK"
+    rfBandwidth:
+      type: number
+      format: float
+    fmDeviation:
+      type: number
+      format: float
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

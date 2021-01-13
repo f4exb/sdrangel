@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGGS232ControllerSettings.h"
+#include "SWGAPRSSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,28 +22,24 @@
 
 namespace SWGSDRangel {
 
-SWGGS232ControllerSettings::SWGGS232ControllerSettings(QString* json) {
+SWGAPRSSettings::SWGAPRSSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
-    azimuth = 0;
-    m_azimuth_isSet = false;
-    elevation = 0;
-    m_elevation_isSet = false;
-    serial_port = nullptr;
-    m_serial_port_isSet = false;
-    baud_rate = 0;
-    m_baud_rate_isSet = false;
-    track = 0;
-    m_track_isSet = false;
-    target = nullptr;
-    m_target_isSet = false;
-    azimuth_offset = 0;
-    m_azimuth_offset_isSet = false;
-    elevation_offset = 0;
-    m_elevation_offset_isSet = false;
+SWGAPRSSettings::SWGAPRSSettings() {
+    igate_server = nullptr;
+    m_igate_server_isSet = false;
+    igate_port = 0;
+    m_igate_port_isSet = false;
+    igate_callsign = nullptr;
+    m_igate_callsign_isSet = false;
+    igate_passcode = nullptr;
+    m_igate_passcode_isSet = false;
+    igate_filter = nullptr;
+    m_igate_filter_isSet = false;
+    igate_enabled = 0;
+    m_igate_enabled_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -60,28 +56,24 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_reverse_api_channel_index_isSet = false;
 }
 
-SWGGS232ControllerSettings::~SWGGS232ControllerSettings() {
+SWGAPRSSettings::~SWGAPRSSettings() {
     this->cleanup();
 }
 
 void
-SWGGS232ControllerSettings::init() {
-    azimuth = 0;
-    m_azimuth_isSet = false;
-    elevation = 0;
-    m_elevation_isSet = false;
-    serial_port = new QString("");
-    m_serial_port_isSet = false;
-    baud_rate = 0;
-    m_baud_rate_isSet = false;
-    track = 0;
-    m_track_isSet = false;
-    target = new QString("");
-    m_target_isSet = false;
-    azimuth_offset = 0;
-    m_azimuth_offset_isSet = false;
-    elevation_offset = 0;
-    m_elevation_offset_isSet = false;
+SWGAPRSSettings::init() {
+    igate_server = new QString("");
+    m_igate_server_isSet = false;
+    igate_port = 0;
+    m_igate_port_isSet = false;
+    igate_callsign = new QString("");
+    m_igate_callsign_isSet = false;
+    igate_passcode = new QString("");
+    m_igate_passcode_isSet = false;
+    igate_filter = new QString("");
+    m_igate_filter_isSet = false;
+    igate_enabled = 0;
+    m_igate_enabled_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -99,18 +91,20 @@ SWGGS232ControllerSettings::init() {
 }
 
 void
-SWGGS232ControllerSettings::cleanup() {
-
-
-    if(serial_port != nullptr) { 
-        delete serial_port;
+SWGAPRSSettings::cleanup() {
+    if(igate_server != nullptr) { 
+        delete igate_server;
     }
 
-
-    if(target != nullptr) { 
-        delete target;
+    if(igate_callsign != nullptr) { 
+        delete igate_callsign;
     }
-
+    if(igate_passcode != nullptr) { 
+        delete igate_passcode;
+    }
+    if(igate_filter != nullptr) { 
+        delete igate_filter;
+    }
 
     if(title != nullptr) { 
         delete title;
@@ -125,8 +119,8 @@ SWGGS232ControllerSettings::cleanup() {
 
 }
 
-SWGGS232ControllerSettings*
-SWGGS232ControllerSettings::fromJson(QString &json) {
+SWGAPRSSettings*
+SWGAPRSSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -135,22 +129,18 @@ SWGGS232ControllerSettings::fromJson(QString &json) {
 }
 
 void
-SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&azimuth, pJson["azimuth"], "qint32", "");
+SWGAPRSSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&igate_server, pJson["igateServer"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&elevation, pJson["elevation"], "qint32", "");
+    ::SWGSDRangel::setValue(&igate_port, pJson["igatePort"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&serial_port, pJson["serialPort"], "QString", "QString");
+    ::SWGSDRangel::setValue(&igate_callsign, pJson["igateCallsign"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&baud_rate, pJson["baudRate"], "qint32", "");
+    ::SWGSDRangel::setValue(&igate_passcode, pJson["igatePasscode"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&track, pJson["track"], "qint32", "");
+    ::SWGSDRangel::setValue(&igate_filter, pJson["igateFilter"], "QString", "QString");
     
-    ::SWGSDRangel::setValue(&target, pJson["target"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "qint32", "");
+    ::SWGSDRangel::setValue(&igate_enabled, pJson["igateEnabled"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -169,7 +159,7 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGGS232ControllerSettings::asJson ()
+SWGAPRSSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -180,31 +170,25 @@ SWGGS232ControllerSettings::asJson ()
 }
 
 QJsonObject*
-SWGGS232ControllerSettings::asJsonObject() {
+SWGAPRSSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_azimuth_isSet){
-        obj->insert("azimuth", QJsonValue(azimuth));
+    if(igate_server != nullptr && *igate_server != QString("")){
+        toJsonValue(QString("igateServer"), igate_server, obj, QString("QString"));
     }
-    if(m_elevation_isSet){
-        obj->insert("elevation", QJsonValue(elevation));
+    if(m_igate_port_isSet){
+        obj->insert("igatePort", QJsonValue(igate_port));
     }
-    if(serial_port != nullptr && *serial_port != QString("")){
-        toJsonValue(QString("serialPort"), serial_port, obj, QString("QString"));
+    if(igate_callsign != nullptr && *igate_callsign != QString("")){
+        toJsonValue(QString("igateCallsign"), igate_callsign, obj, QString("QString"));
     }
-    if(m_baud_rate_isSet){
-        obj->insert("baudRate", QJsonValue(baud_rate));
+    if(igate_passcode != nullptr && *igate_passcode != QString("")){
+        toJsonValue(QString("igatePasscode"), igate_passcode, obj, QString("QString"));
     }
-    if(m_track_isSet){
-        obj->insert("track", QJsonValue(track));
+    if(igate_filter != nullptr && *igate_filter != QString("")){
+        toJsonValue(QString("igateFilter"), igate_filter, obj, QString("QString"));
     }
-    if(target != nullptr && *target != QString("")){
-        toJsonValue(QString("target"), target, obj, QString("QString"));
-    }
-    if(m_azimuth_offset_isSet){
-        obj->insert("azimuthOffset", QJsonValue(azimuth_offset));
-    }
-    if(m_elevation_offset_isSet){
-        obj->insert("elevationOffset", QJsonValue(elevation_offset));
+    if(m_igate_enabled_isSet){
+        obj->insert("igateEnabled", QJsonValue(igate_enabled));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -231,183 +215,157 @@ SWGGS232ControllerSettings::asJsonObject() {
     return obj;
 }
 
-qint32
-SWGGS232ControllerSettings::getAzimuth() {
-    return azimuth;
+QString*
+SWGAPRSSettings::getIgateServer() {
+    return igate_server;
 }
 void
-SWGGS232ControllerSettings::setAzimuth(qint32 azimuth) {
-    this->azimuth = azimuth;
-    this->m_azimuth_isSet = true;
+SWGAPRSSettings::setIgateServer(QString* igate_server) {
+    this->igate_server = igate_server;
+    this->m_igate_server_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getElevation() {
-    return elevation;
+SWGAPRSSettings::getIgatePort() {
+    return igate_port;
 }
 void
-SWGGS232ControllerSettings::setElevation(qint32 elevation) {
-    this->elevation = elevation;
-    this->m_elevation_isSet = true;
+SWGAPRSSettings::setIgatePort(qint32 igate_port) {
+    this->igate_port = igate_port;
+    this->m_igate_port_isSet = true;
 }
 
 QString*
-SWGGS232ControllerSettings::getSerialPort() {
-    return serial_port;
+SWGAPRSSettings::getIgateCallsign() {
+    return igate_callsign;
 }
 void
-SWGGS232ControllerSettings::setSerialPort(QString* serial_port) {
-    this->serial_port = serial_port;
-    this->m_serial_port_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getBaudRate() {
-    return baud_rate;
-}
-void
-SWGGS232ControllerSettings::setBaudRate(qint32 baud_rate) {
-    this->baud_rate = baud_rate;
-    this->m_baud_rate_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getTrack() {
-    return track;
-}
-void
-SWGGS232ControllerSettings::setTrack(qint32 track) {
-    this->track = track;
-    this->m_track_isSet = true;
+SWGAPRSSettings::setIgateCallsign(QString* igate_callsign) {
+    this->igate_callsign = igate_callsign;
+    this->m_igate_callsign_isSet = true;
 }
 
 QString*
-SWGGS232ControllerSettings::getTarget() {
-    return target;
+SWGAPRSSettings::getIgatePasscode() {
+    return igate_passcode;
 }
 void
-SWGGS232ControllerSettings::setTarget(QString* target) {
-    this->target = target;
-    this->m_target_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getAzimuthOffset() {
-    return azimuth_offset;
-}
-void
-SWGGS232ControllerSettings::setAzimuthOffset(qint32 azimuth_offset) {
-    this->azimuth_offset = azimuth_offset;
-    this->m_azimuth_offset_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getElevationOffset() {
-    return elevation_offset;
-}
-void
-SWGGS232ControllerSettings::setElevationOffset(qint32 elevation_offset) {
-    this->elevation_offset = elevation_offset;
-    this->m_elevation_offset_isSet = true;
+SWGAPRSSettings::setIgatePasscode(QString* igate_passcode) {
+    this->igate_passcode = igate_passcode;
+    this->m_igate_passcode_isSet = true;
 }
 
 QString*
-SWGGS232ControllerSettings::getTitle() {
+SWGAPRSSettings::getIgateFilter() {
+    return igate_filter;
+}
+void
+SWGAPRSSettings::setIgateFilter(QString* igate_filter) {
+    this->igate_filter = igate_filter;
+    this->m_igate_filter_isSet = true;
+}
+
+qint32
+SWGAPRSSettings::getIgateEnabled() {
+    return igate_enabled;
+}
+void
+SWGAPRSSettings::setIgateEnabled(qint32 igate_enabled) {
+    this->igate_enabled = igate_enabled;
+    this->m_igate_enabled_isSet = true;
+}
+
+QString*
+SWGAPRSSettings::getTitle() {
     return title;
 }
 void
-SWGGS232ControllerSettings::setTitle(QString* title) {
+SWGAPRSSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getRgbColor() {
+SWGAPRSSettings::getRgbColor() {
     return rgb_color;
 }
 void
-SWGGS232ControllerSettings::setRgbColor(qint32 rgb_color) {
+SWGAPRSSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getUseReverseApi() {
+SWGAPRSSettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGGS232ControllerSettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGAPRSSettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGGS232ControllerSettings::getReverseApiAddress() {
+SWGAPRSSettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGGS232ControllerSettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGAPRSSettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiPort() {
+SWGAPRSSettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGGS232ControllerSettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGAPRSSettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiDeviceIndex() {
+SWGAPRSSettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGGS232ControllerSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGAPRSSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiChannelIndex() {
+SWGAPRSSettings::getReverseApiChannelIndex() {
     return reverse_api_channel_index;
 }
 void
-SWGGS232ControllerSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+SWGAPRSSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
     this->reverse_api_channel_index = reverse_api_channel_index;
     this->m_reverse_api_channel_index_isSet = true;
 }
 
 
 bool
-SWGGS232ControllerSettings::isSet(){
+SWGAPRSSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_azimuth_isSet){
+        if(igate_server && *igate_server != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_elevation_isSet){
+        if(m_igate_port_isSet){
             isObjectUpdated = true; break;
         }
-        if(serial_port && *serial_port != QString("")){
+        if(igate_callsign && *igate_callsign != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_baud_rate_isSet){
+        if(igate_passcode && *igate_passcode != QString("")){
             isObjectUpdated = true; break;
         }
-        if(m_track_isSet){
+        if(igate_filter && *igate_filter != QString("")){
             isObjectUpdated = true; break;
         }
-        if(target && *target != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_azimuth_offset_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_elevation_offset_isSet){
+        if(m_igate_enabled_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGGS232ControllerSettings.h
+ * SWGStarTrackerSettings.h
  *
- * GS-232 Controller settings
+ * Star Tracker settings
  */
 
-#ifndef SWGGS232ControllerSettings_H_
-#define SWGGS232ControllerSettings_H_
+#ifndef SWGStarTrackerSettings_H_
+#define SWGStarTrackerSettings_H_
 
 #include <QJsonObject>
 
@@ -29,42 +29,78 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGS232ControllerSettings: public SWGObject {
+class SWG_API SWGStarTrackerSettings: public SWGObject {
 public:
-    SWGGS232ControllerSettings();
-    SWGGS232ControllerSettings(QString* json);
-    virtual ~SWGGS232ControllerSettings();
+    SWGStarTrackerSettings();
+    SWGStarTrackerSettings(QString* json);
+    virtual ~SWGStarTrackerSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGS232ControllerSettings* fromJson(QString &jsonString) override;
-
-    qint32 getAzimuth();
-    void setAzimuth(qint32 azimuth);
-
-    qint32 getElevation();
-    void setElevation(qint32 elevation);
-
-    QString* getSerialPort();
-    void setSerialPort(QString* serial_port);
-
-    qint32 getBaudRate();
-    void setBaudRate(qint32 baud_rate);
-
-    qint32 getTrack();
-    void setTrack(qint32 track);
+    virtual SWGStarTrackerSettings* fromJson(QString &jsonString) override;
 
     QString* getTarget();
     void setTarget(QString* target);
 
-    qint32 getAzimuthOffset();
-    void setAzimuthOffset(qint32 azimuth_offset);
+    QString* getRa();
+    void setRa(QString* ra);
 
-    qint32 getElevationOffset();
-    void setElevationOffset(qint32 elevation_offset);
+    QString* getDec();
+    void setDec(QString* dec);
+
+    float getLatitude();
+    void setLatitude(float latitude);
+
+    float getLongitude();
+    void setLongitude(float longitude);
+
+    QString* getDateTime();
+    void setDateTime(QString* date_time);
+
+    QString* getRefraction();
+    void setRefraction(QString* refraction);
+
+    float getPressure();
+    void setPressure(float pressure);
+
+    float getTemperature();
+    void setTemperature(float temperature);
+
+    float getHumidity();
+    void setHumidity(float humidity);
+
+    float getHeightAboveSeaLevel();
+    void setHeightAboveSeaLevel(float height_above_sea_level);
+
+    float getTemperatureLapseRate();
+    void setTemperatureLapseRate(float temperature_lapse_rate);
+
+    float getFrequency();
+    void setFrequency(float frequency);
+
+    qint32 getStellariumServerEnabled();
+    void setStellariumServerEnabled(qint32 stellarium_server_enabled);
+
+    qint32 getStellariumPort();
+    void setStellariumPort(qint32 stellarium_port);
+
+    float getUpdatePeriod();
+    void setUpdatePeriod(float update_period);
+
+    QString* getEpoch();
+    void setEpoch(QString* epoch);
+
+    qint32 getDrawSunOnMap();
+    void setDrawSunOnMap(qint32 draw_sun_on_map);
+
+    qint32 getDrawMoonOnMap();
+    void setDrawMoonOnMap(qint32 draw_moon_on_map);
+
+    qint32 getDrawStarOnMap();
+    void setDrawStarOnMap(qint32 draw_star_on_map);
 
     QString* getTitle();
     void setTitle(QString* title);
@@ -91,29 +127,65 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 azimuth;
-    bool m_azimuth_isSet;
-
-    qint32 elevation;
-    bool m_elevation_isSet;
-
-    QString* serial_port;
-    bool m_serial_port_isSet;
-
-    qint32 baud_rate;
-    bool m_baud_rate_isSet;
-
-    qint32 track;
-    bool m_track_isSet;
-
     QString* target;
     bool m_target_isSet;
 
-    qint32 azimuth_offset;
-    bool m_azimuth_offset_isSet;
+    QString* ra;
+    bool m_ra_isSet;
 
-    qint32 elevation_offset;
-    bool m_elevation_offset_isSet;
+    QString* dec;
+    bool m_dec_isSet;
+
+    float latitude;
+    bool m_latitude_isSet;
+
+    float longitude;
+    bool m_longitude_isSet;
+
+    QString* date_time;
+    bool m_date_time_isSet;
+
+    QString* refraction;
+    bool m_refraction_isSet;
+
+    float pressure;
+    bool m_pressure_isSet;
+
+    float temperature;
+    bool m_temperature_isSet;
+
+    float humidity;
+    bool m_humidity_isSet;
+
+    float height_above_sea_level;
+    bool m_height_above_sea_level_isSet;
+
+    float temperature_lapse_rate;
+    bool m_temperature_lapse_rate_isSet;
+
+    float frequency;
+    bool m_frequency_isSet;
+
+    qint32 stellarium_server_enabled;
+    bool m_stellarium_server_enabled_isSet;
+
+    qint32 stellarium_port;
+    bool m_stellarium_port_isSet;
+
+    float update_period;
+    bool m_update_period_isSet;
+
+    QString* epoch;
+    bool m_epoch_isSet;
+
+    qint32 draw_sun_on_map;
+    bool m_draw_sun_on_map_isSet;
+
+    qint32 draw_moon_on_map;
+    bool m_draw_moon_on_map_isSet;
+
+    qint32 draw_star_on_map;
+    bool m_draw_star_on_map_isSet;
 
     QString* title;
     bool m_title_isSet;
@@ -140,4 +212,4 @@ private:
 
 }
 
-#endif /* SWGGS232ControllerSettings_H_ */
+#endif /* SWGStarTrackerSettings_H_ */

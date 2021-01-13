@@ -23,10 +23,13 @@
 
 
 #include "SWGAFCSettings.h"
+#include "SWGAPRSSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
+#include "SWGMapSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSimplePTTSettings.h"
+#include "SWGStarTrackerSettings.h"
 #include "SWGVORLocalizerSettings.h"
 #include <QString>
 
@@ -60,14 +63,23 @@ public:
     SWGAFCSettings* getAfcSettings();
     void setAfcSettings(SWGAFCSettings* afc_settings);
 
+    SWGAPRSSettings* getAprsSettings();
+    void setAprsSettings(SWGAPRSSettings* aprs_settings);
+
     SWGDemodAnalyzerSettings* getDemodAnalyzerSettings();
     void setDemodAnalyzerSettings(SWGDemodAnalyzerSettings* demod_analyzer_settings);
 
     SWGGS232ControllerSettings* getGs232ControllerSettings();
     void setGs232ControllerSettings(SWGGS232ControllerSettings* gs232_controller_settings);
 
+    SWGMapSettings* getMapSettings();
+    void setMapSettings(SWGMapSettings* map_settings);
+
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
+
+    SWGStarTrackerSettings* getStarTrackerSettings();
+    void setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings);
 
     SWGSimplePTTSettings* getSimplePttSettings();
     void setSimplePttSettings(SWGSimplePTTSettings* simple_ptt_settings);
@@ -91,14 +103,23 @@ private:
     SWGAFCSettings* afc_settings;
     bool m_afc_settings_isSet;
 
+    SWGAPRSSettings* aprs_settings;
+    bool m_aprs_settings_isSet;
+
     SWGDemodAnalyzerSettings* demod_analyzer_settings;
     bool m_demod_analyzer_settings_isSet;
 
     SWGGS232ControllerSettings* gs232_controller_settings;
     bool m_gs232_controller_settings_isSet;
 
+    SWGMapSettings* map_settings;
+    bool m_map_settings_isSet;
+
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;
+
+    SWGStarTrackerSettings* star_tracker_settings;
+    bool m_star_tracker_settings_isSet;
 
     SWGSimplePTTSettings* simple_ptt_settings;
     bool m_simple_ptt_settings_isSet;

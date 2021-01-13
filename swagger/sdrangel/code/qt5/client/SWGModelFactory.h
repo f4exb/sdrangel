@@ -25,6 +25,7 @@
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModReport.h"
 #include "SWGAMModSettings.h"
+#include "SWGAPRSSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
@@ -144,12 +145,17 @@
 #include "SWGLocalSourceSettings.h"
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
+#include "SWGMapActions.h"
+#include "SWGMapItem.h"
+#include "SWGMapItem_2.h"
+#include "SWGMapSettings.h"
 #include "SWGMetisMISOSettings.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
 #include "SWGNamedEnum.h"
+#include "SWGPacketDemodSettings.h"
 #include "SWGPacketModActions.h"
 #include "SWGPacketModActions_tx.h"
 #include "SWGPacketModReport.h"
@@ -207,7 +213,9 @@
 #include "SWGSoapySDRReport.h"
 #include "SWGSpectrumServer.h"
 #include "SWGSpectrumServer_clients.h"
+#include "SWGStarTrackerSettings.h"
 #include "SWGSuccessResponse.h"
+#include "SWGTargetAzimuthElevation.h"
 #include "SWGTestMISettings.h"
 #include "SWGTestMOSyncSettings.h"
 #include "SWGTestMiStreamSettings.h"
@@ -273,6 +281,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAMModSettings").compare(type) == 0) {
       return new SWGAMModSettings();
+    }
+    if(QString("SWGAPRSSettings").compare(type) == 0) {
+      return new SWGAPRSSettings();
     }
     if(QString("SWGATVDemodSettings").compare(type) == 0) {
       return new SWGATVDemodSettings();
@@ -631,6 +642,18 @@ namespace SWGSDRangel {
     if(QString("SWGLoggingInfo").compare(type) == 0) {
       return new SWGLoggingInfo();
     }
+    if(QString("SWGMapActions").compare(type) == 0) {
+      return new SWGMapActions();
+    }
+    if(QString("SWGMapItem").compare(type) == 0) {
+      return new SWGMapItem();
+    }
+    if(QString("SWGMapItem_2").compare(type) == 0) {
+      return new SWGMapItem_2();
+    }
+    if(QString("SWGMapSettings").compare(type) == 0) {
+      return new SWGMapSettings();
+    }
     if(QString("SWGMetisMISOSettings").compare(type) == 0) {
       return new SWGMetisMISOSettings();
     }
@@ -648,6 +671,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGNamedEnum").compare(type) == 0) {
       return new SWGNamedEnum();
+    }
+    if(QString("SWGPacketDemodSettings").compare(type) == 0) {
+      return new SWGPacketDemodSettings();
     }
     if(QString("SWGPacketModActions").compare(type) == 0) {
       return new SWGPacketModActions();
@@ -820,8 +846,14 @@ namespace SWGSDRangel {
     if(QString("SWGSpectrumServer_clients").compare(type) == 0) {
       return new SWGSpectrumServer_clients();
     }
+    if(QString("SWGStarTrackerSettings").compare(type) == 0) {
+      return new SWGStarTrackerSettings();
+    }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
       return new SWGSuccessResponse();
+    }
+    if(QString("SWGTargetAzimuthElevation").compare(type) == 0) {
+      return new SWGTargetAzimuthElevation();
     }
     if(QString("SWGTestMISettings").compare(type) == 0) {
       return new SWGTestMISettings();

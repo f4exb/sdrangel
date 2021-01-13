@@ -1,0 +1,87 @@
+StarTrackerSettings:
+  description: "Star Tracker settings"
+  properties:
+    target:
+      description: "Target object (Sun, Moon or Custom)"
+      type: string
+    ra:
+      description: "Right ascension of custom target"
+      type: string
+    dec:
+      description: "Declination of custom target"
+      type: string      
+    latitude: 
+      description: "Latitude in decimal degrees (North positive) of observation/antenna location"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees (East positive) of observation/antenna location"
+      type: number      
+      format: float
+    dateTime:
+      description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time." 
+      type: string
+    refraction: 
+      description: "Atmospheric refraction correction (None or Saemundsson)"
+      type: string
+    pressure:
+      description: "Air pressure in millibars, for refraction"
+      type: number
+      format: float    
+    temperature:
+      description: "Air temperature in Celsuis, for refraction"
+      type: number
+      format: float
+    humidity:
+      description: "Relative humidity in %, for refraction"
+      type: number
+      format: float
+    heightAboveSeaLevel:
+      description: "Height above sea level in metres of observation/antenna location"
+      type: number
+      format: float
+    temperatureLapseRate:
+      description: "Temperature lapse rate in K/km"
+      type: number
+      format: float
+    frequency:
+      description: "Frequency of radio waves being observed in MHz"
+      type: number
+      format: float            
+    stellariumServerEnabled:
+      descrption: "Enable Stellarium server (1 for yes, 0 for no)"
+      type: integer    
+    stellariumPort:
+      description: "IP port number for Stellarium server to listen on (Default is 10001)."
+      type: integer
+    updatePeriod:
+      description: "Time in seconds between each calculation of the target's position"
+      type: number
+      format: float    
+    epoch:
+      description: "Epoch for RA and Dec (J2000 or JNOW)"
+      type: string
+    drawSunOnMap:
+      description: "Draw the overhead position of the Sun on the Map (1 for yes, 0 for no)"
+      type: integer
+    drawMoonOnMap:
+      description: "Draw the overhead position of the Moon on the Map (1 for yes, 0 for no)"
+      type: integer
+    drawStarOnMap:
+      description: "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)"
+      type: integer      
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

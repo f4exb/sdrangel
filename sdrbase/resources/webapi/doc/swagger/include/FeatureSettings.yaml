@@ -15,12 +15,18 @@ FeatureSettings:
       type: integer
     AFCSettings:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCSettings"
+    APRSSettings:
+      $ref: "/doc/swagger/include/APRS.yaml#/APRSSettings"
     DemodAnalyzerSettings:
       $ref: "/doc/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerSettings"
     GS232ControllerSettings:
       $ref: "/doc/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+    MapSettings:
+      $ref: "/doc/swagger/include/Map.yaml#/MapSettings"
     RigCtlServerSettings:
       $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+    StarTrackerSettings:
+      $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerSettings"
     SimplePTTSettings:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     VORLocalizerSettings:

@@ -11,7 +11,7 @@
  */
 
 
-#include "SWGGS232ControllerSettings.h"
+#include "SWGMapSettings.h"
 
 #include "SWGHelpers.h"
 
@@ -22,28 +22,14 @@
 
 namespace SWGSDRangel {
 
-SWGGS232ControllerSettings::SWGGS232ControllerSettings(QString* json) {
+SWGMapSettings::SWGMapSettings(QString* json) {
     init();
     this->fromJson(*json);
 }
 
-SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
-    azimuth = 0;
-    m_azimuth_isSet = false;
-    elevation = 0;
-    m_elevation_isSet = false;
-    serial_port = nullptr;
-    m_serial_port_isSet = false;
-    baud_rate = 0;
-    m_baud_rate_isSet = false;
-    track = 0;
-    m_track_isSet = false;
-    target = nullptr;
-    m_target_isSet = false;
-    azimuth_offset = 0;
-    m_azimuth_offset_isSet = false;
-    elevation_offset = 0;
-    m_elevation_offset_isSet = false;
+SWGMapSettings::SWGMapSettings() {
+    display_names = 0;
+    m_display_names_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -60,28 +46,14 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_reverse_api_channel_index_isSet = false;
 }
 
-SWGGS232ControllerSettings::~SWGGS232ControllerSettings() {
+SWGMapSettings::~SWGMapSettings() {
     this->cleanup();
 }
 
 void
-SWGGS232ControllerSettings::init() {
-    azimuth = 0;
-    m_azimuth_isSet = false;
-    elevation = 0;
-    m_elevation_isSet = false;
-    serial_port = new QString("");
-    m_serial_port_isSet = false;
-    baud_rate = 0;
-    m_baud_rate_isSet = false;
-    track = 0;
-    m_track_isSet = false;
-    target = new QString("");
-    m_target_isSet = false;
-    azimuth_offset = 0;
-    m_azimuth_offset_isSet = false;
-    elevation_offset = 0;
-    m_elevation_offset_isSet = false;
+SWGMapSettings::init() {
+    display_names = 0;
+    m_display_names_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -99,18 +71,7 @@ SWGGS232ControllerSettings::init() {
 }
 
 void
-SWGGS232ControllerSettings::cleanup() {
-
-
-    if(serial_port != nullptr) { 
-        delete serial_port;
-    }
-
-
-    if(target != nullptr) { 
-        delete target;
-    }
-
+SWGMapSettings::cleanup() {
 
     if(title != nullptr) { 
         delete title;
@@ -125,8 +86,8 @@ SWGGS232ControllerSettings::cleanup() {
 
 }
 
-SWGGS232ControllerSettings*
-SWGGS232ControllerSettings::fromJson(QString &json) {
+SWGMapSettings*
+SWGMapSettings::fromJson(QString &json) {
     QByteArray array (json.toStdString().c_str());
     QJsonDocument doc = QJsonDocument::fromJson(array);
     QJsonObject jsonObject = doc.object();
@@ -135,22 +96,8 @@ SWGGS232ControllerSettings::fromJson(QString &json) {
 }
 
 void
-SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&azimuth, pJson["azimuth"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&elevation, pJson["elevation"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&serial_port, pJson["serialPort"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&baud_rate, pJson["baudRate"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&track, pJson["track"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&target, pJson["target"], "QString", "QString");
-    
-    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "qint32", "");
+SWGMapSettings::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&display_names, pJson["displayNames"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -169,7 +116,7 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
 }
 
 QString
-SWGGS232ControllerSettings::asJson ()
+SWGMapSettings::asJson ()
 {
     QJsonObject* obj = this->asJsonObject();
 
@@ -180,31 +127,10 @@ SWGGS232ControllerSettings::asJson ()
 }
 
 QJsonObject*
-SWGGS232ControllerSettings::asJsonObject() {
+SWGMapSettings::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
-    if(m_azimuth_isSet){
-        obj->insert("azimuth", QJsonValue(azimuth));
-    }
-    if(m_elevation_isSet){
-        obj->insert("elevation", QJsonValue(elevation));
-    }
-    if(serial_port != nullptr && *serial_port != QString("")){
-        toJsonValue(QString("serialPort"), serial_port, obj, QString("QString"));
-    }
-    if(m_baud_rate_isSet){
-        obj->insert("baudRate", QJsonValue(baud_rate));
-    }
-    if(m_track_isSet){
-        obj->insert("track", QJsonValue(track));
-    }
-    if(target != nullptr && *target != QString("")){
-        toJsonValue(QString("target"), target, obj, QString("QString"));
-    }
-    if(m_azimuth_offset_isSet){
-        obj->insert("azimuthOffset", QJsonValue(azimuth_offset));
-    }
-    if(m_elevation_offset_isSet){
-        obj->insert("elevationOffset", QJsonValue(elevation_offset));
+    if(m_display_names_isSet){
+        obj->insert("displayNames", QJsonValue(display_names));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -232,182 +158,91 @@ SWGGS232ControllerSettings::asJsonObject() {
 }
 
 qint32
-SWGGS232ControllerSettings::getAzimuth() {
-    return azimuth;
+SWGMapSettings::getDisplayNames() {
+    return display_names;
 }
 void
-SWGGS232ControllerSettings::setAzimuth(qint32 azimuth) {
-    this->azimuth = azimuth;
-    this->m_azimuth_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getElevation() {
-    return elevation;
-}
-void
-SWGGS232ControllerSettings::setElevation(qint32 elevation) {
-    this->elevation = elevation;
-    this->m_elevation_isSet = true;
+SWGMapSettings::setDisplayNames(qint32 display_names) {
+    this->display_names = display_names;
+    this->m_display_names_isSet = true;
 }
 
 QString*
-SWGGS232ControllerSettings::getSerialPort() {
-    return serial_port;
-}
-void
-SWGGS232ControllerSettings::setSerialPort(QString* serial_port) {
-    this->serial_port = serial_port;
-    this->m_serial_port_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getBaudRate() {
-    return baud_rate;
-}
-void
-SWGGS232ControllerSettings::setBaudRate(qint32 baud_rate) {
-    this->baud_rate = baud_rate;
-    this->m_baud_rate_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getTrack() {
-    return track;
-}
-void
-SWGGS232ControllerSettings::setTrack(qint32 track) {
-    this->track = track;
-    this->m_track_isSet = true;
-}
-
-QString*
-SWGGS232ControllerSettings::getTarget() {
-    return target;
-}
-void
-SWGGS232ControllerSettings::setTarget(QString* target) {
-    this->target = target;
-    this->m_target_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getAzimuthOffset() {
-    return azimuth_offset;
-}
-void
-SWGGS232ControllerSettings::setAzimuthOffset(qint32 azimuth_offset) {
-    this->azimuth_offset = azimuth_offset;
-    this->m_azimuth_offset_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getElevationOffset() {
-    return elevation_offset;
-}
-void
-SWGGS232ControllerSettings::setElevationOffset(qint32 elevation_offset) {
-    this->elevation_offset = elevation_offset;
-    this->m_elevation_offset_isSet = true;
-}
-
-QString*
-SWGGS232ControllerSettings::getTitle() {
+SWGMapSettings::getTitle() {
     return title;
 }
 void
-SWGGS232ControllerSettings::setTitle(QString* title) {
+SWGMapSettings::setTitle(QString* title) {
     this->title = title;
     this->m_title_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getRgbColor() {
+SWGMapSettings::getRgbColor() {
     return rgb_color;
 }
 void
-SWGGS232ControllerSettings::setRgbColor(qint32 rgb_color) {
+SWGMapSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getUseReverseApi() {
+SWGMapSettings::getUseReverseApi() {
     return use_reverse_api;
 }
 void
-SWGGS232ControllerSettings::setUseReverseApi(qint32 use_reverse_api) {
+SWGMapSettings::setUseReverseApi(qint32 use_reverse_api) {
     this->use_reverse_api = use_reverse_api;
     this->m_use_reverse_api_isSet = true;
 }
 
 QString*
-SWGGS232ControllerSettings::getReverseApiAddress() {
+SWGMapSettings::getReverseApiAddress() {
     return reverse_api_address;
 }
 void
-SWGGS232ControllerSettings::setReverseApiAddress(QString* reverse_api_address) {
+SWGMapSettings::setReverseApiAddress(QString* reverse_api_address) {
     this->reverse_api_address = reverse_api_address;
     this->m_reverse_api_address_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiPort() {
+SWGMapSettings::getReverseApiPort() {
     return reverse_api_port;
 }
 void
-SWGGS232ControllerSettings::setReverseApiPort(qint32 reverse_api_port) {
+SWGMapSettings::setReverseApiPort(qint32 reverse_api_port) {
     this->reverse_api_port = reverse_api_port;
     this->m_reverse_api_port_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiDeviceIndex() {
+SWGMapSettings::getReverseApiDeviceIndex() {
     return reverse_api_device_index;
 }
 void
-SWGGS232ControllerSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+SWGMapSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
     this->reverse_api_device_index = reverse_api_device_index;
     this->m_reverse_api_device_index_isSet = true;
 }
 
 qint32
-SWGGS232ControllerSettings::getReverseApiChannelIndex() {
+SWGMapSettings::getReverseApiChannelIndex() {
     return reverse_api_channel_index;
 }
 void
-SWGGS232ControllerSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+SWGMapSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
     this->reverse_api_channel_index = reverse_api_channel_index;
     this->m_reverse_api_channel_index_isSet = true;
 }
 
 
 bool
-SWGGS232ControllerSettings::isSet(){
+SWGMapSettings::isSet(){
     bool isObjectUpdated = false;
     do{
-        if(m_azimuth_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_elevation_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(serial_port && *serial_port != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_baud_rate_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_track_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(target && *target != QString("")){
-            isObjectUpdated = true; break;
-        }
-        if(m_azimuth_offset_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_elevation_offset_isSet){
+        if(m_display_names_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

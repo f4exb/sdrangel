@@ -11,20 +11,17 @@
  */
 
 /*
- * SWGFeatureActions.h
+ * SWGMapItem_2.h
  *
- * Base feature actions. Only the feature actions corresponding to the feature specified in the featureType field is or should be present.
+ * An item to draw on the map. Set image to an empty string to remove item from the map.
  */
 
-#ifndef SWGFeatureActions_H_
-#define SWGFeatureActions_H_
+#ifndef SWGMapItem_2_H_
+#define SWGMapItem_2_H_
 
 #include <QJsonObject>
 
 
-#include "SWGAFCActions.h"
-#include "SWGMapActions.h"
-#include "SWGSimplePTTActions.h"
 #include <QString>
 
 #include "SWGObject.h"
@@ -32,61 +29,67 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGFeatureActions: public SWGObject {
+class SWG_API SWGMapItem_2: public SWGObject {
 public:
-    SWGFeatureActions();
-    SWGFeatureActions(QString* json);
-    virtual ~SWGFeatureActions();
+    SWGMapItem_2();
+    SWGMapItem_2(QString* json);
+    virtual ~SWGMapItem_2();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGFeatureActions* fromJson(QString &jsonString) override;
+    virtual SWGMapItem_2* fromJson(QString &jsonString) override;
 
-    QString* getFeatureType();
-    void setFeatureType(QString* feature_type);
+    QString* getName();
+    void setName(QString* name);
 
-    qint32 getOriginatorFeatureSetIndex();
-    void setOriginatorFeatureSetIndex(qint32 originator_feature_set_index);
+    QString* getImage();
+    void setImage(QString* image);
 
-    qint32 getOriginatorFeatureIndex();
-    void setOriginatorFeatureIndex(qint32 originator_feature_index);
+    qint32 getImageRotation();
+    void setImageRotation(qint32 image_rotation);
 
-    SWGAFCActions* getAfcActions();
-    void setAfcActions(SWGAFCActions* afc_actions);
+    qint32 getImageFixedSize();
+    void setImageFixedSize(qint32 image_fixed_size);
 
-    SWGMapActions* getMapActions();
-    void setMapActions(SWGMapActions* map_actions);
+    QString* getText();
+    void setText(QString* text);
 
-    SWGSimplePTTActions* getSimplePttActions();
-    void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
+    float getLatitude();
+    void setLatitude(float latitude);
+
+    float getLongitude();
+    void setLongitude(float longitude);
 
 
     virtual bool isSet() override;
 
 private:
-    QString* feature_type;
-    bool m_feature_type_isSet;
+    QString* name;
+    bool m_name_isSet;
 
-    qint32 originator_feature_set_index;
-    bool m_originator_feature_set_index_isSet;
+    QString* image;
+    bool m_image_isSet;
 
-    qint32 originator_feature_index;
-    bool m_originator_feature_index_isSet;
+    qint32 image_rotation;
+    bool m_image_rotation_isSet;
 
-    SWGAFCActions* afc_actions;
-    bool m_afc_actions_isSet;
+    qint32 image_fixed_size;
+    bool m_image_fixed_size_isSet;
 
-    SWGMapActions* map_actions;
-    bool m_map_actions_isSet;
+    QString* text;
+    bool m_text_isSet;
 
-    SWGSimplePTTActions* simple_ptt_actions;
-    bool m_simple_ptt_actions_isSet;
+    float latitude;
+    bool m_latitude_isSet;
+
+    float longitude;
+    bool m_longitude_isSet;
 
 };
 
 }
 
-#endif /* SWGFeatureActions_H_ */
+#endif /* SWGMapItem_2_H_ */

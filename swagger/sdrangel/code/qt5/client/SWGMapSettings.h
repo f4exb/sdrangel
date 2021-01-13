@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGGS232ControllerSettings.h
+ * SWGMapSettings.h
  *
- * GS-232 Controller settings
+ * Map
  */
 
-#ifndef SWGGS232ControllerSettings_H_
-#define SWGGS232ControllerSettings_H_
+#ifndef SWGMapSettings_H_
+#define SWGMapSettings_H_
 
 #include <QJsonObject>
 
@@ -29,42 +29,21 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGS232ControllerSettings: public SWGObject {
+class SWG_API SWGMapSettings: public SWGObject {
 public:
-    SWGGS232ControllerSettings();
-    SWGGS232ControllerSettings(QString* json);
-    virtual ~SWGGS232ControllerSettings();
+    SWGMapSettings();
+    SWGMapSettings(QString* json);
+    virtual ~SWGMapSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGS232ControllerSettings* fromJson(QString &jsonString) override;
+    virtual SWGMapSettings* fromJson(QString &jsonString) override;
 
-    qint32 getAzimuth();
-    void setAzimuth(qint32 azimuth);
-
-    qint32 getElevation();
-    void setElevation(qint32 elevation);
-
-    QString* getSerialPort();
-    void setSerialPort(QString* serial_port);
-
-    qint32 getBaudRate();
-    void setBaudRate(qint32 baud_rate);
-
-    qint32 getTrack();
-    void setTrack(qint32 track);
-
-    QString* getTarget();
-    void setTarget(QString* target);
-
-    qint32 getAzimuthOffset();
-    void setAzimuthOffset(qint32 azimuth_offset);
-
-    qint32 getElevationOffset();
-    void setElevationOffset(qint32 elevation_offset);
+    qint32 getDisplayNames();
+    void setDisplayNames(qint32 display_names);
 
     QString* getTitle();
     void setTitle(QString* title);
@@ -91,29 +70,8 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 azimuth;
-    bool m_azimuth_isSet;
-
-    qint32 elevation;
-    bool m_elevation_isSet;
-
-    QString* serial_port;
-    bool m_serial_port_isSet;
-
-    qint32 baud_rate;
-    bool m_baud_rate_isSet;
-
-    qint32 track;
-    bool m_track_isSet;
-
-    QString* target;
-    bool m_target_isSet;
-
-    qint32 azimuth_offset;
-    bool m_azimuth_offset_isSet;
-
-    qint32 elevation_offset;
-    bool m_elevation_offset_isSet;
+    qint32 display_names;
+    bool m_display_names_isSet;
 
     QString* title;
     bool m_title_isSet;
@@ -140,4 +98,4 @@ private:
 
 }
 
-#endif /* SWGGS232ControllerSettings_H_ */
+#endif /* SWGMapSettings_H_ */

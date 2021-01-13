@@ -15,5 +15,7 @@ FeatureActions:
       type: integer
     AFCActions:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCActions"
+    MapActions:
+      $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapActions"
     SimplePTTActions:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTActions"
