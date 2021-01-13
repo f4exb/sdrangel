@@ -16,6 +16,7 @@ add_subdirectory(filesink)
 add_subdirectory(freqtracker)
 add_subdirectory(demodchirpchat)
 add_subdirectory(demodvorsc)
+add_subdirectory(demodpacket)
 
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)

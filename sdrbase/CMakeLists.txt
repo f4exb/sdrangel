@@ -158,6 +158,7 @@ set(sdrbase_SOURCES
     feature/feature.cpp
     feature/featureset.cpp
     feature/featureutils.cpp
+    feature/featurewebapiutils.cpp
 
     limerfe/limerfeusbcalib.cpp
 
@@ -174,6 +175,7 @@ set(sdrbase_SOURCES
     settings/preset.cpp
     settings/mainsettings.cpp
 
+    util/ax25.cpp
     util/azel.cpp
     util/crc.cpp
     util/CRC64.cpp
@@ -182,6 +184,7 @@ set(sdrbase_SOURCES
     util/fixedtraits.cpp
     util/httpdownloadmanager.cpp
     util/lfsr.cpp
+    util/maidenhead.cpp
     util/message.cpp
     util/messagequeue.cpp
     util/morse.cpp
@@ -339,6 +342,7 @@ set(sdrbase_HEADERS
     feature/feature.h
     feature/featureset.h
     feature/featureutils.h
+    feature/featurewebapiutils.h
 
     limerfe/limerfeusbcalib.h
 
@@ -361,6 +365,7 @@ set(sdrbase_HEADERS
     settings/preset.h
     settings/mainsettings.h
 
+    util/ax25.h
     util/azel.h
     util/CRC64.h
     util/csv.h
@@ -372,6 +377,7 @@ set(sdrbase_HEADERS
     util/incrementalarray.h
     util/incrementalvector.h
     util/lfsr.h
+    util/maidenhead.h
     util/message.h
     util/messagequeue.h
     util/morse.h
