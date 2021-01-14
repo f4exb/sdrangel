@@ -1,3 +1,12 @@
+sdrangel (6.5.0-1) unstable; urgency=medium
+
+   * New PacketDemod Rx channel plugin. PR #746
+   * New APRS feature plugin. PR #746
+   * New Map feature plugin. PR #746
+   * Star tracker plugin. PR #746
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 14 Jan 2021 22:32:52 +0100
+
 sdrangel (6.4.0-1) unstable; urgency=medium
 
    * New demodulation analyzer feature plugin. Implements #695
