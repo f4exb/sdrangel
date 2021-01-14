@@ -74,6 +74,9 @@ void APRSWorker::stopWork()
     QMutexLocker mutexLocker(&m_mutex);
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     m_running = false;
+    // Close any existing connection
+    if (m_socket.isOpen())
+        m_socket.close();
 }
 
 void APRSWorker::handleInputMessages()
