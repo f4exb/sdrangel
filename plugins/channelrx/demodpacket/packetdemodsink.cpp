@@ -183,7 +183,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
                             if (calcCrc == rxCrc)
                             {
                                 QByteArray rxPacket((char *)m_bytes, m_byteCount);
-                                qDebug() << "RX: " << Qt::hex << rxPacket;
+                                qDebug() << "RX: " << rxPacket.toHex();
                                 if (getMessageQueueToChannel())
                                 {
                                     MainCore::MsgPacket *msg = MainCore::MsgPacket::create(m_packetDemod, rxPacket, QDateTime::currentDateTime()); // FIXME pointer
@@ -191,7 +191,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
                                 }
                             }
                             else
-                                qDebug() << "CRC mismatch: " << Qt::hex << calcCrc << " " << Qt::hex << rxCrc;
+                                qDebug() << QString("CRC mismatch: %1 %2").arg(calcCrc, 4, 16,  QLatin1Char('0')).arg(rxCrc, 4, 16, QLatin1Char('0'));
                             // Reset state to start receiving next packet
                             m_gotSOP = false;
                             m_bits = 0;
