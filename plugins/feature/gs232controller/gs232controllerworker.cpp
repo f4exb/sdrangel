@@ -24,25 +24,14 @@
 #include <QSerialPort>
 #include <QRegularExpression>
 
-#include "SWGDeviceState.h"
-#include "SWGSuccessResponse.h"
-#include "SWGErrorResponse.h"
-#include "SWGDeviceSettings.h"
-#include "SWGChannelSettings.h"
-#include "SWGDeviceSet.h"
-#include "SWGChannelReport.h"
-
-#include "webapi/webapiadapterinterface.h"
-#include "webapi/webapiutils.h"
-
+#include "gs232controller.h"
 #include "gs232controllerworker.h"
 #include "gs232controllerreport.h"
 
 MESSAGE_CLASS_DEFINITION(GS232ControllerWorker::MsgConfigureGS232ControllerWorker, Message)
 MESSAGE_CLASS_DEFINITION(GS232ControllerReport::MsgReportAzAl, Message)
 
-GS232ControllerWorker::GS232ControllerWorker(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    m_webAPIAdapterInterface(webAPIAdapterInterface),
+GS232ControllerWorker::GS232ControllerWorker() :
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
@@ -113,10 +102,10 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
     qDebug() << "GS232ControllerWorker::applySettings:"
             << " m_azimuth: " << settings.m_azimuth
             << " m_elevation: " << settings.m_elevation
+            << " m_azimuthOffset: " << settings.m_azimuthOffset
+            << " m_elevationOffset: " << settings.m_elevationOffset
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
-            << " m_deviceIndex: " << settings.m_deviceIndex
-            << " m_channelIndex: " << settings.m_channelIndex
             << " force: " << force;
 
     if ((settings.m_serialPort != m_settings.m_serialPort) || force)
@@ -126,34 +115,57 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
         m_serialPort.setPortName(settings.m_serialPort);
         m_serialPort.setBaudRate(settings.m_baudRate);
         if (!m_serialPort.open(QIODevice::ReadWrite))
+        {
             qCritical() << "GS232ControllerWorker::applySettings: Failed to open serial port " << settings.m_serialPort << ". Error: " << m_serialPort.error();
+            if (m_msgQueueToFeature)
+                m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Failed to open serial port %1: %2").arg(settings.m_serialPort).arg(m_serialPort.error())));
+        }
     }
     else if ((settings.m_baudRate != m_settings.m_baudRate) || force)
     {
         m_serialPort.setBaudRate(settings.m_baudRate);
     }
 
-    if ((settings.m_elevation != m_settings.m_elevation) || force)
+    if ((settings.m_elevation != m_settings.m_elevation)
+        || (settings.m_elevationOffset != m_settings.m_elevationOffset)
+        || force)
     {
-        setAzimuthElevation(settings.m_azimuth, settings.m_elevation);
+        setAzimuthElevation(settings.m_azimuth, settings.m_elevation, settings.m_azimuthOffset, settings.m_elevationOffset);
     }
-    else if ((settings.m_azimuth != m_settings.m_azimuth) || force)
+    else if ((settings.m_azimuth != m_settings.m_azimuth)
+        || (settings.m_azimuthOffset != m_settings.m_azimuthOffset)
+        || force)
     {
-        setAzimuth(settings.m_azimuth);
+        setAzimuth(settings.m_azimuth, settings.m_azimuthOffset);
     }
 
     m_settings = settings;
 }
 
-void GS232ControllerWorker::setAzimuth(int azimuth)
+void GS232ControllerWorker::setAzimuth(int azimuth, int azimuthOffset)
 {
+   azimuth += azimuthOffset;
+   if (azimuth < 0)
+       azimuth = 0;
+   else if (azimuth > 450)
+       azimuth = 450;
    QString cmd = QString("M%1\r\n").arg(azimuth, 3, 10, QLatin1Char('0'));
    QByteArray data = cmd.toLatin1();
    m_serialPort.write(data);
 }
 
-void GS232ControllerWorker::setAzimuthElevation(int azimuth, int elevation)
+void GS232ControllerWorker::setAzimuthElevation(int azimuth, int elevation, int azimuthOffset, int elevationOffset)
 {
+   azimuth += azimuthOffset;
+   if (azimuth < 0)
+       azimuth = 0;
+   else if (azimuth > 450)
+       azimuth = 450;
+   elevation += elevationOffset;
+   if (elevation < 0)
+       elevation = 0;
+   else if (elevation > 180)
+       elevation = 180;
    QString cmd = QString("W%1 %2\r\n").arg(azimuth, 3, 10, QLatin1Char('0')).arg(elevation, 3, 10, QLatin1Char('0'));
    QByteArray data = cmd.toLatin1();
    m_serialPort.write(data);
@@ -170,7 +182,6 @@ void GS232ControllerWorker::readSerialData()
         if (len != -1)
         {
             QString response = QString::fromUtf8(buf, len);
-
             QRegularExpression re("AZ=(\\d\\d\\d)EL=(\\d\\d\\d)");
             QRegularExpressionMatch match = re.match(response);
             if (match.hasMatch())
@@ -179,15 +190,17 @@ void GS232ControllerWorker::readSerialData()
                 QString el = match.captured(2);
                 //qDebug() << "GS232ControllerWorker::readSerialData read az " << az << " el " << el;
                 if (getMessageQueueToGUI())
-                {
-                    GS232ControllerReport::MsgReportAzAl *msg = GS232ControllerReport::MsgReportAzAl::create(
-                                                                        az.toFloat(), el.toFloat(), GS232ControllerReport::ACTUAL);
-                    getMessageQueueToGUI()->push(msg);
-                }
+                    getMessageQueueToGUI()->push( GS232ControllerReport::MsgReportAzAl::create(az.toFloat(), el.toFloat()));
+            }
+            else if (response == "\r\n")
+            {
+                // Ignore
             }
             else
             {
-                qDebug() << "GS232ControllerWorker::readSerialData unknown response " << response;
+                qDebug() << "GS232ControllerWorker::readSerialData - unexpected response " << response;
+                if (m_msgQueueToFeature)
+                    m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 serial reponse: %1").arg(response)));
             }
         }
     }
@@ -200,49 +213,5 @@ void GS232ControllerWorker::update()
     {
         QByteArray cmd("C2\r\n");
         m_serialPort.write(cmd);
-    }
-
-    // Request target Az/EL from channel
-    if (m_settings.m_track)
-    {
-        SWGSDRangel::SWGChannelReport response;
-        SWGSDRangel::SWGErrorResponse errorResponse;
-
-        int httpRC = m_webAPIAdapterInterface->devicesetChannelReportGet(
-            m_settings.m_deviceIndex,
-            m_settings.m_channelIndex,
-            response,
-            errorResponse
-        );
-
-        if (httpRC/100 != 2)
-        {
-            qWarning("GS232ControllerWorker::update: get channel report error %d: %s",
-                httpRC, qPrintable(*errorResponse.getMessage()));
-        }
-        else
-        {
-            QJsonObject *jsonObj = response.asJsonObject();
-            double targetAzimuth;
-            double targetElevation;
-            bool gotElevation = false;
-            bool gotAzimuth = false;
-
-            if (WebAPIUtils::getSubObjectDouble(*jsonObj, "targetAzimuth", targetAzimuth))
-                gotAzimuth = true;
-
-            if (WebAPIUtils::getSubObjectDouble(*jsonObj, "targetElevation", targetElevation))
-                gotElevation = true;
-
-            if (gotAzimuth && gotElevation)
-            {
-                if (getMessageQueueToGUI())
-                {
-                    GS232ControllerReport::MsgReportAzAl *msg = GS232ControllerReport::MsgReportAzAl::create(
-                                                                targetAzimuth, targetElevation, GS232ControllerReport::TARGET);
-                    getMessageQueueToGUI()->push(msg);
-                }
-            }
-        }
     }
 }

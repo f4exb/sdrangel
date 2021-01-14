@@ -1,0 +1,57 @@
+MapSettings:
+  description: Map
+  properties:
+    displayNames:
+      description: Display object names on the map (1 for yes, 0 for no)
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+MapActions:
+  description: Map
+  properties:
+    find:
+      description: "The name of the item or the location to centre the map on"
+      type: string
+
+MapItem:
+  description: "An item to draw on the map. Set image to an empty string to remove item from the map."
+  required:
+    - name
+  properties:
+    name:
+      description: "A name for the item"
+      type: string
+    image:
+      description: "Filename or URL of image to draw on the map"
+      type: string
+    imageRotation:
+      description: "Angle to rotate the image by"
+      type: integer
+    imageFixedSize:
+      description: "Keep the image the same size, regardless of map zoom level (1 for yes, 0 for no)"
+      type: integer
+    text:
+      descrption: "Text to draw on the map when item is selected"
+      type: string
+    latitude:
+      description: "Latitude in decimal degrees, positive to the north"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees, positive to the east"
+      type: number
+      format: float

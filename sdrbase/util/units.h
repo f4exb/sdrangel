@@ -19,6 +19,10 @@
 #define INCLUDE_UNITS_H
 
 #include <cmath>
+#include <QString>
+#include <QStringList>
+#include <QRegExp>
+#include <QDebug>
 
 #include "export.h"
 
@@ -72,9 +76,141 @@ public:
         return degrees * ((float)M_PI) / 180.0f;
     }
 
-    static float radiansToDegress(float radians)
+    static float radiansToDegrees(float radians)
     {
         return radians * 180.0f / ((float)M_PI);
+    }
+
+    static float fahrenheitToCelsius(float fahrenheit)
+    {
+        return (fahrenheit - 32.0f) * (5.0f/9.0f);
+    }
+
+    static float celsiusToKelvin(float celsius)
+    {
+        return celsius + 273.15f;
+    }
+
+    static float inchesToMilimetres(float inches)
+    {
+        return inches * 25.4f;
+    }
+
+    static float milesToKilometres(float miles)
+    {
+        return miles * 1.60934f;
+    }
+
+    static float degreesMinutesSecondsToDecimal(int degrees, int minutes, float seconds)
+    {
+        float dec = std::abs(degrees) + minutes * 1.0f/60.0f + seconds * 1.0f/(60.0f*60.0f);
+        if (degrees < 0)
+            return -dec;
+        else
+            return dec;
+    }
+
+    static float hoursMinutesSecondsToDecimal(int hours, int minutes, float seconds)
+    {
+        return hours + minutes * 1.0f/60.0f + seconds * 1.0f/(60.0f*60.0f);
+    }
+
+    static QString decimalDegreesToDegreeMinutesAndSeconds(float decimal, int secondsFieldWidth=5)
+    {
+        float v, d, m, s;
+        int neg;
+
+        v = decimal;
+        neg = v < 0.0f;
+        v = fabs(v);
+        d = floor(v);
+        v -= d;
+        v *= 60.0;
+        m = floor(v);
+        v -= m;
+        v *= 60.0;
+        s = v;
+        return QString("%1%2%3%4'%5\"").arg(neg ? "-" : "").arg((int)d).arg(QChar(0xb0)).arg((int)m, 2, 10, QChar('0')).arg(s, secondsFieldWidth, 'f', 2, QChar('0'));
+    }
+
+    static QString decimalDegreesToDegreesAndMinutes(float decimal)
+    {
+        float v, d, m;
+        int neg;
+
+        v = decimal;
+        neg = v < 0.0f;
+        v = fabs(v);
+        d = floor(v);
+        v -= d;
+        v *= 60.0;
+        m = round(v);
+        return QString("%1%2%3%4'").arg(neg ? "-" : "").arg((int)d).arg(QChar(0xb0)).arg((int)m, 2, 10, QChar('0'));
+    }
+
+    static QString decimalDegreesToDegrees(float decimal)
+    {
+        float v, d;
+        int neg;
+
+        v = decimal;
+        neg = v < 0.0f;
+        v = fabs(v);
+        d = round(v);
+        return QString("%1%2%3").arg(neg ? "-" : "").arg((int)d).arg(QChar(0xb0));
+    }
+
+    static QString decimalHoursToHoursMinutesAndSeconds(float decimal, int precision=2)
+    {
+        float v, h, m, s;
+
+        v = decimal;
+        v = fabs(v);
+        h = floor(v);
+        v -= h;
+        v *= 60.0;
+        m = floor(v);
+        v -= m;
+        v *= 60.0;
+        s = v;
+        return QString("%1h%2m%3s").arg((int)h).arg((int)m, 2, 10, QChar('0')).arg(s, 2, 'f', precision, QChar('0'));
+    }
+
+    // Try to convert a string to latitude and longitude. Returns false if not recognised format.
+    // https://en.wikipedia.org/wiki/ISO_6709 specifies a standard syntax
+    // We support both decimal and DMS formats
+    static bool stringToLatitudeAndLongitude(const QString& string, float& latitude, float& longitude)
+    {
+        QRegExp decimal("(-?[0-9]+\\.[0-9]+) *,? *(-?[0-9]+\\.[0-9]+)");
+        if (decimal.exactMatch(string))
+        {
+             latitude = decimal.capturedTexts()[1].toFloat();
+             longitude = decimal.capturedTexts()[2].toFloat();
+             return true;
+        }
+        QRegExp dms(QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0)));
+        if (dms.exactMatch(string))
+        {
+             qDebug() << "Captured: " << dms.capturedTexts();
+             float latD = dms.capturedTexts()[1].toFloat();
+             float latM = dms.capturedTexts()[2].toFloat();
+             float latS = dms.capturedTexts()[3].toFloat();
+             bool north = dms.capturedTexts()[5] == "N";
+             float lonD = dms.capturedTexts()[6].toFloat();
+             float lonM = dms.capturedTexts()[7].toFloat();
+             float lonS = dms.capturedTexts()[8].toFloat();
+             bool east = dms.capturedTexts()[10] == "E";
+             latitude = latD + latM/60.0 + latS/(60.0*60.0);
+             if (!north)
+                 latitude = -latitude;
+             longitude = lonD + lonM/60.0 + lonS/(60.0*60.0);
+             if (!east)
+                 longitude = -longitude;
+             qDebug() << "Lat " << latitude;
+             qDebug() << "Long " << longitude;
+             return true;
+        }
+        return false;
     }
 
 };

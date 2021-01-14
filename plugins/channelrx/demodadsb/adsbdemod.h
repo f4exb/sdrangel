@@ -119,12 +119,7 @@ public:
         m_basebandSink->setMessageQueueToGUI(queue);
     }
 
-    void setTarget(float targetAzimuth, float targetElevation)
-    {
-        m_targetAzimuth = targetAzimuth;
-        m_targetElevation = targetElevation;
-        m_targetAzElValid = true;
-    }
+    void setTarget(const QString& name, float targetAzimuth, float targetElevation);
     void clearTarget() { m_targetAzElValid = false; }
 
     uint32_t getNumberOfDeviceStreams() const;

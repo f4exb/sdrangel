@@ -38,14 +38,16 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_baud_rate_isSet = false;
     track = 0;
     m_track_isSet = false;
+    target = nullptr;
+    m_target_isSet = false;
+    azimuth_offset = 0;
+    m_azimuth_offset_isSet = false;
+    elevation_offset = 0;
+    m_elevation_offset_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
-    device_index = 0;
-    m_device_index_isSet = false;
-    channel_index = 0;
-    m_channel_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = nullptr;
@@ -74,14 +76,16 @@ SWGGS232ControllerSettings::init() {
     m_baud_rate_isSet = false;
     track = 0;
     m_track_isSet = false;
+    target = new QString("");
+    m_target_isSet = false;
+    azimuth_offset = 0;
+    m_azimuth_offset_isSet = false;
+    elevation_offset = 0;
+    m_elevation_offset_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
-    device_index = 0;
-    m_device_index_isSet = false;
-    channel_index = 0;
-    m_channel_index_isSet = false;
     use_reverse_api = 0;
     m_use_reverse_api_isSet = false;
     reverse_api_address = new QString("");
@@ -103,11 +107,14 @@ SWGGS232ControllerSettings::cleanup() {
     }
 
 
-    if(title != nullptr) { 
-        delete title;
+    if(target != nullptr) { 
+        delete target;
     }
 
 
+    if(title != nullptr) { 
+        delete title;
+    }
 
 
     if(reverse_api_address != nullptr) { 
@@ -139,13 +146,15 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&track, pJson["track"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&target, pJson["target"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&device_index, pJson["deviceIndex"], "qint32", "");
-    
-    ::SWGSDRangel::setValue(&channel_index, pJson["channelIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
     
@@ -188,17 +197,20 @@ SWGGS232ControllerSettings::asJsonObject() {
     if(m_track_isSet){
         obj->insert("track", QJsonValue(track));
     }
+    if(target != nullptr && *target != QString("")){
+        toJsonValue(QString("target"), target, obj, QString("QString"));
+    }
+    if(m_azimuth_offset_isSet){
+        obj->insert("azimuthOffset", QJsonValue(azimuth_offset));
+    }
+    if(m_elevation_offset_isSet){
+        obj->insert("elevationOffset", QJsonValue(elevation_offset));
+    }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
-    }
-    if(m_device_index_isSet){
-        obj->insert("deviceIndex", QJsonValue(device_index));
-    }
-    if(m_channel_index_isSet){
-        obj->insert("channelIndex", QJsonValue(channel_index));
     }
     if(m_use_reverse_api_isSet){
         obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
@@ -270,6 +282,36 @@ SWGGS232ControllerSettings::setTrack(qint32 track) {
 }
 
 QString*
+SWGGS232ControllerSettings::getTarget() {
+    return target;
+}
+void
+SWGGS232ControllerSettings::setTarget(QString* target) {
+    this->target = target;
+    this->m_target_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getAzimuthOffset() {
+    return azimuth_offset;
+}
+void
+SWGGS232ControllerSettings::setAzimuthOffset(qint32 azimuth_offset) {
+    this->azimuth_offset = azimuth_offset;
+    this->m_azimuth_offset_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getElevationOffset() {
+    return elevation_offset;
+}
+void
+SWGGS232ControllerSettings::setElevationOffset(qint32 elevation_offset) {
+    this->elevation_offset = elevation_offset;
+    this->m_elevation_offset_isSet = true;
+}
+
+QString*
 SWGGS232ControllerSettings::getTitle() {
     return title;
 }
@@ -287,26 +329,6 @@ void
 SWGGS232ControllerSettings::setRgbColor(qint32 rgb_color) {
     this->rgb_color = rgb_color;
     this->m_rgb_color_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getDeviceIndex() {
-    return device_index;
-}
-void
-SWGGS232ControllerSettings::setDeviceIndex(qint32 device_index) {
-    this->device_index = device_index;
-    this->m_device_index_isSet = true;
-}
-
-qint32
-SWGGS232ControllerSettings::getChannelIndex() {
-    return channel_index;
-}
-void
-SWGGS232ControllerSettings::setChannelIndex(qint32 channel_index) {
-    this->channel_index = channel_index;
-    this->m_channel_index_isSet = true;
 }
 
 qint32
@@ -379,16 +401,19 @@ SWGGS232ControllerSettings::isSet(){
         if(m_track_isSet){
             isObjectUpdated = true; break;
         }
+        if(target && *target != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_azimuth_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_elevation_offset_isSet){
+            isObjectUpdated = true; break;
+        }
         if(title && *title != QString("")){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_device_index_isSet){
-            isObjectUpdated = true; break;
-        }
-        if(m_channel_index_isSet){
             isObjectUpdated = true; break;
         }
         if(m_use_reverse_api_isSet){

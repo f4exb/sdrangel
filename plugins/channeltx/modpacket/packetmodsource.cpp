@@ -25,6 +25,7 @@
 #include "util/crc.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
+#include "channel/channelapi.h"
 
 PacketModSource::PacketModSource() :
     m_channelSampleRate(48000),
@@ -424,33 +425,56 @@ void PacketModSource::applyChannelSettings(int channelSampleRate, int channelFre
     }
 }
 
+static bool ax25_ssid(QByteArray& b, int i, int len, uint8_t& ssid)
+{
+    if (b[i] == '-')
+    {
+        if (len > i + 1)
+        {
+            ssid = b[i+1] - '0';
+            if ((len > i + 2) && isdigit(b[i+2])) {
+                ssid = (ssid*10) + (b[i+2] - '0');
+            }
+            if (ssid >= 16)
+            {
+                qDebug() << "ax25_address: SSID greater than 15 not supported";
+                ssid = ssid & 0xf;
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            qDebug() << "ax25_address: SSID number missing";
+            return false;
+        }
+    }
+    else
+        return false;
+}
+
 static uint8_t *ax25_address(uint8_t *p, QString address, uint8_t crrl)
 {
     int len;
     int i;
     QByteArray b;
-    int ssid;
+    uint8_t ssid = 0;
+    bool hyphenSeen = false;
 
     len = address.length();
     b = address.toUtf8();
     ssid = 0;
     for (i = 0; i < 6; i++)
     {
-        if ((i < len) && (ssid == 0))
+        if ((i < len) && !hyphenSeen)
         {
             if (b[i] == '-')
             {
-                if (len > i + 1)
-                {
-                    ssid = b[i+1] - '0';
-                    if ((len > i + 2) && isdigit(b[i+2])) {
-                        ssid = (ssid*10) + (b[i+1] - '0');
-                    }
-                    if (ssid >= 16)
-                        qDebug() << "ax25_address: SSID greater than 15 not supported";
-                }
-                else
-                    qDebug() << "ax25_address: SSID number missing";
+                ax25_ssid(b, i, len, ssid);
+                hyphenSeen = true;
                 *p++ = ' ' << 1;
             }
             else
@@ -462,6 +486,10 @@ static uint8_t *ax25_address(uint8_t *p, QString address, uint8_t crrl)
         {
             *p++ = ' ' << 1;
         }
+    }
+    if (b[i] == '-')
+    {
+        ax25_ssid(b, i, len, ssid);
     }
     *p++ = crrl | (ssid << 1);
 
@@ -534,6 +562,7 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
 {
     uint8_t packet[AX25_MAX_BYTES];
     uint8_t *crc_start;
+    uint8_t *packet_end;
     uint8_t *p;
     crc16x25 crc;
     uint16_t crcValue;
@@ -565,6 +594,7 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
     crcValue = crc.get();
     *p++ = crcValue & 0xff;
     *p++ = (crcValue >> 8);
+    packet_end = p;
     // Flag
     for (int i = 0; i < std::min(m_settings.m_ax25PostFlags, AX25_MAX_FLAGS); i++)
         *p++ = AX25_FLAG;
@@ -582,8 +612,17 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
         for (int j = 0; j < 8; j++)
         {
             int tx_bit = (packet[i] >> j) & 1;
-            // Stuff 0 if last 5 bits are 1s
-            if ((packet[i] != AX25_FLAG) && (m_last5Bits == 0x1f))
+            // Stuff 0 if last 5 bits are 1s, unless transmitting flag
+            // Except for special case of when last 5 bits of CRC are 1s
+            if (   (   (packet[i] != AX25_FLAG)
+                    || (   (&packet[i] >= crc_start)
+                        && (   (&packet[i] < packet_end)
+                            || ((&packet[i] == packet_end) && (j == 0))
+                           )
+                       )
+                   )
+                && (m_last5Bits == 0x1f)
+               )
                 addBit(0);
             addBit(tx_bit);
         }

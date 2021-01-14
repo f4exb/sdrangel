@@ -27,7 +27,6 @@ class GS232ControllerReport : public QObject
 {
     Q_OBJECT
 public:
-    enum AzAlType {TARGET, ACTUAL};
 
     class MsgReportAzAl : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -35,23 +34,20 @@ public:
     public:
         float getAzimuth() const { return m_azimuth; }
         float getElevation() const { return m_elevation; }
-        AzAlType getType() const { return m_type; }
 
-        static MsgReportAzAl* create(float azimuth, float elevation, AzAlType type)
+        static MsgReportAzAl* create(float azimuth, float elevation)
         {
-            return new MsgReportAzAl(azimuth, elevation, type);
+            return new MsgReportAzAl(azimuth, elevation);
         }
 
     private:
         float m_azimuth;
         float m_elevation;
-        AzAlType m_type;
 
-        MsgReportAzAl(float azimuth, float elevation, AzAlType type) :
+        MsgReportAzAl(float azimuth, float elevation) :
             Message(),
             m_azimuth(azimuth),
-            m_elevation(elevation),
-            m_type(type)
+            m_elevation(elevation)
         {
         }
     };

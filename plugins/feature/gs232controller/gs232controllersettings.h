@@ -28,32 +28,14 @@ class Serializable;
 
 struct GS232ControllerSettings
 {
-    class MsgChannelIndexChange : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        bool getIndex() const { return m_index; }
-
-        static MsgChannelIndexChange* create(int index) {
-            return new MsgChannelIndexChange(index);
-        }
-
-    protected:
-        int m_index;
-
-        MsgChannelIndexChange(int index) :
-            Message(),
-            m_index(index)
-        { }
-    };
-
     int m_azimuth;
     int m_elevation;
     QString m_serialPort;
     int m_baudRate;
-    int m_deviceIndex;
     bool m_track;
-    int m_channelIndex;
+    QString m_target;           // Plugin to get az/el from. E.g: "R0:0 ADSBDemod". Use a string, so can be set via WebAPI
+    int m_azimuthOffset;
+    int m_elevationOffset;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
@@ -66,6 +48,9 @@ struct GS232ControllerSettings
     void resetToDefaults();
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
+
+    static const QStringList m_pipeTypes;
+    static const QStringList m_pipeURIs;
 };
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLERSETTINGS_H_

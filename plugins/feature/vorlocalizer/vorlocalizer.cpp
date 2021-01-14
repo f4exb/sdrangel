@@ -244,8 +244,8 @@ bool VORLocalizer::handleMessage(const Message& cmd)
         qDebug() << "VORLocalizer::handleMessage: MsgReportChannelDeleted";
         MessagePipesCommon::MsgReportChannelDeleted& report = (MessagePipesCommon::MsgReportChannelDeleted&) cmd;
         const MessagePipesCommon::ChannelRegistrationKey& channelKey = report.getChannelRegistrationKey();
-        const ChannelAPI *channel = channelKey.m_key;
-        m_availableChannels.remove(const_cast<ChannelAPI*>(channel));
+        const PipeEndPoint *channel = channelKey.m_key;
+        m_availableChannels.remove(const_cast<ChannelAPI*>(reinterpret_cast<const ChannelAPI*>(channel)));
         updateChannels();
         MessageQueue *messageQueue = MainCore::instance()->getMessagePipes().unregisterChannelToFeature(channel, this, "report");
         disconnect(messageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleChannelMessageQueue(MessageQueue*)));

@@ -57,17 +57,20 @@ public:
     qint32 getTrack();
     void setTrack(qint32 track);
 
+    QString* getTarget();
+    void setTarget(QString* target);
+
+    qint32 getAzimuthOffset();
+    void setAzimuthOffset(qint32 azimuth_offset);
+
+    qint32 getElevationOffset();
+    void setElevationOffset(qint32 elevation_offset);
+
     QString* getTitle();
     void setTitle(QString* title);
 
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
-
-    qint32 getDeviceIndex();
-    void setDeviceIndex(qint32 device_index);
-
-    qint32 getChannelIndex();
-    void setChannelIndex(qint32 channel_index);
 
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
@@ -103,17 +106,20 @@ private:
     qint32 track;
     bool m_track_isSet;
 
+    QString* target;
+    bool m_target_isSet;
+
+    qint32 azimuth_offset;
+    bool m_azimuth_offset_isSet;
+
+    qint32 elevation_offset;
+    bool m_elevation_offset_isSet;
+
     QString* title;
     bool m_title_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
-
-    qint32 device_index;
-    bool m_device_index_isSet;
-
-    qint32 channel_index;
-    bool m_channel_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;

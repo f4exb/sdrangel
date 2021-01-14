@@ -15,15 +15,20 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include "channel/channelapi.h"
 #include "feature/feature.h"
 #include "util/messagequeue.h"
 #include "maincore.h"
 #include "messagepipescommon.h"
 #include "messagepipesgcworker.h"
 
-bool MessagePipesGCWorker::MessagePipesGC::existsProducer(const ChannelAPI *channel)
+bool MessagePipesGCWorker::MessagePipesGC::existsProducer(const PipeEndPoint *pipeEndPoint)
 {
-    return MainCore::instance()->existsChannel(channel);
+    // Not overly sure about casting to both types here, but currently safeish as the
+    // existing functions only use the pointer address - and I presume these
+    // may be pointers to deleted objects anyway?
+    return MainCore::instance()->existsChannel((const ChannelAPI *)pipeEndPoint)
+        || MainCore::instance()->existsFeature((const Feature *)pipeEndPoint);
 }
 
 bool MessagePipesGCWorker::MessagePipesGC::existsConsumer(const Feature *feature)

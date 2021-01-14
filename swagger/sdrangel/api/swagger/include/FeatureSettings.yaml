@@ -15,12 +15,18 @@ FeatureSettings:
       type: integer
     AFCSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCSettings"
+    APRSSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/APRS.yaml#/APRSSettings"
     DemodAnalyzerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/DemodAnalyzer.yaml#/DemodAnalyzerSettings"
     GS232ControllerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
+    MapSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapSettings"
     RigCtlServerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+    StarTrackerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerSettings"
     SimplePTTSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTSettings"
     VORLocalizerSettings:

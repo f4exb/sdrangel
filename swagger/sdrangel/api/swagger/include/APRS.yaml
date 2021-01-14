@@ -1,0 +1,30 @@
+APRSSettings:
+  description: "APRS settings"
+  properties:
+    igateServer:
+      type: string
+    igatePort:
+      type: integer
+    igateCallsign:
+      type: string
+    igatePasscode:
+      type: string
+    igateFilter:
+      type: string
+    igateEnabled:
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

@@ -36,6 +36,8 @@ SWGFeatureActions::SWGFeatureActions() {
     m_originator_feature_index_isSet = false;
     afc_actions = nullptr;
     m_afc_actions_isSet = false;
+    map_actions = nullptr;
+    m_map_actions_isSet = false;
     simple_ptt_actions = nullptr;
     m_simple_ptt_actions_isSet = false;
 }
@@ -54,6 +56,8 @@ SWGFeatureActions::init() {
     m_originator_feature_index_isSet = false;
     afc_actions = new SWGAFCActions();
     m_afc_actions_isSet = false;
+    map_actions = new SWGMapActions();
+    m_map_actions_isSet = false;
     simple_ptt_actions = new SWGSimplePTTActions();
     m_simple_ptt_actions_isSet = false;
 }
@@ -67,6 +71,9 @@ SWGFeatureActions::cleanup() {
 
     if(afc_actions != nullptr) { 
         delete afc_actions;
+    }
+    if(map_actions != nullptr) { 
+        delete map_actions;
     }
     if(simple_ptt_actions != nullptr) { 
         delete simple_ptt_actions;
@@ -91,6 +98,8 @@ SWGFeatureActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_feature_index, pJson["originatorFeatureIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&afc_actions, pJson["AFCActions"], "SWGAFCActions", "SWGAFCActions");
+    
+    ::SWGSDRangel::setValue(&map_actions, pJson["MapActions"], "SWGMapActions", "SWGMapActions");
     
     ::SWGSDRangel::setValue(&simple_ptt_actions, pJson["SimplePTTActions"], "SWGSimplePTTActions", "SWGSimplePTTActions");
     
@@ -121,6 +130,9 @@ SWGFeatureActions::asJsonObject() {
     }
     if((afc_actions != nullptr) && (afc_actions->isSet())){
         toJsonValue(QString("AFCActions"), afc_actions, obj, QString("SWGAFCActions"));
+    }
+    if((map_actions != nullptr) && (map_actions->isSet())){
+        toJsonValue(QString("MapActions"), map_actions, obj, QString("SWGMapActions"));
     }
     if((simple_ptt_actions != nullptr) && (simple_ptt_actions->isSet())){
         toJsonValue(QString("SimplePTTActions"), simple_ptt_actions, obj, QString("SWGSimplePTTActions"));
@@ -169,6 +181,16 @@ SWGFeatureActions::setAfcActions(SWGAFCActions* afc_actions) {
     this->m_afc_actions_isSet = true;
 }
 
+SWGMapActions*
+SWGFeatureActions::getMapActions() {
+    return map_actions;
+}
+void
+SWGFeatureActions::setMapActions(SWGMapActions* map_actions) {
+    this->map_actions = map_actions;
+    this->m_map_actions_isSet = true;
+}
+
 SWGSimplePTTActions*
 SWGFeatureActions::getSimplePttActions() {
     return simple_ptt_actions;
@@ -194,6 +216,9 @@ SWGFeatureActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(afc_actions && afc_actions->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(map_actions && map_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_actions && simple_ptt_actions->isSet()){

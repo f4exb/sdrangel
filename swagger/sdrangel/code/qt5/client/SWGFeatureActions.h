@@ -23,6 +23,7 @@
 
 
 #include "SWGAFCActions.h"
+#include "SWGMapActions.h"
 #include "SWGSimplePTTActions.h"
 #include <QString>
 
@@ -56,6 +57,9 @@ public:
     SWGAFCActions* getAfcActions();
     void setAfcActions(SWGAFCActions* afc_actions);
 
+    SWGMapActions* getMapActions();
+    void setMapActions(SWGMapActions* map_actions);
+
     SWGSimplePTTActions* getSimplePttActions();
     void setSimplePttActions(SWGSimplePTTActions* simple_ptt_actions);
 
@@ -74,6 +78,9 @@ private:
 
     SWGAFCActions* afc_actions;
     bool m_afc_actions_isSet;
+
+    SWGMapActions* map_actions;
+    bool m_map_actions_isSet;
 
     SWGSimplePTTActions* simple_ptt_actions;
     bool m_simple_ptt_actions_isSet;

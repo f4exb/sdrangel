@@ -1063,6 +1063,51 @@ margin-bottom: 20px;
   },
   "description" : "AMMod"
 };
+            defs.APRSSettings = {
+  "properties" : {
+    "igateServer" : {
+      "type" : "string"
+    },
+    "igatePort" : {
+      "type" : "integer"
+    },
+    "igateCallsign" : {
+      "type" : "string"
+    },
+    "igatePasscode" : {
+      "type" : "string"
+    },
+    "igateFilter" : {
+      "type" : "string"
+    },
+    "igateEnabled" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "APRS settings"
+};
             defs.ATVDemodSettings = {
   "properties" : {
     "fpsIndex" : {
@@ -2674,6 +2719,9 @@ margin-bottom: 20px;
     "LocalSourceSettings" : {
       "$ref" : "#/definitions/LocalSourceSettings"
     },
+    "PacketDemodSettings" : {
+      "$ref" : "#/definitions/PacketDemodSettings"
+    },
     "PacketModSettings" : {
       "$ref" : "#/definitions/PacketModSettings"
     },
@@ -4018,6 +4066,9 @@ margin-bottom: 20px;
     "AFCActions" : {
       "$ref" : "#/definitions/AFCActions"
     },
+    "MapActions" : {
+      "$ref" : "#/definitions/MapActions"
+    },
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
     }
@@ -4122,14 +4173,23 @@ margin-bottom: 20px;
     "AFCSettings" : {
       "$ref" : "#/definitions/AFCSettings"
     },
+    "APRSSettings" : {
+      "$ref" : "#/definitions/APRSSettings"
+    },
     "DemodAnalyzerSettings" : {
       "$ref" : "#/definitions/DemodAnalyzerSettings"
     },
     "GS232ControllerSettings" : {
       "$ref" : "#/definitions/GS232ControllerSettings"
     },
+    "MapSettings" : {
+      "$ref" : "#/definitions/MapSettings"
+    },
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
+    },
+    "StarTrackerSettings" : {
+      "$ref" : "#/definitions/StarTrackerSettings"
     },
     "SimplePTTSettings" : {
       "$ref" : "#/definitions/SimplePTTSettings"
@@ -4867,18 +4927,25 @@ margin-bottom: 20px;
       "description" : "The baud rate to use for the serial connection to the GS-232 controller"
     },
     "track" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Track a target where azimuth and elevation are determined by another plugin (1 for yes, 0 for no)"
+    },
+    "target" : {
+      "type" : "string",
+      "description" : "Identifier of the channel or feature plugin providing target azimuth and elevation (E.g. R0:0 ADSBDemod)"
+    },
+    "azimuthOffset" : {
+      "type" : "integer",
+      "description" : "Azimuth offset in degrees"
+    },
+    "elevationOffset" : {
+      "type" : "integer",
+      "description" : "Elevation offset in degrees"
     },
     "title" : {
       "type" : "string"
     },
     "rgbColor" : {
-      "type" : "integer"
-    },
-    "deviceIndex" : {
-      "type" : "integer"
-    },
-    "channelIndex" : {
       "type" : "integer"
     },
     "useReverseAPI" : {
@@ -6156,7 +6223,7 @@ margin-bottom: 20px;
     "latitude" : {
       "type" : "number",
       "format" : "float",
-      "description" : "Lautitude in decimal degrees positive to the north"
+      "description" : "Latitude in decimal degrees positive to the north"
     },
     "longitude" : {
       "type" : "number",
@@ -6186,6 +6253,116 @@ margin-bottom: 20px;
     }
   },
   "description" : "Logging parameters setting"
+};
+            defs.MapActions = {
+  "properties" : {
+    "find" : {
+      "type" : "string",
+      "description" : "The name of the item or the location to centre the map on"
+    }
+  },
+  "description" : "Map"
+};
+            defs.MapItem = {
+  "required" : [ "name" ],
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "description" : "A name for the item"
+    },
+    "image" : {
+      "type" : "string",
+      "description" : "Filename or URL of image to draw on the map"
+    },
+    "imageRotation" : {
+      "type" : "integer",
+      "description" : "Angle to rotate the image by"
+    },
+    "imageFixedSize" : {
+      "type" : "integer",
+      "description" : "Keep the image the same size, regardless of map zoom level (1 for yes, 0 for no)"
+    },
+    "text" : {
+      "type" : "string"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, positive to the north"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, positive to the east"
+    }
+  },
+  "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
+};
+            defs.MapItem_2 = {
+  "required" : [ "name" ],
+  "properties" : {
+    "name" : {
+      "type" : "string",
+      "description" : "A name for the item"
+    },
+    "image" : {
+      "type" : "string",
+      "description" : "Filename or URL of image to draw on the map"
+    },
+    "imageRotation" : {
+      "type" : "integer",
+      "description" : "Angle to rotate the image by"
+    },
+    "imageFixedSize" : {
+      "type" : "integer",
+      "description" : "Keep the image the same size, regardless of map zoom level (1 for yes, 0 for no)"
+    },
+    "text" : {
+      "type" : "string"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees, positive to the north"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees, positive to the east"
+    }
+  },
+  "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
+};
+            defs.MapSettings = {
+  "properties" : {
+    "displayNames" : {
+      "type" : "integer",
+      "description" : "Display object names on the map (1 for yes, 0 for no)"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Map"
 };
             defs.MetisMISOSettings = {
   "properties" : {
@@ -6554,6 +6731,53 @@ margin-bottom: 20px;
     }
   },
   "description" : "Enumeration with name for values"
+};
+            defs.PacketDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "mode" : {
+      "type" : "string",
+      "description" : "Transmission mode\n  * \"1200 AFSK\"\n"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PacketDemod"
 };
             defs.PacketModActions = {
   "properties" : {
@@ -8752,6 +8976,121 @@ margin-bottom: 20px;
     }
   }
 };
+            defs.StarTrackerSettings = {
+  "properties" : {
+    "target" : {
+      "type" : "string",
+      "description" : "Target object (Sun, Moon or Custom)"
+    },
+    "ra" : {
+      "type" : "string",
+      "description" : "Right ascension of custom target"
+    },
+    "dec" : {
+      "type" : "string",
+      "description" : "Declination of custom target"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of observation/antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of observation/antenna location"
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    },
+    "refraction" : {
+      "type" : "string",
+      "description" : "Atmospheric refraction correction (None or Saemundsson)"
+    },
+    "pressure" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Air pressure in millibars, for refraction"
+    },
+    "temperature" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Air temperature in Celsuis, for refraction"
+    },
+    "humidity" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Relative humidity in %, for refraction"
+    },
+    "heightAboveSeaLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Height above sea level in metres of observation/antenna location"
+    },
+    "temperatureLapseRate" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Temperature lapse rate in K/km"
+    },
+    "frequency" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Frequency of radio waves being observed in MHz"
+    },
+    "stellariumServerEnabled" : {
+      "type" : "integer"
+    },
+    "stellariumPort" : {
+      "type" : "integer",
+      "description" : "IP port number for Stellarium server to listen on (Default is 10001)."
+    },
+    "updatePeriod" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time in seconds between each calculation of the target's position"
+    },
+    "epoch" : {
+      "type" : "string",
+      "description" : "Epoch for RA and Dec (J2000 or JNOW)"
+    },
+    "drawSunOnMap" : {
+      "type" : "integer",
+      "description" : "Draw the overhead position of the Sun on the Map (1 for yes, 0 for no)"
+    },
+    "drawMoonOnMap" : {
+      "type" : "integer",
+      "description" : "Draw the overhead position of the Moon on the Map (1 for yes, 0 for no)"
+    },
+    "drawStarOnMap" : {
+      "type" : "integer",
+      "description" : "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Star Tracker settings"
+};
             defs.SuccessResponse = {
   "required" : [ "message" ],
   "properties" : {
@@ -8759,6 +9098,22 @@ margin-bottom: 20px;
       "type" : "string"
     }
   }
+};
+            defs.TargetAzimuthElevation = {
+  "properties" : {
+    "name" : {
+      "type" : "string"
+    },
+    "azimuth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "elevation" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "A target azimuth and elevation"
 };
             defs.TestMISettings = {
   "properties" : {
@@ -44917,7 +45272,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2020-12-20T18:34:47.837+01:00
+              Generated 2021-01-13T17:40:49.583+01:00
             </div>
           </div>
       </div>

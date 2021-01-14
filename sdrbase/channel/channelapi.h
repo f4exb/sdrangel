@@ -27,6 +27,7 @@
 #include <stdint.h>
 
 #include "export.h"
+#include "pipes/pipeendpoint.h"
 
 class DeviceAPI;
 
@@ -37,7 +38,7 @@ namespace SWGSDRangel
     class SWGChannelActions;
 }
 
-class SDRBASE_API ChannelAPI {
+class SDRBASE_API ChannelAPI : public PipeEndPoint {
 public:
     enum StreamType //!< This is the same enum as in PluginInterface
     {

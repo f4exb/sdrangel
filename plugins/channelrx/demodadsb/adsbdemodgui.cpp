@@ -29,6 +29,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
+#include "SWGMapItem.h"
+
 #include "ui_adsbdemodgui.h"
 #include "channel/channelwebapiutils.h"
 #include "plugin/pluginapi.h"
@@ -148,6 +150,104 @@ static Real modulus(double x, double y)
     return x - y * std::floor(x/y);
 }
 
+QString Aircraft::getImage()
+{
+    if (m_emitterCategory.length() > 0)
+    {
+        if (!m_emitterCategory.compare("Heavy"))
+            return QString("aircraft_4engine.png");
+        else if (!m_emitterCategory.compare("Large"))
+            return QString("aircraft_2engine.png");
+        else if (!m_emitterCategory.compare("Small"))
+            return QString("aircraft_2enginesmall.png");
+        else if (!m_emitterCategory.compare("Rotorcraft"))
+            return QString("aircraft_helicopter.png");
+        else if (!m_emitterCategory.compare("High performance"))
+            return QString("aircraft_fighter.png");
+        else if (!m_emitterCategory.compare("Light")
+                || !m_emitterCategory.compare("Ultralight")
+                || !m_emitterCategory.compare("Glider/sailplane"))
+            return QString("aircraft_light.png");
+        else if (!m_emitterCategory.compare("Space vehicle"))
+            return QString("aircraft_space.png");
+        else if (!m_emitterCategory.compare("UAV"))
+            return QString("aircraft_drone.png");
+        else if (!m_emitterCategory.compare("Emergency vehicle")
+                || !m_emitterCategory.compare("Service vehicle"))
+            return QString("truck.png");
+        else
+            return QString("aircraft_2engine.png");
+    }
+    else
+        return QString("aircraft_2engine.png");
+}
+
+QString Aircraft::getText(bool all)
+{
+    QStringList list;
+    if (m_flight.length() > 0)
+    {
+        list.append(QString("Flight: %1").arg(m_flight));
+    }
+    else
+    {
+        list.append(QString("ICAO: %1").arg(m_icao, 1, 16));
+    }
+    if (m_showAll || m_isHighlighted || all)
+    {
+        if (m_aircraftInfo != nullptr)
+        {
+            if (m_aircraftInfo->m_model.size() > 0)
+            {
+                list.append(QString("Aircraft: %1").arg(m_aircraftInfo->m_model));
+            }
+        }
+        if (m_altitudeValid)
+        {
+            if (m_gui->useSIUints())
+                list.append(QString("Altitude: %1 (m)").arg(Units::feetToIntegerMetres(m_altitude)));
+            else
+                list.append(QString("Altitude: %1 (ft)").arg(m_altitude));
+        }
+        if (m_speedValid)
+        {
+            if (m_gui->useSIUints())
+                list.append(QString("%1: %2 (kph)").arg(m_speedTypeNames[m_speedType]).arg(Units::knotsToIntegerKPH(m_speed)));
+            else
+                list.append(QString("%1: %2 (kn)").arg(m_speedTypeNames[m_speedType]).arg(m_speed));
+        }
+        if (m_verticalRateValid)
+        {
+            QString desc;
+            Real rate;
+            QString units;
+
+            if (m_gui->useSIUints())
+            {
+                rate = Units::feetPerMinToIntegerMetresPerSecond(m_verticalRate);
+                units = QString("m/s");
+            }
+            else
+            {
+                rate = m_verticalRate;
+                units = QString("ft/min");
+            }
+            if (m_verticalRate == 0)
+                desc = "Level flight";
+            else if (rate > 0)
+                desc = QString("Climbing: %1 (%2)").arg(rate).arg(units);
+            else
+                desc = QString("Descending: %1 (%2)").arg(rate).arg(units);
+            list.append(QString(desc));
+        }
+        if  ((m_status.length() > 0) && m_status.compare("No emergency"))
+        {
+            list.append(m_status);
+        }
+    }
+    return list.join("\n");
+}
+
 QVariant AircraftModel::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
@@ -170,101 +270,12 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
     else if (role == AircraftModel::adsbDataRole)
     {
         // Create the text to go in the bubble next to the aircraft
-        QStringList list;
-        if (m_aircrafts[row]->m_flight.length() > 0)
-        {
-            list.append(QString("Flight: %1").arg(m_aircrafts[row]->m_flight));
-        }
-        else
-        {
-            list.append(QString("ICAO: %1").arg(m_aircrafts[row]->m_icao, 1, 16));
-        }
-        if (m_aircrafts[row]->m_showAll || m_aircrafts[row]->m_isHighlighted)
-        {
-            if (m_aircrafts[row]->m_aircraftInfo != nullptr)
-            {
-                if (m_aircrafts[row]->m_aircraftInfo->m_model.size() > 0)
-                {
-                    list.append(QString("Aircraft: %1").arg(m_aircrafts[row]->m_aircraftInfo->m_model));
-                }
-            }
-            if (m_aircrafts[row]->m_altitudeValid)
-            {
-                if (m_aircrafts[row]->m_gui->useSIUints())
-                    list.append(QString("Altitude: %1 (m)").arg(Units::feetToIntegerMetres(m_aircrafts[row]->m_altitude)));
-                else
-                    list.append(QString("Altitude: %1 (ft)").arg(m_aircrafts[row]->m_altitude));
-            }
-            if (m_aircrafts[row]->m_speedValid)
-            {
-                if (m_aircrafts[row]->m_gui->useSIUints())
-                    list.append(QString("%1: %2 (kph)").arg(m_aircrafts[row]->m_speedTypeNames[m_aircrafts[row]->m_speedType]).arg(Units::knotsToIntegerKPH(m_aircrafts[row]->m_speed)));
-                else
-                    list.append(QString("%1: %2 (kn)").arg(m_aircrafts[row]->m_speedTypeNames[m_aircrafts[row]->m_speedType]).arg(m_aircrafts[row]->m_speed));
-            }
-            if (m_aircrafts[row]->m_verticalRateValid)
-            {
-                QString desc;
-                Real rate;
-                QString units;
-
-                if (m_aircrafts[row]->m_gui->useSIUints())
-                {
-                    rate = Units::feetPerMinToIntegerMetresPerSecond(m_aircrafts[row]->m_verticalRate);
-                    units = QString("m/s");
-                }
-                else
-                {
-                    rate = m_aircrafts[row]->m_verticalRate;
-                    units = QString("ft/min");
-                }
-                if (m_aircrafts[row]->m_verticalRate == 0)
-                    desc = "Level flight";
-                else if (rate > 0)
-                    desc = QString("Climbing: %1 (%2)").arg(rate).arg(units);
-                else
-                    desc = QString("Descending: %1 (%2)").arg(rate).arg(units);
-                list.append(QString(desc));
-            }
-            if  ((m_aircrafts[row]->m_status.length() > 0) && m_aircrafts[row]->m_status.compare("No emergency"))
-            {
-                list.append(m_aircrafts[row]->m_status);
-            }
-        }
-        QString data = list.join("\n");
-        return QVariant::fromValue(data);
+        return QVariant::fromValue(m_aircrafts[row]->getText());
     }
     else if (role == AircraftModel::aircraftImageRole)
     {
         // Select an image to use for the aircraft
-        if (m_aircrafts[row]->m_emitterCategory.length() > 0)
-        {
-            if (!m_aircrafts[row]->m_emitterCategory.compare("Heavy"))
-                return QVariant::fromValue(QString("aircraft_4engine.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("Large"))
-                return QVariant::fromValue(QString("aircraft_2engine.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("Small"))
-                return QVariant::fromValue(QString("aircraft_2enginesmall.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("Rotorcraft"))
-                return QVariant::fromValue(QString("aircraft_helicopter.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("High performance"))
-                return QVariant::fromValue(QString("aircraft_fighter.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("Light")
-                    || !m_aircrafts[row]->m_emitterCategory.compare("Ultralight")
-                    || !m_aircrafts[row]->m_emitterCategory.compare("Glider/sailplane"))
-                return QVariant::fromValue(QString("aircraft_light.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("Space vehicle"))
-                return QVariant::fromValue(QString("aircraft_space.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("UAV"))
-                return QVariant::fromValue(QString("aircraft_drone.png"));
-            else if (!m_aircrafts[row]->m_emitterCategory.compare("Emergency vehicle")
-                    || !m_aircrafts[row]->m_emitterCategory.compare("Service vehicle"))
-                return QVariant::fromValue(QString("truck.png"));
-            else
-                return QVariant::fromValue(QString("aircraft_2engine.png"));
-        }
-        else
-            return QVariant::fromValue(QString("aircraft_2engine.png"));
+        return QVariant::fromValue(m_aircrafts[row]->getImage());
     }
     else if (role == AircraftModel::bubbleColourRole)
     {
@@ -280,7 +291,7 @@ QVariant AircraftModel::data(const QModelIndex &index, int role) const
     }
     else if (role == AircraftModel::aircraftPathRole)
     {
-       if (m_flightPaths)
+       if ((m_flightPaths && m_aircrafts[row]->m_isHighlighted) || m_allFlightPaths)
            return m_aircrafts[row]->m_coordinates;
        else
            return QVariantList();
@@ -407,7 +418,7 @@ bool AirportModel::setData(const QModelIndex &index, const QVariant& value, int 
         else if (idx == m_airports[row]->m_frequencies.size())
         {
             // Set airport as target
-            m_gui->target(m_azimuth[row], m_elevation[row]);
+            m_gui->target(m_airports[row]->m_name, m_azimuth[row], m_elevation[row]);
             emit dataChanged(index, index);
         }
         return true;
@@ -442,7 +453,29 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
     aircraft->m_rangeItem->setText(QString::number(aircraft->m_range/1000.0, 'f', 1));
     aircraft->m_azElItem->setText(QString("%1/%2").arg(std::round(aircraft->m_azimuth)).arg(std::round(aircraft->m_elevation)));
     if (aircraft == m_trackAircraft)
-        m_adsbDemod->setTarget(aircraft->m_azimuth, aircraft->m_elevation);
+        m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation);
+
+    // Send to Map feature
+    MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+    QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
+    if (mapMessageQueues)
+    {
+        QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+
+        for (; it != mapMessageQueues->end(); ++it)
+        {
+            SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+            swgMapItem->setName(new QString(QString("%1").arg(aircraft->m_icao, 0, 16)));
+            swgMapItem->setLatitude(aircraft->m_latitude);
+            swgMapItem->setLongitude(aircraft->m_longitude);
+            swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
+            swgMapItem->setImageRotation(aircraft->m_heading);
+            swgMapItem->setText(new QString(aircraft->getText(true)));
+
+            MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
+            (*it)->push(msg);
+        }
+    }
 }
 
 // Called when we have lat & long from local decode and we need to check if it is in a valid range (<180nm/333km)
@@ -1359,6 +1392,12 @@ void ADSBDemodGUI::on_flightPaths_clicked(bool checked)
     m_aircraftModel.setFlightPaths(checked);
 }
 
+void ADSBDemodGUI::on_allFlightPaths_clicked(bool checked)
+{
+    m_settings.m_allFlightPaths = checked;
+    m_aircraftModel.setAllFlightPaths(checked);
+}
+
 QString ADSBDemodGUI::getDataDir()
 {
     // Get directory to store app data in (aircraft & airport databases and user-definable icons)
@@ -1633,7 +1672,7 @@ void ADSBDemodGUI::updateAirports()
 }
 
 // Set a static target, such as an airport
-void ADSBDemodGUI::target(float az, float el)
+void ADSBDemodGUI::target(const QString& name, float az, float el)
 {
     if (m_trackAircraft)
     {
@@ -1642,7 +1681,7 @@ void ADSBDemodGUI::target(float az, float el)
         m_aircraftModel.aircraftUpdated(m_trackAircraft);
         m_trackAircraft = nullptr;
     }
-    m_adsbDemod->setTarget(az, el);
+    m_adsbDemod->setTarget(name, az, el);
 }
 
 void ADSBDemodGUI::targetAircraft(Aircraft *aircraft)
@@ -1658,7 +1697,7 @@ void ADSBDemodGUI::targetAircraft(Aircraft *aircraft)
         // Track this aircraft
         m_trackAircraft = aircraft;
         if (aircraft->m_positionValid)
-            m_adsbDemod->setTarget(aircraft->m_azimuth, aircraft->m_elevation);
+            m_adsbDemod->setTarget(aircraft->targetName(), aircraft->m_azimuth, aircraft->m_elevation);
         // Change colour of new target
         aircraft->m_isTarget = true;
         m_aircraftModel.aircraftUpdated(aircraft);
@@ -1922,6 +1961,8 @@ void ADSBDemodGUI::displaySettings()
 
     ui->flightPaths->setChecked(m_settings.m_flightPaths);
     m_aircraftModel.setFlightPaths(m_settings.m_flightPaths);
+    ui->allFlightPaths->setChecked(m_settings.m_allFlightPaths);
+    m_aircraftModel.setAllFlightPaths(m_settings.m_allFlightPaths);
 
     displayStreamIndex();
 
@@ -2035,6 +2076,21 @@ void ADSBDemodGUI::tick()
                 ui->adsbData->removeRow(aircraft->m_icaoItem->row());
                 // Remove aircraft from hash
                 i = m_aircraft.erase(i);
+                // Remove from map feature
+                MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+                QList<MessageQueue*> *mapMessageQueues = messagePipes.getMessageQueues(m_adsbDemod, "mapitems");
+                if (mapMessageQueues)
+                {
+                    QList<MessageQueue*>::iterator it = mapMessageQueues->begin();
+                    for (; it != mapMessageQueues->end(); ++it)
+                    {
+                        SWGSDRangel::SWGMapItem *swgMapItem = new SWGSDRangel::SWGMapItem();
+                        swgMapItem->setName(new QString(QString("%1").arg(aircraft->m_icao, 0, 16)));
+                        swgMapItem->setImage(new QString(""));
+                        MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);
+                        (*it)->push(msg);
+                    }
+                }
                 // And finally free its memory
                 delete aircraft;
             }

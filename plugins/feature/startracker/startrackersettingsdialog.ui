@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StarTrackerSettingsDialog</class>
+ <widget class="QDialog" name="StarTrackerSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>351</width>
+    <height>468</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Star Tracker Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="6" column="0">
+       <widget class="QLabel" name="heightLabel">
+        <property name="text">
+         <string>Height above sea level (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="1">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="15" column="0">
+       <widget class="QCheckBox" name="drawStarOnMap">
+        <property name="text">
+         <string>Draw target star on map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="temperatureLabel">
+        <property name="text">
+         <string>Air temperature (C)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="refractionLabel">
+        <property name="text">
+         <string>Refraction correction</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QSpinBox" name="serverPort">
+        <property name="toolTip">
+         <string>Stellarium telescope server IP port number</string>
+        </property>
+        <property name="minimum">
+         <number>1024</number>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+        <property name="value">
+         <number>10001</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QSpinBox" name="frequency">
+        <property name="toolTip">
+         <string>Radio frequency being observed</string>
+        </property>
+        <property name="maximum">
+         <number>1000000000</number>
+        </property>
+        <property name="value">
+         <number>435</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="pressureLabel">
+        <property name="text">
+         <string>Air pressure (mb)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="pressure">
+        <property name="toolTip">
+         <string>Air pressure in millibars, for use in atmospheric refraction correction</string>
+        </property>
+        <property name="maximum">
+         <double>2000.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>1010.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="epochLabel">
+        <property name="text">
+         <string>Epoch for RA &amp; Dec</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QSpinBox" name="temperature">
+        <property name="toolTip">
+         <string>Air temperature in degrees Celsius, for use in atmospheric refraction correction</string>
+        </property>
+        <property name="minimum">
+         <number>-100</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="13" column="0">
+       <widget class="QCheckBox" name="drawSunOnMap">
+        <property name="text">
+         <string>Draw Sun on map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0">
+       <widget class="QCheckBox" name="drawMoonOnMap">
+        <property name="text">
+         <string>Draw Moon on map</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QSpinBox" name="humidity">
+        <property name="toolTip">
+         <string>Relative humidity in %</string>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="value">
+         <number>80</number>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="serverPortLabel">
+        <property name="text">
+         <string>Stellarium server port</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0">
+       <widget class="QLabel" name="updatePeriodLabel">
+        <property name="text">
+         <string>Update period (s)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="humidityLabel">
+        <property name="text">
+         <string>Humidity (%)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="1">
+       <widget class="QDoubleSpinBox" name="updatePeriod">
+        <property name="toolTip">
+         <string>Enter the time in seconds between each calculation of the target's position</string>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QSpinBox" name="height">
+        <property name="toolTip">
+         <string>Height of observation/antenna location above sea level in metres</string>
+        </property>
+        <property name="minimum">
+         <number>-1000</number>
+        </property>
+        <property name="maximum">
+         <number>20000</number>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="frequencyLabel">
+        <property name="text">
+         <string>Frequency (MHz)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="epoch">
+        <property name="toolTip">
+         <string>Epoch for custom right ascension and declination</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>J2000</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>JNOW</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="azElUnitsLabel">
+        <property name="text">
+         <string>Azimuth and elevation units</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="refraction">
+        <property name="toolTip">
+         <string>Atmospheric refraction correction</string>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Saemundsson</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Positional Astronomy Library</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QCheckBox" name="enableServer">
+        <property name="toolTip">
+         <string>Enable Stellarium server which allows RA and Dec to be sent to and from Stellarium</string>
+        </property>
+        <property name="text">
+         <string>Stellarium server</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="azElUnits">
+        <property name="toolTip">
+         <string>Units used for displaying azimuth and elevation. Either degrees, minutes and seconds or decimal degrees.</string>
+        </property>
+        <property name="editable">
+         <bool>false</bool>
+        </property>
+        <item>
+         <property name="text">
+          <string>° ' &quot;</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>° '</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>°</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Decimal</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="temperatureLapseRateLabel">
+        <property name="toolTip">
+         <string>Temperature lapse rate (K/m)</string>
+        </property>
+        <property name="text">
+         <string>Temperature lapse rate (K/km)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QDoubleSpinBox" name="temperatureLapseRate">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>6.490000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>StarTrackerSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>StarTrackerSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -21,6 +21,8 @@
 #include <QLineEdit>
 #include <QSerialPortInfo>
 
+#include "SWGTargetAzimuthElevation.h"
+
 #include "feature/featureuiset.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "mainwindow.h"
@@ -51,7 +53,6 @@ void GS232ControllerGUI::resetToDefaults()
 
 QByteArray GS232ControllerGUI::serialize() const
 {
-    qDebug("GS232ControllerGUI::serialize: %d", m_settings.m_channelIndex);
     return m_settings.serialize();
 }
 
@@ -59,8 +60,6 @@ bool GS232ControllerGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
-        qDebug("GS232ControllerGUI::deserialize: %d", m_settings.m_channelIndex);
-        updateDeviceSetList();
         displaySettings();
         applySettings(true);
         return true;
@@ -85,30 +84,28 @@ bool GS232ControllerGUI::handleMessage(const Message& message)
 
         return true;
     }
-    else if (GS232ControllerSettings::MsgChannelIndexChange::match(message))
+    else if (PipeEndPoint::MsgReportPipes::match(message))
     {
-        const GS232ControllerSettings::MsgChannelIndexChange& cfg = (GS232ControllerSettings::MsgChannelIndexChange&) message;
-        int newChannelIndex = cfg.getIndex();
-        qDebug("GS232ControllerGUI::handleMessage: GS232ControllerSettings::MsgChannelIndexChange: %d", newChannelIndex);
-        ui->channel->blockSignals(true);
-        ui->channel->setCurrentIndex(newChannelIndex);
-        m_settings.m_channelIndex = newChannelIndex;
-        ui->channel->blockSignals(false);
-
+        PipeEndPoint::MsgReportPipes& report = (PipeEndPoint::MsgReportPipes&) message;
+        m_availablePipes = report.getAvailablePipes();
+        updatePipeList();
         return true;
-    } else if (GS232ControllerReport::MsgReportAzAl::match(message))
+    }
+    else if (GS232ControllerReport::MsgReportAzAl::match(message))
     {
         GS232ControllerReport::MsgReportAzAl& azAl = (GS232ControllerReport::MsgReportAzAl&) message;
-        if (azAl.getType() == GS232ControllerReport::AzAlType::TARGET)
-        {
-            ui->azimuth->setValue(round(azAl.getAzimuth()));
-            ui->elevation->setValue(round(azAl.getElevation()));
-        }
-        else
-        {
-            ui->azimuthCurrentText->setText(QString("%1").arg(round(azAl.getAzimuth())));
-            ui->elevationCurrentText->setText(QString("%1").arg(round(azAl.getElevation())));
-        }
+        ui->azimuthCurrentText->setText(QString("%1").arg(round(azAl.getAzimuth())));
+        ui->elevationCurrentText->setText(QString("%1").arg(round(azAl.getElevation())));
+        return true;
+    }
+    else if (MainCore::MsgTargetAzimuthElevation::match(message))
+    {
+        MainCore::MsgTargetAzimuthElevation& msg = (MainCore::MsgTargetAzimuthElevation&) message;
+        SWGSDRangel::SWGTargetAzimuthElevation *swgTarget = msg.getSWGTargetAzimuthElevation();
+
+        ui->azimuth->setValue(round(swgTarget->getAzimuth()));
+        ui->elevation->setValue(round(swgTarget->getElevation()));
+        ui->targetName->setText(*swgTarget->getName());
         return true;
     }
 
@@ -157,7 +154,6 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     m_statusTimer.start(1000);
 
     updateSerialPortList();
-    updateDeviceSetList();
     displaySettings();
     applySettings(true);
 }
@@ -183,6 +179,9 @@ void GS232ControllerGUI::displaySettings()
         ui->serialPort->lineEdit()->setText(m_settings.m_serialPort);
     ui->baudRate->setCurrentText(QString("%1").arg(m_settings.m_baudRate));
     ui->track->setChecked(m_settings.m_track);
+    ui->targets->setCurrentIndex(ui->targets->findText(m_settings.m_target));
+    ui->azimuthOffset->setValue(m_settings.m_azimuthOffset);
+    ui->elevationOffset->setValue(m_settings.m_elevationOffset);
     blockApplySettings(false);
 }
 
@@ -198,102 +197,34 @@ void GS232ControllerGUI::updateSerialPortList()
     }
 }
 
-void GS232ControllerGUI::updateDeviceSetList()
+void GS232ControllerGUI::updatePipeList()
 {
-    MainWindow *mainWindow = MainWindow::getInstance();
-    std::vector<DeviceUISet*>& deviceUISets = mainWindow->getDeviceUISets();
-    std::vector<DeviceUISet*>::const_iterator it = deviceUISets.begin();
+    QString currentText = ui->targets->currentText();
+    ui->targets->blockSignals(true);
+    ui->targets->clear();
+    QList<PipeEndPoint::AvailablePipeSource>::const_iterator it = m_availablePipes.begin();
 
-    ui->device->blockSignals(true);
-
-    ui->device->clear();
-    unsigned int deviceIndex = 0;
-
-    for (; it != deviceUISets.end(); ++it, deviceIndex++)
+    for (int i = 0; it != m_availablePipes.end(); ++it, i++)
     {
-        DSPDeviceSourceEngine *deviceSourceEngine =  (*it)->m_deviceSourceEngine;
-
-        if (deviceSourceEngine) {
-            ui->device->addItem(QString("R%1").arg(deviceIndex), deviceIndex);
-        }
+        ui->targets->addItem(it->getName());
     }
 
-    int newDeviceIndex;
-
-    if (it != deviceUISets.begin())
+    if (currentText.isEmpty())
     {
-        if (m_settings.m_deviceIndex < 0) {
-            ui->device->setCurrentIndex(0);
-        } else {
-            ui->device->setCurrentIndex(m_settings.m_deviceIndex);
-        }
-
-        newDeviceIndex = ui->device->currentData().toInt();
+        if (m_availablePipes.size() > 0)
+            ui->targets->setCurrentIndex(0);
     }
     else
+        ui->targets->setCurrentIndex(ui->targets->findText(currentText));
+    ui->targets->blockSignals(false);
+
+    QString newText = ui->targets->currentText();
+    if (currentText != newText)
     {
-        newDeviceIndex = -1;
+       m_settings.m_target = newText;
+       ui->targetName->setText("");
+       applySettings();
     }
-
-
-    if (newDeviceIndex != m_settings.m_deviceIndex)
-    {
-        qDebug("GS232ControllerGUI::updateDeviceSetLists: device index changed: %d", newDeviceIndex);
-        m_settings.m_deviceIndex = newDeviceIndex;
-    }
-
-    updateChannelList();
-
-    ui->device->blockSignals(false);
-}
-
-bool GS232ControllerGUI::updateChannelList()
-{
-    int newChannelIndex;
-    ui->channel->blockSignals(true);
-    ui->channel->clear();
-
-    if (m_settings.m_deviceIndex < 0)
-    {
-        newChannelIndex = -1;
-    }
-    else
-    {
-        MainWindow *mainWindow = MainWindow::getInstance();
-        std::vector<DeviceUISet*>& deviceUISets = mainWindow->getDeviceUISets();
-        DeviceUISet *deviceUISet = deviceUISets[m_settings.m_deviceIndex];
-        int nbChannels = deviceUISet->getNumberOfChannels();
-
-        for (int ch = 0; ch < nbChannels; ch++) {
-            ui->channel->addItem(QString("%1").arg(ch), ch);
-        }
-
-        if (nbChannels > 0)
-        {
-            if (m_settings.m_channelIndex < 0) {
-                ui->channel->setCurrentIndex(0);
-            } else {
-                ui->channel->setCurrentIndex(m_settings.m_channelIndex);
-            }
-
-            newChannelIndex = ui->channel->currentIndex();
-        }
-        else
-        {
-            newChannelIndex = -1;
-        }
-    }
-
-    ui->channel->blockSignals(false);
-
-    if (newChannelIndex != m_settings.m_channelIndex)
-    {
-        qDebug("GS232ControllerGUI::updateChannelList: channel index changed: %d", newChannelIndex);
-        m_settings.m_channelIndex = newChannelIndex;
-        return true;
-    }
-
-    return false;
 }
 
 void GS232ControllerGUI::leaveEvent(QEvent*)
@@ -346,32 +277,6 @@ void GS232ControllerGUI::on_startStop_toggled(bool checked)
     }
 }
 
-void GS232ControllerGUI::on_devicesRefresh_clicked()
-{
-    updateDeviceSetList();
-    displaySettings();
-    applySettings();
-}
-
-void GS232ControllerGUI::on_device_currentIndexChanged(int index)
-{
-    if (index >= 0)
-    {
-        m_settings.m_deviceIndex = ui->device->currentData().toInt();
-        updateChannelList();
-        applySettings();
-    }
-}
-
-void GS232ControllerGUI::on_channel_currentIndexChanged(int index)
-{
-    if (index >= 0)
-    {
-        m_settings.m_channelIndex = index;
-        applySettings();
-    }
-}
-
 void GS232ControllerGUI::on_serialPort_currentIndexChanged(int index)
 {
     (void) index;
@@ -389,23 +294,43 @@ void GS232ControllerGUI::on_baudRate_currentIndexChanged(int index)
 void GS232ControllerGUI::on_azimuth_valueChanged(int value)
 {
     m_settings.m_azimuth = value;
+    ui->targetName->setText("");
     applySettings();
 }
 
 void GS232ControllerGUI::on_elevation_valueChanged(int value)
 {
     m_settings.m_elevation = value;
+    ui->targetName->setText("");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_azimuthOffset_valueChanged(int value)
+{
+    m_settings.m_azimuthOffset = value;
+    applySettings();
+}
+
+void GS232ControllerGUI::on_elevationOffset_valueChanged(int value)
+{
+    m_settings.m_elevationOffset = value;
     applySettings();
 }
 
 void GS232ControllerGUI::on_track_stateChanged(int state)
 {
     m_settings.m_track = state == Qt::Checked;
-    ui->devicesRefresh->setEnabled(m_settings.m_track);
-    ui->deviceLabel->setEnabled(m_settings.m_track);
-    ui->device->setEnabled(m_settings.m_track);
-    ui->channelLabel->setEnabled(m_settings.m_track);
-    ui->channel->setEnabled(m_settings.m_track);
+    ui->targetsLabel->setEnabled(m_settings.m_track);
+    ui->targets->setEnabled(m_settings.m_track);
+    if (!m_settings.m_track)
+        ui->targetName->setText("");
+    applySettings();
+}
+
+void GS232ControllerGUI::on_targets_currentTextChanged(const QString& text)
+{
+    m_settings.m_target = text;
+    ui->targetName->setText("");
     applySettings();
 }
 
@@ -415,15 +340,23 @@ void GS232ControllerGUI::updateStatus()
 
     if (m_lastFeatureState != state)
     {
+        // We set checked state of start/stop button, in case it was changed via API
+        bool oldState;
         switch (state)
         {
             case Feature::StNotStarted:
                 ui->startStop->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
                 break;
             case Feature::StIdle:
+                oldState = ui->startStop->blockSignals(true);
+                ui->startStop->setChecked(false);
+                ui->startStop->blockSignals(oldState);
                 ui->startStop->setStyleSheet("QToolButton { background-color : blue; }");
                 break;
             case Feature::StRunning:
+                oldState = ui->startStop->blockSignals(true);
+                ui->startStop->setChecked(true);
+                ui->startStop->blockSignals(oldState);
                 ui->startStop->setStyleSheet("QToolButton { background-color : green; }");
                 break;
             case Feature::StError:

@@ -473,10 +473,10 @@ void VORDemod::webapiFormatChannelSettings(
         swgVORDemodSettings->setStreamIndex(settings.m_streamIndex);
     }
     if (channelSettingsKeys.contains("identThreshold") || force) {
-        swgVORDemodSettings->setAudioMute(settings.m_identThreshold);
+        swgVORDemodSettings->setIdentThreshold(settings.m_identThreshold);
     }
     if (channelSettingsKeys.contains("magDecAdjust") || force) {
-        swgVORDemodSettings->setAudioMute(settings.m_magDecAdjust ? 1 : 0);
+        swgVORDemodSettings->setMagDecAdjust(settings.m_magDecAdjust ? 1 : 0);
     }
 }
 

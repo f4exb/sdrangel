@@ -19,6 +19,7 @@
 
 #include "util/uid.h"
 #include "channelapi.h"
+#include "maincore.h"
 
 ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
     m_streamType(streamType),

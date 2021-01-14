@@ -53,10 +53,11 @@ void ADSBDemodSettings::resetToDefaults()
     m_airportMinimumSize = AirportType::Medium;
     m_displayHeliports = false;
     m_flightPaths = true;
+    m_allFlightPaths = false;
     m_siUnits = false;
     m_tableFontName = "Liberation Sans";
     m_tableFontSize = 9;
-    m_displayDemodStats = true;
+    m_displayDemodStats = false;
     m_correlateFullPreamble = true;
     m_demodModeS = false;
     m_deviceIndex = -1;
@@ -109,6 +110,7 @@ QByteArray ADSBDemodSettings::serialize() const
     s.writeBool(30, m_autoResizeTableColumns);
     s.writeS32(31, m_interpolatorPhaseSteps);
     s.writeFloat(32, m_interpolatorTapsPerPhase);
+    s.writeBool(33, m_allFlightPaths);
 
     for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -188,6 +190,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
         d.readBool(30, &m_autoResizeTableColumns, false);
         d.readS32(31, &m_interpolatorPhaseSteps, 4);
         d.readFloat(32, &m_interpolatorTapsPerPhase, 3.5f);
+        d.readBool(33, &m_allFlightPaths, false);
 
         for (int i = 0; i < ADSBDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

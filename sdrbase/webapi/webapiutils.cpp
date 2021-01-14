@@ -47,6 +47,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
+    {"sdrangel.channelrx.demodpacket", "PacketDemodSettings"},
     {"sdrangel.channeltx.modpacket", "PacketModSettings"},
     {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
@@ -135,6 +136,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModSettings"},
     {"NFMDemod", "NFMDemodSettings"},
     {"NFMMod", "NFMModSettings"},
+    {"PacketDemod", "PacketDemodSettings"},
     {"PacketMod", "PacketModSettings"},
     {"LocalSink", "LocalSinkSettings"},
     {"LocalSource", "LocalSourceSettings"},
@@ -237,16 +239,25 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
+    {"APRS", "APRSSettings"},
+    {"GS232Controller", "GS232ControllerSettings"},
+    {"Map", "MapSettings"},
     {"SimplePTT", "SimplePTTSettings"},
+    {"StarTracker", "StarTrackerSettings"},
     {"RigCtlServer", "RigCtlServerSettings"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
+    {"Map", "MapActions"},
     {"SimplePTT", "SimplePTTActions"}
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.aprs", "APRSSettings"},
+    {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
+    {"sdrangel.feature.map", "MapSettings"},
     {"sdrangel.feature.simpleptt", "SimplePTTSettings"},
+    {"sdrangel.feature.startracker", "StarTrackerSettings"},
     {"sdrangel.feature.rigctlserver", "RigCtlServerSettings"}
 };
 

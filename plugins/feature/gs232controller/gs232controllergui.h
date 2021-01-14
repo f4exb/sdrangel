@@ -23,6 +23,7 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "pipes/pipeendpoint.h"
 #include "gs232controllersettings.h"
 
 class PluginAPI;
@@ -50,6 +51,7 @@ private:
     FeatureUISet* m_featureUISet;
     GS232ControllerSettings m_settings;
     bool m_doApplySettings;
+    QList<PipeEndPoint::AvailablePipeSource> m_availablePipes;
 
     GS232Controller* m_gs232Controller;
     MessageQueue m_inputMessageQueue;
@@ -62,9 +64,8 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void updatePipeList();
     void updateSerialPortList();
-    void updateDeviceSetList();
-    bool updateChannelList(); //!< true if channel index has changed
     bool handleMessage(const Message& message);
 
     void leaveEvent(QEvent*);
@@ -75,14 +76,14 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
     void on_startStop_toggled(bool checked);
-    void on_devicesRefresh_clicked();
-    void on_device_currentIndexChanged(int index);
-    void on_channel_currentIndexChanged(int index);
     void on_serialPort_currentIndexChanged(int index);
     void on_baudRate_currentIndexChanged(int index);
     void on_track_stateChanged(int state);
     void on_azimuth_valueChanged(int value);
     void on_elevation_valueChanged(int value);
+    void on_targets_currentTextChanged(const QString& text);
+    void on_azimuthOffset_valueChanged(int value);
+    void on_elevationOffset_valueChanged(int value);
     void updateStatus();
 };
 

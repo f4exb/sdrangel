@@ -1,0 +1,1514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>APRSGUI</class>
+ <widget class="RollupWidget" name="APRSGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>469</width>
+    <height>761</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>462</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
+  <property name="windowTitle">
+   <string>APRS</string>
+  </property>
+  <property name="statusTip">
+   <string>APRS</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>461</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>350</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="buttonLayout">
+      <item>
+       <widget class="QLabel" name="sourcePipesLabel">
+        <property name="text">
+         <string>Sources</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="sourcePipes">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>APRS packet source channels</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="igate">
+        <property name="toolTip">
+         <string>Enable APRS-IS IGate (Internet gateway)</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/txon.png</normaloff>:/txon.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="displaySettings">
+        <property name="toolTip">
+         <string>Show settings dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="aprsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>40</y>
+     <width>461</width>
+     <height>532</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>APRS</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayoutAPRS" stretch="0">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="topTabWidget">
+      <property name="tabPosition">
+       <enum>QTabWidget::West</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="stationTab">
+       <attribute name="title">
+        <string>Stations and Objects</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QComboBox" name="stationFilter">
+            <property name="minimumSize">
+             <size>
+              <width>140</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Selects which stations and objects to list in the adjacent list</string>
+            </property>
+            <item>
+             <property name="text">
+              <string>All stations/objects</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Stations</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Objects</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Weather stations</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Telemetry</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Course and speed</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="stationSelect">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="viewOnMap">
+            <property name="toolTip">
+             <string>Find on the map</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/gridpolar.png</normaloff>:/gridpolar.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTabWidget" name="stationsTabWidget">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="summaryTab">
+           <attribute name="title">
+            <string>Summary</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="6" column="0">
+             <widget class="QLabel" name="positionLabel">
+              <property name="text">
+               <string>Position</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="0">
+             <widget class="QLabel" name="radioRangeLabel">
+              <property name="text">
+               <string>Radio Range</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QLineEdit" name="course">
+              <property name="toolTip">
+               <string>Last course</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0">
+             <widget class="QLabel" name="antennaHeightLabel">
+              <property name="text">
+               <string>Antenna Height</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="statusLabel">
+              <property name="text">
+               <string>Status</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="1">
+             <widget class="QLineEdit" name="antennaDirectivity">
+              <property name="toolTip">
+               <string>Antenna direction</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="QLineEdit" name="comment">
+              <property name="toolTip">
+               <string>Last comment for this station</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2">
+             <widget class="QLabel" name="altitudeUnitsLabel">
+              <property name="text">
+               <string>Feet</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="0">
+             <widget class="QLabel" name="antennaGainLabel">
+              <property name="text">
+               <string>Antenna Gain</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="QLineEdit" name="position">
+              <property name="toolTip">
+               <string>Last position</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="speedLabel">
+              <property name="text">
+               <string>Speed</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="QLineEdit" name="status">
+              <property name="toolTip">
+               <string>Last status for this station</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="altitudeLabel">
+              <property name="text">
+               <string>Altitude</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QLabel" name="symbol">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="1">
+             <widget class="QLineEdit" name="radioRange">
+              <property name="toolTip">
+               <string>Range of radio</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="2">
+             <widget class="QLabel" name="antennaGainUnitsLabel">
+              <property name="text">
+               <string>dB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1">
+             <widget class="QLineEdit" name="antennaGain">
+              <property name="toolTip">
+               <string>Antenna gain</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="1">
+             <widget class="QLineEdit" name="lastPacket">
+              <property name="toolTip">
+               <string>Time last packet was received from this station</string>
+              </property>
+             </widget>
+            </item>
+            <item row="16" column="1">
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="9" column="1">
+             <widget class="QLineEdit" name="speed">
+              <property name="toolTip">
+               <string>Last speed</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="symbolLabel">
+              <property name="text">
+               <string>Symbol</string>
+              </property>
+             </widget>
+            </item>
+            <item row="13" column="0">
+             <widget class="QLabel" name="antennaDirectivityLabel">
+              <property name="text">
+               <string>Antenna Directivity</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="2">
+             <widget class="QLabel" name="courseUnitsLabel">
+              <property name="text">
+               <string>°</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="commentLabel">
+              <property name="text">
+               <string>Comment</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="reportingStation"/>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="courseLabel">
+              <property name="text">
+               <string>Course</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="2">
+             <widget class="QLabel" name="txPowerUnitsLabel">
+              <property name="text">
+               <string>Watts</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="1">
+             <widget class="QLineEdit" name="antennaHeight">
+              <property name="toolTip">
+               <string>Antenna height</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="txPowerLabel">
+              <property name="text">
+               <string>TX Power</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="2">
+             <widget class="QLabel" name="antennaHeightUnitsLabel">
+              <property name="text">
+               <string>Feet</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="1">
+             <widget class="QLineEdit" name="txPower">
+              <property name="toolTip">
+               <string>Transmit power</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="station">
+              <property name="toolTip">
+               <string>Station callsign and substation ID</string>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="QLineEdit" name="altitude">
+              <property name="toolTip">
+               <string>Last altitude</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="stationObjectLabel">
+              <property name="text">
+               <string>Station/Object</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="2">
+             <widget class="QLabel" name="speedUnitsLabel">
+              <property name="text">
+               <string>Knots</string>
+              </property>
+             </widget>
+            </item>
+            <item row="14" column="2">
+             <widget class="QLabel" name="radioRangeUnitsLabel">
+              <property name="text">
+               <string>Miles</string>
+              </property>
+             </widget>
+            </item>
+            <item row="15" column="0">
+             <widget class="QLabel" name="lastPacketLabel">
+              <property name="text">
+               <string>Last Packet:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="reportingStationLabel">
+              <property name="text">
+               <string>Reporting Station</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="weatherTab">
+           <attribute name="title">
+            <string>Weather</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QTableWidget" name="weatherTable">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>150</height>
+               </size>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Date</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Time</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Dir (°)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Speed (mph)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Gusts (mph)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Temp (F)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Humidity (%)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Pressure (mbar)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Rain (last hour)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Rain (last 24 hours)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Rain (since midnight)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Luminosity</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Snowfall</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Radiation</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Flood level</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="weatherPlotSelectLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Plot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="weatherPlotSelect">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Select data to plot</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Wind direction</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Wind speed</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Gusts</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Temperature</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Humidity</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Pressure</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rain (last hour)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rain (last 24 hours)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Rain (since midnight)</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Luminosity</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Snowfall</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Radiation</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Flood level</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="weatherTimeSelectLabel">
+                <property name="text">
+                 <string>Time</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="weatherTimeSelect">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Time range to plot data for</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Today</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last hour</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 24 hours</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 7 days</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 30 days</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QChartView" name="weatherChart"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="motionTab">
+           <attribute name="title">
+            <string>Motion</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QTableWidget" name="motionTable">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Date</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Time</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Latitude</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Longitude</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Altitude</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Course</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Speed</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="motionHorizontalLayout">
+              <item>
+               <widget class="QLabel" name="motionPlotSelectLabel">
+                <property name="text">
+                 <string>Plot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="motionPlotSelect">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Select data to plot</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Latitude</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Longitude</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Altitude</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Course</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Speed</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="motionTimeSelectLabel">
+                <property name="text">
+                 <string>Time</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="motionTimeSelect">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Time range to plot data for</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Today</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last hour</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 24 hours</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 7 days</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 30 days</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>373</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QChartView" name="motionChart"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="telemetryTab">
+           <attribute name="title">
+            <string>Telemetry</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QTableWidget" name="telemetryTable">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Date</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Time</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Seq No</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>A1</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>A2</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>A3</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>A4</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>A5</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B1</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B2</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B3</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B4</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B5</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B6</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B7</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>B8</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Comment</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QLabel" name="telementryPlotSelectLabel">
+                <property name="text">
+                 <string>Plot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="telemetryPlotSelect">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Select data to plot</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>A1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>A2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>A3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>A4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>A5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B1</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B2</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B3</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B4</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B5</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B6</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B7</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>B8</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="telementryTimeSelectLabel">
+                <property name="text">
+                 <string>Time</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="telemetryTimeSelect">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Time range to plot data for</string>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>Today</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last hour</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 24 hours</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 7 days</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>Last 30 days</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QChartView" name="telemetryChart"/>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="statusTab">
+           <attribute name="title">
+            <string>Status</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QTableWidget" name="statusTable">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Date</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Time</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Status</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Symbol</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Maidenhead</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Beam Heading (°)</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Beam Power (W)</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="packetsTab">
+           <attribute name="title">
+            <string>Packets</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QTableWidget" name="packetsTable">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <column>
+               <property name="text">
+                <string>Date</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Time</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>From</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>To</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Via</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Data</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="messagesTab">
+       <attribute name="title">
+        <string>Messages</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Addressee</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="filterAddressee">
+            <property name="toolTip">
+             <string>Display only messages where the addressee matches the specified regular expression</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="deleteMessages">
+            <property name="toolTip">
+             <string>Delete the selected message or all messages if none selected</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../sdrgui/resources/res.qrc">
+              <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="messagesTable">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <column>
+           <property name="text">
+            <string>Date</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Time</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Addressee</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Message</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Message No</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>sourcePipes</tabstop>
+  <tabstop>igate</tabstop>
+  <tabstop>displaySettings</tabstop>
+  <tabstop>topTabWidget</tabstop>
+  <tabstop>stationSelect</tabstop>
+  <tabstop>viewOnMap</tabstop>
+  <tabstop>stationsTabWidget</tabstop>
+  <tabstop>station</tabstop>
+  <tabstop>reportingStation</tabstop>
+  <tabstop>status</tabstop>
+  <tabstop>comment</tabstop>
+  <tabstop>position</tabstop>
+  <tabstop>altitude</tabstop>
+  <tabstop>course</tabstop>
+  <tabstop>speed</tabstop>
+  <tabstop>txPower</tabstop>
+  <tabstop>antennaHeight</tabstop>
+  <tabstop>antennaGain</tabstop>
+  <tabstop>antennaDirectivity</tabstop>
+  <tabstop>radioRange</tabstop>
+  <tabstop>lastPacket</tabstop>
+  <tabstop>weatherTable</tabstop>
+  <tabstop>weatherPlotSelect</tabstop>
+  <tabstop>weatherTimeSelect</tabstop>
+  <tabstop>weatherChart</tabstop>
+  <tabstop>motionTable</tabstop>
+  <tabstop>motionPlotSelect</tabstop>
+  <tabstop>motionTimeSelect</tabstop>
+  <tabstop>motionChart</tabstop>
+  <tabstop>telemetryTable</tabstop>
+  <tabstop>telemetryPlotSelect</tabstop>
+  <tabstop>telemetryTimeSelect</tabstop>
+  <tabstop>telemetryChart</tabstop>
+  <tabstop>statusTable</tabstop>
+  <tabstop>packetsTable</tabstop>
+  <tabstop>filterAddressee</tabstop>
+  <tabstop>deleteMessages</tabstop>
+  <tabstop>messagesTable</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

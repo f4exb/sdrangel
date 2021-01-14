@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>320</width>
-    <height>187</height>
+    <height>175</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>320</width>
+    <width>350</width>
     <height>16777215</height>
    </size>
   </property>
@@ -43,7 +43,7 @@
      <x>10</x>
      <y>10</y>
      <width>301</width>
-     <height>171</height>
+     <height>161</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -180,6 +180,74 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="localDeviceLayout">
+      <item>
+       <widget class="QCheckBox" name="track">
+        <property name="toolTip">
+         <string>Check to enable automatic tracking of azimuth and elevation from the specified channel</string>
+        </property>
+        <property name="text">
+         <string>Track</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="targetsLabel">
+        <property name="text">
+         <string>Source</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="targets">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Target to track</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="channelLayout">
+      <item>
+       <widget class="QLabel" name="targetNameLabel">
+        <property name="text">
+         <string>Target</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="targetName">
+        <property name="toolTip">
+         <string>Name of the target being tracked as indicated by the source channel / feature</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <layout class="QHBoxLayout" name="serverLayout">
       <item>
        <widget class="QLabel" name="serialLabel">
@@ -271,106 +339,49 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="localDeviceLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="track">
-        <property name="toolTip">
-         <string>Check to enable automatic tracking of azimuth and elevation from the specified channel</string>
-        </property>
+       <widget class="QLabel" name="azimuthOffsetLabel">
         <property name="text">
-         <string>Track</string>
+         <string>Azimuth offset</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="devicesRefresh">
-        <property name="maximumSize">
-         <size>
-          <width>24</width>
-          <height>16777215</height>
-         </size>
-        </property>
+       <widget class="QSpinBox" name="azimuthOffset">
         <property name="toolTip">
-         <string>Refresh indexes of available device sets</string>
+         <string>Specify an offset angel in degrees that will be added to the target azimuth to correct for misalignment</string>
         </property>
-        <property name="text">
-         <string/>
+        <property name="minimum">
+         <number>-360</number>
         </property>
-        <property name="icon">
-         <iconset resource="../../../sdrgui/resources/res.qrc">
-          <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="deviceLabel">
-        <property name="text">
-         <string>Device</string>
+        <property name="maximum">
+         <number>360</number>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="device">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
+       <widget class="QLabel" name="elevationOffsetLabel">
+        <property name="text">
+         <string>Elevation offset</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="elevationOffset">
         <property name="toolTip">
-         <string>Receiver deviceset index</string>
+         <string>Specify an offset angle in degrees that will be added to the target elevation to correct for misalignment</string>
+        </property>
+        <property name="minimum">
+         <number>-180</number>
+        </property>
+        <property name="maximum">
+         <number>180</number>
+        </property>
+        <property name="singleStep">
+         <number>1</number>
         </property>
        </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="channelLabel">
-        <property name="text">
-         <string>Channel</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="channel">
-        <property name="minimumSize">
-         <size>
-          <width>55</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Channel index</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="channelLayout">
-      <item>
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>
@@ -390,6 +401,18 @@
    <header>gui/buttonswitch.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>startStop</tabstop>
+  <tabstop>azimuth</tabstop>
+  <tabstop>elevation</tabstop>
+  <tabstop>track</tabstop>
+  <tabstop>targets</tabstop>
+  <tabstop>targetName</tabstop>
+  <tabstop>serialPort</tabstop>
+  <tabstop>baudRate</tabstop>
+  <tabstop>azimuthOffset</tabstop>
+  <tabstop>elevationOffset</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
  </resources>

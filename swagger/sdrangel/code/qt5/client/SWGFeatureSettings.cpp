@@ -36,12 +36,18 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_index_isSet = false;
     afc_settings = nullptr;
     m_afc_settings_isSet = false;
+    aprs_settings = nullptr;
+    m_aprs_settings_isSet = false;
     demod_analyzer_settings = nullptr;
     m_demod_analyzer_settings_isSet = false;
     gs232_controller_settings = nullptr;
     m_gs232_controller_settings_isSet = false;
+    map_settings = nullptr;
+    m_map_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
     m_rig_ctl_server_settings_isSet = false;
+    star_tracker_settings = nullptr;
+    m_star_tracker_settings_isSet = false;
     simple_ptt_settings = nullptr;
     m_simple_ptt_settings_isSet = false;
     vor_localizer_settings = nullptr;
@@ -62,12 +68,18 @@ SWGFeatureSettings::init() {
     m_originator_feature_index_isSet = false;
     afc_settings = new SWGAFCSettings();
     m_afc_settings_isSet = false;
+    aprs_settings = new SWGAPRSSettings();
+    m_aprs_settings_isSet = false;
     demod_analyzer_settings = new SWGDemodAnalyzerSettings();
     m_demod_analyzer_settings_isSet = false;
     gs232_controller_settings = new SWGGS232ControllerSettings();
     m_gs232_controller_settings_isSet = false;
+    map_settings = new SWGMapSettings();
+    m_map_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
     m_rig_ctl_server_settings_isSet = false;
+    star_tracker_settings = new SWGStarTrackerSettings();
+    m_star_tracker_settings_isSet = false;
     simple_ptt_settings = new SWGSimplePTTSettings();
     m_simple_ptt_settings_isSet = false;
     vor_localizer_settings = new SWGVORLocalizerSettings();
@@ -84,14 +96,23 @@ SWGFeatureSettings::cleanup() {
     if(afc_settings != nullptr) { 
         delete afc_settings;
     }
+    if(aprs_settings != nullptr) { 
+        delete aprs_settings;
+    }
     if(demod_analyzer_settings != nullptr) { 
         delete demod_analyzer_settings;
     }
     if(gs232_controller_settings != nullptr) { 
         delete gs232_controller_settings;
     }
+    if(map_settings != nullptr) { 
+        delete map_settings;
+    }
     if(rig_ctl_server_settings != nullptr) { 
         delete rig_ctl_server_settings;
+    }
+    if(star_tracker_settings != nullptr) { 
+        delete star_tracker_settings;
     }
     if(simple_ptt_settings != nullptr) { 
         delete simple_ptt_settings;
@@ -120,11 +141,17 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_settings, pJson["AFCSettings"], "SWGAFCSettings", "SWGAFCSettings");
     
+    ::SWGSDRangel::setValue(&aprs_settings, pJson["APRSSettings"], "SWGAPRSSettings", "SWGAPRSSettings");
+    
     ::SWGSDRangel::setValue(&demod_analyzer_settings, pJson["DemodAnalyzerSettings"], "SWGDemodAnalyzerSettings", "SWGDemodAnalyzerSettings");
     
     ::SWGSDRangel::setValue(&gs232_controller_settings, pJson["GS232ControllerSettings"], "SWGGS232ControllerSettings", "SWGGS232ControllerSettings");
     
+    ::SWGSDRangel::setValue(&map_settings, pJson["MapSettings"], "SWGMapSettings", "SWGMapSettings");
+    
     ::SWGSDRangel::setValue(&rig_ctl_server_settings, pJson["RigCtlServerSettings"], "SWGRigCtlServerSettings", "SWGRigCtlServerSettings");
+    
+    ::SWGSDRangel::setValue(&star_tracker_settings, pJson["StarTrackerSettings"], "SWGStarTrackerSettings", "SWGStarTrackerSettings");
     
     ::SWGSDRangel::setValue(&simple_ptt_settings, pJson["SimplePTTSettings"], "SWGSimplePTTSettings", "SWGSimplePTTSettings");
     
@@ -158,14 +185,23 @@ SWGFeatureSettings::asJsonObject() {
     if((afc_settings != nullptr) && (afc_settings->isSet())){
         toJsonValue(QString("AFCSettings"), afc_settings, obj, QString("SWGAFCSettings"));
     }
+    if((aprs_settings != nullptr) && (aprs_settings->isSet())){
+        toJsonValue(QString("APRSSettings"), aprs_settings, obj, QString("SWGAPRSSettings"));
+    }
     if((demod_analyzer_settings != nullptr) && (demod_analyzer_settings->isSet())){
         toJsonValue(QString("DemodAnalyzerSettings"), demod_analyzer_settings, obj, QString("SWGDemodAnalyzerSettings"));
     }
     if((gs232_controller_settings != nullptr) && (gs232_controller_settings->isSet())){
         toJsonValue(QString("GS232ControllerSettings"), gs232_controller_settings, obj, QString("SWGGS232ControllerSettings"));
     }
+    if((map_settings != nullptr) && (map_settings->isSet())){
+        toJsonValue(QString("MapSettings"), map_settings, obj, QString("SWGMapSettings"));
+    }
     if((rig_ctl_server_settings != nullptr) && (rig_ctl_server_settings->isSet())){
         toJsonValue(QString("RigCtlServerSettings"), rig_ctl_server_settings, obj, QString("SWGRigCtlServerSettings"));
+    }
+    if((star_tracker_settings != nullptr) && (star_tracker_settings->isSet())){
+        toJsonValue(QString("StarTrackerSettings"), star_tracker_settings, obj, QString("SWGStarTrackerSettings"));
     }
     if((simple_ptt_settings != nullptr) && (simple_ptt_settings->isSet())){
         toJsonValue(QString("SimplePTTSettings"), simple_ptt_settings, obj, QString("SWGSimplePTTSettings"));
@@ -217,6 +253,16 @@ SWGFeatureSettings::setAfcSettings(SWGAFCSettings* afc_settings) {
     this->m_afc_settings_isSet = true;
 }
 
+SWGAPRSSettings*
+SWGFeatureSettings::getAprsSettings() {
+    return aprs_settings;
+}
+void
+SWGFeatureSettings::setAprsSettings(SWGAPRSSettings* aprs_settings) {
+    this->aprs_settings = aprs_settings;
+    this->m_aprs_settings_isSet = true;
+}
+
 SWGDemodAnalyzerSettings*
 SWGFeatureSettings::getDemodAnalyzerSettings() {
     return demod_analyzer_settings;
@@ -237,6 +283,16 @@ SWGFeatureSettings::setGs232ControllerSettings(SWGGS232ControllerSettings* gs232
     this->m_gs232_controller_settings_isSet = true;
 }
 
+SWGMapSettings*
+SWGFeatureSettings::getMapSettings() {
+    return map_settings;
+}
+void
+SWGFeatureSettings::setMapSettings(SWGMapSettings* map_settings) {
+    this->map_settings = map_settings;
+    this->m_map_settings_isSet = true;
+}
+
 SWGRigCtlServerSettings*
 SWGFeatureSettings::getRigCtlServerSettings() {
     return rig_ctl_server_settings;
@@ -245,6 +301,16 @@ void
 SWGFeatureSettings::setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings) {
     this->rig_ctl_server_settings = rig_ctl_server_settings;
     this->m_rig_ctl_server_settings_isSet = true;
+}
+
+SWGStarTrackerSettings*
+SWGFeatureSettings::getStarTrackerSettings() {
+    return star_tracker_settings;
+}
+void
+SWGFeatureSettings::setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings) {
+    this->star_tracker_settings = star_tracker_settings;
+    this->m_star_tracker_settings_isSet = true;
 }
 
 SWGSimplePTTSettings*
@@ -284,13 +350,22 @@ SWGFeatureSettings::isSet(){
         if(afc_settings && afc_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(aprs_settings && aprs_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(demod_analyzer_settings && demod_analyzer_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(gs232_controller_settings && gs232_controller_settings->isSet()){
             isObjectUpdated = true; break;
         }
+        if(map_settings && map_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
         if(rig_ctl_server_settings && rig_ctl_server_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(star_tracker_settings && star_tracker_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(simple_ptt_settings && simple_ptt_settings->isSet()){

@@ -22,16 +22,17 @@
 
 #include <QMap>
 #include <QTimer>
+#include <QDateTime>
 
 #include "export.h"
 #include "settings/mainsettings.h"
 #include "util/message.h"
 #include "pipes/messagepipes.h"
 #include "pipes/datapipes.h"
+#include "channel/channelapi.h"
 
 class DeviceSet;
 class FeatureSet;
-class ChannelAPI;
 class Feature;
 class PluginManager;
 class MessageQueue;
@@ -44,6 +45,8 @@ namespace SWGSDRangel
 {
     class SWGChannelReport;
     class SWGChannelSettings;
+    class SWGMapItem;
+    class SWGTargetAzimuthElevation;
 }
 
 class SDRBASE_API MainCore
@@ -497,6 +500,89 @@ public:
             m_force(force)
         { }
     };
+
+    // Message to Map feature to display an item on the map
+    class SDRBASE_API MsgMapItem : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        SWGSDRangel::SWGMapItem *getSWGMapItem() const { return m_swgMapItem; }
+
+        static MsgMapItem* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGMapItem *swgMapItem)
+        {
+            return new MsgMapItem(pipeSource, swgMapItem);
+        }
+
+    private:
+        const PipeEndPoint *m_pipeSource;
+        SWGSDRangel::SWGMapItem *m_swgMapItem;
+
+        MsgMapItem(const PipeEndPoint *pipeSource, SWGSDRangel::SWGMapItem *swgMapItem) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_swgMapItem(swgMapItem)
+        { }
+    };
+
+    // Message to pass received packets between channels and features
+    class SDRBASE_API MsgPacket : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        QByteArray getPacket() const { return m_packet; }
+        QDateTime getDateTime() const { return m_dateTime; }
+
+        static MsgPacket* create(const PipeEndPoint *pipeSource, QByteArray packet)
+        {
+            return new MsgPacket(pipeSource, packet, QDateTime::currentDateTime());
+        }
+
+        static MsgPacket* create(const PipeEndPoint *pipeSource, QByteArray packet, QDateTime dateTime)
+        {
+            return new MsgPacket(pipeSource, packet, dateTime);
+        }
+
+    private:
+        const PipeEndPoint *m_pipeSource;
+        QByteArray m_packet;
+        QDateTime m_dateTime;
+
+        MsgPacket(const PipeEndPoint *pipeSource, QByteArray packet, QDateTime dateTime) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_packet(packet),
+            m_dateTime(dateTime)
+        {
+        }
+    };
+
+    // Message to pass target azimuth and elevation between channels & features
+    class SDRBASE_API MsgTargetAzimuthElevation : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const PipeEndPoint *getPipeSource() const { return m_pipeSource; }
+        SWGSDRangel::SWGTargetAzimuthElevation *getSWGTargetAzimuthElevation() const { return m_swgTargetAzimuthElevation; }
+
+        static MsgTargetAzimuthElevation* create(const PipeEndPoint *pipeSource, SWGSDRangel::SWGTargetAzimuthElevation *swgTargetAzimuthElevation)
+        {
+            return new MsgTargetAzimuthElevation(pipeSource, swgTargetAzimuthElevation);
+        }
+
+    private:
+        const PipeEndPoint *m_pipeSource;
+        SWGSDRangel::SWGTargetAzimuthElevation *m_swgTargetAzimuthElevation;
+
+        MsgTargetAzimuthElevation(const PipeEndPoint *pipeSource, SWGSDRangel::SWGTargetAzimuthElevation *swgTargetAzimuthElevation) :
+            Message(),
+            m_pipeSource(pipeSource),
+            m_swgTargetAzimuthElevation(swgTargetAzimuthElevation)
+        { }
+    };
+
+
 
 	MainCore();
 	~MainCore();

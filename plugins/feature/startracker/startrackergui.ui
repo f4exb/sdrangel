@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StarTrackerGUI</class>
+ <widget class="RollupWidget" name="StarTrackerGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>337</width>
+    <height>568</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>320</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Star Tracker</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>301</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="latitude">
+        <property name="toolTip">
+         <string>Latitude in decimal degrees (North positive) of observation point / antenna location</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-90.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>90.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-90.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="rightAscension">
+        <property name="toolTip">
+         <string>Right Ascension of the target object.
+
+This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds (E.g. 12h05m10.2s or 12 05 10.2)</string>
+        </property>
+        <property name="text">
+         <string>23h59m59.59s</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QLineEdit" name="azimuth">
+        <property name="toolTip">
+         <string>Computed azimuth in degrees to the target from the observation point</string>
+        </property>
+        <property name="text">
+         <string>360</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="timeLabel">
+        <property name="text">
+         <string>Time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="3">
+       <widget class="QLineEdit" name="declination">
+        <property name="toolTip">
+         <string>Declination of the target object
+
+This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and seconds (E.g. 34d12m10.2s, 34d12'10.2&quot;  34 12 10.2)</string>
+        </property>
+        <property name="text">
+         <string>-90d59'59.59&quot;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="targetLabel">
+        <property name="text">
+         <string>Target</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2" colspan="2">
+       <widget class="QDateTimeEdit" name="dateTime">
+        <property name="toolTip">
+         <string>Date and time to use when calculating target's position</string>
+        </property>
+        <property name="displayFormat">
+         <string>dd/MM/yyyy HH:mm:ss</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="latitudeLabel">
+        <property name="text">
+         <string>Latitude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QComboBox" name="dateTimeSelect">
+        <item>
+         <property name="text">
+          <string>Now</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Custom</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="7" column="2">
+       <widget class="QLabel" name="elevationLabel">
+        <property name="text">
+         <string>Elevation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="rightAscensionLabel">
+        <property name="text">
+         <string>RA</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="4">
+       <layout class="QHBoxLayout" name="buttonLayout">
+        <item>
+         <widget class="ButtonSwitch" name="startStop">
+          <property name="toolTip">
+           <string>start/stop acquisition</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/play.png</normaloff>
+            <normalon>:/stop.png</normalon>:/play.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="viewOnMap">
+          <property name="toolTip">
+           <string>Find target on the map</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/gridpolar.png</normaloff>:/gridpolar.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="useMyPosition">
+          <property name="toolTip">
+           <string>Set latitude, longitude and height from My Position in SDRangel preferences</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/import.png</normaloff>:/import.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="displaySettings">
+          <property name="toolTip">
+           <string>Show settings dialog</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="5" column="1" colspan="3">
+       <layout class="QHBoxLayout" name="targetLayout">
+        <item>
+         <widget class="QComboBox" name="target">
+          <property name="minimumSize">
+           <size>
+            <width>110</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sun</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Moon</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PSR B0329+54</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PSR B0833-45</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Sagittarius A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cassiopeia A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cygnus A</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Taurus A (M1)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Virgo A (M87)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="3">
+       <widget class="QDoubleSpinBox" name="longitude">
+        <property name="toolTip">
+         <string>Longitude in decimal degress (East positive) of observation point / antenna location</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLabel" name="declinationLabel">
+        <property name="text">
+         <string>Dec</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="longitudeLabel">
+        <property name="text">
+         <string>Longitude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="azimuthtLabel">
+        <property name="text">
+         <string>Azimuth</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="3">
+       <widget class="QLineEdit" name="elevation">
+        <property name="toolTip">
+         <string>Computed elevation in degrees to the target from the observation point</string>
+        </property>
+        <property name="text">
+         <string>90</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lstLabel">
+        <property name="text">
+         <string>LST</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="lst">
+        <property name="toolTip">
+         <string>Local sidereal time for selected date, time and longitude</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="chartContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>220</y>
+     <width>318</width>
+     <height>268</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>200</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Elevation vs Time</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <widget class="QChartView" name="elevationChart">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>250</height>
+       </size>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>startStop</tabstop>
+  <tabstop>useMyPosition</tabstop>
+  <tabstop>displaySettings</tabstop>
+  <tabstop>latitude</tabstop>
+  <tabstop>longitude</tabstop>
+  <tabstop>target</tabstop>
+  <tabstop>rightAscension</tabstop>
+  <tabstop>declination</tabstop>
+  <tabstop>azimuth</tabstop>
+  <tabstop>elevation</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

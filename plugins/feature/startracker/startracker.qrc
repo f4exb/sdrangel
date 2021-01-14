@@ -1,0 +1,17 @@
+<RCC>
+  <qresource prefix="/startracker/">
+    <file>startracker/moon-flat-32.png</file>
+    <file>startracker/moon-full-32.png</file>
+    <file>startracker/moon-new-32.png</file>
+    <file>startracker/moon-old-32.png</file>
+    <file>startracker/moon-waning-crescent-32.png</file>
+    <file>startracker/moon-waning-gibbous-32.png</file>
+    <file>startracker/moon-third-quarter-32.png</file>
+    <file>startracker/moon-waxing-crescent-32.png</file>
+    <file>startracker/moon-waxing-gibbous-32.png</file>
+    <file>startracker/moon-first-quarter-32.png</file>
+    <file>startracker/moon-young-32.png</file>
+    <file>startracker/pulsar-32.png</file>
+    <file>startracker/sun-40.png</file>
+  </qresource>
+</RCC>
