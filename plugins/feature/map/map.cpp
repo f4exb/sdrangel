@@ -49,10 +49,14 @@ Map::Map(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_errorMessage = "Map error";
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
     m_updatePipesTimer.start(1000);
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 Map::~Map()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
 }
 
 bool Map::handleMessage(const Message& cmd)

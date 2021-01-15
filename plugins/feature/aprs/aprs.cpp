@@ -50,10 +50,14 @@ APRS::APRS(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_errorMessage = "APRS error";
     connect(&m_updatePipesTimer, SIGNAL(timeout()), this, SLOT(updatePipes()));
     m_updatePipesTimer.start(1000);
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 APRS::~APRS()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }

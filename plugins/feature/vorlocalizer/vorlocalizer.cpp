@@ -53,10 +53,14 @@ VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker = new VorLocalizerWorker(webAPIAdapterInterface);
     m_state = StIdle;
     m_errorMessage = "VORLocalizer error";
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 VORLocalizer::~VORLocalizer()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }

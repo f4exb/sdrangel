@@ -45,10 +45,14 @@ StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker = new StarTrackerWorker(this, webAPIAdapterInterface);
     m_state = StIdle;
     m_errorMessage = "StarTracker error";
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 StarTracker::~StarTracker()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }
