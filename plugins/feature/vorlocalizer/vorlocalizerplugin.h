@@ -15,8 +15,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
-#define INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#ifndef INCLUDE_FEATURE_VORLOCALIZERPLUGIN_H
+#define INCLUDE_FEATURE_VORLOCALIZERPLUGIN_H
 
 #include <QObject>
 #include "plugin/plugininterface.h"
@@ -45,4 +45,4 @@ private:
 	PluginAPI* m_pluginAPI;
 };
 
-#endif // INCLUDE_FEATURE_SIMPLEPTTPLUGIN_H
+#endif // INCLUDE_FEATURE_VORLOCALIZERPLUGIN_H

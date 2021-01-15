@@ -24,7 +24,6 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
-#include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
@@ -39,8 +38,7 @@ const char* const RigCtlServer::m_featureIdURI = "sdrangel.feature.rigctlserver"
 const char* const RigCtlServer::m_featureId = "RigCtlServer";
 
 RigCtlServer::RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_ptt(false)
+    Feature(m_featureIdURI, webAPIAdapterInterface)
 {
     qDebug("RigCtlServer::RigCtlServer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

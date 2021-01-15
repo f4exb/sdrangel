@@ -122,7 +122,6 @@ private:
     QThread m_thread;
     RigCtlServerWorker *m_worker;
     RigCtlServerSettings m_settings;
-    bool m_ptt;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

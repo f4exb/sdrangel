@@ -122,7 +122,6 @@ private:
     QThread m_thread;
     StarTrackerWorker *m_worker;
     StarTrackerSettings m_settings;
-    bool m_ptt;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

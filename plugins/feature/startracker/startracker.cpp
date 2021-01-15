@@ -24,7 +24,6 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
-#include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
@@ -39,8 +38,7 @@ const char* const StarTracker::m_featureIdURI = "sdrangel.feature.startracker";
 const char* const StarTracker::m_featureId = "StarTracker";
 
 StarTracker::StarTracker(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_ptt(false)
+    Feature(m_featureIdURI, webAPIAdapterInterface)
 {
     qDebug("StarTracker::StarTracker: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);

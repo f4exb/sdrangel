@@ -31,8 +31,8 @@ int RigCtlServerWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
-    response.getSimplePttSettings()->init();
+    response.setRigCtlServerSettings(new SWGSDRangel::SWGRigCtlServerSettings());
+    response.getRigCtlServerSettings()->init();
     RigCtlServer::webapiFormatFeatureSettings(response, m_settings);
 
     return 200;

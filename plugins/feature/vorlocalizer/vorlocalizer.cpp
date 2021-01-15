@@ -23,7 +23,6 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
-#include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
 #include "SWGChannelReport.h"
 
@@ -415,8 +414,8 @@ int VORLocalizer::webapiSettingsGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
-    response.getSimplePttSettings()->init();
+    response.setVorLocalizerSettings(new SWGSDRangel::SWGVORLocalizerSettings());
+    response.getVorLocalizerSettings()->init();
     webapiFormatFeatureSettings(response, m_settings);
     return 200;
 }

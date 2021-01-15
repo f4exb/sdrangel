@@ -51,7 +51,6 @@ void VORLocalizerPlugin::initPlugin(PluginAPI* pluginAPI)
 {
 	m_pluginAPI = pluginAPI;
 
-	// register Simple PTT feature
 	m_pluginAPI->registerFeature(VORLocalizer::m_featureIdURI, VORLocalizer::m_featureId, this);
 }
 
