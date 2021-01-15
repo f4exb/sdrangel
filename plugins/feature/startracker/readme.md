@@ -19,7 +19,7 @@ This button starts or stops the plugin. The plugin will only calculate azimuth a
 
 Pressing this button centres the Map Feature (if open) on the current target.
 
-<h3>3: Set latitude and longitude from My Position/h3>
+<h3>3: Set latitude and longitude from My Position</h3>
 
 When clicked, it sets the latitude, longitude and height fields to the values from SDRangel's My Position preferences.
 
@@ -43,7 +43,7 @@ Pressing this button displays a settings dialog, that allows you to set:
 * Whether to draw the Moon on the map.
 * Whether to draw the target star (or galaxy) on the map.
 
-<h3>5: Latitude/h3>
+<h3>5: Latitude</h3>
 
 Specifies the latitude in decimal degrees of the observation point (antenna location).
 
@@ -96,7 +96,7 @@ Displays the calculated azimuth (angle in degrees, clockwise from North) to the 
 
 Displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
 
-<h3>13: Elevation vs Time Plot<h3>
+<h3>13: Elevation vs Time Plot</h3>
 
 In order to assit in determining whether and when observations of the target object may be possible, an elevation vs time plot is drawn for the 24 hours encompassing the selected date and time.
 Some objects may not be visible from a particular latitude for the specified time, in which case, the grahp title will indicate the object is not visible on that particular date.
@@ -104,6 +104,8 @@ Some objects may not be visible from a particular latitude for the specified tim
 <h2>Map</h2>
 
 The Star Tracker feature can send the overhead position of the Sun, Moon and target Star to the Map. These can be enabled individually in the settings dialog. The Moon should be displayed with an approximate phase. Stars (or galaxies) are displayed as an image of a pulsar.
+
+![StarTracker map](../../../doc/img/StarTracker_map.png)
 
 When using the Find feature in the Map GUI, you can search for "Sun", "Moon" or "Star".
 
@@ -134,8 +136,6 @@ Star Tracker will continually send the RA/Dec of its target to Stellarium and th
 To see the rough field of view of your antenna, open the Ocular configuration window and under Eyepieces, add a new eyepiece with name SDRangel.
 Set aFOV to the half-power beam width of your antenna, focal length to 100 and field stop to 0.
 Then select the SDRangel telescope reticle and press Ocular view.
-
-![StarTracker map](../../../doc/img/StarTracker_map.png)
 
 <h2>Attribution</h2>
 
