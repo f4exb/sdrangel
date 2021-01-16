@@ -31,8 +31,8 @@ int GS232ControllerWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
-    response.getSimplePttSettings()->init();
+    response.setGs232ControllerSettings(new SWGSDRangel::SWGGS232ControllerSettings());
+    response.getGs232ControllerSettings()->init();
     GS232Controller::webapiFormatFeatureSettings(response, m_settings);
 
     return 200;

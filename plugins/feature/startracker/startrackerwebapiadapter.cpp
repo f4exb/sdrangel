@@ -31,8 +31,8 @@ int StarTrackerWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
-    response.getSimplePttSettings()->init();
+    response.setStarTrackerSettings(new SWGSDRangel::SWGStarTrackerSettings());
+    response.getStarTrackerSettings()->init();
     StarTracker::webapiFormatFeatureSettings(response, m_settings);
 
     return 200;

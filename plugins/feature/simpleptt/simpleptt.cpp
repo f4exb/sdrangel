@@ -46,10 +46,14 @@ SimplePTT::SimplePTT(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker = new SimplePTTWorker(webAPIAdapterInterface);
     m_state = StIdle;
     m_errorMessage = "SimplePTT error";
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 SimplePTT::~SimplePTT()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }

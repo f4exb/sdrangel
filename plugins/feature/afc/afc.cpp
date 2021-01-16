@@ -54,10 +54,14 @@ AFC::AFC(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker = new AFCWorker(webAPIAdapterInterface);
     m_state = StIdle;
     m_errorMessage = "AFC error";
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 AFC::~AFC()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }

@@ -24,7 +24,6 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
-#include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
@@ -39,18 +38,21 @@ const char* const RigCtlServer::m_featureIdURI = "sdrangel.feature.rigctlserver"
 const char* const RigCtlServer::m_featureId = "RigCtlServer";
 
 RigCtlServer::RigCtlServer(WebAPIAdapterInterface *webAPIAdapterInterface) :
-    Feature(m_featureIdURI, webAPIAdapterInterface),
-    m_ptt(false)
+    Feature(m_featureIdURI, webAPIAdapterInterface)
 {
     qDebug("RigCtlServer::RigCtlServer: webAPIAdapterInterface: %p", webAPIAdapterInterface);
     setObjectName(m_featureId);
     m_worker = new RigCtlServerWorker(webAPIAdapterInterface);
     m_state = StIdle;
     m_errorMessage = "RigCtlServer error";
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 RigCtlServer::~RigCtlServer()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }

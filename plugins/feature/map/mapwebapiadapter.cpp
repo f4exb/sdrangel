@@ -31,8 +31,8 @@ int MapWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
-    response.getSimplePttSettings()->init();
+    response.setMapSettings(new SWGSDRangel::SWGMapSettings());
+    response.getMapSettings()->init();
     Map::webapiFormatFeatureSettings(response, m_settings);
 
     return 200;

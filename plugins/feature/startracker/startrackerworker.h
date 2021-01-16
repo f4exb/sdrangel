@@ -90,8 +90,6 @@ private:
     void applySettings(const StarTrackerSettings& settings, bool force = false);
     void restartServer(bool enabled, uint32_t port);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
-    void setAzimuth(int azimuth);
-    void setAzimuthElevation(int azimuth, int elevation);
     void updateRaDec(RADec rd, QDateTime dt);
     void writeStellariumTarget(double ra, double dec);
     void removeFromMap(QString id);

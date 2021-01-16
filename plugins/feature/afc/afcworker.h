@@ -174,4 +174,4 @@ private slots:
     void handleInputMessages();
 };
 
-#endif // INCLUDE_FEATURE_SIMPLEPTTWORKER_H_
+#endif // INCLUDE_FEATURE_AFCWORKER_H_

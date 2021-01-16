@@ -23,7 +23,6 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFeatureReport.h"
 #include "SWGFeatureActions.h"
-#include "SWGSimplePTTReport.h"
 #include "SWGDeviceState.h"
 #include "SWGChannelReport.h"
 
@@ -54,10 +53,14 @@ VORLocalizer::VORLocalizer(WebAPIAdapterInterface *webAPIAdapterInterface) :
     m_worker = new VorLocalizerWorker(webAPIAdapterInterface);
     m_state = StIdle;
     m_errorMessage = "VORLocalizer error";
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 }
 
 VORLocalizer::~VORLocalizer()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     if (m_worker->isRunning()) {
         stop();
     }
@@ -415,8 +418,8 @@ int VORLocalizer::webapiSettingsGet(
     QString& errorMessage)
 {
     (void) errorMessage;
-    response.setSimplePttSettings(new SWGSDRangel::SWGSimplePTTSettings());
-    response.getSimplePttSettings()->init();
+    response.setVorLocalizerSettings(new SWGSDRangel::SWGVORLocalizerSettings());
+    response.getVorLocalizerSettings()->init();
     webapiFormatFeatureSettings(response, m_settings);
     return 200;
 }

@@ -20,7 +20,7 @@ To centre the map on an object or location, enter:
 * Latitude and longitude. This can be in decimal degrees (E.g: -23.666413, -46.573550) or degrees, minutes and seconds (E.g: 50°40'46.461"N 95°48'26.533"W or 33d51m54.5148sS 151d12m35.6400sE).
 * A Maidenhead locator (E.g: IO86av).
 
-<h3>3: Display Names<h3>
+<h3>3: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
