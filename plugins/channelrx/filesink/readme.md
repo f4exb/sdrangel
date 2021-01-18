@@ -68,7 +68,7 @@ Note that spectrum polling is done every 200 ms. If the signal of interest is sh
 
 This is the squelch level as discussed above. To try to find the correct value you can use the spectrum display (15).
 
-<h3>10: Pre recording period<h3>
+<h3>10: Pre recording period</h3>
 
 This is the number of seconds of data that will be prepended before the start of recording point. Thus you can make sure that the signal of interest will be fully recorded. Works in both spectrum squelch triggered and manual mode.
 
