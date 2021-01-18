@@ -103,7 +103,7 @@ void FileRecord::stop()
     stopRecording();
 }
 
-void FileRecord::startRecording()
+bool FileRecord::startRecording()
 {
     if (m_recordOn) {
         stopRecording();
@@ -114,13 +114,19 @@ void FileRecord::startRecording()
     	qDebug() << "FileRecord::startRecording";
         m_curentFileName = QString("%1.%2.sdriq").arg(m_fileBase).arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-ddTHH_mm_ss_zzz"));
         m_sampleFile.open(m_curentFileName.toStdString().c_str(), std::ios::binary);
+        if (!m_sampleFile.is_open())
+        {
+            qWarning() << "FileRecord::startRecording: failed to open file: " << m_curentFileName;
+            return false;
+        }
         m_recordOn = true;
         m_recordStart = true;
         m_byteCount = 0;
     }
+    return true;
 }
 
-void FileRecord::stopRecording()
+bool FileRecord::stopRecording()
 {
     if (m_sampleFile.is_open())
     {
@@ -128,7 +134,13 @@ void FileRecord::stopRecording()
         m_sampleFile.close();
         m_recordOn = false;
         m_recordStart = false;
+        if (m_sampleFile.bad())
+        {
+            qWarning() << "FileRecord::stopRecording: an error occured while writing to " << m_curentFileName;
+            return false;
+        }
     }
+    return true;
 }
 
 bool FileRecord::handleMessage(const Message& message)

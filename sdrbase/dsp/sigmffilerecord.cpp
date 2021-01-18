@@ -107,8 +107,9 @@ unsigned int SigMFFileRecord::getNbCaptures() const
     return m_metaRecord->captures.size();
 }
 
-void SigMFFileRecord::startRecording()
+bool SigMFFileRecord::startRecording()
 {
+    bool success = true;
 
     if (m_recordStart)
     {
@@ -118,7 +119,17 @@ void SigMFFileRecord::startRecording()
         m_sampleFileName = m_fileName + ".sigmf-data";
         m_metaFileName = m_fileName + ".sigmf-meta";
         m_sampleFile.open(m_sampleFileName.toStdString().c_str(), std::ios::binary);
+        if (!m_sampleFile.is_open())
+        {
+            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_sampleFileName;
+            success = false;
+        }
         m_metaFile.open(m_metaFileName.toStdString().c_str(), std::ofstream::out);
+        if (!m_metaFile.is_open())
+        {
+            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_metaFileName;
+            success = false;
+        }
         makeHeader();
         m_recordStart = false;
     }
@@ -130,16 +141,28 @@ void SigMFFileRecord::startRecording()
     m_captureStartDT = QDateTime::currentDateTimeUtc().addMSecs(m_msShift);
     m_recordOn = true;
     m_sampleCount = 0;
+    return success;
 }
 
-void SigMFFileRecord::stopRecording()
+bool SigMFFileRecord::stopRecording()
 {
     if (m_recordOn)
     {
       	qDebug("SigMFFileRecord::stopRecording: file previous capture");
         makeCapture();
         m_recordOn = false;
+        if (m_sampleFile.bad())
+        {
+            qWarning() << "SigMFFileRecord::stopRecording: an error occured while writing to " << m_sampleFileName;
+            return false;
+        }
+        if (m_metaFile.bad())
+        {
+            qWarning() << "SigMFFileRecord::stopRecording: an error occured while writing to " << m_metaFileName;
+            return false;
+        }
     }
+    return true;
 }
 
 void SigMFFileRecord::makeHeader()
@@ -243,3 +266,4 @@ bool SigMFFileRecord::handleMessage(const Message& message)
         return false;
     }
 }
+

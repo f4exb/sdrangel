@@ -45,8 +45,8 @@ public:
 	virtual bool handleMessage(const Message& message);
 
     virtual void setFileName(const QString& filename);
-    virtual void startRecording();
-    virtual void stopRecording();
+    virtual bool startRecording();
+    virtual bool stopRecording();
     virtual bool isRecording() const { return m_recordOn; }
 
     void setHardwareId(const QString& hardwareId) { m_hardwareId = hardwareId; }

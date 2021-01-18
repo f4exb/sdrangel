@@ -60,8 +60,8 @@ public:
 	virtual bool handleMessage(const Message& message);
 
     virtual void setFileName(const QString& fileBase);
-    virtual void startRecording();
-    virtual void stopRecording();
+    virtual bool startRecording();
+    virtual bool stopRecording();
     virtual bool isRecording() const { return m_recordOn; }
 
     static bool readHeader(std::ifstream& samplefile, Header& header); //!< returns true if CRC checksum is correct else false

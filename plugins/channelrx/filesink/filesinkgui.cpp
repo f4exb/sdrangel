@@ -18,6 +18,7 @@
 #include <QLocale>
 #include <QFileDialog>
 #include <QTime>
+#include <QMessageBox>
 
 #include "device/deviceuiset.h"
 #include "device/deviceapi.h"
@@ -139,6 +140,12 @@ bool FileSinkGUI::handleMessage(const Message& message)
     {
         const FileSinkMessages::MsgReportRecordFileName& report = (FileSinkMessages::MsgReportRecordFileName&) message;
         ui->fileNameText->setText(report.getFileName());
+        return true;
+    }
+    else if (FileSinkMessages::MsgReportRecordFileError::match(message))
+    {
+        const FileSinkMessages::MsgReportRecordFileError& report = (FileSinkMessages::MsgReportRecordFileError&) message;
+        QMessageBox::critical(this, tr("File Error"), report.getMessage());
         return true;
     }
     else
