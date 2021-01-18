@@ -127,7 +127,7 @@ bool SigMFFileRecord::startRecording()
         m_metaFile.open(m_metaFileName.toStdString().c_str(), std::ofstream::out);
         if (!m_metaFile.is_open())
         {
-            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_metaFile;
+            qWarning() << "SigMFFileRecord::startRecording: failed to open file: " << m_metaFileName;
             success = false;
         }
         makeHeader();
@@ -266,3 +266,4 @@ bool SigMFFileRecord::handleMessage(const Message& message)
         return false;
     }
 }
+
