@@ -103,6 +103,25 @@ public:
             m_fileName(fileName)
         { }
     };
+
+    class MsgReportRecordFileError : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString& getMessage() const { return m_message; }
+
+        static MsgReportRecordFileError* create(const QString& message) {
+            return new MsgReportRecordFileError(message);
+        }
+
+    private:
+        QString m_message;
+
+        MsgReportRecordFileError(const QString& message) :
+            Message(),
+            m_message(message)
+        { }
+    };
 };
 
 #endif // INCLUDE_FILESINKMESSAGES_H_

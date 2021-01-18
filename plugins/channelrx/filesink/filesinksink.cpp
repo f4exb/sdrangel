@@ -49,7 +49,17 @@ void FileSinkSink::startRecording()
         m_fileSink.setMsShift(-mSShift);
 
         // notify capture start
-        m_fileSink.startRecording();
+        if (!m_fileSink.startRecording())
+        {
+            // qWarning already output in startRecording, just need to send to GUI
+            if (m_msgQueueToGUI)
+            {
+                FileSinkMessages::MsgReportRecordFileError *msg
+                    = FileSinkMessages::MsgReportRecordFileError::create(QString("Failed to open %1").arg(m_fileSink.getCurrentFileName()));
+                m_msgQueueToGUI->push(msg);
+            }
+            return;
+        }
         m_record = true;
         m_nbCaptures++;
 
@@ -84,7 +94,16 @@ void FileSinkSink::stopRecording()
     if (m_record)
     {
         m_preRecordBuffer.reset();
-        m_fileSink.stopRecording();
+        if (!m_fileSink.stopRecording())
+        {
+            // qWarning already output stopRecording, just need to send to GUI
+            if (m_msgQueueToGUI)
+            {
+                FileSinkMessages::MsgReportRecordFileError *msg
+                    = FileSinkMessages::MsgReportRecordFileError::create(QString("Error while writing to %1").arg(m_fileSink.getCurrentFileName()));
+                m_msgQueueToGUI->push(msg);
+            }
+        }
         m_record = false;
     }
 }
