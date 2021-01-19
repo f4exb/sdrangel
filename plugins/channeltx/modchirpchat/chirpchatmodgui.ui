@@ -450,7 +450,7 @@
      </rect>
     </property>
     <property name="toolTip">
-     <string>Idle time beween packets (s)</string>
+     <string>Idle time between packets (s)</string>
     </property>
     <property name="minimum">
      <number>1</number>

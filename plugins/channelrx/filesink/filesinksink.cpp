@@ -217,7 +217,7 @@ void FileSinkSink::applyChannelSettings(
     {
         int decim = channelSampleRate / sinkSampleRate;
 
-        for (int i = 0; i < 7; i++) // find log2 beween 0 and 6
+        for (int i = 0; i < 7; i++) // find log2 between 0 and 6
         {
             if ((decim & 1) == 1)
             {

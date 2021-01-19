@@ -153,12 +153,12 @@ bool SigMFFileRecord::stopRecording()
         m_recordOn = false;
         if (m_sampleFile.bad())
         {
-            qWarning() << "SigMFFileRecord::stopRecording: an error occured while writing to " << m_sampleFileName;
+            qWarning() << "SigMFFileRecord::stopRecording: an error occurred while writing to " << m_sampleFileName;
             return false;
         }
         if (m_metaFile.bad())
         {
-            qWarning() << "SigMFFileRecord::stopRecording: an error occured while writing to " << m_metaFileName;
+            qWarning() << "SigMFFileRecord::stopRecording: an error occurred while writing to " << m_metaFileName;
             return false;
         }
     }
