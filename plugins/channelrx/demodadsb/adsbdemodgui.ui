@@ -586,7 +586,7 @@
       <item>
        <widget class="ButtonSwitch" name="feed">
         <property name="toolTip">
-         <string>Enable feeding of received ADS-B messages to the specifed server. Right click for settings.</string>
+         <string>Enable feeding of received ADS-B messages to the specified server. Right click for settings.</string>
         </property>
         <property name="text">
          <string>...</string>

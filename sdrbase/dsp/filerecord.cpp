@@ -136,7 +136,7 @@ bool FileRecord::stopRecording()
         m_recordStart = false;
         if (m_sampleFile.bad())
         {
-            qWarning() << "FileRecord::stopRecording: an error occured while writing to " << m_curentFileName;
+            qWarning() << "FileRecord::stopRecording: an error occurred while writing to " << m_curentFileName;
             return false;
         }
     }

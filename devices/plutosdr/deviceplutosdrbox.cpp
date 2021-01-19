@@ -134,7 +134,7 @@ void DevicePlutoSDRBox::set_params(DeviceType devType,
 
         if (pos == std::string::npos)
         {
-            std::cerr << "DevicePlutoSDRBox::set_params: Misformed line: " << *it << std::endl;
+            std::cerr << "DevicePlutoSDRBox::set_params: Malformed line: " << *it << std::endl;
             continue;
         }
 

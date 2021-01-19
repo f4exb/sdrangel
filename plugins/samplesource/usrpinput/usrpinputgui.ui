@@ -734,7 +734,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Red if overruns occured. Cleared when restarting acquisition</string>
+        <string>Red if overruns occurred. Cleared when restarting acquisition</string>
        </property>
        <property name="styleSheet">
         <string notr="true">background:rgb(79,79,79);</string>
@@ -756,7 +756,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Red if timeouts occured. Cleared when restarting acquisition</string>
+        <string>Red if timeouts occurred. Cleared when restarting acquisition</string>
        </property>
        <property name="styleSheet">
         <string notr="true">background:rgb(79,79,79);</string>

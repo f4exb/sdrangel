@@ -146,7 +146,7 @@ void ADSBDemodWorker::errorOccurred(QAbstractSocket::SocketError socketError)
 
 void ADSBDemodWorker::recv()
 {
-    // Not expecting to receving anything from server
+    // Not expecting to receiving anything from server
     qDebug() << "ADSBDemodWorker::recv";
     qDebug() << m_socket.readAll();
 }

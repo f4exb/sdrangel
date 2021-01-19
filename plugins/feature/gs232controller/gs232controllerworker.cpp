@@ -200,7 +200,7 @@ void GS232ControllerWorker::readSerialData()
             {
                 qDebug() << "GS232ControllerWorker::readSerialData - unexpected response " << response;
                 if (m_msgQueueToFeature)
-                    m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 serial reponse: %1").arg(response)));
+                    m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 serial response: %1").arg(response)));
             }
         }
     }

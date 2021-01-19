@@ -310,7 +310,7 @@ void WebAPIRequestMapper::instanceConfigService(qtwebapp::HttpRequest& request, 
                 }
                 else
                 {
-                    normalResponse.setMessage(new QString("Error occured while updating configuration"));
+                    normalResponse.setMessage(new QString("Error occurred while updating configuration"));
                     response.write(errorResponse.asJson().toUtf8());
                 }
             }
