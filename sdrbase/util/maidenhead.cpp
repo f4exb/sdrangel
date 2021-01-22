@@ -52,10 +52,15 @@ bool Maidenhead::fromMaidenhead(const QString& maidenhead, float& latitude, floa
         int lat1 = maidenhead[1].toUpper().toLatin1() - 'A';
         int lon2 = maidenhead[2].toLatin1() - '0';
         int lat2 = maidenhead[3].toLatin1() - '0';
-        int lon3 = maidenhead[4].toUpper().toLatin1() - 'A';
-        int lat3 = maidenhead[5].toUpper().toLatin1() - 'A';
+        int lon3 = 0;
+        int lat3 = 0;
         int lon4 = 0;
         int lat4 = 0;
+        if (maidenhead.length() >= 6)
+        {
+            lon3 = maidenhead[4].toUpper().toLatin1() - 'A';
+            lat3 = maidenhead[5].toUpper().toLatin1() - 'A';
+        }
         if (maidenhead.length() == 8)
         {
             lon4 = maidenhead[6].toLatin1() - '0';
@@ -76,8 +81,8 @@ bool Maidenhead::fromMaidenhead(const QString& maidenhead, float& latitude, floa
 bool Maidenhead::isMaidenhead(const QString& maidenhead)
 {
     int length = maidenhead.length();
-    if ((length != 6) && (length != 8))
+    if ((length != 4) && (length != 6) && (length != 8))
         return false;
-    QRegExp re("[A-Ra-r][A-Ra-r][0-9][0-9][A-Xa-x][A-Xa-x]([0-9][0-9])?");
+    QRegExp re("[A-Ra-r][A-Ra-r][0-9][0-9]([A-Xa-x][A-Xa-x]([0-9][0-9])?)?");
     return re.exactMatch(maidenhead);
 }

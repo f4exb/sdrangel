@@ -468,6 +468,7 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
             swgMapItem->setName(new QString(QString("%1").arg(aircraft->m_icao, 0, 16)));
             swgMapItem->setLatitude(aircraft->m_latitude);
             swgMapItem->setLongitude(aircraft->m_longitude);
+            swgMapItem->setAltitude(Units::feetToMetres(aircraft->m_altitude));
             swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
             swgMapItem->setImageRotation(aircraft->m_heading);
             swgMapItem->setText(new QString(aircraft->getText(true)));

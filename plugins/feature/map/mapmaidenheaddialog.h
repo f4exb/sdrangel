@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2021 Jon Beniston, M7RCE                                        //
-// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -16,48 +15,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_FEATURE_MAPSETTINGS_H_
-#define INCLUDE_FEATURE_MAPSETTINGS_H_
+#ifndef INCLUDE_FEATURE_MAPMAIDENHEADDIALOG_H
+#define INCLUDE_FEATURE_MAPMAIDENHEADDIALOG_H
 
-#include <QByteArray>
-#include <QString>
+#include "ui_mapmaidenheaddialog.h"
 
-#include "util/message.h"
+class MapMaidenheadDialog : public QDialog {
+    Q_OBJECT
 
-class Serializable;
-class PipeEndPoint;
+public:
+    explicit MapMaidenheadDialog(QWidget* parent = 0);
+    ~MapMaidenheadDialog();
 
-struct MapSettings
-{
-    bool m_displayNames;
-    QString m_mapProvider;
-    QString m_mapBoxApiKey;
-    QString m_mapBoxStyles;
-    quint32 m_sources;                 // Bitmask of SOURCE_*
-    QString m_title;
-    quint32 m_rgbColor;
-    bool m_useReverseAPI;
-    QString m_reverseAPIAddress;
-    uint16_t m_reverseAPIPort;
-    uint16_t m_reverseAPIFeatureSetIndex;
-    uint16_t m_reverseAPIFeatureIndex;
+    void geoReply();
 
-    MapSettings();
-    void resetToDefaults();
-    QByteArray serialize() const;
-    bool deserialize(const QByteArray& data);
+private slots:
+    void on_address_returnPressed();
+    void on_latAndLong_returnPressed();
+    void on_maidenhead_returnPressed();
+    void on_close_clicked();
 
-    static const QStringList m_pipeTypes;
-    static const QStringList m_pipeURIs;
-
-    static const QStringList m_mapProviders;
-
-    // The first few should match the order in m_pipeTypes for MapGUI::getSourceMask to work
-    static const quint32 SOURCE_ADSB = 0x1;
-    static const quint32 SOURCE_APRS = 0x2;
-    static const quint32 SOURCE_STAR_TRACKER = 0x4;
-    static const quint32 SOURCE_BEACONS = 0x8;
-    static const quint32 SOURCE_STATION = 0x10;
+private:
+    Ui::MapMaidenheadDialog* ui;
 };
 
-#endif // INCLUDE_FEATURE_MAPSETTINGS_H_
+#endif // INCLUDE_FEATURE_MAPMAIDENHEADDIALOG_H

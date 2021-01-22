@@ -51,8 +51,8 @@ public:
     qint32 getImageRotation();
     void setImageRotation(qint32 image_rotation);
 
-    qint32 getImageFixedSize();
-    void setImageFixedSize(qint32 image_fixed_size);
+    qint32 getImageMinZoom();
+    void setImageMinZoom(qint32 image_min_zoom);
 
     QString* getText();
     void setText(QString* text);
@@ -62,6 +62,9 @@ public:
 
     float getLongitude();
     void setLongitude(float longitude);
+
+    float getAltitude();
+    void setAltitude(float altitude);
 
 
     virtual bool isSet() override;
@@ -76,8 +79,8 @@ private:
     qint32 image_rotation;
     bool m_image_rotation_isSet;
 
-    qint32 image_fixed_size;
-    bool m_image_fixed_size_isSet;
+    qint32 image_min_zoom;
+    bool m_image_min_zoom_isSet;
 
     QString* text;
     bool m_text_isSet;
@@ -87,6 +90,9 @@ private:
 
     float longitude;
     bool m_longitude_isSet;
+
+    float altitude;
+    bool m_altitude_isSet;
 
 };
 

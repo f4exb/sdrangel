@@ -354,6 +354,7 @@ bool APRSGUI::handleMessage(const Message& message)
                                 swgMapItem->setName(new QString(aprs->m_from));
                             swgMapItem->setLatitude(aprs->m_latitude);
                             swgMapItem->setLongitude(aprs->m_longitude);
+                            swgMapItem->setAltitude(aprs->m_hasAltitude ? Units::feetToMetres(aprs->m_altitudeFt) : 0);
                             if (aprs->m_objectKilled)
                             {
                                 swgMapItem->setImage(new QString(""));
@@ -364,7 +365,7 @@ bool APRSGUI::handleMessage(const Message& message)
                                 swgMapItem->setImage(new QString(QString("qrc:///%1").arg(aprs->m_symbolImage)));
                                 swgMapItem->setText(new QString(aprs->toText()));
                             }
-                            swgMapItem->setImageFixedSize(0);
+                            swgMapItem->setImageMinZoom(11);
 
                             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_aprs, swgMapItem);
                             (*it)->push(msg);

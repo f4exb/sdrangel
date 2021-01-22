@@ -308,6 +308,7 @@ if (BUILD_GUI)
     find_package(Qt5 COMPONENTS Quick)
     find_package(Qt5 COMPONENTS QuickWidgets)
     find_package(Qt5 COMPONENTS Positioning)
+    find_package(Qt5 COMPONENTS Location)
     find_package(Qt5 COMPONENTS Charts)
 endif()
 

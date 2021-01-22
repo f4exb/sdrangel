@@ -13,6 +13,7 @@ set(map_HEADERS
     mapplugin.h
     mapreport.h
     mapwebapiadapter.h
+    beacon.h
 )
 
 include_directories(
@@ -24,15 +25,27 @@ if(NOT SERVER_MODE)
         ${map_SOURCES}
         mapgui.cpp
         mapgui.ui
+        maplocationdialog.cpp
+        maplocationdialog.ui
+        mapmaidenheaddialog.cpp
+        mapmaidenheaddialog.ui
+        mapsettingsdialog.cpp
+        mapsettingsdialog.ui
+        mapbeacondialog.cpp
+        mapbeacondialog.ui
         map.qrc
     )
     set(map_HEADERS
         ${map_HEADERS}
         mapgui.h
+        maplocationdialog.h
+        mapmaidenheaddialog.h
+        mapsettingsdialog.h
+        mapbeacondialog.h
     )
 
     set(TARGET_NAME map)
-    set(TARGET_LIB "Qt5::Widgets" Qt5::Quick Qt5::QuickWidgets Qt5::Positioning)
+    set(TARGET_LIB "Qt5::Widgets" Qt5::Quick Qt5::QuickWidgets Qt5::Positioning Qt5::Location)
     set(TARGET_LIB_GUI "sdrgui")
     set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
 else()
@@ -54,3 +67,9 @@ target_link_libraries(${TARGET_NAME}
 )
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+if(WIN32)
+  # Run deployqt for QtQuick etc
+  include(DeployQt)
+  windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/map)
+endif()

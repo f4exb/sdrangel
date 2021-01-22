@@ -41,9 +41,11 @@ MapItem:
     imageRotation:
       description: "Angle to rotate the image by"
       type: integer
-    imageFixedSize:
-      description: "Keep the image the same size, regardless of map zoom level (1 for yes, 0 for no)"
+      default: 0
+    imageMinZoom:
+      description: "Minimim zoom value"
       type: integer
+      default: 11
     text:
       descrption: "Text to draw on the map when item is selected"
       type: string
@@ -53,5 +55,9 @@ MapItem:
       format: float
     longitude:
       description: "Longitude in decimal degrees, positive to the east"
+      type: number
+      format: float
+    altitude:
+      description: "Altitude / height above sea level in metres"
       type: number
       format: float
