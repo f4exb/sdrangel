@@ -213,6 +213,16 @@ public:
         return false;
     }
 
+    static float solarFluxUnitsToJansky(float sfu)
+    {
+        return sfu * 10000.0f;
+    }
+
+    static float solarFluxUnitsToWattsPerMetrePerHertz(float sfu)
+    {
+        return sfu * 1e-22f;
+    }
+
 };
 
 #endif // INCLUDE_UNITS_H
