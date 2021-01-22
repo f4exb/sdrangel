@@ -66,9 +66,9 @@ The map displays objects reported by other SDRangel channels and features, as we
 * To pan around the map, click the left mouse button and drag. To zoom in or out, use the mouse scroll wheel.
 * Single clicking on an object in the map will display a text bubble with additional information about the object.
 * Right clicking on a object will open a context menu, which allows:
-  * To set an object as the target. The target object with have its azimuth and elevation displayed in the text bubble and sent to the Rotator Controller feature.
-  * Setting the center frequency to the first frequency found in the text bubble for the object.
-  * Changing the order in which the objects are drawn, which can be help to cycle through multiple objects that are at the same position.
+  * To set an object as the target. The target object will have its azimuth and elevation displayed in the text bubble and sent to the Rotator Controller feature.
+  * Setting the Device center frequency to the first frequency found in the text bubble for the object.
+  * Changing the order in which the objects are drawn, which can help to cycle through multiple objects that are at the same location on the map.
 
 <h2>Attribution</h2>
 
