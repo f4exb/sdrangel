@@ -25,9 +25,11 @@
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
+#include "util/azel.h"
 #include "pipes/pipeendpoint.h"
 #include "mapsettings.h"
 #include "SWGMapItem.h"
+#include "mapbeacondialog.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -39,31 +41,41 @@ namespace Ui {
 
 class MapGUI;
 class MapModel;
+struct Beacon;
 
 // Information required about each item displayed on the map
 class MapItem {
 
 public:
-    MapItem(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *mapItem)
+    MapItem(const PipeEndPoint *sourcePipe, quint32 sourceMask, SWGSDRangel::SWGMapItem *mapItem)
     {
-        m_source = source;
+        m_sourcePipe = sourcePipe;
+        m_sourceMask = sourceMask;
         m_name = *mapItem->getName();
         m_latitude = mapItem->getLatitude();
         m_longitude = mapItem->getLongitude();
+        m_altitude = mapItem->getAltitude();
         m_image = *mapItem->getImage();
         m_imageRotation = mapItem->getImageRotation();
-        m_imageFixedSize = mapItem->getImageFixedSize() == 1;
-        m_text = *mapItem->getText();
+        m_imageMinZoom = mapItem->getImageMinZoom();
+        QString *text = mapItem->getText();
+        if (text != nullptr)
+            m_text = *text;
+        findFrequency();
     }
 
     void update(SWGSDRangel::SWGMapItem *mapItem)
     {
         m_latitude = mapItem->getLatitude();
         m_longitude = mapItem->getLongitude();
+        m_altitude = mapItem->getAltitude();
         m_image = *mapItem->getImage();
         m_imageRotation = mapItem->getImageRotation();
-        m_imageFixedSize = mapItem->getImageFixedSize() == 1;
-        m_text = *mapItem->getText();
+        m_imageMinZoom = mapItem->getImageMinZoom();
+        QString *text = mapItem->getText();
+        if (text != nullptr)
+            m_text = *text;
+        findFrequency();
     }
 
     QGeoCoordinate getCoordinates()
@@ -75,15 +87,22 @@ public:
     }
 
 private:
+
+    void findFrequency();
+
     friend MapModel;
-    const PipeEndPoint *m_source;       // Channel/feature that created the item
+    const PipeEndPoint *m_sourcePipe;   // Channel/feature that created the item
+    quint32 m_sourceMask;               // Source bitmask as per MapSettings::SOURCE_* constants
     QString m_name;
     float m_latitude;
     float m_longitude;
+    float m_altitude;                   // In metres
     QString m_image;
     int m_imageRotation;
-    bool m_imageFixedSize;              // Keep image same size when map is zoomed
+    int m_imageMinZoom;
     QString m_text;
+    double m_frequency;                 // Frequency to set
+    QString m_frequencyString;
 };
 
 // Model used for each item on the map
@@ -96,15 +115,21 @@ public:
         positionRole = Qt::UserRole + 1,
         mapTextRole = Qt::UserRole + 2,
         mapTextVisibleRole = Qt::UserRole + 3,
-        mapImageRole = Qt::UserRole + 4,
-        mapImageRotationRole = Qt::UserRole + 5,
-        mapImageFixedSizeRole = Qt::UserRole + 6,
-        bubbleColourRole = Qt::UserRole + 7,
-        selectedRole = Qt::UserRole + 8
+        mapImageVisibleRole = Qt::UserRole + 4,
+        mapImageRole = Qt::UserRole + 5,
+        mapImageRotationRole = Qt::UserRole + 6,
+        mapImageMinZoomRole = Qt::UserRole + 7,
+        bubbleColourRole = Qt::UserRole + 8,
+        selectedRole = Qt::UserRole + 9,
+        targetRole = Qt::UserRole + 10,
+        frequencyRole = Qt::UserRole + 11,
+        frequencyStringRole = Qt::UserRole + 12
     };
 
     MapModel(MapGUI *gui) :
-        m_gui(gui)
+        m_gui(gui),
+        m_target(-1),
+        m_sources(-1)
     {
     }
 
@@ -116,37 +141,9 @@ public:
         endInsertRows();
     }
 
-    void update(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *swgMapItem)
-    {
-        QString name = *swgMapItem->getName();
-        // Add, update or delete and item
-        MapItem *item = findMapItem(source, name);
-        if (item != nullptr)
-        {
-            QString image = *swgMapItem->getImage();
-            if (image.isEmpty())
-            {
-                // Delete the item
-                remove(item);
-            }
-            else
-            {
-                // Update the item
-                item->update(swgMapItem);
-                update(item);
-            }
-        }
-        else
-        {
-            // Make sure not a duplicate request to delete
-            QString image = *swgMapItem->getImage();
-            if (!image.isEmpty())
-            {
-                // Add new item
-                add(new MapItem(source, swgMapItem));
-            }
-        }
-    }
+    void update(const PipeEndPoint *source, SWGSDRangel::SWGMapItem *swgMapItem, quint32 sourceMask=0);
+
+    void updateTarget();
 
     void update(MapItem *item)
     {
@@ -155,6 +152,8 @@ public:
         {
             QModelIndex idx = index(row);
             emit dataChanged(idx, idx);
+            if (row == m_target)
+                updateTarget();
         }
     }
 
@@ -166,9 +165,51 @@ public:
             beginRemoveRows(QModelIndex(), row, row);
             m_items.removeAt(row);
             m_selected.removeAt(row);
+            if (row == m_target)
+                m_target = -1;
             endRemoveRows();
         }
      }
+
+    Q_INVOKABLE void moveToFront(int oldRow)
+    {
+        // Last item in list is drawn on top, so remove than add to end of list
+        if (oldRow < m_items.size() - 1)
+        {
+            bool wasTarget = m_target == oldRow;
+            MapItem *item = m_items[oldRow];
+            bool wasSelected = m_selected[oldRow];
+            remove(item);
+            add(item);
+            int newRow = m_items.size() - 1;
+            if (wasTarget)
+                m_target = newRow;
+            m_selected[newRow] = wasSelected;
+            QModelIndex idx = index(newRow);
+            emit dataChanged(idx, idx);
+        }
+    }
+
+    Q_INVOKABLE void moveToBack(int oldRow)
+    {
+        // First item in list is drawn first, so remove item then add to front of list
+        if ((oldRow < m_items.size()) && (oldRow > 0))
+        {
+            bool wasTarget = m_target == oldRow;
+            int newRow = 0;
+            // See: https://forum.qt.io/topic/122991/changing-the-order-mapquickitems-are-drawn-on-a-map
+            //QModelIndex parent;
+            //beginMoveRows(parent, oldRow, oldRow, parent, newRow);
+            beginResetModel();
+            m_items.move(oldRow, newRow);
+            m_selected.move(oldRow, newRow);
+            if (wasTarget)
+                m_target = newRow;
+            //endMoveRows();
+            endResetModel();
+            //emit dataChanged(index(oldRow), index(newRow));
+        }
+    }
 
     MapItem *findMapItem(const PipeEndPoint *source, const QString& name)
     {
@@ -177,7 +218,7 @@ public:
         while (i.hasNext())
         {
             MapItem *item = i.next();
-            if ((item->m_name == name) && (item->m_source == source))
+            if ((item->m_name == name) && (item->m_sourcePipe == source))
                 return item;
         }
         return nullptr;
@@ -234,25 +275,40 @@ public:
         allUpdated();
     }
 
+    Q_INVOKABLE void setFrequency(double frequency);
+
     QHash<int, QByteArray> roleNames() const
     {
         QHash<int, QByteArray> roles;
         roles[positionRole] = "position";
         roles[mapTextRole] = "mapText";
         roles[mapTextVisibleRole] = "mapTextVisible";
+        roles[mapImageVisibleRole] = "mapImageVisible";
         roles[mapImageRole] = "mapImage";
         roles[mapImageRotationRole] = "mapImageRotation";
-        roles[mapImageFixedSizeRole] = "mapImageFixedSize";
+        roles[mapImageMinZoomRole] = "mapImageMinZoom";
         roles[bubbleColourRole] = "bubbleColour";
         roles[selectedRole] = "selected";
+        roles[targetRole] = "target";
+        roles[frequencyRole] = "frequency";
+        roles[frequencyStringRole] = "frequencyString";
         return roles;
+    }
+
+    // Set the sources of data we should display
+    void setSources(quint32 sources)
+    {
+        m_sources = sources;
+        allUpdated();
     }
 
 private:
     MapGUI *m_gui;
     QList<MapItem *> m_items;
     QList<bool> m_selected;
+    int m_target;               // Row number of current target, or -1 for none
     bool m_displayNames;
+    quint32 m_sources;
 };
 
 class MapGUI : public FeatureGUI {
@@ -265,6 +321,13 @@ public:
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
+    AzEl *getAzEl() { return &m_azEl; }
+    Map *getMap() { return m_map; }
+    quint32 getSourceMask(const PipeEndPoint *sourcePipe);
+    static QString getBeaconFilename();
+    QList<Beacon *> *getBeacons() { return m_beacons; }
+    void setBeacons(QList<Beacon *> *beacons);
+    void find(const QString& target);
 
 private:
     Ui::MapGUI* ui;
@@ -277,19 +340,24 @@ private:
     Map* m_map;
     MessageQueue m_inputMessageQueue;
     MapModel m_mapModel;
+    AzEl m_azEl;                        // Position of station
+    QList<Beacon *> *m_beacons;
+    MapBeaconDialog m_beaconDialog;
 
     explicit MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~MapGUI();
 
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
+    void applyMapSettings();
     void displaySettings();
-    void updatePipeList();
     bool handleMessage(const Message& message);
-    void find(const QString& target);
+    void geoReply();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
+
+    static QString getDataDir();
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
@@ -297,7 +365,11 @@ private slots:
     void handleInputMessages();
     void on_displayNames_clicked(bool checked=false);
     void on_find_returnPressed();
+    void on_maidenhead_clicked();
     void on_deleteAll_clicked();
+    void on_displaySettings_clicked();
+    void on_mapTypes_currentIndexChanged(int index);
+    void on_beacons_clicked();
 };
 
 

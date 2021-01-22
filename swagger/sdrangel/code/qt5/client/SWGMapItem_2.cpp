@@ -34,14 +34,16 @@ SWGMapItem_2::SWGMapItem_2() {
     m_image_isSet = false;
     image_rotation = 0;
     m_image_rotation_isSet = false;
-    image_fixed_size = 0;
-    m_image_fixed_size_isSet = false;
+    image_min_zoom = 0;
+    m_image_min_zoom_isSet = false;
     text = nullptr;
     m_text_isSet = false;
     latitude = 0.0f;
     m_latitude_isSet = false;
     longitude = 0.0f;
     m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
 }
 
 SWGMapItem_2::~SWGMapItem_2() {
@@ -56,14 +58,16 @@ SWGMapItem_2::init() {
     m_image_isSet = false;
     image_rotation = 0;
     m_image_rotation_isSet = false;
-    image_fixed_size = 0;
-    m_image_fixed_size_isSet = false;
+    image_min_zoom = 0;
+    m_image_min_zoom_isSet = false;
     text = new QString("");
     m_text_isSet = false;
     latitude = 0.0f;
     m_latitude_isSet = false;
     longitude = 0.0f;
     m_longitude_isSet = false;
+    altitude = 0.0f;
+    m_altitude_isSet = false;
 }
 
 void
@@ -79,6 +83,7 @@ SWGMapItem_2::cleanup() {
     if(text != nullptr) { 
         delete text;
     }
+
 
 
 }
@@ -100,13 +105,15 @@ SWGMapItem_2::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&image_rotation, pJson["imageRotation"], "qint32", "");
     
-    ::SWGSDRangel::setValue(&image_fixed_size, pJson["imageFixedSize"], "qint32", "");
+    ::SWGSDRangel::setValue(&image_min_zoom, pJson["imageMinZoom"], "qint32", "");
     
     ::SWGSDRangel::setValue(&text, pJson["text"], "QString", "QString");
     
     ::SWGSDRangel::setValue(&latitude, pJson["latitude"], "float", "");
     
     ::SWGSDRangel::setValue(&longitude, pJson["longitude"], "float", "");
+    
+    ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
     
 }
 
@@ -133,8 +140,8 @@ SWGMapItem_2::asJsonObject() {
     if(m_image_rotation_isSet){
         obj->insert("imageRotation", QJsonValue(image_rotation));
     }
-    if(m_image_fixed_size_isSet){
-        obj->insert("imageFixedSize", QJsonValue(image_fixed_size));
+    if(m_image_min_zoom_isSet){
+        obj->insert("imageMinZoom", QJsonValue(image_min_zoom));
     }
     if(text != nullptr && *text != QString("")){
         toJsonValue(QString("text"), text, obj, QString("QString"));
@@ -144,6 +151,9 @@ SWGMapItem_2::asJsonObject() {
     }
     if(m_longitude_isSet){
         obj->insert("longitude", QJsonValue(longitude));
+    }
+    if(m_altitude_isSet){
+        obj->insert("altitude", QJsonValue(altitude));
     }
 
     return obj;
@@ -180,13 +190,13 @@ SWGMapItem_2::setImageRotation(qint32 image_rotation) {
 }
 
 qint32
-SWGMapItem_2::getImageFixedSize() {
-    return image_fixed_size;
+SWGMapItem_2::getImageMinZoom() {
+    return image_min_zoom;
 }
 void
-SWGMapItem_2::setImageFixedSize(qint32 image_fixed_size) {
-    this->image_fixed_size = image_fixed_size;
-    this->m_image_fixed_size_isSet = true;
+SWGMapItem_2::setImageMinZoom(qint32 image_min_zoom) {
+    this->image_min_zoom = image_min_zoom;
+    this->m_image_min_zoom_isSet = true;
 }
 
 QString*
@@ -219,6 +229,16 @@ SWGMapItem_2::setLongitude(float longitude) {
     this->m_longitude_isSet = true;
 }
 
+float
+SWGMapItem_2::getAltitude() {
+    return altitude;
+}
+void
+SWGMapItem_2::setAltitude(float altitude) {
+    this->altitude = altitude;
+    this->m_altitude_isSet = true;
+}
+
 
 bool
 SWGMapItem_2::isSet(){
@@ -233,7 +253,7 @@ SWGMapItem_2::isSet(){
         if(m_image_rotation_isSet){
             isObjectUpdated = true; break;
         }
-        if(m_image_fixed_size_isSet){
+        if(m_image_min_zoom_isSet){
             isObjectUpdated = true; break;
         }
         if(text && *text != QString("")){
@@ -243,6 +263,9 @@ SWGMapItem_2::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_longitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_altitude_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

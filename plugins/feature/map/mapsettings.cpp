@@ -35,6 +35,14 @@ const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.feature.startracker")
 };
 
+// GUI combo box should match ordering in this list
+const QStringList MapSettings::m_mapProviders = {
+    QStringLiteral("osm"),
+    QStringLiteral("esri"),
+    QStringLiteral("mapbox"),
+    QStringLiteral("mapboxgl")
+};
+
 MapSettings::MapSettings()
 {
     resetToDefaults();
@@ -43,6 +51,10 @@ MapSettings::MapSettings()
 void MapSettings::resetToDefaults()
 {
     m_displayNames = true;
+    m_mapProvider = "osm";
+    m_mapBoxApiKey = "";
+    m_mapBoxStyles = "";
+    m_sources = -1;
     m_title = "Map";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -57,6 +69,10 @@ QByteArray MapSettings::serialize() const
     SimpleSerializer s(1);
 
     s.writeBool(1, m_displayNames);
+    s.writeString(2, m_mapProvider);
+    s.writeString(3, m_mapBoxApiKey);
+    s.writeString(4, m_mapBoxStyles);
+    s.writeU32(5, m_sources);
     s.writeString(8, m_title);
     s.writeU32(9, m_rgbColor);
     s.writeBool(10, m_useReverseAPI);
@@ -85,6 +101,10 @@ bool MapSettings::deserialize(const QByteArray& data)
         QString strtmp;
 
         d.readBool(1, &m_displayNames, true);
+        d.readString(2, &m_mapProvider, "osm");
+        d.readString(3, &m_mapBoxApiKey, "");
+        d.readString(4, &m_mapBoxStyles, "");
+        d.readU32(5, &m_sources, -1);
         d.readString(8, &m_title, "Map");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(10, &m_useReverseAPI, false);

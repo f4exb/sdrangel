@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -74,26 +74,6 @@
     <item>
      <layout class="QHBoxLayout" name="buttonLayout">
       <item>
-       <widget class="QLabel" name="pipesLabel">
-        <property name="text">
-         <string>Sources</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="pipes">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>Data source channels and features</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QLabel" name="findLabel">
         <property name="text">
          <string>Find</string>
@@ -102,8 +82,14 @@
       </item>
       <item>
        <widget class="QLineEdit" name="find">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>Enter name of object to find, latitude and longitude or Maidenhead locator</string>
+         <string>Enter name of object to find, latitude and longitude, Maidenhead locator or an address</string>
         </property>
        </widget>
       </item>
@@ -119,6 +105,47 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QComboBox" name="mapTypes">
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Select type of map to display</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="maidenhead">
+        <property name="toolTip">
+         <string>Maidenhead locator conversion</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/mem.png</normaloff>:/mem.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="beacons">
+        <property name="toolTip">
+         <string>Display Beacon dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/antenna.png</normaloff>:/antenna.png</iconset>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="ButtonSwitch" name="displayNames">
@@ -151,6 +178,20 @@
         <property name="icon">
          <iconset resource="../../../sdrgui/resources/res.qrc">
           <normaloff>:/bin.png</normaloff>:/bin.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="displaySettings">
+        <property name="toolTip">
+         <string>Show settings dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
         </property>
        </widget>
       </item>
@@ -241,6 +282,13 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>find</tabstop>
+  <tabstop>mapTypes</tabstop>
+  <tabstop>maidenhead</tabstop>
+  <tabstop>beacons</tabstop>
+  <tabstop>displayNames</tabstop>
+  <tabstop>deleteAll</tabstop>
+  <tabstop>displaySettings</tabstop>
   <tabstop>map</tabstop>
  </tabstops>
  <resources>

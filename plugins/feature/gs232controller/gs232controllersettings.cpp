@@ -25,11 +25,13 @@
 
 const QStringList GS232ControllerSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
+    QStringLiteral("Map"),
     QStringLiteral("StarTracker")
 };
 
 const QStringList GS232ControllerSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),
+    QStringLiteral("sdrangel.feature.map"),
     QStringLiteral("sdrangel.feature.startracker")
 };
 

@@ -4,7 +4,7 @@
 
 The GS-232 Rotator Controller feature plugin allows SDRangel to send commands to GS-232 rotators. This allows SDRangel to point antennas mounted on a rotator to a specified azimuth and elevation.
 
-Azimuth and elevation can be set manually by a user in the GUI, via the REST API, or via another plugin, such as the ADS-B Demodulator, which can track a selected aircraft, or the Star Tracker, for radio astronomy or EME communication.
+Azimuth and elevation can be set manually by a user in the GUI, via the REST API, or via another plugin, such as the Map Feature, the ADS-B Demodulator, or the Star Tracker.
 
 <h2>Interface</h2>
 

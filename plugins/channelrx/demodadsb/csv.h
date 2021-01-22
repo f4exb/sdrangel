@@ -22,7 +22,7 @@
 #include <QHash>
 
 // Extract string from CSV line, updating pp to next column
-static inline char *csvNext(char **pp)
+static inline char *csvNext(char **pp, char delimiter=',')
 {
     char *p = *pp;
 
@@ -31,7 +31,7 @@ static inline char *csvNext(char **pp)
 
     char *start = p;
 
-    while ((*p != ',') && (*p != '\n'))
+    while ((*p != delimiter) && (*p != '\n'))
         p++;
     *p++ = '\0';
     *pp = p;
