@@ -46,6 +46,7 @@ void StarTrackerSettings::resetToDefaults()
     m_enableServer = true;
     m_serverPort = 10001;
     m_azElUnits = DM;
+    m_solarFluxUnits = SFU;
     m_updatePeriod = 1.0;
     m_jnow = false;
     m_drawSunOnMap = true;
@@ -92,6 +93,7 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeU32(26, m_reverseAPIPort);
     s.writeU32(27, m_reverseAPIFeatureSetIndex);
     s.writeU32(28, m_reverseAPIFeatureIndex);
+    s.writeU32(29, m_solarFluxUnits);
 
     return s.final();
 }
@@ -155,6 +157,8 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(28, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+
+        d.readS32(29, (qint32 *)&m_solarFluxUnits, SFU);
 
         return true;
     }

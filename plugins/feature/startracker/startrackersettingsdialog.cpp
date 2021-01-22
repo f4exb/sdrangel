@@ -37,6 +37,7 @@ StarTrackerSettingsDialog::StarTrackerSettingsDialog(StarTrackerSettings *settin
     ui->height->setValue(settings->m_heightAboveSeaLevel);
     ui->temperatureLapseRate->setValue(settings->m_temperatureLapseRate);
     ui->frequency->setValue(settings->m_frequency/1000000.0);
+    ui->solarFluxUnits->setCurrentIndex((int)settings->m_solarFluxUnits);
     ui->drawSunOnMap->setChecked(settings->m_drawSunOnMap);
     ui->drawMoonOnMap->setChecked(settings->m_drawMoonOnMap);
     ui->drawStarOnMap->setChecked(settings->m_drawStarOnMap);
@@ -61,6 +62,7 @@ void StarTrackerSettingsDialog::accept()
     m_settings->m_heightAboveSeaLevel = ui->height->value();
     m_settings->m_temperatureLapseRate = ui->temperatureLapseRate->value();
     m_settings->m_frequency = ui->frequency->value() * 1000000.0;
+    m_settings->m_solarFluxUnits = (StarTrackerSettings::SolarFluxUnits)ui->solarFluxUnits->currentIndex();
     m_settings->m_drawSunOnMap = ui->drawSunOnMap->isChecked();
     m_settings->m_drawMoonOnMap = ui->drawMoonOnMap->isChecked();
     m_settings->m_drawStarOnMap = ui->drawStarOnMap->isChecked();

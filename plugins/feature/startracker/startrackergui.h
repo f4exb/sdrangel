@@ -21,6 +21,7 @@
 
 #include <QTimer>
 #include <QtCharts>
+#include <QNetworkRequest>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
@@ -29,6 +30,8 @@
 class PluginAPI;
 class FeatureUISet;
 class StarTracker;
+class QNetworkAccessManager;
+class QNetworkReply;
 
 namespace Ui {
     class StarTrackerGUI;
@@ -57,11 +60,16 @@ private:
     StarTracker* m_starTracker;
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
+    QTimer m_solarFluxTimer;
     int m_lastFeatureState;
 
     QChart m_chart;
     QDateTimeAxis m_chartXAxis;
     QValueAxis m_chartYAxis;
+
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
+    double m_solarFlux;
 
     explicit StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~StarTrackerGUI();
@@ -74,6 +82,7 @@ private:
     bool handleMessage(const Message& message);
     void updateLST();
     void plotChart();
+    void displaySolarFlux();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
@@ -94,6 +103,8 @@ private slots:
     void on_dateTime_dateTimeChanged(const QDateTime &datetime);
     void updateStatus();
     void on_viewOnMap_clicked();
+    void updateSolarFlux();
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 

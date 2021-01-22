@@ -20,6 +20,8 @@
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QRegExp>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -147,7 +149,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_pluginAPI(pluginAPI),
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
-    m_lastFeatureState(0)
+    m_lastFeatureState(0),
+    m_networkManager(nullptr),
+    m_solarFlux(0.0)
 {
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -197,10 +201,19 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
                                                 m_settings.m_temperatureLapseRate));
     printf("];\n");
 */    
+
+    m_networkManager = new QNetworkAccessManager();
+    connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+
+    connect(&m_solarFluxTimer, SIGNAL(timeout()), this, SLOT(updateSolarFlux()));
+    m_solarFluxTimer.start(1000*60*60*24); // Update every 24hours
+    updateSolarFlux();
 }
 
 StarTrackerGUI::~StarTrackerGUI()
 {
+    disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
+    delete m_networkManager;
     delete ui;
 }
 
@@ -475,6 +488,7 @@ void StarTrackerGUI::on_displaySettings_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         applySettings();
+        displaySolarFlux();
     }
 }
 
@@ -581,4 +595,61 @@ void StarTrackerGUI::on_viewOnMap_clicked()
 {
     QString target = m_settings.m_target == "Sun" || m_settings.m_target == "Moon" ? m_settings.m_target : "Star";
     FeatureWebAPIUtils::mapFind(target);
+}
+
+void StarTrackerGUI::updateSolarFlux()
+{
+    qDebug() << "StarTrackerGUI: Updating flux";
+    m_networkRequest.setUrl(QUrl("https://www.spaceweather.gc.ca/solarflux/sx-4-en.php"));
+    m_networkManager->get(m_networkRequest);
+}
+
+void StarTrackerGUI::displaySolarFlux()
+{
+    if (m_solarFlux <= 0.0)
+        ui->solarFlux->setText("");
+    else
+    {
+        switch (m_settings.m_solarFluxUnits)
+        {
+        case StarTrackerSettings::SFU:
+            ui->solarFlux->setText(QString("%1 sfu").arg(m_solarFlux));
+            break;
+        case StarTrackerSettings::JANSKY:
+            ui->solarFlux->setText(QString("%1 Jy").arg(Units::solarFluxUnitsToJansky(m_solarFlux)));
+            break;
+        case StarTrackerSettings::WATTS_M_HZ:
+            ui->solarFlux->setText(QString("%1 Wm^-2Hz^-1").arg(Units::solarFluxUnitsToWattsPerMetrePerHertz(m_solarFlux)));
+            break;
+        }
+        ui->solarFlux->setCursorPosition(0);
+    }
+}
+
+void StarTrackerGUI::networkManagerFinished(QNetworkReply *reply)
+{
+    ui->solarFlux->setText(""); // Don't show obsolete data
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "StarTrackerGUI::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        QRegExp re("\\<th\\>Observed Flux Density\\<\\/th\\>\\<td\\>([0-9]+(\\.[0-9]+)?)\\<\\/td\\>");
+        if (re.indexIn(answer) != -1)
+        {
+            m_solarFlux = re.capturedTexts()[1].toDouble();
+            displaySolarFlux();
+        }
+        else
+            qDebug() << "No Solar flux found: " << answer;
+    }
+
+    reply->deleteLater();
 }

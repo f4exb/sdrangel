@@ -409,6 +409,23 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
         </property>
        </widget>
       </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="solarFluxLabel">
+        <property name="text">
+         <string>Solar Flux</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLineEdit" name="solarFlux">
+        <property name="toolTip">
+         <string>Displays the solar flux at 10.7cm</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -486,15 +503,21 @@ This can be specified as a decimal (E.g. 34.23) or in degrees, minutes and secon
  </customwidgets>
  <tabstops>
   <tabstop>startStop</tabstop>
+  <tabstop>viewOnMap</tabstop>
   <tabstop>useMyPosition</tabstop>
   <tabstop>displaySettings</tabstop>
   <tabstop>latitude</tabstop>
   <tabstop>longitude</tabstop>
+  <tabstop>dateTimeSelect</tabstop>
+  <tabstop>dateTime</tabstop>
+  <tabstop>lst</tabstop>
+  <tabstop>solarFlux</tabstop>
   <tabstop>target</tabstop>
   <tabstop>rightAscension</tabstop>
   <tabstop>declination</tabstop>
   <tabstop>azimuth</tabstop>
   <tabstop>elevation</tabstop>
+  <tabstop>elevationChart</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>

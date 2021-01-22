@@ -44,6 +44,7 @@ struct StarTrackerSettings
     uint16_t m_serverPort;
     bool m_enableServer;        // Enable Stellarium server
     enum AzElUnits {DMS, DM, D, Decimal} m_azElUnits;
+    enum SolarFluxUnits {SFU, JANSKY, WATTS_M_HZ} m_solarFluxUnits;
     float m_updatePeriod;
     bool m_jnow;                // Use JNOW epoch rather than J2000
     bool m_drawSunOnMap;
