@@ -158,7 +158,7 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readU32(28, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
 
-        d.readS32(29, (qint32 *)&m_solarFluxUnits, SFU);
+        d.readU32(29, (quint32 *)&m_solarFluxUnits, SFU);
 
         return true;
     }
