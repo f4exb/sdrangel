@@ -365,7 +365,7 @@ private slots:
     void handleInputMessages();
     void on_displayNames_clicked(bool checked=false);
     void on_find_returnPressed();
-    void on_maidenhead_clicked(bool checked=false);
+    void on_maidenhead_clicked();
     void on_deleteAll_clicked();
     void on_displaySettings_clicked();
     void on_mapTypes_currentIndexChanged(int index);

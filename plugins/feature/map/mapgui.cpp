@@ -543,7 +543,7 @@ void MapGUI::applySettings(bool force)
     }
 }
 
-void MapGUI::on_maidenhead_clicked(bool checked)
+void MapGUI::on_maidenhead_clicked()
 {
     MapMaidenheadDialog dialog;
     dialog.exec();

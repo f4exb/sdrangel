@@ -130,7 +130,6 @@ struct Beacon {
                 // Read data
                 while (fgets(row, sizeof(row), file))
                 {
-                    int id = 0;
                     char *callsign = nullptr;
                     size_t callsignLen = 0;
                     char *frequencyString = nullptr;
