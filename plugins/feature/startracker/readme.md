@@ -36,6 +36,7 @@ Pressing this button displays a settings dialog, that allows you to set:
 * Height above sea level in metres for use in refraction correction.
 * Temperature lapse rate in Kelvin per kilometer for use in refraction correction.
 * Radio frequency being observed in MHz for use in refraction correction.
+* The units to display the solar flux in.
 * The update period in seconds, which controls how frequently azimuth and elevation are re-calculated.
 * The IP port number the Stellarium server listens on.
 * Whether to start a Stellarium telescope server.
@@ -55,7 +56,17 @@ Specifies the longitude in decimal degrees of the observation point (antenna loc
 
 Select the date and time at which the position of the target should be calculated. Select either Now, for the current time, or Custom to manually enter a date and time.
 
-<h3>8: Target</h3>
+<h3>8: LST - Local Sidereal Time</h3>
+
+The LST field displays the local sidereal time at the specified location (5&6) and Solar time (7).
+
+<h3>9: Solar Flux</h3>
+
+The Canadian Solar Radio Monitoring Program measures the Solar flux at 10.7cm three times a day, and is reported in Solar Flux Units (sfu), where 1 SFU equals 10,000 Jansky or 10^-22 Wm^-2Hz-1.
+
+The Solar flux field displays this flux value, using units that can be set in the settings dialog. The field is updated every 24 hours.
+
+<h3>10: Target</h3>
 
 Select a target object to track from the list.
 To manually enter RA (right ascension) and Dec (declination) of an unlisted target, select Custom.
@@ -80,19 +91,19 @@ References:
 * Cassiopeia A, Cygnus A, Taurus A, and Virgo A at ultra-low radio frequencies - https://research.chalmers.se/publication/516438/file/516438_Fulltext.pdf
 * Repeating Jansky - https://www.gb.nrao.edu/~fghigo/JanskyAntenna/RepeatingJansky_memo10.pdf
 
-<h3>9: Right Ascension</h3>
+<h3>11: Right Ascension</h3>
 
 When target is set to Custom, you can specify the right ascension in hours of the target object. This can be specified as a decimal (E.g. 12.23, from 0 to 24) or in hours, minutes and seconds (E.g. 12h05m10.2s or 12 05 10.2). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
 
-<h3>10: Declination</h3>
+<h3>12: Declination</h3>
 
 When target is set to Custom, you can specify the declination in degrees of the target object. This can be specified as a decimal (E.g. 34.6, from -90.0 to 90.0) or in degrees, minutes and seconds (E.g. 34d12m5.6s, 34d12'5.6"  34 12 5.6). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
 
-<h3>11: Azimuth</h3>
+<h3>13: Azimuth</h3>
 
 Displays the calculated azimuth (angle in degrees, clockwise from North) to the object.
 
-<h3>12: Elevation</h3>
+<h3>14: Elevation</h3>
 
 Displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
 
@@ -138,6 +149,8 @@ Set aFOV to the half-power beam width of your antenna, focal length to 100 and f
 Then select the SDRangel telescope reticle and press Ocular view.
 
 <h2>Attribution</h2>
+
+Solar radio flux measurement at 10.7cm is from National Research Council Canada and Natural Resources Canada: https://www.spaceweather.gc.ca/solarflux/sx-4-en.php
 
 Icons are by Adnen Kadri and Erik Madsen, from the Noun Project Noun Project: https://thenounproject.com/
 
