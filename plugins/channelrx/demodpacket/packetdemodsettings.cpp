@@ -60,7 +60,7 @@ QByteArray PacketDemodSettings::serialize() const
     SimpleSerializer s(1);
     s.writeS32(1, m_inputFrequencyOffset);
     s.writeS32(2, m_streamIndex);
-    s.writeString(4, m_filterFrom);
+    s.writeString(3, m_filterFrom);
     s.writeString(4, m_filterTo);
     s.writeString(5, m_filterPID);
 
