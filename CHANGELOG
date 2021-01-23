@@ -1,3 +1,13 @@
+sdrangel (6.5.1-1) unstable; urgency=medium
+
+   * StarTracker feature: many enhancements. PR #757
+   * Packet demod: Fixed issue #750. PR #756
+   * Map feature: many enhancements. PR #755
+   * FileSink: fixes and enhancements. PR #751
+   * PTT feature: fixed copy paste typos. PR #748
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 23 Jan 2021 10:37:33 +0100
+
 sdrangel (6.5.0-1) unstable; urgency=medium
 
    * New PacketDemod Rx channel plugin. PR #746
