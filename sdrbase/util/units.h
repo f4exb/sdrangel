@@ -71,14 +71,16 @@ public:
         return (int)std::round(feetPerMinToMetresPerSecond(fpm));
     }
 
-    static float degreesToRadians(float degrees)
+    template <class T>
+    static T degreesToRadians(T degrees)
     {
-        return degrees * ((float)M_PI) / 180.0f;
+        return degrees * ((T)M_PI) / 180.0f;
     }
 
-    static float radiansToDegrees(float radians)
+    template <class T>
+    static T radiansToDegrees(T radians)
     {
-        return radians * 180.0f / ((float)M_PI);
+        return radians * 180.0f / ((T)M_PI);
     }
 
     static float fahrenheitToCelsius(float fahrenheit)
@@ -218,7 +220,8 @@ public:
         return sfu * 10000.0f;
     }
 
-    static float solarFluxUnitsToWattsPerMetrePerHertz(float sfu)
+    template <class T>
+    static T solarFluxUnitsToWattsPerMetrePerHertz(T sfu)
     {
         return sfu * 1e-22f;
     }

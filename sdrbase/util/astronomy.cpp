@@ -492,6 +492,61 @@ double Astronomy::lstAndRAToLongitude(double lst, double raHours)
     return -longitude; // East positive
 }
 
+// Return right ascension and declination of North Galactic Pole in J2000 Epoch
+void Astronomy::northGalacticPoleJ2000(double& ra, double& dec)
+{
+    ra = 12 + 51.4 / 60.0;
+    dec = 27.13;
+}
+
+// Convert from equatorial to Galactic coordinates, J2000 Epoch
+void Astronomy::equatorialToGalactic(double ra, double dec, double& l, double& b)
+{
+    const double raRad = Units::degreesToRadians(ra * 15.0);
+    const double decRad = Units::degreesToRadians(dec);
+
+    // Calculate RA and dec for North Galactic pole, J2000
+    double ngpRa, ngpDec;
+    northGalacticPoleJ2000(ngpRa, ngpDec);
+    const double ngpRaRad = Units::degreesToRadians(ngpRa * 15.0);
+    const double ngpDecRad = Units::degreesToRadians(ngpDec);
+
+    // Calculate galactic latitude for North Celestial pole, J2000
+    const double ncpLRad = Units::degreesToRadians(122.93192);
+
+    // Calculate galactic longitude in radians
+    double bRad = asin(sin(ngpDecRad)*sin(decRad)+cos(ngpDecRad)*cos(decRad)*cos(raRad - ngpRaRad));
+
+    // Find the two possible solutions for galactic longitude in radians
+    double rhs1 = cos(decRad)*sin(raRad-ngpRaRad)/cos(bRad);
+    double rhs2 = (-cos(decRad)*sin(ngpDecRad)*cos(raRad-ngpRaRad)+sin(decRad)*cos(ngpDecRad))/cos(bRad);
+    double l1 = ncpLRad - asin(rhs1);
+    double l2 = ncpLRad - acos(rhs2);
+
+    // Plug them back in and select solution which is valid for both equations
+    // (Error should be 0, but we have to allow for small numerical differences)
+    // There's probably a better way to solve this.
+    double l1lhs1 = sin(ncpLRad - l1);
+    double l1lhs2 = cos(ncpLRad - l1);
+    double l2lhs1 = sin(ncpLRad - l2);
+    double l2lhs2 = cos(ncpLRad - l2);
+    double l1Diff = abs(l1lhs1 - rhs1) + abs(l1lhs2 - rhs2);
+    double l2Diff = abs(l2lhs1 - rhs1) + abs(l2lhs2 - rhs2);
+    double lRad;
+    if (l1Diff < l2Diff)
+        lRad = l1;
+    else
+        lRad = l2;
+
+    // Convert to degrees in range -90,90 and 0,360
+    b = Units::radiansToDegrees(bRad);
+    l = Units::radiansToDegrees(lRad);
+    if (l < 0.0)
+        l += 360.0;
+    if (l > 360.0)
+        l -= 360.0;
+}
+
 // The following functions are from Starlink Positional Astronomy Library
 // https://github.com/Starlink/pal
 

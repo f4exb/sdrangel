@@ -61,6 +61,9 @@ public:
 
     static double lstAndRAToLongitude(double lst, double raHours);
 
+    static void equatorialToGalactic(double ra, double dec, double& l, double& b);
+    static void northGalacticPoleJ2000(double& ra, double& dec);
+
 protected:
     static double modulo(double a, double b);
 };

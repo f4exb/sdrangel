@@ -41,9 +41,11 @@ struct StarTrackerSettings
     double m_heightAboveSeaLevel; // In metres
     double m_temperatureLapseRate; // In K/km
     double m_frequency;         // Observation frequency in Hz
+    double m_beamwidth;         // Beamwidth in degrees
     uint16_t m_serverPort;
     bool m_enableServer;        // Enable Stellarium server
     enum AzElUnits {DMS, DM, D, Decimal} m_azElUnits;
+    enum SolarFluxData {DRAO_2800, L_245, L_410, L_610, L_1415, L2695, L_4995, L_8800, L_15400, TARGET_FREQ} m_solarFluxData; // What Solar flux density data to display
     enum SolarFluxUnits {SFU, JANSKY, WATTS_M_HZ} m_solarFluxUnits;
     float m_updatePeriod;
     bool m_jnow;                // Use JNOW epoch rather than J2000
