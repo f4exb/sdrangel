@@ -199,7 +199,7 @@ struct Beacon {
                         idx++;
                     }
                     float latitude, longitude;
-                    if (callsign && frequency && locator && Maidenhead::fromMaidenhead(locator, latitude, longitude))
+                    if (callsign && frequencyString && locator && Maidenhead::fromMaidenhead(locator, latitude, longitude))
                     {
                         Beacon *beacon = new Beacon();
                         beacon->m_callsign = callsign;
