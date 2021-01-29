@@ -109,7 +109,7 @@ private:
     double convertSolarFluxUnits(double sfu);
     QString solarFluxUnit();
     void displaySolarFlux();
-    QString getSolarFluxFilename(QDate date);
+    QString getSolarFluxFilename();
     bool readSolarFlux();
     void raDecChanged();
     void updateChartSubSelect();

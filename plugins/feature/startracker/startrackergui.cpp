@@ -882,8 +882,8 @@ void StarTrackerGUI::plotSkyTemperatureChart()
 
 void StarTrackerGUI::plotAreaChanged(const QRectF &plotArea)
 {
-    int width = static_cast<int>(m_chart.plotArea().width());
-    int height = static_cast<int>(m_chart.plotArea().height());
+    int width = static_cast<int>(plotArea.width());
+    int height = static_cast<int>(plotArea.height());
     int viewW = static_cast<int>(ui->chart->width());
     int viewH = static_cast<int>(ui->chart->height());
 
@@ -897,8 +897,7 @@ void StarTrackerGUI::plotAreaChanged(const QRectF &plotArea)
     QImage translated(viewW, viewH, QImage::Format_ARGB32);
     translated.fill(Qt::white);
     QPainter painter(&translated);
-    QPointF topLeft = m_chart.plotArea().topLeft();
-    painter.drawImage(topLeft, image);
+    painter.drawImage(plotArea.topLeft(), image);
 
     m_chart.setPlotAreaBackgroundBrush(translated);
     m_chart.setPlotAreaBackgroundVisible(true);
@@ -1018,7 +1017,7 @@ void StarTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 {
     bool oldState = ui->chartSubSelect->blockSignals(true);
     ui->chartSubSelect->clear();
-    if (ui->chartSelect->currentIndex() == 2)
+    if (index == 2)
     {
         ui->chartSubSelect->addItem(QString("150 MHz 5%1 Equatorial").arg(QChar(0xb0)));
         ui->chartSubSelect->addItem(QString("150 MHz 5%1 Galactic").arg(QChar(0xb0)));
@@ -1037,6 +1036,7 @@ void StarTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 
 void StarTrackerGUI::on_chartSubSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotChart();
 }
 
@@ -1139,8 +1139,7 @@ void StarTrackerGUI::displaySolarFlux()
 
 bool StarTrackerGUI::readSolarFlux()
 {
-    QDate today = QDateTime::currentDateTimeUtc().date();
-    QFile file(getSolarFluxFilename(today));
+    QFile file(getSolarFluxFilename());
     QDateTime lastModified = file.fileTime(QFileDevice::FileModificationTime);
     if (QDateTime::currentDateTime().secsTo(lastModified) >= -(60*60*24))
     {
@@ -1195,7 +1194,7 @@ void StarTrackerGUI::networkManagerFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-QString StarTrackerGUI::getSolarFluxFilename(QDate date)
+QString StarTrackerGUI::getSolarFluxFilename()
 {
     return HttpDownloadManager::downloadDir() + "/solar_flux.srd";
 }
@@ -1206,7 +1205,7 @@ void StarTrackerGUI::updateSolarFlux(bool all)
     if ((m_settings.m_solarFluxData != StarTrackerSettings::DRAO_2800) || all)
     {
         QDate today = QDateTime::currentDateTimeUtc().date();
-        QString solarFluxFile = getSolarFluxFilename(today);
+        QString solarFluxFile = getSolarFluxFilename();
         if (m_dlm.confirmDownload(solarFluxFile))
         {
             QString urlString = QString("http://www.sws.bom.gov.au/Category/World Data Centre/Data Display and Download/Solar Radio/station/learmonth/SRD/%1/L%2.SRD")
@@ -1233,6 +1232,7 @@ void StarTrackerGUI::on_downloadSolarFlux_clicked()
 
 void StarTrackerGUI::downloadFinished(const QString& filename, bool success)
 {
+    (void) filename;
     if (success)
         readSolarFlux();
 }
