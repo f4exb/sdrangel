@@ -16,7 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <algorithm>
+#include <cmath>
 
+#include <QtGlobal>
 #include <QRegExp>
 #include <QDebug>
 #include <QResource>
@@ -28,8 +30,15 @@ FITS::FITS(QString resourceName) :
 {
     QResource m_res(resourceName);
     int m_headerSize = 2880;
+    qint64 m_fileSize;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
     m_data = m_res.uncompressedData();
-    int hLen = std::min((qint64)m_headerSize * 3, m_res.uncompressedSize());   // Could possibly be bigger
+    m_fileSize = m_res.uncompressedSize();
+#else
+    m_data = QByteArray::fromRawData((const char *)m_res.data(), m_res.size());
+    m_fileSize = m_res.size();
+#endif
+    int hLen = std::min((qint64)m_headerSize * 3, m_fileSize);   // Could possibly be bigger
     QByteArray headerBytes = m_data.left(hLen);
     QString header = QString::fromLatin1(headerBytes);
     QRegExp widthRE("NAXIS1 *= *([0-9]+)");
@@ -128,7 +137,13 @@ float FITS::value(int x, int y)
         return v * m_bscale + m_bzero;
     }
     else
-        return *reinterpret_cast<float*>(&v);
+    {
+        // Type-punning via unions apparently undefined behaviour in C++
+        uint32_t i = (uint32_t)v;
+        float f;
+        memcpy(&f, &i, sizeof(f));
+        return f;
+    }
 }
 
 float FITS::scaledValue(int x, int y)
