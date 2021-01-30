@@ -13,5 +13,16 @@
     <file>startracker/moon-young-32.png</file>
     <file>startracker/pulsar-32.png</file>
     <file>startracker/sun-40.png</file>
+    <file>startracker/sun-button-24.png</file>
+    <file>startracker/150mhz_ra_dec.png</file>
+    <file>startracker/408mhz_ra_dec.png</file>
+    <file>startracker/1420mhz_ra_dec.png</file>
+    <file>startracker/150mhz_galactic.png</file>
+    <file>startracker/408mhz_galactic.png</file>
+    <file>startracker/1420mhz_galactic.png</file>
+    <file>startracker/150mhz_ra_dec.fits</file>
+    <file>startracker/408mhz_ra_dec.fits</file>
+    <file>startracker/1420mhz_ra_dec.fits</file>
+    <file>startracker/408mhz_ra_dec_spectral_index.fits</file>
   </qresource>
 </RCC>

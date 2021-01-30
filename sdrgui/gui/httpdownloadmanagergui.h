@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,44 +15,31 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_HTTPDOWNLOADMANAGER_H
-#define INCLUDE_HTTPDOWNLOADMANAGER_H
+#ifndef INCLUDE_HTTPDOWNLOADMANAGERGUI_H
+#define INCLUDE_HTTPDOWNLOADMANAGERGUI_H
 
-#include <QtCore>
-#include <QtNetwork>
+#include "util/httpdownloadmanager.h"
 
 #include "export.h"
 
-class QSslError;
+class QWidget;
+class QProgressDialog;
 
-// Class to download files via http and write them to disk
-class SDRBASE_API HttpDownloadManager : public QObject
+// Class to download files via http and write them to disk with progress dialog
+class SDRGUI_API HttpDownloadManagerGUI : public HttpDownloadManager
 {
-    Q_OBJECT
 public:
-    HttpDownloadManager();
-    QNetworkReply *download(const QUrl &url, const QString &filename);
+    HttpDownloadManagerGUI();
+    QNetworkReply *download(const QUrl &url, const QString &filename, QWidget *parent = nullptr);
 
-    static QString downloadDir();
-
-protected:
-    static qint64 fileAgeInDays(const QString& filename);
+    static bool confirmDownload(const QString& filename, QWidget *parent = nullptr, int maxAge = 100);
 
 private:
-    QNetworkAccessManager manager;
-    QVector<QNetworkReply *> downloads;
-    QVector<QString> filenames;
-
-    static bool writeToFile(const QString &filename, QIODevice *data);
-    static bool isHttpRedirect(QNetworkReply *reply);
+    QVector<QString> m_filenames;
+    QVector<QProgressDialog *> m_progressDialogs;
 
 public slots:
-    void downloadFinished(QNetworkReply *reply);
-    void sslErrors(const QList<QSslError> &errors);
-
-signals:
-    void downloadComplete(const QString &filename, bool success);
-
+    void downloadCompleteGUI(const QString &filename, bool success);
 };
 
-#endif /* INCLUDE_HTTPDOWNLOADMANAGER_H */
+#endif /* INCLUDE_HTTPDOWNLOADMANAGERGUI_H */

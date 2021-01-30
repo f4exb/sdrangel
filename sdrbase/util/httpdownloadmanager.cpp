@@ -18,6 +18,8 @@
 #include "httpdownloadmanager.h"
 
 #include <QDebug>
+#include <QFile>
+#include <QDateTime>
 
 HttpDownloadManager::HttpDownloadManager()
 {
@@ -34,8 +36,30 @@ QNetworkReply *HttpDownloadManager::download(const QUrl &url, const QString &fil
     qDebug() << "HttpDownloadManager: Downloading from " << url << " to " << filename;
     downloads.append(reply);
     filenames.append(filename);
-
     return reply;
+}
+
+qint64 HttpDownloadManager::fileAgeInDays(const QString& filename)
+{
+    QFile file(filename);
+    if (file.exists())
+    {
+        QDateTime modified = file.fileTime(QFileDevice::FileModificationTime);
+        if (modified.isValid())
+            return modified.daysTo(QDateTime::currentDateTime());
+        else
+            return -1;
+    }
+    return -1;
+}
+
+// Get default directory to write downloads to
+QString HttpDownloadManager::downloadDir()
+{
+    // Get directory to store app data in
+    QStringList locations = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
+    // First dir is writable
+    return locations[0];
 }
 
 void HttpDownloadManager::sslErrors(const QList<QSslError> &sslErrors)

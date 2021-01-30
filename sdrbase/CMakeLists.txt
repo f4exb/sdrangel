@@ -184,6 +184,7 @@ set(sdrbase_SOURCES
     util/csv.cpp
     util/db.cpp
     util/fixedtraits.cpp
+    util/fits.cpp
     util/httpdownloadmanager.cpp
     util/lfsr.cpp
     util/maidenhead.cpp
@@ -377,6 +378,7 @@ set(sdrbase_HEADERS
     util/doublebuffer.h
     util/doublebufferfifo.h
     util/fixedtraits.h
+    util/fits.h
     util/httpdownloadmanager.h
     util/incrementalarray.h
     util/incrementalvector.h

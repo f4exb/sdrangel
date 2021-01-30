@@ -42,10 +42,12 @@ void StarTrackerSettings::resetToDefaults()
     m_humidity = 80.0;
     m_heightAboveSeaLevel = 0.0;
     m_temperatureLapseRate = 6.49;
-    m_frequency = 435000000;
+    m_frequency = 432000000;
+    m_beamwidth = 25.0;
     m_enableServer = true;
     m_serverPort = 10001;
     m_azElUnits = DM;
+    m_solarFluxData = DRAO_2800;
     m_solarFluxUnits = SFU;
     m_updatePeriod = 1.0;
     m_jnow = false;
@@ -94,6 +96,8 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeU32(27, m_reverseAPIFeatureSetIndex);
     s.writeU32(28, m_reverseAPIFeatureIndex);
     s.writeU32(29, m_solarFluxUnits);
+    s.writeDouble(30, m_beamwidth);
+    s.writeU32(31, m_solarFluxData);
 
     return s.final();
 }
@@ -159,6 +163,8 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
 
         d.readU32(29, (quint32 *)&m_solarFluxUnits, SFU);
+        d.readDouble(30, &m_beamwidth, 25.0);
+        d.readU32(31, (quint32 *)&m_solarFluxData, DRAO_2800);
 
         return true;
     }
