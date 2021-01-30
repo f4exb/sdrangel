@@ -1,3 +1,10 @@
+sdrangel (6.5.2-1) unstable; urgency=medium
+
+   * StarTracker feature: more updates. PR #761
+   * SigMFFileSink: fixed spectrum GUI
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 30 Jan 2021 17:58:02 +0100
+
 sdrangel (6.5.1-1) unstable; urgency=medium
 
    * StarTracker feature: many enhancements. PR #757
