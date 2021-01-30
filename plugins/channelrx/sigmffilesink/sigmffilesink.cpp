@@ -84,6 +84,12 @@ SigMFFileSink::~SigMFFileSink()
     delete m_basebandSink;
 }
 
+void SigMFFileSink::setMessageQueueToGUI(MessageQueue* queue)
+{
+    BasebandSampleSink::setMessageQueueToGUI(queue);
+    m_basebandSink->setMessageQueueToGUI(queue);
+}
+
 uint32_t SigMFFileSink::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
