@@ -33,7 +33,7 @@ class QNetworkReply;
 class DeviceAPI;
 class XTRXMIThread;
 class XTRXMOThread;
-class DeviceLimeSDRParams;
+struct DeviceLimeSDRParams;
 
 #endif // PLUGINS_SAMPLEMIMO_XTRXMIMO_XTRXMIMO_H_
 
