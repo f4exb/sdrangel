@@ -293,23 +293,26 @@ set(CMAKE_AUTORCC TRUE)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # Qt requirements
-set(_required_qt_version "5.6.0")
-find_package(Qt5 COMPONENTS Core REQUIRED)
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt5 COMPONENTS WebSockets REQUIRED)
-find_package(Qt5 COMPONENTS Multimedia REQUIRED)
-find_package(Qt5 COMPONENTS MultimediaWidgets REQUIRED)
-find_package(Qt5 COMPONENTS SerialPort)
+find_package(Qt5
+               REQUIRED COMPONENTS
+                 Core
+                 Widgets
+                 WebSockets
+                 Multimedia
+                 MultimediaWidgets
+                 SerialPort)
 
 # for the server we don't need OpenGL/Qt Quick components
 if (BUILD_GUI)
     find_package(OpenGL REQUIRED)
-    find_package(Qt5 COMPONENTS OpenGL REQUIRED)
-    find_package(Qt5 COMPONENTS Quick)
-    find_package(Qt5 COMPONENTS QuickWidgets)
-    find_package(Qt5 COMPONENTS Positioning)
-    find_package(Qt5 COMPONENTS Location)
-    find_package(Qt5 COMPONENTS Charts)
+    find_package(Qt5
+                   REQUIRED COMPONENTS
+                     OpenGL
+                     Quick
+                     QuickWidgets
+                     Positioning
+                     Location
+                     Charts)
 endif()
 
 # other requirements
