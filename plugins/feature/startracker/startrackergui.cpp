@@ -1206,7 +1206,7 @@ void StarTrackerGUI::updateSolarFlux(bool all)
     {
         QDate today = QDateTime::currentDateTimeUtc().date();
         QString solarFluxFile = getSolarFluxFilename();
-        if (m_dlm.confirmDownload(solarFluxFile))
+        if (m_dlm.confirmDownload(solarFluxFile, nullptr, 1))
         {
             QString urlString = QString("http://www.sws.bom.gov.au/Category/World Data Centre/Data Display and Download/Solar Radio/station/learmonth/SRD/%1/L%2.SRD")
                                     .arg(today.year()).arg(today.toString("yyMMdd"));
