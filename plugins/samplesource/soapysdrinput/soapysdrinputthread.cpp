@@ -100,11 +100,13 @@ void SoapySDRInputThread::run()
 
         qDebug("SoapySDRInputThread::run: format: %s fullScale: %f", format.c_str(), fullScale);
 
-        if ((format == "CS8") && (fullScale == 128.0)) { // 8 bit signed - native
+        // Older version of soapy and it's plugins were incorrectly reporting
+        // (1 << n) instead (1 << n) - 1. Accept both values.
+        if ((format == "CS8") && (fullScale == 127.0 || fullScale == 128.0)) { // 8 bit signed - native
             m_decimatorType = Decimator8;
-        } else if ((format == "CS16") && (fullScale == 2048.0)) { // 12 bit signed - native
+        } else if ((format == "CS16") && (fullScale == 2047.0 || fullScale == 2048.0)) { // 12 bit signed - native
             m_decimatorType = Decimator12;
-        } else if ((format == "CS16") && (fullScale == 32768.0)) { // 16 bit signed - native
+        } else if ((format == "CS16") && (fullScale == 32767.0 || fullScale == 32768.0 )) { // 16 bit signed - native
             m_decimatorType = Decimator16;
         } else { // for other types make a conversion to float
             m_decimatorType = DecimatorFloat;
