@@ -29,6 +29,9 @@ if(NOT SERVER_MODE)
         startrackersettingsdialog.cpp
         startrackersettingsdialog.ui
         startracker.qrc
+        startracker150mhz.qrc
+        startracker408mhz.qrc
+        startracker1420mhz.qrc
     )
     set(startracker_HEADERS
         ${startracker_HEADERS}
