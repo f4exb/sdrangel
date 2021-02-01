@@ -111,6 +111,12 @@ void AirspyHFWorker::callbackIQ(const float* buf, qint32 len)
     case 6:
         m_decimatorsIQ.decimate64_cen(&it, buf, len);
         break;
+    case 7:
+        m_decimatorsIQ.decimate128_cen(&it, buf, len);
+        break;
+    case 8:
+        m_decimatorsIQ.decimate256_cen(&it, buf, len);
+        break;
     default:
         break;
     }
@@ -144,6 +150,12 @@ void AirspyHFWorker::callbackQI(const float* buf, qint32 len)
         break;
     case 6:
         m_decimatorsQI.decimate64_cen(&it, buf, len);
+        break;
+    case 7:
+        m_decimatorsQI.decimate128_cen(&it, buf, len);
+        break;
+    case 8:
+        m_decimatorsQI.decimate256_cen(&it, buf, len);
         break;
     default:
         break;
