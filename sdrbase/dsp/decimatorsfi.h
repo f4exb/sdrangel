@@ -47,6 +47,8 @@ public:
     void decimate64_inf(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate64_sup(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
     void decimate64_cen(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    void decimate128_cen(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
+    void decimate256_cen(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ);
 
     IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, IQOrder> m_decimator2;  // 1st stages
     IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, true> m_decimator2s; // 1st stages - straight
@@ -55,6 +57,8 @@ public:
     IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, true> m_decimator16; // 4th stages
     IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, true> m_decimator32; // 5th stages
     IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, true> m_decimator64; // 6th stages
+    IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, true> m_decimator128; // 7th stages
+    IntHalfbandFilterEOF<DECIMATORSFI_HB_FILTER_ORDER, true> m_decimator256; // 8th stages
 };
 
 
@@ -1131,6 +1135,847 @@ void DecimatorsFI<IQOrder>::decimate64_cen(SampleVector::iterator* it, const flo
 
         (**it).setReal(intbuf[62] * SDR_RX_SCALED);
         (**it).setImag(intbuf[63] * SDR_RX_SCALED);
+        ++(*it);
+    }
+}
+
+template<bool IQOrder>
+void DecimatorsFI<IQOrder>::decimate128_cen(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+{
+    float intbuf[128];
+
+    for (int pos = 0; pos < nbIAndQ - 255; pos += 256)
+    {
+        float *intbufp;
+        int posi;
+
+        intbufp = intbuf;
+        posi = pos;
+        for (int i = 0; i < 4; i++)
+        {
+            intbufp[0]  = buf[posi+2];
+            intbufp[1]  = buf[posi+3];
+            intbufp[2]  = buf[posi+6];
+            intbufp[3]  = buf[posi+7];
+            intbufp[4]  = buf[posi+10];
+            intbufp[5]  = buf[posi+11];
+            intbufp[6]  = buf[posi+14];
+            intbufp[7]  = buf[posi+15];
+            intbufp[8]  = buf[posi+18];
+            intbufp[9]  = buf[posi+19];
+            intbufp[10] = buf[posi+22];
+            intbufp[11] = buf[posi+23];
+            intbufp[12] = buf[posi+26];
+            intbufp[13] = buf[posi+27];
+            intbufp[14] = buf[posi+30];
+            intbufp[15] = buf[posi+31];
+            intbufp[16] = buf[posi+34];
+            intbufp[17] = buf[posi+35];
+            intbufp[18] = buf[posi+38];
+            intbufp[19] = buf[posi+39];
+            intbufp[20] = buf[posi+42];
+            intbufp[21] = buf[posi+43];
+            intbufp[22] = buf[posi+46];
+            intbufp[23] = buf[posi+47];
+            intbufp[24] = buf[posi+50];
+            intbufp[25] = buf[posi+51];
+            intbufp[26] = buf[posi+54];
+            intbufp[27] = buf[posi+55];
+            intbufp[28] = buf[posi+58];
+            intbufp[29] = buf[posi+59];
+            intbufp[30] = buf[posi+62];
+            intbufp[31] = buf[posi+63];
+            intbufp += 32;
+            posi += 64;
+        }
+
+        intbufp = intbuf;
+        posi = pos;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator2.myDecimate(
+                    buf[posi+0],
+                    buf[posi+1],
+                    &intbufp[0],
+                    &intbufp[1]);
+            m_decimator2.myDecimate(
+                    buf[posi+4],
+                    buf[posi+5],
+                    &intbufp[2],
+                    &intbufp[3]);
+            m_decimator2.myDecimate(
+                    buf[posi+8],
+                    buf[posi+9],
+                    &intbufp[4],
+                    &intbufp[5]);
+            m_decimator2.myDecimate(
+                    buf[posi+12],
+                    buf[posi+13],
+                    &intbufp[6],
+                    &intbufp[7]);
+            m_decimator2.myDecimate(
+                    buf[posi+16],
+                    buf[posi+17],
+                    &intbufp[8],
+                    &intbufp[9]);
+            m_decimator2.myDecimate(
+                    buf[posi+20],
+                    buf[posi+21],
+                    &intbufp[10],
+                    &intbufp[11]);
+            m_decimator2.myDecimate(
+                    buf[posi+24],
+                    buf[posi+25],
+                    &intbufp[12],
+                    &intbufp[13]);
+            m_decimator2.myDecimate(
+                    buf[posi+28],
+                    buf[posi+29],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator2.myDecimate(
+                    buf[posi+32],
+                    buf[posi+33],
+                    &intbufp[16],
+                    &intbufp[17]);
+            m_decimator2.myDecimate(
+                    buf[posi+36],
+                    buf[posi+37],
+                    &intbufp[18],
+                    &intbufp[19]);
+            m_decimator2.myDecimate(
+                    buf[posi+40],
+                    buf[posi+41],
+                    &intbufp[20],
+                    &intbufp[21]);
+            m_decimator2.myDecimate(
+                    buf[posi+44],
+                    buf[posi+45],
+                    &intbufp[22],
+                    &intbufp[23]);
+            m_decimator2.myDecimate(
+                    buf[posi+48],
+                    buf[posi+49],
+                    &intbufp[24],
+                    &intbufp[25]);
+            m_decimator2.myDecimate(
+                    buf[posi+52],
+                    buf[posi+53],
+                    &intbufp[26],
+                    &intbufp[27]);
+            m_decimator2.myDecimate(
+                    buf[posi+56],
+                    buf[posi+57],
+                    &intbufp[28],
+                    &intbufp[29]);
+            m_decimator2.myDecimate(
+                    buf[posi+60],
+                    buf[posi+61],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator2.myDecimate(
+                    buf[posi+64],
+                    buf[posi+65],
+                    &intbufp[32],
+                    &intbufp[33]);
+            m_decimator2.myDecimate(
+                    buf[posi+68],
+                    buf[posi+69],
+                    &intbufp[34],
+                    &intbufp[35]);
+            m_decimator2.myDecimate(
+                    buf[posi+72],
+                    buf[posi+73],
+                    &intbufp[36],
+                    &intbufp[37]);
+            m_decimator2.myDecimate(
+                    buf[posi+76],
+                    buf[posi+77],
+                    &intbufp[38],
+                    &intbufp[39]);
+            m_decimator2.myDecimate(
+                    buf[posi+80],
+                    buf[posi+81],
+                    &intbufp[40],
+                    &intbufp[41]);
+            m_decimator2.myDecimate(
+                    buf[posi+84],
+                    buf[posi+85],
+                    &intbufp[42],
+                    &intbufp[43]);
+            m_decimator2.myDecimate(
+                    buf[posi+88],
+                    buf[posi+89],
+                    &intbufp[44],
+                    &intbufp[45]);
+            m_decimator2.myDecimate(
+                    buf[posi+92],
+                    buf[posi+93],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator2.myDecimate(
+                    buf[posi+96],
+                    buf[posi+97],
+                    &intbufp[48],
+                    &intbufp[49]);
+            m_decimator2.myDecimate(
+                    buf[posi+100],
+                    buf[posi+101],
+                    &intbufp[50],
+                    &intbufp[51]);
+            m_decimator2.myDecimate(
+                    buf[posi+104],
+                    buf[posi+105],
+                    &intbufp[52],
+                    &intbufp[53]);
+            m_decimator2.myDecimate(
+                    buf[posi+108],
+                    buf[posi+109],
+                    &intbufp[54],
+                    &intbufp[55]);
+            m_decimator2.myDecimate(
+                    buf[posi+112],
+                    buf[posi+113],
+                    &intbufp[56],
+                    &intbufp[57]);
+            m_decimator2.myDecimate(
+                    buf[posi+116],
+                    buf[posi+117],
+                    &intbufp[58],
+                    &intbufp[59]);
+            m_decimator2.myDecimate(
+                    buf[posi+120],
+                    buf[posi+121],
+                    &intbufp[60],
+                    &intbufp[61]);
+            m_decimator2.myDecimate(
+                    buf[posi+124],
+                    buf[posi+125],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+            posi += 128;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator4.myDecimate(
+                    intbufp[0],
+                    intbufp[1],
+                    &intbufp[2],
+                    &intbufp[3]);
+            m_decimator4.myDecimate(
+                    intbufp[4],
+                    intbufp[5],
+                    &intbufp[6],
+                    &intbufp[7]);
+            m_decimator4.myDecimate(
+                    intbufp[8],
+                    intbufp[9],
+                    &intbufp[10],
+                    &intbufp[11]);
+            m_decimator4.myDecimate(
+                    intbufp[12],
+                    intbufp[13],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator4.myDecimate(
+                    intbufp[16],
+                    intbufp[17],
+                    &intbufp[18],
+                    &intbufp[19]);
+            m_decimator4.myDecimate(
+                    intbufp[20],
+                    intbufp[21],
+                    &intbufp[22],
+                    &intbufp[23]);
+            m_decimator4.myDecimate(
+                    intbufp[24],
+                    intbufp[25],
+                    &intbufp[26],
+                    &intbufp[27]);
+            m_decimator4.myDecimate(
+                    intbufp[28],
+                    intbufp[29],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator4.myDecimate(
+                    intbufp[32],
+                    intbufp[33],
+                    &intbufp[34],
+                    &intbufp[35]);
+            m_decimator4.myDecimate(
+                    intbufp[36],
+                    intbufp[37],
+                    &intbufp[38],
+                    &intbufp[39]);
+            m_decimator4.myDecimate(
+                    intbufp[40],
+                    intbufp[41],
+                    &intbufp[42],
+                    &intbufp[43]);
+            m_decimator4.myDecimate(
+                    intbufp[44],
+                    intbufp[45],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator4.myDecimate(
+                    intbufp[48],
+                    intbufp[49],
+                    &intbufp[50],
+                    &intbufp[51]);
+            m_decimator4.myDecimate(
+                    intbufp[52],
+                    intbufp[53],
+                    &intbufp[54],
+                    &intbufp[55]);
+            m_decimator4.myDecimate(
+                    intbufp[56],
+                    intbufp[57],
+                    &intbufp[58],
+                    &intbufp[59]);
+            m_decimator4.myDecimate(
+                    intbufp[60],
+                    intbufp[61],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator8.myDecimate(
+                    intbufp[2],
+                    intbufp[3],
+                    &intbufp[6],
+                    &intbufp[7]);
+            m_decimator8.myDecimate(
+                    intbufp[10],
+                    intbufp[11],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator8.myDecimate(
+                    intbufp[18],
+                    intbufp[19],
+                    &intbufp[22],
+                    &intbufp[23]);
+            m_decimator8.myDecimate(
+                    intbufp[26],
+                    intbufp[27],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator8.myDecimate(
+                    intbufp[34],
+                    intbufp[35],
+                    &intbufp[38],
+                    &intbufp[39]);
+            m_decimator8.myDecimate(
+                    intbufp[42],
+                    intbufp[43],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator8.myDecimate(
+                    intbufp[50],
+                    intbufp[51],
+                    &intbufp[54],
+                    &intbufp[55]);
+            m_decimator8.myDecimate(
+                    intbufp[58],
+                    intbufp[59],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator16.myDecimate(
+                    intbufp[6],
+                    intbufp[7],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator16.myDecimate(
+                    intbufp[22],
+                    intbufp[23],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator16.myDecimate(
+                    intbufp[38],
+                    intbufp[39],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator16.myDecimate(
+                    intbufp[54],
+                    intbufp[55],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator32.myDecimate(
+                    intbufp[14],
+                    intbufp[15],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator32.myDecimate(
+                    intbufp[46],
+                    intbufp[47],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator64.myDecimate(
+                    intbufp[30],
+                    intbufp[31],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        m_decimator128.myDecimate(
+                intbuf[62],
+                intbuf[63],
+                &intbuf[126],
+                &intbuf[127]);
+
+        (**it).setReal(intbuf[126] * SDR_RX_SCALED);
+        (**it).setImag(intbuf[127] * SDR_RX_SCALED);
+        ++(*it);
+    }
+}
+
+template<bool IQOrder>
+void DecimatorsFI<IQOrder>::decimate256_cen(SampleVector::iterator* it, const float* buf, qint32 nbIAndQ)
+{
+    float intbuf[256];
+
+    for (int pos = 0; pos < nbIAndQ - 511; pos += 512)
+    {
+        float *intbufp;
+        int posi;
+
+        intbufp = intbuf;
+        posi = pos;
+        for (int i = 0; i < 8; i++)
+        {
+            intbufp[0]  = buf[posi+2];
+            intbufp[1]  = buf[posi+3];
+            intbufp[2]  = buf[posi+6];
+            intbufp[3]  = buf[posi+7];
+            intbufp[4]  = buf[posi+10];
+            intbufp[5]  = buf[posi+11];
+            intbufp[6]  = buf[posi+14];
+            intbufp[7]  = buf[posi+15];
+            intbufp[8]  = buf[posi+18];
+            intbufp[9]  = buf[posi+19];
+            intbufp[10] = buf[posi+22];
+            intbufp[11] = buf[posi+23];
+            intbufp[12] = buf[posi+26];
+            intbufp[13] = buf[posi+27];
+            intbufp[14] = buf[posi+30];
+            intbufp[15] = buf[posi+31];
+            intbufp[16] = buf[posi+34];
+            intbufp[17] = buf[posi+35];
+            intbufp[18] = buf[posi+38];
+            intbufp[19] = buf[posi+39];
+            intbufp[20] = buf[posi+42];
+            intbufp[21] = buf[posi+43];
+            intbufp[22] = buf[posi+46];
+            intbufp[23] = buf[posi+47];
+            intbufp[24] = buf[posi+50];
+            intbufp[25] = buf[posi+51];
+            intbufp[26] = buf[posi+54];
+            intbufp[27] = buf[posi+55];
+            intbufp[28] = buf[posi+58];
+            intbufp[29] = buf[posi+59];
+            intbufp[30] = buf[posi+62];
+            intbufp[31] = buf[posi+63];
+            intbufp += 32;
+            posi += 64;
+        }
+
+        intbufp = intbuf;
+        posi = pos;
+        for (int i = 0; i < 4; i++)
+        {
+            m_decimator2.myDecimate(
+                    buf[posi+0],
+                    buf[posi+1],
+                    &intbufp[0],
+                    &intbufp[1]);
+            m_decimator2.myDecimate(
+                    buf[posi+4],
+                    buf[posi+5],
+                    &intbufp[2],
+                    &intbufp[3]);
+            m_decimator2.myDecimate(
+                    buf[posi+8],
+                    buf[posi+9],
+                    &intbufp[4],
+                    &intbufp[5]);
+            m_decimator2.myDecimate(
+                    buf[posi+12],
+                    buf[posi+13],
+                    &intbufp[6],
+                    &intbufp[7]);
+            m_decimator2.myDecimate(
+                    buf[posi+16],
+                    buf[posi+17],
+                    &intbufp[8],
+                    &intbufp[9]);
+            m_decimator2.myDecimate(
+                    buf[posi+20],
+                    buf[posi+21],
+                    &intbufp[10],
+                    &intbufp[11]);
+            m_decimator2.myDecimate(
+                    buf[posi+24],
+                    buf[posi+25],
+                    &intbufp[12],
+                    &intbufp[13]);
+            m_decimator2.myDecimate(
+                    buf[posi+28],
+                    buf[posi+29],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator2.myDecimate(
+                    buf[posi+32],
+                    buf[posi+33],
+                    &intbufp[16],
+                    &intbufp[17]);
+            m_decimator2.myDecimate(
+                    buf[posi+36],
+                    buf[posi+37],
+                    &intbufp[18],
+                    &intbufp[19]);
+            m_decimator2.myDecimate(
+                    buf[posi+40],
+                    buf[posi+41],
+                    &intbufp[20],
+                    &intbufp[21]);
+            m_decimator2.myDecimate(
+                    buf[posi+44],
+                    buf[posi+45],
+                    &intbufp[22],
+                    &intbufp[23]);
+            m_decimator2.myDecimate(
+                    buf[posi+48],
+                    buf[posi+49],
+                    &intbufp[24],
+                    &intbufp[25]);
+            m_decimator2.myDecimate(
+                    buf[posi+52],
+                    buf[posi+53],
+                    &intbufp[26],
+                    &intbufp[27]);
+            m_decimator2.myDecimate(
+                    buf[posi+56],
+                    buf[posi+57],
+                    &intbufp[28],
+                    &intbufp[29]);
+            m_decimator2.myDecimate(
+                    buf[posi+60],
+                    buf[posi+61],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator2.myDecimate(
+                    buf[posi+64],
+                    buf[posi+65],
+                    &intbufp[32],
+                    &intbufp[33]);
+            m_decimator2.myDecimate(
+                    buf[posi+68],
+                    buf[posi+69],
+                    &intbufp[34],
+                    &intbufp[35]);
+            m_decimator2.myDecimate(
+                    buf[posi+72],
+                    buf[posi+73],
+                    &intbufp[36],
+                    &intbufp[37]);
+            m_decimator2.myDecimate(
+                    buf[posi+76],
+                    buf[posi+77],
+                    &intbufp[38],
+                    &intbufp[39]);
+            m_decimator2.myDecimate(
+                    buf[posi+80],
+                    buf[posi+81],
+                    &intbufp[40],
+                    &intbufp[41]);
+            m_decimator2.myDecimate(
+                    buf[posi+84],
+                    buf[posi+85],
+                    &intbufp[42],
+                    &intbufp[43]);
+            m_decimator2.myDecimate(
+                    buf[posi+88],
+                    buf[posi+89],
+                    &intbufp[44],
+                    &intbufp[45]);
+            m_decimator2.myDecimate(
+                    buf[posi+92],
+                    buf[posi+93],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator2.myDecimate(
+                    buf[posi+96],
+                    buf[posi+97],
+                    &intbufp[48],
+                    &intbufp[49]);
+            m_decimator2.myDecimate(
+                    buf[posi+100],
+                    buf[posi+101],
+                    &intbufp[50],
+                    &intbufp[51]);
+            m_decimator2.myDecimate(
+                    buf[posi+104],
+                    buf[posi+105],
+                    &intbufp[52],
+                    &intbufp[53]);
+            m_decimator2.myDecimate(
+                    buf[posi+108],
+                    buf[posi+109],
+                    &intbufp[54],
+                    &intbufp[55]);
+            m_decimator2.myDecimate(
+                    buf[posi+112],
+                    buf[posi+113],
+                    &intbufp[56],
+                    &intbufp[57]);
+            m_decimator2.myDecimate(
+                    buf[posi+116],
+                    buf[posi+117],
+                    &intbufp[58],
+                    &intbufp[59]);
+            m_decimator2.myDecimate(
+                    buf[posi+120],
+                    buf[posi+121],
+                    &intbufp[60],
+                    &intbufp[61]);
+            m_decimator2.myDecimate(
+                    buf[posi+124],
+                    buf[posi+125],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+            posi += 128;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 4; i++)
+        {
+            m_decimator4.myDecimate(
+                    intbufp[0],
+                    intbufp[1],
+                    &intbufp[2],
+                    &intbufp[3]);
+            m_decimator4.myDecimate(
+                    intbufp[4],
+                    intbufp[5],
+                    &intbufp[6],
+                    &intbufp[7]);
+            m_decimator4.myDecimate(
+                    intbufp[8],
+                    intbufp[9],
+                    &intbufp[10],
+                    &intbufp[11]);
+            m_decimator4.myDecimate(
+                    intbufp[12],
+                    intbufp[13],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator4.myDecimate(
+                    intbufp[16],
+                    intbufp[17],
+                    &intbufp[18],
+                    &intbufp[19]);
+            m_decimator4.myDecimate(
+                    intbufp[20],
+                    intbufp[21],
+                    &intbufp[22],
+                    &intbufp[23]);
+            m_decimator4.myDecimate(
+                    intbufp[24],
+                    intbufp[25],
+                    &intbufp[26],
+                    &intbufp[27]);
+            m_decimator4.myDecimate(
+                    intbufp[28],
+                    intbufp[29],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator4.myDecimate(
+                    intbufp[32],
+                    intbufp[33],
+                    &intbufp[34],
+                    &intbufp[35]);
+            m_decimator4.myDecimate(
+                    intbufp[36],
+                    intbufp[37],
+                    &intbufp[38],
+                    &intbufp[39]);
+            m_decimator4.myDecimate(
+                    intbufp[40],
+                    intbufp[41],
+                    &intbufp[42],
+                    &intbufp[43]);
+            m_decimator4.myDecimate(
+                    intbufp[44],
+                    intbufp[45],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator4.myDecimate(
+                    intbufp[48],
+                    intbufp[49],
+                    &intbufp[50],
+                    &intbufp[51]);
+            m_decimator4.myDecimate(
+                    intbufp[52],
+                    intbufp[53],
+                    &intbufp[54],
+                    &intbufp[55]);
+            m_decimator4.myDecimate(
+                    intbufp[56],
+                    intbufp[57],
+                    &intbufp[58],
+                    &intbufp[59]);
+            m_decimator4.myDecimate(
+                    intbufp[60],
+                    intbufp[61],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 4; i++)
+        {
+            m_decimator8.myDecimate(
+                    intbufp[2],
+                    intbufp[3],
+                    &intbufp[6],
+                    &intbufp[7]);
+            m_decimator8.myDecimate(
+                    intbufp[10],
+                    intbufp[11],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator8.myDecimate(
+                    intbufp[18],
+                    intbufp[19],
+                    &intbufp[22],
+                    &intbufp[23]);
+            m_decimator8.myDecimate(
+                    intbufp[26],
+                    intbufp[27],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator8.myDecimate(
+                    intbufp[34],
+                    intbufp[35],
+                    &intbufp[38],
+                    &intbufp[39]);
+            m_decimator8.myDecimate(
+                    intbufp[42],
+                    intbufp[43],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator8.myDecimate(
+                    intbufp[50],
+                    intbufp[51],
+                    &intbufp[54],
+                    &intbufp[55]);
+            m_decimator8.myDecimate(
+                    intbufp[58],
+                    intbufp[59],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 4; i++)
+        {
+            m_decimator16.myDecimate(
+                    intbufp[6],
+                    intbufp[7],
+                    &intbufp[14],
+                    &intbufp[15]);
+            m_decimator16.myDecimate(
+                    intbufp[22],
+                    intbufp[23],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator16.myDecimate(
+                    intbufp[38],
+                    intbufp[39],
+                    &intbufp[46],
+                    &intbufp[47]);
+            m_decimator16.myDecimate(
+                    intbufp[54],
+                    intbufp[55],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 4; i++)
+        {
+            m_decimator32.myDecimate(
+                    intbufp[14],
+                    intbufp[15],
+                    &intbufp[30],
+                    &intbufp[31]);
+            m_decimator32.myDecimate(
+                    intbufp[46],
+                    intbufp[47],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 4; i++)
+        {
+            m_decimator64.myDecimate(
+                    intbufp[30],
+                    intbufp[31],
+                    &intbufp[62],
+                    &intbufp[63]);
+            intbufp += 64;
+        }
+
+        intbufp = intbuf;
+        for (int i = 0; i < 2; i++)
+        {
+            m_decimator128.myDecimate(
+                    intbufp[62],
+                    intbufp[63],
+                    &intbufp[126],
+                    &intbufp[127]);
+            intbufp += 128;
+        }
+
+        m_decimator256.myDecimate(
+                intbuf[126],
+                intbuf[127],
+                &intbuf[254],
+                &intbuf[255]);
+
+        (**it).setReal(intbuf[254] * SDR_RX_SCALED);
+        (**it).setImag(intbuf[255] * SDR_RX_SCALED);
         ++(*it);
     }
 }

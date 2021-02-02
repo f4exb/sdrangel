@@ -71,7 +71,7 @@ Although the combo box is there to present a choice of sample rates at present t
 
 <h3>8: Decimation factor</h3>
 
-The I/Q stream from the AirspyHF to host is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64. When using audio channel plugins (AM, DSD, NFM, SSB...) please make sure that the sample rate is not less than the audio sample rate.
+The I/Q stream from the AirspyHF to host is downsampled by a power of two before being sent to the passband. Possible values are increasing powers of two: 1 (no decimation), 2, 4, 8, 16, 32, 64, 128, 256. When using audio channel plugins (AM, DSD, NFM, SSB...) please make sure that the sample rate is not less than the audio sample rate.
 
 <h3>9: Transverter mode open dialog</h3>
 
