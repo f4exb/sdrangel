@@ -1965,7 +1965,7 @@ void DecimatorsFI<IQOrder>::decimate256_cen(SampleVector::iterator* it, const fl
                     intbufp[63],
                     &intbufp[126],
                     &intbufp[127]);
-            intbufp += 64;
+            intbufp += 128;
         }
 
         m_decimator256.myDecimate(
