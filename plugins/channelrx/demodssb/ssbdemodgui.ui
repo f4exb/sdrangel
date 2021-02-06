@@ -682,6 +682,12 @@
           <height>24</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Audio volume in dB</string>
+        </property>
+        <property name="maximum">
+         <number>40</number>
+        </property>
         <property name="pageStep">
          <number>1</number>
         </property>
@@ -689,14 +695,11 @@
       </item>
       <item>
        <widget class="QLabel" name="volumeText">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
+        <property name="toolTip">
+         <string>Audio volume in dB</string>
         </property>
         <property name="text">
-         <string>2.0</string>
+         <string>10</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
