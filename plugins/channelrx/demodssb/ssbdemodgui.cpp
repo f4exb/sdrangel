@@ -147,8 +147,8 @@ void SSBDemodGUI::on_lowCut_valueChanged(int value)
 
 void SSBDemodGUI::on_volume_valueChanged(int value)
 {
-	ui->volumeText->setText(QString("%1").arg(value / 10.0, 0, 'f', 1));
-	m_settings.m_volume = value / 10.0;
+	ui->volumeText->setText(QString("%1").arg(value));
+	m_settings.m_volume = CalcDb::powerFromdB(value);
 	applySettings();
 }
 
@@ -545,8 +545,9 @@ void SSBDemodGUI::displaySettings()
     ui->lowCut->setValue(m_settings.m_lowCutoff / 100.0);
     ui->lowCutText->setText(tr("%1k").arg(m_settings.m_lowCutoff / 1000.0));
 
-    ui->volume->setValue(m_settings.m_volume * 10.0);
-    ui->volumeText->setText(QString("%1").arg(m_settings.m_volume, 0, 'f', 1));
+    int volume = CalcDb::dbPower(m_settings.m_volume);
+    ui->volume->setValue(volume);
+    ui->volumeText->setText(QString("%1").arg(volume));
 
     ui->agcTimeLog2->setValue(m_settings.m_agcTimeLog2);
     s = QString::number((1<<ui->agcTimeLog2->value()), 'f', 0);
