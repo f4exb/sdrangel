@@ -567,8 +567,8 @@ void CWKeyer::applySettings(const CWKeyerSettings& settings, bool force)
      || (m_settings.m_sampleRate != settings.m_sampleRate) || force)
     {
         QMutexLocker mutexLocker(&m_mutex);
-        m_dotLength = (int) (0.24f * settings.m_sampleRate * (5.0f / settings.m_wpm));
-        m_cwSmoother.setNbFadeSamples(m_dotLength/5); // 20% the dot time
+        m_dotLength = (int) ((1.2f / settings.m_wpm) * settings.m_sampleRate);
+        m_cwSmoother.setNbFadeSamples(m_dotLength/10); // 10% the dot time
     }
 
     if ((m_settings.m_mode != settings.m_mode) || force)
