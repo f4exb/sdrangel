@@ -397,7 +397,16 @@ if (LINUX)
                 GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
                 GIT_TAG ${LIMESUITE_TAG}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DLIME_SUITE_EXTVER=release -DENABLE_GUI=OFF -DENABLE_NOVENARF7=OFF -DENABLE_SOAPY_LMS7=OFF -DENABLE_OCTAVE=OFF -DENABLE_SIMD_FLAGS=SSE3
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                  -DLIME_SUITE_EXTVER=release
+                  -DENABLE_GUI=OFF
+                  -DENABLE_NOVENARF7=OFF
+                  -DENABLE_SOAPY_LMS7=OFF
+                  -DENABLE_OCTAVE=OFF
+                  -DENABLE_QUICKTEST=OFF
+                  -DENABLE_EXAMPLES=OFF
+                  -DENABLE_LIME_UTIL=OFF
+                  -DENABLE_SIMD_FLAGS=SSE3
                 BUILD_BYPRODUCTS "${LIMESUITE_LIBRARY}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
@@ -438,7 +447,11 @@ if (LINUX)
                 GIT_REPOSITORY https://github.com/analogdevicesinc/libiio.git
                 GIT_TAG ${LIBIIO_TAG}
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/libiio"
-                CMAKE_ARGS ${COMMON_CMAKE_ARGS} -DOSX_PACKAGE=OFF -DWITH_DOC=OFF
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                  -DOSX_PACKAGE=OFF
+                  -DWITH_DOC=OFF
+                  -DWITH_MATLAB_BINDINGS_API=OFF
+                  -DWITH_TESTS=OFF
                 BUILD_BYPRODUCTS "${LIBIIO_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""
@@ -575,6 +588,7 @@ if (WIN32 OR APPLE)
                 -DENABLE_OCTAVE=OFF
                 -DENABLE_QUICKTEST=OFF
                 -DENABLE_EXAMPLES=OFF
+                -DENABLE_LIME_UTIL=OFF
                 -DENABLE_SIMD_FLAGS=SSE3
                 -DFX3_SDK_PATH=${FX3SDK_DIR}
                 BUILD_BYPRODUCTS "${LIMESUITE_LIBRARY}"
@@ -707,9 +721,6 @@ if (WIN32 OR APPLE)
     endif (ENABLE_AIRSPYHF)
 
     if (ENABLE_HACKRF)
-        # SOURCE_SUBDIR require cmake 3.7.0
-        # otherwise use CONFIGURE_COMMAND
-        cmake_minimum_required(VERSION 3.7.0)
         # needs pkgconfig, libusb, fftw, pthreads
         if (WIN32)
             set(HACKRF_LIBUSB_INCLUDE_DIR ${LIBUSB_INCLUDE_DIR}/libusb-1.0)
@@ -811,8 +822,10 @@ if (WIN32 OR APPLE)
                 -DLIBXML2_LIBRARIES=${LIBXML2_LIBRARIES}
                 -DCSHARP_BINDINGS=OFF
                 -DPYTHON_BINDINGS=OFF
-                -DWITH_MATLAB_BINDINGS_API=OFF
                 -DOSX_PACKAGE=OFF
+                -DWITH_DOC=OFF
+                -DWITH_MATLAB_BINDINGS_API=OFF
+                -DWITH_TESTS=OFF
                 BUILD_BYPRODUCTS "${LIBIIO_LIBRARIES}"
                 INSTALL_COMMAND ""
                 TEST_COMMAND ""

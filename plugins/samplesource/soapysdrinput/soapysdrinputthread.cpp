@@ -100,11 +100,13 @@ void SoapySDRInputThread::run()
 
         qDebug("SoapySDRInputThread::run: format: %s fullScale: %f", format.c_str(), fullScale);
 
-        if ((format == "CS8") && (fullScale == 128.0)) { // 8 bit signed - native
+        // Older version of soapy and it's plugins were incorrectly reporting
+        // (1 << n) instead (1 << n) - 1. Accept both values.
+        if ((format == "CS8") && (fullScale == 127.0 || fullScale == 128.0)) { // 8 bit signed - native
             m_decimatorType = Decimator8;
-        } else if ((format == "CS16") && (fullScale == 2048.0)) { // 12 bit signed - native
+        } else if ((format == "CS16") && (fullScale == 2047.0 || fullScale == 2048.0)) { // 12 bit signed - native
             m_decimatorType = Decimator12;
-        } else if ((format == "CS16") && (fullScale == 32768.0)) { // 16 bit signed - native
+        } else if ((format == "CS16") && (fullScale == 32767.0 || fullScale == 32768.0 )) { // 16 bit signed - native
             m_decimatorType = Decimator16;
         } else { // for other types make a conversion to float
             m_decimatorType = DecimatorFloat;
@@ -160,24 +162,24 @@ void SoapySDRInputThread::run()
             {
                 if (m_nbChannels > 1)
                 {
-                    callbackMIIQ(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
+                    callbackMIIQ(buffs, ret*2); // size given in number of I or Q samples (2 items per sample)
                 }
                 else
                 {
                     switch (m_decimatorType)
                     {
                     case Decimator8:
-                        callbackSI8IQ((const qint8*) buffs[0], numElems*2);
+                        callbackSI8IQ((const qint8*) buffs[0], ret*2);
                         break;
                     case Decimator12:
-                        callbackSI12IQ((const qint16*) buffs[0], numElems*2);
+                        callbackSI12IQ((const qint16*) buffs[0], ret*2);
                         break;
                     case Decimator16:
-                        callbackSI16IQ((const qint16*) buffs[0], numElems*2);
+                        callbackSI16IQ((const qint16*) buffs[0], ret*2);
                         break;
                     case DecimatorFloat:
                     default:
-                        callbackSIFIQ((const float*) buffs[0], numElems*2);
+                        callbackSIFIQ((const float*) buffs[0], ret*2);
                     }
                 }
             }
@@ -185,24 +187,24 @@ void SoapySDRInputThread::run()
             {
                 if (m_nbChannels > 1)
                 {
-                    callbackMIQI(buffs, numElems*2); // size given in number of I or Q samples (2 items per sample)
+                    callbackMIQI(buffs, ret*2); // size given in number of I or Q samples (2 items per sample)
                 }
                 else
                 {
                     switch (m_decimatorType)
                     {
                     case Decimator8:
-                        callbackSI8QI((const qint8*) buffs[0], numElems*2);
+                        callbackSI8QI((const qint8*) buffs[0], ret*2);
                         break;
                     case Decimator12:
-                        callbackSI12QI((const qint16*) buffs[0], numElems*2);
+                        callbackSI12QI((const qint16*) buffs[0], ret*2);
                         break;
                     case Decimator16:
-                        callbackSI16QI((const qint16*) buffs[0], numElems*2);
+                        callbackSI16QI((const qint16*) buffs[0], ret*2);
                         break;
                     case DecimatorFloat:
                     default:
-                        callbackSIFQI((const float*) buffs[0], numElems*2);
+                        callbackSIFQI((const float*) buffs[0], ret*2);
                     }
                 }
             }

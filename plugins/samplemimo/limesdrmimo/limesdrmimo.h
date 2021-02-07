@@ -34,7 +34,7 @@ class QNetworkReply;
 class DeviceAPI;
 class LimeSDRMIThread;
 class LimeSDRMOThread;
-class DeviceLimeSDRParams;
+struct DeviceLimeSDRParams;
 
 class LimeSDRMIMO : public DeviceSampleMIMO {
     Q_OBJECT
