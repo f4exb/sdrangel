@@ -1,3 +1,17 @@
+sdrangel (6.5.3-1) unstable; urgency=medium
+
+   * More Star Tracker updates. PR #762
+   * AirspyHF: added decimation by 128 and 256. PR #764
+   * SSB demod: use log (dB) for volume setting
+   * CW keyer: revised the WPM calculation
+   * SoapySDR: a few fixes. PR #766
+   * RTLSDR: changed BW setting limits. PR #766
+   * Various changes in build and compiler warning fixes. PR #766
+   * NFM demod: cosmetic changes. PR #766
+   * Removed FPS limitation in WSSpectrum. Implements #767
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 07 Feb 2021 10:00:23 +0100
+
 sdrangel (6.5.2-1) unstable; urgency=medium
 
    * StarTracker feature: more updates. PR #761
