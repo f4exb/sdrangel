@@ -163,10 +163,6 @@ void WSSpectrum::newSpectrum(
     bool usb
 )
 {
-    if (m_timer.elapsed() < 200) { // Max 5 frames per second
-        return;
-    }
-
     qint64 elapsed = m_timer.restart();
     uint64_t nowMs = TimeUtil::nowms();
     QByteArray payload;
