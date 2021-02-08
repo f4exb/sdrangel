@@ -190,9 +190,9 @@ private:
 	std::vector<Real> m_powerSpectrum;
 
     GLSpectrumSettings m_settings;
-	std::size_t m_overlapSize;
-	std::size_t m_refillSize;
-	std::size_t m_fftBufferFill;
+	int m_overlapSize;
+	int m_refillSize;
+	int m_fftBufferFill;
 	bool m_needMoreSamples;
 
 	Real m_scalef;

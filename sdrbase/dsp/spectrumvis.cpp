@@ -123,9 +123,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
     if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone)
     {
-        for (unsigned int i = 0; i < m_settings.m_fftSize; i++)
+        for (int i = 0; i < m_settings.m_fftSize; i++)
         {
-            if (i < length) {
+            if (i < (int) length) {
                 c = begin[i];
             } else {
                 c = Complex{0,0};
@@ -157,9 +157,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
     }
     else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMoving)
     {
-        for (unsigned int i = 0; i < m_settings.m_fftSize; i++)
+        for (int i = 0; i < m_settings.m_fftSize; i++)
         {
-            if (i < length) {
+            if (i < (int) length) {
                 c = begin[i];
             } else {
                 c = Complex{0,0};
@@ -196,9 +196,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
     {
         double avg;
 
-        for (unsigned int i = 0; i < m_settings.m_fftSize; i++)
+        for (int i = 0; i < m_settings.m_fftSize; i++)
         {
-            if (i < length) {
+            if (i < (int) length) {
                 c = begin[i];
             } else {
                 c = Complex{0,0};
@@ -241,9 +241,9 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
     {
         double max;
 
-        for (unsigned int i = 0; i < m_settings.m_fftSize; i++)
+        for (int i = 0; i < m_settings.m_fftSize; i++)
         {
-            if (i < length) {
+            if (i < (int) length) {
                 c = begin[i];
             } else {
                 c = Complex{0,0};
@@ -690,22 +690,16 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    unsigned int fftSize = settings.m_fftSize > MAX_FFT_SIZE ?
+    int fftSize = settings.m_fftSize > MAX_FFT_SIZE ?
         MAX_FFT_SIZE :
         settings.m_fftSize < 64 ?
             64 :
             settings.m_fftSize;
 
-    int overlapPercent = settings.m_fftOverlap > 100 ?
-        100 :
-        settings.m_fftOverlap < 0 ?
-            0 :
-            settings.m_fftOverlap;
-
     qDebug() << "SpectrumVis::applySettings:"
         << " m_fftSize: " << fftSize
         << " m_fftWindow: " << settings.m_fftWindow
-        << " m_fftOverlap: " << overlapPercent
+        << " m_fftOverlap: " << settings.m_fftOverlap
         << " m_averagingIndex: " << settings.m_averagingIndex
         << " m_averagingMode: " << settings.m_averagingMode
         << " m_refLevel: " << settings.m_refLevel
@@ -738,9 +732,10 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
     }
 
     if ((fftSize != m_settings.m_fftSize)
-     || (overlapPercent != m_settings.m_fftOverlap) || force)
+     || (settings.m_fftOverlap != m_settings.m_fftOverlap) || force)
     {
-        m_overlapSize = (fftSize * overlapPercent) / 100;
+        m_overlapSize = settings.m_fftOverlap >= fftSize ? fftSize - 1 :
+            settings.m_fftOverlap < 0 ? 0 : settings.m_fftOverlap;
         m_refillSize = fftSize - m_overlapSize;
         m_fftBufferFill = m_overlapSize;
     }
@@ -762,7 +757,6 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
 
     m_settings = settings;
     m_settings.m_fftSize = fftSize;
-    m_settings.m_fftOverlap = overlapPercent;
 }
 
 void SpectrumVis::handleConfigureDSP(uint64_t centerFrequency, int sampleRate)
