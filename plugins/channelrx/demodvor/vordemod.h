@@ -121,7 +121,7 @@ public:
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
     void setMessageQueueToGUI(MessageQueue* queue) override {
-        BasebandSampleSink::setMessageQueueToGUI(queue);
+        ChannelAPI::setMessageQueueToGUI(queue);
         m_basebandSink->setMessageQueueToGUI(queue);
     }
 

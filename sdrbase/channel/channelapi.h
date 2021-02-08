@@ -30,6 +30,7 @@
 #include "pipes/pipeendpoint.h"
 
 class DeviceAPI;
+class MessageQueue;
 
 namespace SWGSDRangel
 {
@@ -60,6 +61,9 @@ public:
 
     virtual QByteArray serialize() const = 0;
     virtual bool deserialize(const QByteArray& data) = 0;
+
+    virtual void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
     /**
      * API adapter for the channel settings GET requests
@@ -124,6 +128,9 @@ public:
     virtual int getNbSinkStreams() const = 0;
     virtual int getNbSourceStreams() const = 0;
     virtual qint64 getStreamCenterFrequency(int streamIndex, bool sinkElseSource) const = 0;
+
+protected:
+    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
 private:
     StreamType m_streamType;

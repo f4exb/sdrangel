@@ -86,7 +86,7 @@ SigMFFileSink::~SigMFFileSink()
 
 void SigMFFileSink::setMessageQueueToGUI(MessageQueue* queue)
 {
-    BasebandSampleSink::setMessageQueueToGUI(queue);
+    ChannelAPI::setMessageQueueToGUI(queue);
     m_basebandSink->setMessageQueueToGUI(queue);
 }
 

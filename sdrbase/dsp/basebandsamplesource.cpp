@@ -19,8 +19,7 @@
 #include "dsp/basebandsamplesource.h"
 #include "util/message.h"
 
-BasebandSampleSource::BasebandSampleSource() :
-    m_guiMessageQueue(nullptr)
+BasebandSampleSource::BasebandSampleSource()
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }

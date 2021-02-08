@@ -762,6 +762,6 @@ void ATVMod::getCameraNumbers(std::vector<int>& numbers)
 }
 
 void ATVMod::setMessageQueueToGUI(MessageQueue* queue) {
-    BasebandSampleSource::setMessageQueueToGUI(queue);
+    ChannelAPI::setMessageQueueToGUI(queue);
     m_basebandSource->setMessageQueueToGUI(queue);
 }

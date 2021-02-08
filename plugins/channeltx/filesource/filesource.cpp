@@ -613,7 +613,7 @@ void FileSource::getMagSqLevels(double& avg, double& peak, int& nbSamples) const
 }
 
 void FileSource::setMessageQueueToGUI(MessageQueue* queue) {
-    BasebandSampleSource::setMessageQueueToGUI(queue);
+    ChannelAPI::setMessageQueueToGUI(queue);
     m_basebandSource->setMessageQueueToGUI(queue);
 }
 

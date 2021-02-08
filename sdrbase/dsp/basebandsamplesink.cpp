@@ -19,8 +19,7 @@
 
 #include "basebandsamplesink.h"
 
-BasebandSampleSink::BasebandSampleSink() :
-    m_guiMessageQueue(0)
+BasebandSampleSink::BasebandSampleSink()
 {
 	connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }

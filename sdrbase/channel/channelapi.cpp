@@ -22,6 +22,7 @@
 #include "maincore.h"
 
 ChannelAPI::ChannelAPI(const QString& uri, StreamType streamType) :
+    m_guiMessageQueue(nullptr),
     m_streamType(streamType),
     m_name(uri),
     m_uri(uri),

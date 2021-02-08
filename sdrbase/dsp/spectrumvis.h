@@ -132,6 +132,9 @@ public:
 	virtual void stop();
 	virtual bool handleMessage(const Message& message);
 
+    void setMessageQueueToGUI(MessageQueue *queue) { m_guiMessageQueue = queue; }
+    MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
+
     int webapiSpectrumSettingsGet(SWGSDRangel::SWGGLSpectrum& response, QString& errorMessage) const;
     int webapiSpectrumSettingsPutPatch(
             bool force,
@@ -206,6 +209,8 @@ private:
 	Real m_ofs;
 	Real m_powFFTDiv;
 	static const Real m_mult;
+
+    MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI
 
 	QMutex m_mutex;
 

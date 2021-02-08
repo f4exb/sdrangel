@@ -112,7 +112,7 @@ public:
 	float getFrequencyOffset() const { return m_basebandSink->getFrequencyOffset(); }
 	bool isSync() const { return m_basebandSink->isSync(); }
     void setMessageQueueToGUI(MessageQueue* queue) override {
-        BasebandSampleSink::setMessageQueueToGUI(queue);
+        ChannelAPI::setMessageQueueToGUI(queue);
         m_basebandSink->setMessageQueueToGUI(queue);
     }
 
