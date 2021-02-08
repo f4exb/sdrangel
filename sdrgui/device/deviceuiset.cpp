@@ -165,7 +165,8 @@ void DeviceUISet::loadRxChannelSettings(const Preset *preset, PluginAPI *pluginA
         {
             qDebug("DeviceUISet::loadRxChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
-            m_channelInstanceRegistrations[i].m_gui->destroy(); // FIXME: stop channel before
+            m_channelInstanceRegistrations[i].m_channelAPI->setMessageQueueToGUI(nullptr); // have channel stop sending messages to its GUI
+            m_channelInstanceRegistrations[i].m_gui->destroy();
             m_channelInstanceRegistrations[i].m_channelAPI->destroy();
         }
 
@@ -250,6 +251,7 @@ void DeviceUISet::loadTxChannelSettings(const Preset *preset, PluginAPI *pluginA
         {
             qDebug("DeviceUISet::loadTxChannelSettings: destroying old channel [%s]",
                 qPrintable(m_channelInstanceRegistrations[i].m_channelAPI->getURI()));
+            m_channelInstanceRegistrations[i].m_channelAPI->setMessageQueueToGUI(nullptr); // have channel stop sending messages to its GUI
             m_channelInstanceRegistrations[i].m_gui->destroy();
             m_channelInstanceRegistrations[i].m_channelAPI->destroy();
         }
