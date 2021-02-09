@@ -68,7 +68,9 @@ bool HttpDownloadManagerGUI::confirmDownload(const QString& filename, QWidget *p
 
 void HttpDownloadManagerGUI::downloadCompleteGUI(const QString& filename, bool success)
 {
+    (void) success;
     int idx = m_filenames.indexOf(filename);
+
     if (idx >= 0)
     {
         QProgressDialog *progressDialog = m_progressDialogs[idx];
