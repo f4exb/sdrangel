@@ -734,8 +734,8 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
     if ((fftSize != m_settings.m_fftSize)
      || (settings.m_fftOverlap != m_settings.m_fftOverlap) || force)
     {
-        m_overlapSize = settings.m_fftOverlap >= fftSize ? fftSize - 1 :
-            settings.m_fftOverlap < 0 ? 0 : settings.m_fftOverlap;
+        m_overlapSize = settings.m_fftOverlap < 0 ? 0 :
+            settings.m_fftOverlap < fftSize/2 ? settings.m_fftOverlap : (fftSize/2) - 1;
         m_refillSize = fftSize - m_overlapSize;
         m_fftBufferFill = m_overlapSize;
     }

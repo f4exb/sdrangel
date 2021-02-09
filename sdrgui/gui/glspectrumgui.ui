@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
-    <height>75</height>
+    <width>397</width>
+    <height>112</height>
    </rect>
   </property>
   <property name="font">
@@ -19,7 +19,10 @@
   <property name="windowTitle">
    <string>Spectrum</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>3</number>
+   </property>
    <property name="leftMargin">
     <number>2</number>
    </property>
@@ -32,11 +35,464 @@
    <property name="bottomMargin">
     <number>2</number>
    </property>
-   <property name="spacing">
-    <number>3</number>
-   </property>
-   <item row="3" column="0" colspan="3">
-    <layout class="QHBoxLayout" name="controlBtns">
+   <item>
+    <layout class="QHBoxLayout" name="Line1Layout">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QComboBox" name="fftWindow">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>FFT window function</string>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToContents</enum>
+       </property>
+       <item>
+        <property name="text">
+         <string>Bart</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>B-H</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FT</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Ham</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Han</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Rec</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Kai</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fftSize">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>45</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>FFT size</string>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToContents</enum>
+       </property>
+       <item>
+        <property name="text">
+         <string>128</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>256</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>512</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4k</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="fftOverlap">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>FFT overlap</string>
+       </property>
+       <property name="maximum">
+        <number>63</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="fftOverlapText">
+       <property name="minimumSize">
+        <size>
+         <width>30</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>FFT overlap</string>
+       </property>
+       <property name="text">
+        <string>0000</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="averagingMode">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Averaging type</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>No</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Mov</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fix</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Max</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="averaging">
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>45</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Number of averaging samples</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>20</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>50</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>100</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>200</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>500</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>20k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>50k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1e5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2e5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5e5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1M</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="freeze">
+       <property name="toolTip">
+        <string>Play/Pause spectrum display</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/pause.png</normaloff>
+         <normalon>:/play.png</normalon>:/pause.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="Line2Layout">
+     <property name="spacing">
+      <number>3</number>
+     </property>
+     <item>
+      <widget class="QSpinBox" name="refLevel">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Reference level (dB)</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="minimum">
+        <number>-110</number>
+       </property>
+       <property name="maximum">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="levelRange">
+       <property name="minimumSize">
+        <size>
+         <width>45</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>45</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Range (dB)</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="linscale">
+       <property name="toolTip">
+        <string>Logarithmic / Linear scale selection</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../resources/res.qrc">
+         <normaloff>:/logarithmic.png</normaloff>
+         <normalon>:/linear.png</normalon>:/logarithmic.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ButtonSwitch" name="wsSpectrum">
+       <property name="toolTip">
+        <string>Left: toggle websocket spectrum - Right: websocket spectrum parameters</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normalon>:/stream.png</normalon>
+        </iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="Line3Layout">
      <property name="spacing">
       <number>3</number>
      </property>
@@ -312,405 +768,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ButtonSwitch" name="freeze">
-       <property name="toolTip">
-        <string>Play/Pause spectrum display</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/pause.png</normaloff>
-         <normalon>:/play.png</normalon>:/pause.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0" colspan="3">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="spacing">
-      <number>3</number>
-     </property>
-     <item>
-      <widget class="QComboBox" name="fftWindow">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>FFT window function</string>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContents</enum>
-       </property>
-       <item>
-        <property name="text">
-         <string>Bart</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>B-H</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>FT</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Ham</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Han</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Rec</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Kai</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="fftSize">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>45</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>45</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>FFT size</string>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContents</enum>
-       </property>
-       <item>
-        <property name="text">
-         <string>128</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>256</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>512</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4k</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="refLevel">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Reference level (dB)</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="minimum">
-        <number>-110</number>
-       </property>
-       <property name="maximum">
-        <number>0</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="levelRange">
-       <property name="minimumSize">
-        <size>
-         <width>45</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>45</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Range (dB)</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>100</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="averagingMode">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Averaging type</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>No</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Mov</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Fix</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Max</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="averaging">
-       <property name="minimumSize">
-        <size>
-         <width>45</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>45</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Number of averaging samples</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>20</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>50</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>100</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>200</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>500</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>5k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>20k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>50k</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1e5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2e5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>5e5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>1M</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="linscale">
-       <property name="toolTip">
-        <string>Logarithmic / Linear scale selection</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../resources/res.qrc">
-         <normaloff>:/logarithmic.png</normaloff>
-         <normalon>:/linear.png</normalon>:/logarithmic.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="ButtonSwitch" name="wsSpectrum">
-       <property name="toolTip">
-        <string>Left: toggle websocket spectrum - Right: websocket spectrum parameters</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normalon>:/stream.png</normalon>
-        </iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

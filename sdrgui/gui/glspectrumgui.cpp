@@ -133,15 +133,18 @@ void GLSpectrumGUI::displaySettings()
 
 	ui->fftWindow->setCurrentIndex(m_settings.m_fftWindow);
 
-	for (unsigned int i = 0; i < 6; i++)
+	for (int i = 0; i < 6; i++)
 	{
-		if (m_settings.m_fftSize == (1U << (i + 7)))
+		if (m_settings.m_fftSize == (1 << (i + 7)))
 		{
 			ui->fftSize->setCurrentIndex(i);
 			break;
 		}
 	}
 
+    ui->fftOverlap->setValue(m_settings.m_fftOverlap);
+    ui->fftOverlapText->setText(tr("%1").arg(m_settings.m_fftOverlap));
+    setMaximumOverlap();
 	ui->averaging->setCurrentIndex(m_settings.m_averagingIndex);
 	ui->averagingMode->setCurrentIndex((int) m_settings.m_averagingMode);
 	ui->linscale->setChecked(m_settings.m_linear);
@@ -218,8 +221,18 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
 	qDebug("GLSpectrumGUI::on_fftSize_currentIndexChanged: %d", index);
 	m_settings.m_fftSize = 1 << (7 + index);
+    setMaximumOverlap();
 	applySettings();
 	setAveragingToolitp();
+}
+
+void GLSpectrumGUI::on_fftOverlap_valueChanged(int value)
+{
+    qDebug("GLSpectrumGUI::on_fftOverlap_valueChanged: %d", value);
+    m_settings.m_fftOverlap = value;
+    ui->fftOverlapText->setText(tr("%1").arg(m_settings.m_fftOverlap));
+    setMaximumOverlap();
+    applySettings();
 }
 
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
@@ -499,6 +512,13 @@ void GLSpectrumGUI::setAveragingToolitp()
 void GLSpectrumGUI::setFFTSize(int log2FFTSize)
 {
     ui->fftSize->setCurrentIndex(log2FFTSize < 7 ? 0 : log2FFTSize > 12 ? 5 : log2FFTSize - 7); // 128 to 4096 in powers of 2
+}
+
+void GLSpectrumGUI::setMaximumOverlap()
+{
+    ui->fftOverlap->setMaximum((m_settings.m_fftSize/2)-1);
+    int value = ui->fftOverlap->value();
+    ui->fftOverlapText->setText(tr("%1").arg(value));
 }
 
 bool GLSpectrumGUI::handleMessage(const Message& message)
