@@ -522,6 +522,10 @@ void GLSpectrumGUI::setMaximumOverlap()
     ui->fftOverlap->setMaximum((m_settings.m_fftSize/2)-1);
     int value = ui->fftOverlap->value();
     ui->fftOverlapText->setText(tr("%1").arg(value));
+
+    if (m_glSpectrum) {
+        m_glSpectrum->setFFTOverlap(value);
+    }
 }
 
 bool GLSpectrumGUI::handleMessage(const Message& message)

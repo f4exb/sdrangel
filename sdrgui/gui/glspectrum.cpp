@@ -250,6 +250,15 @@ void GLSpectrum::setTimingRate(qint32 timingRate)
     update();
 }
 
+void GLSpectrum::setFFTOverlap(int overlap)
+{
+    m_mutex.lock();
+    m_fftOverlap = overlap;
+    m_changesPending = true;
+	m_mutex.unlock();
+    update();
+}
+
 void GLSpectrum::setDisplayWaterfall(bool display)
 {
     m_mutex.lock();
@@ -1292,6 +1301,8 @@ void GLSpectrum::applyChanges()
 		if (m_sampleRate > 0)
 		{
 			float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
+			float halfFFTSize = m_fftSize / 2;
+			scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
 
 			if (!m_invertedWaterfall) {
 				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / scaleDiv, 0);
@@ -1393,6 +1404,8 @@ void GLSpectrum::applyChanges()
 		if (m_sampleRate > 0)
 		{
 			float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
+			float halfFFTSize = m_fftSize / 2;
+			scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
 
 			if (!m_invertedWaterfall) {
 				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / scaleDiv, 0);
