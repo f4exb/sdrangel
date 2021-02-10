@@ -33,7 +33,7 @@
 #define MAX_FFT_SIZE 4096
 
 #ifndef LINUX
-inline double log2f(double n)
+inline double log2(double n)
 {
 	return log(n) / log(2.0);
 }
@@ -45,7 +45,7 @@ MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgStartStop, Message)
 
-const Real SpectrumVis::m_mult = (10.0f / log2f(10.0f));
+const Real SpectrumVis::m_mult = (10.0f / log2(10.0f));
 
 SpectrumVis::SpectrumVis(Real scalef) :
 	BasebandSampleSink(),
@@ -54,6 +54,7 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_fftEngineSequence(0),
 	m_fftBuffer(MAX_FFT_SIZE),
 	m_powerSpectrum(MAX_FFT_SIZE),
+    m_psd(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
 	m_scalef(scalef),
@@ -132,6 +133,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             }
 
             v = c.real() * c.real() + c.imag() * c.imag();
+            m_psd[i] = v/m_powFFTDiv;
             v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
             m_powerSpectrum[i] = v;
         }
@@ -167,6 +169,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
             v = c.real() * c.real() + c.imag() * c.imag();
             v = m_movingAverage.storeAndGetAvg(v, i);
+            m_psd[i] = v/m_powFFTDiv;
             v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
             m_powerSpectrum[i] = v;
         }
@@ -209,6 +212,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             // result available
             if (m_fixedAverage.storeAndGetAvg(avg, v, i))
             {
+                m_psd[i] = avg/m_powFFTDiv;
                 avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                 m_powerSpectrum[i] = avg;
             }
@@ -254,6 +258,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             // result available
             if (m_max.storeAndGetMax(max, v, i))
             {
+                m_psd[i] = max/m_powFFTDiv;
                 max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                 m_powerSpectrum[i] = max;
             }
@@ -340,6 +345,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     {
                         c = fftOut[i];
                         v = c.real() * c.real() + c.imag() * c.imag();
+                        m_psd[i] = v/m_powFFTDiv;
                         m_specMax = v > m_specMax ? v : m_specMax;
                         v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
                         m_powerSpectrum[i * 2] = v;
@@ -352,12 +358,14 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     {
                         c = fftOut[i + halfSize];
                         v = c.real() * c.real() + c.imag() * c.imag();
+                        m_psd[i] = v/m_powFFTDiv;
                         m_specMax = v > m_specMax ? v : m_specMax;
                         v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
                         m_powerSpectrum[i] = v;
 
                         c = fftOut[i];
                         v = c.real() * c.real() + c.imag() * c.imag();
+                        m_psd[i + halfSize] = v/m_powFFTDiv;
                         m_specMax = v > m_specMax ? v : m_specMax;
                         v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
                         m_powerSpectrum[i + halfSize] = v;
@@ -394,6 +402,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	                    c = fftOut[i];
 	                    v = c.real() * c.real() + c.imag() * c.imag();
 	                    v = m_movingAverage.storeAndGetAvg(v, i);
+                        m_psd[i] = v/m_powFFTDiv;
                         m_specMax = v > m_specMax ? v : m_specMax;
 	                    v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
 	                    m_powerSpectrum[i * 2] = v;
@@ -407,6 +416,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	                    c = fftOut[i + halfSize];
 	                    v = c.real() * c.real() + c.imag() * c.imag();
 	                    v = m_movingAverage.storeAndGetAvg(v, i+halfSize);
+                        m_psd[i] = v/m_powFFTDiv;
                         m_specMax = v > m_specMax ? v : m_specMax;
 	                    v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
 	                    m_powerSpectrum[i] = v;
@@ -414,6 +424,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	                    c = fftOut[i];
 	                    v = c.real() * c.real() + c.imag() * c.imag();
 	                    v = m_movingAverage.storeAndGetAvg(v, i);
+                        m_psd[i + halfSize] = v/m_powFFTDiv;
                         m_specMax = v > m_specMax ? v : m_specMax;
 	                    v = m_settings.m_linear ? v/m_powFFTDiv : m_mult * log2f(v) + m_ofs;
 	                    m_powerSpectrum[i + halfSize] = v;
@@ -456,6 +467,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_fixedAverage.storeAndGetAvg(avg, v, i))
                         {
+                            m_psd[i] = avg/m_powFFTDiv;
                             specMax = avg > specMax ? avg : specMax;
                             avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                             m_powerSpectrum[i * 2] = avg;
@@ -473,6 +485,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_fixedAverage.storeAndGetAvg(avg, v, i+halfSize))
                         {
+                            m_psd[i] = avg/m_powFFTDiv;
                             specMax = avg > specMax ? avg : specMax;
                             avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                             m_powerSpectrum[i] = avg;
@@ -484,6 +497,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_fixedAverage.storeAndGetAvg(avg, v, i))
                         {
+                            m_psd[i + halfSize] = avg/m_powFFTDiv;
                             specMax = avg > specMax ? avg : specMax;
                             avg = m_settings.m_linear ? avg/m_powFFTDiv : m_mult * log2f(avg) + m_ofs;
                             m_powerSpectrum[i + halfSize] = avg;
@@ -531,6 +545,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_max.storeAndGetMax(max, v, i))
                         {
+                            m_psd[i] = max/m_powFFTDiv;
                             specMax = max > specMax ? max : specMax;
                             max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                             m_powerSpectrum[i * 2] = max;
@@ -548,6 +563,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_max.storeAndGetMax(max, v, i+halfSize))
                         {
+                            m_psd[i] = max/m_powFFTDiv;
                             specMax = max > specMax ? max : specMax;
                             max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                             m_powerSpectrum[i] = max;
@@ -559,6 +575,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                         // result available
                         if (m_max.storeAndGetMax(max, v, i))
                         {
+                            m_psd[i + halfSize] = max/m_powFFTDiv;
                             specMax = max > specMax ? max : specMax;
                             max = m_settings.m_linear ? max/m_powFFTDiv : m_mult * log2f(max) + m_ofs;
                             m_powerSpectrum[i + halfSize] = max;

@@ -29,6 +29,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/wsspectrumsettingsdialog.h"
 #include "util/simpleserializer.h"
+#include "util/db.h"
 #include "ui_glspectrumgui.h"
 
 GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
@@ -48,6 +49,7 @@ GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
     );
     ui->refLevel->setStyleSheet(levelStyle);
     ui->levelRange->setStyleSheet(levelStyle);
+    ui->fftOverlap->setStyleSheet(levelStyle);
     // ui->refLevel->findChild<QLineEdit*>()->setStyleSheet("color: white; background-color: rgb(79, 79, 79); border: 1px solid gray; border-radius: 4px; ");
     // ui->refLevel->setStyleSheet("background-color: rgb(79, 79, 79);");
 
@@ -143,7 +145,6 @@ void GLSpectrumGUI::displaySettings()
 	}
 
     ui->fftOverlap->setValue(m_settings.m_fftOverlap);
-    ui->fftOverlapText->setText(tr("%1").arg(m_settings.m_fftOverlap));
     setMaximumOverlap();
 	ui->averaging->setCurrentIndex(m_settings.m_averagingIndex);
 	ui->averagingMode->setCurrentIndex((int) m_settings.m_averagingMode);
@@ -230,10 +231,49 @@ void GLSpectrumGUI::on_fftOverlap_valueChanged(int value)
 {
     qDebug("GLSpectrumGUI::on_fftOverlap_valueChanged: %d", value);
     m_settings.m_fftOverlap = value;
-    ui->fftOverlapText->setText(tr("%1").arg(m_settings.m_fftOverlap));
     setMaximumOverlap();
     applySettings();
     setAveragingToolitp();
+}
+
+void GLSpectrumGUI::on_autoscale_clicked(bool checked)
+{
+    (void) checked;
+
+    if (!m_spectrumVis) {
+        return;
+    }
+
+    std::vector<Real> psd;
+    m_spectrumVis->getPSDCopy(psd);
+    int avgRange = m_settings.m_fftSize / 32;
+
+    if (psd.size() < (unsigned int) avgRange) {
+        return;
+    }
+
+    std::sort(psd.begin(), psd.end());
+    float maxSum = 0.0f, minSum = 0.0f;
+
+    for (int i = 0; i < avgRange; i++)
+    {
+        minSum += psd[i];
+        maxSum += psd[psd.size() - i-1];
+    }
+
+    float minAvg = minSum / avgRange;
+    float maxAvg = maxSum / avgRange;
+    int minLvl = CalcDb::dbPower(minAvg*2);
+    int maxLvl = CalcDb::dbPower(maxAvg*10);
+
+    m_settings.m_refLevel = maxLvl;
+    m_settings.m_powerRange = maxLvl - minLvl;
+	ui->refLevel->setValue(m_settings.m_refLevel);
+	ui->levelRange->setValue(m_settings.m_powerRange);
+    // qDebug("GLSpectrumGUI::on_autoscale_clicked: max: %d min %d max: %e min: %e",
+    //     maxLvl, minLvl, maxAvg, minAvg);
+
+    applySettings();
 }
 
 void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
@@ -519,9 +559,11 @@ void GLSpectrumGUI::setFFTSize(int log2FFTSize)
 
 void GLSpectrumGUI::setMaximumOverlap()
 {
-    ui->fftOverlap->setMaximum((m_settings.m_fftSize/2)-1);
+    int halfSize = m_settings.m_fftSize/2;
+    ui->fftOverlap->setMaximum((halfSize)-1);
     int value = ui->fftOverlap->value();
-    ui->fftOverlapText->setText(tr("%1").arg(value));
+    ui->fftOverlap->setValue(value);
+    ui->fftOverlap->setToolTip(tr("FFT overlap %1 %").arg((value/(float)halfSize)*100.0f));
 
     if (m_glSpectrum) {
         m_glSpectrum->setFFTOverlap(value);

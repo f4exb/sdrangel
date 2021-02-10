@@ -86,6 +86,7 @@ private slots:
 	void on_fftWindow_currentIndexChanged(int index);
 	void on_fftSize_currentIndexChanged(int index);
 	void on_fftOverlap_valueChanged(int value);
+	void on_autoscale_clicked(bool checked);
 	void on_refLevel_valueChanged(int value);
 	void on_levelRange_valueChanged(int value);
 	void on_decay_valueChanged(int index);

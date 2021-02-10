@@ -162,40 +162,24 @@
       </widget>
      </item>
      <item>
-      <widget class="QDial" name="fftOverlap">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>FFT overlap</string>
-       </property>
-       <property name="maximum">
-        <number>63</number>
-       </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="fftOverlapText">
+      <widget class="QSpinBox" name="fftOverlap">
        <property name="minimumSize">
         <size>
-         <width>30</width>
+         <width>60</width>
          <height>0</height>
         </size>
        </property>
        <property name="toolTip">
         <string>FFT overlap</string>
        </property>
-       <property name="text">
-        <string>0000</string>
-       </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="maximum">
+        <number>63</number>
        </property>
       </widget>
      </item>
@@ -387,6 +371,22 @@
      <property name="spacing">
       <number>3</number>
      </property>
+     <item>
+      <widget class="QPushButton" name="autoscale">
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Autoscale max level and range</string>
+       </property>
+       <property name="text">
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QSpinBox" name="refLevel">
        <property name="minimumSize">

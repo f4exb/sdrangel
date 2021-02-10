@@ -124,6 +124,8 @@ public:
     void configureWSSpectrum(const QString& address, uint16_t port);
     const GLSpectrumSettings& getSettings() const { return m_settings; }
     Real getSpecMax() const { return m_specMax / m_powFFTDiv; }
+    void getPowerSpectrumCopy(std::vector<Real>& copy) { copy.assign(m_powerSpectrum.begin(), m_powerSpectrum.end()); }
+    void getPSDCopy(std::vector<Real>& copy) { copy.assign(m_psd.begin(), m_psd.begin() + m_settings.m_fftSize); }
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
@@ -187,7 +189,8 @@ private:
     unsigned int m_fftEngineSequence;
 
 	std::vector<Complex> m_fftBuffer;
-	std::vector<Real> m_powerSpectrum;
+	std::vector<Real> m_powerSpectrum; //!< displayable power spectrum
+    std::vector<Real> m_psd; //!< real PSD
 
     GLSpectrumSettings m_settings;
 	int m_overlapSize;
