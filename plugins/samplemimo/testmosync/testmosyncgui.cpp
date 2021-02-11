@@ -62,7 +62,6 @@ TestMOSyncGui::TestMOSyncGui(DeviceUISet *deviceUISet, QWidget* parent) :
     m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     ui->glSpectrum->setCenterFrequency(m_settings.m_centerFrequency);
     ui->glSpectrum->setSampleRate(m_settings.m_sampleRate*(1<<m_settings.m_log2Interp));
-    ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
     ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));

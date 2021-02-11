@@ -67,6 +67,7 @@ private:
 	MessageQueue m_messageQueue;
     GLSpectrumSettings m_settings;
     bool m_doApplySettings;
+    static const int m_fpsMs[];
 
     void blockApplySettings(bool block);
 	void applySettings();
@@ -89,6 +90,7 @@ private slots:
 	void on_autoscale_clicked(bool checked);
 	void on_refLevel_valueChanged(int value);
 	void on_levelRange_valueChanged(int value);
+	void on_fps_currentIndexChanged(int index);
 	void on_decay_valueChanged(int index);
 	void on_decayDivisor_valueChanged(int index);
 	void on_stroke_valueChanged(int index);

@@ -108,8 +108,7 @@ public:
 
 	Real getWaterfallShare() const { return m_waterfallShare; }
 	void setWaterfallShare(Real waterfallShare);
-	void connectTimer(const QTimer& timer);
-    void disconnectTimer();
+    void setFPSPeriodMs(int fpsPeriodMs);
 
     void setDisplayedStream(bool sourceOrSink, int streamIndex)
     {
@@ -237,7 +236,7 @@ private:
 	int m_cursorChannel;
 
 	QTimer m_timer;
-    const QTimer *m_masterTimer;
+    int m_fpsPeriodMs;
 	QMutex m_mutex;
 	bool m_mouseInside;
 	bool m_changesPending;

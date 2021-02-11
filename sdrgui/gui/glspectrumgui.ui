@@ -226,7 +226,7 @@
       <widget class="QComboBox" name="averaging">
        <property name="minimumSize">
         <size>
-         <width>45</width>
+         <width>55</width>
          <height>0</height>
         </size>
        </property>
@@ -441,6 +441,68 @@
        <property name="maximum">
         <number>100</number>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="fps">
+       <property name="minimumSize">
+        <size>
+         <width>55</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>45</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Spectrum maximum FPS (NL for No Limit)</string>
+       </property>
+       <property name="currentIndex">
+        <number>3</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>20</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>50</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>100</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>200</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NL</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

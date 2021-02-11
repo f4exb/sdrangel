@@ -9,25 +9,25 @@ StarTrackerSettings:
       type: string
     dec:
       description: "Declination of custom target"
-      type: string      
-    latitude: 
+      type: string
+    latitude:
       description: "Latitude in decimal degrees (North positive) of observation/antenna location"
       type: number
       format: float
     longitude:
       description: "Longitude in decimal degrees (East positive) of observation/antenna location"
-      type: number      
+      type: number
       format: float
     dateTime:
-      description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time." 
+      description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
       type: string
-    refraction: 
+    refraction:
       description: "Atmospheric refraction correction (None or Saemundsson)"
       type: string
     pressure:
       description: "Air pressure in millibars, for refraction"
       type: number
-      format: float    
+      format: float
     temperature:
       description: "Air temperature in Celsuis, for refraction"
       type: number
@@ -47,17 +47,17 @@ StarTrackerSettings:
     frequency:
       description: "Frequency of radio waves being observed in MHz"
       type: number
-      format: float            
+      format: float
     stellariumServerEnabled:
       descrption: "Enable Stellarium server (1 for yes, 0 for no)"
-      type: integer    
+      type: integer
     stellariumPort:
       description: "IP port number for Stellarium server to listen on (Default is 10001)."
       type: integer
     updatePeriod:
       description: "Time in seconds between each calculation of the target's position"
       type: number
-      format: float    
+      format: float
     epoch:
       description: "Epoch for RA and Dec (J2000 or JNOW)"
       type: string
@@ -69,7 +69,7 @@ StarTrackerSettings:
       type: integer
     drawStarOnMap:
       description: "Draw the overhead position of the target Star on the Map (1 for yes, 0 for no)"
-      type: integer      
+      type: integer
     title:
       type: string
     rgbColor:

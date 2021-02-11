@@ -392,7 +392,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	ui->glSpectrum->setSsbSpectrum(false);
     ui->glSpectrum->setLsbDisplay(false);
 
-	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -427,7 +426,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
     qDebug("ChannelAnalyzerGUI::~ChannelAnalyzerGUI");
-	ui->glSpectrum->disconnectTimer();
 	ui->glScope->disconnectTimer();
 	delete ui;
 	delete m_spectrumScopeComboVis;

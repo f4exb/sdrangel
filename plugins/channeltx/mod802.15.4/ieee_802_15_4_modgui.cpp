@@ -385,7 +385,6 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->glSpectrum->setDisplayWaterfall(false);
     ui->glSpectrum->setDisplayMaxHold(false);
     ui->glSpectrum->setDisplayHistogram(false);
-    ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 
     CRightClickEnabler *repeatRightClickEnabler = new CRightClickEnabler(ui->repeat);
     connect(repeatRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(repeatSelect()));

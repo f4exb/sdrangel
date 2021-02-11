@@ -126,7 +126,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     ui->glSpectrum->setLsbDisplay(false);
     ui->glScope->setTraceModulo(Interferometer::m_fftSize);
 
-	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 

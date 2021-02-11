@@ -3391,6 +3391,11 @@ bool WebAPIRequestMapper::validateSpectrumSettings(SWGSDRangel::SWGGLSpectrum& s
         spectrumSettings.setPowerRange(jsonObject["powerRange"].toDouble(100.0));
         spectrumSettingsKeys.append("powerRange");
     }
+    if (jsonObject.contains("fpsPeriodMs"))
+    {
+        spectrumSettings.setFpsPeriodMs(jsonObject["fpsPeriodMs"].toInt(50));
+        spectrumSettingsKeys.append("fpsPeriodMs");
+    }
     if (jsonObject.contains("displayWaterfall"))
     {
         spectrumSettings.setDisplayWaterfall(jsonObject["displayWaterfall"].toInt(0));

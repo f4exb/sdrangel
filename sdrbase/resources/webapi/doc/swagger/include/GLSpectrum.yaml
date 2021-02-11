@@ -14,6 +14,9 @@ GLSpectrum:
     powerRange:
       type: number
       format: float
+    fpsPeriodMs:
+      type: integer
+      description: FPS capping period in milliseconds. 0 for no limit.
     displayWaterfall:
       description: boolean
       type: integer

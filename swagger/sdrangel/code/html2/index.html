@@ -4835,6 +4835,10 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float"
     },
+    "fpsPeriodMs" : {
+      "type" : "integer",
+      "description" : "FPS capping period in milliseconds. 0 for no limit."
+    },
     "displayWaterfall" : {
       "type" : "integer",
       "description" : "boolean"
@@ -6278,9 +6282,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Angle to rotate the image by"
     },
-    "imageFixedSize" : {
+    "imageMinZoom" : {
       "type" : "integer",
-      "description" : "Keep the image the same size, regardless of map zoom level (1 for yes, 0 for no)"
+      "description" : "Minimim zoom value"
     },
     "text" : {
       "type" : "string"
@@ -6294,6 +6298,11 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Longitude in decimal degrees, positive to the east"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude / height above sea level in metres"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -6313,9 +6322,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Angle to rotate the image by"
     },
-    "imageFixedSize" : {
+    "imageMinZoom" : {
       "type" : "integer",
-      "description" : "Keep the image the same size, regardless of map zoom level (1 for yes, 0 for no)"
+      "description" : "Minimim zoom value"
     },
     "text" : {
       "type" : "string"
@@ -6329,6 +6338,11 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Longitude in decimal degrees, positive to the east"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Altitude / height above sea level in metres"
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -45272,7 +45286,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-01-13T17:40:49.583+01:00
+              Generated 2021-02-11T23:51:16.152+01:00
             </div>
           </div>
       </div>

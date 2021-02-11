@@ -57,6 +57,9 @@ public:
     float getPowerRange();
     void setPowerRange(float power_range);
 
+    qint32 getFpsPeriodMs();
+    void setFpsPeriodMs(qint32 fps_period_ms);
+
     qint32 getDisplayWaterfall();
     void setDisplayWaterfall(qint32 display_waterfall);
 
@@ -132,6 +135,9 @@ private:
 
     float power_range;
     bool m_power_range_isSet;
+
+    qint32 fps_period_ms;
+    bool m_fps_period_ms_isSet;
 
     qint32 display_waterfall;
     bool m_display_waterfall_isSet;

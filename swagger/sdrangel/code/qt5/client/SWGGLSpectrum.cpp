@@ -38,6 +38,8 @@ SWGGLSpectrum::SWGGLSpectrum() {
     m_ref_level_isSet = false;
     power_range = 0.0f;
     m_power_range_isSet = false;
+    fps_period_ms = 0;
+    m_fps_period_ms_isSet = false;
     display_waterfall = 0;
     m_display_waterfall_isSet = false;
     inverted_waterfall = 0;
@@ -94,6 +96,8 @@ SWGGLSpectrum::init() {
     m_ref_level_isSet = false;
     power_range = 0.0f;
     m_power_range_isSet = false;
+    fps_period_ms = 0;
+    m_fps_period_ms_isSet = false;
     display_waterfall = 0;
     m_display_waterfall_isSet = false;
     inverted_waterfall = 0;
@@ -158,6 +162,7 @@ SWGGLSpectrum::cleanup() {
 
 
 
+
     if(ws_spectrum_address != nullptr) { 
         delete ws_spectrum_address;
     }
@@ -184,6 +189,8 @@ SWGGLSpectrum::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ref_level, pJson["refLevel"], "float", "");
     
     ::SWGSDRangel::setValue(&power_range, pJson["powerRange"], "float", "");
+    
+    ::SWGSDRangel::setValue(&fps_period_ms, pJson["fpsPeriodMs"], "qint32", "");
     
     ::SWGSDRangel::setValue(&display_waterfall, pJson["displayWaterfall"], "qint32", "");
     
@@ -253,6 +260,9 @@ SWGGLSpectrum::asJsonObject() {
     }
     if(m_power_range_isSet){
         obj->insert("powerRange", QJsonValue(power_range));
+    }
+    if(m_fps_period_ms_isSet){
+        obj->insert("fpsPeriodMs", QJsonValue(fps_period_ms));
     }
     if(m_display_waterfall_isSet){
         obj->insert("displayWaterfall", QJsonValue(display_waterfall));
@@ -363,6 +373,16 @@ void
 SWGGLSpectrum::setPowerRange(float power_range) {
     this->power_range = power_range;
     this->m_power_range_isSet = true;
+}
+
+qint32
+SWGGLSpectrum::getFpsPeriodMs() {
+    return fps_period_ms;
+}
+void
+SWGGLSpectrum::setFpsPeriodMs(qint32 fps_period_ms) {
+    this->fps_period_ms = fps_period_ms;
+    this->m_fps_period_ms_isSet = true;
 }
 
 qint32
@@ -573,6 +593,9 @@ SWGGLSpectrum::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_power_range_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_fps_period_ms_isSet){
             isObjectUpdated = true; break;
         }
         if(m_display_waterfall_isSet){

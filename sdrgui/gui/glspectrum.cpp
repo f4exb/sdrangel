@@ -37,7 +37,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
 	m_cursorState(CSNormal),
     m_cursorChannel(0),
-	m_masterTimer(nullptr),
+	m_fpsPeriodMs(50),
 	m_mouseInside(false),
 	m_changesPending(true),
 	m_centerFrequency(100000000),
@@ -160,8 +160,9 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_textOverlayFont.setBold(true);
     // m_textOverlayFont.setPointSize(font().pointSize() - 1);
 
+	m_timer.setTimerType(Qt::PreciseTimer);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
-	m_timer.start(50);
+	m_timer.start(m_fpsPeriodMs);
 }
 
 GLSpectrum::~GLSpectrum()
@@ -428,6 +429,10 @@ void GLSpectrum::newSpectrum(const std::vector<Real>& spectrum, int fftSize)
 
 	updateWaterfall(spectrum);
 	updateHistogram(spectrum);
+
+	if (m_fpsPeriodMs == 0) {
+		update();
+	}
 }
 
 void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
@@ -2288,24 +2293,20 @@ void GLSpectrum::setWaterfallShare(Real waterfallShare)
     m_changesPending = true;
 }
 
-void GLSpectrum::connectTimer(const QTimer& timer)
+void GLSpectrum::setFPSPeriodMs(int fpsPeriodMs)
 {
-	qDebug() << "GLSpectrum::connectTimer";
-	disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
-	connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
-	m_masterTimer = &timer;
-	m_timer.stop();
-}
+	if (fpsPeriodMs == 0)
+	{
+		disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+		m_timer.stop();
+	}
+	else
+	{
+		connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+		m_timer.start(fpsPeriodMs);
+	}
 
-void GLSpectrum::disconnectTimer()
-{
-    qDebug() << "GLScope::disconnectTimer";
-
-    if (m_masterTimer) {
-        disconnect(m_masterTimer, SIGNAL(timeout()), this, SLOT(tick()));
-    }
-
-    m_masterTimer = nullptr;
+	m_fpsPeriodMs = fpsPeriodMs;
 }
 
 void GLSpectrum::cleanup()

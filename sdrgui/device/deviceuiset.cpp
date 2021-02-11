@@ -36,12 +36,11 @@
 
 #include "deviceuiset.h"
 
-DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet, QTimer& timer)
+DeviceUISet::DeviceUISet(int tabIndex, DeviceSet *deviceSet)
 {
     m_spectrum = new GLSpectrum;
     m_spectrumVis = deviceSet->m_spectrumVis;
     m_spectrumVis->setGLSpectrum(m_spectrum);
-    m_spectrum->connectTimer(timer);
     m_spectrumGUI = new GLSpectrumGUI;
     m_spectrumGUI->setBuddies(m_spectrumVis, m_spectrum);
     m_channelWindow = new ChannelWindow;

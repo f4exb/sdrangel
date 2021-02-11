@@ -163,7 +163,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_scopeVis->setLiveRate(m_sampleRate/(1<<m_settings.m_log2Decim));
     displaySampleRate(m_sampleRate/(1<<m_settings.m_log2Decim));
 
-	ui->glSpectrum->connectTimer(MainCore::instance()->getMasterTimer());
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 

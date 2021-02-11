@@ -34,6 +34,7 @@ void GLSpectrumSettings::resetToDefaults()
 	m_fftWindow = FFTWindow::Hanning;
 	m_refLevel = 0;
 	m_powerRange = 100;
+	m_fpsPeriodMs = 50;
 	m_decay = 1;
 	m_decayDivisor = 1;
 	m_histogramStroke = 30;
@@ -65,6 +66,7 @@ QByteArray GLSpectrumSettings::serialize() const
 	s.writeS32(3, (int) m_fftWindow);
 	s.writeReal(4, m_refLevel);
 	s.writeReal(5, m_powerRange);
+	s.writeS32(26, m_fpsPeriodMs);
 	s.writeBool(6, m_displayWaterfall);
 	s.writeBool(7, m_invertedWaterfall);
 	s.writeBool(8, m_displayMaxHold);
@@ -108,6 +110,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		m_fftWindow = (FFTWindow::Function) tmp;
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
+		d.readS32(26, &m_fpsPeriodMs, 50);
 		d.readBool(6, &m_displayWaterfall, true);
 		d.readBool(7, &m_invertedWaterfall, true);
 		d.readBool(8, &m_displayMaxHold, false);

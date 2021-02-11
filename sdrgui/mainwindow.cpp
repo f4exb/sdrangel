@@ -304,7 +304,7 @@ void MainWindow::addSourceDevice(int deviceIndex)
     ui->inputViewDock->addDevice(0, deviceTabIndex);
 
     m_mainCore->appendDeviceSet(0);
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back(), m_mainCore->m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back()));
     m_deviceUIs.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = dspDeviceSourceEngine;
     m_deviceUIs.back()->m_deviceSinkEngine = nullptr;
@@ -383,7 +383,7 @@ void MainWindow::addSinkDevice()
     ui->inputViewDock->addDevice(1, deviceTabIndex);
 
     m_mainCore->appendDeviceSet(1);
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back(), m_mainCore->m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back()));
     m_deviceUIs.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_deviceUIs.back()->m_deviceSinkEngine = dspDeviceSinkEngine;
@@ -460,7 +460,7 @@ void MainWindow::addMIMODevice()
     ui->inputViewDock->addDevice(2, deviceTabIndex);
 
     m_mainCore->appendDeviceSet(2);
-    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back(), m_mainCore->m_masterTimer));
+    m_deviceUIs.push_back(new DeviceUISet(deviceTabIndex, m_mainCore->m_deviceSets.back()));
     m_deviceUIs.back()->m_deviceSourceEngine = nullptr;
     m_mainCore->m_deviceSets.back()->m_deviceSourceEngine = nullptr;
     m_deviceUIs.back()->m_deviceSinkEngine = nullptr;

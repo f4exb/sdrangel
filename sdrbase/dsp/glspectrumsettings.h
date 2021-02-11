@@ -41,6 +41,7 @@ public:
 	FFTWindow::Function m_fftWindow;
 	Real m_refLevel;
 	Real m_powerRange;
+	int m_fpsPeriodMs; //!< FPS capping period in ms FPS = 1000/m_fpsPeriodMs. If zero: no limit.
 	int m_decay;
 	int m_decayDivisor;
 	int m_histogramStroke;

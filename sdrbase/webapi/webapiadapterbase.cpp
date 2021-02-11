@@ -149,6 +149,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgSpectrumConfig->setFftWindow((int) m_spectrumSettings.m_fftWindow);
         swgSpectrumConfig->setRefLevel(m_spectrumSettings.m_refLevel);
         swgSpectrumConfig->setPowerRange(m_spectrumSettings.m_powerRange);
+        swgSpectrumConfig->setFpsPeriodMs(m_spectrumSettings.m_fpsPeriodMs);
         swgSpectrumConfig->setDisplayWaterfall(m_spectrumSettings.m_displayWaterfall ? 1 : 0);
         swgSpectrumConfig->setInvertedWaterfall(m_spectrumSettings.m_invertedWaterfall ? 1 : 0);
         swgSpectrumConfig->setDisplayMaxHold(m_spectrumSettings.m_displayMaxHold ? 1 : 0);
@@ -368,6 +369,9 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         }
         if (spectrumIt->contains("refLevel")) {
             spectrumSettings.m_refLevel = apiPreset->getSpectrumConfig()->getRefLevel();
+        }
+        if (spectrumIt->contains("fpsPeriodMs")) {
+            spectrumSettings.m_fpsPeriodMs = apiPreset->getSpectrumConfig()->getFpsPeriodMs();
         }
         if (spectrumIt->contains("waterfallShare")) {
             spectrumSettings.m_waterfallShare = apiPreset->getSpectrumConfig()->getWaterfallShare();

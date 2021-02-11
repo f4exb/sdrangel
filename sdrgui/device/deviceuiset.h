@@ -61,7 +61,7 @@ public:
     DSPDeviceMIMOEngine *m_deviceMIMOEngine;
     QByteArray m_mainWindowState;
 
-    DeviceUISet(int tabIndex, DeviceSet *deviceSet, QTimer& timer);
+    DeviceUISet(int tabIndex, DeviceSet *deviceSet);
     ~DeviceUISet();
 
     GLSpectrum *getSpectrum() { return m_spectrum; }     //!< Direct spectrum getter

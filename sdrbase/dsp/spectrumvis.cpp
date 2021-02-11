@@ -721,6 +721,7 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
         << " m_averagingMode: " << settings.m_averagingMode
         << " m_refLevel: " << settings.m_refLevel
         << " m_powerRange: " << settings.m_powerRange
+        << " m_fpsPeriodMs: " << settings.m_fpsPeriodMs
         << " m_linear: " << settings.m_linear
         << " m_ssb: " << settings.m_ssb
         << " m_usb: " << settings.m_usb
@@ -919,6 +920,7 @@ void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& respo
     response.setFftWindow((int) settings.m_fftWindow);
     response.setRefLevel(settings.m_refLevel);
     response.setPowerRange(settings.m_powerRange);
+    response.setFpsPeriodMs(settings.m_fpsPeriodMs);
     response.setDecay(settings.m_decay);
     response.setDecayDivisor(settings.m_decayDivisor);
     response.setHistogramStroke(settings.m_histogramStroke);
@@ -964,6 +966,9 @@ void SpectrumVis::webapiUpdateSpectrumSettings(
     }
     if (spectrumSettingsKeys.contains("powerRange")) {
         settings.m_powerRange = response.getPowerRange();
+    }
+    if (spectrumSettingsKeys.contains("fpsPeriodMs")) {
+        settings.m_fpsPeriodMs = response.getFpsPeriodMs();
     }
     if (spectrumSettingsKeys.contains("decay")) {
         settings.m_decay = response.getDecay();

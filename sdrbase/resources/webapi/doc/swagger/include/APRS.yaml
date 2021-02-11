@@ -4,15 +4,15 @@ APRSSettings:
     igateServer:
       type: string
     igatePort:
-      type: integer  
+      type: integer
     igateCallsign:
       type: string
     igatePasscode:
       type: string
     igateFilter:
-      type: string  
+      type: string
     igateEnabled:
-      type: integer    
+      type: integer
     title:
       type: string
     rgbColor:

@@ -132,6 +132,7 @@ void InterferometerWebAPIAdapter::webapiFormatChannelSettings(
     swgSpectrum->setDisplayWaterfall(spectrumSettings.m_displayWaterfall ? 1 : 0);
     swgSpectrum->setFftOverlap(spectrumSettings.m_fftOverlap);
     swgSpectrum->setFftSize(spectrumSettings.m_fftSize);
+    swgSpectrum->setFpsPeriodMs(spectrumSettings.m_fpsPeriodMs);
 }
 
 int InterferometerWebAPIAdapter::webapiSettingsPutPatch(
@@ -368,6 +369,9 @@ void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
         }
         if (channelSettingsKeys.contains("spectrumConfig.fftSize")) {
             spectrumSettings.m_fftSize = response.getInterferometerSettings()->getSpectrumConfig()->getFftSize();
+        }
+        if (channelSettingsKeys.contains("spectrumConfig.fpsPeriodMs")) {
+            spectrumSettings.m_fpsPeriodMs = response.getInterferometerSettings()->getSpectrumConfig()->getFpsPeriodMs();
         }
     }
 }
