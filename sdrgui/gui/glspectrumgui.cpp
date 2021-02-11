@@ -253,18 +253,16 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
     }
 
     std::sort(psd.begin(), psd.end());
-    float maxSum = 0.0f, minSum = 0.0f;
+    float max = psd[psd.size() - 1];
+    float minSum = 0.0f;
 
-    for (int i = 0; i < avgRange; i++)
-    {
+    for (int i = 0; i < avgRange; i++) {
         minSum += psd[i];
-        maxSum += psd[psd.size() - i-1];
     }
 
     float minAvg = minSum / avgRange;
-    float maxAvg = maxSum / avgRange;
     int minLvl = CalcDb::dbPower(minAvg*2);
-    int maxLvl = CalcDb::dbPower(maxAvg*10);
+    int maxLvl = CalcDb::dbPower(max*10);
 
     m_settings.m_refLevel = maxLvl;
     m_settings.m_powerRange = maxLvl - minLvl;
