@@ -72,7 +72,10 @@ bool SSBDemodGUI::handleMessage(const Message& message)
     else if (DSPConfigureAudio::match(message))
     {
         qDebug("SSBDemodGUI::handleMessage: DSPConfigureAudio: %d", m_ssbDemod->getAudioSampleRate());
-        applyBandwidths(5 - ui->spanLog2->value()); // will update spectrum details with new sample rate
+        applyBandwidths(1 + ui->spanLog2->maximum() - ui->spanLog2->value()); // will update spectrum details with new sample rate
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
         return true;
     }
     else
@@ -123,7 +126,7 @@ void SSBDemodGUI::on_audioFlipChannels_toggled(bool flip)
 void SSBDemodGUI::on_dsb_toggled(bool dsb)
 {
     ui->flipSidebands->setEnabled(!dsb);
-    applyBandwidths(5 - ui->spanLog2->value());
+    applyBandwidths(1 + ui->spanLog2->maximum() - ui->spanLog2->value());
 }
 
 void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
@@ -136,13 +139,14 @@ void SSBDemodGUI::on_deltaFrequency_changed(qint64 value)
 void SSBDemodGUI::on_BW_valueChanged(int value)
 {
     (void) value;
-    applyBandwidths(5 - ui->spanLog2->value());
+    qDebug("SSBDemodGUI::on_BW_valueChanged: ui->spanLog2: %d", ui->spanLog2->value());
+    applyBandwidths(1 + ui->spanLog2->maximum() - ui->spanLog2->value());
 }
 
 void SSBDemodGUI::on_lowCut_valueChanged(int value)
 {
     (void) value;
-    applyBandwidths(5 - ui->spanLog2->value());
+    applyBandwidths(1 + ui->spanLog2->maximum() - ui->spanLog2->value());
 }
 
 void SSBDemodGUI::on_volume_valueChanged(int value)
@@ -383,6 +387,7 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     tickInterval = tickInterval == 0 ? 1 : tickInterval;
 
     qDebug() << "SSBDemodGUI::applyBandwidths:"
+            << " s2max:" << s2max
             << " dsb: " << dsb
             << " spanLog2: " << spanLog2
             << " m_spectrumRate: " << m_spectrumRate
@@ -444,7 +449,6 @@ void SSBDemodGUI::applyBandwidths(unsigned int spanLog2, bool force)
     }
 
     ui->lowCutText->setText(tr("%1k").arg(lwStr));
-
 
     ui->BW->blockSignals(true);
     ui->lowCut->blockSignals(true);
@@ -522,7 +526,7 @@ void SSBDemodGUI::displaySettings()
     ui->BW->blockSignals(true);
 
     ui->dsb->setChecked(m_settings.m_dsb);
-    ui->spanLog2->setValue(5 - m_settings.m_spanLog2);
+    ui->spanLog2->setValue(1 + ui->spanLog2->maximum() - m_settings.m_spanLog2);
 
     ui->BW->setValue(m_settings.m_rfBandwidth / 100.0);
     QString s = QString::number(m_settings.m_rfBandwidth/1000.0, 'f', 1);
