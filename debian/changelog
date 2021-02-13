@@ -1,3 +1,12 @@
+sdrangel (6.5.4-1) unstable; urgency=medium
+
+   * Spectrum: more FPS capping options. Implements #772
+   * Spectrum: autoscaling. Implements #771
+   * Spectrum: overlap control. Implements #770
+   * SSB demod: corrections to spanLog2 processing
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 13 Feb 2021 09:05:18 +0100
+
 sdrangel (6.5.3-1) unstable; urgency=medium
 
    * More Star Tracker updates. PR #762
