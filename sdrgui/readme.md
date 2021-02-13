@@ -334,11 +334,19 @@ Most devices will also present an interface to control automatic DC removal and 
 These are the controls of the main spectrum display in (7). The same controls are found in the plugins that feature a spectrum display:
   - Channel Analyzer
   - Broadcast FM demodulator
-  - SSB demodulator
-  - UDP source
-  - UDP sink
+  - ChirpChat (LoRa) demodulator
+  - File sink
+  - FreeDV demodulator and modulator
+  - Frequency tracker
+  - SigMF file sink
+  - SSB demodulator and modulator
+  - UDP source and sink
 
-<h4>3.1. FFT window selector</h4>
+<h3>3A.  Spectrum display control line 1</h3>
+
+![Spectrum GUI A](../doc/img/MainWindow_spectrum_gui_A.png)
+
+<h4>3A.1. FFT window selector</h4>
 
 Use this combo box to select which window is applied to the FFT:
   - **Bart**: Bartlett
@@ -349,7 +357,7 @@ Use this combo box to select which window is applied to the FFT:
   - **Rec**: Rectangular (no window)
   - **Kai**: Kaiser with alpha = 2.15 (beta = 6.76) gives sidelobes &lt; -70dB
 
-<h4>3.2. FFT size</h4>
+<h4>3A.2. FFT size</h4>
 
 Select the size of the FFT window among these values:
   - 128
@@ -359,15 +367,13 @@ Select the size of the FFT window among these values:
   - 2k = 2048
   - 4k = 4096
 
-<h4>3.3. Reference level</h4>
+<h4>3A.3. FFT Overlap</h4>
 
-This is the level in dB at the top of the display range. You can select values between 0 and -110 in 1 dB steps
+FFT Overlap in number of samples over half of the FFT size. The percentage of overlap appears in the tooltip. Ranges from 0 (no overlap) to half the FFT size minus one (maximum overlap).
 
-<h4>3.4. Range</h4>
+Example with a FFT of 1k (1024) and an overlap of 128 the overlap percentage is 128 &divide; 512 = 25%
 
-This is the range of display in dB. You can select values between 1 and 100 in 1 dB steps
-
-<h4>3.5. Averaging mode</h4>
+<h4>3A.4. Averaging mode</h4>
 
 Use this combo to select which averaging mode is applied:
   - **No**: no averaging. Disables averaging regardless of the number of averaged samples (4.6). This is the default option
@@ -375,68 +381,53 @@ Use this combo to select which averaging mode is applied:
   - **Fix**: fixed average. Average is done over the amount of samples specified next (4.6) and a result is produced at the end of the corresponding period then the next block of averaged samples is processed. There is one complete FFT line produced every FFT sampling period multiplied by the number of averaged samples (4.6). The time scale on the waterfall display is updated accordingly.
   - **Max**: this is not an averaging but a max hold. It will retain the maximum value over the amount of samples specified next (4.6). Similarly to the fixed average a result is produced at the end of the corresponding period which results in slowing down the waterfall display. The point of this mode is to make outlying short bursts within the "averaging" period stand out. With averaging they would only cause a modest increase and could be missed out.
 
-<h4>3.6. Number of averaged samples</h4>
+<h4>3A.5. Number of averaged samples</h4>
 
-Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 1 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) for all modes and in addition 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000) for "fixed" and "max" modes. The tooltip mentions the resulting averaging period considering the baseband sample rate and FFT size.
-Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
+Each FFT bin (squared magnitude) is averaged or max'ed over a number of samples. This combo allows selecting the number of samples between these values: 1 (no averaging), 2, 5, 10, 20, 50, 100, 200, 500, 1k (1000) for all modes and in addition 2k, 5k, 10k, 20k, 50k, 1e5 (100000), 2e5, 5e5, 1M (1000000) for "fixed" and "max" modes. Averaging reduces the noise variance and can be used to better detect weak continuous signals. The fixed averaging mode allows long time monitoring on the waterfall. The max mode helps showing short bursts that may appear during the "averaging" period.
 
-&#9758; Note: The spectrum display is refreshed every 50ms (20 FPS). Setting an averaging time above this value will make sure that a short burst is not missed particularly when using the max mode.
+The resulting spectrum refresh period appears in the tooltip taking sample rate, FFT size (3A.2), average size (3A.5) and overlap (3A.3) into consideration. Averaging size adjustment is valid for fixed average and max modes only:
 
-<h4>3.7. Phosphor display stroke decay</h4>
+Period = ((((FFT_size &divide; 2) - overlap) &times; 2) &divide; sample_rate) &times; averaging_size
 
-This controls the decay rate of the stroke when phosphor display is engaged (4.C). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (4.B) is pressed.
+<h4>3A.6. Play/Pause spectrum</h4>
 
-<h4>3.8. Phosphor display stroke decay divisor</h4>
+Use this button to freeze the spectrum update. Useful when making measurements (Paragraph 6).
 
-When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
+<h3>3B.  Spectrum display control line 2</h3>
 
-<h4>3.9. Phosphor display stroke strength</h4>
+![Spectrum GUI B](../doc/img/MainWindow_spectrum_gui_B.png)
 
-This controls the stroke strength when phosphor display is engaged (4.C). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
+<h4>3B.1. Autoscale</h4>
 
-<h4>3.A. Trace intensity</h4>
+Scales spectrum by setting reference level and range automatically based on maximum and minimum levels. Takes the average of FFT size &divide; 32 minima for the minimum and 10 dB over maximum for the maximum.
 
-This controls the intensity of the maximum (4.D) and current (4.E) spectrum trace
+<h4>3B.2. Reference level</h4>
 
-<h4>3.B. Clear spectrum</h4>
+This is the level in dB at the top of the display range. You can select values between 0 and -110 in 1 dB steps
 
-This resets the maximum spectrum trace and phosphor remanence
+<h4>3B.3. Range</h4>
 
-<h4>3.C. Phosphor display</h4>
+This is the range of display in dB. You can select values between 1 and 100 in 1 dB steps
 
-Toggles the phosphor display on the spectrum
+<h4>3B.4. FPS capping</h4>
 
-<h4>3.D. Maximum trace</h4>
+The refresh rate of the spectrum is capped by this value in FPS i.e the refresh period in seconds is 1 &divide; FPS. The default value is 20 and corresponds to general usage. You may use a lower value to limit GPU usage and power consumption. You may also use a higher value for an even more reactive display. "NL" corresponds to "No Limit". With "No Limit" the spectrum update will be triggered immediately when a new FFT is calculated. Note that actual refresh rate will be limited by other factors related to hardware and graphics drivers.
 
-Toggles the maximum trace display (red trace) on the spectrum
+The refresh period is limited anyway by the FFT period which is the FFT size divided by the baseband sampling rate and multiplied by the fixed average or max size (3A.5) in case these features are engaged (3A.4). Setting a resulting FFT refresh time above the refresh rate will make sure that a short burst is not missed particularly when using the max mode.
 
-<h4>3.E. Current trace</h4>
+Example with a FFT size of 1k (1024) and no overlap, a baseband rate of 48 kS/s and an averaging size of 5 the refresh period is:
 
-Toggles the current trace display (yellow trace) on the spectrum
+(1024 &divide; 48000) &times; 5 &approx; 107 ms
 
-<h4>3.F. Waterfall/spectrum placement</h4>
+Thus if the FPS capping is 20 (50 ms) the refresh period will be in fact 107 ms (&approx; 9 FPS) anyway.
 
-Toggles the spectrum on top or on bottom versus waterfall
-
-<h4>3.G. Waterfall</h4>
-
-Toggles the waterfall display
-
-<h4>3.H.Grid</h4>
-
-Toggles the grid display
-
-<h4>3.I.Grid intensity</h4>
-
-Controls the intensity of the grid display
-
-<h4>3.J. Logarithmic/linear scale</h4>
+<h4>3B.5. Logarithmic/linear scale</h4>
 
 Use this toggle button to switch between spectrum logarithmic and linear scale display. The face of the button will change to represent either a logaritmic or linear curve.
 
 When in linear mode the range control (4.4) has no effect because the actual range is between 0 and the reference level. The reference level in dB (4.3) still applies but is translated to a linear value e.g -40 dB is 1e-4. In linear mode the scale numbers are formatted using scientific notation so that they always occupy the same space.
 
-<h4>4.K. Spectrum server control</h4>
+<h4>3B.6. Spectrum server control</h4>
 
 A websockets based server can be used to send spectrum data to clients. An example of such client can be found in the [SDRangelSpectrum](https://github.com/f4exb/sdrangelspectrum) project.
 
@@ -495,6 +486,58 @@ The server only sends data. Control including FFT details is done via the REST A
     </tr>
 
 </table>
+
+<h3>3C.  Spectrum display control line 3</h3>
+
+![Spectrum GUI C](../doc/img/MainWindow_spectrum_gui_C.png)
+
+<h4>3C.1. Clear spectrum</h4>
+
+This resets the maximum spectrum trace and phosphor remanence
+
+<h4>3C.2. Phosphor display</h4>
+
+Toggles the phosphor display on the spectrum
+
+<h4>3C.3. Phosphor display stroke and max hold decay</h4>
+
+This controls the decay rate of the stroke when phosphor display is engaged (4.C). The histogram pixel value is diminished by this value each time a new FFT is produced. A value of zero means no decay and thus phosphor history and max hold (red line) will be kept until the clear button (4.B) is pressed.
+
+<h4>3C.4. Phosphor display stroke and max hold decay divisor</h4>
+
+When phosphor display is engaged (4.C) and stroke decay is 1 (4.7) this divides the unit decay by this value by diminishing histogram pixel value by one each time a number of FFTs equal to this number have been produced. Thus the actual decay rate is 1 over this value. This allow setting a slower decay rate than one unit for each new FFT.
+
+<h4>3C.5. Phosphor display stroke strength</h4>
+
+This controls the stroke strength when phosphor display is engaged (4.C). The histogram value is incremented by this value at each new FFT until the maximum (red) is reached.
+
+<h4>3C.6. Maximum hold trace</h4>
+
+Toggles the maximum hold trace display (red trace) on the spectrum
+
+<h4>3C.7. Current trace</h4>
+
+Toggles the current trace display (yellow trace) on the spectrum
+
+<h4>3C.8. Trace intensity</h4>
+
+This controls the intensity of the maximum (4.D) and current (4.E) spectrum trace
+
+<h4>3C.9. Waterfall/spectrum placement</h4>
+
+Toggles the spectrum on top or on bottom versus waterfall
+
+<h4>3C.10. Waterfall</h4>
+
+Toggles the waterfall display
+
+<h4>3C.11.Grid</h4>
+
+Toggles the grid display
+
+<h4>3C.12.Grid intensity</h4>
+
+Controls the intensity of the grid display
 
 <h3>5. Presets and commands</h3>
 

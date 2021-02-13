@@ -306,6 +306,7 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 
     setAveragingCombo();
 	applySettings();
+    setAveragingToolitp();
 }
 
 void GLSpectrumGUI::on_averaging_currentIndexChanged(int index)
@@ -564,11 +565,12 @@ void GLSpectrumGUI::setAveragingToolitp()
     if (m_glSpectrum)
     {
         QString s;
+        int averagingIndex = m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone ? 0 : m_settings.m_averagingIndex;
         float halfSize = m_settings.m_fftSize / 2;
         float overlapFactor = (halfSize - m_settings.m_fftOverlap) / halfSize;
-        float averagingTime = (m_settings.m_fftSize * (getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
+        float averagingTime = (m_settings.m_fftSize * (getAveragingValue(averagingIndex, m_settings.m_averagingMode) == 0 ?
             1 :
-            getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode))) / (float) m_glSpectrum->getSampleRate();
+            getAveragingValue(averagingIndex, m_settings.m_averagingMode))) / (float) m_glSpectrum->getSampleRate();
         setNumberStr(averagingTime*overlapFactor, 2, s);
         ui->averaging->setToolTip(QString("Number of averaging samples (avg time: %1s)").arg(s));
     }
