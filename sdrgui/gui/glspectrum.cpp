@@ -52,6 +52,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_sampleRate(500000),
 	m_timingRate(1),
 	m_fftSize(512),
+	m_nbBins(512),
 	m_displayGrid(true),
 	m_displayGridIntensity(5),
 	m_displayTraceIntensity(50),
@@ -413,7 +414,7 @@ void GLSpectrum::removeChannelMarker(ChannelMarker* channelMarker)
 	m_mutex.unlock();
 }
 
-void GLSpectrum::newSpectrum(const Real *spectrum, int fftSize)
+void GLSpectrum::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -422,12 +423,14 @@ void GLSpectrum::newSpectrum(const Real *spectrum, int fftSize)
 	if (m_changesPending)
     {
 		m_fftSize = fftSize;
+		m_nbBins = nbBins;
 		return;
 	}
 
-	if (fftSize != m_fftSize)
+	if ((fftSize != m_fftSize) || (m_nbBins != nbBins))
     {
 		m_fftSize = fftSize;
+		m_nbBins = nbBins;
 		m_changesPending = true;
 		return;
 	}
@@ -446,7 +449,7 @@ void GLSpectrum::updateWaterfall(const Real *spectrum)
     {
 		quint32* pix = (quint32*)m_waterfallBuffer->scanLine(m_waterfallBufferPos);
 
-		for (int i = 0; i < m_fftSize; i++)
+		for (int i = 0; i < m_nbBins; i++)
         {
 			int v = (int)((spectrum[i] - m_referenceLevel) * 2.4 * 100.0 / m_powerRange + 240.0);
 
@@ -466,7 +469,7 @@ void GLSpectrum::updateWaterfall(const Real *spectrum)
 void GLSpectrum::updateHistogram(const Real *spectrum)
 {
 	quint8* b = m_histogram;
-	int fftMulSize = 100 * m_fftSize;
+	int fftMulSize = 100 * m_nbBins;
 
 	if ((m_displayHistogram || m_displayMaxHold) && (m_decay != 0))
 	{
@@ -557,7 +560,7 @@ void GLSpectrum::updateHistogram(const Real *spectrum)
         }
     }
 #else
-    for (int i = 0; i < m_fftSize; i++)
+    for (int i = 0; i < m_nbBins; i++)
     {
         int v = (int)((spectrum[i] - m_referenceLevel) * 100.0 / m_powerRange + 100.0);
 
@@ -626,7 +629,7 @@ void GLSpectrum::clearSpectrumHistogram()
 		return;
 	}
 
-	memset(m_histogram, 0x00, 100 * m_fftSize);
+	memset(m_histogram, 0x00, 100 * m_nbBins);
 
 	m_mutex.unlock();
 	update();
@@ -644,7 +647,7 @@ void GLSpectrum::paintGL()
 		m_changesPending = false;
 	}
 
-	if (m_fftSize <= 0)
+	if (m_nbBins <= 0)
 	{
 		m_mutex.unlock();
 		return;
@@ -668,15 +671,15 @@ void GLSpectrum::paintGL()
 
 			if (m_waterfallTexturePos + m_waterfallBufferPos < m_waterfallTextureHeight)
 			{
-				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_fftSize, m_waterfallBufferPos,  m_waterfallBuffer->scanLine(0));
+				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_nbBins, m_waterfallBufferPos,  m_waterfallBuffer->scanLine(0));
 				m_waterfallTexturePos += m_waterfallBufferPos;
 			}
 			else
 			{
 				int breakLine = m_waterfallTextureHeight - m_waterfallTexturePos;
 				int linesLeft = m_waterfallTexturePos + m_waterfallBufferPos - m_waterfallTextureHeight;
-				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_fftSize, breakLine,  m_waterfallBuffer->scanLine(0));
-				m_glShaderWaterfall.subTexture(0, 0, m_fftSize, linesLeft,  m_waterfallBuffer->scanLine(breakLine));
+				m_glShaderWaterfall.subTexture(0, m_waterfallTexturePos, m_nbBins, breakLine,  m_waterfallBuffer->scanLine(0));
+				m_glShaderWaterfall.subTexture(0, 0, m_nbBins, linesLeft,  m_waterfallBuffer->scanLine(breakLine));
 				m_waterfallTexturePos = linesLeft;
 			}
 
@@ -756,7 +759,7 @@ void GLSpectrum::paintGL()
 					quint8* b = bs;
 					pix = (quint32*)m_histogramBuffer->scanLine(99 - y);
 
-					for (int x = 0; x < m_fftSize; x++)
+					for (int x = 0; x < m_nbBins; x++)
 					{
 						*pix = m_histogramPalette[*b];
 						pix++;
@@ -779,7 +782,7 @@ void GLSpectrum::paintGL()
 			    		0, 1
 			    };
 
-				m_glShaderHistogram.subTexture(0, 0, m_fftSize, 100,  m_histogramBuffer->scanLine(0));
+				m_glShaderHistogram.subTexture(0, 0, m_nbBins, 100,  m_histogramBuffer->scanLine(0));
 				m_glShaderHistogram.drawSurface(m_glHistogramBoxMatrix, tex1, vtx1, 4);
 			}
 		}
@@ -917,11 +920,11 @@ void GLSpectrum::paintGL()
 	// paint max hold lines on top of histogram
 	if (m_displayMaxHold)
 	{
-		if (m_maxHold.size() < (uint) m_fftSize) {
-		    m_maxHold.resize(m_fftSize);
+		if (m_maxHold.size() < (uint) m_nbBins) {
+		    m_maxHold.resize(m_nbBins);
 		}
 
-		for (int i = 0; i < m_fftSize; i++)
+		for (int i = 0; i < m_nbBins; i++)
 		{
 			int j;
 			quint8* bs = m_histogram + i * 100;
@@ -940,7 +943,7 @@ void GLSpectrum::paintGL()
 		{
 		    GLfloat *q3 = m_q3FFT.m_array;
 
-			for (int i = 0; i < m_fftSize; i++)
+			for (int i = 0; i < m_nbBins; i++)
 			{
 				Real v = m_maxHold[i] - m_referenceLevel;
 
@@ -955,7 +958,7 @@ void GLSpectrum::paintGL()
 			}
 
 			QVector4D color(1.0f, 0.0f, 0.0f, (float) m_displayTraceIntensity / 100.0f);
-			m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_fftSize);
+			m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins);
 		}
 	}
 
@@ -966,7 +969,7 @@ void GLSpectrum::paintGL()
 			Real bottom = -m_powerRange;
 			GLfloat *q3 = m_q3FFT.m_array;
 
-			for (int i = 0; i < m_fftSize; i++)
+			for (int i = 0; i < m_nbBins; i++)
 			{
 				Real v = m_currentSpectrum[i] - m_referenceLevel;
 
@@ -981,7 +984,7 @@ void GLSpectrum::paintGL()
 			}
 
 			QVector4D color(1.0f, 1.0f, 0.25f, (float) m_displayTraceIntensity / 100.0f);
-			m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_fftSize);
+			m_glShaderSimple.drawPolyline(m_glHistogramSpectrumMatrix, color, q3, m_nbBins);
 		}
 	}
 
@@ -1265,7 +1268,7 @@ void GLSpectrum::stopDrag()
 
 void GLSpectrum::applyChanges()
 {
-	if (m_fftSize <= 0) {
+	if (m_nbBins <= 0) {
 		return;
 	}
 
@@ -1371,7 +1374,7 @@ void GLSpectrum::applyChanges()
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
 		m_glHistogramSpectrumMatrix.scale(
-			((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
+			((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins - 1)),
 			((float) 2*m_histogramHeight / height()) / m_powerRange
 		);
 
@@ -1497,7 +1500,7 @@ void GLSpectrum::applyChanges()
 			 1.0f - ((float)(2*histogramTop) / (float) height())
 		);
 		m_glHistogramSpectrumMatrix.scale(
-			((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_fftSize - 1)),
+			((float) 2 * (width() - m_leftMargin - m_rightMargin)) / ((float) width() * (float)(m_nbBins - 1)),
 			((float) 2*(height() - m_topMargin - m_frequencyScaleHeight)) / (height()*m_powerRange)
 		);
 
@@ -1837,7 +1840,7 @@ void GLSpectrum::applyChanges()
 	bool fftSizeChanged = true;
 
 	if (m_waterfallBuffer) {
-		fftSizeChanged = m_waterfallBuffer->width() != m_fftSize;
+		fftSizeChanged = m_waterfallBuffer->width() != m_nbBins;
 	}
 
 	bool windowSizeChanged = m_waterfallTextureHeight != m_waterfallHeight;
@@ -1848,7 +1851,7 @@ void GLSpectrum::applyChanges()
 			delete m_waterfallBuffer;
 		}
 
-		m_waterfallBuffer = new QImage(m_fftSize, m_waterfallHeight, QImage::Format_ARGB32);
+		m_waterfallBuffer = new QImage(m_nbBins, m_waterfallHeight, QImage::Format_ARGB32);
 
         m_waterfallBuffer->fill(qRgb(0x00, 0x00, 0x00));
         m_glShaderWaterfall.initTexture(*m_waterfallBuffer);
@@ -1868,15 +1871,15 @@ void GLSpectrum::applyChanges()
 			m_histogram = nullptr;
 		}
 
-		m_histogramBuffer = new QImage(m_fftSize, 100, QImage::Format_RGB32);
+		m_histogramBuffer = new QImage(m_nbBins, 100, QImage::Format_RGB32);
 
         m_histogramBuffer->fill(qRgb(0x00, 0x00, 0x00));
         m_glShaderHistogram.initTexture(*m_histogramBuffer, QOpenGLTexture::ClampToEdge);
 
-		m_histogram = new quint8[100 * m_fftSize];
-		memset(m_histogram, 0x00, 100 * m_fftSize);
+		m_histogram = new quint8[100 * m_nbBins];
+		memset(m_histogram, 0x00, 100 * m_nbBins);
 
-		m_q3FFT.allocate(2*m_fftSize);
+		m_q3FFT.allocate(2*m_nbBins);
 	}
 
 	if (fftSizeChanged || windowSizeChanged)
@@ -2217,12 +2220,16 @@ void GLSpectrum::frequencyZoom(QWheelEvent *event)
 	{
 		if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
 			m_frequencyZoomFactor += 0.5f;
+		} else {
+			return;
 		}
 	}
 	else
 	{
 		if (m_frequencyZoomFactor > 1.0f) {
 			m_frequencyZoomFactor -= 0.5f;
+		} else {
+			return;
 		}
 	}
 

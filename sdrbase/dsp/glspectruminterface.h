@@ -26,9 +26,10 @@ class GLSpectrumInterface
 public:
     GLSpectrumInterface() {}
     virtual ~GLSpectrumInterface() {}
-    virtual void newSpectrum(const Real* spectrum, int fftSize)
+    virtual void newSpectrum(const Real* spectrum, int nbBins, int fftSize)
     {
         (void) spectrum;
+        (void) nbBins;
         (void) fftSize;
     }
 };

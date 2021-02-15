@@ -104,7 +104,7 @@ public:
 	void removeChannelMarker(ChannelMarker* channelMarker);
 	void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
-	virtual void newSpectrum(const Real* spectrum, int fftSize);
+	virtual void newSpectrum(const Real* spectrum, int nbBins, int fftSize);
 	void clearSpectrumHistogram();
 
 	Real getWaterfallShare() const { return m_waterfallShare; }
@@ -253,7 +253,8 @@ private:
 	quint32 m_timingRate;
     int m_fftOverlap;
 
-	int m_fftSize;
+	int m_fftSize; //!< FFT size in number of bins
+    int m_nbBins;  //!< Number of visible FFT bins (zoom support)
 
 	bool m_displayGrid;
 	int m_displayGridIntensity;
