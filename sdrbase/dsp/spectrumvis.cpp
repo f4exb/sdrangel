@@ -44,6 +44,7 @@ MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureScalingFactor, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrumOpenClose, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgConfigureWSpectrum, Message)
 MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgStartStop, Message)
+MESSAGE_CLASS_DEFINITION(SpectrumVis::MsgFrequencyZooming, Message)
 
 const Real SpectrumVis::m_mult = (10.0f / log2(10.0f));
 
@@ -57,6 +58,8 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_psd(MAX_FFT_SIZE),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
+    m_frequencyZoomFactor(1.0f),
+    m_frequencyZoomPos(0.5f),
 	m_scalef(scalef),
 	m_glSpectrum(nullptr),
     m_specMax(0.0f),
@@ -121,6 +124,10 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
     Complex c;
     Real v;
+    int fftMin = (m_frequencyZoomFactor == 1.0f) ?
+        0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMax = (m_frequencyZoomFactor == 1.0f) ?
+        m_settings.m_fftSize : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
 
     if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone)
     {
@@ -140,7 +147,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
         // send new data to visualisation
         if (m_glSpectrum) {
-            m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+            m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
         }
 
         // web socket spectrum connections
@@ -176,7 +183,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
         // send new data to visualisation
         if (m_glSpectrum) {
-            m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+            m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
         }
 
         // web socket spectrum connections
@@ -223,7 +230,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
         {
             // send new data to visualisation
             if (m_glSpectrum) {
-                m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+                m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
             }
 
             // web socket spectrum connections
@@ -269,7 +276,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
         {
             // send new data to visualisation
             if (m_glSpectrum) {
-                m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+                m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
             }
 
             // web socket spectrum connections
@@ -374,7 +381,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
                 // send new data to visualisation
                 if (m_glSpectrum) {
-                    m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+                    m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
                 }
 
                 // web socket spectrum connections
@@ -433,7 +440,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 	            // send new data to visualisation
                 if (m_glSpectrum) {
-    	            m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+    	            m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
                 }
 
                 // web socket spectrum connections
@@ -512,7 +519,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
                     // send new data to visualisation
                     if (m_glSpectrum) {
-                        m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+                        m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
                     }
 
                     // web socket spectrum connections
@@ -590,7 +597,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
                     // send new data to visualisation
                     if (m_glSpectrum) {
-                        m_glSpectrum->newSpectrum(m_powerSpectrum, m_settings.m_fftSize);
+                        m_glSpectrum->newSpectrum(m_powerSpectrum.data(), m_settings.m_fftSize);
                     }
 
                     // web socket spectrum connections
@@ -694,7 +701,13 @@ bool SpectrumVis::handleMessage(const Message& message)
     {
         MsgStartStop& cmd = (MsgStartStop&) message;
         setRunning(cmd.getStartStop());
-
+        return true;
+    }
+    else if (MsgFrequencyZooming::match(message))
+    {
+        MsgFrequencyZooming& cmd = (MsgFrequencyZooming&) message;
+        m_frequencyZoomFactor = cmd.getFrequencyZoomFactor();
+        m_frequencyZoomPos = cmd.getFrequencyZoomPos();
         return true;
     }
 	else

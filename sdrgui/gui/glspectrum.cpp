@@ -25,6 +25,7 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include <QFontDatabase>
+#include "dsp/spectrumvis.h"
 #include "gui/glspectrum.h"
 #include "util/messagequeue.h"
 
@@ -33,10 +34,13 @@
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportWaterfallShare, Message)
 
+const float GLSpectrum::m_maxFrequencyZoom = 4.0f;
+
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
 	m_cursorState(CSNormal),
     m_cursorChannel(0),
+	m_spectrumVis(nullptr),
 	m_fpsPeriodMs(50),
 	m_mouseInside(false),
 	m_changesPending(true),
@@ -159,6 +163,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
     m_textOverlayFont = font(); // QFontDatabase::systemFont(QFontDatabase::FixedFont);
     m_textOverlayFont.setBold(true);
     // m_textOverlayFont.setPointSize(font().pointSize() - 1);
+	resetFrequencyZoom();
 
 	m_timer.setTimerType(Qt::PreciseTimer);
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
@@ -408,7 +413,7 @@ void GLSpectrum::removeChannelMarker(ChannelMarker* channelMarker)
 	m_mutex.unlock();
 }
 
-void GLSpectrum::newSpectrum(const std::vector<Real>& spectrum, int fftSize)
+void GLSpectrum::newSpectrum(const Real *spectrum, int fftSize)
 {
 	QMutexLocker mutexLocker(&m_mutex);
 
@@ -435,7 +440,7 @@ void GLSpectrum::newSpectrum(const std::vector<Real>& spectrum, int fftSize)
 	}
 }
 
-void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
+void GLSpectrum::updateWaterfall(const Real *spectrum)
 {
 	if (m_waterfallBufferPos < m_waterfallBuffer->height())
     {
@@ -458,7 +463,7 @@ void GLSpectrum::updateWaterfall(const std::vector<Real>& spectrum)
 	}
 }
 
-void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
+void GLSpectrum::updateHistogram(const Real *spectrum)
 {
 	quint8* b = m_histogram;
 	int fftMulSize = 100 * m_fftSize;
@@ -484,7 +489,7 @@ void GLSpectrum::updateHistogram(const std::vector<Real>& spectrum)
 		}
 	}
 
-	m_currentSpectrum = &spectrum; // Store spectrum for current spectrum line display
+	m_currentSpectrum = spectrum; // Store spectrum for current spectrum line display
 
 #if 0 //def USE_SSE2
     if(m_decay >= 0) { // normal
@@ -963,7 +968,7 @@ void GLSpectrum::paintGL()
 
 			for (int i = 0; i < m_fftSize; i++)
 			{
-				Real v = (*m_currentSpectrum)[i] - m_referenceLevel;
+				Real v = m_currentSpectrum[i] - m_referenceLevel;
 
 				if (v > 0) {
 				    v = 0;
@@ -2193,16 +2198,73 @@ void GLSpectrum::mouseReleaseEvent(QMouseEvent*)
 
 void GLSpectrum::wheelEvent(QWheelEvent *event)
 {
-    int mul;
-
     if (event->modifiers() & Qt::ShiftModifier) {
-        mul = 100;
+		channelMarkerMove(event, 100);
     } else if (event->modifiers() & Qt::ControlModifier) {
-        mul = 10;
+		channelMarkerMove(event, 10);
+    } else if (event->modifiers() & Qt::AltModifier) {
+		frequencyZoom(event);
     } else {
-        mul = 1;
+        channelMarkerMove(event, 1);
     }
+}
 
+void GLSpectrum::frequencyZoom(QWheelEvent *event)
+{
+	const QPointF& p = event->position();
+
+	if (event->delta() > 0) // zoom in
+	{
+		if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
+			m_frequencyZoomFactor += 0.5f;
+		}
+	}
+	else
+	{
+		if (m_frequencyZoomFactor > 1.0f) {
+			m_frequencyZoomFactor -= 0.5f;
+		}
+	}
+
+	float pw = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // position in window
+	pw = pw < 0.0f ? 0.0f : pw > 1.0f ? 1.0 : pw;
+	m_frequencyZoomPos += (pw - 0.5f) * (1.0f / m_frequencyZoomFactor);
+	float lim = 0.5f / m_frequencyZoomFactor;
+	m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
+
+	updateFFTLimits();
+	qDebug("GLSpectrum::spectrumZoom: pw: %f p: %f z: %f", pw, m_frequencyZoomPos, m_frequencyZoomFactor);
+}
+
+void GLSpectrum::resetFrequencyZoom()
+{
+	m_frequencyZoomFactor = 1.0f;
+	m_frequencyZoomPos = 0.5f;
+
+	updateFFTLimits();
+}
+
+void GLSpectrum::updateFFTLimits()
+{
+	if (!m_spectrumVis) {
+		return;
+	}
+
+	SpectrumVis::MsgFrequencyZooming *msg = SpectrumVis::MsgFrequencyZooming::create(
+		m_frequencyZoomFactor, m_frequencyZoomPos
+	);
+
+	m_spectrumVis->getInputMessageQueue()->push(msg);
+}
+
+// void GLSpectrum::updateFFTLimits()
+// {
+// 	m_fftMin = m_frequencyZoomFactor == 1 ? 0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_fftSize;
+// 	m_fftMax = m_frequencyZoomFactor == 1 ? m_fftSize : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_fftSize;
+// }
+
+void GLSpectrum::channelMarkerMove(QWheelEvent *event, int mul)
+{
     for (int i = 0; i < m_channelMarkerStates.size(); ++i)
     {
         if ((m_channelMarkerStates[i]->m_channelMarker->getSourceOrSinkStream() != m_displaySourceOrSink)

@@ -107,6 +107,28 @@ public:
         {}
     };
 
+    class MsgFrequencyZooming : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        float getFrequencyZoomFactor() const { return m_frequencyZoomFactor; }
+        float getFrequencyZoomPos() const { return m_frequencyZoomPos; }
+
+        static MsgFrequencyZooming* create(float frequencyZoomFactor, float frequencyZoomPos) {
+            return new MsgFrequencyZooming(frequencyZoomFactor, frequencyZoomPos);
+        }
+
+    private:
+        float m_frequencyZoomFactor;
+        float m_frequencyZoomPos;
+
+        MsgFrequencyZooming(float frequencyZoomFactor, float frequencyZoomPos) :
+            Message(),
+            m_frequencyZoomFactor(frequencyZoomFactor),
+            m_frequencyZoomPos(frequencyZoomPos)
+        { }
+    };
+
     enum AvgMode
     {
         AvgModeNone,
@@ -197,6 +219,9 @@ private:
 	int m_refillSize;
 	int m_fftBufferFill;
 	bool m_needMoreSamples;
+
+    float m_frequencyZoomFactor;
+    float m_frequencyZoomPos;
 
 	Real m_scalef;
 	GLSpectrumInterface* m_glSpectrum;

@@ -77,6 +77,7 @@ void GLSpectrumGUI::setBuddies(SpectrumVis* spectrumVis, GLSpectrum* glSpectrum)
 {
 	m_spectrumVis = spectrumVis;
 	m_glSpectrum = glSpectrum;
+    m_glSpectrum->setSpectrumVis(spectrumVis);
 	m_glSpectrum->setMessageQueueToGUI(&m_messageQueue);
     m_spectrumVis->setMessageQueueToGUI(&m_messageQueue);
 }

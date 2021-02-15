@@ -26,7 +26,7 @@ class GLSpectrumInterface
 public:
     GLSpectrumInterface() {}
     virtual ~GLSpectrumInterface() {}
-    virtual void newSpectrum(const std::vector<Real>& spectrum, int fftSize)
+    virtual void newSpectrum(const Real* spectrum, int fftSize)
     {
         (void) spectrum;
         (void) fftSize;

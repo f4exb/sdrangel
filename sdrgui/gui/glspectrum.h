@@ -39,6 +39,7 @@
 
 class QOpenGLShaderProgram;
 class MessageQueue;
+class SpectrumVis;
 
 class SDRGUI_API GLSpectrum : public QGLWidget, public GLSpectrumInterface {
 	Q_OBJECT
@@ -103,7 +104,7 @@ public:
 	void removeChannelMarker(ChannelMarker* channelMarker);
 	void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
 
-	virtual void newSpectrum(const std::vector<Real>& spectrum, int fftSize);
+	virtual void newSpectrum(const Real* spectrum, int fftSize);
 	void clearSpectrumHistogram();
 
 	Real getWaterfallShare() const { return m_waterfallShare; }
@@ -115,6 +116,7 @@ public:
         m_displaySourceOrSink = sourceOrSink;
         m_displayStreamIndex = streamIndex;
     }
+    void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
 
 private:
 	struct ChannelMarkerState {
@@ -235,6 +237,7 @@ private:
 	CursorState m_cursorState;
 	int m_cursorChannel;
 
+    SpectrumVis* m_spectrumVis;
 	QTimer m_timer;
     int m_fpsPeriodMs;
 	QMutex m_mutex;
@@ -259,7 +262,7 @@ private:
 
 	std::vector<Real> m_maxHold;
 	bool m_displayMaxHold;
-	const std::vector<Real> *m_currentSpectrum;
+	const Real *m_currentSpectrum;
 	bool m_displayCurrent;
 
 	Real m_waterfallShare;
@@ -305,6 +308,9 @@ private:
 	bool m_displayChanged;
     bool m_displaySourceOrSink;
     int m_displayStreamIndex;
+    float m_frequencyZoomFactor;
+    float m_frequencyZoomPos;
+    static const float m_maxFrequencyZoom;
 
 	GLShaderSimple m_glShaderSimple;
 	GLShaderTextured m_glShaderLeftScale;
@@ -321,10 +327,8 @@ private:
 
 	MessageQueue *m_messageQueueToGUI;
 
-	static const int m_waterfallBufferHeight = 256;
-
-	void updateWaterfall(const std::vector<Real>& spectrum);
-	void updateHistogram(const std::vector<Real>& spectrum);
+	void updateWaterfall(const Real *spectrum);
+	void updateHistogram(const Real *spectrum);
 
 	void initializeGL();
 	void resizeGL(int width, int height);
@@ -338,6 +342,10 @@ private:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseReleaseEvent(QMouseEvent* event);
     void wheelEvent(QWheelEvent*);
+    void channelMarkerMove(QWheelEvent*, int mul);
+    void frequencyZoom(QWheelEvent*);
+    void resetFrequencyZoom();
+    void updateFFTLimits();
 
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
