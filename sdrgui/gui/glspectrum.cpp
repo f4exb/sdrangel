@@ -34,7 +34,7 @@
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportWaterfallShare, Message)
 
-const float GLSpectrum::m_maxFrequencyZoom = 4.0f;
+const float GLSpectrum::m_maxFrequencyZoom = 10.0f;
 
 GLSpectrum::GLSpectrum(QWidget* parent) :
 	QGLWidget(parent),
@@ -1892,7 +1892,7 @@ void GLSpectrum::applyChanges()
 		painter.drawRect(m_leftMargin, 0, width() - m_leftMargin, m_infoHeight);
 		painter.setPen(QColor(0xf0, 0xf0, 0xff));
 		painter.setFont(font());
-		painter.drawText(QPointF(m_leftMargin, fm.height() + fm.ascent() / 2 - 1), infoText);
+		painter.drawText(QPointF(m_leftMargin, fm.height() + fm.ascent() / 2 - 2), infoText);
 	}
 
 	m_glShaderInfo.initTexture(m_infoPixmap.toImage());
@@ -2135,7 +2135,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                     m_histogramMarkers.back().m_frequencyStr = displayScaled(
                         frequency,
                         'f',
-                        getPrecision(m_centerFrequency/m_sampleRate),
+                        getPrecision((m_centerFrequency*1000)/m_sampleRate),
                         false);
                     m_histogramMarkers.back().m_power = power;
                     m_histogramMarkers.back().m_powerStr = displayScaledF(
@@ -2179,7 +2179,7 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                     m_waterfallMarkers.back().m_frequencyStr = displayScaled(
                         frequency,
                         'f',
-                        getPrecision(m_centerFrequency/m_sampleRate),
+                        getPrecision((m_centerFrequency*1000)/m_sampleRate),
                         false);
                     m_waterfallMarkers.back().m_time = time;
                     m_waterfallMarkers.back().m_timeStr = displayScaledF(
@@ -2603,4 +2603,12 @@ void GLSpectrum::formatTextInfo(QString& info)
 	if (m_frequencyZoomFactor != 1.0f) {
 		info.append(tr("%1x ").arg(QString::number(m_frequencyZoomFactor, 'f', 1)));
 	}
+
+	int64_t centerFrequency;
+	int frequencySpan;
+
+	getFrequencyZoom(centerFrequency, frequencySpan);
+
+	info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
+	info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', getPrecision(frequencySpan/100), true)));
 }
