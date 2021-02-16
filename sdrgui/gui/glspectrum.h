@@ -272,20 +272,24 @@ private:
     int m_rightMargin;
     int m_topMargin;
     int m_frequencyScaleHeight;
+    int m_infoHeight;
     int m_histogramHeight;
     int m_waterfallHeight;
     int m_bottomMargin;
     QFont m_textOverlayFont;
 	QPixmap m_leftMarginPixmap;
 	QPixmap m_frequencyPixmap;
+    QPixmap m_infoPixmap;
 	ScaleEngine m_timeScale;
 	ScaleEngine m_powerScale;
 	ScaleEngine m_frequencyScale;
     QRectF m_histogramRect;
 	QRect m_frequencyScaleRect;
     QRectF m_waterfallRect;
+    QRect m_infoRect;
 	QMatrix4x4 m_glFrequencyScaleBoxMatrix;
 	QMatrix4x4 m_glLeftScaleBoxMatrix;
+    QMatrix4x4 m_glInfoBoxMatrix;
 
 	QRgb m_waterfallPalette[240];
 	QImage* m_waterfallBuffer;
@@ -319,6 +323,7 @@ private:
 	GLShaderTextured m_glShaderWaterfall;
 	GLShaderTextured m_glShaderHistogram;
     GLShaderTextured m_glShaderTextOverlay;
+    GLShaderTextured m_glShaderInfo;
 	int m_matrixLoc;
 	int m_colorLoc;
 	IncrementalArray<GLfloat> m_q3TickTime;
@@ -365,6 +370,7 @@ private:
             bool leftHalf,
             bool topHalf,
             const QRectF& glRect);
+    void formatTextInfo(QString& info);
 
 private slots:
 	void cleanup();

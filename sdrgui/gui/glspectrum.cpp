@@ -613,6 +613,7 @@ void GLSpectrum::initializeGL()
 	m_glShaderWaterfall.initializeGL();
 	m_glShaderHistogram.initializeGL();
     m_glShaderTextOverlay.initializeGL();
+	m_glShaderInfo.initializeGL();
 }
 
 void GLSpectrum::resizeGL(int width, int height)
@@ -1114,6 +1115,24 @@ void GLSpectrum::paintGL()
 		}
 	}
 
+	// Paint info line
+	{
+		GLfloat vtx1[] = {
+				0, 1,
+				1, 1,
+				1, 0,
+				0, 0
+		};
+		GLfloat tex1[] = {
+				0, 1,
+				1, 1,
+				1, 0,
+				0, 0
+		};
+
+		m_glShaderInfo.drawSurface(m_glInfoBoxMatrix, tex1, vtx1, 4);
+	}
+
 	m_mutex.unlock();
 }
 
@@ -1275,8 +1294,9 @@ void GLSpectrum::applyChanges()
 	QFontMetrics fm(font());
 	int M = fm.horizontalAdvance("-");
 
-	m_topMargin = fm.ascent() * 1.5;
-	m_bottomMargin = fm.ascent() * 1.5;
+	m_topMargin = fm.ascent() * 2.0;
+	m_bottomMargin = fm.ascent() * 1.0;
+	m_infoHeight = fm.height() * 3;
 
 	int waterfallTop = 0;
 	m_frequencyScaleHeight = fm.height() * 3; // +1 line for marker frequency scale
@@ -1843,6 +1863,39 @@ void GLSpectrum::applyChanges()
 
 		m_glShaderFrequencyScale.initTexture(m_frequencyPixmap.toImage());
 	}
+
+	// Top info line
+	m_glInfoBoxMatrix.setToIdentity();
+	m_glInfoBoxMatrix.translate (
+		-1.0f,
+		1.0f
+	);
+	m_glInfoBoxMatrix.scale (
+		2.0f,
+		(float) -2*m_infoHeight / (float) height()
+	);
+    m_infoRect = QRect(
+        0,
+        0,
+        width(),
+        m_infoHeight
+    );
+	QString infoText;
+	formatTextInfo(infoText);
+	m_infoPixmap = QPixmap(width(), m_infoHeight);
+	m_infoPixmap.fill(Qt::transparent);
+	{
+		QPainter painter(&m_infoPixmap);
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(Qt::black);
+		painter.setBrush(Qt::transparent);
+		painter.drawRect(m_leftMargin, 0, width() - m_leftMargin, m_infoHeight);
+		painter.setPen(QColor(0xf0, 0xf0, 0xff));
+		painter.setFont(font());
+		painter.drawText(QPointF(m_leftMargin, fm.height() + fm.ascent() / 2 - 1), infoText);
+	}
+
+	m_glShaderInfo.initTexture(m_infoPixmap.toImage());
 
 	bool fftSizeChanged = true;
 
@@ -2413,6 +2466,7 @@ void GLSpectrum::cleanup()
 	m_glShaderLeftScale.cleanup();
 	m_glShaderWaterfall.cleanup();
     m_glShaderTextOverlay.cleanup();
+	m_glShaderInfo.cleanup();
     //doneCurrent();
 }
 
@@ -2542,4 +2596,11 @@ void GLSpectrum::drawTextOverlay(
         mat.scale(2.0f * rectW, -2.0f * rectH);
         m_glShaderTextOverlay.drawSurface(mat, tex1, vtx1, 4);
     }
+}
+
+void GLSpectrum::formatTextInfo(QString& info)
+{
+	if (m_frequencyZoomFactor != 1.0f) {
+		info.append(tr("%1x ").arg(QString::number(m_frequencyZoomFactor, 'f', 1)));
+	}
 }
