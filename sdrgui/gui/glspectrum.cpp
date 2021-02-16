@@ -1344,9 +1344,7 @@ void GLSpectrum::applyChanges()
 
 		m_leftMargin += 2 * M;
 
-		m_frequencyScale.setSize(width() - m_leftMargin - m_rightMargin);
-		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
-		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
+		setFrequencyScale();
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
@@ -1438,9 +1436,7 @@ void GLSpectrum::applyChanges()
 		m_leftMargin = m_timeScale.getScaleWidth();
 		m_leftMargin += 2 * M;
 
-		m_frequencyScale.setSize(width() - m_leftMargin - m_rightMargin);
-		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2.0, m_centerFrequency + m_sampleRate / 2.0);
-		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
+		setFrequencyScale();
 
 		m_glWaterfallBoxMatrix.setToIdentity();
 		m_glWaterfallBoxMatrix.translate(
@@ -1490,9 +1486,7 @@ void GLSpectrum::applyChanges()
 		m_leftMargin = m_powerScale.getScaleWidth();
 		m_leftMargin += 2 * M;
 
-		m_frequencyScale.setSize(width() - m_leftMargin - m_rightMargin);
-		m_frequencyScale.setRange(Unit::Frequency, m_centerFrequency - m_sampleRate / 2, m_centerFrequency + m_sampleRate / 2);
-		m_frequencyScale.setMakeOpposite(m_lsbDisplay);
+		setFrequencyScale();
 
 		m_glHistogramSpectrumMatrix.setToIdentity();
 		m_glHistogramSpectrumMatrix.translate(
@@ -1591,6 +1585,19 @@ void GLSpectrum::applyChanges()
     }
 
 	// channel overlays
+	int64_t centerFrequency;
+	int frequencySpan;
+
+	if (m_frequencyZoomFactor == 1.0f)
+	{
+		centerFrequency = m_centerFrequency;
+		frequencySpan = m_sampleRate;
+	}
+	else
+	{
+		getFrequencyZoom(centerFrequency, frequencySpan);
+	}
+
 	for (int i = 0; i < m_channelMarkerStates.size(); ++i)
 	{
 		ChannelMarkerState* dv = m_channelMarkerStates[i];
@@ -1628,7 +1635,7 @@ void GLSpectrum::applyChanges()
 			 1.0f
 		);
 		glMatrixDsb.scale(
-			2.0f * (dsbw / (float)m_sampleRate),
+			2.0f * (dsbw / (float) frequencySpan),
 			-2.0f
 		);
 
@@ -1671,7 +1678,7 @@ void GLSpectrum::applyChanges()
 			 1.0f
 		);
 		glMatrix.scale(
-			2.0f * ((pw-nw) / (float)m_sampleRate),
+			2.0f * ((pw-nw) / (float) frequencySpan),
 			-2.0f
 		);
 
@@ -2262,6 +2269,25 @@ void GLSpectrum::updateFFTLimits()
 	);
 
 	m_spectrumVis->getInputMessageQueue()->push(msg);
+}
+
+void GLSpectrum::setFrequencyScale()
+{
+	int frequencySpan;
+	int64_t centerFrequency;
+
+	getFrequencyZoom(centerFrequency, frequencySpan);
+	m_frequencyScale.setSize(width() - m_leftMargin - m_rightMargin);
+	m_frequencyScale.setRange(Unit::Frequency, centerFrequency - frequencySpan / 2.0, centerFrequency + frequencySpan / 2.0);
+	m_frequencyScale.setMakeOpposite(m_lsbDisplay);
+}
+
+void GLSpectrum::getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan)
+{
+	frequencySpan = (m_frequencyZoomFactor == 1) ?
+		m_sampleRate : m_sampleRate * (1.0 / m_frequencyZoomFactor);
+	centerFrequency = (m_frequencyZoomFactor == 1) ?
+		m_centerFrequency : (m_frequencyZoomPos - 0.5) * m_sampleRate + m_centerFrequency;
 }
 
 // void GLSpectrum::updateFFTLimits()

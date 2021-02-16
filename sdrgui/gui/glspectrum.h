@@ -347,6 +347,8 @@ private:
     void frequencyZoom(QWheelEvent*);
     void resetFrequencyZoom();
     void updateFFTLimits();
+    void setFrequencyScale();
+    void getFrequencyZoom(int64_t& centerFrequency, int& frequencySpan);
 
 	void enterEvent(QEvent* event);
 	void leaveEvent(QEvent* event);
