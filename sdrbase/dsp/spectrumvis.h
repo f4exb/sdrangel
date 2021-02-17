@@ -107,7 +107,7 @@ public:
         {}
     };
 
-    class MsgFrequencyZooming : public Message {
+    class SDRBASE_API MsgFrequencyZooming : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:

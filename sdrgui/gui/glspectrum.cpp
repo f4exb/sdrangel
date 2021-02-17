@@ -2278,7 +2278,11 @@ void GLSpectrum::wheelEvent(QWheelEvent *event)
 
 void GLSpectrum::frequencyZoom(QWheelEvent *event)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
 	const QPointF& p = event->position();
+#else
+	const QPointF& p = event->pos();
+#endif
 
 	if (event->delta() > 0) // zoom in
 	{
