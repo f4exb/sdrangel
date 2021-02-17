@@ -132,6 +132,7 @@ void DeviceUISet::freeChannels()
         m_channelInstanceRegistrations[i].m_channelAPI->destroy();
     }
 
+    m_channelInstanceRegistrations.clear();
     m_deviceSet->clearChannels();
 }
 
@@ -144,6 +145,7 @@ void DeviceUISet::deleteChannel(int channelIndex)
                 channelIndex);
         m_channelInstanceRegistrations[channelIndex].m_gui->destroy();
         m_channelInstanceRegistrations[channelIndex].m_channelAPI->destroy();
+        m_channelInstanceRegistrations.removeAt(channelIndex);
     }
 
     m_deviceSet->removeChannelInstanceAt(channelIndex);
