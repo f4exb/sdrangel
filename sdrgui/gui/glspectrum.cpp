@@ -2211,6 +2211,10 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
                 update();
             }
         }
+		else if (event->modifiers() & Qt::AltModifier)
+		{
+			frequencyPan(event);
+		}
 
         if  (m_cursorState == CSSplitter)
         {
@@ -2301,6 +2305,24 @@ void GLSpectrum::frequencyZoom(QWheelEvent *event)
 
 	updateFFTLimits();
 	qDebug("GLSpectrum::spectrumZoom: pw: %f p: %f z: %f", pw, m_frequencyZoomPos, m_frequencyZoomFactor);
+}
+
+void GLSpectrum::frequencyPan(QMouseEvent *event)
+{
+	if (m_frequencyZoomFactor == 1.0f) {
+		return;
+	}
+
+	const QPointF& p = event->pos();
+	float pw = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // position in window
+	pw = pw < 0.0f ? 0.0f : pw > 1.0f ? 1.0 : pw;
+	float dw = pw - 0.5f;
+	m_frequencyZoomPos += dw * (1.0f / m_frequencyZoomFactor);
+	float lim = 0.5f / m_frequencyZoomFactor;
+	m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
+
+	updateFFTLimits();
+	qDebug("GLSpectrum::frequencyPan: pw: %f p: %f", pw, m_frequencyZoomPos);
 }
 
 void GLSpectrum::resetFrequencyZoom()

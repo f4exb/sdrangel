@@ -350,6 +350,7 @@ private:
     void wheelEvent(QWheelEvent*);
     void channelMarkerMove(QWheelEvent*, int mul);
     void frequencyZoom(QWheelEvent*);
+    void frequencyPan(QMouseEvent*);
     void resetFrequencyZoom();
     void updateFFTLimits();
     void setFrequencyScale();
