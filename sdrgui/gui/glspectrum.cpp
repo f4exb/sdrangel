@@ -2228,7 +2228,10 @@ void GLSpectrum::mousePressEvent(QMouseEvent* event)
             m_cursorState = CSChannelMoving;
             return;
         }
-        else if ((m_cursorState == CSNormal) && (m_channelMarkerStates.size() == 1) && !(event->modifiers() & Qt::ShiftModifier))
+        else if ((m_cursorState == CSNormal) &&
+			(m_channelMarkerStates.size() == 1) &&
+			!(event->modifiers() & Qt::ShiftModifier) &&
+			!(event->modifiers() & Qt::AltModifier))
         {
             grabMouse();
             setCursor(Qt::SizeHorCursor);
@@ -2307,8 +2310,8 @@ void GLSpectrum::frequencyZoom(QWheelEvent *event)
 	float lim = 0.5f / m_frequencyZoomFactor;
 	m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
 
-	updateFFTLimits();
 	qDebug("GLSpectrum::spectrumZoom: pw: %f p: %f z: %f", pw, m_frequencyZoomPos, m_frequencyZoomFactor);
+	updateFFTLimits();
 }
 
 void GLSpectrum::frequencyPan(QMouseEvent *event)
@@ -2325,8 +2328,8 @@ void GLSpectrum::frequencyPan(QMouseEvent *event)
 	float lim = 0.5f / m_frequencyZoomFactor;
 	m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
 
-	updateFFTLimits();
 	qDebug("GLSpectrum::frequencyPan: pw: %f p: %f", pw, m_frequencyZoomPos);
+	updateFFTLimits();
 }
 
 void GLSpectrum::resetFrequencyZoom()
@@ -2348,6 +2351,7 @@ void GLSpectrum::updateFFTLimits()
 	);
 
 	m_spectrumVis->getInputMessageQueue()->push(msg);
+	m_changesPending = true;
 }
 
 void GLSpectrum::setFrequencyScale()
