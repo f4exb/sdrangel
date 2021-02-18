@@ -937,6 +937,16 @@ This shows the spectrum in the passband returned from the sampling device possib
 
 The spectrum display is controlled by the display control (4).
 
+<h4>Status line</h4>
+
+![Spectrum Statuss](../doc/img/Spectrum_Status.png)
+
+A status line is displayed at the left of the top margin. It displays the following items from left to right:
+
+  - if frequency zooming is active the zooming factor
+  - `CF:` followed by the Center Frequency of the displayed spectrum possibly with multiplier suffix (G, M, k)
+  - `SP:` followed by the frequency SPan of the displayed spectrum possibly with multiplier suffix (M, k)
+
 <h4>Spectrum markers</h4>
 
 ![Spectrum Markers](../doc/img/Spectrum_Markers.png)
@@ -960,6 +970,18 @@ Values may be suffixed by a multiplier character:
 Use mouse right click anywhere in the view to remove the last entered marker. Use shift and mouse right click to remove all markers.
 
 Any change in the spectrum settings is not reflected in the markers. You have to clear them and make a new measurement if any critical setting of the spectrum is changed.
+
+<h4>Mouse scroll wheel</h4>
+
+When the mouse is over the center line of a channel:
+
+  - scrolling will move the channel by +/- 10 Hz at each scroll up/down respectively
+  - combined with Ctrl it will move the channel by +/- 100 Hz
+  - combined with Shift it will move the channel by +/- 1 kHz
+
+When the mouse is not over the center line of a channel it will zoom in/out along X (frequency) axis by a 0.5 step at each scroll up/down respectively between 1x (no zoom) and 10x. Note that in order to zoom on the center line of a channel you may move the mouse pointer in the top margin (center line moving is not active there but zooming is).
+
+When zooming is active use Alt + left click to move the center frequency to the clicked point.
 
 <h3>7. Status</h3>
 

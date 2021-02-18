@@ -2272,8 +2272,6 @@ void GLSpectrum::wheelEvent(QWheelEvent *event)
 		channelMarkerMove(event, 100);
     } else if (event->modifiers() & Qt::ControlModifier) {
 		channelMarkerMove(event, 10);
-    } else if (event->modifiers() & Qt::AltModifier) {
-		frequencyZoom(event);
     } else {
         channelMarkerMove(event, 1);
     }
@@ -2417,8 +2415,12 @@ void GLSpectrum::channelMarkerMove(QWheelEvent *event, int mul)
                 c.setPos(cp_a);
                 setCursor(c);
             }
+
+			return;
         }
     }
+
+	frequencyZoom(event);
 }
 
 void GLSpectrum::enterEvent(QEvent* event)
@@ -2640,5 +2642,5 @@ void GLSpectrum::formatTextInfo(QString& info)
 	getFrequencyZoom(centerFrequency, frequencySpan);
 
 	info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
-	info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', getPrecision(frequencySpan/100), true)));
+	info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', 3, true)));
 }
