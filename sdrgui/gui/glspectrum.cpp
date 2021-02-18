@@ -51,6 +51,7 @@ GLSpectrum::GLSpectrum(QWidget* parent) :
 	m_decay(1),
 	m_sampleRate(500000),
 	m_timingRate(1),
+	m_fftOverlap(0),
 	m_fftSize(512),
 	m_nbBins(512),
 	m_displayGrid(true),
@@ -2636,11 +2637,16 @@ void GLSpectrum::formatTextInfo(QString& info)
 		info.append(tr("%1x ").arg(QString::number(m_frequencyZoomFactor, 'f', 1)));
 	}
 
-	int64_t centerFrequency;
-	int frequencySpan;
-
-	getFrequencyZoom(centerFrequency, frequencySpan);
-
-	info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
-	info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', 3, true)));
+	if (m_sampleRate == 0)
+	{
+		info.append(tr("CF:%1 SP:%2").arg(m_centerFrequency).arg(m_sampleRate));
+	}
+	else
+	{
+		int64_t centerFrequency;
+		int frequencySpan;
+		getFrequencyZoom(centerFrequency, frequencySpan);
+		info.append(tr("CF:%1 ").arg(displayScaled(centerFrequency, 'f', getPrecision(centerFrequency/frequencySpan), true)));
+		info.append(tr("SP:%1 ").arg(displayScaled(frequencySpan, 'f', 3, true)));
+	}
 }
