@@ -683,6 +683,15 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 	 m_mutex.unlock();
 }
 
+void SpectrumVis::getZoomedPSDCopy(std::vector<Real>& copy) const
+{
+    int fftMin = (m_frequencyZoomFactor == 1.0f) ?
+        0 : (m_frequencyZoomPos - (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    int fftMax = (m_frequencyZoomFactor == 1.0f) ?
+        m_settings.m_fftSize : (m_frequencyZoomPos + (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
+    copy.assign(m_psd.begin() + fftMin, m_psd.begin() + fftMax);
+}
+
 void SpectrumVis::start()
 {
     setRunning(true);

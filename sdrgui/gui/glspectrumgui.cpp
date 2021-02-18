@@ -267,7 +267,7 @@ void GLSpectrumGUI::on_autoscale_clicked(bool checked)
     }
 
     std::vector<Real> psd;
-    m_spectrumVis->getPSDCopy(psd);
+    m_spectrumVis->getZoomedPSDCopy(psd);
     int avgRange = m_settings.m_fftSize / 32;
 
     if (psd.size() < (unsigned int) avgRange) {

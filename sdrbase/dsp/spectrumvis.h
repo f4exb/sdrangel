@@ -147,7 +147,8 @@ public:
     const GLSpectrumSettings& getSettings() const { return m_settings; }
     Real getSpecMax() const { return m_specMax / m_powFFTDiv; }
     void getPowerSpectrumCopy(std::vector<Real>& copy) { copy.assign(m_powerSpectrum.begin(), m_powerSpectrum.end()); }
-    void getPSDCopy(std::vector<Real>& copy) { copy.assign(m_psd.begin(), m_psd.begin() + m_settings.m_fftSize); }
+    void getPSDCopy(std::vector<Real>& copy) const { copy.assign(m_psd.begin(), m_psd.begin() + m_settings.m_fftSize); }
+    void getZoomedPSDCopy(std::vector<Real>& copy) const;
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     virtual void feed(const Complex *begin, unsigned int length); //!< direct FFT feed
