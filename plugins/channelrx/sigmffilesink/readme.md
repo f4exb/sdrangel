@@ -10,6 +10,9 @@ As per SigMF specifications two files are created in fact.
   - One with `.sigmf-meta` extension contains meta data and details to find the different captures in the data file blob. It is written in JSON format and is human readable. You can refer to SigMF documentation in the link at top to read about the details.
   - Another with `.sigmf-data` contains the IQ data as a blob indexed by structures in the `.sigmf-meta` file. Thus to the SigMF file reader data appears as a sequence of captures having idependent start time and length, center frequency and with SDRangel specific extensions independent sample rates.
 
+If a filename is given without `.sigmf-meta` extension then the `.sigmf-meta` extension is appended automatically.
+If a filename is given with an extension different of `.sigmf-meta` then the extension is replaced by `.sigmf-meta` automatically.
+
 It adds a dependency to the [libsigmf library](https://github.com/f4exb/libsigmf) more specifically the `f4exb` fork that supports `multirecordings` and `sdrangel` extensions.
 
 <h2>Interface</h2>

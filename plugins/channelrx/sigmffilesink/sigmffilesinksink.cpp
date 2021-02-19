@@ -237,10 +237,28 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         << "m_fileRecordName: " << settings.m_fileRecordName
         << "force: " << force;
 
+    QString fileRecordName = settings.m_fileRecordName;
+
     if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force)
     {
+        QStringList dotBreakout = settings.m_fileRecordName.split(QLatin1Char('.'));
+
+        if (dotBreakout.size() > 1) {
+            QString extension = dotBreakout.last();
+
+            if (extension != "sigmf-meta") {
+                dotBreakout.last() = "sigmf-meta";
+            }
+        }
+        else
+        {
+            dotBreakout.append("sigmf-meta");
+        }
+
+        fileRecordName = dotBreakout.join(QLatin1Char('.'));
+
         QString fileBase;
-        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(settings.m_fileRecordName, fileBase);
+        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(fileRecordName, fileBase);
 
         if (recordType == FileRecordInterface::RecordTypeSigMF)
         {
@@ -266,6 +284,7 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
     }
 
     m_settings = settings;
+    m_settings.m_fileRecordName = fileRecordName;
 }
 
 void SigMFFileSinkSink::squelchRecording(bool squelchOpen)
