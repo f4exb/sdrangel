@@ -33,6 +33,8 @@
 
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportWaterfallShare, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportFFTOverlap, Message)
+MESSAGE_CLASS_DEFINITION(GLSpectrum::MsgReportPowerScale, Message)
 
 const float GLSpectrum::m_maxFrequencyZoom = 10.0f;
 
@@ -1315,19 +1317,19 @@ void GLSpectrum::applyChanges()
 			m_waterfallHeight = 0;
 		}
 
-		if (!m_invertedWaterfall)
-		{
-			waterfallTop = m_topMargin;
-			frequencyScaleTop = waterfallTop + m_waterfallHeight + 1;
-			histogramTop = waterfallTop + m_waterfallHeight + m_frequencyScaleHeight + 1;
-			m_histogramHeight = height() - m_topMargin - m_waterfallHeight - m_frequencyScaleHeight - m_bottomMargin;
-		}
-		else
+		if (m_invertedWaterfall)
 		{
 			histogramTop = m_topMargin;
 			m_histogramHeight = height() - m_topMargin - m_waterfallHeight - m_frequencyScaleHeight - m_bottomMargin;
 			waterfallTop = histogramTop + m_histogramHeight + m_frequencyScaleHeight + 1;
 			frequencyScaleTop = histogramTop + m_histogramHeight + 1;
+		}
+		else
+		{
+			waterfallTop = m_topMargin;
+			frequencyScaleTop = waterfallTop + m_waterfallHeight + 1;
+			histogramTop = waterfallTop + m_waterfallHeight + m_frequencyScaleHeight + 1;
+			m_histogramHeight = height() - m_topMargin - m_waterfallHeight - m_frequencyScaleHeight - m_bottomMargin;
 		}
 
 		m_timeScale.setSize(m_waterfallHeight);
@@ -1336,7 +1338,10 @@ void GLSpectrum::applyChanges()
 		{
 			float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
 			float halfFFTSize = m_fftSize / 2;
-			scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
+
+			if (halfFFTSize > m_fftOverlap) {
+				scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
+			}
 
 			if (!m_invertedWaterfall) {
 				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / scaleDiv, 0);
@@ -1437,7 +1442,10 @@ void GLSpectrum::applyChanges()
 		{
 			float scaleDiv = ((float)m_sampleRate / (float)m_timingRate) * (m_ssbSpectrum ? 2 : 1);
 			float halfFFTSize = m_fftSize / 2;
-			scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
+
+			if (halfFFTSize > m_fftOverlap) {
+				scaleDiv *= halfFFTSize / (halfFFTSize - m_fftOverlap);
+			}
 
 			if (!m_invertedWaterfall) {
 				m_timeScale.setRange(m_timingRate > 1 ? Unit::TimeHMS : Unit::Time, (m_waterfallHeight * m_fftSize) / scaleDiv, 0);
@@ -2278,7 +2286,7 @@ void GLSpectrum::wheelEvent(QWheelEvent *event)
     }
 }
 
-void GLSpectrum::frequencyZoom(QWheelEvent *event)
+void GLSpectrum::zoom(QWheelEvent *event)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
 	const QPointF& p = event->position();
@@ -2286,30 +2294,63 @@ void GLSpectrum::frequencyZoom(QWheelEvent *event)
 	const QPointF& p = event->pos();
 #endif
 
-	if (event->delta() > 0) // zoom in
+	float pwx = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // x position in window
+
+	if ((pwx >= 0.0f) && (pwx <= 1.0f))
 	{
-		if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
-			m_frequencyZoomFactor += 0.5f;
-		} else {
-			return;
+		if (event->delta() > 0) // zoom in
+		{
+			if (m_frequencyZoomFactor < m_maxFrequencyZoom) {
+				m_frequencyZoomFactor += 0.5f;
+			} else {
+				return;
+			}
 		}
+		else
+		{
+			if (m_frequencyZoomFactor > 1.0f) {
+				m_frequencyZoomFactor -= 0.5f;
+			} else {
+				return;
+			}
+		}
+
+		frequencyZoom(pwx);
 	}
 	else
 	{
-		if (m_frequencyZoomFactor > 1.0f) {
-			m_frequencyZoomFactor -= 0.5f;
-		} else {
-			return;
+		float pwyh, pwyw;
+
+		if (m_invertedWaterfall) // histo on top
+		{
+			pwyh = (p.y() - m_topMargin) / m_histogramHeight;
+			pwyw = (p.y() - m_topMargin - m_histogramHeight - m_frequencyScaleHeight) / m_waterfallHeight;
+		}
+		else // waterfall on top
+		{
+			pwyw = (p.y() - m_topMargin) / m_waterfallHeight;
+			pwyh = (p.y() - m_topMargin - m_waterfallHeight - m_frequencyScaleHeight) / m_histogramHeight;
+		}
+
+		//qDebug("GLSpectrum::zoom: pwyh: %f pwyw: %f", pwyh, pwyw);
+
+		if ((pwyw >= 0.0f) && (pwyw <= 1.0f)) {
+			timeZoom(event->delta() > 0);
+		}
+
+		if ((pwyh >= 0.0f) && (pwyh <= 1.0f) && !m_linear) {
+			powerZoom(pwyh, event->delta() > 0);
 		}
 	}
+}
 
-	float pw = (p.x() - m_leftMargin) / (width() - m_leftMargin - m_rightMargin); // position in window
-	pw = pw < 0.0f ? 0.0f : pw > 1.0f ? 1.0 : pw;
+void GLSpectrum::frequencyZoom(float pw)
+{
 	m_frequencyZoomPos += (pw - 0.5f) * (1.0f / m_frequencyZoomFactor);
 	float lim = 0.5f / m_frequencyZoomFactor;
 	m_frequencyZoomPos = m_frequencyZoomPos < lim ? lim : m_frequencyZoomPos > 1 - lim ? 1 - lim : m_frequencyZoomPos;
 
-	qDebug("GLSpectrum::spectrumZoom: pw: %f p: %f z: %f", pw, m_frequencyZoomPos, m_frequencyZoomFactor);
+	qDebug("GLSpectrum::frequencyZoom: pw: %f p: %f z: %f", pw, m_frequencyZoomPos, m_frequencyZoomFactor);
 	updateFFTLimits();
 }
 
@@ -2329,6 +2370,47 @@ void GLSpectrum::frequencyPan(QMouseEvent *event)
 
 	qDebug("GLSpectrum::frequencyPan: pw: %f p: %f", pw, m_frequencyZoomPos);
 	updateFFTLimits();
+}
+
+void GLSpectrum::timeZoom(bool zoomInElseOut)
+{
+	if ((m_fftOverlap  == 0) && !zoomInElseOut) {
+		return;
+	}
+
+	if (zoomInElseOut && (m_fftOverlap == m_fftSize/2 - 1)) {
+		return;
+	}
+
+	m_fftOverlap = m_fftOverlap + (zoomInElseOut ? 1 : -1);
+	m_changesPending = true;
+
+	if (m_messageQueueToGUI)
+	{
+		MsgReportFFTOverlap *msg = new MsgReportFFTOverlap(m_fftOverlap);
+		m_messageQueueToGUI->push(msg);
+	}
+}
+
+void GLSpectrum::powerZoom(float pw, bool zoomInElseOut)
+{
+	m_powerRange = m_powerRange + (zoomInElseOut ? -2 : 2);
+
+	if (pw > 2.0/3.0) { // bottom
+		m_referenceLevel = m_referenceLevel + (zoomInElseOut ? -2 : 2);
+	} else if (pw > 1.0/3.0) { // middle
+		m_referenceLevel = m_referenceLevel + (zoomInElseOut ? -1 : 1);
+	} // top
+
+	m_powerRange = m_powerRange < 1 ? 1 : m_powerRange > 100 ? 100 : m_powerRange;
+	m_referenceLevel = m_referenceLevel < -110 ? -110 : m_referenceLevel > 0 ? 0 : m_referenceLevel;
+	m_changesPending = true;
+
+	if (m_messageQueueToGUI)
+	{
+		MsgReportPowerScale *msg = new MsgReportPowerScale(m_referenceLevel, m_powerRange);
+		m_messageQueueToGUI->push(msg);
+	}
 }
 
 void GLSpectrum::resetFrequencyZoom()
@@ -2421,7 +2503,7 @@ void GLSpectrum::channelMarkerMove(QWheelEvent *event, int mul)
         }
     }
 
-	frequencyZoom(event);
+	zoom(event);
 }
 
 void GLSpectrum::enterEvent(QEvent* event)

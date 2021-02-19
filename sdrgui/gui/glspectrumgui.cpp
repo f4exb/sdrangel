@@ -630,6 +630,29 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
     {
         const GLSpectrum::MsgReportWaterfallShare& report = (const GLSpectrum::MsgReportWaterfallShare&) message;
         m_settings.m_waterfallShare = report.getWaterfallShare();
+        return true;
+    }
+    else if (GLSpectrum::MsgReportFFTOverlap::match(message))
+    {
+        const GLSpectrum::MsgReportFFTOverlap& report = (const GLSpectrum::MsgReportFFTOverlap&) message;
+        m_settings.m_fftOverlap = report.getOverlap();
+        ui->fftOverlap->blockSignals(true);
+        ui->fftOverlap->setValue(m_settings.m_fftOverlap);
+        ui->fftOverlap->blockSignals(false);
+        return true;
+    }
+    else if (GLSpectrum::MsgReportPowerScale::match(message))
+    {
+        const GLSpectrum::MsgReportPowerScale& report = (const GLSpectrum::MsgReportPowerScale&) message;
+        m_settings.m_refLevel = report.getRefLevel();
+        m_settings.m_powerRange = report.getRange();
+        ui->refLevel->blockSignals(true);
+        ui->levelRange->blockSignals(true);
+        ui->refLevel->setValue(m_settings.m_refLevel);
+        ui->levelRange->setValue(m_settings.m_powerRange);
+        ui->levelRange->blockSignals(false);
+        ui->refLevel->blockSignals(false);
+        return true;
     }
     else if (SpectrumVis::MsgStartStop::match(message))
     {

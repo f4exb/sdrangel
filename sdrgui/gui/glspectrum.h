@@ -75,6 +75,39 @@ public:
         Real m_waterfallShare;
     };
 
+    class MsgReportFFTOverlap : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportFFTOverlap(int overlap) :
+            Message(),
+            m_overlap(overlap)
+        {}
+
+        int getOverlap() const { return m_overlap; }
+
+    private:
+        int m_overlap;
+    };
+
+    class MsgReportPowerScale : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        MsgReportPowerScale(int refLevel, int range) :
+            Message(),
+            m_refLevel(refLevel),
+            m_range(range)
+        {}
+
+        Real getRefLevel() const { return m_refLevel; }
+        Real getRange() const { return m_range; }
+
+    private:
+        Real m_refLevel;
+        Real m_range;
+    };
+
 	GLSpectrum(QWidget* parent = nullptr);
 	virtual ~GLSpectrum();
 
@@ -349,8 +382,11 @@ private:
 	void mouseReleaseEvent(QMouseEvent* event);
     void wheelEvent(QWheelEvent*);
     void channelMarkerMove(QWheelEvent*, int mul);
-    void frequencyZoom(QWheelEvent*);
+    void zoom(QWheelEvent*);
+    void frequencyZoom(float pw);
     void frequencyPan(QMouseEvent*);
+    void timeZoom(bool zoomInElseOut);
+    void powerZoom(float pw, bool zoomInElseOut);
     void resetFrequencyZoom();
     void updateFFTLimits();
     void setFrequencyScale();
