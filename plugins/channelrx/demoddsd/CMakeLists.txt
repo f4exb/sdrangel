@@ -58,7 +58,7 @@ add_library(${TARGET_NAME} SHARED
 )
 
 if(LIBDSDCC_EXTERNAL)
-    add_dependencies(${TARGET_NAME} dsdcc)
+    add_dependencies(${TARGET_NAME} dsdcc mbelib)
 endif()
 
 target_link_libraries(${TARGET_NAME}
