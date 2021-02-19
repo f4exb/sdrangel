@@ -13,6 +13,9 @@ Each recording is written in a new file with the starting timestamp before the `
   - Given file name: `test.first.sdriq` then a recording file will be like: `test.2020-08-05T22_00_07_974.sdriq`
   - Given file name: `record.test.first.sdriq` then a recording file will be like: `reocrd.test.2020-08-05T21_39_52_974.sdriq`
 
+If a filename is given without `.sdriq` extension then the `.sdriq` extension is appended automatically before the above algorithm is applied.
+If a filename is given with an extension different of `.sdriq` then the extension is replaced by `.sdriq` automatically before the above algorithm is applied.
+
 <h2>Interface</h2>
 
 ![File Sink plugin GUI](../../../doc/img/FileSink_plugin.png)

@@ -264,10 +264,28 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
         << "m_fileRecordName: " << settings.m_fileRecordName
         << "force: " << force;
 
+    QString fileRecordName = settings.m_fileRecordName;
+
     if ((settings.m_fileRecordName != m_settings.m_fileRecordName) || force)
     {
+        QStringList dotBreakout = settings.m_fileRecordName.split(QLatin1Char('.'));
+
+        if (dotBreakout.size() > 1) {
+            QString extension = dotBreakout.last();
+
+            if (extension != "sdriq") {
+                dotBreakout.last() = "sdriq";
+            }
+        }
+        else
+        {
+            dotBreakout.append("sdriq");
+        }
+
+        fileRecordName = dotBreakout.join(QLatin1Char('.'));
+
         QString fileBase;
-        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(settings.m_fileRecordName, fileBase);
+        FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(fileRecordName, fileBase);
 
         if (recordType == FileRecordInterface::RecordTypeSdrIQ)
         {
@@ -293,6 +311,7 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
     }
 
     m_settings = settings;
+    m_settings.m_fileRecordName = fileRecordName;
 }
 
 void FileSinkSink::squelchRecording(bool squelchOpen)
