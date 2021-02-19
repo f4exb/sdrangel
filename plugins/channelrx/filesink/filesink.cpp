@@ -84,6 +84,12 @@ FileSink::~FileSink()
     delete m_basebandSink;
 }
 
+void FileSink::setMessageQueueToGUI(MessageQueue* queue)
+{
+    ChannelAPI::setMessageQueueToGUI(queue);
+    m_basebandSink->setMessageQueueToGUI(queue);
+}
+
 uint32_t FileSink::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSourceStreams();
