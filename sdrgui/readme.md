@@ -973,7 +973,9 @@ Any change in the spectrum settings is not reflected in the markers. You have to
 
 <h4>Mouse scroll wheel</h4>
 
-<h5>Channel moving</h5>
+![Spectrum Mousewheel](../doc/img/MainWindow_spectrum_mousewheel.png)
+
+<h5>A: Channel moving</h5>
 
 When the mouse is over the center line of a channel:
 
@@ -981,13 +983,13 @@ When the mouse is over the center line of a channel:
   - combined with Ctrl it will move the channel by +/- 100 Hz
   - combined with Shift it will move the channel by +/- 1 kHz
 
-<h5>Frequency zooming</h5>
+<h5>B: Frequency zooming</h5>
 
-When the mouse is in the spectrum area but not over the center line of a channel it will zoom in/out along X (frequency) axis by a 0.5 step at each scroll up/down respectively between 1x (no zoom) and 10x. Note that in order to zoom on the center line of a channel you may move the mouse pointer in the top margin (center line moving is not active there but zooming is).
+When the mouse is in the spectrum or waterfall area but not over the center line of a channel it will zoom in/out along X (frequency) axis by a 0.5 step at each scroll up/down respectively between 1x (no zoom) and 10x. Note that in order to zoom on the center line of a channel you may move the mouse pointer in the top margin (center line moving is not active there but zooming is).
 
 When frequency zooming is active use Alt + left click to move the center frequency to the clicked point.
 
-<h5>Power zooming</h5>
+<h5>C: Power zooming</h5>
 
 When the mouse is inside the power scale (spectrum) the power range is decreased by 2 (zoom in) or increased by 2 (zoom in) at each wheel step forward or backward respectively. The behavior of the reference level depends on where in the scale is the mouse pointer:
 
@@ -995,7 +997,7 @@ When the mouse is inside the power scale (spectrum) the power range is decreased
   - in the middle third: the reference level is decreased by 1 (zoom in) or increased by 1 (zoom out) at each wheel step forward or backward thus the level in the middle stays the same
   - in the bottom third: the reference level is decreased by 2 (zoom in) or increased by 2 (zoom out) at each wheel step forward or backward thus the level at the bottom stays the same
 
-<h5>Time zooming</h5>
+<h5>D: Time zooming</h5>
 
 When the mouse is inside the time scale (waterfall) the overlap is increased by 1 (zoom in) or decreased by 1 (zoom out) at each wheel step forward or backward respectively. Overlap is bounded by 0 and half of the FFT size minus one.
 
