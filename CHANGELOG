@@ -1,3 +1,15 @@
+sdrangel (6.5.5-1) unstable; urgency=medium
+
+  * Spectrum frequency zooming: Implements #773
+  * Spectrum time and power zomming. Implements #779
+  * DeviceUISet: fixed channel instance registrations element deletion. Fixes #776
+  * FileSink: fixed spectrum GUI center frequency setting (baseband to GUI communication)
+  * FileSink: give .sdriq extension to provided file name automatically. Fixes #780
+  * SigMFFileSink: give .sigmf-meta extension to provided file name automatically.
+  * SigMFFileSink: append data if file exists and has been recorded with SDRangel. Implements #781
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 20 Feb 2021 17:28:46 +0100
+
 sdrangel (6.5.4-1) unstable; urgency=medium
 
    * Spectrum: more FPS capping options. Implements #772
