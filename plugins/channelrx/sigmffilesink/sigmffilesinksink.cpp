@@ -264,8 +264,8 @@ void SigMFFileSinkSink::applySettings(const SigMFFileSinkSettings& settings, boo
         {
             m_fileSink.setFileName(fileBase);
             m_fileSink.setHardwareId(m_deviceHwId);
-            m_msCount = 0;
-            m_byteCount = 0;
+            m_msCount = m_fileSink.getInitialMsCount();
+            m_byteCount = m_fileSink.getInitialBytesCount();
             m_recordEnabled = true;
         }
         else

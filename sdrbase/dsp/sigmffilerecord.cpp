@@ -19,6 +19,7 @@
 
 #include <QCoreApplication>
 #include <QSysInfo>
+#include <QFile>
 #include <QDebug>
 
 #include "libsigmf/sigmf_core_generated.h"
@@ -39,7 +40,9 @@ SigMFFileRecord::SigMFFileRecord() :
 	m_recordOn(false),
     m_recordStart(true),
     m_sampleStart(0),
-    m_sampleCount(0)
+    m_sampleCount(0),
+    m_initialMsCount(0),
+    m_initialBytesCount(0)
 {
     qDebug("SigMFFileRecord::SigMFFileRecord: test");
 	setObjectName("SigMFFileSink");
@@ -57,7 +60,9 @@ SigMFFileRecord::SigMFFileRecord(const QString& fileName, const QString& hardwar
     m_recordOn(false),
     m_recordStart(true),
     m_sampleStart(0),
-    m_sampleCount(0)
+    m_sampleCount(0),
+    m_initialMsCount(0),
+    m_initialBytesCount(0)
 {
     qDebug("SigMFFileRecord::SigMFFileRecord: %s", qPrintable(fileName));
     setObjectName("SigMFFileSink");
@@ -98,7 +103,66 @@ void SigMFFileRecord::setFileName(const QString& fileName)
         }
 
         m_fileName = fileName;
-        m_recordStart = true;
+
+        if (QFile::exists(fileName + ".sigmf-data") && QFile::exists(fileName + ".sigmf-meta"))
+        {
+            m_metaFileName = m_fileName + ".sigmf-meta";
+            std::ifstream metaStream;
+#ifdef Q_OS_WIN
+        	metaStream.open(m_metaFileName.toStdWString().c_str());
+#else
+        	metaStream.open(m_metaFileName.toStdString().c_str());
+#endif
+            std::ostringstream meta_buffer;
+            meta_buffer << metaStream.rdbuf();
+            try
+            {
+                from_json(json::parse(meta_buffer.str()), *m_metaRecord);
+                metaStream.close();
+                std::string sdrAngelVersion = m_metaRecord->global.access<sdrangel::GlobalT>().version;
+
+                if (sdrAngelVersion.size() != 0)
+                {
+                    qDebug("SigMFFileRecord::setFileName: appending mode");
+                    m_metaFile.open(m_metaFileName.toStdString().c_str(), std::ofstream::out);
+                    m_initialMsCount = 0;
+
+                    for (auto capture : m_metaRecord->captures)
+                    {
+                        uint64_t length = capture.get<core::DescrT>().length;
+                        int32_t sampleRate = capture.get<sdrangel::DescrT>().sample_rate;
+                        m_initialMsCount += (length * 1000) / sampleRate;
+                    }
+
+                    m_sampleFileName = m_fileName + ".sigmf-data";
+                    m_sampleFile.open(m_sampleFileName.toStdString().c_str(), std::ios::binary & std::ios::app);
+                    m_initialBytesCount = (uint64_t) m_sampleFile.tellp();
+                    m_sampleStart =  m_initialBytesCount / sizeof(Sample);
+
+                    m_recordStart = false;
+                }
+                else
+                {
+                    qDebug("SigMFFileRecord::setFileName: SigMF not recorded with SDRangel. Recreating files...");
+                    m_initialBytesCount = 0;
+                    m_initialMsCount = 0;
+                    m_recordStart = true;
+                }
+            }
+            catch(const std::exception& e)
+            {
+                qInfo("SigMFFileRecord::setFileName: exception: %s. Recreating files...", qPrintable(e.what()));
+                m_initialBytesCount = 0;
+                m_initialMsCount = 0;
+                m_recordStart = true;
+            }
+        }
+        else
+        {
+            m_initialBytesCount = 0;
+            m_initialMsCount = 0;
+            m_recordStart = true;
+        }
     }
 }
 

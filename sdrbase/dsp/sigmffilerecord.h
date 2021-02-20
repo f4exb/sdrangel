@@ -52,6 +52,8 @@ public:
     void setHardwareId(const QString& hardwareId) { m_hardwareId = hardwareId; }
     void setMsShift(qint64 msShift) { m_msShift = msShift; }
     unsigned int getNbCaptures() const;
+    uint64_t getInitialMsCount() const { return m_initialMsCount; }
+    uint64_t getInitialBytesCount() const { return m_initialBytesCount; }
 
 private:
     QString m_hardwareId;
@@ -68,6 +70,8 @@ private:
     std::ofstream m_sampleFile;
     quint64 m_sampleStart;
     quint64 m_sampleCount;
+    quint64 m_initialMsCount;
+    quint64 m_initialBytesCount;
     sigmf::SigMF<sigmf::Global<core::DescrT, sdrangel::DescrT>,
             sigmf::Capture<core::DescrT, sdrangel::DescrT>,
             sigmf::Annotation<core::DescrT> > *m_metaRecord;

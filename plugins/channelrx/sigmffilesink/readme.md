@@ -13,6 +13,8 @@ As per SigMF specifications two files are created in fact.
 If a filename is given without `.sigmf-meta` extension then the `.sigmf-meta` extension is appended automatically.
 If a filename is given with an extension different of `.sigmf-meta` then the extension is replaced by `.sigmf-meta` automatically.
 
+If the couple `.sigmf-meta`, `.sigmf-data` exists for a file set and it was recorded by SDRangel then new data will be appended as new captures.
+
 It adds a dependency to the [libsigmf library](https://github.com/f4exb/libsigmf) more specifically the `f4exb` fork that supports `multirecordings` and `sdrangel` extensions.
 
 <h2>Interface</h2>
