@@ -59,6 +59,7 @@ public:
 
     bool setTVScreen(TVScreen *objScreen);
     void setMERLabel(QLabel *merLabel);
+    void setCNRLabel(QLabel *cnrLabel);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
     bool audioActive();
     bool audioDecodeOK();
@@ -114,7 +115,7 @@ private:
             Fs(2.4e6),
             Fderot(0),
             anf(0),
-            cnr(false),
+            cnr(true),
             decim(0),
             Fm(2e6),
             constellation(leansdr::cstln_lut<leansdr::eucl_ss, 256>::QPSK),
@@ -275,6 +276,7 @@ private:
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
     leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
     leansdr::datvgaugelabel *r_merGauge;
+    leansdr::datvgaugelabel *r_cnrGauge;
 
     //*************** DATV PARAMETERS  ***************
     TVScreen *m_objRegisteredTVScreen;
@@ -283,6 +285,7 @@ private:
     DATVUDPStream m_udpStream;
     DATVideoRenderThread *m_objRenderThread;
     QLabel *m_merLabel;
+    QLabel *m_cnrLabel;
 
     // Audio
 	AudioFifo m_audioFifo;

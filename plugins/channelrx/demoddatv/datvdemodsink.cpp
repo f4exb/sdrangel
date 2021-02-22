@@ -38,6 +38,7 @@ DATVDemodSink::DATVDemodSink() :
     m_udpStream(leansdr::tspacket::SIZE),
     m_objRenderThread(nullptr),
     m_merLabel(nullptr),
+    m_cnrLabel(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
     m_blnStartStopVideo(false),
@@ -87,9 +88,12 @@ bool DATVDemodSink::setTVScreen(TVScreen *objScreen)
     return true;
 }
 
-void DATVDemodSink::setMERLabel(QLabel *merLabel)
-{
+void DATVDemodSink::setMERLabel(QLabel *merLabel) {
     m_merLabel = merLabel;
+}
+
+void DATVDemodSink::setCNRLabel(QLabel *cnrLabel) {
+    m_cnrLabel = cnrLabel;
 }
 
 DATVideostream *DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
@@ -350,6 +354,9 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
         if (r_merGauge != nullptr) {
             delete r_merGauge;
         }
+        if (r_cnrGauge != nullptr) {
+            delete r_cnrGauge;
+        }
 
         // INPUT
         //if(p_rawiq!=nullptr) delete p_rawiq;
@@ -504,6 +511,7 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     //CONSTELLATION
     r_scope_symbols = nullptr;
     r_merGauge = nullptr;
+    r_cnrGauge = nullptr;
 
     //DVB-S2
     p_slots_dvbs2 = nullptr;
@@ -650,7 +658,7 @@ void DATVDemodSink::InitDATVFramework()
     if (m_objCfg.cnr == true)
     {
         r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
-        r_cnr->decimation = decimation(m_objCfg.Fs, 1);  // 1 Hz
+        r_cnr->decimation = decimation(m_objCfg.Fs, 5);  // 5 Hz
     }
 
     // FILTERING
@@ -777,6 +785,10 @@ void DATVDemodSink::InitDATVFramework()
 
     if (m_merLabel) {
         r_merGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_mer, m_merLabel);
+    }
+
+    if (m_cnrLabel) {
+        r_cnrGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_cnr, m_cnrLabel);
     }
 
     // DECONVOLUTION AND SYNCHRONIZATION
@@ -972,15 +984,15 @@ void DATVDemodSink::InitDATVS2Framework()
     //******** -> if ( m_objCfg.Fderot>0 )
 
     // CNR ESTIMATION
-    /**
+
     p_cnr = new leansdr::pipebuf<leansdr::f32>(m_objScheduler, "cnr", BUF_SLOW);
 
     if (m_objCfg.cnr == true)
     {
         r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
-        r_cnr->decimation = decimation(m_objCfg.Fs, 1);  // 1 Hz
+        r_cnr->decimation = decimation(m_objCfg.Fs, 5);  // 5 Hz
     }
-    **/
+
     // FILTERING
 
     //******** -> if ( m_objCfg.resample )
@@ -1085,6 +1097,10 @@ void DATVDemodSink::InitDATVS2Framework()
 
     if (m_merLabel) {
         r_merGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_mer, m_merLabel);
+    }
+
+    if (m_cnrLabel) {
+        r_cnrGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_cnr, m_cnrLabel);
     }
 
     // Bit-flipping mode.

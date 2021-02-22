@@ -87,6 +87,7 @@ public:
     double getMagSq() const { return m_sink.getMagSq(); }
     void setTVScreen(TVScreen *tvScreen) { m_sink.setTVScreen(tvScreen); }
     void setMERLabel(QLabel *merLabel) { m_sink.setMERLabel(merLabel); }
+    void setCNRLabel(QLabel *cnrLabel) { m_sink.setCNRLabel(cnrLabel); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
     DATVideostream *SetVideoRender(DATVideoRender *objScreen) { return m_sink.SetVideoRender(objScreen); }

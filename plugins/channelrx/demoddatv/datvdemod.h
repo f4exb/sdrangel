@@ -67,6 +67,7 @@ public:
 
     void SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
     void setMERLabel(QLabel *merLabel) { m_basebandSink->setMERLabel(merLabel); }
+    void setCNRLabel(QLabel *cnrLabel) { m_basebandSink->setCNRLabel(cnrLabel); }
     DATVideostream *SetVideoRender(DATVideoRender *objScreen) { return m_basebandSink->SetVideoRender(objScreen); }
     bool audioActive() { return m_basebandSink->audioActive(); }
     bool audioDecodeOK() { return m_basebandSink->audioDecodeOK(); }

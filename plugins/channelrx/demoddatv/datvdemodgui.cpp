@@ -196,6 +196,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
     m_objDATVDemod->SetTVScreen(ui->screenTV);
     m_objDATVDemod->setMERLabel(ui->merText);
+    m_objDATVDemod->setCNRLabel(ui->cnrText);
 
     connect(m_objDATVDemod->SetVideoRender(ui->screenTV_2), &DATVideostream::onDataPackets, this, &DATVDemodGUI::on_StreamDataAvailable);
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
