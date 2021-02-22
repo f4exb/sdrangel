@@ -1155,7 +1155,12 @@ struct cstln_receiver : runnable
         int max_meas = chunk_size / meas_decimation + 1;
         // Large margin on output_size because mu adjustments
         // can lead to more than chunk_size/min_omega symbols.
-        while (in.readable() >= chunk_size + sampler->readahead() && out.writable() >= chunk_size && (!freq_out || freq_out->writable() >= max_meas) && (!ss_out || ss_out->writable() >= max_meas) && (!mer_out || mer_out->writable() >= max_meas) && (!cstln_out || cstln_out->writable() >= max_meas))
+        while (in.readable() >= chunk_size + sampler->readahead() &&
+            out.writable() >= chunk_size &&
+            (!freq_out || freq_out->writable() >= max_meas) &&
+            (!ss_out || ss_out->writable() >= max_meas) &&
+            (!mer_out || mer_out->writable() >= max_meas) &&
+            (!cstln_out || cstln_out->writable() >= max_meas))
         {
             sampler->update_freq(freqw, chunk_size);
 

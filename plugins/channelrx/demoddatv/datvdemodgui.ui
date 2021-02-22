@@ -738,7 +738,7 @@
        <x>10</x>
        <y>260</y>
        <width>481</width>
-       <height>25</height>
+       <height>33</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="udpLayout">
@@ -812,6 +812,77 @@
       </item>
       <item>
        <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="horizontalLayoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>300</y>
+       <width>481</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="merLabel">
+        <property name="text">
+         <string>MER</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="merText">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cnrLabel">
+        <property name="text">
+         <string>CNR</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cnrText">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>00.0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>

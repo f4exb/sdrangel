@@ -32,11 +32,12 @@ const unsigned int DATVDemodSink::m_rfFilterFftLength = 1024;
 
 DATVDemodSink::DATVDemodSink() :
     m_blnNeedConfigUpdate(false),
-    m_objRegisteredTVScreen(0),
-    m_objRegisteredVideoRender(0),
+    m_objRegisteredTVScreen(nullptr),
+    m_objRegisteredVideoRender(nullptr),
     m_objVideoStream(nullptr),
     m_udpStream(leansdr::tspacket::SIZE),
     m_objRenderThread(nullptr),
+    m_merLabel(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
     m_blnStartStopVideo(false),
@@ -84,6 +85,11 @@ bool DATVDemodSink::setTVScreen(TVScreen *objScreen)
 {
     m_objRegisteredTVScreen = objScreen;
     return true;
+}
+
+void DATVDemodSink::setMERLabel(QLabel *merLabel)
+{
+    m_merLabel = merLabel;
 }
 
 DATVideostream *DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
@@ -341,6 +347,9 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
         if (r_scope_symbols != nullptr) {
             delete r_scope_symbols;
         }
+        if (r_merGauge != nullptr) {
+            delete r_merGauge;
+        }
 
         // INPUT
         //if(p_rawiq!=nullptr) delete p_rawiq;
@@ -494,6 +503,7 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
 
     //CONSTELLATION
     r_scope_symbols = nullptr;
+    r_merGauge = nullptr;
 
     //DVB-S2
     p_slots_dvbs2 = nullptr;
@@ -765,6 +775,10 @@ void DATVDemodSink::InitDATVFramework()
         r_scope_symbols->calculate_cstln_points();
     }
 
+    if (m_merLabel) {
+        r_merGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_mer, m_merLabel);
+    }
+
     // DECONVOLUTION AND SYNCHRONIZATION
 
     p_bytes = new leansdr::pipebuf<leansdr::u8>(m_objScheduler, "bytes", BUF_BYTES);
@@ -1027,7 +1041,7 @@ void DATVDemodSink::InitDATVS2Framework()
                         *(leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> > *) p_slots_dvbs2,
                         /* p_freq */ nullptr,
                         /* p_ss */ nullptr,
-                        /* p_mer */ nullptr,
+                        p_mer,
                         p_cstln,
                         /* p_cstln_pls */ nullptr,
                         /*p_iqsymbols*/ nullptr,
@@ -1067,6 +1081,10 @@ void DATVDemodSink::InitDATVS2Framework()
         r_scope_symbols_dvbs2->decimation = 1;
         r_scope_symbols_dvbs2->cstln = (leansdr::cstln_base**) &objDemodulatorDVBS2->cstln;
         r_scope_symbols_dvbs2->calculate_cstln_points();
+    }
+
+    if (m_merLabel) {
+        r_merGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_mer, m_merLabel);
     }
 
     // Bit-flipping mode.

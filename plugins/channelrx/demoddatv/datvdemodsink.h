@@ -28,6 +28,7 @@
 #include "leansdr/iess.h"
 
 #include "datvconstellation.h"
+#include "datvgaugelabel.h"
 #include "datvdvbs2constellation.h"
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
@@ -47,6 +48,7 @@
 
 class TVScreen;
 class DATVideoRender;
+class QLabel;
 
 class DATVDemodSink : public ChannelSampleSink {
 public:
@@ -56,6 +58,7 @@ public:
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
     bool setTVScreen(TVScreen *objScreen);
+    void setMERLabel(QLabel *merLabel);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
     bool audioActive();
     bool audioDecodeOK();
@@ -271,6 +274,7 @@ private:
     //CONSTELLATION
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
     leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
+    leansdr::datvgaugelabel *r_merGauge;
 
     //*************** DATV PARAMETERS  ***************
     TVScreen *m_objRegisteredTVScreen;
@@ -278,6 +282,7 @@ private:
     DATVideostream *m_objVideoStream;
     DATVUDPStream m_udpStream;
     DATVideoRenderThread *m_objRenderThread;
+    QLabel *m_merLabel;
 
     // Audio
 	AudioFifo m_audioFifo;
