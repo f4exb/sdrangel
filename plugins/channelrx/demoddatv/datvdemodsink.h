@@ -28,7 +28,7 @@
 #include "leansdr/iess.h"
 
 #include "datvconstellation.h"
-#include "datvgaugelabel.h"
+#include "datvgauge.h"
 #include "datvdvbs2constellation.h"
 #include "datvvideoplayer.h"
 #include "datvideostream.h"
@@ -49,6 +49,7 @@
 class TVScreen;
 class DATVideoRender;
 class QLabel;
+class LevelMeterSignalDB;
 
 class DATVDemodSink : public ChannelSampleSink {
 public:
@@ -60,6 +61,8 @@ public:
     bool setTVScreen(TVScreen *objScreen);
     void setMERLabel(QLabel *merLabel);
     void setCNRLabel(QLabel *cnrLabel);
+    void setMERMeter(LevelMeterSignalDB *merMeter);
+    void setCNRMeter(LevelMeterSignalDB *cnrMeter);
     DATVideostream * SetVideoRender(DATVideoRender *objScreen);
     bool audioActive();
     bool audioDecodeOK();
@@ -275,8 +278,8 @@ private:
     //CONSTELLATION
     leansdr::datvconstellation<leansdr::f32> *r_scope_symbols;
     leansdr::datvdvbs2constellation<leansdr::f32> *r_scope_symbols_dvbs2;
-    leansdr::datvgaugelabel *r_merGauge;
-    leansdr::datvgaugelabel *r_cnrGauge;
+    leansdr::datvgauge *r_merGauge;
+    leansdr::datvgauge *r_cnrGauge;
 
     //*************** DATV PARAMETERS  ***************
     TVScreen *m_objRegisteredTVScreen;
@@ -286,6 +289,8 @@ private:
     DATVideoRenderThread *m_objRenderThread;
     QLabel *m_merLabel;
     QLabel *m_cnrLabel;
+    LevelMeterSignalDB *m_merMeter;
+    LevelMeterSignalDB *m_cnrMeter;
 
     // Audio
 	AudioFifo m_audioFifo;

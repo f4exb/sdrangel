@@ -68,6 +68,8 @@ public:
     void SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
     void setMERLabel(QLabel *merLabel) { m_basebandSink->setMERLabel(merLabel); }
     void setCNRLabel(QLabel *cnrLabel) { m_basebandSink->setCNRLabel(cnrLabel); }
+    void setMERMeter(LevelMeterSignalDB *merMeter) { m_basebandSink->setMERMeter(merMeter); }
+    void setCNRMeter(LevelMeterSignalDB *cnrMeter) { m_basebandSink->setCNRMeter(cnrMeter); }
     DATVideostream *SetVideoRender(DATVideoRender *objScreen) { return m_basebandSink->SetVideoRender(objScreen); }
     bool audioActive() { return m_basebandSink->audioActive(); }
     bool audioDecodeOK() { return m_basebandSink->audioDecodeOK(); }

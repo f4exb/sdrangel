@@ -191,12 +191,22 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
+    ui->merMeter->setColorTheme(LevelMeterSignalDB::ColorCyanAndBlue);
+    ui->merMeter->setRange(0, 30);
+    ui->merMeter->setAverageSmoothing(2);
+
+    ui->cnrMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
+    ui->cnrMeter->setRange(0, 30);
+    ui->cnrMeter->setAverageSmoothing(2);
+
     m_objDATVDemod = (DATVDemod*) rxChannel;
     m_objDATVDemod->setMessageQueueToGUI(getInputMessageQueue());
 
     m_objDATVDemod->SetTVScreen(ui->screenTV);
     m_objDATVDemod->setMERLabel(ui->merText);
     m_objDATVDemod->setCNRLabel(ui->cnrText);
+    m_objDATVDemod->setMERMeter(ui->merMeter);
+    m_objDATVDemod->setCNRMeter(ui->cnrMeter);
 
     connect(m_objDATVDemod->SetVideoRender(ui->screenTV_2), &DATVideostream::onDataPackets, this, &DATVDemodGUI::on_StreamDataAvailable);
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
@@ -239,7 +249,6 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
-
 
     resetToDefaults(); // does applySettings()
 }

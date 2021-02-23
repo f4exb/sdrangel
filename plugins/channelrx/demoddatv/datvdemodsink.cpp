@@ -39,6 +39,8 @@ DATVDemodSink::DATVDemodSink() :
     m_objRenderThread(nullptr),
     m_merLabel(nullptr),
     m_cnrLabel(nullptr),
+    m_merMeter(nullptr),
+    m_cnrMeter(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
     m_blnStartStopVideo(false),
@@ -94,6 +96,14 @@ void DATVDemodSink::setMERLabel(QLabel *merLabel) {
 
 void DATVDemodSink::setCNRLabel(QLabel *cnrLabel) {
     m_cnrLabel = cnrLabel;
+}
+
+void DATVDemodSink::setMERMeter(LevelMeterSignalDB *merMeter) {
+    m_merMeter = merMeter;
+}
+
+void DATVDemodSink::setCNRMeter(LevelMeterSignalDB *cnrMeter) {
+    m_cnrMeter = cnrMeter;
 }
 
 DATVideostream *DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
@@ -783,12 +793,12 @@ void DATVDemodSink::InitDATVFramework()
         r_scope_symbols->calculate_cstln_points();
     }
 
-    if (m_merLabel) {
-        r_merGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_mer, m_merLabel);
+    if (m_merLabel && m_merMeter) {
+        r_merGauge = new leansdr::datvgauge(m_objScheduler, *p_mer, m_merLabel, m_merMeter);
     }
 
-    if (m_cnrLabel) {
-        r_cnrGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_cnr, m_cnrLabel);
+    if (m_cnrLabel && m_cnrMeter) {
+        r_cnrGauge = new leansdr::datvgauge(m_objScheduler, *p_cnr, m_cnrLabel, m_cnrMeter);
     }
 
     // DECONVOLUTION AND SYNCHRONIZATION
@@ -1095,12 +1105,12 @@ void DATVDemodSink::InitDATVS2Framework()
         r_scope_symbols_dvbs2->calculate_cstln_points();
     }
 
-    if (m_merLabel) {
-        r_merGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_mer, m_merLabel);
+    if (m_merLabel && m_merMeter) {
+        r_merGauge = new leansdr::datvgauge(m_objScheduler, *p_mer, m_merLabel, m_merMeter);
     }
 
-    if (m_cnrLabel) {
-        r_cnrGauge = new leansdr::datvgaugelabel(m_objScheduler, *p_cnr, m_cnrLabel);
+    if (m_cnrLabel && m_cnrMeter) {
+        r_cnrGauge = new leansdr::datvgauge(m_objScheduler, *p_cnr, m_cnrLabel, m_cnrMeter);
     }
 
     // Bit-flipping mode.
