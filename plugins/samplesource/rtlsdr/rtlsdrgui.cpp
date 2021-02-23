@@ -342,7 +342,7 @@ void RTLSDRGui::on_fcPos_currentIndexChanged(int index)
 
 void RTLSDRGui::on_ppm_valueChanged(int value)
 {
-	if ((value > 99) || (value < -99))
+	if ((value > 200) || (value < -200))
 	{
 		return;
 	}
