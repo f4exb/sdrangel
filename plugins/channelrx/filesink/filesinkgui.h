@@ -59,6 +59,7 @@ private:
     DeviceUISet* m_deviceUISet;
     ChannelMarker m_channelMarker;
     FileSinkSettings m_settings;
+    bool m_running;
     int m_fixedShiftIndex;
     int m_basebandSampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor

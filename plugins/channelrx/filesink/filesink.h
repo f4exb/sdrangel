@@ -62,6 +62,25 @@ public:
         { }
     };
 
+    class MsgReportStartStop : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        bool getStartStop() const { return m_startStop; }
+
+        static MsgReportStartStop* create(bool startStop) {
+            return new MsgReportStartStop(startStop);
+        }
+
+    protected:
+        bool m_startStop;
+
+        MsgReportStartStop(bool startStop) :
+            Message(),
+            m_startStop(startStop)
+        { }
+    };
+
     FileSink(DeviceAPI *deviceAPI);
     virtual ~FileSink();
     virtual void destroy() { delete this; }

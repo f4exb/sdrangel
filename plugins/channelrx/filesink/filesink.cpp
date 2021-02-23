@@ -43,6 +43,7 @@
 #include "filesink.h"
 
 MESSAGE_CLASS_DEFINITION(FileSink::MsgConfigureFileSink, Message)
+MESSAGE_CLASS_DEFINITION(FileSink::MsgReportStartStop, Message)
 
 const char* const FileSink::m_channelIdURI = "sdrangel.channel.filesink";
 const char* const FileSink::m_channelId = "FileSink";
@@ -116,6 +117,12 @@ void FileSink::start()
 
     FileSinkBaseband::MsgConfigureFileSinkBaseband *msg = FileSinkBaseband::MsgConfigureFileSinkBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    if (getMessageQueueToGUI())
+    {
+        MsgReportStartStop *msg = MsgReportStartStop::create(true);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 void FileSink::stop()
@@ -124,6 +131,12 @@ void FileSink::stop()
     m_basebandSink->stopWork();
 	m_thread.exit();
 	m_thread.wait();
+
+    if (getMessageQueueToGUI())
+    {
+        MsgReportStartStop *msg = MsgReportStartStop::create(false);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 bool FileSink::handleMessage(const Message& cmd)
