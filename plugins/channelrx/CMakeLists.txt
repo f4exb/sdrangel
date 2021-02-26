@@ -18,6 +18,10 @@ add_subdirectory(demodchirpchat)
 add_subdirectory(demodvorsc)
 add_subdirectory(demodpacket)
 
+if(APT_FOUND)
+    add_subdirectory(demodapt)
+endif()
+
 if(LIBDSDCC_FOUND AND LIBMBE_FOUND)
     add_subdirectory(demoddsd)
 endif(LIBDSDCC_FOUND AND LIBMBE_FOUND)

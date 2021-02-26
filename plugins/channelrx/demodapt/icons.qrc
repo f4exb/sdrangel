@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/apt">
+    <file>icons/cropnoise.png</file>
+    <file>icons/denoise.png</file>
+    <file>icons/precipitation.png</file>
+  </qresource>
+</RCC>
