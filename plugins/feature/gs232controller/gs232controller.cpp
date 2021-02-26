@@ -210,6 +210,12 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
     qDebug() << "GS232Controller::applySettings:"
             << " m_azimuth: " << settings.m_azimuth
             << " m_elevation: " << settings.m_elevation
+            << " m_azimuthOffset: " << settings.m_azimuthOffset
+            << " m_elevationOffset: " << settings.m_elevationOffset
+            << " m_azimuthMin: " << settings.m_azimuthMin
+            << " m_azimuthMax: " << settings.m_azimuthMax
+            << " m_elevationMin: " << settings.m_elevationMin
+            << " m_elevationMax: " << settings.m_elevationMax
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
             << " m_track: " << settings.m_track
@@ -258,6 +264,15 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
     }
     if ((m_settings.m_elevationOffset != settings.m_elevationOffset) || force) {
         reverseAPIKeys.append("elevationOffset");
+    }
+    if ((m_settings.m_azimuthMin != settings.m_azimuthMin) || force) {
+        reverseAPIKeys.append("azimuthMin");
+    }
+    if ((m_settings.m_azimuthMax != settings.m_azimuthMax) || force) {
+        reverseAPIKeys.append("azimuthMax");
+    }
+    if ((m_settings.m_elevationMin != settings.m_elevationMin) || force) {
+        reverseAPIKeys.append("elevationMin");
     }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
@@ -341,6 +356,10 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setTrack(settings.m_track);
     response.getGs232ControllerSettings()->setAzimuthOffset(settings.m_azimuthOffset);
     response.getGs232ControllerSettings()->setElevationOffset(settings.m_elevationOffset);
+    response.getGs232ControllerSettings()->setAzimuthMin(settings.m_azimuthMin);
+    response.getGs232ControllerSettings()->setAzimuthMax(settings.m_azimuthMax);
+    response.getGs232ControllerSettings()->setElevationMin(settings.m_elevationMin);
+    response.getGs232ControllerSettings()->setElevationMax(settings.m_elevationMax);
 
     if (response.getGs232ControllerSettings()->getTitle()) {
         *response.getGs232ControllerSettings()->getTitle() = settings.m_title;
@@ -388,6 +407,18 @@ void GS232Controller::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("elevationOffset")) {
         settings.m_elevationOffset = response.getGs232ControllerSettings()->getElevationOffset();
+    }
+    if (featureSettingsKeys.contains("azimuthMin")) {
+        settings.m_azimuthMin = response.getGs232ControllerSettings()->getAzimuthMin();
+    }
+    if (featureSettingsKeys.contains("azimuthMax")) {
+        settings.m_azimuthMax = response.getGs232ControllerSettings()->getAzimuthMax();
+    }
+    if (featureSettingsKeys.contains("elevationMin")) {
+        settings.m_elevationMin = response.getGs232ControllerSettings()->getElevationMin();
+    }
+    if (featureSettingsKeys.contains("elevationMax")) {
+        settings.m_elevationMax = response.getGs232ControllerSettings()->getElevationMax();
     }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getGs232ControllerSettings()->getTitle();
@@ -440,6 +471,18 @@ void GS232Controller::webapiReverseSendSettings(QList<QString>& featureSettingsK
     }
     if (featureSettingsKeys.contains("elevationOffset") || force) {
         swgGS232ControllerSettings->setElevationOffset(settings.m_elevationOffset);
+    }
+    if (featureSettingsKeys.contains("azimuthMin") || force) {
+        swgGS232ControllerSettings->setAzimuthMin(settings.m_azimuthMin);
+    }
+    if (featureSettingsKeys.contains("azimuthMax") || force) {
+        swgGS232ControllerSettings->setAzimuthMax(settings.m_azimuthMax);
+    }
+    if (featureSettingsKeys.contains("elevationMin") || force) {
+        swgGS232ControllerSettings->setElevationMin(settings.m_elevationMin);
+    }
+    if (featureSettingsKeys.contains("elevationMax") || force) {
+        swgGS232ControllerSettings->setElevationMax(settings.m_elevationMax);
     }
     if (featureSettingsKeys.contains("title") || force) {
         swgGS232ControllerSettings->setTitle(new QString(settings.m_title));

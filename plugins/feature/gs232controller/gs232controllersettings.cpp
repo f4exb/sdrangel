@@ -26,13 +26,15 @@
 const QStringList GS232ControllerSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
     QStringLiteral("Map"),
-    QStringLiteral("StarTracker")
+    QStringLiteral("StarTracker"),
+    QStringLiteral("SatelliteTracker")
 };
 
 const QStringList GS232ControllerSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),
     QStringLiteral("sdrangel.feature.map"),
-    QStringLiteral("sdrangel.feature.startracker")
+    QStringLiteral("sdrangel.feature.startracker"),
+    QStringLiteral("sdrangel.feature.satellitetracker")
 };
 
 GS232ControllerSettings::GS232ControllerSettings()
@@ -57,6 +59,10 @@ void GS232ControllerSettings::resetToDefaults()
     m_reverseAPIFeatureIndex = 0;
     m_azimuthOffset = 0;
     m_elevationOffset = 0;
+    m_azimuthMin = 0;
+    m_azimuthMax = 450;
+    m_elevationMin = 0;
+    m_elevationMax = 180;
 }
 
 QByteArray GS232ControllerSettings::serialize() const
@@ -78,6 +84,10 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeU32(14, m_reverseAPIFeatureIndex);
     s.writeS32(15, m_azimuthOffset);
     s.writeS32(16, m_elevationOffset);
+    s.writeS32(17, m_azimuthMin);
+    s.writeS32(18, m_azimuthMax);
+    s.writeS32(19, m_elevationMin);
+    s.writeS32(20, m_elevationMax);
 
     return s.final();
 }
@@ -122,6 +132,10 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
         d.readS32(15, &m_azimuthOffset, 0);
         d.readS32(16, &m_elevationOffset, 0);
+        d.readS32(17, &m_azimuthMin, 0);
+        d.readS32(18, &m_azimuthMax, 450);
+        d.readS32(19, &m_elevationMin, 0);
+        d.readS32(20, &m_elevationMax, 180);
 
         return true;
     }

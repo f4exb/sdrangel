@@ -84,6 +84,10 @@ private slots:
     void on_targets_currentTextChanged(const QString& text);
     void on_azimuthOffset_valueChanged(int value);
     void on_elevationOffset_valueChanged(int value);
+    void on_azimuthMin_valueChanged(int value);
+    void on_azimuthMax_valueChanged(int value);
+    void on_elevationMin_valueChanged(int value);
+    void on_elevationMax_valueChanged(int value);
     void updateStatus();
 };
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>175</height>
+    <width>350</width>
+    <height>223</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,8 +42,8 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>301</width>
-     <height>161</height>
+     <width>331</width>
+     <height>191</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -248,45 +248,50 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="serverLayout">
-      <item>
-       <widget class="QLabel" name="serialLabel">
-        <property name="text">
-         <string>Serial Port</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="serialPort">
-        <property name="toolTip">
-         <string>Name of serial port to use to connect to the GS-232 controller</string>
-        </property>
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="2">
        <widget class="QLabel" name="baudRateLabel">
         <property name="text">
          <string>Baud rate</string>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="3" column="1">
+       <widget class="QSpinBox" name="elevationMin">
+        <property name="maximum">
+         <number>180</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="elevationMinLabel">
+        <property name="text">
+         <string>Elevation min</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="azimuthMinLabel">
+        <property name="text">
+         <string>Azimuth min</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="elevationMaxLabel">
+        <property name="text">
+         <string>Elevation max</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QSpinBox" name="elevationMax">
+        <property name="maximum">
+         <number>180</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
        <widget class="QComboBox" name="baudRate">
         <property name="toolTip">
          <string>Serial port baud rate for the GS-232 controller</string>
@@ -336,18 +341,52 @@
         </item>
        </widget>
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
+      <item row="2" column="3">
+       <widget class="QSpinBox" name="azimuthMax">
+        <property name="maximum">
+         <number>450</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="azimuthMin">
+        <property name="maximum">
+         <number>450</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="serialPort">
+        <property name="toolTip">
+         <string>Name of serial port to use to connect to the GS-232 controller</string>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="serialLabel">
+        <property name="text">
+         <string>Serial Port</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="azimuthMaxLabel">
+        <property name="text">
+         <string>Azimuth max</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="azimuthOffsetLabel">
         <property name="text">
          <string>Azimuth offset</string>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="1" column="1">
        <widget class="QSpinBox" name="azimuthOffset">
         <property name="toolTip">
          <string>Specify an offset angel in degrees that will be added to the target azimuth to correct for misalignment</string>
@@ -360,14 +399,14 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="1" column="2">
        <widget class="QLabel" name="elevationOffsetLabel">
         <property name="text">
          <string>Elevation offset</string>
         </property>
        </widget>
       </item>
-      <item>
+      <item row="1" column="3">
        <widget class="QSpinBox" name="elevationOffset">
         <property name="toolTip">
          <string>Specify an offset angle in degrees that will be added to the target elevation to correct for misalignment</string>
@@ -412,6 +451,10 @@
   <tabstop>baudRate</tabstop>
   <tabstop>azimuthOffset</tabstop>
   <tabstop>elevationOffset</tabstop>
+  <tabstop>azimuthMin</tabstop>
+  <tabstop>azimuthMax</tabstop>
+  <tabstop>elevationMin</tabstop>
+  <tabstop>elevationMax</tabstop>
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
