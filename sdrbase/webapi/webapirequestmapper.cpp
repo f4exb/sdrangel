@@ -3821,6 +3821,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setAmModSettings(new SWGSDRangel::SWGAMModSettings());
             channelSettings->getAmModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "APTDemodSettings")
+        {
+            channelSettings->setAptDemodSettings(new SWGSDRangel::SWGAPTDemodSettings());
+            channelSettings->getAptDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "ATVDemodSettings")
         {
             channelSettings->setAtvDemodSettings(new SWGSDRangel::SWGATVDemodSettings());
@@ -4008,7 +4013,12 @@ bool WebAPIRequestMapper::getChannelActions(
         QJsonObject actionsJsonObject = channelActionsJson[channelActionsKey].toObject();
         channelActionsKeys = actionsJsonObject.keys();
 
-        if (channelActionsKey == "FileSinkActions")
+        if (channelActionsKey == "APTDemodActions")
+        {
+            channelActions->setAptDemodActions(new SWGSDRangel::SWGAPTDemodActions());
+            channelActions->getAptDemodActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "FileSinkActions")
         {
             channelActions->setFileSinkActions(new SWGSDRangel::SWGFileSinkActions());
             channelActions->getFileSinkActions()->fromJsonObject(actionsJsonObject);
@@ -4564,6 +4574,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setAdsbDemodSettings(nullptr);
     channelSettings.setAmDemodSettings(nullptr);
     channelSettings.setAmModSettings(nullptr);
+    channelSettings.setAptDemodSettings(nullptr);
     channelSettings.setAtvModSettings(nullptr);
     channelSettings.setBfmDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
@@ -4610,6 +4621,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
 void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& channelActions)
 {
     channelActions.cleanup();
+    channelActions.setAptDemodActions(nullptr);
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
     channelActions.setIeee802154ModActions(nullptr);

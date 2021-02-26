@@ -24,6 +24,7 @@
 const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.adsbdemod", "ADSBDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
+    {"sdrangel.channel.aptdemod", "APTDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.modam", "AMModSettings"},
     {"sdrangel.channeltx.modatv", "ATVModSettings"},
@@ -47,7 +48,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
-    {"sdrangel.channelrx.demodpacket", "PacketDemodSettings"},
+    {"sdrangel.channel.packetdemod", "PacketDemodSettings"},
     {"sdrangel.channeltx.modpacket", "PacketModSettings"},
     {"sdrangel.channeltx.mod802.15.4", "IEEE_802_15_4_ModSettings"},
     {"sdrangel.demod.remotesink", "RemoteSinkSettings"},
@@ -118,6 +119,7 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"ADSBDemod", "ADSBDemodSettings"},
+    {"APTDemod", "APTemodSettings"},
     {"AMDemod", "AMDemodSettings"},
     {"AMMod", "AMModSettings"},
     {"ATVDemod", "ATVDemodSettings"},
@@ -155,6 +157,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
+    {"APTDemod", "APTDemodActions"},
     {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
     {"SigMFFileSink", "SigMFFileSinkActions"},

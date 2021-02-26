@@ -44,6 +44,14 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_azimuth_offset_isSet = false;
     elevation_offset = 0;
     m_elevation_offset_isSet = false;
+    azimuth_min = 0;
+    m_azimuth_min_isSet = false;
+    azimuth_max = 0;
+    m_azimuth_max_isSet = false;
+    elevation_min = 0;
+    m_elevation_min_isSet = false;
+    elevation_max = 0;
+    m_elevation_max_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -82,6 +90,14 @@ SWGGS232ControllerSettings::init() {
     m_azimuth_offset_isSet = false;
     elevation_offset = 0;
     m_elevation_offset_isSet = false;
+    azimuth_min = 0;
+    m_azimuth_min_isSet = false;
+    azimuth_max = 0;
+    m_azimuth_max_isSet = false;
+    elevation_min = 0;
+    m_elevation_min_isSet = false;
+    elevation_max = 0;
+    m_elevation_max_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -110,6 +126,10 @@ SWGGS232ControllerSettings::cleanup() {
     if(target != nullptr) { 
         delete target;
     }
+
+
+
+
 
 
     if(title != nullptr) { 
@@ -151,6 +171,14 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&azimuth_offset, pJson["azimuthOffset"], "qint32", "");
     
     ::SWGSDRangel::setValue(&elevation_offset, pJson["elevationOffset"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&azimuth_min, pJson["azimuthMin"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&azimuth_max, pJson["azimuthMax"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&elevation_min, pJson["elevationMin"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&elevation_max, pJson["elevationMax"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -205,6 +233,18 @@ SWGGS232ControllerSettings::asJsonObject() {
     }
     if(m_elevation_offset_isSet){
         obj->insert("elevationOffset", QJsonValue(elevation_offset));
+    }
+    if(m_azimuth_min_isSet){
+        obj->insert("azimuthMin", QJsonValue(azimuth_min));
+    }
+    if(m_azimuth_max_isSet){
+        obj->insert("azimuthMax", QJsonValue(azimuth_max));
+    }
+    if(m_elevation_min_isSet){
+        obj->insert("elevationMin", QJsonValue(elevation_min));
+    }
+    if(m_elevation_max_isSet){
+        obj->insert("elevationMax", QJsonValue(elevation_max));
     }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
@@ -311,6 +351,46 @@ SWGGS232ControllerSettings::setElevationOffset(qint32 elevation_offset) {
     this->m_elevation_offset_isSet = true;
 }
 
+qint32
+SWGGS232ControllerSettings::getAzimuthMin() {
+    return azimuth_min;
+}
+void
+SWGGS232ControllerSettings::setAzimuthMin(qint32 azimuth_min) {
+    this->azimuth_min = azimuth_min;
+    this->m_azimuth_min_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getAzimuthMax() {
+    return azimuth_max;
+}
+void
+SWGGS232ControllerSettings::setAzimuthMax(qint32 azimuth_max) {
+    this->azimuth_max = azimuth_max;
+    this->m_azimuth_max_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getElevationMin() {
+    return elevation_min;
+}
+void
+SWGGS232ControllerSettings::setElevationMin(qint32 elevation_min) {
+    this->elevation_min = elevation_min;
+    this->m_elevation_min_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getElevationMax() {
+    return elevation_max;
+}
+void
+SWGGS232ControllerSettings::setElevationMax(qint32 elevation_max) {
+    this->elevation_max = elevation_max;
+    this->m_elevation_max_isSet = true;
+}
+
 QString*
 SWGGS232ControllerSettings::getTitle() {
     return title;
@@ -408,6 +488,18 @@ SWGGS232ControllerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_elevation_offset_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_azimuth_min_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_azimuth_max_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_elevation_min_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_elevation_max_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){

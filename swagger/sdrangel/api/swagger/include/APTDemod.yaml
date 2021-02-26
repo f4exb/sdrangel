@@ -1,0 +1,86 @@
+APTDemodSettings:
+  description: APTDemod
+  properties:
+    inputFrequencyOffset:
+      description: channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: channel RF bandwidth in Hz
+      type: number
+      format: float
+    fmDeviation:
+      description: frequency deviation in Hz
+      type: integer
+    cropNoise:
+      description: crop noise from top and bottom of image
+      type: integer
+    denoise:
+      description: apply denoise filter to image 
+      type: integer
+    linearEqualise:
+      description: apply linear equalisation to image
+      type: integer
+    histogramEqualise:
+      description: apply histogram equalisation to image
+      type: integer
+    precipitationOverlay:
+      description: create colour overlay of precipitation
+      type: integer
+    flip:
+      description: flip image for South to North passes
+      type: integer
+    channels:
+      description: which channel to display (0=both, 1=A, 2=B)
+      type: integer
+    decodeEnabled:
+      description: controls whether the decoder is enabled
+      type: integer
+    autoSave:
+      description: automatically save images when acquisition is stopped
+      type: integer
+    autoSavePath:
+      description: directory to automatically save images in
+      type: string
+    autoSaveMinScanLines:
+      desciption: minimum number of scanlines (after cropping) for an image to be automatically saved
+      type: integer 
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+APTDemodActions:
+  description: APTDemod
+  properties:
+    aos:
+      description: "Acquisition of signal"
+      type: object
+      properties:
+        satelliteName:
+          description: "Name of the satellite"
+          type: string
+        northToSouthPass:
+          description: "Satellite is passing from the North to the South (1) or South to North (0)"
+          type: integer
+    los:
+      description: "Loss of signal"
+      type: object
+      properties:
+        satelliteName:
+          description: "Name of the satellite"
+          type: string

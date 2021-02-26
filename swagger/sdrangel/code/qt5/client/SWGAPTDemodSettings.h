@@ -11,13 +11,13 @@
  */
 
 /*
- * SWGGS232ControllerSettings.h
+ * SWGAPTDemodSettings.h
  *
- * GS-232 Controller settings
+ * APTDemod
  */
 
-#ifndef SWGGS232ControllerSettings_H_
-#define SWGGS232ControllerSettings_H_
+#ifndef SWGAPTDemodSettings_H_
+#define SWGAPTDemodSettings_H_
 
 #include <QJsonObject>
 
@@ -29,60 +29,69 @@
 
 namespace SWGSDRangel {
 
-class SWG_API SWGGS232ControllerSettings: public SWGObject {
+class SWG_API SWGAPTDemodSettings: public SWGObject {
 public:
-    SWGGS232ControllerSettings();
-    SWGGS232ControllerSettings(QString* json);
-    virtual ~SWGGS232ControllerSettings();
+    SWGAPTDemodSettings();
+    SWGAPTDemodSettings(QString* json);
+    virtual ~SWGAPTDemodSettings();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGGS232ControllerSettings* fromJson(QString &jsonString) override;
+    virtual SWGAPTDemodSettings* fromJson(QString &jsonString) override;
 
-    qint32 getAzimuth();
-    void setAzimuth(qint32 azimuth);
+    qint64 getInputFrequencyOffset();
+    void setInputFrequencyOffset(qint64 input_frequency_offset);
 
-    qint32 getElevation();
-    void setElevation(qint32 elevation);
+    float getRfBandwidth();
+    void setRfBandwidth(float rf_bandwidth);
 
-    QString* getSerialPort();
-    void setSerialPort(QString* serial_port);
+    qint32 getFmDeviation();
+    void setFmDeviation(qint32 fm_deviation);
 
-    qint32 getBaudRate();
-    void setBaudRate(qint32 baud_rate);
+    qint32 getCropNoise();
+    void setCropNoise(qint32 crop_noise);
 
-    qint32 getTrack();
-    void setTrack(qint32 track);
+    qint32 getDenoise();
+    void setDenoise(qint32 denoise);
 
-    QString* getTarget();
-    void setTarget(QString* target);
+    qint32 getLinearEqualise();
+    void setLinearEqualise(qint32 linear_equalise);
 
-    qint32 getAzimuthOffset();
-    void setAzimuthOffset(qint32 azimuth_offset);
+    qint32 getHistogramEqualise();
+    void setHistogramEqualise(qint32 histogram_equalise);
 
-    qint32 getElevationOffset();
-    void setElevationOffset(qint32 elevation_offset);
+    qint32 getPrecipitationOverlay();
+    void setPrecipitationOverlay(qint32 precipitation_overlay);
 
-    qint32 getAzimuthMin();
-    void setAzimuthMin(qint32 azimuth_min);
+    qint32 getFlip();
+    void setFlip(qint32 flip);
 
-    qint32 getAzimuthMax();
-    void setAzimuthMax(qint32 azimuth_max);
+    qint32 getChannels();
+    void setChannels(qint32 channels);
 
-    qint32 getElevationMin();
-    void setElevationMin(qint32 elevation_min);
+    qint32 getDecodeEnabled();
+    void setDecodeEnabled(qint32 decode_enabled);
 
-    qint32 getElevationMax();
-    void setElevationMax(qint32 elevation_max);
+    qint32 getAutoSave();
+    void setAutoSave(qint32 auto_save);
+
+    QString* getAutoSavePath();
+    void setAutoSavePath(QString* auto_save_path);
+
+    qint32 getAutoSaveMinScanLines();
+    void setAutoSaveMinScanLines(qint32 auto_save_min_scan_lines);
+
+    qint32 getRgbColor();
+    void setRgbColor(qint32 rgb_color);
 
     QString* getTitle();
     void setTitle(QString* title);
 
-    qint32 getRgbColor();
-    void setRgbColor(qint32 rgb_color);
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
 
     qint32 getUseReverseApi();
     void setUseReverseApi(qint32 use_reverse_api);
@@ -103,47 +112,56 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 azimuth;
-    bool m_azimuth_isSet;
+    qint64 input_frequency_offset;
+    bool m_input_frequency_offset_isSet;
 
-    qint32 elevation;
-    bool m_elevation_isSet;
+    float rf_bandwidth;
+    bool m_rf_bandwidth_isSet;
 
-    QString* serial_port;
-    bool m_serial_port_isSet;
+    qint32 fm_deviation;
+    bool m_fm_deviation_isSet;
 
-    qint32 baud_rate;
-    bool m_baud_rate_isSet;
+    qint32 crop_noise;
+    bool m_crop_noise_isSet;
 
-    qint32 track;
-    bool m_track_isSet;
+    qint32 denoise;
+    bool m_denoise_isSet;
 
-    QString* target;
-    bool m_target_isSet;
+    qint32 linear_equalise;
+    bool m_linear_equalise_isSet;
 
-    qint32 azimuth_offset;
-    bool m_azimuth_offset_isSet;
+    qint32 histogram_equalise;
+    bool m_histogram_equalise_isSet;
 
-    qint32 elevation_offset;
-    bool m_elevation_offset_isSet;
+    qint32 precipitation_overlay;
+    bool m_precipitation_overlay_isSet;
 
-    qint32 azimuth_min;
-    bool m_azimuth_min_isSet;
+    qint32 flip;
+    bool m_flip_isSet;
 
-    qint32 azimuth_max;
-    bool m_azimuth_max_isSet;
+    qint32 channels;
+    bool m_channels_isSet;
 
-    qint32 elevation_min;
-    bool m_elevation_min_isSet;
+    qint32 decode_enabled;
+    bool m_decode_enabled_isSet;
 
-    qint32 elevation_max;
-    bool m_elevation_max_isSet;
+    qint32 auto_save;
+    bool m_auto_save_isSet;
+
+    QString* auto_save_path;
+    bool m_auto_save_path_isSet;
+
+    qint32 auto_save_min_scan_lines;
+    bool m_auto_save_min_scan_lines_isSet;
+
+    qint32 rgb_color;
+    bool m_rgb_color_isSet;
 
     QString* title;
     bool m_title_isSet;
 
-    qint32 rgb_color;
-    bool m_rgb_color_isSet;
+    qint32 stream_index;
+    bool m_stream_index_isSet;
 
     qint32 use_reverse_api;
     bool m_use_reverse_api_isSet;
@@ -164,4 +182,4 @@ private:
 
 }
 
-#endif /* SWGGS232ControllerSettings_H_ */
+#endif /* SWGAPTDemodSettings_H_ */

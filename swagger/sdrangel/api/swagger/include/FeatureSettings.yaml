@@ -25,6 +25,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapSettings"
     RigCtlServerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+    SatelliteTrackerSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerSettings"
     StarTrackerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/StarTracker.yaml#/StarTrackerSettings"
     SimplePTTSettings:

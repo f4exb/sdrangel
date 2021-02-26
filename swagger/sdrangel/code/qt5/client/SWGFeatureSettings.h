@@ -28,6 +28,7 @@
 #include "SWGGS232ControllerSettings.h"
 #include "SWGMapSettings.h"
 #include "SWGRigCtlServerSettings.h"
+#include "SWGSatelliteTrackerSettings.h"
 #include "SWGSimplePTTSettings.h"
 #include "SWGStarTrackerSettings.h"
 #include "SWGVORLocalizerSettings.h"
@@ -78,6 +79,9 @@ public:
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
 
+    SWGSatelliteTrackerSettings* getSatelliteTrackerSettings();
+    void setSatelliteTrackerSettings(SWGSatelliteTrackerSettings* satellite_tracker_settings);
+
     SWGStarTrackerSettings* getStarTrackerSettings();
     void setStarTrackerSettings(SWGStarTrackerSettings* star_tracker_settings);
 
@@ -117,6 +121,9 @@ private:
 
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;
+
+    SWGSatelliteTrackerSettings* satellite_tracker_settings;
+    bool m_satellite_tracker_settings_isSet;
 
     SWGStarTrackerSettings* star_tracker_settings;
     bool m_star_tracker_settings_isSet;

@@ -44,6 +44,10 @@ SWGMapItem_2::SWGMapItem_2() {
     m_longitude_isSet = false;
     altitude = 0.0f;
     m_altitude_isSet = false;
+    track = nullptr;
+    m_track_isSet = false;
+    predicted_track = nullptr;
+    m_predicted_track_isSet = false;
 }
 
 SWGMapItem_2::~SWGMapItem_2() {
@@ -68,6 +72,10 @@ SWGMapItem_2::init() {
     m_longitude_isSet = false;
     altitude = 0.0f;
     m_altitude_isSet = false;
+    track = new QList<SWGMapCoordinate*>();
+    m_track_isSet = false;
+    predicted_track = new QList<SWGMapCoordinate*>();
+    m_predicted_track_isSet = false;
 }
 
 void
@@ -86,6 +94,20 @@ SWGMapItem_2::cleanup() {
 
 
 
+    if(track != nullptr) { 
+        auto arr = track;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete track;
+    }
+    if(predicted_track != nullptr) { 
+        auto arr = predicted_track;
+        for(auto o: *arr) { 
+            delete o;
+        }
+        delete predicted_track;
+    }
 }
 
 SWGMapItem_2*
@@ -115,6 +137,10 @@ SWGMapItem_2::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&altitude, pJson["altitude"], "float", "");
     
+    
+    ::SWGSDRangel::setValue(&track, pJson["track"], "QList", "SWGMapCoordinate");
+    
+    ::SWGSDRangel::setValue(&predicted_track, pJson["predictedTrack"], "QList", "SWGMapCoordinate");
 }
 
 QString
@@ -154,6 +180,12 @@ SWGMapItem_2::asJsonObject() {
     }
     if(m_altitude_isSet){
         obj->insert("altitude", QJsonValue(altitude));
+    }
+    if(track && track->size() > 0){
+        toJsonArray((QList<void*>*)track, obj, "track", "SWGMapCoordinate");
+    }
+    if(predicted_track && predicted_track->size() > 0){
+        toJsonArray((QList<void*>*)predicted_track, obj, "predictedTrack", "SWGMapCoordinate");
     }
 
     return obj;
@@ -239,6 +271,26 @@ SWGMapItem_2::setAltitude(float altitude) {
     this->m_altitude_isSet = true;
 }
 
+QList<SWGMapCoordinate*>*
+SWGMapItem_2::getTrack() {
+    return track;
+}
+void
+SWGMapItem_2::setTrack(QList<SWGMapCoordinate*>* track) {
+    this->track = track;
+    this->m_track_isSet = true;
+}
+
+QList<SWGMapCoordinate*>*
+SWGMapItem_2::getPredictedTrack() {
+    return predicted_track;
+}
+void
+SWGMapItem_2::setPredictedTrack(QList<SWGMapCoordinate*>* predicted_track) {
+    this->predicted_track = predicted_track;
+    this->m_predicted_track_isSet = true;
+}
+
 
 bool
 SWGMapItem_2::isSet(){
@@ -266,6 +318,12 @@ SWGMapItem_2::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_altitude_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(track && (track->size() > 0)){
+            isObjectUpdated = true; break;
+        }
+        if(predicted_track && (predicted_track->size() > 0)){
             isObjectUpdated = true; break;
         }
     }while(false);

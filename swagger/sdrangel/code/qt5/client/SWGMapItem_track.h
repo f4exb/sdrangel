@@ -11,53 +11,35 @@
  */
 
 /*
- * SWGMapItem_2.h
+ * SWGMapItem_track.h
  *
- * An item to draw on the map. Set image to an empty string to remove item from the map.
+ * 
  */
 
-#ifndef SWGMapItem_2_H_
-#define SWGMapItem_2_H_
+#ifndef SWGMapItem_track_H_
+#define SWGMapItem_track_H_
 
 #include <QJsonObject>
 
 
-#include "SWGMapCoordinate.h"
-#include <QList>
-#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
 
 namespace SWGSDRangel {
 
-class SWG_API SWGMapItem_2: public SWGObject {
+class SWG_API SWGMapItem_track: public SWGObject {
 public:
-    SWGMapItem_2();
-    SWGMapItem_2(QString* json);
-    virtual ~SWGMapItem_2();
+    SWGMapItem_track();
+    SWGMapItem_track(QString* json);
+    virtual ~SWGMapItem_track();
     void init();
     void cleanup();
 
     virtual QString asJson () override;
     virtual QJsonObject* asJsonObject() override;
     virtual void fromJsonObject(QJsonObject &json) override;
-    virtual SWGMapItem_2* fromJson(QString &jsonString) override;
-
-    QString* getName();
-    void setName(QString* name);
-
-    QString* getImage();
-    void setImage(QString* image);
-
-    qint32 getImageRotation();
-    void setImageRotation(qint32 image_rotation);
-
-    qint32 getImageMinZoom();
-    void setImageMinZoom(qint32 image_min_zoom);
-
-    QString* getText();
-    void setText(QString* text);
+    virtual SWGMapItem_track* fromJson(QString &jsonString) override;
 
     float getLatitude();
     void setLatitude(float latitude);
@@ -68,31 +50,10 @@ public:
     float getAltitude();
     void setAltitude(float altitude);
 
-    QList<SWGMapCoordinate*>* getTrack();
-    void setTrack(QList<SWGMapCoordinate*>* track);
-
-    QList<SWGMapCoordinate*>* getPredictedTrack();
-    void setPredictedTrack(QList<SWGMapCoordinate*>* predicted_track);
-
 
     virtual bool isSet() override;
 
 private:
-    QString* name;
-    bool m_name_isSet;
-
-    QString* image;
-    bool m_image_isSet;
-
-    qint32 image_rotation;
-    bool m_image_rotation_isSet;
-
-    qint32 image_min_zoom;
-    bool m_image_min_zoom_isSet;
-
-    QString* text;
-    bool m_text_isSet;
-
     float latitude;
     bool m_latitude_isSet;
 
@@ -102,14 +63,8 @@ private:
     float altitude;
     bool m_altitude_isSet;
 
-    QList<SWGMapCoordinate*>* track;
-    bool m_track_isSet;
-
-    QList<SWGMapCoordinate*>* predicted_track;
-    bool m_predicted_track_isSet;
-
 };
 
 }
 
-#endif /* SWGMapItem_2_H_ */
+#endif /* SWGMapItem_track_H_ */

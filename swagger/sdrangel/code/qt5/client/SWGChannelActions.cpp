@@ -36,6 +36,8 @@ SWGChannelActions::SWGChannelActions() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    apt_demod_actions = nullptr;
+    m_apt_demod_actions_isSet = false;
     file_sink_actions = nullptr;
     m_file_sink_actions_isSet = false;
     file_source_actions = nullptr;
@@ -62,6 +64,8 @@ SWGChannelActions::init() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    apt_demod_actions = new SWGAPTDemodActions();
+    m_apt_demod_actions_isSet = false;
     file_sink_actions = new SWGFileSinkActions();
     m_file_sink_actions_isSet = false;
     file_source_actions = new SWGFileSourceActions();
@@ -82,6 +86,9 @@ SWGChannelActions::cleanup() {
 
 
 
+    if(apt_demod_actions != nullptr) { 
+        delete apt_demod_actions;
+    }
     if(file_sink_actions != nullptr) { 
         delete file_sink_actions;
     }
@@ -117,6 +124,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_device_set_index, pJson["originatorDeviceSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_channel_index, pJson["originatorChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&apt_demod_actions, pJson["APTDemodActions"], "SWGAPTDemodActions", "SWGAPTDemodActions");
     
     ::SWGSDRangel::setValue(&file_sink_actions, pJson["FileSinkActions"], "SWGFileSinkActions", "SWGFileSinkActions");
     
@@ -155,6 +164,9 @@ SWGChannelActions::asJsonObject() {
     }
     if(m_originator_channel_index_isSet){
         obj->insert("originatorChannelIndex", QJsonValue(originator_channel_index));
+    }
+    if((apt_demod_actions != nullptr) && (apt_demod_actions->isSet())){
+        toJsonValue(QString("APTDemodActions"), apt_demod_actions, obj, QString("SWGAPTDemodActions"));
     }
     if((file_sink_actions != nullptr) && (file_sink_actions->isSet())){
         toJsonValue(QString("FileSinkActions"), file_sink_actions, obj, QString("SWGFileSinkActions"));
@@ -213,6 +225,16 @@ void
 SWGChannelActions::setOriginatorChannelIndex(qint32 originator_channel_index) {
     this->originator_channel_index = originator_channel_index;
     this->m_originator_channel_index_isSet = true;
+}
+
+SWGAPTDemodActions*
+SWGChannelActions::getAptDemodActions() {
+    return apt_demod_actions;
+}
+void
+SWGChannelActions::setAptDemodActions(SWGAPTDemodActions* apt_demod_actions) {
+    this->apt_demod_actions = apt_demod_actions;
+    this->m_apt_demod_actions_isSet = true;
 }
 
 SWGFileSinkActions*
@@ -280,6 +302,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(apt_demod_actions && apt_demod_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(file_sink_actions && file_sink_actions->isSet()){

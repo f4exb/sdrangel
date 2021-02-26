@@ -23,6 +23,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AMDemod.yaml#/AMDemodSettings"
     AMModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AMMod.yaml#/AMModSettings"
+    APTDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/APTDemod.yaml#/APTDemodSettings"
     ATVDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
     ATVModSettings:

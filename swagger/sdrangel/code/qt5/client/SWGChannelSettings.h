@@ -25,6 +25,7 @@
 #include "SWGADSBDemodSettings.h"
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
+#include "SWGAPTDemodSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModSettings.h"
 #include "SWGBFMDemodSettings.h"
@@ -98,6 +99,9 @@ public:
 
     SWGAMModSettings* getAmModSettings();
     void setAmModSettings(SWGAMModSettings* am_mod_settings);
+
+    SWGAPTDemodSettings* getAptDemodSettings();
+    void setAptDemodSettings(SWGAPTDemodSettings* apt_demod_settings);
 
     SWGATVDemodSettings* getAtvDemodSettings();
     void setAtvDemodSettings(SWGATVDemodSettings* atv_demod_settings);
@@ -222,6 +226,9 @@ private:
 
     SWGAMModSettings* am_mod_settings;
     bool m_am_mod_settings_isSet;
+
+    SWGAPTDemodSettings* apt_demod_settings;
+    bool m_apt_demod_settings_isSet;
 
     SWGATVDemodSettings* atv_demod_settings;
     bool m_atv_demod_settings_isSet;

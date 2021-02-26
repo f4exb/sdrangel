@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include "SWGAPTDemodActions.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSourceActions.h"
 #include "SWGIEEE_802_15_4_ModActions.h"
@@ -59,6 +60,9 @@ public:
     qint32 getOriginatorChannelIndex();
     void setOriginatorChannelIndex(qint32 originator_channel_index);
 
+    SWGAPTDemodActions* getAptDemodActions();
+    void setAptDemodActions(SWGAPTDemodActions* apt_demod_actions);
+
     SWGFileSinkActions* getFileSinkActions();
     void setFileSinkActions(SWGFileSinkActions* file_sink_actions);
 
@@ -89,6 +93,9 @@ private:
 
     qint32 originator_channel_index;
     bool m_originator_channel_index_isSet;
+
+    SWGAPTDemodActions* apt_demod_actions;
+    bool m_apt_demod_actions_isSet;
 
     SWGFileSinkActions* file_sink_actions;
     bool m_file_sink_actions_isSet;
