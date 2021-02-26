@@ -34,6 +34,8 @@ public:
 
 private slots:
     void accept();
+    void on_groundTrackColor_clicked();
+    void on_predictedGroundTrackColor_clicked();
 
 private:
     Ui::MapSettingsDialog* ui;

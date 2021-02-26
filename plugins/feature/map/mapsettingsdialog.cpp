@@ -16,11 +16,24 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include <QDebug>
+#include <QColorDialog>
+#include <QColor>
 
 #include "util/units.h"
 
 #include "mapsettingsdialog.h"
 #include "maplocationdialog.h"
+
+static QString rgbToColor(quint32 rgb)
+{
+    QColor color = QColor::fromRgb(rgb);
+    return QString("%1,%2,%3").arg(color.red()).arg(color.green()).arg(color.blue());
+}
+
+static QString backgroundCSS(quint32 rgb)
+{
+    return QString("QToolButton { background:rgb(%1); }").arg(rgbToColor(rgb));
+}
 
 MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     QDialog(parent),
@@ -33,6 +46,8 @@ MapSettingsDialog::MapSettingsDialog(MapSettings *settings, QWidget* parent) :
     ui->mapBoxStyles->setText(settings->m_mapBoxStyles);
     for (int i = 0; i < ui->sourceList->count(); i++)
          ui->sourceList->item(i)->setCheckState((m_settings->m_sources & (1 << i)) ? Qt::Checked : Qt::Unchecked);
+    ui->groundTrackColor->setStyleSheet(backgroundCSS(m_settings->m_groundTrackColor));
+    ui->predictedGroundTrackColor->setStyleSheet(backgroundCSS(m_settings->m_predictedGroundTrackColor));
 }
 
 MapSettingsDialog::~MapSettingsDialog()
@@ -63,4 +78,24 @@ void MapSettingsDialog::accept()
     m_sourcesChanged = sources != m_settings->m_sources;
     m_settings->m_sources = sources;
     QDialog::accept();
+}
+
+void MapSettingsDialog::on_groundTrackColor_clicked()
+{
+    QColorDialog dialog(QColor::fromRgb(m_settings->m_groundTrackColor), this);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settings->m_groundTrackColor = dialog.selectedColor().rgb();
+        ui->groundTrackColor->setStyleSheet(backgroundCSS(m_settings->m_groundTrackColor));
+    }
+}
+
+void MapSettingsDialog::on_predictedGroundTrackColor_clicked()
+{
+    QColorDialog dialog(QColor::fromRgb(m_settings->m_predictedGroundTrackColor), this);
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        m_settings->m_predictedGroundTrackColor = dialog.selectedColor().rgb();
+        ui->predictedGroundTrackColor->setStyleSheet(backgroundCSS(m_settings->m_predictedGroundTrackColor));
+    }
 }

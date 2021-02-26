@@ -1,8 +1,8 @@
-import QtQuick 2.14
-import QtQuick.Window 2.14
-import QtQuick.Controls 2.14
-import QtLocation 5.14
-import QtPositioning 5.14
+import QtQuick 2.12
+import QtQuick.Window 2.12
+import QtQuick.Controls 2.12
+import QtLocation 5.12
+import QtPositioning 5.12
 
 Item {
     id: qmlMap
@@ -14,16 +14,16 @@ Item {
     function createMap(pluginParameters) {
         var parameters = new Array()
         for (var prop in pluginParameters) {
-            var parameter = Qt.createQmlObject('import QtLocation 5.14; PluginParameter{ name: "'+ prop + '"; value: "' + pluginParameters[prop]+'"}', qmlMap)
+            var parameter = Qt.createQmlObject('import QtLocation 5.6; PluginParameter{ name: "'+ prop + '"; value: "' + pluginParameters[prop]+'"}', qmlMap)
             parameters.push(parameter)
         }
         qmlMap.mapParameters = parameters
 
         var plugin
         if (mapParameters && mapParameters.length > 0)
-            plugin = Qt.createQmlObject ('import QtLocation 5.14; Plugin{ name:"' + mapProvider + '"; parameters: qmlMap.mapParameters}', qmlMap)
+            plugin = Qt.createQmlObject ('import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"; parameters: qmlMap.mapParameters}', qmlMap)
         else
-            plugin = Qt.createQmlObject ('import QtLocation 5.14; Plugin{ name:"' + mapProvider + '"}', qmlMap)
+            plugin = Qt.createQmlObject ('import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"}', qmlMap)
         if (mapPtr) {
             // Objects aren't destroyed immediately, so rename the old
             // map, so any C++ code that calls findChild("map") doesn't find
@@ -121,7 +121,7 @@ Item {
             anchorPoint.y: image.height/2
             coordinate: position
             zoomLevel: mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom
-            autoFadeIn: false               // not in 5.12
+            //autoFadeIn: false               // not in 5.12
 
             sourceItem: Grid {
                 id: gridItem
@@ -226,7 +226,6 @@ Item {
             line.width: 2
             line.color: predictedGroundTrackColor
             path: predictedGroundTrack1
-            autoFadeIn: false
         }
     }
 
@@ -237,7 +236,6 @@ Item {
             line.width: 2
             line.color: predictedGroundTrackColor
             path: predictedGroundTrack2
-            autoFadeIn: false
         }
     }
 
@@ -247,7 +245,6 @@ Item {
             line.width: 2
             line.color: groundTrackColor
             path: groundTrack1
-            autoFadeIn: false
         }
     }
 
@@ -258,7 +255,6 @@ Item {
             line.width: 2
             line.color: groundTrackColor
             path: groundTrack2
-            autoFadeIn: false
         }
     }
 

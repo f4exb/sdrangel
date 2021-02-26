@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QAbstractListModel>
 #include <QGeoCoordinate>
+#include <QGeoRectangle>
 
 #include "feature/featuregui.h"
 #include "util/messagequeue.h"
@@ -41,6 +42,7 @@ namespace Ui {
 
 class MapGUI;
 class MapModel;
+class QQuickItem;
 struct Beacon;
 
 // Information required about each item displayed on the map
@@ -62,6 +64,8 @@ public:
         if (text != nullptr)
             m_text = *text;
         findFrequency();
+        updateTrack(mapItem->getTrack());
+        updatePredictedTrack(mapItem->getPredictedTrack());
     }
 
     void update(SWGSDRangel::SWGMapItem *mapItem)
@@ -76,6 +80,8 @@ public:
         if (text != nullptr)
             m_text = *text;
         findFrequency();
+        updateTrack(mapItem->getTrack());
+        updatePredictedTrack(mapItem->getPredictedTrack());
     }
 
     QGeoCoordinate getCoordinates()
@@ -90,6 +96,64 @@ private:
 
     void findFrequency();
 
+    void updateTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track)
+    {
+        if (track != nullptr)
+        {
+            qDeleteAll(m_takenTrackCoords);
+            m_takenTrackCoords.clear();
+            m_takenTrack.clear();
+            m_takenTrack1.clear();
+            m_takenTrack2.clear();
+            for (int i = 0; i < track->size(); i++)
+            {
+                SWGSDRangel::SWGMapCoordinate* p = track->at(i);
+                QGeoCoordinate *c = new QGeoCoordinate(p->getLatitude(), p->getLongitude(), p->getAltitude());
+                m_takenTrackCoords.push_back(c);
+                m_takenTrack.push_back(QVariant::fromValue(*c));
+            }
+        }
+        else
+        {
+            // Automatically create a track
+            if (m_takenTrackCoords.size() == 0)
+            {
+                QGeoCoordinate *c = new QGeoCoordinate(m_latitude, m_longitude, m_altitude);
+                m_takenTrackCoords.push_back(c);
+                m_takenTrack.push_back(QVariant::fromValue(*c));
+            }
+            else
+            {
+                QGeoCoordinate *prev = m_takenTrackCoords.last();
+                if ((prev->latitude() != m_latitude) || (prev->longitude() != m_longitude) || (prev->altitude() != m_altitude))
+                {
+                    QGeoCoordinate *c = new QGeoCoordinate(m_latitude, m_longitude, m_altitude);
+                    m_takenTrackCoords.push_back(c);
+                    m_takenTrack.push_back(QVariant::fromValue(*c));
+                }
+            }
+        }
+    }
+
+    void updatePredictedTrack(QList<SWGSDRangel::SWGMapCoordinate *> *track)
+    {
+        if (track != nullptr)
+        {
+            qDeleteAll(m_predictedTrackCoords);
+            m_predictedTrackCoords.clear();
+            m_predictedTrack.clear();
+            m_predictedTrack1.clear();
+            m_predictedTrack2.clear();
+            for (int i = 0; i < track->size(); i++)
+            {
+                SWGSDRangel::SWGMapCoordinate* p = track->at(i);
+                QGeoCoordinate *c = new QGeoCoordinate(p->getLatitude(), p->getLongitude(), p->getAltitude());
+                m_predictedTrackCoords.push_back(c);
+                m_predictedTrack.push_back(QVariant::fromValue(*c));
+            }
+        }
+    }
+
     friend MapModel;
     const PipeEndPoint *m_sourcePipe;   // Channel/feature that created the item
     quint32 m_sourceMask;               // Source bitmask as per MapSettings::SOURCE_* constants
@@ -103,6 +167,22 @@ private:
     QString m_text;
     double m_frequency;                 // Frequency to set
     QString m_frequencyString;
+    QList<QGeoCoordinate *> m_predictedTrackCoords;
+    QVariantList m_predictedTrack;      // Line showing where the object is going
+    QVariantList m_predictedTrack1;
+    QVariantList m_predictedTrack2;
+    QGeoCoordinate m_predictedStart1;
+    QGeoCoordinate m_predictedStart2;
+    QGeoCoordinate m_predictedEnd1;
+    QGeoCoordinate m_predictedEnd2;
+    QList<QGeoCoordinate *> m_takenTrackCoords;
+    QVariantList m_takenTrack;          // Line showing where the object has been
+    QVariantList m_takenTrack1;
+    QVariantList m_takenTrack2;
+    QGeoCoordinate m_takenStart1;
+    QGeoCoordinate m_takenStart2;
+    QGeoCoordinate m_takenEnd1;
+    QGeoCoordinate m_takenEnd2;
 };
 
 // Model used for each item on the map
@@ -123,7 +203,13 @@ public:
         selectedRole = Qt::UserRole + 9,
         targetRole = Qt::UserRole + 10,
         frequencyRole = Qt::UserRole + 11,
-        frequencyStringRole = Qt::UserRole + 12
+        frequencyStringRole = Qt::UserRole + 12,
+        predictedGroundTrack1Role = Qt::UserRole + 13,
+        predictedGroundTrack2Role = Qt::UserRole + 14,
+        groundTrack1Role = Qt::UserRole + 15,
+        groundTrack2Role = Qt::UserRole + 16,
+        groundTrackColorRole = Qt::UserRole + 17,
+        predictedGroundTrackColorRole = Qt::UserRole + 18
     };
 
     MapModel(MapGUI *gui) :
@@ -131,6 +217,8 @@ public:
         m_target(-1),
         m_sources(-1)
     {
+        setGroundTrackColor(0);
+        setPredictedGroundTrackColor(0);
     }
 
     Q_INVOKABLE void add(MapItem *item)
@@ -275,7 +363,40 @@ public:
         allUpdated();
     }
 
+    void setDisplaySelectedGroundTracks(bool displayGroundTracks)
+    {
+        m_displaySelectedGroundTracks = displayGroundTracks;
+        allUpdated();
+    }
+
+    void setDisplayAllGroundTracks(bool displayGroundTracks)
+    {
+        m_displayAllGroundTracks = displayGroundTracks;
+        allUpdated();
+    }
+
+    void setGroundTrackColor(quint32 color)
+    {
+        m_groundTrackColor = QVariant::fromValue(QColor::fromRgb(color));
+    }
+
+    void setPredictedGroundTrackColor(quint32 color)
+    {
+        m_predictedGroundTrackColor = QVariant::fromValue(QColor::fromRgb(color));
+    }
+
     Q_INVOKABLE void setFrequency(double frequency);
+
+    void interpolateEast(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen);
+    void interpolateWest(QGeoCoordinate *c1, QGeoCoordinate *c2, double x, QGeoCoordinate *ci, bool offScreen);
+    void interpolate(QGeoCoordinate *c1, QGeoCoordinate *c2, double bottomLeftLongitude, double bottomRightLongitude, QGeoCoordinate* ci, bool offScreen);
+
+    void splitTracks(MapItem *item);
+    void splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantList& track,
+                        QVariantList& track1, QVariantList& track2,
+                        QGeoCoordinate& start1, QGeoCoordinate& start2,
+                        QGeoCoordinate& end1, QGeoCoordinate& end2);
+    Q_INVOKABLE void viewChanged(double bottomLeftLongitude, double bottomRightLongitude);
 
     QHash<int, QByteArray> roleNames() const
     {
@@ -292,6 +413,12 @@ public:
         roles[targetRole] = "target";
         roles[frequencyRole] = "frequency";
         roles[frequencyStringRole] = "frequencyString";
+        roles[predictedGroundTrack1Role] = "predictedGroundTrack1";
+        roles[predictedGroundTrack2Role] = "predictedGroundTrack2";
+        roles[groundTrack1Role] = "groundTrack1";
+        roles[groundTrack2Role] = "groundTrack2";
+        roles[groundTrackColorRole] = "groundTrackColor";
+        roles[predictedGroundTrackColorRole] = "predictedGroundTrackColor";
         return roles;
     }
 
@@ -302,13 +429,26 @@ public:
         allUpdated();
     }
 
+    // Linear interpolation
+    double interpolate(double x0, double y0, double x1, double y1, double x)
+    {
+        return (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+    }
+
 private:
     MapGUI *m_gui;
     QList<MapItem *> m_items;
     QList<bool> m_selected;
     int m_target;               // Row number of current target, or -1 for none
     bool m_displayNames;
+    bool m_displaySelectedGroundTracks;
+    bool m_displayAllGroundTracks;
     quint32 m_sources;
+    QVariant m_groundTrackColor;
+    QVariant m_predictedGroundTrackColor;
+
+    double m_bottomLeftLongitude;
+    double m_bottomRightLongitude;
 };
 
 class MapGUI : public FeatureGUI {
@@ -323,6 +463,7 @@ public:
     virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
     AzEl *getAzEl() { return &m_azEl; }
     Map *getMap() { return m_map; }
+    QQuickItem *getMapItem();
     quint32 getSourceMask(const PipeEndPoint *sourcePipe);
     static QString getBeaconFilename();
     QList<Beacon *> *getBeacons() { return m_beacons; }
@@ -364,6 +505,8 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
     void on_displayNames_clicked(bool checked=false);
+    void on_displayAllGroundTracks_clicked(bool checked=false);
+    void on_displaySelectedGroundTracks_clicked(bool checked=false);
     void on_find_returnPressed();
     void on_maidenhead_clicked();
     void on_deleteAll_clicked();

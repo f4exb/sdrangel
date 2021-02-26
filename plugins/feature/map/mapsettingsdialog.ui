@@ -67,6 +67,14 @@
         </item>
         <item>
          <property name="text">
+          <string>Satellite Tracker</string>
+         </property>
+         <property name="checkState">
+          <enum>Checked</enum>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Beacons</string>
          </property>
          <property name="checkState">
@@ -76,7 +84,50 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_2">
+       <widget class="QGroupBox" name="colorsGroupBox">
+        <property name="title">
+         <string>Colours</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="1">
+          <widget class="QLabel" name="predictedGroundTrackColorLabel">
+           <property name="text">
+            <string>Ground tracks (predicted)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="groundTrackColorLabel">
+           <property name="text">
+            <string>Ground tracks (taken)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QToolButton" name="predictedGroundTrackColor">
+           <property name="toolTip">
+            <string>Select color for predicted ground tracks</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QToolButton" name="groundTrackColor">
+           <property name="toolTip">
+            <string>Select color for taken ground tracks</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="mapProvidersGroupBox">
         <property name="title">
          <string>Map Provider Settings</string>
         </property>
