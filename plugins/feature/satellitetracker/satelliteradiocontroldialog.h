@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +15,39 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#ifndef INCLUDE_FEATURE_SATELLITERADIOCONTROLDIALOG_H
+#define INCLUDE_FEATURE_SATELLITERADIOCONTROLDIALOG_H
 
-#include <QString>
+#include <QHash>
 
-#include "export.h"
+#include "ui_SatelliteRadioControlDialog.h"
+#include "satellitetrackersettings.h"
+#include "satellitedevicesettingsgui.h"
+#include "satnogs.h"
 
-class SDRBASE_API ChannelWebAPIUtils
-{
+class SatelliteRadioControlDialog : public QDialog {
+    Q_OBJECT
+
 public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
+    explicit SatelliteRadioControlDialog(SatelliteTrackerSettings* settings, const QHash<QString, SatNogsSatellite *>& satellites, QWidget* parent = 0);
+    ~SatelliteRadioControlDialog();
+
+   SatelliteTrackerSettings *m_settings;
+
+private:
+    void resizeTable();
+
+private slots:
+    void accept();
+    void on_add_clicked();
+    void on_remove_clicked();
+    void on_satelliteSelect_currentIndexChanged(int index);
+
+private:
+    const QHash<QString, SatNogsSatellite *>& m_satellites;
+    QHash<QString, QList<SatelliteTrackerSettings::SatelliteDeviceSettings *> *> m_deviceSettings;      // Device settings per sateillite
+    QList<SatelliteDeviceSettingsGUI *> m_devSettingsGUIs;                                              // For selected satellite
+    Ui::SatelliteRadioControlDialog* ui;
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#endif // INCLUDE_FEATURE_SATELLITERADIOCONTROLDIALOG_H

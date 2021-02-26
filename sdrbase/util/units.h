@@ -61,6 +61,16 @@ public:
         return (int)std::round(knotsToKPH(knots));
     }
 
+    static float kmpsToKPH(float kps)
+    {
+        return kps * (60.0 * 60.0);
+    }
+
+    static int kmpsToIntegerKPH(float kps)
+    {
+        return (int)std::round(kmpsToKPH(kps));
+    }
+
     static float feetPerMinToMetresPerSecond(float fpm)
     {
         return fpm * 0.00508f;

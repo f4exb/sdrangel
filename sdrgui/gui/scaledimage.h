@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +15,33 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#ifndef SDRGUI_GUI_SCALEDIMAGE_H
+#define SDRGUI_GUI_SCALEDIMAGE_H
 
-#include <QString>
+#include <QLabel>
+#include <QPixmap>
+#include <QSize>
+#include <QResizeEvent>
 
 #include "export.h"
 
-class SDRBASE_API ChannelWebAPIUtils
-{
+// Similar to displaying a pixmap with QLabel, except we preserve the aspect ratio
+class SDRGUI_API ScaledImage : public QLabel {
+
 public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
+    explicit ScaledImage(QWidget *parent = nullptr);
+
+    void setPixmap(const QPixmap& pixmap);
+    void setPixmap(const QPixmap& pixmap, const QSize& size);
+
+protected:
+
+    virtual void resizeEvent(QResizeEvent *event);
+
+private:
+    QPixmap m_pixmap;
+    QPixmap m_pixmapScaled;
+
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#endif // SDRGUI_GUI_SCALEDIMAGE_H

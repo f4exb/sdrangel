@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SatelliteTrackerGUI</class>
+ <widget class="RollupWidget" name="SatelliteTrackerGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>525</width>
+    <height>750</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>320</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Satellite Tracker</string>
+  </property>
+  <widget class="QWidget" name="settingsContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>301</width>
+     <height>141</height>
+    </rect>
+   </property>
+   <property name="windowTitle">
+    <string>Settings</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <property name="leftMargin">
+     <number>2</number>
+    </property>
+    <property name="topMargin">
+     <number>2</number>
+    </property>
+    <property name="rightMargin">
+     <number>2</number>
+    </property>
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
+    <item>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="3">
+       <widget class="QLabel" name="longitudeLabel">
+        <property name="text">
+         <string>Longitude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="latitudeLabel">
+        <property name="text">
+         <string>Latitude</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QComboBox" name="dateTimeSelect">
+        <property name="toolTip">
+         <string>Date and time to use when calculating satellite's position</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Now</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Custom</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="aos">
+        <property name="toolTip">
+         <string>Time to acquistion of signal (AOS)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="timeLabel">
+        <property name="text">
+         <string>Time</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QDoubleSpinBox" name="latitude">
+        <property name="toolTip">
+         <string>Latitude in decimal degrees (North positive) of antenna location</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-90.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>90.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-90.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="3">
+       <widget class="QLabel" name="elevationLabel">
+        <property name="text">
+         <string>Elevation</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="2">
+       <widget class="QLineEdit" name="azimuth">
+        <property name="toolTip">
+         <string>Computed azimuth in degrees to the target satellite from the antenna's location</string>
+        </property>
+        <property name="text">
+         <string>360</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="targetLabel">
+        <property name="text">
+         <string>Target</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="5">
+       <layout class="QHBoxLayout" name="buttonLayout">
+        <item>
+         <widget class="ButtonSwitch" name="startStop">
+          <property name="toolTip">
+           <string>Start/stop tracking</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/play.png</normaloff>
+            <normalon>:/stop.png</normalon>:/play.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="buttonHorizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="viewOnMap">
+          <property name="toolTip">
+           <string>Find target on the map</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/gridpolar.png</normaloff>:/gridpolar.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="ButtonSwitch" name="autoTarget">
+          <property name="toolTip">
+           <string>Automatically select target satellite on AOS</string>
+          </property>
+          <property name="text">
+           <string>^</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/link.png</normaloff>:/link.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="updateSatData">
+          <property name="toolTip">
+           <string>Update satellite data</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/recycle.png</normaloff>:/recycle.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="radioControl">
+          <property name="toolTip">
+           <string>SDRangel control</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/sdrangel_icon.png</normaloff>:/sdrangel_icon.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="selectSats">
+          <property name="toolTip">
+           <string>Select satellites</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/gps.png</normaloff>:/gps.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="useMyPosition">
+          <property name="toolTip">
+           <string>Set latitude, longitude and height from My Position in SDRangel preferences</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/import.png</normaloff>:/import.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="displaySettings">
+          <property name="toolTip">
+           <string>Show settings dialog</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../sdrgui/resources/res.qrc">
+            <normaloff>:/listing.png</normaloff>:/listing.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="4">
+       <widget class="QDoubleSpinBox" name="longitude">
+        <property name="toolTip">
+         <string>Longitude in decimal degress (East positive) of antenna location</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="minimum">
+         <double>-180.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>180.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>-180.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="4">
+       <widget class="QLineEdit" name="elevation">
+        <property name="toolTip">
+         <string>Computed elevation in degrees to the target satellite from the antenna's location</string>
+        </property>
+        <property name="text">
+         <string>90</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="azimuthtLabel">
+        <property name="text">
+         <string>Azimuth</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QComboBox" name="target">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Target satellite</string>
+        </property>
+        <property name="currentIndex">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3" colspan="2">
+       <widget class="WrappingDateTimeEdit" name="dateTime">
+        <property name="toolTip">
+         <string>Date and time to use when calculating satellite's position</string>
+        </property>
+        <property name="displayFormat">
+         <string>dd/MM/yyyy HH:mm:ss</string>
+        </property>
+        <property name="calendarPopup">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QLabel" name="aosLabel">
+        <property name="text">
+         <string>AOS</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="chartContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>160</y>
+     <width>318</width>
+     <height>268</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>200</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Pass Chart</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QComboBox" name="chartSelect">
+        <property name="toolTip">
+         <string>Select type of chart to plot</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Polar</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Az/El vs Time</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="prevPass">
+        <property name="toolTip">
+         <string>Plot previous pass</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/arrow_right.png</normaloff>:/arrow_right.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="nextPass">
+        <property name="toolTip">
+         <string>Plot next pass</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/arrow_left.png</normaloff>:/arrow_left.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="passLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>15</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Pass number</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QChartView" name="passChart">
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>250</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Azimuth and elevation over time for satellite pass</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="dataContainer" native="true">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>440</y>
+     <width>431</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="windowTitle">
+    <string>Satellite Data</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayoutTable">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="leftMargin">
+     <number>3</number>
+    </property>
+    <property name="topMargin">
+     <number>3</number>
+    </property>
+    <property name="rightMargin">
+     <number>3</number>
+    </property>
+    <property name="bottomMargin">
+     <number>3</number>
+    </property>
+    <item>
+     <widget class="QTableWidget" name="satTable">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <column>
+       <property name="text">
+        <string>Satellite</string>
+       </property>
+       <property name="toolTip">
+        <string>Satellite name</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Az</string>
+       </property>
+       <property name="toolTip">
+        <string>Azimuth in degrees to satellite from antenna location</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>El</string>
+       </property>
+       <property name="toolTip">
+        <string>Elevation in degrees to satellite from antenna location</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>AOS</string>
+       </property>
+       <property name="toolTip">
+        <string>Time of next AOS (Acquisition of signal)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>LOS</string>
+       </property>
+       <property name="toolTip">
+        <string>Time of next LOS (Loss of signal)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Max El.</string>
+       </property>
+       <property name="toolTip">
+        <string>Maximum elevation in degrees of next satellite pass</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Dir</string>
+       </property>
+       <property name="toolTip">
+        <string>Direction of the next pass</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Alt (km)</string>
+       </property>
+       <property name="toolTip">
+        <string>Satellite altitude in kilometres</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Range (km)</string>
+       </property>
+       <property name="toolTip">
+        <string>Range to satellite in kilometres</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Range rate (km/s)</string>
+       </property>
+       <property name="toolTip">
+        <string>Speed of satellite towards antenna location in kilometers per second</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Doppler (Hz)</string>
+       </property>
+       <property name="toolTip">
+        <string>Receive Doppler shift in Hertz (At frequency set in settings)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Path loss (dB)</string>
+       </property>
+       <property name="toolTip">
+        <string>Free space loss of signal in decibels (At frequency set in settings)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Delay (ms)</string>
+       </property>
+       <property name="toolTip">
+        <string>Propagation delay of a signal from the antenna to the satellite in milliseconds (assuming line-of-sight)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Norad ID</string>
+       </property>
+       <property name="toolTip">
+        <string>Norad catalog idenfitier for the satellite</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RollupWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/rollupwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ButtonSwitch</class>
+   <extends>QToolButton</extends>
+   <header>gui/buttonswitch.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
+  </customwidget>
+  <customwidget>
+   <class>WrappingDateTimeEdit</class>
+   <extends>QDateTimeEdit</extends>
+   <header>gui/wrappingdatetimeedit.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>startStop</tabstop>
+  <tabstop>viewOnMap</tabstop>
+  <tabstop>autoTarget</tabstop>
+  <tabstop>updateSatData</tabstop>
+  <tabstop>radioControl</tabstop>
+  <tabstop>selectSats</tabstop>
+  <tabstop>useMyPosition</tabstop>
+  <tabstop>displaySettings</tabstop>
+  <tabstop>latitude</tabstop>
+  <tabstop>longitude</tabstop>
+  <tabstop>dateTimeSelect</tabstop>
+  <tabstop>dateTime</tabstop>
+  <tabstop>target</tabstop>
+  <tabstop>aos</tabstop>
+  <tabstop>azimuth</tabstop>
+  <tabstop>elevation</tabstop>
+  <tabstop>chartSelect</tabstop>
+  <tabstop>prevPass</tabstop>
+  <tabstop>nextPass</tabstop>
+  <tabstop>passChart</tabstop>
+  <tabstop>satTable</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections/>
+</ui>

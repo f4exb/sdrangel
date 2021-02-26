@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +15,21 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#ifndef SDRGUI_GUI_WRAPPINGDATETIMEEDIT_H
+#define SDRGUI_GUI_WRAPPINGDATETIMEEDIT_H
 
-#include <QString>
+#include <QDateTimeEdit>
 
 #include "export.h"
 
-class SDRBASE_API ChannelWebAPIUtils
-{
+// Same as QDateTimeEdit, except allows minutes to wrap to hours and hours to
+// days when scrolling up or down
+class SDRGUI_API WrappingDateTimeEdit : public QDateTimeEdit {
+
 public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
+    explicit WrappingDateTimeEdit(QWidget *parent = nullptr);
+
+    void stepBy(int steps) override;
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#endif // SDRGUI_GUI_WRAPPINGDATETIMEEDIT_H

@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB.                                  //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +16,35 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#ifndef INCLUDE_SATELLITETRACKER_WEBAPIADAPTER_H
+#define INCLUDE_SATELLITETRACKER_WEBAPIADAPTER_H
 
-#include <QString>
+#include "feature/featurewebapiadapter.h"
+#include "satellitetrackersettings.h"
 
-#include "export.h"
-
-class SDRBASE_API ChannelWebAPIUtils
-{
+/**
+ * Standalone API adapter only for the settings
+ */
+class SatelliteTrackerWebAPIAdapter : public FeatureWebAPIAdapter {
 public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
+    SatelliteTrackerWebAPIAdapter();
+    virtual ~SatelliteTrackerWebAPIAdapter();
+
+    virtual QByteArray serialize() const { return m_settings.serialize(); }
+    virtual bool deserialize(const QByteArray& data) { return m_settings.deserialize(data); }
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& featureSettingsKeys,
+            SWGSDRangel::SWGFeatureSettings& response,
+            QString& errorMessage);
+
+private:
+    SatelliteTrackerSettings m_settings;
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#endif // INCLUDE_SATELLITETRACKER_WEBAPIADAPTER_H

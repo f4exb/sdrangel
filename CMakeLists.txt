@@ -312,7 +312,8 @@ if (BUILD_GUI)
                      QuickWidgets
                      Positioning
                      Location
-                     Charts)
+                     Charts
+                     TextToSpeech)
 endif()
 
 # other requirements

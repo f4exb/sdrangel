@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SatelliteRadioControlDialog</class>
+ <widget class="QDialog" name="SatelliteRadioControlDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>955</width>
+    <height>400</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::PreventContextMenu</enum>
+  </property>
+  <property name="windowTitle">
+   <string>Satellite Radio Control</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="5" column="0">
+       <widget class="QTableWidget" name="table">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>Device set</string>
+         </property>
+         <property name="toolTip">
+          <string>Device set to control</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Preset to load on AOS</string>
+         </property>
+         <property name="toolTip">
+          <string>Preset to load to device set</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Doppler correction</string>
+         </property>
+         <property name="toolTip">
+          <string>Channel numbers that will have Doppler correction applied</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Start on AOS</string>
+         </property>
+         <property name="toolTip">
+          <string>Start acquisition on AOS</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Stop on LOS</string>
+         </property>
+         <property name="toolTip">
+          <string>Stop acquisition on LOS</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Start/stop file sinks</string>
+         </property>
+         <property name="toolTip">
+          <string>Start file sinks recording on AOS and stop recording on LOS</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Override frequency (MHz)</string>
+         </property>
+         <property name="toolTip">
+          <string>Override the center frequency in the preset with a value specified here in MHz.
+This allows a single preset to be shared between different satellites that differ only in frequency.</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>AOS command</string>
+         </property>
+         <property name="toolTip">
+          <string>Command to execute on AOS</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>LOS command</string>
+         </property>
+         <property name="toolTip">
+          <string>Command to execute on LOS</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="8" column="0">
+       <widget class="QTextEdit" name="satelliteModes">
+        <property name="toolTip">
+         <string>Satellite modes from SatNOGS</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="satHorizontalLayout">
+        <item>
+         <widget class="QLabel" name="satelliteSelectlabel">
+          <property name="text">
+           <string>Satellite</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="satelliteSelect">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="satHorizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="6" column="0">
+       <layout class="QHBoxLayout" name="buttonsHorizontalLayout">
+        <item>
+         <widget class="QPushButton" name="add">
+          <property name="toolTip">
+           <string>Add device set control</string>
+          </property>
+          <property name="text">
+           <string>+</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="remove">
+          <property name="toolTip">
+           <string>Remove device set control</string>
+          </property>
+          <property name="text">
+           <string>-</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="buttonsHorizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="satelliteModesLabel">
+        <property name="text">
+         <string>Satellite modes</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>satelliteSelect</tabstop>
+  <tabstop>table</tabstop>
+  <tabstop>add</tabstop>
+  <tabstop>remove</tabstop>
+  <tabstop>satelliteModes</tabstop>
+ </tabstops>
+ <resources>
+  <include location="../../../sdrgui/resources/res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SatelliteRadioControlDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SatelliteRadioControlDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

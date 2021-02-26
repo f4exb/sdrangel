@@ -1,0 +1,83 @@
+project(satellitetracker)
+
+set(satellitetracker_SOURCES
+    satellitetracker.cpp
+    satellitetrackersettings.cpp
+    satellitetrackerplugin.cpp
+    satellitetrackerworker.cpp
+    satellitetrackerwebapiadapter.cpp
+    satellitetrackersgp4.cpp
+)
+
+set(satellitetracker_HEADERS
+    satellitetracker.h
+    satellitetrackersettings.h
+    satellitetrackerplugin.h
+    satellitetrackerreport.h
+    satellitetrackerworker.h
+    satellitetrackerwebapiadapter.h
+    satellitetrackersgp4.h
+)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+    ${SGP4_INCLUDE_DIR}
+)
+
+if(NOT SERVER_MODE)
+    set(satellitetracker_SOURCES
+        ${satellitetracker_SOURCES}
+        satellitetrackergui.cpp
+        satellitetrackergui.ui
+        satellitetrackersettingsdialog.cpp
+        satellitetrackersettingsdialog.ui
+        satellitetracker.qrc
+        satelliteselectiondialog.cpp
+        satelliteselectiondialog.ui
+        satelliteradiocontroldialog.cpp
+        satelliteradiocontroldialog.ui
+        satellitedevicesettingsgui.cpp
+    )
+    set(satellitetracker_HEADERS
+        ${satellitetracker_HEADERS}
+        satellitetrackergui.h
+        satellitetrackersettingsdialog.h
+        satelliteselectiondialog.h
+        satelliteradiocontroldialog.h
+        satellitedevicesettingsgui.h
+    )
+
+    set(TARGET_NAME featuresatellitetracker)
+    set(TARGET_LIB Qt5::Widgets Qt5::Positioning Qt5::Charts Qt5::TextToSpeech)
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME featuresatellitetrackersrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
+    ${satellitetracker_SOURCES}
+)
+
+if(SGP4_EXTERNAL)
+    add_dependencies(${TARGET_NAME} sgp4)
+endif()
+
+target_link_libraries(${TARGET_NAME}
+    Qt5::Core
+    ${TARGET_LIB}
+    sdrbase
+    ${TARGET_LIB_GUI}
+    ${SGP4_LIBRARIES}
+)
+
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
+
+if(WIN32)
+  # Run deployqt for Charts and TextToSpeech etc
+  include(DeployQt)
+  windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/aprs)
+endif()

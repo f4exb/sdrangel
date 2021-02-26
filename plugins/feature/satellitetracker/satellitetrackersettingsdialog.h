@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +15,28 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#ifndef INCLUDE_SATELLITETRACKERSETTINGSDIALOG_H
+#define INCLUDE_SATELLITETRACKERSETTINGSDIALOG_H
 
-#include <QString>
+#include "ui_satellitetrackersettingsdialog.h"
+#include "satellitetrackersettings.h"
 
-#include "export.h"
+class SatelliteTrackerSettingsDialog : public QDialog {
+    Q_OBJECT
 
-class SDRBASE_API ChannelWebAPIUtils
-{
 public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
+    explicit SatelliteTrackerSettingsDialog(SatelliteTrackerSettings* settings, QWidget* parent = 0);
+    ~SatelliteTrackerSettingsDialog();
+
+   SatelliteTrackerSettings *m_settings;
+
+private slots:
+    void on_addTle_clicked();
+    void on_removeTle_clicked();
+    void accept();
+
+private:
+    Ui::SatelliteTrackerSettingsDialog* ui;
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#endif // INCLUDE_SATELLITETRACKERSETTINGSDIALOG_H

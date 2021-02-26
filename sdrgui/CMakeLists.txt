@@ -55,6 +55,7 @@ set(sdrgui_SOURCES
     gui/samplingdevicedialog.cpp
     gui/samplingdevicesdock.cpp
     gui/scaleengine.cpp
+    gui/scaledimage.cpp
     gui/sdrangelsplash.cpp
     gui/tickedslider.cpp
     gui/transverterbutton.cpp
@@ -64,6 +65,7 @@ set(sdrgui_SOURCES
     gui/valuedial.cpp
     gui/valuedialz.cpp
     gui/wsspectrumsettingsdialog.cpp
+    gui/wrappingdatetimeedit.cpp
 
     dsp/scopevis.cpp
     dsp/scopevisxy.cpp
@@ -141,6 +143,7 @@ set(sdrgui_HEADERS
     gui/samplingdevicedialog.h
     gui/samplingdevicesdock.h
     gui/scaleengine.h
+    gui/scaledimage.h
     gui/sdrangelsplash.h
     gui/tickedslider.h
     gui/transverterbutton.h
@@ -150,6 +153,7 @@ set(sdrgui_HEADERS
     gui/valuedial.h
     gui/valuedialz.h
     gui/wsspectrumsettingsdialog.h
+    gui/wrappingdatetimeedit.h
 
     dsp/scopevis.h
     dsp/scopevisxy.h

@@ -1,5 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2020 Edouard Griffiths, F4EXB                                   //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +16,34 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#ifndef INCLUDE_FEATURE_SATELLITETRACKERPLUGIN_H
+#define INCLUDE_FEATURE_SATELLITETRACKERPLUGIN_H
 
-#include <QString>
+#include <QObject>
+#include "plugin/plugininterface.h"
 
-#include "export.h"
+class FeatureGUI;
+class WebAPIAdapterInterface;
 
-class SDRBASE_API ChannelWebAPIUtils
-{
+class SatelliteTrackerPlugin : public QObject, PluginInterface {
+	Q_OBJECT
+	Q_INTERFACES(PluginInterface)
+	Q_PLUGIN_METADATA(IID "sdrangel.feature.satellitetracker")
+
 public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
+	explicit SatelliteTrackerPlugin(QObject* parent = nullptr);
+
+	const PluginDescriptor& getPluginDescriptor() const;
+	void initPlugin(PluginAPI* pluginAPI);
+
+	virtual FeatureGUI* createFeatureGUI(FeatureUISet *featureUISet, Feature *feature) const;
+	virtual Feature* createFeature(WebAPIAdapterInterface *webAPIAdapterInterface) const;
+	virtual FeatureWebAPIAdapter* createFeatureWebAPIAdapter() const;
+
+private:
+	static const PluginDescriptor m_pluginDescriptor;
+
+	PluginAPI* m_pluginAPI;
 };
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#endif // INCLUDE_FEATURE_SATELLITETRACKERPLUGIN_H

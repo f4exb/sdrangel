@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SatelliteTrackerSettingsDialog</class>
+ <widget class="QDialog" name="SatelliteTrackerSettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>487</width>
+    <height>543</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Liberation Sans</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Satellite Tracker Settings</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="1">
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="passesTab">
+         <attribute name="title">
+          <string>Passes</string>
+         </attribute>
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="heightLabel">
+            <property name="text">
+             <string>Antenna height (m ASL)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="height">
+            <property name="toolTip">
+             <string>Height of antenna location above sea level in metres</string>
+            </property>
+            <property name="minimum">
+             <number>-1000</number>
+            </property>
+            <property name="maximum">
+             <number>20000</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="predictionPeriod">
+            <property name="toolTip">
+             <string>Number of days ahead for which passes should be predicted in</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>365</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="minimumAOSElevationLabel">
+            <property name="text">
+             <string>Minimum elevation for AOS (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="minimumAOSElevation">
+            <property name="toolTip">
+             <string>Enter a minimum elevation in degrees for which AOS (Acquisition of Signal) will be indicated</string>
+            </property>
+            <property name="minimum">
+             <number>-90</number>
+            </property>
+            <property name="maximum">
+             <number>90</number>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="minimumPassElevationLabel">
+            <property name="text">
+             <string>Minimum elevation for pass  (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="minimumPassElevation">
+            <property name="toolTip">
+             <string>Enter a minimum elevation in degrees a satellite must reach in a pass</string>
+            </property>
+            <property name="maximum">
+             <number>90</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="passStartTimeLabel">
+            <property name="text">
+             <string>Passes must start after</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QTimeEdit" name="passStartTime"/>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="passFinishTimeLabel">
+            <property name="text">
+             <string>Passes must finish before</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QTimeEdit" name="passFinishTime">
+            <property name="time">
+             <time>
+              <hour>23</hour>
+              <minute>59</minute>
+              <second>59</second>
+             </time>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="rotatorMaximumAzimuthLabel">
+            <property name="text">
+             <string>Rotator maximum azimuth (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="rotatorMaximumAzimuth">
+            <property name="toolTip">
+             <string>Maximum azimuth angle of rotator in degrees</string>
+            </property>
+            <property name="minimum">
+             <number>360</number>
+            </property>
+            <property name="maximum">
+             <number>720</number>
+            </property>
+            <property name="singleStep">
+             <number>90</number>
+            </property>
+            <property name="value">
+             <number>450</number>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="rotatorMaximumElevationLabel">
+            <property name="text">
+             <string>Rotator maximum elevation (°)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QSpinBox" name="rotatorMaximumElevation">
+            <property name="toolTip">
+             <string>Maximum elevation angle of rotator in degrees</string>
+            </property>
+            <property name="maximum">
+             <number>180</number>
+            </property>
+            <property name="singleStep">
+             <number>90</number>
+            </property>
+            <property name="value">
+             <number>180</number>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="aosSpeechLabel">
+            <property name="text">
+             <string>AOS speech warning</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QLineEdit" name="aosSpeech">
+            <property name="toolTip">
+             <string>Text to say when a satellite signal is acquired</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="losSpeechLabel">
+            <property name="text">
+             <string>LOS speech warning</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QLineEdit" name="losSpeech">
+            <property name="toolTip">
+             <string>Text to say when a satellite signal is lost</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="aosCommandLabel">
+            <property name="text">
+             <string>AOS command</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QLineEdit" name="aosCommand">
+            <property name="toolTip">
+             <string>Program / script to execute on AOS</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QLabel" name="losCommandLabel">
+            <property name="text">
+             <string>LOS command</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QLineEdit" name="losCommand">
+            <property name="toolTip">
+             <string>Program / script to execute on LOS</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QLabel" name="dopplerPeriodLabel">
+            <property name="text">
+             <string>Doppler period (s)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="1">
+           <widget class="QDoubleSpinBox" name="dopplerPeriod">
+            <property name="toolTip">
+             <string>Enter the time in seconds between each Doppler correction</string>
+            </property>
+            <property name="minimum">
+             <double>0.010000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>10.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="13" column="0">
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="predictionPeriodLabel">
+            <property name="text">
+             <string>Prediction period (days)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="tleTab">
+         <attribute name="title">
+          <string>TLEs</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QListWidget" name="tles">
+            <property name="toolTip">
+             <string>Satellite Two Line Element (TLE) sources</string>
+            </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="ButtonHorizontalLayout">
+            <item>
+             <widget class="QPushButton" name="addTle">
+              <property name="toolTip">
+               <string>Add TLE</string>
+              </property>
+              <property name="text">
+               <string>+</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="removeTle">
+              <property name="toolTip">
+               <string>Remove selected TLE</string>
+              </property>
+              <property name="text">
+               <string>-</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="buttonHorizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="displayTab">
+         <attribute name="title">
+          <string>Display</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="2" column="1">
+           <widget class="QDoubleSpinBox" name="defaultFrequency">
+            <property name="toolTip">
+             <string>Frequency used for Doppler and free space path loss calculations in the satellite table</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>50000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>100.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>100.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="dateFormat">
+            <property name="toolTip">
+             <string>Format for dates displayed in the GUI</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
+           <widget class="QCheckBox" name="drawOnMap">
+            <property name="toolTip">
+             <string>When checked satellite positions are sent to the map</string>
+            </property>
+            <property name="text">
+             <string>Draw satellites on map</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="updatePeriodLabel">
+            <property name="text">
+             <string>Update period (s)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="updatePeriod">
+            <property name="toolTip">
+             <string>Enter the time in seconds between each calculation of the target's position</string>
+            </property>
+            <property name="maximum">
+             <double>3600.000000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="defaultFrequencyLabel">
+            <property name="text">
+             <string>Default frequency (MHz)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="azElUnits">
+            <property name="toolTip">
+             <string>Units used for displaying azimuth and elevation. Either degrees, minutes and seconds or decimal degrees.</string>
+            </property>
+            <property name="editable">
+             <bool>false</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>° ' &quot;</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>° '</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>°</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Decimal</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="azElUnitsLabel">
+            <property name="text">
+             <string>Azimuth and elevation units</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QCheckBox" name="utc">
+            <property name="toolTip">
+             <string>When checked times are dispayed using UTC rather than the local time zone</string>
+            </property>
+            <property name="text">
+             <string>Display times in UTC</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="dateFormatLabel">
+            <property name="text">
+             <string>Date format</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="groundTrackPointsLabel">
+            <property name="text">
+             <string>Ground track points</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="groundTrackPoints">
+            <property name="toolTip">
+             <string>Number of points in ground tracks (more points result in smoother curves)</string>
+            </property>
+            <property name="minimum">
+             <number>10</number>
+            </property>
+            <property name="maximum">
+             <number>360</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>height</tabstop>
+  <tabstop>predictionPeriod</tabstop>
+  <tabstop>minimumAOSElevation</tabstop>
+  <tabstop>minimumPassElevation</tabstop>
+  <tabstop>passStartTime</tabstop>
+  <tabstop>passFinishTime</tabstop>
+  <tabstop>rotatorMaximumAzimuth</tabstop>
+  <tabstop>rotatorMaximumElevation</tabstop>
+  <tabstop>aosSpeech</tabstop>
+  <tabstop>losSpeech</tabstop>
+  <tabstop>aosCommand</tabstop>
+  <tabstop>losCommand</tabstop>
+  <tabstop>dopplerPeriod</tabstop>
+  <tabstop>tles</tabstop>
+  <tabstop>addTle</tabstop>
+  <tabstop>removeTle</tabstop>
+  <tabstop>updatePeriod</tabstop>
+  <tabstop>defaultFrequency</tabstop>
+  <tabstop>azElUnits</tabstop>
+  <tabstop>groundTrackPoints</tabstop>
+  <tabstop>dateFormat</tabstop>
+  <tabstop>utc</tabstop>
+  <tabstop>drawOnMap</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>SatelliteTrackerSettingsDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>SatelliteTrackerSettingsDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2020 Jon Beniston, M7RCE                                        //
+// Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
 // it under the terms of the GNU General Public License as published by          //
@@ -15,25 +15,27 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
-#define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+#include "scaledimage.h"
 
-#include <QString>
-
-#include "export.h"
-
-class SDRBASE_API ChannelWebAPIUtils
+ScaledImage::ScaledImage(QWidget *parent) :
+    QLabel(parent)
 {
-public:
-    static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
-    static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
-    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
-    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
-    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
-    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
-    static bool satelliteAOS(const QString name, bool northToSouthPass);
-    static bool satelliteLOS(const QString name);
-};
+}
 
-#endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
+void ScaledImage::setPixmap(const QPixmap& pixmap)
+{
+    setPixmap(pixmap, size());
+}
+
+void ScaledImage::setPixmap(const QPixmap& pixmap, const QSize& size)
+{
+    m_pixmap = pixmap;
+    m_pixmapScaled = pixmap.scaled(size, Qt::KeepAspectRatio);
+    QLabel::setPixmap(m_pixmapScaled);
+}
+
+void ScaledImage::resizeEvent(QResizeEvent *event)
+{
+    QLabel::resizeEvent(event);
+    setPixmap(m_pixmap, event->size());
+}
