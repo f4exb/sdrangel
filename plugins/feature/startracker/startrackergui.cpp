@@ -43,6 +43,17 @@
 #include "startrackerreport.h"
 #include "startrackersettingsdialog.h"
 
+// Linear extrapolation
+static double extrapolate(double x0, double y0, double x1, double y1, double x)
+{
+    return y0 + ((x-x0)/(x1-x0)) * (y1-y0);
+}
+
+// Linear interpolation
+static double interpolate(double x0, double y0, double x1, double y1, double x)
+{
+    return (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
+}
 
 StarTrackerGUI* StarTrackerGUI::create(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature)
 {
@@ -153,8 +164,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_featureUISet(featureUISet),
     m_doApplySettings(true),
     m_lastFeatureState(0),
+    m_azElLineChart(nullptr),
+    m_azElPolarChart(nullptr),
     m_networkManager(nullptr),
-    m_progressDialog(nullptr),
     m_solarFlux(0.0),
     m_solarFluxesValid(false),
     m_images{QImage(":/startracker/startracker/150mhz_ra_dec.png"),
@@ -194,6 +206,16 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     m_chart.layout()->setContentsMargins(0, 0, 0, 0);
     m_chart.setMargins(QMargins(1, 1, 1, 1));
 
+    m_solarFluxChart.setTitle("");
+    m_solarFluxChart.legend()->hide();
+    m_solarFluxChart.addAxis(&m_chartSolarFluxXAxis, Qt::AlignBottom);
+    m_solarFluxChart.addAxis(&m_chartSolarFluxYAxis, Qt::AlignLeft);
+    m_solarFluxChart.layout()->setContentsMargins(0, 0, 0, 0);
+    m_solarFluxChart.setMargins(QMargins(1, 1, 1, 1));
+    m_chartSolarFluxXAxis.setTitleText(QString("Frequency (MHz)"));
+    m_chartSolarFluxXAxis.setMinorTickCount(-1);
+    m_chartSolarFluxYAxis.setTitleText(QString("Solar flux density (%1)").arg(solarFluxUnit()));
+
     // Create axes that are static
 
     m_skyTempGalacticLXAxis.setTitleText(QString("Galactic longitude (%1)").arg(QChar(0xb0)));
@@ -229,6 +251,9 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
     ui->dateTime->setDateTime(QDateTime::currentDateTime());
     displaySettings();
     applySettings(true);
+
+    // Populate subchart menu
+    on_chartSelect_currentIndexChanged(0);
 
     // Use My Position from preferences, if none set
     if ((m_settings.m_latitude == 0.0) && (m_settings.m_longitude == 0.0))
@@ -580,7 +605,12 @@ void StarTrackerGUI::on_dateTime_dateTimeChanged(const QDateTime &datetime)
 void StarTrackerGUI::plotChart()
 {
     if (ui->chartSelect->currentIndex() == 0)
-        plotElevationChart();
+    {
+        if (ui->chartSubSelect->currentIndex() == 0)
+            plotElevationLineChart();
+        else
+            plotElevationPolarChart();
+    }
     else if (ui->chartSelect->currentIndex() == 1)
         plotSolarFluxChart();
     else if (ui->chartSelect->currentIndex() == 2)
@@ -616,8 +646,7 @@ void StarTrackerGUI::on_beamwidth_valueChanged(double value)
 
 void StarTrackerGUI::plotSolarFluxChart()
 {
-    m_chart.removeAllSeries();
-    removeAllAxes();
+    m_solarFluxChart.removeAllSeries();
     if (m_solarFluxesValid)
     {
         double maxValue = -std::numeric_limits<double>::infinity();
@@ -633,35 +662,30 @@ void StarTrackerGUI::plotSolarFluxChart()
         series->setPointLabelsVisible(true);
         series->setPointLabelsFormat("@yPoint");
         series->setPointLabelsClipping(false);
-        m_chart.setTitle("");
-        m_chart.addAxis(&m_chartSolarFluxXAxis, Qt::AlignBottom);
-        m_chart.addAxis(&m_chartYAxis, Qt::AlignLeft);
-        m_chart.addSeries(series);
+        m_solarFluxChart.addSeries(series);
         series->attachAxis(&m_chartSolarFluxXAxis);
-        series->attachAxis(&m_chartYAxis);
-        m_chartSolarFluxXAxis.setTitleText(QString("Frequency (MHz)"));
-        m_chartSolarFluxXAxis.setMinorTickCount(-1);
+        series->attachAxis(&m_chartSolarFluxYAxis);
         if (m_settings.m_solarFluxUnits == StarTrackerSettings::SFU)
         {
-            m_chartYAxis.setLabelFormat("%d");
-            m_chartYAxis.setRange(0.0, ((((int)maxValue)+99)/100)*100);
+            m_chartSolarFluxYAxis.setLabelFormat("%d");
+            m_chartSolarFluxYAxis.setRange(0.0, ((((int)maxValue)+99)/100)*100);
         }
         else if (m_settings.m_solarFluxUnits == StarTrackerSettings::JANSKY)
         {
-            m_chartYAxis.setLabelFormat("%.2g");
-            m_chartYAxis.setRange(0, ((((int)maxValue)+999999)/100000)*100000);
+            m_chartSolarFluxYAxis.setLabelFormat("%.2g");
+            m_chartSolarFluxYAxis.setRange(0, ((((int)maxValue)+999999)/100000)*100000);
         }
         else
         {
-            m_chartYAxis.setLabelFormat("%.2g");
-            m_chartYAxis.setRange(minValue, maxValue);
+            m_chartSolarFluxYAxis.setLabelFormat("%.2g");
+            m_chartSolarFluxYAxis.setRange(minValue, maxValue);
         }
-        m_chartYAxis.setTitleText(QString("Solar flux density (%1)").arg(solarFluxUnit()));
     }
     else
-        m_chart.setTitle("Press download Solar flux density data to view");
-    m_chart.setPlotAreaBackgroundVisible(false);
-    disconnect(&m_chart, SIGNAL(plotAreaChanged(QRectF)), this, SLOT(plotAreaChanged(QRectF)));
+        m_solarFluxChart.setTitle("Press download Solar flux density data to view");
+    ui->chart->setChart(&m_solarFluxChart);
+//    m_chart.setPlotAreaBackgroundVisible(false);
+//    disconnect(&m_chart, SIGNAL(plotAreaChanged(QRectF)), this, SLOT(plotAreaChanged(QRectF)));
 }
 
 void StarTrackerGUI::plotSkyTemperatureChart()
@@ -875,7 +899,7 @@ void StarTrackerGUI::plotSkyTemperatureChart()
         m_chart.addAxis(&m_skyTempYAxis, Qt::AlignLeft);
         series->attachAxis(&m_skyTempYAxis);
     }
-
+    ui->chart->setChart(&m_chart);
     plotAreaChanged(m_chart.plotArea());
     connect(&m_chart, SIGNAL(plotAreaChanged(QRectF)), this, SLOT(plotAreaChanged(QRectF)));
 }
@@ -915,14 +939,29 @@ void StarTrackerGUI::removeAllAxes()
 }
 
 // Plot target elevation angle over the day
-void StarTrackerGUI::plotElevationChart()
+void StarTrackerGUI::plotElevationLineChart()
 {
-    m_chart.removeAllSeries();
-    removeAllAxes();
+    QChart *oldChart = m_azElLineChart;
+
+    m_azElLineChart = new QChart();
+    QDateTimeAxis *xAxis = new QDateTimeAxis();
+    QValueAxis *yLeftAxis = new QValueAxis();
+    QValueAxis *yRightAxis = new QValueAxis();
+
+    m_azElLineChart->legend()->hide();
+
+    m_azElLineChart->layout()->setContentsMargins(0, 0, 0, 0);
+    m_azElLineChart->setMargins(QMargins(1, 1, 1, 1));
 
     double maxElevation = -90.0;
 
-    QLineSeries *series = new QLineSeries();
+    QLineSeries *elSeries = new QLineSeries();
+    QList<QLineSeries *> azSeriesList;
+    QLineSeries *azSeries = new QLineSeries();
+    azSeriesList.append(azSeries);
+    QPen pen(QColor(153, 202, 83), 2, Qt::SolidLine);
+    azSeries->setPen(pen);
+
     QDateTime dt;
     if (m_settings.m_dateTime.isEmpty())
         dt = QDateTime::currentDateTime();
@@ -931,7 +970,9 @@ void StarTrackerGUI::plotElevationChart()
     dt.setTime(QTime(0,0));
     QDateTime startTime = dt;
     QDateTime endTime = dt;
-    for (int hour = 0; hour <= 24; hour++)
+    double prevAz;
+    int timestep = 10*60;
+    for (int step = 0; step <= 24*60*60/timestep; step++)
     {
         AzAlt aa;
         RADec rd;
@@ -967,28 +1008,239 @@ void StarTrackerGUI::plotElevationChart()
                 aa.alt = 90.0f;
         }
 
-        series->append(dt.toMSecsSinceEpoch(), aa.alt);
+        if (step == 0)
+            prevAz = aa.az;
+
+        if (((prevAz >= 270) && (aa.az < 90)) || ((prevAz < 90) && (aa.az >= 270)))
+        {
+            azSeries = new QLineSeries();
+            azSeriesList.append(azSeries);
+            azSeries->setPen(pen);
+        }
+
+        elSeries->append(dt.toMSecsSinceEpoch(), aa.alt);
+        azSeries->append(dt.toMSecsSinceEpoch(), aa.az);
 
         endTime = dt;
-        dt = dt.addSecs(60*60); // addSecs accounts for daylight savings jumps
+        prevAz = aa.az;
+        dt = dt.addSecs(timestep); // addSecs accounts for daylight savings jumps
     }
+    m_azElLineChart->addAxis(xAxis, Qt::AlignBottom);
+    m_azElLineChart->addAxis(yLeftAxis, Qt::AlignLeft);
+    m_azElLineChart->addAxis(yRightAxis, Qt::AlignRight);
+    m_azElLineChart->addSeries(elSeries);
+    for (int i = 0; i < azSeriesList.size(); i++)
+    {
+        m_azElLineChart->addSeries(azSeriesList[i]);
+        azSeriesList[i]->attachAxis(xAxis);
+        azSeriesList[i]->attachAxis(yRightAxis);
+    }
+    elSeries->attachAxis(xAxis);
+    elSeries->attachAxis(yLeftAxis);
+    xAxis->setTitleText(QString("%1 %2").arg(startTime.date().toString()).arg(startTime.timeZoneAbbreviation()));
+    xAxis->setFormat("hh");
+    xAxis->setTickCount(7);
+    xAxis->setRange(startTime, endTime);
+    yLeftAxis->setRange(0.0, 90.0);
+    yLeftAxis->setTitleText(QString("Elevation (%1)").arg(QChar(0xb0)));
+    yRightAxis->setRange(0.0, 360.0);
+    yRightAxis->setTitleText(QString("Azimuth (%1)").arg(QChar(0xb0)));
     if (maxElevation < 0)
-        m_chart.setTitle("Not visible from this latitude");
+        m_azElLineChart->setTitle("Not visible from this latitude");
     else
-        m_chart.setTitle("");
-    m_chart.addAxis(&m_chartXAxis, Qt::AlignBottom);
-    m_chart.addAxis(&m_chartYAxis, Qt::AlignLeft);
-    m_chart.addSeries(series);
-    series->attachAxis(&m_chartXAxis);
-    series->attachAxis(&m_chartYAxis);
-    m_chartXAxis.setTitleText(QString("%1 %2").arg(startTime.date().toString()).arg(startTime.timeZoneAbbreviation()));
-    m_chartXAxis.setFormat("hh");
-    m_chartXAxis.setTickCount(7);
-    m_chartXAxis.setRange(startTime, endTime);
-    m_chartYAxis.setRange(0.0, 90.0);
-    m_chartYAxis.setTitleText(QString("Elevation (%1)").arg(QChar(0xb0)));
-    m_chart.setPlotAreaBackgroundVisible(false);
-    disconnect(&m_chart, SIGNAL(plotAreaChanged(QRectF)), this, SLOT(plotAreaChanged(QRectF)));
+        m_azElLineChart->setTitle("");
+    ui->chart->setChart(m_azElLineChart);
+
+    delete oldChart;
+}
+
+// Plot target elevation angle over the day
+void StarTrackerGUI::plotElevationPolarChart()
+{
+    QChart *oldChart = m_azElPolarChart;
+
+    m_azElPolarChart = new QPolarChart();
+    QValueAxis *angularAxis = new QValueAxis();
+    QCategoryAxis *radialAxis = new QCategoryAxis();
+
+    angularAxis->setTickCount(9);
+    angularAxis->setMinorTickCount(1);
+    angularAxis->setLabelFormat("%d");
+    angularAxis->setRange(0, 360);
+
+    radialAxis->setMin(0);
+    radialAxis->setMax(90);
+    radialAxis->append("90", 0);
+    radialAxis->append("60", 30);
+    radialAxis->append("30", 60);
+    radialAxis->append("0", 90);
+    radialAxis->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
+
+    m_azElPolarChart->addAxis(angularAxis, QPolarChart::PolarOrientationAngular);
+    m_azElPolarChart->addAxis(radialAxis, QPolarChart::PolarOrientationRadial);
+    m_azElPolarChart->legend()->hide();
+    m_azElPolarChart->layout()->setContentsMargins(0, 0, 0, 0);
+    m_azElPolarChart->setMargins(QMargins(1, 1, 1, 1));
+
+    double maxElevation = -90.0;
+
+    QLineSeries *polarSeries = new QLineSeries();
+    QDateTime dt;
+    if (m_settings.m_dateTime.isEmpty())
+        dt = QDateTime::currentDateTime();
+    else
+        dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+    dt.setTime(QTime(0,0));
+    QDateTime startTime = dt;
+    QDateTime endTime = dt;
+    QDateTime riseTime;
+    QDateTime setTime;
+    int riseIdx = -1;
+    int setIdx = -1;
+    int idx = 0;
+    int timestep = 10*60; // Rise/set times accurate to nearest 10 minutes
+    double prevAlt;
+    for (int step = 0; step <= 24*60*60/timestep; step++)
+    {
+        AzAlt aa;
+        RADec rd;
+
+        // Calculate elevation of desired object
+        if (m_settings.m_target == "Sun")
+            Astronomy::sunPosition(aa, rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+        else if (m_settings.m_target == "Moon")
+            Astronomy::moonPosition(aa, rd, m_settings.m_latitude, m_settings.m_longitude, dt);
+        else
+        {
+            rd.ra = Astronomy::raToDecimal(m_settings.m_ra);
+            rd.dec = Astronomy::decToDecimal(m_settings.m_dec);
+            aa = Astronomy::raDecToAzAlt(rd, m_settings.m_latitude, m_settings.m_longitude, dt, !m_settings.m_jnow);
+        }
+
+        if (aa.alt > maxElevation)
+            maxElevation = aa.alt;
+
+        // Adjust for refraction
+        if (m_settings.m_refraction == "Positional Astronomy Library")
+        {
+            aa.alt += Astronomy::refractionPAL(aa.alt, m_settings.m_pressure, m_settings.m_temperature, m_settings.m_humidity,
+                                                m_settings.m_frequency, m_settings.m_latitude, m_settings.m_heightAboveSeaLevel,
+                                                m_settings.m_temperatureLapseRate);
+            if (aa.alt > 90.0)
+                aa.alt = 90.0f;
+        }
+        else if (m_settings.m_refraction == "Saemundsson")
+        {
+            aa.alt += Astronomy::refractionSaemundsson(aa.alt, m_settings.m_pressure, m_settings.m_temperature);
+            if (aa.alt > 90.0)
+                aa.alt = 90.0f;
+        }
+
+        if (idx == 0)
+            prevAlt = aa.alt;
+
+        // We can have set before rise in a day, if the object starts > 0
+        if ((aa.alt >= 0.0) && (prevAlt < 0.0))
+        {
+            riseTime = dt;
+            riseIdx = idx;
+        }
+        if ((aa.alt < 0.0) && (prevAlt >= 0.0))
+        {
+            setTime = endTime;
+            setIdx = idx;
+        }
+
+        polarSeries->append(aa.az, 90 - aa.alt);
+        idx++;
+
+        endTime = dt;
+        prevAlt = aa.alt;
+
+        dt = dt.addSecs(timestep); // addSecs accounts for daylight savings jumps
+    }
+
+    // Polar charts can't handle points that are more than 180 degrees apart, so
+    // we need to split passes that cross from 359 -> 0 degrees (or the reverse)
+    QList<QLineSeries *> series;
+    series.append(new QLineSeries());
+    QLineSeries *s = series.first();
+    QPen pen(QColor(32, 159, 223), 2, Qt::SolidLine);
+    s->setPen(pen);
+
+    qreal prevAz = polarSeries->at(0).x();
+    qreal prevEl = polarSeries->at(0).y();
+    for (int i = 1; i < polarSeries->count(); i++)
+    {
+        qreal az = polarSeries->at(i).x();
+        qreal el = polarSeries->at(i).y();
+        if ((prevAz > 270.0) && (az <= 90.0))
+        {
+            double elMid = interpolate(prevAz, prevEl, az+360.0, el, 360.0);
+            s->append(360.0, elMid);
+            series.append(new QLineSeries());
+            s = series.last();
+            s->setPen(pen);
+            s->append(0.0, elMid);
+            s->append(az, el);
+        }
+        else if ((prevAz <= 90.0) && (az > 270.0))
+        {
+            double elMid = interpolate(prevAz, prevEl, az-360.0, el, 0.0);
+            s->append(0.0, elMid);
+            series.append(new QLineSeries());
+            s = series.last();
+            s->setPen(pen);
+            s->append(360.0, elMid);
+            s->append(az, el);
+        }
+        else
+            s->append(polarSeries->at(i));
+        prevAz = az;
+        prevEl = el;
+    }
+
+    for (int i = 0; i < series.length(); i++)
+    {
+        m_azElPolarChart->addSeries(series[i]);
+        series[i]->attachAxis(angularAxis);
+        series[i]->attachAxis(radialAxis);
+    }
+
+    // Create series with single point, so we can plot time of rising
+    if (riseTime.isValid())
+    {
+        QLineSeries *riseSeries = new QLineSeries();
+        riseSeries->append(polarSeries->at(riseIdx));
+        riseSeries->setPointLabelsFormat(QString("Rise %1").arg(riseTime.time().toString("hh:mm")));
+        riseSeries->setPointLabelsVisible(true);
+        riseSeries->setPointLabelsClipping(false);
+        m_azElPolarChart->addSeries(riseSeries);
+        riseSeries->attachAxis(angularAxis);
+        riseSeries->attachAxis(radialAxis);
+    }
+
+    // Create series with single point, so we can plot time of setting
+    if (setTime.isValid())
+    {
+        QLineSeries *setSeries = new QLineSeries();
+        setSeries->append(polarSeries->at(setIdx));
+        setSeries->setPointLabelsFormat(QString("Set %1").arg(setTime.time().toString("hh:mm")));
+        setSeries->setPointLabelsVisible(true);
+        setSeries->setPointLabelsClipping(false);
+        m_azElPolarChart->addSeries(setSeries);
+        setSeries->attachAxis(angularAxis);
+        setSeries->attachAxis(radialAxis);
+    }
+
+    if (maxElevation < 0)
+        m_azElPolarChart->setTitle("Not visible from this latitude");
+    else
+        m_azElPolarChart->setTitle("");
+    ui->chart->setChart(m_azElPolarChart);
+
+    delete polarSeries;
+    delete oldChart;
 }
 
 // Find target on the Map
@@ -1017,7 +1269,12 @@ void StarTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 {
     bool oldState = ui->chartSubSelect->blockSignals(true);
     ui->chartSubSelect->clear();
-    if (index == 2)
+    if (index == 0)
+    {
+        ui->chartSubSelect->addItem("Az/El vs time");
+        ui->chartSubSelect->addItem("Polar");
+    }
+    else if (index == 2)
     {
         ui->chartSubSelect->addItem(QString("150 MHz 5%1 Equatorial").arg(QChar(0xb0)));
         ui->chartSubSelect->addItem(QString("150 MHz 5%1 Galactic").arg(QChar(0xb0)));
@@ -1066,18 +1323,6 @@ QString StarTrackerGUI::solarFluxUnit()
         return "Wm^-2Hz^-1";
     }
     return "";
-}
-
-// Linear extrapolation
-static double extrapolate(double x0, double y0, double x1, double y1, double x)
-{
-    return y0 + ((x-x0)/(x1-x0)) * (y1-y0);
-}
-
-// Linear interpolation
-static double interpolate(double x0, double y0, double x1, double y1, double x)
-{
-    return (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
 }
 
 void StarTrackerGUI::displaySolarFlux()

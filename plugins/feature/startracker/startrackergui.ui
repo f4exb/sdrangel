@@ -109,7 +109,7 @@
        </widget>
       </item>
       <item row="3" column="2" colspan="2">
-       <widget class="QDateTimeEdit" name="dateTime">
+       <widget class="WrappingDateTimeEdit" name="dateTime">
         <property name="toolTip">
          <string>Date and time to use when calculating target's position</string>
         </property>
@@ -313,7 +313,7 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
         <item>
          <widget class="ButtonSwitch" name="startStop">
           <property name="toolTip">
-           <string>start/stop acquisition</string>
+           <string>Start/stop tracking</string>
           </property>
           <property name="text">
            <string/>
@@ -339,7 +339,7 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="viewOnMap">
+         <widget class="QToolButton" name="viewOnMap">
           <property name="toolTip">
            <string>Find target on the map</string>
           </property>
@@ -353,7 +353,7 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="downloadSolarFlux">
+         <widget class="QToolButton" name="downloadSolarFlux">
           <property name="toolTip">
            <string>Download Solar flux density data</string>
           </property>
@@ -367,7 +367,7 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="useMyPosition">
+         <widget class="QToolButton" name="useMyPosition">
           <property name="toolTip">
            <string>Set latitude, longitude and height from My Position in SDRangel preferences</string>
           </property>
@@ -381,7 +381,7 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="displaySettings">
+         <widget class="QToolButton" name="displaySettings">
           <property name="toolTip">
            <string>Show settings dialog</string>
           </property>
@@ -595,10 +595,17 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
    <extends>QGraphicsView</extends>
    <header>QtCharts</header>
   </customwidget>
+  <customwidget>
+   <class>WrappingDateTimeEdit</class>
+   <extends>QDateTimeEdit</extends>
+   <header>gui/wrappingdatetimeedit.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>startStop</tabstop>
   <tabstop>viewOnMap</tabstop>
+  <tabstop>downloadSolarFlux</tabstop>
   <tabstop>useMyPosition</tabstop>
   <tabstop>displaySettings</tabstop>
   <tabstop>latitude</tabstop>
@@ -608,10 +615,14 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
   <tabstop>lst</tabstop>
   <tabstop>solarFlux</tabstop>
   <tabstop>target</tabstop>
+  <tabstop>frequency</tabstop>
+  <tabstop>beamwidth</tabstop>
   <tabstop>rightAscension</tabstop>
   <tabstop>declination</tabstop>
   <tabstop>azimuth</tabstop>
   <tabstop>elevation</tabstop>
+  <tabstop>chartSelect</tabstop>
+  <tabstop>chartSubSelect</tabstop>
   <tabstop>chart</tabstop>
  </tabstops>
  <resources>
