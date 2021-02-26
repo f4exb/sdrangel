@@ -519,18 +519,24 @@ APRSGUI::APRSGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feat
     ui->weatherChart->setRenderHint(QPainter::Antialiasing);
     m_weatherChart.addAxis(&m_weatherChartXAxis, Qt::AlignBottom);
     m_weatherChart.addAxis(&m_weatherChartYAxis, Qt::AlignLeft);
+    m_weatherChart.layout()->setContentsMargins(0, 0, 0, 0);
+    m_weatherChart.setMargins(QMargins(1, 1, 1, 1));
 
     m_telemetryChart.legend()->hide();
     ui->telemetryChart->setChart(&m_telemetryChart);
     ui->telemetryChart->setRenderHint(QPainter::Antialiasing);
     m_telemetryChart.addAxis(&m_telemetryChartXAxis, Qt::AlignBottom);
     m_telemetryChart.addAxis(&m_telemetryChartYAxis, Qt::AlignLeft);
+    m_telemetryChart.layout()->setContentsMargins(0, 0, 0, 0);
+    m_telemetryChart.setMargins(QMargins(1, 1, 1, 1));
 
     m_motionChart.legend()->hide();
     ui->motionChart->setChart(&m_motionChart);
     ui->motionChart->setRenderHint(QPainter::Antialiasing);
     m_motionChart.addAxis(&m_motionChartXAxis, Qt::AlignBottom);
     m_motionChart.addAxis(&m_motionChartYAxis, Qt::AlignLeft);
+    m_motionChart.layout()->setContentsMargins(0, 0, 0, 0);
+    m_motionChart.setMargins(QMargins(1, 1, 1, 1));
 
     displaySettings();
     applySettings(true);
