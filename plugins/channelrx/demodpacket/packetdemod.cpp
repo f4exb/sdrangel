@@ -42,7 +42,7 @@
 
 MESSAGE_CLASS_DEFINITION(PacketDemod::MsgConfigurePacketDemod, Message)
 
-const char * const PacketDemod::m_channelIdURI = "sdrangel.channelrx.packetdemod";
+const char * const PacketDemod::m_channelIdURI = "sdrangel.channel.packetdemod";
 const char * const PacketDemod::m_channelId = "PacketDemod";
 
 PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
