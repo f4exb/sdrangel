@@ -471,6 +471,7 @@ void ADSBDemodGUI::updatePosition(Aircraft *aircraft)
             swgMapItem->setAltitude(Units::feetToMetres(aircraft->m_altitude));
             swgMapItem->setImage(new QString(QString("qrc:///map/%1").arg(aircraft->getImage())));
             swgMapItem->setImageRotation(aircraft->m_heading);
+            swgMapItem->setImageMinZoom(11);
             swgMapItem->setText(new QString(aircraft->getText(true)));
 
             MainCore::MsgMapItem *msg = MainCore::MsgMapItem::create(m_adsbDemod, swgMapItem);

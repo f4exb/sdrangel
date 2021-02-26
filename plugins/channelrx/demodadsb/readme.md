@@ -133,7 +133,7 @@ If an ADS-B frame has not been received from an aircraft for 60 seconds, the air
 * Double clicking in an Az/El cell will set the aircraft as the active target. The azimuth and elevation to the aicraft will be sent to a rotator controller plugin. The aircraft information box will be coloured green, rather than blue, on the map.
 * Double clicking on any other cell in the table will centre the map on the corresponding aircraft.
 
-<h3>Map</h3>
+<h2>Map</h2>
 
 The map displays aircraft locations and data geographically.
 
@@ -149,7 +149,8 @@ Aircraft are only placed upon the map when a position can be calculated, which c
 * Left clicking the information box next to an aircraft will reveal more information. It can be closed by clicking it again.
 * Left clicking the information box next to an airport will reveal ATC frequencies for the airport (if the OurAirports database has been downloaded.). This information box can be closed by left clicking on the airport identifier. Double clicking on one of the listed frequencies, will set it as the centre frequency on the selected SDRangel device set (15). The Az/El row gives the azimuth and elevation of the airport from the location set under Preferences > My Position. Double clicking on this row will set the airport as the active target.
 
-<h3>Attribution</h3>
+<h2>Attribution</h2>
 
 Airline logos and flags are by Steve Hibberd from https://radarspotting.com
+
 Map icons are by Alice Design, Alex Ahineev, Botho Willer, Verry Obito, Sean Maldjia, Tinashe Mugayi, Georgiana Ionescu, Andreas Vögele, Tom Fricker, Will Sullivan, Tim Tores, BGBOXXX Design, and Angriawan Ditya Zulkarnain from the Noun Project https://thenounproject.com/
