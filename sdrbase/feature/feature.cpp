@@ -27,6 +27,7 @@
 
 Feature::Feature(const QString& uri, WebAPIAdapterInterface *webAPIAdapterInterface) :
 	m_webAPIAdapterInterface(webAPIAdapterInterface),
+    m_guiMessageQueue(nullptr),
     m_name(uri),
 	m_uri(uri),
     m_uid(UidCalculator::getNewObjectId())
