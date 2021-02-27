@@ -40,15 +40,23 @@ Power of signal received in the channel (dB)
 
 ![DATV Demodulator plugin DATV GUI](../../../doc/img/DATVDemod_pluginDATV.png)
 
-<h4>B.3: Output transport stream to UDP</h4>
+<h4>B.3: MER estimation</h4>
+
+This gauge gives the MER estimation. The averaged value appears on the right.
+
+<h4>B.3: CNR estimation</h4>
+
+This gauge gives the CNR estimation. The averaged value appears on the right.
+
+<h4>B.5: Output transport stream to UDP</h4>
 
 Activate output of transport stream to UDP with 7 TS blocks per UDP frame
 
-<h4>B.4: UDP address</h4>
+<h4>B.6: UDP address</h4>
 
 This is the address of the TS UDP
 
-<h4>B.5: UDP port</h4>
+<h4>B.7: UDP port</h4>
 
 This is the port of the TS UDP
 
@@ -154,6 +162,20 @@ The mode and rate selection can be done manually but if a discrepancy in the num
 <h5>B.2b.5: DVB-S specific controls</h5>
 
 The controls specific to DVB-S are disabled and greyed out. These are: Fast Lock, Allow Drift, Hard Metric and Viterbi.
+
+<h5>B.2b.6: DVB-S2 specific - Soft LDPC decoder</h5>
+
+Not implemented yet
+
+<h5>B.2b.7: DVB-S2 specific - LDPC maximum number of bit flips allowed</h5>
+
+May vary between 0 and 500. On strong signals (17 dB SNR or more) you may set it to 0 thus saving processing on occasional bit flips that will not cause significant degradation. When SNR decreases you may set it to a medium value of about 200 allowing bit flips corrections to take place and decoding of signals down to about 10dB MER. A higher value towards the maximum (500) will not make a significant difference and is allowed mostly for experimentation.
+
+If you have enough processing power it is fine to always leave it at 200.
+
+Comparatively:
+  - with max = 0 you need ~15 dB MER which corresponds to ~16 dB CNR
+  - with max = 200 you need ~10 dB MER which corresponds to ~13 dB CNR
 
 <h3>C: DATV video stream</h3>
 

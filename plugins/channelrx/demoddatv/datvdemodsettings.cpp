@@ -42,6 +42,8 @@ void DATVDemodSettings::resetToDefaults()
     m_standard = DVB_S;
     m_modulation = BPSK;
     m_fec = FEC12;
+    m_softLDPC = false;
+    m_maxBitflips = 0;
     m_symbolRate = 250000;
     m_notchFilters = 0;
     m_allowDrift = false;
@@ -103,6 +105,8 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeU32(29, m_reverseAPIPort);
     s.writeU32(30, m_reverseAPIDeviceIndex);
     s.writeU32(31, m_reverseAPIChannelIndex);
+    s.writeBool(32, m_softLDPC);
+    s.writeS32(33, m_maxBitflips);
 
     return s.final();
 }
@@ -185,6 +189,9 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readU32(31, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
 
+        d.readBool(32, &m_softLDPC, false);
+        d.readS32(33, &m_maxBitflips, 0);
+
         validateSystemConfiguration();
 
         return true;
@@ -209,6 +216,8 @@ void DATVDemodSettings::debug(const QString& msg) const
         << " m_rollOff: " << m_rollOff
         << " m_viterbi: " << m_viterbi
         << " m_fec: " << m_fec
+        << " m_softLDPC: " << m_softLDPC
+        << " m_maxBitflips: " << m_maxBitflips
         << " m_modulation: " << m_modulation
         << " m_standard: " << m_standard
         << " m_notchFilters: " << m_notchFilters
@@ -229,6 +238,8 @@ bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
         || (m_rollOff != other.m_rollOff)
         || (m_viterbi != other.m_viterbi)
         || (m_fec != other.m_fec)
+        || (m_softLDPC != other.m_softLDPC)
+        || (m_maxBitflips != other.m_maxBitflips)
         || (m_modulation != other.m_modulation)
         || (m_standard != other.m_standard)
         || (m_notchFilters != other.m_notchFilters)

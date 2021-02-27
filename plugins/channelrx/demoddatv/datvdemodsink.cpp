@@ -1137,7 +1137,7 @@ void DATVDemodSink::InitDATVS2Framework()
     );
     leansdr::s2_fecdec<bool, leansdr::hard_sb> *fecdec = (leansdr::s2_fecdec<bool, leansdr::hard_sb> * ) r_fecdec;
 
-    fecdec->bitflips=0;
+    fecdec->bitflips=m_settings.m_maxBitflips;
 
     /*
     fecdec->bitflips = cfg.ldpc_bf; //int TODO
@@ -1217,12 +1217,12 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
             if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
             {
-                printf("SWITCHING TO DVBS-2\r\n");
+                qDebug("DATVDemodSink::feed: init DVBS-2");
                 InitDATVS2Framework();
             }
             else
             {
-                printf("SWITCHING TO DVBS\r\n");
+                qDebug("DATVDemodSink::feed: init DVBS");
                 InitDATVFramework();
             }
         }

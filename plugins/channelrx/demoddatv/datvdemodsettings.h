@@ -80,6 +80,8 @@ struct DATVDemodSettings
     dvb_version m_standard;
     DATVModulation m_modulation;
     DATVCodeRate m_fec;
+    bool m_softLDPC;
+    int m_maxBitflips;
     bool m_audioMute;
     QString m_audioDeviceName;
     int m_symbolRate;

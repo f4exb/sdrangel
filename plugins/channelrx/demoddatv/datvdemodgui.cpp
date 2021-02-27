@@ -281,6 +281,8 @@ void DATVDemodGUI::displaySettings()
     ui->chkHardMetric->setChecked(m_settings.m_hardMetric);
     ui->chkFastlock->setChecked(m_settings.m_fastLock);
     ui->chkViterbi->setChecked(m_settings.m_viterbi);
+    ui->softLDPC->setChecked(m_settings.m_softLDPC);
+    ui->maxBitflips->setValue(m_settings.m_maxBitflips);
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
     {
@@ -288,10 +290,15 @@ void DATVDemodGUI::displaySettings()
         ui->chkHardMetric->setEnabled(true);
         ui->chkFastlock->setEnabled(true);
         ui->chkViterbi->setEnabled(true);
+        ui->softLDPC->setEnabled(false);
+        ui->maxBitflips->setEnabled(false);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: white }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: white }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: white }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: white }");
+        ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
+        ui->maxBitflips->setStyleSheet("QSpinBox { color: gray }");
+        ui->maxBitflipsLabel->setStyleSheet("QLabel { color: gray }");
     }
     else
     {
@@ -299,10 +306,15 @@ void DATVDemodGUI::displaySettings()
         ui->chkHardMetric->setEnabled(false);
         ui->chkFastlock->setEnabled(false);
         ui->chkViterbi->setEnabled(false);
+        ui->softLDPC->setEnabled(true);
+        ui->maxBitflips->setEnabled(true);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: gray }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: gray }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: gray }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: gray }");
+        ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
+        ui->maxBitflips->setStyleSheet("QSpinBox { color: white }");
+        ui->maxBitflipsLabel->setStyleSheet("QLabel { color: white }");
     }
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
@@ -508,10 +520,15 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
         ui->chkHardMetric->setEnabled(true);
         ui->chkFastlock->setEnabled(true);
         ui->chkViterbi->setEnabled(true);
+        ui->softLDPC->setEnabled(false);
+        ui->maxBitflips->setEnabled(false);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: white }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: white }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: white }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: white }");
+        ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
+        ui->maxBitflips->setStyleSheet("QSpinBox { color: gray }");
+        ui->maxBitflipsLabel->setStyleSheet("QLabel { color: gray }");
     }
     else
     {
@@ -519,10 +536,15 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
         ui->chkHardMetric->setEnabled(false);
         ui->chkFastlock->setEnabled(false);
         ui->chkViterbi->setEnabled(false);
+        ui->softLDPC->setEnabled(true);
+        ui->maxBitflips->setEnabled(true);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: gray }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: gray }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: gray }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: gray }");
+        ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
+        ui->maxBitflips->setStyleSheet("QSpinBox { color: white }");
+        ui->maxBitflipsLabel->setStyleSheet("QLabel { color: white }");
     }
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
@@ -557,6 +579,18 @@ void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
     (void) arg1;
     QString strFEC = ui->cmbFEC->currentText();
     m_settings.m_fec = DATVDemodSettings::getCodeRateFromStr(strFEC);
+    applySettings();
+}
+
+void DATVDemodGUI::on_softLDPC_clicked()
+{
+    m_settings.m_softLDPC = ui->softLDPC->isChecked();
+    applySettings();
+}
+
+void DATVDemodGUI::on_maxBitflips_valueChanged(int value)
+{
+    m_settings.m_maxBitflips = value;
     applySettings();
 }
 

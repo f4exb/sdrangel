@@ -67,6 +67,8 @@ private slots:
     void on_cmbStandard_currentIndexChanged(int index);
     void on_cmbModulation_currentIndexChanged(const QString &arg1);
     void on_cmbFEC_currentIndexChanged(const QString &arg1);
+    void on_softLDPC_clicked();
+    void on_maxBitflips_valueChanged(int value);
     void on_chkViterbi_clicked();
     void on_chkHardMetric_clicked();
     void on_resetDefaults_clicked();
