@@ -74,6 +74,7 @@ void FileSinkBaseband::startWork()
 void FileSinkBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_sink.stopRecording();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     QObject::disconnect(
         &m_sampleFifo,
@@ -166,13 +167,10 @@ bool FileSinkBaseband::handleMessage(const Message& cmd)
 		MsgConfigureFileSinkWork& conf = (MsgConfigureFileSinkWork&) cmd;
         qDebug() << "FileSinkBaseband::handleMessage: MsgConfigureFileSinkWork: " << conf.isWorking();
 
-        if (!m_settings.m_squelchRecordingEnable)
-        {
-            if (conf.isWorking()) {
-                m_sink.startRecording();
-            } else {
-                m_sink.stopRecording();
-            }
+        if (conf.isWorking()) {
+            m_sink.startRecording();
+        } else {
+            m_sink.stopRecording();
         }
 
 		return true;

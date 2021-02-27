@@ -65,9 +65,11 @@ void FileSinkSink::startRecording()
 
         if (m_msgQueueToGUI)
         {
-            FileSinkMessages::MsgReportRecordFileName *msg
+            FileSinkMessages::MsgReportRecordFileName *msg1
                 = FileSinkMessages::MsgReportRecordFileName::create(m_fileSink.getCurrentFileName());
-            m_msgQueueToGUI->push(msg);
+            m_msgQueueToGUI->push(msg1);
+            FileSinkMessages::MsgReportRecording *msg2 = FileSinkMessages::MsgReportRecording::create(true);
+            m_msgQueueToGUI->push(msg2);
         }
 
         // copy pre record samples
@@ -94,6 +96,7 @@ void FileSinkSink::stopRecording()
     if (m_record)
     {
         m_preRecordBuffer.reset();
+
         if (!m_fileSink.stopRecording())
         {
             // qWarning already output stopRecording, just need to send to GUI
@@ -104,6 +107,13 @@ void FileSinkSink::stopRecording()
                 m_msgQueueToGUI->push(msg);
             }
         }
+
+        if (m_msgQueueToGUI)
+        {
+            FileSinkMessages::MsgReportRecording *msg = FileSinkMessages::MsgReportRecording::create(false);
+            m_msgQueueToGUI->push(msg);
+        }
+
         m_record = false;
     }
 }
@@ -152,12 +162,6 @@ void FileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleV
             }
             else
             {
-                if (m_msgQueueToGUI)
-                {
-                    FileSinkMessages::MsgReportRecording *msg = FileSinkMessages::MsgReportRecording::create(false);
-                    m_msgQueueToGUI->push(msg);
-                }
-
                 m_fileSink.feed(beginw, endw + m_postSquelchCounter, true);
                 nbToWrite = m_postSquelchCounter;
                 m_postSquelchCounter = 0;
@@ -322,15 +326,8 @@ void FileSinkSink::squelchRecording(bool squelchOpen)
 
     if (squelchOpen)
     {
-        if (!m_record)
-        {
+        if (!m_record) {
             startRecording();
-
-            if (m_msgQueueToGUI)
-            {
-                FileSinkMessages::MsgReportRecording *msg = FileSinkMessages::MsgReportRecording::create(true);
-                m_msgQueueToGUI->push(msg);
-            }
         }
     }
     else

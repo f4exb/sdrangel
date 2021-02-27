@@ -104,11 +104,11 @@ bool FileSinkGUI::handleMessage(const Message& message)
     {
         const FileSink::MsgReportStartStop& cfg = (FileSink::MsgReportStartStop&) message;
         m_running = cfg.getStartStop();
+        blockSignals(true);
+        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+        ui->record->setChecked(false);
         ui->record->setEnabled(m_running && !m_settings.m_squelchRecordingEnable);
-
-        if (!m_running) {
-            ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-        }
+        blockSignals(false);
 
         return true;
     }
@@ -134,16 +134,22 @@ bool FileSinkGUI::handleMessage(const Message& message)
     else if (FileSinkMessages::MsgReportRecording::match(message))
     {
         const FileSinkMessages::MsgReportSquelch& report = (FileSinkMessages::MsgReportSquelch&) message;
+        qDebug("FileSinkGUI::handleMessage: FileSinkMessages::MsgReportRecording: %s", report.getOpen() ? "on" : "off");
+
+        blockSignals(true);
 
         if (report.getOpen())
         {
             ui->record->setStyleSheet("QToolButton { background-color : red; }");
+            ui->record->setChecked(true);
         }
         else
         {
             ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
+            ui->record->setChecked(false);
         }
 
+        blockSignals(false);
         return true;
     }
     else if (FileSinkMessages::MsgReportRecordFileName::match(message))
@@ -191,7 +197,6 @@ FileSinkGUI::FileSinkGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->deltaFrequency->setValueRange(false, 8, -99999999, 99999999);
     ui->position->setEnabled(m_fixedPosition);
     ui->glSpectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
-    ui->record->setEnabled(false);
 
     m_channelMarker.blockSignals(true);
     m_channelMarker.setColor(m_settings.m_rgbColor);
@@ -250,6 +255,8 @@ void FileSinkGUI::displaySettings()
 
     blockApplySettings(true);
 
+    ui->record->setEnabled(!m_settings.m_squelchRecordingEnable);
+    ui->squelchedRecording->setChecked(m_settings.m_squelchRecordingEnable);
     ui->deltaFrequency->setValue(m_channelMarker.getCenterFrequency());
     ui->fileNameText->setText(m_settings.m_fileRecordName);
     ui->decimationFactor->setCurrentIndex(m_settings.m_log2Decim);
@@ -260,7 +267,6 @@ void FileSinkGUI::displaySettings()
     ui->preRecordTimeText->setText(tr("%1").arg(m_settings.m_preRecordTime));
     ui->postSquelchTime->setValue(m_settings.m_squelchPostRecordTime);
     ui->postSquelchTimeText->setText(tr("%1").arg(m_settings.m_squelchPostRecordTime));
-    ui->record->setEnabled(m_running && !m_settings.m_squelchRecordingEnable);
 
     if (!m_settings.m_spectrumSquelchMode) {
         ui->squelchLevel->setStyleSheet("QDial { background:rgb(79,79,79); }");
@@ -444,11 +450,11 @@ void FileSinkGUI::on_spectrumSquelch_toggled(bool checked)
     if (!m_settings.m_spectrumSquelchMode)
     {
         m_settings.m_squelchRecordingEnable = false;
+        ui->record->setEnabled(true);
         ui->squelchLevel->setStyleSheet("QDial { background:rgb(79,79,79); }");
         ui->squelchedRecording->blockSignals(true);
         ui->squelchedRecording->setChecked(false);
         ui->squelchedRecording->blockSignals(false);
-        ui->record->setEnabled(true);
     }
 
     applySettings();
@@ -477,19 +483,13 @@ void FileSinkGUI::on_postSquelchTime_valueChanged(int value)
 
 void FileSinkGUI::on_squelchedRecording_toggled(bool checked)
 {
-    ui->record->setEnabled(m_running && !checked);
+    ui->record->setEnabled(!checked);
     m_settings.m_squelchRecordingEnable = checked;
     applySettings();
 }
 
 void FileSinkGUI::on_record_toggled(bool checked)
 {
-    if (checked) {
-        ui->record->setStyleSheet("QToolButton { background-color : red; }");
-    } else {
-        ui->record->setStyleSheet("QToolButton { background:rgb(79,79,79); }");
-    }
-
     m_fileSink->record(checked);
 }
 
