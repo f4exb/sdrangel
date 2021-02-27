@@ -40,7 +40,7 @@ Satellite positions can only be predicted with limited accuracy, so without the 
 
 Pressing this button displays the SDRangel Control dialog.
 
-![SDRangel Control dialog](../../../doc/img/SatellitTracker_plugin_control.png)
+![SDRangel Control dialog](../../../doc/img/SatelliteTracker_plugin_control.png)
 
 This dialog determines the actions the Satellite Tracker will take when AOS or LOS occurs for a satellite. First, select a satellite from the dropdown box. Information about the satellites transmit and receive modes should appear in the field at the bottom of the dialog, if available in the SatNogs database.
 
@@ -62,7 +62,7 @@ Multiple rows can be added, to allow independent control of multiple device sets
 
 Pressing this button displays the Satellite Selection dialog.
 
-![Satellite Selection dialog](../../../doc/img/SatellitTracker_plugin_selection.png)
+![Satellite Selection dialog](../../../doc/img/SatelliteTracker_plugin_selection.png)
 
 On the left hand side are a list of all available satellites, as determined by the TLE files that have been downloaded. (If none are visible, ensure the TLEs tab of the Satellite Settings dialog (8) contains at least https://db.satnogs.org/api/tle/ and then press the Update satellite data (4) button)
 
@@ -82,7 +82,7 @@ When clicked, it sets the latitude, longitude and height fields to the values fr
 
 Pressing this button displays the Settings dialog.
 
-![Satellite tracker settings dialog](../../../doc/img/SatellitTracker_plugin_settingsdialog1.png)
+![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog1.png)
 
 On the Settings tab, you can set:
 
@@ -99,12 +99,12 @@ On the Settings tab, you can set:
 * A command/script to be executed on LOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog.
 * The Doppler correction period in seconds, which controls how frequently Doppler correction is applied. Which channels have Doppler correction applied is set on a per-channel basis in the SDRangel Control dialog.
 
-![Satellite tracker settings dialog](../../../doc/img/SatellitTracker_plugin_settingsdialog2.png)
+![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog2.png)
 
 On the TLEs tab, you can provide a list of URL from which satellite Two Line Element files can be downloaded from.
 TLE files contain the orbital parameters for a satellite and are required in order to be able to calculate a satellites position.
 
-![Satellite tracker settings dialog](../../../doc/img/SatellitTracker_plugin_settingsdialog3.png)
+![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_settingsdialog3.png)
 
 On the display tab, you can set:
 
@@ -115,7 +115,7 @@ On the display tab, you can set:
 * Whether times are display in the local time zone or UTC.
 * Whether to draw the satellites on the map.
 
-<h3>9: Latitude/h3>
+<h3>9: Latitude</h3>
 
 Specifies the latitude in decimal degrees (North positive) of the antenna location.
 
@@ -147,7 +147,7 @@ Displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zen
 
 Pass charts can be plotted showing the azimuth and elevation of the target satellite from AOS to LOS. This can be in polar of Cartesian form:
 
-![Satellite tracker settings dialog](../../../doc/img/SatellitTracker_plugin_passchart.png)
+![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_passchart.png)
 
 The arrows next to the chart combobox, allow the pass number to be selected. Pass 0 is the next pass, with higher numbered passes occuring later in time.
 The amount of passes is determined by the prediction period, which can be set in the Settings dialog.
@@ -156,7 +156,7 @@ The amount of passes is determined by the prediction period, which can be set in
 
 The satellite data table displays calculated data about the selected satellites.
 
-![Satellite data table](../../../doc/img/SatellitTracker_plugin_satdata.png)
+![Satellite data table](../../../doc/img/SatelliteTracker_plugin_satdata.png)
 
 The table contains:
 
