@@ -366,7 +366,7 @@ static bool crossesAntimeridianWest(double prevLon, double lon)
     return crosses;
 }
 
-static bool crossesEdge(double lon, double prevLon, double bottomLeftLongitude, double bottomRightLongitude, double width, bool antimed)
+static bool crossesEdge(double lon, double prevLon, double bottomLeftLongitude, double bottomRightLongitude)
 {
     // Determine if antimerdian is between the two points
     if (!crossesAntimeridian(prevLon, lon))
@@ -484,7 +484,7 @@ void MapModel::splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantL
         // Can be onscreen after having crossed edge from other side
         // Or can be onscreen after previously having been off screen
         onScreen = isOnScreen(lon, bottomLeftLongitude, bottomRightLongitude, width, antimed);
-        bool crossedEdge = crossesEdge(lon, prevLon, bottomLeftLongitude, bottomRightLongitude, width, antimed);
+        bool crossedEdge = crossesEdge(lon, prevLon, bottomLeftLongitude, bottomRightLongitude);
         if ((onScreen && !crossedEdge) || (onScreen && !prevOnScreen))
         {
             if ((i > 0) && (tracks[trackIdx]->size() == 0)) // Could also use (onScreen && !prevOnScreen)?
@@ -554,7 +554,8 @@ void MapModel::splitTrack(const QList<QGeoCoordinate *>& coords, const QVariantL
 
 void MapModel::viewChanged(double bottomLeftLongitude, double bottomRightLongitude)
 {
-    if (!isnan(bottomLeftLongitude))
+    (void) bottomRightLongitude;
+    if (!std::isnan(bottomLeftLongitude))
     {
         for (int row = 0; row < m_items.size(); row++)
         {
