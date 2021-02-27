@@ -367,6 +367,8 @@ else()
     find_package(LibMbe)
     find_package(SerialDV REQUIRED)
     find_package(LibDSDcc)
+    find_package(Sgp4)
+    find_package(AptDec)
 endif()
 
 # Devices
