@@ -20,7 +20,7 @@
 
 #include <QHash>
 
-#include "ui_SatelliteRadioControlDialog.h"
+#include "ui_satelliteradiocontroldialog.h"
 #include "satellitetrackersettings.h"
 #include "satellitedevicesettingsgui.h"
 #include "satnogs.h"

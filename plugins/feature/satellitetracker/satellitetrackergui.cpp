@@ -651,6 +651,7 @@ void SatelliteTrackerGUI::on_prevPass_clicked()
 
 void SatelliteTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 {
+    (void) index;
     plotChart();
 }
 
@@ -666,17 +667,6 @@ void SatelliteTrackerGUI::plotChart()
 static double interpolate(double x0, double y0, double x1, double y1, double x)
 {
     return (y0*(x1-x) + y1*(x-x0)) / (x1-x0);
-}
-
-static int findClosestPoint(qint64 v, QLineSeries *series)
-{
-    int i;
-    for (i = 0; i < series->count(); i++)
-    {
-        if (v < series->at(i).x())
-            return i;
-    }
-    return i-1;
 }
 
 // Plot pass in polar coords
@@ -863,10 +853,11 @@ void SatelliteTrackerGUI::plotPolarChart()
 
         QLineSeries *nowSeries = new QLineSeries();
 
+        QDateTime endTime = currentTime.addSecs(1);
         getPassAzEl(nullptr, nullptr, nowSeries,
                     sat->m_tle->m_tle0, sat->m_tle->m_tle1, sat->m_tle->m_tle2,
                     m_settings.m_latitude, m_settings.m_longitude, m_settings.m_heightAboveSeaLevel/1000.0,
-                    currentTime, currentTime.addSecs(1));
+                    currentTime, endTime);
 
         nowSeries->setPointLabelsFormat(m_settings.m_target);
         nowSeries->setPointLabelsVisible(true);
@@ -1120,6 +1111,8 @@ void SatelliteTrackerGUI::updateTable(SatelliteState *satState)
 
 void SatelliteTrackerGUI::on_satTable_cellDoubleClicked(int row, int column)
 {
+    (void) column;
+
     QString sat = ui->satTable->item(row, SAT_COL_NAME)->text();
     FeatureWebAPIUtils::mapFind(sat);
 }

@@ -579,7 +579,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 if (preset != nullptr)
                 {
                     qDebug() << "SatelliteTrackerWorker::aos: Loading preset " << preset->getDescription() << " to " << devSettings->m_deviceSet[0];
-                    int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
+                    unsigned int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
                     std::vector<DeviceSet*>& deviceSets = mainCore->getDeviceSets();
                     if (deviceSetIndex < deviceSets.size())
                     {

@@ -74,7 +74,7 @@ void getGroundTrack(QDateTime dateTime,
     }
 
     coordinates.clear();
-    while (forward && (currentTime < endTime) || !forward && (currentTime > endTime))
+    while ((forward && (currentTime < endTime)) || (!forward && (currentTime > endTime)))
     {
         // Calculate satellite position
         Eci eci = sgp4.FindPosition(currentTime);
@@ -133,15 +133,15 @@ void getPassAzEl(QLineSeries* azimuth, QLineSeries* elevation, QLineSeries* pola
             currentTime = currentTime.AddSeconds(timeStep);
         }
     }
-    catch (SatelliteException se)
+    catch (SatelliteException& se)
     {
         qDebug() << se.what();
     }
-    catch (DecayedException de)
+    catch (DecayedException& de)
     {
         qDebug() << de.what();
     }
-    catch (TleException tlee)
+    catch (TleException& tlee)
     {
         qDebug() << tlee.what();
     }
@@ -186,15 +186,15 @@ bool getPassesThrough0Deg(const QString& tle0, const QString& tle1, const QStrin
             currentTime = currentTime.AddSeconds(timeStep);
         }
     }
-    catch (SatelliteException se)
+    catch (SatelliteException& se)
     {
         qDebug() << se.what();
     }
-    catch (DecayedException de)
+    catch (DecayedException& de)
     {
         qDebug() << de.what();
     }
-    catch (TleException tlee)
+    catch (TleException& tlee)
     {
         qDebug() << tlee.what();
     }
@@ -482,15 +482,15 @@ void getSatelliteState(QDateTime dateTime,
         getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, false, satState->m_groundTrack);
         getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, true, satState->m_predictedGroundTrack);
     }
-    catch (SatelliteException se)
+    catch (SatelliteException& se)
     {
         qDebug() << "getSatelliteState: " << satState->m_name << ": " << se.what();
     }
-    catch (DecayedException de)
+    catch (DecayedException& de)
     {
         qDebug() << "getSatelliteState: " << satState->m_name << ": " << de.what();
     }
-    catch (TleException tlee)
+    catch (TleException& tlee)
     {
         qDebug() << "getSatelliteState: " << satState->m_name << ": " << tlee.what();
     }

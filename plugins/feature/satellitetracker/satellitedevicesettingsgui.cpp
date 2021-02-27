@@ -255,6 +255,7 @@ void SatelliteDeviceSettingsGUI::on_m_deviceSetWidget_currentTextChanged(const Q
 // Update doppler combo, to correspond to selected preset
 void SatelliteDeviceSettingsGUI::on_m_presetWidget_currentIndexChanged(int index)
 {
+    (void) index;
     addChannels();
 }
 

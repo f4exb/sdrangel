@@ -101,6 +101,8 @@ void SatelliteRadioControlDialog::on_remove_clicked()
 
 void SatelliteRadioControlDialog::on_satelliteSelect_currentIndexChanged(int index)
 {
+    (void) index;
+
     // Save details from current GUI elements
     for (int i = 0; i < m_devSettingsGUIs.size(); i++)
         m_devSettingsGUIs[i]->accept();

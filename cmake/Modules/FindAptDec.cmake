@@ -5,9 +5,9 @@ IF(NOT APT_FOUND)
     FIND_PATH(
         APT_INCLUDE_DIR
         NAMES apt.h
-        HINTS ${APT_DIR}/include
-        PATHS /usr/local/include
-              /usr/include
+        HINTS ${APT_DIR}/include/apt
+        PATHS /usr/local/include/apt
+              /usr/include/apt
     )
 
     FIND_LIBRARY(

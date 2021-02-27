@@ -20,8 +20,8 @@
 
 #include <QList>
 #include <QDateTime>
-#include <QLineSeries>
 #include <QGeoCoordinate>
+#include <QtCharts/QLineSeries>
 
 using namespace QtCharts;
 
