@@ -184,7 +184,7 @@ The Satellite Tracker feature can send the overhead position of the satellite to
 
 When using the Find feature in the Map GUI, you can search by the name of the satellite.
 
-![SatelliteTracker map](../../../doc/img/SatelliteTracker_map.png)
+![SatelliteTracker map](../../../doc/img/SatelliteTracker_plugin_map.png)
 
 <h2>Attribution</h2>
 
