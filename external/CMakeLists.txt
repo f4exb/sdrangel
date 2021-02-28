@@ -360,7 +360,11 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 
 # For APT demodulator
-set(APT_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/apt.lib" CACHE INTERNAL "")
+if (WIN32)
+    set(APT_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/apt.lib" CACHE INTERNAL "")
+elseif (LINUX)
+    set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+endif()
 ExternalProject_Add(apt
         GIT_REPOSITORY https://github.com/srcejon/aptdec.git
         GIT_TAG libaptdec
@@ -386,7 +390,11 @@ endif ()
 # For Satellite Tracker feature
 # No tags for this in github - but doesn't change often
 # Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
-set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
+if (WIN32)
+    set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
+elseif (LINUX)
+    set(LIBDSDCC_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+endif()
 ExternalProject_Add(sgp4
         GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
         PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sgp4"

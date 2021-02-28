@@ -307,13 +307,13 @@ if (BUILD_GUI)
     find_package(OpenGL REQUIRED)
     find_package(Qt5
                    REQUIRED COMPONENTS
-                     OpenGL
-                     Quick
-                     QuickWidgets
-                     Positioning
-                     Location
-                     Charts
-                     TextToSpeech)
+                    OpenGL
+                    Quick
+                    QuickWidgets
+                    Positioning
+                    Location
+                    Charts
+                    TextToSpeech)
 endif()
 
 # other requirements
