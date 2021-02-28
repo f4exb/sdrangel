@@ -52,6 +52,12 @@ void SigMFFileSinkSink::startRecording()
         m_fileSink.startRecording();
         m_record = true;
 
+        if (m_msgQueueToGUI)
+        {
+            SigMFFileSinkMessages::MsgReportRecording *msg = SigMFFileSinkMessages::MsgReportRecording::create(true);
+            m_msgQueueToGUI->push(msg);
+        }
+
         // copy pre record samples
         SampleVector::iterator p1Begin, p1End, p2Begin, p2End;
         m_preRecordBuffer.readBegin(m_preRecordFill, &p1Begin, &p1End, &p2Begin, &p2End);
@@ -77,6 +83,13 @@ void SigMFFileSinkSink::stopRecording()
     {
         m_preRecordBuffer.reset();
         m_fileSink.stopRecording();
+
+        if (m_msgQueueToGUI)
+        {
+            SigMFFileSinkMessages::MsgReportRecording *msg = SigMFFileSinkMessages::MsgReportRecording::create(false);
+            m_msgQueueToGUI->push(msg);
+        }
+
         m_record = false;
     }
 }
@@ -125,12 +138,6 @@ void SigMFFileSinkSink::feed(const SampleVector::const_iterator& begin, const Sa
             }
             else
             {
-                if (m_msgQueueToGUI)
-                {
-                    SigMFFileSinkMessages::MsgReportRecording *msg = SigMFFileSinkMessages::MsgReportRecording::create(false);
-                    m_msgQueueToGUI->push(msg);
-                }
-
                 m_fileSink.feed(beginw, endw + m_postSquelchCounter, true);
                 nbToWrite = m_postSquelchCounter;
                 m_postSquelchCounter = 0;
@@ -295,15 +302,8 @@ void SigMFFileSinkSink::squelchRecording(bool squelchOpen)
 
     if (squelchOpen)
     {
-        if (!m_record)
-        {
+        if (!m_record) {
             startRecording();
-
-            if (m_msgQueueToGUI)
-            {
-                SigMFFileSinkMessages::MsgReportRecording *msg = SigMFFileSinkMessages::MsgReportRecording::create(true);
-                m_msgQueueToGUI->push(msg);
-            }
         }
     }
     else

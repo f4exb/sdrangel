@@ -43,6 +43,7 @@
 #include "sigmffilesink.h"
 
 MESSAGE_CLASS_DEFINITION(SigMFFileSink::MsgConfigureSigMFFileSink, Message)
+MESSAGE_CLASS_DEFINITION(SigMFFileSink::MsgReportStartStop, Message)
 
 const char* const SigMFFileSink::m_channelIdURI = "sdrangel.channel.sigmffilesink";
 const char* const SigMFFileSink::m_channelId = "SigMFFileSink";
@@ -116,6 +117,12 @@ void SigMFFileSink::start()
 
     SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband *msg = SigMFFileSinkBaseband::MsgConfigureSigMFFileSinkBaseband::create(m_settings, true);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    if (getMessageQueueToGUI())
+    {
+        MsgReportStartStop *msg = MsgReportStartStop::create(true);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 void SigMFFileSink::stop()
@@ -124,6 +131,12 @@ void SigMFFileSink::stop()
     m_basebandSink->stopWork();
 	m_thread.exit();
 	m_thread.wait();
+
+    if (getMessageQueueToGUI())
+    {
+        MsgReportStartStop *msg = MsgReportStartStop::create(false);
+        getMessageQueueToGUI()->push(msg);
+    }
 }
 
 bool SigMFFileSink::handleMessage(const Message& cmd)
