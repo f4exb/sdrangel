@@ -46,6 +46,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_map_settings_isSet = false;
     rig_ctl_server_settings = nullptr;
     m_rig_ctl_server_settings_isSet = false;
+    satellite_tracker_settings = nullptr;
+    m_satellite_tracker_settings_isSet = false;
     star_tracker_settings = nullptr;
     m_star_tracker_settings_isSet = false;
     simple_ptt_settings = nullptr;
@@ -78,6 +80,8 @@ SWGFeatureSettings::init() {
     m_map_settings_isSet = false;
     rig_ctl_server_settings = new SWGRigCtlServerSettings();
     m_rig_ctl_server_settings_isSet = false;
+    satellite_tracker_settings = new SWGSatelliteTrackerSettings();
+    m_satellite_tracker_settings_isSet = false;
     star_tracker_settings = new SWGStarTrackerSettings();
     m_star_tracker_settings_isSet = false;
     simple_ptt_settings = new SWGSimplePTTSettings();
@@ -110,6 +114,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(rig_ctl_server_settings != nullptr) { 
         delete rig_ctl_server_settings;
+    }
+    if(satellite_tracker_settings != nullptr) { 
+        delete satellite_tracker_settings;
     }
     if(star_tracker_settings != nullptr) { 
         delete star_tracker_settings;
@@ -150,6 +157,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&map_settings, pJson["MapSettings"], "SWGMapSettings", "SWGMapSettings");
     
     ::SWGSDRangel::setValue(&rig_ctl_server_settings, pJson["RigCtlServerSettings"], "SWGRigCtlServerSettings", "SWGRigCtlServerSettings");
+    
+    ::SWGSDRangel::setValue(&satellite_tracker_settings, pJson["SatelliteTrackerSettings"], "SWGSatelliteTrackerSettings", "SWGSatelliteTrackerSettings");
     
     ::SWGSDRangel::setValue(&star_tracker_settings, pJson["StarTrackerSettings"], "SWGStarTrackerSettings", "SWGStarTrackerSettings");
     
@@ -199,6 +208,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((rig_ctl_server_settings != nullptr) && (rig_ctl_server_settings->isSet())){
         toJsonValue(QString("RigCtlServerSettings"), rig_ctl_server_settings, obj, QString("SWGRigCtlServerSettings"));
+    }
+    if((satellite_tracker_settings != nullptr) && (satellite_tracker_settings->isSet())){
+        toJsonValue(QString("SatelliteTrackerSettings"), satellite_tracker_settings, obj, QString("SWGSatelliteTrackerSettings"));
     }
     if((star_tracker_settings != nullptr) && (star_tracker_settings->isSet())){
         toJsonValue(QString("StarTrackerSettings"), star_tracker_settings, obj, QString("SWGStarTrackerSettings"));
@@ -303,6 +315,16 @@ SWGFeatureSettings::setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_ser
     this->m_rig_ctl_server_settings_isSet = true;
 }
 
+SWGSatelliteTrackerSettings*
+SWGFeatureSettings::getSatelliteTrackerSettings() {
+    return satellite_tracker_settings;
+}
+void
+SWGFeatureSettings::setSatelliteTrackerSettings(SWGSatelliteTrackerSettings* satellite_tracker_settings) {
+    this->satellite_tracker_settings = satellite_tracker_settings;
+    this->m_satellite_tracker_settings_isSet = true;
+}
+
 SWGStarTrackerSettings*
 SWGFeatureSettings::getStarTrackerSettings() {
     return star_tracker_settings;
@@ -363,6 +385,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(rig_ctl_server_settings && rig_ctl_server_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(satellite_tracker_settings && satellite_tracker_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(star_tracker_settings && star_tracker_settings->isSet()){

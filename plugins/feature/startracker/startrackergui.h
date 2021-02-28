@@ -67,6 +67,9 @@ private:
     QTimer m_solarFluxTimer;
     int m_lastFeatureState;
 
+    QChart *m_azElLineChart;
+    QPolarChart *m_azElPolarChart;
+
     QChart m_chart;
     QDateTimeAxis m_chartXAxis;
     QValueAxis m_chartYAxis;
@@ -75,12 +78,13 @@ private:
     QCategoryAxis m_skyTempRAXAxis;
     QValueAxis m_skyTempYAxis;
 
+    QChart m_solarFluxChart;
     QLogValueAxis m_chartSolarFluxXAxis;
+    QValueAxis m_chartSolarFluxYAxis;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
     HttpDownloadManagerGUI m_dlm;
-    QProgressDialog *m_progressDialog;
 
     double m_solarFlux; // 10.7cm/2800MHz
     bool m_solarFluxesValid;
@@ -101,7 +105,8 @@ private:
     QString convertDegreesToText(double degrees);
     bool handleMessage(const Message& message);
     void updateLST();
-    void plotElevationChart();
+    void plotElevationLineChart();
+    void plotElevationPolarChart();
     void plotSkyTemperatureChart();
     void plotSolarFluxChart();
     void plotChart();

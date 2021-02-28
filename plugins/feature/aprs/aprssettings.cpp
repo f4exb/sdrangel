@@ -28,7 +28,7 @@ const QStringList APRSSettings::m_pipeTypes = {
 };
 
 const QStringList APRSSettings::m_pipeURIs = {
-    QStringLiteral("sdrangel.channelrx.packetdemod"),
+    QStringLiteral("sdrangel.channel.packetdemod"),
 };
 
 APRSSettings::APRSSettings()

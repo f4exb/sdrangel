@@ -76,11 +76,15 @@ private:
     QSerialPort m_serialPort;
     QTimer m_pollTimer;
 
+    int m_lastAzimuth;
+    int m_lastElevation;
+
     bool handleMessage(const Message& cmd);
     void applySettings(const GS232ControllerSettings& settings, bool force = false);
     MessageQueue *getMessageQueueToGUI() { return m_msgQueueToGUI; }
-    void setAzimuth(int azimuth, int azimuthOffset);
-    void setAzimuthElevation(int azimuth, int elevation, int azimuthOffset, int elevationOffset);
+    void openSerialPort(const GS232ControllerSettings& settings);
+    void setAzimuth(int azimuth);
+    void setAzimuthElevation(int azimuth, int elevation);
 
 private slots:
     void handleInputMessages();

@@ -34,6 +34,10 @@ struct MapSettings
     QString m_mapBoxApiKey;
     QString m_mapBoxStyles;
     quint32 m_sources;                 // Bitmask of SOURCE_*
+    bool m_displayAllGroundTracks;
+    bool m_displaySelectedGroundTracks;
+    quint32 m_groundTrackColor;
+    quint32 m_predictedGroundTrackColor;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
@@ -56,8 +60,9 @@ struct MapSettings
     static const quint32 SOURCE_ADSB = 0x1;
     static const quint32 SOURCE_APRS = 0x2;
     static const quint32 SOURCE_STAR_TRACKER = 0x4;
-    static const quint32 SOURCE_BEACONS = 0x8;
-    static const quint32 SOURCE_STATION = 0x10;
+    static const quint32 SOURCE_SATELLITE_TRACKER = 0x8;
+    static const quint32 SOURCE_BEACONS = 0x10;
+    static const quint32 SOURCE_STATION = 0x20;
 };
 
 #endif // INCLUDE_FEATURE_MAPSETTINGS_H_

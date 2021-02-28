@@ -39,7 +39,7 @@ void PacketDemodSettings::resetToDefaults()
     m_filterTo = "";
     m_filterPID = "";
 
-    m_rgbColor = QColor(255, 255, 0).rgb();
+    m_rgbColor = QColor(0, 105, 2).rgb();
     m_title = "Packet Demodulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -76,6 +76,9 @@ QByteArray PacketDemodSettings::serialize() const
     s.writeU32(17, m_reverseAPIDeviceIndex);
     s.writeU32(18, m_reverseAPIChannelIndex);
 
+    s.writeFloat(20, m_rfBandwidth);
+    s.writeFloat(21, m_fmDeviation);
+
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
@@ -111,7 +114,7 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
 
-        d.readU32(7, &m_rgbColor);
+        d.readU32(7, &m_rgbColor, QColor(0, 105, 2).rgb());
         d.readString(9, &m_title, "Packet Demodulator");
         d.readBool(14, &m_useReverseAPI, false);
         d.readString(15, &m_reverseAPIAddress, "127.0.0.1");
@@ -127,6 +130,9 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(18, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+
+        d.readFloat(20, &m_rfBandwidth, 12500.0f);
+        d.readFloat(21, &m_fmDeviation, 2500.0f);
 
         for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

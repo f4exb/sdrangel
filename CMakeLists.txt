@@ -312,7 +312,8 @@ if (BUILD_GUI)
                      QuickWidgets
                      Positioning
                      Location
-                     Charts)
+                     Charts
+                     TextToSpeech)
 endif()
 
 # other requirements
@@ -366,6 +367,8 @@ else()
     find_package(LibMbe)
     find_package(SerialDV REQUIRED)
     find_package(LibDSDcc)
+    find_package(Sgp4)
+    find_package(AptDec)
 endif()
 
 # Devices

@@ -1108,6 +1108,127 @@ margin-bottom: 20px;
   },
   "description" : "APRS settings"
 };
+            defs.APTDemodActions = {
+  "properties" : {
+    "aos" : {
+      "$ref" : "#/definitions/APTDemodActions_aos"
+    },
+    "los" : {
+      "$ref" : "#/definitions/APTDemodActions_los"
+    }
+  },
+  "description" : "APTDemod"
+};
+            defs.APTDemodActions_aos = {
+  "properties" : {
+    "satelliteName" : {
+      "type" : "string",
+      "description" : "Name of the satellite"
+    },
+    "northToSouthPass" : {
+      "type" : "integer",
+      "description" : "Satellite is passing from the North to the South (1) or South to North (0)"
+    }
+  },
+  "description" : "Acquisition of signal"
+};
+            defs.APTDemodActions_los = {
+  "properties" : {
+    "satelliteName" : {
+      "type" : "string",
+      "description" : "Name of the satellite"
+    }
+  },
+  "description" : "Loss of signal"
+};
+            defs.APTDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz"
+    },
+    "fmDeviation" : {
+      "type" : "integer",
+      "description" : "frequency deviation in Hz"
+    },
+    "cropNoise" : {
+      "type" : "integer",
+      "description" : "crop noise from top and bottom of image"
+    },
+    "denoise" : {
+      "type" : "integer",
+      "description" : "apply denoise filter to image"
+    },
+    "linearEqualise" : {
+      "type" : "integer",
+      "description" : "apply linear equalisation to image"
+    },
+    "histogramEqualise" : {
+      "type" : "integer",
+      "description" : "apply histogram equalisation to image"
+    },
+    "precipitationOverlay" : {
+      "type" : "integer",
+      "description" : "create colour overlay of precipitation"
+    },
+    "flip" : {
+      "type" : "integer",
+      "description" : "flip image for South to North passes"
+    },
+    "channels" : {
+      "type" : "integer",
+      "description" : "which channel to display (0=both, 1=A, 2=B)"
+    },
+    "decodeEnabled" : {
+      "type" : "integer",
+      "description" : "controls whether the decoder is enabled"
+    },
+    "autoSave" : {
+      "type" : "integer",
+      "description" : "automatically save images when acquisition is stopped"
+    },
+    "autoSavePath" : {
+      "type" : "string",
+      "description" : "directory to automatically save images in"
+    },
+    "autoSaveMinScanLines" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "APTDemod"
+};
             defs.ATVDemodSettings = {
   "properties" : {
     "fpsIndex" : {
@@ -2411,6 +2532,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the channel index from where the message comes from."
     },
+    "APTDemodActions" : {
+      "$ref" : "#/definitions/APTDemodActions"
+    },
     "FileSinkActions" : {
       "$ref" : "#/definitions/FileSinkActions"
     },
@@ -2658,6 +2782,9 @@ margin-bottom: 20px;
     },
     "AMModSettings" : {
       "$ref" : "#/definitions/AMModSettings"
+    },
+    "APTDemodSettings" : {
+      "$ref" : "#/definitions/APTDemodSettings"
     },
     "ATVDemodSettings" : {
       "$ref" : "#/definitions/ATVDemodSettings"
@@ -4188,6 +4315,9 @@ margin-bottom: 20px;
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
     },
+    "SatelliteTrackerSettings" : {
+      "$ref" : "#/definitions/SatelliteTrackerSettings"
+    },
     "StarTrackerSettings" : {
       "$ref" : "#/definitions/StarTrackerSettings"
     },
@@ -4945,6 +5075,22 @@ margin-bottom: 20px;
     "elevationOffset" : {
       "type" : "integer",
       "description" : "Elevation offset in degrees"
+    },
+    "azimuthMin" : {
+      "type" : "integer",
+      "description" : "Minimum azimuth the controller will output"
+    },
+    "azimuthMax" : {
+      "type" : "integer",
+      "description" : "Maximum azimuth the controller will output"
+    },
+    "elevationMin" : {
+      "type" : "integer",
+      "description" : "Minimum elevation the controller will output"
+    },
+    "elevationMax" : {
+      "type" : "integer",
+      "description" : "Maximum elevation the controller will output"
     },
     "title" : {
       "type" : "string"
@@ -6267,6 +6413,23 @@ margin-bottom: 20px;
   },
   "description" : "Map"
 };
+            defs.MapCoordinate = {
+  "properties" : {
+    "latitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "altitude" : {
+      "type" : "number",
+      "format" : "float"
+    }
+  },
+  "description" : "A map coordinate"
+};
             defs.MapItem = {
   "required" : [ "name" ],
   "properties" : {
@@ -6303,6 +6466,20 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Altitude / height above sea level in metres"
+    },
+    "track" : {
+      "type" : "array",
+      "description" : "Track/path the item has taken",
+      "items" : {
+        "$ref" : "#/definitions/MapCoordinate"
+      }
+    },
+    "predictedTrack" : {
+      "type" : "array",
+      "description" : "Track/path the item is predicted to take",
+      "items" : {
+        "$ref" : "#/definitions/MapCoordinate"
+      }
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -6343,6 +6520,20 @@ margin-bottom: 20px;
       "type" : "number",
       "format" : "float",
       "description" : "Altitude / height above sea level in metres"
+    },
+    "track" : {
+      "type" : "array",
+      "description" : "Track/path the item has taken",
+      "items" : {
+        "$ref" : "#/definitions/MapCoordinate"
+      }
+    },
+    "predictedTrack" : {
+      "type" : "array",
+      "description" : "Track/path the item is predicted to take",
+      "items" : {
+        "$ref" : "#/definitions/MapCoordinate"
+      }
     }
   },
   "description" : "An item to draw on the map. Set image to an empty string to remove item from the map."
@@ -8360,6 +8551,152 @@ margin-bottom: 20px;
     }
   },
   "description" : "Information about a logical device available from an attached hardware device that can be used as a sampling device"
+};
+            defs.SatelliteTrackerSettings = {
+  "properties" : {
+    "latitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Latitude in decimal degrees (North positive) of antenna location"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Longitude in decimal degrees (East positive) of antenna location"
+    },
+    "heightAboveSeaLevel" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Height above sea level in metres of antenna location"
+    },
+    "target" : {
+      "type" : "string",
+      "description" : "Target satellite"
+    },
+    "satellites" : {
+      "type" : "array",
+      "description" : "Satellites to track",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "tles" : {
+      "type" : "array",
+      "description" : "Two line element files",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "dateTime" : {
+      "type" : "string",
+      "description" : "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+    },
+    "minAOSElevation" : {
+      "type" : "integer",
+      "description" : "Minimum elevation in degrees for AOS"
+    },
+    "minPassElevation" : {
+      "type" : "integer",
+      "description" : "Minimum elevation in degrees for a pass"
+    },
+    "rotatorMaxAzimuth" : {
+      "type" : "integer",
+      "description" : "Maximum azimuth in degrees for the rotator"
+    },
+    "rotatorMaxElevation" : {
+      "type" : "integer",
+      "description" : "Maximum elevation in degrees for elevation"
+    },
+    "azElUnits" : {
+      "type" : "integer",
+      "description" : "DMS (0) DM (1) D (2) Decimal (3)"
+    },
+    "groundTrackPoints" : {
+      "type" : "integer",
+      "description" : "Number of points used to draw ground tracks"
+    },
+    "dateFormat" : {
+      "type" : "string"
+    },
+    "utc" : {
+      "type" : "integer",
+      "description" : "Times are UTC (1) or local (0)"
+    },
+    "updatePeriod" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time in seconds between each calculation of the target's position"
+    },
+    "dopplerPeriod" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Time in seconds between each Doppler correction"
+    },
+    "predictionPeriod" : {
+      "type" : "integer",
+      "description" : "How many days ahead to predict passes in"
+    },
+    "passStartTime" : {
+      "type" : "string",
+      "description" : "Time after which a pass must start"
+    },
+    "passFinishTime" : {
+      "type" : "string",
+      "description" : "Time before which a pass must finish"
+    },
+    "defaultFrequency" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Frequency to use for Doppler and free space path loss calculations in Satellite data table"
+    },
+    "drawOnMap" : {
+      "type" : "integer",
+      "description" : "Draw satellites on the Map (1 for yes, 0 for no)"
+    },
+    "autoTarget" : {
+      "type" : "integer",
+      "description" : "Automatically select target on AOS (1 for yes, 0 for no)"
+    },
+    "aosSpeech" : {
+      "type" : "string",
+      "description" : "Speech warning on AOS"
+    },
+    "losSpeech" : {
+      "type" : "string",
+      "description" : "Speech warning on LOS"
+    },
+    "aosCommand" : {
+      "type" : "string",
+      "description" : "Command to execute on AOS for all satellites"
+    },
+    "losCommand" : {
+      "type" : "string",
+      "description" : "Command to execute on LOS for all satellites"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "Satellite Tracker settings"
 };
             defs.SigMFFileInputActions = {
   "properties" : {
@@ -45286,7 +45623,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-02-11T23:51:16.152+01:00
+              Generated 2021-02-26T21:05:20.434+01:00
             </div>
           </div>
       </div>

@@ -1,8 +1,8 @@
-import QtQuick 2.12
-import QtQuick.Window 2.12
-import QtQuick.Controls 2.12
-import QtLocation 5.12
-import QtPositioning 5.12
+import QtQuick 2.14
+import QtQuick.Window 2.14
+import QtQuick.Controls 2.14
+import QtLocation 5.14
+import QtPositioning 5.14
 
 Item {
     id: qmlMap
@@ -14,16 +14,16 @@ Item {
     function createMap(pluginParameters) {
         var parameters = new Array()
         for (var prop in pluginParameters) {
-            var parameter = Qt.createQmlObject('import QtLocation 5.6; PluginParameter{ name: "'+ prop + '"; value: "' + pluginParameters[prop]+'"}', qmlMap)
+            var parameter = Qt.createQmlObject('import QtLocation 5.14; PluginParameter{ name: "'+ prop + '"; value: "' + pluginParameters[prop]+'"}', qmlMap)
             parameters.push(parameter)
         }
         qmlMap.mapParameters = parameters
 
         var plugin
         if (mapParameters && mapParameters.length > 0)
-            plugin = Qt.createQmlObject ('import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"; parameters: qmlMap.mapParameters}', qmlMap)
+            plugin = Qt.createQmlObject ('import QtLocation 5.14; Plugin{ name:"' + mapProvider + '"; parameters: qmlMap.mapParameters}', qmlMap)
         else
-            plugin = Qt.createQmlObject ('import QtLocation 5.12; Plugin{ name:"' + mapProvider + '"}', qmlMap)
+            plugin = Qt.createQmlObject ('import QtLocation 5.14; Plugin{ name:"' + mapProvider + '"}', qmlMap)
         if (mapPtr) {
             // Objects aren't destroyed immediately, so rename the old
             // map, so any C++ code that calls findChild("map") doesn't find
@@ -66,6 +66,27 @@ Item {
             center: QtPositioning.coordinate(51.5, 0.125) // London
             zoomLevel: 10
 
+            // Tracks first, so drawn under other items
+            MapItemView {
+                model: mapModel
+                delegate: groundTrack1Component
+            }
+
+            MapItemView {
+                model: mapModel
+                delegate: groundTrack2Component
+            }
+
+            MapItemView {
+                model: mapModel
+                delegate: predictedGroundTrack1Component
+            }
+
+            MapItemView {
+                model: mapModel
+                delegate: predictedGroundTrack2Component
+            }
+
             MapItemView {
                 model: mapModel
                 delegate: mapComponent
@@ -73,10 +94,23 @@ Item {
 
             onZoomLevelChanged: {
                 mapZoomLevel = zoomLevel
+            }
 
+            // The map displays MapPolyLines in the wrong place (+360 degrees) if
+            // they start to the left of the visible region, so we need to
+            // split them so they don't, each time the visible region is changed. meh.
+            onCenterChanged: {
+                mapModel.viewChanged(visibleRegion.boundingGeoRectangle().bottomLeft.longitude, visibleRegion.boundingGeoRectangle().bottomRight.longitude);
             }
 
         }
+    }
+
+    function mapRect() {
+        if (mapPtr)
+            return mapPtr.visibleRegion.boundingGeoRectangle();
+        else
+            return null;
     }
 
     Component {
@@ -87,6 +121,7 @@ Item {
             anchorPoint.y: image.height/2
             coordinate: position
             zoomLevel: mapZoomLevel > mapImageMinZoom ? mapZoomLevel : mapImageMinZoom
+            autoFadeIn: false               // not in 5.12
 
             sourceItem: Grid {
                 id: gridItem
@@ -182,6 +217,48 @@ Item {
                     }
                 }
             }
+        }
+    }
+
+    Component {
+        id: predictedGroundTrack1Component
+        MapPolyline {
+            line.width: 2
+            line.color: predictedGroundTrackColor
+            path: predictedGroundTrack1
+            autoFadeIn: false
+        }
+    }
+
+    // Part of the line that crosses edge of map
+    Component {
+        id: predictedGroundTrack2Component
+        MapPolyline {
+            line.width: 2
+            line.color: predictedGroundTrackColor
+            path: predictedGroundTrack2
+            autoFadeIn: false
+        }
+    }
+
+    Component {
+        id: groundTrack1Component
+        MapPolyline {
+            line.width: 2
+            line.color: groundTrackColor
+            path: groundTrack1
+            autoFadeIn: false
+        }
+    }
+
+    // Part of the line that crosses edge of map
+    Component {
+        id: groundTrack2Component
+        MapPolyline {
+            line.width: 2
+            line.color: groundTrackColor
+            path: groundTrack2
+            autoFadeIn: false
         }
     }
 

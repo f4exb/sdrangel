@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>462</width>
-    <height>689</height>
+    <width>481</width>
+    <height>750</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -42,7 +42,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>461</width>
+     <width>471</width>
      <height>41</height>
     </rect>
    </property>
@@ -82,9 +82,15 @@
       </item>
       <item>
        <widget class="QLineEdit" name="find">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
-          <width>150</width>
+          <width>100</width>
           <height>0</height>
          </size>
         </property>
@@ -92,19 +98,6 @@
          <string>Enter name of object to find, latitude and longitude, Maidenhead locator or an address</string>
         </property>
        </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
       <item>
        <widget class="QComboBox" name="mapTypes">
@@ -120,7 +113,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="maidenhead">
+       <widget class="QToolButton" name="maidenhead">
         <property name="toolTip">
          <string>Maidenhead locator conversion</string>
         </property>
@@ -134,7 +127,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="beacons">
+       <widget class="QToolButton" name="beacons">
         <property name="toolTip">
          <string>Display Beacon dialog</string>
         </property>
@@ -168,7 +161,57 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="deleteAll">
+       <widget class="ButtonSwitch" name="displaySelectedGroundTracks">
+        <property name="font">
+         <font>
+          <family>Adobe Devanagari</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Display ground tracks for selected item</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/logarithmic.png</normaloff>:/logarithmic.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="displayAllGroundTracks">
+        <property name="font">
+         <font>
+          <family>Adobe Devanagari</family>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Display all ground tracks</string>
+        </property>
+        <property name="text">
+         <string>^</string>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/groundtracks.png</normaloff>:/map/icons/groundtracks.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="deleteAll">
         <property name="toolTip">
          <string>Delete all items on the map</string>
         </property>
@@ -182,7 +225,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="displaySettings">
+       <widget class="QToolButton" name="displaySettings">
         <property name="toolTip">
          <string>Show settings dialog</string>
         </property>
@@ -203,9 +246,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>100</y>
-     <width>461</width>
-     <height>581</height>
+     <y>60</y>
+     <width>471</width>
+     <height>681</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -244,7 +287,7 @@
       <property name="minimumSize">
        <size>
         <width>100</width>
-        <height>500</height>
+        <height>590</height>
        </size>
       </property>
       <property name="toolTip">
@@ -293,6 +336,7 @@
  </tabstops>
  <resources>
   <include location="../../../sdrgui/resources/res.qrc"/>
+  <include location="icons.qrc"/>
  </resources>
  <connections/>
 </ui>

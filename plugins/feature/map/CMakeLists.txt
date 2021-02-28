@@ -34,6 +34,7 @@ if(NOT SERVER_MODE)
         mapbeacondialog.cpp
         mapbeacondialog.ui
         map.qrc
+        icons.qrc
     )
     set(map_HEADERS
         ${map_HEADERS}

@@ -26,6 +26,10 @@
 #include "SWGAMModReport.h"
 #include "SWGAMModSettings.h"
 #include "SWGAPRSSettings.h"
+#include "SWGAPTDemodActions.h"
+#include "SWGAPTDemodActions_aos.h"
+#include "SWGAPTDemodActions_los.h"
+#include "SWGAPTDemodSettings.h"
 #include "SWGATVDemodSettings.h"
 #include "SWGATVModReport.h"
 #include "SWGATVModSettings.h"
@@ -146,6 +150,7 @@
 #include "SWGLocationInformation.h"
 #include "SWGLoggingInfo.h"
 #include "SWGMapActions.h"
+#include "SWGMapCoordinate.h"
 #include "SWGMapItem.h"
 #include "SWGMapItem_2.h"
 #include "SWGMapSettings.h"
@@ -197,6 +202,7 @@
 #include "SWGSSBModSettings.h"
 #include "SWGSampleRate.h"
 #include "SWGSamplingDevice.h"
+#include "SWGSatelliteTrackerSettings.h"
 #include "SWGSigMFFileInputActions.h"
 #include "SWGSigMFFileInputReport.h"
 #include "SWGSigMFFileInputSettings.h"
@@ -284,6 +290,18 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAPRSSettings").compare(type) == 0) {
       return new SWGAPRSSettings();
+    }
+    if(QString("SWGAPTDemodActions").compare(type) == 0) {
+      return new SWGAPTDemodActions();
+    }
+    if(QString("SWGAPTDemodActions_aos").compare(type) == 0) {
+      return new SWGAPTDemodActions_aos();
+    }
+    if(QString("SWGAPTDemodActions_los").compare(type) == 0) {
+      return new SWGAPTDemodActions_los();
+    }
+    if(QString("SWGAPTDemodSettings").compare(type) == 0) {
+      return new SWGAPTDemodSettings();
     }
     if(QString("SWGATVDemodSettings").compare(type) == 0) {
       return new SWGATVDemodSettings();
@@ -645,6 +663,9 @@ namespace SWGSDRangel {
     if(QString("SWGMapActions").compare(type) == 0) {
       return new SWGMapActions();
     }
+    if(QString("SWGMapCoordinate").compare(type) == 0) {
+      return new SWGMapCoordinate();
+    }
     if(QString("SWGMapItem").compare(type) == 0) {
       return new SWGMapItem();
     }
@@ -797,6 +818,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
       return new SWGSamplingDevice();
+    }
+    if(QString("SWGSatelliteTrackerSettings").compare(type) == 0) {
+      return new SWGSatelliteTrackerSettings();
     }
     if(QString("SWGSigMFFileInputActions").compare(type) == 0) {
       return new SWGSigMFFileInputActions();

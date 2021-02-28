@@ -3,8 +3,15 @@
 <h2>Introduction</h2>
 
 The Map Feature plugin displays a world map. It can display street maps, satellite imagery as well as custom map types.
-On top of this, it can plot data from other plugins, such as APRS symbols from the APRS Feature, aircraft from the ADS-B Demodulator
-or the Sun, Moon and Stars from the Star Tracker. It can also display beacon locations based on the IARU Region 1 beacon database.
+On top of this, it can plot data from other plugins, such as:
+
+* APRS symbols from the APRS Feature,
+* Aircraft from the ADS-B Demodulator,
+* Satellites from the Satellite Tracker,
+* The Sun, Moon and Stars from the Star Tracker,
+* Beacons based on the IARU Region 1 beacon database.
+
+It can also create tracks showing the path aircraft and APRS objects have taken, as well as predicted paths for satellites.
 
 ![Map feature](../../../doc/img/Map_plugin_beacons.png)
 
@@ -44,15 +51,24 @@ The beacons will then be displayed in the table and on the map.
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>6: Delete</h3>
+<h3>6: Display tracks for selected object</h3>
+
+When checked, displays the track (taken or predicted) for the selected object.
+
+<h3>7: Display tracks for all objects</h3>
+
+When checked, displays the track (taken or predicted) for the all objects.
+
+<h3>8: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>7: Display settings</h3>
+<h3>9: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog, which allows setting:
 
 * Which data the Map will display.
+* The colour of the taken and predicted tracks.
 * Which Map provider will be used to source the map image.
 
 In order to display Mapbox maps, you will need to enter an API Key. A key can be obtained by registering at: http://www.mapbox.com/

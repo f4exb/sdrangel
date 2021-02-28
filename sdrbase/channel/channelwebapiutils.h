@@ -18,6 +18,8 @@
 #ifndef SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
 #define SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_
 
+#include <QString>
+
 #include "export.h"
 
 class SDRBASE_API ChannelWebAPIUtils
@@ -25,6 +27,13 @@ class SDRBASE_API ChannelWebAPIUtils
 public:
     static bool getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz);
     static bool setCenterFrequency(unsigned int deviceIndex, double frequencyInHz);
+    static bool run(unsigned int deviceIndex, int subsystemIndex=0);
+    static bool stop(unsigned int deviceIndex, int subsystemIndex=0);
+    static bool getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset);
+    static bool setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset);
+    static bool startStopFileSinks(unsigned int deviceIndex, bool start);
+    static bool satelliteAOS(const QString name, bool northToSouthPass);
+    static bool satelliteLOS(const QString name);
 };
 
 #endif // SDRBASE_CHANNEL_CHANNELWEBAPIUTILS_H_

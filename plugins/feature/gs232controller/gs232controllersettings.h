@@ -36,6 +36,10 @@ struct GS232ControllerSettings
     QString m_target;           // Plugin to get az/el from. E.g: "R0:0 ADSBDemod". Use a string, so can be set via WebAPI
     int m_azimuthOffset;
     int m_elevationOffset;
+    int m_azimuthMin;
+    int m_azimuthMax;
+    int m_elevationMin;
+    int m_elevationMax;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;

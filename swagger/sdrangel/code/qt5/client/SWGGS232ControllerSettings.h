@@ -66,6 +66,18 @@ public:
     qint32 getElevationOffset();
     void setElevationOffset(qint32 elevation_offset);
 
+    qint32 getAzimuthMin();
+    void setAzimuthMin(qint32 azimuth_min);
+
+    qint32 getAzimuthMax();
+    void setAzimuthMax(qint32 azimuth_max);
+
+    qint32 getElevationMin();
+    void setElevationMin(qint32 elevation_min);
+
+    qint32 getElevationMax();
+    void setElevationMax(qint32 elevation_max);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -114,6 +126,18 @@ private:
 
     qint32 elevation_offset;
     bool m_elevation_offset_isSet;
+
+    qint32 azimuth_min;
+    bool m_azimuth_min_isSet;
+
+    qint32 azimuth_max;
+    bool m_azimuth_max_isSet;
+
+    qint32 elevation_min;
+    bool m_elevation_min_isSet;
+
+    qint32 elevation_max;
+    bool m_elevation_max_isSet;
 
     QString* title;
     bool m_title_isSet;

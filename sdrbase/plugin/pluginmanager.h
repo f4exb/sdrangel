@@ -89,6 +89,9 @@ public:
 	const PluginInterface *getDevicePluginInterface(const QString& deviceId) const;
 	const PluginInterface *getFeaturePluginInterface(const QString& featureIdURI) const;
 
+    // Map channel/feature URI to short form Id
+    QString uriToId(const QString& uri) const;
+
 	static const QString& getFileInputDeviceId() { return m_fileInputDeviceTypeID; }
     static const QString& getTestMIMODeviceId() { return m_testMIMODeviceTypeID; }
 	static const QString& getFileOutputDeviceId() { return m_fileOutputDeviceTypeID; }

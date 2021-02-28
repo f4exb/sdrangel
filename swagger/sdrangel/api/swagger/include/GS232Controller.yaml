@@ -25,6 +25,18 @@ GS232ControllerSettings:
     elevationOffset:
       description: Elevation offset in degrees
       type: integer
+    azimuthMin:
+      description: Minimum azimuth the controller will output
+      type: integer
+    azimuthMax:
+      description: Maximum azimuth the controller will output
+      type: integer
+    elevationMin:
+      description: Minimum elevation the controller will output
+      type: integer
+    elevationMax:
+      description: Maximum elevation the controller will output
+      type: integer
     title:
       type: string
     rgbColor:

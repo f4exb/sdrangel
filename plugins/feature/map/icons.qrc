@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/map/">
+    <file>icons/groundtracks.png</file>
+  </qresource>
+</RCC>

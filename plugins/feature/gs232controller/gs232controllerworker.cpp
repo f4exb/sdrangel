@@ -16,6 +16,8 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include <QDebug>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -35,7 +37,9 @@ GS232ControllerWorker::GS232ControllerWorker() :
     m_msgQueueToFeature(nullptr),
     m_msgQueueToGUI(nullptr),
     m_running(false),
-    m_mutex(QMutex::Recursive)
+    m_mutex(QMutex::Recursive),
+    m_lastAzimuth(-1),
+    m_lastElevation(-1)
 {
     connect(&m_pollTimer, SIGNAL(timeout()), this, SLOT(update()));
     m_pollTimer.start(1000);
@@ -57,6 +61,7 @@ bool GS232ControllerWorker::startWork()
     QMutexLocker mutexLocker(&m_mutex);
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     connect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readSerialData);
+    openSerialPort(m_settings);
     m_running = true;
     return m_running;
 }
@@ -64,6 +69,9 @@ bool GS232ControllerWorker::startWork()
 void GS232ControllerWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    // Close serial port as USB/controller activity can create RFI
+    if (m_serialPort.isOpen())
+        m_serialPort.close();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     disconnect(&m_serialPort, &QSerialPort::readyRead, this, &GS232ControllerWorker::readSerialData);
     m_running = false;
@@ -104,71 +112,78 @@ void GS232ControllerWorker::applySettings(const GS232ControllerSettings& setting
             << " m_elevation: " << settings.m_elevation
             << " m_azimuthOffset: " << settings.m_azimuthOffset
             << " m_elevationOffset: " << settings.m_elevationOffset
+            << " m_azimuthMin: " << settings.m_azimuthMin
+            << " m_azimuthMax: " << settings.m_azimuthMax
+            << " m_elevationMin: " << settings.m_elevationMin
+            << " m_elevationMax: " << settings.m_elevationMax
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
             << " force: " << force;
 
     if ((settings.m_serialPort != m_settings.m_serialPort) || force)
     {
-        if (m_serialPort.isOpen())
-            m_serialPort.close();
-        m_serialPort.setPortName(settings.m_serialPort);
-        m_serialPort.setBaudRate(settings.m_baudRate);
-        if (!m_serialPort.open(QIODevice::ReadWrite))
-        {
-            qCritical() << "GS232ControllerWorker::applySettings: Failed to open serial port " << settings.m_serialPort << ". Error: " << m_serialPort.error();
-            if (m_msgQueueToFeature)
-                m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Failed to open serial port %1: %2").arg(settings.m_serialPort).arg(m_serialPort.error())));
-        }
+        openSerialPort(settings);
     }
     else if ((settings.m_baudRate != m_settings.m_baudRate) || force)
     {
         m_serialPort.setBaudRate(settings.m_baudRate);
     }
 
-    if ((settings.m_elevation != m_settings.m_elevation)
-        || (settings.m_elevationOffset != m_settings.m_elevationOffset)
-        || force)
+    // Apply offset then clamp
+
+    int azimuth = settings.m_azimuth;
+    azimuth += settings.m_azimuthOffset;
+    azimuth = std::max(azimuth, settings.m_azimuthMin);
+    azimuth = std::min(azimuth, settings.m_azimuthMax);
+
+    int elevation = settings.m_elevation;
+    elevation += settings.m_elevationOffset;
+    elevation = std::max(elevation, settings.m_elevationMin);
+    elevation = std::min(elevation, settings.m_elevationMax);
+
+    if (((elevation != m_lastElevation) || force) && (settings.m_elevationMax != 0))
     {
-        setAzimuthElevation(settings.m_azimuth, settings.m_elevation, settings.m_azimuthOffset, settings.m_elevationOffset);
+        setAzimuthElevation(azimuth, elevation);
     }
-    else if ((settings.m_azimuth != m_settings.m_azimuth)
-        || (settings.m_azimuthOffset != m_settings.m_azimuthOffset)
-        || force)
+    else if ((azimuth != m_lastAzimuth) || force)
     {
-        setAzimuth(settings.m_azimuth, settings.m_azimuthOffset);
+        setAzimuth(azimuth);
     }
 
     m_settings = settings;
 }
 
-void GS232ControllerWorker::setAzimuth(int azimuth, int azimuthOffset)
+void GS232ControllerWorker::openSerialPort(const GS232ControllerSettings& settings)
 {
-   azimuth += azimuthOffset;
-   if (azimuth < 0)
-       azimuth = 0;
-   else if (azimuth > 450)
-       azimuth = 450;
+    if (m_serialPort.isOpen())
+        m_serialPort.close();
+    m_serialPort.setPortName(settings.m_serialPort);
+    m_serialPort.setBaudRate(settings.m_baudRate);
+    if (!m_serialPort.open(QIODevice::ReadWrite))
+    {
+        qCritical() << "GS232ControllerWorker::openSerialPort: Failed to open serial port " << settings.m_serialPort << ". Error: " << m_serialPort.error();
+        if (m_msgQueueToFeature)
+            m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Failed to open serial port %1: %2").arg(settings.m_serialPort).arg(m_serialPort.error())));
+    }
+    m_lastAzimuth = -1;
+    m_lastElevation = -1;
+}
+
+void GS232ControllerWorker::setAzimuth(int azimuth)
+{
    QString cmd = QString("M%1\r\n").arg(azimuth, 3, 10, QLatin1Char('0'));
    QByteArray data = cmd.toLatin1();
    m_serialPort.write(data);
+   m_lastAzimuth = azimuth;
 }
 
-void GS232ControllerWorker::setAzimuthElevation(int azimuth, int elevation, int azimuthOffset, int elevationOffset)
+void GS232ControllerWorker::setAzimuthElevation(int azimuth, int elevation)
 {
-   azimuth += azimuthOffset;
-   if (azimuth < 0)
-       azimuth = 0;
-   else if (azimuth > 450)
-       azimuth = 450;
-   elevation += elevationOffset;
-   if (elevation < 0)
-       elevation = 0;
-   else if (elevation > 180)
-       elevation = 180;
    QString cmd = QString("W%1 %2\r\n").arg(azimuth, 3, 10, QLatin1Char('0')).arg(elevation, 3, 10, QLatin1Char('0'));
    QByteArray data = cmd.toLatin1();
    m_serialPort.write(data);
+   m_lastAzimuth = azimuth;
+   m_lastElevation = elevation;
 }
 
 void GS232ControllerWorker::readSerialData()

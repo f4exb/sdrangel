@@ -54,6 +54,23 @@ The azimuth offset specifies an angle in degrees that is added to the target azi
 
 The elevation offset specifies an angle in degrees that is added to the target elevation before sending to the controller. This allows for a misalignment of the rotator to be corrected.
 
+<h3>11 and 12: Azimuth Min and Max</h3>
+
+The azimuth min and max values specify the minimum and maximum azimuth values (after offset has been applied), that will be sent to the rotator.
+These values can be used to prevent the rotator from rotating an antenna in to an obstable.
+
+<h3>13 and 14: Elevation Min and Max</h3>
+
+The elevation min and max values specify the minimum and maximum elevation values (after offset has been applied), that will be sent to the rotator.
+These values can be used to prevent the rotator from rotating an antenna in to an obstable.
+If the maximum elevation is set to 0, the controller will only use the M GS-232 command, rather than M and W.
+
+<h2>GS-232 Protocol Implementation</h2>
+
+The controller uses the Waaa eee command when elevation needs to be set.
+When only azimuth needs to be set, the Maaa command is used.
+The C2 command is used to read current azimuth and elevation. A response of AZ=aaaEL=eee is expected.
+
 <h2>API</h2>
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to set the azimuth and elevation from the command line:

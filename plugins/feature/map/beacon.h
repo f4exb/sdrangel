@@ -74,6 +74,16 @@ struct Beacon {
             return QString("%1 kHz").arg(m_frequency/1000.0, 0, ',', 3);
     }
 
+    QString getFrequencyShortText()
+    {
+        if (m_frequency > 1000000000)
+            return QString("%1G").arg(m_frequency/1000000000.0, 0, ',', 1);
+        else if (m_frequency > 1000000)
+            return QString("%1M").arg(std::floor(m_frequency/1000000.0), 0, ',', 0);
+        else
+            return QString("%1k").arg(std::floor(m_frequency/1000.0), 0, ',', 0);
+    }
+
     // Uses ; rather than ,
     static QList<Beacon *> *readIARUCSV(const QString &filename)
     {

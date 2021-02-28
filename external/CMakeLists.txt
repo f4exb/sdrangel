@@ -359,6 +359,57 @@ if ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
     endif ()
 endif ((NOT LIBDSDCC_FOUND OR LIBDSDCC_EXTERNAL) AND LIBMBE_FOUND)
 
+# For APT demodulator
+set(APT_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/apt.lib" CACHE INTERNAL "")
+ExternalProject_Add(apt
+        GIT_REPOSITORY https://github.com/srcejon/aptdec.git
+        GIT_TAG libaptdec
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/apt"
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+        BUILD_BYPRODUCTS "${APT_LIBRARIES}"
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+ExternalProject_Get_Property(apt source_dir binary_dir)
+set(APT_FOUND ON CACHE INTERNAL "")
+set(APT_EXTERNAL ON CACHE INTERNAL "")
+set(APT_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/apt/src/apt/src" CACHE INTERNAL "")
+if (WIN32)
+    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/apt${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+elseif (APPLE)
+    set(APT_LIBRARIES "${binary_dir}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+            FILES_MATCHING PATTERN "libapt*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+endif ()
+
+# For Satellite Tracker feature
+# No tags for this in github - but doesn't change often
+# Fails to build with CMAKE_INTERPROCEDURAL_OPTIMIZATION=ON on Windows
+set(SGP4_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/sgp4s.lib" CACHE INTERNAL "")
+ExternalProject_Add(sgp4
+        GIT_REPOSITORY https://github.com/dnwrnr/sgp4.git
+        PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sgp4"
+        CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+        BUILD_BYPRODUCTS "${SGP4_LIBRARIES}"
+        INSTALL_COMMAND ""
+        TEST_COMMAND ""
+        )
+ExternalProject_Get_Property(sgp4 source_dir binary_dir)
+set(SGP4_FOUND ON CACHE INTERNAL "")
+set(SGP4_EXTERNAL ON CACHE INTERNAL "")
+set(SGP4_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sgp4/src/sgp4/libsgp4" CACHE INTERNAL "")
+if (WIN32)
+    install(FILES "${SDRANGEL_BINARY_BIN_DIR}/sgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+elseif (APPLE)
+    set(SGP4_LIBRARIES "${binary_dir}/libsgp4s${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+            FILES_MATCHING PATTERN "libsgp4s*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+endif ()
+
+
 # requirements needed by many packages on windows
 if (WIN32)
     ExternalProject_Add(pthreads4w

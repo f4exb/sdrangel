@@ -182,6 +182,10 @@ void GS232ControllerGUI::displaySettings()
     ui->targets->setCurrentIndex(ui->targets->findText(m_settings.m_target));
     ui->azimuthOffset->setValue(m_settings.m_azimuthOffset);
     ui->elevationOffset->setValue(m_settings.m_elevationOffset);
+    ui->azimuthMin->setValue(m_settings.m_azimuthMin);
+    ui->azimuthMax->setValue(m_settings.m_azimuthMax);
+    ui->elevationMin->setValue(m_settings.m_elevationMin);
+    ui->elevationMax->setValue(m_settings.m_elevationMax);
     blockApplySettings(false);
 }
 
@@ -314,6 +318,30 @@ void GS232ControllerGUI::on_azimuthOffset_valueChanged(int value)
 void GS232ControllerGUI::on_elevationOffset_valueChanged(int value)
 {
     m_settings.m_elevationOffset = value;
+    applySettings();
+}
+
+void GS232ControllerGUI::on_azimuthMin_valueChanged(int value)
+{
+    m_settings.m_azimuthMin = value;
+    applySettings();
+}
+
+void GS232ControllerGUI::on_azimuthMax_valueChanged(int value)
+{
+    m_settings.m_azimuthMax = value;
+    applySettings();
+}
+
+void GS232ControllerGUI::on_elevationMin_valueChanged(int value)
+{
+    m_settings.m_elevationMin = value;
+    applySettings();
+}
+
+void GS232ControllerGUI::on_elevationMax_valueChanged(int value)
+{
+    m_settings.m_elevationMax = value;
     applySettings();
 }
 

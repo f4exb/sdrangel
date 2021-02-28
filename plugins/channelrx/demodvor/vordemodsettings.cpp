@@ -34,7 +34,7 @@ void VORDemodSettings::resetToDefaults()
     m_squelch = -60.0;
     m_volume = 2.0;
     m_audioMute = false;
-    m_rgbColor = QColor(255, 255, 0).rgb();
+    m_rgbColor = QColor(255, 255, 102).rgb();
     m_title = "VOR Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
     m_streamIndex = 0;
@@ -117,7 +117,7 @@ bool VORDemodSettings::deserialize(const QByteArray& data)
             m_channelMarker->deserialize(bytetmp);
         }
 
-        d.readU32(7, &m_rgbColor);
+        d.readU32(7, &m_rgbColor, QColor(255, 255, 102).rgb());
         d.readString(9, &m_title, "VOR Demodulator");
         d.readString(11, &m_audioDeviceName, AudioDeviceManager::m_defaultDeviceName);
         d.readBool(14, &m_useReverseAPI, false);

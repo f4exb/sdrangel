@@ -25,20 +25,24 @@
 #include "SWGDeviceSettings.h"
 #include "SWGChannelSettings.h"
 #include "SWGDeviceSet.h"
+#include "SWGChannelActions.h"
+#include "SWGFileSinkActions.h"
 
 #include "maincore.h"
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
+#include "channel/channelutils.h"
 #include "dsp/devicesamplesource.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/devicesamplemimo.h"
 #include "webapi/webapiadapterinterface.h"
 #include "webapi/webapiutils.h"
 
+// Get device center frequency
 bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &frequencyInHz)
 {
     SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
-    SWGSDRangel::SWGErrorResponse errorResponse;
+    QString errorResponse;
     int httpRC;
     DeviceSet *deviceSet;
 
@@ -52,21 +56,21 @@ bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &fr
             deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
             deviceSettingsResponse.setDirection(0);
             DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-            httpRC = source->webapiSettingsGet(deviceSettingsResponse, *errorResponse.getMessage());
+            httpRC = source->webapiSettingsGet(deviceSettingsResponse, errorResponse);
         }
         else if (deviceSet->m_deviceSinkEngine)
         {
             deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
             deviceSettingsResponse.setDirection(1);
             DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
-            httpRC = sink->webapiSettingsGet(deviceSettingsResponse, *errorResponse.getMessage());
+            httpRC = sink->webapiSettingsGet(deviceSettingsResponse, errorResponse);
         }
         else if (deviceSet->m_deviceMIMOEngine)
         {
             deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
             deviceSettingsResponse.setDirection(2);
             DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
-            httpRC = mimo->webapiSettingsGet(deviceSettingsResponse, *errorResponse.getMessage());
+            httpRC = mimo->webapiSettingsGet(deviceSettingsResponse, errorResponse);
         }
         else
         {
@@ -83,7 +87,7 @@ bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &fr
     if (httpRC/100 != 2)
     {
         qWarning("ChannelWebAPIUtils::getCenterFrequency: get device frequency error %d: %s",
-            httpRC, qPrintable(*errorResponse.getMessage()));
+            httpRC, qPrintable(errorResponse));
         return false;
     }
 
@@ -91,10 +95,11 @@ bool ChannelWebAPIUtils::getCenterFrequency(unsigned int deviceIndex, double &fr
     return WebAPIUtils::getSubObjectDouble(*jsonObj, "centerFrequency", frequencyInHz);
 }
 
+// Set device center frequency
 bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double frequencyInHz)
 {
     SWGSDRangel::SWGDeviceSettings deviceSettingsResponse;
-    SWGSDRangel::SWGErrorResponse errorResponse;
+    QString errorResponse;
     int httpRC;
     DeviceSet *deviceSet;
 
@@ -108,21 +113,21 @@ bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double fre
             deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
             deviceSettingsResponse.setDirection(0);
             DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
-            httpRC = source->webapiSettingsGet(deviceSettingsResponse, *errorResponse.getMessage());
+            httpRC = source->webapiSettingsGet(deviceSettingsResponse, errorResponse);
         }
         else if (deviceSet->m_deviceSinkEngine)
         {
             deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
             deviceSettingsResponse.setDirection(1);
             DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
-            httpRC = sink->webapiSettingsGet(deviceSettingsResponse, *errorResponse.getMessage());
+            httpRC = sink->webapiSettingsGet(deviceSettingsResponse, errorResponse);
         }
         else if (deviceSet->m_deviceMIMOEngine)
         {
             deviceSettingsResponse.setDeviceHwType(new QString(deviceSet->m_deviceAPI->getHardwareId()));
             deviceSettingsResponse.setDirection(2);
             DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
-            httpRC = mimo->webapiSettingsGet(deviceSettingsResponse, *errorResponse.getMessage());
+            httpRC = mimo->webapiSettingsGet(deviceSettingsResponse, errorResponse);
         }
         else
         {
@@ -139,7 +144,7 @@ bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double fre
     if (httpRC/100 != 2)
     {
         qWarning("ChannelWebAPIUtils::setCenterFrequency: get device frequency error %d: %s",
-            httpRC, qPrintable(*errorResponse.getMessage()));
+            httpRC, qPrintable(errorResponse));
         return false;
     }
 
@@ -176,5 +181,284 @@ bool ChannelWebAPIUtils::setCenterFrequency(unsigned int deviceIndex, double fre
         return false;
     }
 
+    return true;
+}
+
+// Start acquisition
+bool ChannelWebAPIUtils::run(unsigned int deviceIndex, int subsystemIndex)
+{
+    SWGSDRangel::SWGDeviceState runResponse;
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        runResponse.setState(new QString());
+        deviceSet = deviceSets[deviceIndex];
+        if (deviceSet->m_deviceSourceEngine)
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+            httpRC = source->webapiRun(1, runResponse, errorResponse);
+        }
+        else if (deviceSet->m_deviceSinkEngine)
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            httpRC = sink->webapiRun(1, runResponse, errorResponse);
+        }
+        else if (deviceSet->m_deviceMIMOEngine)
+        {
+            DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
+            httpRC = mimo->webapiRun(1, subsystemIndex, runResponse, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::run - unknown device " << deviceIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::run - no device " << deviceIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::run: run error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
+
+// Stop acquisition
+bool ChannelWebAPIUtils::stop(unsigned int deviceIndex, int subsystemIndex)
+{
+    SWGSDRangel::SWGDeviceState runResponse;
+    QString errorResponse;
+    int httpRC;
+    DeviceSet *deviceSet;
+
+    std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
+    if (deviceIndex < deviceSets.size())
+    {
+        runResponse.setState(new QString());
+        deviceSet = deviceSets[deviceIndex];
+        if (deviceSet->m_deviceSourceEngine)
+        {
+            DeviceSampleSource *source = deviceSet->m_deviceAPI->getSampleSource();
+            httpRC = source->webapiRun(0, runResponse, errorResponse);
+        }
+        else if (deviceSet->m_deviceSinkEngine)
+        {
+            DeviceSampleSink *sink = deviceSet->m_deviceAPI->getSampleSink();
+            httpRC = sink->webapiRun(0, runResponse, errorResponse);
+        }
+        else if (deviceSet->m_deviceMIMOEngine)
+        {
+            DeviceSampleMIMO *mimo = deviceSet->m_deviceAPI->getSampleMIMO();
+            httpRC = mimo->webapiRun(0, subsystemIndex, runResponse, errorResponse);
+        }
+        else
+        {
+            qDebug() << "ChannelWebAPIUtils::stop - unknown device " << deviceIndex;
+            return false;
+        }
+    }
+    else
+    {
+        qDebug() << "ChannelWebAPIUtils::stop - no device " << deviceIndex;
+        return false;
+    }
+
+    if (httpRC/100 != 2)
+    {
+        qWarning("ChannelWebAPIUtils::stop: run error %d: %s",
+            httpRC, qPrintable(errorResponse));
+        return false;
+    }
+
+    return true;
+}
+
+// Get input frequency offset for a channel
+bool ChannelWebAPIUtils::getFrequencyOffset(unsigned int deviceIndex, int channelIndex, int& offset)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    QJsonObject *jsonObj;
+    double offsetD;
+
+    ChannelAPI *channel = MainCore::instance()->getChannel(deviceIndex, channelIndex);
+    if (channel != nullptr)
+    {
+        httpRC = channel->webapiSettingsGet(channelSettingsResponse, errorResponse);
+        if (httpRC/100 != 2)
+        {
+            qWarning("ChannelWebAPIUtils::getFrequencyOffset: get channel settings error %d: %s",
+                httpRC, qPrintable(errorResponse));
+            return false;
+        }
+
+        jsonObj = channelSettingsResponse.asJsonObject();
+        if (WebAPIUtils::getSubObjectDouble(*jsonObj, "inputFrequencyOffset", offsetD))
+        {
+            offset = (int)offsetD;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Set input frequency offset for a channel
+bool ChannelWebAPIUtils::setFrequencyOffset(unsigned int deviceIndex, int channelIndex, int offset)
+{
+    SWGSDRangel::SWGChannelSettings channelSettingsResponse;
+    QString errorResponse;
+    int httpRC;
+    QJsonObject *jsonObj;
+
+    ChannelAPI *channel = MainCore::instance()->getChannel(deviceIndex, channelIndex);
+    if (channel != nullptr)
+    {
+        httpRC = channel->webapiSettingsGet(channelSettingsResponse, errorResponse);
+        if (httpRC/100 != 2)
+        {
+            qWarning("ChannelWebAPIUtils::setFrequencyOffset: get channel settings error %d: %s",
+                httpRC, qPrintable(errorResponse));
+            return false;
+        }
+
+        jsonObj = channelSettingsResponse.asJsonObject();
+
+        if (WebAPIUtils::setSubObjectDouble(*jsonObj, "inputFrequencyOffset", (double)offset))
+        {
+            QStringList keys;
+            keys.append("inputFrequencyOffset");
+            channelSettingsResponse.init();
+            channelSettingsResponse.fromJsonObject(*jsonObj);
+            httpRC = channel->webapiSettingsPutPatch(false, keys, channelSettingsResponse, errorResponse);
+            if (httpRC/100 != 2)
+            {
+                qWarning("ChannelWebAPIUtils::setFrequencyOffset: patch channel settings error %d: %s",
+                    httpRC, qPrintable(errorResponse));
+                return false;
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
+// Start or stop all file sinks in a given device set
+bool ChannelWebAPIUtils::startStopFileSinks(unsigned int deviceIndex, bool start)
+{
+    MainCore *mainCore = MainCore::instance();
+    ChannelAPI *channel;
+    int channelIndex = 0;
+    while(nullptr != (channel = mainCore->getChannel(deviceIndex, channelIndex)))
+    {
+        if (ChannelUtils::compareChannelURIs(channel->getURI(), "sdrangel.channel.filesink"))
+        {
+            QStringList channelActionKeys = {"record"};
+            SWGSDRangel::SWGChannelActions channelActions;
+            SWGSDRangel::SWGFileSinkActions *fileSinkAction = new SWGSDRangel::SWGFileSinkActions();
+            QString errorResponse;
+            int httpRC;
+
+            fileSinkAction->setRecord(start);
+            channelActions.setFileSinkActions(fileSinkAction);
+            httpRC = channel->webapiActionsPost(channelActionKeys, channelActions, errorResponse);
+            if (httpRC/100 != 2)
+            {
+                qWarning("ChannelWebAPIUtils::startStopFileSinks: webapiActionsPost error %d: %s",
+                    httpRC, qPrintable(errorResponse));
+                return false;
+            }
+        }
+        channelIndex++;
+    }
+    return true;
+}
+
+// Send AOS actions to all channels that support it
+bool ChannelWebAPIUtils::satelliteAOS(const QString name, bool northToSouthPass)
+{
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*> deviceSets = mainCore->getDeviceSets();
+    for (unsigned int deviceIndex = 0; deviceIndex < deviceSets.size(); deviceIndex++)
+    {
+        ChannelAPI *channel;
+        int channelIndex = 0;
+        while(nullptr != (channel = mainCore->getChannel(deviceIndex, channelIndex)))
+        {
+            if (ChannelUtils::compareChannelURIs(channel->getURI(), "sdrangel.channel.aptdemod"))
+            {
+                QStringList channelActionKeys = {"aos"};
+                SWGSDRangel::SWGChannelActions channelActions;
+                SWGSDRangel::SWGAPTDemodActions *aptDemodAction = new SWGSDRangel::SWGAPTDemodActions();
+                SWGSDRangel::SWGAPTDemodActions_aos *aosAction = new SWGSDRangel::SWGAPTDemodActions_aos();
+                QString errorResponse;
+                int httpRC;
+
+                aosAction->setSatelliteName(new QString(name));
+                aosAction->setNorthToSouthPass(northToSouthPass);
+                aptDemodAction->setAos(aosAction);
+
+                channelActions.setAptDemodActions(aptDemodAction);
+                httpRC = channel->webapiActionsPost(channelActionKeys, channelActions, errorResponse);
+                if (httpRC/100 != 2)
+                {
+                    qWarning("ChannelWebAPIUtils::satelliteAOS: webapiActionsPost error %d: %s",
+                        httpRC, qPrintable(errorResponse));
+                    return false;
+                }
+            }
+            channelIndex++;
+        }
+    }
+    return true;
+}
+
+// Send LOS actions to all channels that support it
+bool ChannelWebAPIUtils::satelliteLOS(const QString name)
+{
+    MainCore *mainCore = MainCore::instance();
+    std::vector<DeviceSet*> deviceSets = mainCore->getDeviceSets();
+    for (unsigned int deviceIndex = 0; deviceIndex < deviceSets.size(); deviceIndex++)
+    {
+        ChannelAPI *channel;
+        int channelIndex = 0;
+        while(nullptr != (channel = mainCore->getChannel(deviceIndex, channelIndex)))
+        {
+            if (ChannelUtils::compareChannelURIs(channel->getURI(), "sdrangel.channel.aptdemod"))
+            {
+                QStringList channelActionKeys = {"los"};
+                SWGSDRangel::SWGChannelActions channelActions;
+                SWGSDRangel::SWGAPTDemodActions *aptDemodAction = new SWGSDRangel::SWGAPTDemodActions();
+                SWGSDRangel::SWGAPTDemodActions_los *losAction = new SWGSDRangel::SWGAPTDemodActions_los();
+                QString errorResponse;
+                int httpRC;
+
+                losAction->setSatelliteName(new QString(name));
+                aptDemodAction->setLos(losAction);
+
+                channelActions.setAptDemodActions(aptDemodAction);
+                httpRC = channel->webapiActionsPost(channelActionKeys, channelActions, errorResponse);
+                if (httpRC/100 != 2)
+                {
+                    qWarning("ChannelWebAPIUtils::satelliteLOS: webapiActionsPost error %d: %s",
+                        httpRC, qPrintable(errorResponse));
+                    return false;
+                }
+            }
+            channelIndex++;
+        }
+    }
     return true;
 }

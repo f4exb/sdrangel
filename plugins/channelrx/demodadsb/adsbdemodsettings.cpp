@@ -41,7 +41,7 @@ void ADSBDemodSettings::resetToDefaults()
     m_feedHost = "feed.adsbexchange.com";
     m_feedPort = 30005;
     m_feedFormat = BeastBinary;
-    m_rgbColor = QColor(255, 0, 0).rgb();
+    m_rgbColor = QColor(244, 151, 57).rgb();
     m_title = "ADS-B Demodulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -157,7 +157,7 @@ bool ADSBDemodSettings::deserialize(const QByteArray& data)
             m_feedPort = 30005;
         }
 
-        d.readU32(9, &m_rgbColor, QColor(255, 0, 0).rgb());
+        d.readU32(9, &m_rgbColor, QColor(244, 151, 57).rgb());
         d.readString(11, &m_title, "ADS-B Demodulator");
         d.readBool(12, &m_useReverseAPI, false);
         d.readString(13, &m_reverseAPIAddress, "127.0.0.1");

@@ -60,8 +60,3 @@ target_link_libraries(${TARGET_NAME}
 
 install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})
 
-if(WIN32)
-  # Run deployqt for Charts etc
-  include(DeployQt)
-  windeployqt(${TARGET_NAME} ${SDRANGEL_BINARY_BIN_DIR} ${PROJECT_SOURCE_DIR}/aprs)
-endif()

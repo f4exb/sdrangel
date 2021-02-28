@@ -22,6 +22,8 @@
 #include <QJsonObject>
 
 
+#include "SWGMapCoordinate.h"
+#include <QList>
 #include <QString>
 
 #include "SWGObject.h"
@@ -66,6 +68,12 @@ public:
     float getAltitude();
     void setAltitude(float altitude);
 
+    QList<SWGMapCoordinate*>* getTrack();
+    void setTrack(QList<SWGMapCoordinate*>* track);
+
+    QList<SWGMapCoordinate*>* getPredictedTrack();
+    void setPredictedTrack(QList<SWGMapCoordinate*>* predicted_track);
+
 
     virtual bool isSet() override;
 
@@ -93,6 +101,12 @@ private:
 
     float altitude;
     bool m_altitude_isSet;
+
+    QList<SWGMapCoordinate*>* track;
+    bool m_track_isSet;
+
+    QList<SWGMapCoordinate*>* predicted_track;
+    bool m_predicted_track_isSet;
 
 };
 

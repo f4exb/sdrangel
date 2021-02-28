@@ -338,3 +338,28 @@ const PluginInterface *PluginManager::getFeaturePluginInterface(const QString& f
 
     return nullptr;
 }
+
+QString PluginManager::uriToId(const QString& uri) const
+{
+    for (int i = 0; i < m_rxChannelRegistrations.size(); i++)
+    {
+        if (m_rxChannelRegistrations[i].m_channelIdURI == uri)
+            return m_rxChannelRegistrations[i].m_channelId;
+    }
+    for (int i = 0; i < m_txChannelRegistrations.size(); i++)
+    {
+        if (m_txChannelRegistrations[i].m_channelIdURI == uri)
+            return m_txChannelRegistrations[i].m_channelId;
+    }
+    for (int i = 0; i < m_mimoChannelRegistrations.size(); i++)
+    {
+        if (m_mimoChannelRegistrations[i].m_channelIdURI == uri)
+            return m_mimoChannelRegistrations[i].m_channelId;
+    }
+    for (int i = 0; i < m_featureRegistrations.size(); i++)
+    {
+        if (m_featureRegistrations[i].m_featureIdURI == uri)
+            return m_featureRegistrations[i].m_featureId;
+    }
+    return uri;
+}

@@ -26,13 +26,15 @@
 const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
     QStringLiteral("APRS"),
-    QStringLiteral("StarTracker")
+    QStringLiteral("StarTracker"),
+    QStringLiteral("SatelliteTracker")
 };
 
 const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),
     QStringLiteral("sdrangel.feature.aprs"),
-    QStringLiteral("sdrangel.feature.startracker")
+    QStringLiteral("sdrangel.feature.startracker"),
+    QStringLiteral("sdrangel.feature.satellitetracker")
 };
 
 // GUI combo box should match ordering in this list
@@ -55,6 +57,10 @@ void MapSettings::resetToDefaults()
     m_mapBoxApiKey = "";
     m_mapBoxStyles = "";
     m_sources = -1;
+    m_displaySelectedGroundTracks = true;
+    m_displayAllGroundTracks = true;
+    m_groundTrackColor = QColor(150, 0, 20).rgb();
+    m_predictedGroundTrackColor = QColor(225, 0, 50).rgb();
     m_title = "Map";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -73,6 +79,8 @@ QByteArray MapSettings::serialize() const
     s.writeString(3, m_mapBoxApiKey);
     s.writeString(4, m_mapBoxStyles);
     s.writeU32(5, m_sources);
+    s.writeU32(6, m_groundTrackColor);
+    s.writeU32(7, m_predictedGroundTrackColor);
     s.writeString(8, m_title);
     s.writeU32(9, m_rgbColor);
     s.writeBool(10, m_useReverseAPI);
@@ -80,6 +88,8 @@ QByteArray MapSettings::serialize() const
     s.writeU32(12, m_reverseAPIPort);
     s.writeU32(13, m_reverseAPIFeatureSetIndex);
     s.writeU32(14, m_reverseAPIFeatureIndex);
+    s.writeBool(15, m_displaySelectedGroundTracks);
+    s.writeBool(16, m_displayAllGroundTracks);
 
     return s.final();
 }
@@ -105,6 +115,8 @@ bool MapSettings::deserialize(const QByteArray& data)
         d.readString(3, &m_mapBoxApiKey, "");
         d.readString(4, &m_mapBoxStyles, "");
         d.readU32(5, &m_sources, -1);
+        d.readU32(6, &m_groundTrackColor, QColor(150, 0, 20).rgb());
+        d.readU32(7, &m_predictedGroundTrackColor, QColor(225, 0, 50).rgb());
         d.readString(8, &m_title, "Map");
         d.readU32(9, &m_rgbColor, QColor(225, 25, 99).rgb());
         d.readBool(10, &m_useReverseAPI, false);
@@ -121,6 +133,8 @@ bool MapSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(14, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+        d.readBool(15, &m_displaySelectedGroundTracks, true);
+        d.readBool(16, &m_displayAllGroundTracks, true);
 
         return true;
     }

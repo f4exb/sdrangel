@@ -2,6 +2,7 @@
   <qresource prefix="/">
     <file>info.png</file>
     <file>arrow_left.png</file>
+    <file>arrow_right.png</file>
     <file>star.png</file>
     <file>swap.png</file>
     <file>gridpolar.png</file>
