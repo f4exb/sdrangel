@@ -1,3 +1,15 @@
+sdrangel (6.6.0-1) unstable; urgency=medium
+
+  * New APT demodulator for NOAA satellites. PR #787
+  * New Satellite tracker feature plugin. PR #787
+  * DATV: display MER and CNR. Issue #784
+  * DATV: new control for LDPC bit flips maximum corrections
+  * RTL-SDR: increase LO ppm range to +/-200
+  * FileSink: enable record button only when plugin is running. Issue #782
+  * SigMFFileSink: enable record button only when plugin is running
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 28 Feb 2021 18:43:09 +0100
+
 sdrangel (6.5.5-1) unstable; urgency=medium
 
   * Spectrum frequency zooming: Implements #773

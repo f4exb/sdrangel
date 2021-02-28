@@ -29,7 +29,7 @@
 const PluginDescriptor SigMFFileSinkPlugin::m_pluginDescriptor = {
     SigMFFileSink::m_channelId,
     QStringLiteral("SigMF File Sink"),
-    QStringLiteral("6.5.5"),
+    QStringLiteral("6.6.0"),
     QStringLiteral("(c) Edouard Griffiths, F4EXB"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,
