@@ -197,7 +197,7 @@ void GS232ControllerWorker::readSerialData()
         if (len != -1)
         {
             QString response = QString::fromUtf8(buf, len);
-            QRegularExpression re("AZ=(\\d\\d\\d)EL=(\\d\\d\\d)");
+            QRegularExpression re("AZ=(\\d\\d\\d) *EL=(\\d\\d\\d)");
             QRegularExpressionMatch match = re.match(response);
             if (match.hasMatch())
             {
@@ -213,7 +213,7 @@ void GS232ControllerWorker::readSerialData()
             }
             else
             {
-                qDebug() << "GS232ControllerWorker::readSerialData - unexpected response " << response;
+                qDebug() << "GS232ControllerWorker::readSerialData - unexpected response \"" << response << "\"";
                 if (m_msgQueueToFeature)
                     m_msgQueueToFeature->push(GS232Controller::MsgReportWorker::create(QString("Unexpected GS-232 serial response: %1").arg(response)));
             }
