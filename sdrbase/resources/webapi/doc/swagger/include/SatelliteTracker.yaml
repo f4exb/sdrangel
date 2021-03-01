@@ -1,0 +1,109 @@
+SatelliteTrackerSettings:
+  description: "Satellite Tracker settings"
+  properties:
+    latitude:
+      description: "Latitude in decimal degrees (North positive) of antenna location"
+      type: number
+      format: float
+    longitude:
+      description: "Longitude in decimal degrees (East positive) of antenna location"
+      type: number
+      format: float
+    heightAboveSeaLevel:
+      description: "Height above sea level in metres of antenna location"
+      type: number
+      format: float
+    target:
+      description: "Target satellite"
+      type: string
+    satellites:
+      description: "Satellites to track"
+      type: array
+      items:
+        type: string
+    tles:
+      description: "Two line element files"
+      type: array
+      items:
+        type: string
+    dateTime:
+      description: "Date and time of observation. ISO 8601 extended format: yyyy-MM-ddTHH:mm:ss with Z suffix for UTC. Empty string for current time."
+      type: string
+    minAOSElevation:
+      description: "Minimum elevation in degrees for AOS"
+      type: integer
+    minPassElevation:
+      description: "Minimum elevation in degrees for a pass"
+      type: integer
+    rotatorMaxAzimuth:
+      description: "Maximum azimuth in degrees for the rotator"
+      type: integer
+    rotatorMaxElevation:
+      description: "Maximum elevation in degrees for elevation"
+      type: integer
+    azElUnits:
+      description: "DMS (0) DM (1) D (2) Decimal (3)"
+      type: integer
+    groundTrackPoints:
+      description: "Number of points used to draw ground tracks"
+      type: integer
+    dateFormat:
+      desciption: "Format for dates in the GUI (E.g: yy/MM/dd)"
+      type: string
+    utc:
+      description: "Times are UTC (1) or local (0)"
+      type: integer
+    updatePeriod:
+      description: "Time in seconds between each calculation of the target's position"
+      type: number
+      format: float
+    dopplerPeriod:
+      description: "Time in seconds between each Doppler correction"
+      type: number
+      format: float
+    predictionPeriod:
+      description: "How many days ahead to predict passes in"
+      type: integer
+    passStartTime:
+      description: "Time after which a pass must start"
+      type: string
+    passFinishTime:
+      description: "Time before which a pass must finish"
+      type: string
+    defaultFrequency:
+      description: "Frequency to use for Doppler and free space path loss calculations in Satellite data table"
+      type: number
+      format: float
+    drawOnMap:
+      description: "Draw satellites on the Map (1 for yes, 0 for no)"
+      type: integer
+    autoTarget:
+      description: "Automatically select target on AOS (1 for yes, 0 for no)"
+      type: integer
+    aosSpeech:
+      description: "Speech warning on AOS"
+      type: string
+    losSpeech:
+      description: "Speech warning on LOS"
+      type: string
+    aosCommand:
+      description: "Command to execute on AOS for all satellites"
+      type: string
+    losCommand:
+      description: "Command to execute on LOS for all satellites"
+      type: string
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

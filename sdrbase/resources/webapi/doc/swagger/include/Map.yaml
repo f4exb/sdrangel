@@ -61,3 +61,27 @@ MapItem:
       description: "Altitude / height above sea level in metres"
       type: number
       format: float
+    track:
+      description: "Track/path the item has taken"
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Map.yaml#/MapCoordinate"
+    predictedTrack:
+      description: "Track/path the item is predicted to take"
+      type: array
+      items:
+        $ref: "/doc/swagger/include/Map.yaml#/MapCoordinate"
+
+MapCoordinate:
+  description: "A map coordinate"
+  properties:
+    latitude:
+      type: number
+      format: float
+    longitude:
+      type: number
+      format: float
+    altitude:
+      type: number
+      format: float
+

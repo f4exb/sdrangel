@@ -23,6 +23,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
     AMModSettings:
       $ref: "/doc/swagger/include/AMMod.yaml#/AMModSettings"
+    APTDemodSettings:
+      $ref: "/doc/swagger/include/APTDemod.yaml#/APTDemodSettings"
     ATVDemodSettings:
       $ref: "/doc/swagger/include/ATVDemod.yaml#/ATVDemodSettings"
     ATVModSettings:

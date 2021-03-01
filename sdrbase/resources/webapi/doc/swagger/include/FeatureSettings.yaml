@@ -25,6 +25,8 @@ FeatureSettings:
       $ref: "/doc/swagger/include/Map.yaml#/MapSettings"
     RigCtlServerSettings:
       $ref: "/doc/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
+    SatelliteTrackerSettings:
+      $ref: "/doc/swagger/include/SatelliteTracker.yaml#/SatelliteTrackerSettings"
     StarTrackerSettings:
       $ref: "/doc/swagger/include/StarTracker.yaml#/StarTrackerSettings"
     SimplePTTSettings:
