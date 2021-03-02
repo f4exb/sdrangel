@@ -5,7 +5,7 @@
 The Satellite Tracker feature plugin can be used to:
 
 * Track satellites, pointing antennas at them via SDRangel's Rotator Controller Features
-* Control SDRangel by loading presets, starting/stopping acqusition and setting center frequenies on AOS (Acquisition of Signal) for each satellite
+* Control SDRangel by loading presets, starting/stopping acquisition and setting center frequencies on AOS (Acquisition of Signal) for each satellite
 * Adjust channels' input frequency offset to account for Doppler shift
 * Display polar and elevation/azimuth vs time plots for satellite passes
 * Display the overhead position of satellites on the Map Feature, along with the ground track of the satellites
@@ -32,9 +32,9 @@ Priority is determined by the order the satellites appear in the Satellite Selec
 
 <h3>4: Update satellite data</h3>
 
-When clicked, the TLE (two line element) files selected in the Settings dialog are downloaded as well as the latest SatNogs satellite database, containing details of satellite's transmitter and receiver frequencies. While downloading, this button will appear green.
+When clicked, the TLE (two line element) files selected in the Settings dialog are downloaded, as well as the latest SatNogs satellite database, containing details of satellites' transmitter and receiver frequencies. While downloading, this button will appear green.
 
-Satellite positions can only be predicted with limited accuracy, so without the TLEs need to be updated frequently for accurate positioning. This could be daily, weekly or monthly depending upon the individual satellite. This downloads around 1MB of data.
+Satellite positions can only be predicted with limited accuracy, so the TLEs need to be updated frequently for accurate positioning. This could be daily, weekly or monthly depending upon the individual satellite. This downloads around 1MB of data.
 
 <h3>5: Show SDRangel Control dialog</h3>
 
@@ -42,16 +42,16 @@ Pressing this button displays the SDRangel Control dialog.
 
 ![SDRangel Control dialog](../../../doc/img/SatelliteTracker_plugin_control.png)
 
-This dialog determines the actions the Satellite Tracker will take when AOS or LOS occurs for a satellite. First, select a satellite from the dropdown box. Information about the satellites transmit and receive modes should appear in the field at the bottom of the dialog, if available in the SatNogs database.
+This dialog determines the actions the Satellite Tracker will take when AOS or LOS occurs for a satellite. First, select a satellite from the dropdown box. Information about the satellite's transmit and receive modes should appear in the field at the bottom of the dialog, if available in the SatNogs database.
 
 To perform an action on an SDRangel device set on AOS or LOS, press the + button. This will add a row in the table, allowing you to select:
 
 * The device set that will be controlled. This will list all currently open device sets. You can also type the name of a new device set.
 * The preset to load on AOS. This allows preset device settings (E.g. centre frequency) and demodulators to be opened when the satellite becomes visible.
-* Which channels Doppler correction should be applied to. The list of channels is taken from the selected preset. Check a channel to enable Doppler correct for that channel. The Doppler correction is applied to the channel's input frequency offset.
-* Whether to start acquisition (i.e. start the DDR device) on AOS.
-* Whether to start acquisition on LOS.
-* Whether and file sinks in the preset should be started on AOS and stopped on LOS. This allows the baseband signal received from the satellite to be recorded to a file.
+* Which channels Doppler correction should be applied to. The list of channels is taken from the selected preset. Check a channel to enable Doppler correction for that channel. The Doppler correction is applied to the channel's input frequency offset.
+* Whether to start acquisition (i.e. start the SDR device) on AOS.
+* Whether to stop acquisition on LOS.
+* Whether any file sinks in the preset should be started on AOS and stopped on LOS. This allows the baseband signal received from the satellite to be recorded to a file.
 * Whether to override the centre frequency in the preset. This allows a single preset to be used with multiple satellites.
 * A command or script to execute on AOS.
 * A command or script to execute on LOS.
@@ -86,15 +86,15 @@ Pressing this button displays the Settings dialog.
 
 On the Settings tab, you can set:
 
-* Height above sea level in metres of the anntenna.
-* The prediciton period in days. This limits the maximum number of days ahead for which satellite passes are predicted until.
-* The minimum elevation in degrees from the antenna location, which a satellite much reach in order for AOS to be indicated.
+* Height above sea level in metres of the antenna.
+* The prediction period in days. This limits the maximum number of days ahead for which satellite passes are predicted until.
+* The elevation in degrees from the antenna location, which a satellite much reach in order for AOS to be indicated.
 * The minimum elevation in degrees from the antenna location, which a satellite much reach in order for a pass to be indicated.
 * A time window for which passes must start and end between, to be displayed or acted upon. For example, for day time passes, you could set "must start after" to 8:00 and "must end before" to 18:00. For night time passes, set "must start after" to 20:00 and "must end before" to 6:00.
 * The maximum azimuth angle in degrees supported by your rotator. 450 degree support is beneficial for passes that pass through 360/0 degrees, to avoid the rotator having to do a complete rotation mid pass.
 * The maximum elevation angle in degrees supported by your rotator. 180 degree support is beneficial for passes that pass through 360/0 degrees, to avoid the rotator having to do a complete rotation mid pass.
-* A speech warning to be given on AOS. ${name} will be subsitited with the name of the satellite, ${duration} the pass duration and ${elevation} the maximum elevation of the pass.
-* A speech warning to be given on LOS. ${name} will be subsitited with the name of the satellite.
+* A speech warning to be given on AOS. ${name} will be substituted with the name of the satellite, ${duration} the pass duration and ${elevation} the maximum elevation of the pass.
+* A speech warning to be given on LOS. ${name} will be substituted with the name of the satellite.
 * A command/script to be executed on AOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog.
 * A command/script to be executed on LOS. This applies to all satellites. It is also possible to set a per-satellite command in the SDRangel Control dialog.
 * The Doppler correction period in seconds, which controls how frequently Doppler correction is applied. Which channels have Doppler correction applied is set on a per-channel basis in the SDRangel Control dialog.
@@ -112,7 +112,7 @@ On the display tab, you can set:
 * The default frequency in MHz that is used for calculating Doppler and free space path loss in the Satellite Data table.
 * The units used to display azimuth and elevation to the target satellite. This can be in degrees, minutes and seconds or decimal degrees.
 * The number of points used for ground tracks on the map. More points result in smoother tracks, but require more processing.
-* Whether times are display in the local time zone or UTC.
+* Whether times are displayrf in the local time zone or UTC.
 * Whether to draw the satellites on the map.
 
 <h3>9: Latitude</h3>
@@ -149,7 +149,7 @@ Pass charts can be plotted showing the azimuth and elevation of the target satel
 
 ![Satellite tracker settings dialog](../../../doc/img/SatelliteTracker_plugin_passchart.png)
 
-The arrows next to the chart combobox, allow the pass number to be selected. Pass 0 is the next pass, with higher numbered passes occuring later in time.
+The arrows next to the chart combobox, allow the pass number to be selected. Pass 0 is the next pass, with higher numbered passes occurring later in time.
 The amount of passes is determined by the prediction period, which can be set in the Settings dialog.
 
 <h2>Satellite Data</h2>
@@ -162,18 +162,18 @@ The table contains:
 
 * The satellite name.
 * The azimuth in degrees to the satellite from the antenna location.
-* The elevation in degress to the satellite from the antenna location.
-* The time of the next AOS. If time is some days in the future, the number of days will be displayed as +days. E.g. +1 for tomorrow.
+* The elevation in degrees to the satellite from the antenna location.
+* The time of the next AOS. If this time is some days in the future, the number of days will be displayed as +days. E.g. +1 for tomorrow.
 * The time of the next LOS.
 * The maximum elevation in degrees that the satellite will be from the antenna location in the next pass.
-* Whether the satellite will be heading South to North (up addow) or North to South (down arrow) in the next pass.
+* Whether the satellite will be heading South to North (up arrow) or North to South (down arrow) in the next pass.
 * The altitude of the satellite in kilometres.
-* The range to the satellite from the antenna location in kilometers.
-* The range range (i.e. speed the satellite is moving away from the antenna location) in kilometres per second.
+* The range to the satellite from the antenna location in kilometres.
+* The rate range (i.e. speed the satellite is moving away from the antenna location) in kilometres per second.
 * The Doppler shift due to the satellite's motion that would be observed on a signal at the default frequency (which can be set in the Settings dialog).
 * The free space path loss to the satellite, at the default frequency.
 * The one-way propagation delay to the satellite from the antenna location in milliseconds.
-* The NORAD catalog identifier for the satellite.
+* The NORAD catalogue identifier for the satellite.
 
 Rows can be ordered by left clicking column headers.
 Columns can be hidden by right clicking on the header and unchecking them.
