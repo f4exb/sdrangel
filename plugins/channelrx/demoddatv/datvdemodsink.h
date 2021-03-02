@@ -224,6 +224,7 @@ private:
     void *p_bbframes;
     void *p_s2_deinterleaver;
     void *r_fecdec;
+    void *r_fecdecsoft;
     void *p_deframer;
 
     //DECIMATION

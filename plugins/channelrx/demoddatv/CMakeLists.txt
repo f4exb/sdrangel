@@ -18,6 +18,7 @@ set(datv_SOURCES
     leansdr/framework.cpp
     leansdr/math.cpp
     leansdr/sdr.cpp
+    ldpctool/tables_handler.cpp
     datvdemodgui.ui
 )
 
@@ -41,6 +42,10 @@ set(datv_HEADERS
     leansdr/framework.h
     leansdr/math.h
     leansdr/sdr.h
+    ldpctool/ldpc.h
+    ldpctool/dvb_s2_tables.h
+    ldpctool/dvb_s2x_tables.h
+    ldpctool/dvb_t2_tables.h
 )
 
 include_directories(
