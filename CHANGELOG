@@ -1,3 +1,13 @@
+sdrangel (6.6.1-1) unstable; urgency=medium
+
+  * GS-232 Controller feature: added ERC-M controller support. PR #788
+  * Added missing swagger files from recent updates. PR #788
+  * Satellite Tracker feature: fixed build on Mac. PR #788
+  * Spectrum Vis: initialize pointer to GUI. Fixes #790
+  * Reapply audio sample on effective channel sample rate  change. Implements #791
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Wed, 03 Mar 2021 12:47:45 +0100
+
 sdrangel (6.6.0-1) unstable; urgency=medium
 
   * New APT demodulator for NOAA satellites. PR #787
