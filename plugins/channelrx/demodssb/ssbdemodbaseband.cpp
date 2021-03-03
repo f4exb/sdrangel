@@ -46,6 +46,7 @@ SSBDemodBaseband::SSBDemodBaseband() :
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
     m_audioSampleRate = DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate();
     m_sink.applyAudioSampleRate(m_audioSampleRate);
+    m_channelSampleRate = 0;
 
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
@@ -61,6 +62,7 @@ void SSBDemodBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
     m_sampleFifo.reset();
+    m_channelSampleRate = 0;
 }
 
 void SSBDemodBaseband::setChannel(ChannelAPI *channel)
@@ -132,7 +134,12 @@ bool SSBDemodBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
-        m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply in case of channel sample rate change
+
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        {
+            m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply when channel sample rate changes
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+        }
 
 		return true;
     }
@@ -148,7 +155,12 @@ void SSBDemodBaseband::applySettings(const SSBDemodSettings& settings, bool forc
     {
         m_channelizer->setChannelization(m_audioSampleRate, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
-        m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply in case of channel sample rate change
+
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        {
+            m_sink.applyAudioSampleRate(m_audioSampleRate); // reapply when channel sample rate changes
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+        }
     }
 
     if ((settings.m_spanLog2 != m_settings.m_spanLog2) || force)

@@ -74,6 +74,7 @@ public:
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer * m_channelizer;
+    int m_channelSampleRate;
     VORDemodSCSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     VORDemodSCSettings m_settings;

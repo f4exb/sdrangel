@@ -78,6 +78,7 @@ public:
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
+    int m_channelSampleRate;
     AMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AMDemodSettings m_settings;

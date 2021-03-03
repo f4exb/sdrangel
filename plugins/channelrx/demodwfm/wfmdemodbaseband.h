@@ -75,6 +75,7 @@ public:
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
+    int m_channelSampleRate;
     WFMDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     WFMDemodSettings m_settings;

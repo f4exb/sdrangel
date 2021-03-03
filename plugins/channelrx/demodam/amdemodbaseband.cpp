@@ -36,6 +36,7 @@ AMDemodBaseband::AMDemodBaseband() :
 
     DSPEngine::instance()->getAudioDeviceManager()->addAudioSink(m_sink.getAudioFifo(), getInputMessageQueue());
     m_sink.applyAudioSampleRate(DSPEngine::instance()->getAudioDeviceManager()->getOutputSampleRate());
+    m_channelSampleRate = 0;
 }
 
 AMDemodBaseband::~AMDemodBaseband()
@@ -50,6 +51,7 @@ void AMDemodBaseband::reset()
     QMutexLocker mutexLocker(&m_mutex);
     m_inputMessageQueue.clear();
     m_sampleFifo.reset();
+    m_channelSampleRate = 0;
 }
 
 void AMDemodBaseband::startWork()
@@ -148,7 +150,12 @@ bool AMDemodBaseband::handleMessage(const Message& cmd)
         m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(notif.getSampleRate()));
         m_channelizer->setBasebandSampleRate(notif.getSampleRate());
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
-        m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply in case of channel sample rate change
+
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        {
+            m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+        }
 
 		return true;
     }
@@ -164,7 +171,12 @@ void AMDemodBaseband::applySettings(const AMDemodSettings& settings, bool force)
     {
         m_channelizer->setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
-        m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply in case of channel sample rate change
+
+        if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
+        {
+            m_sink.applyAudioSampleRate(m_sink.getAudioSampleRate()); // reapply when channel sample rate changes
+            m_channelSampleRate = m_channelizer->getChannelSampleRate();
+        }
     }
 
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force)

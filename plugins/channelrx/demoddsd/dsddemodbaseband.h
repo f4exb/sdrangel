@@ -77,6 +77,7 @@ public:
 private:
     SampleSinkFifo m_sampleFifo;
     DownChannelizer *m_channelizer;
+    int m_channelSampleRate;
     DSDDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     DSDDemodSettings m_settings;

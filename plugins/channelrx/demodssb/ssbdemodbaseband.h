@@ -79,6 +79,7 @@ private:
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     SSBDemodSettings m_settings;
     unsigned int m_audioSampleRate;
+    int m_channelSampleRate;
     MessageQueue *m_messageQueueToGUI;
     SpectrumVis *m_spectrumVis;
     QMutex m_mutex;
