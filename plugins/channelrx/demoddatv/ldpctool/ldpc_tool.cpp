@@ -19,6 +19,7 @@ Copyright 2019 <pabr@pabr.org>
 #include <functional>
 #include "testbench.h"
 #include "algorithms.h"
+#include "ldpc.h"
 
 #if 0
 #include "flooding_decoder.h"
@@ -28,7 +29,7 @@ static const int DEFAULT_TRIALS = 50;
 static const int DEFAULT_TRIALS = 25;
 #endif
 
-ldpctool::LDPCInterface *create_ldpc(char *standard, char prefix, int number);
+//ldpctool::LDPCInterface *create_ldpc(char *standard, char prefix, int number);
 
 void fail(const char *msg)
 {
@@ -109,7 +110,7 @@ int main(int argc, char **argv)
 	if (!tabname)
 		fail("unsupported modcod");
 
-	ldpctool::LDPCInterface *ldpc = create_ldpc((char *)"S2", tabname[0], atoi(tabname + 1));
+	ldpctool::LDPCInterface *ldpc = ldpctool::create_ldpc((char *)"S2", tabname[0], atoi(tabname + 1));
 
 	if (!ldpc)
 	{

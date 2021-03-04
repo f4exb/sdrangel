@@ -2419,7 +2419,7 @@ struct s2_fecdec_helper : runnable
         for (int i = 0; i < p->nprocs; ++i)
         {
             helper_instance *h = &p->procs[i];
-            size_t iosize = (pin->pls.framebits() / 8) * sizeof(SOFTBYTE);
+            int iosize = (pin->pls.framebits() / 8) * sizeof(SOFTBYTE);
             // fprintf(stderr, "Writing %lu to fd %d\n", iosize, h->fd_tx);
             int nw = write(h->fd_tx, pin->bytes, iosize);
             if (nw < 0 && errno == EWOULDBLOCK)
@@ -2494,7 +2494,7 @@ struct s2_fecdec_helper : runnable
             char mc_arg[16];
             sprintf(mc_arg, "%d", pls->modcod);
             const char *sf_arg = pls->sf ? "--shortframes" : NULL;
-            const char *argv[] = {command, "--modcod", mc_arg, sf_arg, NULL};
+            const char *argv[] = {command, "--trials", "10", "--modcod", mc_arg, sf_arg, NULL};
             execve(command, (char *const *)argv, NULL);
             fatal(command);
         }
@@ -2514,7 +2514,7 @@ struct s2_fecdec_helper : runnable
     {
         // Read corrected frame from helper
         const s2_pls *pls = &job->pls;
-        size_t iosize = (pls->framebits() / 8) * sizeof(ldpc_buf[0]);
+        int iosize = (pls->framebits() / 8) * sizeof(ldpc_buf[0]);
         int nr = read(job->h->fd_rx, ldpc_buf, iosize);
         if (nr < 0)
             fatal("read(LDPC helper)");
@@ -2526,8 +2526,8 @@ struct s2_fecdec_helper : runnable
         const fec_info *fi = &fec_infos[job->pls.sf][mcinfo->rate];
         uint8_t *hardbytes = softbytes_harden(ldpc_buf, fi->kldpc / 8, bch_buf);
         size_t cwbytes = fi->kldpc / 8;
-        size_t msgbytes = fi->Kbch / 8;
-        size_t chkbytes = cwbytes - msgbytes;
+        //size_t msgbytes = fi->Kbch / 8;
+        //size_t chkbytes = cwbytes - msgbytes;
         bch_interface *bch = s2bch.bchs[job->pls.sf][mcinfo->rate];
         int ncorr = bch->decode(hardbytes, cwbytes);
         if (sch->debug2)

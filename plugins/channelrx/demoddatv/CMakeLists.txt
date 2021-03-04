@@ -75,4 +75,10 @@ target_link_libraries(demoddatv
     ${SWRESAMPLE_LIBRARIES}
 )
 
+add_executable(ldpctool
+    ldpctool/ldpc_tool.cpp
+    ldpctool/tables_handler.cpp
+)
+
 install(TARGETS demoddatv DESTINATION ${INSTALL_PLUGINS_DIR})
+install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})

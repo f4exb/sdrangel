@@ -369,8 +369,12 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
         }
 
         // INPUT
-        //if(p_rawiq!=nullptr) delete p_rawiq;
-        //if(p_rawiq_writer!=nullptr) delete p_rawiq_writer;
+        if (p_rawiq != nullptr) {
+            delete p_rawiq;
+        }
+        if (p_rawiq_writer != nullptr) {
+            delete p_rawiq_writer;
+        }
         //if(p_preprocessed!=nullptr) delete p_preprocessed;
 
         //DVB-S2
@@ -1137,6 +1141,7 @@ void DATVDemodSink::InitDATVS2Framework()
 
     if (m_settings.m_softLDPC)
     {
+#if 0
         // External LDPC decoder mode.
         // Deinterleave into soft bits.
         p_fecframes = new leansdr::pipebuf<leansdr::fecframe<leansdr::llr_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
@@ -1153,6 +1158,30 @@ void DATVDemodSink::InitDATVS2Framework()
             p_vbitcount,
             p_verrcount
         );
+#else
+        // External LDPC decoder mode.
+        // Deinterleave into soft bits.
+        // TBD Latency
+        p_fecframes = new leansdr::pipebuf<leansdr::fecframe<leansdr::llr_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
+        p_s2_deinterleaver = new leansdr::s2_deinterleaver<leansdr::llr_ss, leansdr::llr_sb>(
+            m_objScheduler,
+            *(leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> > *) p_slots_dvbs2,
+            *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes
+        );
+        // Decode FEC-protected frames into plain BB frames.
+        leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *r_fecdec =
+        new leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb>(
+            m_objScheduler,
+            *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes,
+            *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
+            "/opt/install/sdrangel/bin/ldpctool",
+            p_vbitcount,
+            p_verrcount)
+        ;
+        const int nhelpers = 6;
+        r_fecdec->nhelpers = nhelpers;
+        r_fecdec->must_buffer = false;
+#endif
     }
     else
     {
@@ -1290,8 +1319,8 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
                     m_objScheduler->step();
 
                     m_lngReadIQ=0;
-                    //delete p_rawiq_writer;
-                    //p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
+                    delete p_rawiq_writer;
+                    p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
                 }
             }
 
