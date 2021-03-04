@@ -168,10 +168,13 @@ int main(int argc, char **argv)
 				for (int i = 0; i < CODE_LEN; ++i)
 					code[(j + n) * CODE_LEN + i] = reinterpret_cast<ldpctool::code_type *>(simd + i)[n];
 
-			if (count < 0) {
+			if (count < 0)
+			{
 				iterations += blocks * trials;
-				// std::cerr << "decoder failed at converging to a code word in " << trials << " trials" << std::endl;
-			} else {
+				std::cerr << "ldpc_tool: decoder failed at converging to a code word in " << trials << " trials" << std::endl;
+			}
+			else
+			{
 				iterations += blocks * (trials - count);
 			}
 		}

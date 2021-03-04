@@ -2411,36 +2411,46 @@ struct s2_fecdec_helper : runnable
         s2_pls pls;
         helper_instance *h;
     };
+
     simplequeue<helper_job, 1024> jobs;
+
     // Try to send a frame. Return false if helper was busy.
     bool send_frame(fecframe<SOFTBYTE> *pin)
     {
         pool *p = get_pool(&pin->pls);
+
         for (int i = 0; i < p->nprocs; ++i)
         {
             helper_instance *h = &p->procs[i];
             int iosize = (pin->pls.framebits() / 8) * sizeof(SOFTBYTE);
             // fprintf(stderr, "Writing %lu to fd %d\n", iosize, h->fd_tx);
             int nw = write(h->fd_tx, pin->bytes, iosize);
+
             if (nw < 0 && errno == EWOULDBLOCK)
-                continue;
+                continue; // next worker
             if (nw < 0)
                 fatal("write(LDPC helper");
             if (nw != iosize)
                 fatal("partial write(LDPC helper)");
+
             helper_job *job = jobs.put();
             job->pls = pin->pls;
             job->h = h;
             ++h->b_in;
+
             if (h->b_in >= h->batch_size)
             {
                 h->b_in -= h->batch_size;
                 h->b_out += h->batch_size;
             }
-            return true;
+
+            return true; // done sent to worker
         }
-        return false;
+
+        fprintf(stderr, "s2_fecdec_helper::send_frame: WARNING: all %d workers are busy\n", p->nprocs);
+        return false; // all workers are busy
     }
+
     // Return a pool of running helpers for a given modcod.
     pool *get_pool(const s2_pls *pls)
     {
@@ -2454,6 +2464,7 @@ struct s2_fecdec_helper : runnable
         }
         return p;
     }
+
     // Spawn a helper process.
     void spawn_helper(helper_instance *h, const s2_pls *pls)
     {
@@ -2554,6 +2565,7 @@ struct s2_fecdec_helper : runnable
         if (sch->debug)
             fprintf(stderr, "%c", corrupted ? '!' : ncorr ? '.' : '_');
     }
+
     pipereader<fecframe<SOFTBYTE>> in;
     pipewriter<bbframe> out;
     const char *command;

@@ -1169,8 +1169,7 @@ void DATVDemodSink::InitDATVS2Framework()
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes
         );
         // Decode FEC-protected frames into plain BB frames.
-        leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *r_fecdec =
-        new leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb>(
+        r_fecdec = new leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb>(
             m_objScheduler,
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes,
             *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
@@ -1178,9 +1177,10 @@ void DATVDemodSink::InitDATVS2Framework()
             p_vbitcount,
             p_verrcount)
         ;
-        const int nhelpers = 6;
-        r_fecdec->nhelpers = nhelpers;
-        r_fecdec->must_buffer = false;
+        leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *fecdec = (leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *) r_fecdec;
+        const int nhelpers = 2;
+        fecdec->nhelpers = nhelpers;
+        fecdec->must_buffer = false;
 #endif
     }
     else
@@ -1194,7 +1194,8 @@ void DATVDemodSink::InitDATVS2Framework()
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> > * ) p_fecframes
         );
         r_fecdec =  new leansdr::s2_fecdec<bool, leansdr::hard_sb>(
-            m_objScheduler, *(leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> > * ) p_fecframes,
+            m_objScheduler,
+            *(leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> > * ) p_fecframes,
             *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
             p_vbitcount,
             p_verrcount
