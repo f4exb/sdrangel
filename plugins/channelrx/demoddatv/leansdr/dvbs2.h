@@ -2367,29 +2367,30 @@ struct s2_fecdec_helper : runnable
     }
     void run()
     {
-        bool work_done = false;
+        in_count = out_count = 0;
         // Send work until all helpers block.
-        bool all_blocked = false;
         while (in.readable() >= 1 && !jobs.full())
         {
-            if (!send_frame(in.rd()))
-            {
-                all_blocked = true;
+            if (!send_frame(in.rd())) {
                 break;
             }
+
             in.read(1);
-            work_done = true;
+            in_count++;
         }
-        // Risk blocking on read() only when we have nothing else to do
-        // and we know a result is coming.
-        while ((all_blocked || !work_done || jobs.full()) &&
-               !jobs.empty() &&
-               jobs.peek()->h->b_out &&
-               out.writable() >= 1 &&
-               opt_writable(bitcount, 1) && opt_writable(errcount, 1))
+
+        while (
+            !jobs.empty() &&
+            jobs.peek()->h->b_out &&
+            out.writable() >= 1 &&
+            opt_writable(bitcount, 1) &&
+            opt_writable(errcount, 1)
+        )
         {
             receive_frame(jobs.get());
         }
+
+        fprintf(stderr, "s2_fecdec_helper::run: in=%d out=%d\n", in_count, out_count);
     }
 
   private:
@@ -2561,6 +2562,7 @@ struct s2_fecdec_helper : runnable
             pout->pls = job->pls;
             bbscrambling.transform(hardbytes, fi->Kbch / 8, pout->bytes);
             out.written(1);
+            out_count++;
         }
         if (sch->debug)
             fprintf(stderr, "%c", corrupted ? '!' : ncorr ? '.' : '_');
@@ -2574,6 +2576,7 @@ struct s2_fecdec_helper : runnable
     s2_bch_engines s2bch;
     s2_bbscrambling bbscrambling;
     pipewriter<int> *bitcount, *errcount;
+    int in_count, out_count;
 }; // s2_fecdec_helper
 
 // S2 FRAMER
