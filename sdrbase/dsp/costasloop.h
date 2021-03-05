@@ -65,10 +65,12 @@ private:
 
     void phaseWrap()
     {
-        while (m_phase > (2 * M_PI))
-            m_phase -= 2 * M_PI;
-        while (m_phase < (-2 * M_PI))
-            m_phase += 2 * M_PI;
+        const float two_pi = (float)(2.0 * M_PI);
+
+        while (m_phase > two_pi)
+            m_phase -= two_pi;
+        while (m_phase < -two_pi)
+            m_phase += two_pi;
     }
 
     void frequencyLimit()
