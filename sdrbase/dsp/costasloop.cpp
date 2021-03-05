@@ -58,6 +58,8 @@ void CostasLoop::computeCoefficients(float loopBW)
 
 void CostasLoop::setSampleRate(unsigned int sampleRate)
 {
+    (void) sampleRate;
+
     reset();
 }
 
@@ -80,7 +82,7 @@ static void fastComplexMultiply(std::complex<float> &out, const std::complex<flo
 
 void CostasLoop::feed(float re, float im)
 {
-    std::complex<float> nco(std::cosf(-m_phase), std::sinf(-m_phase));
+    std::complex<float> nco(::cosf(-m_phase), ::sinf(-m_phase));
 
     std::complex<float> in, out;
     in.real(re);
