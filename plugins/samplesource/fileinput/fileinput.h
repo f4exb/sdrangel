@@ -336,7 +336,6 @@ public:
 	FileInputWorker* m_fileInputWorker;
 	QThread m_fileInputWorkerThread;
 	QString m_deviceDescription;
-	QString m_fileName;
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;

@@ -15,6 +15,7 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <QDebug>
 #include "util/simpleserializer.h"
 
 #include "fileinputsettings.h"
@@ -28,7 +29,7 @@ FileInputSettings::FileInputSettings()
 
 void FileInputSettings::resetToDefaults()
 {
-    m_fileName = "./test.sdriq";
+    m_fileName = "";
     m_accelerationFactor = 1;
     m_loop = true;
     m_useReverseAPI = false;
@@ -64,7 +65,7 @@ bool FileInputSettings::deserialize(const QByteArray& data)
     {
         uint32_t uintval;
 
-        d.readString(1, &m_fileName, "./test.sdriq");
+        d.readString(1, &m_fileName, "");
         d.readU32(2, &m_accelerationFactor, 1);
         d.readBool(3, &m_loop, true);
         d.readBool(4, &m_useReverseAPI, false);
