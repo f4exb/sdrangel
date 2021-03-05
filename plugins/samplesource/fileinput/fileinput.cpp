@@ -54,7 +54,6 @@ FileInput::FileInput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_fileInputWorker(nullptr),
 	m_deviceDescription(),
-	m_fileName("..."),
 	m_sampleRate(48000),
 	m_sampleSize(0),
 	m_centerFrequency(435000000),
@@ -94,9 +93,9 @@ void FileInput::openFileStream()
 	}
 
 #ifdef Q_OS_WIN
-	m_ifstream.open(m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
+	m_ifstream.open(m_settings.m_fileName.toStdWString().c_str(), std::ios::binary | std::ios::ate);
 #else
-	m_ifstream.open(m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
+	m_ifstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary | std::ios::ate);
 #endif
 	quint64 fileSize = m_ifstream.tellg();
 
@@ -133,7 +132,7 @@ void FileInput::openFileStream()
 		m_recordLengthMuSec = 0;
 	}
 
-	qDebug() << "FileInput::openFileStream: " << m_fileName.toStdString().c_str()
+	qDebug() << "FileInput::openFileStream: " << m_settings.m_fileName.toStdString().c_str()
 			<< " fileSize: " << fileSize << " bytes"
 			<< " length: " << m_recordLengthMuSec << " microseconds"
 			<< " sample rate: " << m_sampleRate << " S/s"
@@ -329,7 +328,7 @@ bool FileInput::handleMessage(const Message& message)
     else if (MsgConfigureFileSourceName::match(message))
 	{
 		MsgConfigureFileSourceName& conf = (MsgConfigureFileSourceName&) message;
-		m_fileName = conf.getFileName();
+		m_settings.m_fileName = conf.getFileName();
 		openFileStream();
 		return true;
 	}
@@ -463,6 +462,11 @@ bool FileInput::applySettings(const FileInputSettings& settings, bool force)
     }
 
     m_settings = settings;
+
+    // Open the file if there isn't a GUI which will open it
+    if ((m_guiMessageQueue == nullptr) && reverseAPIKeys.contains("fileName") && !m_settings.m_fileName.isEmpty())
+        openFileStream();
+
     return true;
 }
 
@@ -616,7 +620,7 @@ void FileInput::webapiFormatDeviceReport(SWGSDRangel::SWGDeviceReport& response)
     recordLength = recordLength.addMSecs(m_recordLengthMuSec / 1000UL);
     response.getFileInputReport()->setDurationTime(new QString(recordLength.toString("HH:mm:ss.zzz")));
 
-    response.getFileInputReport()->setFileName(new QString(m_fileName));
+    response.getFileInputReport()->setFileName(new QString(m_settings.m_fileName));
     response.getFileInputReport()->setSampleRate(m_sampleRate);
     response.getFileInputReport()->setSampleSize(m_sampleSize);
 }

@@ -46,7 +46,6 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_doApplySettings(true),
 	m_sampleSource(0),
 	m_acquisition(false),
-	m_fileName("..."),
 	m_sampleRate(0),
 	m_centerFrequency(0),
 	m_recordLengthMuSec(0),
@@ -59,7 +58,6 @@ FileInputGUI::FileInputGUI(DeviceUISet *deviceUISet, QWidget* parent) :
 	ui->setupUi(this);
 	ui->centerFrequency->setColorMapper(ColorMapper(ColorMapper::GrayGold));
 	ui->centerFrequency->setValueRange(7, 0, pow(10,7));
-	ui->fileNameText->setText(m_fileName);
 	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
@@ -221,6 +219,12 @@ void FileInputGUI::displaySettings()
     blockApplySettings(true);
     ui->playLoop->setChecked(m_settings.m_loop);
     ui->acceleration->setCurrentIndex(FileInputSettings::getAccelerationIndex(m_settings.m_accelerationFactor));
+    if (!m_settings.m_fileName.isEmpty() && (m_settings.m_fileName != ui->fileNameText->text()))
+    {
+	ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
+	configureFileName();
+    }
+    ui->fileNameText->setText(m_settings.m_fileName);
     blockApplySettings(false);
 }
 
@@ -302,8 +306,8 @@ void FileInputGUI::on_showFileDialog_clicked(bool checked)
 
 	if (fileName != "")
 	{
-		m_fileName = fileName;
-		ui->fileNameText->setText(m_fileName);
+		m_settings.m_fileName = fileName;
+		ui->fileNameText->setText(m_settings.m_fileName);
 		ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		configureFileName();
 	}
@@ -321,8 +325,8 @@ void FileInputGUI::on_acceleration_currentIndexChanged(int index)
 
 void FileInputGUI::configureFileName()
 {
-	qDebug() << "FileInputGUI::configureFileName: " << m_fileName.toStdString().c_str();
-	FileInput::MsgConfigureFileSourceName* message = FileInput::MsgConfigureFileSourceName::create(m_fileName);
+	qDebug() << "FileInputGUI::configureFileName: " << m_settings.m_fileName.toStdString().c_str();
+	FileInput::MsgConfigureFileSourceName* message = FileInput::MsgConfigureFileSourceName::create(m_settings.m_fileName);
 	m_sampleSource->getInputMessageQueue()->push(message);
 }
 

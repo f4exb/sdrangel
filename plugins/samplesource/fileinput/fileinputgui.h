@@ -57,7 +57,6 @@ private:
 	std::vector<int> m_gains;
 	DeviceSampleSource* m_sampleSource;
     bool m_acquisition;
-    QString m_fileName;
 	int m_sampleRate;
 	quint32 m_sampleSize;
 	quint64 m_centerFrequency;
