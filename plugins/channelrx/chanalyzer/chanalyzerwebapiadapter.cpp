@@ -55,9 +55,13 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
     response.getChannelAnalyzerSettings()->setSsb(settings.m_ssb ? 1 : 0);
     response.getChannelAnalyzerSettings()->setPll(settings.m_pll ? 1 : 0);
     response.getChannelAnalyzerSettings()->setFll(settings.m_fll ? 1 : 0);
+    response.getChannelAnalyzerSettings()->setCostasLoop(settings.m_costasLoop ? 1 : 0);
     response.getChannelAnalyzerSettings()->setRrc(settings.m_rrc ? 1 : 0);
     response.getChannelAnalyzerSettings()->setRrcRolloff(settings.m_rrcRolloff);
     response.getChannelAnalyzerSettings()->setPllPskOrder(settings.m_pllPskOrder);
+    response.getChannelAnalyzerSettings()->setPllBandwidth(settings.m_pllBandwidth);
+    response.getChannelAnalyzerSettings()->setPllDampingFactor(settings.m_pllBandwidth);
+    response.getChannelAnalyzerSettings()->setPllLoopGain(settings.m_pllLoopGain);
     response.getChannelAnalyzerSettings()->setInputType((int) settings.m_inputType);
     response.getChannelAnalyzerSettings()->setRgbColor(settings.m_rgbColor);
     response.getChannelAnalyzerSettings()->setTitle(new QString(settings.m_title));
@@ -190,8 +194,20 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("pll")) {
         settings.m_pll = response.getChannelAnalyzerSettings()->getPll() != 0;
     }
+    if (channelSettingsKeys.contains("costasLoop")) {
+        settings.m_costasLoop = response.getChannelAnalyzerSettings()->getCostasLoop() != 0;
+    }
     if (channelSettingsKeys.contains("pllPskOrder")) {
         settings.m_pllPskOrder = response.getChannelAnalyzerSettings()->getPllPskOrder();
+    }
+    if (channelSettingsKeys.contains("pllBandwidth")) {
+        settings.m_pllBandwidth = response.getChannelAnalyzerSettings()->getPllBandwidth();
+    }
+    if (channelSettingsKeys.contains("pllDampingFactor")) {
+        settings.m_pllDampingFactor = response.getChannelAnalyzerSettings()->getPllDampingFactor();
+    }
+    if (channelSettingsKeys.contains("pllLoopGain")) {
+        settings.m_pllLoopGain = response.getChannelAnalyzerSettings()->getPllLoopGain();
     }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getChannelAnalyzerSettings()->getRgbColor();

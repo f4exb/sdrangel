@@ -103,18 +103,85 @@ void ChannelAnalyzerGUI::displaySettings()
 
 void ChannelAnalyzerGUI::displayPLLSettings()
 {
-    if (m_settings.m_fll)
-    {
-        ui->pllPskOrder->setCurrentIndex(5);
-    }
+    if (m_settings.m_costasLoop)
+        ui->pllType->setCurrentIndex(2);
+    else if (m_settings.m_fll)
+        ui->pllType->setCurrentIndex(1);
     else
-    {
-        int i = 0;
-        for(; ((m_settings.m_pllPskOrder>>i) & 1) == 0; i++);
+        ui->pllType->setCurrentIndex(0);
+    setPLLVisibility();
+
+    int i = 0;
+    for(; ((m_settings.m_pllPskOrder>>i) & 1) == 0; i++);
+    if (m_settings.m_costasLoop)
+        ui->pllPskOrder->setCurrentIndex(i==0 ? 0 : i-1);
+    else
         ui->pllPskOrder->setCurrentIndex(i);
-    }
 
     ui->pll->setChecked(m_settings.m_pll);
+    ui->pllBandwidth->setValue((int)(m_settings.m_pllBandwidth*1000.0));
+    QString bandwidthStr = QString::number(m_settings.m_pllBandwidth, 'f', 3);
+    ui->pllBandwidthText->setText(bandwidthStr);
+    ui->pllDampingFactor->setValue((int)(m_settings.m_pllDampingFactor*10.0));
+    QString factorStr = QString::number(m_settings.m_pllDampingFactor, 'f', 1);
+    ui->pllDampingFactorText->setText(factorStr);
+    ui->pllLoopGain->setValue((int)(m_settings.m_pllLoopGain));
+    QString gainStr = QString::number(m_settings.m_pllLoopGain, 'f', 0);
+    ui->pllLoopGainText->setText(gainStr);
+}
+
+void ChannelAnalyzerGUI::setPLLVisibility()
+{
+    ui->pllToolbar->setVisible(m_settings.m_pll);
+
+    // BW
+    ui->pllPskOrder->setVisible(!m_settings.m_fll);
+    ui->pllLine1->setVisible(!m_settings.m_fll);
+    ui->pllBandwidthLabel->setVisible(!m_settings.m_fll);
+    ui->pllBandwidth->setVisible(!m_settings.m_fll);
+    ui->pllBandwidthText->setVisible(!m_settings.m_fll);
+    ui->pllLine2->setVisible(!m_settings.m_fll);
+
+    // Damping factor and gain
+    bool stdPll = !m_settings.m_fll && !m_settings.m_costasLoop;
+    ui->pllDamplingFactor->setVisible(stdPll);
+    ui->pllDampingFactor->setVisible(stdPll);
+    ui->pllDampingFactorText->setVisible(stdPll);
+    ui->pllLine3->setVisible(stdPll);
+    ui->pllLoopGainLabel->setVisible(stdPll);
+    ui->pllLoopGain->setVisible(stdPll);
+    ui->pllLoopGainText->setVisible(stdPll);
+    ui->pllLine4->setVisible(stdPll);
+
+    // Order
+    ui->pllPskOrder->blockSignals(true);
+    ui->pllPskOrder->clear();
+    if (stdPll)
+    {
+        ui->pllPskOrder->addItem("CW");
+        ui->pllPskOrder->addItem("BPSK");
+        ui->pllPskOrder->addItem("QPSK");
+        ui->pllPskOrder->addItem("8PSK");
+        ui->pllPskOrder->addItem("16PSK");
+    }
+    else if (m_settings.m_costasLoop)
+    {
+        ui->pllPskOrder->addItem("BPSK");
+        ui->pllPskOrder->addItem("QPSK");
+        ui->pllPskOrder->addItem("8PSK");
+        if (m_settings.m_pllPskOrder < 2)
+            m_settings.m_pllPskOrder = 2;
+        else if (m_settings.m_pllPskOrder > 8)
+            m_settings.m_pllPskOrder = 8;
+    }
+    int i = 0;
+    for(; ((m_settings.m_pllPskOrder>>i) & 1) == 0; i++);
+    if (m_settings.m_costasLoop)
+        ui->pllPskOrder->setCurrentIndex(i==0 ? 0 : i-1);
+    else
+        ui->pllPskOrder->setCurrentIndex(i);
+    ui->pllPskOrder->blockSignals(false);
+    arrangeRollups();
 }
 
 void ChannelAnalyzerGUI::setSpectrumDisplay()
@@ -212,9 +279,10 @@ void ChannelAnalyzerGUI::tick()
 
 	if (ui->pll->isChecked())
 	{
-        double sampleRate = ((double) m_channelAnalyzer->getChannelSampleRate()) / m_channelAnalyzer->getDecimation();
+        double sampleRate = (double) m_channelAnalyzer->getChannelSampleRate();
 		int freq = (m_channelAnalyzer->getPllFrequency() * sampleRate) / (2.0*M_PI);
 		ui->pll->setToolTip(tr("PLL lock. Freq = %1 Hz").arg(freq));
+		ui->pllLockFrequency->setText(tr("%1 Hz").arg(freq));
 	}
 }
 
@@ -232,16 +300,48 @@ void ChannelAnalyzerGUI::on_pll_toggled(bool checked)
 	}
 
 	m_settings.m_pll = checked;
+    setPLLVisibility();
+    applySettings();
+}
+
+void ChannelAnalyzerGUI::on_pllType_currentIndexChanged(int index)
+{
+    m_settings.m_fll = (index == 1);
+    m_settings.m_costasLoop = (index == 2);
+    setPLLVisibility();
     applySettings();
 }
 
 void ChannelAnalyzerGUI::on_pllPskOrder_currentIndexChanged(int index)
 {
-    if (index < 5) {
+    if (m_settings.m_costasLoop)
+        m_settings.m_pllPskOrder = (1<<(index+1));
+    else
         m_settings.m_pllPskOrder = (1<<index);
-    }
+    applySettings();
+}
 
-    m_settings.m_fll = (index == 5);
+void ChannelAnalyzerGUI::on_pllBandwidth_valueChanged(int value)
+{
+    m_settings.m_pllBandwidth = value/1000.0;
+    QString bandwidthStr = QString::number(m_settings.m_pllBandwidth, 'f', 3);
+    ui->pllBandwidthText->setText(bandwidthStr);
+    applySettings();
+}
+
+void ChannelAnalyzerGUI::on_pllDampingFactor_valueChanged(int value)
+{
+    m_settings.m_pllDampingFactor = value/10.0;
+    QString factorStr = QString::number(m_settings.m_pllDampingFactor, 'f', 1);
+    ui->pllDampingFactorText->setText(factorStr);
+    applySettings();
+}
+
+void ChannelAnalyzerGUI::on_pllLoopGain_valueChanged(int value)
+{
+    m_settings.m_pllLoopGain = value;
+    QString gainStr = QString::number(m_settings.m_pllLoopGain, 'f', 0);
+    ui->pllLoopGainText->setText(gainStr);
     applySettings();
 }
 

@@ -97,6 +97,7 @@ set(sdrbase_SOURCES
     dsp/ctcssfrequencies.cpp
     dsp/channelsamplesink.cpp
     dsp/channelsamplesource.cpp
+    dsp/costasloop.cpp
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
     dsp/datafifo.cpp
@@ -255,6 +256,7 @@ set(sdrbase_HEADERS
     dsp/channelsamplesink.h
     dsp/channelsamplesource.h
     dsp/complex.h
+    dsp/costasloop.h
     dsp/ctcssdetector.h
     dsp/ctcssfrequencies.h
     dsp/cwkeyer.h

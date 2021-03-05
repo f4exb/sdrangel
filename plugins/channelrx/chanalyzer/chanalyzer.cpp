@@ -139,7 +139,11 @@ void ChannelAnalyzer::applySettings(const ChannelAnalyzerSettings& settings, boo
             << " m_ssb: " << settings.m_ssb
             << " m_pll: " << settings.m_pll
             << " m_fll: " << settings.m_fll
+            << " m_costasLoop: " << settings.m_costasLoop
             << " m_pllPskOrder: " << settings.m_pllPskOrder
+            << " m_pllBandwidth: " << settings.m_pllBandwidth
+            << " m_pllDampingFactor: " << settings.m_pllDampingFactor
+            << " m_pllLoopGain: " << settings.m_pllLoopGain
             << " m_inputType: " << (int) settings.m_inputType;
 
     ChannelAnalyzerBaseband::MsgConfigureChannelAnalyzerBaseband *msg

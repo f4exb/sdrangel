@@ -42,9 +42,13 @@ void ChannelAnalyzerSettings::resetToDefaults()
     m_ssb = false;
     m_pll = false;
     m_fll = false;
+    m_costasLoop = false;
     m_rrc = false;
     m_rrcRolloff = 35; // 0.35
     m_pllPskOrder = 1;
+    m_pllBandwidth = 0.002f;
+    m_pllDampingFactor = 0.5f;
+    m_pllLoopGain = 10.0f;
     m_inputType = InputSignal;
     m_rgbColor = QColor(128, 128, 128).rgb();
     m_title = "Channel Analyzer";
@@ -71,6 +75,10 @@ QByteArray ChannelAnalyzerSettings::serialize() const
     s.writeString(15, m_title);
     s.writeBool(16, m_rrc);
     s.writeU32(17, m_rrcRolloff);
+    s.writeFloat(18, m_pllBandwidth);
+    s.writeFloat(19, m_pllDampingFactor);
+    s.writeFloat(20, m_pllLoopGain);
+    s.writeBool(21, m_costasLoop);
 
     return s.final();
 }
@@ -118,6 +126,10 @@ bool ChannelAnalyzerSettings::deserialize(const QByteArray& data)
         d.readString(15, &m_title, "Channel Analyzer");
         d.readBool(16, &m_rrc, false);
         d.readU32(17, &m_rrcRolloff, 35);
+        d.readFloat(18, &m_pllBandwidth, 0.002f);
+        d.readFloat(19, &m_pllDampingFactor, 0.5f);
+        d.readFloat(20, &m_pllLoopGain, 10.0f);
+        d.readBool(21, &m_costasLoop, false);
 
         return true;
     }

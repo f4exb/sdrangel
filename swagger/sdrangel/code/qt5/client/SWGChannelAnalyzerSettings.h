@@ -71,6 +71,9 @@ public:
     qint32 getFll();
     void setFll(qint32 fll);
 
+    qint32 getCostasLoop();
+    void setCostasLoop(qint32 costas_loop);
+
     qint32 getRrc();
     void setRrc(qint32 rrc);
 
@@ -79,6 +82,15 @@ public:
 
     qint32 getPllPskOrder();
     void setPllPskOrder(qint32 pll_psk_order);
+
+    float getPllBandwidth();
+    void setPllBandwidth(float pll_bandwidth);
+
+    float getPllDampingFactor();
+    void setPllDampingFactor(float pll_damping_factor);
+
+    float getPllLoopGain();
+    void setPllLoopGain(float pll_loop_gain);
 
     qint32 getInputType();
     void setInputType(qint32 input_type);
@@ -126,6 +138,9 @@ private:
     qint32 fll;
     bool m_fll_isSet;
 
+    qint32 costas_loop;
+    bool m_costas_loop_isSet;
+
     qint32 rrc;
     bool m_rrc_isSet;
 
@@ -134,6 +149,15 @@ private:
 
     qint32 pll_psk_order;
     bool m_pll_psk_order_isSet;
+
+    float pll_bandwidth;
+    bool m_pll_bandwidth_isSet;
+
+    float pll_damping_factor;
+    bool m_pll_damping_factor_isSet;
+
+    float pll_loop_gain;
+    bool m_pll_loop_gain_isSet;
 
     qint32 input_type;
     bool m_input_type_isSet;

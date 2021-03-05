@@ -30,6 +30,7 @@ ChannelAnalyzerSink::ChannelAnalyzerSink() :
     m_channelSampleRate(48000),
     m_channelFrequencyOffset(0),
     m_sinkSampleRate(48000),
+    m_costasLoop(0.002, 2),
     m_sampleSink(nullptr)
 {
 	m_usb = true;
@@ -38,7 +39,8 @@ ChannelAnalyzerSink::ChannelAnalyzerSink() :
 	DSBFilter = new fftfilt(m_settings.m_bandwidth / m_channelSampleRate, 2*m_ssbFftLen);
 	RRCFilter = new fftfilt(m_settings.m_bandwidth / m_channelSampleRate, 2*m_ssbFftLen);
 	m_corr = new fftcorr(2*m_corrFFTLen); // 8k for 4k effective samples
-	m_pll.computeCoefficients(0.002f, 0.5f, 10.0f); // bandwidth, damping factor, loop gain
+	m_pll.computeCoefficients(m_settings.m_pllBandwidth, m_settings.m_pllDampingFactor, m_settings.m_pllLoopGain);
+        m_costasLoop.computeCoefficients(m_settings.m_pllBandwidth);
 
     applyChannelSettings(m_channelSampleRate, m_sinkSampleRate, m_channelFrequencyOffset, true);
 	applySettings(m_settings, true);
@@ -123,21 +125,28 @@ void ChannelAnalyzerSink::processOneSample(Complex& c, fftfilt::cmplx *sideband)
 
         if (m_settings.m_pll)
         {
-            if (m_settings.m_fll)
+            // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
+            if (m_settings.m_costasLoop)
+            {
+                m_costasLoop.feed(re, im);
+                mix = si * std::conj(m_costasLoop.getComplex());
+                feedOneSample(mix, m_costasLoop.getComplex());
+            }
+            else if (m_settings.m_fll)
             {
                 m_fll.feed(re, im);
-                // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
                 mix = si * std::conj(m_fll.getComplex());
+                feedOneSample(mix, m_fll.getComplex());
             }
             else
             {
                 m_pll.feed(re, im);
-                // Use -fPLL to mix (exchange PLL real and image in the complex multiplication)
                 mix = si * std::conj(m_pll.getComplex());
+                feedOneSample(mix, m_pll.getComplex());
             }
         }
-
-        feedOneSample(m_settings.m_pll ? mix : si, m_settings.m_fll ? m_fll.getComplex() : m_pll.getComplex());
+        else
+            feedOneSample(si, si);
     }
 }
 
@@ -230,7 +239,11 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
             << " m_ssb: " << settings.m_ssb
             << " m_pll: " << settings.m_pll
             << " m_fll: " << settings.m_fll
+            << " m_costasLoop: " << settings.m_costasLoop
             << " m_pllPskOrder: " << settings.m_pllPskOrder
+            << " m_pllBandwidth: " << settings.m_pllBandwidth
+            << " m_pllDampingFactor: " << settings.m_pllDampingFactor
+            << " m_pllLoopGain: " << settings.m_pllLoopGain
             << " m_inputType: " << (int) settings.m_inputType;
     bool doApplySampleRate = false;
 
@@ -247,6 +260,7 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
         {
             m_pll.reset();
             m_fll.reset();
+            m_costasLoop.reset();
         }
     }
 
@@ -257,11 +271,30 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
         }
     }
 
+    if (settings.m_costasLoop != m_settings.m_costasLoop || force)
+    {
+        if (settings.m_costasLoop) {
+            m_costasLoop.reset();
+        }
+    }
+
     if (settings.m_pllPskOrder != m_settings.m_pllPskOrder || force)
     {
         if (settings.m_pllPskOrder < 32) {
             m_pll.setPskOrder(settings.m_pllPskOrder);
         }
+        if (settings.m_pllPskOrder < 16) {
+            m_costasLoop.setPskOrder(settings.m_pllPskOrder);
+        }
+    }
+
+    if ((settings.m_pllBandwidth != m_settings.m_pllBandwidth)
+        || (settings.m_pllDampingFactor != m_settings.m_pllDampingFactor)
+        || (settings.m_pllLoopGain != m_settings.m_pllLoopGain)
+        || force)
+    {
+        m_pll.computeCoefficients(settings.m_pllBandwidth, settings.m_pllDampingFactor, settings.m_pllLoopGain);
+        m_costasLoop.computeCoefficients(settings.m_pllBandwidth);
     }
 
     if ((settings.m_rationalDownSample != m_settings.m_rationalDownSample) ||
@@ -280,15 +313,42 @@ void ChannelAnalyzerSink::applySettings(const ChannelAnalyzerSettings& settings,
     }
 }
 
+bool ChannelAnalyzerSink::isPllLocked() const
+{
+    if (m_settings.m_pll)
+        return m_pll.locked();
+    else
+        return false;
+}
+
 Real ChannelAnalyzerSink::getPllFrequency() const
 {
-    if (m_settings.m_fll) {
+    if (m_settings.m_costasLoop)
+        return m_costasLoop.getFreq();
+    else if (m_settings.m_fll)
         return m_fll.getFreq();
-    } else if (m_settings.m_pll) {
+    else if (m_settings.m_pll)
         return m_pll.getFreq();
-    } else {
+    else
         return 0.0;
-    }
+}
+
+Real ChannelAnalyzerSink::getPllPhase() const
+{
+    if (m_settings.m_costasLoop)
+        return m_costasLoop.getPhiHat();
+    else if (m_settings.m_pll)
+        return m_pll.getPhiHat();
+    else
+        return 0.0f;
+}
+
+Real ChannelAnalyzerSink::getPllDeltaPhase() const
+{
+    if (m_settings.m_pll)
+        return m_pll.getDeltaPhi();
+    else
+        return 0.0f;
 }
 
 int ChannelAnalyzerSink::getActualSampleRate()
@@ -307,5 +367,6 @@ void ChannelAnalyzerSink::applySampleRate()
     setFilters(sampleRate, m_settings.m_bandwidth, m_settings.m_lowCutoff);
     m_pll.setSampleRate(sampleRate);
     m_fll.setSampleRate(sampleRate);
+    m_costasLoop.setSampleRate(sampleRate);
     RRCFilter->create_rrc_filter(m_settings.m_bandwidth / (float) sampleRate, m_settings.m_rrcRolloff / 100.0);
 }
