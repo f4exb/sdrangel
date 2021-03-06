@@ -27,6 +27,7 @@
 */
 
 #include <stdlib.h>
+#include <deque>
 
 #include "bch.h"
 #include "crc.h"
@@ -2358,6 +2359,9 @@ struct s2_fecdec_helper : runnable
           must_buffer(false),
           in(_in), out(_out),
           command(_command),
+          writing_modulo(1),
+          zeros_count(0),
+          run_count(0),
           bitcount(opt_writer(_bitcount, 1)),
           errcount(opt_writer(_errcount, 1))
     {
@@ -2367,7 +2371,6 @@ struct s2_fecdec_helper : runnable
     }
     void run()
     {
-        in_count = out_count = 0;
         // Send work until all helpers block.
         while (in.readable() >= 1 && !jobs.full())
         {
@@ -2376,21 +2379,56 @@ struct s2_fecdec_helper : runnable
             }
 
             in.read(1);
-            in_count++;
         }
 
+        // while (
+        //     !jobs.empty() &&
+        //     jobs.peek()->h->b_out &&
+        //     out.writable() >= 1 &&
+        //     opt_writable(bitcount, 1) &&
+        //     opt_writable(errcount, 1)
+        // )
         while (
             !jobs.empty() &&
-            jobs.peek()->h->b_out &&
-            out.writable() >= 1 &&
-            opt_writable(bitcount, 1) &&
-            opt_writable(errcount, 1)
-        )
+            jobs.peek()->h->b_out)
         {
             receive_frame(jobs.get());
         }
 
-        fprintf(stderr, "s2_fecdec_helper::run: in=%d out=%d\n", in_count, out_count);
+        if ((run_count % writing_modulo == 0) && (bbframe_q.size() != 0) && out.writable() >= 1)
+        {
+            if (zeros_count != 0)
+            {
+                writing_modulo = (bbframe_q.size() + zeros_count) / bbframe_q.size();
+                fprintf(stderr, "s2_fecdec_helper::run: bbframe queue size: %lu zeros: %d writing_modulo: %d\n",
+                    bbframe_q.size(), zeros_count, writing_modulo);
+            }
+
+            bbframe *pout = out.wr();
+            pout->pls = bbframe_q.front().pls;
+            std::copy(bbframe_q.front().bytes, bbframe_q.front().bytes + (58192 / 8), pout->bytes);
+            bbframe_q.pop_front();
+            out.written(1);
+            zeros_count = 0;
+        }
+        else
+        {
+            zeros_count++;
+        }
+
+        if ((bitcount_q.size() != 0) && opt_writable(bitcount, 1))
+        {
+            opt_write(bitcount, bitcount_q.front());
+            bitcount_q.pop_front();
+        }
+
+        if ((errcount_q.size() != 0) && opt_writable(errcount, 1))
+        {
+            opt_write(errcount, errcount_q.front());
+            errcount_q.pop_front();
+        }
+
+        run_count++;
     }
 
   private:
@@ -2546,8 +2584,10 @@ struct s2_fecdec_helper : runnable
             fprintf(stderr, "BCHCORR = %d\n", ncorr);
         bool corrupted = (ncorr < 0);
         // Report VBER
-        opt_write(bitcount, fi->Kbch);
-        opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
+        bitcount_q.push_back(fi->Kbch);
+        //opt_write(bitcount, fi->Kbch);
+        errcount_q.push_front((ncorr >= 0) ? ncorr : fi->Kbch);
+        //opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
 #if 0
       // TBD Some decoders want the bad packets.
 	if ( corrupted ) {
@@ -2558,11 +2598,11 @@ struct s2_fecdec_helper : runnable
         if (!corrupted)
         {
             // Descramble and output
-            bbframe *pout = out.wr();
-            pout->pls = job->pls;
-            bbscrambling.transform(hardbytes, fi->Kbch / 8, pout->bytes);
-            out.written(1);
-            out_count++;
+            bbframe_q.emplace_back();
+            //bbframe *pout = out.wr();
+            bbframe_q.back().pls = job->pls;
+            bbscrambling.transform(hardbytes, fi->Kbch / 8, bbframe_q.back().bytes);
+            //out.written(1);
         }
         if (sch->debug)
             fprintf(stderr, "%c", corrupted ? '!' : ncorr ? '.' : '_');
@@ -2575,8 +2615,13 @@ struct s2_fecdec_helper : runnable
     uint8_t bch_buf[64800 / 8]; // Temp storage for hardening before BCH
     s2_bch_engines s2bch;
     s2_bbscrambling bbscrambling;
+    std::deque<bbframe> bbframe_q;
+    std::deque<int> bitcount_q;
+    std::deque<int> errcount_q;
+    unsigned int writing_modulo;
+    unsigned int zeros_count;
+    unsigned int run_count;
     pipewriter<int> *bitcount, *errcount;
-    int in_count, out_count;
 }; // s2_fecdec_helper
 
 // S2 FRAMER
