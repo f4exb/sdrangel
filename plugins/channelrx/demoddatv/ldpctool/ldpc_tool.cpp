@@ -28,6 +28,7 @@ static const int DEFAULT_TRIALS = 50;
 #include "layered_decoder.h"
 static const int DEFAULT_TRIALS = 25;
 #endif
+static const int DEFAULT_BATCH_SIZE = 32;
 
 //ldpctool::LDPCInterface *create_ldpc(char *standard, char prefix, int number);
 
@@ -46,7 +47,7 @@ void fatal(const char *msg)
 
 void usage(const char *name, FILE *f, int c, const char *info = NULL)
 {
-	fprintf(f, "Usage: %s [--standard DVB-S2] --modcod INT [--trials INT] [--shortframes]  < FECFRAMES.int8  > FECFRAMES.int8\n", name);
+	fprintf(f, "Usage: %s [--standard DVB-S2] --modcod INT [--trials 25] [--batch-size 32] [--shortframes]  < FECFRAMES.int8  > FECFRAMES.int8\n", name);
 	if (info)
 		fprintf(f, "** Error while processing '%s'\n", info);
 	exit(c);
@@ -57,6 +58,7 @@ int main(int argc, char **argv)
 	const char *standard = "DVB-S2";
 	int modcod = -1;
 	int max_trials = DEFAULT_TRIALS;
+	int batch_size = DEFAULT_BATCH_SIZE;
 	bool shortframes = false;
 
 	for (int i = 1; i < argc; ++i)
@@ -67,6 +69,8 @@ int main(int argc, char **argv)
 			modcod = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "--trials") && i + 1 < argc)
 			max_trials = atoi(argv[++i]);
+		else if (!strcmp(argv[i], "--batch-size") && i + 1 < argc)
+			batch_size = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "--shortframes"))
 			shortframes = true;
 		else if (!strcmp(argv[i], "-h"))
@@ -123,7 +127,7 @@ int main(int argc, char **argv)
 
 	decode.init(ldpc);
 
-	int BLOCKS = 32;
+	int BLOCKS = batch_size;
 	ldpctool::code_type *code = new ldpctool::code_type[BLOCKS * CODE_LEN];
 	void *aligned_buffer = aligned_alloc(sizeof(ldpctool::simd_type), sizeof(ldpctool::simd_type) * CODE_LEN);
 	ldpctool::simd_type *simd = reinterpret_cast<ldpctool::simd_type *>(aligned_buffer);
@@ -172,6 +176,7 @@ int main(int argc, char **argv)
 			{
 				iterations += blocks * trials;
 				std::cerr << "ldpc_tool: decoder failed at converging to a code word in " << trials << " trials" << std::endl;
+				break;
 			}
 			else
 			{

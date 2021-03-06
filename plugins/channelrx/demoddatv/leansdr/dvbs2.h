@@ -393,7 +393,7 @@ struct s2_frame_transmitter : runnable
   private:
     pipereader<plslot<hard_ss>> in;
     pipewriter<complex<T>> out;
-    cstln_lut<hard_ss, 256> *cstln; // NULL initially
+    cstln_lut<hard_ss, 256> *cstln; // nullptr initially
     complex<T> *csymbols;           // Valid iff cstln is valid. RMS cstln_amp.
     void update_cstln(const modcod_info *mcinfo)
     {
@@ -445,13 +445,13 @@ struct s2_frame_receiver : runnable
                       sampler_interface<T> *_sampler,
                       pipebuf<complex<T>> &_in,
                       pipebuf<plslot<SOFTSYMB>> &_out,
-                      pipebuf<float> *_freq_out = NULL,
-                      pipebuf<float> *_ss_out = NULL,
-                      pipebuf<float> *_mer_out = NULL,
-                      pipebuf<complex<float>> *_cstln_out = NULL,
-                      pipebuf<complex<float>> *_cstln_pls_out = NULL,
-                      pipebuf<complex<float>> *_symbols_out = NULL,
-                      pipebuf<int> *_state_out = NULL)
+                      pipebuf<float> *_freq_out = nullptr,
+                      pipebuf<float> *_ss_out = nullptr,
+                      pipebuf<float> *_mer_out = nullptr,
+                      pipebuf<complex<float>> *_cstln_out = nullptr,
+                      pipebuf<complex<float>> *_cstln_pls_out = nullptr,
+                      pipebuf<complex<float>> *_symbols_out = nullptr,
+                      pipebuf<int> *_state_out = nullptr)
         : runnable(sch, "S2 frame receiver"),
           sampler(_sampler),
           meas_decimation(1048576),
@@ -459,7 +459,7 @@ struct s2_frame_receiver : runnable
           strongpls(false),
           in_power(0), ev_power(0), agc_gain(1), agc_bw(1e-3),
           nsyncs(0),
-          cstln(NULL),
+          cstln(nullptr),
           in(_in), out(_out, 1 + modcod_info::MAX_SLOTS_PER_FRAME),
           meas_count(0),
           freq_out(opt_writer(_freq_out)),
@@ -612,7 +612,7 @@ struct s2_frame_receiver : runnable
         if (cstln_out && cstln_out->writable() >= 1024)
             psampled = cstln_out->wr();
         else
-            psampled = NULL;
+            psampled = nullptr;
 
         // Preserve float precision
         phase16 -= 65536 * floor(phase16 / 65536);
@@ -714,15 +714,15 @@ struct s2_frame_receiver : runnable
         if (cstln_out && cstln_out->writable() >= 1024)
             psampled = cstln_out->wr();
         else
-            psampled = NULL;
+            psampled = nullptr;
         complex<float> *psampled_pls;
         if (cstln_pls_out && cstln_pls_out->writable() >= 1024)
             psampled_pls = cstln_pls_out->wr();
         else
-            psampled_pls = NULL;
+            psampled_pls = nullptr;
 
 #if TEST_DIVERSITY
-        complex<float> *psymbols = symbols_out ? symbols_out->wr() : NULL;
+        complex<float> *psymbols = symbols_out ? symbols_out->wr() : nullptr;
         float scale_symbols = 1.0 / cstln_amp;
 #endif
 
@@ -1941,7 +1941,7 @@ struct s2_ldpc_engines
                 const fec_info *fi = &fec_infos[sf][fec];
                 if (!fi->ldpc)
                 {
-                    ldpcs[sf][fec] = NULL;
+                    ldpcs[sf][fec] = nullptr;
                 }
                 else
                 {
@@ -2095,8 +2095,8 @@ struct s2_fecdec : runnable
     int bitflips;
     s2_fecdec(scheduler *sch,
               pipebuf<fecframe<SOFTBYTE>> &_in, pipebuf<bbframe> &_out,
-              pipebuf<int> *_bitcount = NULL,
-              pipebuf<int> *_errcount = NULL)
+              pipebuf<int> *_bitcount = nullptr,
+              pipebuf<int> *_errcount = nullptr)
         : runnable(sch, "S2 fecdec"),
           bitflips(0),
           in(_in), out(_out),
@@ -2309,7 +2309,7 @@ private:
     uint8_t bch_buf[64800 / 8]; // Temp storage for hardening before BCH
     s2_bch_engines s2bch;
     s2_bbscrambling bbscrambling;
-};
+}; // s2_fecdec_soft
 
 // External LDPC decoder
 // Spawns a user-specified command, FEC frames on stdin/stdout.
@@ -2351,29 +2351,54 @@ struct s2_fecdec_helper : runnable
                      pipebuf<fecframe<SOFTBYTE>> &_in,
                      pipebuf<bbframe> &_out,
                      const char *_command,
-                     pipebuf<int> *_bitcount = NULL,
-                     pipebuf<int> *_errcount = NULL)
+                     pipebuf<int> *_bitcount = nullptr,
+                     pipebuf<int> *_errcount = nullptr)
         : runnable(sch, "S2 fecdec io"),
-          batch_size(32),
+          batch_size(16),
           nhelpers(1),
           must_buffer(false),
           in(_in), out(_out),
           command(_command),
-          writing_modulo(1),
-          zeros_count(0),
-          run_count(0),
           bitcount(opt_writer(_bitcount, 1)),
           errcount(opt_writer(_errcount, 1))
     {
         for (int mc = 0; mc < 32; ++mc)
             for (int sf = 0; sf < 2; ++sf)
-                pools[mc][sf].procs = NULL;
+                pools[mc][sf].procs = nullptr;
     }
     void run()
     {
         // Send work until all helpers block.
         while (in.readable() >= 1 && !jobs.full())
         {
+            if (out.writable() >= 1)
+            {
+                if (bbframe_q.size() != 0)
+                {
+                    bbframe *pout = out.wr();
+                    pout->pls = bbframe_q.front().pls;
+                    std::copy(bbframe_q.front().bytes, bbframe_q.front().bytes + (58192 / 8), pout->bytes);
+                    bbframe_q.pop_front();
+                    out.written(1);
+                }
+                else
+                {
+                    fprintf(stderr, "s2_fecdec_helper::run: WARNING: bbframe queue is empty\n");
+                }
+            }
+
+            if ((bitcount_q.size() != 0) && opt_writable(bitcount, 1))
+            {
+                opt_write(bitcount, bitcount_q.front());
+                bitcount_q.pop_front();
+            }
+
+            if ((errcount_q.size() != 0) && opt_writable(errcount, 1))
+            {
+                opt_write(errcount, errcount_q.front());
+                errcount_q.pop_front();
+            }
+
             if (!send_frame(in.rd())) {
                 break;
             }
@@ -2381,54 +2406,12 @@ struct s2_fecdec_helper : runnable
             in.read(1);
         }
 
-        // while (
-        //     !jobs.empty() &&
-        //     jobs.peek()->h->b_out &&
-        //     out.writable() >= 1 &&
-        //     opt_writable(bitcount, 1) &&
-        //     opt_writable(errcount, 1)
-        // )
         while (
             !jobs.empty() &&
             jobs.peek()->h->b_out)
         {
             receive_frame(jobs.get());
         }
-
-        if ((run_count % writing_modulo == 0) && (bbframe_q.size() != 0) && out.writable() >= 1)
-        {
-            if (zeros_count != 0)
-            {
-                writing_modulo = (bbframe_q.size() + zeros_count) / bbframe_q.size();
-                fprintf(stderr, "s2_fecdec_helper::run: bbframe queue size: %lu zeros: %d writing_modulo: %d\n",
-                    bbframe_q.size(), zeros_count, writing_modulo);
-            }
-
-            bbframe *pout = out.wr();
-            pout->pls = bbframe_q.front().pls;
-            std::copy(bbframe_q.front().bytes, bbframe_q.front().bytes + (58192 / 8), pout->bytes);
-            bbframe_q.pop_front();
-            out.written(1);
-            zeros_count = 0;
-        }
-        else
-        {
-            zeros_count++;
-        }
-
-        if ((bitcount_q.size() != 0) && opt_writable(bitcount, 1))
-        {
-            opt_write(bitcount, bitcount_q.front());
-            bitcount_q.pop_front();
-        }
-
-        if ((errcount_q.size() != 0) && opt_writable(errcount, 1))
-        {
-            opt_write(errcount, errcount_q.front());
-            errcount_q.pop_front();
-        }
-
-        run_count++;
     }
 
   private:
@@ -2442,7 +2425,7 @@ struct s2_fecdec_helper : runnable
     };
     struct pool
     {
-        helper_instance *procs; // NULL or [nprocs]
+        helper_instance *procs; // nullptr or [nprocs]
         int nprocs;
     } pools[32][2]; // [modcod][sf]
     struct helper_job
@@ -2533,7 +2516,10 @@ struct s2_fecdec_helper : runnable
                 fprintf(stderr, "*** Throughput will be suboptimal.\n");
         }
 #endif
-        int child = vfork();
+        // vfork() differs from fork(2) in that the calling thread is
+        // suspended until the child terminates
+        int child = fork();
+
         if (!child)
         {
             // Child process
@@ -2543,16 +2529,19 @@ struct s2_fecdec_helper : runnable
             dup2(rx[1], 1);
             char mc_arg[16];
             sprintf(mc_arg, "%d", pls->modcod);
-            const char *sf_arg = pls->sf ? "--shortframes" : NULL;
-            const char *argv[] = {command, "--trials", "10", "--modcod", mc_arg, sf_arg, NULL};
-            execve(command, (char *const *)argv, NULL);
+            char batch_size_arg[16];
+            sprintf(batch_size_arg, "%d", batch_size);
+            const char *sf_arg = pls->sf ? "--shortframes" : nullptr;
+            const char *argv[] = {command, "--trials", "5", "--batch-size", batch_size_arg, "--modcod", mc_arg, sf_arg, nullptr};
+            execve(command, (char *const *)argv, nullptr);
             fatal(command);
         }
+
         h->fd_tx = tx[1];
         close(tx[0]);
         h->fd_rx = rx[0];
         close(rx[1]);
-        h->batch_size = 32; // TBD
+        h->batch_size = batch_size; // TBD
         h->b_in = h->b_out = 0;
         int flags = fcntl(h->fd_tx, F_GETFL);
         if (fcntl(h->fd_tx, F_SETFL, flags | O_NONBLOCK))
@@ -2618,9 +2607,6 @@ struct s2_fecdec_helper : runnable
     std::deque<bbframe> bbframe_q;
     std::deque<int> bitcount_q;
     std::deque<int> errcount_q;
-    unsigned int writing_modulo;
-    unsigned int zeros_count;
-    unsigned int run_count;
     pipewriter<int> *bitcount, *errcount;
 }; // s2_fecdec_helper
 
@@ -2714,8 +2700,8 @@ struct s2_framer : runnable
 struct s2_deframer : runnable
 {
     s2_deframer(scheduler *sch, pipebuf<bbframe> &_in, pipebuf<tspacket> &_out,
-                pipebuf<int> *_state_out = NULL,
-                pipebuf<unsigned long> *_locktime_out = NULL)
+                pipebuf<int> *_state_out = nullptr,
+                pipebuf<unsigned long> *_locktime_out = nullptr)
         : runnable(sch, "S2 deframer"),
           missing(-1),
           in(_in), out(_out, MAX_TS_PER_BBFRAME),
@@ -2767,7 +2753,9 @@ struct s2_deframer : runnable
             syncd > dfl || (dfl & 7) || (syncd & 7))
         {
             // Note: Maybe accept syncd=65535
-            fprintf(stderr, "Bad bbframe\n");
+            if (sch->debug) {
+                fprintf(stderr, "Bad bbframe\n");
+            }
             missing = -1;
             info_unlocked();
             return;
@@ -2778,7 +2766,9 @@ struct s2_deframer : runnable
         {
             // Skip unusable data at beginning of bbframe
             pos = syncd / 8;
-            fprintf(stderr, "Start TS at %d\n", pos);
+            if (sch->debug) {
+                fprintf(stderr, "Start TS at %d\n", pos);
+            }
             missing = 0;
         }
         else
@@ -2786,7 +2776,9 @@ struct s2_deframer : runnable
             // Sanity check
             if (syncd / 8 != missing)
             {
-                fprintf(stderr, "Lost a bbframe ?\n");
+                if (sch->debug) {
+                    fprintf(stderr, "Lost a bbframe ?\n");
+                }
                 missing = -1;
                 info_unlocked();
                 return;
