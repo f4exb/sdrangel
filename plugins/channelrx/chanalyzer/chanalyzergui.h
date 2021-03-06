@@ -81,6 +81,7 @@ private:
 	void applySettings(bool force = false);
 	void displaySettings();
 	void displayPLLSettings();
+        void setPLLVisibility();
 	void setSpectrumDisplay();
 	bool handleMessage(const Message& message);
 
@@ -91,7 +92,11 @@ private slots:
 	void on_deltaFrequency_changed(qint64 value);
     void on_rationalDownSamplerRate_changed(quint64 value);
     void on_pll_toggled(bool checked);
+    void on_pllType_currentIndexChanged(int index);
     void on_pllPskOrder_currentIndexChanged(int index);
+    void on_pllBandwidth_valueChanged(int value);
+    void on_pllDampingFactor_valueChanged(int value);
+    void on_pllLoopGain_valueChanged(int value);
     void on_useRationalDownsampler_toggled(bool checked);
     void on_signalSelect_currentIndexChanged(int index);
     void on_rrcFilter_toggled(bool checked);

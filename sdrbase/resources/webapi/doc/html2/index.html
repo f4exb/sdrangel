@@ -2586,6 +2586,10 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Boolean"
     },
+    "costasLoop" : {
+      "type" : "integer",
+      "description" : "Boolean"
+    },
     "rrc" : {
       "type" : "integer",
       "description" : "Boolean"
@@ -2596,6 +2600,18 @@ margin-bottom: 20px;
     },
     "pllPskOrder" : {
       "type" : "integer"
+    },
+    "pllBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "pllDampingFactor" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "pllLoopGain" : {
+      "type" : "number",
+      "format" : "float"
     },
     "inputType" : {
       "type" : "integer",
@@ -45623,7 +45639,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-03-01T10:47:56.898+01:00
+              Generated 2021-03-05T14:04:36.302+01:00
             </div>
           </div>
       </div>

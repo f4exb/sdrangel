@@ -26,6 +26,7 @@
 #include "dsp/fftfilt.h"
 #include "dsp/phaselockcomplex.h"
 #include "dsp/freqlockcomplex.h"
+#include "dsp/costasloop.h"
 #include "audio/audiofifo.h"
 
 #include "util/movingaverage.h"
@@ -46,10 +47,10 @@ public:
 
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
-	bool isPllLocked() const { return m_settings.m_pll && m_pll.locked(); }
+    bool isPllLocked() const;
     Real getPllFrequency() const;
-	Real getPllDeltaPhase() const { return m_pll.getDeltaPhi(); }
-    Real getPllPhase() const { return m_pll.getPhiHat(); }
+    Real getPllDeltaPhase() const;
+    Real getPllPhase() const;
     void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
 
     static const unsigned int m_corrFFTLen;
@@ -70,6 +71,7 @@ private:
 	Real m_interpolatorDistanceRemain;
 	PhaseLockComplex m_pll;
 	FreqLockComplex m_fll;
+	CostasLoop m_costasLoop;
     DecimatorC m_decimator;
 
 	fftfilt* SSBFilter;

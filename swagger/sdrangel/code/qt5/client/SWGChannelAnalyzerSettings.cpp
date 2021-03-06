@@ -46,12 +46,20 @@ SWGChannelAnalyzerSettings::SWGChannelAnalyzerSettings() {
     m_pll_isSet = false;
     fll = 0;
     m_fll_isSet = false;
+    costas_loop = 0;
+    m_costas_loop_isSet = false;
     rrc = 0;
     m_rrc_isSet = false;
     rrc_rolloff = 0;
     m_rrc_rolloff_isSet = false;
     pll_psk_order = 0;
     m_pll_psk_order_isSet = false;
+    pll_bandwidth = 0.0f;
+    m_pll_bandwidth_isSet = false;
+    pll_damping_factor = 0.0f;
+    m_pll_damping_factor_isSet = false;
+    pll_loop_gain = 0.0f;
+    m_pll_loop_gain_isSet = false;
     input_type = 0;
     m_input_type_isSet = false;
     rgb_color = 0;
@@ -88,12 +96,20 @@ SWGChannelAnalyzerSettings::init() {
     m_pll_isSet = false;
     fll = 0;
     m_fll_isSet = false;
+    costas_loop = 0;
+    m_costas_loop_isSet = false;
     rrc = 0;
     m_rrc_isSet = false;
     rrc_rolloff = 0;
     m_rrc_rolloff_isSet = false;
     pll_psk_order = 0;
     m_pll_psk_order_isSet = false;
+    pll_bandwidth = 0.0f;
+    m_pll_bandwidth_isSet = false;
+    pll_damping_factor = 0.0f;
+    m_pll_damping_factor_isSet = false;
+    pll_loop_gain = 0.0f;
+    m_pll_loop_gain_isSet = false;
     input_type = 0;
     m_input_type_isSet = false;
     rgb_color = 0;
@@ -108,6 +124,10 @@ SWGChannelAnalyzerSettings::init() {
 
 void
 SWGChannelAnalyzerSettings::cleanup() {
+
+
+
+
 
 
 
@@ -162,11 +182,19 @@ SWGChannelAnalyzerSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&fll, pJson["fll"], "qint32", "");
     
+    ::SWGSDRangel::setValue(&costas_loop, pJson["costasLoop"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&rrc, pJson["rrc"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rrc_rolloff, pJson["rrcRolloff"], "qint32", "");
     
     ::SWGSDRangel::setValue(&pll_psk_order, pJson["pllPskOrder"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&pll_bandwidth, pJson["pllBandwidth"], "float", "");
+    
+    ::SWGSDRangel::setValue(&pll_damping_factor, pJson["pllDampingFactor"], "float", "");
+    
+    ::SWGSDRangel::setValue(&pll_loop_gain, pJson["pllLoopGain"], "float", "");
     
     ::SWGSDRangel::setValue(&input_type, pJson["inputType"], "qint32", "");
     
@@ -221,6 +249,9 @@ SWGChannelAnalyzerSettings::asJsonObject() {
     if(m_fll_isSet){
         obj->insert("fll", QJsonValue(fll));
     }
+    if(m_costas_loop_isSet){
+        obj->insert("costasLoop", QJsonValue(costas_loop));
+    }
     if(m_rrc_isSet){
         obj->insert("rrc", QJsonValue(rrc));
     }
@@ -229,6 +260,15 @@ SWGChannelAnalyzerSettings::asJsonObject() {
     }
     if(m_pll_psk_order_isSet){
         obj->insert("pllPskOrder", QJsonValue(pll_psk_order));
+    }
+    if(m_pll_bandwidth_isSet){
+        obj->insert("pllBandwidth", QJsonValue(pll_bandwidth));
+    }
+    if(m_pll_damping_factor_isSet){
+        obj->insert("pllDampingFactor", QJsonValue(pll_damping_factor));
+    }
+    if(m_pll_loop_gain_isSet){
+        obj->insert("pllLoopGain", QJsonValue(pll_loop_gain));
     }
     if(m_input_type_isSet){
         obj->insert("inputType", QJsonValue(input_type));
@@ -340,6 +380,16 @@ SWGChannelAnalyzerSettings::setFll(qint32 fll) {
 }
 
 qint32
+SWGChannelAnalyzerSettings::getCostasLoop() {
+    return costas_loop;
+}
+void
+SWGChannelAnalyzerSettings::setCostasLoop(qint32 costas_loop) {
+    this->costas_loop = costas_loop;
+    this->m_costas_loop_isSet = true;
+}
+
+qint32
 SWGChannelAnalyzerSettings::getRrc() {
     return rrc;
 }
@@ -367,6 +417,36 @@ void
 SWGChannelAnalyzerSettings::setPllPskOrder(qint32 pll_psk_order) {
     this->pll_psk_order = pll_psk_order;
     this->m_pll_psk_order_isSet = true;
+}
+
+float
+SWGChannelAnalyzerSettings::getPllBandwidth() {
+    return pll_bandwidth;
+}
+void
+SWGChannelAnalyzerSettings::setPllBandwidth(float pll_bandwidth) {
+    this->pll_bandwidth = pll_bandwidth;
+    this->m_pll_bandwidth_isSet = true;
+}
+
+float
+SWGChannelAnalyzerSettings::getPllDampingFactor() {
+    return pll_damping_factor;
+}
+void
+SWGChannelAnalyzerSettings::setPllDampingFactor(float pll_damping_factor) {
+    this->pll_damping_factor = pll_damping_factor;
+    this->m_pll_damping_factor_isSet = true;
+}
+
+float
+SWGChannelAnalyzerSettings::getPllLoopGain() {
+    return pll_loop_gain;
+}
+void
+SWGChannelAnalyzerSettings::setPllLoopGain(float pll_loop_gain) {
+    this->pll_loop_gain = pll_loop_gain;
+    this->m_pll_loop_gain_isSet = true;
 }
 
 qint32
@@ -451,6 +531,9 @@ SWGChannelAnalyzerSettings::isSet(){
         if(m_fll_isSet){
             isObjectUpdated = true; break;
         }
+        if(m_costas_loop_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_rrc_isSet){
             isObjectUpdated = true; break;
         }
@@ -458,6 +541,15 @@ SWGChannelAnalyzerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_pll_psk_order_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pll_bandwidth_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pll_damping_factor_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_pll_loop_gain_isSet){
             isObjectUpdated = true; break;
         }
         if(m_input_type_isSet){

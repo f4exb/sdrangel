@@ -29,9 +29,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>10</y>
-     <width>631</width>
-     <height>81</height>
+     <y>0</y>
+     <width>524</width>
+     <height>101</height>
     </rect>
    </property>
    <property name="windowTitle">
@@ -335,49 +335,6 @@
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QComboBox" name="pllPskOrder">
-          <property name="maximumSize">
-           <size>
-            <width>40</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>PLL PSK order (1 for CW)</string>
-          </property>
-          <item>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>2</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>4</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>8</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>16</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>F</string>
-           </property>
-          </item>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
@@ -591,6 +548,274 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QWidget" name="pllToolbar" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>2</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QComboBox" name="pllType">
+         <property name="toolTip">
+          <string>PLL type</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>PLL</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>FLL</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Costas Loop</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="pllPskOrder">
+         <property name="minimumSize">
+          <size>
+           <width>70</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>70</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>PLL PSK order (1 for CW)</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>CW</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>BPSK</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>QPSK</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>8PSK</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>16PSK</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="pllLine1">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllBandwidthLabel">
+         <property name="text">
+          <string>BW</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDial" name="pllBandwidth">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>PLL loop bandwidth</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>2</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllBandwidthText">
+         <property name="text">
+          <string>0.002</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="pllLine2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllDamplingFactor">
+         <property name="text">
+          <string>D</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDial" name="pllDampingFactor">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>PLL damping factor</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>10</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>5</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllDampingFactorText">
+         <property name="text">
+          <string>0.5</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="pllLine3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllLoopGainLabel">
+         <property name="text">
+          <string>G</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QDial" name="pllLoopGain">
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>PLL loop gain</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="pageStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>10</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllLoopGainText">
+         <property name="text">
+          <string>10</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="pllLine4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="pllHorizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllLockFrequencyLabel">
+         <property name="text">
+          <string>Freq</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="pllLockFrequency">
+         <property name="minimumSize">
+          <size>
+           <width>60</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>PLL lock frequency</string>
+         </property>
+         <property name="text">
+          <string>-100000Hz</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
    </layout>
   </widget>

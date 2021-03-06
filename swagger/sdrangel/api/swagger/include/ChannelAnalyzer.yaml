@@ -23,6 +23,9 @@ ChannelAnalyzerSettings:
     fll:
       description: Boolean
       type: integer
+    costasLoop:
+      description: Boolean
+      type: integer
     rrc:
       description: Boolean
       type: integer
@@ -31,6 +34,15 @@ ChannelAnalyzerSettings:
       type: integer
     pllPskOrder:
       type: integer
+    pllBandwidth:
+      type: number
+      format: float
+    pllDampingFactor:
+      type: number
+      format: float
+    pllLoopGain:
+      type: number
+      format: float
     inputType:
       description: see ChannelAnalyzerSettings::InputType
       type: integer

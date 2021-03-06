@@ -40,9 +40,13 @@ struct ChannelAnalyzerSettings
     bool m_ssb;
     bool m_pll;
     bool m_fll;
+    bool m_costasLoop;
     bool m_rrc;
     quint32 m_rrcRolloff; //!< in 100ths
     unsigned int m_pllPskOrder;
+    float m_pllBandwidth;
+    float m_pllDampingFactor;
+    float m_pllLoopGain;
     InputType m_inputType;
     quint32 m_rgbColor;
     QString m_title;
