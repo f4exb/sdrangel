@@ -2196,92 +2196,91 @@ struct s2_fecdec_soft : runnable
           bitcount(opt_writer(_bitcount, 1)),
           errcount(opt_writer(_errcount, 1))
     {
-        tabname = ldpctool::LDPCInterface::mc_tabnames[shortframes][modcod];
-        ldpc = ldpctool::create_ldpc((char *)"S2", tabname[0], atoi(tabname + 1));
-        CODE_LEN = ldpc->code_len();
-        DATA_LEN = ldpc->data_len();
-        decode.init(ldpc);
-        code = new ldpctool::code_type[BLOCKS * CODE_LEN];
-        aligned_buffer = aligned_alloc(sizeof(ldpctool::simd_type), sizeof(ldpctool::simd_type) * CODE_LEN);
-        simd = reinterpret_cast<ldpctool::simd_type *>(aligned_buffer);
+        const char *tabname = ldpctool::LDPCInterface::mc_tabnames[shortframes][modcod];
+        fprintf(stderr, "s2_fecdec_soft::s2_fecdec_soft: tabname: %s\n", tabname);
+
+        if (tabname)
+        {
+            ldpc = ldpctool::create_ldpc((char *)"S2", tabname[0], atoi(tabname + 1));
+            code = new ldpctool::code_type[ldpc->code_len()];
+            aligned_buffer = aligned_alloc(sizeof(ldpctool::simd_type), sizeof(ldpctool::simd_type) * ldpc->code_len());
+            simd = reinterpret_cast<ldpctool::simd_type *>(aligned_buffer);
+        }
+        else
+        {
+            ldpc = nullptr;
+            aligned_buffer = nullptr;
+            code = nullptr;
+        }
     }
 
     ~s2_fecdec_soft()
     {
-        delete[] code;
+        if (aligned_buffer) {
+            free(aligned_buffer);
+        }
+        if (code) {
+            delete[] code;
+        }
     }
 
     void run()
     {
-        while (in.readable() >= 1 && out.writable() >= 1 &&
-               opt_writable(bitcount, 1) && opt_writable(errcount, 1))
+        while (in.readable() >= 1 &&
+            out.writable() >= 1 &&
+            opt_writable(bitcount, 1) &&
+            opt_writable(errcount, 1))
         {
-            // input
             fecframe<SOFTBYTE> *pin = in.rd();
-            size_t iosize = (pin->pls.framebits() / 8) * sizeof(SOFTBYTE);
-            int8_t *ibytes = reinterpret_cast<int8_t*>(pin->bytes);
-            int8_t *icode = reinterpret_cast<int8_t*>(code);
-            std::copy(ibytes, ibytes + iosize, icode); // write/read
+            const modcod_info *mcinfo = check_modcod(pin->pls.modcod);
+            const fec_info *fi = &fec_infos[pin->pls.sf][mcinfo->rate];
+            bool corrupted = false;
+            bool residual_errors;
 
-            // process
-    		int iterations = 0;
-	    	int num_decodes = 0;
-
-            for (int j = 0; j < BLOCKS; j += ldpctool::SIMD_WIDTH)
+            if (ldpc)
             {
-                int blocks = j + ldpctool::SIMD_WIDTH > BLOCKS ? BLOCKS - j : ldpctool::SIMD_WIDTH;
-
-                for (int n = 0; n < blocks; ++n)
-                {
-                    for (int i = 0; i < CODE_LEN; ++i) {
-                        reinterpret_cast<ldpctool::code_type *>(simd + i)[n] = code[(j + n) * CODE_LEN + i];
-                    }
-                }
-
-                int trials = max_trials;
-                int count = decode(simd, simd + DATA_LEN, trials, blocks);
-                ++num_decodes;
-
-                for (int n = 0; n < blocks; ++n)
-                {
-                    for (int i = 0; i < CODE_LEN; ++i) {
-                        code[(j + n) * CODE_LEN + i] = reinterpret_cast<ldpctool::code_type *>(simd + i)[n];
-                    }
-                }
+                decode.init(ldpc);
+                int count = decode(simd, simd + ldpc->data_len(), max_trials, 1);
 
                 if (count < 0) {
-                    iterations += blocks * trials;
-                } else {
-                    iterations += blocks * (trials - count);
+                    fprintf(stderr, "s2_fecdec_soft::run: decoder failed at converging to a code word in %d trials\n", max_trials);
                 }
-            }
 
-            // output
-            int8_t *ildpc = reinterpret_cast<int8_t*>(ldpc_buf);
-            std::copy(icode, icode + iosize, ildpc); // write/read
+                for (int i = 0; i < ldpc->code_len(); ++i) {
+                    code[i] = reinterpret_cast<ldpctool::code_type *>(simd + i)[0];
+                }
 
-            // Decode BCH.
-            const modcod_info *mcinfo = check_modcod(modcod);
-            const fec_info *fi = &fec_infos[pin->pls.sf ? 1 : 0][mcinfo->rate];
-            uint8_t *hardbytes = softbytes_harden(ldpc_buf, fi->kldpc / 8, bch_buf);
-            size_t cwbytes = fi->kldpc / 8;
-            bch_interface *bch = s2bch.bchs[pin->pls.sf ? 1 : 0][mcinfo->rate];
-            int ncorr = bch->decode(hardbytes, cwbytes);
-            bool corrupted = (ncorr < 0);
-            // Report VBER
-            opt_write(bitcount, fi->Kbch);
-            opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
+                SOFTBYTE *ldpc_buf = reinterpret_cast<SOFTBYTE*>(code);
+                uint8_t *hardbytes = softbytes_harden(ldpc_buf, fi->kldpc / 8, bch_buf);
 
-            if (!corrupted)
-            {
-                // Descramble and output
-                bbframe *pout = out.wr();
-                pout->pls = pin->pls;
-                bbscrambling.transform(hardbytes, fi->Kbch / 8, pout->bytes);
-                out.written(1);
-            }
-            if (sch->debug)
-                fprintf(stderr, "%c", corrupted ? '!' : ncorr ? '.' : '_');
+                // BCH decode
+                size_t cwbytes = fi->kldpc / 8;
+                // Decode with suitable BCH decoder for this MODCOD
+                bch_interface *bch = s2bch.bchs[pin->pls.sf][mcinfo->rate];
+                int ncorr = bch->decode(hardbytes, cwbytes);
+                if (sch->debug2)
+                    fprintf(stderr, "BCHCORR = %d\n", ncorr);
+                corrupted = (ncorr < 0);
+                residual_errors = (ncorr != 0);
+                // Report VER
+                opt_write(bitcount, fi->Kbch);
+                opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
+                int bbsize = fi->Kbch / 8;
+
+                if (!corrupted)
+                {
+                    // Descramble and output
+                    bbframe *pout = out.wr();
+                    pout->pls = pin->pls;
+                    bbscrambling.transform(hardbytes, bbsize, pout->bytes);
+                    out.written(1);
+                }
+
+                if (sch->debug) {
+                    fprintf(stderr, "%c", corrupted ? ':' : residual_errors ? '.' : '_');
+                }
+            } // ldpc engine allocated
+
             in.read(1);
         }
     }
@@ -2294,18 +2293,22 @@ private:
     int max_trials;
     pipewriter<int> *bitcount, *errcount;
 
-    static const int BLOCKS = 32;
-    int CODE_LEN;
-    int DATA_LEN;
-    const char *tabname;
+	typedef ldpctool::NormalUpdate<ldpctool::simd_type> update_type;
+	//typedef SelfCorrectedUpdate<simd_type> update_type;
+
+	//typedef MinSumAlgorithm<simd_type, update_type> algorithm_type;
+	//typedef OffsetMinSumAlgorithm<simd_type, update_type, FACTOR> algorithm_type;
+	typedef ldpctool::MinSumCAlgorithm<ldpctool::simd_type, update_type, ldpctool::FACTOR> algorithm_type;
+	//typedef LogDomainSPA<simd_type, update_type> algorithm_type;
+	//typedef LambdaMinAlgorithm<simd_type, update_type, 3> algorithm_type;
+	//typedef SumProductAlgorithm<simd_type, update_type> algorithm_type;
+
+	ldpctool::LDPCDecoder<ldpctool::simd_type, algorithm_type> decode;
+
     ldpctool::LDPCInterface *ldpc;
     ldpctool::code_type *code;
     void *aligned_buffer;
     ldpctool::simd_type *simd;
-    typedef ldpctool::NormalUpdate<ldpctool::simd_type> update_type;
-    typedef ldpctool::MinSumCAlgorithm<ldpctool::simd_type, update_type, ldpctool::FACTOR> algorithm_type;
-    ldpctool::LDPCDecoder<ldpctool::simd_type, algorithm_type> decode;
-    SOFTBYTE ldpc_buf[64800 / 8];
     uint8_t bch_buf[64800 / 8]; // Temp storage for hardening before BCH
     s2_bch_engines s2bch;
     s2_bbscrambling bbscrambling;
@@ -2371,20 +2374,13 @@ struct s2_fecdec_helper : runnable
         // Send work until all helpers block.
         while (in.readable() >= 1 && !jobs.full())
         {
-            if (out.writable() >= 1)
+            if ((bbframe_q.size() != 0) && (out.writable() >= 1))
             {
-                if (bbframe_q.size() != 0)
-                {
-                    bbframe *pout = out.wr();
-                    pout->pls = bbframe_q.front().pls;
-                    std::copy(bbframe_q.front().bytes, bbframe_q.front().bytes + (58192 / 8), pout->bytes);
-                    bbframe_q.pop_front();
-                    out.written(1);
-                }
-                else
-                {
-                    fprintf(stderr, "s2_fecdec_helper::run: WARNING: bbframe queue is empty\n");
-                }
+                bbframe *pout = out.wr();
+                pout->pls = bbframe_q.front().pls;
+                std::copy(bbframe_q.front().bytes, bbframe_q.front().bytes + (58192 / 8), pout->bytes);
+                bbframe_q.pop_front();
+                out.written(1);
             }
 
             if ((bitcount_q.size() != 0) && opt_writable(bitcount, 1))
@@ -2399,18 +2395,15 @@ struct s2_fecdec_helper : runnable
                 errcount_q.pop_front();
             }
 
+            if (!jobs.empty() && jobs.peek()->h->b_out) {
+                receive_frame(jobs.get());
+            }
+
             if (!send_frame(in.rd())) {
                 break;
             }
 
             in.read(1);
-        }
-
-        while (
-            !jobs.empty() &&
-            jobs.peek()->h->b_out)
-        {
-            receive_frame(jobs.get());
         }
     }
 
@@ -2532,7 +2525,7 @@ struct s2_fecdec_helper : runnable
             char batch_size_arg[16];
             sprintf(batch_size_arg, "%d", batch_size);
             const char *sf_arg = pls->sf ? "--shortframes" : nullptr;
-            const char *argv[] = {command, "--trials", "5", "--batch-size", batch_size_arg, "--modcod", mc_arg, sf_arg, nullptr};
+            const char *argv[] = {command, "--trials", "8", "--batch-size", batch_size_arg, "--modcod", mc_arg, sf_arg, nullptr};
             execve(command, (char *const *)argv, nullptr);
             fatal(command);
         }

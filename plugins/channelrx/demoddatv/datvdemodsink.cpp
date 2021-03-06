@@ -1142,7 +1142,7 @@ void DATVDemodSink::InitDATVS2Framework()
     if (m_settings.m_softLDPC)
     {
 #if 0
-        // External LDPC decoder mode.
+        // Soft LDPC decoder mode.
         // Deinterleave into soft bits.
         p_fecframes = new leansdr::pipebuf<leansdr::fecframe<leansdr::llr_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
         p_s2_deinterleaver = new leansdr::s2_deinterleaver<leansdr::llr_ss, leansdr::llr_sb>(
