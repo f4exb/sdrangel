@@ -35,7 +35,8 @@ FileRecord::FileRecord() :
 	m_recordOn(false),
     m_recordStart(false),
     m_byteCount(0),
-    m_msShift(0)
+    m_msShift(0),
+    m_mutex(QMutex::Recursive)
 {
 	setObjectName("FileRecord");
 }
@@ -47,7 +48,8 @@ FileRecord::FileRecord(const QString& fileBase) :
     m_centerFrequency(0),
     m_recordOn(false),
     m_recordStart(false),
-    m_byteCount(0)
+    m_byteCount(0),
+    m_mutex(QMutex::Recursive)
 {
     setObjectName("FileRecord");
 }
@@ -76,7 +78,10 @@ void FileRecord::genUniqueFileName(uint deviceUID, int istream)
 
 void FileRecord::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     (void) positiveOnly;
+
     // if no recording is active, send the samples to /dev/null
     if(!m_recordOn)
         return;
@@ -105,6 +110,8 @@ void FileRecord::stop()
 
 bool FileRecord::startRecording()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     if (m_recordOn) {
         stopRecording();
     }
@@ -128,6 +135,8 @@ bool FileRecord::startRecording()
 
 bool FileRecord::stopRecording()
 {
+    QMutexLocker mutexLocker(&m_mutex);
+
     if (m_sampleFile.is_open())
     {
     	qDebug() << "FileRecord::stopRecording";
