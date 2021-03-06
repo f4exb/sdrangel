@@ -81,6 +81,8 @@ struct DATVDemodSettings
     DATVModulation m_modulation;
     DATVCodeRate m_fec;
     bool m_softLDPC;
+    QString m_softLDPCToolPath;
+    int m_softLDPCMaxTrials;
     int m_maxBitflips;
     bool m_audioMute;
     QString m_audioDeviceName;

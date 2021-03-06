@@ -2350,6 +2350,8 @@ struct s2_fecdec_helper : runnable
     int batch_size;
     int nhelpers;
     bool must_buffer;
+    int max_trials;
+
     s2_fecdec_helper(scheduler *sch,
                      pipebuf<fecframe<SOFTBYTE>> &_in,
                      pipebuf<bbframe> &_out,
@@ -2360,15 +2362,22 @@ struct s2_fecdec_helper : runnable
           batch_size(16),
           nhelpers(1),
           must_buffer(false),
+          max_trials(8),
           in(_in), out(_out),
-          command(_command),
           bitcount(opt_writer(_bitcount, 1)),
           errcount(opt_writer(_errcount, 1))
     {
+        command = strdup(_command);
         for (int mc = 0; mc < 32; ++mc)
             for (int sf = 0; sf < 2; ++sf)
                 pools[mc][sf].procs = nullptr;
     }
+
+    ~s2_fecdec_helper()
+    {
+        free(command);
+    }
+
     void run()
     {
         // Send work until all helpers block.
@@ -2520,12 +2529,21 @@ struct s2_fecdec_helper : runnable
             dup2(tx[0], 0);
             close(rx[0]);
             dup2(rx[1], 1);
-            char mc_arg[16];
-            sprintf(mc_arg, "%d", pls->modcod);
+            char max_trials_arg[16];
+            sprintf(max_trials_arg, "%d", max_trials);
             char batch_size_arg[16];
             sprintf(batch_size_arg, "%d", batch_size);
+            char mc_arg[16];
+            sprintf(mc_arg, "%d", pls->modcod);
             const char *sf_arg = pls->sf ? "--shortframes" : nullptr;
-            const char *argv[] = {command, "--trials", "8", "--batch-size", batch_size_arg, "--modcod", mc_arg, sf_arg, nullptr};
+            const char *argv[] = {
+                command,
+                "--trials", max_trials_arg,
+                "--batch-size", batch_size_arg,
+                "--modcod", mc_arg,
+                sf_arg,
+                nullptr
+            };
             execve(command, (char *const *)argv, nullptr);
             fatal(command);
         }
@@ -2592,7 +2610,7 @@ struct s2_fecdec_helper : runnable
 
     pipereader<fecframe<SOFTBYTE>> in;
     pipewriter<bbframe> out;
-    const char *command;
+    char *command;
     SOFTBYTE ldpc_buf[64800 / 8];
     uint8_t bch_buf[64800 / 8]; // Temp storage for hardening before BCH
     s2_bch_engines s2bch;

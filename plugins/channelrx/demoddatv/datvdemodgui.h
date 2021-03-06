@@ -62,6 +62,7 @@ private slots:
 	void onMenuDialogCalled(const QPoint& p);
     void handleInputMessages();
     void audioSelect();
+    void ldpcToolSelect();
     void tick();
 
     void on_cmbStandard_currentIndexChanged(int index);

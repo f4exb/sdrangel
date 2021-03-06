@@ -13,6 +13,7 @@ set(datv_SOURCES
     datvdemodreport.cpp
     datvdemodsink.cpp
     datvdemodbaseband.cpp
+    datvdvbs2ldpcdialog.cpp
     leansdr/dvb.cpp
     leansdr/filtergen.cpp
     leansdr/framework.cpp
@@ -20,6 +21,7 @@ set(datv_SOURCES
     leansdr/sdr.cpp
     ldpctool/tables_handler.cpp
     datvdemodgui.ui
+    datvdvbs2ldpcdialog.ui
 )
 
 set(datv_HEADERS
@@ -36,6 +38,7 @@ set(datv_HEADERS
     datvdemodreport.h
     datvdemodsink.h
     datvdemodbaseband.h
+    datvdvbs2ldpcdialog.h
     leansdr/dvb.h
     leansdr/dvbs2.h
     leansdr/filtergen.h

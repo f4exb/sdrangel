@@ -34,6 +34,7 @@
 #include "mainwindow.h"
 
 #include "datvdemodreport.h"
+#include "datvdvbs2ldpcdialog.h"
 #include "datvdemodgui.h"
 
 const char* const DATVDemodGUI::m_strChannelID = "sdrangel.channel.demoddatv";
@@ -250,6 +251,9 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
+    CRightClickEnabler *ldpcToolRightClickEnabler = new CRightClickEnabler(ui->softLDPC);
+    connect(ldpcToolRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(ldpcToolSelect()));
+
     resetToDefaults(); // does applySettings()
 }
 
@@ -428,13 +432,28 @@ void DATVDemodGUI::enterEvent(QEvent*)
 
 void DATVDemodGUI::audioSelect()
 {
-    qDebug("AMDemodGUI::audioSelect");
+    qDebug("DATVDemodGUI::audioSelect");
     AudioSelectDialog audioSelect(DSPEngine::instance()->getAudioDeviceManager(), m_settings.m_audioDeviceName);
     audioSelect.exec();
 
     if (audioSelect.m_selected)
     {
         m_settings.m_audioDeviceName = audioSelect.m_audioDeviceName;
+        applySettings();
+    }
+}
+
+void DATVDemodGUI::ldpcToolSelect()
+{
+    qDebug("DATVDemodGUI::ldpcToolSelect");
+    DatvDvbS2LdpcDialog ldpcDialog;
+    ldpcDialog.setFileName(m_settings.m_softLDPCToolPath);
+    ldpcDialog.setMaxTrials(m_settings.m_softLDPCMaxTrials);
+
+    if (ldpcDialog.exec() == QDialog::Accepted)
+    {
+        m_settings.m_softLDPCMaxTrials = ldpcDialog.getMaxTrials();
+        m_settings.m_softLDPCToolPath = ldpcDialog.getFileName();
         applySettings();
     }
 }

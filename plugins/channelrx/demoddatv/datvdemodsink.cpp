@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QFileInfo>
 
 #include "audio/audiooutputdevice.h"
 #include "dsp/dspengine.h"
@@ -903,9 +904,9 @@ void DATVDemodSink::InitDATVS2Framework()
         <<  " RollOff: " << m_settings.m_rollOff
         <<  " Viterbi: " << m_settings.m_viterbi
         <<  " Excursion: " << m_settings.m_excursion
-        <<  " Sample rate: " << m_channelSampleRate ;
-
-
+        <<  " Sample rate: " << m_channelSampleRate
+        <<  " m_softLDPCMaxTrials: " << m_settings.m_softLDPCMaxTrials
+        <<  " m_softLDPCToolPath: " << m_settings.m_softLDPCToolPath;
 
     m_objCfg.standard = m_settings.m_standard;
 
@@ -1139,9 +1140,18 @@ void DATVDemodSink::InitDATVS2Framework()
     p_vbitcount= new leansdr::pipebuf<int>(m_objScheduler, "Bits processed", BUF_S2PACKETS);
     p_verrcount = new leansdr::pipebuf<int>(m_objScheduler, "Bits corrected", BUF_S2PACKETS);
 
-    if (m_settings.m_softLDPC)
+    bool commandFileValid = false;
+
+    if (QFileInfo::exists(m_settings.m_softLDPCToolPath))
+    {
+        QFileInfo fileInfo = QFileInfo(m_settings.m_softLDPCToolPath);
+        commandFileValid = fileInfo.isExecutable();
+    }
+
+    if (m_settings.m_softLDPC && commandFileValid)
     {
 #if 0
+        // Doesn't work...
         // Soft LDPC decoder mode.
         // Deinterleave into soft bits.
         p_fecframes = new leansdr::pipebuf<leansdr::fecframe<leansdr::llr_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
@@ -1162,6 +1172,8 @@ void DATVDemodSink::InitDATVS2Framework()
         // External LDPC decoder mode.
         // Deinterleave into soft bits.
         // TBD Latency
+        QByteArray ba = m_settings.m_softLDPCToolPath.toLocal8Bit();
+        const char *c_str2 = ba.data();
         p_fecframes = new leansdr::pipebuf<leansdr::fecframe<leansdr::llr_sb> >(m_objScheduler, "FEC frames", BUF_FRAMES);
         p_s2_deinterleaver = new leansdr::s2_deinterleaver<leansdr::llr_ss, leansdr::llr_sb>(
             m_objScheduler,
@@ -1173,7 +1185,7 @@ void DATVDemodSink::InitDATVS2Framework()
             m_objScheduler,
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes,
             *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
-            "/opt/install/sdrangel/bin/ldpctool",
+            c_str2,
             p_vbitcount,
             p_verrcount)
         ;
@@ -1181,6 +1193,7 @@ void DATVDemodSink::InitDATVS2Framework()
         const int nhelpers = 2;
         fecdec->nhelpers = nhelpers;
         fecdec->must_buffer = false;
+        fecdec->max_trials = m_settings.m_softLDPCMaxTrials;
 #endif
     }
     else
