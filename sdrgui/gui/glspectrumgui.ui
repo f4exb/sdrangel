@@ -461,7 +461,7 @@
         <string>Spectrum maximum FPS (NL for No Limit)</string>
        </property>
        <property name="currentIndex">
-        <number>3</number>
+        <number>0</number>
        </property>
        <item>
         <property name="text">
@@ -496,11 +496,6 @@
        <item>
         <property name="text">
          <string>200</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>NL</string>
         </property>
        </item>
       </widget>

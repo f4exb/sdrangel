@@ -440,10 +440,6 @@ void GLSpectrum::newSpectrum(const Real *spectrum, int nbBins, int fftSize)
 
 	updateWaterfall(spectrum);
 	updateHistogram(spectrum);
-
-	if (m_fpsPeriodMs == 0) {
-		update();
-	}
 }
 
 void GLSpectrum::updateWaterfall(const Real *spectrum)

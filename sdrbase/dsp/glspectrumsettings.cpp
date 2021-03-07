@@ -110,7 +110,8 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 		m_fftWindow = (FFTWindow::Function) tmp;
 		d.readReal(4, &m_refLevel, 0);
 		d.readReal(5, &m_powerRange, 100);
-		d.readS32(26, &m_fpsPeriodMs, 50);
+		d.readS32(26, &tmp, 50);
+		m_fpsPeriodMs = tmp < 5 ? 5 : tmp > 500 ? 500 : tmp;
 		d.readBool(6, &m_displayWaterfall, true);
 		d.readBool(7, &m_invertedWaterfall, true);
 		d.readBool(8, &m_displayMaxHold, false);

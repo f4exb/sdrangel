@@ -370,8 +370,10 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         if (spectrumIt->contains("refLevel")) {
             spectrumSettings.m_refLevel = apiPreset->getSpectrumConfig()->getRefLevel();
         }
-        if (spectrumIt->contains("fpsPeriodMs")) {
-            spectrumSettings.m_fpsPeriodMs = apiPreset->getSpectrumConfig()->getFpsPeriodMs();
+        if (spectrumIt->contains("fpsPeriodMs"))
+        {
+            qint32 fpsPeriodMs = apiPreset->getSpectrumConfig()->getFpsPeriodMs();
+            spectrumSettings.m_fpsPeriodMs = fpsPeriodMs < 5 ? 5 : fpsPeriodMs > 500 ? 500 : fpsPeriodMs;
         }
         if (spectrumIt->contains("waterfallShare")) {
             spectrumSettings.m_waterfallShare = apiPreset->getSpectrumConfig()->getWaterfallShare();

@@ -32,7 +32,7 @@
 #include "util/db.h"
 #include "ui_glspectrumgui.h"
 
-const int GLSpectrumGUI::m_fpsMs[] = {500, 200, 100, 50, 20, 10, 5, 0};
+const int GLSpectrumGUI::m_fpsMs[] = {500, 200, 100, 50, 20, 10, 5};
 
 GLSpectrumGUI::GLSpectrumGUI(QWidget* parent) :
 	QWidget(parent),
@@ -147,23 +147,16 @@ void GLSpectrumGUI::displaySettings()
 		}
 	}
 
-    if (m_settings.m_fpsPeriodMs == 0)
-    {
-        ui->fps->setCurrentIndex(sizeof(m_fpsMs)/sizeof(m_fpsMs[0]) - 1);
-    }
-    else
-    {
-        unsigned int i = 0;
+    unsigned int i = 0;
 
-        for (; i < sizeof(m_fpsMs)/sizeof(m_fpsMs[0]); i++)
-        {
-            if (m_settings.m_fpsPeriodMs >= m_fpsMs[i]) {
-                break;
-            }
+    for (; i < sizeof(m_fpsMs)/sizeof(m_fpsMs[0]); i++)
+    {
+        if (m_settings.m_fpsPeriodMs >= m_fpsMs[i]) {
+            break;
         }
-
-        ui->fps->setCurrentIndex(i);
     }
+
+    ui->fps->setCurrentIndex(i);
 
     ui->fftOverlap->setValue(m_settings.m_fftOverlap);
     setMaximumOverlap();
