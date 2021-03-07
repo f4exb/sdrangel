@@ -1,3 +1,11 @@
+sdrangel (6.6.2-1) unstable; urgency=medium
+
+  * FileSink: File name handling in settings and API. PR #798
+  * FileRecord: cut file only if sample rate changes. Implements #795
+  * ChannelAnalyzer: Added Costas Loop PLL and more controls. PR #797
+  * DATV: implemented soft LDPC external tool. Issue #785
+  * Spectrum: removed FPS no limit setting. Fixes #793
+
 sdrangel (6.6.1-1) unstable; urgency=medium
 
   * GS-232 Controller feature: added ERC-M controller support. PR #788
