@@ -3,13 +3,11 @@
 
 #include <QDialog>
 
-#include "export.h"
-
 namespace Ui {
 	class RecordInfoDialog;
 }
 
-class SDRGUI_API RecordInfoDialog : public QDialog {
+class RecordInfoDialog : public QDialog {
 	Q_OBJECT
 
 public:

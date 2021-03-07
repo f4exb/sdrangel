@@ -634,8 +634,10 @@ void DATVDemodGUI::on_softLDPC_clicked()
 
 void DATVDemodGUI::on_maxBitflips_valueChanged(int value)
 {
+#ifdef LINUX
     m_settings.m_maxBitflips = value;
     applySettings();
+#endif
 }
 
 void DATVDemodGUI::on_chkViterbi_clicked()

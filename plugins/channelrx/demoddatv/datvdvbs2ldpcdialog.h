@@ -20,13 +20,12 @@
 #define SDRGUI_GUI_DATVDVBS2LDPCDIALOG_H_
 
 #include <QDialog>
-#include "export.h"
 
 namespace Ui {
     class DatvDvbS2LdpcDialog;
 }
 
-class SDRGUI_API DatvDvbS2LdpcDialog : public QDialog {
+class DatvDvbS2LdpcDialog : public QDialog {
     Q_OBJECT
 public:
     explicit DatvDvbS2LdpcDialog(QWidget* parent = nullptr);
