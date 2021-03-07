@@ -157,14 +157,17 @@ bool FileRecord::handleMessage(const Message& message)
 	if (DSPSignalNotification::match(message))
 	{
 		DSPSignalNotification& notif = (DSPSignalNotification&) message;
-		m_sampleRate = notif.getSampleRate();
-		m_centerFrequency = notif.getCenterFrequency();
-		qDebug() << "FileRecord::handleMessage: DSPSignalNotification: m_inputSampleRate: " << m_sampleRate
-				<< " m_centerFrequency: " << m_centerFrequency;
+		quint32 sampleRate = notif.getSampleRate();
+		qint64 centerFrequency = notif.getCenterFrequency();
+		qDebug() << "FileRecord::handleMessage: DSPSignalNotification: inputSampleRate: " << sampleRate
+				<< " centerFrequency: " << centerFrequency;
 
-        if (m_recordOn) {
+        if (m_recordOn && (m_sampleRate != sampleRate)) {
             startRecording();
         }
+
+        m_sampleRate = sampleRate;
+        m_centerFrequency = centerFrequency;
 
         return true;
 	}
