@@ -19,9 +19,12 @@ set(datv_SOURCES
     leansdr/framework.cpp
     leansdr/math.cpp
     leansdr/sdr.cpp
-    ldpctool/tables_handler.cpp
     datvdemodgui.ui
     datvdvbs2ldpcdialog.ui
+)
+
+set(ldpc_SOURCES
+    ldpctool/tables_handler.cpp
 )
 
 set(datv_HEADERS
@@ -45,6 +48,9 @@ set(datv_HEADERS
     leansdr/framework.h
     leansdr/math.h
     leansdr/sdr.h
+)
+
+set(ldpc_HEADERS
     ldpctool/ldpc.h
     ldpctool/dvb_s2_tables.h
     ldpctool/dvb_s2x_tables.h
@@ -60,9 +66,16 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 )
 
-add_library(demoddatv SHARED
-    ${datv_SOURCES}
-)
+if (LINUX)
+    add_library(demoddatv SHARED
+        ${datv_SOURCES}
+        ${ldpc_SOURCES}
+    )
+else()
+    add_library(demoddatv SHARED
+        ${datv_SOURCES}
+    )
+endif()
 
 target_link_libraries(demoddatv
     Qt5::Core
@@ -78,10 +91,12 @@ target_link_libraries(demoddatv
     ${SWRESAMPLE_LIBRARIES}
 )
 
-add_executable(ldpctool
-    ldpctool/ldpc_tool.cpp
-    ldpctool/tables_handler.cpp
-)
+if (LINUX)
+    add_executable(ldpctool
+        ldpctool/ldpc_tool.cpp
+        ldpctool/tables_handler.cpp
+    )
+    install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})
+endif()
 
 install(TARGETS demoddatv DESTINATION ${INSTALL_PLUGINS_DIR})
-install(TARGETS ldpctool DESTINATION ${INSTALL_BIN_DIR})

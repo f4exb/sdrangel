@@ -163,6 +163,7 @@ set(CUSTOM_WINDOWS_INCLUDE "${CMAKE_SOURCE_DIR}/custom/windows" CACHE INTERNAL "
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(LINUX TRUE)
+  add_definitions(-DLINUX)
   # populate distribution name
   # LSB_CODENAME will hold trusty for example
   find_program(LSB_RELEASE_EXECUTABLE lsb_release)

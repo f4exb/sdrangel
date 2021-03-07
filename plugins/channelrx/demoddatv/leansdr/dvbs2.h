@@ -36,9 +36,11 @@
 #include "ldpc.h"
 #include "sdr.h"
 
+#ifdef LINUX
 #include "ldpctool/layered_decoder.h"
 #include "ldpctool/testbench.h"
 #include "ldpctool/algorithms.h"
+#endif
 
 namespace leansdr
 {
@@ -2174,6 +2176,8 @@ struct s2_fecdec : runnable
     pipewriter<int> *bitcount, *errcount;
 }; // s2_fecdec
 
+#ifdef LINUX
+
 // Soft LDPC decoder
 // Internally implemented LDPC tool. Replaces external LDPC decoder
 
@@ -2316,7 +2320,6 @@ private:
 
 // External LDPC decoder
 // Spawns a user-specified command, FEC frames on stdin/stdout.
-
 template <typename T, int _SIZE>
 struct simplequeue
 {
@@ -2620,6 +2623,7 @@ struct s2_fecdec_helper : runnable
     std::deque<int> errcount_q;
     pipewriter<int> *bitcount, *errcount;
 }; // s2_fecdec_helper
+#endif
 
 // S2 FRAMER
 // EN 302 307-1 section 5.1 Mode adaptation

@@ -165,7 +165,7 @@ The controls specific to DVB-S are disabled and greyed out. These are: Fast Lock
 
 <h5>B.2b.6: DVB-S2 specific - Soft LDPC decoder</h5>
 
-This is for experimenters only. It can be used to decode signals lower that ~10 db MER which is the limit of LDPC hard decoding as explained next (B.2b.7). Video degrades progressively down to about 7.5 dB MER and drops below this limit.
+This is for experimenters only working in Linux. It can be used to decode signals lower that ~10 db MER which is the limit of LDPC hard decoding as explained next (B.2b.7). Video degrades progressively down to about 7.5 dB MER and drops below this limit.
 
 Runs the `ldpctool` program for soft LDPC decoding. Frames are sent on its standard input and decoded frames retrieved from its standard output. Two processes executing `ldpctool` are spawned but so far it seems that only one is effectively used.
 

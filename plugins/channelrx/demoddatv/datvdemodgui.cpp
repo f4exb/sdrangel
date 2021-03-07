@@ -251,8 +251,13 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 	CRightClickEnabler *audioMuteRightClickEnabler = new CRightClickEnabler(ui->audioMute);
 	connect(audioMuteRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(audioSelect()));
 
+#ifdef LINUX
     CRightClickEnabler *ldpcToolRightClickEnabler = new CRightClickEnabler(ui->softLDPC);
     connect(ldpcToolRightClickEnabler, SIGNAL(rightClick(const QPoint &)), this, SLOT(ldpcToolSelect()));
+#else
+    ui->softLDPC->setEnabled(false);
+    ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
+#endif
 
     resetToDefaults(); // does applySettings()
 }
@@ -294,13 +299,11 @@ void DATVDemodGUI::displaySettings()
         ui->chkHardMetric->setEnabled(true);
         ui->chkFastlock->setEnabled(true);
         ui->chkViterbi->setEnabled(true);
-        ui->softLDPC->setEnabled(false);
         ui->maxBitflips->setEnabled(false);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: white }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: white }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: white }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: white }");
-        ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
         ui->maxBitflips->setStyleSheet("QSpinBox { color: gray }");
         ui->maxBitflipsLabel->setStyleSheet("QLabel { color: gray }");
     }
@@ -310,16 +313,27 @@ void DATVDemodGUI::displaySettings()
         ui->chkHardMetric->setEnabled(false);
         ui->chkFastlock->setEnabled(false);
         ui->chkViterbi->setEnabled(false);
-        ui->softLDPC->setEnabled(true);
         ui->maxBitflips->setEnabled(true);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: gray }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: gray }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: gray }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: gray }");
-        ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
         ui->maxBitflips->setStyleSheet("QSpinBox { color: white }");
         ui->maxBitflipsLabel->setStyleSheet("QLabel { color: white }");
     }
+
+#ifdef LINUX
+    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
+    {
+        ui->softLDPC->setEnabled(false);
+        ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
+    }
+    else
+    {
+        ui->softLDPC->setEnabled(true);
+        ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
+    }
+#endif
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
         ui->statusText->clear();
@@ -539,13 +553,11 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
         ui->chkHardMetric->setEnabled(true);
         ui->chkFastlock->setEnabled(true);
         ui->chkViterbi->setEnabled(true);
-        ui->softLDPC->setEnabled(false);
         ui->maxBitflips->setEnabled(false);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: white }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: white }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: white }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: white }");
-        ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
         ui->maxBitflips->setStyleSheet("QSpinBox { color: gray }");
         ui->maxBitflipsLabel->setStyleSheet("QLabel { color: gray }");
     }
@@ -555,16 +567,27 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
         ui->chkHardMetric->setEnabled(false);
         ui->chkFastlock->setEnabled(false);
         ui->chkViterbi->setEnabled(false);
-        ui->softLDPC->setEnabled(true);
         ui->maxBitflips->setEnabled(true);
         ui->chkAllowDrift->setStyleSheet("QCheckBox { color: gray }");
         ui->chkHardMetric->setStyleSheet("QCheckBox { color: gray }");
         ui->chkFastlock->setStyleSheet("QCheckBox { color: gray }");
         ui->chkViterbi->setStyleSheet("QCheckBox { color: gray }");
-        ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
         ui->maxBitflips->setStyleSheet("QSpinBox { color: white }");
         ui->maxBitflipsLabel->setStyleSheet("QLabel { color: white }");
     }
+
+#ifdef LINUX
+    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
+    {
+        ui->softLDPC->setEnabled(false);
+        ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
+    }
+    else
+    {
+        ui->softLDPC->setEnabled(true);
+        ui->softLDPC->setStyleSheet("QCheckBox { color: white }");
+    }
+#endif
 
     if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
         ui->statusText->clear();
@@ -603,8 +626,10 @@ void DATVDemodGUI::on_cmbFEC_currentIndexChanged(const QString &arg1)
 
 void DATVDemodGUI::on_softLDPC_clicked()
 {
+#ifdef LINUX
     m_settings.m_softLDPC = ui->softLDPC->isChecked();
     applySettings();
+#endif
 }
 
 void DATVDemodGUI::on_maxBitflips_valueChanged(int value)
