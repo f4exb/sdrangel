@@ -74,20 +74,45 @@ Use this combo to select which (complex) signal to use as the display source:
 
 <h3>7: Locked loop</h3>
 
-Locks a PLL or FLL (depends on control 3) on the signal and mixes its NCO with the input signal. This is mostly useful for carrier recovery on PSK modulations (PLL is used). This effectively de-rotates the signal and symbol points (constellation) can be seen in XY mode with real part as X and imagiary part as Y.
+Locks a PLL or FLL on the signal and mixes its NCO with the input signal. This is mostly useful for carrier recovery on PSK modulations (PLL is used). This effectively de-rotates the signal and symbol points (constellation) can be seen in XY mode with real part as X and imagiary part as Y.
 
 When the PLL is locked the icon lights up in green. The frequency shift from carrier appears in the tooltip. Locking indicator is pretty sharp with about +/- 100 Hz range. The FLL has no indicator.
 
-<h3>8: Locked loop mode</h3>
+When enabled an extra line of control appears:
+
+![Channel Analyzer NG plugin controls](../../../doc/img/ChAnalyzerNG_plugin_pll.png)
+
+<h3>7.1: Locked loop mode</h3>
+
+  - **PLL**: Classical PLL
+  - **FLL**: Frequency Locked Loop for CW signals
+  - **Costas Loop**: Costas loop based PLL
+
+<h3>7.2: Locked loop type</h3>
 
 Use this combo to control the locked loop type:
 
-  - 1: PLL with no phase modulation. Locks to CW carrier.
-  - 2: PLL for BPSK modulation (bi-phase). Locks to a BPSK transmission
-  - 4: PLL for QPSK modulation (quad-phase). Locks to a QPSK transmission
-  - 8: PLL for 8-PSK modulation (octo-phase). Locks to a 8-PSK transmission
-  - 16: PLL for 16-PSK modulation (16-phase). Locks to a 16-PSK transmission
-  - F: FLL. Actually a frequency follower. This effectively implements an AFC for FM modulations.
+  - **CW**: PLL/FLL with no phase modulation. Locks to CW carrier. In FLL mode this effectively implements an AFC for FM modulations.
+  - **BPSK**: PLL for BPSK modulation (bi-phase). Locks to a BPSK transmission
+  - **QPSK**: PLL for QPSK modulation (quad-phase). Locks to a QPSK transmission
+  - **8PSK**: PLL for 8-PSK modulation (octo-phase). Locks to a 8-PSK transmission
+  - **16PSK**: PLL for 16-PSK modulation (16-phase). Locks to a 16-PSK transmission
+
+<h3>7.3: Loop bandwidth</h3>
+
+The loop bandwidth is the channel bandwidth multiplied by this factor
+
+<h3>7.4: Loop damping factor</h3>
+
+An exponential average with alpha equal to this value is applied on the loop signal
+
+<h3>7.5: Loop gain</h3>
+
+Gain applied to the loop signal
+
+<h3>7.6: Frequency shift from carrier</h3>
+
+Frequency shift from carrier in Hz
 
 <h3>9. Channel power</h3>
 
