@@ -2411,10 +2411,7 @@ struct s2_fecdec_helper : runnable
                 receive_frame(jobs.get());
             }
 
-            if (!send_frame(in.rd())) {
-                break;
-            }
-
+            send_frame(in.rd());
             in.read(1);
         }
     }
@@ -2474,7 +2471,8 @@ struct s2_fecdec_helper : runnable
             return true; // done sent to worker
         }
 
-        fprintf(stderr, "s2_fecdec_helper::send_frame: WARNING: all %d workers are busy\n", p->nprocs);
+        fprintf(stderr, "s2_fecdec_helper::send_frame: WARNING: all %d workers are busy: modcod=%d sf=%d)\n",
+            p->nprocs, pin->pls.modcod, pin->pls.sf);
         return false; // all workers are busy
     }
 
@@ -2482,13 +2480,17 @@ struct s2_fecdec_helper : runnable
     pool *get_pool(const s2_pls *pls)
     {
         pool *p = &pools[pls->modcod][pls->sf];
+
         if (!p->procs)
         {
+            fprintf(stderr, "s2_fecdec_helper::get_pool: allocate %d workers: modcod=%d sf=%d\n",
+                nhelpers, pls->modcod, pls->sf);
             p->procs = new helper_instance[nhelpers];
             for (int i = 0; i < nhelpers; ++i)
                 spawn_helper(&p->procs[i], pls);
             p->nprocs = nhelpers;
         }
+
         return p;
     }
 
@@ -2496,8 +2498,7 @@ struct s2_fecdec_helper : runnable
     void spawn_helper(helper_instance *h, const s2_pls *pls)
     {
         if (sch->debug)
-            fprintf(stderr, "Spawning LDPC helper: modcod=%d sf=%d\n",
-                    pls->modcod, pls->sf);
+            fprintf(stderr, "Spawning LDPC helper: modcod=%d sf=%d\n", pls->modcod, pls->sf);
         int tx[2], rx[2];
         if (pipe(tx) || pipe(rx))
             fatal("pipe");
