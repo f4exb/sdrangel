@@ -631,19 +631,6 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 }
             }
 
-            for (int i = 0; i < m_deviceSettingsList->size(); i++)
-            {
-                SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
-
-                // Start file sinks (See issue #782 - currently must occur after starting acqusition)
-                if (devSettings->m_startStopFileSink)
-                {
-                    qDebug() << "SatelliteTrackerWorker::aos: starting file sinks";
-                    int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
-                    ChannelWebAPIUtils::startStopFileSinks(deviceSetIndex, true);
-                }
-            }
-
             // Send AOS message to channels
             SatWorkerState *satWorkerState = m_workerState.value(name);
             ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth);
@@ -682,6 +669,23 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                     doppler(satWorkerState);
                 });
             }
+
+            // Start file sinks (need a little delay to ensure sample rate message has been handled in filerecord)
+            QTimer::singleShot(1000, [this, m_deviceSettingsList]()
+            {
+                for (int i = 0; i < m_deviceSettingsList->size(); i++)
+                {
+                    SatelliteTrackerSettings::SatelliteDeviceSettings *devSettings = m_deviceSettingsList->at(i);
+
+                    if (devSettings->m_startStopFileSink)
+                    {
+                        qDebug() << "SatelliteTrackerWorker::aos: starting file sinks";
+                        int deviceSetIndex = devSettings->m_deviceSet.mid(1).toInt();
+                        ChannelWebAPIUtils::startStopFileSinks(deviceSetIndex, true);
+                    }
+                }
+            });
+
         });
     }
     else
