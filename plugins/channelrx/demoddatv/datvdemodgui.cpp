@@ -87,6 +87,8 @@ bool DATVDemodGUI::handleMessage(const Message& message)
         m_settings.m_fec = notif.getCodeRate();
         m_settings.m_modulation = notif.getModulation();
         m_settings.validateSystemConfiguration();
+        qDebug("DATVDemodReport::MsgReportModcodCstlnChange: m_modulation: %d m_fec: %d",
+            m_settings.m_modulation, m_settings.m_fec);
         displaySystemConfiguration();
         return true;
     }
