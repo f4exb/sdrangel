@@ -156,6 +156,7 @@ bool FileRecord::handleMessage(const Message& message)
 {
 	if (DSPSignalNotification::match(message))
 	{
+        QMutexLocker mutexLocker(&m_mutex);
 		DSPSignalNotification& notif = (DSPSignalNotification&) message;
 		quint32 sampleRate = notif.getSampleRate();
 		qint64 centerFrequency = notif.getCenterFrequency();
