@@ -110,14 +110,19 @@ void FileInput::openFileStream()
 		m_sampleSize = header.sampleSize;
 		QString crcHex = QString("%1").arg(header.crc32 , 0, 16);
 
-	    if (crcOK)
+	    if (crcOK && (m_sampleRate > 0) && (m_sampleSize > 0))
 	    {
 	        qDebug("FileInput::openFileStream: CRC32 OK for header: %s", qPrintable(crcHex));
 	        m_recordLengthMuSec = ((fileSize - sizeof(FileRecord::Header)) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_sampleRate);
 	    }
-	    else
+	    else if (!crcOK)
 	    {
 	        qCritical("FileInput::openFileStream: bad CRC32 for header: %s", qPrintable(crcHex));
+	        m_recordLengthMuSec = 0;
+	    }
+            else
+	    {
+	        qCritical("FileInput::openFileStream: invalid header");
 	        m_recordLengthMuSec = 0;
 	    }
 
