@@ -19,6 +19,7 @@
 #include <QFileDialog>
 
 #include "datvdvbs2ldpcdialog.h"
+#include "datvdemodsettings.h"
 #include "ui_datvdvbs2ldpcdialog.h"
 
 DatvDvbS2LdpcDialog::DatvDvbS2LdpcDialog(QWidget* parent) :
@@ -46,7 +47,8 @@ void DatvDvbS2LdpcDialog::setFileName(const QString& fileName)
 
 void DatvDvbS2LdpcDialog::setMaxTrials(int maxTrials)
 {
-    m_maxTrials = maxTrials < 1 ? 1 : maxTrials > 8 ? 8 : maxTrials;
+    m_maxTrials = maxTrials < 1 ? 1 :
+        maxTrials > DATVDemodSettings::m_softLDPCMaxMaxTrials ? DATVDemodSettings::m_softLDPCMaxMaxTrials : maxTrials;
     ui->maxTrials->setValue(m_maxTrials);
 }
 

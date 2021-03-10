@@ -37,6 +37,8 @@
 #include "sdr.h"
 
 #ifdef LINUX
+#include <signal.h>
+#include <sys/wait.h>
 #include "ldpctool/layered_decoder.h"
 #include "ldpctool/testbench.h"
 #include "ldpctool/algorithms.h"
@@ -2379,6 +2381,7 @@ struct s2_fecdec_helper : runnable
     ~s2_fecdec_helper()
     {
         free(command);
+        killall();
     }
 
     void run()
@@ -2424,6 +2427,7 @@ struct s2_fecdec_helper : runnable
         int batch_size; // Latency
         int b_in;       // Jobs in input queue
         int b_out;      // Jobs in output queue
+        int pid;        // PID of the child
     };
     struct pool
     {
@@ -2451,10 +2455,13 @@ struct s2_fecdec_helper : runnable
             int nw = write(h->fd_tx, pin->bytes, iosize);
 
             if (nw < 0 && errno == EWOULDBLOCK)
+            {
+                lseek(h->fd_tx, 0, SEEK_SET); // allow new writes on this worker
                 continue; // next worker
+            }
             if (nw < 0)
                 fatal("write(LDPC helper");
-            if (nw != iosize)
+            else if (nw != iosize)
                 fatal("partial write(LDPC helper)");
 
             helper_job *job = jobs.put();
@@ -2471,9 +2478,9 @@ struct s2_fecdec_helper : runnable
             return true; // done sent to worker
         }
 
-        fprintf(stderr, "s2_fecdec_helper::send_frame: WARNING: all %d workers are busy: modcod=%d sf=%d)\n",
+        fprintf(stderr, "s2_fecdec_helper::send_frame: WARNING: all %d workers were busy: modcod=%d sf=%d)\n",
             p->nprocs, pin->pls.modcod, pin->pls.sf);
-        return false; // all workers are busy
+        return false; // all workers were busy
     }
 
     // Return a pool of running helpers for a given modcod.
@@ -2494,6 +2501,42 @@ struct s2_fecdec_helper : runnable
         return p;
     }
 
+    void killall()
+    {
+        fprintf(stderr, "s2_fecdec_helper::killall\n");
+
+        for (int i = 0; i < 32; i++) // all MODCODs
+        {
+            for (int j = 0; j < 2; j++) // long and short frames
+            {
+                pool *p = &pools[i][j];
+
+                if (p->procs)
+                {
+                    for (int i = 0; i < p->nprocs; ++i)
+                    {
+                        helper_instance *h = &p->procs[i];
+                        fprintf(stderr, "s2_fecdec_helper::killall: killing %d\n", h->pid);
+                        int rc = kill(h->pid, SIGKILL);
+                        if (rc < 0) {
+                            fatal("s2_fecdec_helper::killall");
+                        } else {
+                            int cs;
+                            waitpid(h->pid, &cs, 0);
+                        }
+                        // reset pipes
+                        lseek(h->fd_tx, 0, SEEK_SET);
+                        lseek(h->fd_rx, 0, SEEK_SET);
+                    }
+
+                    delete p->procs;
+                    p->procs = nullptr;
+                    p->nprocs = 0;
+                }
+            } // long and short frames
+        } // all MODCODs
+    }
+
     // Spawn a helper process.
     void spawn_helper(helper_instance *h, const s2_pls *pls)
     {
@@ -2507,19 +2550,31 @@ struct s2_fecdec_helper : runnable
 // macOS does not have F_SETPIPE_SZ and there
 // is no way to change the buffer size
 #ifndef __APPLE__
-        if (fcntl(tx[0], F_SETPIPE_SZ, pipesize) < 0 ||
-            fcntl(rx[0], F_SETPIPE_SZ, pipesize) < 0 ||
-            fcntl(tx[1], F_SETPIPE_SZ, pipesize) < 0 ||
-            fcntl(rx[1], F_SETPIPE_SZ, pipesize) < 0)
+        long min_pipe_size = (long) fcntl(tx[0], F_GETPIPE_SZ);
+        long pipe_size = (long) fcntl(rx[0], F_GETPIPE_SZ);
+        min_pipe_size = std::min(min_pipe_size, pipe_size);
+        pipe_size = (long) fcntl(tx[1], F_GETPIPE_SZ);
+        min_pipe_size = std::min(min_pipe_size, pipe_size);
+        pipe_size = (long) fcntl(rx[1], F_GETPIPE_SZ);
+        min_pipe_size = std::min(min_pipe_size, pipe_size);
+
+        if (min_pipe_size < pipesize)
         {
-            fprintf(stderr,
-                    "*** Failed to increase pipe size.\n"
-                    "*** Try echo %d > /proc/sys/fs/pipe-max-size\n",
-                    pipesize);
-            if (must_buffer)
-                fatal("F_SETPIPE_SZ");
-            else
-                fprintf(stderr, "*** Throughput will be suboptimal.\n");
+            if (fcntl(tx[0], F_SETPIPE_SZ, pipesize) < 0 ||
+                fcntl(rx[0], F_SETPIPE_SZ, pipesize) < 0 ||
+                fcntl(tx[1], F_SETPIPE_SZ, pipesize) < 0 ||
+                fcntl(rx[1], F_SETPIPE_SZ, pipesize) < 0)
+            {
+                fprintf(stderr,
+                        "*** Failed to increase pipe size from %ld.\n"
+                        "*** Try echo %d > /proc/sys/fs/pipe-max-size\n",
+                        min_pipe_size,
+                        pipesize);
+                if (must_buffer)
+                    fatal("F_SETPIPE_SZ");
+                else
+                    fprintf(stderr, "*** Throughput will be suboptimal.\n");
+            }
         }
 #endif
         // vfork() differs from fork(2) in that the calling thread is
@@ -2552,15 +2607,19 @@ struct s2_fecdec_helper : runnable
             fatal(command);
         }
 
+        h->pid = child;
         h->fd_tx = tx[1];
         close(tx[0]);
         h->fd_rx = rx[0];
         close(rx[1]);
         h->batch_size = batch_size; // TBD
         h->b_in = h->b_out = 0;
-        int flags = fcntl(h->fd_tx, F_GETFL);
-        if (fcntl(h->fd_tx, F_SETFL, flags | O_NONBLOCK))
-            fatal("fcntl(helper)");
+        int flags_tx = fcntl(h->fd_tx, F_GETFL);
+        if (fcntl(h->fd_tx, F_SETFL, flags_tx | O_NONBLOCK))
+            fatal("fcntl_tx(helper)");
+        int flags_rx = fcntl(h->fd_rx, F_GETFL);
+        if (fcntl(h->fd_rx, F_SETFL, flags_rx | O_NONBLOCK))
+            fatal("fcntl_rx(helper)");
     }
 
     // Receive a finished job.
@@ -2570,10 +2629,18 @@ struct s2_fecdec_helper : runnable
         const s2_pls *pls = &job->pls;
         int iosize = (pls->framebits() / 8) * sizeof(ldpc_buf[0]);
         int nr = read(job->h->fd_rx, ldpc_buf, iosize);
+
         if (nr < 0)
-            fatal("read(LDPC helper)");
-        if (nr != iosize)
-            fatal("partial read(LDPC helper)");
+        {
+            if (errno != EAGAIN) { // if no data then try again next time
+                fatal("s2_fecdec_helper::receive_frame read error");
+            }
+        }
+        else if (nr != iosize)
+        {
+            fprintf(stderr, "s2_fecdec_helper::receive_frame: %d bytes read vs %d", nr, iosize);
+        }
+
         --job->h->b_out;
         // Decode BCH.
         const modcod_info *mcinfo = check_modcod(job->pls.modcod);

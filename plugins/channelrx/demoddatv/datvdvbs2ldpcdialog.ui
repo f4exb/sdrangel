@@ -31,11 +31,17 @@
      </item>
      <item>
       <widget class="QSpinBox" name="maxTrials">
+       <property name="minimumSize">
+        <size>
+         <width>55</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>8</number>
+        <number>25</number>
        </property>
        <property name="displayIntegerBase">
         <number>10</number>

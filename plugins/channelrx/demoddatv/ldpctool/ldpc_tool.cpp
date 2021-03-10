@@ -136,6 +136,10 @@ int main(int argc, char **argv)
 	if (sizeof(ldpctool::code_type) != 1)
 		fail("Bug: Unsupported code_type");
 
+	int trials_count = 0;
+	int max_count = 0;
+	int num_decodes = 0;
+
 	while (true)
 	{
 		ssize_t iosize = BLOCKS * CODE_LEN * sizeof(*code);
@@ -153,8 +157,6 @@ int main(int argc, char **argv)
 			pos += nr;
 		}
 
-		int iterations = 0;
-		int num_decodes = 0;
 
 		for (int j = 0; j < BLOCKS; j += ldpctool::SIMD_WIDTH)
 		{
@@ -164,24 +166,31 @@ int main(int argc, char **argv)
 				for (int i = 0; i < CODE_LEN; ++i)
 					reinterpret_cast<ldpctool::code_type *>(simd + i)[n] = code[(j + n) * CODE_LEN + i];
 
-			int trials = max_trials;
-			int count = decode(simd, simd + DATA_LEN, trials, blocks);
-			++num_decodes;
+			int count = decode(simd, simd + DATA_LEN, max_trials, blocks);
+			num_decodes++;
+
+			if (count < 0)
+			{
+				trials_count += max_trials;
+				max_count++;
+			}
+			else
+			{
+				trials_count += max_trials - count;
+			}
+
+			if (num_decodes == 20)
+			{
+				fprintf(stderr, "ldpc_tool: trials: %d%% max: %d%% at converging to a code word\n",
+					(trials_count*100)/(num_decodes*max_trials), (max_count*100)/num_decodes);
+				trials_count = 0;
+				max_count = 0;
+				num_decodes = 0;
+			}
 
 			for (int n = 0; n < blocks; ++n)
 				for (int i = 0; i < CODE_LEN; ++i)
 					code[(j + n) * CODE_LEN + i] = reinterpret_cast<ldpctool::code_type *>(simd + i)[n];
-
-			if (count < 0)
-			{
-				iterations += blocks * trials;
-				std::cerr << "ldpc_tool: decoder failed at converging to a code word in " << trials << " trials" << std::endl;
-				break;
-			}
-			else
-			{
-				iterations += blocks * (trials - count);
-			}
 		}
 
 		for (int i = 0; i < BLOCKS * CODE_LEN; ++i)

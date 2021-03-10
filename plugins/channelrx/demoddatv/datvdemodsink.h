@@ -225,6 +225,7 @@ private:
     void *p_s2_deinterleaver;
     void *r_fecdec;
     void *r_fecdecsoft;
+    void *r_fecdechelper;
     void *p_deframer;
 
     //DECIMATION

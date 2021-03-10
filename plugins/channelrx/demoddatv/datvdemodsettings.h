@@ -106,6 +106,7 @@ struct DATVDemodSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    static const int m_softLDPCMaxMaxTrials = 25;
 
     DATVDemodSettings();
     void resetToDefaults();

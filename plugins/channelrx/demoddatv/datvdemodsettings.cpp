@@ -197,7 +197,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readS32(33, &m_maxBitflips, 0);
         d.readString(34, &m_softLDPCToolPath, "/opt/install/sdrangel/bin/ldpctool");
         d.readS32(35, &tmp, 8);
-        m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > 8 ? 8 : tmp;
+        m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
 
         validateSystemConfiguration();
 

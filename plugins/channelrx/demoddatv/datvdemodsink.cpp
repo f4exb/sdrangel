@@ -431,6 +431,10 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
         {
             delete (leansdr::s2_fecdec_soft<leansdr::llr_t,leansdr::llr_sb>*) r_fecdecsoft;
         }
+        if(r_fecdechelper != nullptr)
+        {
+            delete (leansdr::s2_fecdec_helper<leansdr::llr_t,leansdr::llr_sb>*) r_fecdechelper;
+        }
 #endif
 
         if(p_deframer != nullptr)
@@ -442,7 +446,7 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
         {
             delete r_scope_symbols_dvbs2;
         }
-    }
+    } // blnRelease
 
     m_objScheduler=nullptr;
 
@@ -547,6 +551,7 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     p_s2_deinterleaver = nullptr;
     r_fecdec = nullptr;
     r_fecdecsoft = nullptr;
+    r_fecdechelper = nullptr;
     p_deframer = nullptr;
     r_scope_symbols_dvbs2 = nullptr;
 }
@@ -893,7 +898,7 @@ void DATVDemodSink::InitDATVS2Framework()
 
     m_blnDVBInitialized = false;
     m_lngReadIQ = 0;
-    CleanUpDATVFramework(false);
+    CleanUpDATVFramework(true);
 
     qDebug()  << "DATVDemodSink::InitDATVS2Framework:"
         <<  " Standard: " << m_settings.m_standard
@@ -1185,7 +1190,7 @@ void DATVDemodSink::InitDATVS2Framework()
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes
         );
         // Decode FEC-protected frames into plain BB frames.
-        r_fecdec = new leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb>(
+        r_fecdechelper = new leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb>(
             m_objScheduler,
             *(leansdr::pipebuf< leansdr::fecframe<leansdr::llr_sb> > *) p_fecframes,
             *(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes,
@@ -1193,8 +1198,8 @@ void DATVDemodSink::InitDATVS2Framework()
             p_vbitcount,
             p_verrcount)
         ;
-        leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *fecdec = (leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *) r_fecdec;
-        const int nhelpers = 2;
+        leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *fecdec = (leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *) r_fecdechelper;
+        const int nhelpers = 4;
         fecdec->nhelpers = nhelpers;
         fecdec->must_buffer = false;
         fecdec->max_trials = m_settings.m_softLDPCMaxTrials;
