@@ -123,12 +123,12 @@ template<typename T> struct datvdvbs2constellation: runnable
     std::vector<int> cstln_cols;
 
     datvdvbs2constellation(
-            scheduler *sch,
-            pipebuf<complex<T> > &_in,
-            T _xymin,
-            T _xymax,
-            const char *_name = nullptr,
-            TVScreen *objDATVScreen = nullptr) :
+        scheduler *sch,
+        pipebuf<complex<T> > &_in,
+        T _xymin,
+        T _xymax,
+        const char *_name = nullptr,
+        TVScreen *objDATVScreen = nullptr) :
         runnable(sch, _name ? _name : _in.name),
         xymin(_xymin),
         xymax(_xymax),

@@ -181,8 +181,8 @@ int main(int argc, char **argv)
 
 			if (num_decodes == 20)
 			{
-				fprintf(stderr, "ldpc_tool: trials: %d%% max: %d%% at converging to a code word\n",
-					(trials_count*100)/(num_decodes*max_trials), (max_count*100)/num_decodes);
+				fprintf(stderr, "ldpc_tool: trials: %d%% max: %d%% at converging to a code word (max trials: %d)\n",
+					(trials_count*100)/(num_decodes*max_trials), (max_count*100)/num_decodes, max_trials);
 				trials_count = 0;
 				max_count = 0;
 				num_decodes = 0;

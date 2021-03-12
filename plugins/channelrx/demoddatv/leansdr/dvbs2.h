@@ -299,11 +299,14 @@ const modcod_info *check_modcod(int m)
 template <typename T>
 struct s2_frame_transmitter : runnable
 {
-    s2_frame_transmitter(scheduler *sch,
-                         pipebuf<plslot<hard_ss>> &_in,
-                         pipebuf<complex<T>> &_out)
-        : runnable(sch, "S2 frame transmitter"),
-          in(_in), out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME)
+    s2_frame_transmitter(
+        scheduler *sch,
+        pipebuf<plslot<hard_ss>> &_in,
+        pipebuf<complex<T>> &_out
+    ) :
+        runnable(sch, "S2 frame transmitter"),
+        in(_in),
+        out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME)
     {
         float amp = cstln_amp / sqrtf(2);
         qsymbols[0].re = +amp;
@@ -437,65 +440,17 @@ static int pl_errors = 0, pl_symbols = 0;
 template <typename T, typename SOFTSYMB>
 struct s2_frame_receiver : runnable
 {
-    sampler_interface<T> *sampler;
-    int meas_decimation;
-    float Ftune; // Tuning bias in cycles per symbol
-    float Fm;    // Baud rate in Hz, for debug messages only. TBD remove.
-    bool strongpls;
-    static const int MAX_SYMBOLS_PER_FRAME =
-        (1 + modcod_info::MAX_SLOTS_PER_FRAME) * plslot<hard_ss>::LENGTH +
-        ((modcod_info::MAX_SLOTS_PER_FRAME - 1) / 16) * pilot_length;
-    s2_frame_receiver(scheduler *sch,
-                      sampler_interface<T> *_sampler,
-                      pipebuf<complex<T>> &_in,
-                      pipebuf<plslot<SOFTSYMB>> &_out,
-                      pipebuf<float> *_freq_out = nullptr,
-                      pipebuf<float> *_ss_out = nullptr,
-                      pipebuf<float> *_mer_out = nullptr,
-                      pipebuf<complex<float>> *_cstln_out = nullptr,
-                      pipebuf<complex<float>> *_cstln_pls_out = nullptr,
-                      pipebuf<complex<float>> *_symbols_out = nullptr,
-                      pipebuf<int> *_state_out = nullptr)
-        : runnable(sch, "S2 frame receiver"),
-          sampler(_sampler),
-          meas_decimation(1048576),
-          Ftune(0), Fm(0),
-          strongpls(false),
-          in_power(0), ev_power(0), agc_gain(1), agc_bw(1e-3),
-          nsyncs(0),
-          cstln(nullptr),
-          in(_in), out(_out, 1 + modcod_info::MAX_SLOTS_PER_FRAME),
-          meas_count(0),
-          freq_out(opt_writer(_freq_out)),
-          ss_out(opt_writer(_ss_out)),
-          mer_out(opt_writer(_mer_out)),
-          cstln_out(opt_writer(_cstln_out, 1024)),
-          cstln_pls_out(opt_writer(_cstln_pls_out, 1024)),
-          symbols_out(opt_writer(_symbols_out, MAX_SYMBOLS_PER_FRAME)),
-          state_out(opt_writer(_state_out)),
-          report_state(false),
-          scrambling(0),
-          m_modcodType(-1),
-          m_modcodRate(-1)
-    {
-        // Constellation for PLS
-        qpsk = new cstln_lut<SOFTSYMB, 256>(cstln_base::QPSK);
-        add_syncs(qpsk);
-
-        init_coarse_freq();
-
-#if TEST_DIVERSITY
-        fprintf(stderr, "** DEBUG: Diversity test mode (slower)\n");
-#endif
-    }
-
-    enum
-    {
+    enum {
         COARSE_FREQ,
         FRAME_SEARCH,
         FRAME_LOCKED,
     } state;
 
+    sampler_interface<T> *sampler;
+    int meas_decimation;
+    float Ftune; // Tuning bias in cycles per symbol
+    float Fm;    // Baud rate in Hz, for debug messages only. TBD remove.
+    bool strongpls;
     float min_freqw16, max_freqw16;
 
     // State during COARSE_FREQ
@@ -508,6 +463,61 @@ struct s2_frame_receiver : runnable
 
     float mu;    // Time to next symbol, in samples
     float omega0; // Samples per symbol
+
+    static const int MAX_SYMBOLS_PER_FRAME =
+        (1 + modcod_info::MAX_SLOTS_PER_FRAME) * plslot<hard_ss>::LENGTH +
+        ((modcod_info::MAX_SLOTS_PER_FRAME - 1) / 16) * pilot_length;
+
+    s2_frame_receiver(
+        scheduler *sch,
+        sampler_interface<T> *_sampler,
+        pipebuf<complex<T>> &_in,
+        pipebuf<plslot<SOFTSYMB>> &_out,
+        pipebuf<float> *_freq_out = nullptr,
+        pipebuf<float> *_ss_out = nullptr,
+        pipebuf<float> *_mer_out = nullptr,
+        pipebuf<complex<float>> *_cstln_out = nullptr,
+        pipebuf<complex<float>> *_cstln_pls_out = nullptr,
+        pipebuf<complex<float>> *_symbols_out = nullptr,
+        pipebuf<int> *_state_out = nullptr
+    ) :
+        runnable(sch, "S2 frame receiver"),
+        sampler(_sampler),
+        meas_decimation(1048576),
+        Ftune(0), Fm(0),
+        strongpls(false),
+        in_power(0), ev_power(0), agc_gain(1), agc_bw(1e-3),
+        nsyncs(0),
+        cstln(nullptr),
+        in(_in), out(_out, 1 + modcod_info::MAX_SLOTS_PER_FRAME),
+        meas_count(0),
+        freq_out(opt_writer(_freq_out)),
+        ss_out(opt_writer(_ss_out)),
+        mer_out(opt_writer(_mer_out)),
+        cstln_out(opt_writer(_cstln_out, 1024)),
+        cstln_pls_out(opt_writer(_cstln_pls_out, 1024)),
+        symbols_out(opt_writer(_symbols_out, MAX_SYMBOLS_PER_FRAME)),
+        state_out(opt_writer(_state_out)),
+        report_state(false),
+        scrambling(0),
+        m_modcodType(-1),
+        m_modcodRate(-1)
+    {
+        // Constellation for PLS
+        qpsk = new cstln_lut<SOFTSYMB, 256>(cstln_base::QPSK);
+        add_syncs(qpsk);
+
+        init_coarse_freq();
+
+#if TEST_DIVERSITY
+        fprintf(stderr, "** DEBUG: Diversity test mode (slower)\n");
+#endif
+    }
+
+    ~s2_frame_receiver()
+    {
+        delete qpsk;
+    }
 
     void run()
     {
@@ -1237,11 +1247,14 @@ struct fecframe
 
 struct s2_interleaver : runnable
 {
-    s2_interleaver(scheduler *sch,
-                   pipebuf<fecframe<hard_sb>> &_in,
-                   pipebuf<plslot<hard_ss>> &_out)
-        : runnable(sch, "S2 interleaver"),
-          in(_in), out(_out, 1 + 360)
+    s2_interleaver(
+        scheduler *sch,
+        pipebuf<fecframe<hard_sb>> &_in,
+        pipebuf<plslot<hard_ss>> &_out
+    ) :
+        runnable(sch, "S2 interleaver"),
+        in(_in),
+        out(_out, 1 + 360)
     {
     }
     void run()
@@ -1566,13 +1579,17 @@ struct s2_interleaver : runnable
 template <typename SOFTSYMB, typename SOFTBYTE>
 struct s2_deinterleaver : runnable
 {
-    s2_deinterleaver(scheduler *sch,
-                     pipebuf<plslot<SOFTSYMB>> &_in,
-                     pipebuf<fecframe<SOFTBYTE>> &_out)
-        : runnable(sch, "S2 deinterleaver"),
-          in(_in), out(_out)
+    s2_deinterleaver(
+        scheduler *sch,
+        pipebuf<plslot<SOFTSYMB>> &_in,
+        pipebuf<fecframe<SOFTBYTE>> &_out
+    ) :
+        runnable(sch, "S2 deinterleaver"),
+        in(_in),
+        out(_out)
     {
     }
+
     void run()
     {
         while (in.readable() >= 1 && out.writable() >= 1)
@@ -2044,10 +2061,14 @@ struct s2_bch_engines
 struct s2_fecenc : runnable
 {
     typedef ldpc_engine<bool, hard_sb, 8, uint16_t> s2_ldpc_engine;
-    s2_fecenc(scheduler *sch,
-              pipebuf<bbframe> &_in, pipebuf<fecframe<hard_sb>> &_out)
-        : runnable(sch, "S2 fecenc"),
-          in(_in), out(_out)
+    s2_fecenc(
+        scheduler *sch,
+        pipebuf<bbframe> &_in,
+        pipebuf<fecframe<hard_sb>> &_out
+    ) :
+        runnable(sch, "S2 fecenc"),
+        in(_in),
+        out(_out)
     {
         if (sch->debug)
             s2ldpc.print_node_stats();
@@ -2097,15 +2118,18 @@ template <typename SOFTBIT, typename SOFTBYTE>
 struct s2_fecdec : runnable
 {
     int bitflips;
-    s2_fecdec(scheduler *sch,
-              pipebuf<fecframe<SOFTBYTE>> &_in, pipebuf<bbframe> &_out,
-              pipebuf<int> *_bitcount = nullptr,
-              pipebuf<int> *_errcount = nullptr)
-        : runnable(sch, "S2 fecdec"),
-          bitflips(0),
-          in(_in), out(_out),
-          bitcount(opt_writer(_bitcount, 1)),
-          errcount(opt_writer(_errcount, 1))
+    s2_fecdec(
+        scheduler *sch,
+        pipebuf<fecframe<SOFTBYTE>> &_in, pipebuf<bbframe> &_out,
+        pipebuf<int> *_bitcount = nullptr,
+        pipebuf<int> *_errcount = nullptr
+    ) :
+        runnable(sch, "S2 fecdec"),
+        bitflips(0),
+        in(_in),
+        out(_out),
+        bitcount(opt_writer(_bitcount, 1)),
+        errcount(opt_writer(_errcount, 1))
     {
         if (sch->debug)
             s2ldpc.print_node_stats();
@@ -2186,21 +2210,24 @@ struct s2_fecdec : runnable
 template <typename SOFTBIT, typename SOFTBYTE>
 struct s2_fecdec_soft : runnable
 {
-    s2_fecdec_soft(scheduler *sch,
-                   pipebuf<fecframe<SOFTBYTE>> &_in,
-                   pipebuf<bbframe> &_out,
-                   int _modcod,
-                   bool _shortframes = true,
-                   int _max_trials = 25,
-                   pipebuf<int> *_bitcount = nullptr,
-                   pipebuf<int> *_errcount = nullptr)
-        : runnable(sch, "S2 fecdec soft"),
-          in(_in), out(_out),
-          modcod(_modcod < 0 ? 0 : _modcod > 31 ? 31 : _modcod),
-          shortframes(_shortframes ? 1 : 0),
-          max_trials(_max_trials),
-          bitcount(opt_writer(_bitcount, 1)),
-          errcount(opt_writer(_errcount, 1))
+    s2_fecdec_soft(
+        scheduler *sch,
+        pipebuf<fecframe<SOFTBYTE>> &_in,
+        pipebuf<bbframe> &_out,
+        int _modcod,
+        bool _shortframes = true,
+        int _max_trials = 25,
+        pipebuf<int> *_bitcount = nullptr,
+        pipebuf<int> *_errcount = nullptr
+    ) :
+        runnable(sch, "S2 fecdec soft"),
+        in(_in),
+        out(_out),
+        modcod(_modcod < 0 ? 0 : _modcod > 31 ? 31 : _modcod),
+        shortframes(_shortframes ? 1 : 0),
+        max_trials(_max_trials),
+        bitcount(opt_writer(_bitcount, 1)),
+        errcount(opt_writer(_errcount, 1))
     {
         const char *tabname = ldpctool::LDPCInterface::mc_tabnames[shortframes][modcod];
         fprintf(stderr, "s2_fecdec_soft::s2_fecdec_soft: tabname: %s\n", tabname);
@@ -2357,20 +2384,23 @@ struct s2_fecdec_helper : runnable
     bool must_buffer;
     int max_trials;
 
-    s2_fecdec_helper(scheduler *sch,
-                     pipebuf<fecframe<SOFTBYTE>> &_in,
-                     pipebuf<bbframe> &_out,
-                     const char *_command,
-                     pipebuf<int> *_bitcount = nullptr,
-                     pipebuf<int> *_errcount = nullptr)
-        : runnable(sch, "S2 fecdec io"),
-          batch_size(16),
-          nhelpers(1),
-          must_buffer(false),
-          max_trials(8),
-          in(_in), out(_out),
-          bitcount(opt_writer(_bitcount, 1)),
-          errcount(opt_writer(_errcount, 1))
+    s2_fecdec_helper(
+        scheduler *sch,
+        pipebuf<fecframe<SOFTBYTE>> &_in,
+        pipebuf<bbframe> &_out,
+        const char *_command,
+        pipebuf<int> *_bitcount = nullptr,
+        pipebuf<int> *_errcount = nullptr
+    ) :
+        runnable(sch, "S2 fecdec io"),
+        batch_size(16),
+        nhelpers(1),
+        must_buffer(false),
+        max_trials(8),
+        in(_in),
+        out(_out),
+        bitcount(opt_writer(_bitcount, 1)),
+        errcount(opt_writer(_errcount, 1))
     {
         command = strdup(_command);
         for (int mc = 0; mc < 32; ++mc)
@@ -2459,6 +2489,7 @@ struct s2_fecdec_helper : runnable
                 lseek(h->fd_tx, 0, SEEK_SET); // allow new writes on this worker
                 continue; // next worker
             }
+
             if (nw < 0)
                 fatal("write(LDPC helper");
             else if (nw != iosize)
@@ -2524,9 +2555,9 @@ struct s2_fecdec_helper : runnable
                             int cs;
                             waitpid(h->pid, &cs, 0);
                         }
-                        // reset pipes
-                        lseek(h->fd_tx, 0, SEEK_SET);
-                        lseek(h->fd_rx, 0, SEEK_SET);
+                        // close pipes
+                        close(h->fd_tx);
+                        close(h->fd_rx);
                     }
 
                     delete p->procs;
@@ -2638,7 +2669,7 @@ struct s2_fecdec_helper : runnable
         }
         else if (nr != iosize)
         {
-            fprintf(stderr, "s2_fecdec_helper::receive_frame: %d bytes read vs %d", nr, iosize);
+            fprintf(stderr, "s2_fecdec_helper::receive_frame: %d bytes read vs %d\n", nr, iosize);
         }
 
         --job->h->b_out;
@@ -2700,9 +2731,15 @@ struct s2_framer : runnable
 {
     uint8_t rolloff_code; // 0=0.35, 1=0.25, 2=0.20, 3=reserved
     s2_pls pls;
-    s2_framer(scheduler *sch, pipebuf<tspacket> &_in, pipebuf<bbframe> &_out)
-        : runnable(sch, "S2 framer"),
-          in(_in), out(_out)
+
+    s2_framer(
+        scheduler *sch,
+        pipebuf<tspacket> &_in,
+        pipebuf<bbframe> &_out
+    ) :
+        runnable(sch, "S2 framer"),
+        in(_in),
+        out(_out)
     {
         pls.modcod = 4;
         pls.sf = false;
@@ -2782,17 +2819,22 @@ struct s2_framer : runnable
 
 struct s2_deframer : runnable
 {
-    s2_deframer(scheduler *sch, pipebuf<bbframe> &_in, pipebuf<tspacket> &_out,
-                pipebuf<int> *_state_out = nullptr,
-                pipebuf<unsigned long> *_locktime_out = nullptr)
-        : runnable(sch, "S2 deframer"),
-          missing(-1),
-          in(_in), out(_out, MAX_TS_PER_BBFRAME),
-          current_state(false),
-          state_out(opt_writer(_state_out, 2)),
-          report_state(true),
-          locktime(0),
-          locktime_out(opt_writer(_locktime_out, MAX_TS_PER_BBFRAME))
+    s2_deframer(
+        scheduler *sch,
+        pipebuf<bbframe> &_in,
+        pipebuf<tspacket> &_out,
+        pipebuf<int> *_state_out = nullptr,
+        pipebuf<unsigned long> *_locktime_out = nullptr
+    ) :
+        runnable(sch, "S2 deframer"),
+        missing(-1),
+        in(_in),
+        out(_out, MAX_TS_PER_BBFRAME),
+        current_state(false),
+        state_out(opt_writer(_state_out, 2)),
+        report_state(true),
+        locktime(0),
+        locktime_out(opt_writer(_locktime_out, MAX_TS_PER_BBFRAME))
     {
     }
     void run()

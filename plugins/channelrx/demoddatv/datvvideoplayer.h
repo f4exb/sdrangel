@@ -29,10 +29,10 @@ namespace leansdr
 template<typename T> struct datvvideoplayer: runnable
 {
     datvvideoplayer(
-            scheduler *sch,
-            pipebuf<T> &_in,
-            DATVideostream *objVideoStream,
-            DATVUDPStream *udpStream) :
+        scheduler *sch,
+        pipebuf<T> &_in,
+        DATVideostream *objVideoStream,
+        DATVUDPStream *udpStream) :
         runnable(sch, _in.name),
         in(_in),
         m_objVideoStream(objVideoStream),

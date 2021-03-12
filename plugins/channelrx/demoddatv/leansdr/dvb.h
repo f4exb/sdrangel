@@ -111,17 +111,20 @@ static const int DVBS_G2 = 0133;
 template <typename Tbyte, Tbyte BYTE_ERASED>
 struct deconvol_sync : runnable
 {
-    deconvol_sync(scheduler *sch,
-                  pipebuf<eucl_ss> &_in,
-                  pipebuf<Tbyte> &_out,
-                  uint32_t gX,
-                  uint32_t gY,
-                  uint32_t pX,
-                  uint32_t pY) : runnable(sch, "deconvol_sync"),
-                                 fastlock(false),
-                                 in(_in),
-                                 out(_out, SIZE_RSPACKET),
-                                 skip(0)
+    deconvol_sync(
+        scheduler *sch,
+        pipebuf<eucl_ss> &_in,
+        pipebuf<Tbyte> &_out,
+        uint32_t gX,
+        uint32_t gY,
+        uint32_t pX,
+        uint32_t pY
+    ) :
+        runnable(sch, "deconvol_sync"),
+        fastlock(false),
+        in(_in),
+        out(_out, SIZE_RSPACKET),
+        skip(0)
     {
         conv = new uint32_t[2];
         conv[0] = gX;
@@ -149,6 +152,14 @@ struct deconvol_sync : runnable
         inverse_convolution();
         init_syncs();
         locked = &syncs[0];
+    }
+
+    ~deconvol_sync()
+    {
+        delete[] deconv2;
+        delete[] deconv;
+        delete[] punct;
+        delete[] conv;
     }
 
     typedef uint64_t signal_t;
@@ -582,10 +593,11 @@ struct deconvol_sync : runnable
 
 typedef deconvol_sync<u8, 0> deconvol_sync_simple;
 
-deconvol_sync_simple *make_deconvol_sync_simple(scheduler *sch,
-                                                pipebuf<eucl_ss> &_in,
-                                                pipebuf<u8> &_out,
-                                                enum code_rate rate);
+deconvol_sync_simple *make_deconvol_sync_simple(
+    scheduler *sch,
+    pipebuf<eucl_ss> &_in,
+    pipebuf<u8> &_out,
+    enum code_rate rate);
 
 // CONVOLUTIONAL ENCODER
 
@@ -665,13 +677,16 @@ struct dvb_convol : runnable
     typedef u8 uncoded_byte;
     typedef u8 hardsymbol;
 
-    dvb_convol(scheduler *sch,
-               pipebuf<uncoded_byte> &_in,
-               pipebuf<hardsymbol> &_out,
-               code_rate fec,
-               int bits_per_symbol) : runnable(sch, "dvb_convol"),
-                                      in(_in),
-                                      out(_out, 64) // BPSK 7/8: 7 bytes in, 64 symbols out
+    dvb_convol(
+        scheduler *sch,
+        pipebuf<uncoded_byte> &_in,
+        pipebuf<hardsymbol> &_out,
+        code_rate fec,
+        int bits_per_symbol
+    ) :
+        runnable(sch, "dvb_convol"),
+        in(_in),
+        out(_out, 64) // BPSK 7/8: 7 bytes in, 64 symbols out
     {
         fec_spec *fs = &fec_specs[fec];
 
@@ -719,13 +734,16 @@ struct dvb_deconvol_sync : runnable
     int resync_period;
     static const int chunk_size = 64; // At least 2*sizeof(Thist)/8
 
-    dvb_deconvol_sync(scheduler *sch,
-                      pipebuf<Tin> &_in,
-                      pipebuf<decoded_byte> &_out) : runnable(sch, "deconvol_sync_multipoly"),
-                                                     resync_period(32),
-                                                     in(_in),
-                                                     out(_out, chunk_size),
-                                                     resync_phase(0)
+    dvb_deconvol_sync(
+        scheduler *sch,
+        pipebuf<Tin> &_in,
+        pipebuf<decoded_byte> &_out
+    ) :
+        runnable(sch, "deconvol_sync_multipoly"),
+        resync_period(32),
+        in(_in),
+        out(_out, chunk_size),
+        resync_phase(0)
     {
         init_syncs();
         locked = &syncs[0];
@@ -736,7 +754,7 @@ struct dvb_deconvol_sync : runnable
         while (in.readable() >= chunk_size * 8 && out.writable() >= chunk_size)
         {
             int errors_best = 1 << 30;
-            sync_t *best = NULL;
+            sync_t *best = nullptr;
 
             for (sync_t *s = syncs; s < syncs + NSYNCS; ++s)
             {
@@ -833,29 +851,42 @@ struct mpeg_sync : runnable
     bool fastlock;
     int resync_period;
 
-    mpeg_sync(scheduler *sch,
-              pipebuf<Tbyte> &_in,
-              pipebuf<Tbyte> &_out,
-              deconvol_sync<Tbyte, 0> *_deconv,
-              pipebuf<int> *_state_out = NULL,
-              pipebuf<unsigned long> *_locktime_out = NULL) : runnable(sch, "sync_detect"),
-                                                              scan_syncs(8),
-                                                              want_syncs(4),
-                                                              lock_timeout(4),
-                                                              fastlock(false),
-                                                              resync_period(1),
-                                                              in(_in),
-                                                              out(_out, SIZE_RSPACKET * (scan_syncs + 1)),
-                                                              deconv(_deconv),
-                                                              polarity(0),
-                                                              resync_phase(0),
-                                                              bitphase(0),
-                                                              synchronized(false),
-                                                              next_sync_count(0),
-                                                              report_state(true)
+    mpeg_sync(
+        scheduler *sch,
+        pipebuf<Tbyte> &_in,
+        pipebuf<Tbyte> &_out,
+        deconvol_sync<Tbyte, 0> *_deconv,
+        pipebuf<int> *_state_out = nullptr,
+        pipebuf<unsigned long> *_locktime_out = nullptr
+    ) :
+        runnable(sch, "sync_detect"),
+        scan_syncs(8),
+        want_syncs(4),
+        lock_timeout(4),
+        fastlock(false),
+        resync_period(1),
+        in(_in),
+        out(_out, SIZE_RSPACKET * (scan_syncs + 1)),
+        deconv(_deconv),
+        polarity(0),
+        resync_phase(0),
+        bitphase(0),
+        synchronized(false),
+        next_sync_count(0),
+        report_state(true)
     {
-        state_out = _state_out ? new pipewriter<int>(*_state_out) : NULL;
-        locktime_out = _locktime_out ? new pipewriter<unsigned long>(*_locktime_out) : NULL;
+        state_out = _state_out ? new pipewriter<int>(*_state_out) : nullptr;
+        locktime_out = _locktime_out ? new pipewriter<unsigned long>(*_locktime_out) : nullptr;
+    }
+
+    ~mpeg_sync()
+    {
+        if (state_out) {
+            delete state_out;
+        }
+        if (locktime_out) {
+            delete locktime_out;
+        }
     }
 
     void run()
@@ -1096,11 +1127,14 @@ struct rspacket
 
 struct interleaver : runnable
 {
-    interleaver(scheduler *sch,
-                pipebuf<rspacket<u8>> &_in,
-                pipebuf<u8> &_out) : runnable(sch, "interleaver"),
-                                     in(_in),
-                                     out(_out, SIZE_RSPACKET)
+    interleaver(
+        scheduler *sch,
+        pipebuf<rspacket<u8>> &_in,
+        pipebuf<u8> &_out
+    ) :
+        runnable(sch, "interleaver"),
+        in(_in),
+        out(_out, SIZE_RSPACKET)
     {
     }
 
@@ -1112,8 +1146,7 @@ struct interleaver : runnable
             u8 *pout = out.wr();
             int delay = 0;
 
-            for (int i = 0; i < SIZE_RSPACKET; ++i, ++pout, delay = (delay + 1) % 12)
-            {
+            for (int i = 0; i < SIZE_RSPACKET; ++i, ++pout, delay = (delay + 1) % 12) {
                 *pout = pin[11 - delay].data[i];
             }
 
@@ -1133,11 +1166,14 @@ struct interleaver : runnable
 template <typename Tbyte>
 struct deinterleaver : runnable
 {
-    deinterleaver(scheduler *sch,
-                  pipebuf<Tbyte> &_in,
-                  pipebuf<rspacket<Tbyte>> &_out) : runnable(sch, "deinterleaver"),
-                                                    in(_in),
-                                                    out(_out)
+    deinterleaver(
+        scheduler *sch,
+        pipebuf<Tbyte> &_in,
+        pipebuf<rspacket<Tbyte>> &_out
+    ) :
+        runnable(sch, "deinterleaver"),
+        in(_in),
+        out(_out)
     {
     }
 
@@ -1148,8 +1184,7 @@ struct deinterleaver : runnable
             Tbyte *pin = in.rd() + 17 * 11 * 12, *pend = pin + SIZE_RSPACKET;
             Tbyte *pout = out.wr()->data;
 
-            for (int delay = 17 * 11; pin < pend; ++pin, ++pout, delay = (delay - 17 + 17 * 12) % (17 * 12))
-            {
+            for (int delay = 17 * 11; pin < pend; ++pin, ++pout, delay = (delay - 17 + 17 * 12) % (17 * 12)) {
                 *pout = pin[-delay * 12];
             }
 
@@ -1175,11 +1210,14 @@ struct tspacket
 
 struct rs_encoder : runnable
 {
-    rs_encoder(scheduler *sch,
-               pipebuf<tspacket> &_in,
-               pipebuf<rspacket<u8>> &_out) : runnable(sch, "RS encoder"),
-                                              in(_in),
-                                              out(_out)
+    rs_encoder(
+        scheduler *sch,
+        pipebuf<tspacket> &_in,
+        pipebuf<rspacket<u8>> &_out
+    ) :
+        runnable(sch, "RS encoder"),
+        in(_in),
+        out(_out)
     {
     }
 
@@ -1213,16 +1251,29 @@ struct rs_decoder : runnable
 {
     rs_engine rs;
 
-    rs_decoder(scheduler *sch,
-               pipebuf<rspacket<Tbyte>> &_in,
-               pipebuf<tspacket> &_out,
-               pipebuf<int> *_bitcount = NULL,
-               pipebuf<int> *_errcount = NULL) : runnable(sch, "RS decoder"),
-                                                 in(_in),
-                                                 out(_out)
+    rs_decoder(
+        scheduler *sch,
+        pipebuf<rspacket<Tbyte>> &_in,
+        pipebuf<tspacket> &_out,
+        pipebuf<int> *_bitcount = nullptr,
+        pipebuf<int> *_errcount = nullptr
+    ) :
+        runnable(sch, "RS decoder"),
+        in(_in),
+        out(_out)
     {
-        bitcount = _bitcount ? new pipewriter<int>(*_bitcount) : NULL;
-        errcount = _errcount ? new pipewriter<int>(*_errcount) : NULL;
+        bitcount = _bitcount ? new pipewriter<int>(*_bitcount) : nullptr;
+        errcount = _errcount ? new pipewriter<int>(*_errcount) : nullptr;
+    }
+
+    ~rs_decoder()
+    {
+        if (bitcount) {
+            delete bitcount;
+        }
+        if (errcount) {
+            delete errcount;
+        }
     }
 
     void run()
@@ -1307,11 +1358,14 @@ struct rs_decoder : runnable
 
 struct randomizer : runnable
 {
-    randomizer(scheduler *sch,
-               pipebuf<tspacket> &_in,
-               pipebuf<tspacket> &_out) : runnable(sch, "derandomizer"),
-                                          in(_in),
-                                          out(_out)
+    randomizer(
+        scheduler *sch,
+        pipebuf<tspacket> &_in,
+        pipebuf<tspacket> &_out
+    ) :
+        runnable(sch, "derandomizer"),
+        in(_in),
+        out(_out)
     {
         precompute_pattern();
         pos = pattern;
@@ -1367,11 +1421,14 @@ struct randomizer : runnable
 
 struct derandomizer : runnable
 {
-    derandomizer(scheduler *sch,
-                 pipebuf<tspacket> &_in,
-                 pipebuf<tspacket> &_out) : runnable(sch, "derandomizer"),
-                                            in(_in),
-                                            out(_out)
+    derandomizer(
+        scheduler *sch,
+        pipebuf<tspacket> &_in,
+        pipebuf<tspacket> &_out
+    ) :
+        runnable(sch, "derandomizer"),
+        in(_in),
+        out(_out)
     {
         precompute_pattern();
         pos = pattern;
@@ -1525,17 +1582,20 @@ struct viterbi_sync : runnable
   public:
     int resync_period;
 
-    viterbi_sync(scheduler *sch,
-                 pipebuf<eucl_ss> &_in,
-                 pipebuf<unsigned char> &_out,
-                 cstln_lut<eucl_ss, 256> *_cstln,
-                 code_rate cr) : runnable(sch, "viterbi_sync"),
-                                 in(_in),
-                                 out(_out, chunk_size),
-                                 cstln(_cstln),
-                                 current_sync(0),
-                                 resync_phase(0),
-                                 resync_period(32) // 1/32 = 9% synchronization overhead TBD
+    viterbi_sync(
+        scheduler *sch,
+        pipebuf<eucl_ss> &_in,
+        pipebuf<unsigned char> &_out,
+        cstln_lut<eucl_ss, 256> *_cstln,
+        code_rate cr
+    ) :
+        runnable(sch, "viterbi_sync"),
+        in(_in),
+        out(_out, chunk_size),
+        cstln(_cstln),
+        current_sync(0),
+        resync_phase(0),
+        resync_period(32) // 1/32 = 9% synchronization overhead TBD
     {
         bits_per_symbol = log2i(cstln->nsymbols);
         fec = &fec_specs[cr];
@@ -1657,6 +1717,11 @@ struct viterbi_sync : runnable
         {
             fail("CR not supported");
         }
+    }
+
+    ~viterbi_sync()
+    {
+        delete syncs;
     }
 
     TCS *init_map(bool conj, float angle)

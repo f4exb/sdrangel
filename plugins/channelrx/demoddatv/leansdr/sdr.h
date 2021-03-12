@@ -48,20 +48,23 @@ struct auto_notch : runnable
     int decimation;
     float k;
 
-    auto_notch(scheduler *sch,
-               pipebuf<complex<T>> &_in,
-               pipebuf<complex<T>> &_out,
-               int _nslots,
-               T _agc_rms_setpoint) : runnable(sch, "auto_notch"),
-                                      decimation(1024 * 4096),
-                                      k(0.002), // k(0.01)
-                                      fft(4096),
-                                      in(_in),
-                                      out(_out, fft.n),
-                                      nslots(_nslots),
-                                      phase(0),
-                                      gain(1),
-                                      agc_rms_setpoint(_agc_rms_setpoint)
+    auto_notch(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<complex<T>> &_out,
+        int _nslots,
+        T _agc_rms_setpoint
+    ) :
+        runnable(sch, "auto_notch"),
+        decimation(1024 * 4096),
+        k(0.002), // k(0.01)
+        fft(4096),
+        in(_in),
+        out(_out, fft.n),
+        nslots(_nslots),
+        phase(0),
+        gain(1),
+        agc_rms_setpoint(_agc_rms_setpoint)
     {
         __slots = new slot[nslots];
 
@@ -74,6 +77,10 @@ struct auto_notch : runnable
 
     ~auto_notch()
     {
+        for (int s = 0; s < nslots; ++s) {
+            delete[] __slots[s].expj;
+        }
+
         delete[] __slots;
     }
 
@@ -226,12 +233,16 @@ struct ss_estimator : runnable
     unsigned long window_size; // Samples per estimation
     unsigned long decimation;  // Output rate
 
-    ss_estimator(scheduler *sch, pipebuf<complex<T>> &_in, pipebuf<T> &_out) : runnable(sch, "SS estimator"),
-                                                                               window_size(1024),
-                                                                               decimation(1024),
-                                                                               in(_in),
-                                                                               out(_out),
-                                                                               phase(0)
+    ss_estimator(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in, pipebuf<T> &_out
+    ) :
+        runnable(sch, "SS estimator"),
+        window_size(1024),
+        decimation(1024),
+        in(_in),
+        out(_out),
+        phase(0)
     {
     }
 
@@ -268,18 +279,21 @@ struct ss_amp_estimator : runnable
     unsigned long window_size; // Samples per estimation
     unsigned long decimation;  // Output rate
 
-    ss_amp_estimator(scheduler *sch,
-                     pipebuf<complex<T>> &_in,
-                     pipebuf<T> &_out_ss,
-                     pipebuf<T> &_out_ampmin,
-                     pipebuf<T> &_out_ampmax) : runnable(sch, "SS estimator"),
-                                                window_size(1024),
-                                                decimation(1024),
-                                                in(_in),
-                                                out_ss(_out_ss),
-                                                out_ampmin(_out_ampmin),
-                                                out_ampmax(_out_ampmax),
-                                                phase(0)
+    ss_amp_estimator(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<T> &_out_ss,
+        pipebuf<T> &_out_ampmin,
+        pipebuf<T> &_out_ampmax
+    ) :
+        runnable(sch, "SS estimator"),
+        window_size(1024),
+        decimation(1024),
+        in(_in),
+        out_ss(_out_ss),
+        out_ampmin(_out_ampmin),
+        out_ampmax(_out_ampmax),
+        phase(0)
     {
     }
 
@@ -332,14 +346,17 @@ struct simple_agc : runnable
     float estimated; // Input power
     static const int chunk_size = 128;
 
-    simple_agc(scheduler *sch,
-               pipebuf<complex<T>> &_in,
-               pipebuf<complex<T>> &_out) : runnable(sch, "AGC"),
-                                            out_rms(1),
-                                            bw(0.001),
-                                            estimated(0),
-                                            in(_in),
-                                            out(_out, chunk_size)
+    simple_agc(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<complex<T>> &_out
+    ) :
+        runnable(sch, "AGC"),
+        out_rms(1),
+        bw(0.001),
+        estimated(0),
+        in(_in),
+        out(_out, chunk_size)
     {
     }
 
@@ -484,12 +501,16 @@ struct cstln_base
 template <typename SOFTSYMB, int R>
 struct cstln_lut : cstln_base
 {
-    cstln_lut(cstln_base::predef type,
-              float mer = 10,
-              float gamma1 = 0,
-              float gamma2 = 0,
-              float gamma3 = 0)
+    cstln_lut(
+        cstln_base::predef type,
+        float mer = 10,
+        float gamma1 = 0,
+        float gamma2 = 0,
+        float gamma3 = 0
+    )
     {
+        symbols = nullptr;
+
         switch (type)
         {
         case BPSK:
@@ -676,6 +697,13 @@ struct cstln_lut : cstln_base
             break;
         default:
             fail("Constellation not implemented");
+        }
+    }
+
+    ~cstln_lut()
+    {
+        if (symbols) {
+            delete[] symbols;
         }
     }
 
@@ -958,13 +986,19 @@ struct linear_sampler : sampler_interface<T>
 template <typename T, typename Tc>
 struct fir_sampler : sampler_interface<T>
 {
-    fir_sampler(int _ncoeffs, Tc *_coeffs, int _subsampling = 1) : ncoeffs(_ncoeffs),
-                                                                   coeffs(_coeffs),
-                                                                   subsampling(_subsampling),
-                                                                   shifted_coeffs(new complex<T>[ncoeffs]),
-                                                                   update_freq_phase(0)
+    fir_sampler(int _ncoeffs, Tc *_coeffs, int _subsampling = 1) :
+        ncoeffs(_ncoeffs),
+        coeffs(_coeffs),
+        subsampling(_subsampling),
+        update_freq_phase(0)
     {
+        shifted_coeffs = new complex<T>[ncoeffs];
         do_update_freq(0); // In case application never calls update_freq()
+    }
+
+    ~fir_sampler()
+    {
+        delete[] shifted_coeffs;
     }
 
     int readahead()
@@ -1050,41 +1084,60 @@ struct cstln_receiver : runnable
     static const unsigned int chunk_size = 128;
     float kest;
 
-    cstln_receiver(scheduler *sch,
-                   sampler_interface<T> *_sampler,
-                   pipebuf<complex<T>> &_in,
-                   pipebuf<SOFTSYMB> &_out,
-                   pipebuf<float> *_freq_out = NULL,
-                   pipebuf<float> *_ss_out = NULL,
-                   pipebuf<float> *_mer_out = NULL,
-                   pipebuf<cf32> *_cstln_out = NULL) : runnable(sch, "Constellation receiver"),
-                                                       sampler(_sampler),
-                                                       cstln(NULL),
-                                                       meas_decimation(1048576),
-                                                       pll_adjustment(1.0),
-                                                       allow_drift(false),
-                                                       kest(0.01),
-                                                       in(_in),
-                                                       out(_out, chunk_size),
-                                                       est_insp(cstln_amp * cstln_amp),
-                                                       agc_gain(1),
-                                                       mu(0),
-                                                       phase(0),
-                                                       est_sp(0),
-                                                       est_ep(0),
-                                                       meas_count(0)
+    cstln_receiver(
+        scheduler *sch,
+        sampler_interface<T> *_sampler,
+        pipebuf<complex<T>> &_in,
+        pipebuf<SOFTSYMB> &_out,
+        pipebuf<float> *_freq_out = nullptr,
+        pipebuf<float> *_ss_out = nullptr,
+        pipebuf<float> *_mer_out = nullptr,
+        pipebuf<cf32> *_cstln_out = nullptr
+    ) :
+        runnable(sch, "Constellation receiver"),
+        sampler(_sampler),
+        cstln(nullptr),
+        meas_decimation(1048576),
+        pll_adjustment(1.0),
+        allow_drift(false),
+        kest(0.01),
+        in(_in),
+        out(_out, chunk_size),
+        est_insp(cstln_amp * cstln_amp),
+        agc_gain(1),
+        mu(0),
+        phase(0),
+        est_sp(0),
+        est_ep(0),
+        meas_count(0)
     {
         set_omega(1);
         set_freq(0);
-        freq_out = _freq_out ? new pipewriter<float>(*_freq_out) : NULL;
-        ss_out = _ss_out ? new pipewriter<float>(*_ss_out) : NULL;
-        mer_out = _mer_out ? new pipewriter<float>(*_mer_out) : NULL;
-        cstln_out = _cstln_out ? new pipewriter<cf32>(*_cstln_out) : NULL;
+        freq_out = _freq_out ? new pipewriter<float>(*_freq_out) : nullptr;
+        ss_out = _ss_out ? new pipewriter<float>(*_ss_out) : nullptr;
+        mer_out = _mer_out ? new pipewriter<float>(*_mer_out) : nullptr;
+        cstln_out = _cstln_out ? new pipewriter<cf32>(*_cstln_out) : nullptr;
 
         for (int i = 0; i < 3; i++)
         {
             hist[i].p = 0;
             hist[i].c = 0;
+        }
+    }
+
+    ~cstln_receiver()
+    {
+        if (freq_out) {
+            delete freq_out;
+        }
+        if (ss_out) {
+            delete ss_out;
+        }
+        if (mer_out) {
+            delete mer_out;
+        }
+        if (cstln_out) {
+            delete cstln_out;
         }
     }
 
@@ -1170,7 +1223,7 @@ struct cstln_receiver : runnable
             // These are scoped outside the loop for SS and MER estimation.
             complex<float> sg{0.0f, 0.0f}; // Symbol before AGC;
             complex<float> s;  // For MER estimation and constellation viewer
-            complex<signed char> *cstln_point = NULL;
+            complex<signed char> *cstln_point = nullptr;
 
             while (pin < pend)
             {
@@ -1292,8 +1345,7 @@ struct cstln_receiver : runnable
                 if (ss_out)
                     ss_out->write(sqrtf(est_insp));
                 if (mer_out)
-                    mer_out->write(
-                        est_ep ? 10 * logf(est_sp / est_ep) / logf(10) : 0);
+                    mer_out->write(est_ep ? 10 * log10f(est_sp / est_ep) : 0);
             }
 
         } // Work to do
@@ -1342,26 +1394,39 @@ struct fast_qpsk_receiver : runnable
     bool allow_drift; // Follow carrier beyond safe limits
     static const unsigned int chunk_size = 128;
 
-    fast_qpsk_receiver(scheduler *sch,
-                       pipebuf<complex<T>> &_in,
-                       pipebuf<hardsymbol> &_out,
-                       pipebuf<float> *_freq_out = NULL,
-                       pipebuf<complex<T>> *_cstln_out = NULL) : runnable(sch, "Fast QPSK receiver"),
-                                                                 meas_decimation(1048576),
-                                                                 pll_adjustment(1.0),
-                                                                 allow_drift(false),
-                                                                 in(_in),
-                                                                 out(_out, chunk_size),
-                                                                 mu(0),
-                                                                 phase(0),
-                                                                 meas_count(0)
+    fast_qpsk_receiver(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<hardsymbol> &_out,
+        pipebuf<float> *_freq_out = nullptr,
+        pipebuf<complex<T>> *_cstln_out = nullptr
+    ) :
+        runnable(sch, "Fast QPSK receiver"),
+        meas_decimation(1048576),
+        pll_adjustment(1.0),
+        allow_drift(false),
+        in(_in),
+        out(_out, chunk_size),
+        mu(0),
+        phase(0),
+        meas_count(0)
     {
         set_omega(1);
         set_freq(0);
-        freq_out = _freq_out ? new pipewriter<float>(*_freq_out) : NULL;
-        cstln_out = _cstln_out ? new pipewriter<complex<T>>(*_cstln_out) : NULL;
+        freq_out = _freq_out ? new pipewriter<float>(*_freq_out) : nullptr;
+        cstln_out = _cstln_out ? new pipewriter<complex<T>>(*_cstln_out) : nullptr;
         memset(hist, 0, sizeof(hist));
         init_lookup_tables();
+    }
+
+    ~fast_qpsk_receiver()
+    {
+        if (freq_out) {
+            delete freq_out;
+        }
+        if (cstln_out) {
+            delete cstln_out;
+        }
     }
 
     void set_omega(float _omega, float tol = 10e-6)
@@ -1621,12 +1686,15 @@ struct cstln_transmitter : runnable
 {
     cstln_lut<hard_ss, 256> *cstln;
 
-    cstln_transmitter(scheduler *sch,
-                      pipebuf<u8> &_in,
-                      pipebuf<complex<Tout>> &_out) : runnable(sch, "cstln_transmitter"),
-                                                      in(_in),
-                                                      out(_out),
-                                                      cstln(0)
+    cstln_transmitter(
+        scheduler *sch,
+        pipebuf<u8> &_in,
+        pipebuf<complex<Tout>> &_out
+    ) :
+        runnable(sch, "cstln_transmitter"),
+        in(_in),
+        out(_out),
+        cstln(nullptr)
     {
     }
 
@@ -1663,13 +1731,16 @@ struct cstln_transmitter : runnable
 template <typename T>
 struct rotator : runnable
 {
-    rotator(scheduler *sch,
-            pipebuf<complex<T>> &_in,
-            pipebuf<complex<T>> &_out,
-            float freq) : runnable(sch, "rotator"),
-                          in(_in),
-                          out(_out),
-                          index(0)
+    rotator(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<complex<T>> &_out,
+        float freq
+    ) :
+        runnable(sch, "rotator"),
+        in(_in),
+        out(_out),
+        index(0)
     {
         int ifreq = freq * 65536;
         if (sch->debug)
@@ -1721,29 +1792,34 @@ struct rotator : runnable
 template <typename T>
 struct cnr_fft : runnable
 {
-    cnr_fft(scheduler *sch,
-            pipebuf<complex<T>> &_in,
-            pipebuf<float> &_out,
-            float _bandwidth, int nfft = 4096) : runnable(sch, "cnr_fft"),
-                                                 bandwidth(_bandwidth),
-                                                 freq_tap(NULL),
-                                                 tap_multiplier(1),
-                                                 decimation(1048576),
-                                                 kavg(0.1),
-                                                 in(_in),
-                                                 out(_out),
-                                                 fft(nfft),
-                                                 avgpower(NULL),
-                                                 phase(0)
+    cnr_fft(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<float> &_out,
+        float _bandwidth, int nfft = 4096
+    ) :
+        runnable(sch, "cnr_fft"),
+        bandwidth(_bandwidth),
+        freq_tap(nullptr),
+        tap_multiplier(1),
+        decimation(1048576),
+        kavg(0.1),
+        in(_in),
+        out(_out),
+        fft(nfft),
+        avgpower(nullptr),
+        phase(0)
     {
         if (bandwidth > 0.25)
             fail("CNR estimator requires Fsampling > 4x Fsignal");
     }
 
-    float bandwidth;
-    float *freq_tap, tap_multiplier;
-    int decimation;
-    float kavg;
+    ~cnr_fft()
+    {
+        if (avgpower) {
+            delete[] avgpower;
+        }
+    }
 
     void run()
     {
@@ -1760,6 +1836,11 @@ struct cnr_fft : runnable
             in.read(fft.n);
         }
     }
+
+    float bandwidth;
+    float *freq_tap, tap_multiplier;
+    int decimation;
+    float kavg;
 
   private:
     void do_cnr()
@@ -1826,22 +1907,32 @@ struct cnr_fft : runnable
 template <typename T, int NFFT>
 struct spectrum : runnable
 {
-    spectrum(scheduler *sch,
-             pipebuf<complex<T>> &_in,
-             pipebuf<float[NFFT]> &_out) : runnable(sch, "spectrum"),
-                                           decimation(1048576),
-                                           kavg(0.1),
-                                           decim(1), in(_in),
-                                           out(_out),
-                                           fft(NFFT),
-                                           avgpower(NULL),
-                                           phase(0)
-    {
-    }
-
     int decimation;
     float kavg;
     int decim;
+
+    spectrum(
+        scheduler *sch,
+        pipebuf<complex<T>> &_in,
+        pipebuf<float[NFFT]> &_out
+    ) :
+        runnable(sch, "spectrum"),
+        decimation(1048576),
+        kavg(0.1),
+        decim(1), in(_in),
+        out(_out),
+        fft(NFFT),
+        avgpower(nullptr),
+        phase(0)
+    {
+    }
+
+    ~spectrum()
+    {
+        if (avgpower) {
+            delete avgpower;
+        }
+    }
 
     void run()
     {

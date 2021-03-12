@@ -54,7 +54,7 @@ DATVDemodSink::DATVDemodSink() :
 {
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
-    CleanUpDATVFramework(false);
+    ResetDATVFrameworkPointers();
     m_objVideoStream = new DATVideostream();
     m_objRFFilter = new fftfilt(-256000.0 / 1024000.0, 256000.0 / 1024000.0, m_rfFilterFftLength);
 }
@@ -81,7 +81,7 @@ DATVDemodSink::~DATVDemodSink()
         m_objRenderThread->wait(2000);
     }
 
-    CleanUpDATVFramework(true);
+    CleanUpDATVFramework();
 
     delete m_objRFFilter;
 }
@@ -154,7 +154,6 @@ bool DATVDemodSink::videoDecodeOK()
 
 bool DATVDemodSink::PlayVideo(bool blnStartStop)
 {
-
     if (m_objVideoStream == nullptr) {
         return false;
     }
@@ -195,262 +194,248 @@ bool DATVDemodSink::PlayVideo(bool blnStartStop)
     return true;
 }
 
-void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
+void DATVDemodSink::CleanUpDATVFramework()
 {
-    if (blnRelease == true)
+    if (m_objScheduler != nullptr)
     {
-        if (m_objScheduler != nullptr)
-        {
-            m_objScheduler->shutdown();
-            delete m_objScheduler;
-        }
+        m_objScheduler->shutdown();
+        delete m_objScheduler;
+    }
 
-        // NOTCH FILTER
+    // NOTCH FILTER
 
-        if (r_auto_notch != nullptr) {
-            delete r_auto_notch;
-        }
-        if (p_autonotched != nullptr) {
-            delete p_autonotched;
-        }
+    if (r_auto_notch != nullptr) {
+        delete r_auto_notch;
+    }
+    if (p_autonotched != nullptr) {
+        delete p_autonotched;
+    }
 
-        // FREQUENCY CORRECTION : DEROTATOR
-        if (p_derot != nullptr) {
-            delete p_derot;
-        }
-        if (r_derot != nullptr) {
-            delete r_derot;
-        }
+    // FREQUENCY CORRECTION : DEROTATOR
+    if (p_derot != nullptr) {
+        delete p_derot;
+    }
+    if (r_derot != nullptr) {
+        delete r_derot;
+    }
 
-        // CNR ESTIMATION
-        if (p_cnr != nullptr) {
-            delete p_cnr;
-        }
-        if (r_cnr != nullptr) {
-            delete r_cnr;
-        }
+    // CNR ESTIMATION
+    if (p_cnr != nullptr) {
+        delete p_cnr;
+    }
+    if (r_cnr != nullptr) {
+        delete r_cnr;
+    }
+    if (r_cnrGauge != nullptr) {
+        delete r_cnrGauge;
+    }
 
-        //FILTERING
-        if (r_resample != nullptr) {
-            delete r_resample;
-        }
-        if (p_resampled != nullptr) {
-            delete p_resampled;
-        }
-        if (coeffs != nullptr) {
-            delete coeffs;
-        }
+    //FILTERING
+    if (r_resample != nullptr) {
+        delete r_resample;
+    }
+    if (p_resampled != nullptr) {
+        delete p_resampled;
+    }
+    if (coeffs != nullptr) {
+        delete coeffs;
+    }
 
-        // OUTPUT PREPROCESSED DATA
-        if (sampler != nullptr) {
-            delete sampler;
-        }
-        if (coeffs_sampler != nullptr) {
-            delete coeffs_sampler;
-        }
-        if (p_symbols != nullptr) {
-            delete p_symbols;
-        }
-        if (p_freq != nullptr) {
-            delete p_freq;
-        }
-        if (p_ss != nullptr) {
-            delete p_ss;
-        }
-        if (p_mer != nullptr) {
-            delete p_mer;
-        }
-        if (p_sampled != nullptr) {
-            delete p_sampled;
-        }
+    // OUTPUT PREPROCESSED DATA
+    if (sampler != nullptr) {
+        delete sampler;
+    }
+    if (coeffs_sampler != nullptr) {
+        delete coeffs_sampler;
+    }
+    if (p_symbols != nullptr) {
+        delete p_symbols;
+    }
+    if (p_freq != nullptr) {
+        delete p_freq;
+    }
+    if (p_ss != nullptr) {
+        delete p_ss;
+    }
+    if (p_mer != nullptr) {
+        delete p_mer;
+    }
+    if (r_merGauge != nullptr) {
+        delete r_merGauge;
+    }
+    if (p_sampled != nullptr) {
+        delete p_sampled;
+    }
 
-        //DECIMATION
-        if (p_decimated != nullptr) {
-            delete p_decimated;
-        }
-        if (p_decim != nullptr) {
-            delete p_decim;
-        }
-        if (r_ppout != nullptr) {
-            delete r_ppout;
-        }
+    //DECIMATION
+    if (p_decimated != nullptr) {
+        delete p_decimated;
+    }
+    if (p_decim != nullptr) {
+        delete p_decim;
+    }
+    if (r_ppout != nullptr) {
+        delete r_ppout;
+    }
 
-        //GENERIC CONSTELLATION RECEIVER
-        if (m_objDemodulator != nullptr) {
-            delete m_objDemodulator;
-        }
+    //GENERIC CONSTELLATION RECEIVER
+    if (m_objDemodulator != nullptr) {
+        delete m_objDemodulator;
+    }
 
-        //DECONVOLUTION AND SYNCHRONIZATION
-        if (p_bytes != nullptr) {
-            delete p_bytes;
-        }
-        if (r_deconv != nullptr) {
-            delete r_deconv;
-        }
-        if (r != nullptr) {
-            delete r;
-        }
-        if (p_descrambled != nullptr) {
-            delete p_descrambled;
-        }
-        if (p_frames != nullptr) {
-            delete p_frames;
-        }
-        if (r_etr192_descrambler != nullptr) {
-            delete r_etr192_descrambler;
-        }
-        if (r_sync != nullptr) {
-            delete r_sync;
-        }
-        if (p_mpegbytes != nullptr) {
-            delete p_mpegbytes;
-        }
-        if (p_lock != nullptr) {
-            delete p_lock;
-        }
-        if (p_locktime != nullptr) {
-            delete p_locktime;
-        }
-        if (r_sync_mpeg != nullptr) {
-            delete r_sync_mpeg;
-        }
+    //DECONVOLUTION AND SYNCHRONIZATION
+    if (p_bytes != nullptr) {
+        delete p_bytes;
+    }
+    if (r_deconv != nullptr) {
+        delete r_deconv;
+    }
+    if (r != nullptr) {
+        delete r;
+    }
+    if (p_descrambled != nullptr) {
+        delete p_descrambled;
+    }
+    if (p_frames != nullptr) {
+        delete p_frames;
+    }
+    if (r_etr192_descrambler != nullptr) {
+        delete r_etr192_descrambler;
+    }
+    if (r_sync != nullptr) {
+        delete r_sync;
+    }
+    if (p_mpegbytes != nullptr) {
+        delete p_mpegbytes;
+    }
+    if (p_lock != nullptr) {
+        delete p_lock;
+    }
+    if (p_locktime != nullptr) {
+        delete p_locktime;
+    }
+    if (r_sync_mpeg != nullptr) {
+        delete r_sync_mpeg;
+    }
 
-        // DEINTERLEAVING
-        if (p_rspackets != nullptr) {
-            delete p_rspackets;
-        }
-        if (r_deinter != nullptr) {
-            delete r_deinter;
-        }
-        if (p_vbitcount != nullptr) {
-            delete p_vbitcount;
-        }
-        if (p_verrcount != nullptr) {
-            delete p_verrcount;
-        }
-        if (p_rtspackets != nullptr) {
-            delete p_rtspackets;
-        }
-        if (r_rsdec != nullptr) {
-            delete r_rsdec;
-        }
+    // DEINTERLEAVING
+    if (p_rspackets != nullptr) {
+        delete p_rspackets;
+    }
+    if (r_deinter != nullptr) {
+        delete r_deinter;
+    }
+    if (p_vbitcount != nullptr) {
+        delete p_vbitcount;
+    }
+    if (p_verrcount != nullptr) {
+        delete p_verrcount;
+    }
+    if (p_rtspackets != nullptr) {
+        delete p_rtspackets;
+    }
+    if (r_rsdec != nullptr) {
+        delete r_rsdec;
+    }
 
-        //BER ESTIMATION
-        if (p_vber != nullptr) {
-            delete p_vber;
-        }
-        if (r_vber != nullptr) {
-            delete r_vber;
-        }
+    //BER ESTIMATION
+    if (p_vber != nullptr) {
+        delete p_vber;
+    }
+    if (r_vber != nullptr) {
+        delete r_vber;
+    }
 
-        // DERANDOMIZATION
-        if (p_tspackets != nullptr) {
-            delete p_tspackets;
-        }
-        if (r_derand != nullptr) {
-            delete r_derand;
-        }
+    // DERANDOMIZATION
+    if (p_tspackets != nullptr) {
+        delete p_tspackets;
+    }
+    if (r_derand != nullptr) {
+        delete r_derand;
+    }
 
-        //OUTPUT : To remove
-        if (r_stdout != nullptr) {
-            delete r_stdout;
-        }
-        if (r_videoplayer != nullptr) {
-            delete r_videoplayer;
-        }
+    //OUTPUT
+    if (r_videoplayer != nullptr) {
+        delete r_videoplayer;
+    }
 
-        //CONSTELLATION
-        if (r_scope_symbols != nullptr) {
-            delete r_scope_symbols;
-        }
-        if (r_merGauge != nullptr) {
-            delete r_merGauge;
-        }
-        if (r_cnrGauge != nullptr) {
-            delete r_cnrGauge;
-        }
-
-        // INPUT
-        if (p_rawiq != nullptr) {
-            delete p_rawiq;
-        }
-        if (p_rawiq_writer != nullptr) {
-            delete p_rawiq_writer;
-        }
-        //if(p_preprocessed!=nullptr) delete p_preprocessed;
-
-        //DVB-S2
-
-        if(p_slots_dvbs2  != nullptr)
-        {
-            delete (leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> >*) p_slots_dvbs2;
-        }
-
-        if(p_cstln  != nullptr)
-        {
-            delete p_cstln;
-        }
-
-        if(p_cstln_pls != nullptr)
-        {
-            delete p_cstln_pls;
-        }
-
-        if(p_framelock != nullptr)
-        {
-            delete p_framelock;
-        }
-
-        if(m_objDemodulatorDVBS2 != nullptr)
-        {
-            delete (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss>*) m_objDemodulatorDVBS2;
-        }
-
-        if(p_fecframes != nullptr)
-        {
-            delete (leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> >*) p_fecframes;
-        }
-
-        if(p_bbframes != nullptr)
-        {
-            delete (leansdr::pipebuf<leansdr::bbframe>*) p_bbframes;
-        }
-
-        if(p_s2_deinterleaver != nullptr)
-        {
-            delete (leansdr::s2_deinterleaver<leansdr::llr_ss,leansdr::hard_sb>*) p_s2_deinterleaver;
-        }
-
-        if(r_fecdec != nullptr)
-        {
-            delete (leansdr::s2_fecdec<bool, leansdr::hard_sb>*) r_fecdec;
-        }
-
-#ifdef LINUX
-        if(r_fecdecsoft != nullptr)
-        {
-            delete (leansdr::s2_fecdec_soft<leansdr::llr_t,leansdr::llr_sb>*) r_fecdecsoft;
-        }
-        if(r_fecdechelper != nullptr)
-        {
-            delete (leansdr::s2_fecdec_helper<leansdr::llr_t,leansdr::llr_sb>*) r_fecdechelper;
-        }
-#endif
-
-        if(p_deframer != nullptr)
-        {
-            delete (leansdr::s2_deframer*) p_deframer;
-        }
-
-        if(r_scope_symbols_dvbs2 != nullptr)
-        {
-            delete r_scope_symbols_dvbs2;
-        }
-    } // blnRelease
-
-    m_objScheduler=nullptr;
+    //CONSTELLATION
+    if (r_scope_symbols != nullptr) {
+        delete r_scope_symbols;
+    }
 
     // INPUT
+    if (p_rawiq != nullptr) {
+        delete p_rawiq;
+    }
+    if (p_rawiq_writer != nullptr) {
+        delete p_rawiq_writer;
+    }
+    //if(p_preprocessed!=nullptr) delete p_preprocessed;
+
+    //DVB-S2
+
+    if (p_slots_dvbs2  != nullptr) {
+        delete (leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> >*) p_slots_dvbs2;
+    }
+
+    if (p_cstln  != nullptr) {
+        delete p_cstln;
+    }
+
+    if (p_cstln_pls != nullptr) {
+        delete p_cstln_pls;
+    }
+
+    if (p_framelock != nullptr) {
+        delete p_framelock;
+    }
+
+    if (m_objDemodulatorDVBS2 != nullptr) {
+        delete (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss>*) m_objDemodulatorDVBS2;
+    }
+
+    if (p_fecframes != nullptr) {
+        delete (leansdr::pipebuf< leansdr::fecframe<leansdr::hard_sb> >*) p_fecframes;
+    }
+
+    if (p_bbframes != nullptr) {
+        delete (leansdr::pipebuf<leansdr::bbframe>*) p_bbframes;
+    }
+
+    if (p_s2_deinterleaver != nullptr) {
+        delete (leansdr::s2_deinterleaver<leansdr::llr_ss,leansdr::hard_sb>*) p_s2_deinterleaver;
+    }
+
+    if (r_fecdec != nullptr) {
+        delete (leansdr::s2_fecdec<bool, leansdr::hard_sb>*) r_fecdec;
+    }
+
+#ifdef LINUX
+    if (r_fecdecsoft != nullptr) {
+        delete (leansdr::s2_fecdec_soft<leansdr::llr_t,leansdr::llr_sb>*) r_fecdecsoft;
+    }
+
+    if (r_fecdechelper != nullptr) {
+        delete (leansdr::s2_fecdec_helper<leansdr::llr_t,leansdr::llr_sb>*) r_fecdechelper;
+    }
+#endif
+
+    if (p_deframer != nullptr) {
+        delete (leansdr::s2_deframer*) p_deframer;
+    }
+
+    if (r_scope_symbols_dvbs2 != nullptr) {
+        delete r_scope_symbols_dvbs2;
+    }
+
+    ResetDATVFrameworkPointers();
+}
+
+void DATVDemodSink::ResetDATVFrameworkPointers()
+{
+    // INPUT
+    m_objScheduler = nullptr;
 
     p_rawiq = nullptr;
     p_rawiq_writer = nullptr;
@@ -468,6 +453,7 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     // CNR ESTIMATION
     p_cnr = nullptr;
     r_cnr = nullptr;
+    r_cnrGauge = nullptr;
 
     //FILTERING
     r_resample = nullptr;
@@ -484,6 +470,7 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     p_freq = nullptr;
     p_ss = nullptr;
     p_mer = nullptr;
+    r_merGauge = nullptr;
     p_sampled = nullptr;
 
     //DECIMATION
@@ -509,7 +496,6 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     p_locktime = nullptr;
     r_sync_mpeg = nullptr;
 
-
     // DEINTERLEAVING
     p_rspackets = nullptr;
     r_deinter = nullptr;
@@ -519,26 +505,19 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     p_rtspackets = nullptr;
     r_rsdec = nullptr;
 
-
     //BER ESTIMATION
     p_vber = nullptr;
     r_vber  = nullptr;
-
 
     // DERANDOMIZATION
     p_tspackets = nullptr;
     r_derand = nullptr;
 
-
     //OUTPUT : To remove void *
-    r_stdout = nullptr;
     r_videoplayer = nullptr;
-
 
     //CONSTELLATION
     r_scope_symbols = nullptr;
-    r_merGauge = nullptr;
-    r_cnrGauge = nullptr;
 
     //DVB-S2
     p_slots_dvbs2 = nullptr;
@@ -550,8 +529,10 @@ void DATVDemodSink::CleanUpDATVFramework(bool blnRelease)
     p_bbframes = nullptr;
     p_s2_deinterleaver = nullptr;
     r_fecdec = nullptr;
+#ifdef LINUX
     r_fecdecsoft = nullptr;
     r_fecdechelper = nullptr;
+#endif
     p_deframer = nullptr;
     r_scope_symbols_dvbs2 = nullptr;
 }
@@ -560,7 +541,7 @@ void DATVDemodSink::InitDATVFramework()
 {
     m_blnDVBInitialized = false;
     m_lngReadIQ = 0;
-    CleanUpDATVFramework(false);
+    CleanUpDATVFramework();
 
     qDebug()  << "DATVDemodSink::InitDATVFramework:"
         <<  " Standard: " << m_settings.m_standard
@@ -675,7 +656,6 @@ void DATVDemodSink::InitDATVFramework()
         p_preprocessed = p_autonotched;
     }
 
-
     // FREQUENCY CORRECTION
 
     //******** -> if ( m_objCfg.Fderot>0 )
@@ -696,14 +676,12 @@ void DATVDemodSink::InitDATVFramework()
 
     //******** -> if ( m_objCfg.resample )
 
-
     // DECIMATION
     // (Unless already done in resampler)
 
     //******** -> if ( !m_objCfg.resample && m_objCfg.decim>1 )
 
     //Resampling FS
-
 
     // Generic constellation receiver
 
@@ -898,7 +876,7 @@ void DATVDemodSink::InitDATVS2Framework()
 
     m_blnDVBInitialized = false;
     m_lngReadIQ = 0;
-    CleanUpDATVFramework(true);
+    CleanUpDATVFramework();
 
     qDebug()  << "DATVDemodSink::InitDATVS2Framework:"
         <<  " Standard: " << m_settings.m_standard
@@ -1026,14 +1004,12 @@ void DATVDemodSink::InitDATVS2Framework()
 
     //******** -> if ( m_objCfg.resample )
 
-
     // DECIMATION
     // (Unless already done in resampler)
 
     //******** -> if ( !m_objCfg.resample && m_objCfg.decim>1 )
 
     //Resampling FS
-
 
     // Generic constellation receiver
 
@@ -1076,24 +1052,22 @@ void DATVDemodSink::InitDATVS2Framework()
     p_framelock = new leansdr::pipebuf<int>(m_objScheduler, "frame lock", BUF_SLOW);
 
     m_objDemodulatorDVBS2 = new leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss>(
-                        m_objScheduler,
-                        sampler,
-                        *p_preprocessed,
-                        *(leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> > *) p_slots_dvbs2,
-                        /* p_freq */ nullptr,
-                        /* p_ss */ nullptr,
-                        p_mer,
-                        p_cstln,
-                        /* p_cstln_pls */ nullptr,
-                        /*p_iqsymbols*/ nullptr,
-                        /* p_framelock */nullptr);
+        m_objScheduler,
+        sampler,
+        *p_preprocessed,
+        *(leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> > *) p_slots_dvbs2,
+        /* p_freq */ nullptr,
+        /* p_ss */ nullptr,
+        p_mer,
+        p_cstln,
+        /* p_cstln_pls */ nullptr,
+        /*p_iqsymbols*/ nullptr,
+        /* p_framelock */nullptr
+    );
 
     objDemodulatorDVBS2 = (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
-
-
     objDemodulatorDVBS2->omega0 = m_objCfg.Fs/m_objCfg.Fm;
-//objDemodulatorDVBS2->mu=1;
-
+    //objDemodulatorDVBS2->mu=1;
 
     m_objCfg.Ftune=0.0f;
     objDemodulatorDVBS2->Ftune = m_objCfg.Ftune / m_objCfg.Fm;
@@ -1102,12 +1076,8 @@ void DATVDemodSink::InitDATVS2Framework()
   demod.strongpls = cfg.strongpls;
 */
 
-    //objDemodulatorDVBS2->Fm = m_objCfg.Fm; deprecated
     objDemodulatorDVBS2->meas_decimation = decimation(m_objCfg.Fs, m_objCfg.Finfo);
-
     objDemodulatorDVBS2->strongpls = false;
-
-
     objDemodulatorDVBS2->cstln = make_dvbs2_constellation(m_objCfg.constellation, m_objCfg.fec);
     m_cstlnSetByModcod = false;
 
@@ -1116,7 +1086,6 @@ void DATVDemodSink::InitDATVS2Framework()
     if (m_objRegisteredTVScreen)
     {
         qDebug("DATVDemodSink::InitDATVS2Framework: Register DVBS 2 TVSCREEN");
-
         m_objRegisteredTVScreen->resizeTVScreen(256,256);
         r_scope_symbols_dvbs2 = new leansdr::datvdvbs2constellation<leansdr::f32>(m_objScheduler, *p_cstln /* *p_sampled */ /* *p_cstln */, -128,128, nullptr, m_objRegisteredTVScreen);
         r_scope_symbols_dvbs2->decimation = 1;
@@ -1249,13 +1218,11 @@ void DATVDemodSink::InitDATVS2Framework()
     p_lock = new leansdr::pipebuf<int> (m_objScheduler, "lock", BUF_SLOW);
     p_locktime = new leansdr::pipebuf<leansdr::u32> (m_objScheduler, "locktime", BUF_S2PACKETS);
     p_tspackets = new leansdr::pipebuf<leansdr::tspacket>(m_objScheduler, "TS packets", BUF_S2PACKETS);
-
     p_deframer = new leansdr::s2_deframer(m_objScheduler,*(leansdr::pipebuf<leansdr::bbframe> *) p_bbframes, *p_tspackets, p_lock, p_locktime);
 
 /*
  if ( cfg.fd_gse >= 0 ) deframer.fd_gse = cfg.fd_gse;
 */
-    //**********************************************
 
     // OUTPUT
     r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
@@ -1268,7 +1235,6 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     float fltI;
     float fltQ;
     leansdr::cf32 objIQ;
-    //Complex objC;
     fftfilt::cmplx *objRF;
     int intRFOut;
     double magSq;
@@ -1276,7 +1242,6 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     int lngWritable=0;
 
     //********** Bis repetita : Let's rock and roll buddy ! **********
-
 #ifdef EXTENDED_DIRECT_SAMPLE
 
     qint16 * ptrBuffer;
@@ -1306,10 +1271,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         fltQ = it->imag();
 #endif
 
-
         //********** demodulation **********
-
-
         if (m_blnNeedConfigUpdate)
         {
             qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
@@ -1327,13 +1289,9 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
             }
         }
 
-
         //********** iq stream ****************
-
         Complex objC(fltI,fltQ);
-
         objC *= m_objNCO.nextIQ();
-
         intRFOut = m_objRFFilter->runFilt(objC, &objRF); // filter RF before demod
 
         for (int intI = 0 ; intI < intRFOut; intI++)

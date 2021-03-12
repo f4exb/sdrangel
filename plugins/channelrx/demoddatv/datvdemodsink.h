@@ -142,7 +142,8 @@ private:
 
     inline int decimation(float Fin, float Fout) { int d = Fin / Fout; return std::max(d, 1); }
 
-    void CleanUpDATVFramework(bool blnRelease);
+    void CleanUpDATVFramework();
+    void ResetDATVFrameworkPointers();
     void InitDATVFramework();
     void InitDATVS2Framework();
 
@@ -274,7 +275,6 @@ private:
 
 
     //OUTPUT
-    leansdr::file_writer<leansdr::tspacket> *r_stdout;
     leansdr::datvvideoplayer<leansdr::tspacket> *r_videoplayer;
 
     //CONSTELLATION

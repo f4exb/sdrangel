@@ -255,7 +255,7 @@ bool DATVideoRender::PreprocessStream()
     MetaData.Program = "";
     MetaData.Stream = "";
 
-    if (m_formatCtx->programs)
+    if (m_formatCtx->programs && m_formatCtx->programs[m_videoStreamIndex])
     {
         buffer = nullptr;
         av_dict_get_string(m_formatCtx->programs[m_videoStreamIndex]->metadata, &buffer, ':', '\n');

@@ -107,7 +107,7 @@ struct runnable_common
 
 struct window_placement
 {
-    const char *name; // NULL to terminate
+    const char *name; // nullptr to terminate
     int x, y, w, h;
 };
 
@@ -120,12 +120,13 @@ struct scheduler
     window_placement *windows;
     bool verbose, debug, debug2;
 
-    scheduler() : npipes(0),
-                  nrunnables(0),
-                  windows(NULL),
-                  verbose(false),
-                  debug(false),
-                  debug2(false)
+    scheduler() :
+        npipes(0),
+        nrunnables(0),
+        windows(nullptr),
+        verbose(false),
+        debug(false),
+        debug2(false)
     {
     }
 
@@ -208,20 +209,26 @@ struct pipebuf : pipebuf_common
     T *wr;
     T *end;
 
-    int sizeofT()
+    pipebuf(scheduler *sch, const char *name, unsigned long size) :
+        pipebuf_common(name),
+        nrd(0),
+        min_write(1),
+        total_written(0),
+        total_read(0)
     {
-        return sizeof(T);
+        buf = new T[size];
+        wr = buf;
+        end = buf + size;
+        sch->add_pipe(this);
     }
 
-    pipebuf(scheduler *sch, const char *name, unsigned long size) : pipebuf_common(name),
-                                                                    buf(new T[size]),
-                                                                    nrd(0), wr(buf),
-                                                                    end(buf + size),
-                                                                    min_write(1),
-                                                                    total_written(0),
-                                                                    total_read(0)
+    ~pipebuf()
     {
-        sch->add_pipe(this);
+        delete[] buf;
+    }
+
+    int sizeofT() {
+        return sizeof(T);
     }
 
     int add_reader()
@@ -307,9 +314,8 @@ struct pipewriter
 
     void written(unsigned long n)
     {
-        if (buf.wr + n > buf.end)
-        {
-            fprintf(stderr, "Bug: overflow to %s\n", buf.name);
+        if (buf.wr + n > buf.end) {
+            fprintf(stderr, "pipewriter::written: bug: overflow to %s\n", buf.name);
         }
 
         buf.wr += n;
@@ -328,13 +334,13 @@ struct pipewriter
 template <typename T>
 pipewriter<T> *opt_writer(pipebuf<T> *buf, unsigned long min_write = 1)
 {
-    return buf ? new pipewriter<T>(*buf, min_write) : NULL;
+    return buf ? new pipewriter<T>(*buf, min_write) : nullptr;
 }
 
 template <typename T>
 bool opt_writable(pipewriter<T> *p, int n = 1)
 {
-    return (p == NULL) || p->writable() >= n;
+    return (p == nullptr) || p->writable() >= n;
 }
 
 template <typename T>

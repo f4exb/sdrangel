@@ -124,6 +124,7 @@ template <typename TUS,
           typename TPM>
 struct viterbi_dec_interface
 {
+    virtual ~viterbi_dec_interface() {}
     virtual TUS update(TBM *costs, TPM *quality = NULL) = 0;
     virtual TUS update(TCS s, TBM cost, TPM *quality = NULL) = 0;
 };
