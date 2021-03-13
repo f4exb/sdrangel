@@ -1808,10 +1808,15 @@ struct cnr_fft : runnable
         out(_out),
         fft(nfft),
         avgpower(nullptr),
-        phase(0)
+        phase(0),
+        cslots_ratio(0.2),
+        nslots_shift_ratio(0.65),
+        nslots_ratio(0.1)
     {
-        if (bandwidth > 0.25)
-            fail("CNR estimator requires Fsampling > 4x Fsignal");
+        fprintf(stderr, "cnr_fft::cnr_fft: bw: %f FFT: %d\n", bandwidth, fft.n);
+        if (bandwidth > 0.25) {
+            fail("cnr_fft::cnr_fft: CNR estimator requires Fsampling > 4x Fsignal");
+        }
     }
 
     ~cnr_fft()
@@ -1866,21 +1871,37 @@ struct cnr_fft : runnable
         for (int i = 0; i < fft.n; ++i)
             avgpower[i] = avgpower[i] * (1 - kavg) + power[i] * kavg;
 
+#if 0
         int bwslots = (bandwidth / 4) * fft.n;
 
-        if (!bwslots)
+        if (!bwslots) {
+            return;
+        }
+
+        // Measure carrier+noise in center band
+        float c2plusn2 = avgslots(icf-bwslots, icf+bwslots);
+        // Measure noise left and right of roll-off zones
+        float n2 = ( avgslots(icf-bwslots*4, icf-bwslots*3) +
+		    avgslots(icf+bwslots*3, icf+bwslots*4) ) / 2;
+#else
+        int cbwslots = bandwidth * cslots_ratio * fft.n;
+        int nstart = bandwidth * nslots_shift_ratio * fft.n;
+        int nstop = nstart + bandwidth * nslots_ratio * fft.n;
+
+        if (!cbwslots || !nstart || !nstop)
         {
             delete[] power;
             delete[] data;
             return;
         }
-
         // Measure carrier+noise in center band
-        float c2plusn2 = avgslots(icf - bwslots, icf + bwslots);
+        float c2plusn2 = avgslots(icf - cbwslots, icf + cbwslots);
         // Measure noise left and right of roll-off zones
-        float n2 = (avgslots(icf - bwslots * 4, icf - bwslots * 3) + avgslots(icf + bwslots * 3, icf + bwslots * 4)) / 2;
+        float n2 = (avgslots(icf - nstop, icf - nstart) +
+            avgslots(icf + nstart, icf + nstop)) / 2;
+#endif
         float c2 = c2plusn2 - n2;
-        float cnr = (c2 > 0 && n2 > 0) ? 10 * logf(c2 / n2) / logf(10) : -50;
+        float cnr = (c2 > 0 && n2 > 0) ? 10 * log10f(c2 / n2) : -50;
         out.write(cnr);
         delete[] power;
         delete[] data;
@@ -1901,6 +1922,9 @@ struct cnr_fft : runnable
     cfft_engine<T> fft;
     T *avgpower;
     int phase;
+    float cslots_ratio;
+    float nslots_shift_ratio;
+    float nslots_ratio;
 };
 // cnr_fft
 
