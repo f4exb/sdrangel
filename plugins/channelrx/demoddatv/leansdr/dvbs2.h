@@ -486,7 +486,10 @@ struct s2_frame_receiver : runnable
         meas_decimation(1048576),
         Ftune(0), Fm(0),
         strongpls(false),
-        in_power(0), ev_power(0), agc_gain(1), agc_bw(1e-3),
+        in_power(0),
+        ev_power(0),
+        agc_gain(1),
+        agc_bw(1e-3),
         nsyncs(0),
         cstln(nullptr),
         in(_in), out(_out, 1 + modcod_info::MAX_SLOTS_PER_FRAME),
@@ -985,7 +988,7 @@ struct s2_frame_receiver : runnable
             opt_write(ss_out, in_power);
             // TBD Adjust if cfg.strongpls
             float mer = ev_power ? (float)cstln_amp * cstln_amp / ev_power : 1;
-            opt_write(mer_out, 10 * logf(mer) / logf(10));
+            opt_write(mer_out, 10 * log10f(mer));
             meas_count -= meas_decimation;
         }
 
@@ -1000,7 +1003,7 @@ struct s2_frame_receiver : runnable
                  pls_errors, pilot_errors, sof_errors, all_errors, max_errors);
         pl_errors += all_errors;
         pl_symbols += max_errors;
-    }
+    } // run_frame_locked
 
     void shutdown()
     {
@@ -2463,6 +2466,7 @@ struct s2_fecdec_helper : runnable
     {
         helper_instance *procs; // nullptr or [nprocs]
         int nprocs;
+        int shift;
     } pools[32][2]; // [modcod][sf]
     struct helper_job
     {
@@ -2477,8 +2481,9 @@ struct s2_fecdec_helper : runnable
     {
         pool *p = get_pool(&pin->pls);
 
-        for (int i = 0; i < p->nprocs; ++i)
+        for (int j = 0; j < p->nprocs; ++j)
         {
+            int i = (p->shift + j) % p->nprocs;
             helper_instance *h = &p->procs[i];
             int iosize = (pin->pls.framebits() / 8) * sizeof(SOFTBYTE);
             // fprintf(stderr, "Writing %lu to fd %d\n", iosize, h->fd_tx);
@@ -2486,7 +2491,8 @@ struct s2_fecdec_helper : runnable
 
             if (nw < 0 && errno == EWOULDBLOCK)
             {
-                lseek(h->fd_tx, 0, SEEK_SET); // allow new writes on this worker
+                //lseek(h->fd_tx, 0, SEEK_SET); // allow new writes on this worker
+                //fprintf(stderr, "s2_fecdec_helper::send_frame: %d worker is busy\n", h->pid);
                 continue; // next worker
             }
 
@@ -2495,6 +2501,7 @@ struct s2_fecdec_helper : runnable
             else if (nw != iosize)
                 fatal("partial write(LDPC helper)");
 
+            p->shift = i;
             helper_job *job = jobs.put();
             job->pls = pin->pls;
             job->h = h;
@@ -2527,6 +2534,7 @@ struct s2_fecdec_helper : runnable
             for (int i = 0; i < nhelpers; ++i)
                 spawn_helper(&p->procs[i], pls);
             p->nprocs = nhelpers;
+            p->shift = 0;
         }
 
         return p;
