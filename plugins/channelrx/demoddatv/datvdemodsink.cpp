@@ -569,6 +569,8 @@ void DATVDemodSink::InitDATVFramework()
     m_objCfg.rrc_rej = (float) m_settings.m_excursion;  //dB
     m_objCfg.rrc_steps = 0; //auto
 
+    m_objVideoStream->resetTotalReceived();
+
     switch(m_settings.m_modulation)
     {
         case DATVDemodSettings::BPSK:
@@ -905,6 +907,8 @@ void DATVDemodSink::InitDATVS2Framework()
     m_objCfg.rolloff = m_settings.m_rollOff;  //0...1
     m_objCfg.rrc_rej = (float) m_settings.m_excursion;  //dB
     m_objCfg.rrc_steps = 0; //auto
+
+    m_objVideoStream->resetTotalReceived();
 
     switch(m_settings.m_modulation)
     {

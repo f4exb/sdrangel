@@ -344,7 +344,7 @@ void DATVDemodGUI::displaySettings()
     ui->cmbFilter->setCurrentIndex((int) m_settings.m_filter);
     displayRRCParameters(((int) m_settings.m_filter == 2));
 
-    ui->spiRollOff->setValue((int) (m_settings.m_rollOff * 100.0f));
+    ui->spiRollOff->setValue((int) roundf(m_settings.m_rollOff * 100.0f));
     ui->audioMute->setChecked(m_settings.m_audioMute);
     displaySystemConfiguration();
     ui->cmbStandard->setCurrentIndex((int) m_settings.m_standard);

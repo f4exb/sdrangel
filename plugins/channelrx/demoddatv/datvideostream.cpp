@@ -65,6 +65,12 @@ bool DATVideostream::setMemoryLimit(int intMemoryLimit)
     return true;
 }
 
+void DATVideostream::resetTotalReceived()
+{
+    m_intTotalReceived = 0;
+    emit onDataPackets(&m_intQueueWaiting, &m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
+}
+
 int DATVideostream::pushData(const char * chrData, int intSize)
 {
     if (intSize <= 0) {

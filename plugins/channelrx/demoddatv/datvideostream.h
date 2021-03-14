@@ -42,6 +42,7 @@ public:
 
     int pushData(const char * chrData, int intSize);
     bool setMemoryLimit(int intMemoryLimit);
+    void resetTotalReceived();
 
     virtual bool isSequential() const;
     virtual qint64 bytesAvailable() const;
