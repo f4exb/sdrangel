@@ -668,7 +668,7 @@ void DATVDemodSink::InitDATVFramework()
 
     if (m_objCfg.cnr == true)
     {
-        r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
+        r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs, 1024);
         r_cnr->decimation = decimation(m_objCfg.Fs, 5);  // 5 Hz
     }
 
@@ -1000,7 +1000,7 @@ void DATVDemodSink::InitDATVS2Framework()
 
     if (m_objCfg.cnr == true)
     {
-        r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs);
+        r_cnr = new leansdr::cnr_fft<leansdr::f32>(m_objScheduler, *p_preprocessed, *p_cnr, m_objCfg.Fm/m_objCfg.Fs, 1024);
         r_cnr->decimation = decimation(m_objCfg.Fs, 5);  // 5 Hz
     }
 

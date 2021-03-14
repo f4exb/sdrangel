@@ -1796,7 +1796,8 @@ struct cnr_fft : runnable
         scheduler *sch,
         pipebuf<complex<T>> &_in,
         pipebuf<float> &_out,
-        float _bandwidth, int nfft = 4096
+        float _bandwidth,
+        int nfft = 4096
     ) :
         runnable(sch, "cnr_fft"),
         bandwidth(_bandwidth),
@@ -1808,6 +1809,8 @@ struct cnr_fft : runnable
         out(_out),
         fft(nfft),
         avgpower(nullptr),
+        data(nullptr),
+        power(nullptr),
         phase(0),
         cslots_ratio(0.2),
         nslots_shift_ratio(0.65),
@@ -1823,6 +1826,12 @@ struct cnr_fft : runnable
     {
         if (avgpower) {
             delete[] avgpower;
+        }
+        if (data) {
+            delete[] data;
+        }
+        if (power) {
+            delete[] power;
         }
     }
 
@@ -1850,12 +1859,17 @@ struct cnr_fft : runnable
   private:
     void do_cnr()
     {
+        if (!data) {
+            data = new complex<T>[fft.n];
+        }
+        if (!power) {
+            power = new T[fft.n];
+        }
+
         float center_freq = freq_tap ? *freq_tap * tap_multiplier : 0;
         int icf = floor(center_freq * fft.n + 0.5);
-        complex<T> *data = new complex<T>[fft.n];
         memcpy(data, in.rd(), fft.n * sizeof(data[0]));
         fft.inplace(data, true);
-        T *power = new T[fft.n];
 
         for (int i = 0; i < fft.n; ++i)
             power[i] = data[i].re * data[i].re + data[i].im * data[i].im;
@@ -1867,9 +1881,10 @@ struct cnr_fft : runnable
             memcpy(avgpower, power, fft.n * sizeof(avgpower[0]));
         }
 
-        // Accumulate and low-pass filter
-        for (int i = 0; i < fft.n; ++i)
+        // Accumulate and low-pass filter (exponential averaging)
+        for (int i = 0; i < fft.n; ++i) {
             avgpower[i] = avgpower[i] * (1 - kavg) + power[i] * kavg;
+        }
 
 #if 0
         int bwslots = (bandwidth / 4) * fft.n;
@@ -1888,12 +1903,10 @@ struct cnr_fft : runnable
         int nstart = bandwidth * nslots_shift_ratio * fft.n;
         int nstop = nstart + bandwidth * nslots_ratio * fft.n;
 
-        if (!cbwslots || !nstart || !nstop)
-        {
-            delete[] power;
-            delete[] data;
+        if (!cbwslots || !nstart || !nstop) {
             return;
         }
+
         // Measure carrier+noise in center band
         float c2plusn2 = avgslots(icf - cbwslots, icf + cbwslots);
         // Measure noise left and right of roll-off zones
@@ -1903,8 +1916,6 @@ struct cnr_fft : runnable
         float c2 = c2plusn2 - n2;
         float cnr = (c2 > 0 && n2 > 0) ? 10 * log10f(c2 / n2) : -50;
         out.write(cnr);
-        delete[] power;
-        delete[] data;
     }
 
     float avgslots(int i0, int i1)
@@ -1921,6 +1932,8 @@ struct cnr_fft : runnable
     pipewriter<float> out;
     cfft_engine<T> fft;
     T *avgpower;
+    complex<T> *data;
+    T *power;
     int phase;
     float cslots_ratio;
     float nslots_shift_ratio;
