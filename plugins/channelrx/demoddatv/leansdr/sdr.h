@@ -17,6 +17,8 @@
 #ifndef LEANSDR_SDR_H
 #define LEANSDR_SDR_H
 
+#include <numeric>
+
 #include "leansdr/dsp.h"
 #include "leansdr/math.h"
 
@@ -1809,6 +1811,7 @@ struct cnr_fft : runnable
         out(_out),
         fft(nfft),
         avgpower(nullptr),
+        sorted(nullptr),
         data(nullptr),
         power(nullptr),
         phase(0),
@@ -1826,6 +1829,9 @@ struct cnr_fft : runnable
     {
         if (avgpower) {
             delete[] avgpower;
+        }
+        if (sorted) {
+            delete[] sorted;
         }
         if (data) {
             delete[] data;
@@ -1859,6 +1865,9 @@ struct cnr_fft : runnable
   private:
     void do_cnr()
     {
+        if (!sorted) {
+            sorted = new T[fft.n];
+        }
         if (!data) {
             data = new complex<T>[fft.n];
         }
@@ -1886,7 +1895,8 @@ struct cnr_fft : runnable
             avgpower[i] = avgpower[i] * (1 - kavg) + power[i] * kavg;
         }
 
-#if 0
+#define LEANDVB_SDR_CNR_METHOD 2
+#if LEANDVB_SDR_CNR_METHOD == 0
         int bwslots = (bandwidth / 4) * fft.n;
 
         if (!bwslots) {
@@ -1898,7 +1908,7 @@ struct cnr_fft : runnable
         // Measure noise left and right of roll-off zones
         float n2 = ( avgslots(icf-bwslots*4, icf-bwslots*3) +
 		    avgslots(icf+bwslots*3, icf+bwslots*4) ) / 2;
-#else
+#elif LEANDVB_SDR_CNR_METHOD == 1
         int cbwslots = bandwidth * cslots_ratio * fft.n;
         int nstart = bandwidth * nslots_shift_ratio * fft.n;
         int nstop = nstart + bandwidth * nslots_ratio * fft.n;
@@ -1912,6 +1922,11 @@ struct cnr_fft : runnable
         // Measure noise left and right of roll-off zones
         float n2 = (avgslots(icf - nstop, icf - nstart) +
             avgslots(icf + nstart, icf + nstop)) / 2;
+#elif LEANDVB_SDR_CNR_METHOD == 2
+        int bw = bandwidth * 0.75 * fft.n;
+        float c2plusn2 = 0;
+        float n2 = 0;
+        minmax(icf - bw, icf + bw, n2, c2plusn2);
 #endif
         float c2 = c2plusn2 - n2;
         float cnr = (c2 > 0 && n2 > 0) ? 10 * log10f(c2 / n2) : -50;
@@ -1928,10 +1943,26 @@ struct cnr_fft : runnable
         return s / (i1 - i0 + 1);
     }
 
+    void minmax(int i0, int i1, float& min, float&max)
+    {
+        int l = 0;
+
+        for (int i = i0; i <= i1; ++i, ++l)
+            sorted[l] = avgpower[i & (fft.n - 1)];
+
+        std::sort(sorted, &sorted[l]);
+        int m = l/5;
+        min = std::accumulate<T*>(&sorted[0], &sorted[m], (T) 0) / (m+1);
+        max = std::accumulate<T*>(&sorted[l-m], &sorted[l], (T) 0) / (m+1);
+
+        // fprintf(stderr, "l: %d m: %d min: %f max: %f\n", l, m, min, max);
+    }
+
     pipereader<complex<T>> in;
     pipewriter<float> out;
     cfft_engine<T> fft;
     T *avgpower;
+    T *sorted;
     complex<T> *data;
     T *power;
     int phase;
