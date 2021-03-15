@@ -266,6 +266,12 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
 DATVDemodGUI::~DATVDemodGUI()
 {
+    m_objDATVDemod->SetTVScreen(nullptr);
+    m_objDATVDemod->setMERLabel(nullptr);
+    m_objDATVDemod->setCNRLabel(nullptr);
+    m_objDATVDemod->setMERMeter(nullptr);
+    m_objDATVDemod->setCNRMeter(nullptr);
+
     delete ui;
 }
 

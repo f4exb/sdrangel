@@ -55,7 +55,7 @@ DSDDemodSink::DSDDemodSink() :
     m_squelchDelayLine(24000),
     m_audioFifo1(48000),
     m_audioFifo2(48000),
-    m_scopeXY(0),
+    m_scopeXY(nullptr),
     m_scopeEnabled(true),
     m_dsdDecoder(),
     m_signalFormat(signalFormatNone)
@@ -297,7 +297,7 @@ void DSDDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
         }
 	}
 
-    if ((m_scopeXY != 0) && (m_scopeEnabled))
+    if ((m_scopeXY != nullptr) && (m_scopeEnabled))
     {
         m_scopeXY->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), true); // true = real samples for what it's worth
     }
