@@ -685,6 +685,9 @@
         <property name="toolTip">
          <string>Audio volume in dB</string>
         </property>
+        <property name="minimum">
+         <number>-10</number>
+        </property>
         <property name="maximum">
          <number>40</number>
         </property>

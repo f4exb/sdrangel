@@ -10,16 +10,16 @@ matrix:
 
 environment:
   matrix:
-    # - TARGET: vs2019gui
-    #   APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
-    #   configuration: Release
-    #   CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
-    #                          -DARCH_OPT=SSE4_2 \
-    #                          -DDEBUG_OUTPUT=ON \
-    #                          -DENABLE_MIRISDR=OFF \
-    #                          -DBUILD_SERVER=OFF \
-    #                          -DCMAKE_PREFIX_PATH=C:\\Qt\\5.15.2\\msvc2019_64;C:\\Libraries\\boost_1_73_0"
-    #   CMAKE_GENERATOR: Ninja
+    - TARGET: vs2019gui
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2019'
+      configuration: Release
+      CMAKE_CUSTOM_OPTIONS: "-DCMAKE_BUILD_TYPE=Release \
+                             -DARCH_OPT=SSE4_2 \
+                             -DDEBUG_OUTPUT=ON \
+                             -DENABLE_MIRISDR=OFF \
+                             -DBUILD_SERVER=OFF \
+                             -DCMAKE_PREFIX_PATH=C:\\Qt\\5.15.2\\msvc2019_64;C:\\Libraries\\boost_1_73_0"
+      CMAKE_GENERATOR: Ninja
     - TARGET: ubuntu2004prod
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       CC:  "gcc-9"
@@ -35,36 +35,36 @@ environment:
       APPVEYOR_CONSOLE_DISABLE_PTY: true
 
 for:
-  # - matrix:
-  #     only:
-  #       - TARGET: 'vs2019gui'
-  #   cache:
-  #     - C:\ProgramData\chocolatey\bin
-  #     - C:\ProgramData\chocolatey\lib
-  #   build_script:
-  #     - call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-  #     # Install GNU patch as applying patches with git fails in BladeRF tree
-  #     - choco install patch
-  #     - git submodule update --init --recursive
-  #     - mkdir build && cd build
-  #     - cmake .. -G "%CMAKE_GENERATOR%" %CMAKE_CUSTOM_OPTIONS%
-  #     - cmake --build . --config Release --target package
-  #   artifacts: # push installer executable
-  #     path: build\*.exe
-  #     name: installer
-  #   deploy:
-  #     release: sdrangel-v$(appveyor_build_version)
-  #     description: 'SDRangel Windows'
-  #     provider: GitHub
-  #     auth_token:
-  #       secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
-  #     artifact: installer, portable
-  #     draft: false
-  #     prerelease: false
-  #     tag: $(APPVEYOR_REPO_TAG_NAME) # will not work until tag is pushed
-  #     on:
-  #       APPVEYOR_REPO_TAG: true   # deploy on tag push only
-  #       branch: master            # release from master branch only
+  - matrix:
+      only:
+        - TARGET: 'vs2019gui'
+    cache:
+      - C:\ProgramData\chocolatey\bin
+      - C:\ProgramData\chocolatey\lib
+    build_script:
+      - call "%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+      # Install GNU patch as applying patches with git fails in BladeRF tree
+      - choco install patch
+      - git submodule update --init --recursive
+      - mkdir build && cd build
+      - cmake .. -G "%CMAKE_GENERATOR%" %CMAKE_CUSTOM_OPTIONS%
+      - cmake --build . --config Release --target package
+    artifacts: # push installer executable
+      path: build\*.exe
+      name: installer
+    deploy:
+      release: sdrangel-v$(appveyor_build_version)
+      description: 'SDRangel Windows'
+      provider: GitHub
+      auth_token:
+        secure: kyU5TaXRoily6q/QLRLqal2xCFGWEdnb8AJIu7FknsUQyj1wjRGmqC2My+Wfszod
+      artifact: installer, portable
+      draft: false
+      prerelease: false
+      tag: $(APPVEYOR_REPO_TAG_NAME) # will not work until tag is pushed
+      on:
+        APPVEYOR_REPO_TAG: true   # deploy on tag push only
+        branch: master            # release from master branch only
   - matrix:
       only:
         - TARGET: ubuntu2004prod
