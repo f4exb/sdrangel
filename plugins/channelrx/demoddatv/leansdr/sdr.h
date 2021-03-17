@@ -1938,7 +1938,10 @@ struct cnr_fft : runnable
         T s = 0;
 
         for (int i = i0; i <= i1; ++i)
-            s += avgpower[i & (fft.n - 1)];
+        {
+            int j = i < 0 ? fft.n + i : i;
+            s += avgpower[j < 0 ? 0 : j >= fft.n ? fft.n-1 : j];
+        }
 
         return s / (i1 - i0 + 1);
     }
@@ -1948,7 +1951,10 @@ struct cnr_fft : runnable
         int l = 0;
 
         for (int i = i0; i <= i1; ++i, ++l)
-            sorted[l] = avgpower[i & (fft.n - 1)];
+        {
+            int j = i < 0 ? fft.n + i : i;
+            sorted[l] = avgpower[j < 0 ? 0 : j >= fft.n ? fft.n-1 : j];
+        }
 
         std::sort(sorted, &sorted[l]);
         int m = l/5;
