@@ -114,7 +114,7 @@ class DATVideoRender : public TVScreen
     Qt::WindowFlags m_originalWindowFlags;
     QSize m_originalSize;
 
-    bool m_running;
+    QAtomicInt m_running;
     bool m_isFullScreen;
 
     bool m_isFFMPEGInitialized;
