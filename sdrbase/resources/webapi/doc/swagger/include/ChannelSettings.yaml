@@ -39,6 +39,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/ChirpChatDemod.yaml#/ChirpChatDemodSettings"
     ChirpChatModSettings:
       $ref: "/doc/swagger/include/ChirpChatMod.yaml#/ChirpChatModSettings"
+    DATVModSettings:
+      $ref: "/doc/swagger/include/DATVMod.yaml#/DATVModSettings"
     DATVDemodSettings:
       $ref: "/doc/swagger/include/DATVDemod.yaml#/DATVDemodSettings"
     DSDDemodSettings:

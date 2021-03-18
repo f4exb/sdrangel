@@ -28,6 +28,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
     {"sdrangel.channeltx.modam", "AMModSettings"},
     {"sdrangel.channeltx.modatv", "ATVModSettings"},
+    {"sdrangel.channeltx.moddatv", "DATVModSettings"},
     {"sdrangel.channel.bfm", "BFMDemodSettings"},
     {"sdrangel.channel.chanalyzer", "ChannelAnalyzerSettings"},
     {"sdrangel.channel.chanalyzerng", "ChannelAnalyzerSettings"}, // remap
@@ -129,6 +130,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"ChirpChatDemod", "ChirpChatDemodSettings"},
     {"ChirpChatMod", "ChirpChatModSettings"},
     {"DATVDemod", "DATVDemodSettings"},
+    {"DATVMod", "DATVModSettings"},
     {"DSDDemod", "DSDDemodSettings"},
     {"FileSink", "FileSinkSettings"},
     {"FileSource", "FileSourceSettings"},

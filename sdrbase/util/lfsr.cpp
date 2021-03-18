@@ -37,7 +37,6 @@ int LFSR::scramble(int bit_in)
     m_sr = (m_sr << 1) | bit_out;
     return bit_out;
 }
- #include <stdio.h>
 
 // Scramble data using LFSR - LSB first
 void LFSR::scramble(uint8_t *data, int length)
@@ -81,7 +80,7 @@ void LFSR::descramble(uint8_t *data, int length)
     }
 }
 
-// XOR data with rand_bit of LFSR - LSB first
+// XOR data with rand_bits of LFSR - LSB first
 void LFSR::randomize(uint8_t *data, int length)
 {
     uint8_t byte_in, byte_out;
@@ -95,12 +94,37 @@ void LFSR::randomize(uint8_t *data, int length)
         {
             // XOR input bit with specified bit from SR
             bit_in = (byte_in >> j) & 1;
-            bit_out = ((m_sr >> m_rand_bit) & 1) ^ bit_in;
+            //bit_out = ((m_sr >> m_rand_bit) & 1) ^ bit_in;
+            bit_out = (popcount(m_sr & m_rand_bits) & 1) ^ bit_in;
             byte_out = byte_out | (bit_out << j);
             // Update LFSR
             bit = popcount(m_sr & m_polynomial) & 1;
             m_sr = (m_sr << 1) | bit;
         }
         data[i] = byte_out;
+    }
+}
+
+// XOR data with rand_bits of LFSR - MSB first
+void LFSR::randomizeMSB(const uint8_t *dataIn, uint8_t *dataOut, int length)
+{
+    uint8_t byte_in, byte_out;
+    int bit_in, bit_out, bit;
+
+    for(int i = 0; i < length; i++)
+    {
+        byte_in = dataIn[i];
+        byte_out = 0;
+        for (int j = 7; j >= 0; j--)
+        {
+            // XOR input bit with selected bits from SR
+            bit_in = (byte_in >> j) & 1;
+            bit_out = (popcount(m_sr & m_rand_bits) & 1) ^ bit_in;
+            byte_out = byte_out | (bit_out << j);
+            // Update LFSR
+            bit = popcount(m_sr & m_polynomial) & 1;
+            m_sr = (m_sr << 1) | bit;
+        }
+        dataOut[i] = byte_out;
     }
 }
