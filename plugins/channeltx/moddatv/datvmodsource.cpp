@@ -95,6 +95,27 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings)
     case DATVModSettings::FEC78:
         convFactor = 7.0f/8.0f;
         break;
+    case DATVModSettings::FEC45:
+        convFactor = 4.0f/5.0f;
+        break;
+    case DATVModSettings::FEC89:
+        convFactor = 8.0f/9.0f;
+        break;
+    case DATVModSettings::FEC910:
+        convFactor = 9.0f/10.0f;
+        break;
+    case DATVModSettings::FEC14:
+        convFactor = 1.0f/4.0f;
+        break;
+    case DATVModSettings::FEC13:
+        convFactor = 1.0f/3.0f;
+        break;
+    case DATVModSettings::FEC25:
+        convFactor = 2.0f/5.0f;
+        break;
+    case DATVModSettings::FEC35:
+        convFactor = 3.0f/5.0f;
+        break;
     }
     switch (settings.m_modulation)
     {
@@ -106,6 +127,12 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings)
         break;
     case DATVModSettings::PSK8:
         bitsPerSymbol = 3.0f;
+        break;
+    case DATVModSettings::APSK16:
+        bitsPerSymbol = 4.0f;
+        break;
+    case DATVModSettings::APSK32:
+        bitsPerSymbol = 5.0f;
         break;
     }
 
@@ -255,10 +282,10 @@ void DATVModSource::modulateSample()
                 int size = ba.size();
                 char *data = ba.data();
 
-                if (size <= sizeof(m_udpBuffer))
+                if (size <= (int)sizeof(m_udpBuffer))
                 {
                     memcpy(m_mpegTS, data, sizeof(m_mpegTS));
-                    if (size >= sizeof(m_mpegTS))
+                    if (size >= (int)sizeof(m_mpegTS))
                         memcpy(&m_udpBuffer[0], &data[sizeof(m_mpegTS)], size - sizeof(m_mpegTS));
                     m_udpBufferIdx = 0;
                     m_udpBufferCount = (size / sizeof(m_mpegTS)) - 1;

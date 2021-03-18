@@ -134,7 +134,7 @@ public:
 private:
     std::vector<Real> m_taps;
     std::vector<Type> m_samples;
-    int m_ptr;
+    unsigned int m_ptr;
 };
 
 #endif // INCLUDE_RAISEDCOSINE_H

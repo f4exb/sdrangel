@@ -56,8 +56,6 @@ public:
         m_taps.resize(nTaps / 2 + 1);
 
         // calculate filter taps
-        double Ne = (nTaps-1) / 2;
-
         for(i = 0; i < nTaps / 2 + 1; i++)
         {
             double t = (i - (nTaps / 2)) / (double)samplesPerSymbol;
@@ -136,7 +134,7 @@ public:
 private:
     std::vector<Real> m_taps;
     std::vector<Type> m_samples;
-    int m_ptr;
+    unsigned int m_ptr;
 };
 
 #endif // INCLUDE_ROOTRAISEDCOSINE_H

@@ -287,12 +287,14 @@ void DATVModGUI::on_modulation_currentIndexChanged(int index)
 
 void DATVModGUI::on_rollOff_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_rollOff = ui->rollOff->currentText().toFloat();
     applySettings();
 }
 
 void DATVModGUI::on_fec_currentIndexChanged(int index)
 {
+    (void) index;
     m_settings.m_fec = DATVModSettings::mapCodeRate(ui->fec->currentText());
     applySettings();
 }
