@@ -1172,7 +1172,7 @@ void DATVDemodSink::InitDATVS2Framework()
             p_verrcount)
         ;
         leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *fecdec = (leansdr::s2_fecdec_helper<leansdr::llr_t, leansdr::llr_sb> *) r_fecdechelper;
-        const int nhelpers = 4;
+        const int nhelpers = 6;
         fecdec->nhelpers = nhelpers;
         fecdec->must_buffer = false;
         fecdec->max_trials = m_settings.m_softLDPCMaxTrials;
