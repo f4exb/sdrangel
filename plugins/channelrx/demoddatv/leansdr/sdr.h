@@ -62,7 +62,7 @@ struct auto_notch : runnable
         k(0.002), // k(0.01)
         fft(4096),
         in(_in),
-        out(_out, fft.n),
+        out(_out, fft.size()),
         nslots(_nslots),
         phase(0),
         gain(1),
@@ -73,7 +73,7 @@ struct auto_notch : runnable
         for (int s = 0; s < nslots; ++s)
         {
             __slots[s].i = -1;
-            __slots[s].expj = new complex<float>[fft.n];
+            __slots[s].expj = new complex<float>[fft.size()];
         }
     }
 
@@ -88,9 +88,9 @@ struct auto_notch : runnable
 
     void run()
     {
-        while (in.readable() >= fft.n && out.writable() >= fft.n)
+        while (in.readable() >= fft.size() && out.writable() >= fft.size())
         {
-            phase += fft.n;
+            phase += fft.size();
 
             if (phase >= decimation)
             {
@@ -99,18 +99,18 @@ struct auto_notch : runnable
             }
 
             process();
-            in.read(fft.n);
-            out.written(fft.n);
+            in.read(fft.size());
+            out.written(fft.size());
         }
     }
 
     void detect()
     {
         complex<T> *pin = in.rd();
-        complex<float> *data = new complex<float>[fft.n];
+        complex<float> *data = new complex<float>[fft.size()];
         float m0 = 0, m2 = 0;
 
-        for (int i = 0; i < fft.n; ++i)
+        for (int i = 0; i < fft.size(); ++i)
         {
             data[i].re = pin[i].re;
             data[i].im = pin[i].im;
@@ -123,7 +123,7 @@ struct auto_notch : runnable
 
         if (agc_rms_setpoint && m2)
         {
-            float rms = gen_sqrt(m2 / fft.n);
+            float rms = gen_sqrt(m2 / fft.size());
             if (sch->debug)
                 fprintf(stderr, "(pow %f max %f)", rms, m0);
             float new_gain = agc_rms_setpoint / rms;
@@ -131,16 +131,16 @@ struct auto_notch : runnable
         }
 
         fft.inplace(data, true);
-        float *amp = new float[fft.n];
+        float *amp = new float[fft.size()];
 
-        for (int i = 0; i < fft.n; ++i)
+        for (int i = 0; i < fft.size(); ++i)
             amp[i] = hypotf(data[i].re, data[i].im);
 
         for (slot *s = __slots; s < __slots + nslots; ++s)
         {
             int iamax = 0;
 
-            for (int i = 0; i < fft.n; ++i)
+            for (int i = 0; i < fft.size(); ++i)
                 if (amp[i] > amp[iamax])
                     iamax = i;
 
@@ -154,9 +154,9 @@ struct auto_notch : runnable
                 s->estim.im = 0;
                 s->estt = 0;
 
-                for (int i = 0; i < fft.n; ++i)
+                for (int i = 0; i < fft.size(); ++i)
                 {
-                    float a = 2 * M_PI * s->i * i / fft.n;
+                    float a = 2 * M_PI * s->i * i / fft.size();
                     s->expj[i].re = cosf(a);
                     s->expj[i].im = sinf(a);
                 }
@@ -167,7 +167,7 @@ struct auto_notch : runnable
             if (iamax - 1 >= 0)
                 amp[iamax - 1] = 0;
 
-            if (iamax + 1 < fft.n)
+            if (iamax + 1 < fft.size())
                 amp[iamax + 1] = 0;
         }
 
@@ -177,7 +177,7 @@ struct auto_notch : runnable
 
     void process()
     {
-        complex<T> *pin = in.rd(), *pend = pin + fft.n, *pout = out.wr();
+        complex<T> *pin = in.rd(), *pend = pin + fft.size(), *pout = out.wr();
 
         for (slot *s = __slots; s < __slots + nslots; ++s)
             s->ej = s->expj;
@@ -1809,7 +1809,7 @@ struct cnr_fft : runnable
         kavg(0.1),
         in(_in),
         out(_out),
-        fft(nfft),
+        fft(nfft < 128 ? 128 : nfft > 4096 ? 4096 : nfft),
         avgpower(nullptr),
         sorted(nullptr),
         data(nullptr),
@@ -1819,7 +1819,8 @@ struct cnr_fft : runnable
         nslots_shift_ratio(0.65),
         nslots_ratio(0.1)
     {
-        fprintf(stderr, "cnr_fft::cnr_fft: bw: %f FFT: %d\n", bandwidth, fft.n);
+        fprintf(stderr, "cnr_fft::cnr_fft: bw: %f FFT: %d\n", bandwidth, fft.size());
+
         if (bandwidth > 0.25) {
             fail("cnr_fft::cnr_fft: CNR estimator requires Fsampling > 4x Fsignal");
         }
@@ -1843,9 +1844,9 @@ struct cnr_fft : runnable
 
     void run()
     {
-        while (in.readable() >= fft.n && out.writable() >= 1)
+        while (in.readable() >= fft.size() && out.writable() >= 1)
         {
-            phase += fft.n;
+            phase += fft.size();
 
             if (phase >= decimation)
             {
@@ -1853,7 +1854,7 @@ struct cnr_fft : runnable
                 do_cnr();
             }
 
-            in.read(fft.n);
+            in.read(fft.size());
         }
     }
 
@@ -1866,38 +1867,38 @@ struct cnr_fft : runnable
     void do_cnr()
     {
         if (!sorted) {
-            sorted = new T[fft.n];
+            sorted = new T[fft.size()];
         }
         if (!data) {
-            data = new complex<T>[fft.n];
+            data = new complex<T>[fft.size()];
         }
         if (!power) {
-            power = new T[fft.n];
+            power = new T[fft.size()];
         }
 
         float center_freq = freq_tap ? *freq_tap * tap_multiplier : 0;
-        int icf = floor(center_freq * fft.n + 0.5);
-        memcpy(data, in.rd(), fft.n * sizeof(data[0]));
+        int icf = floor(center_freq * fft.size() + 0.5);
+        memcpy(data, in.rd(), fft.size() * sizeof(data[0]));
         fft.inplace(data, true);
 
-        for (int i = 0; i < fft.n; ++i)
+        for (int i = 0; i < fft.size(); ++i)
             power[i] = data[i].re * data[i].re + data[i].im * data[i].im;
 
         if (!avgpower)
         {
             // Initialize with first spectrum
-            avgpower = new T[fft.n];
-            memcpy(avgpower, power, fft.n * sizeof(avgpower[0]));
+            avgpower = new T[fft.size()];
+            memcpy(avgpower, power, fft.size() * sizeof(avgpower[0]));
         }
 
         // Accumulate and low-pass filter (exponential averaging)
-        for (int i = 0; i < fft.n; ++i) {
+        for (int i = 0; i < fft.size(); ++i) {
             avgpower[i] = avgpower[i] * (1 - kavg) + power[i] * kavg;
         }
 
 #define LEANDVB_SDR_CNR_METHOD 2
 #if LEANDVB_SDR_CNR_METHOD == 0
-        int bwslots = (bandwidth / 4) * fft.n;
+        int bwslots = (bandwidth / 4) * fft.size();
 
         if (!bwslots) {
             return;
@@ -1909,9 +1910,9 @@ struct cnr_fft : runnable
         float n2 = ( avgslots(icf-bwslots*4, icf-bwslots*3) +
 		    avgslots(icf+bwslots*3, icf+bwslots*4) ) / 2;
 #elif LEANDVB_SDR_CNR_METHOD == 1
-        int cbwslots = bandwidth * cslots_ratio * fft.n;
-        int nstart = bandwidth * nslots_shift_ratio * fft.n;
-        int nstop = nstart + bandwidth * nslots_ratio * fft.n;
+        int cbwslots = bandwidth * cslots_ratio * fft.size();
+        int nstart = bandwidth * nslots_shift_ratio * fft.size();
+        int nstop = nstart + bandwidth * nslots_ratio * fft.size();
 
         if (!cbwslots || !nstart || !nstop) {
             return;
@@ -1923,7 +1924,7 @@ struct cnr_fft : runnable
         float n2 = (avgslots(icf - nstop, icf - nstart) +
             avgslots(icf + nstart, icf + nstop)) / 2;
 #elif LEANDVB_SDR_CNR_METHOD == 2
-        int bw = bandwidth * 0.75 * fft.n;
+        int bw = bandwidth * 0.75 * fft.size();
         float c2plusn2 = 0;
         float n2 = 0;
         minmax(icf - bw, icf + bw, n2, c2plusn2);
@@ -1939,8 +1940,8 @@ struct cnr_fft : runnable
 
         for (int i = i0; i <= i1; ++i)
         {
-            int j = i < 0 ? fft.n + i : i;
-            s += avgpower[j < 0 ? 0 : j >= fft.n ? fft.n-1 : j];
+            int j = i < 0 ? fft.size() + i : i;
+            s += avgpower[j < 0 ? 0 : j >= fft.size() ? fft.size()-1 : j];
         }
 
         return s / (i1 - i0 + 1);
@@ -1950,10 +1951,10 @@ struct cnr_fft : runnable
     {
         int l = 0;
 
-        for (int i = i0; i <= i1; ++i, ++l)
+        for (int i = i0; i <= i1 && l < fft.size(); ++i, ++l)
         {
-            int j = i < 0 ? fft.n + i : i;
-            sorted[l] = avgpower[j < 0 ? 0 : j >= fft.n ? fft.n-1 : j];
+            int j = i < 0 ? fft.size() + i : i;
+            sorted[l] = avgpower[j < 0 ? 0 : j >= fft.size() ? fft.size()-1 : j];
         }
 
         std::sort(sorted, &sorted[l]);

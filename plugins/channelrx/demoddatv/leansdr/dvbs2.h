@@ -604,7 +604,7 @@ struct s2_frame_receiver : runnable
             fprintf(stderr, "COARSE(%d): %f rad/symb (%.0f Hz at %.0f baud)\n",
                     coarse_count, freqw, freqw * Fm / (2 * M_PI), Fm);
 #if 0
-	freqw16 = freqw * 65536 / (2*M_PI);
+	        freqw16 = freqw * 65536 / (2*M_PI);
 #else
             fprintf(stderr, "Ignoring coarse det, using %f\n", freqw16 * Fm / 65536);
 #endif

@@ -61,9 +61,27 @@ struct cconverter : runnable
 template <typename T>
 struct cfft_engine
 {
-    const int n;
-    cfft_engine(int _n) : n(_n), invsqrtn(1.0 / sqrt(n))
+    cfft_engine(int _n) :
+        bitrev(nullptr),
+        omega(nullptr),
+        omega_rev(nullptr)
     {
+        init(_n);
+    }
+
+    ~cfft_engine() {
+        release();
+    }
+
+    int size() {
+        return n;
+    }
+
+    void init(int _n)
+    {
+        release();
+        n = _n;
+        invsqrtn = 1.0 / sqrt(n);
         // Compute log2(n)
         logn = 0;
         for (int t = n; t > 1; t >>= 1)
@@ -86,6 +104,7 @@ struct cfft_engine
             omega_rev[i].im = -(omega[i].im = sinf(a));
         }
     }
+
     void inplace(complex<T> *data, bool reverse = false)
     {
         // Bit-reversal permutation
@@ -133,10 +152,25 @@ struct cfft_engine
     }
 
   private:
-    int logn;
+    void release()
+    {
+        if (bitrev) {
+            delete[] bitrev;
+        }
+        if (omega) {
+            delete[] omega;
+        }
+        if (omega_rev) {
+            delete[] omega_rev;
+        }
+    }
+
     int *bitrev;
-    complex<T> *omega, *omega_rev;
+    complex<T> *omega;
+    complex<T> *omega_rev;
+    int n;
     float invsqrtn;
+    int logn;
 };
 
 template <typename T>
