@@ -58,6 +58,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_chirp_chat_demod_settings_isSet = false;
     chirp_chat_mod_settings = nullptr;
     m_chirp_chat_mod_settings_isSet = false;
+    datv_mod_settings = nullptr;
+    m_datv_mod_settings_isSet = false;
     datv_demod_settings = nullptr;
     m_datv_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
@@ -148,6 +150,8 @@ SWGChannelSettings::init() {
     m_chirp_chat_demod_settings_isSet = false;
     chirp_chat_mod_settings = new SWGChirpChatModSettings();
     m_chirp_chat_mod_settings_isSet = false;
+    datv_mod_settings = new SWGDATVModSettings();
+    m_datv_mod_settings_isSet = false;
     datv_demod_settings = new SWGDATVDemodSettings();
     m_datv_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
@@ -242,6 +246,9 @@ SWGChannelSettings::cleanup() {
     }
     if(chirp_chat_mod_settings != nullptr) { 
         delete chirp_chat_mod_settings;
+    }
+    if(datv_mod_settings != nullptr) { 
+        delete datv_mod_settings;
     }
     if(datv_demod_settings != nullptr) { 
         delete datv_demod_settings;
@@ -364,6 +371,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&chirp_chat_mod_settings, pJson["ChirpChatModSettings"], "SWGChirpChatModSettings", "SWGChirpChatModSettings");
     
+    ::SWGSDRangel::setValue(&datv_mod_settings, pJson["DATVModSettings"], "SWGDATVModSettings", "SWGDATVModSettings");
+    
     ::SWGSDRangel::setValue(&datv_demod_settings, pJson["DATVDemodSettings"], "SWGDATVDemodSettings", "SWGDATVDemodSettings");
     
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
@@ -476,6 +485,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((chirp_chat_mod_settings != nullptr) && (chirp_chat_mod_settings->isSet())){
         toJsonValue(QString("ChirpChatModSettings"), chirp_chat_mod_settings, obj, QString("SWGChirpChatModSettings"));
+    }
+    if((datv_mod_settings != nullptr) && (datv_mod_settings->isSet())){
+        toJsonValue(QString("DATVModSettings"), datv_mod_settings, obj, QString("SWGDATVModSettings"));
     }
     if((datv_demod_settings != nullptr) && (datv_demod_settings->isSet())){
         toJsonValue(QString("DATVDemodSettings"), datv_demod_settings, obj, QString("SWGDATVDemodSettings"));
@@ -707,6 +719,16 @@ void
 SWGChannelSettings::setChirpChatModSettings(SWGChirpChatModSettings* chirp_chat_mod_settings) {
     this->chirp_chat_mod_settings = chirp_chat_mod_settings;
     this->m_chirp_chat_mod_settings_isSet = true;
+}
+
+SWGDATVModSettings*
+SWGChannelSettings::getDatvModSettings() {
+    return datv_mod_settings;
+}
+void
+SWGChannelSettings::setDatvModSettings(SWGDATVModSettings* datv_mod_settings) {
+    this->datv_mod_settings = datv_mod_settings;
+    this->m_datv_mod_settings_isSet = true;
 }
 
 SWGDATVDemodSettings*
@@ -1017,6 +1039,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(chirp_chat_mod_settings && chirp_chat_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(datv_mod_settings && datv_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(datv_demod_settings && datv_demod_settings->isSet()){

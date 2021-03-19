@@ -28,7 +28,7 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
     m_channelFrequencyOffset(0),
     m_spectrumRate(0),
     m_sinLUT(nullptr),
-    m_scrambler(0x108, 0x1fe, 0),
+    m_scrambler(0x108, 0x1fe, 1),
     m_spectrumSink(nullptr),
     m_scopeSink(nullptr),
     m_magsq(0.0),

@@ -2707,6 +2707,9 @@ margin-bottom: 20px;
     "ChirpChatModReport" : {
       "$ref" : "#/definitions/ChirpChatModReport"
     },
+    "DATVModReport" : {
+      "$ref" : "#/definitions/DATVModReport"
+    },
     "DSDDemodReport" : {
       "$ref" : "#/definitions/DSDDemodReport"
     },
@@ -2822,6 +2825,9 @@ margin-bottom: 20px;
     },
     "ChirpChatModSettings" : {
       "$ref" : "#/definitions/ChirpChatModSettings"
+    },
+    "DATVModSettings" : {
+      "$ref" : "#/definitions/DATVModSettings"
     },
     "DATVDemodSettings" : {
       "$ref" : "#/definitions/DATVDemodSettings"
@@ -3409,6 +3415,103 @@ margin-bottom: 20px;
     }
   },
   "description" : "DATVDemod"
+};
+            defs.DATVModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "DATVMod"
+};
+            defs.DATVModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "standard" : {
+      "type" : "integer",
+      "description" : "Broadcast standard (DVB-S=0)"
+    },
+    "modulation" : {
+      "type" : "integer",
+      "description" : "Modulation (BPSK=0 QPSK=1)"
+    },
+    "fec" : {
+      "type" : "integer",
+      "description" : "Forward error correct code rate (1/2=0 2/3=1 3/4=2 5/6=3 7/8=4)"
+    },
+    "symbolRate" : {
+      "type" : "integer",
+      "description" : "Symbol rate in symbols per second"
+    },
+    "rollOff" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "Root raised cosine filter bandwidth (0.35)"
+    },
+    "tsSource" : {
+      "type" : "integer",
+      "description" : "Transport stream source (File=0 UDP=1)"
+    },
+    "tsFileName" : {
+      "type" : "string"
+    },
+    "tsFilePlayLoop" : {
+      "type" : "integer"
+    },
+    "tsFilePlay" : {
+      "type" : "integer",
+      "description" : "(Pause=0 Play=1)"
+    },
+    "udpAddress" : {
+      "type" : "string"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port number to receive MPEG transport stream on"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "DATVMod"
 };
             defs.DSDDemodReport = {
   "properties" : {
@@ -45639,7 +45742,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-03-05T14:04:36.302+01:00
+              Generated 2021-03-18T18:13:23.857+01:00
             </div>
           </div>
       </div>

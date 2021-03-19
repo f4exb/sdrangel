@@ -34,6 +34,7 @@
 #include "SWGChirpChatDemodSettings.h"
 #include "SWGChirpChatModSettings.h"
 #include "SWGDATVDemodSettings.h"
+#include "SWGDATVModSettings.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGFileSinkSettings.h"
 #include "SWGFileSourceSettings.h"
@@ -123,6 +124,9 @@ public:
 
     SWGChirpChatModSettings* getChirpChatModSettings();
     void setChirpChatModSettings(SWGChirpChatModSettings* chirp_chat_mod_settings);
+
+    SWGDATVModSettings* getDatvModSettings();
+    void setDatvModSettings(SWGDATVModSettings* datv_mod_settings);
 
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
@@ -250,6 +254,9 @@ private:
 
     SWGChirpChatModSettings* chirp_chat_mod_settings;
     bool m_chirp_chat_mod_settings_isSet;
+
+    SWGDATVModSettings* datv_mod_settings;
+    bool m_datv_mod_settings_isSet;
 
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;

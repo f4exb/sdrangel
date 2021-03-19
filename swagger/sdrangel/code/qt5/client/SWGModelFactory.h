@@ -73,6 +73,8 @@
 #include "SWGCommand.h"
 #include "SWGComplex.h"
 #include "SWGDATVDemodSettings.h"
+#include "SWGDATVModReport.h"
+#include "SWGDATVModSettings.h"
 #include "SWGDSDDemodReport.h"
 #include "SWGDSDDemodSettings.h"
 #include "SWGDVSerialDevice.h"
@@ -431,6 +433,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGDATVDemodSettings").compare(type) == 0) {
       return new SWGDATVDemodSettings();
+    }
+    if(QString("SWGDATVModReport").compare(type) == 0) {
+      return new SWGDATVModReport();
+    }
+    if(QString("SWGDATVModSettings").compare(type) == 0) {
+      return new SWGDATVModSettings();
     }
     if(QString("SWGDSDDemodReport").compare(type) == 0) {
       return new SWGDSDDemodReport();
