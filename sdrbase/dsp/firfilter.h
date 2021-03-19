@@ -38,7 +38,7 @@ public:
         unsigned int n_samples = m_samples.size();
         unsigned int n_taps = m_taps.size() - 1;
         unsigned int a = m_ptr;
-        unsigned int b = a == 0 ? n_samples - 1 : a - 1;
+        unsigned int b = a == n_samples - 1 ? 0 : a + 1;
 
         m_samples[m_ptr] = sample;
 
@@ -46,8 +46,8 @@ public:
         {
             acc += (m_samples[a] + m_samples[b]) * m_taps[i];
 
-            a = (a == n_samples - 1) ? 0             : a + 1;
-            b = (b == 0)             ? n_samples - 1 : b - 1;
+            a = (a == 0)             ? n_samples - 1 : a - 1;
+            b = (b == n_samples - 1) ? 0             : b + 1;
         }
 
         acc += m_samples[a] * m_taps[n_taps];
