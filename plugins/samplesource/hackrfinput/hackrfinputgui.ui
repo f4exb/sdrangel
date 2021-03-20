@@ -215,6 +215,13 @@
      <property name="bottomMargin">
       <number>2</number>
      </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="corrLabel">
+       <property name="text">
+        <string>Auto</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
       <widget class="ButtonSwitch" name="dcOffset">
        <property name="toolTip">
@@ -235,40 +242,17 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="corrLabel">
+     <item row="0" column="3">
+       <widget class="ButtonSwitch" name="autoBBF">
+       <property name="toolTip">
+        <string>Bandpass Filter auto select</string>
+       </property>
        <property name="text">
-        <string>Auto</string>
+        <string>BBF</string>
        </property>
       </widget>
      </item>
      <item row="0" column="4">
-      <widget class="QCheckBox" name="biasT">
-       <property name="toolTip">
-        <string>Activate antenna bias tee</string>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="text">
-        <string>Bias T</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5">
-      <widget class="QCheckBox" name="lnaExt">
-       <property name="toolTip">
-        <string>Extra LNA +14dB</string>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="text">
-        <string>RF Amp</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3">
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -281,7 +265,33 @@
        </property>
       </spacer>
      </item>
+     <item row="0" column="5">
+      <widget class="QCheckBox" name="biasT">
+       <property name="toolTip">
+        <string>Activate antenna bias tee</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Bias T</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="6">
+      <widget class="QCheckBox" name="lnaExt">
+       <property name="toolTip">
+        <string>Extra LNA +14dB</string>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>RF Amp</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="7">
       <widget class="TransverterButton" name="transverter">
        <property name="maximumSize">
         <size>

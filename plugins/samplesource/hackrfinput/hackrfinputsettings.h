@@ -40,6 +40,7 @@ struct HackRFInputSettings {
 	bool m_lnaExt;
 	bool m_dcBlock;
 	bool m_iqCorrection;
+	bool m_autoBBF;
     bool   m_transverterMode;
 	qint64 m_transverterDeltaFrequency;
     bool m_iqOrder;

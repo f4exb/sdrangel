@@ -44,6 +44,7 @@ These buttons control the local DSP auto correction options:
 
   - **DC**: auto remove DC component
   - **IQ**: auto make I/Q balance. The DC correction must be enabled for this to be effective.
+  - **BBF**: auto select bandpass filter setting. Compute best value depending on sample rate.
 
 <h3>4: Bias tee</h3>
 

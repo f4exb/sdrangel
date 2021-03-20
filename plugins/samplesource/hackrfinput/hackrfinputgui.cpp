@@ -246,6 +246,7 @@ void HackRFInputGui::displaySettings()
 	ui->LOppmText->setText(QString("%1").arg(QString::number(m_settings.m_LOppmTenths/10.0, 'f', 1)));
 	ui->dcOffset->setChecked(m_settings.m_dcBlock);
 	ui->iqImbalance->setChecked(m_settings.m_iqCorrection);
+    ui->autoBBF->setChecked(m_settings.m_autoBBF);
 
     displaySampleRate();
 
@@ -313,10 +314,23 @@ void HackRFInputGui::on_iqImbalance_toggled(bool checked)
 	sendSettings();
 }
 
+void HackRFInputGui::on_autoBBF_toggled(bool checked)
+{
+    m_settings.m_autoBBF = checked;
+    if(checked){
+        m_settings.m_bandwidth = hackrf_compute_baseband_filter_bw(m_settings.m_devSampleRate);
+        ui->bbFilter->blockSignals(true);
+        displaySettings();
+        ui->bbFilter->blockSignals(false);
+        sendSettings();
+    }
+}
+
 void HackRFInputGui::on_bbFilter_currentIndexChanged(int index)
 {
     int newBandwidth = HackRFBandwidths::getBandwidth(index);
 	m_settings.m_bandwidth = newBandwidth * 1000;
+    ui->autoBBF->setChecked(false);
 	sendSettings();
 }
 
@@ -344,6 +358,13 @@ void HackRFInputGui::on_sampleRate_changed(quint64 value)
 
     if (!m_sampleRateMode) {
         m_settings.m_devSampleRate <<= m_settings.m_log2Decim;
+    }
+
+    if(m_settings.m_autoBBF){
+        m_settings.m_bandwidth = hackrf_compute_baseband_filter_bw(m_settings.m_devSampleRate);
+        ui->bbFilter->blockSignals(true);
+        displaySettings();
+        ui->bbFilter->blockSignals(false);
     }
 
     displayFcTooltip();

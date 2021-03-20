@@ -39,6 +39,7 @@ void HackRFInputSettings::resetToDefaults()
 	m_vgaGain = 16;
 	m_dcBlock = false;
 	m_iqCorrection = false;
+	m_autoBBF = true;
 	m_devSampleRate = 2400000;
     m_transverterMode = false;
 	m_transverterDeltaFrequency = 0;
@@ -71,6 +72,7 @@ QByteArray HackRFInputSettings::serialize() const
     s.writeBool(18, m_transverterMode);
     s.writeS64(19, m_transverterDeltaFrequency);
     s.writeBool(20, m_iqOrder);
+    s.writeBool(21, m_autoBBF);
 
 	return s.final();
 }
@@ -117,6 +119,7 @@ bool HackRFInputSettings::deserialize(const QByteArray& data)
         d.readBool(18, &m_transverterMode, false);
         d.readS64(19, &m_transverterDeltaFrequency, 0);
         d.readBool(20, &m_iqOrder, true);
+        d.readBool(21, &m_autoBBF, true);
 
 		return true;
 	}
