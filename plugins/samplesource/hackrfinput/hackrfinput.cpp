@@ -375,6 +375,12 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
 	                qDebug("HackRFInput::applySettings: sample rate set to %llu S/s", settings.m_devSampleRate);
 	                m_hackRFThread->setSamplerate(settings.m_devSampleRate);
 			    }
+    			rc = (hackrf_error) hackrf_set_baseband_filter_bandwidth(m_dev, m_settings.m_bandwidth); // restore baseband bandwidth filter. libhackrf automatically sets baseband filter when sample rate is set.
+				if (rc != HACKRF_SUCCESS) {
+					qDebug("HackRFInput::applySettings: Restore baseband filter failed: %s", hackrf_error_name(rc));
+				} else {
+					qDebug() << "HackRFInput:applySettings: Baseband BW filter restored to " << m_settings.m_bandwidth << " Hz";
+				}
 			}
 		}
 	}
