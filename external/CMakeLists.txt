@@ -636,8 +636,8 @@ if (WIN32 OR APPLE)
             set(LIMESUITE_LIBRARY "${SDRANGEL_BINARY_LIB_DIR}/LimeSuite.lib" CACHE INTERNAL "")
         endif ()
         ExternalProject_Add(limesuite
-                GIT_REPOSITORY https://github.com/myriadrf/LimeSuite.git
-                GIT_TAG ${LIMESUITE_TAG}
+                GIT_REPOSITORY https://github.com/f4exb/LimeSuite.git
+                GIT_TAG "msvc_fix"
                 PREFIX "${EXTERNAL_BUILD_LIBRARIES}/limesuite"
                 CMAKE_ARGS ${COMMON_CMAKE_ARGS}
                 -DLIME_SUITE_EXTVER=release
