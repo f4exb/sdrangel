@@ -651,45 +651,44 @@ bool DATVideoRender::RenderStream()
 
                 if (gotFrame)
                 {
-                    int16_t *audioBuffer;
+                    int16_t *audioBuffer = nullptr;
                     av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
-                    int frame_count = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
+                    int samples_per_channel = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
+                    if (samples_per_channel < m_frame->nb_samples) {
+                        qDebug("DATVideoRender::RenderStream: converted samples missing %d/%d returned", samples_per_channel, m_frame->nb_samples);
+                    }
 
                     // direct writing:
-                    // int ret = m_audioFifo->write((const quint8*) &audioBuffer[0], frame_count);
-
-                    // if (ret < frame_count) {
-                    //     qDebug("DATVideoRender::RenderStream: audio frames missing %d vs %d", ret, frame_count);
-                    // }
+                    std::for_each(audioBuffer, audioBuffer + 2*samples_per_channel, [this](int16_t &x) {
+                        x *= m_audioVolume;
+                    });
+                    int ret = m_audioFifo->write((const quint8*) &audioBuffer[0], samples_per_channel);
+                    if (ret < samples_per_channel) {
+                        qDebug("DATVideoRender::RenderStream: audio samples missing %d/%d written", ret, samples_per_channel);
+                    }
 
                     // buffered writing:
-                    // if (m_audioFifoBufferIndex + frame_count < m_audioFifoBufferSize)
+                    // if (m_audioFifoBufferIndex + samples_per_channel < m_audioFifoBufferSize)
                     // {
-                    //     std::copy(&audioBuffer[0], &audioBuffer[2*frame_count], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
-                    //     m_audioFifoBufferIndex += frame_count;
+                    //     std::copy(&audioBuffer[0], &audioBuffer[2*samples_per_channel], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                    //     m_audioFifoBufferIndex += samples_per_channel;
                     // }
                     // else
                     // {
                     //     int remainder = m_audioFifoBufferSize - m_audioFifoBufferIndex;
                     //     std::copy(&audioBuffer[0], &audioBuffer[2*remainder], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
-                    //     m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
-                    //     std::copy(&audioBuffer[2*remainder], &audioBuffer[2*frame_count], &m_audioFifoBuffer[0]);
-                    //     m_audioFifoBufferIndex = frame_count - remainder;
+                    //     std::for_each(m_audioFifoBuffer, m_audioFifoBuffer+2*m_audioFifoBufferSize, [this](int16_t &x) {
+                    //         x *= m_audioVolume;
+                    //     });
+                    //     int ret = m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
+                    //     if (ret < m_audioFifoBufferSize) {
+                    //         qDebug("DATVideoRender::RenderStream: audio samples missing %d/%d written", ret, m_audioFifoBufferSize);
+                    //     }
+                    //     std::copy(&audioBuffer[2*remainder], &audioBuffer[2*samples_per_channel], &m_audioFifoBuffer[0]);
+                    //     m_audioFifoBufferIndex = samples_per_channel - remainder;
                     // }
 
-                    // Apply volume:
-                    for (int i = 0; i < frame_count; i++)
-                    {
-                        m_audioFifoBuffer[2*m_audioFifoBufferIndex]   = m_audioVolume * audioBuffer[2*i];
-                        m_audioFifoBuffer[2*m_audioFifoBufferIndex+1] = m_audioVolume * audioBuffer[2*i+1];
-                        m_audioFifoBufferIndex++;
-
-                        if (m_audioFifoBufferIndex >= m_audioFifoBufferSize)
-                        {
-                            m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
-                            m_audioFifoBufferIndex = 0;
-                        }
-                    }
+                    av_freep(&audioBuffer);
                 }
             }
             else
