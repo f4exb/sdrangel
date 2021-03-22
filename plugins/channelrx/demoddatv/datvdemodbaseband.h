@@ -97,7 +97,7 @@ public:
     bool audioDecodeOK() { return m_sink.audioDecodeOK(); }
     bool videoActive() { return m_sink.videoActive(); }
     bool videoDecodeOK() { return m_sink.videoDecodeOK(); }
-    bool PlayVideo(bool blnStartStop) { return m_sink.PlayVideo(blnStartStop); }
+    bool playVideo() { return m_sink.playVideo(); }
 
     int getModcodModulation() const { return m_sink.getModcodModulation(); }
     int getModcodCodeRate() const { return m_sink.getModcodCodeRate(); }

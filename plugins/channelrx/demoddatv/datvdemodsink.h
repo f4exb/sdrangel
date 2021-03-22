@@ -69,7 +69,7 @@ public:
     bool videoActive();
     bool videoDecodeOK();
 
-    bool PlayVideo(bool blnStartStop);
+    bool playVideo();
 
     int GetSampleRate();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30
@@ -302,7 +302,6 @@ private:
 
     bool m_blnInitialized;
     bool m_blnRenderingVideo;
-    bool m_blnStartStopVideo;
     bool m_cstlnSetByModcod;
     int m_modcodModulation;
     int m_modcodCodeRate;

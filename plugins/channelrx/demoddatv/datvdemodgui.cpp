@@ -546,7 +546,7 @@ void DATVDemodGUI::tick()
     m_intPreviousDecodedData = m_intLastDecodedData;
 
     //Try to start video rendering
-    m_objDATVDemod->PlayVideo(false);
+    m_objDATVDemod->playVideo();
 
     return;
 }

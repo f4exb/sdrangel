@@ -80,7 +80,7 @@ public:
     bool videoActive() { return m_basebandSink->videoActive(); }
     bool videoDecodeOK() { return m_basebandSink->videoDecodeOK(); }
 
-    bool PlayVideo(bool blnStartStop) { return m_basebandSink->PlayVideo(blnStartStop); }
+    bool playVideo() { return m_basebandSink->playVideo(); }
 
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     int getModcodModulation() const { return m_basebandSink->getModcodModulation(); }

@@ -44,7 +44,6 @@ DATVDemodSink::DATVDemodSink() :
     m_cnrMeter(nullptr),
     m_audioFifo(48000),
     m_blnRenderingVideo(false),
-    m_blnStartStopVideo(false),
     m_cstlnSetByModcod(false),
     m_modcodModulation(-1),
     m_modcodCodeRate(-1),
@@ -152,7 +151,7 @@ bool DATVDemodSink::videoDecodeOK()
     }
 }
 
-bool DATVDemodSink::PlayVideo(bool blnStartStop)
+bool DATVDemodSink::playVideo()
 {
     if (m_objVideoStream == nullptr) {
         return false;
@@ -166,20 +165,7 @@ bool DATVDemodSink::PlayVideo(bool blnStartStop)
         return false;
     }
 
-    if (m_blnStartStopVideo && !blnStartStop) {
-        return true;
-    }
-
-    if (blnStartStop == true) {
-        m_blnStartStopVideo = true;
-    }
-
-    if (m_objRenderThread->isRunning())
-    {
-        if (blnStartStop == true) {
-            m_objRenderThread->stopRendering();
-        }
-
+    if (m_objRenderThread->isRunning()) {
         return true;
     }
 
