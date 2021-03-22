@@ -770,7 +770,7 @@ void DATVDemodGUI::on_udpTS_clicked(bool checked)
 void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
 {
 
-    if (objMetaData != nullptr)
+    if (objMetaData)
     {
         QString strMetaData = "";
 
@@ -794,6 +794,8 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
         if (objMetaData->Height > 0) {
             ui->screenTV_2->setFixedWidth((int)objMetaData->Width*(270.0f/(float)objMetaData->Height));
         }
+
+        delete objMetaData;
     }
 }
 

@@ -66,8 +66,13 @@ struct DataTSMetaData2
 
     DataTSMetaData2()
     {
-        PID = -1;
+        reset();
+    }
+
+    void reset()
+    {
         CodecID = -1;
+        PID = -1;
         Program = "";
         Stream = "";
         Width = -1;
@@ -75,6 +80,7 @@ struct DataTSMetaData2
         BitRate = -1;
         Channels = -1;
         CodecDescription = "";
+
         OK_Data = false;
         OK_Decoding = false;
         OK_TransportStream = false;
@@ -107,9 +113,8 @@ class DATVideoRender : public TVScreen
     bool getAudioDecodeOK() const { return m_audioDecodeOK; }
     bool getVideoDecodeOK() const { return m_videoDecodeOK; }
 
-    struct DataTSMetaData2 MetaData;
-
   private:
+    struct DataTSMetaData2 m_metaData;
     QWidget *m_parentWidget;
     Qt::WindowFlags m_originalWindowFlags;
     QSize m_originalSize;

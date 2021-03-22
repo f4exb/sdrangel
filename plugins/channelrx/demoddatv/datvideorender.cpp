@@ -156,21 +156,8 @@ static int64_t SeekFunction(void *opaque, int64_t offset, int whence)
 
 void DATVideoRender::ResetMetaData()
 {
-    MetaData.CodecID = -1;
-    MetaData.PID = -1;
-    MetaData.Program = "";
-    MetaData.Stream = "";
-    MetaData.Width = -1;
-    MetaData.Height = -1;
-    MetaData.BitRate = -1;
-    MetaData.Channels = -1;
-    MetaData.CodecDescription = "";
-
-    MetaData.OK_Decoding = false;
-    MetaData.OK_TransportStream = false;
-    MetaData.OK_VideoStream = false;
-
-    emit onMetaDataChanged(&MetaData);
+    m_metaData.reset();
+    emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 }
 
 bool DATVideoRender::InitializeFFMPEG()
@@ -248,11 +235,11 @@ bool DATVideoRender::PreprocessStream()
 
     //Meta Data
 
-    MetaData.PID = m_formatCtx->streams[m_videoStreamIndex]->id;
-    MetaData.CodecID = m_videoDecoderCtx->codec_id;
-    MetaData.OK_TransportStream = true;
-    MetaData.Program = "";
-    MetaData.Stream = "";
+    m_metaData.PID = m_formatCtx->streams[m_videoStreamIndex]->id;
+    m_metaData.CodecID = m_videoDecoderCtx->codec_id;
+    m_metaData.OK_TransportStream = true;
+    m_metaData.Program = "";
+    m_metaData.Stream = "";
 
     if (m_formatCtx->programs && m_formatCtx->programs[m_videoStreamIndex])
     {
@@ -261,7 +248,7 @@ bool DATVideoRender::PreprocessStream()
 
         if (buffer != nullptr)
         {
-            MetaData.Program = QString("%1").arg(buffer);
+            m_metaData.Program = QString("%1").arg(buffer);
         }
     }
 
@@ -271,10 +258,10 @@ bool DATVideoRender::PreprocessStream()
 
     if (buffer != nullptr)
     {
-        MetaData.Stream = QString("%1").arg(buffer);
+        m_metaData.Stream = QString("%1").arg(buffer);
     }
 
-    emit onMetaDataChanged(&MetaData);
+    emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 
     //Decoder
     videoCodec = avcodec_find_decoder(m_videoDecoderCtx->codec_id);
@@ -316,14 +303,14 @@ bool DATVideoRender::PreprocessStream()
     }
 
     m_frameCount = 0;
-    MetaData.Width = m_videoDecoderCtx->width;
-    MetaData.Height = m_videoDecoderCtx->height;
-    MetaData.BitRate = m_videoDecoderCtx->bit_rate;
-    MetaData.Channels = m_videoDecoderCtx->channels;
-    MetaData.CodecDescription = QString("%1").arg(videoCodec->long_name);
-    MetaData.OK_VideoStream = true;
+    m_metaData.Width = m_videoDecoderCtx->width;
+    m_metaData.Height = m_videoDecoderCtx->height;
+    m_metaData.BitRate = m_videoDecoderCtx->bit_rate;
+    m_metaData.Channels = m_videoDecoderCtx->channels;
+    m_metaData.CodecDescription = QString("%1").arg(videoCodec->long_name);
+    m_metaData.OK_VideoStream = true;
 
-    emit onMetaDataChanged(&MetaData);
+    emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 
     // Prepare Audio Codec
 
@@ -395,16 +382,16 @@ bool DATVideoRender::OpenStream(DATVideostream *device)
     if (device->bytesAvailable() <= 0)
     {
         qDebug() << "DATVideoRender::OpenStream no data available";
-        MetaData.OK_Data = false;
-        emit onMetaDataChanged(&MetaData);
+        m_metaData.OK_Data = false;
+        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
         return false;
     }
 
     //Only once execution
     if (m_running.testAndSetOrdered(0,1))
     {
-        MetaData.OK_Data = true;
-        emit onMetaDataChanged(&MetaData);
+        m_metaData.OK_Data = true;
+        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 
         InitializeFFMPEG();
 
@@ -602,10 +589,10 @@ bool DATVideoRender::RenderStream()
                         m_currentRenderWidth = m_frame->width;
                         m_currentRenderHeight = m_frame->height;
 
-                        MetaData.Width = m_frame->width;
-                        MetaData.Height = m_frame->height;
-                        MetaData.OK_Decoding = true;
-                        emit onMetaDataChanged(&MetaData);
+                        m_metaData.Width = m_frame->width;
+                        m_metaData.Height = m_frame->height;
+                        m_metaData.OK_Decoding = true;
+                        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
                     }
 
                     //Frame rendering
@@ -797,7 +784,7 @@ bool DATVideoRender::CloseStream(QIODevice *device)
         m_currentRenderHeight = -1;
 
         ResetMetaData();
-        emit onMetaDataChanged(&MetaData);
+        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         m_running.storeRelaxed(0);
