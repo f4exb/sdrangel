@@ -27,25 +27,31 @@ template <typename T>
 struct complex
 {
     T re, im;
+
     complex() {}
+
     complex(T x) : re(x), im(0) {}
     complex(T x, T y) : re(x), im(y) {}
+
     inline void operator+=(const complex<T> &x)
     {
         re += x.re;
         im += x.im;
     }
+
     inline void operator*=(const complex<T> &c)
     {
         T tre = re * c.re - im * c.im;
         im = re * c.im + im * c.re;
         re = tre;
     }
+
     inline void operator-=(const complex<T> &x)
     {
         re-=x.re;
         im-=x.im;
     }
+
     inline void operator*=(const T &k)
     {
         re *= k;
@@ -86,8 +92,11 @@ template <typename T>
 T dotprod(const T *u, const T *v, int n)
 {
     T acc = 0;
-    while (n--)
+
+    while (n--) {
         acc += (*u++) * (*v++);
+    }
+
     return acc;
 }
 
@@ -101,8 +110,11 @@ template <typename T>
 T cnorm2(const complex<T> *p, int n)
 {
     T res = 0;
-    for (; n--; ++p)
+
+    for (; n--; ++p) {
         res += cnorm2(*p);
+    }
+
     return res;
 }
 
@@ -110,8 +122,10 @@ T cnorm2(const complex<T> *p, int n)
 template <typename T>
 inline complex<T> conjprod(const complex<T> &u, const complex<T> &v)
 {
-    return complex<T>(u.re * v.re + u.im * v.im,
-                      u.re * v.im - u.im * v.re);
+    return complex<T>(
+        u.re * v.re + u.im * v.im,
+        u.re * v.im - u.im * v.re
+    );
 }
 
 // Return sum(conj(u[i])*v[i])
@@ -119,8 +133,11 @@ template <typename T>
 complex<T> conjprod(const complex<T> *u, const complex<T> *v, int n)
 {
     complex<T> acc = 0;
-    while (n--)
+
+    while (n--) {
         acc += conjprod(*u++, *v++);
+    }
+
     return acc;
 }
 
@@ -140,6 +157,7 @@ int log2i(uint64_t x);
 struct trig16
 {
     complex<float> lut[65536]; // TBD static and shared
+
     trig16()
     {
         for (int a = 0; a < 65536; ++a)
@@ -149,10 +167,12 @@ struct trig16
             lut[a].im = sinf(af);
         }
     }
+
     inline const complex<float> &expi(uint16_t a) const
     {
         return lut[a];
     }
+
     // a must fit in a int32_t, otherwise behaviour is undefined
     inline const complex<float> &expi(float a) const
     {
@@ -162,7 +182,8 @@ struct trig16
 
 // Modulo with signed result in [-m/2..m/2[
 
-inline float fmodfs(float v, float m) {
+inline float fmodfs(float v, float m)
+{
     v = fmodf(v, m);
     return (v>=m/2) ? v-m : (v<-m/2) ? v+m : v;
 }
@@ -170,22 +191,41 @@ inline float fmodfs(float v, float m) {
 // Simple statistics
 
 template<typename T>
-struct statistics {
-    statistics() { reset(); }
-    void reset() { vm1=vm2=0; count=0; vmin=vmax=99;/*comp warning*/ }
-    void add(const T &v) {
+struct statistics
+{
+    statistics() {
+        reset();
+    }
+
+    void reset()
+    {
+        vm1 = vm2 = 0;
+        count = 0;
+        vmin = vmax = 99;/*comp warning*/
+    }
+
+    void add(const T &v)
+    {
         vm1 += v;
         vm2 += v*v;
-        if ( count == 0 ) { vmin = vmax = v; }
-        else if ( v < vmin ) { vmin = v; }
-        else if ( v > vmax ) { vmax = v; }
+
+        if ( count == 0 ) {
+            vmin = vmax = v;
+        } else if (
+            v < vmin ) { vmin = v;
+        } else if ( v > vmax ) {
+            vmax = v;
+        }
+
         ++count;
     }
+
     T average() { return vm1 / count; }
     T variance() { return vm2/count - (vm1/count)*(vm1/count); }
     T stddev() { return gen_sqrt(variance()); }
     T min() { return vmin; }
     T max() { return vmax; }
+
 private:
     T vm1, vm2;    // Moments
     T vmin, vmax;  // Range

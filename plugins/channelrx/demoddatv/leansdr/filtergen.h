@@ -30,34 +30,50 @@ template <typename T>
 void normalize_power(int n, T *coeffs, float gain = 1)
 {
     float s2 = 0;
-    for (int i = 0; i < n; ++i)
+
+    for (int i = 0; i < n; ++i) {
         s2 = s2 + coeffs[i] * coeffs[i]; // TBD complex
-    if (s2)
+    }
+
+    if (s2) {
         gain /= gen_sqrt(s2);
-    for (int i = 0; i < n; ++i)
+    }
+
+    for (int i = 0; i < n; ++i) {
         coeffs[i] = coeffs[i] * gain;
+    }
 }
 
 template <typename T>
 void normalize_dcgain(int n, T *coeffs, float gain = 1)
 {
     float s = 0;
-    for (int i = 0; i < n; ++i)
+
+    for (int i = 0; i < n; ++i) {
         s = s + coeffs[i];
-    if (s)
+    }
+
+    if (s) {
         gain /= s;
-    for (int i = 0; i < n; ++i)
+    }
+
+    for (int i = 0; i < n; ++i) {
         coeffs[i] = coeffs[i] * gain;
+    }
 }
 
 template <typename T>
 void cancel_dcgain(int n, T *coeffs)
 {
     float s = 0;
-    for (int i = 0; i < n; ++i)
+
+    for (int i = 0; i < n; ++i) {
         s = s + coeffs[i];
-    for (int i = 0; i < n; ++i)
+    }
+
+    for (int i = 0; i < n; ++i) {
         coeffs[i] -= s / n;
+    }
 }
 
 // Generate coefficients for a sinc filter.
@@ -68,6 +84,7 @@ int lowpass(int order, float Fcut, T **coeffs, float gain = 1)
 {
     int ncoeffs = order + 1;
     *coeffs = new T[ncoeffs];
+
     for (int i = 0; i < ncoeffs; ++i)
     {
         float t = i - (ncoeffs - 1) * 0.5;
@@ -80,6 +97,7 @@ int lowpass(int order, float Fcut, T **coeffs, float gain = 1)
 #endif
         (*coeffs)[i] = sinc * window;
     }
+
     normalize_dcgain(ncoeffs, *coeffs, gain);
     return ncoeffs;
 }
@@ -93,23 +111,31 @@ int root_raised_cosine(int order, float Fs, float rolloff, T **coeffs, float gai
     float B = rolloff, pi = M_PI;
     int ncoeffs = (order + 1) | 1;
     *coeffs = new T[ncoeffs];
+
     for (int i = 0; i < ncoeffs; ++i)
     {
         int t = i - ncoeffs / 2;
         float c;
+
         if (t == 0)
+        {
             c = (1 - B + 4*B/pi);
+        }
         else
         {
             float tT = t * Fs;
             float den = pi * tT * (1 - (4 * B * tT) * (4 * B * tT));
-            if (!den)
+
+            if (!den) {
                 c = B/sqrtf(2) * ( (1+2/pi)*sinf(pi/(4*B)) + (1-2/pi)*cosf(pi/(4*B)) );
-            else
+            } else {
                 c = ( sinf(pi*tT*(1-B)) + 4*B*tT*cosf(pi*tT*(1+B)) ) / den;
+            }
         }
+
         (*coeffs)[i] = Fs * c * gain;
     }
+
     return ncoeffs;
 }
 

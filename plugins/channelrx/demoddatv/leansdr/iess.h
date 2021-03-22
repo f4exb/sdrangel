@@ -28,22 +28,28 @@ namespace leansdr
 
 struct etr192_descrambler : runnable
 {
-    etr192_descrambler(scheduler *sch,
-                       pipebuf<u8> &_in,  // Packed scrambled bits
-                       pipebuf<u8> &_out) // Packed bits
-        : runnable(sch, "etr192_dec"),
-          in(_in), out(_out),
-          shiftreg(0), counter(0)
+    etr192_descrambler(
+        scheduler *sch,
+        pipebuf<u8> &_in, // Packed scrambled bits
+        pipebuf<u8> &_out // Packed bits
+    ) :
+        runnable(sch, "etr192_dec"),
+        in(_in),
+        out(_out),
+        shiftreg(0),
+        counter(0)
     {
     }
 
     void run()
     {
         int count = min(in.readable(), out.writable());
+
         for (u8 *pin = in.rd(), *pend = pin + count, *pout = out.wr();
              pin < pend; ++pin, ++pout)
         {
             u8 byte_in = *pin, byte_out = 0;
+
             for (int b = 8; b--; byte_in <<= 1)
             {
                 // Levels before clock transition
@@ -61,8 +67,10 @@ struct etr192_descrambler : runnable
                 counter = reset_counter ? 0 : (counter + 1) & 31;
                 byte_out = (byte_out << 1) | bit_out;
             }
+
             *pout = byte_out;
         }
+
         in.read(count);
         out.written(count);
     }

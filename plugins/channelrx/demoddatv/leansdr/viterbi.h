@@ -57,17 +57,20 @@ struct trellis
     trellis()
     {
         for (TS s = 0; s < NSTATES; ++s)
-            for (int cs = 0; cs < NCS; ++cs)
+        {
+            for (int cs = 0; cs < NCS; ++cs) {
                 states[s].branches[cs].pred = NOSTATE;
+            }
+        }
     }
 
     // TBD Polynomial width should be a template parameter ?
     void init_convolutional(const uint16_t G[])
     {
-        if (NCS & (NCS - 1))
-        {
+        if (NCS & (NCS - 1)) {
             fprintf(stderr, "NCS must be a power of 2\n");
         }
+
         // Derive number of polynomials from NCS.
         int nG = log2i(NCS);
 
@@ -79,20 +82,29 @@ struct trellis
                 uint64_t shiftreg = s; // TBD type
                 // Reverse bits
                 TUS us_rev = 0;
+
                 for (int b = 1; b < NUS; b *= 2)
-                    if (us & b)
+                {
+                    if (us & b) {
                         us_rev |= (NUS / 2 / b);
+                    }
+                }
+
                 shiftreg |= us_rev * NSTATES;
                 uint32_t cs = 0; // TBD type
-                for (int g = 0; g < nG; ++g)
+
+                for (int g = 0; g < nG; ++g) {
                     cs = (cs << 1) | parity(shiftreg & G[g]);
+                }
+
                 shiftreg /= NUS; // Shift bits for 1 uncoded symbol
                 // [us] at state [s] emits [cs] and leads to state [shiftreg].
                 typename state::branch *b = &states[shiftreg].branches[cs];
-                if (b->pred != NOSTATE)
-                {
+
+                if (b->pred != NOSTATE) {
                     fprintf(stderr, "Invalid convolutional code\n");
                 }
+
                 b->pred = s;
                 b->us = us;
             }
@@ -104,14 +116,18 @@ struct trellis
         for (int s = 0; s < NSTATES; ++s)
         {
             fprintf(stderr, "State %02x:", s);
+
             for (int cs = 0; cs < NCS; ++cs)
             {
                 typename state::branch *b = &states[s].branches[cs];
-                if (b->pred == NOSTATE)
+
+                if (b->pred == NOSTATE) {
                     fprintf(stderr, "     - ");
-                else
+                } else {
                     fprintf(stderr, "   %02x+%x", b->pred, b->us);
+                }
             }
+
             fprintf(stderr, "\n");
         }
     }
@@ -125,8 +141,8 @@ template <typename TUS,
 struct viterbi_dec_interface
 {
     virtual ~viterbi_dec_interface() {}
-    virtual TUS update(TBM *costs, TPM *quality = NULL) = 0;
-    virtual TUS update(TCS s, TBM cost, TPM *quality = NULL) = 0;
+    virtual TUS update(TBM *costs, TPM *quality = nullptr) = 0;
+    virtual TUS update(TCS s, TBM cost, TPM *quality = nullptr) = 0;
 };
 
 template <typename TS, int NSTATES,
@@ -144,6 +160,7 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
         TPM cost; // Metric of best path leading to this state
         TP path;  // Best path leading to this state
     };
+
     typedef state statebank[NSTATES];
     state statebanks[2][NSTATES];
     statebank *states, *newstates; // Alternate between banks
@@ -152,46 +169,57 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
     {
         states = &statebanks[0];
         newstates = &statebanks[1];
-        for (TS s = 0; s < NSTATES; ++s)
+
+        for (TS s = 0; s < NSTATES; ++s) {
             (*states)[s].cost = 0;
+        }
+
         // Determine max value that can fit in TPM
         max_tpm = (TPM)0 - 1;
+
         if (max_tpm < 0)
         {
             // TPM is signed
-            for (max_tpm = 0; max_tpm * 2 + 1 > max_tpm; max_tpm = max_tpm * 2 + 1)
-                ;
+            for (max_tpm = 0; max_tpm * 2 + 1 > max_tpm; max_tpm = max_tpm * 2 + 1);
         }
     }
 
     // Update with full metric
 
-    TUS update(TBM costs[NCS], TPM *quality = NULL)
+    TUS update(TBM costs[NCS], TPM *quality = nullptr)
     {
         TPM best_tpm = max_tpm, best2_tpm = max_tpm;
         TS best_state = 0;
+
         // Update all states
         for (int s = 0; s < NSTATES; ++s)
         {
             TPM best_m = max_tpm;
-            typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *best_b = NULL;
+            typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *best_b = nullptr;
+
             // Select best branch
             for (int cs = 0; cs < NCS; ++cs)
             {
                 typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b =
                     &trell->states[s].branches[cs];
-                if (b->pred == trell->NOSTATE)
+
+                if (b->pred == trell->NOSTATE) {
                     continue;
+                }
+
                 TPM m = (*states)[b->pred].cost + costs[cs];
+
                 if (m <= best_m)
                 { // <= guarantees one match
                     best_m = m;
                     best_b = b;
                 }
             }
+
             (*newstates)[s].path = (*states)[best_b->pred].path;
             (*newstates)[s].path.append(best_b->us);
             (*newstates)[s].cost = best_m;
+
             // Select best and second-best states
             if (best_m < best_tpm)
             {
@@ -200,7 +228,9 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
                 best_tpm = best_m;
             }
             else if (best_m < best2_tpm)
+            {
                 best2_tpm = best_m;
+            }
         }
         // Swap banks
         {
@@ -208,9 +238,11 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
             states = newstates;
             newstates = tmp;
         }
+
         // Prevent overflow of path metrics
-        for (TS s = 0; s < NSTATES; ++s)
+        for (TS s = 0; s < NSTATES; ++s) {
             (*states)[s].cost -= best_tpm;
+        }
 #if 0
       // Observe that the min-max range remains bounded
       fprintf(stderr,"-%2d = [", best_tpm);
@@ -218,8 +250,9 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
       fprintf(stderr," ]\n");
 #endif
         // Return difference between best and second-best as quality metric.
-        if (quality)
+        if (quality) {
             *quality = best2_tpm - best_tpm;
+        }
         // Return uncoded symbol of best path
         return (*states)[best_state].path.read();
     }
@@ -228,23 +261,29 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
     // The costs provided must be negative.
     // The other symbols will be assigned a cost of 0.
 
-    TUS update(int nm, TCS cs[], TBM costs[], TPM *quality = NULL)
+    TUS update(int nm, TCS cs[], TBM costs[], TPM *quality = nullptr)
     {
         TPM best_tpm = max_tpm, best2_tpm = max_tpm;
         TS best_state = 0;
+
         // Update all states
         for (int s = 0; s < NSTATES; ++s)
         {
             // Select best branch among those for with metrics are provided
             TPM best_m = max_tpm;
-            typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *best_b = NULL;
+            typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *best_b = nullptr;
+
             for (int im = 0; im < nm; ++im)
             {
                 typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b =
                     &trell->states[s].branches[cs[im]];
-                if (b->pred == trell->NOSTATE)
+
+                if (b->pred == trell->NOSTATE) {
                     continue;
+                }
+
                 TPM m = (*states)[b->pred].cost + costs[im];
+
                 if (m <= best_m)
                 { // <= guarantees one match
                     best_m = m;
@@ -260,9 +299,13 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
                 {
                     typename trellis<TS, NSTATES, TUS, NUS, NCS>::state::branch *b =
                         &trell->states[s].branches[cs];
-                    if (b->pred == trell->NOSTATE)
+
+                    if (b->pred == trell->NOSTATE) {
                         continue;
+                    }
+
                     TPM m = (*states)[b->pred].cost;
+
                     if (m <= best_m)
                     {
                         best_m = m;
@@ -270,9 +313,11 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
                     }
                 }
             }
+
             (*newstates)[s].path = (*states)[best_b->pred].path;
             (*newstates)[s].path.append(best_b->us);
             (*newstates)[s].cost = best_m;
+
             // Select best states
             if (best_m < best_tpm)
             {
@@ -281,7 +326,9 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
                 best_tpm = best_m;
             }
             else if (best_m < best2_tpm)
+            {
                 best2_tpm = best_m;
+            }
         }
         // Swap banks
         {
@@ -290,8 +337,9 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
             newstates = tmp;
         }
         // Prevent overflow of path metrics
-        for (TS s = 0; s < NSTATES; ++s)
+        for (TS s = 0; s < NSTATES; ++s) {
             (*states)[s].cost -= best_tpm;
+        }
 #if 0
       // Observe that the min-max range remains bounded
       fprintf(stderr,"-%2d = [", best_tpm);
@@ -299,8 +347,10 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
       fprintf(stderr," ]\n");
 #endif
         // Return difference between best and second-best as quality metric.
-        if (quality)
+        if (quality) {
             *quality = best2_tpm - best_tpm;
+        }
+
         // Return uncoded symbol of best path
         return (*states)[best_state].path.read();
     }
@@ -308,17 +358,21 @@ struct viterbi_dec : viterbi_dec_interface<TUS, TCS, TBM, TPM>
     // Update with single-symbol metric.
     // cost must be negative.
 
-    TUS update(TCS cs, TBM cost, TPM *quality = NULL)
-    {
+    TUS update(TCS cs, TBM cost, TPM *quality = nullptr) {
         return update(1, &cs, &cost, quality);
     }
 
     void dump()
     {
         fprintf(stderr, "[");
+
         for (TS s = 0; s < NSTATES; ++s)
-            if (states[s].cost)
+        {
+            if (states[s].cost) {
                 fprintf(stderr, " %02x:%d", s, states[s].cost);
+            }
+        }
+
         fprintf(stderr, "\n");
     }
 

@@ -30,9 +30,12 @@ const char *LDPCInterface::mc_tabnames[2][32] = { // [shortframes][modcod]
 
 LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 {
-	if (!strcmp(standard, "S2")) {
-		if (prefix == 'B') {
-			switch (number) {
+	if (!strcmp(standard, "S2"))
+	{
+		if (prefix == 'B')
+		{
+			switch (number)
+			{
 			case 1:
 				return new LDPC<DVB_S2_TABLE_B1>();
 			case 2:
@@ -57,8 +60,11 @@ LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 				return new LDPC<DVB_S2_TABLE_B11>();
 			}
 		}
-		if (prefix == 'C') {
-			switch (number) {
+
+		if (prefix == 'C')
+		{
+			switch (number)
+			{
 			case 1:
 				return new LDPC<DVB_S2_TABLE_C1>();
 			case 2:
@@ -82,9 +88,13 @@ LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 			}
 		}
 	}
-	if (!strcmp(standard, "S2X")) {
-		if (prefix == 'B') {
-			switch (number) {
+
+	if (!strcmp(standard, "S2X"))
+	{
+		if (prefix == 'B')
+		{
+			switch (number)
+			{
 			case 1:
 				return new LDPC<DVB_S2X_TABLE_B1>();
 			case 2:
@@ -135,8 +145,11 @@ LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 				return new LDPC<DVB_S2X_TABLE_B24>();
 			}
 		}
-		if (prefix == 'C') {
-			switch (number) {
+
+		if (prefix == 'C')
+		{
+			switch (number)
+			{
 			case 1:
 				return new LDPC<DVB_S2X_TABLE_C1>();
 			case 2:
@@ -160,9 +173,13 @@ LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 			}
 		}
 	}
-	if (!strcmp(standard, "T2")) {
-		if (prefix == 'A') {
-			switch (number) {
+
+	if (!strcmp(standard, "T2"))
+	{
+		if (prefix == 'A')
+		{
+			switch (number)
+			{
 			case 1:
 				return new LDPC<DVB_T2_TABLE_A1>();
 			case 2:
@@ -177,8 +194,11 @@ LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 				return new LDPC<DVB_T2_TABLE_A6>();
 			}
 		}
-		if (prefix == 'B') {
-			switch (number) {
+
+		if (prefix == 'B')
+		{
+			switch (number)
+			{
 			case 1:
 				return new LDPC<DVB_T2_TABLE_B1>();
 			case 2:
@@ -200,7 +220,8 @@ LDPCInterface *create_ldpc(char *standard, char prefix, int number)
 			}
 		}
 	}
-	return 0;
+
+	return nullptr;
 }
 
 constexpr int DVB_S2_TABLE_B1::DEG[];

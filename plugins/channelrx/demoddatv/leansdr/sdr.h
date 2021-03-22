@@ -115,17 +115,24 @@ struct auto_notch : runnable
             data[i].re = pin[i].re;
             data[i].im = pin[i].im;
             m2 += (float)pin[i].re * pin[i].re + (float)pin[i].im * pin[i].im;
-            if (gen_abs(pin[i].re) > m0)
+
+            if (gen_abs(pin[i].re) > m0) {
                 m0 = gen_abs(pin[i].re);
-            if (gen_abs(pin[i].im) > m0)
+            }
+
+            if (gen_abs(pin[i].im) > m0) {
                 m0 = gen_abs(pin[i].im);
+            }
         }
 
         if (agc_rms_setpoint && m2)
         {
             float rms = gen_sqrt(m2 / fft.size());
-            if (sch->debug)
+
+            if (sch->debug) {
                 fprintf(stderr, "(pow %f max %f)", rms, m0);
+            }
+
             float new_gain = agc_rms_setpoint / rms;
             gain = gain * 0.9 + new_gain * 0.1;
         }
@@ -133,21 +140,26 @@ struct auto_notch : runnable
         fft.inplace(data, true);
         float *amp = new float[fft.size()];
 
-        for (int i = 0; i < fft.size(); ++i)
+        for (int i = 0; i < fft.size(); ++i) {
             amp[i] = hypotf(data[i].re, data[i].im);
+        }
 
         for (slot *s = __slots; s < __slots + nslots; ++s)
         {
             int iamax = 0;
 
             for (int i = 0; i < fft.size(); ++i)
-                if (amp[i] > amp[iamax])
+            {
+                if (amp[i] > amp[iamax]) {
                     iamax = i;
+                }
+            }
 
             if (iamax != s->i)
             {
-                if (sch->debug)
+                if (sch->debug) {
                     fprintf(stderr, "%s: slot %d new peak %d -> %d\n", name, (int)(s - __slots), s->i, iamax);
+                }
 
                 s->i = iamax;
                 s->estim.re = 0;
@@ -164,11 +176,13 @@ struct auto_notch : runnable
 
             amp[iamax] = 0;
 
-            if (iamax - 1 >= 0)
+            if (iamax - 1 >= 0) {
                 amp[iamax - 1] = 0;
+            }
 
-            if (iamax + 1 < fft.size())
+            if (iamax + 1 < fft.size()) {
                 amp[iamax + 1] = 0;
+            }
         }
 
         delete[] amp;
@@ -179,8 +193,9 @@ struct auto_notch : runnable
     {
         complex<T> *pin = in.rd(), *pend = pin + fft.size(), *pout = out.wr();
 
-        for (slot *s = __slots; s < __slots + nslots; ++s)
+        for (slot *s = __slots; s < __slots + nslots; ++s) {
             s->ej = s->expj;
+        }
 
         for (; pin < pend; ++pin, ++pout)
         {
@@ -189,13 +204,16 @@ struct auto_notch : runnable
 
             for (slot *s = __slots; s < __slots + nslots; ++s->ej, ++s)
             {
-                complex<float> bb(pin->re * s->ej->re + pin->im * s->ej->im,
-                                  -pin->re * s->ej->im + pin->im * s->ej->re);
+                complex<float> bb(
+                    pin->re * s->ej->re + pin->im * s->ej->im,
+                    -pin->re * s->ej->im + pin->im * s->ej->re
+                );
                 s->estim.re = bb.re * k + s->estim.re * (1 - k);
                 s->estim.im = bb.im * k + s->estim.im * (1 - k);
                 complex<float> sub(
                     s->estim.re * s->ej->re - s->estim.im * s->ej->im,
-                    s->estim.re * s->ej->im + s->estim.im * s->ej->re);
+                    s->estim.re * s->ej->im + s->estim.im * s->ej->re
+                );
                 out.re -= sub.re;
                 out.im -= sub.im;
             }
@@ -237,7 +255,8 @@ struct ss_estimator : runnable
 
     ss_estimator(
         scheduler *sch,
-        pipebuf<complex<T>> &_in, pipebuf<T> &_out
+        pipebuf<complex<T>> &_in,
+        pipebuf<T> &_out
     ) :
         runnable(sch, "SS estimator"),
         window_size(1024),
@@ -260,11 +279,13 @@ struct ss_estimator : runnable
                 complex<T> *p = in.rd(), *pend = p + window_size;
                 float s = 0;
 
-                for (; p < pend; ++p)
+                for (; p < pend; ++p) {
                     s += (float)p->re * p->re + (float)p->im * p->im;
+                }
 
                 out.write(sqrtf(s / window_size));
             }
+
             in.read(window_size);
         }
     }
@@ -317,10 +338,14 @@ struct ss_amp_estimator : runnable
                     float mag2 = (float)p->re * p->re + (float)p->im * p->im;
                     s2 += mag2;
                     float mag = sqrtf(mag2);
-                    if (mag < amin)
+
+                    if (mag < amin) {
                         amin = mag;
-                    if (mag > amax)
+                    }
+
+                    if (mag > amax) {
                         amax = mag;
+                    }
                 }
 
                 out_ss.write(sqrtf(s2 / window_size));
@@ -373,13 +398,15 @@ struct simple_agc : runnable
             complex<T> *pin = in.rd(), *pend = pin + chunk_size;
             float amp2 = 0;
 
-            for (; pin < pend; ++pin)
+            for (; pin < pend; ++pin) {
                 amp2 += pin->re * pin->re + pin->im * pin->im;
+            }
 
             amp2 /= chunk_size;
 
-            if (!estimated)
+            if (!estimated) {
                 estimated = amp2;
+            }
 
             estimated = estimated * (1 - bw) + amp2 * bw;
             float gain = estimated ? out_rms / sqrtf(estimated) : 0;
@@ -746,8 +773,10 @@ struct cstln_lut : cstln_base
     complex<signed char> polar(float r, int n, float i)
     {
         float a = i * 2 * M_PI / n;
-        return complex<signed char>(r * cosf(a) * cstln_amp,
-                                    r * sinf(a) * cstln_amp);
+        return complex<signed char>(
+            r * cosf(a) * cstln_amp,
+            r * sinf(a) * cstln_amp
+        );
     }
 
     // Helper function for some constellation tables
@@ -758,8 +787,10 @@ struct cstln_lut : cstln_base
         for (int j = 0; j < 4; ++j)
         {
             float phi = a[j] * M_PI;
-            symbols[i + j] = complex<signed char>(r * cosf(phi) * cstln_amp,
-                                                  r * sinf(phi) * cstln_amp);
+            symbols[i + j] = complex<signed char>(
+                r * cosf(phi) * cstln_amp,
+                r * sinf(phi) * cstln_amp
+            );
         }
     }
 
@@ -806,8 +837,9 @@ struct cstln_lut : cstln_base
         // Shared scope so that we don't have to reset dists2[nsymbols..] to -1.
         struct full_ss fss;
 
-        for (int s = 0; s < 256; ++s)
+        for (int s = 0; s < 256; ++s) {
             fss.dists2[s] = -1;
+        }
 
         for (int I = -R / 2; I < R / 2; ++I)
         {
@@ -831,14 +863,14 @@ struct cstln_lut : cstln_base
                 {
                     float d2 = ((I - symbols[s].re) * (I - symbols[s].re) + (Q - symbols[s].im) * (Q - symbols[s].im));
 
-                    if (d2 < fss.dists2[fss.nearest])
+                    if (d2 < fss.dists2[fss.nearest]) {
                         fss.nearest = s;
+                    }
 
                     fss.dists2[s] = d2;
                     float p = expf(-d2 / (2 * sigma * sigma)) / (sqrtf(2 * M_PI) * sigma);
 
-                    for (int bit = 0; bit < 8; ++bit)
-                    {
+                    for (int bit = 0; bit < 8; ++bit) {
                         probs[bit][(s >> bit) & 1] += p;
                     }
                 }
@@ -847,9 +879,12 @@ struct cstln_lut : cstln_base
                 for (int b = 0; b < 8; ++b)
                 {
                     float p = probs[b][1] / (probs[b][0] + probs[b][1]);
+
                     // Avoid trouble when sigma is unrealistically low.
-                    if (!isnormal(p))
+                    if (!isnormal(p)) {
                         p = 0;
+                    }
+
                     fss.p[b] = p;
                 }
 
@@ -857,8 +892,10 @@ struct cstln_lut : cstln_base
                 to_softsymb(&fss, &pr->ss);
                 // Always record nearest symbol and phase error for C&T.
                 pr->symbol = fss.nearest;
-                float ph_symbol = atan2f(symbols[pr->symbol].im,
-                                         symbols[pr->symbol].re);
+                float ph_symbol = atan2f(
+                    symbols[pr->symbol].im,
+                    symbols[pr->symbol].re
+                );
                 float ph_err = atan2f(Q, I) - ph_symbol;
                 pr->phase_error = (int32_t)(ph_err * 65536 / (2 * M_PI)); // Mod 65536
             }
@@ -879,15 +916,19 @@ struct cstln_lut : cstln_base
                 {
                     result *pr = &lut[I & (R - 1)][Q & (R - 1)];
                     uint8_t v;
-                    if (bit < bps)
+
+                    if (bit < bps) {
                         v = softsymb_to_dump(pr->ss, bit);
-                    else
+                    } else {
                         v = 128 + pr->phase_error / 64;
+                    }
+
                     // Highlight the constellation symbols.
                     for (int s = 0; s < nsymbols; ++s)
                     {
-                        if (symbols[s].re == I && symbols[s].im == Q)
+                        if (symbols[s].re == I && symbols[s].im == Q) {
                             v ^= 128;
+                        }
                     }
 
                     fputc(v, f);
@@ -901,8 +942,9 @@ struct cstln_lut : cstln_base
     {
         for (int i = 0; i < R; ++i)
         {
-            for (int q = 0; q < R; ++q)
+            for (int q = 0; q < R; ++q) {
                 softsymb_harden(&lut[i][q].ss);
+            }
         }
     }
 
@@ -917,9 +959,9 @@ struct cstln_lut : cstln_base
 template <typename T>
 struct sampler_interface
 {
-    virtual ~sampler_interface()
-    {
+    virtual ~sampler_interface() {
     }
+
     virtual complex<T> interp(const complex<T> *pin, float mu, float phase) = 0;
 
     virtual void update_freq(float freqw, int weight = 0)
@@ -927,6 +969,7 @@ struct sampler_interface
         (void) freqw;
         (void) weight;
     } // 65536 = 1 Hz
+
     virtual int readahead() = 0;
 };
 
@@ -936,8 +979,7 @@ struct sampler_interface
 template <typename T>
 struct nearest_sampler : sampler_interface<T>
 {
-    int readahead()
-    {
+    int readahead() {
         return 0;
     }
 
@@ -957,8 +999,7 @@ struct nearest_sampler : sampler_interface<T>
 template <typename T>
 struct linear_sampler : sampler_interface<T>
 {
-    int readahead()
-    {
+    int readahead() {
         return 1;
     }
 
@@ -998,13 +1039,12 @@ struct fir_sampler : sampler_interface<T>
         do_update_freq(0); // In case application never calls update_freq()
     }
 
-    ~fir_sampler()
+    virtual ~fir_sampler()
     {
         delete[] shifted_coeffs;
     }
 
-    int readahead()
-    {
+    int readahead() {
         return ncoeffs - 1;
     }
 
@@ -1020,15 +1060,17 @@ struct fir_sampler : sampler_interface<T>
             // Special case for heavily oversampled signals,
             // where filtering is expensive.
             // gcc-4.9.2 can vectorize this form with NEON on ARM.
-            while (pc < pcend)
+            while (pc < pcend) {
                 acc += (*pc++) * (*pin++);
+            }
         }
         else
         {
             // Not vectorized because the coefficients are not
             // guaranteed to be contiguous in memory.
-            for (; pc < pcend; pc += subsampling, ++pin)
+            for (; pc < pcend; pc += subsampling, ++pin) {
                 acc += (*pc) * (*pin);
+            }
         }
 
         // Derotate
@@ -1055,8 +1097,10 @@ struct fir_sampler : sampler_interface<T>
     void do_update_freq(float freqw)
     {
         float f = freqw / subsampling;
-        for (int i = 0; i < ncoeffs; ++i)
+
+        for (int i = 0; i < ncoeffs; ++i) {
             shifted_coeffs[i] = trig.expi(-f * (i - ncoeffs / 2)) * coeffs[i];
+        }
     }
 
     trig16 trig;
@@ -1199,15 +1243,16 @@ struct cstln_receiver : runnable
 
     void run()
     {
-        if (!cstln)
+        if (!cstln) {
             fail("constellation not set");
+        }
 
         // Magic constants that work with the qa recordings.
         float freq_alpha = 0.04;
         float freq_beta = 0.0012 / omega * pll_adjustment;
         float gain_mu = 0.02 / (cstln_amp * cstln_amp) * 2;
-
         int max_meas = chunk_size / meas_decimation + 1;
+
         // Large margin on output_size because mu adjustments
         // can lead to more than chunk_size/min_omega symbols.
         while (in.readable() >= chunk_size + sampler->readahead() &&
@@ -1259,14 +1304,20 @@ struct cstln_receiver : runnable
                     cstln_point = &cstln->symbols[cr->symbol];
                     hist[0].c.re = cstln_point->re;
                     hist[0].c.im = cstln_point->im;
-                    float muerr = ((hist[0].p.re - hist[2].p.re) * hist[1].c.re + (hist[0].p.im - hist[2].p.im) * hist[1].c.im) - ((hist[0].c.re - hist[2].c.re) * hist[1].p.re + (hist[0].c.im - hist[2].c.im) * hist[1].p.im);
+                    float muerr = ((hist[0].p.re - hist[2].p.re) * hist[1].c.re + (hist[0].p.im - hist[2].p.im) * hist[1].c.im)
+                        - ((hist[0].c.re - hist[2].c.re) * hist[1].p.re + (hist[0].c.im - hist[2].c.im) * hist[1].p.im);
                     float mucorr = muerr * gain_mu;
                     const float max_mucorr = 0.1;
+
                     // TBD Optimize out statically
-                    if (mucorr < -max_mucorr)
+                    if (mucorr < -max_mucorr) {
                         mucorr = -max_mucorr;
-                    if (mucorr > max_mucorr)
+                    }
+
+                    if (mucorr > max_mucorr) {
                         mucorr = max_mucorr;
+                    }
+
                     mu += mucorr;
                     mu += omega; // Next symbol time;
                 }                // mu<1
@@ -1288,8 +1339,9 @@ struct cstln_receiver : runnable
             if (cstln_point)
             {
                 // Output the last interpolated PSK symbol, max once per chunk_size
-                if (cstln_out)
+                if (cstln_out) {
                     cstln_out->write(s);
+                }
 
                 // AGC
                 // For APSK we must do AGC on the symbols, not the whole signal.
@@ -1297,12 +1349,15 @@ struct cstln_receiver : runnable
                 float insp = sg.re * sg.re + sg.im * sg.im;
                 est_insp = insp * kest + est_insp * (1 - kest);
 
-                if (est_insp)
+                if (est_insp) {
                     agc_gain = cstln_amp / gen_sqrt(est_insp);
+                }
 
                 // SS and MER
-                complex<float> ev(s.re - cstln_point->re,
-                                  s.im - cstln_point->im);
+                complex<float> ev(
+                    s.re - cstln_point->re,
+                    s.im - cstln_point->im
+                );
                 float sig_power, ev_power;
 
                 if (cstln->nsymbols == 2)
@@ -1329,8 +1384,9 @@ struct cstln_receiver : runnable
 
             if (!allow_drift)
             {
-                if (freqw < min_freqw || freqw > max_freqw)
+                if (freqw < min_freqw || freqw > max_freqw) {
                     freqw = (max_freqw + min_freqw) / 2;
+                }
             }
 
             // Output measurements
@@ -1342,12 +1398,18 @@ struct cstln_receiver : runnable
             while (meas_count >= meas_decimation)
             {
                 meas_count -= meas_decimation;
-                if (freq_out)
+
+                if (freq_out) {
                     freq_out->write(freq_tap);
-                if (ss_out)
+                }
+
+                if (ss_out) {
                     ss_out->write(sqrtf(est_insp));
-                if (mer_out)
+                }
+
+                if (mer_out) {
                     mer_out->write(est_ep ? 10 * log10f(est_sp / est_ep) : 0);
+                }
             }
 
         } // Work to do
@@ -1462,8 +1524,9 @@ struct fast_qpsk_receiver : runnable
         signed long freq_alpha = 0.04 * 65536;
         signed long freq_beta = 0.0012 * 256 * 65536 / omega * pll_adjustment;
 
-        if (!freq_beta)
+        if (!freq_beta) {
             fail("Excessive oversampling");
+        }
 
         float gain_mu = 0.02 / (cstln_amp * cstln_amp) * 2;
 
@@ -1562,11 +1625,16 @@ struct fast_qpsk_receiver : runnable
 #endif
                     float mucorr = muerr * gain_mu;
                     const float max_mucorr = 0.1;
+
                     // TBD Optimize out statically
-                    if (mucorr < -max_mucorr)
+                    if (mucorr < -max_mucorr) {
                         mucorr = -max_mucorr;
-                    if (mucorr > max_mucorr)
+                    }
+
+                    if (mucorr > max_mucorr) {
                         mucorr = max_mucorr;
+                    }
+
                     mu += mucorr;
                     mu += omega; // Next symbol time;
                 }                // mu<1
@@ -1580,17 +1648,19 @@ struct fast_qpsk_receiver : runnable
             in.read(pin - pin0);
             out.written(pout - pout0);
 
-            if (symbol_arg && cstln_out)
+            if (symbol_arg && cstln_out) {
                 // Output the last interpolated PSK symbol, max once per chunk_size
                 cstln_out->write(s);
+            }
 
             // This is best done periodically ouside the inner loop,
             // but will cause non-deterministic output.
 
             if (!allow_drift)
             {
-                if (freqw < min_freqw || freqw > max_freqw)
+                if (freqw < min_freqw || freqw > max_freqw) {
                     freqw = (max_freqw + min_freqw) / 2;
+                }
             }
 
             // Output measurements
@@ -1601,8 +1671,9 @@ struct fast_qpsk_receiver : runnable
             {
                 meas_count -= meas_decimation;
 
-                if (freq_out)
+                if (freq_out) {
                     freq_out->write((float)freqw / 65536);
+                }
             }
 
         } // Work to do
@@ -1702,8 +1773,9 @@ struct cstln_transmitter : runnable
 
     void run()
     {
-        if (!cstln)
+        if (!cstln) {
             fail("constellation not set");
+        }
 
         int count = min(in.readable(), out.writable());
         u8 *pin = in.rd(), *pend = pin + count;
@@ -1745,8 +1817,10 @@ struct rotator : runnable
         index(0)
     {
         int ifreq = freq * 65536;
-        if (sch->debug)
+
+        if (sch->debug) {
             fprintf(stderr, "Rotate: req=%f real=%f\n", freq, ifreq / 65536.0);
+        }
 
         for (int i = 0; i < 65536; ++i)
         {
@@ -2038,15 +2112,17 @@ struct spectrum : runnable
         {
             complex<T> *pin = in.rd();
 
-            for (int i = 0; i < fft.n; ++i, pin += decim)
+            for (int i = 0; i < fft.n; ++i, pin += decim) {
                 data[i] = *pin;
+            }
         }
 
         fft.inplace(data, true);
         float power[NFFT];
 
-        for (int i = 0; i < fft.n; ++i)
+        for (int i = 0; i < fft.n; ++i) {
             power[i] = (float)data[i].re * data[i].re + (float)data[i].im * data[i].im;
+        }
 
         if (!avgpower)
         {

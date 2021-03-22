@@ -33,22 +33,29 @@ namespace leansdr
 template <typename Tin, int Zin, typename Tout, int Zout, int Gn, int Gd>
 struct cconverter : runnable
 {
-    cconverter(scheduler *sch, pipebuf<complex<Tin>> &_in,
-               pipebuf<complex<Tout>> &_out)
-        : runnable(sch, "cconverter"),
-          in(_in), out(_out)
+    cconverter(
+        scheduler *sch,
+        pipebuf<complex<Tin>> &_in,
+        pipebuf<complex<Tout>> &_out
+    ) :
+        runnable(sch, "cconverter"),
+        in(_in),
+        out(_out)
     {
     }
+
     void run()
     {
         unsigned long count = min(in.readable(), out.writable());
         complex<Tin> *pin = in.rd(), *pend = pin + count;
         complex<Tout> *pout = out.wr();
+
         for (; pin < pend; ++pin, ++pout)
         {
             pout->re = Zout + (pin->re - (Tin)Zin) * Gn / Gd;
             pout->im = Zout + (pin->im - (Tin)Zin) * Gn / Gd;
         }
+
         in.read(count);
         out.written(count);
     }
@@ -82,21 +89,29 @@ struct cfft_engine
         release();
         n = _n;
         invsqrtn = 1.0 / sqrt(n);
+
         // Compute log2(n)
         logn = 0;
-        for (int t = n; t > 1; t >>= 1)
+        for (int t = n; t > 1; t >>= 1) {
             ++logn;
+        }
+
         // Bit reversal
         bitrev = new int[n];
+
         for (int i = 0; i < n; ++i)
         {
             bitrev[i] = 0;
-            for (int b = 0; b < logn; ++b)
+
+            for (int b = 0; b < logn; ++b) {
                 bitrev[i] = (bitrev[i] << 1) | ((i >> b) & 1);
+            }
         }
+
         // Float constants
         omega = new complex<T>[n];
         omega_rev = new complex<T>[n];
+
         for (int i = 0; i < n; ++i)
         {
             float a = 2.0 * M_PI * i / n;
@@ -111,6 +126,7 @@ struct cfft_engine
         for (int i = 0; i < n; ++i)
         {
             int r = bitrev[i];
+
             if (r < i)
             {
                 complex<T> tmp = data[i];
@@ -118,15 +134,18 @@ struct cfft_engine
                 data[r] = tmp;
             }
         }
+
         complex<T> *om = reverse ? omega_rev : omega;
         // Danielson-Lanczos
         for (int i = 0; i < logn; ++i)
         {
             int hbs = 1 << i;
             int dom = 1 << (logn - 1 - i);
+
             for (int j = 0; j < dom; ++j)
             {
                 int p = j * hbs * 2, q = p + hbs;
+
                 for (int k = 0; k < hbs; ++k)
                 {
                     complex<T> &w = om[k * dom];
@@ -140,9 +159,11 @@ struct cfft_engine
                 }
             }
         }
+
         if (reverse)
         {
             float invn = 1.0 / n;
+
             for (int i = 0; i < n; ++i)
             {
                 data[i].re *= invn;
@@ -176,22 +197,37 @@ struct cfft_engine
 template <typename T>
 struct adder : runnable
 {
-    adder(scheduler *sch,
-          pipebuf<T> &_in1, pipebuf<T> &_in2, pipebuf<T> &_out)
-        : runnable(sch, "adder"),
-          in1(_in1), in2(_in2), out(_out)
+    adder(
+        scheduler *sch,
+        pipebuf<T> &_in1,
+        pipebuf<T> &_in2,
+        pipebuf<T> &_out
+    ) :
+        runnable(sch, "adder"),
+        in1(_in1),
+        in2(_in2),
+        out(_out)
     {
     }
+
     void run()
     {
         int n = out.writable();
-        if (in1.readable() < n)
+
+        if (in1.readable() < n) {
             n = in1.readable();
-        if (in2.readable() < n)
+        }
+
+        if (in2.readable() < n) {
             n = in2.readable();
+        }
+
         T *pin1 = in1.rd(), *pin2 = in2.rd(), *pout = out.wr(), *pend = pout + n;
-        while (pout < pend)
+
+        while (pout < pend) {
             *pout++ = *pin1++ + *pin2++;
+        }
+
         in1.read(n);
         in2.read(n);
         out.written(n);
@@ -206,20 +242,30 @@ template <typename Tscale, typename Tin, typename Tout>
 struct scaler : runnable
 {
     Tscale scale;
-    scaler(scheduler *sch, Tscale _scale,
-           pipebuf<Tin> &_in, pipebuf<Tout> &_out)
-        : runnable(sch, "scaler"),
-          scale(_scale),
-          in(_in), out(_out)
+
+    scaler(
+        scheduler *sch,
+        Tscale _scale,
+        pipebuf<Tin> &_in,
+        pipebuf<Tout> &_out
+    ) :
+        runnable(sch, "scaler"),
+        scale(_scale),
+        in(_in),
+        out(_out)
     {
     }
+
     void run()
     {
         unsigned long count = min(in.readable(), out.writable());
         Tin *pin = in.rd(), *pend = pin + count;
         Tout *pout = out.wr();
-        for (; pin < pend; ++pin, ++pout)
+
+        for (; pin < pend; ++pin, ++pout) {
             *pout = *pin * scale;
+        }
+
         in.read(count);
         out.written(count);
     }
@@ -234,29 +280,40 @@ struct scaler : runnable
 template <typename T>
 struct wgn_c : runnable
 {
-    wgn_c(scheduler *sch, pipebuf<complex<T>> &_out)
-        : runnable(sch, "awgn"), stddev(1.0), out(_out)
+    wgn_c(
+        scheduler *sch,
+        pipebuf<complex<T>>
+        &_out
+    ) :
+        runnable(sch, "awgn"),
+        stddev(1.0),
+        out(_out)
     {
     }
+
     void run()
     {
         int n = out.writable();
         complex<T> *pout = out.wr(), *pend = pout + n;
+
         while (pout < pend)
         {
             // TAOCP
             float x, y, r2;
+
             do
             {
                 x = 2 * drand48() - 1;
                 y = 2 * drand48() - 1;
                 r2 = x * x + y * y;
             } while (r2 == 0 || r2 >= 1);
+
             float k = sqrtf(-logf(r2) / r2) * stddev;
             pout->re = k * x;
             pout->im = k * y;
             ++pout;
         }
+
         out.written(n);
     }
     float stddev;
@@ -268,26 +325,41 @@ struct wgn_c : runnable
 template <typename T>
 struct naive_lowpass : runnable
 {
-    naive_lowpass(scheduler *sch, pipebuf<T> &_in, pipebuf<T> &_out, int _w)
-        : runnable(sch, "lowpass"), in(_in), out(_out), w(_w)
+    naive_lowpass(
+        scheduler *sch,
+        pipebuf<T> &_in,
+        pipebuf<T> &_out,
+        int _w
+    ) :
+        runnable(sch, "lowpass"),
+        in(_in),
+        out(_out),
+        w(_w)
     {
     }
 
     void run()
     {
-        if (in.readable() < w)
+        if (in.readable() < w) {
             return;
+        }
+
         unsigned long count = min(in.readable() - w, out.writable());
         T *pin = in.rd(), *pend = pin + count;
         T *pout = out.wr();
         float k = 1.0 / w;
+
         for (; pin < pend; ++pin, ++pout)
         {
             T x = 0.0;
-            for (int i = 0; i < w; ++i)
+
+            for (int i = 0; i < w; ++i) {
                 x = x + pin[i];
+            }
+
             *pout = x * k;
         }
+
         in.read(count);
         out.written(count);
     }
@@ -301,17 +373,30 @@ struct naive_lowpass : runnable
 template <typename T, typename Tc>
 struct fir_filter : runnable
 {
-    fir_filter(scheduler *sch, int _ncoeffs, Tc *_coeffs,
-               pipebuf<T> &_in, pipebuf<T> &_out,
-               unsigned int _decim = 1)
-        : runnable(sch, "fir_filter"),
-          ncoeffs(_ncoeffs), coeffs(_coeffs),
-          in(_in), out(_out),
-          decim(_decim),
-          freq_tap(NULL), tap_multiplier(1), freq_tol(0.1)
+    fir_filter(
+        scheduler *sch,
+        int _ncoeffs,
+        Tc *_coeffs,
+        pipebuf<T> &_in,
+        pipebuf<T> &_out,
+        unsigned int _decim = 1
+    ) :
+        runnable(sch, "fir_filter"),
+        ncoeffs(_ncoeffs),
+        coeffs(_coeffs),
+        in(_in),
+        out(_out),
+        decim(_decim),
+        freq_tap(nullptr),
+        tap_multiplier(1),
+        freq_tol(0.1)
     {
         shifted_coeffs = new T[ncoeffs];
         set_freq(0);
+    }
+
+    ~fir_filter() {
+        delete[] shifted_coeffs;
     }
 
     void run()
@@ -348,15 +433,20 @@ struct fir_filter : runnable
         out.written(count);
     }
 
+  public:
+    float *freq_tap;
+    float tap_multiplier;
+    float freq_tol;
+
   private:
     int ncoeffs;
     Tc *coeffs;
     pipereader<T> in;
     pipewriter<T> out;
     int decim;
-
     T *shifted_coeffs;
     float current_freq;
+
     void set_freq(float f)
     {
         for (int i = 0; i < ncoeffs; ++i)
@@ -369,11 +459,6 @@ struct fir_filter : runnable
         }
         current_freq = f;
     }
-
-  public:
-    float *freq_tap;
-    float tap_multiplier;
-    float freq_tol;
 }; // fir_filter
 
 // FIR FILTER WITH INTERPOLATION AND DECIMATION
@@ -381,19 +466,34 @@ struct fir_filter : runnable
 template <typename T, typename Tc>
 struct fir_resampler : runnable
 {
-    fir_resampler(scheduler *sch, int _ncoeffs, Tc *_coeffs,
-                  pipebuf<T> &_in, pipebuf<T> &_out,
-                  int _interp = 1, int _decim = 1)
-        : runnable(sch, "fir_resampler"),
-          ncoeffs(_ncoeffs), coeffs(_coeffs),
-          interp(_interp), decim(_decim),
-          in(_in), out(_out, interp),
-          freq_tap(NULL), tap_multiplier(1), freq_tol(0.1)
+    fir_resampler(
+        scheduler *sch,
+        int _ncoeffs,
+        Tc *_coeffs,
+        pipebuf<T> &_in,
+        pipebuf<T> &_out,
+        int _interp = 1,
+        int _decim = 1
+    ) :
+        runnable(sch, "fir_resampler"),
+        ncoeffs(_ncoeffs),
+        coeffs(_coeffs),
+        interp(_interp),
+        decim(_decim),
+        in(_in),
+        out(_out, interp),
+        freq_tap(nullptr),
+        tap_multiplier(1),
+        freq_tol(0.1)
     {
         if (decim != 1)
             fail("fir_resampler: decim not implemented"); // TBD
         shifted_coeffs = new T[ncoeffs];
         set_freq(0);
+    }
+
+    ~fir_resampler() {
+        delete[] shifted_coeffs;
     }
 
     void run()
@@ -436,21 +536,20 @@ struct fir_resampler : runnable
         out.written(count * interp);
     }
 
-  private:
-    unsigned int ncoeffs;
-    Tc *coeffs;
-    int interp, decim;
-    pipereader<T> in;
-    pipewriter<T> out;
-
   public:
     float *freq_tap;
     float tap_multiplier;
     float freq_tol;
 
   private:
+    unsigned int ncoeffs;
+    Tc *coeffs;
+    int interp, decim;
+    pipereader<T> in;
+    pipewriter<T> out;
     T *shifted_coeffs;
     float current_freq;
+
     void set_freq(float f)
     {
         for (int i = 0; i < ncoeffs; ++i)

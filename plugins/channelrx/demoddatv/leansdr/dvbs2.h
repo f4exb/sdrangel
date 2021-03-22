@@ -66,6 +66,7 @@ struct s2_sof
     static const uint32_t MASK = 0x3ffffff;
     static const int LENGTH = 26;
     complex<T> symbols[LENGTH];
+
     s2_sof()
     {
         for (int s = 0; s < LENGTH; ++s)
@@ -89,6 +90,7 @@ struct s2_plscodes
     static const int LENGTH = 64;
     uint64_t codewords[COUNT];
     complex<T> symbols[COUNT][LENGTH];
+
     s2_plscodes()
     {
         uint32_t G[6] = {0x55555555,
@@ -97,26 +99,36 @@ struct s2_plscodes
                          0x00ff00ff,
                          0x0000ffff,
                          0xffffffff};
+
         for (int index = 0; index < COUNT; ++index)
         {
             uint32_t y = 0;
+
             for (int row = 0; row < 6; ++row)
-                if ((index >> (6 - row)) & 1)
+            {
+                if ((index >> (6 - row)) & 1) {
                     y ^= G[row];
+                }
+            }
+
             uint64_t code = 0;
+
             for (int bit = 31; bit >= 0; --bit)
             {
                 int yi = (y >> bit) & 1;
-                if (index & 1)
+
+                if (index & 1) {
                     code = (code << 2) | (yi << 1) | (yi ^ 1);
-                else
+                } else {
                     code = (code << 2) | (yi << 1) | yi;
+                }
             }
             // Scrambling
             code ^= SCRAMBLING;
             // Store precomputed codeword.
             codewords[index] = code;
             // Also store as symbols.
+
             for (int i = 0; i < LENGTH; ++i)
             {
                 int yi = (code >> (LENGTH - 1 - i)) & 1;
@@ -136,12 +148,16 @@ struct s2_plscodes
 struct s2_scrambling
 {
     uint8_t Rn[131072]; // 0..3  (* 2pi/4)
+
     s2_scrambling(int codenum = 0)
     {
         uint32_t stx = 0x00001, sty = 0x3ffff;
+
         // x starts at codenum, wraps at index 2^18-1 by design
-        for (int i = 0; i < codenum; ++i)
+        for (int i = 0; i < codenum; ++i) {
             stx = lfsr_x(stx);
+        }
+
         // First half of sequence is LSB of scrambling angle
         for (int i = 0; i < 131072; ++i)
         {
@@ -150,6 +166,7 @@ struct s2_scrambling
             stx = lfsr_x(stx);
             sty = lfsr_y(sty);
         }
+
         // Second half is MSB
         for (int i = 0; i < 131072; ++i)
         {
@@ -159,11 +176,13 @@ struct s2_scrambling
             sty = lfsr_y(sty);
         }
     }
+
     uint32_t lfsr_x(uint32_t X)
     {
         int bit = ((X >> 7) ^ X) & 1;
         return ((bit << 18) | X) >> 1;
     }
+
     uint32_t lfsr_y(uint32_t Y)
     {
         int bit = ((Y >> 10) ^ (Y >> 7) ^ (Y >> 5) ^ Y) & 1;
@@ -180,27 +199,32 @@ struct s2_bbscrambling
     s2_bbscrambling()
     {
         uint16_t st = 0x00a9; // 000 0000 1010 1001  (Fig 5 reversed)
+
         for (unsigned int i = 0; i < sizeof(pattern); ++i)
         {
             uint8_t out = 0;
+
             for (int n = 8; n--;)
             {
                 int bit = ((st >> 13) ^ (st >> 14)) & 1; // Taps
                 out = (out << 1) | bit;                  // MSB first
                 st = (st << 1) | bit;                    // Feedback
             }
+
             pattern[i] = out;
         }
     }
+
     void transform(const uint8_t *in, int bbsize, uint8_t *out)
     {
-        for (int i = 0; i < bbsize; ++i)
+        for (int i = 0; i < bbsize; ++i) {
             out[i] = in[i] ^ pattern[i];
+        }
     }
 
   private:
     uint8_t pattern[58192]; // Values 0..3
-};                          // s2_bbscrambling
+}; // s2_bbscrambling
 
 // S2 PHYSICAL LAYER SIGNALLING
 
@@ -209,7 +233,10 @@ struct s2_pls
     int modcod; // 0..31
     bool sf;
     bool pilots;
-    int framebits() const { return sf ? 16200 : 64800; }
+
+    int framebits() const {
+        return sf ? 16200 : 64800;
+    }
 };
 
 template <typename SOFTSYMB>
@@ -286,11 +313,16 @@ const struct modcod_info
 // Assert that a MODCOD number is valid
 const modcod_info *check_modcod(int m)
 {
-    if (m < 0 || m > 31)
+    if (m < 0 || m > 31) {
         fail("Invalid MODCOD number");
+    }
+
     const modcod_info *r = &modcod_infos[m];
-    if (!r->nslots_nf)
+
+    if (!r->nslots_nf) {
         fail("Unsupported MODCOD");
+    }
+
     return r;
 }
 
@@ -306,7 +338,9 @@ struct s2_frame_transmitter : runnable
     ) :
         runnable(sch, "S2 frame transmitter"),
         in(_in),
-        out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME)
+        out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME),
+        cstln(nullptr),
+        csymbols(nullptr)
     {
         float amp = cstln_amp / sqrtf(2);
         qsymbols[0].re = +amp;
@@ -318,34 +352,62 @@ struct s2_frame_transmitter : runnable
         qsymbols[3].re = -amp;
         qsymbols[3].im = -amp;
     }
+
+    ~s2_frame_transmitter()
+    {
+        if (cstln) {
+            delete cstln;
+        }
+        if (csymbols) {
+            delete csymbols;
+        }
+    }
+
     void run()
     {
         while (in.readable() >= 1)
         {
             plslot<hard_ss> *pin = in.rd();
-            if (!pin->is_pls)
+
+            if (!pin->is_pls) {
                 fail("Expected PLS pseudo-slot");
+            }
+
             s2_pls *pls = &pin->pls;
             const modcod_info *mcinfo = check_modcod(pls->modcod);
             int nslots = (pls->sf ? mcinfo->nslots_nf / 4 : mcinfo->nslots_nf);
-            if (in.readable() < 1 + nslots)
+
+            if (in.readable() < 1 + nslots) {
                 break;
+            }
+
             // Require room for BBHEADER + slots + optional pilots.
             int nsymbols = ((1 + nslots) * plslot<hard_ss>::LENGTH +
                             (pls->pilots ? ((nslots - 1) / 16) * pilot_length : 0));
-            if (out.writable() < nsymbols)
+
+            if (out.writable() < nsymbols) {
                 break;
+            }
+
             update_cstln(mcinfo);
             int nw = run_frame(pls, mcinfo, pin + 1, nslots, out.wr());
-            if (nw != nsymbols)
+
+            if (nw != nsymbols) {
                 fail("Bug: s2_frame_transmitter overflow");
+            }
+
             in.read(1 + nslots);
             out.written(nsymbols);
         }
     }
-    int run_frame(s2_pls *pls, const modcod_info *mcinfo,
-                  const plslot<hard_ss> *pin, int nslots,
-                  complex<T> *pout)
+
+    int run_frame(
+        s2_pls *pls,
+        const modcod_info *mcinfo,
+        const plslot<hard_ss> *pin,
+        int nslots,
+        complex<T> *pout
+    )
     {
         complex<T> *pout0 = pout; // For sanity check
         // PLHEADER: SOF AND PLSCODE
@@ -358,24 +420,33 @@ struct s2_frame_transmitter : runnable
         // Slots and pilots
         int till_next_pilot = pls->pilots ? 16 : nslots;
         uint8_t *scr = &scrambling.Rn[0];
+
         for (int S = 0; S < nslots; ++S, ++pin, --till_next_pilot)
         {
             if (till_next_pilot == 0)
             {
                 // Send pilot
-                for (int s = 0; s < pilot_length; ++s, ++scr, ++pout)
+                for (int s = 0; s < pilot_length; ++s, ++scr, ++pout) {
                     scramble(&qsymbols[0], *scr, pout);
+                }
                 till_next_pilot = 16;
             }
+
             // Send slot
-            if (pin->is_pls)
+            if (pin->is_pls) {
                 fail("s2_frame_transmitter: bad input sequence");
+            }
+
             const hard_ss *ps = pin->symbols;
-            for (int s = 0; s < pin->LENGTH; ++s, ++ps, ++scr, ++pout)
+
+            for (int s = 0; s < pin->LENGTH; ++s, ++ps, ++scr, ++pout) {
                 scramble(&csymbols[*ps], *scr, pout);
+            }
         }
+
         return pout - pout0;
     }
+
     inline void scramble(const complex<T> *src, uint8_t r, complex<T> *dst)
     {
         switch (r)
@@ -401,7 +472,9 @@ struct s2_frame_transmitter : runnable
     pipereader<plslot<hard_ss>> in;
     pipewriter<complex<T>> out;
     cstln_lut<hard_ss, 256> *cstln; // nullptr initially
-    complex<T> *csymbols;           // Valid iff cstln is valid. RMS cstln_amp.
+    complex<T> *csymbols;
+             // Valid iff cstln is valid. RMS cstln_amp.
+
     void update_cstln(const modcod_info *mcinfo)
     {
         if (!cstln || cstln->nsymbols != mcinfo->nsymbols)
@@ -410,14 +483,27 @@ struct s2_frame_transmitter : runnable
             {
                 fprintf(stderr, "Warning: Variable MODCOD is inefficient\n");
                 delete cstln;
+            }
+
+            if (sch->debug) {
+                fprintf(stderr, "Building constellation %d\n", mcinfo->nsymbols);
+            }
+
+            // TBD Different Es/N0 for short frames ?
+            cstln = new cstln_lut<hard_ss, 256>(
+                mcinfo->c,
+                mcinfo->esn0_nf,
+                mcinfo->g1,
+                mcinfo->g2,
+                mcinfo->g3
+            );
+
+            if (csymbols) {
                 delete csymbols;
             }
-            if (sch->debug)
-                fprintf(stderr, "Building constellation %d\n", mcinfo->nsymbols);
-            // TBD Different Es/N0 for short frames ?
-            cstln = new cstln_lut<hard_ss, 256>(mcinfo->c, mcinfo->esn0_nf,
-                                                mcinfo->g1, mcinfo->g2, mcinfo->g3);
+
             csymbols = new complex<T>[cstln->nsymbols];
+
             for (int s = 0; s < cstln->nsymbols; ++s)
             {
                 csymbols[s].re = cstln->symbols[s].re;
@@ -425,6 +511,7 @@ struct s2_frame_transmitter : runnable
             }
         }
     }
+
     complex<T> qsymbols[4]; // RMS cstln_amp
     s2_sof<T> sof;
     s2_plscodes<T> plscodes;
@@ -509,9 +596,7 @@ struct s2_frame_receiver : runnable
         // Constellation for PLS
         qpsk = new cstln_lut<SOFTSYMB, 256>(cstln_base::QPSK);
         add_syncs(qpsk);
-
         init_coarse_freq();
-
 #if TEST_DIVERSITY
         fprintf(stderr, "** DEBUG: Diversity test mode (slower)\n");
 #endif
@@ -520,6 +605,10 @@ struct s2_frame_receiver : runnable
     ~s2_frame_receiver()
     {
         delete qpsk;
+
+        if (cstln) {
+            delete cstln;
+        }
     }
 
     void run()
@@ -589,6 +678,7 @@ struct s2_frame_receiver : runnable
         complex<T> *pin = in.rd();
         complex<T> p = *pin++;
         int nsamples = MAX_SYMBOLS_PER_FRAME * omega0;
+
         for (int s = nsamples; s--; ++pin)
         {
             complex<T> n = *pin;
@@ -596,8 +686,10 @@ struct s2_frame_receiver : runnable
             diffcorr.im += p.re * n.im - p.im * n.re;
             p = n;
         }
+
         in.read(nsamples);
         ++coarse_count;
+
         if (coarse_count == 50)
         {
             float freqw = atan2f(diffcorr.im, diffcorr.re) * omega0;
@@ -618,29 +710,34 @@ struct s2_frame_receiver : runnable
         opt_write(state_out, 0);
         mu = 0;
         phase16 = 0;
-        if (sch->debug)
+
+        if (sch->debug) {
             fprintf(stderr, "ACQ\n");
+        }
+
         state = FRAME_SEARCH;
     }
 
     void run_frame_search()
     {
         complex<float> *psampled;
-        if (cstln_out && cstln_out->writable() >= 1024)
+
+        if (cstln_out && cstln_out->writable() >= 1024) {
             psampled = cstln_out->wr();
-        else
+        } else {
             psampled = nullptr;
+        }
 
         // Preserve float precision
         phase16 -= 65536 * floor(phase16 / 65536);
-
         int nsymbols = MAX_SYMBOLS_PER_FRAME; // TBD Adjust after PLS decoding
-
         sampler_state ss = {in.rd(), mu, phase16, freqw16, nullptr};
         sampler->update_freq(ss.fw16 / omega0);
 
-        if (!in_power)
+        if (!in_power) {
             init_agc(ss.p, 64);
+        }
+
         update_agc();
 
         for (int s = 0; s < nsymbols; ++s)
@@ -650,8 +747,9 @@ struct s2_frame_receiver : runnable
             complex<float> p = p0 * agc_gain;
 
             // Constellation plot
-            if (psampled && s < 1024)
+            if (psampled && s < 1024) {
                 *psampled++ = p;
+            }
 
             // Demodulate everything as QPSK.
             // Occasionally it locks onto 8PSK at offet 2pi/16.
@@ -662,22 +760,28 @@ struct s2_frame_receiver : runnable
             {
                 ps->hist = (ps->hist << 1) | ((ps->tobpsk >> symb) & 1);
                 int errors = hamming_weight((ps->hist & sof.MASK) ^ sof.VALUE);
+
                 if (errors <= S2_MAX_ERR_SOF_INITIAL)
                 {
-                    if (sch->debug2)
-                        fprintf(stderr, "Found SOF+%d at %d offset %f\n",
-                                errors, s, ps->offset16);
+                    if (sch->debug2) {
+                        fprintf(stderr, "Found SOF+%d at %d offset %f\n", errors, s, ps->offset16);
+                    }
+
                     ss.ph16 += ps->offset16;
                     in.read(ss.p - in.rd());
                     mu = ss.mu;
                     phase16 = ss.ph16;
                     freqw16 = ss.fw16;
-                    if (psampled)
+
+                    if (psampled) {
                         cstln_out->written(psampled - cstln_out->wr());
+                    }
+
                     enter_frame_locked();
                     return;
                 }
             }
+
             ss.normalize();
         }
 
@@ -686,16 +790,21 @@ struct s2_frame_receiver : runnable
         mu = ss.mu;
         phase16 = ss.ph16;
         freqw16 = ss.fw16;
-        if (psampled)
+
+        if (psampled) {
             cstln_out->written(psampled - cstln_out->wr());
+        }
     }
 
     // State transtion
     void enter_frame_locked()
     {
         opt_write(state_out, 1);
-        if (sch->debug)
+
+        if (sch->debug) {
             fprintf(stderr, "LOCKED\n");
+        }
+
         state = FRAME_LOCKED;
     }
 
@@ -708,12 +817,14 @@ struct s2_frame_receiver : runnable
         float ph16;    // Carrier phase at next symbol, cycles*65536
         float fw16;    // Carrier frequency, cycles per symbol * 65536
         uint8_t *scr;  // Position in scrambling sequeence
+
         void skip_symbols(int ns, float omega0)
         {
             mu += omega0 * ns;
             ph16 += fw16 * ns;
             scr += ns;
         }
+
         void normalize()
         {
             ph16 = fmodf(ph16, 65536.0f); // Rounding direction irrelevant
@@ -728,15 +839,19 @@ struct s2_frame_receiver : runnable
     void run_frame_locked()
     {
         complex<float> *psampled;
-        if (cstln_out && cstln_out->writable() >= 1024)
+        if (cstln_out && cstln_out->writable() >= 1024) {
             psampled = cstln_out->wr();
-        else
+        } else {
             psampled = nullptr;
+        }
+
         complex<float> *psampled_pls;
-        if (cstln_pls_out && cstln_pls_out->writable() >= 1024)
+
+        if (cstln_pls_out && cstln_pls_out->writable() >= 1024) {
             psampled_pls = cstln_pls_out->wr();
-        else
+        } else {
             psampled_pls = nullptr;
+        }
 
 #if TEST_DIVERSITY
         complex<float> *psymbols = symbols_out ? symbols_out->wr() : nullptr;
@@ -752,9 +867,9 @@ struct s2_frame_receiver : runnable
         update_agc();
 
         // Read PLSCODE
-
         uint64_t plscode = 0;
         complex<float> pls_symbols[s2_plscodes<T>::LENGTH];
+
         for (int s = 0; s < plscodes.LENGTH; ++s)
         {
             complex<float> p = interp_next(&ss) * agc_gain;
@@ -763,35 +878,43 @@ struct s2_frame_receiver : runnable
                 *psymbols++ = p * scale_symbols;
 #endif
             pls_symbols[s] = p;
-            if (psampled_pls)
+
+            if (psampled_pls) {
                 *psampled_pls++ = p;
+            }
+
             int bit = (p.im < 1); // TBD suboptimal
             plscode = (plscode << 1) | bit;
         }
+
         int pls_index = -1;
         int pls_errors = S2_MAX_ERR_PLSCODE + 1; // dmin=32
         // TBD: Optimiser
+
         for (int i = 0; i < plscodes.COUNT; ++i)
         {
             int e = hamming_weight(plscode ^ plscodes.codewords[i]);
+
             if (e < pls_errors)
             {
                 pls_errors = e;
                 pls_index = i;
             }
         }
+
         if (pls_index < 0)
         {
-            if (sch->debug2)
+            if (sch->debug2) {
                 fprintf(stderr, "Too many errors in plheader (%d)\n", pls_errors);
+            }
+
             in.read(ss.p - in.rd());
             enter_frame_search();
             return;
         }
 
         // Adjust phase with PLS
-        complex<float> pls_corr = conjprod(plscodes.symbols[pls_index],
-                                           pls_symbols, plscodes.LENGTH);
+        complex<float> pls_corr = conjprod(plscodes.symbols[pls_index], pls_symbols, plscodes.LENGTH);
         ss.normalize();
         align_phase(&ss, pls_corr);
 
@@ -802,6 +925,7 @@ struct s2_frame_receiver : runnable
         xfprintf(stderr, "PLS: modcod %d, short=%d, pilots=%d (%d errors)\n",
                  pls.modcod, pls.sf, pls.pilots, pls_errors);
         const modcod_info *mcinfo = &modcod_infos[pls.modcod];
+
         if (!mcinfo->nslots_nf)
         {
             fprintf(stderr, "Unsupported or corrupted MODCOD\n");
@@ -822,6 +946,7 @@ struct s2_frame_receiver : runnable
         if (mcinfo->c != m_modcodType) {
             m_modcodType = mcinfo->c;
         }
+
         if (mcinfo->rate != m_modcodRate) {
             m_modcodRate = mcinfo->rate;
         }
@@ -834,6 +959,7 @@ struct s2_frame_receiver : runnable
                 fprintf(stderr, "Warning: Variable MODCOD is inefficient\n");
                 delete cstln;
             }
+
             fprintf(stderr, "Creating LUT for %s ratecode %d\n",
                     cstln_base::names[mcinfo->c], mcinfo->rate);
             cstln = new cstln_lut<SOFTSYMB, 256>(mcinfo->c, mcinfo->esn0_nf,
@@ -870,6 +996,7 @@ struct s2_frame_receiver : runnable
                 // Read pilot
                 int errors = 0;
                 complex<float> corr = 0;
+
                 for (int s = 0; s < pilot_length; ++s)
                 {
                     complex<float> p0 = interp_next(&ss);
@@ -880,18 +1007,27 @@ struct s2_frame_receiver : runnable
                         *psymbols++ = p * scale_symbols;
 #endif
                     (void)track_symbol(&ss, p, qpsk, 1);
-                    if (psampled_pls)
+
+                    if (psampled_pls) {
                         *psampled_pls++ = p;
+                    }
+
                     complex<float> d = descramble(&ss, p);
-                    if (d.im < 0 || d.re < 0)
+
+                    if (d.im < 0 || d.re < 0) {
                         ++errors;
+                    }
+
                     corr.re += d.re + d.im;
                     corr.im += d.im - d.re;
                 }
+
                 if (errors > S2_MAX_ERR_PILOT)
                 {
-                    if (sch->debug2)
+                    if (sch->debug2) {
                         fprintf(stderr, "Too many errors in pilot (%d/36)\n", errors);
+                    }
+
                     in.read(ss.p - in.rd());
                     enter_frame_search();
                     return;
@@ -901,9 +1037,11 @@ struct s2_frame_receiver : runnable
                 align_phase(&ss, corr);
                 till_next_pls = 16;
             }
+
             // Read slot
             pout->is_pls = false;
             complex<float> p; // Export last symbols for cstln_out
+
             for (int s = 0; s < pout->LENGTH; ++s)
             {
                 p = interp_next(&ss) * agc_gain;
@@ -922,8 +1060,10 @@ struct s2_frame_receiver : runnable
 #endif
                 pout->symbols[s] = *symb;
             }
-            if (psampled)
+
+            if (psampled) {
                 *psampled++ = p;
+            }
         } // slots
 
         // Read SOF
@@ -936,6 +1076,7 @@ struct s2_frame_receiver : runnable
 
         complex<float> sof_corr = 0;
         uint32_t sofbits = 0;
+
         for (int s = 0; s < sof.LENGTH; ++s)
         {
             complex<float> p0 = interp_next(&ss);
@@ -945,21 +1086,28 @@ struct s2_frame_receiver : runnable
             if (psymbols)
                 *psymbols++ = p * scale_symbols;
 #endif
-            if (psampled_pls)
+            if (psampled_pls) {
                 *psampled_pls++ = p;
+            }
+
             int bit = (p.im < 0); // suboptimal
             sofbits = (sofbits << 1) | bit;
             sof_corr += conjprod(sof.symbols[s], p);
         }
+
         int sof_errors = hamming_weight(sofbits ^ sof.VALUE);
+
         if (sof_errors >= S2_MAX_ERR_SOF)
         {
-            if (sch->debug2)
+            if (sch->debug2) {
                 fprintf(stderr, "Too many errors in SOF (%d/26)\n", sof_errors);
+            }
+
             in.read(ss.p - in.rd());
             enter_coarse_freq();
             return;
         }
+
         ss.normalize();
         align_phase(&ss, sof_corr);
 
@@ -974,13 +1122,17 @@ struct s2_frame_receiver : runnable
         freqw16 = ss.fw16;
 
         // Measurements
-        if (psampled)
+        if (psampled) {
             cstln_out->written(psampled - cstln_out->wr());
-        if (psampled_pls)
+        }
+
+        if (psampled_pls) {
             cstln_pls_out->written(psampled_pls - cstln_pls_out->wr());
+        }
 #if TEST_DIVERSITY
-        if (psymbols)
+        if (psymbols) {
             symbols_out->written(psymbols - symbols_out->wr());
+        }
 #endif
         if (meas_count >= meas_decimation)
         {
@@ -994,8 +1146,10 @@ struct s2_frame_receiver : runnable
 
         int all_errors = pls_errors + pilot_errors + sof_errors;
         int max_errors = plscodes.LENGTH + sof.LENGTH;
-        if (pls.pilots)
+
+        if (pls.pilots) {
             max_errors += ((S - 1) / 16) * pilot_length;
+        }
 
         xfprintf(stderr, "success   fw= %f (%.0f Hz) mu= %f "
                          "errors=%d/64+%d+%d/26 = %2d/%d\n",
@@ -1013,10 +1167,14 @@ struct s2_frame_receiver : runnable
     void init_agc(const complex<T> *buf, int n)
     {
         in_power = 0;
-        for (int i = 0; i < n; ++i)
+
+        for (int i = 0; i < n; ++i) {
             in_power += cnorm2(buf[i]);
+        }
+
         in_power /= n;
     }
+
     void track_agc(const complex<float> &p)
     {
         float in_p = p.re * p.re + p.im * p.im;
@@ -1026,8 +1184,11 @@ struct s2_frame_receiver : runnable
     void update_agc()
     {
         float in_amp = gen_sqrt(in_power);
-        if (!in_amp)
+
+        if (!in_amp) {
             return;
+        }
+
         if (!strongpls || !cstln)
         {
             // Match RMS amplitude
@@ -1044,6 +1205,7 @@ struct s2_frame_receiver : runnable
     {
         int r = *ss->scr++;
         complex<float> res;
+
         switch (r)
         {
         case 3:
@@ -1061,6 +1223,7 @@ struct s2_frame_receiver : runnable
         default:
             res = p;
         }
+
         return res;
     }
 
@@ -1102,8 +1265,10 @@ struct s2_frame_receiver : runnable
       float err = atan2f(c.im,c.re) * (65536/(2*M_PI));
 #else
         // Same performance as atan2f, faster
-        if (!c.re)
+        if (!c.re) {
             return;
+        }
+
         float err = c.im / c.re * (65536 / (2 * M_PI));
 #endif
         ss->ph16 += err;
@@ -1114,19 +1279,38 @@ struct s2_frame_receiver : runnable
     {
         static struct
         {
-            float kph, kfw, kmu;
-        } gains[2] = {
-            {4e-2, 1e-4, (float) 0.001 / (cstln_amp * cstln_amp)},
-            {4e-2, 1e-4, (float) 0.001 / (cstln_amp * cstln_amp)}};
+            float kph;
+            float kfw;
+            float kmu;
+        }
+        gains[2] =
+        {
+            {
+                4e-2,
+                1e-4,
+                (float) 0.001 / (cstln_amp * cstln_amp)
+            },
+            {
+                4e-2,
+                1e-4,
+                (float) 0.001 / (cstln_amp * cstln_amp)
+            }
+        };
+
         // Decision
         typename cstln_lut<SOFTSYMB, 256>::result *cr = c->lookup(p.re, p.im);
         // Carrier tracking
         ss->ph16 += cr->phase_error * gains[mode].kph;
         ss->fw16 += cr->phase_error * gains[mode].kfw;
-        if (ss->fw16 < min_freqw16)
+
+        if (ss->fw16 < min_freqw16) {
             ss->fw16 = min_freqw16;
-        if (ss->fw16 > max_freqw16)
+        }
+
+        if (ss->fw16 > max_freqw16) {
             ss->fw16 = max_freqw16;
+        }
+
         // Phase tracking
         hist[2] = hist[1];
         hist[1] = hist[0];
@@ -1141,11 +1325,16 @@ struct s2_frame_receiver : runnable
              (hist[0].c.im - hist[2].c.im) * hist[1].p.im);
         float mucorr = muerr * gains[mode].kmu;
         const float max_mucorr = 0.1;
+
         // TBD Optimize out statically
-        if (mucorr < -max_mucorr)
+        if (mucorr < -max_mucorr) {
             mucorr = -max_mucorr;
-        if (mucorr > max_mucorr)
+        }
+
+        if (mucorr > max_mucorr) {
             mucorr = max_mucorr;
+        }
+
         ss->mu += mucorr;
         // Error vector for MER
         complex<float> ev(p.re - cp->re, p.im - cp->im);
@@ -1166,6 +1355,7 @@ struct s2_frame_receiver : runnable
     float agc_bw;
     cstln_lut<SOFTSYMB, 256> *qpsk;
     static const int MAXSYNCS = 8;
+
     struct sync
     {
         uint16_t nsmask; // bitmask of cstln orders for which this sync is used
@@ -1173,10 +1363,12 @@ struct s2_frame_receiver : runnable
         float offset16;  // Phase offset 0..65536
         uint32_t hist;   // For SOF detection
     } syncs[MAXSYNCS], *current_sync;
+
     int nsyncs;
     s2_plscodes<T> plscodes;
     cstln_lut<SOFTSYMB, 256> *cstln;
     // Initialize synchronizers for an arbitrary constellation.
+
     void add_syncs(cstln_lut<SOFTSYMB, 256> *c)
     {
         int random_decision = 0;
@@ -1189,34 +1381,43 @@ struct s2_frame_receiver : runnable
 #endif
         for (int r = 0; r < nrot; ++r)
         {
-            if (nsyncs == MAXSYNCS)
+            if (nsyncs == MAXSYNCS) {
                 fail("Bug: too many syncs");
+            }
+
             sync *s = &syncs[nsyncs++];
             s->offset16 = 65536.0 * r / nrot;
             float angle = -2 * M_PI * r / nrot;
             s->tobpsk = 0;
+
             for (int i = c->nsymbols; i--;)
             {
                 complex<int8_t> p = c->symbols[i];
                 float im = p.re * sinf(angle) + p.im * cosf(angle);
                 int bit;
+
                 if (im > 1)
+                {
                     bit = 0;
+                }
                 else if (im < -1)
+                {
                     bit = 1;
+                }
                 else
                 {
                     bit = random_decision;
                     random_decision ^= 1;
                 } // Near 0
+
                 s->tobpsk = (s->tobpsk << 1) | bit;
             }
+
             s->hist = 0;
         }
     }
 
     trig16 trig;
-    modcod_info *mcinfo;
     pipereader<complex<T>> in;
     pipewriter<plslot<SOFTSYMB>> out;
     int meas_count;
@@ -1260,6 +1461,7 @@ struct s2_interleaver : runnable
         out(_out, 1 + 360)
     {
     }
+
     void run()
     {
         while (in.readable() >= 1)
@@ -1267,8 +1469,11 @@ struct s2_interleaver : runnable
             const s2_pls *pls = &in.rd()->pls;
             const modcod_info *mcinfo = check_modcod(pls->modcod);
             int nslots = pls->sf ? mcinfo->nslots_nf / 4 : mcinfo->nslots_nf;
-            if (out.writable() < 1 + nslots)
+
+            if (out.writable() < 1 + nslots) {
                 return;
+            }
+
             const hard_sb *pbytes = in.rd()->bytes;
             // Output pseudo slot with PLS.
             plslot<hard_ss> *ppls = out.wr();
@@ -1277,17 +1482,22 @@ struct s2_interleaver : runnable
             out.written(1);
             // Interleave
             plslot<hard_ss> *pout = out.wr();
+
             if (mcinfo->nsymbols == 4)
+            {
                 serialize_qpsk(pbytes, nslots, pout);
+            }
             else
             {
                 int bps = log2(mcinfo->nsymbols);
                 int rows = pls->framebits() / bps;
-                if (mcinfo->nsymbols == 8 && mcinfo->rate == FEC35)
+                if (mcinfo->nsymbols == 8 && mcinfo->rate == FEC35) {
                     interleave(bps, rows, pbytes, nslots, false, pout);
-                else
+                } else {
                     interleave(bps, rows, pbytes, nslots, true, pout);
+                }
             }
+
             in.read(1);
             out.written(nslots);
         }
@@ -1313,8 +1523,10 @@ struct s2_interleaver : runnable
       }
       if ( nacc ) fail("Bug: s2_interleaver");
 #else
-        if (nslots % 2)
+        if (nslots % 2) {
             fatal("Bug: Truncated byte");
+        }
+
         for (; nslots; nslots -= 2)
         {
             hard_sb b;
@@ -1322,6 +1534,7 @@ struct s2_interleaver : runnable
             // Slot 0 (mod 2)
             pout->is_pls = false;
             ps = pout->symbols;
+
             for (int i = 0; i < 22; ++i)
             {
                 b = *pin++;
@@ -1330,6 +1543,7 @@ struct s2_interleaver : runnable
                 *ps++ = (b >> 2) & 3;
                 *ps++ = (b)&3;
             }
+
             b = *pin++;
             *ps++ = (b >> 6);
             *ps++ = (b >> 4) & 3;
@@ -1339,6 +1553,7 @@ struct s2_interleaver : runnable
             ps = pout->symbols;
             *ps++ = (b >> 2) & 3;
             *ps++ = (b)&3;
+
             for (int i = 0; i < 22; ++i)
             {
                 b = *pin++;
@@ -1347,6 +1562,7 @@ struct s2_interleaver : runnable
                 *ps++ = (b >> 2) & 3;
                 *ps++ = (b)&3;
             }
+
             ++pout;
         }
 #endif
@@ -1398,7 +1614,9 @@ struct s2_interleaver : runnable
     {
         void (*func)(int rows, const hard_sb *pin, int nslots,
                      plslot<hard_ss> *pout) = 0;
+
         if (msb_first)
+        {
             switch (bps)
             {
             case 2:
@@ -1416,7 +1634,9 @@ struct s2_interleaver : runnable
             default:
                 fail("Bad bps");
             }
+        }
         else
+        {
             switch (bps)
             {
             case 2:
@@ -1434,19 +1654,29 @@ struct s2_interleaver : runnable
             default:
                 fail("Bad bps");
             }
+        }
+
         (*func)(rows, pin, nslots, pout);
     }
+
     template <int MSB_FIRST, int BPS>
     static void interleave(int rows, const hard_sb *pin, int nslots,
                            plslot<hard_ss> *pout)
     {
-        if (BPS == 4 && rows == 4050 && MSB_FIRST)
+        if (BPS == 4 && rows == 4050 && MSB_FIRST) {
             return interleave4050(pin, nslots, pout);
-        if (rows % 8)
+        }
+
+        if (rows % 8) {
             fatal("modcod/framesize combination not supported\n");
+        }
+
         int stride = rows / 8; // Offset to next column, in bytes
-        if (nslots % 4)
+
+        if (nslots % 4) {
             fatal("Bug: Truncated byte");
+        }
+
         // plslot::symbols[] are not packed across slots,
         // so we need tos split bytes at boundaries.
         for (; nslots; nslots -= 4)
@@ -1456,11 +1686,13 @@ struct s2_interleaver : runnable
             // Slot 0 (mod 4): 88+2
             pout->is_pls = false;
             ps = pout->symbols;
+
             for (int i = 0; i < 11; ++i)
             {
                 split_byte<BPS>(pin++, stride, accs);
                 pop_symbols<MSB_FIRST, BPS>(accs, &ps, 8);
             }
+
             split_byte<BPS>(pin++, stride, accs);
             pop_symbols<MSB_FIRST, BPS>(accs, &ps, 2);
             ++pout;
@@ -1468,11 +1700,13 @@ struct s2_interleaver : runnable
             pout->is_pls = false;
             ps = pout->symbols;
             pop_symbols<MSB_FIRST, BPS>(accs, &ps, 6);
+
             for (int i = 0; i < 10; ++i)
             {
                 split_byte<BPS>(pin++, stride, accs);
                 pop_symbols<MSB_FIRST, BPS>(accs, &ps, 8);
             }
+
             split_byte<BPS>(pin++, stride, accs);
             pop_symbols<MSB_FIRST, BPS>(accs, &ps, 4);
             ++pout;
@@ -1480,11 +1714,13 @@ struct s2_interleaver : runnable
             pout->is_pls = false;
             ps = pout->symbols;
             pop_symbols<MSB_FIRST, BPS>(accs, &ps, 4);
+
             for (int i = 0; i < 10; ++i)
             {
                 split_byte<BPS>(pin++, stride, accs);
                 pop_symbols<MSB_FIRST, BPS>(accs, &ps, 8);
             }
+
             split_byte<BPS>(pin++, stride, accs);
             pop_symbols<MSB_FIRST, BPS>(accs, &ps, 6);
             ++pout;
@@ -1492,22 +1728,27 @@ struct s2_interleaver : runnable
             pout->is_pls = false;
             ps = pout->symbols;
             pop_symbols<MSB_FIRST, BPS>(accs, &ps, 2);
+
             for (int i = 0; i < 11; ++i)
             {
                 split_byte<BPS>(pin++, stride, accs);
                 pop_symbols<MSB_FIRST, BPS>(accs, &ps, 8);
             }
+
             ++pout;
         }
     }
+
     template <int BPS>
     static inline void split_byte(const hard_sb *pi, int stride,
                                   hard_sb accs[BPS])
     {
         // TBD Pass stride as template parameter.
-        for (int b = 0; b < BPS; ++b, pi += stride)
+        for (int b = 0; b < BPS; ++b, pi += stride) {
             accs[b] = *pi;
+        }
     }
+
     template <int MSB_FIRST, int BPS>
     static void pop_symbols(hard_sb accs[BPS], hard_ss **ps, int ns)
     {
@@ -1516,12 +1757,18 @@ struct s2_interleaver : runnable
             hard_ss symb = 0;
             // Check unrolling and constant propagation.
             for (int b = 0; b < BPS; ++b)
-                if (MSB_FIRST)
+            {
+                if (MSB_FIRST) {
                     symb = (symb << 1) | (accs[b] >> 7);
-                else
+                } else {
                     symb = (symb << 1) | (accs[BPS - 1 - b] >> 7);
-            for (int b = 0; b < BPS; ++b)
+                }
+            }
+
+            for (int b = 0; b < BPS; ++b) {
                 accs[b] <<= 1;
+            }
+
             *(*ps)++ = symb;
         }
     }
@@ -1534,10 +1781,12 @@ struct s2_interleaver : runnable
     {
         hard_sb accs[4]; // One accumulator per column
         int nacc = 0;    // Bits in each column accumulator
+
         for (; nslots; --nslots, ++pout)
         {
             pout->is_pls = false;
             hard_ss *ps = pout->symbols;
+
             for (int ns = pout->LENGTH; ns--; ++ps)
             {
                 if (!nacc)
@@ -1557,15 +1806,19 @@ struct s2_interleaver : runnable
                         accs[2] = (pin[1012] << 4) | (pin[1013] >> 4);
                         accs[3] = (pin[1518] << 6) | (pin[1519] >> 2);
                     }
+
                     ++pin;
                     nacc = 8;
                 }
+
                 hard_ss symb = 0;
+
                 for (int b = 0; b < 4; ++b)
                 {
                     symb = (symb << 1) | (accs[b] >> 7);
                     accs[b] <<= 1;
                 }
+
                 --nacc;
                 *ps = symb;
             }
@@ -1598,27 +1851,39 @@ struct s2_deinterleaver : runnable
         while (in.readable() >= 1 && out.writable() >= 1)
         {
             plslot<SOFTSYMB> *pin = in.rd();
-            if (!pin->is_pls)
+
+            if (!pin->is_pls) {
                 fail("s2_deinterleaver: bad input sequence");
+            }
+
             s2_pls *pls = &pin->pls;
             const modcod_info *mcinfo = check_modcod(pls->modcod);
             int nslots = pls->sf ? mcinfo->nslots_nf / 4 : mcinfo->nslots_nf;
-            if (in.readable() < 1 + nslots)
+
+            if (in.readable() < 1 + nslots) {
                 return;
+            }
+
             fecframe<SOFTBYTE> *pout = out.wr();
             pout->pls = *pls;
             SOFTBYTE *pbytes = pout->bytes;
+
             if (mcinfo->nsymbols == 4)
+            {
                 deserialize_qpsk(pin + 1, nslots, pbytes);
+            }
             else
             {
                 int bps = log2(mcinfo->nsymbols);
                 int rows = pls->framebits() / bps;
-                if (mcinfo->nsymbols == 8 && mcinfo->rate == FEC35)
+
+                if (mcinfo->nsymbols == 8 && mcinfo->rate == FEC35) {
                     deinterleave(bps, rows, pin + 1, nslots, false, pbytes);
-                else
+                } else {
                     deinterleave(bps, rows, pin + 1, nslots, true, pbytes);
+                }
             }
+
             in.read(1 + nslots);
             out.written(1);
         }
@@ -1632,13 +1897,16 @@ struct s2_deinterleaver : runnable
         SOFTBYTE acc;
         softword_clear(&acc); // gcc warning
         int nacc = 0;
+
         for (; nslots; --nslots, ++pin)
         {
             SOFTSYMB *ps = pin->symbols;
+
             for (int ns = pin->LENGTH; ns--; ++ps)
             {
                 pack_qpsk_symbol(*ps, &acc, nacc);
                 nacc += 2;
+
                 if (nacc == 8)
                 { // TBD unroll
                     *pout++ = acc;
@@ -1683,7 +1951,9 @@ struct s2_deinterleaver : runnable
     {
         void (*func)(int rows, const plslot<SOFTSYMB> *pin, int nslots,
                      SOFTBYTE *pout) = 0;
+
         if (msb_first)
+        {
             switch (bps)
             {
             case 2:
@@ -1701,7 +1971,9 @@ struct s2_deinterleaver : runnable
             default:
                 fail("Bad bps");
             }
+        }
         else
+        {
             switch (bps)
             {
             case 2:
@@ -1719,6 +1991,8 @@ struct s2_deinterleaver : runnable
             default:
                 fail("Bad bps");
             }
+        }
+
         (*func)(rows, pin, nslots, pout);
     }
 
@@ -1726,35 +2000,50 @@ struct s2_deinterleaver : runnable
     static void deinterleave(int rows, const plslot<SOFTSYMB> *pin, int nslots,
                              SOFTBYTE *pout)
     {
-        if (BPS == 4 && rows == 4050 && MSB_FIRST)
+        if (BPS == 4 && rows == 4050 && MSB_FIRST) {
             return deinterleave4050(pin, nslots, pout);
-        if (rows % 8)
+        }
+
+        if (rows % 8) {
             fatal("modcod/framesize combination not supported\n");
+        }
+
         int stride = rows / 8; // Offset to next column, in bytes
         SOFTBYTE accs[BPS];
-        for (int b = 0; b < BPS; ++b)
+
+        for (int b = 0; b < BPS; ++b) {
             softword_clear(&accs[b]); // gcc warning
+        }
+
         int nacc = 0;
+
         for (; nslots; --nslots, ++pin)
         {
             const SOFTSYMB *ps = pin->symbols;
+
             for (int ns = pin->LENGTH; ns--; ++ps)
             {
                 split_symbol(*ps, BPS, accs, nacc, MSB_FIRST);
                 ++nacc;
+
                 if (nacc == 8)
                 { // TBD Unroll, same as interleave()
                     SOFTBYTE *po = pout;
+
                     // TBD Pass stride as template parameter.
-                    for (int b = 0; b < BPS; ++b, po += stride)
+                    for (int b = 0; b < BPS; ++b, po += stride) {
                         *po = accs[b];
+                    }
+
                     ++pout;
                     nacc = 0;
                 }
             }
         }
-        if (nacc)
+
+        if (nacc) {
             fail("Bug: s2_deinterleaver");
+        }
     }
 #endif // reference
 
@@ -1766,16 +2055,22 @@ struct s2_deinterleaver : runnable
     {
         const int rows = 4050;
         SOFTBYTE accs[4];
-        for (int b = 0; b < 4; ++b)
+
+        for (int b = 0; b < 4; ++b) {
             softword_clear(&accs[b]); // gcc warning
+        }
+
         int nacc = 0;
+
         for (; nslots; --nslots, ++pin)
         {
             const SOFTSYMB *ps = pin->symbols;
+
             for (int ns = pin->LENGTH; ns--; ++ps)
             {
                 split_symbol(*ps, 4, accs, nacc, true);
                 ++nacc;
+
                 if (nacc == 8)
                 {
                     for (int b = 0; b < 8; ++b)
@@ -1785,16 +2080,22 @@ struct s2_deinterleaver : runnable
                         softwords_set(pout, rows * 2 + b, softword_get(accs[2], b));
                         softwords_set(pout, rows * 3 + b, softword_get(accs[3], b));
                     }
+
                     ++pout;
                     nacc = 0;
                 }
             }
         }
-        if (nacc != 2)
+
+        if (nacc != 2) {
             fatal("Bug: Expected 2 leftover rows\n");
+        }
+
         // Pad with random symbol so that we can use accs[].
-        for (int b = nacc; b < 8; ++b)
+        for (int b = nacc; b < 8; ++b) {
             split_symbol(pin->symbols[0], 4, accs, b, true);
+        }
+
         for (int b = 0; b < nacc; ++b)
         {
             softwords_set(pout, rows * 0 + b, softword_get(accs[0], b));
@@ -1811,17 +2112,21 @@ struct s2_deinterleaver : runnable
                                     bool msb_first)
     {
         (void) nacc;
+
         if (msb_first)
         {
-            for (int b = 0; b < bps; ++b)
+            for (int b = 0; b < bps; ++b) {
                 accs[b] = (accs[b] << 1) | llr_harden(ps.bits[bps - 1 - b]);
+            }
         }
         else
         {
-            for (int b = 0; b < bps; ++b)
+            for (int b = 0; b < bps; ++b) {
                 accs[b] = (accs[b] << 1) | llr_harden(ps.bits[b]);
+            }
         }
     }
+
     // Fast variant
     template <int MSB_FIRST, int BPS>
     static inline void split_symbol(const llr_ss &ps,
@@ -1829,52 +2134,68 @@ struct s2_deinterleaver : runnable
     {
         if (MSB_FIRST)
         {
-            for (int b = 0; b < BPS; ++b)
+            for (int b = 0; b < BPS; ++b) {
                 accs[b] = (accs[b] << 1) | llr_harden(ps.bits[BPS - 1 - b]);
+            }
         }
         else
         {
-            for (int b = 0; b < BPS; ++b)
+            for (int b = 0; b < BPS; ++b) {
                 accs[b] = (accs[b] << 1) | llr_harden(ps.bits[b]);
+            }
         }
     }
 
     // Spread LLR symbol across LLR columns.
-    static inline void split_symbol(const llr_ss &ps, int bps,
-                                    llr_sb accs[/*bps*/], int nacc,
-                                    bool msb_first)
+    static inline void split_symbol(
+        const llr_ss &ps,
+        int bps,
+        llr_sb accs[/*bps*/],
+        int nacc,
+        bool msb_first
+    )
     {
         if (msb_first)
         {
-            for (int b = 0; b < bps; ++b)
+            for (int b = 0; b < bps; ++b) {
                 accs[b].bits[nacc] = ps.bits[bps - 1 - b];
+            }
         }
         else
         {
-            for (int b = 0; b < bps; ++b)
+            for (int b = 0; b < bps; ++b) {
                 accs[b].bits[nacc] = ps.bits[b];
+            }
         }
     }
+
     // Fast variant
     template <int MSB_FIRST, int BPS>
-    static inline void split_symbol(const llr_ss &ps,
-                                    llr_sb accs[/*bps*/], int nacc)
+    static inline void split_symbol(
+        const llr_ss &ps,
+        llr_sb accs[/*bps*/],
+        int nacc)
     {
         if (MSB_FIRST)
         {
-            for (int b = 0; b < BPS; ++b)
+            for (int b = 0; b < BPS; ++b) {
                 accs[b].bits[nacc] = ps.bits[BPS - 1 - b];
+            }
         }
         else
         {
-            for (int b = 0; b < BPS; ++b)
+            for (int b = 0; b < BPS; ++b) {
                 accs[b].bits[nacc] = ps.bits[b];
+            }
         }
     }
 
     // Merge QPSK LLR symbol into hard byte.
-    static inline void pack_qpsk_symbol(const llr_ss &ps,
-                                        hard_sb *acc, int nacc)
+    static inline void pack_qpsk_symbol(
+        const llr_ss &ps,
+        hard_sb *acc,
+        int nacc
+    )
     {
         (void) nacc;
         // TBD Must match LLR law, see softsymb_harden.
@@ -1883,8 +2204,11 @@ struct s2_deinterleaver : runnable
     }
 
     // Merge QPSK LLR symbol into LLR byte.
-    static inline void pack_qpsk_symbol(const llr_ss &ps,
-                                        llr_sb *acc, int nacc)
+    static inline void pack_qpsk_symbol(
+        const llr_ss &ps,
+        llr_sb *acc,
+        int nacc
+    )
     {
         acc->bits[nacc] = ps.bits[1];
         acc->bits[nacc + 1] = ps.bits[0];
@@ -1906,7 +2230,9 @@ static const struct fec_info
     int kldpc; // LDPC message size (= BCH codeword size) (bits)
     int t;     // BCH error correction
     const s2_ldpc_table *ldpc;
-} fec_infos[2][FEC_COUNT] = {
+}
+fec_infos[2][FEC_COUNT] =
+{
     {
         // Normal frames - must respect enum code_rate order
         {32208, 32400, 12, &ldpc_nf_fec12},  // FEC12 (was [FEC12] = {...} and so on. Does not compile with MSVC)
@@ -1955,14 +2281,17 @@ struct s2_ldpc_engines
 {
     typedef ldpc_engine<SOFTBIT, SOFTBYTE, 8, uint16_t> s2_ldpc_engine;
     s2_ldpc_engine *ldpcs[2][FEC_COUNT]; // [shortframes][fec]
+
     s2_ldpc_engines()
     {
-        memset(ldpcs, 0, sizeof(ldpcs));
+        // memset(ldpcs, 0, sizeof(ldpcs)); // useless as initialization comes next
+
         for (int sf = 0; sf <= 1; ++sf)
         {
             for (int fec = 0; fec < FEC_COUNT; ++fec)
             {
                 const fec_info *fi = &fec_infos[sf][fec];
+
                 if (!fi->ldpc)
                 {
                     ldpcs[sf][fec] = nullptr;
@@ -1976,15 +2305,33 @@ struct s2_ldpc_engines
             }
         }
     }
+
+    ~s2_ldpc_engines()
+    {
+        for (int sf = 0; sf <= 1; ++sf)
+        {
+            for (int fec = 0; fec < FEC_COUNT; ++fec)
+            {
+                if (ldpcs[sf][fec]) {
+                    delete ldpcs[sf][fec];
+                }
+            }
+        }
+    }
+
     void print_node_stats()
     {
         for (int sf = 0; sf <= 1; ++sf)
+        {
             for (int fec = 0; fec < FEC_COUNT; ++fec)
             {
                 s2_ldpc_engine *ldpc = ldpcs[sf][fec];
-                if (ldpc)
+
+                if (ldpc) {
                     ldpc->print_node_stats();
+                }
             }
+        }
     }
 }; // s2_ldpc_engines
 
@@ -2002,9 +2349,11 @@ struct s2_bch_engines
     typedef bch_engine<uint32_t, 128, 17, 16, uint16_t, 0x002d> s2_bch_engine_nf8;
     // Short frames with 12 polynomials.
     typedef bch_engine<uint32_t, 168, 17, 14, uint16_t, 0x002b> s2_bch_engine_sf12;
+
     s2_bch_engines()
     {
         bitvect<uint32_t, 17> bch_polys[2][12]; // [shortframes][polyindex]
+
         // EN 302 307-1 5.3.1 Table 6a (polynomials for normal frames)
         bch_polys[0][0] = bitvect<uint32_t, 17>(0x1002d);  // g1
         bch_polys[0][1] = bitvect<uint32_t, 17>(0x10173);  // g2
@@ -2018,6 +2367,7 @@ struct s2_bch_engines
         bch_polys[0][9] = bitvect<uint32_t, 17>(0x175a7);  // g10
         bch_polys[0][10] = bitvect<uint32_t, 17>(0x13a2d); // g11
         bch_polys[0][11] = bitvect<uint32_t, 17>(0x11ae3); // g12
+
         // EN 302 307-1 5.3.1 Table 6b (polynomials for short frames)
         bch_polys[1][0] = bitvect<uint32_t, 17>(0x402b);  // g1
         bch_polys[1][1] = bitvect<uint32_t, 17>(0x4941);  // g2
@@ -2031,8 +2381,16 @@ struct s2_bch_engines
         bch_polys[1][9] = bitvect<uint32_t, 17>(0x5a49);  // g10
         bch_polys[1][10] = bitvect<uint32_t, 17>(0x5811); // g11
         bch_polys[1][11] = bitvect<uint32_t, 17>(0x65ef); // g12
+
         // Redundant with fec_infos[], but needs static template argument.
-        memset(bchs, 0, sizeof(bchs));
+
+        for (int sf = 0; sf <= 1; ++sf)
+        {
+            for (int fec = 0; fec < FEC_COUNT; ++fec) {
+                bchs[sf][fec] = nullptr;
+            }
+        }
+
         bchs[0][FEC12] = new s2_bch_engine_nf12(bch_polys[0], 12);
         bchs[0][FEC23] = new s2_bch_engine_nf10(bch_polys[0], 10);
         bchs[0][FEC34] = new s2_bch_engine_nf12(bch_polys[0], 12);
@@ -2044,6 +2402,7 @@ struct s2_bch_engines
         bchs[0][FEC13] = new s2_bch_engine_nf12(bch_polys[0], 12);
         bchs[0][FEC25] = new s2_bch_engine_nf12(bch_polys[0], 12);
         bchs[0][FEC35] = new s2_bch_engine_nf12(bch_polys[0], 12);
+
         bchs[1][FEC12] = new s2_bch_engine_sf12(bch_polys[1], 12);
         bchs[1][FEC23] = new s2_bch_engine_sf12(bch_polys[1], 12);
         bchs[1][FEC34] = new s2_bch_engine_sf12(bch_polys[1], 12);
@@ -2055,6 +2414,19 @@ struct s2_bch_engines
         bchs[1][FEC25] = new s2_bch_engine_sf12(bch_polys[1], 12);
         bchs[1][FEC35] = new s2_bch_engine_sf12(bch_polys[1], 12);
     }
+
+    ~s2_bch_engines()
+    {
+        for (int sf = 0; sf <= 1; ++sf)
+        {
+            for (int fec = 0; fec < FEC_COUNT; ++fec)
+            {
+                if (bchs[sf][fec]) {
+                    delete bchs[sf][fec];
+                }
+            }
+        }
+    }
 }; // s2_bch_engines
 
 // S2 BASEBAND DESCRAMBLER AND FEC ENCODER
@@ -2064,6 +2436,7 @@ struct s2_bch_engines
 struct s2_fecenc : runnable
 {
     typedef ldpc_engine<bool, hard_sb, 8, uint16_t> s2_ldpc_engine;
+
     s2_fecenc(
         scheduler *sch,
         pipebuf<bbframe> &_in,
@@ -2073,9 +2446,11 @@ struct s2_fecenc : runnable
         in(_in),
         out(_out)
     {
-        if (sch->debug)
+        if (sch->debug) {
             s2ldpc.print_node_stats();
+        }
     }
+
     void run()
     {
         while (in.readable() >= 1 && out.writable() >= 1)
@@ -2094,11 +2469,13 @@ struct s2_fecenc : runnable
         pout->pls = pin->pls;
         hard_sb *pbytes = pout->bytes;
         bbscrambling.transform(pin->bytes, fi->Kbch / 8, pbytes);
+
         { // BCH
             size_t msgbytes = fi->Kbch / 8;
             bch_interface *bch = s2bch.bchs[pin->pls.sf][mcinfo->rate];
             bch->encode(pbytes, msgbytes, pbytes + msgbytes);
         }
+
         { // LDPC
             size_t msgbits = fi->kldpc;
             size_t cwbits = pin->pls.framebits();
@@ -2106,6 +2483,7 @@ struct s2_fecenc : runnable
             ldpc->encode(fi->ldpc, pbytes, msgbits, cwbits, pbytes + msgbits / 8);
         }
     }
+
     pipereader<bbframe> in;
     pipewriter<fecframe<hard_sb>> out;
     s2_bbscrambling bbscrambling;
@@ -2121,6 +2499,7 @@ template <typename SOFTBIT, typename SOFTBYTE>
 struct s2_fecdec : runnable
 {
     int bitflips;
+
     s2_fecdec(
         scheduler *sch,
         pipebuf<fecframe<SOFTBYTE>> &_in, pipebuf<bbframe> &_out,
@@ -2134,9 +2513,11 @@ struct s2_fecdec : runnable
         bitcount(opt_writer(_bitcount, 1)),
         errcount(opt_writer(_errcount, 1))
     {
-        if (sch->debug)
+        if (sch->debug) {
             s2ldpc.print_node_stats();
+        }
     }
+
     void run()
     {
         while (in.readable() >= 1 && out.writable() >= 1 &&
@@ -2147,6 +2528,7 @@ struct s2_fecdec : runnable
             const fec_info *fi = &fec_infos[pin->pls.sf][mcinfo->rate];
             bool corrupted = false;
             bool residual_errors;
+
             if (true)
             {
                 // LDPC decode
@@ -2154,10 +2536,14 @@ struct s2_fecdec : runnable
                 size_t msgbits = fi->kldpc;
                 s2_ldpc_engine *ldpc = s2ldpc.ldpcs[pin->pls.sf][mcinfo->rate];
                 int ncorr = ldpc->decode_bitflip(fi->ldpc, pin->bytes, msgbits, cwbits, bitflips);
-                if (sch->debug2)
+
+                if (sch->debug2) {
                     fprintf(stderr, "LDPCCORR = %d\n", ncorr);
+                }
             }
+
             uint8_t *hardbytes = softbytes_harden(pin->bytes, fi->kldpc / 8, bch_buf);
+
             if (true)
             {
                 // BCH decode
@@ -2165,14 +2551,19 @@ struct s2_fecdec : runnable
                 // Decode with suitable BCH decoder for this MODCOD
                 bch_interface *bch = s2bch.bchs[pin->pls.sf][mcinfo->rate];
                 int ncorr = bch->decode(hardbytes, cwbytes);
-                if (sch->debug2)
+
+                if (sch->debug2) {
                     fprintf(stderr, "BCHCORR = %d\n", ncorr);
+                }
+
                 corrupted = (ncorr < 0);
                 residual_errors = (ncorr != 0);
+
                 // Report VER
                 opt_write(bitcount, fi->Kbch);
                 opt_write(errcount, (ncorr >= 0) ? ncorr : fi->Kbch);
             }
+
             int bbsize = fi->Kbch / 8;
             // TBD Some decoders want the bad packets.
 #if 0
@@ -2189,8 +2580,11 @@ struct s2_fecdec : runnable
                 bbscrambling.transform(hardbytes, bbsize, pout->bytes);
                 out.written(1);
             }
-            if (sch->debug)
+
+            if (sch->debug) {
                 fprintf(stderr, "%c", corrupted ? ':' : residual_errors ? '.' : '_');
+            }
+
             in.read(1);
         }
     }
@@ -2252,6 +2646,9 @@ struct s2_fecdec_soft : runnable
 
     ~s2_fecdec_soft()
     {
+        if (ldpc) {
+            delete ldpc;
+        }
         if (aligned_buffer) {
             free(aligned_buffer);
         }
@@ -2294,8 +2691,11 @@ struct s2_fecdec_soft : runnable
                 // Decode with suitable BCH decoder for this MODCOD
                 bch_interface *bch = s2bch.bchs[pin->pls.sf][mcinfo->rate];
                 int ncorr = bch->decode(hardbytes, cwbytes);
-                if (sch->debug2)
+
+                if (sch->debug2) {
                     fprintf(stderr, "BCHCORR = %d\n", ncorr);
+                }
+
                 corrupted = (ncorr < 0);
                 residual_errors = (ncorr != 0);
                 // Report VER
@@ -2356,8 +2756,14 @@ template <typename T, int _SIZE>
 struct simplequeue
 {
     static const int SIZE = _SIZE;
-    simplequeue() { rd = wr = count = 0; }
+
+    simplequeue()
+    {
+        rd = wr = count = 0;
+    }
+
     bool full() { return count == SIZE; }
+
     T *put()
     {
         T *res = &q[wr];
@@ -2365,8 +2771,10 @@ struct simplequeue
         ++count;
         return res;
     }
+
     bool empty() { return count == 0; }
     const T *peek() { return &q[rd]; }
+
     const T *get()
     {
         const T *res = &q[rd];
@@ -2374,7 +2782,8 @@ struct simplequeue
         --count;
         return res;
     }
-    //  private:
+
+private:
     int rd, wr, count;
     T q[SIZE];
 };
@@ -2406,15 +2815,18 @@ struct s2_fecdec_helper : runnable
         errcount(opt_writer(_errcount, 1))
     {
         command = strdup(_command);
-        for (int mc = 0; mc < 32; ++mc)
-            for (int sf = 0; sf < 2; ++sf)
+
+        for (int mc = 0; mc < 32; ++mc) {
+            for (int sf = 0; sf < 2; ++sf) {
                 pools[mc][sf].procs = nullptr;
+            }
+        }
     }
 
     ~s2_fecdec_helper()
     {
         free(command);
-        killall();
+        killall(); // also deletes pools[mc][sf].procs if necessary
     }
 
     void run()
@@ -2496,10 +2908,11 @@ struct s2_fecdec_helper : runnable
                 continue; // next worker
             }
 
-            if (nw < 0)
+            if (nw < 0) {
                 fatal("write(LDPC helper");
-            else if (nw != iosize)
+            } else if (nw != iosize) {
                 fatal("partial write(LDPC helper)");
+            }
 
             p->shift = i;
             helper_job *job = jobs.put();
@@ -2531,8 +2944,11 @@ struct s2_fecdec_helper : runnable
             fprintf(stderr, "s2_fecdec_helper::get_pool: allocate %d workers: modcod=%d sf=%d\n",
                 nhelpers, pls->modcod, pls->sf);
             p->procs = new helper_instance[nhelpers];
-            for (int i = 0; i < nhelpers; ++i)
+
+            for (int i = 0; i < nhelpers; ++i) {
                 spawn_helper(&p->procs[i], pls);
+            }
+
             p->nprocs = nhelpers;
             p->shift = 0;
         }
@@ -2557,12 +2973,17 @@ struct s2_fecdec_helper : runnable
                         helper_instance *h = &p->procs[i];
                         fprintf(stderr, "s2_fecdec_helper::killall: killing %d\n", h->pid);
                         int rc = kill(h->pid, SIGKILL);
-                        if (rc < 0) {
+
+                        if (rc < 0)
+                        {
                             fatal("s2_fecdec_helper::killall");
-                        } else {
+                        }
+                        else
+                        {
                             int cs;
                             waitpid(h->pid, &cs, 0);
                         }
+
                         // close pipes
                         close(h->fd_tx);
                         close(h->fd_rx);
@@ -2579,11 +3000,16 @@ struct s2_fecdec_helper : runnable
     // Spawn a helper process.
     void spawn_helper(helper_instance *h, const s2_pls *pls)
     {
-        if (sch->debug)
+        if (sch->debug) {
             fprintf(stderr, "Spawning LDPC helper: modcod=%d sf=%d\n", pls->modcod, pls->sf);
+        }
+
         int tx[2], rx[2];
-        if (pipe(tx) || pipe(rx))
+
+        if (pipe(tx) || pipe(rx)) {
             fatal("pipe");
+        }
+
         // Size the pipes so that the helper never runs out of work to do.
         int pipesize = 64800 * batch_size;
 // macOS does not have F_SETPIPE_SZ and there
@@ -2609,10 +3035,12 @@ struct s2_fecdec_helper : runnable
                         "*** Try echo %d > /proc/sys/fs/pipe-max-size\n",
                         min_pipe_size,
                         pipesize);
-                if (must_buffer)
+
+                if (must_buffer) {
                     fatal("F_SETPIPE_SZ");
-                else
+                } else {
                     fprintf(stderr, "*** Throughput will be suboptimal.\n");
+                }
             }
         }
 #endif
@@ -2654,11 +3082,16 @@ struct s2_fecdec_helper : runnable
         h->batch_size = batch_size; // TBD
         h->b_in = h->b_out = 0;
         int flags_tx = fcntl(h->fd_tx, F_GETFL);
-        if (fcntl(h->fd_tx, F_SETFL, flags_tx | O_NONBLOCK))
+
+        if (fcntl(h->fd_tx, F_SETFL, flags_tx | O_NONBLOCK)) {
             fatal("fcntl_tx(helper)");
+        }
+
         int flags_rx = fcntl(h->fd_rx, F_GETFL);
-        if (fcntl(h->fd_rx, F_SETFL, flags_rx | O_NONBLOCK))
+
+        if (fcntl(h->fd_rx, F_SETFL, flags_rx | O_NONBLOCK)) {
             fatal("fcntl_rx(helper)");
+        }
     }
 
     // Receive a finished job.
@@ -2690,8 +3123,11 @@ struct s2_fecdec_helper : runnable
         //size_t chkbytes = cwbytes - msgbytes;
         bch_interface *bch = s2bch.bchs[job->pls.sf][mcinfo->rate];
         int ncorr = bch->decode(hardbytes, cwbytes);
-        if (sch->debug2)
+
+        if (sch->debug2) {
             fprintf(stderr, "BCHCORR = %d\n", ncorr);
+        }
+
         bool corrupted = (ncorr < 0);
         // Report VBER
         bitcount_q.push_back(fi->Kbch);
@@ -2714,8 +3150,10 @@ struct s2_fecdec_helper : runnable
             bbscrambling.transform(hardbytes, fi->Kbch / 8, bbframe_q.back().bytes);
             //out.written(1);
         }
-        if (sch->debug)
+
+        if (sch->debug) {
             fprintf(stderr, "%c", corrupted ? '!' : ncorr ? '.' : '_');
+        }
     }
 
     pipereader<fecframe<SOFTBYTE>> in;
@@ -2755,6 +3193,7 @@ struct s2_framer : runnable
         nremain = 0;
         remcrc = 0; // CRC for nonexistent previous packet
     }
+
     void run()
     {
         while (out.writable() >= 1)
@@ -2762,10 +3201,15 @@ struct s2_framer : runnable
             const modcod_info *mcinfo = check_modcod(pls.modcod);
             const fec_info *fi = &fec_infos[pls.sf][mcinfo->rate];
             int framebytes = fi->Kbch / 8;
-            if (!framebytes)
+
+            if (!framebytes) {
                 fail("MODCOD/framesize combination not allowed");
-            if (10 + nremain + 188 * in.readable() < framebytes)
+            }
+
+            if (10 + nremain + 188 * in.readable() < framebytes) {
                 break; // Not enough data to fill a frame
+            }
+
             bbframe *pout = out.wr();
             pout->pls = pls;
             uint8_t *buf = pout->bytes;
@@ -2788,27 +3232,39 @@ struct s2_framer : runnable
             // Data field
             memcpy(buf, rembuf, nremain); // Leftover from previous runs
             buf += nremain;
+
             while (buf < end)
             {
                 tspacket *tsp = in.rd();
-                if (tsp->data[0] != MPEG_SYNC)
+
+                if (tsp->data[0] != MPEG_SYNC) {
                     fail("Invalid TS");
+                }
+
                 *buf++ = remcrc; // Replace SYNC with CRC of previous.
                 remcrc = crc8.compute(tsp->data + 1, tspacket::SIZE - 1);
                 int nused = end - buf;
-                if (nused > tspacket::SIZE - 1)
+
+                if (nused > tspacket::SIZE - 1) {
                     nused = tspacket::SIZE - 1;
+                }
+
                 memcpy(buf, tsp->data + 1, nused);
                 buf += nused;
+
                 if (buf == end)
                 {
                     nremain = (tspacket::SIZE - 1) - nused;
                     memcpy(rembuf, tsp->data + 1 + nused, nremain);
                 }
+
                 in.read(1);
             }
-            if (buf != end)
+
+            if (buf != end) {
                 fail("Bug: s2_framer");
+            }
+
             out.written(1);
         }
     }
@@ -2845,6 +3301,7 @@ struct s2_deframer : runnable
         locktime_out(opt_writer(_locktime_out, MAX_TS_PER_BBFRAME))
     {
     }
+
     void run()
     {
         while (in.readable() >= 1 && out.writable() >= MAX_TS_PER_BBFRAME &&
@@ -2857,6 +3314,7 @@ struct s2_deframer : runnable
                 opt_write(state_out, 0);
                 report_state = false;
             }
+
             run_bbframe(in.rd());
             in.read(1);
         }
@@ -2874,6 +3332,7 @@ struct s2_deframer : runnable
         uint8_t crc = bbh[9];
         uint8_t *data = bbh + 10;
         int ro_code = bbh[0] & 3;
+
         if (sch->debug2)
         {
             static float ro_values[] = {0.35, 0.25, 0.20, 0};
@@ -2882,6 +3341,7 @@ struct s2_deframer : runnable
                     crc, crcexp, (crc == crcexp) ? "OK" : "KO",
                     bbh[0], bbh[1], ro_values[ro_code], upl, dfl, sync, syncd);
         }
+
         if (crc != crcexp || upl != 188 * 8 || sync != 0x47 || dfl > fec_info::KBCH_MAX ||
             syncd > dfl || (dfl & 7) || (syncd & 7))
         {
@@ -2889,19 +3349,24 @@ struct s2_deframer : runnable
             if (sch->debug) {
                 fprintf(stderr, "Bad bbframe\n");
             }
+
             missing = -1;
             info_unlocked();
             return;
         }
+
         // TBD Handle packets as payload+finalCRC and do crc8 before pout
         int pos; // Start of useful data in this bbframe
+
         if (missing < 0)
         {
             // Skip unusable data at beginning of bbframe
             pos = syncd / 8;
+
             if (sch->debug) {
                 fprintf(stderr, "Start TS at %d\n", pos);
             }
+
             missing = 0;
         }
         else
@@ -2912,12 +3377,14 @@ struct s2_deframer : runnable
                 if (sch->debug) {
                     fprintf(stderr, "Lost a bbframe ?\n");
                 }
+
                 missing = -1;
                 info_unlocked();
                 return;
             }
             pos = 0;
         }
+
         if (missing)
         {
             // Complete and output the partial TS packet in leftover[].
@@ -2931,6 +3398,7 @@ struct s2_deframer : runnable
             pos += missing;
             missing = 0;
         }
+
         while (pos + 188 <= dfl / 8)
         {
             tspacket *pout = out.wr();
@@ -2940,7 +3408,9 @@ struct s2_deframer : runnable
             info_good_packet();
             pos += 188;
         }
+
         int remain = dfl / 8 - pos;
+
         if (remain)
         {
             memcpy(leftover, data + pos, remain);
@@ -2954,12 +3424,14 @@ struct s2_deframer : runnable
         info_is_locked(false);
         locktime = 0;
     }
+
     void info_good_packet()
     {
         info_is_locked(true);
         ++locktime;
         opt_write(locktime_out, locktime);
     }
+
     void info_is_locked(bool newstate)
     {
         if (newstate != current_state)

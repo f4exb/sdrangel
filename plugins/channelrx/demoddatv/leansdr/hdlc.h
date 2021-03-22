@@ -27,15 +27,23 @@ namespace leansdr
 struct hdlc_dec
 {
 
-    hdlc_dec(int _minframesize, // Including CRC, excluding HDLC flags.
-             int _maxframesize,
-             bool _invert) : minframesize(_minframesize),
-                             maxframesize(_maxframesize),
-                             invertmask(_invert ? 0xff : 0),
-                             framebuf(new u8[maxframesize]),
-                             debug(false)
+    hdlc_dec(
+        int _minframesize, // Including CRC, excluding HDLC flags.
+        int _maxframesize,
+        bool _invert
+    ) :
+        minframesize(_minframesize),
+        maxframesize(_maxframesize),
+        invertmask(_invert ? 0xff : 0),
+        framebuf(new u8[maxframesize]),
+        debug(false)
     {
         reset();
+    }
+
+    ~hdlc_dec()
+    {
+        delete[] framebuf;
     }
 
     void reset()
@@ -51,7 +59,7 @@ struct hdlc_dec
     }
 
     // Decode (*ppin)[count] as MSB-packed HDLC bitstream.
-    // Return pointer to buffer[*pdatasize], or NULL if no valid frame.
+    // Return pointer to buffer[*pdatasize], or nullptr if no valid frame.
     // Return number of discarded bytes in *discarded.
     // Return number of checksum errors in *fcs_errors.
     // *ppin will have increased by at least 1 (unless count==0).
@@ -92,31 +100,41 @@ struct hdlc_dec
                         if (nbits_out != 7)
                         {
                             // Not at byte boundary
-                            if (debug)
+                            if (debug) {
                                 fprintf(stderr, "^");
+                            }
+
                             ++*hdlc_errors;
                         }
                         else
                         {
                             // Checksum
                             crc16 ^= 0xffff;
+
                             if (framesize < 2 || framesize < minframesize || crc16 != crc16_check)
                             {
-                                if (debug)
+                                if (debug) {
                                     fprintf(stderr, "!");
+                                }
+
                                 ++*hdlc_errors;
+
                                 // Do not report random noise as FCS errors
-                                if (framesize >= minframesize)
+                                if (framesize >= minframesize) {
                                     ++*fcs_errors;
+                                }
                             }
                             else
                             {
-                                if (debug)
+                                if (debug) {
                                     fprintf(stderr, "_");
+                                }
+
                                 // This will trigger output, but we finish the byte first.
                                 *pdatasize = framesize - 2;
                             }
                         }
+
                         nbits_out = 0;
                         begin_frame();
                         // Keep processing up to 7 remaining bits from byte_in.
@@ -126,16 +144,20 @@ struct hdlc_dec
                     { // 11111110 HDLC invalid
                         if (framesize)
                         {
-                            if (debug)
+                            if (debug) {
                                 fprintf(stderr, "^");
+                            }
+
                             ++*hdlc_errors;
                         }
+
                         inframe = false;
                     }
                     else
                     {                                        // Data bit
                         byte_out = (byte_out >> 1) | bit_in; // HDLC is LSB first
                         ++nbits_out;
+
                         if (nbits_out == 8)
                         {
                             if (framesize < maxframesize)
@@ -143,11 +165,13 @@ struct hdlc_dec
                                 framebuf[framesize++] = byte_out;
                                 crc16_byte(byte_out);
                             }
+
                             nbits_out = 0;
                         }
                     }
                 } // inframe
             }     // bits
+
             if (*pdatasize != -1)
             {
                 // Found a complete frame
@@ -157,7 +181,7 @@ struct hdlc_dec
         }
 
         *ppin = pin;
-        return NULL;
+        return nullptr;
     }
 
   private:
@@ -181,8 +205,7 @@ struct hdlc_dec
     {
         crc16 ^= data;
 
-        for (int bit = 8; bit--;)
-        {
+        for (int bit = 8; bit--;) {
             crc16 = (crc16 & 1) ? (crc16 >> 1) ^ crc16_poly : (crc16 >> 1);
         }
     }
@@ -196,38 +219,42 @@ struct hdlc_dec
 
 struct hdlc_sync : runnable
 {
-    hdlc_sync(scheduler *sch, pipebuf<u8> &_in, // Packed bits
-              pipebuf<u8> &_out,                // Bytes
-              int _minframesize,                // Including CRC, excluding HDLC flags.
-              int _maxframesize,
-              // Status
-              pipebuf<int> *_lock_out = NULL,
-              pipebuf<int> *_framecount_out = NULL,
-              pipebuf<int> *_fcserrcount_out = NULL,
-              pipebuf<int> *_hdlcbytecount_out = NULL,
-              pipebuf<int> *_databytecount_out = NULL) : runnable(sch, "hdlc_sync"),
-                                                         minframesize(_minframesize),
-                                                         maxframesize(_maxframesize),
-                                                         chunk_size(maxframesize + 2),
-                                                         in(_in),
-                                                         out(_out, _maxframesize + chunk_size),
-                                                         lock_out(opt_writer(_lock_out)),
-                                                         framecount_out(opt_writer(_framecount_out)),
-                                                         fcserrcount_out(opt_writer(_fcserrcount_out)),
-                                                         hdlcbytecount_out(opt_writer(_hdlcbytecount_out)),
-                                                         databytecount_out(opt_writer(_databytecount_out)),
-                                                         cur_sync(0),
-                                                         resync_phase(0),
-                                                         lock_state(false),
-                                                         resync_period(32),
-                                                         header16(false)
+    hdlc_sync(
+        scheduler *sch, pipebuf<u8> &_in, // Packed bits
+        pipebuf<u8> &_out,                // Bytes
+        int _minframesize,                // Including CRC, excluding HDLC flags.
+        int _maxframesize,
+        // Status
+        pipebuf<int> *_lock_out = nullptr,
+        pipebuf<int> *_framecount_out = nullptr,
+        pipebuf<int> *_fcserrcount_out = nullptr,
+        pipebuf<int> *_hdlcbytecount_out = nullptr,
+        pipebuf<int> *_databytecount_out = nullptr
+    ) :
+        runnable(sch, "hdlc_sync"),
+        minframesize(_minframesize),
+        maxframesize(_maxframesize),
+        chunk_size(maxframesize + 2),
+        in(_in),
+        out(_out, _maxframesize + chunk_size),
+        lock_out(opt_writer(_lock_out)),
+        framecount_out(opt_writer(_framecount_out)),
+        fcserrcount_out(opt_writer(_fcserrcount_out)),
+        hdlcbytecount_out(opt_writer(_hdlcbytecount_out)),
+        databytecount_out(opt_writer(_databytecount_out)),
+        cur_sync(0),
+        resync_phase(0),
+        lock_state(false),
+        resync_period(32),
+        header16(false)
     {
         for (int s = 0; s < NSYNCS; ++s)
         {
             syncs[s].dec = new hdlc_dec(minframesize, maxframesize, s != 0);
 
-            for (int h = 0; h < NERRHIST; ++h)
+            for (int h = 0; h < NERRHIST; ++h) {
                 syncs[s].errhist[h] = 0;
+            }
         }
 
         syncs[cur_sync].dec->debug = sch->debug;
@@ -236,7 +263,11 @@ struct hdlc_sync : runnable
 
     void run()
     {
-        if (!opt_writable(lock_out) || !opt_writable(framecount_out) || !opt_writable(fcserrcount_out) || !opt_writable(hdlcbytecount_out) || !opt_writable(databytecount_out))
+        if (!opt_writable(lock_out) ||
+            !opt_writable(framecount_out) ||
+            !opt_writable(fcserrcount_out) ||
+            !opt_writable(hdlcbytecount_out) ||
+            !opt_writable(databytecount_out))
         {
             return;
         }
@@ -253,8 +284,9 @@ struct hdlc_sync : runnable
                 // Once every resync_phase, try all decoders
                 for (int s = 0; s < NSYNCS; ++s)
                 {
-                    if (s != cur_sync)
+                    if (s != cur_sync) {
                         syncs[s].dec->reset();
+                    }
 
                     syncs[s].errhist[errslot] = 0;
 
@@ -289,22 +321,27 @@ struct hdlc_sync : runnable
                 {
                     total_errors[s] = 0;
 
-                    for (int h = 0; h < NERRHIST; ++h)
+                    for (int h = 0; h < NERRHIST; ++h) {
                         total_errors[s] += syncs[s].errhist[h];
+                    }
                 }
 
                 int best = cur_sync;
 
                 for (int s = 0; s < NSYNCS; ++s)
-                    if (total_errors[s] < total_errors[best])
+                {
+                    if (total_errors[s] < total_errors[best]) {
                         best = s;
+                    }
+                }
 
                 if (best != cur_sync)
                 {
                     lock_state = false;
 
-                    if (sch->debug)
+                    if (sch->debug) {
                         fprintf(stderr, "[%d:%d->%d:%d]", cur_sync, total_errors[cur_sync], best, total_errors[best]);
+                    }
 
                     // No verbose messages on candidate syncs
                     syncs[cur_sync].dec->debug = false;
@@ -336,12 +373,14 @@ struct hdlc_sync : runnable
             in.read(chunk_size);
             hdlcbytecount += chunk_size;
 
-            if (++resync_phase >= resync_period)
+            if (++resync_phase >= resync_period) {
                 resync_phase = 0;
+            }
         } // Work to do
 
-        if (lock_state != previous_lock_state)
+        if (lock_state != previous_lock_state) {
             opt_write(lock_out, lock_state ? 1 : 0);
+        }
 
         opt_write(framecount_out, framecount);
         opt_write(fcserrcount_out, fcserrcount);
@@ -388,8 +427,7 @@ struct hdlc_sync : runnable
   public:
     int resync_period;
     bool header16; // Output length prefix
-};
-// hdlc_sync
+}; // hdlc_sync
 
 } // namespace leansdr
 

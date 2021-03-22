@@ -47,50 +47,65 @@ namespace leansdr
 template <typename Te, typename Tp, Tp P, int N, Te ALPHA>
 struct gf2x_p
 {
+    static const Te alpha = ALPHA;
+
     gf2x_p()
     {
-        if (ALPHA != 2)
+        if (ALPHA != 2) {
             fail("alpha!=2 not implemented");
+        }
+
         // Precompute log and exp tables.
         Tp alpha_i = 1;
+
         for (Tp i = 0; i < (1 << N); ++i)
         {
             lut_exp[i] = alpha_i;
             lut_exp[((1 << N) - 1) + i] = alpha_i;
             lut_log[alpha_i] = i;
             alpha_i <<= 1; // Multiply by alpha=[X] i.e. increase degrees
-            if (alpha_i & (1 << N))
+
+            if (alpha_i & (1 << N)) {
                 alpha_i ^= P; // Modulo P iteratively
+            }
         }
     }
-    static const Te alpha = ALPHA;
+
     inline Te add(Te x, Te y) { return x ^ y; } // Addition modulo 2
     inline Te sub(Te x, Te y) { return x ^ y; } // Subtraction modulo 2
+
     inline Te mul(Te x, Te y)
     {
-        if (!x || !y)
+        if (!x || !y) {
             return 0;
+        }
+
         return lut_exp[lut_log[x] + lut_log[y]];
     }
+
     inline Te div(Te x, Te y)
     {
         //if ( ! y ) fail("div"); // TODO
-        if (!x)
+        if (!x) {
             return 0;
+        }
+
         return lut_exp[lut_log[x] + ((1 << N) - 1) - lut_log[y]];
     }
+
     inline Te inv(Te x)
     {
         //    if ( ! x ) fail("inv");
         return lut_exp[((1 << N) - 1) - lut_log[x]];
     }
+
     inline Te exp(Te x) { return lut_exp[x]; }
     inline Te log(Te x) { return lut_log[x]; }
 
   private:
     Te lut_exp[(1 << N) * 2]; // Wrap to avoid indexing modulo 2^N-1
     Te lut_log[1 << N];
-};
+}; // gf2x_p
 
 // Reed-Solomon for RS(204,188) shortened from RS(255,239).
 
@@ -99,21 +114,23 @@ struct rs_engine
     // EN 300 421, section 4.4.2, Field Generator Polynomial
     // p(X) = X^8 + X^4 + X^3 + X^2 + 1
     gf2x_p<unsigned char, unsigned short, 0x11d, 8, 2> gf;
-
     u8 G[17]; // { G_16, ..., G_0 }
 
     rs_engine()
     {
         // EN 300 421, section 4.4.2, Code Generator Polynomial
         // G(X) = (X-alpha^0)*...*(X-alpha^15)
-        for (int i = 0; i <= 16; ++i)
+        for (int i = 0; i <= 16; ++i) {
             G[i] = (i == 16) ? 1 : 0; // Init G=1
+        }
+
         for (int d = 0; d < 16; ++d)
         {
             // Multiply by (X-alpha^d)
             // G := X*G - alpha^d*G
-            for (int i = 0; i <= 16; ++i)
+            for (int i = 0; i <= 16; ++i) {
                 G[i] = gf.sub((i == 16) ? 0 : G[i + 1], gf.mul(gf.exp(d), G[i]));
+            }
         }
 #if DEBUG_RS
         fprintf(stderr, "RS generator:");
@@ -132,20 +149,28 @@ struct rs_engine
     bool syndromes(const u8 *poly, u8 *synd)
     {
         bool corrupted = false;
+
         for (int i = 0; i < 16; ++i)
         {
             synd[i] = eval_poly_rev(poly, 204, gf.exp(i));
-            if (synd[i])
+
+            if (synd[i]) {
                 corrupted = true;
+            }
         }
+
         return corrupted;
     }
+
     u8 eval_poly_rev(const u8 *poly, int n, u8 x)
     {
         // poly[0]*x^(n-1) + .. + poly[n-1]*x^0 with Hörner method.
         u8 acc = 0;
-        for (int i = 0; i < n; ++i)
+
+        for (int i = 0; i < n; ++i) {
             acc = gf.add(gf.mul(acc, x), poly[i]);
+        }
+
         return acc;
     }
 
@@ -154,8 +179,11 @@ struct rs_engine
     {
         // poly[0]*x^0 + .. + poly[deg]*x^deg with Hörner method.
         u8 acc = 0;
-        for (; deg >= 0; --deg)
+
+        for (; deg >= 0; --deg) {
             acc = gf.add(gf.mul(acc, x), poly[deg]);
+        }
+
         return acc;
     }
 
@@ -178,12 +206,15 @@ struct rs_engine
         for (int d = 0; d < 188; ++d)
         {
             // Clear monomial of degree d
-            if (!p[d])
+            if (!p[d]) {
                 continue;
+            }
+
             u8 k = gf.div(p[d], G[0]);
             // p(X) := p(X) - k*G(X)*X^(188-d)
-            for (int i = 0; i <= 16; ++i)
+            for (int i = 0; i <= 16; ++i) {
                 p[d + i] = gf.sub(p[d + i], gf.mul(k, G[i]));
+            }
         }
 #if DEBUG_RS
         fprintf(stderr, "coded:");
@@ -198,8 +229,12 @@ struct rs_engine
     // If pin[] is provided, errors will be fixed in the original
     // message too and syndromes will be updated.
 
-    bool correct(u8 synd[16], u8 pout[188],
-                 u8 pin[204] = NULL, int *bits_corrected = NULL)
+    bool correct(
+        u8 synd[16],
+        u8 pout[188],
+        u8 pin[204] = nullptr,
+        int *bits_corrected = nullptr
+    )
     {
         // Berlekamp - Massey
         // http://en.wikipedia.org/wiki/Berlekamp%E2%80%93Massey_algorithm#Code_sample
@@ -208,11 +243,15 @@ struct rs_engine
         int L = 0;
         int m = 1;
         u8 b = 1;
+
         for (int n = 0; n < 16; ++n)
         {
             u8 d = synd[n];
-            for (int i = 1; i <= L; ++i)
+
+            for (int i = 1; i <= L; ++i) {
                 d ^= gf.mul(C[i], synd[n - i]);
+            }
+
             if (!d)
             {
                 ++m;
@@ -221,8 +260,11 @@ struct rs_engine
             {
                 u8 T[16];
                 memcpy(T, C, sizeof(T));
-                for (int i = 0; i < 16 - m; ++i)
+
+                for (int i = 0; i < 16 - m; ++i) {
                     C[m + i] ^= gf.mul(d, gf.mul(gf.inv(b), B[i]));
+                }
+
                 L = n + 1 - L;
                 memcpy(B, T, sizeof(B));
                 b = d;
@@ -230,8 +272,10 @@ struct rs_engine
             }
             else
             {
-                for (int i = 0; i < 16 - m; ++i)
+                for (int i = 0; i < 16 - m; ++i) {
                     C[m + i] ^= gf.mul(d, gf.mul(gf.inv(b), B[i]));
+                }
+
                 ++m;
             }
         }
@@ -254,11 +298,17 @@ struct rs_engine
         // Compute Omega
         u8 omega[16];
         memset(omega, 0, sizeof(omega));
+
         // TODO loops
         for (int i = 0; i < 16; ++i)
+        {
             for (int j = 0; j < 16; ++j)
-                if (i + j < 16)
+            {
+                if (i + j < 16) {
                     omega[i + j] ^= gf.mul(synd[i], C[j]);
+                }
+            }
+        }
 #if DEBUG_RS
         fprintf(stderr, "omega=");
         for (int i = 0; i < 16; ++i)
@@ -268,8 +318,10 @@ struct rs_engine
 
         // Compute Lambda'
         u8 Cprime[15];
-        for (int i = 0; i < 15; ++i)
+
+        for (int i = 0; i < 15; ++i) {
             Cprime[i] = (i & 1) ? 0 : C[i + 1];
+        }
 #if DEBUG_RS
         fprintf(stderr, "Cprime=");
         for (int i = 0; i < 15; ++i)
@@ -280,10 +332,12 @@ struct rs_engine
         // Find zeroes of C by exhaustive search?
         // TODO Chien method
         int roots_found = 0;
+
         for (int i = 0; i < 255; ++i)
         {
             u8 r = gf.exp(i); // Candidate root alpha^0..alpha^254
             u8 v = eval_poly(C, L, r);
+
             if (!v)
             {
                 // r is a root X_k^-1 of the error locator polynomial.
@@ -298,25 +352,35 @@ struct rs_engine
                     u8 num = gf.mul(xk, eval_poly(omega, L, r));
                     u8 den = eval_poly(Cprime, 14, r);
                     u8 e = gf.div(num, den);
+
                     // Subtract e from coefficient of degree loc.
                     // Note: Coeffients listed by decreasing degree in pin[] and pout[].
-                    if (bits_corrected)
+                    if (bits_corrected) {
                         *bits_corrected += hamming_weight(e);
-                    if (loc >= 16)
+                    }
+
+                    if (loc >= 16) {
                         pout[203 - loc] ^= e;
-                    if (pin)
+                    }
+
+                    if (pin) {
                         pin[203 - loc] ^= e;
+                    }
                 }
-                if (++roots_found == L)
+
+                if (++roots_found == L) {
                     break;
+                }
             }
         }
-        if (pin)
+
+        if (pin) {
             return syndromes(pin, synd);
-        else
+        } else {
             return false;
+        }
     }
-};
+}; // rs_engine
 
 } // namespace leansdr
 
