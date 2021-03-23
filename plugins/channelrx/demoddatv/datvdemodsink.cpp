@@ -75,9 +75,8 @@ DATVDemodSink::~DATVDemodSink()
         {
             m_objRenderThread->stopRendering();
             m_objRenderThread->quit();
+            m_objRenderThread->wait();
         }
-
-        m_objRenderThread->wait(2000);
     }
 
     CleanUpDATVFramework();

@@ -33,7 +33,6 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent), m_pare
 {
     installEventFilter(this);
     m_isFullScreen = false;
-    m_running = 0;
     m_isFFMPEGInitialized = false;
     m_isOpen = false;
     m_formatCtx = nullptr;
@@ -69,6 +68,8 @@ DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent), m_pare
 
 DATVideoRender::~DATVideoRender()
 {
+    qDebug("DATVideoRender::~DATVideoRender");
+
     if (m_audioSWR) {
         swr_free(&m_audioSWR);
     }
@@ -387,93 +388,61 @@ bool DATVideoRender::OpenStream(DATVideostream *device)
         return false;
     }
 
-    //Only once execution
-    if (m_running.testAndSetOrdered(0,1))
+    m_metaData.OK_Data = true;
+    emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
+
+    InitializeFFMPEG();
+
+    if (!m_isFFMPEGInitialized)
     {
-        m_metaData.OK_Data = true;
-        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
-
-        InitializeFFMPEG();
-
-        if (!m_isFFMPEGInitialized)
-        {
-            qDebug() << "DATVideoRender::OpenStream FFMPEG not initialized";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            m_running.storeRelaxed(0);
-#else
-            m_running.store(0);
-#endif
-            return false;
-        }
-
-        if (!device->open(QIODevice::ReadOnly))
-        {
-            qDebug() << "DATVideoRender::OpenStream cannot open QIODevice";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            m_running.storeRelaxed(0);
-#else
-            m_running.store(0);
-#endif
-            return false;
-        }
-
-        //Connect QIODevice to FFMPEG Reader
-
-        m_formatCtx = avformat_alloc_context();
-
-        if (m_formatCtx == nullptr)
-        {
-            qDebug() << "DATVideoRender::OpenStream cannot alloc format FFMPEG context";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            m_running.storeRelaxed(0);
-#else
-            m_running.store(0);
-#endif
-            return false;
-        }
-
-        ptrIOBuffer = (unsigned char *)av_malloc(ioBufferSize + AV_INPUT_BUFFER_PADDING_SIZE);
-
-        ioCtx = avio_alloc_context(ptrIOBuffer,
-                                    ioBufferSize,
-                                    0,
-                                    reinterpret_cast<void *>(device),
-                                    &ReadFunction,
-                                    nullptr,
-                                    &SeekFunction);
-
-        m_formatCtx->pb = ioCtx;
-        m_formatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
-
-        if (avformat_open_input(&m_formatCtx, nullptr, nullptr, nullptr) < 0)
-        {
-            qDebug() << "DATVideoRender::OpenStream cannot open stream";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            m_running.storeRelaxed(0);
-#else
-            m_running.store(0);
-#endif
-            return false;
-        }
-
-        if (!PreprocessStream())
-        {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            m_running.storeRelaxed(0);
-#else
-            m_running.store(0);
-#endif
-            return false;
-        }
-
-        m_isOpen = true;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        m_running.storeRelaxed(0);
-#else
-        m_running.store(0);
-#endif
+        qDebug() << "DATVideoRender::OpenStream FFMPEG not initialized";
+        return false;
     }
+
+    if (!device->open(QIODevice::ReadOnly))
+    {
+        qDebug() << "DATVideoRender::OpenStream cannot open QIODevice";
+        return false;
+    }
+
+    //Connect QIODevice to FFMPEG Reader
+
+    m_formatCtx = avformat_alloc_context();
+
+    if (m_formatCtx == nullptr)
+    {
+        qDebug() << "DATVideoRender::OpenStream cannot alloc format FFMPEG context";
+        return false;
+    }
+
+    ptrIOBuffer = (unsigned char *)av_malloc(ioBufferSize + AV_INPUT_BUFFER_PADDING_SIZE);
+
+    ioCtx = avio_alloc_context(
+        ptrIOBuffer,
+        ioBufferSize,
+        0,
+        reinterpret_cast<void *>(device),
+        &ReadFunction,
+        nullptr,
+        &SeekFunction
+    );
+
+    m_formatCtx->pb = ioCtx;
+    m_formatCtx->flags |= AVFMT_FLAG_CUSTOM_IO;
+
+    if (avformat_open_input(&m_formatCtx, nullptr, nullptr, nullptr) < 0)
+    {
+        qDebug() << "DATVideoRender::OpenStream cannot open stream";
+        return false;
+    }
+
+    if (!PreprocessStream())
+    {
+        return false;
+    }
+
+    qDebug("DATVideoRender::OpenStream: successful");
+    m_isOpen = true;
 
     return true;
 }
@@ -490,210 +459,180 @@ bool DATVideoRender::RenderStream()
         return false;
     }
 
-    //Only once execution
-    if (m_running.testAndSetOrdered(0,1))
+    //********** Rendering **********
+    if (av_read_frame(m_formatCtx, &packet) < 0)
     {
-        //********** Rendering **********
-        if (av_read_frame(m_formatCtx, &packet) < 0)
+        qDebug() << "DATVideoRender::RenderStream reading packet error";
+        return false;
+    }
+
+    //Video channel
+    if ((packet.stream_index == m_videoStreamIndex) && (!m_videoMute))
+    {
+        memset(m_frame, 0, sizeof(AVFrame));
+        av_frame_unref(m_frame);
+
+        gotFrame = 0;
+
+        if (new_decode(m_videoDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
         {
-            qDebug() << "DATVideoRender::RenderStream reading packet error";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-            m_running.storeRelaxed(0);
-#else
-            m_running.store(0);
-#endif
-            return false;
-        }
+            m_videoDecodeOK = true;
 
-        //Video channel
-        if ((packet.stream_index == m_videoStreamIndex) && (!m_videoMute))
-        {
-            memset(m_frame, 0, sizeof(AVFrame));
-            av_frame_unref(m_frame);
-
-            gotFrame = 0;
-
-            if (new_decode(m_videoDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
+            if (gotFrame)
             {
-                m_videoDecodeOK = true;
+                //Rendering and RGB Converter setup
+                needRenderingSetup = (m_frameCount == 0);
+                needRenderingSetup |= (m_swsCtx == nullptr);
 
-                if (gotFrame)
+                if ((m_currentRenderWidth != m_frame->width) || (m_currentRenderHeight != m_frame->height))
                 {
-                    //Rendering and RGB Converter setup
-                    needRenderingSetup = (m_frameCount == 0);
-                    needRenderingSetup |= (m_swsCtx == nullptr);
+                    needRenderingSetup = true;
+                }
 
-                    if ((m_currentRenderWidth != m_frame->width) || (m_currentRenderHeight != m_frame->height))
+                if (needRenderingSetup)
+                {
+                    if (m_swsCtx != nullptr)
                     {
-                        needRenderingSetup = true;
+                        sws_freeContext(m_swsCtx);
+                        m_swsCtx = nullptr;
                     }
 
-                    if (needRenderingSetup)
+                    //Convertisseur YUV -> RGB
+                    m_swsCtx = sws_alloc_context();
+
+                    av_opt_set_int(m_swsCtx, "srcw", m_frame->width, 0);
+                    av_opt_set_int(m_swsCtx, "srch", m_frame->height, 0);
+                    av_opt_set_int(m_swsCtx, "src_format", m_frame->format, 0);
+
+                    av_opt_set_int(m_swsCtx, "dstw", m_frame->width, 0);
+                    av_opt_set_int(m_swsCtx, "dsth", m_frame->height, 0);
+                    av_opt_set_int(m_swsCtx, "dst_format", AV_PIX_FMT_RGB24, 0);
+
+                    av_opt_set_int(m_swsCtx, "sws_flag", SWS_FAST_BILINEAR /* SWS_BICUBIC*/, 0);
+
+                    if (sws_init_context(m_swsCtx, nullptr, nullptr) < 0)
                     {
-                        if (m_swsCtx != nullptr)
-                        {
-                            sws_freeContext(m_swsCtx);
-                            m_swsCtx = nullptr;
-                        }
-
-                        //Convertisseur YUV -> RGB
-                        m_swsCtx = sws_alloc_context();
-
-                        av_opt_set_int(m_swsCtx, "srcw", m_frame->width, 0);
-                        av_opt_set_int(m_swsCtx, "srch", m_frame->height, 0);
-                        av_opt_set_int(m_swsCtx, "src_format", m_frame->format, 0);
-
-                        av_opt_set_int(m_swsCtx, "dstw", m_frame->width, 0);
-                        av_opt_set_int(m_swsCtx, "dsth", m_frame->height, 0);
-                        av_opt_set_int(m_swsCtx, "dst_format", AV_PIX_FMT_RGB24, 0);
-
-                        av_opt_set_int(m_swsCtx, "sws_flag", SWS_FAST_BILINEAR /* SWS_BICUBIC*/, 0);
-
-                        if (sws_init_context(m_swsCtx, nullptr, nullptr) < 0)
-                        {
-                            qDebug() << "DATVideoRender::RenderStream cannont init video data converter";
-                            m_swsCtx = nullptr;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                            m_running.storeRelaxed(0);
-#else
-                            m_running.store(0);
-#endif
-                            return false;
-                        }
-
-                        if ((m_currentRenderHeight > 0) && (m_currentRenderWidth > 0))
-                        {
-                            //av_freep(&m_pbytDecodedData[0]);
-                            //av_freep(&m_pintDecodedLineSize[0]);
-                        }
-
-                        if (av_image_alloc(m_pbytDecodedData, m_pintDecodedLineSize, m_frame->width, m_frame->height, AV_PIX_FMT_RGB24, 1) < 0)
-                        {
-                            qDebug() << "DATVideoRender::RenderStream cannont init video image buffer";
-                            sws_freeContext(m_swsCtx);
-                            m_swsCtx = nullptr;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                            m_running.storeRelaxed(0);
-#else
-                            m_running.store(0);
-#endif
-                            return false;
-                        }
-
-                        //Rendering device setup
-
-                        resizeTVScreen(m_frame->width, m_frame->height);
-                        update();
-                        resetImage();
-
-                        m_currentRenderWidth = m_frame->width;
-                        m_currentRenderHeight = m_frame->height;
-
-                        m_metaData.Width = m_frame->width;
-                        m_metaData.Height = m_frame->height;
-                        m_metaData.OK_Decoding = true;
-                        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
-                    }
-
-                    //Frame rendering
-
-                    if (sws_scale(m_swsCtx, m_frame->data, m_frame->linesize, 0, m_frame->height, m_pbytDecodedData, m_pintDecodedLineSize) < 0)
-                    {
-                        qDebug() << "DATVideoRender::RenderStream error converting video frame to RGB";
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-                        m_running.storeRelaxed(0);
-#else
-                        m_running.store(0);
-#endif
+                        qDebug() << "DATVideoRender::RenderStream cannont init video data converter";
+                        m_swsCtx = nullptr;
                         return false;
                     }
 
-                    renderImage(m_pbytDecodedData[0]);
-                    av_frame_unref(m_frame);
-                    m_frameCount++;
+                    if ((m_currentRenderHeight > 0) && (m_currentRenderWidth > 0))
+                    {
+                        //av_freep(&m_pbytDecodedData[0]);
+                        //av_freep(&m_pintDecodedLineSize[0]);
+                    }
+
+                    if (av_image_alloc(m_pbytDecodedData, m_pintDecodedLineSize, m_frame->width, m_frame->height, AV_PIX_FMT_RGB24, 1) < 0)
+                    {
+                        qDebug() << "DATVideoRender::RenderStream cannont init video image buffer";
+                        sws_freeContext(m_swsCtx);
+                        m_swsCtx = nullptr;
+                        return false;
+                    }
+
+                    //Rendering device setup
+
+                    resizeTVScreen(m_frame->width, m_frame->height);
+                    update();
+                    resetImage();
+
+                    m_currentRenderWidth = m_frame->width;
+                    m_currentRenderHeight = m_frame->height;
+
+                    m_metaData.Width = m_frame->width;
+                    m_metaData.Height = m_frame->height;
+                    m_metaData.OK_Decoding = true;
+                    emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
                 }
-            }
-            else
-            {
-                m_videoDecodeOK = false;
-                // qDebug() << "DATVideoRender::RenderStream video decode error";
-            }
-        }
-        // Audio channel
-        else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)) && (!m_audioMute))
-        {
-            if (m_updateAudioResampler)
-            {
-                setResampler();
-                m_updateAudioResampler = false;
-            }
 
-            memset(m_frame, 0, sizeof(AVFrame));
-            av_frame_unref(m_frame);
-            gotFrame = 0;
+                //Frame rendering
 
-            if (new_decode(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
-            {
-                m_audioDecodeOK = true;
-
-                if (gotFrame)
+                if (sws_scale(m_swsCtx, m_frame->data, m_frame->linesize, 0, m_frame->height, m_pbytDecodedData, m_pintDecodedLineSize) < 0)
                 {
-                    int16_t *audioBuffer = nullptr;
-                    av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
-                    int samples_per_channel = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
-                    if (samples_per_channel < m_frame->nb_samples) {
-                        qDebug("DATVideoRender::RenderStream: converted samples missing %d/%d returned", samples_per_channel, m_frame->nb_samples);
-                    }
-
-                    // direct writing:
-                    std::for_each(audioBuffer, audioBuffer + 2*samples_per_channel, [this](int16_t &x) {
-                        x *= m_audioVolume;
-                    });
-                    int ret = m_audioFifo->write((const quint8*) &audioBuffer[0], samples_per_channel);
-                    if (ret < samples_per_channel) {
-                        qDebug("DATVideoRender::RenderStream: audio samples missing %d/%d written", ret, samples_per_channel);
-                    }
-
-                    // buffered writing:
-                    // if (m_audioFifoBufferIndex + samples_per_channel < m_audioFifoBufferSize)
-                    // {
-                    //     std::copy(&audioBuffer[0], &audioBuffer[2*samples_per_channel], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
-                    //     m_audioFifoBufferIndex += samples_per_channel;
-                    // }
-                    // else
-                    // {
-                    //     int remainder = m_audioFifoBufferSize - m_audioFifoBufferIndex;
-                    //     std::copy(&audioBuffer[0], &audioBuffer[2*remainder], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
-                    //     std::for_each(m_audioFifoBuffer, m_audioFifoBuffer+2*m_audioFifoBufferSize, [this](int16_t &x) {
-                    //         x *= m_audioVolume;
-                    //     });
-                    //     int ret = m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
-                    //     if (ret < m_audioFifoBufferSize) {
-                    //         qDebug("DATVideoRender::RenderStream: audio samples missing %d/%d written", ret, m_audioFifoBufferSize);
-                    //     }
-                    //     std::copy(&audioBuffer[2*remainder], &audioBuffer[2*samples_per_channel], &m_audioFifoBuffer[0]);
-                    //     m_audioFifoBufferIndex = samples_per_channel - remainder;
-                    // }
-
-                    av_freep(&audioBuffer);
+                    qDebug() << "DATVideoRender::RenderStream error converting video frame to RGB";
+                    return false;
                 }
-            }
-            else
-            {
-                m_audioDecodeOK = false;
-                // qDebug("DATVideoRender::RenderStream: audio decode error");
+
+                renderImage(m_pbytDecodedData[0]);
+                av_frame_unref(m_frame);
+                m_frameCount++;
             }
         }
-
-        av_packet_unref(&packet);
-        //********** Rendering **********
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        m_running.storeRelaxed(0);
-#else
-        m_running.store(0);
-#endif
+        else
+        {
+            m_videoDecodeOK = false;
+            // qDebug() << "DATVideoRender::RenderStream video decode error";
+        }
     }
+    // Audio channel
+    else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)) && (!m_audioMute))
+    {
+        if (m_updateAudioResampler)
+        {
+            setResampler();
+            m_updateAudioResampler = false;
+        }
+
+        memset(m_frame, 0, sizeof(AVFrame));
+        av_frame_unref(m_frame);
+        gotFrame = 0;
+
+        if (new_decode(m_audioDecoderCtx, m_frame, &gotFrame, &packet) >= 0)
+        {
+            m_audioDecodeOK = true;
+
+            if (gotFrame)
+            {
+                int16_t *audioBuffer = nullptr;
+                av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
+                int samples_per_channel = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
+                if (samples_per_channel < m_frame->nb_samples) {
+                    qDebug("DATVideoRender::RenderStream: converted samples missing %d/%d returned", samples_per_channel, m_frame->nb_samples);
+                }
+
+                // direct writing:
+                std::for_each(audioBuffer, audioBuffer + 2*samples_per_channel, [this](int16_t &x) {
+                    x *= m_audioVolume;
+                });
+                int ret = m_audioFifo->write((const quint8*) &audioBuffer[0], samples_per_channel);
+                if (ret < samples_per_channel) {
+                    // qDebug("DATVideoRender::RenderStream: audio samples missing %d/%d written", ret, samples_per_channel);
+                }
+
+                // buffered writing:
+                // if (m_audioFifoBufferIndex + samples_per_channel < m_audioFifoBufferSize)
+                // {
+                //     std::copy(&audioBuffer[0], &audioBuffer[2*samples_per_channel], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                //     m_audioFifoBufferIndex += samples_per_channel;
+                // }
+                // else
+                // {
+                //     int remainder = m_audioFifoBufferSize - m_audioFifoBufferIndex;
+                //     std::copy(&audioBuffer[0], &audioBuffer[2*remainder], &m_audioFifoBuffer[2*m_audioFifoBufferIndex]);
+                //     std::for_each(m_audioFifoBuffer, m_audioFifoBuffer+2*m_audioFifoBufferSize, [this](int16_t &x) {
+                //         x *= m_audioVolume;
+                //     });
+                //     int ret = m_audioFifo->write((const quint8*) &m_audioFifoBuffer[0], m_audioFifoBufferSize);
+                //     if (ret < m_audioFifoBufferSize) {
+                //         qDebug("DATVideoRender::RenderStream: audio samples missing %d/%d written", ret, m_audioFifoBufferSize);
+                //     }
+                //     std::copy(&audioBuffer[2*remainder], &audioBuffer[2*samples_per_channel], &m_audioFifoBuffer[0]);
+                //     m_audioFifoBufferIndex = samples_per_channel - remainder;
+                // }
+
+                av_freep(&audioBuffer);
+            }
+        }
+        else
+        {
+            m_audioDecodeOK = false;
+            // qDebug("DATVideoRender::RenderStream: audio decode error");
+        }
+    }
+
+    av_packet_unref(&packet);
+    //********** Rendering **********
 
     return true;
 }
@@ -735,6 +674,8 @@ void DATVideoRender::setResampler()
 
 bool DATVideoRender::CloseStream(QIODevice *device)
 {
+    qDebug("DATVideoRender::CloseStream");
+
     if (!device)
     {
         qDebug() << "DATVideoRender::CloseStream QIODevice is nullptr";
@@ -753,45 +694,34 @@ bool DATVideoRender::CloseStream(QIODevice *device)
         return false;
     }
 
-    //Only once execution
-    if (m_running.testAndSetOrdered(0,1))
+    // maybe done in the avcodec_close
+    //    avformat_close_input(&m_formatCtx);
+    //    m_formatCtx=nullptr;
+
+    if (m_videoDecoderCtx)
     {
-        // maybe done in the avcodec_close
-        //    avformat_close_input(&m_formatCtx);
-        //    m_formatCtx=nullptr;
-
-        if (m_videoDecoderCtx)
-        {
-            avcodec_close(m_videoDecoderCtx);
-            m_videoDecoderCtx = nullptr;
-        }
-
-        if (m_frame)
-        {
-            av_frame_unref(m_frame);
-            av_frame_free(&m_frame);
-        }
-
-        if (m_swsCtx != nullptr)
-        {
-            sws_freeContext(m_swsCtx);
-            m_swsCtx = nullptr;
-        }
-
-        device->close();
-        m_isOpen = false;
-        m_currentRenderWidth = -1;
-        m_currentRenderHeight = -1;
-
-        ResetMetaData();
-        emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
-        m_running.storeRelaxed(0);
-#else
-        m_running.store(0);
-#endif
+        avcodec_close(m_videoDecoderCtx);
+        m_videoDecoderCtx = nullptr;
     }
+
+    if (m_frame)
+    {
+        av_frame_unref(m_frame);
+        av_frame_free(&m_frame);
+    }
+
+    if (m_swsCtx != nullptr)
+    {
+        sws_freeContext(m_swsCtx);
+        m_swsCtx = nullptr;
+    }
+
+    device->close();
+    m_isOpen = false;
+    m_currentRenderWidth = -1;
+    m_currentRenderHeight = -1;
+
+    ResetMetaData();
 
     return true;
 }

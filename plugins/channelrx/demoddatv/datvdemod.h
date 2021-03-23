@@ -22,6 +22,8 @@
 
 class DeviceAPI;
 
+#include <QThread>
+
 #include "channel/channelapi.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/devicesamplesource.h"
@@ -29,7 +31,6 @@ class DeviceAPI;
 #include "util/message.h"
 
 #include "datvdemodbaseband.h"
-
 
 class DATVDemod : public BasebandSampleSink, public ChannelAPI
 {
@@ -115,7 +116,7 @@ public:
 
 private:
     DeviceAPI* m_deviceAPI;
-    QThread *m_thread;
+    QThread m_thread;
     DATVDemodBaseband* m_basebandSink;
     DATVDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink

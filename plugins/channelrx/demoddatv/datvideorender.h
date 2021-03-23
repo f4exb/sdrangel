@@ -119,7 +119,6 @@ class DATVideoRender : public TVScreen
     Qt::WindowFlags m_originalWindowFlags;
     QSize m_originalSize;
 
-    QAtomicInt m_running;
     bool m_isFullScreen;
 
     bool m_isFFMPEGInitialized;
@@ -188,32 +187,32 @@ class DATVideoRenderThread : public QThread
 
     void setStreamAndRenderer(DATVideoRender *renderer, DATVideostream *stream)
     {
+        m_renderingVideo = false;
         m_renderer = renderer;
         m_stream = stream;
-        m_renderingVideo = false;
     }
 
     void run()
     {
-        if (m_renderingVideo)
-        {
+        if (m_renderingVideo) {
             return;
         }
 
-        if ((m_renderer == nullptr) || (m_stream == nullptr))
-        {
+        if ((m_renderer == nullptr) || (m_stream == nullptr)) {
             return;
         }
 
         m_renderingVideo = m_renderer->OpenStream(m_stream);
 
-        if (!m_renderingVideo)
-        {
+        if (!m_renderingVideo) {
             return;
         }
 
-        while ((m_renderer->RenderStream()) && (m_renderingVideo == true))
+        while (m_renderingVideo == true)
         {
+            if (!m_renderer->RenderStream()) {
+                break;
+            }
         }
 
         m_renderer->CloseStream(m_stream);

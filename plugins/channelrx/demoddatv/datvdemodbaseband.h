@@ -81,6 +81,8 @@ public:
     DATVDemodBaseband();
     ~DATVDemodBaseband();
     void reset();
+    void startWork();
+    void stopWork();
     void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
@@ -102,6 +104,7 @@ public:
     int getModcodModulation() const { return m_sink.getModcodModulation(); }
     int getModcodCodeRate() const { return m_sink.getModcodCodeRate(); }
     bool isCstlnSetByModcod() const { return m_sink.isCstlnSetByModcod(); }
+    bool isRunning() const { return m_running; }
 
 private:
     SampleSinkFifo m_sampleFifo;
@@ -109,6 +112,7 @@ private:
     DATVDemodSink m_sink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     DATVDemodSettings m_settings;
+    bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);

@@ -35,9 +35,8 @@ DATVDemod::DATVDemod(DeviceAPI *deviceAPI) :
 {
     qDebug("DATVDemod::DATVDemod");
     setObjectName("DATVDemod");
-    m_thread = new QThread(this);
     m_basebandSink = new DATVDemodBaseband();
-    m_basebandSink->moveToThread(m_thread);
+    m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
 
@@ -51,8 +50,12 @@ DATVDemod::~DATVDemod()
     qDebug("DATVDemod::~DATVDemod");
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
-    delete m_basebandSink;
-    delete m_thread;
+
+    if (m_basebandSink->isRunning()) {
+        stop();
+    }
+
+    m_basebandSink->deleteLater();
 }
 
 void DATVDemod::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool firstOfBurst)
@@ -70,14 +73,19 @@ void DATVDemod::start()
     }
 
     m_basebandSink->reset();
-    m_thread->start();
+    m_basebandSink->startWork();
+    m_thread.start();
+
+    DATVDemodBaseband::MsgConfigureDATVDemodBaseband *msg = DATVDemodBaseband::MsgConfigureDATVDemodBaseband::create(m_settings, true);
+    m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
 void DATVDemod::stop()
 {
     qDebug("DATVDemod::stop");
-	m_thread->exit();
-	m_thread->wait();
+	m_basebandSink->stopWork();
+	m_thread.quit();
+	m_thread.wait();
 }
 
 bool DATVDemod::handleMessage(const Message& cmd)
