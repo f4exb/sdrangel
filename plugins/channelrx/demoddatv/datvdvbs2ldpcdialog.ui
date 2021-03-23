@@ -41,7 +41,7 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>25</number>
+        <number>50</number>
        </property>
        <property name="displayIntegerBase">
         <number>10</number>
