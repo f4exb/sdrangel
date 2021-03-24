@@ -14,6 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// Latest updates:
+//   |  S2: Revert to tracking all symbols. pabr committed on Mar 6, 2019
+//   |  Cleanup: Remove debug code. pabr committed on Mar 6, 2019
+//   |  S2: Dummy PLFRAME handling pabr committed on Mar 26, 2019
+//   |  S2: Preliminary support for GSE pabr committed on Mar 26, 2019
+//   |  leandvbtx: Signal S2 MATYPE as TS. pabr committed on Mar 26, 2019
+//   |  DVB-S2 VCM support, suitable for ACM reception (not MIS). pabr committed on Nov 24, 2019
+//   |  Remove unused constants. pabr committed on Dec 4, 2019
+//   |  S2 RX: Capture TED decision history in sampler_state. pabr committed on Dec 5, 2019
+//   |  S2 RX: Print error rate on PLS symbols. pabr committed on Dec 5, 2019
+//   |  New DVB-S2 receiver with PL-based carrier recovery. modcod/framesize filtering for VCM. pabr committed on Jan 9, 2020
+
 #ifndef LEANSDR_DVBS2_H
 #define LEANSDR_DVBS2_H
 
@@ -141,6 +153,22 @@ struct s2_plscodes
     static const uint64_t SCRAMBLING = 0x719d83c953422dfa;
 }; // s2_plscodes
 
+static const int PILOT_LENGTH = 36;
+
+// Date about pilots.
+// Mostly for consistency with s2_sof and s2_plscodes.
+
+template<typename T>
+struct s2_pilot
+{
+    static const int LENGTH = PILOT_LENGTH;
+    complex<T> symbol;
+
+    s2_pilot() {
+        symbol.re = symbol.im = cstln_amp*0.707107;
+    }
+};  // s2_pilot
+
 // S2 SCRAMBLING
 // Precomputes the symbol rotations for PL scrambling.
 // EN 302 307-1 section 5.5.4 Physical layer scrambling
@@ -237,12 +265,18 @@ struct s2_pls
     int framebits() const {
         return sf ? 16200 : 64800;
     }
+
+    bool is_dummy() {
+        return (modcod==0);
+    }
 };
+
+static const int PLSLOT_LENGTH = 90;
 
 template <typename SOFTSYMB>
 struct plslot
 {
-    static const int LENGTH = 90;
+    static const int LENGTH = PLSLOT_LENGTH;
     bool is_pls;
     union {
         s2_pls pls;
@@ -338,9 +372,7 @@ struct s2_frame_transmitter : runnable
     ) :
         runnable(sch, "S2 frame transmitter"),
         in(_in),
-        out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME),
-        cstln(nullptr),
-        csymbols(nullptr)
+        out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME)
     {
         float amp = cstln_amp / sqrtf(2);
         qsymbols[0].re = +amp;
@@ -351,16 +383,15 @@ struct s2_frame_transmitter : runnable
         qsymbols[2].im = +amp;
         qsymbols[3].re = -amp;
         qsymbols[3].im = -amp;
+
+        // Clear the constellation cache.
+        for (int i = 0; i < 32; ++i) {
+            pcsymbols[i] = nullptr;
+        }
     }
 
     ~s2_frame_transmitter()
     {
-        if (cstln) {
-            delete cstln;
-        }
-        if (csymbols) {
-            delete csymbols;
-        }
     }
 
     void run()
@@ -389,7 +420,6 @@ struct s2_frame_transmitter : runnable
                 break;
             }
 
-            update_cstln(mcinfo);
             int nw = run_frame(pls, mcinfo, pin + 1, nslots, out.wr());
 
             if (nw != nsymbols) {
@@ -417,6 +447,7 @@ struct s2_frame_transmitter : runnable
         int pls_index = (pls->modcod << 2) | (pls->sf << 1) | pls->pilots;
         memcpy(pout, plscodes.symbols[pls_index], plscodes.LENGTH * sizeof(*pout));
         pout += plscodes.LENGTH;
+        complex<T> *csymbols = get_csymbols(pls->modcod);
         // Slots and pilots
         int till_next_pilot = pls->pilots ? 16 : nslots;
         uint8_t *scr = &scrambling.Rn[0];
@@ -471,26 +502,26 @@ struct s2_frame_transmitter : runnable
   private:
     pipereader<plslot<hard_ss>> in;
     pipewriter<complex<T>> out;
-    cstln_lut<hard_ss, 256> *cstln; // nullptr initially
-    complex<T> *csymbols;
-             // Valid iff cstln is valid. RMS cstln_amp.
+    complex<T> *pcsymbols[32];  // Constellations in use, indexed by modcod
 
-    void update_cstln(const modcod_info *mcinfo)
+    complex<T> *get_csymbols(int modcod)
     {
-        if (!cstln || cstln->nsymbols != mcinfo->nsymbols)
+        if (!pcsymbols[modcod])
         {
-            if (cstln)
-            {
-                fprintf(stderr, "Warning: Variable MODCOD is inefficient\n");
-                delete cstln;
-            }
+            const modcod_info *mcinfo = check_modcod(modcod);
 
-            if (sch->debug) {
-                fprintf(stderr, "Building constellation %d\n", mcinfo->nsymbols);
+            if (sch->debug)
+            {
+                fprintf(
+                    stderr,
+                    "Building constellation %s ratecode %d\n",
+                    cstln_base::names[mcinfo->c],
+                    mcinfo->rate
+                );
             }
 
             // TBD Different Es/N0 for short frames ?
-            cstln = new cstln_lut<hard_ss, 256>(
+            cstln_lut<hard_ss,256> cstln(
                 mcinfo->c,
                 mcinfo->esn0_nf,
                 mcinfo->g1,
@@ -498,18 +529,16 @@ struct s2_frame_transmitter : runnable
                 mcinfo->g3
             );
 
-            if (csymbols) {
-                delete csymbols;
-            }
+            pcsymbols[modcod] = new complex<T>[cstln.nsymbols];
 
-            csymbols = new complex<T>[cstln->nsymbols];
-
-            for (int s = 0; s < cstln->nsymbols; ++s)
+            for ( int s=0; s<cstln.nsymbols; ++s )
             {
-                csymbols[s].re = cstln->symbols[s].re;
-                csymbols[s].im = cstln->symbols[s].im;
+                pcsymbols[modcod][s].re = cstln.symbols[s].re;
+                pcsymbols[modcod][s].im = cstln.symbols[s].im;
             }
         }
+
+        return pcsymbols[modcod];
     }
 
     complex<T> qsymbols[4]; // RMS cstln_amp
@@ -520,83 +549,79 @@ struct s2_frame_transmitter : runnable
 
 // S2 FRAME RECEIVER
 
-static int pl_errors = 0, pl_symbols = 0;
-
 #define TEST_DIVERSITY 0
 
-template <typename T, typename SOFTSYMB>
+template<typename T, typename SOFTSYMB>
 struct s2_frame_receiver : runnable
 {
-    enum {
-        COARSE_FREQ,
-        FRAME_SEARCH,
-        FRAME_LOCKED,
-    } state;
-
     sampler_interface<T> *sampler;
     int meas_decimation;
-    float Ftune; // Tuning bias in cycles per symbol
-    float Fm;    // Baud rate in Hz, for debug messages only. TBD remove.
-    bool strongpls;
-    float min_freqw16, max_freqw16;
-
-    // State during COARSE_FREQ
-    complex<float> diffcorr;
-    int coarse_count;
-
-    // State during FRAME_SEARCH and FRAME_LOCKED
-    float freqw16; // Carrier frequency initialized by COARSE_FREQ
-    float phase16; // Estimated phase of carrier at next symbol
-
-    float mu;    // Time to next symbol, in samples
-    float omega0; // Samples per symbol
-
+    float Ftune;         // Tuning bias in cycles per symbol
+    bool allow_drift;    // Unbounded carrier tracking
+    float omega0;        // Samples per symbol
+    bool strongpls;      // PL symbols at max amplitude (default: RMS)
+    uint32_t modcods;    // Bitmask of desired modcods
+    uint8_t framesizes;  // Bitmask of desired frame sizes
+    bool fastlock;       // Synchronize more agressively
+    bool fastdrift;      // Carrier drift faster than pilots
+    float freq_tol;      // Tolerance on carrier frequency
+    float sr_tol;        // Tolerance on symbol rate
     static const int MAX_SYMBOLS_PER_FRAME =
-        (1 + modcod_info::MAX_SLOTS_PER_FRAME) * plslot<hard_ss>::LENGTH +
-        ((modcod_info::MAX_SLOTS_PER_FRAME - 1) / 16) * pilot_length;
+        (1+modcod_info::MAX_SLOTS_PER_FRAME)*PLSLOT_LENGTH +
+        ((modcod_info::MAX_SLOTS_PER_FRAME-1)/16)*PILOT_LENGTH;
 
     s2_frame_receiver(
         scheduler *sch,
         sampler_interface<T> *_sampler,
-        pipebuf<complex<T>> &_in,
-        pipebuf<plslot<SOFTSYMB>> &_out,
-        pipebuf<float> *_freq_out = nullptr,
-        pipebuf<float> *_ss_out = nullptr,
-        pipebuf<float> *_mer_out = nullptr,
-        pipebuf<complex<float>> *_cstln_out = nullptr,
-        pipebuf<complex<float>> *_cstln_pls_out = nullptr,
-        pipebuf<complex<float>> *_symbols_out = nullptr,
-        pipebuf<int> *_state_out = nullptr
+        pipebuf< complex<T> > &_in,
+        pipebuf< plslot<SOFTSYMB> > &_out,
+        pipebuf<float> *_freq_out=NULL,
+        pipebuf<float> *_ss_out=NULL,
+        pipebuf<float> *_mer_out=NULL,
+        pipebuf< complex<float> > *_cstln_out=NULL,
+        pipebuf< complex<float> > *_cstln_pls_out=NULL,
+        pipebuf< complex<float> > *_symbols_out=NULL,
+        pipebuf<int> *_state_out=NULL
     ) :
         runnable(sch, "S2 frame receiver"),
         sampler(_sampler),
         meas_decimation(1048576),
-        Ftune(0), Fm(0),
+        Ftune(0),
+        allow_drift(false),
         strongpls(false),
-        in_power(0),
-        ev_power(0),
-        agc_gain(1),
-        agc_bw(1e-3),
-        nsyncs(0),
-        cstln(nullptr),
-        in(_in), out(_out, 1 + modcod_info::MAX_SLOTS_PER_FRAME),
+        modcods(0xffffffff),
+        framesizes(0x03),
+        fastlock(false),
+        fastdrift(false),
+        freq_tol(0.25),
+        sr_tol(100e-6),
+        cstln(NULL),
+        in(_in), out(_out,1+modcod_info::MAX_SLOTS_PER_FRAME),
         meas_count(0),
         freq_out(opt_writer(_freq_out)),
         ss_out(opt_writer(_ss_out)),
         mer_out(opt_writer(_mer_out)),
-        cstln_out(opt_writer(_cstln_out, 1024)),
-        cstln_pls_out(opt_writer(_cstln_pls_out, 1024)),
-        symbols_out(opt_writer(_symbols_out, MAX_SYMBOLS_PER_FRAME)),
+        cstln_out(opt_writer(_cstln_out,1024)),
+        cstln_pls_out(opt_writer(_cstln_pls_out,1024)),
+        symbols_out(opt_writer(_symbols_out,MAX_SYMBOLS_PER_FRAME)),
         state_out(opt_writer(_state_out)),
-        report_state(false),
+        first_run(true),
         scrambling(0),
+        pls_total_errors(0),
+        pls_total_count(0),
         m_modcodType(-1),
-        m_modcodRate(-1)
+        m_modcodRate(-1),
+        diffs(nullptr),
+        sspilots(nullptr)
     {
         // Constellation for PLS
-        qpsk = new cstln_lut<SOFTSYMB, 256>(cstln_base::QPSK);
-        add_syncs(qpsk);
-        init_coarse_freq();
+        qpsk = new cstln_lut<SOFTSYMB,256>(cstln_base::QPSK);
+
+        // Clear the constellation cache.
+        for (int i=0; i<32; ++i) {
+            cstlns[i] = NULL;
+        }
+
 #if TEST_DIVERSITY
         fprintf(stderr, "** DEBUG: Diversity test mode (slower)\n");
 #endif
@@ -606,39 +631,105 @@ struct s2_frame_receiver : runnable
     {
         delete qpsk;
 
-        if (cstln) {
-            delete cstln;
+        for (int i=0; i<32; ++i)
+        {
+            if (cstlns[i]) {
+                delete cstlns[i];
+            }
+        }
+
+        if (diffs) {
+            delete[] diffs;
+        }
+
+        if (sspilots) {
+            delete[] sspilots;
         }
     }
 
+    enum {
+      FRAME_DETECT,   // Looking for PLHEADER
+      FRAME_PROBE,    // Aligned with PLHEADER, ready to recover carrier
+      FRAME_LOCKED,   // Demodulating
+    } state;
+
+    // sampler_state holds the entire state of the PLL.
+    // Useful for looking ahead (e.g. next pilots/SOF) then rewinding.
+
+    struct sampler_state {
+        complex<T> *p;  // Pointer to samples (update when entering run())
+        float mu;       // Time of next symbol, counted from p
+        float omega;    // Samples per symbol
+        float gain;     // Scaling factor toward cstln_amp
+        float ph16;     // Carrier phase at next symbol (cycles * 65536)
+        float fw16;     // Carrier frequency (cycles per symbol * 65536)
+        uint8_t *scr;   // Position in scrambling sequence for next symbol
+
+        void normalize() {
+            ph16 = fmodf(ph16, 65536.0f);  // Rounding direction irrelevant
+        }
+
+        void skip_symbols(int ns)
+        {
+            mu += omega * ns;
+            p += (int)floorf(mu);
+            mu -= floorf(mu);
+            ph16 += fw16 * ns;
+            normalize();
+            scr += ns;
+        }
+
+        char *format() {
+            static char buf[256];
+            sprintf(
+                buf,
+                "%9.2lf %+6.0f ppm  %+3.0f °  %f",
+                (double)((p-(complex<T>*)NULL)&262143)+mu,  // Arbitrary wrap
+                fw16*1e6/65536,
+                fmodfs(ph16,65536.0f)*360/65536,
+                gain
+            );
+            return buf;
+        }
+    };
+
+    float min_freqw16, max_freqw16;
+
+    // State during FRAME_SEARCH and FRAME_LOCKED
+    sampler_state ss_cache;
+
     void run()
     {
+        if (strongpls) {
+            fail("--strongpls is broken.");
+        }
+
         // Require enough samples to detect one plheader,
         // TBD margin ?
         int min_samples = (1 + MAX_SYMBOLS_PER_FRAME +
-                           plslot<SOFTSYMB>::LENGTH) *
-                          omega0 * 2;
+        sof.LENGTH+plscodes.LENGTH)*omega0 * 2;
+
         while (in.readable() >= min_samples + sampler->readahead() &&
-               out.writable() >= 1 + modcod_info::MAX_SLOTS_PER_FRAME &&
-               opt_writable(freq_out, 1) &&
-               opt_writable(ss_out, 1) &&
-               opt_writable(mer_out, 1) &&
-               opt_writable(symbols_out, MAX_SYMBOLS_PER_FRAME) &&
-               opt_writable(state_out, 1))
+            out.writable() >= 1+modcod_info::MAX_SLOTS_PER_FRAME &&
+            opt_writable(freq_out, 1) &&
+            opt_writable(ss_out, 1) &&
+            opt_writable(mer_out, 1) &&
+            opt_writable(symbols_out, MAX_SYMBOLS_PER_FRAME) &&
+            opt_writable(state_out, 1))
         {
-            if (report_state)
+            if (first_run)
             {
-                // Report unlocked state on first invocation.
-                opt_write(state_out, 0);
-                report_state = false;
+                enter_frame_detect();
+                first_run = false;
             }
-            switch (state)
+
+            switch ( state )
             {
-            case COARSE_FREQ:
-                run_frame_coarse();
+            case FRAME_DETECT:
+                run_frame_detect();
                 break;
-            case FRAME_SEARCH:
-                run_frame_search();
+            case FRAME_PROBE:
+                run_frame_probe();
                 break;
             case FRAME_LOCKED:
                 run_frame_locked();
@@ -647,455 +738,163 @@ struct s2_frame_receiver : runnable
         }
     }
 
-    // Initial state
-    void init_coarse_freq()
-    {
-        diffcorr = 0;
-        coarse_count = 0;
-
-        for (int i = 0; i < 3; i++)
-        {
-            hist[i].p = 0;
-            hist[i].c = 0;
-        }
-
-        state = COARSE_FREQ;
-    }
-
     // State transtion
-    void enter_coarse_freq()
+    void enter_frame_detect()
     {
-        opt_write(state_out, 0);
-        init_coarse_freq();
-    }
+        state = FRAME_DETECT;
+        // Setup sampler for interpolation only.
+        ss_cache.fw16 = 65536 * Ftune;
+        ss_cache.ph16 = 0;
+        ss_cache.mu = 0;
+        ss_cache.gain = 1;
+        ss_cache.omega = omega0;
 
-    void run_frame_coarse()
-    {
-        freqw16 = 65536 * Ftune;
-        min_freqw16 = freqw16 - 65536.0 / 9;
-        max_freqw16 = freqw16 + 65536.0 / 9;
-
-        complex<T> *pin = in.rd();
-        complex<T> p = *pin++;
-        int nsamples = MAX_SYMBOLS_PER_FRAME * omega0;
-
-        for (int s = nsamples; s--; ++pin)
+        // Set frequency tracking boundaries around tuning frequency.
+        if (allow_drift)
         {
-            complex<T> n = *pin;
-            diffcorr.re += p.re * n.re + p.im * n.im;
-            diffcorr.im += p.re * n.im - p.im * n.re;
-            p = n;
+            // Track across the whole baseband.
+            min_freqw16 = ss_cache.fw16 - omega0*65536;
+            max_freqw16 = ss_cache.fw16 + omega0*65536;
+        }
+        else
+        {
+            min_freqw16 = ss_cache.fw16 - freq_tol*65536.0;
+            max_freqw16 = ss_cache.fw16 + freq_tol*65536.0;
         }
 
-        in.read(nsamples);
-        ++coarse_count;
-
-        if (coarse_count == 50)
-        {
-            float freqw = atan2f(diffcorr.im, diffcorr.re) * omega0;
-            fprintf(stderr, "COARSE(%d): %f rad/symb (%.0f Hz at %.0f baud)\n",
-                    coarse_count, freqw, freqw * Fm / (2 * M_PI), Fm);
-#if 0
-	        freqw16 = freqw * 65536 / (2*M_PI);
-#else
-            fprintf(stderr, "Ignoring coarse det, using %f\n", freqw16 * Fm / 65536);
-#endif
-            enter_frame_search();
-        }
-    }
-
-    // State transtion
-    void enter_frame_search()
-    {
         opt_write(state_out, 0);
-        mu = 0;
-        phase16 = 0;
 
         if (sch->debug) {
-            fprintf(stderr, "ACQ\n");
+            fprintf(stderr, "DETECT\n");
         }
 
-        state = FRAME_SEARCH;
-    }
-
-    void run_frame_search()
-    {
-        complex<float> *psampled;
-
-        if (cstln_out && cstln_out->writable() >= 1024) {
-            psampled = cstln_out->wr();
-        } else {
-            psampled = nullptr;
-        }
-
-        // Preserve float precision
-        phase16 -= 65536 * floor(phase16 / 65536);
-        int nsymbols = MAX_SYMBOLS_PER_FRAME; // TBD Adjust after PLS decoding
-        sampler_state ss = {in.rd(), mu, phase16, freqw16, nullptr};
-        sampler->update_freq(ss.fw16 / omega0);
-
-        if (!in_power) {
-            init_agc(ss.p, 64);
-        }
-
-        update_agc();
-
-        for (int s = 0; s < nsymbols; ++s)
+        if (fastlock || first_run)
         {
-            complex<float> p0 = interp_next(&ss);
-            track_agc(p0);
-            complex<float> p = p0 * agc_gain;
-
-            // Constellation plot
-            if (psampled && s < 1024) {
-                *psampled++ = p;
-            }
-
-            // Demodulate everything as QPSK.
-            // Occasionally it locks onto 8PSK at offet 2pi/16.
-            uint8_t symb = track_symbol(&ss, p, qpsk, 1);
-
-            // Feed symbol into all synchronizers.
-            for (sync *ps = syncs; ps < syncs + nsyncs; ++ps)
-            {
-                ps->hist = (ps->hist << 1) | ((ps->tobpsk >> symb) & 1);
-                int errors = hamming_weight((ps->hist & sof.MASK) ^ sof.VALUE);
-
-                if (errors <= S2_MAX_ERR_SOF_INITIAL)
-                {
-                    if (sch->debug2) {
-                        fprintf(stderr, "Found SOF+%d at %d offset %f\n", errors, s, ps->offset16);
-                    }
-
-                    ss.ph16 += ps->offset16;
-                    in.read(ss.p - in.rd());
-                    mu = ss.mu;
-                    phase16 = ss.ph16;
-                    freqw16 = ss.fw16;
-
-                    if (psampled) {
-                        cstln_out->written(psampled - cstln_out->wr());
-                    }
-
-                    enter_frame_locked();
-                    return;
-                }
-            }
-
-            ss.normalize();
+            discard = 0;
         }
-
-        // Write back sampler progress
-        in.read(ss.p - in.rd());
-        mu = ss.mu;
-        phase16 = ss.ph16;
-        freqw16 = ss.fw16;
-
-        if (psampled) {
-            cstln_out->written(psampled - cstln_out->wr());
+        else
+        {
+            // Discard some data so that CPU usage during PLHEADER detection
+            // is at same level as during steady-state demodulation.
+            // This has no effect if the first detection is successful.
+            float duty_factor = 5;
+            discard = MAX_SYMBOLS_PER_FRAME * omega0 * (duty_factor+drand48()-0.5);
         }
     }
 
-    // State transtion
+    long discard;
+
+    void run_frame_detect()
+    {
+        if ( discard )
+        {
+            size_t d = std::min(discard, in.readable());
+            in.read(d);
+            discard -= d;
+            return;
+        }
+
+        sampler->update_freq(ss_cache.fw16/omega0);
+
+        const int search_range = MAX_SYMBOLS_PER_FRAME;
+        ss_cache.p = in.rd();
+        find_plheader(&ss_cache, search_range);
+#if DEBUG_CARRIER
+        fprintf(stderr, "CARRIER diffcorr: %.0f%%  %s\n",
+            q*100, ss_cache.format());
+#endif
+        in.read(ss_cache.p-in.rd());
+        enter_frame_probe();
+    }
+
+    void enter_frame_probe()
+    {
+        if (sch->debug) {
+            fprintf(stderr, "PROBE\n");
+        }
+
+        state = FRAME_PROBE;
+    }
+
+    void run_frame_probe() {
+      return run_frame_probe_locked();
+    }
+
     void enter_frame_locked()
     {
-        opt_write(state_out, 1);
+        state = FRAME_LOCKED;
 
         if (sch->debug) {
             fprintf(stderr, "LOCKED\n");
         }
 
-        state = FRAME_LOCKED;
+        opt_write(state_out, 1);
     }
 
-    // Note: Starts after SOF
-
-    struct sampler_state
-    {
-        complex<T> *p; // Pointer to samples
-        float mu;      // Time of next symbol, counted from p
-        float ph16;    // Carrier phase at next symbol, cycles*65536
-        float fw16;    // Carrier frequency, cycles per symbol * 65536
-        uint8_t *scr;  // Position in scrambling sequeence
-
-        void skip_symbols(int ns, float omega0)
-        {
-            mu += omega0 * ns;
-            ph16 += fw16 * ns;
-            scr += ns;
-        }
-
-        void normalize()
-        {
-            ph16 = fmodf(ph16, 65536.0f); // Rounding direction irrelevant
-        }
-    };
-
-#define xfprintf(...) \
-    {                 \
+    void run_frame_locked() {
+        return run_frame_probe_locked();
     }
-    //#define xfprintf fprintf
 
-    void run_frame_locked()
+    // Process one frame.
+    // Perform additional carrier estimation if state==FRAME_PROBE.
+
+    void run_frame_probe_locked()
     {
-        complex<float> *psampled;
-        if (cstln_out && cstln_out->writable() >= 1024) {
+        complex<float> *psampled;  // Data symbols (one per slot)
+
+        if (cstln_out && cstln_out->writable()>=1024) {
             psampled = cstln_out->wr();
         } else {
-            psampled = nullptr;
+            psampled = NULL;
         }
 
-        complex<float> *psampled_pls;
+        complex<float> *psampled_pls;  // PLHEADER symbols
 
-        if (cstln_pls_out && cstln_pls_out->writable() >= 1024) {
+        if (cstln_pls_out && cstln_pls_out->writable()>=1024) {
             psampled_pls = cstln_pls_out->wr();
         } else {
-            psampled_pls = nullptr;
+            psampled_pls = NULL;
         }
-
 #if TEST_DIVERSITY
-        complex<float> *psymbols = symbols_out ? symbols_out->wr() : nullptr;
+        complex<float> *psymbols = symbols_out ? symbols_out->wr() : NULL;
         float scale_symbols = 1.0 / cstln_amp;
 #endif
-
-        xfprintf(stderr, "lock0step fw= %f (%.0f Hz) mu=%f\n",
-                 freqw16, freqw16 * Fm / 65536, mu);
-
-        sampler_state ss = {in.rd(), mu, phase16, freqw16, scrambling.Rn};
-        sampler->update_freq(ss.fw16 / omega0);
-
-        update_agc();
-
-        // Read PLSCODE
-        uint64_t plscode = 0;
-        complex<float> pls_symbols[s2_plscodes<T>::LENGTH];
-
-        for (int s = 0; s < plscodes.LENGTH; ++s)
-        {
-            complex<float> p = interp_next(&ss) * agc_gain;
-#if TEST_DIVERSITY
-            if (psymbols)
-                *psymbols++ = p * scale_symbols;
-#endif
-            pls_symbols[s] = p;
-
-            if (psampled_pls) {
-                *psampled_pls++ = p;
-            }
-
-            int bit = (p.im < 1); // TBD suboptimal
-            plscode = (plscode << 1) | bit;
-        }
-
-        int pls_index = -1;
-        int pls_errors = S2_MAX_ERR_PLSCODE + 1; // dmin=32
-        // TBD: Optimiser
-
-        for (int i = 0; i < plscodes.COUNT; ++i)
-        {
-            int e = hamming_weight(plscode ^ plscodes.codewords[i]);
-
-            if (e < pls_errors)
-            {
-                pls_errors = e;
-                pls_index = i;
-            }
-        }
-
-        if (pls_index < 0)
-        {
-            if (sch->debug2) {
-                fprintf(stderr, "Too many errors in plheader (%d)\n", pls_errors);
-            }
-
-            in.read(ss.p - in.rd());
-            enter_frame_search();
-            return;
-        }
-
-        // Adjust phase with PLS
-        complex<float> pls_corr = conjprod(plscodes.symbols[pls_index], pls_symbols, plscodes.LENGTH);
+        sampler_state ss = ss_cache;
+        ss.p = in.rd();
         ss.normalize();
-        align_phase(&ss, pls_corr);
+        sampler->update_freq(ss.fw16/omega0);
+#if DEBUG_CARRIER
+        fprintf(stderr, "CARRIER frame: %s\n", ss.format());
+#endif
+        // Interpolate PLHEADER.
 
-        s2_pls pls;
-        pls.modcod = pls_index >> 2; // Guaranteed 0..31
-        pls.sf = pls_index & 2;
-        pls.pilots = pls_index & 1;
-        xfprintf(stderr, "PLS: modcod %d, short=%d, pilots=%d (%d errors)\n",
-                 pls.modcod, pls.sf, pls.pilots, pls_errors);
-        const modcod_info *mcinfo = &modcod_infos[pls.modcod];
+        const int PLH_LENGTH = sof.LENGTH + plscodes.LENGTH;
+        complex<float> plh_symbols[PLH_LENGTH];
 
-        if (!mcinfo->nslots_nf)
+        for (int s=0; s<PLH_LENGTH; ++s)
         {
-            fprintf(stderr, "Unsupported or corrupted MODCOD\n");
-            in.read(ss.p - in.rd());
-            enter_frame_search();
-            return;
-        }
-#if 1 // TBD use fec_infos
-        if (pls.sf && mcinfo->rate == FEC910)
-        {
-            fprintf(stderr, "Unsupported or corrupted FEC\n");
-            in.read(ss.p - in.rd());
-            enter_frame_search();
-            return;
-        }
-#endif
-        // Store current MODCOD info
-        if (mcinfo->c != m_modcodType) {
-            m_modcodType = mcinfo->c;
-        }
+            complex<float> p = interp_next(&ss) * ss.gain;
+            plh_symbols[s] = p;
 
-        if (mcinfo->rate != m_modcodRate) {
-            m_modcodRate = mcinfo->rate;
-        }
-
-        // TBD Comparison of nsymbols is insufficient for DVB-S2X.
-        if (!cstln || cstln->nsymbols != mcinfo->nsymbols)
-        {
-            if (cstln)
-            {
-                fprintf(stderr, "Warning: Variable MODCOD is inefficient\n");
-                delete cstln;
-            }
-
-            fprintf(stderr, "Creating LUT for %s ratecode %d\n",
-                    cstln_base::names[mcinfo->c], mcinfo->rate);
-            cstln = new cstln_lut<SOFTSYMB, 256>(mcinfo->c, mcinfo->esn0_nf,
-                                                 mcinfo->g1, mcinfo->g2, mcinfo->g3);
-            cstln->m_rateCode = (int) mcinfo->rate;
-            cstln->m_typeCode = (int) mcinfo->c;
-            cstln->m_setByModcod = true;
-#if 0
-	fprintf(stderr, "Dumping constellation LUT to stdout.\n");
-	cstln->dump(stdout);
-#endif
-        }
-
-        int S = pls.sf ? mcinfo->nslots_nf / 4 : mcinfo->nslots_nf;
-
-        plslot<SOFTSYMB> *pout = out.wr(), *pout0 = pout;
-
-        // Output special slot with PLS information
-        pout->is_pls = true;
-        pout->pls = pls;
-        ++pout;
-
-        // Read slots and pilots
-
-        int pilot_errors = 0;
-
-        // Slots to skip until next PL slot (pilot or sof)
-        int till_next_pls = pls.pilots ? 16 : S;
-
-        for (int leansdr_slots = S; leansdr_slots--; ++pout, --till_next_pls)
-        {
-            if (till_next_pls == 0)
-            {
-                // Read pilot
-                int errors = 0;
-                complex<float> corr = 0;
-
-                for (int s = 0; s < pilot_length; ++s)
-                {
-                    complex<float> p0 = interp_next(&ss);
-                    track_agc(p0);
-                    complex<float> p = p0 * agc_gain;
-#if TEST_DIVERSITY
-                    if (psymbols)
-                        *psymbols++ = p * scale_symbols;
-#endif
-                    (void)track_symbol(&ss, p, qpsk, 1);
-
-                    if (psampled_pls) {
-                        *psampled_pls++ = p;
-                    }
-
-                    complex<float> d = descramble(&ss, p);
-
-                    if (d.im < 0 || d.re < 0) {
-                        ++errors;
-                    }
-
-                    corr.re += d.re + d.im;
-                    corr.im += d.im - d.re;
-                }
-
-                if (errors > S2_MAX_ERR_PILOT)
-                {
-                    if (sch->debug2) {
-                        fprintf(stderr, "Too many errors in pilot (%d/36)\n", errors);
-                    }
-
-                    in.read(ss.p - in.rd());
-                    enter_frame_search();
-                    return;
-                }
-                pilot_errors += errors;
-                ss.normalize();
-                align_phase(&ss, corr);
-                till_next_pls = 16;
-            }
-
-            // Read slot
-            pout->is_pls = false;
-            complex<float> p; // Export last symbols for cstln_out
-
-            for (int s = 0; s < pout->LENGTH; ++s)
-            {
-                p = interp_next(&ss) * agc_gain;
-#if TEST_DIVERSITY
-                if (psymbols)
-                    *psymbols++ = p * scale_symbols;
-#endif
-#if 1 || TEST_DIVERSITY
-                (void)track_symbol(&ss, p, cstln, 0); // SLOW
-#endif
-                complex<float> d = descramble(&ss, p);
-#if 0 // Slow
-	  SOFTSYMB *symb = &cstln->lookup(d.re, d.im)->ss;
-#else // Avoid scaling floats. May wrap at very low SNR.
-                SOFTSYMB *symb = &cstln->lookup((int)d.re, (int)d.im)->ss;
-#endif
-                pout->symbols[s] = *symb;
-            }
-
-            if (psampled) {
-                *psampled++ = p;
-            }
-        } // slots
-
-        // Read SOF
-
-        for (int i = 0; i < 3; i++)
-        {
-            hist[i].p = 0;
-            hist[i].c = 0;
-        }
-
-        complex<float> sof_corr = 0;
-        uint32_t sofbits = 0;
-
-        for (int s = 0; s < sof.LENGTH; ++s)
-        {
-            complex<float> p0 = interp_next(&ss);
-            track_agc(p0);
-            complex<float> p = p0 * agc_gain;
-#if TEST_DIVERSITY
-            if (psymbols)
-                *psymbols++ = p * scale_symbols;
-#endif
             if (psampled_pls) {
                 *psampled_pls++ = p;
             }
-
-            int bit = (p.im < 0); // suboptimal
-            sofbits = (sofbits << 1) | bit;
-            sof_corr += conjprod(sof.symbols[s], p);
         }
 
-        int sof_errors = hamming_weight(sofbits ^ sof.VALUE);
+        // Decode SOF.
+
+        uint32_t sof_bits = 0;
+
+        for (int i=0; i<sof.LENGTH; ++i)
+        {
+            complex<float> p = plh_symbols[i];
+            float d = ( (i&1) ? p.im-p.re : p.im+p.re);
+            sof_bits = (sof_bits<<1) | (d<0);
+        }
+
+        int sof_errors = hamming_weight(sof_bits ^ sof.VALUE);
+        pls_total_errors += sof_errors;
+        pls_total_count += sof.LENGTH;
 
         if (sof_errors >= S2_MAX_ERR_SOF)
         {
@@ -1103,101 +902,777 @@ struct s2_frame_receiver : runnable
                 fprintf(stderr, "Too many errors in SOF (%d/26)\n", sof_errors);
             }
 
-            in.read(ss.p - in.rd());
-            enter_coarse_freq();
+            in.read(ss.p-in.rd());
+            enter_frame_detect();
             return;
         }
 
-        ss.normalize();
-        align_phase(&ss, sof_corr);
+        // Decode PLSCODE.
 
-        // Commit whole frame after final SOF.
-        out.written(pout - pout0);
+        uint64_t plscode = 0;
 
-        // Write back sampler progress
-        meas_count += ss.p - in.rd();
-        in.read(ss.p - in.rd());
-        mu = ss.mu;
-        phase16 = ss.ph16;
-        freqw16 = ss.fw16;
-
-        // Measurements
-        if (psampled) {
-            cstln_out->written(psampled - cstln_out->wr());
+        for (int i=0; i<plscodes.LENGTH; ++i)
+        {
+            complex<float> p = plh_symbols[sof.LENGTH+i];
+            float d = ( (i&1) ? p.im-p.re : p.im+p.re);
+            plscode = (plscode<<1) | (d<0);
         }
 
-        if (psampled_pls) {
-            cstln_pls_out->written(psampled_pls - cstln_pls_out->wr());
+        int plscode_errors = plscodes.LENGTH + 1;
+        int plscode_index = -1;  // Avoid compiler warning.
+
+        // TBD: Optimiser
+        for ( int i=0; i<plscodes.COUNT; ++i )
+        {
+        	int e = hamming_weight(plscode^plscodes.codewords[i]);
+
+            if (e < plscode_errors ) {
+                plscode_errors=e; plscode_index=i;
+            }
         }
-#if TEST_DIVERSITY
-        if (psymbols) {
-            symbols_out->written(psymbols - symbols_out->wr());
+
+        pls_total_errors += plscode_errors;
+        pls_total_count += plscodes.LENGTH;
+
+        if (plscode_errors >= S2_MAX_ERR_PLSCODE)
+        {
+            if (sch->debug2) {
+                fprintf(stderr, "Too many errors in plscode (%d)\n", plscode_errors);
+            }
+
+            in.read(ss.p-in.rd());
+            enter_frame_detect();
+            return;
         }
+
+        // ss now points to first data slot.
+        ss.scr = scrambling.Rn;
+
+        complex<float> plh_expected[PLH_LENGTH];
+
+        for (int i=0; i<sof.LENGTH; ++i) {
+	        plh_expected[i] = sof.symbols[i];
+        }
+
+        for (int i=0; i<plscodes.LENGTH; ++i) {
+	        plh_expected[sof.LENGTH+i] = plscodes.symbols[plscode_index][i];
+        }
+
+        if ( state == FRAME_PROBE )
+        {
+	        // Carrier frequency from differential detector is still not reliable.
+	        // Use known PLH symbols to improve.
+	        match_freq(plh_expected, plh_symbols, PLH_LENGTH, &ss);
+#if DEBUG_CARRIER
+	        fprintf(stderr, "CARRIER freq: %s\n", ss.format());
 #endif
-        if (meas_count >= meas_decimation)
+        }
+
+        // Use known PLH symbols to estimate carrier phase and amplitude.
+
+        float mer2 = match_ph_amp(plh_expected, plh_symbols, PLH_LENGTH, &ss);
+        float mer = 10*log10f(mer2);
+#if DEBUG_CARRIER
+        fprintf(stderr, "CARRIER plheader: %s MER %.1f dB\n", ss.format(), mer);
+#endif
+      // Parse PLSCODE.
+
+        s2_pls pls;
+        pls.modcod = plscode_index >> 2;  // Guaranteed 0..31
+        pls.sf = plscode_index & 2;
+        pls.pilots = plscode_index & 1;
+
+        plslot<SOFTSYMB> *pout=out.wr(), *pout0 = pout;
+
+        if  (sch->debug2)
         {
-            opt_write(freq_out, freqw16 / 65536 / omega0);
-            opt_write(ss_out, in_power);
-            // TBD Adjust if cfg.strongpls
-            float mer = ev_power ? (float)cstln_amp * cstln_amp / ev_power : 1;
-            opt_write(mer_out, 10 * log10f(mer));
-            meas_count -= meas_decimation;
+	        fprintf(
+                stderr,
+                "PLS: mc=%2d, sf=%d, pilots=%d (%2d/90) %4.1f dB ",
+		        pls.modcod,
+                pls.sf,
+                pls.pilots,
+                sof_errors+plscode_errors,
+                mer
+            );
         }
 
-        int all_errors = pls_errors + pilot_errors + sof_errors;
-        int max_errors = plscodes.LENGTH + sof.LENGTH;
+        // Determine contents of frame.
 
-        if (pls.pilots) {
-            max_errors += ((S - 1) / 16) * pilot_length;
-        }
+        int S;                            // Data slots in this frame
+        cstln_lut<SOFTSYMB,256> *dcstln;  // Constellation for data slots
 
-        xfprintf(stderr, "success   fw= %f (%.0f Hz) mu= %f "
-                         "errors=%d/64+%d+%d/26 = %2d/%d\n",
-                 freqw16, freqw16 * Fm / 65536, mu,
-                 pls_errors, pilot_errors, sof_errors, all_errors, max_errors);
-        pl_errors += all_errors;
-        pl_symbols += max_errors;
-    } // run_frame_locked
-
-    void shutdown()
-    {
-        fprintf(stderr, "PL SER: %f ppm\n", pl_errors / (pl_symbols + 1e-6) * 1e6);
-    }
-
-    void init_agc(const complex<T> *buf, int n)
-    {
-        in_power = 0;
-
-        for (int i = 0; i < n; ++i) {
-            in_power += cnorm2(buf[i]);
-        }
-
-        in_power /= n;
-    }
-
-    void track_agc(const complex<float> &p)
-    {
-        float in_p = p.re * p.re + p.im * p.im;
-        in_power = in_p * agc_bw + in_power * (1.0f - agc_bw);
-    }
-
-    void update_agc()
-    {
-        float in_amp = gen_sqrt(in_power);
-
-        if (!in_amp) {
-            return;
-        }
-
-        if (!strongpls || !cstln)
+        if (pls.is_dummy())
         {
-            // Match RMS amplitude
-            agc_gain = cstln_amp / in_amp;
+            S = 36;
+            dcstln = qpsk;
         }
         else
         {
-            // Match peak amplitude
-            agc_gain = cstln_amp / cstln->amp_max / in_amp;
+            const modcod_info *mcinfo = &modcod_infos[pls.modcod];
+
+            if (! mcinfo->nslots_nf)
+            {
+                fprintf(stderr, "Unsupported or corrupted MODCOD\n");
+                in.read(ss.p-in.rd());
+                enter_frame_detect();
+                return;
+            }
+
+            if (mer < mcinfo->esn0_nf - 1.0f)
+            {
+                // False positive from PLHEADER detection.
+                if ( sch->debug ) fprintf(stderr, "Insufficient MER\n");
+                in.read(ss.p-in.rd());
+                enter_frame_detect();
+                return;
+            }
+
+            if (pls.sf && mcinfo->rate==FEC910)
+            {  // TBD use fec_infos
+                fprintf(stderr, "Unsupported or corrupted FEC\n");
+                in.read(ss.p-in.rd());
+                enter_frame_detect();
+                return;
+            }
+
+            // Store current MODCOD info
+            if (mcinfo->c != m_modcodType) {
+            m_modcodType = mcinfo->c;
+            }
+
+            if (mcinfo->rate != m_modcodRate) {
+            m_modcodRate = mcinfo->rate;
+            }
+
+            S = pls.sf ? mcinfo->nslots_nf/4 : mcinfo->nslots_nf;
+            // Constellation for data slots.
+            dcstln = get_cstln(pls.modcod);
+            cstln = dcstln;  // Used by GUI
+            // Output special slot with PLS information.
+            pout->is_pls = true;
+            pout->pls = pls;
+            ++pout;
+        }
+
+        // Now we know the frame structure.
+        // Estimate carrier over known symbols.
+
+#if DEBUG_LOOKAHEAD
+        static int plh_counter = 0;  // For debugging only
+        fprintf(stderr, "\nLOOKAHEAD %d PLH sr %+3.0f  %s  %.1f dB\n",
+	        plh_counter, (1-ss.omega/omega0)*1e6,
+	        ss.format(), 10*log10f(mer2));
+#endif
+        // Next SOF
+        sampler_state ssnext;
+
+        {
+            ssnext = ss;
+            int ns = (S*PLSLOT_LENGTH +
+                (pls.pilots?((S-1)/16)*pilot.LENGTH:0));
+            // Find next SOP at expected position +- tolerance on symbol rate.
+            int ns_tol = lrintf(ns*sr_tol);
+            ssnext.omega = omega0;
+            ssnext.skip_symbols(ns-ns_tol);
+            find_plheader(&ssnext, ns_tol*2);
+            // Don't trust frequency from differential correlator.
+            // Our current estimate should be better.
+            ssnext.fw16 = ss.fw16;
+            interp_match_sof(&ssnext);
+#if DEBUG_CARRIER
+            fprintf(stderr, "\nCARRIER next: %.0f%%  %s  %.1f dB\n",
+                q*100, ssnext.format(), 10*log10f(m2));
+#endif
+            // Estimate symbol rate (considered stable over whole frame)
+            float dist = (ssnext.p-ss.p) + (ssnext.mu-ss.mu);
+            // Set symbol period accordingly.
+            ss.omega = dist / (ns+sof.LENGTH);
+        }
+
+        // Pilots
+        int npilots = (S-1) / 16;
+
+        if (sspilots) {
+            delete[] sspilots;
+        }
+
+        sspilots = new sampler_state[npilots];
+
+        // Detect pilots
+        if (pls.pilots)
+        {
+            sampler_state ssp = ss;
+
+            for ( int i=0; i<npilots; ++i )
+            {
+                ssp.skip_symbols(16*PLSLOT_LENGTH);
+                interp_match_pilot(&ssp);
+                sspilots[i] = ssp;
+#if DEBUG_LOOKAHEAD
+                fprintf(stderr, "LOOKAHEAD %d PILOT%02d  sr %+3.0f  %s  %.1f dB\n",
+                    plh_counter, i, (1-ssp.omega/omega0)*1e6,
+                    ssp.format(), 10*log10f(mer2));
+#endif
+        	}
+        }
+
+        if (pls.pilots)
+        {
+            // Measure average frequency, using pilots to unwrap.
+            float totalph = 0;
+            float prevph = ss.ph16;
+            int span = 16*PLSLOT_LENGTH + pilot.LENGTH;
+            // Wrap phase around current freq estimate, pilot by pilot.
+
+            for (int i=0; i<npilots; ++i)
+            {
+                float dph = sspilots[i].ph16 - (prevph+ss.fw16*span);
+                totalph += fmodfs(dph, 65536.0f);
+                prevph = sspilots[i].ph16;
+            }
+
+            // TBD Use data between last pilot and next SOF ?
+            // Tricky when there is still an integer ambiguity.
+            ss.fw16 += totalph / (span*npilots);
+        }
+        else
+        {
+            // Measure average frequency over whole frame.
+            // Mostly useful for null frames.
+            int span = S*plslot<SOFTSYMB>::LENGTH + sof.LENGTH;
+            float dph = ssnext.ph16 - (ss.ph16+ss.fw16*span);
+            ss.fw16 += fmodfs(dph,65536.0f) / span;
+        }
+#if DEBUG_LOOKAHEAD
+        fprintf(stderr, "LOOKAHEAD %d NEXTSOF  sr %+3.0f  %s  %.1f dB\n",
+            plh_counter, (1-ssnext.omega/omega0)*1e6,
+            ssnext.format(), 10*log10f(mer2));
+        ++plh_counter;
+#endif
+
+        if (state == FRAME_PROBE)
+        {
+            float fw0 = ss.fw16;
+            match_frame(&ss, &pls, S, dcstln);
+            // Apply retroactively from midpoint of pilots and next SOF.
+            float fw_adj = ss.fw16 - fw0;
+
+            if (pls.pilots)
+            {
+                for (int i=0; i<npilots; ++i) {
+                    sspilots[i].ph16 += fw_adj * PILOT_LENGTH / 2;
+                }
+            }
+
+            ssnext.ph16 += fw_adj * sof.LENGTH / 2;
+#if DEBUG_CARRIER
+        	fprintf(stderr, "CARRIER disambiguated:  %s\n", ss.format());
+#endif
+        }
+
+        // TBD In FRAME_LOCKED, match_frame with sliprange +-1
+        // to avoid broken locks ?
+
+        // Per-frame statistics on carrier frequency.
+        // Useful at very low symbol rates to detect situations where
+        // the carrier fluctuates too fast for pilot-aided recovery.
+        statistics<float> freq_stats;
+
+        // Read slots and pilots
+#if DEBUG_CARRIER
+        fprintf(stderr, "CARRIER data: %s\n", ss.format());
+#endif
+
+        // int pilot_errors = 0;
+
+        for (int slot=0; slot<S; ++slot,++pout)
+        {
+            // Pilot before this slot ?
+
+            if (pls.pilots && !(slot&15) && slot)
+            {
+                ss.skip_symbols(pilot.LENGTH);
+                ss.ph16 = sspilots[slot/16-1].ph16;
+            }
+
+	        // Time for pilot-aided carrier recovery ?
+            if ( pls.pilots && !(slot&15) && slot+16<S )
+            {
+                // Sequence of data slots followed by pilots
+                sampler_state *ssp = &sspilots[slot/16];
+                int span = 16*pout->LENGTH + pilot.LENGTH;
+                float dph = ssp->ph16 - (ss.ph16+ss.fw16*span);
+                ss.fw16 += fmodfs(dph,65536.0f) / span;
+            }
+            else if (( pls.pilots && !(slot&15) && slot+16>=S) ||
+                (!pls.pilots && !slot ))
+            {
+                // Sequence of data slots followed by SOF
+                int span = (S-slot)*pout->LENGTH + sof.LENGTH;
+                float dph = ssnext.ph16 - (ss.ph16+ss.fw16*span);
+                ss.fw16 += fmodfs(dph,65536.0f) / span;
+            }
+
+            // Read slot.
+            freq_stats.add(ss.fw16);
+            pout->is_pls = false;
+            complex<float> p;  // Export last symbols for cstln_out
+
+        	for (int s=0; s<pout->LENGTH; ++s)
+            {
+	            p = interp_next(&ss) * ss.gain;
+#if TEST_DIVERSITY
+                if ( psymbols )
+                    *psymbols++ = p * scale_symbols;
+#endif
+                if (!pls.pilots || fastdrift) {
+                    (void) track_symbol(&ss, p, dcstln);  // SLOW
+                }
+
+	            complex<float> d = descramble(&ss, p);
+#if 1  // Slow
+	            SOFTSYMB *symb = &dcstln->lookup(d.re, d.im)->ss;
+#else  // Avoid scaling floats. May wrap at very low SNR.
+	            SOFTSYMB *symb = &dcstln->lookup((int)d.re, (int)d.im)->ss;
+#endif
+	            pout->symbols[s] = *symb;
+	        }
+
+	        ss.normalize();
+
+            if (psampled) {
+                *psampled++ = p;
+            }
+        }  // slot
+
+        if (sch->debug2)
+        {
+            fprintf(
+                stderr,
+                "sr%+.0f fs=%.0f\n",
+                (1-ss.omega/omega0)*1e6,
+                (freq_stats.max()-freq_stats.min())*1e6/65536.0f
+            );
+        }
+
+        // Commit whole frame after final SOF.
+        if (! pls.is_dummy())
+        {
+            if ((modcods&(1<<pls.modcod)) && (framesizes&(1<<pls.sf)))
+            {
+                out.written(pout-pout0);
+            }
+            else
+            {
+                if (sch->debug2) {
+                    fprintf(stderr, "modcod %d size %d rejected\n", pls.modcod, pls.sf);
+                }
+            }
+        }
+
+        // Write back sampler progress
+        meas_count += ss.p - in.rd();
+        in.read(ss.p-in.rd());
+        ss_cache = ss;
+
+        // Measurements
+        if (psampled) {
+            cstln_out->written(psampled-cstln_out->wr());
+        }
+
+        if (psampled_pls) {
+            cstln_pls_out->written(psampled_pls-cstln_pls_out->wr());
+        }
+#if TEST_DIVERSITY
+        if ( psymbols ) symbols_out->written(psymbols-symbols_out->wr());
+#endif
+        if (meas_count >= meas_decimation)
+        {
+            opt_write(freq_out, ss_cache.fw16/65536/ss_cache.omega);
+            opt_write(ss_out, cstln_amp / ss_cache.gain);
+            opt_write(mer_out, mer2 ? 10*log10f(mer2) : -99);
+            meas_count -= meas_decimation;
+        }
+
+        if (state == FRAME_PROBE)
+        {
+	        // First frame completed successfully.  Validate the lock.
+	        enter_frame_locked();
+        }
+
+        if (ss_cache.fw16<min_freqw16 || ss_cache.fw16>max_freqw16)
+        {
+            if (sch->debug) {
+                fprintf(stderr, "Carrier out of bounds\n");
+            }
+
+            enter_frame_detect();
+        }
+    } // run_frame_probe_locked
+
+    // Find most likely PLHEADER between *pss and *pss+search_range
+    // by differential correlation.
+    // Align symbol timing.
+    // Estimate carrier frequency (to about +-10kppm).
+    // Estimate carrier phase (to about +-PI/4).
+    // Adjust *ss accordingly.
+    // Initialize AGC.
+    // Return confidence (unbounded, 0=bad, 1=nominal).
+
+    float find_plheader(sampler_state *pss, int search_range)
+    {
+        complex<T> best_corr = 0;
+        int best_imu = 0;  // Avoid compiler warning.
+        int best_pos = 0;  // Avoid compiler warning.
+
+        // Symbol clock is not recovered yet, so we try fractional symbols.
+        const int interp = 8;
+
+        for (int imu=0; imu<interp; ++imu)
+        {
+            const int ndiffs = search_range + sof.LENGTH + plscodes.LENGTH;
+
+            if (diffs) {
+                delete[] diffs;
+            }
+
+            diffs = new complex<T>[ndiffs];
+            sampler_state ss = *pss;
+            ss.mu += imu * ss.omega / interp;
+
+            // Compute rotation between consecutive symbols.
+            complex<T> prev = 0;
+            for (int i=0; i<ndiffs; ++i)
+            {
+                complex<T> p = interp_next(&ss);
+                diffs[i] = conjprod(prev, p);
+                prev = p;
+            }
+
+            // Find best PLHEADER candidate position.
+            const int ncorrs = search_range;
+            for (int i=0; i<ncorrs; ++i)
+            {
+                complex<T> c = correlate_plheader_diff(&diffs[i]);
+                //if ( cnorm2(c) > cnorm2(best_corr) ) {
+                // c.im>0 enforces frequency error +-Fm/4
+                if (cnorm2(c)>cnorm2(best_corr) && c.im>0)
+                {
+                    best_corr = c;
+                    best_imu = imu;
+                    best_pos = i;
+                }
+            }
+        }  // imu
+
+        // Setup sampler according to best match.
+        pss->mu += best_imu * pss->omega / interp;
+        pss->skip_symbols(best_pos);
+        pss->normalize();
+#if 0
+        // Lowpass-filter the differential correlator.
+        // (Does not help much.)
+        static complex<float> acc = 0;
+        static const float k = 0.05;
+        acc = best_corr*k + acc*(1-k);
+        best_corr = acc;
+#endif
+        // Get rough estimate of carrier frequency from differential correlator.
+        // (best_corr is nominally +j).
+        float freqw = atan2f(-best_corr.re, best_corr.im);
+        pss->fw16 += freqw * 65536 / (2*M_PI);
+        // Force refresh because correction may be large.
+        sampler->update_freq(pss->fw16/omega0);
+
+        // Interpolate SOF with initial frequency estimation.
+        // Estimate phase by correlation.
+        // Initialize AGC (naive).
+        float q;
+
+        {
+            sampler_state ss = *pss;
+            float power = 0;
+            complex<T> symbs[sof.LENGTH];
+
+            for (int i=0; i<sof.LENGTH; ++i)
+            {
+                symbs[i] = interp_next(&ss);
+                power += cnorm2(symbs[i]);
+            }
+
+            complex<float> c = conjprod(sof.symbols, symbs, sof.LENGTH);
+            c *= 1.0f / sof.LENGTH;
+            align_phase(pss, c);
+            float signal_amp = sqrtf(power/sof.LENGTH);
+            q = sqrtf(cnorm2(c)) / (cstln_amp*signal_amp);
+            pss->gain = cstln_amp / signal_amp;
+        }
+
+        return q;
+    }
+
+    // Correlate PLHEADER.
+
+    complex<float> correlate_plheader_diff(complex<T> *diffs)
+    {
+        complex<T> csof = correlate_sof_diff(diffs);
+        complex<T> cplsc = correlate_plscode_diff(&diffs[sof.LENGTH]);
+        // Use csof+cplsc or csof-cplsc, whichever maximizes likelihood.
+        complex<T> c0 = csof + cplsc;  // Best when b7==0 (pilots off)
+        complex<T> c1 = csof - cplsc;  // Best when b7==1 (pilots on)
+        complex<T> c = (cnorm2(c0)>cnorm2(c1)) ? c0 : c1;
+        return c * (1.0f/(26-1+64/2));
+    }
+
+    // Correlate 25 differential transitions in SOF.
+
+    complex<float> correlate_sof_diff(complex<T> *diffs)
+    {
+        complex<T> c = 0;
+        const uint32_t dsof = sof.VALUE ^ (sof.VALUE>>1);
+
+        for (int i=0; i<sof.LENGTH; ++i)
+        {
+            // Constant  odd bit => +PI/4
+            // Constant even bit => -PI/4
+            // Toggled   odd bit => -PI/4
+            // Toggled  even bit => +PI/4
+            if (((dsof>>(sof.LENGTH-1-i)) ^ i) & 1) {
+                c += diffs[i];
+            } else {
+                c -= diffs[i];
+            }
+        }
+
+        return c;
+    }
+
+    // Correlate 32 data-independent transitions in PLSCODE.
+
+    complex<float> correlate_plscode_diff(complex<T> *diffs)
+    {
+        complex<T> c = 0;
+        uint64_t dscr = plscodes.SCRAMBLING ^ (plscodes.SCRAMBLING>>1);
+
+        for (int i=1; i<plscodes.LENGTH; i+=2)
+        {
+            if ( (dscr>>(plscodes.LENGTH-1-i)) & 1 ) {
+                c -= diffs[i];
+            } else {
+                c += diffs[i];
+            }
+        }
+
+        return c;
+    }
+
+    // Adjust carrier frequency in *pss to match target phase after ns symbols.
+
+    void adjust_freq(sampler_state *pss, int ns, const sampler_state *pnext)
+    {
+        // Note: Minimum deviation from current estimate.
+        float adj = fmodfs(pnext->ph16-(pss->ph16+pss->fw16*ns),65536.0f) / ns;
+        // 2sps vcm avec adj 10711K
+        // 2sps vcm avec adj/2 10265k
+        // 2sps vcm sans adj 8060K
+        // 5sps 2MS1 avec adj 2262K
+        // 5sps 2MS1 avec adj/2 3109K
+        // 5sps 2MS1 avec adj/3 3254K
+        // 5sps 2MS1 sans adj 3254K
+        // 1.2sps oldbeacon avec adj 5774K
+        // 1.2sps oldbeacon avec adj/2 15M
+        // 1.2sps oldbeacon avec adj/3 15.6M max 17M
+        // 1.2sps oldbeacon sans adj 14M malgré drift
+        pss->fw16 += adj;
+    }
+
+    // Estimate frequency from known symbols by differential correlation.
+    // Adjust *ss accordingly.
+    // Retroactively frequency-shift the samples in-place.
+    //
+    // *ss must point after the sampled symbols.
+    // expect[] must be PSK with amplitude cstln_amp.
+    // Idempotent.
+    // Not affected by phase error nor by gain mismatch.
+    // Can handle +-25% error.
+    // Result is typically such that residual phase error over a PLHEADER
+    // spans less than 90°.
+
+    void match_freq(
+        complex<float> *expect,
+        complex<float> *recv,
+        int ns,
+		sampler_state *ss)
+    {
+        complex<float> diff = 0;
+
+        for (int i=0; i<ns-1; ++i)
+        {
+            complex<float> de = conjprod(expect[i], expect[i+1]);
+            complex<float> dr = conjprod(recv[i], recv[i+1]);
+            diff += conjprod(de, dr);
+        }
+
+        float dfw16 = atan2f(diff.im,diff.re) * 65536 / (2*M_PI);
+
+        // Derotate.
+        for (int i=0; i<ns; ++i) {
+            recv[i] *= trig.expi(-dfw16*i);
+        }
+
+        ss->fw16 += dfw16;
+        ss->ph16 += dfw16 * ns;  // Retroactively
+    }
+
+    // Interpolate a pilot block.
+    // Perform ML match.
+
+    float interp_match_pilot(sampler_state *pss)
+    {
+        complex<T> symbols[pilot.LENGTH];
+        complex<T> expected[pilot.LENGTH];
+
+        for (int i=0; i<pilot.LENGTH; ++i)
+        {
+            complex<float> p = interp_next(pss) * pss->gain;
+            symbols[i] = descramble(pss, p);
+            expected[i] = pilot.symbol;
+            //fprintf(stderr, "%f %f\n", symbols[i].re, symbols[i].im);
+        }
+
+        return match_ph_amp(expected, symbols, pilot.LENGTH, pss);
+    }
+
+    // Interpolate a SOF.
+    // Perform ML match.
+
+    float interp_match_sof(sampler_state *pss)
+    {
+        complex<T> symbols[pilot.LENGTH];
+
+        for (int i=0; i<sof.LENGTH; ++i) {
+            symbols[i] = interp_next(pss) * pss->gain;
+        }
+
+        return match_ph_amp(sof.symbols, symbols, sof.LENGTH, pss);
+    }
+
+    // Estimate phase and amplitude from known symbols.
+    // Adjust *ss accordingly.
+    // Retroactively derotate and scale the samples in-place.
+    // Return MER^2.
+    //
+    // *ss must point after the sampled symbols, with gain applied.
+    // expect[] must be PSK (not APSK) with amplitude cstln_amp.
+    // Idempotent.
+
+    float match_ph_amp(
+        complex<float> *expect,
+        complex<float> *recv,
+        int ns,
+		sampler_state *ss
+    )
+    {
+        complex<float> rr = 0;
+
+        for (int i=0; i<ns; ++i) {
+            rr += conjprod(expect[i], recv[i]);
+        }
+
+        rr *= 1.0f / (ns*cstln_amp);
+        float dph16 = atan2f(rr.im,rr.re) * 65536 / (2*M_PI);
+        ss->ph16 += dph16;
+        rr *= trig.expi(-dph16);
+        // rr.re is now the modulation amplitude.
+        float dgain = cstln_amp / rr.re;
+        ss->gain *= dgain;
+        // Rotate and scale.  Compute error power.
+        complex<float> adj = trig.expi(-dph16) * dgain;
+        float ev2 = 0;
+
+        for (int i=0; i<ns; ++i)
+        {
+            recv[i] *= adj;
+            ev2 += cnorm2(recv[i]-expect[i]);
+        }
+
+        // Return MER^2.
+        ev2 *= 1.0f / (ns*cstln_amp*cstln_amp);
+        return 1.0f / ev2;
+    }
+
+    // Adjust frequency in *pss by an integer number of cycles per data block
+    // so that phases align best on data symbols.
+    //
+    // *pss must point to the beginning of a frame.
+
+    void match_frame(
+        sampler_state *pss,
+        const s2_pls *pls,
+        int S,
+		cstln_lut<SOFTSYMB,256> *dcstln
+    )
+    {
+        // With pilots: Use first block of data slots.
+        // Without pilots: Use whole frame.
+        int ns = pls->pilots ? 16*90 : S*90;
+        // Pilots: steps of ~700 ppm (= 1 cycle between pilots)
+        // No pilots, normal frames: steps of ~30(QPSK) - ~80(32APSK) ppm
+        // No pilots, short frames: steps of ~120(QPSK) - 300(32APSK) ppm
+        int nwrap = pls->pilots ? 16*90+pilot.LENGTH : S*90+sof.LENGTH;
+        // Frequency search range.
+        int sliprange = pls->pilots ? 10 : 50;  // TBD Customizable ?
+        float besterr = 1e99;
+        float bestslip = 0;  // Avoid compiler warning
+
+        for (int slip=-sliprange; slip<=sliprange; ++slip)
+        {
+            sampler_state ssl = *pss;
+            float dfw = slip * 65536.0f / nwrap;
+            ssl.fw16 += dfw;
+            // Apply retroactively from midpoint of preceeding PLHEADER,
+            // where the phase from match_ph_amp is most reliable.
+            ssl.ph16 += dfw * (plscodes.LENGTH+sof.LENGTH)/2;
+            float err = 0;
+
+            for (int s=0; s<ns; ++s)
+            {
+                complex<float> p = interp_next(&ssl) * ssl.gain;
+                typename cstln_lut<SOFTSYMB,256>::result *cr =
+                    dcstln->lookup(p.re, p.im);
+                complex<int8_t> &cp = dcstln->symbols[cr->symbol];
+                complex<float> ev(p.re-cp.re, p.im-cp.im);
+                err += cnorm2(ev);
+            }
+
+            err /= ns * cstln_amp * cstln_amp;
+
+            if (err < besterr)
+            {
+                besterr=err;
+                bestslip=slip;
+            }
+#if DEBUG_CARRIER
+        fprintf(stderr, "slip %+3d  %6.0f ppm  err=%f\n",
+            slip, ssl.fw16*1e6/65536, err);
+#endif
+        }
+
+        pss->fw16 += bestslip * 65536.0f / nwrap;
+    }  // match_frame
+
+    void shutdown()
+    {
+        if (sch->verbose)
+        {
+            fprintf(
+                stderr,
+                "PL errors: %d/%d (%.0f ppm)\n",
+                pls_total_errors,
+                pls_total_count,
+                1e6 * pls_total_errors / pls_total_count
+            );
         }
     }
 
@@ -1210,14 +1685,14 @@ struct s2_frame_receiver : runnable
         {
         case 3:
             res.re = -p.im;
-            res.im = p.re;
+            res.im =  p.re;
             break;
         case 2:
             res.re = -p.re;
             res.im = -p.im;
             break;
         case 1:
-            res.re = p.im;
+            res.re =  p.im;
             res.im = -p.re;
             break;
         default:
@@ -1235,73 +1710,50 @@ struct s2_frame_receiver : runnable
         while (ss->mu >= 1)
         {
             ++ss->p;
-            ss->mu -= 1.0f;
+            ss->mu-=1.0f;
         }
         // Interpolate
 #if 0
-      // Interpolate linearly then derotate.
-      // This will fail with large carrier offsets (e.g. --tune).
-      float cmu = 1.0f - ss->mu;
-      complex<float> s(ss->p[0].re*cmu + ss->p[1].re*ss->mu,
-		       ss->p[0].im*cmu + ss->p[1].im*ss->mu);
-      ss->mu += omega0;
-      // Derotate
-      const complex<float> &rot = trig.expi(-ss->ph16);
-      ss->ph16 += ss->fw16;
-      return rot * s;
+        // Interpolate linearly then derotate.
+        // This will fail with large carrier offsets (e.g. --tune).
+        float cmu = 1.0f - ss->mu;
+        complex<float> s(ss->p[0].re*cmu + ss->p[1].re*ss->mu,
+                ss->p[0].im*cmu + ss->p[1].im*ss->mu);
+        ss->mu += ss->omega;
+        // Derotate
+        const complex<float> &rot = trig.expi(-ss->ph16);
+        ss->ph16 += ss->fw16;
+        return rot * s;
 #else
         // Use generic interpolator
         complex<float> s = sampler->interp(ss->p, ss->mu, ss->ph16);
-        ss->mu += omega0;
+        ss->mu += ss->omega;
         ss->ph16 += ss->fw16;
         return s;
 #endif
     }
 
+    // Adjust phase in [ss] to cancel offset observed as [c].
+
     void align_phase(sampler_state *ss, const complex<float> &c)
     {
-#if 0
-      // Reference implementation
-      float err = atan2f(c.im,c.re) * (65536/(2*M_PI));
-#else
-        // Same performance as atan2f, faster
-        if (!c.re) {
-            return;
-        }
-
-        float err = c.im / c.re * (65536 / (2 * M_PI));
-#endif
+        float err = atan2f(c.im,c.re) * 65536 / (2*M_PI);
         ss->ph16 += err;
     }
 
-    inline uint8_t track_symbol(sampler_state *ss, const complex<float> &p,
-                                cstln_lut<SOFTSYMB, 256> *c, int mode)
+    inline uint8_t track_symbol(
+        sampler_state *ss,
+        const complex<float> &p,
+		cstln_lut<SOFTSYMB,256> *c
+    )
     {
-        static struct
-        {
-            float kph;
-            float kfw;
-            float kmu;
-        }
-        gains[2] =
-        {
-            {
-                4e-2,
-                1e-4,
-                (float) 0.001 / (cstln_amp * cstln_amp)
-            },
-            {
-                4e-2,
-                1e-4,
-                (float) 0.001 / (cstln_amp * cstln_amp)
-            }
-        };
-
+        static const float kph = 4e-2;
+        static const float kfw = 1e-4;
         // Decision
-        typename cstln_lut<SOFTSYMB, 256>::result *cr = c->lookup(p.re, p.im);
+        typename cstln_lut<SOFTSYMB,256>::result *cr = c->lookup(p.re, p.im);
         // Carrier tracking
-        ss->ph16 += cr->phase_error * gains[mode].kph;
-        ss->fw16 += cr->phase_error * gains[mode].kfw;
+        ss->ph16 += cr->phase_error * kph;
+        ss->fw16 += cr->phase_error * kfw;
 
         if (ss->fw16 < min_freqw16) {
             ss->fw16 = min_freqw16;
@@ -1311,133 +1763,71 @@ struct s2_frame_receiver : runnable
             ss->fw16 = max_freqw16;
         }
 
-        // Phase tracking
-        hist[2] = hist[1];
-        hist[1] = hist[0];
-        hist[0].p = p;
-        complex<int8_t> *cp = &c->symbols[cr->symbol];
-        hist[0].c.re = cp->re;
-        hist[0].c.im = cp->im;
-        float muerr =
-            ((hist[0].p.re - hist[2].p.re) * hist[1].c.re +
-             (hist[0].p.im - hist[2].p.im) * hist[1].c.im) -
-            ((hist[0].c.re - hist[2].c.re) * hist[1].p.re +
-             (hist[0].c.im - hist[2].c.im) * hist[1].p.im);
-        float mucorr = muerr * gains[mode].kmu;
-        const float max_mucorr = 0.1;
-
-        // TBD Optimize out statically
-        if (mucorr < -max_mucorr) {
-            mucorr = -max_mucorr;
-        }
-
-        if (mucorr > max_mucorr) {
-            mucorr = max_mucorr;
-        }
-
-        ss->mu += mucorr;
-        // Error vector for MER
-        complex<float> ev(p.re - cp->re, p.im - cp->im);
-        float ev_p = ev.re * ev.re + ev.im * ev.im;
-        ev_power = ev_p * agc_bw + ev_power * (1.0f - agc_bw);
         return cr->symbol;
     }
 
-    struct
-    {
-        complex<float> p; // Received symbol
-        complex<float> c; // Matched constellation point
-    } hist[3];
-
   public:
-    float in_power, ev_power;
-    float agc_gain;
-    float agc_bw;
-    cstln_lut<SOFTSYMB, 256> *qpsk;
-    static const int MAXSYNCS = 8;
-
-    struct sync
-    {
-        uint16_t nsmask; // bitmask of cstln orders for which this sync is used
-        uint64_t tobpsk; // Bitmask from cstln symbols to pi/2-BPSK bits
-        float offset16;  // Phase offset 0..65536
-        uint32_t hist;   // For SOF detection
-    } syncs[MAXSYNCS], *current_sync;
-
-    int nsyncs;
+    cstln_lut<SOFTSYMB,256> *qpsk;
     s2_plscodes<T> plscodes;
-    cstln_lut<SOFTSYMB, 256> *cstln;
-    // Initialize synchronizers for an arbitrary constellation.
+    cstln_lut<SOFTSYMB,256> *cstlns[32];  // Constellations in use, by modcod
 
-    void add_syncs(cstln_lut<SOFTSYMB, 256> *c)
+    cstln_lut<SOFTSYMB,256> *get_cstln(int modcod)
     {
-        int random_decision = 0;
-        int nrot = c->nrotations;
-#if 0
-      if ( nrot == 4 ) {
-	fprintf(stderr, "Special case for 8PSK locking as QPSK pi/8\n");
-	nrot = 8;
-      }
-#endif
-        for (int r = 0; r < nrot; ++r)
+        if (!cstlns[modcod])
         {
-            if (nsyncs == MAXSYNCS) {
-                fail("Bug: too many syncs");
-            }
+            const modcod_info *mcinfo = &modcod_infos[modcod];
 
-            sync *s = &syncs[nsyncs++];
-            s->offset16 = 65536.0 * r / nrot;
-            float angle = -2 * M_PI * r / nrot;
-            s->tobpsk = 0;
-
-            for (int i = c->nsymbols; i--;)
+            if (sch->debug)
             {
-                complex<int8_t> p = c->symbols[i];
-                float im = p.re * sinf(angle) + p.im * cosf(angle);
-                int bit;
-
-                if (im > 1)
-                {
-                    bit = 0;
-                }
-                else if (im < -1)
-                {
-                    bit = 1;
-                }
-                else
-                {
-                    bit = random_decision;
-                    random_decision ^= 1;
-                } // Near 0
-
-                s->tobpsk = (s->tobpsk << 1) | bit;
+                fprintf(
+                    stderr,
+                    "Creating LUT for %s ratecode %d\n",
+                    cstln_base::names[mcinfo->c],
+                    mcinfo->rate
+                );
             }
 
-            s->hist = 0;
+            cstlns[modcod] = new cstln_lut<SOFTSYMB,256>(
+                mcinfo->c,
+                mcinfo->esn0_nf,
+                mcinfo->g1,
+                mcinfo->g2,
+                mcinfo->g3
+            );
+#if 0
+            fprintf(stderr, "Dumping constellation LUT to stdout.\n");
+            cstlns[modcod]->dump(stdout);
+            exit(0);
+#endif
         }
+
+        return cstlns[modcod];
     }
 
+    cstln_lut<SOFTSYMB,256> *cstln;  // Last seen, or NULL (legacy)
     trig16 trig;
-    pipereader<complex<T>> in;
-    pipewriter<plslot<SOFTSYMB>> out;
+    pipereader< complex<T> > in;
+    pipewriter< plslot<SOFTSYMB> > out;
     int meas_count;
     pipewriter<float> *freq_out, *ss_out, *mer_out;
-    pipewriter<complex<float>> *cstln_out;
-    pipewriter<complex<float>> *cstln_pls_out;
-    pipewriter<complex<float>> *symbols_out;
+    pipewriter< complex<float> > *cstln_out;
+    pipewriter< complex<float> > *cstln_pls_out;
+    pipewriter< complex<float> > *symbols_out;
     pipewriter<int> *state_out;
-    bool report_state;
+    bool first_run;
     // S2 constants
     s2_scrambling scrambling;
     s2_sof<T> sof;
+    s2_pilot<T> pilot;
+    // Performance stats on PL signalling
+    uint32_t pls_total_errors, pls_total_count;
     int m_modcodType;
     int m_modcodRate;
-    // Max size of one frame
-    //    static const int MAX_SLOTS = 360;
-    static const int MAX_SLOTS = 240; // DEBUG match test signal
-    static const int MAX_SYMBOLS =
-        (1 + MAX_SLOTS) * plslot<SOFTSYMB>::LENGTH + ((MAX_SLOTS - 1) / 16) * pilot_length;
-}; // s2_frame_receiver
+
+private:
+    complex<T> *diffs;
+    sampler_state *sspilots;
+  };  // s2_frame_receiver
 
 template <typename SOFTBYTE>
 struct fecframe
@@ -1491,6 +1881,7 @@ struct s2_interleaver : runnable
             {
                 int bps = log2(mcinfo->nsymbols);
                 int rows = pls->framebits() / bps;
+
                 if (mcinfo->nsymbols == 8 && mcinfo->rate == FEC35) {
                     interleave(bps, rows, pbytes, nslots, false, pout);
                 } else {
@@ -1877,7 +2268,7 @@ struct s2_deinterleaver : runnable
                 int bps = log2(mcinfo->nsymbols);
                 int rows = pls->framebits() / bps;
 
-                if (mcinfo->nsymbols == 8 && mcinfo->rate == FEC35) {
+                if ((mcinfo->nsymbols == 8) && (mcinfo->rate == FEC35)) {
                     deinterleave(bps, rows, pin + 1, nslots, false, pbytes);
                 } else {
                     deinterleave(bps, rows, pin + 1, nslots, true, pbytes);
@@ -3176,7 +3567,12 @@ struct s2_fecdec_helper : runnable
 struct s2_framer : runnable
 {
     uint8_t rolloff_code; // 0=0.35, 1=0.25, 2=0.20, 3=reserved
-    s2_pls pls;
+    // User must provide pls_seq[n_pls_seq].
+    // For ACM, user can change pls_seq[0] at runtime.
+    // For VCM with a repeating pattern, use n_pls_seq>=2.
+    s2_pls *pls_seq;
+    int n_pls_seq;
+
 
     s2_framer(
         scheduler *sch,
@@ -3184,12 +3580,11 @@ struct s2_framer : runnable
         pipebuf<bbframe> &_out
     ) :
         runnable(sch, "S2 framer"),
+    	n_pls_seq(0),
+	    pls_index(0),
         in(_in),
         out(_out)
     {
-        pls.modcod = 4;
-        pls.sf = false;
-        pls.pilots = true;
         nremain = 0;
         remcrc = 0; // CRC for nonexistent previous packet
     }
@@ -3198,8 +3593,13 @@ struct s2_framer : runnable
     {
         while (out.writable() >= 1)
         {
-            const modcod_info *mcinfo = check_modcod(pls.modcod);
-            const fec_info *fi = &fec_infos[pls.sf][mcinfo->rate];
+            if (!n_pls_seq ) {
+                fail("PLS not specified");
+            }
+
+            s2_pls *pls = &pls_seq[pls_index];
+            const modcod_info *mcinfo = check_modcod(pls->modcod);
+            const fec_info *fi = &fec_infos[pls->sf][mcinfo->rate];
             int framebytes = fi->Kbch / 8;
 
             if (!framebytes) {
@@ -3211,12 +3611,18 @@ struct s2_framer : runnable
             }
 
             bbframe *pout = out.wr();
-            pout->pls = pls;
+            pout->pls = *pls;
             uint8_t *buf = pout->bytes;
             uint8_t *end = buf + framebytes;
             // EN 302 307-1 section 5.1.6 Base-Band Header insertion
             uint8_t *bbheader = buf;
-            *buf++ = 0x30 | rolloff_code; // MATYPE-1: SIS, CCM
+            uint8_t matype1 = 0;
+            matype1 |= 0xc0;  // TS
+            matype1 |= 0x20;  // SIS
+            matype1 |= (n_pls_seq==1) ? 0x10 : 0x00;  // CCM/ACM
+            // TBD ISSY/NPD required for ACM ?
+            matype1 |= rolloff_code;
+            *buf++ = matype1;             // MATYPE-1
             *buf++ = 0;                   // MATYPE-2
             uint16_t upl = 188 * 8;
             *buf++ = upl >> 8; // UPL MSB
@@ -3266,10 +3672,16 @@ struct s2_framer : runnable
             }
 
             out.written(1);
+	        ++pls_index;
+
+	        if (pls_index == n_pls_seq) {
+                pls_index = 0;
+            }
         }
     }
 
-  private:
+private:
+    int pls_index; // Next slot to use in pls_seq
     pipereader<tspacket> in;
     pipewriter<bbframe> out;
     crc8_engine crc8;
@@ -3283,6 +3695,8 @@ struct s2_framer : runnable
 
 struct s2_deframer : runnable
 {
+    int fd_gse; // FD for generic streams, or -1
+
     s2_deframer(
         scheduler *sch,
         pipebuf<bbframe> &_in,
@@ -3291,6 +3705,7 @@ struct s2_deframer : runnable
         pipebuf<unsigned long> *_locktime_out = nullptr
     ) :
         runnable(sch, "S2 deframer"),
+        fd_gse(-1),
         missing(-1),
         in(_in),
         out(_out, MAX_TS_PER_BBFRAME),
@@ -3320,10 +3735,18 @@ struct s2_deframer : runnable
         }
     }
 
-  private:
+private:
     void run_bbframe(bbframe *pin)
     {
         uint8_t *bbh = pin->bytes;
+        // EN 302 307 section 5.1.6 Base-Band Header Insertion
+        uint8_t streamtype = bbh[0] >> 6;
+        bool sis = bbh[0] & 32;
+        bool ccm = bbh[0] & 16;
+        bool issyi = bbh[0] & 8;
+        bool npd = bbh[0] & 4;
+        int ro_code = bbh[0] & 3;
+        uint8_t isi = bbh[1];  // if !sis
         uint16_t upl = (bbh[2] << 8) | bbh[3];
         uint16_t dfl = (bbh[4] << 8) | bbh[5];
         uint8_t sync = bbh[6];
@@ -3331,19 +3754,31 @@ struct s2_deframer : runnable
         uint8_t crcexp = crc8.compute(bbh, 9);
         uint8_t crc = bbh[9];
         uint8_t *data = bbh + 10;
-        int ro_code = bbh[0] & 3;
 
         if (sch->debug2)
         {
+            static const char *stnames[] = { "GP", "GC", "??", "TS" };
             static float ro_values[] = {0.35, 0.25, 0.20, 0};
-            fprintf(stderr, "BBH: crc %02x/%02x %s ma=%02x%02x ro=%.2f"
-                            " upl=%d dfl=%d sync=%02x syncd=%d\n",
-                    crc, crcexp, (crc == crcexp) ? "OK" : "KO",
-                    bbh[0], bbh[1], ro_values[ro_code], upl, dfl, sync, syncd);
+            fprintf(stderr, "BBH: crc %02x/%02x(%s) %s %s(ISI=%d) %s%s%s ro=%.2f"
+                " upl=%d dfl=%d sync=%02x syncd=%d\n",
+                crc,
+                crcexp,
+                (crc == crcexp) ? "OK" : "KO",
+                stnames[streamtype],
+                (sis ? "SIS" : "MIS"),
+                isi,
+                (ccm ? "CCM" : "ACM"),
+                (issyi ? " ISSYI": ""),
+                (npd ? " NPD" : ""),
+                ro_values[ro_code],
+                upl,
+                dfl,
+                sync,
+                syncd
+            );
         }
 
-        if (crc != crcexp || upl != 188 * 8 || sync != 0x47 || dfl > fec_info::KBCH_MAX ||
-            syncd > dfl || (dfl & 7) || (syncd & 7))
+        if (crc != crcexp || dfl > fec_info::KBCH_MAX)
         {
             // Note: Maybe accept syncd=65535
             if (sch->debug) {
@@ -3355,6 +3790,42 @@ struct s2_deframer : runnable
             return;
         }
 
+        // TBD: Supporting byte-oriented payloads only.
+        if ((dfl&7) || (syncd&7))
+        {
+            fprintf(stderr, "Unsupported bbframe\n");
+            missing = -1;
+            info_unlocked();
+            return;
+        }
+
+        if (streamtype==3 && upl==188*8 && sync==0x47 && syncd<=dfl)
+        {
+	        handle_ts(data, dfl, syncd, sync);
+        }
+        else if (streamtype == 1)
+        {
+            if (fd_gse >= 0)
+            {
+                ssize_t nw = write(fd_gse, data, dfl/8);
+
+                if (nw < 0) {
+                    fatal("write(gse)");
+                }
+
+                if (nw != dfl/8) {
+                    fail("partial write(gse");
+                }
+            }
+            else
+            {
+                fprintf(stderr, "Unrecognized bbframe\n");
+            }
+        }
+    }
+
+    void handle_ts(uint8_t *data, uint16_t dfl, uint16_t syncd, uint8_t sync)
+    {
         // TBD Handle packets as payload+finalCRC and do crc8 before pout
         int pos; // Start of useful data in this bbframe
 
