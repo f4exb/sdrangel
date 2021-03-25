@@ -34,6 +34,7 @@
 #include "dsp/dspcommands.h"
 #include "device/deviceapi.h"
 #include "feature/feature.h"
+#include "util/ax25.h"
 #include "util/db.h"
 #include "maincore.h"
 
@@ -186,6 +187,44 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 msgToGUI->setPayloadParityStatus(m_lastMsgPayloadParityStatus);
                 msgToGUI->setPayloadCRCStatus(m_lastMsgPayloadCRC);
                 getMessageQueueToGUI()->push(msgToGUI);
+            }
+
+            // Is this an APRS packet?
+            // As per: https://github.com/oe3cjb/TTGO-T-Beam-LoRa-APRS/blob/master/lib/BG_RF95/BG_RF95.cpp
+            // There is a 3 byte header for LoRa APRS packets. Addressing follows in ASCII: srccall>dst:
+            // TODO: Should we check for valid CRC?
+            int colonIdx = m_lastMsgBytes.indexOf(':');
+            int greaterThanIdx =  m_lastMsgBytes.indexOf('>');
+            if ((m_lastMsgBytes[0] == '<') && (greaterThanIdx != -1) && (colonIdx != -1))
+            {
+                QByteArray packet;
+
+                // Extract addresses
+                const char *d = m_lastMsgBytes.data();
+                QString srcString = QString::fromLatin1(d + 3, greaterThanIdx - 3);
+                QString dstString = QString::fromLatin1(d + greaterThanIdx + 1, colonIdx - greaterThanIdx - 1);
+
+                // Convert to AX.25 format
+                packet.append(AX25Packet::encodeAddress(dstString));
+                packet.append(AX25Packet::encodeAddress(srcString, 1));
+                packet.append(3);
+                packet.append(-16); // 0xf0
+                packet.append(m_lastMsgBytes.mid(colonIdx+1));
+                packet.append((char)0); // dummy crc
+                packet.append((char)0);
+
+                // Forward to APRS and other packet features
+                MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
+                QList<MessageQueue*> *packetMessageQueues = messagePipes.getMessageQueues(this, "packets");
+                if (packetMessageQueues)
+                {
+                    QList<MessageQueue*>::iterator it = packetMessageQueues->begin();
+                    for (; it != packetMessageQueues->end(); ++it)
+                    {
+                        MainCore::MsgPacket *msg = MainCore::MsgPacket::create(this, packet, QDateTime::currentDateTime());
+                        (*it)->push(msg);
+                    }
+                }
             }
 
             if (m_settings.m_autoNbSymbolsMax)

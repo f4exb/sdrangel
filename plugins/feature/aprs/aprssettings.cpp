@@ -24,11 +24,13 @@
 #include "aprssettings.h"
 
 const QStringList APRSSettings::m_pipeTypes = {
-    QStringLiteral("PacketDemod")
+    QStringLiteral("PacketDemod"),
+    QStringLiteral("ChirpChatDemod")
 };
 
 const QStringList APRSSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.packetdemod"),
+    QStringLiteral("sdrangel.channel.chirpchatdemod")
 };
 
 APRSSettings::APRSSettings()
