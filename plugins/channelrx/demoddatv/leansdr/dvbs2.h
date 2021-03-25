@@ -25,6 +25,9 @@
 //   |  S2 RX: Capture TED decision history in sampler_state. pabr committed on Dec 5, 2019
 //   |  S2 RX: Print error rate on PLS symbols. pabr committed on Dec 5, 2019
 //   |  New DVB-S2 receiver with PL-based carrier recovery. modcod/framesize filtering for VCM. pabr committed on Jan 9, 2020
+// skip Soft-decoding of S2 PLSCODE. pabr committed on Jan 16, 2020
+// skip Validate PLHEADER soft-decoding when DEBUG_CARRIER==1. pabr committed on Jan 17, 2020
+//   |  Cleanup scope of some S2 constants. pabr committed on Apr 29, 2020
 
 #ifndef LEANSDR_DVBS2_H
 #define LEANSDR_DVBS2_H
@@ -289,10 +292,13 @@ struct plslot
 
 const struct modcod_info
 {
+    static const int MIN_SLOTS_PER_FRAME = 144;
+    static const int MIN_SYMBOLS_PER_FRAME =
+        (1+MIN_SLOTS_PER_FRAME) * PLSLOT_LENGTH;
     static const int MAX_SLOTS_PER_FRAME = 360;
     static const int MAX_SYMBOLS_PER_FRAME =
-        (1 + MAX_SLOTS_PER_FRAME) * plslot<uint8_t>::LENGTH +
-        ((MAX_SLOTS_PER_FRAME - 1) / 16) * pilot_length;
+        (1 + MAX_SLOTS_PER_FRAME) * PLSLOT_LENGTH +
+        ((MAX_SLOTS_PER_FRAME - 1) / 16) * PILOT_LENGTH;
     int nslots_nf; // Number of 90-symbol slots per normal frame
     int nsymbols;  // Symbols in the constellation
     cstln_base::predef c;
@@ -566,9 +572,6 @@ struct s2_frame_receiver : runnable
     bool fastdrift;      // Carrier drift faster than pilots
     float freq_tol;      // Tolerance on carrier frequency
     float sr_tol;        // Tolerance on symbol rate
-    static const int MAX_SYMBOLS_PER_FRAME =
-        (1+modcod_info::MAX_SLOTS_PER_FRAME)*PLSLOT_LENGTH +
-        ((modcod_info::MAX_SLOTS_PER_FRAME-1)/16)*PILOT_LENGTH;
 
     s2_frame_receiver(
         scheduler *sch,
@@ -603,7 +606,7 @@ struct s2_frame_receiver : runnable
         mer_out(opt_writer(_mer_out)),
         cstln_out(opt_writer(_cstln_out,1024)),
         cstln_pls_out(opt_writer(_cstln_pls_out,1024)),
-        symbols_out(opt_writer(_symbols_out,MAX_SYMBOLS_PER_FRAME)),
+        symbols_out(opt_writer(_symbols_out, modcod_info::MAX_SYMBOLS_PER_FRAME)),
         state_out(opt_writer(_state_out)),
         first_run(true),
         scrambling(0),
@@ -706,7 +709,7 @@ struct s2_frame_receiver : runnable
 
         // Require enough samples to detect one plheader,
         // TBD margin ?
-        int min_samples = (1 + MAX_SYMBOLS_PER_FRAME +
+        int min_samples = (1 + modcod_info::MAX_SYMBOLS_PER_FRAME +
         sof.LENGTH+plscodes.LENGTH)*omega0 * 2;
 
         while (in.readable() >= min_samples + sampler->readahead() &&
@@ -714,7 +717,7 @@ struct s2_frame_receiver : runnable
             opt_writable(freq_out, 1) &&
             opt_writable(ss_out, 1) &&
             opt_writable(mer_out, 1) &&
-            opt_writable(symbols_out, MAX_SYMBOLS_PER_FRAME) &&
+            opt_writable(symbols_out, modcod_info::MAX_SYMBOLS_PER_FRAME) &&
             opt_writable(state_out, 1))
         {
             if (first_run)
@@ -778,7 +781,7 @@ struct s2_frame_receiver : runnable
             // is at same level as during steady-state demodulation.
             // This has no effect if the first detection is successful.
             float duty_factor = 5;
-            discard = MAX_SYMBOLS_PER_FRAME * omega0 * (duty_factor+drand48()-0.5);
+            discard = modcod_info::MAX_SYMBOLS_PER_FRAME * omega0 * (duty_factor+drand48()-0.5);
         }
     }
 
@@ -796,7 +799,7 @@ struct s2_frame_receiver : runnable
 
         sampler->update_freq(ss_cache.fw16/omega0);
 
-        const int search_range = MAX_SYMBOLS_PER_FRAME;
+        const int search_range = modcod_info::MAX_SYMBOLS_PER_FRAME;
         ss_cache.p = in.rd();
         find_plheader(&ss_cache, search_range);
 #if DEBUG_CARRIER
