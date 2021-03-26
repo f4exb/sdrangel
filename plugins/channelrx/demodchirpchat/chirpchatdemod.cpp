@@ -192,10 +192,13 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
             // Is this an APRS packet?
             // As per: https://github.com/oe3cjb/TTGO-T-Beam-LoRa-APRS/blob/master/lib/BG_RF95/BG_RF95.cpp
             // There is a 3 byte header for LoRa APRS packets. Addressing follows in ASCII: srccall>dst:
-            // TODO: Should we check for valid CRC?
             int colonIdx = m_lastMsgBytes.indexOf(':');
             int greaterThanIdx =  m_lastMsgBytes.indexOf('>');
-            if ((m_lastMsgBytes[0] == '<') && (greaterThanIdx != -1) && (colonIdx != -1))
+            if (   (m_lastMsgBytes[0] == '<')
+                && (greaterThanIdx != -1)
+                && (colonIdx != -1)
+                && ((m_lastMsgHasCRC && m_lastMsgPayloadCRC) || !m_lastMsgHasCRC)
+               )
             {
                 QByteArray packet;
 
@@ -210,8 +213,11 @@ bool ChirpChatDemod::handleMessage(const Message& cmd)
                 packet.append(3);
                 packet.append(-16); // 0xf0
                 packet.append(m_lastMsgBytes.mid(colonIdx+1));
-                packet.append((char)0); // dummy crc
-                packet.append((char)0);
+                if (!m_lastMsgHasCRC)
+                {
+                    packet.append((char)0); // dummy crc
+                    packet.append((char)0);
+                }
 
                 // Forward to APRS and other packet features
                 MessagePipes& messagePipes = MainCore::instance()->getMessagePipes();
