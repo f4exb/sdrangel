@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-The APRS plugin displays APRS (Automatic Packet Reporting System) packets. APRS packets can be received over RF via one or more Packet Demodulator source channels or from the Internet via an APRS-IS IGate.
+The APRS plugin displays APRS (Automatic Packet Reporting System) packets. APRS packets can be received over RF via one or more Packet Demodulator or ChirpChat Demodulator source channels or from the Internet via an APRS-IS IGate.
 
 <h2>Interface</h2>
 
@@ -10,7 +10,7 @@ The APRS plugin displays APRS (Automatic Packet Reporting System) packets. APRS 
 
 <h3>1: Source channels</h3>
 
-This displays a list of the Packet Demodulator channels the APRS feature is receiving packets from.
+This displays a list of the Packet Demodulator or ChirpChat Demodulator channels the APRS feature is receiving packets from.
 
 <h3>2: Enable APRS-IS IGate</h3>
 
