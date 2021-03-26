@@ -1054,6 +1054,9 @@ struct s2_frame_receiver : runnable
             // Constellation for data slots.
             dcstln = get_cstln(pls.modcod);
             cstln = dcstln;  // Used by GUI
+            cstln->m_rateCode = (int) mcinfo->rate;
+            cstln->m_typeCode = (int) mcinfo->c;
+            cstln->m_setByModcod = true;
             // Output special slot with PLS information.
             pout->is_pls = true;
             pout->pls = pls;
