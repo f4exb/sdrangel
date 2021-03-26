@@ -28,6 +28,8 @@
 // skip Soft-decoding of S2 PLSCODE. pabr committed on Jan 16, 2020
 // skip Validate PLHEADER soft-decoding when DEBUG_CARRIER==1. pabr committed on Jan 17, 2020
 //   |  Cleanup scope of some S2 constants. pabr committed on Apr 29, 2020
+// skip Fix overflow to state_out stream. pabr committed on Apr 29, 2020
+//   |  S2 deframer: Set TEI bit on TS packets with bad CRC8. pabr committed on Jul 29, 2020
 
 #ifndef LEANSDR_DVBS2_H
 #define LEANSDR_DVBS2_H
@@ -3709,7 +3711,7 @@ struct s2_deframer : runnable
     ) :
         runnable(sch, "S2 deframer"),
         fd_gse(-1),
-        missing(-1),
+        nleftover(-1),
         in(_in),
         out(_out, MAX_TS_PER_BBFRAME),
         current_state(false),
@@ -3788,18 +3790,18 @@ private:
                 fprintf(stderr, "Bad bbframe\n");
             }
 
-            missing = -1;
+            nleftover = -1;
             info_unlocked();
-            return;
+            return; // Max one state_out per loop
         }
 
         // TBD: Supporting byte-oriented payloads only.
         if ((dfl&7) || (syncd&7))
         {
             fprintf(stderr, "Unsupported bbframe\n");
-            missing = -1;
+            nleftover = -1;
             info_unlocked();
-            return;
+            return; // Max one state_out per loop
         }
 
         if (streamtype==3 && upl==188*8 && sync==0x47 && syncd<=dfl)
@@ -3829,68 +3831,70 @@ private:
 
     void handle_ts(uint8_t *data, uint16_t dfl, uint16_t syncd, uint8_t sync)
     {
-        // TBD Handle packets as payload+finalCRC and do crc8 before pout
         int pos; // Start of useful data in this bbframe
 
-        if (missing < 0)
+        if (nleftover < 0)
         {
-            // Skip unusable data at beginning of bbframe
+            // Not synced. Skip unusable data at beginning of bbframe
             pos = syncd / 8;
 
             if (sch->debug) {
                 fprintf(stderr, "Start TS at %d\n", pos);
             }
 
-            missing = 0;
+            nleftover = 0;
         }
         else
         {
             // Sanity check
-            if (syncd / 8 != missing)
+            if (syncd / 8 != 188 - nleftover)
             {
                 if (sch->debug) {
                     fprintf(stderr, "Lost a bbframe ?\n");
                 }
 
-                missing = -1;
+                nleftover = -1;
                 info_unlocked();
-                return;
+                return; // Max one state_out per loop
             }
             pos = 0;
         }
 
-        if (missing)
+        while ( pos+(188-nleftover)+1 <= dfl/8 )
         {
-            // Complete and output the partial TS packet in leftover[].
+            // Enough data available for one packet and its CRC.
             tspacket *pout = out.wr();
-            memcpy(pout->data, leftover, 188 - missing);
-            memcpy(pout->data + (188 - missing), data + pos, missing);
-            out.written(1);
-            info_good_packet();
-            ++pout;
-            // Skip to beginning of next TS packet
-            pos += missing;
-            missing = 0;
-        }
-
-        while (pos + 188 <= dfl / 8)
-        {
-            tspacket *pout = out.wr();
-            memcpy(pout->data, data + pos, 188);
+            memcpy(pout->data, leftover, nleftover);  // NOP most of the time
+            memcpy(pout->data+nleftover, data+pos, 188-nleftover);
             pout->data[0] = sync; // Replace CRC
+            uint8_t crc = crc8.compute(pout->data+1, 188-1);
+
+            if (data[pos+(188-nleftover)] == crc)
+            {
+                info_good_packet();
+            }
+            else
+            {
+                pout->data[1] |= 0x80;  // Set TEI bit
+
+                if (sch->debug) {
+                    fprintf(stderr, "C");
+                }
+            }
+
             out.written(1);
-            info_good_packet();
-            pos += 188;
+            pos += 188 - nleftover;
+            nleftover = 0;
         }
 
         int remain = dfl / 8 - pos;
 
-        if (remain)
-        {
-            memcpy(leftover, data + pos, remain);
-            leftover[0] = sync; // Replace CRC
-            missing = 188 - remain;
+        if (nleftover + remain > (int) sizeof(leftover)) {
+            fail("Bug: TS deframer");
         }
+
+        memcpy(leftover+nleftover, data+pos, remain);
+        nleftover += remain;
     }
 
     void info_unlocked()
@@ -3916,9 +3920,11 @@ private:
     }
 
     crc8_engine crc8;
-    int missing; // Bytes needed to complete leftover[],
-                 // or 0 if no leftover data,
-                 // or -1 if not synced.
+    int nleftover;  // Bytes in leftover[]:
+                    // -1      = not synced.
+                    // 0       = no leftover data
+                    // 1 - 187 = incomplete packet
+                    // 188     =  waiting for CRC
     uint8_t leftover[188];
     static const int MAX_TS_PER_BBFRAME = fec_info::KBCH_MAX / 8 / 188 + 1;
     bool locked;
