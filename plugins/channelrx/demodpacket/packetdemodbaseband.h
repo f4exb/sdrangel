@@ -29,6 +29,7 @@
 #include "packetdemodsink.h"
 
 class DownChannelizer;
+class ChannelAPI;
 class PacketDemod;
 
 class PacketDemodBaseband : public QObject
@@ -70,6 +71,7 @@ public:
     }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
+    void setChannel(ChannelAPI *channel);
     double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }
 
