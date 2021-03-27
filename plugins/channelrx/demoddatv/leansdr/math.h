@@ -188,6 +188,15 @@ inline float fmodfs(float v, float m)
     return (v>=m/2) ? v-m : (v<-m/2) ? v+m : v;
 }
 
+inline double rand_compat()
+{
+#ifdef WIN32
+    return double(rand())/RAND_MAX;
+#else
+    return drand48();
+#endif
+}
+
 // Simple statistics
 
 template<typename T>

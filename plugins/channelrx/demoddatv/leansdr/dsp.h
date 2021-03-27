@@ -303,8 +303,8 @@ struct wgn_c : runnable
 
             do
             {
-                x = 2 * drand48() - 1;
-                y = 2 * drand48() - 1;
+                x = 2 * rand_compat() - 1;
+                y = 2 * rand_compat() - 1;
                 r2 = x * x + y * y;
             } while (r2 == 0 || r2 >= 1);
 

@@ -782,7 +782,7 @@ struct s2_frame_receiver : runnable
             // is at same level as during steady-state demodulation.
             // This has no effect if the first detection is successful.
             float duty_factor = 5;
-            discard = modcod_info::MAX_SYMBOLS_PER_FRAME * omega0 * (duty_factor+drand48()-0.5);
+            discard = modcod_info::MAX_SYMBOLS_PER_FRAME * omega0 * (duty_factor+rand_compat()-0.5);
         }
     }
 
