@@ -663,7 +663,7 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
             }
             if (requiresDoppler)
             {
-                satWorkerState->m_dopplerTimer.setInterval(m_settings.m_dopplerPeriod);
+                satWorkerState->m_dopplerTimer.setInterval(m_settings.m_dopplerPeriod * 1000);
                 satWorkerState->m_dopplerTimer.start();
                 connect(&satWorkerState->m_dopplerTimer, &QTimer::timeout, [this, satWorkerState]() {
                     doppler(satWorkerState);
