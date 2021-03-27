@@ -86,7 +86,8 @@ void DVBS::scramble(const uint8_t *packetIn, uint8_t *packetOut)
 // Using GF(2^8=256) so 1 symbol is 1 byte
 // Code generator polynomial: (x+l^0)(x+l^1)..(x+l^15) l=0x02
 // Field generator polynomial: x^8+x^4+x^3+x^2+1 (a primitive polynomial)
-// Add 51 zero bytes before 188-byte packet to pad to 239 bytes, which are discarded after RS encoding
+// Add 51 zero bytes before 188-byte packet to pad to 239 bytes, which are
+// discarded after RS encoding. They don't change the result so can just be ignored
 // n=255 k=239
 // RS adds 2t = 16 bytes (n-k) after original data (so is systematic)
 // t=8 means we can correct 8 bytes if we don't know where the errors are
@@ -104,19 +105,16 @@ uint8_t DVBS::gfMul(uint8_t a, uint8_t b)
 // Reed Solomon encoder
 void DVBS::reedSolomon(uint8_t *packet)
 {
-    uint8_t tmp[rsN];
-    const int zeroPadding = rsK - tsPacketLen;
-    const int partityBytesIdx = zeroPadding + tsPacketLen;
+    uint8_t tmp[rsK];
+    const int partityBytesIdx = tsPacketLen;
 
-    // Zero pad from 188 to 239 bytes
-    memset(tmp, 0, zeroPadding);
     // Copy in packet
-    memcpy(&tmp[zeroPadding], packet, tsPacketLen);
+    memcpy(&tmp[0], packet, tsPacketLen);
     // Zero parity bytes
     memset(&tmp[partityBytesIdx], 0, rs2T);
 
-    // Divide generator polynomial by input to compute parity bytes
-    for (int i = 0; i < rsK; i++)
+    // Divide input by generator polynomial to compute parity bytes
+    for (int i = 0; i < tsPacketLen; i++)
     {
         uint8_t coef = tmp[i];
 
