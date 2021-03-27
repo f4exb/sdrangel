@@ -3824,6 +3824,7 @@ private:
         {
 	        handle_ts(data, dfl, syncd, sync);
         }
+#ifdef LINUX
         else if (streamtype == 1)
         {
             if (fd_gse >= 0)
@@ -3843,6 +3844,7 @@ private:
                 fprintf(stderr, "Unrecognized bbframe\n");
             }
         }
+#endif
     }
 
     void handle_ts(uint8_t *data, uint16_t dfl, uint16_t syncd, uint8_t sync)
