@@ -45,6 +45,7 @@
 
 #include <stdlib.h>
 #include <deque>
+#include <bitset>
 
 #include "bch.h"
 #include "crc.h"
@@ -66,10 +67,8 @@ namespace leansdr
 
 // S2 THRESHOLDS (for comparing demodulators)
 
-static const int S2_MAX_ERR_SOF_INITIAL = 1; // 26 bits
-static const int S2_MAX_ERR_SOF = 13;        // 26 bits
-static const int S2_MAX_ERR_PLSCODE = 8;     // 64 bits, dmin=32
-static const int S2_MAX_ERR_PILOT = 10;      // 36 bits
+static const uint32_t S2_MAX_ERR_SOF = 13;        // 26 bits
+static const uint64_t S2_MAX_ERR_PLSCODE = 8;     // 64 bits, dmin=32
 
 static const int pilot_length = 36;
 
@@ -890,21 +889,24 @@ struct s2_frame_receiver : runnable
 
         uint32_t sof_bits = 0;
 
-        for (int i=0; i<sof.LENGTH; ++i)
+        // Optimization with half loop and even/odd processing in a single step
+        for (int i = 0; i < sof.LENGTH/2; ++i)
         {
-            complex<float> p = plh_symbols[i];
-            float d = ( (i&1) ? p.im-p.re : p.im+p.re);
-            sof_bits = (sof_bits<<1) | (d<0);
+            complex<float> p0 = plh_symbols[2*i];
+            complex<float> p1 = plh_symbols[2*i+1];
+            float d0 = p0.im + p0.re;
+            float d1 = p1.im - p1.re;
+            sof_bits = (sof_bits<<2) | ((d0<0)<<1) | (d1<0);
         }
 
-        int sof_errors = hamming_weight(sof_bits ^ sof.VALUE);
+        uint32_t sof_errors = hamming_weight(sof_bits ^ sof.VALUE);
         pls_total_errors += sof_errors;
         pls_total_count += sof.LENGTH;
 
         if (sof_errors >= S2_MAX_ERR_SOF)
         {
             if (sch->debug2) {
-                fprintf(stderr, "Too many errors in SOF (%d/26)\n", sof_errors);
+                fprintf(stderr, "Too many errors in SOF (%u/26)\n", sof_errors);
             }
 
             in.read(ss.p-in.rd());
@@ -916,33 +918,49 @@ struct s2_frame_receiver : runnable
 
         uint64_t plscode = 0;
 
-        for (int i=0; i<plscodes.LENGTH; ++i)
+        // Optimization with half loop and even/odd processing in a single step
+        for (int i=0; i<plscodes.LENGTH/2; ++i)
         {
-            complex<float> p = plh_symbols[sof.LENGTH+i];
-            float d = ( (i&1) ? p.im-p.re : p.im+p.re);
-            plscode = (plscode<<1) | (d<0);
+            complex<float> p0 = plh_symbols[sof.LENGTH+2*i];
+            complex<float> p1 = plh_symbols[sof.LENGTH+2*i+1];
+            float d0 = p0.im + p0.re;
+            float d1 = p1.im - p1.re;
+            plscode = (plscode<<2) | ((d0<0)<<1) | (d1<0);
         }
 
-        int plscode_errors = plscodes.LENGTH + 1;
+        uint32_t plscode_errors = plscodes.LENGTH + 1;
         int plscode_index = -1;  // Avoid compiler warning.
 
-        // TBD: Optimiser
-        for ( int i=0; i<plscodes.COUNT; ++i )
+        // TBD: Optimization?
+#if 1
+        for (int i = 0; i < plscodes.COUNT; ++i)
         {
-        	int e = hamming_weight(plscode^plscodes.codewords[i]);
+            // number of different bits from codeword
+            uint32_t e = std::bitset<64>(plscode ^ plscodes.codewords[i]).count();
 
-            if (e < plscode_errors ) {
-                plscode_errors=e; plscode_index=i;
+            if (e < plscode_errors )
+            {
+                plscode_errors = e;
+                plscode_index = i;
             }
         }
-
+#else
+        uint64_t pls_candidates[plscodes.COUNT];
+        std::fill(pls_candidates, pls_candidates + plscodes.COUNT, plscode);
+        std::transform(pls_candidates, pls_candidates + plscodes.COUNT, plscodes.codewords, pls_candidates, [](uint64_t x, uint64_t y) {
+            return hamming_weight(x^y); // number of different bits with codeword
+        });
+        uint64_t *pls_elected = std::min_element(pls_candidates, pls_candidates + plscodes.COUNT); // choose the one with lowest difference
+        plscode_errors = *pls_elected;
+        plscode_index = pls_elected - pls_candidates;
+#endif
         pls_total_errors += plscode_errors;
         pls_total_count += plscodes.LENGTH;
 
         if (plscode_errors >= S2_MAX_ERR_PLSCODE)
         {
             if (sch->debug2) {
-                fprintf(stderr, "Too many errors in plscode (%d)\n", plscode_errors);
+                fprintf(stderr, "Too many errors in plscode (%u)\n", plscode_errors);
             }
 
             in.read(ss.p-in.rd());
@@ -955,13 +973,8 @@ struct s2_frame_receiver : runnable
 
         complex<float> plh_expected[PLH_LENGTH];
 
-        for (int i=0; i<sof.LENGTH; ++i) {
-	        plh_expected[i] = sof.symbols[i];
-        }
-
-        for (int i=0; i<plscodes.LENGTH; ++i) {
-	        plh_expected[sof.LENGTH+i] = plscodes.symbols[plscode_index][i];
-        }
+        std::copy(sof.symbols, sof.symbols + sof.LENGTH, plh_expected);
+        std::copy(plscodes.symbols[plscode_index], plscodes.symbols[plscode_index] + plscodes.LENGTH, &plh_expected[sof.LENGTH]);
 
         if ( state == FRAME_PROBE )
         {
@@ -993,11 +1006,11 @@ struct s2_frame_receiver : runnable
         {
 	        fprintf(
                 stderr,
-                "PLS: mc=%2d, sf=%d, pilots=%d (%2d/90) %4.1f dB ",
+                "PLS: mc=%2d, sf=%d, pilots=%d (%2u/90) %4.1f dB ",
 		        pls.modcod,
                 pls.sf,
                 pls.pilots,
-                sof_errors+plscode_errors,
+                sof_errors + plscode_errors,
                 mer
             );
         }
