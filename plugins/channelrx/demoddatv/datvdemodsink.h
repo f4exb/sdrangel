@@ -70,6 +70,7 @@ public:
     bool videoDecodeOK();
 
     bool playVideo();
+    void stopVideo();
 
     int GetSampleRate();
     double getMagSq() const { return m_objMagSqAverage; } //!< Beware this is scaled to 2^30

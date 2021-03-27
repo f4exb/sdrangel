@@ -69,6 +69,14 @@ DATVDemodSink::~DATVDemodSink()
         m_objVideoStream->deleteLater();
     }
 
+    stopVideo();
+    CleanUpDATVFramework();
+
+    delete m_objRFFilter;
+}
+
+void DATVDemodSink::stopVideo()
+{
     if (m_objRenderThread)
     {
         if (m_objRenderThread->isRunning())
@@ -78,10 +86,6 @@ DATVDemodSink::~DATVDemodSink()
             m_objRenderThread->wait();
         }
     }
-
-    CleanUpDATVFramework();
-
-    delete m_objRFFilter;
 }
 
 bool DATVDemodSink::setTVScreen(TVScreen *objScreen)

@@ -63,6 +63,7 @@ void DATVDemodBaseband::startWork()
 void DATVDemodBaseband::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+    m_sink.stopVideo();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     QObject::disconnect(
         &m_sampleFifo,
