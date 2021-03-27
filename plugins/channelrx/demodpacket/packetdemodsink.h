@@ -19,6 +19,8 @@
 #ifndef INCLUDE_PACKETDEMODSINK_H
 #define INCLUDE_PACKETDEMODSINK_H
 
+#include <QVector>
+
 #include "dsp/channelsamplesink.h"
 #include "dsp/phasediscri.h"
 #include "dsp/nco.h"
@@ -39,6 +41,7 @@
 // Must be integer multiple of m_baud=1200
 #define PACKETDEMOD_CHANNEL_SAMPLE_RATE 38400
 
+class ChannelAPI;
 class PacketDemod;
 
 class PacketDemodSink : public ChannelSampleSink {
@@ -51,6 +54,7 @@ public:
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const PacketDemodSettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
+    void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
     double getMagSq() const { return m_magsq; }
 
@@ -86,6 +90,7 @@ private:
 
     PacketDemod *m_packetDemod;
     PacketDemodSettings m_settings;
+    ChannelAPI *m_channel;
     int m_channelSampleRate;
     int m_channelFrequencyOffset;
 
@@ -127,6 +132,9 @@ private:
     unsigned char m_bytes[512]; // Info field can be 256 bytes
     int m_byteCount;
     crc16x25 m_crc;
+
+    QVector<qint16> m_demodBuffer;
+    int m_demodBufferFill;
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }

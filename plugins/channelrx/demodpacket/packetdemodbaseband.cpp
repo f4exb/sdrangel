@@ -78,6 +78,11 @@ void PacketDemodBaseband::stopWork()
     m_running = false;
 }
 
+void PacketDemodBaseband::setChannel(ChannelAPI *channel)
+{
+    m_sink.setChannel(channel);
+}
+
 void PacketDemodBaseband::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
 {
     m_sampleFifo.write(begin, end);

@@ -21,7 +21,7 @@
 #include <complex.h>
 
 #include "dsp/dspengine.h"
-#include "dsp/dspengine.h"
+#include "dsp/datafifo.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
 #include "pipes/pipeendpoint.h"
@@ -45,6 +45,9 @@ PacketDemodSink::PacketDemodSink(PacketDemod *packetDemod) :
         m_corrCnt(0)
 {
     m_magsq = 0.0;
+
+    m_demodBuffer.resize(1<<12);
+    m_demodBufferFill = 0;
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -236,6 +239,24 @@ void PacketDemodSink::processOneSample(Complex &ci)
     }
     m_corrIdx = (m_corrIdx + 1) % m_correlationLength;
     m_corrCnt++;
+
+    m_demodBuffer[m_demodBufferFill++] = fmDemod * std::numeric_limits<int16_t>::max();
+
+    if (m_demodBufferFill >= m_demodBuffer.size())
+    {
+        QList<DataFifo*> *dataFifos = MainCore::instance()->getDataPipes().getFifos(m_channel, "demod");
+
+        if (dataFifos)
+        {
+            QList<DataFifo*>::iterator it = dataFifos->begin();
+
+            for (; it != dataFifos->end(); ++it) {
+                (*it)->write((quint8*) &m_demodBuffer[0], m_demodBuffer.size() * sizeof(qint16));
+            }
+        }
+
+        m_demodBufferFill = 0;
+    }
 }
 
 void PacketDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
@@ -252,9 +273,9 @@ void PacketDemodSink::applyChannelSettings(int channelSampleRate, int channelFre
 
     if ((m_channelSampleRate != channelSampleRate) || force)
     {
-        m_interpolator.create(16, channelSampleRate, PACKETDEMOD_CHANNEL_BANDWIDTH);
-        m_interpolatorDistanceRemain = 0;
+        m_interpolator.create(16, channelSampleRate, m_settings.m_rfBandwidth / 2.2);
         m_interpolatorDistance = (Real) channelSampleRate / (Real) PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistanceRemain = m_interpolatorDistance;
     }
 
     m_channelSampleRate = channelSampleRate;
@@ -266,11 +287,20 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
     qDebug() << "PacketDemodSink::applySettings:"
             << " force: " << force;
 
+    if ((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force)
+    {
+        m_interpolator.create(16, m_channelSampleRate, settings.m_rfBandwidth / 2.2);
+        m_interpolatorDistance = (Real) m_channelSampleRate / (Real) PACKETDEMOD_CHANNEL_SAMPLE_RATE;
+        m_interpolatorDistanceRemain = m_interpolatorDistance;
+        m_lowpass.create(301, PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
+    }
+    if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force)
+    {
+        m_phaseDiscri.setFMScaling(PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
+    }
+
     if (force)
     {
-        m_lowpass.create(301, PACKETDEMOD_CHANNEL_SAMPLE_RATE, settings.m_rfBandwidth / 2.0f);
-        m_phaseDiscri.setFMScaling(PACKETDEMOD_CHANNEL_SAMPLE_RATE / (2.0f * settings.m_fmDeviation));
-
         delete m_f1;
         delete m_f0;
         delete m_corrBuf;

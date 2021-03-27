@@ -54,6 +54,7 @@ PacketDemod::PacketDemod(DeviceAPI *deviceAPI) :
 
     m_basebandSink = new PacketDemodBaseband(this);
     m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
+    m_basebandSink->setChannel(this);
     m_basebandSink->moveToThread(&m_thread);
 
     applySettings(m_settings, true);
