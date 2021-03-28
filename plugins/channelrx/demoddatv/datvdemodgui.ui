@@ -779,6 +779,37 @@
        </property>
       </widget>
      </widget>
+     <widget class="QLabel" name="playerIndicator">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>250</y>
+        <width>16</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Player thread running indicator</string>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel { background-color: gray; border-radius: 8px; }</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="horizontalLayoutWidget">
      <property name="geometry">
@@ -911,7 +942,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>SNR estimation</string>
+         <string>MER estimation</string>
         </property>
        </widget>
       </item>
@@ -971,7 +1002,7 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>SNR estimation</string>
+         <string>CNR estimation</string>
         </property>
        </widget>
       </item>

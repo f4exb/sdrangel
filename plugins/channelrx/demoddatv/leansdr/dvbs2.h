@@ -769,7 +769,7 @@ struct s2_frame_receiver : runnable
         opt_write(state_out, 0);
 
         if (sch->debug) {
-            fprintf(stderr, "DETECT\n");
+            fprintf(stderr, "enter_frame_detect\n");
         }
 
         if (fastlock || first_run)
@@ -960,7 +960,7 @@ struct s2_frame_receiver : runnable
         if (plscode_errors >= S2_MAX_ERR_PLSCODE)
         {
             if (sch->debug2) {
-                fprintf(stderr, "Too many errors in plscode (%u)\n", plscode_errors);
+                fprintf(stderr, "Too many errors in plscode (%u/%lu)\n", plscode_errors, S2_MAX_ERR_PLSCODE);
             }
 
             in.read(ss.p-in.rd());
@@ -1040,13 +1040,16 @@ struct s2_frame_receiver : runnable
             if (mer < mcinfo->esn0_nf - 1.0f)
             {
                 // False positive from PLHEADER detection.
-                if ( sch->debug ) fprintf(stderr, "Insufficient MER\n");
+                if (sch->debug) {
+                    fprintf(stderr, "Insufficient MER (%f/%f)\n", mer, mcinfo->esn0_nf - 1.0f);
+                }
+
                 in.read(ss.p-in.rd());
                 enter_frame_detect();
                 return;
             }
 
-            if (pls.sf && mcinfo->rate==FEC910)
+            if (pls.sf && mcinfo->rate == FEC910)
             {  // TBD use fec_infos
                 fprintf(stderr, "Unsupported or corrupted FEC\n");
                 in.read(ss.p-in.rd());
@@ -1056,19 +1059,19 @@ struct s2_frame_receiver : runnable
 
             // Store current MODCOD info
             if (mcinfo->c != m_modcodType) {
-            m_modcodType = mcinfo->c;
+                m_modcodType = mcinfo->c < cstln_base::predef::COUNT ? mcinfo->c : -1;
             }
 
             if (mcinfo->rate != m_modcodRate) {
-            m_modcodRate = mcinfo->rate;
+                m_modcodRate = mcinfo->rate < code_rate::FEC_COUNT ? mcinfo->rate : -1;
             }
 
             S = pls.sf ? mcinfo->nslots_nf/4 : mcinfo->nslots_nf;
             // Constellation for data slots.
             dcstln = get_cstln(pls.modcod);
             cstln = dcstln;  // Used by GUI
-            cstln->m_rateCode = (int) mcinfo->rate;
-            cstln->m_typeCode = (int) mcinfo->c;
+            cstln->m_rateCode = mcinfo->rate < code_rate::FEC_COUNT ? mcinfo->rate : -1;
+            cstln->m_typeCode = mcinfo->c < cstln_base::predef::COUNT ? mcinfo->c : -1;
             cstln->m_setByModcod = true;
             // Output special slot with PLS information.
             pout->is_pls = true;
@@ -1324,10 +1327,7 @@ struct s2_frame_receiver : runnable
 
         if (ss_cache.fw16<min_freqw16 || ss_cache.fw16>max_freqw16)
         {
-            if (sch->debug) {
-                fprintf(stderr, "Carrier out of bounds\n");
-            }
-
+            fprintf(stderr, "Carrier out of bounds\n");
             enter_frame_detect();
         }
     } // run_frame_probe_locked

@@ -66,10 +66,12 @@ public:
         return m_settings.m_centerFrequency;
     }
 
-    void setMessageQueueToGUI(MessageQueue* queue) override {
+    void setMessageQueueToGUI(MessageQueue* queue) override
+    {
         ChannelAPI::setMessageQueueToGUI(queue);
         m_basebandSink->setMessageQueueToGUI(queue);
     }
+
     void SetTVScreen(TVScreen *objScreen) { m_basebandSink->setTVScreen(objScreen); }
     void setMERLabel(QLabel *merLabel) { m_basebandSink->setMERLabel(merLabel); }
     void setCNRLabel(QLabel *cnrLabel) { m_basebandSink->setCNRLabel(cnrLabel); }

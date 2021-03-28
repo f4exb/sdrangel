@@ -176,11 +176,12 @@ bool DATVDemodSink::playVideo()
     {
         m_objRenderThread->setStreamAndRenderer(m_objRegisteredVideoRender, m_objVideoStream);
         m_objVideoStream->MultiThreaded = true;
-        m_objVideoStream->ThreadTimeOut = 5000; //5000 ms
+        m_objVideoStream->ThreadTimeOut = DATVideoRenderThread::videoThreadTimeoutMs;
         m_objRenderThread->start();
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void DATVDemodSink::CleanUpDATVFramework()
@@ -1013,29 +1014,29 @@ void DATVDemodSink::InitDATVS2Framework()
     switch (m_objCfg.sampler)
     {
         case DATVDemodSettings::SAMP_NEAREST:
-          sampler = new leansdr::nearest_sampler<float>();
-          break;
+            sampler = new leansdr::nearest_sampler<float>();
+            break;
         case DATVDemodSettings::SAMP_LINEAR:
-          sampler = new leansdr::linear_sampler<float>();
-          break;
+            sampler = new leansdr::linear_sampler<float>();
+            break;
         case DATVDemodSettings::SAMP_RRC:
         {
-          if (m_objCfg.rrc_steps == 0)
-          {
-            // At least 64 discrete sampling points between symbols
-            m_objCfg.rrc_steps = std::max(1, (int)(64*m_objCfg.Fm / m_objCfg.Fs));
-          }
+            if (m_objCfg.rrc_steps == 0)
+            {
+                // At least 64 discrete sampling points between symbols
+                m_objCfg.rrc_steps = std::max(1, (int)(64*m_objCfg.Fm / m_objCfg.Fs));
+            }
 
-          float Frrc = m_objCfg.Fs * m_objCfg.rrc_steps;  // Sample freq of the RRC filter
-          float transition = (m_objCfg.Fm/2) * m_objCfg.rolloff;
-          int order = m_objCfg.rrc_rej * Frrc / (22*transition);
-          ncoeffs_sampler = leansdr::filtergen::root_raised_cosine(order, m_objCfg.Fm/Frrc, m_objCfg.rolloff, &coeffs_sampler);
-          sampler = new leansdr::fir_sampler<float,float>(ncoeffs_sampler, coeffs_sampler, m_objCfg.rrc_steps);
-          break;
+            float Frrc = m_objCfg.Fs * m_objCfg.rrc_steps;  // Sample freq of the RRC filter
+            float transition = (m_objCfg.Fm/2) * m_objCfg.rolloff;
+            int order = m_objCfg.rrc_rej * Frrc / (22*transition);
+            ncoeffs_sampler = leansdr::filtergen::root_raised_cosine(order, m_objCfg.Fm/Frrc, m_objCfg.rolloff, &coeffs_sampler);
+            sampler = new leansdr::fir_sampler<float,float>(ncoeffs_sampler, coeffs_sampler, m_objCfg.rrc_steps);
+            break;
         }
         default:
-          qCritical("DATVDemodSink::InitDATVS2Framework: Interpolator not implemented");
-          return;
+            qCritical("DATVDemodSink::InitDATVS2Framework: Interpolator not implemented");
+            return;
     }
 
     p_slots_dvbs2 = new leansdr::pipebuf< leansdr::plslot<leansdr::llr_ss> > (m_objScheduler, "PL slots", BUF_SLOTS);
@@ -1268,7 +1269,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         if (m_blnNeedConfigUpdate)
         {
             qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
-            m_blnNeedConfigUpdate=false;
+            m_blnNeedConfigUpdate = false;
 
             if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
             {
@@ -1297,8 +1298,8 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
             objRF ++;
 
             if (m_blnDVBInitialized
-               && (p_rawiq_writer!=nullptr)
-               && (m_objScheduler!=nullptr))
+                && (p_rawiq_writer!=nullptr)
+                && (m_objScheduler!=nullptr))
             {
                 p_rawiq_writer->write(objIQ);
                 m_lngReadIQ++;
@@ -1321,7 +1322,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     } // Samples for loop
 
     // DVBS2: Track change of constellation via MODCOD
-    if (m_settings.m_standard==DATVDemodSettings::DVB_S2)
+    if (m_settings.m_standard == DATVDemodSettings::DVB_S2)
     {
         leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> * objDemodulatorDVBS2 = (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
 
@@ -1341,6 +1342,22 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
                 );
 
                 getMessageQueueToGUI()->push(msg);
+            }
+
+            if (
+                (
+                    (m_modcodModulation != objDemodulatorDVBS2->m_modcodType) &&
+                    (m_modcodModulation >= 0) &&
+                    (objDemodulatorDVBS2->m_modcodType >= 0)
+                ) ||
+                (
+                    (m_modcodCodeRate != objDemodulatorDVBS2->m_modcodRate) &&
+                    (m_modcodCodeRate >= 0) &&
+                    (objDemodulatorDVBS2->m_modcodRate >= 0)
+                )
+            )
+            {
+                m_blnNeedConfigUpdate = true;
             }
         }
 

@@ -86,6 +86,20 @@ struct DataTSMetaData2
         OK_TransportStream = false;
         OK_VideoStream = false;
     }
+
+    void formatString(QString &s)
+    {
+        QTextStream out(&s);
+        out << " CodecID:" << CodecID
+            << " PID:" << PID
+            << " Program:" << Program
+            << " Stream:" << Stream
+            << " Width:" << Width
+            << " Height:" << Height
+            << " BitRate:" << BitRate
+            << " Channels:" << Channels
+            << " CodecDescription:" << CodecDescription;
+    }
 };
 
 class DATVideoRender : public TVScreen
@@ -98,11 +112,11 @@ class DATVideoRender : public TVScreen
 
     void SetFullScreen(bool blnFullScreen);
 
+    void setAudioFIFO(AudioFifo *fifo) { m_audioFifo = fifo; }
     bool OpenStream(DATVideostream *objDevice);
     bool RenderStream();
     bool CloseStream(QIODevice *objDevice);
 
-    void setAudioFIFO(AudioFifo *fifo) { m_audioFifo = fifo; }
     int getVideoStreamIndex() const { return m_videoStreamIndex; }
     int getAudioStreamIndex() const { return m_audioStreamIndex; }
 
@@ -114,6 +128,7 @@ class DATVideoRender : public TVScreen
     bool getVideoDecodeOK() const { return m_videoDecodeOK; }
 
   private:
+
     struct DataTSMetaData2 m_metaData;
     QWidget *m_parentWidget;
     Qt::WindowFlags m_originalWindowFlags;
@@ -223,6 +238,8 @@ class DATVideoRenderThread : public QThread
     {
         m_renderingVideo = false;
     }
+
+    static const int videoThreadTimeoutMs = 2000;
 
   private:
     DATVideoRender *m_renderer;

@@ -29,8 +29,10 @@ namespace leansdr {
 
 static const int DEFAULT_GUI_DVBS2_DECIMATION = 64;
 
-static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(cstln_lut<llr_ss, 256>::predef c,
-        code_rate r)
+static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(
+    cstln_lut<llr_ss, 256>::predef c,
+    code_rate r
+)
 {
     float gamma1 = 1, gamma2 = 1, gamma3 = 1;
 
@@ -104,8 +106,8 @@ static inline cstln_lut<llr_ss, 256> * make_dvbs2_constellation(cstln_lut<llr_ss
     }
 
     cstln_lut<llr_ss, 256> *newCstln = new cstln_lut<llr_ss, 256>(c, 10, gamma1, gamma2, gamma3);
-    newCstln->m_rateCode = (int) r;
-    newCstln->m_typeCode = (int) c;
+    newCstln->m_rateCode = r < code_rate::FEC_COUNT ? r : -1;
+    newCstln->m_typeCode = c < cstln_lut<llr_ss, 256>::predef::COUNT ? c : -1;
     newCstln->m_setByModcod = false;
     return newCstln;
 }

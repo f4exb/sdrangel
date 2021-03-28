@@ -29,7 +29,8 @@ extern "C"
 #include "audio/audiofifo.h"
 #include "datvideorender.h"
 
-DATVideoRender::DATVideoRender(QWidget *parent) : TVScreen(true, parent), m_parentWidget(parent)
+DATVideoRender::DATVideoRender(QWidget *parent) :
+    TVScreen(true, parent), m_parentWidget(parent)
 {
     installEventFilter(this);
     m_isFullScreen = false;
@@ -229,7 +230,7 @@ bool DATVideoRender::PreprocessStream()
         avcodec_free_context(&m_videoDecoderCtx);
     }
 
-    m_videoDecoderCtx = avcodec_alloc_context3(NULL);
+    m_videoDecoderCtx = avcodec_alloc_context3(nullptr);
     avcodec_parameters_to_context(m_videoDecoderCtx, parms);
 
     // m_videoDecoderCtx = m_formatCtx->streams[m_videoStreamIndex]->codec; // old style
@@ -310,6 +311,10 @@ bool DATVideoRender::PreprocessStream()
     m_metaData.Channels = m_videoDecoderCtx->channels;
     m_metaData.CodecDescription = QString("%1").arg(videoCodec->long_name);
     m_metaData.OK_VideoStream = true;
+
+    QString metaStr;
+    m_metaData.formatString(metaStr);
+    qDebug() << "DATVideoRender::PreprocessStream: video: " << metaStr;
 
     emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 
@@ -702,6 +707,13 @@ bool DATVideoRender::CloseStream(QIODevice *device)
     {
         avcodec_close(m_videoDecoderCtx);
         m_videoDecoderCtx = nullptr;
+    }
+
+    if (m_audioDecoderCtx)
+    {
+        avcodec_free_context(&m_audioDecoderCtx);
+        avcodec_close(m_audioDecoderCtx);
+        m_audioDecoderCtx = nullptr;
     }
 
     if (m_frame)

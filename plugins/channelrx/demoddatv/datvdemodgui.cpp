@@ -261,6 +261,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     ui->softLDPC->setStyleSheet("QCheckBox { color: gray }");
 #endif
 
+    ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     resetToDefaults(); // does applySettings()
 }
 
@@ -547,7 +548,13 @@ void DATVDemodGUI::tick()
     m_intPreviousDecodedData = m_intLastDecodedData;
 
     //Try to start video rendering
-    m_objDATVDemod->playVideo();
+    bool success = m_objDATVDemod->playVideo();
+
+    if (success) {
+        ui->playerIndicator->setStyleSheet("QLabel { background-color: rgb(85, 232, 85); border-radius: 8px; }"); // green
+    } else {
+        ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
+    }
 
     return;
 }
