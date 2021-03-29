@@ -753,7 +753,7 @@ struct cstln_lut : cstln_base
         //   demodulation would probably fail anyway.
         //
         // Comment-out for better throughput at high SNR.
-#if 1
+#if 0
         while (I < -128 || I > 127 || Q < -128 || Q > 127)
         {
             I *= 0.5;

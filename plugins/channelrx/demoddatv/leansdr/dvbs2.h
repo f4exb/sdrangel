@@ -615,6 +615,7 @@ struct s2_frame_receiver : runnable
         pls_total_count(0),
         m_modcodType(-1),
         m_modcodRate(-1),
+        m_locked(false),
         diffs(nullptr),
         sspilots(nullptr)
     {
@@ -817,6 +818,12 @@ struct s2_frame_receiver : runnable
             fprintf(stderr, "PROBE\n");
         }
 
+        if (m_locked)
+        {
+            fprintf(stderr, "UNLOCKED\n");
+            m_locked = false;
+        }
+
         state = FRAME_PROBE;
     }
 
@@ -830,6 +837,12 @@ struct s2_frame_receiver : runnable
 
         if (sch->debug) {
             fprintf(stderr, "LOCKED\n");
+        }
+
+        if (!m_locked)
+        {
+            fprintf(stderr, "LOCKED\n");
+            m_locked = true;
         }
 
         opt_write(state_out, 1);
@@ -1037,11 +1050,11 @@ struct s2_frame_receiver : runnable
                 return;
             }
 
-            if (mer < mcinfo->esn0_nf - 1.0f)
+            if (mer < mcinfo->esn0_nf - 3.0f) // was -1.0f
             {
                 // False positive from PLHEADER detection.
                 if (sch->debug) {
-                    fprintf(stderr, "Insufficient MER (%f/%f)\n", mer, mcinfo->esn0_nf - 1.0f);
+                    fprintf(stderr, "Insufficient MER (%f/%f)\n", mer, mcinfo->esn0_nf - 3.0f);
                 }
 
                 in.read(ss.p-in.rd());
@@ -1526,6 +1539,10 @@ struct s2_frame_receiver : runnable
         int ns,
 		sampler_state *ss)
     {
+        if (sch->debug) {
+            fprintf(stderr, "match_freq\n");
+        }
+
         complex<float> diff = 0;
 
         for (int i=0; i<ns-1; ++i)
@@ -1635,6 +1652,10 @@ struct s2_frame_receiver : runnable
 		cstln_lut<SOFTSYMB,256> *dcstln
     )
     {
+        if (sch->debug) {
+            fprintf(stderr, "match_frame\n");
+        }
+
         // With pilots: Use first block of data slots.
         // Without pilots: Use whole frame.
         int ns = pls->pilots ? 16*90 : S*90;
@@ -1647,17 +1668,17 @@ struct s2_frame_receiver : runnable
         float besterr = 1e99;
         float bestslip = 0;  // Avoid compiler warning
 
-        for (int slip=-sliprange; slip<=sliprange; ++slip)
+        for (int slip = -sliprange; slip <= sliprange; ++slip)
         {
             sampler_state ssl = *pss;
             float dfw = slip * 65536.0f / nwrap;
             ssl.fw16 += dfw;
             // Apply retroactively from midpoint of preceeding PLHEADER,
             // where the phase from match_ph_amp is most reliable.
-            ssl.ph16 += dfw * (plscodes.LENGTH+sof.LENGTH)/2;
+            ssl.ph16 += dfw * (plscodes.LENGTH + sof.LENGTH) / 2;
             float err = 0;
 
-            for (int s=0; s<ns; ++s)
+            for (int s = 0; s < ns; ++s)
             {
                 complex<float> p = interp_next(&ssl) * ssl.gain;
                 typename cstln_lut<SOFTSYMB,256>::result *cr =
@@ -1671,8 +1692,8 @@ struct s2_frame_receiver : runnable
 
             if (err < besterr)
             {
-                besterr=err;
-                bestslip=slip;
+                besterr = err;
+                bestslip = slip;
             }
 #if DEBUG_CARRIER
         fprintf(stderr, "slip %+3d  %6.0f ppm  err=%f\n",
@@ -1844,6 +1865,7 @@ struct s2_frame_receiver : runnable
     uint32_t pls_total_errors, pls_total_count;
     int m_modcodType;
     int m_modcodRate;
+    bool m_locked;
 
 private:
     complex<T> *diffs;
