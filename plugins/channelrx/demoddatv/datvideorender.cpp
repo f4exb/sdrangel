@@ -474,7 +474,7 @@ bool DATVideoRender::RenderStream()
     //Video channel
     if ((packet.stream_index == m_videoStreamIndex) && (!m_videoMute))
     {
-        memset(m_frame, 0, sizeof(AVFrame));
+        // memset(m_frame, 0, sizeof(AVFrame));
         av_frame_unref(m_frame);
 
         gotFrame = 0;
@@ -579,7 +579,7 @@ bool DATVideoRender::RenderStream()
             m_updateAudioResampler = false;
         }
 
-        memset(m_frame, 0, sizeof(AVFrame));
+        // memset(m_frame, 0, sizeof(AVFrame));
         av_frame_unref(m_frame);
         gotFrame = 0;
 
