@@ -316,19 +316,18 @@ bool HackRFInput::handleMessage(const Message& message)
 	}
 }
 
-void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz, qint32 LOppmTenths)
+void HackRFInput::setDeviceCenterFrequency(quint64 freq_hz)
 {
     if (!m_dev) {
         return;
     }
 
-	qint64 df = ((qint64)freq_hz * LOppmTenths) / 10000000LL;
-	hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz + df));
+	hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz));
 
 	if (rc != HACKRF_SUCCESS) {
-		qWarning("HackRFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz + df);
+		qWarning("HackRFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
 	} else {
-		qDebug("HackRFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz + df);
+		qDebug("HackRFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
 	}
 }
 
@@ -410,22 +409,84 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
         reverseAPIKeys.append("centerFrequency");
 	}
 
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
-        reverseAPIKeys.append("LOppmTenths");
-    }
-    if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
-        reverseAPIKeys.append("fcPos");
-    }
-    if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
-        reverseAPIKeys.append("transverterMode");
-    }
-    if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
-        reverseAPIKeys.append("transverterDeltaFrequency");
-    }
+  if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
+      reverseAPIKeys.append("LOppmTenths");
+      if (m_dev != 0)
+      {
+        const uint32_t msnaRegBase = 26; // Multisynth NA config register base
+        const int32_t msnaFreq = 800000000; // Multisynth NA target frequency
+        int32_t xo = 25000000; //Crystal frequency
+        int32_t a; // Multisynth NA XTAL multiplier integer 32 * 25mhz = 800mhz
+        int32_t b; // Multisynth NA XTAL multiplier fractional numerator  0 to 1048575
+        int32_t c; // Multisynth NA XTAL multiplier fractional denominator 1048575 max resolution
+        int64_t rem;
+        int32_t p1, p2, p3; // raw register values
+
+        xo = xo-xo/1000000*settings.m_LOppmTenths/10; //adjust crystal freq by ppm error
+        a = msnaFreq/xo; //multiplier integer
+        rem = msnaFreq%xo; // multiplier remainder
+
+        if (rem){ //fraction mode
+          b = ((rem * 10485750)/xo +5) /10; //multiplier fractional numerator with rounding
+          c = 1048575; //multiplier fractional divisor
+          rc = (hackrf_error) hackrf_si5351c_write(m_dev, 22, 128); // MSNA set fractional mode
+          qDebug() << "HackRFInput::applySettings: si5351c MSNA set to fraction mode.";
+        } else { //integer mode
+          b = 0;
+          c = 1;
+          rc = (hackrf_error) hackrf_si5351c_write(m_dev, 22, 0); // MSNA set integer mode
+          qDebug() << "HackRFInput::applySettings: si5351c MSNA set to integer mode.";
+        }
+
+        qDebug() << "HackRFInput::applySettings: si5351c MSNA rem" << rem;
+        qDebug() << "HackRFInput::applySettings: si5351c MSNA xoppm" << settings.m_LOppmTenths;
+        qDebug() << "HackRFInput::applySettings: si5351c MSNA xo" << xo;
+        qDebug() << "HackRFInput::applySettings: si5351c MSNA a" << a;
+        qDebug() << "HackRFInput::applySettings: si5351c MSNA b" << b;
+        qDebug() << "HackRFInput::applySettings: si5351c MSNA c" << c;
+
+        p1 = 128*a + (128 * b/c) - 512;
+        p2 = (128*b) % c;
+        p3 = c;
+
+        if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev,msnaRegBase, (p3 >> 8) & 0xFF); // reg 26 MSNA_P3[15:8]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 1, p3 & 0xFF); // reg 27 MSNA_P3[7:0]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 2, (p1 >> 16) & 0x3); // reg28 bits 1:0  MSNA_P1[17:16]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 3, (p1 >> 8) & 0xFF); // reg 29 MSNA_P1[15:8]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 4, p1 & 0xFF); // reg 30 MSNA_P1[7:0]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 5, ((p3 & 0xF0000) >> 12) | ((p2 >> 16) & 0xF)); // bits 7:4 MSNA_P3[19:16], reg31 bits 3:0 MSNA_P2[19:16]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 6, (p2 >> 8) & 0xFF); // reg 32 MSNA_P2[15:8]
+    		if (rc==HACKRF_SUCCESS) rc = (hackrf_error) hackrf_si5351c_write(m_dev, msnaRegBase + 7, p2 & 0xFF); // reg 33 MSNA_P2[7:0]
+
+        if (rc != HACKRF_SUCCESS) {
+          qDebug("HackRFInput::applySettings: XTAL error adjust failed: %s", hackrf_error_name(rc));
+        } else {
+          qDebug() << "HackRFInput::applySettings: si5351c MSNA registers"
+            << msnaRegBase << "<-"  << ((p3 >> 8) & 0xFF)
+            << (msnaRegBase + 1) << "<-" << (p3 & 0xFF)
+            << (msnaRegBase + 2) << "<-" << ((p1 >> 16) & 0x3)
+            << (msnaRegBase + 3) << "<-" << ((p1 >> 8) & 0xFF)
+            << (msnaRegBase + 4) << "<-" << (p1 & 0xFF)
+            << (msnaRegBase + 5) << "<-" << (((p3 & 0xF0000) >> 12) | ((p2 >> 16) & 0xF))
+            << (msnaRegBase + 6) << "<-" << ((p2 >> 8) & 0xFF)
+            << (msnaRegBase + 7) << "<-" << (p2 & 0xFF);
+          qDebug() << "HackRFInput::applySettings: XTAL error adjusted by" << (settings.m_LOppmTenths/10.0) << "PPM." << settings.m_LOppmTenths;
+        }
+      }
+  }
+
+  if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
+      reverseAPIKeys.append("fcPos");
+  }
+  if ((m_settings.m_transverterMode != settings.m_transverterMode) || force) {
+      reverseAPIKeys.append("transverterMode");
+  }
+  if ((m_settings.m_transverterDeltaFrequency != settings.m_transverterDeltaFrequency) || force) {
+      reverseAPIKeys.append("transverterDeltaFrequency");
+  }
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
         (m_settings.m_log2Decim != settings.m_log2Decim) ||
         (m_settings.m_fcPos != settings.m_fcPos) ||
         (m_settings.m_transverterMode != settings.m_transverterMode) ||
@@ -439,7 +500,7 @@ bool HackRFInput::applySettings(const HackRFInputSettings& settings, bool force)
                 settings.m_devSampleRate,
                 DeviceSampleSource::FrequencyShiftScheme::FSHIFT_TXSYNC,
                 settings.m_transverterMode);
-		setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
+		setDeviceCenterFrequency(deviceCenterFrequency);
 
         if (m_deviceAPI->getSinkBuddies().size() > 0) // forward to buddy if necessary
 	    {
