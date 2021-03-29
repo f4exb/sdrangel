@@ -1289,9 +1289,9 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
         for (int intI = 0 ; intI < intRFOut; intI++)
         {
-            objIQ.re = objRF->real();
-            objIQ.im = objRF->imag();
-            magSq = objIQ.re*objIQ.re + objIQ.im*objIQ.im;
+            objIQ.real(objRF->real());
+            objIQ.imag(objRF->imag());
+            magSq = objIQ.real() * objIQ.real() + objIQ.imag() * objIQ.imag();
             m_objMagSqAverage(magSq);
 
             objRF ++;

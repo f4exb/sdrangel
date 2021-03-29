@@ -81,15 +81,15 @@ struct s2_sof
     static const uint32_t VALUE = 0x18d2e82;
     static const uint32_t MASK = 0x3ffffff;
     static const int LENGTH = 26;
-    complex<T> symbols[LENGTH];
+    std::complex<T> symbols[LENGTH];
 
     s2_sof()
     {
         for (int s = 0; s < LENGTH; ++s)
         {
             int angle = ((VALUE >> (LENGTH - 1 - s)) & 1) * 2 + (s & 1); // pi/2-BPSK
-            symbols[s].re = cstln_amp * cosf(M_PI / 4 + 2 * M_PI * angle / 4);
-            symbols[s].im = cstln_amp * sinf(M_PI / 4 + 2 * M_PI * angle / 4);
+            symbols[s].real(cstln_amp * cosf(M_PI / 4 + 2 * M_PI * angle / 4));
+            symbols[s].imag(cstln_amp * sinf(M_PI / 4 + 2 * M_PI * angle / 4));
         }
     }
 }; // s2_sof
@@ -105,7 +105,7 @@ struct s2_plscodes
     static const int COUNT = 128;
     static const int LENGTH = 64;
     uint64_t codewords[COUNT];
-    complex<T> symbols[COUNT][LENGTH];
+    std::complex<T> symbols[COUNT][LENGTH];
 
     s2_plscodes()
     {
@@ -149,8 +149,8 @@ struct s2_plscodes
             {
                 int yi = (code >> (LENGTH - 1 - i)) & 1;
                 int nyi = yi ^ (i & 1);
-                symbols[index][i].re = cstln_amp * (1 - 2 * nyi) / sqrtf(2);
-                symbols[index][i].im = cstln_amp * (1 - 2 * yi) / sqrtf(2);
+                symbols[index][i].real(cstln_amp * (1 - 2 * nyi) / sqrtf(2));
+                symbols[index][i].imag(cstln_amp * (1 - 2 * yi) / sqrtf(2));
             }
         }
     }
@@ -166,10 +166,12 @@ template<typename T>
 struct s2_pilot
 {
     static const int LENGTH = PILOT_LENGTH;
-    complex<T> symbol;
+    std::complex<T> symbol;
 
-    s2_pilot() {
-        symbol.re = symbol.im = cstln_amp*0.707107;
+    s2_pilot()
+    {
+        symbol.real(cstln_amp*0.707107);
+        symbol.imag(cstln_amp*0.707107);
     }
 };  // s2_pilot
 
@@ -375,21 +377,21 @@ struct s2_frame_transmitter : runnable
     s2_frame_transmitter(
         scheduler *sch,
         pipebuf<plslot<hard_ss>> &_in,
-        pipebuf<complex<T>> &_out
+        pipebuf<std::complex<T>> &_out
     ) :
         runnable(sch, "S2 frame transmitter"),
         in(_in),
         out(_out, modcod_info::MAX_SYMBOLS_PER_FRAME)
     {
         float amp = cstln_amp / sqrtf(2);
-        qsymbols[0].re = +amp;
-        qsymbols[0].im = +amp;
-        qsymbols[1].re = +amp;
-        qsymbols[1].im = -amp;
-        qsymbols[2].re = -amp;
-        qsymbols[2].im = +amp;
-        qsymbols[3].re = -amp;
-        qsymbols[3].im = -amp;
+        qsymbols[0].real() = +amp;
+        qsymbols[0].imag() = +amp;
+        qsymbols[1].real() = +amp;
+        qsymbols[1].imag() = -amp;
+        qsymbols[2].real() = -amp;
+        qsymbols[2].imag() = +amp;
+        qsymbols[3].real() = -amp;
+        qsymbols[3].imag() = -amp;
 
         // Clear the constellation cache.
         for (int i = 0; i < 32; ++i) {
@@ -443,10 +445,10 @@ struct s2_frame_transmitter : runnable
         const modcod_info *mcinfo,
         const plslot<hard_ss> *pin,
         int nslots,
-        complex<T> *pout
+        std::complex<T> *pout
     )
     {
-        complex<T> *pout0 = pout; // For sanity check
+        std::complex<T> *pout0 = pout; // For sanity check
         // PLHEADER: SOF AND PLSCODE
         // EN 302 307-1 section 5.5.2 PL signalling
         memcpy(pout, sof.symbols, sof.LENGTH * sizeof(*pout));
@@ -454,7 +456,7 @@ struct s2_frame_transmitter : runnable
         int pls_index = (pls->modcod << 2) | (pls->sf << 1) | pls->pilots;
         memcpy(pout, plscodes.symbols[pls_index], plscodes.LENGTH * sizeof(*pout));
         pout += plscodes.LENGTH;
-        complex<T> *csymbols = get_csymbols(pls->modcod);
+        std::complex<T> *csymbols = get_csymbols(pls->modcod);
         // Slots and pilots
         int till_next_pilot = pls->pilots ? 16 : nslots;
         uint8_t *scr = &scrambling.Rn[0];
@@ -485,7 +487,7 @@ struct s2_frame_transmitter : runnable
         return pout - pout0;
     }
 
-    inline void scramble(const complex<T> *src, uint8_t r, complex<T> *dst)
+    inline void scramble(const std::complex<T> *src, uint8_t r, std::complex<T> *dst)
     {
         switch (r)
         {
@@ -508,10 +510,10 @@ struct s2_frame_transmitter : runnable
 
   private:
     pipereader<plslot<hard_ss>> in;
-    pipewriter<complex<T>> out;
-    complex<T> *pcsymbols[32];  // Constellations in use, indexed by modcod
+    pipewriter<std::complex<T>> out;
+    std::complex<T> *pcsymbols[32];  // Constellations in use, indexed by modcod
 
-    complex<T> *get_csymbols(int modcod)
+    std::complex<T> *get_csymbols(int modcod)
     {
         if (!pcsymbols[modcod])
         {
@@ -536,19 +538,19 @@ struct s2_frame_transmitter : runnable
                 mcinfo->g3
             );
 
-            pcsymbols[modcod] = new complex<T>[cstln.nsymbols];
+            pcsymbols[modcod] = new std::complex<T>[cstln.nsymbols];
 
             for ( int s=0; s<cstln.nsymbols; ++s )
             {
-                pcsymbols[modcod][s].re = cstln.symbols[s].re;
-                pcsymbols[modcod][s].im = cstln.symbols[s].im;
+                pcsymbols[modcod][s].real() = cstln.symbols[s].real();
+                pcsymbols[modcod][s].imag() = cstln.symbols[s].imag();
             }
         }
 
         return pcsymbols[modcod];
     }
 
-    complex<T> qsymbols[4]; // RMS cstln_amp
+    std::complex<T> qsymbols[4]; // RMS cstln_amp
     s2_sof<T> sof;
     s2_plscodes<T> plscodes;
     s2_scrambling scrambling;
@@ -577,14 +579,14 @@ struct s2_frame_receiver : runnable
     s2_frame_receiver(
         scheduler *sch,
         sampler_interface<T> *_sampler,
-        pipebuf< complex<T> > &_in,
+        pipebuf< std::complex<T> > &_in,
         pipebuf< plslot<SOFTSYMB> > &_out,
         pipebuf<float> *_freq_out=NULL,
         pipebuf<float> *_ss_out=NULL,
         pipebuf<float> *_mer_out=NULL,
-        pipebuf< complex<float> > *_cstln_out=NULL,
-        pipebuf< complex<float> > *_cstln_pls_out=NULL,
-        pipebuf< complex<float> > *_symbols_out=NULL,
+        pipebuf< std::complex<float> > *_cstln_out=NULL,
+        pipebuf< std::complex<float> > *_cstln_pls_out=NULL,
+        pipebuf< std::complex<float> > *_symbols_out=NULL,
         pipebuf<int> *_state_out=NULL
     ) :
         runnable(sch, "S2 frame receiver"),
@@ -662,7 +664,7 @@ struct s2_frame_receiver : runnable
     // Useful for looking ahead (e.g. next pilots/SOF) then rewinding.
 
     struct sampler_state {
-        complex<T> *p;  // Pointer to samples (update when entering run())
+        std::complex<T> *p;  // Pointer to samples (update when entering run())
         float mu;       // Time of next symbol, counted from p
         float omega;    // Samples per symbol
         float gain;     // Scaling factor toward cstln_amp
@@ -689,7 +691,7 @@ struct s2_frame_receiver : runnable
             sprintf(
                 buf,
                 "%9.2lf %+6.0f ppm  %+3.0f °  %f",
-                (double)((p-(complex<T>*)NULL)&262143)+mu,  // Arbitrary wrap
+                (double)((p-(std::complex<T>*)NULL)&262143)+mu,  // Arbitrary wrap
                 fw16*1e6/65536,
                 fmodfs(ph16,65536.0f)*360/65536,
                 gain
@@ -857,7 +859,7 @@ struct s2_frame_receiver : runnable
 
     void run_frame_probe_locked()
     {
-        complex<float> *psampled;  // Data symbols (one per slot)
+        std::complex<float> *psampled;  // Data symbols (one per slot)
 
         if (cstln_out && cstln_out->writable()>=1024) {
             psampled = cstln_out->wr();
@@ -865,7 +867,7 @@ struct s2_frame_receiver : runnable
             psampled = NULL;
         }
 
-        complex<float> *psampled_pls;  // PLHEADER symbols
+        std::complex<float> *psampled_pls;  // PLHEADER symbols
 
         if (cstln_pls_out && cstln_pls_out->writable()>=1024) {
             psampled_pls = cstln_pls_out->wr();
@@ -873,7 +875,7 @@ struct s2_frame_receiver : runnable
             psampled_pls = NULL;
         }
 #if TEST_DIVERSITY
-        complex<float> *psymbols = symbols_out ? symbols_out->wr() : NULL;
+        std::complex<float> *psymbols = symbols_out ? symbols_out->wr() : NULL;
         float scale_symbols = 1.0 / cstln_amp;
 #endif
         sampler_state ss = ss_cache;
@@ -886,11 +888,11 @@ struct s2_frame_receiver : runnable
         // Interpolate PLHEADER.
 
         const int PLH_LENGTH = sof.LENGTH + plscodes.LENGTH;
-        complex<float> plh_symbols[PLH_LENGTH];
+        std::complex<float> plh_symbols[PLH_LENGTH];
 
         for (int s=0; s<PLH_LENGTH; ++s)
         {
-            complex<float> p = interp_next(&ss) * ss.gain;
+            std::complex<float> p = interp_next(&ss) * ss.gain;
             plh_symbols[s] = p;
 
             if (psampled_pls) {
@@ -905,10 +907,10 @@ struct s2_frame_receiver : runnable
         // Optimization with half loop and even/odd processing in a single step
         for (int i = 0; i < sof.LENGTH/2; ++i)
         {
-            complex<float> p0 = plh_symbols[2*i];
-            complex<float> p1 = plh_symbols[2*i+1];
-            float d0 = p0.im + p0.re;
-            float d1 = p1.im - p1.re;
+            std::complex<float> p0 = plh_symbols[2*i];
+            std::complex<float> p1 = plh_symbols[2*i+1];
+            float d0 = p0.imag() + p0.real();
+            float d1 = p1.imag() - p1.real();
             sof_bits = (sof_bits<<2) | ((d0<0)<<1) | (d1<0);
         }
 
@@ -934,10 +936,10 @@ struct s2_frame_receiver : runnable
         // Optimization with half loop and even/odd processing in a single step
         for (int i=0; i<plscodes.LENGTH/2; ++i)
         {
-            complex<float> p0 = plh_symbols[sof.LENGTH+2*i];
-            complex<float> p1 = plh_symbols[sof.LENGTH+2*i+1];
-            float d0 = p0.im + p0.re;
-            float d1 = p1.im - p1.re;
+            std::complex<float> p0 = plh_symbols[sof.LENGTH+2*i];
+            std::complex<float> p1 = plh_symbols[sof.LENGTH+2*i+1];
+            float d0 = p0.imag() + p0.real();
+            float d1 = p1.imag() - p1.real();
             plscode = (plscode<<2) | ((d0<0)<<1) | (d1<0);
         }
 
@@ -984,7 +986,7 @@ struct s2_frame_receiver : runnable
         // ss now points to first data slot.
         ss.scr = scrambling.Rn;
 
-        complex<float> plh_expected[PLH_LENGTH];
+        std::complex<float> plh_expected[PLH_LENGTH];
 
         std::copy(sof.symbols, sof.symbols + sof.LENGTH, plh_expected);
         std::copy(plscodes.symbols[plscode_index], plscodes.symbols[plscode_index] + plscodes.LENGTH, &plh_expected[sof.LENGTH]);
@@ -1254,7 +1256,7 @@ struct s2_frame_receiver : runnable
             // Read slot.
             freq_stats.add(ss.fw16);
             pout->is_pls = false;
-            complex<float> p;  // Export last symbols for cstln_out
+            std::complex<float> p;  // Export last symbols for cstln_out
 
         	for (int s=0; s<pout->LENGTH; ++s)
             {
@@ -1267,11 +1269,11 @@ struct s2_frame_receiver : runnable
                     (void) track_symbol(&ss, p, dcstln);  // SLOW
                 }
 
-	            complex<float> d = descramble(&ss, p);
+	            std::complex<float> d = descramble(&ss, p);
 #if 1  // Slow
-	            SOFTSYMB *symb = &dcstln->lookup(d.re, d.im)->ss;
+	            SOFTSYMB *symb = &dcstln->lookup(d.real(), d.imag())->ss;
 #else  // Avoid scaling floats. May wrap at very low SNR.
-	            SOFTSYMB *symb = &dcstln->lookup((int)d.re, (int)d.im)->ss;
+	            SOFTSYMB *symb = &dcstln->lookup((int)d.real(), (int)d.imag())->ss;
 #endif
 	            pout->symbols[s] = *symb;
 	        }
@@ -1356,7 +1358,7 @@ struct s2_frame_receiver : runnable
 
     float find_plheader(sampler_state *pss, int search_range)
     {
-        complex<T> best_corr = 0;
+        std::complex<T> best_corr = 0;
         int best_imu = 0;  // Avoid compiler warning.
         int best_pos = 0;  // Avoid compiler warning.
 
@@ -1371,15 +1373,15 @@ struct s2_frame_receiver : runnable
                 delete[] diffs;
             }
 
-            diffs = new complex<T>[ndiffs];
+            diffs = new std::complex<T>[ndiffs];
             sampler_state ss = *pss;
             ss.mu += imu * ss.omega / interp;
 
             // Compute rotation between consecutive symbols.
-            complex<T> prev = 0;
+            std::complex<T> prev = 0;
             for (int i=0; i<ndiffs; ++i)
             {
-                complex<T> p = interp_next(&ss);
+                std::complex<T> p = interp_next(&ss);
                 diffs[i] = conjprod(prev, p);
                 prev = p;
             }
@@ -1388,10 +1390,10 @@ struct s2_frame_receiver : runnable
             const int ncorrs = search_range;
             for (int i=0; i<ncorrs; ++i)
             {
-                complex<T> c = correlate_plheader_diff(&diffs[i]);
+                std::complex<T> c = correlate_plheader_diff(&diffs[i]);
                 //if ( cnorm2(c) > cnorm2(best_corr) ) {
-                // c.im>0 enforces frequency error +-Fm/4
-                if (cnorm2(c)>cnorm2(best_corr) && c.im>0)
+                // c.imag()>0 enforces frequency error +-Fm/4
+                if (cnorm2(c)>cnorm2(best_corr) && c.imag()>0)
                 {
                     best_corr = c;
                     best_imu = imu;
@@ -1407,14 +1409,14 @@ struct s2_frame_receiver : runnable
 #if 0
         // Lowpass-filter the differential correlator.
         // (Does not help much.)
-        static complex<float> acc = 0;
+        static std::complex<float> acc = 0;
         static const float k = 0.05;
         acc = best_corr*k + acc*(1-k);
         best_corr = acc;
 #endif
         // Get rough estimate of carrier frequency from differential correlator.
         // (best_corr is nominally +j).
-        float freqw = atan2f(-best_corr.re, best_corr.im);
+        float freqw = atan2f(-best_corr.real(), best_corr.imag());
         pss->fw16 += freqw * 65536 / (2*M_PI);
         // Force refresh because correction may be large.
         sampler->update_freq(pss->fw16/omega0);
@@ -1427,7 +1429,7 @@ struct s2_frame_receiver : runnable
         {
             sampler_state ss = *pss;
             float power = 0;
-            complex<T> symbs[sof.LENGTH];
+            std::complex<T> symbs[sof.LENGTH];
 
             for (int i=0; i<sof.LENGTH; ++i)
             {
@@ -1435,7 +1437,7 @@ struct s2_frame_receiver : runnable
                 power += cnorm2(symbs[i]);
             }
 
-            complex<float> c = conjprod(sof.symbols, symbs, sof.LENGTH);
+            std::complex<float> c = conjprod(sof.symbols, symbs, sof.LENGTH);
             c *= 1.0f / sof.LENGTH;
             align_phase(pss, c);
             float signal_amp = sqrtf(power/sof.LENGTH);
@@ -1448,22 +1450,22 @@ struct s2_frame_receiver : runnable
 
     // Correlate PLHEADER.
 
-    complex<float> correlate_plheader_diff(complex<T> *diffs)
+    std::complex<float> correlate_plheader_diff(std::complex<T> *diffs)
     {
-        complex<T> csof = correlate_sof_diff(diffs);
-        complex<T> cplsc = correlate_plscode_diff(&diffs[sof.LENGTH]);
+        std::complex<T> csof = correlate_sof_diff(diffs);
+        std::complex<T> cplsc = correlate_plscode_diff(&diffs[sof.LENGTH]);
         // Use csof+cplsc or csof-cplsc, whichever maximizes likelihood.
-        complex<T> c0 = csof + cplsc;  // Best when b7==0 (pilots off)
-        complex<T> c1 = csof - cplsc;  // Best when b7==1 (pilots on)
-        complex<T> c = (cnorm2(c0)>cnorm2(c1)) ? c0 : c1;
+        std::complex<T> c0 = csof + cplsc;  // Best when b7==0 (pilots off)
+        std::complex<T> c1 = csof - cplsc;  // Best when b7==1 (pilots on)
+        std::complex<T> c = (cnorm2(c0)>cnorm2(c1)) ? c0 : c1;
         return c * (1.0f/(26-1+64/2));
     }
 
     // Correlate 25 differential transitions in SOF.
 
-    complex<float> correlate_sof_diff(complex<T> *diffs)
+    std::complex<float> correlate_sof_diff(std::complex<T> *diffs)
     {
-        complex<T> c = 0;
+        std::complex<T> c = 0;
         const uint32_t dsof = sof.VALUE ^ (sof.VALUE>>1);
 
         for (int i=0; i<sof.LENGTH; ++i)
@@ -1484,9 +1486,9 @@ struct s2_frame_receiver : runnable
 
     // Correlate 32 data-independent transitions in PLSCODE.
 
-    complex<float> correlate_plscode_diff(complex<T> *diffs)
+    std::complex<float> correlate_plscode_diff(std::complex<T> *diffs)
     {
-        complex<T> c = 0;
+        std::complex<T> c = 0;
         uint64_t dscr = plscodes.SCRAMBLING ^ (plscodes.SCRAMBLING>>1);
 
         for (int i=1; i<plscodes.LENGTH; i+=2)
@@ -1534,8 +1536,8 @@ struct s2_frame_receiver : runnable
     // spans less than 90°.
 
     void match_freq(
-        complex<float> *expect,
-        complex<float> *recv,
+        std::complex<float> *expect,
+        std::complex<float> *recv,
         int ns,
 		sampler_state *ss)
     {
@@ -1543,16 +1545,16 @@ struct s2_frame_receiver : runnable
             fprintf(stderr, "match_freq\n");
         }
 
-        complex<float> diff = 0;
+        std::complex<float> diff = 0;
 
         for (int i=0; i<ns-1; ++i)
         {
-            complex<float> de = conjprod(expect[i], expect[i+1]);
-            complex<float> dr = conjprod(recv[i], recv[i+1]);
+            std::complex<float> de = conjprod(expect[i], expect[i+1]);
+            std::complex<float> dr = conjprod(recv[i], recv[i+1]);
             diff += conjprod(de, dr);
         }
 
-        float dfw16 = atan2f(diff.im,diff.re) * 65536 / (2*M_PI);
+        float dfw16 = atan2f(diff.imag(),diff.real()) * 65536 / (2*M_PI);
 
         // Derotate.
         for (int i=0; i<ns; ++i) {
@@ -1568,15 +1570,15 @@ struct s2_frame_receiver : runnable
 
     float interp_match_pilot(sampler_state *pss)
     {
-        complex<T> symbols[pilot.LENGTH];
-        complex<T> expected[pilot.LENGTH];
+        std::complex<T> symbols[pilot.LENGTH];
+        std::complex<T> expected[pilot.LENGTH];
 
         for (int i=0; i<pilot.LENGTH; ++i)
         {
-            complex<float> p = interp_next(pss) * pss->gain;
+            std::complex<float> p = interp_next(pss) * pss->gain;
             symbols[i] = descramble(pss, p);
             expected[i] = pilot.symbol;
-            //fprintf(stderr, "%f %f\n", symbols[i].re, symbols[i].im);
+            //fprintf(stderr, "%f %f\n", symbols[i].real(), symbols[i].imag());
         }
 
         return match_ph_amp(expected, symbols, pilot.LENGTH, pss);
@@ -1587,7 +1589,7 @@ struct s2_frame_receiver : runnable
 
     float interp_match_sof(sampler_state *pss)
     {
-        complex<T> symbols[pilot.LENGTH];
+        std::complex<T> symbols[pilot.LENGTH];
 
         for (int i=0; i<sof.LENGTH; ++i) {
             symbols[i] = interp_next(pss) * pss->gain;
@@ -1606,27 +1608,27 @@ struct s2_frame_receiver : runnable
     // Idempotent.
 
     float match_ph_amp(
-        complex<float> *expect,
-        complex<float> *recv,
+        std::complex<float> *expect,
+        std::complex<float> *recv,
         int ns,
 		sampler_state *ss
     )
     {
-        complex<float> rr = 0;
+        std::complex<float> rr = 0;
 
         for (int i=0; i<ns; ++i) {
             rr += conjprod(expect[i], recv[i]);
         }
 
         rr *= 1.0f / (ns*cstln_amp);
-        float dph16 = atan2f(rr.im,rr.re) * 65536 / (2*M_PI);
+        float dph16 = atan2f(rr.imag(),rr.real()) * 65536 / (2*M_PI);
         ss->ph16 += dph16;
         rr *= trig.expi(-dph16);
-        // rr.re is now the modulation amplitude.
-        float dgain = cstln_amp / rr.re;
+        // rr.real() is now the modulation amplitude.
+        float dgain = cstln_amp / rr.real();
         ss->gain *= dgain;
         // Rotate and scale.  Compute error power.
-        complex<float> adj = trig.expi(-dph16) * dgain;
+        std::complex<float> adj = trig.expi(-dph16) * dgain;
         float ev2 = 0;
 
         for (int i=0; i<ns; ++i)
@@ -1680,11 +1682,11 @@ struct s2_frame_receiver : runnable
 
             for (int s = 0; s < ns; ++s)
             {
-                complex<float> p = interp_next(&ssl) * ssl.gain;
+                std::complex<float> p = interp_next(&ssl) * ssl.gain;
                 typename cstln_lut<SOFTSYMB,256>::result *cr =
-                    dcstln->lookup(p.re, p.im);
-                complex<int8_t> &cp = dcstln->symbols[cr->symbol];
-                complex<float> ev(p.re-cp.re, p.im-cp.im);
+                    dcstln->lookup(p.real(), p.imag());
+                std::complex<int8_t> &cp = dcstln->symbols[cr->symbol];
+                std::complex<float> ev(p.real()-cp.real(), p.imag()-cp.imag());
                 err += cnorm2(ev);
             }
 
@@ -1718,24 +1720,24 @@ struct s2_frame_receiver : runnable
         }
     }
 
-    complex<float> descramble(sampler_state *ss, const complex<float> &p)
+    std::complex<float> descramble(sampler_state *ss, const std::complex<float> &p)
     {
         int r = *ss->scr++;
-        complex<float> res;
+        std::complex<float> res;
 
         switch (r)
         {
         case 3:
-            res.re = -p.im;
-            res.im =  p.re;
+            res.real(-p.imag());
+            res.imag(p.real());
             break;
         case 2:
-            res.re = -p.re;
-            res.im = -p.im;
+            res.real(-p.real());
+            res.imag(-p.imag());
             break;
         case 1:
-            res.re =  p.im;
-            res.im = -p.re;
+            res.real(p.imag());
+            res.imag(-p.real());
             break;
         default:
             res = p;
@@ -1746,7 +1748,7 @@ struct s2_frame_receiver : runnable
 
     // Interpolator
 
-    inline complex<float> interp_next(sampler_state *ss)
+    inline std::complex<float> interp_next(sampler_state *ss)
     {
         // Skip to next sample
         while (ss->mu >= 1)
@@ -1759,16 +1761,16 @@ struct s2_frame_receiver : runnable
         // Interpolate linearly then derotate.
         // This will fail with large carrier offsets (e.g. --tune).
         float cmu = 1.0f - ss->mu;
-        complex<float> s(ss->p[0].re*cmu + ss->p[1].re*ss->mu,
-                ss->p[0].im*cmu + ss->p[1].im*ss->mu);
+        std::complex<float> s(ss->p[0].real()*cmu + ss->p[1].real()*ss->mu,
+                ss->p[0].imag()*cmu + ss->p[1].imag()*ss->mu);
         ss->mu += ss->omega;
         // Derotate
-        const complex<float> &rot = trig.expi(-ss->ph16);
+        const std::complex<float> &rot = trig.expi(-ss->ph16);
         ss->ph16 += ss->fw16;
         return rot * s;
 #else
         // Use generic interpolator
-        complex<float> s = sampler->interp(ss->p, ss->mu, ss->ph16);
+        std::complex<float> s = sampler->interp(ss->p, ss->mu, ss->ph16);
         ss->mu += ss->omega;
         ss->ph16 += ss->fw16;
         return s;
@@ -1777,22 +1779,22 @@ struct s2_frame_receiver : runnable
 
     // Adjust phase in [ss] to cancel offset observed as [c].
 
-    void align_phase(sampler_state *ss, const complex<float> &c)
+    void align_phase(sampler_state *ss, const std::complex<float> &c)
     {
-        float err = atan2f(c.im,c.re) * 65536 / (2*M_PI);
+        float err = atan2f(c.imag(),c.real()) * 65536 / (2*M_PI);
         ss->ph16 += err;
     }
 
     inline uint8_t track_symbol(
         sampler_state *ss,
-        const complex<float> &p,
+        const std::complex<float> &p,
 		cstln_lut<SOFTSYMB,256> *c
     )
     {
         static const float kph = 4e-2;
         static const float kfw = 1e-4;
         // Decision
-        typename cstln_lut<SOFTSYMB,256>::result *cr = c->lookup(p.re, p.im);
+        typename cstln_lut<SOFTSYMB,256>::result *cr = c->lookup(p.real(), p.imag());
         // Carrier tracking
         ss->ph16 += cr->phase_error * kph;
         ss->fw16 += cr->phase_error * kfw;
@@ -1848,13 +1850,13 @@ struct s2_frame_receiver : runnable
 
     cstln_lut<SOFTSYMB,256> *cstln;  // Last seen, or NULL (legacy)
     trig16 trig;
-    pipereader< complex<T> > in;
+    pipereader< std::complex<T> > in;
     pipewriter< plslot<SOFTSYMB> > out;
     int meas_count;
     pipewriter<float> *freq_out, *ss_out, *mer_out;
-    pipewriter< complex<float> > *cstln_out;
-    pipewriter< complex<float> > *cstln_pls_out;
-    pipewriter< complex<float> > *symbols_out;
+    pipewriter< std::complex<float> > *cstln_out;
+    pipewriter< std::complex<float> > *cstln_pls_out;
+    pipewriter< std::complex<float> > *symbols_out;
     pipewriter<int> *state_out;
     bool first_run;
     // S2 constants
@@ -1868,7 +1870,7 @@ struct s2_frame_receiver : runnable
     bool m_locked;
 
 private:
-    complex<T> *diffs;
+    std::complex<T> *diffs;
     sampler_state *sspilots;
   };  // s2_frame_receiver
 

@@ -18,6 +18,7 @@
 #define LEANSDR_SDR_H
 
 #include <numeric>
+#include <complex>
 
 #include "leansdr/dsp.h"
 #include "leansdr/math.h"
@@ -29,11 +30,11 @@ namespace leansdr
 
 typedef float f32;
 
-typedef complex<u8> cu8;
-typedef complex<s8> cs8;
-typedef complex<u16> cu16;
-typedef complex<s16> cs16;
-typedef complex<f32> cf32;
+typedef std::complex<u8> cu8;
+typedef std::complex<s8> cs8;
+typedef std::complex<u16> cu16;
+typedef std::complex<s16> cs16;
+typedef std::complex<f32> cf32;
 
 //////////////////////////////////////////////////////////////////////
 // SDR blocks
@@ -52,8 +53,8 @@ struct auto_notch : runnable
 
     auto_notch(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
-        pipebuf<complex<T>> &_out,
+        pipebuf<std::complex<T>> &_in,
+        pipebuf<std::complex<T>> &_out,
         int _nslots,
         T _agc_rms_setpoint
     ) :
@@ -73,7 +74,7 @@ struct auto_notch : runnable
         for (int s = 0; s < nslots; ++s)
         {
             __slots[s].i = -1;
-            __slots[s].expj = new complex<float>[fft.size()];
+            __slots[s].expj = new std::complex<float>[fft.size()];
         }
     }
 
@@ -106,22 +107,21 @@ struct auto_notch : runnable
 
     void detect()
     {
-        complex<T> *pin = in.rd();
-        complex<float> *data = new complex<float>[fft.size()];
+        std::complex<T> *pin = in.rd();
+        std::complex<float> *data = new std::complex<float>[fft.size()];
         float m0 = 0, m2 = 0;
 
         for (int i = 0; i < fft.size(); ++i)
         {
-            data[i].re = pin[i].re;
-            data[i].im = pin[i].im;
-            m2 += (float)pin[i].re * pin[i].re + (float)pin[i].im * pin[i].im;
+            data[i] = pin[i];
+            m2 += (float) pin[i].real() * pin[i].real() + (float) pin[i].imag() * pin[i].imag();
 
-            if (gen_abs(pin[i].re) > m0) {
-                m0 = gen_abs(pin[i].re);
+            if (gen_abs(pin[i].real()) > m0) {
+                m0 = gen_abs(pin[i].real());
             }
 
-            if (gen_abs(pin[i].im) > m0) {
-                m0 = gen_abs(pin[i].im);
+            if (gen_abs(pin[i].imag()) > m0) {
+                m0 = gen_abs(pin[i].imag());
             }
         }
 
@@ -141,7 +141,7 @@ struct auto_notch : runnable
         float *amp = new float[fft.size()];
 
         for (int i = 0; i < fft.size(); ++i) {
-            amp[i] = hypotf(data[i].re, data[i].im);
+            amp[i] = hypotf(data[i].real(), data[i].imag());
         }
 
         for (slot *s = __slots; s < __slots + nslots; ++s)
@@ -162,15 +162,15 @@ struct auto_notch : runnable
                 }
 
                 s->i = iamax;
-                s->estim.re = 0;
-                s->estim.im = 0;
+                s->estim.real(0);
+                s->estim.imag(0);
                 s->estt = 0;
 
                 for (int i = 0; i < fft.size(); ++i)
                 {
                     float a = 2 * M_PI * s->i * i / fft.size();
-                    s->expj[i].re = cosf(a);
-                    s->expj[i].im = sinf(a);
+                    s->expj[i].real(cosf(a));
+                    s->expj[i].imag(sinf(a));
                 }
             }
 
@@ -191,7 +191,7 @@ struct auto_notch : runnable
 
     void process()
     {
-        complex<T> *pin = in.rd(), *pend = pin + fft.size(), *pout = out.wr();
+        std::complex<T> *pin = in.rd(), *pend = pin + fft.size(), *pout = out.wr();
 
         for (slot *s = __slots; s < __slots + nslots; ++s) {
             s->ej = s->expj;
@@ -199,41 +199,41 @@ struct auto_notch : runnable
 
         for (; pin < pend; ++pin, ++pout)
         {
-            complex<float> out = *pin;
+            std::complex<float> out = *pin;
             // TODO Optimize for nslots==1 ?
 
             for (slot *s = __slots; s < __slots + nslots; ++s->ej, ++s)
             {
-                complex<float> bb(
-                    pin->re * s->ej->re + pin->im * s->ej->im,
-                    -pin->re * s->ej->im + pin->im * s->ej->re
+                std::complex<float> bb(
+                    pin->real() * s->ej->real() + pin->imag() * s->ej->imag(),
+                    -pin->real() * s->ej->imag() + pin->imag() * s->ej->real()
                 );
-                s->estim.re = bb.re * k + s->estim.re * (1 - k);
-                s->estim.im = bb.im * k + s->estim.im * (1 - k);
-                complex<float> sub(
-                    s->estim.re * s->ej->re - s->estim.im * s->ej->im,
-                    s->estim.re * s->ej->im + s->estim.im * s->ej->re
+                s->estim.real(bb.real() * k + s->estim.real() * (1 - k));
+                s->estim.imag(bb.imag() * k + s->estim.imag() * (1 - k));
+                std::complex<float> sub(
+                    s->estim.real() * s->ej->real() - s->estim.imag() * s->ej->imag(),
+                    s->estim.real() * s->ej->imag() + s->estim.imag() * s->ej->real()
                 );
-                out.re -= sub.re;
-                out.im -= sub.im;
+                out.real(out.real() - sub.real());
+                out.imag(out.imag() - sub.imag());
             }
 
-            pout->re = gain * out.re;
-            pout->im = gain * out.im;
+            pout->real(gain * out.real());
+            pout->imag(gain * out.imag());
         }
     }
 
   private:
     cfft_engine<float> fft;
-    pipereader<complex<T>> in;
-    pipewriter<complex<T>> out;
+    pipereader<std::complex<T>> in;
+    pipewriter<std::complex<T>> out;
     int nslots;
 
     struct slot
     {
         int i;
-        complex<float> estim;
-        complex<float> *expj, *ej;
+        std::complex<float> estim;
+        std::complex<float> *expj, *ej;
         int estt;
     };
 
@@ -255,7 +255,7 @@ struct ss_estimator : runnable
 
     ss_estimator(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         pipebuf<T> &_out
     ) :
         runnable(sch, "SS estimator"),
@@ -276,11 +276,11 @@ struct ss_estimator : runnable
             if (phase >= decimation)
             {
                 phase -= decimation;
-                complex<T> *p = in.rd(), *pend = p + window_size;
+                std::complex<T> *p = in.rd(), *pend = p + window_size;
                 float s = 0;
 
                 for (; p < pend; ++p) {
-                    s += (float)p->re * p->re + (float)p->im * p->im;
+                    s += (float)p->real() * p->real() + (float)p->imag() * p->imag();
                 }
 
                 out.write(sqrtf(s / window_size));
@@ -291,7 +291,7 @@ struct ss_estimator : runnable
     }
 
   private:
-    pipereader<complex<T>> in;
+    pipereader<std::complex<T>> in;
     pipewriter<T> out;
     unsigned long phase;
 };
@@ -304,7 +304,7 @@ struct ss_amp_estimator : runnable
 
     ss_amp_estimator(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         pipebuf<T> &_out_ss,
         pipebuf<T> &_out_ampmin,
         pipebuf<T> &_out_ampmax
@@ -329,13 +329,13 @@ struct ss_amp_estimator : runnable
             if (phase >= decimation)
             {
                 phase -= decimation;
-                complex<T> *p = in.rd(), *pend = p + window_size;
+                std::complex<T> *p = in.rd(), *pend = p + window_size;
                 float s2 = 0;
                 float amin = 1e38, amax = 0;
 
                 for (; p < pend; ++p)
                 {
-                    float mag2 = (float)p->re * p->re + (float)p->im * p->im;
+                    float mag2 = (float)p->real() * p->real() + (float)p->imag() * p->imag();
                     s2 += mag2;
                     float mag = sqrtf(mag2);
 
@@ -358,7 +358,7 @@ struct ss_amp_estimator : runnable
     }
 
   private:
-    pipereader<complex<T>> in;
+    pipereader<std::complex<T>> in;
     pipewriter<T> out_ss, out_ampmin, out_ampmax;
     unsigned long phase;
 };
@@ -375,8 +375,8 @@ struct simple_agc : runnable
 
     simple_agc(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
-        pipebuf<complex<T>> &_out
+        pipebuf<std::complex<T>> &_in,
+        pipebuf<std::complex<T>> &_out
     ) :
         runnable(sch, "AGC"),
         out_rms(1),
@@ -388,18 +388,18 @@ struct simple_agc : runnable
     }
 
   private:
-    pipereader<complex<T>> in;
-    pipewriter<complex<T>> out;
+    pipereader<std::complex<T>> in;
+    pipewriter<std::complex<T>> out;
 
     void run()
     {
         while (in.readable() >= chunk_size && out.writable() >= chunk_size)
         {
-            complex<T> *pin = in.rd(), *pend = pin + chunk_size;
+            std::complex<T> *pin = in.rd(), *pend = pin + chunk_size;
             float amp2 = 0;
 
             for (; pin < pend; ++pin) {
-                amp2 += pin->re * pin->re + pin->im * pin->im;
+                amp2 += pin->real() * pin->real() + pin->imag() * pin->imag();
             }
 
             amp2 /= chunk_size;
@@ -411,13 +411,13 @@ struct simple_agc : runnable
             estimated = estimated * (1 - bw) + amp2 * bw;
             float gain = estimated ? out_rms / sqrtf(estimated) : 0;
             pin = in.rd();
-            complex<T> *pout = out.wr();
+            std::complex<T> *pout = out.wr();
             float bwcomp = 1 - bw;
 
             for (; pin < pend; ++pin, ++pout)
             {
-                pout->re = pin->re * gain;
-                pout->im = pin->im * gain;
+                pout->real() = pin->real() * gain;
+                pout->imag() = pin->imag() * gain;
             }
 
             in.read(chunk_size);
@@ -521,7 +521,7 @@ struct cstln_base
 
     static const char *names[];
     float amp_max; // Max amplitude. 1 for PSK, 0 if not applicable.
-    complex<int8_t> *symbols;
+    std::complex<int8_t> *symbols;
     int nsymbols;
     int nrotations;
 };
@@ -546,7 +546,7 @@ struct cstln_lut : cstln_base
             amp_max = 1;
             nrotations = 2;
             nsymbols = 2;
-            symbols = new complex<signed char>[nsymbols];
+            symbols = new std::complex<signed char>[nsymbols];
 #if 0 // BPSK at 0°
             symbols[0] = polar(1, 2, 0);
             symbols[1] = polar(1, 2, 1);
@@ -564,7 +564,7 @@ struct cstln_lut : cstln_base
             // EN 302 307, section 5.4.1
             nrotations = 4;
             nsymbols = 4;
-            symbols = new complex<signed char>[nsymbols];
+            symbols = new std::complex<signed char>[nsymbols];
             symbols[0] = polar(1, 4, 0.5);
             symbols[1] = polar(1, 4, 3.5);
             symbols[2] = polar(1, 4, 1.5);
@@ -577,7 +577,7 @@ struct cstln_lut : cstln_base
             // EN 302 307, section 5.4.2
             nrotations = 8;
             nsymbols = 8;
-            symbols = new complex<signed char>[nsymbols];
+            symbols = new std::complex<signed char>[nsymbols];
             symbols[0] = polar(1, 8, 1);
             symbols[1] = polar(1, 8, 0);
             symbols[2] = polar(1, 8, 4);
@@ -600,7 +600,7 @@ struct cstln_lut : cstln_base
             amp_max = r2;
             nrotations = 4;
             nsymbols = 16;
-            symbols = new complex<signed char>[nsymbols];
+            symbols = new std::complex<signed char>[nsymbols];
             symbols[0] = polar(r2, 12, 1.5);
             symbols[1] = polar(r2, 12, 10.5);
             symbols[2] = polar(r2, 12, 4.5);
@@ -636,7 +636,7 @@ struct cstln_lut : cstln_base
             amp_max = r3;
             nrotations = 4;
             nsymbols = 32;
-            symbols = new complex<signed char>[nsymbols];
+            symbols = new std::complex<signed char>[nsymbols];
             symbols[0] = polar(r2, 12, 1.5);
             symbols[1] = polar(r2, 12, 2.5);
             symbols[2] = polar(r2, 12, 10.5);
@@ -691,7 +691,7 @@ struct cstln_lut : cstln_base
             amp_max = r4;
             nrotations = 4;
             nsymbols = 64;
-            symbols = new complex<signed char>[nsymbols];
+            symbols = new std::complex<signed char>[nsymbols];
             polar2(0, r4, 1.0 / 4, 7.0 / 4, 3.0 / 4, 5.0 / 4);
             polar2(4, r4, 13.0 / 28, 43.0 / 28, 15.0 / 28, 41.0 / 28);
             polar2(8, r4, 1.0 / 28, 55.0 / 28, 27.0 / 28, 29.0 / 28);
@@ -770,10 +770,10 @@ struct cstln_lut : cstln_base
     }
 
   private:
-    complex<signed char> polar(float r, int n, float i)
+    std::complex<signed char> polar(float r, int n, float i)
     {
         float a = i * 2 * M_PI / n;
-        return complex<signed char>(
+        return std::complex<signed char>(
             r * cosf(a) * cstln_amp,
             r * sinf(a) * cstln_amp
         );
@@ -787,7 +787,7 @@ struct cstln_lut : cstln_base
         for (int j = 0; j < 4; ++j)
         {
             float phi = a[j] * M_PI;
-            symbols[i + j] = complex<signed char>(
+            symbols[i + j] = std::complex<signed char>(
                 r * cosf(phi) * cstln_amp,
                 r * sinf(phi) * cstln_amp
             );
@@ -798,7 +798,7 @@ struct cstln_lut : cstln_base
     {
         nrotations = 4;
         nsymbols = n;
-        symbols = new complex<signed char>[nsymbols];
+        symbols = new std::complex<signed char>[nsymbols];
         int m = sqrtl(n);
         float scale;
 
@@ -817,8 +817,8 @@ struct cstln_lut : cstln_base
             {
                 float I = x - (float)(m - 1) / 2;
                 float Q = y - (float)(m - 1) / 2;
-                symbols[s].re = I * scale * cstln_amp;
-                symbols[s].im = Q * scale * cstln_amp;
+                symbols[s].real(I * scale * cstln_amp);
+                symbols[s].imag(Q * scale * cstln_amp);
                 ++s;
             }
         }
@@ -861,7 +861,7 @@ struct cstln_lut : cstln_base
 
                 for (int s = 0; s < nsymbols; ++s)
                 {
-                    float d2 = ((I - symbols[s].re) * (I - symbols[s].re) + (Q - symbols[s].im) * (Q - symbols[s].im));
+                    float d2 = ((I - symbols[s].real()) * (I - symbols[s].real()) + (Q - symbols[s].imag()) * (Q - symbols[s].imag()));
 
                     if (d2 < fss.dists2[fss.nearest]) {
                         fss.nearest = s;
@@ -893,8 +893,8 @@ struct cstln_lut : cstln_base
                 // Always record nearest symbol and phase error for C&T.
                 pr->symbol = fss.nearest;
                 float ph_symbol = atan2f(
-                    symbols[pr->symbol].im,
-                    symbols[pr->symbol].re
+                    symbols[pr->symbol].imag(),
+                    symbols[pr->symbol].real()
                 );
                 float ph_err = atan2f(Q, I) - ph_symbol;
                 pr->phase_error = (int32_t)(ph_err * 65536 / (2 * M_PI)); // Mod 65536
@@ -926,7 +926,7 @@ struct cstln_lut : cstln_base
                     // Highlight the constellation symbols.
                     for (int s = 0; s < nsymbols; ++s)
                     {
-                        if (symbols[s].re == I && symbols[s].im == Q) {
+                        if (symbols[s].real() == I && symbols[s].imag() == Q) {
                             v ^= 128;
                         }
                     }
@@ -962,7 +962,7 @@ struct sampler_interface
     virtual ~sampler_interface() {
     }
 
-    virtual complex<T> interp(const complex<T> *pin, float mu, float phase) = 0;
+    virtual std::complex<T> interp(const std::complex<T> *pin, float mu, float phase) = 0;
 
     virtual void update_freq(float freqw, int weight = 0)
     {
@@ -983,7 +983,7 @@ struct nearest_sampler : sampler_interface<T>
         return 0;
     }
 
-    complex<T> interp(const complex<T> *pin, float mu, float phase)
+    std::complex<T> interp(const std::complex<T> *pin, float mu, float phase)
     {
         (void) mu;
         return pin[0] * trig.expi(-phase);
@@ -1003,11 +1003,11 @@ struct linear_sampler : sampler_interface<T>
         return 1;
     }
 
-    complex<T> interp(const complex<T> *pin, float mu, float phase)
+    std::complex<T> interp(const std::complex<T> *pin, float mu, float phase)
     {
         // Derotate pin[0] and pin[1]
-        complex<T> s0 = pin[0] * trig.expi(-phase);
-        complex<T> s1 = pin[1] * trig.expi(-(phase + freqw));
+        std::complex<T> s0 = pin[0] * trig.expi(-phase);
+        std::complex<T> s1 = pin[1] * trig.expi(-(phase + freqw));
         // Interpolate linearly
         return s0 * (1 - mu) + s1 * mu;
     }
@@ -1035,7 +1035,7 @@ struct fir_sampler : sampler_interface<T>
         subsampling(_subsampling),
         update_freq_phase(0)
     {
-        shifted_coeffs = new complex<T>[ncoeffs];
+        shifted_coeffs = new std::complex<T>[ncoeffs];
         do_update_freq(0); // In case application never calls update_freq()
     }
 
@@ -1048,12 +1048,12 @@ struct fir_sampler : sampler_interface<T>
         return ncoeffs - 1;
     }
 
-    complex<T> interp(const complex<T> *pin, float mu, float phase)
+    std::complex<T> interp(const std::complex<T> *pin, float mu, float phase)
     {
         // Apply FIR filter with subsampling
-        complex<T> acc(0, 0);
-        complex<T> *pc = shifted_coeffs + (int)((1 - mu) * subsampling);
-        complex<T> *pcend = shifted_coeffs + ncoeffs;
+        std::complex<T> acc(0, 0);
+        std::complex<T> *pc = shifted_coeffs + (int)((1 - mu) * subsampling);
+        std::complex<T> *pcend = shifted_coeffs + ncoeffs;
 
         if (subsampling == 1)
         {
@@ -1133,7 +1133,7 @@ struct cstln_receiver : runnable
     cstln_receiver(
         scheduler *sch,
         sampler_interface<T> *_sampler,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         pipebuf<SOFTSYMB> &_out,
         pipebuf<float> *_freq_out = nullptr,
         pipebuf<float> *_ss_out = nullptr,
@@ -1264,13 +1264,13 @@ struct cstln_receiver : runnable
         {
             sampler->update_freq(freqw, chunk_size);
 
-            complex<T> *pin = in.rd(), *pin0 = pin, *pend = pin + chunk_size;
+            std::complex<T> *pin = in.rd(), *pin0 = pin, *pend = pin + chunk_size;
             SOFTSYMB *pout = out.wr(), *pout0 = pout;
 
             // These are scoped outside the loop for SS and MER estimation.
-            complex<float> sg{0.0f, 0.0f}; // Symbol before AGC;
-            complex<float> s;  // For MER estimation and constellation viewer
-            complex<signed char> *cstln_point = nullptr;
+            std::complex<float> sg{0.0f, 0.0f}; // Symbol before AGC;
+            std::complex<float> s;  // For MER estimation and constellation viewer
+            std::complex<signed char> *cstln_point = nullptr;
 
             while (pin < pend)
             {
@@ -1284,7 +1284,7 @@ struct cstln_receiver : runnable
 
                     // Constellation look-up
                     typename cstln_lut<SOFTSYMB, 256>::result *cr =
-                        cstln->lookup(s.re, s.im);
+                        cstln->lookup(s.real(), s.imag());
                     *pout = cr->ss;
                     ++pout;
 
@@ -1299,13 +1299,13 @@ struct cstln_receiver : runnable
                     // c = decisions (constellation points)
                     hist[2] = hist[1];
                     hist[1] = hist[0];
-                    hist[0].p.re = s.re;
-                    hist[0].p.im = s.im;
+                    hist[0].p.real(s.real());
+                    hist[0].p.imag(s.imag());
                     cstln_point = &cstln->symbols[cr->symbol];
-                    hist[0].c.re = cstln_point->re;
-                    hist[0].c.im = cstln_point->im;
-                    float muerr = ((hist[0].p.re - hist[2].p.re) * hist[1].c.re + (hist[0].p.im - hist[2].p.im) * hist[1].c.im)
-                        - ((hist[0].c.re - hist[2].c.re) * hist[1].p.re + (hist[0].c.im - hist[2].c.im) * hist[1].p.im);
+                    hist[0].c.real(cstln_point->real());
+                    hist[0].c.imag(cstln_point->imag());
+                    float muerr = ((hist[0].p.real() - hist[2].p.real()) * hist[1].c.real() + (hist[0].p.imag() - hist[2].p.imag()) * hist[1].c.imag())
+                        - ((hist[0].c.real() - hist[2].c.real()) * hist[1].p.real() + (hist[0].c.imag() - hist[2].c.imag()) * hist[1].p.imag());
                     float mucorr = muerr * gain_mu;
                     const float max_mucorr = 0.1;
 
@@ -1346,7 +1346,7 @@ struct cstln_receiver : runnable
                 // AGC
                 // For APSK we must do AGC on the symbols, not the whole signal.
                 // TODO Use a better estimator at low SNR.
-                float insp = sg.re * sg.re + sg.im * sg.im;
+                float insp = sg.real() * sg.real() + sg.imag() * sg.imag();
                 est_insp = insp * kest + est_insp * (1 - kest);
 
                 if (est_insp) {
@@ -1354,9 +1354,9 @@ struct cstln_receiver : runnable
                 }
 
                 // SS and MER
-                complex<float> ev(
-                    s.re - cstln_point->re,
-                    s.im - cstln_point->im
+                std::complex<float> ev(
+                    s.real() - cstln_point->real(),
+                    s.imag() - cstln_point->imag()
                 );
                 float sig_power, ev_power;
 
@@ -1364,15 +1364,15 @@ struct cstln_receiver : runnable
                 {
                     // Special case for BPSK: Ignore quadrature component of noise.
                     // TBD Projection on I axis assumes BPSK at 45°
-                    float sig_real = (cstln_point->re + cstln_point->im) * 0.707;
-                    float ev_real = (ev.re + ev.im) * 0.707;
+                    float sig_real = (cstln_point->real() + cstln_point->imag()) * 0.707;
+                    float ev_real = (ev.real() + ev.imag()) * 0.707;
                     sig_power = sig_real * sig_real;
                     ev_power = ev_real * ev_real;
                 }
                 else
                 {
-                    sig_power = (int)cstln_point->re * cstln_point->re + (int)cstln_point->im * cstln_point->im;
-                    ev_power = ev.re * ev.re + ev.im * ev.im;
+                    sig_power = (int)cstln_point->real() * cstln_point->real() + (int)cstln_point->imag() * cstln_point->imag();
+                    ev_power = ev.real() * ev.real() + ev.imag() * ev.imag();
                 }
 
                 est_sp = sig_power * kest + est_sp * (1 - kest);
@@ -1425,11 +1425,11 @@ struct cstln_receiver : runnable
   private:
     struct
     {
-        complex<float> p; // Received symbol
-        complex<float> c; // Matched constellation point
+        std::complex<float> p; // Received symbol
+        std::complex<float> c; // Matched constellation point
     } hist[3];
 
-    pipereader<complex<T>> in;
+    pipereader<std::complex<T>> in;
     pipewriter<SOFTSYMB> out;
     float est_insp, agc_gain;
     float mu;    // PSK time expressed in clock ticks
@@ -1460,10 +1460,10 @@ struct fast_qpsk_receiver : runnable
 
     fast_qpsk_receiver(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         pipebuf<hardsymbol> &_out,
         pipebuf<float> *_freq_out = nullptr,
-        pipebuf<complex<T>> *_cstln_out = nullptr
+        pipebuf<std::complex<T>> *_cstln_out = nullptr
     ) :
         runnable(sch, "Fast QPSK receiver"),
         meas_decimation(1048576),
@@ -1478,7 +1478,7 @@ struct fast_qpsk_receiver : runnable
         set_omega(1);
         set_freq(0);
         freq_out = _freq_out ? new pipewriter<float>(*_freq_out) : nullptr;
-        cstln_out = _cstln_out ? new pipewriter<complex<T>>(*_cstln_out) : nullptr;
+        cstln_out = _cstln_out ? new pipewriter<std::complex<T>>(*_cstln_out) : nullptr;
         memset(hist, 0, sizeof(hist));
         init_lookup_tables();
     }
@@ -1537,7 +1537,7 @@ struct fast_qpsk_receiver : runnable
         while (in.readable() >= chunk_size + 1 && // +1 for interpolation
                out.writable() >= chunk_size && (!freq_out || freq_out->writable() >= max_meas) && (!cstln_out || cstln_out->writable() >= max_meas))
         {
-            complex<T> *pin = in.rd(), *pin0 = pin, *pend = pin + chunk_size;
+            std::complex<T> *pin = in.rd(), *pin0 = pin, *pend = pin + chunk_size;
             hardsymbol *pout = out.wr(), *pout0 = pout;
 
             cu8 s;
@@ -1560,28 +1560,28 @@ struct fast_qpsk_receiver : runnable
                     symbol_arg = a0 + (s_angle)(da*mu);
                     s = arg_to_symbol(symbol_arg);
 #elif 1 // Linear by lookup-table. 1.2M on bench3bishs
-                    polar *p0 = &lut_polar[pin[0].re][pin[0].im];
+                    polar *p0 = &lut_polar[pin[0].real()][pin[0].imag()];
                     u_angle a0 = (u_angle)(p0->a - phase) >> (16 - RLUT_BITS);
                     cu8 *p0r = &lut_rect[a0][p0->r >> 1];
-                    polar *p1 = &lut_polar[pin[1].re][pin[1].im];
+                    polar *p1 = &lut_polar[pin[1].real()][pin[1].imag()];
                     u_angle a1 = (u_angle)(p1->a - (phase + freqw)) >> (16 - RLUT_BITS);
                     cu8 *p1r = &lut_rect[a1][p1->r >> 1];
-                    s.re = (int)(p0r->re + (p1r->re - p0r->re) * mu);
-                    s.im = (int)(p0r->im + (p1r->im - p0r->im) * mu);
+                    s.real((int)(p0r->real() + (p1r->real() - p0r->real()) * mu));
+                    s.imag((int)(p0r->imag() + (p1r->imag() - p0r->imag()) * mu));
                     symbol_arg = fast_arg(s);
 #else   // Linear floating-point, for reference
                     float a0 = -(int)phase * M_PI / 32768;
                     float cosa0 = cosf(a0), sina0 = sinf(a0);
-                    complex<float>
-                        p0r(((float)pin[0].re - 128) * cosa0 - ((float)pin[0].im - 128) * sina0,
-                            ((float)pin[0].re - 128) * sina0 + ((float)pin[0].im - 128) * cosa0);
+                    std::complex<float>
+                        p0r(((float)pin[0].real() - 128) * cosa0 - ((float)pin[0].imag() - 128) * sina0,
+                            ((float)pin[0].real() - 128) * sina0 + ((float)pin[0].imag() - 128) * cosa0);
                     float a1 = -(int)(phase + freqw) * M_PI / 32768;
                     float cosa1 = cosf(a1), sina1 = sinf(a1);
-                    complex<float>
-                        p1r(((float)pin[1].re - 128) * cosa1 - ((float)pin[1].im - 128) * sina1,
-                            ((float)pin[1].re - 128) * sina1 + ((float)pin[1].im - 128) * cosa1);
-                    s.re = (int)(128 + p0r.re + (p1r.re - p0r.re) * mu);
-                    s.im = (int)(128 + p0r.im + (p1r.im - p0r.im) * mu);
+                    std::complex<float>
+                        p1r(((float)pin[1].real() - 128) * cosa1 - ((float)pin[1].imag() - 128) * sina1,
+                            ((float)pin[1].real() - 128) * sina1 + ((float)pin[1].imag() - 128) * cosa1);
+                    s.real() = (int)(128 + p0r.real() + (p1r.real() - p0r.real()) * mu);
+                    s.imag() = (int)(128 + p0r.imag() + (p1r.imag() - p0r.imag()) * mu);
                     symbol_arg = fast_arg(s);
 #endif
 
@@ -1604,24 +1604,24 @@ struct fast_qpsk_receiver : runnable
                     hist[1] = hist[0];
 #define HIST_FLOAT 0
 #if HIST_FLOAT
-                    hist[0].p.re = (float)s.re - 128;
-                    hist[0].p.im = (float)s.im - 128;
+                    hist[0].p.real() = (float)s.real() - 128;
+                    hist[0].p.imag() = (float)s.imag() - 128;
 
                     cu8 cp = arg_to_symbol((symbol_arg & 49152) + 8192);
-                    hist[0].c.re = (float)cp.re - 128;
-                    hist[0].c.im = (float)cp.im - 128;
+                    hist[0].c.real() = (float)cp.real() - 128;
+                    hist[0].c.imag() = (float)cp.imag() - 128;
 
                     float muerr =
-                        ((hist[0].p.re - hist[2].p.re) * hist[1].c.re +
-                         (hist[0].p.im - hist[2].p.im) * hist[1].c.im) -
-                        ((hist[0].c.re - hist[2].c.re) * hist[1].p.re +
-                         (hist[0].c.im - hist[2].c.im) * hist[1].p.im);
+                        ((hist[0].p.real() - hist[2].p.real()) * hist[1].c.real() +
+                         (hist[0].p.imag() - hist[2].p.imag()) * hist[1].c.imag()) -
+                        ((hist[0].c.real() - hist[2].c.real()) * hist[1].p.real() +
+                         (hist[0].c.imag() - hist[2].c.imag()) * hist[1].p.imag());
 #else
                     hist[0].p = s;
                     hist[0].c = arg_to_symbol((symbol_arg & 49152) + 8192);
 
                     int muerr =
-                        ((signed char)(hist[0].p.re - hist[2].p.re) * ((int)hist[1].c.re - 128) + (signed char)(hist[0].p.im - hist[2].p.im) * ((int)hist[1].c.im - 128)) - ((signed char)(hist[0].c.re - hist[2].c.re) * ((int)hist[1].p.re - 128) + (signed char)(hist[0].c.im - hist[2].c.im) * ((int)hist[1].p.im - 128));
+                        ((signed char)(hist[0].p.real() - hist[2].p.real()) * ((int)hist[1].c.real() - 128) + (signed char)(hist[0].p.imag() - hist[2].p.imag()) * ((int)hist[1].c.imag() - 128)) - ((signed char)(hist[0].c.real() - hist[2].c.real()) * ((int)hist[1].p.real() - 128) + (signed char)(hist[0].c.imag() - hist[2].c.imag()) * ((int)hist[1].p.imag() - 128));
 #endif
                     float mucorr = muerr * gain_mu;
                     const float max_mucorr = 0.1;
@@ -1689,7 +1689,7 @@ struct fast_qpsk_receiver : runnable
     u_angle fast_arg(const cu8 &c)
     {
         // TBD read cu8 as u16 index, same endianness as in init()
-        return lut_polar[c.re][c.im].a;
+        return lut_polar[c.real()][c.imag()].a;
     }
 
     cu8 lut_rect[RLUT_ANGLES][256];
@@ -1715,16 +1715,16 @@ struct fast_qpsk_receiver : runnable
         for (unsigned long a = 0; a < 65536; ++a)
         {
             float f = 2 * M_PI * a / 65536;
-            lut_sincos[a].re = 128 + cstln_amp * cosf(f);
-            lut_sincos[a].im = 128 + cstln_amp * sinf(f);
+            lut_sincos[a].real() = 128 + cstln_amp * cosf(f);
+            lut_sincos[a].imag() = 128 + cstln_amp * sinf(f);
         }
 
         for (int a = 0; a < RLUT_ANGLES; ++a)
         {
             for (int r = 0; r < 256; ++r)
             {
-                lut_rect[a][r].re = (int)(128 + r * cos(2 * M_PI * a / RLUT_ANGLES));
-                lut_rect[a][r].im = (int)(128 + r * sin(2 * M_PI * a / RLUT_ANGLES));
+                lut_rect[a][r].real() = (int)(128 + r * cos(2 * M_PI * a / RLUT_ANGLES));
+                lut_rect[a][r].imag() = (int)(128 + r * sin(2 * M_PI * a / RLUT_ANGLES));
             }
         }
     }
@@ -1732,8 +1732,8 @@ struct fast_qpsk_receiver : runnable
     struct
     {
 #if HIST_FLOAT
-        complex<float> p; // Received symbol
-        complex<float> c; // Matched constellation point
+        std::complex<float> p; // Received symbol
+        std::complex<float> c; // Matched constellation point
 #else
         cu8 p; // Received symbol
         cu8 c; // Matched constellation point
@@ -1762,7 +1762,7 @@ struct cstln_transmitter : runnable
     cstln_transmitter(
         scheduler *sch,
         pipebuf<u8> &_in,
-        pipebuf<complex<Tout>> &_out
+        pipebuf<std::complex<Tout>> &_out
     ) :
         runnable(sch, "cstln_transmitter"),
         in(_in),
@@ -1779,13 +1779,13 @@ struct cstln_transmitter : runnable
 
         int count = min(in.readable(), out.writable());
         u8 *pin = in.rd(), *pend = pin + count;
-        complex<Tout> *pout = out.wr();
+        std::complex<Tout> *pout = out.wr();
 
         for (; pin < pend; ++pin, ++pout)
         {
-            complex<signed char> *cp = &cstln->symbols[*pin];
-            pout->re = Zout + cp->re;
-            pout->im = Zout + cp->im;
+            std::complex<signed char> *cp = &cstln->symbols[*pin];
+            pout->real(Zout + cp->real());
+            pout->imag(Zout + cp->imag());
         }
 
         in.read(count);
@@ -1794,7 +1794,7 @@ struct cstln_transmitter : runnable
 
   private:
     pipereader<u8> in;
-    pipewriter<complex<Tout>> out;
+    pipewriter<std::complex<Tout>> out;
 };
 // cstln_transmitter
 
@@ -1807,8 +1807,8 @@ struct rotator : runnable
 {
     rotator(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
-        pipebuf<complex<T>> &_out,
+        pipebuf<std::complex<T>> &_in,
+        pipebuf<std::complex<T>> &_out,
         float freq
     ) :
         runnable(sch, "rotator"),
@@ -1832,15 +1832,15 @@ struct rotator : runnable
     void run()
     {
         unsigned long count = min(in.readable(), out.writable());
-        complex<T> *pin = in.rd(), *pend = pin + count;
-        complex<T> *pout = out.wr();
+        std::complex<T> *pin = in.rd(), *pend = pin + count;
+        std::complex<T> *pout = out.wr();
 
         for (; pin < pend; ++pin, ++pout, ++index)
         {
             float c = lut_cos[index];
             float s = lut_sin[index];
-            pout->re = pin->re * c - pin->im * s;
-            pout->im = pin->re * s + pin->im * c;
+            pout->real(pin->real() * c - pin->imag() * s);
+            pout->imag(pin->real() * s + pin->imag() * c);
         }
 
         in.read(count);
@@ -1848,8 +1848,8 @@ struct rotator : runnable
     }
 
   private:
-    pipereader<complex<T>> in;
-    pipewriter<complex<T>> out;
+    pipereader<std::complex<T>> in;
+    pipewriter<std::complex<T>> out;
     float lut_cos[65536];
     float lut_sin[65536];
     unsigned short index; // Current phase
@@ -1870,7 +1870,7 @@ struct cnr_fft : runnable
 {
     cnr_fft(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         pipebuf<float> &_out,
         float _bandwidth,
         int nfft = 4096
@@ -1944,7 +1944,7 @@ struct cnr_fft : runnable
             sorted = new T[fft.size()];
         }
         if (!data) {
-            data = new complex<T>[fft.size()];
+            data = new std::complex<T>[fft.size()];
         }
         if (!power) {
             power = new T[fft.size()];
@@ -1956,7 +1956,7 @@ struct cnr_fft : runnable
         fft.inplace(data, true);
 
         for (int i = 0; i < fft.size(); ++i)
-            power[i] = data[i].re * data[i].re + data[i].im * data[i].im;
+            power[i] = data[i].real() * data[i].real() + data[i].imag() * data[i].imag();
 
         if (!avgpower)
         {
@@ -2039,12 +2039,12 @@ struct cnr_fft : runnable
         // fprintf(stderr, "l: %d m: %d min: %f max: %f\n", l, m, min, max);
     }
 
-    pipereader<complex<T>> in;
+    pipereader<std::complex<T>> in;
     pipewriter<float> out;
     cfft_engine<T> fft;
     T *avgpower;
     T *sorted;
-    complex<T> *data;
+    std::complex<T> *data;
     T *power;
     int phase;
     float cslots_ratio;
@@ -2062,7 +2062,7 @@ struct spectrum : runnable
 
     spectrum(
         scheduler *sch,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         pipebuf<float[NFFT]> &_out
     ) :
         runnable(sch, "spectrum"),
@@ -2102,7 +2102,7 @@ struct spectrum : runnable
   private:
     void do_spectrum()
     {
-        complex<T> data[fft.n];
+        std::complex<T> data[fft.n];
 
         if (decim == 1)
         {
@@ -2110,7 +2110,7 @@ struct spectrum : runnable
         }
         else
         {
-            complex<T> *pin = in.rd();
+            std::complex<T> *pin = in.rd();
 
             for (int i = 0; i < fft.n; ++i, pin += decim) {
                 data[i] = *pin;
@@ -2121,7 +2121,7 @@ struct spectrum : runnable
         float power[NFFT];
 
         for (int i = 0; i < fft.n; ++i) {
-            power[i] = (float)data[i].re * data[i].re + (float)data[i].im * data[i].im;
+            power[i] = (float)data[i].real() * data[i].real() + (float)data[i].imag() * data[i].imag();
         }
 
         if (!avgpower)
@@ -2146,7 +2146,7 @@ struct spectrum : runnable
         out.written(1);
     }
 
-    pipereader<complex<T>> in;
+    pipereader<std::complex<T>> in;
     pipewriter<float[NFFT]> out;
     cfft_engine<T> fft;
     T *avgpower;

@@ -18,75 +18,11 @@
 #define LEANSDR_MATH_H
 
 #include <cmath>
+#include <complex>
 #include <stdint.h>
 
 namespace leansdr
 {
-
-template <typename T>
-struct complex
-{
-    T re, im;
-
-    complex() {}
-
-    complex(T x) : re(x), im(0) {}
-    complex(T x, T y) : re(x), im(y) {}
-
-    inline void operator+=(const complex<T> &x)
-    {
-        re += x.re;
-        im += x.im;
-    }
-
-    inline void operator*=(const complex<T> &c)
-    {
-        T tre = re * c.re - im * c.im;
-        im = re * c.im + im * c.re;
-        re = tre;
-    }
-
-    inline void operator-=(const complex<T> &x)
-    {
-        re-=x.re;
-        im-=x.im;
-    }
-
-    inline void operator*=(const T &k)
-    {
-        re *= k;
-        im *= k;
-    }
-};
-
-template <typename T>
-complex<T> operator+(const complex<T> &a, const complex<T> &b)
-{
-    return complex<T>(a.re + b.re, a.im + b.im);
-}
-
-template<typename T>
-complex<T> operator -(const complex<T> &a, const complex<T> &b) {
-    return complex<T>(a.re - b.re, a.im - b.im);
-}
-
-template <typename T>
-complex<T> operator*(const complex<T> &a, const complex<T> &b)
-{
-    return complex<T>(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
-}
-
-template <typename T>
-complex<T> operator*(const complex<T> &a, const T &k)
-{
-    return complex<T>(a.re * k, a.im * k);
-}
-
-template <typename T>
-complex<T> operator*(const T &k, const complex<T> &a)
-{
-    return complex<T>(k * a.re, k * a.im);
-}
 
 template <typename T>
 T dotprod(const T *u, const T *v, int n)
@@ -101,13 +37,13 @@ T dotprod(const T *u, const T *v, int n)
 }
 
 template <typename T>
-inline T cnorm2(const complex<T> &u)
+inline T cnorm2(const std::complex<T> &u)
 {
-    return u.re * u.re + u.im * u.im;
+    return u.real() * u.real() + u.imag() * u.imag();
 }
 
 template <typename T>
-T cnorm2(const complex<T> *p, int n)
+T cnorm2(const std::complex<T> *p, int n)
 {
     T res = 0;
 
@@ -120,19 +56,19 @@ T cnorm2(const complex<T> *p, int n)
 
 // Return conj(u)*v
 template <typename T>
-inline complex<T> conjprod(const complex<T> &u, const complex<T> &v)
+inline std::complex<T> conjprod(const std::complex<T> &u, const std::complex<T> &v)
 {
-    return complex<T>(
-        u.re * v.re + u.im * v.im,
-        u.re * v.im - u.im * v.re
+    return std::complex<T>(
+        u.real() * v.real() + u.imag() * v.imag(),
+        u.real() * v.imag() - u.imag() * v.real()
     );
 }
 
 // Return sum(conj(u[i])*v[i])
 template <typename T>
-complex<T> conjprod(const complex<T> *u, const complex<T> *v, int n)
+std::complex<T> conjprod(const std::complex<T> *u, const std::complex<T> *v, int n)
 {
-    complex<T> acc = 0;
+    std::complex<T> acc = 0;
 
     while (n--) {
         acc += conjprod(*u++, *v++);
@@ -156,25 +92,24 @@ int log2i(uint64_t x);
 
 struct trig16
 {
-    complex<float> lut[65536]; // TBD static and shared
+    std::complex<float> lut[65536]; // TBD static and shared
 
     trig16()
     {
         for (int a = 0; a < 65536; ++a)
         {
             float af = a * 2 * M_PI / 65536;
-            lut[a].re = cosf(af);
-            lut[a].im = sinf(af);
+            lut[a] = {cosf(af), sinf(af)};
         }
     }
 
-    inline const complex<float> &expi(uint16_t a) const
+    inline const std::complex<float> &expi(uint16_t a) const
     {
         return lut[a];
     }
 
     // a must fit in a int32_t, otherwise behaviour is undefined
-    inline const complex<float> &expi(float a) const
+    inline const std::complex<float> &expi(float a) const
     {
         return expi((uint16_t)(int16_t)(int32_t)a);
     }

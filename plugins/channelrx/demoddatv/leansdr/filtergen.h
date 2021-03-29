@@ -32,7 +32,7 @@ void normalize_power(int n, T *coeffs, float gain = 1)
     float s2 = 0;
 
     for (int i = 0; i < n; ++i) {
-        s2 = s2 + coeffs[i] * coeffs[i]; // TBD complex
+        s2 = s2 + coeffs[i] * coeffs[i]; // TBD std::complex
     }
 
     if (s2) {

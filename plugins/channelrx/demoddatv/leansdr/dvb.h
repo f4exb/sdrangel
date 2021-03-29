@@ -1733,8 +1733,8 @@ struct viterbi_sync : runnable
 
         for (int i = 0; i < cstln->nsymbols; ++i)
         {
-            int8_t I = cstln->symbols[i].re;
-            int8_t Q = cstln->symbols[i].im;
+            int8_t I = cstln->symbols[i].real();
+            int8_t Q = cstln->symbols[i].imag();
 
             if (conj)
                 Q = -Q;

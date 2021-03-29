@@ -260,7 +260,7 @@ struct file_printer : runnable
 
 // [file_carrayprinter] writes all data available from a [pipebuf]
 // to a file descriptor on a single line.
-// Special case for complex.
+// Special case for std::complex.
 
 template <typename T>
 struct file_carrayprinter : runnable
@@ -271,7 +271,7 @@ struct file_carrayprinter : runnable
         const char *_format,
         const char *_sep,
         const char *_tail,
-        pipebuf<complex<T>> &_in,
+        pipebuf<std::complex<T>> &_in,
         int _fdout
     ) :
         runnable(sch, _in.name),
@@ -299,7 +299,7 @@ struct file_carrayprinter : runnable
             if (fout)
             {
                 fprintf(fout, head, n);
-                complex<T> *pin = in.rd();
+                std::complex<T> *pin = in.rd();
 
                 for (int i = 0; i < n; ++i)
                 {
@@ -307,7 +307,7 @@ struct file_carrayprinter : runnable
                         fprintf(fout, "%s", sep);
                     }
 
-                    fprintf(fout, format, pin[i].re * scale, pin[i].im * scale);
+                    fprintf(fout, format, pin[i].real() * scale, pin[i].imag() * scale);
                 }
 
                 fprintf(fout, "%s", tail);
@@ -322,7 +322,7 @@ struct file_carrayprinter : runnable
     int fixed_size; // Number of elements per batch, or 0.
 
   private:
-    pipereader<complex<T>> in;
+    pipereader<std::complex<T>> in;
     const char *head, *format, *sep, *tail;
     FILE *fout;
 };

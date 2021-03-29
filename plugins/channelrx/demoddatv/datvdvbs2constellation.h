@@ -119,14 +119,14 @@ template<typename T> struct datvdvbs2constellation: runnable
     long pixels_per_frame;
     /*cstln_lut<llr_ss, 256>*/ cstln_base **cstln;  // Optional ptr to optional constellation
     TVScreen *m_objDATVScreen;
-    pipereader<complex<T> > in;
+    pipereader<std::complex<T> > in;
     unsigned long phase;
     std::vector<int> cstln_rows;
     std::vector<int> cstln_cols;
 
     datvdvbs2constellation(
         scheduler *sch,
-        pipebuf<complex<T> > &_in,
+        pipebuf<std::complex<T> > &_in,
         T _xymin,
         T _xymax,
         const char *_name = nullptr,
@@ -154,13 +154,13 @@ template<typename T> struct datvdvbs2constellation: runnable
             {
                 m_objDATVScreen->resetImage();
 
-                complex<T> *p = in.rd(), *pend = p + pixels_per_frame;
+                std::complex<T> *p = in.rd(), *pend = p + pixels_per_frame;
 
                 for (; p < pend; ++p)
                 {
-                    m_objDATVScreen->selectRow(256 * (p->re - xymin) / (xymax - xymin));
+                    m_objDATVScreen->selectRow(256 * (p->real() - xymin) / (xymax - xymin));
                     m_objDATVScreen->setDataColor(
-                        256 - 256 * ((p->im - xymin) / (xymax - xymin)),
+                        256 - 256 * ((p->imag() - xymin) / (xymax - xymin)),
                         255, 0, 255);
                 }
 
@@ -203,9 +203,9 @@ template<typename T> struct datvdvbs2constellation: runnable
 
         for (int i = 0; i < (*cstln)->nsymbols; ++i)
         {
-            complex<signed char> *p = &(*cstln)->symbols[i];
-            int x = 256 * (p->re - xymin) / (xymax - xymin);
-            int y = 256 - 256 * (p->im - xymin) / (xymax - xymin);
+            std::complex<signed char> *p = &(*cstln)->symbols[i];
+            int x = 256 * (p->real() - xymin) / (xymax - xymin);
+            int y = 256 - 256 * (p->imag() - xymin) / (xymax - xymin);
 
             for (int d = -4; d <= 4; ++d)
             {

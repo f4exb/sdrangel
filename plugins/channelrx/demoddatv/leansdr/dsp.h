@@ -28,15 +28,15 @@ namespace leansdr
 // DSP blocks
 //////////////////////////////////////////////////////////////////////
 
-// [cconverter] converts complex streams between numric types,
+// [cconverter] converts std::complex streams between numric types,
 // with optional ofsetting and rational scaling.
 template <typename Tin, int Zin, typename Tout, int Zout, int Gn, int Gd>
 struct cconverter : runnable
 {
     cconverter(
         scheduler *sch,
-        pipebuf<complex<Tin>> &_in,
-        pipebuf<complex<Tout>> &_out
+        pipebuf<std::complex<Tin>> &_in,
+        pipebuf<std::complex<Tout>> &_out
     ) :
         runnable(sch, "cconverter"),
         in(_in),
@@ -47,8 +47,8 @@ struct cconverter : runnable
     void run()
     {
         unsigned long count = min(in.readable(), out.writable());
-        complex<Tin> *pin = in.rd(), *pend = pin + count;
-        complex<Tout> *pout = out.wr();
+        std::complex<Tin> *pin = in.rd(), *pend = pin + count;
+        std::complex<Tout> *pout = out.wr();
 
         for (; pin < pend; ++pin, ++pout)
         {
@@ -61,8 +61,8 @@ struct cconverter : runnable
     }
 
   private:
-    pipereader<complex<Tin>> in;
-    pipewriter<complex<Tout>> out;
+    pipereader<std::complex<Tin>> in;
+    pipewriter<std::complex<Tout>> out;
 };
 
 template <typename T>
@@ -109,18 +109,22 @@ struct cfft_engine
         }
 
         // Float constants
-        omega = new complex<T>[n];
-        omega_rev = new complex<T>[n];
+        omega = new std::complex<T>[n];
+        omega_rev = new std::complex<T>[n];
 
         for (int i = 0; i < n; ++i)
         {
             float a = 2.0 * M_PI * i / n;
-            omega_rev[i].re = (omega[i].re = cosf(a));
-            omega_rev[i].im = -(omega[i].im = sinf(a));
+            omega_rev[i].real(cosf(a));
+            omega[i].real(cosf(a));
+            omega_rev[i].imag(sinf(a));
+            omega[i].imag(sinf(a));
+            // omega_rev[i].re = (omega[i].re = cosf(a));
+            // omega_rev[i].im = -(omega[i].im = sinf(a));
         }
     }
 
-    void inplace(complex<T> *data, bool reverse = false)
+    void inplace(std::complex<T> *data, bool reverse = false)
     {
         // Bit-reversal permutation
         for (int i = 0; i < n; ++i)
@@ -129,13 +133,13 @@ struct cfft_engine
 
             if (r < i)
             {
-                complex<T> tmp = data[i];
+                std::complex<T> tmp = data[i];
                 data[i] = data[r];
                 data[r] = tmp;
             }
         }
 
-        complex<T> *om = reverse ? omega_rev : omega;
+        std::complex<T> *om = reverse ? omega_rev : omega;
         // Danielson-Lanczos
         for (int i = 0; i < logn; ++i)
         {
@@ -148,14 +152,14 @@ struct cfft_engine
 
                 for (int k = 0; k < hbs; ++k)
                 {
-                    complex<T> &w = om[k * dom];
-                    complex<T> &dqk = data[q + k];
-                    complex<T> x(w.re * dqk.re - w.im * dqk.im,
-                                 w.re * dqk.im + w.im * dqk.re);
-                    data[q + k].re = data[p + k].re - x.re;
-                    data[q + k].im = data[p + k].im - x.im;
-                    data[p + k].re = data[p + k].re + x.re;
-                    data[p + k].im = data[p + k].im + x.im;
+                    std::complex<T> &w = om[k * dom];
+                    std::complex<T> &dqk = data[q + k];
+                    std::complex<T> x(w.real() * dqk.real() - w.imag() * dqk.imag(),
+                                 w.real() * dqk.imag() + w.imag() * dqk.real());
+                    data[q + k].real(data[p + k].real() - x.real());
+                    data[q + k].imag(data[p + k].imag() - x.imag());
+                    data[p + k].real(data[p + k].real() + x.real());
+                    data[p + k].imag(data[p + k].imag() + x.imag());
                 }
             }
         }
@@ -164,10 +168,8 @@ struct cfft_engine
         {
             float invn = 1.0 / n;
 
-            for (int i = 0; i < n; ++i)
-            {
-                data[i].re *= invn;
-                data[i].im *= invn;
+            for (int i = 0; i < n; ++i) {
+                data[i] *= invn;
             }
         }
     }
@@ -187,8 +189,8 @@ struct cfft_engine
     }
 
     int *bitrev;
-    complex<T> *omega;
-    complex<T> *omega_rev;
+    std::complex<T> *omega;
+    std::complex<T> *omega_rev;
     int n;
     float invsqrtn;
     int logn;
@@ -275,14 +277,14 @@ struct scaler : runnable
     pipewriter<Tout> out;
 };
 
-// [awgb_c] generates complex white gaussian noise.
+// [awgb_c] generates std::complex white gaussian noise.
 
 template <typename T>
 struct wgn_c : runnable
 {
     wgn_c(
         scheduler *sch,
-        pipebuf<complex<T>>
+        pipebuf<std::complex<T>>
         &_out
     ) :
         runnable(sch, "awgn"),
@@ -294,7 +296,7 @@ struct wgn_c : runnable
     void run()
     {
         int n = out.writable();
-        complex<T> *pout = out.wr(), *pend = pout + n;
+        std::complex<T> *pout = out.wr(), *pend = pout + n;
 
         while (pout < pend)
         {
@@ -319,7 +321,7 @@ struct wgn_c : runnable
     float stddev;
 
   private:
-    pipewriter<complex<T>> out;
+    pipewriter<std::complex<T>> out;
 };
 
 template <typename T>
@@ -453,9 +455,9 @@ struct fir_filter : runnable
         {
             float a = 2 * M_PI * f * (i - ncoeffs / 2.0);
             float c = cosf(a), s = sinf(a);
-            // TBD Support T=complex
-            shifted_coeffs[i].re = coeffs[i] * c;
-            shifted_coeffs[i].im = coeffs[i] * s;
+            // TBD Support T=std::complex
+            shifted_coeffs[i].real(coeffs[i] * c);
+            shifted_coeffs[i].imag(coeffs[i] * s);
         }
         current_freq = f;
     }
@@ -556,7 +558,7 @@ struct fir_resampler : runnable
         {
             float a = 2 * M_PI * f * i;
             float c = cosf(a), s = sinf(a);
-            // TBD Support T=complex
+            // TBD Support T=std::complex
             shifted_coeffs[i].re = coeffs[i] * c;
             shifted_coeffs[i].im = coeffs[i] * s;
         }
