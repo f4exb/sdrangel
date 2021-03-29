@@ -1,3 +1,18 @@
+sdrangel (6.7.0-1) unstable; urgency=medium
+
+  * New DATV modulator plugin: DVB-S modulator. PR #810
+  * FileInput: Sample rate fixes, PR #803
+  * Set depending objects to nullptr before deleting GUI. Fixes #806
+  * SSB demod: increase audio volume range to -10 to +40 dB.
+  * Fix impulse response of FIR filter. PR #811
+  * HackRF: auto baseband filter and hardware LO correction PR #812, 824
+  * DATV demod: many fixes to improve stabilty of DVB-S2
+  * ChirpChat demod: LoRa APRS support. PR #814, 815
+  * SatTracker: Fixed Doppler timing interval. PR #818
+  * DemodAnalyzer: Support Packer demod. PR #820
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 29 Mar 2021 19:09:55 +0200
+
 sdrangel (6.6.2-1) unstable; urgency=medium
 
   * FileSink: File name handling in settings and API. PR #798
