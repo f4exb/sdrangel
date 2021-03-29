@@ -77,7 +77,8 @@ public:
     void setCNRLabel(QLabel *cnrLabel) { m_basebandSink->setCNRLabel(cnrLabel); }
     void setMERMeter(LevelMeterSignalDB *merMeter) { m_basebandSink->setMERMeter(merMeter); }
     void setCNRMeter(LevelMeterSignalDB *cnrMeter) { m_basebandSink->setCNRMeter(cnrMeter); }
-    DATVideostream *SetVideoRender(DATVideoRender *objScreen) { return m_basebandSink->SetVideoRender(objScreen); }
+    void SetVideoRender(DATVideoRender *objScreen) { m_basebandSink->SetVideoRender(objScreen); }
+    DATVideostream *getVideoStream() { return m_basebandSink->getVideoStream(); }
     bool audioActive() { return m_basebandSink->audioActive(); }
     bool audioDecodeOK() { return m_basebandSink->audioDecodeOK(); }
     bool videoActive() { return m_basebandSink->videoActive(); }

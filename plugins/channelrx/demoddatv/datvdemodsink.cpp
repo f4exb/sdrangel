@@ -35,7 +35,7 @@ DATVDemodSink::DATVDemodSink() :
     m_blnNeedConfigUpdate(false),
     m_objRegisteredTVScreen(nullptr),
     m_objRegisteredVideoRender(nullptr),
-    m_objVideoStream(nullptr),
+    m_objVideoStream(new DATVideostream()),
     m_udpStream(leansdr::tspacket::SIZE),
     m_objRenderThread(nullptr),
     m_merLabel(nullptr),
@@ -54,23 +54,23 @@ DATVDemodSink::DATVDemodSink() :
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
     ResetDATVFrameworkPointers();
-    m_objVideoStream = new DATVideostream();
     m_objRFFilter = new fftfilt(-256000.0 / 1024000.0, 256000.0 / 1024000.0, m_rfFilterFftLength);
 }
 
 DATVDemodSink::~DATVDemodSink()
 {
-    m_blnInitialized=false;
+    m_blnInitialized = false;
 
-    if (m_objVideoStream)
-    {
-        //Immediately exit from DATVideoStream if waiting for data before killing thread
-        m_objVideoStream->ThreadTimeOut = 0;
-        m_objVideoStream->deleteLater();
-    }
+    //Immediately exit from DATVideoStream if waiting for data before killing thread
+    m_objVideoStream->ThreadTimeOut = 0;
+    m_objVideoStream->deleteLater();
 
     stopVideo();
     CleanUpDATVFramework();
+
+    if (m_objRenderThread) {
+        delete m_objRenderThread;
+    }
 
     delete m_objRFFilter;
 }
@@ -110,12 +110,11 @@ void DATVDemodSink::setCNRMeter(LevelMeterSignalDB *cnrMeter) {
     m_cnrMeter = cnrMeter;
 }
 
-DATVideostream *DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
+void DATVDemodSink::SetVideoRender(DATVideoRender *objScreen)
 {
     m_objRegisteredVideoRender = objScreen;
     m_objRegisteredVideoRender->setAudioFIFO(&m_audioFifo);
     m_objRenderThread = new DATVideoRenderThread(m_objRegisteredVideoRender, m_objVideoStream);
-    return m_objVideoStream;
 }
 
 bool DATVDemodSink::audioActive()
@@ -453,8 +452,8 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
 
     // OUTPUT PREPROCESSED DATA
     sampler = nullptr;
-    coeffs_sampler=nullptr;
-    ncoeffs_sampler=0;
+    coeffs_sampler = nullptr;
+    ncoeffs_sampler = 0;
 
     p_symbols = nullptr;
     p_freq = nullptr;
@@ -472,8 +471,8 @@ void DATVDemodSink::ResetDATVFrameworkPointers()
     m_objDemodulator = nullptr;
 
     //DECONVOLUTION AND SYNCHRONIZATION
-    p_bytes=nullptr;
-    r_deconv=nullptr;
+    p_bytes = nullptr;
+    r_deconv = nullptr;
     r = nullptr;
 
     p_descrambled = nullptr;
@@ -1312,7 +1311,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
                 {
                     m_objScheduler->step();
 
-                    m_lngReadIQ=0;
+                    m_lngReadIQ = 0;
                     delete p_rawiq_writer;
                     p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
                 }

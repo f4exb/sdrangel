@@ -210,8 +210,9 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_objDATVDemod->setCNRLabel(ui->cnrText);
     m_objDATVDemod->setMERMeter(ui->merMeter);
     m_objDATVDemod->setCNRMeter(ui->cnrMeter);
+    m_objDATVDemod->SetVideoRender(ui->screenTV_2);
 
-    connect(m_objDATVDemod->SetVideoRender(ui->screenTV_2), &DATVideostream::onDataPackets, this, &DATVDemodGUI::on_StreamDataAvailable);
+    connect(m_objDATVDemod->getVideoStream(), &DATVideostream::onDataPackets, this, &DATVDemodGUI::on_StreamDataAvailable);
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
 
     m_intPreviousDecodedData=0;

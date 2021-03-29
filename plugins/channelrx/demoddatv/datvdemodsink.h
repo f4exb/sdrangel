@@ -63,7 +63,8 @@ public:
     void setCNRLabel(QLabel *cnrLabel);
     void setMERMeter(LevelMeterSignalDB *merMeter);
     void setCNRMeter(LevelMeterSignalDB *cnrMeter);
-    DATVideostream * SetVideoRender(DATVideoRender *objScreen);
+    void SetVideoRender(DATVideoRender *objScreen);
+    DATVideostream *getVideoStream() { return m_objVideoStream; }
     bool audioActive();
     bool audioDecodeOK();
     bool videoActive();

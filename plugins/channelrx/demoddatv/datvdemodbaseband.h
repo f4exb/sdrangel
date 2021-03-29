@@ -94,7 +94,8 @@ public:
     void setCNRMeter(LevelMeterSignalDB *cnrMeter) { m_sink.setCNRMeter(cnrMeter); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
-    DATVideostream *SetVideoRender(DATVideoRender *objScreen) { return m_sink.SetVideoRender(objScreen); }
+    void SetVideoRender(DATVideoRender *objScreen) { m_sink.SetVideoRender(objScreen); }
+    DATVideostream *getVideoStream() { return m_sink.getVideoStream(); }
     bool audioActive() { return m_sink.audioActive(); }
     bool audioDecodeOK() { return m_sink.audioDecodeOK(); }
     bool videoActive() { return m_sink.videoActive(); }
