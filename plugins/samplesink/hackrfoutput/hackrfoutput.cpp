@@ -306,20 +306,19 @@ bool HackRFOutput::handleMessage(const Message& message)
 	}
 }
 
-void HackRFOutput::setDeviceCenterFrequency(quint64 freq_hz, qint32 LOppmTenths)
+void HackRFOutput::setDeviceCenterFrequency(quint64 freq_hz)
 {
     if (!m_dev) {
         return;
     }
 
-    qint64 df = ((qint64)freq_hz * LOppmTenths) / 10000000LL;
-    hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz + df));
+    hackrf_error rc = (hackrf_error) hackrf_set_freq(m_dev, static_cast<uint64_t>(freq_hz));
 
-    if (rc != HACKRF_SUCCESS) {
-        qWarning("HackRFOutput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz + df);
-    } else {
-        qDebug("HackRFOutput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz + df);
-    }
+	if (rc != HACKRF_SUCCESS) {
+		qWarning("HackRFInput::setDeviceCenterFrequency: could not frequency to %llu Hz", freq_hz);
+	} else {
+		qDebug("HackRFInput::setDeviceCenterFrequency: frequency set to %llu Hz", freq_hz);
+	}
 }
 
 bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool force)
@@ -413,8 +412,10 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
     if ((m_settings.m_centerFrequency != settings.m_centerFrequency) || force) {
         reverseAPIKeys.append("centerFrequency");
     }
-    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force) {
+    if ((m_settings.m_LOppmTenths != settings.m_LOppmTenths) || force)
+    {
         reverseAPIKeys.append("LOppmTenths");
+        DeviceHackRF::setDevicePPMCorrection(m_dev, settings.m_LOppmTenths);
     }
     if ((m_settings.m_fcPos != settings.m_fcPos) || force) {
         reverseAPIKeys.append("fcPos");
@@ -428,7 +429,6 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
 
 	if ((m_settings.m_centerFrequency != settings.m_centerFrequency) ||
 	    (m_settings.m_devSampleRate != settings.m_devSampleRate) ||
-        (m_settings.m_LOppmTenths != settings.m_LOppmTenths) ||
         (m_settings.m_log2Interp != settings.m_log2Interp) ||
         (m_settings.m_fcPos != settings.m_fcPos) ||
         (m_settings.m_transverterMode != settings.m_transverterMode) ||
@@ -441,7 +441,7 @@ bool HackRFOutput::applySettings(const HackRFOutputSettings& settings, bool forc
                 (DeviceSampleSink::fcPos_t) settings.m_fcPos,
                 settings.m_devSampleRate,
                 settings.m_transverterMode);
-        setDeviceCenterFrequency(deviceCenterFrequency, settings.m_LOppmTenths);
+        setDeviceCenterFrequency(deviceCenterFrequency);
 
         if (m_deviceAPI->getSourceBuddies().size() > 0)
         {

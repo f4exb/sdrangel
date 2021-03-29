@@ -30,6 +30,7 @@ public:
     static hackrf_device *open_hackrf(int sequence);
     static hackrf_device *open_hackrf(const char * const serial);
     static void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
+    static void setDevicePPMCorrection(hackrf_device *dev, qint32 loPPMTenths);
 protected:
     DeviceHackRF();
     DeviceHackRF(const DeviceHackRF&) {}
