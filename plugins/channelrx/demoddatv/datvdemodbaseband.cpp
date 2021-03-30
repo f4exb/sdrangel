@@ -24,7 +24,6 @@
 #include "datvdemodbaseband.h"
 
 MESSAGE_CLASS_DEFINITION(DATVDemodBaseband::MsgConfigureDATVDemodBaseband, Message)
-MESSAGE_CLASS_DEFINITION(DATVDemodBaseband::MsgConfigureChannelizer, Message)
 
 DATVDemodBaseband::DATVDemodBaseband() :
     m_running(false),
@@ -127,18 +126,6 @@ bool DATVDemodBaseband::handleMessage(const Message& cmd)
         qDebug() << "DATVDemodBaseband::handleMessage: MsgConfigureDATVDemodBaseband";
 
         applySettings(cfg.getSettings(), cfg.getForce());
-
-        return true;
-    }
-    else if (MsgConfigureChannelizer::match(cmd))
-    {
-        QMutexLocker mutexLocker(&m_mutex);
-        MsgConfigureChannelizer& cfg = (MsgConfigureChannelizer&) cmd;
-        qDebug() << "DATVDemodBaseband::handleMessage: MsgConfigureChannelizer"
-            << "(requested) sinkSampleRate: " << cfg.getSinkSampleRate()
-            << "(requested) sinkCenterFrequency: " << cfg.getSinkCenterFrequency();
-        m_channelizer->setChannelization(cfg.getSinkSampleRate(), cfg.getSinkCenterFrequency());
-        m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         return true;
     }
