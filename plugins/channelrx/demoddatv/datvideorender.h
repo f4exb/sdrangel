@@ -234,8 +234,7 @@ class DATVideoRenderThread : public QThread
         m_renderingVideo = false;
     }
 
-    void stopRendering()
-    {
+    void stopRendering() {
         m_renderingVideo = false;
     }
 

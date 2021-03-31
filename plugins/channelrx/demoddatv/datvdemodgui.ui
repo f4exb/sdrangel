@@ -720,6 +720,9 @@
          <height>19</height>
         </rect>
        </property>
+       <property name="toolTip">
+        <string>Modulation detection status</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>

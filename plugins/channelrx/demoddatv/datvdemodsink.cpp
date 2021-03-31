@@ -177,7 +177,6 @@ bool DATVDemodSink::playVideo()
         m_objVideoStream->MultiThreaded = true;
         m_objVideoStream->ThreadTimeOut = DATVideoRenderThread::videoThreadTimeoutMs;
         m_objRenderThread->start();
-        return true;
     }
 
     return false;
@@ -893,7 +892,7 @@ void DATVDemodSink::InitDATVS2Framework()
     m_objCfg.fastlock = m_settings.m_fastLock;
 
     m_objCfg.sampler = m_settings.m_filter;
-    m_objCfg.rolloff = m_settings.m_rollOff;  //0...1
+    m_objCfg.rolloff = m_settings.m_rollOff * 1.001f;  //0...1 and correct 0.2 bug
     m_objCfg.rrc_rej = (float) m_settings.m_excursion;  //dB
     m_objCfg.rrc_steps = 0; //auto
 

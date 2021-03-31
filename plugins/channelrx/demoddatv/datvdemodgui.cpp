@@ -346,8 +346,10 @@ void DATVDemodGUI::displaySettings()
     }
 #endif
 
-    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
+    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
+    {
         ui->statusText->clear();
+        ui->statusText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
     }
 
     ui->cmbFilter->setCurrentIndex((int) m_settings.m_filter);
@@ -606,8 +608,10 @@ void DATVDemodGUI::on_cmbStandard_currentIndexChanged(int index)
     }
 #endif
 
-    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S) {
+    if (m_settings.m_standard == DATVDemodSettings::dvb_version::DVB_S)
+    {
         ui->statusText->clear();
+        ui->statusText->setStyleSheet("QLabel { background:rgb(79,79,79); }");
     }
 
     m_settings.validateSystemConfiguration();

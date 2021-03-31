@@ -793,7 +793,11 @@ struct s2_frame_receiver : runnable
 
     void run_frame_detect()
     {
-        if ( discard )
+        cstln->m_rateCode = -1;
+        cstln->m_typeCode = -1;
+        cstln->m_setByModcod = cstln->m_typeCode != -1;
+
+        if (discard)
         {
             size_t d = std::min(discard, in.readable());
             in.read(d);
@@ -921,7 +925,7 @@ struct s2_frame_receiver : runnable
         if (sof_errors >= S2_MAX_ERR_SOF)
         {
             if (sch->debug2) {
-                fprintf(stderr, "Too many errors in SOF (%u/26)\n", sof_errors);
+                fprintf(stderr, "Too many errors in SOF (%u/%u)\n", sof_errors, S2_MAX_ERR_SOF);
             }
 
             in.read(ss.p-in.rd());
@@ -1087,7 +1091,7 @@ struct s2_frame_receiver : runnable
             cstln = dcstln;  // Used by GUI
             cstln->m_rateCode = mcinfo->rate < code_rate::FEC_COUNT ? mcinfo->rate : -1;
             cstln->m_typeCode = mcinfo->c < cstln_base::predef::COUNT ? mcinfo->c : -1;
-            cstln->m_setByModcod = true;
+            cstln->m_setByModcod = cstln->m_typeCode != -1;
             // Output special slot with PLS information.
             pout->is_pls = true;
             pout->pls = pls;
@@ -1658,17 +1662,19 @@ struct s2_frame_receiver : runnable
             fprintf(stderr, "match_frame\n");
         }
 
+        bool pilots = pls->pilots; // force to true for lighter processing
         // With pilots: Use first block of data slots.
         // Without pilots: Use whole frame.
-        int ns = pls->pilots ? 16*90 : S*90;
+        int ns = pilots ? 16*90 : S*90;
         // Pilots: steps of ~700 ppm (= 1 cycle between pilots)
         // No pilots, normal frames: steps of ~30(QPSK) - ~80(32APSK) ppm
         // No pilots, short frames: steps of ~120(QPSK) - 300(32APSK) ppm
-        int nwrap = pls->pilots ? 16*90+pilot.LENGTH : S*90+sof.LENGTH;
+        int nwrap = pilots ? 16*90+pilot.LENGTH : S*90+sof.LENGTH;
         // Frequency search range.
-        int sliprange = pls->pilots ? 10 : 50;  // TBD Customizable ?
+        int sliprange = pilots ? 10 : 50;  // TBD Customizable ?
         float besterr = 1e99;
         float bestslip = 0;  // Avoid compiler warning
+        int err_div = ns * cstln_amp * cstln_amp;
 
         for (int slip = -sliprange; slip <= sliprange; ++slip)
         {
@@ -1685,12 +1691,12 @@ struct s2_frame_receiver : runnable
                 std::complex<float> p = interp_next(&ssl) * ssl.gain;
                 typename cstln_lut<SOFTSYMB,256>::result *cr =
                     dcstln->lookup(p.real(), p.imag());
-                std::complex<int8_t> &cp = dcstln->symbols[cr->symbol];
-                std::complex<float> ev(p.real()-cp.real(), p.imag()-cp.imag());
-                err += cnorm2(ev);
+                float evreal = p.real() - dcstln->symbols[cr->symbol].real();
+                float evimag = p.imag() - dcstln->symbols[cr->symbol].imag();
+                err += evreal*evreal + evimag*evimag;
             }
 
-            err /= ns * cstln_amp * cstln_amp;
+            err /= err_div;
 
             if (err < besterr)
             {
