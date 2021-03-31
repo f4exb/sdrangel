@@ -150,10 +150,12 @@ void DATVDemodBaseband::applySettings(const DATVDemodSettings& settings, bool fo
 {
     qDebug("DATVDemodBaseband::applySettings");
 
-    if ((settings.m_centerFrequency != m_settings.m_centerFrequency)|| force)
+    if ((settings.m_centerFrequency != m_settings.m_centerFrequency) ||
+        (settings.m_symbolRate != m_settings.m_symbolRate) || force)
     {
-        unsigned int desiredSampleRate = m_channelizer->getBasebandSampleRate();
+        unsigned int desiredSampleRate = 2 * settings.m_symbolRate; // m_channelizer->getBasebandSampleRate();
         m_channelizer->setChannelization(desiredSampleRate, settings.m_centerFrequency);
+        m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(m_channelizer->getBasebandSampleRate()));
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
     }
 
