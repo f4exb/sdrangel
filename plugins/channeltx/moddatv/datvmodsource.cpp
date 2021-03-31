@@ -187,6 +187,9 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings)
         case DATVModSettings::FEC35:
             uncodedBlockSize = 38688;
             break;
+        default:
+            qDebug() << "DATVModSource::getDVBSDataBitrate: Unsupported DVB-S2 code rate";
+            break;
         }
         fecFactor = (uncodedBlockSize-bbHeaderBits)/(float)codedBlockSize;
         float symbolsPerFrame = codedBlockSize/bitsPerSymbol;
@@ -716,6 +719,9 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
             case DATVModSettings::APSK32:
                 m_dvbs2Format.constellation = M_32APSK;
                 break;
+            default:
+                qDebug() << "DATVModSource::applySettings: Unsupported modulation for DVB-S2";
+                break;
             }
 
             switch (settings.m_fec)
@@ -752,6 +758,9 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
                 break;
             case DATVModSettings::FEC35:
                 m_dvbs2Format.code_rate = CR_3_5;
+                break;
+            default:
+                qDebug() << "DATVModSource::getDVBSDataBitrate: Unsupported code rate for DVB-S2";
                 break;
             }
 

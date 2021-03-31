@@ -32,7 +32,7 @@ void display_poly( int *in, int len )
 //
 void display_poly_pack( unsigned int *in, int len )
 {
-
+   (void) in;
    //     loggerf("\n");
 	for( int i = 0; i < len/32; i++ )
 	{
