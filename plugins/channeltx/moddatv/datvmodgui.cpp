@@ -225,16 +225,59 @@ void DATVModGUI::on_deltaFrequency_changed(qint64 value)
 
 void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
 {
+    int idx;
+
     m_settings.m_standard = (DATVModSettings::DVBStandard) index;
 
-    ui->fec->blockSignals(true);
     ui->rollOff->blockSignals(true);
     ui->modulation->blockSignals(true);
 
-    ui->fec->clear();
     ui->rollOff->clear();
     ui->modulation->clear();
 
+    if (m_settings.m_standard == DATVModSettings::DVB_S)
+    {
+        ui->rollOff->addItem("0.35");
+        ui->modulation->addItem("BPSK");
+        ui->modulation->addItem("QPSK");
+    }
+    else
+    {
+        ui->rollOff->addItem("0.20");
+        ui->rollOff->addItem("0.25");
+        ui->rollOff->addItem("0.35");
+        ui->modulation->addItem("QPSK");
+        ui->modulation->addItem("8PSK");
+        ui->modulation->addItem("16APSK");
+        ui->modulation->addItem("32APSK");
+    }
+
+    ui->rollOff->blockSignals(false);
+    ui->modulation->blockSignals(false);
+
+    m_doApplySettings = false;
+
+    idx = ui->rollOff->findText(QString("%1").arg(m_settings.m_rollOff, 0, 'f', 2));
+    idx = idx == -1 ? 0 : idx;
+    ui->rollOff->setCurrentIndex(idx);
+    on_rollOff_currentIndexChanged(idx);
+    idx = ui->modulation->findText(DATVModSettings::mapModulation(m_settings.m_modulation));
+    idx = idx == -1 ? 0 : idx;
+    ui->modulation->setCurrentIndex(idx);
+    on_modulation_currentIndexChanged(idx);
+
+    updateFEC();
+
+    m_doApplySettings = true;
+
+    applySettings();
+}
+
+void DATVModGUI::updateFEC()
+{
+    ui->fec->blockSignals(true);
+
+    ui->fec->clear();
     if (m_settings.m_standard == DATVModSettings::DVB_S)
     {
         ui->fec->addItem("1/2");
@@ -242,11 +285,8 @@ void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
         ui->fec->addItem("3/4");
         ui->fec->addItem("5/6");
         ui->fec->addItem("7/8");
-        ui->rollOff->addItem("0.35");
-        ui->modulation->addItem("BPSK");
-        ui->modulation->addItem("QPSK");
     }
-    else
+    else if (m_settings.m_modulation == DATVModSettings::QPSK)
     {
         ui->fec->addItem("1/4");
         ui->fec->addItem("1/3");
@@ -259,29 +299,51 @@ void DATVModGUI::on_dvbStandard_currentIndexChanged(int index)
         ui->fec->addItem("5/6");
         ui->fec->addItem("8/9");
         ui->fec->addItem("9/10");
-        ui->rollOff->addItem("0.20");
-        ui->rollOff->addItem("0.25");
-        ui->rollOff->addItem("0.35");
-        ui->modulation->addItem("QPSK");
-        ui->modulation->addItem("8PSK");
-        ui->modulation->addItem("16APSK");
-        ui->modulation->addItem("32APSK");
+    }
+    else if (m_settings.m_modulation == DATVModSettings::PSK8)
+    {
+        ui->fec->addItem("3/5");
+        ui->fec->addItem("2/3");
+        ui->fec->addItem("3/4");
+        ui->fec->addItem("5/6");
+        ui->fec->addItem("8/9");
+        ui->fec->addItem("9/10");
+    }
+    else if (m_settings.m_modulation == DATVModSettings::APSK16)
+    {
+        ui->fec->addItem("2/3");
+        ui->fec->addItem("3/4");
+        ui->fec->addItem("4/5");
+        ui->fec->addItem("5/6");
+        ui->fec->addItem("8/9");
+        ui->fec->addItem("9/10");
+    }
+    else if (m_settings.m_modulation == DATVModSettings::APSK32)
+    {
+        ui->fec->addItem("3/4");
+        ui->fec->addItem("4/5");
+        ui->fec->addItem("5/6");
+        ui->fec->addItem("8/9");
+        ui->fec->addItem("9/10");
     }
 
-    ui->fec->setCurrentIndex(ui->fec->findText(DATVModSettings::mapCodeRate(m_settings.m_fec)));
-    ui->rollOff->setCurrentIndex(ui->rollOff->findText(QString("%1").arg(m_settings.m_rollOff, 0, 'f', 2)));
-    ui->modulation->setCurrentIndex(ui->modulation->findText(DATVModSettings::mapModulation(m_settings.m_modulation)));
-
     ui->fec->blockSignals(false);
-    ui->rollOff->blockSignals(false);
-    ui->modulation->blockSignals(false);
 
-    applySettings();
+    int idx = ui->fec->findText(DATVModSettings::mapCodeRate(m_settings.m_fec));
+    idx = idx == -1 ? 0 : idx;
+    ui->fec->setCurrentIndex(idx);
+    on_fec_currentIndexChanged(idx);
 }
 
 void DATVModGUI::on_modulation_currentIndexChanged(int index)
 {
-    m_settings.m_modulation = (DATVModSettings::DATVModulation) index;
+    if (m_settings.m_standard == DATVModSettings::DVB_S)
+        m_settings.m_modulation = (DATVModSettings::DATVModulation) index;
+    else
+        m_settings.m_modulation = (DATVModSettings::DATVModulation) (index + 1);
+    m_doApplySettings = false;
+    updateFEC();
+    m_doApplySettings = true;
     applySettings();
 }
 

@@ -9,6 +9,18 @@ set(moddatv_SOURCES
     datvmodsettings.cpp
     datvmodwebapiadapter.cpp
     dvb-s/dvb-s.cpp
+    dvb-s2/DVB2.cpp
+    dvb-s2/DVBS2.cpp
+    dvb-s2/dvb2_bbheader.cpp
+    dvb-s2/dvb2_bch.cpp
+    dvb-s2/dvb2_ldpc_encode.cpp
+    dvb-s2/dvb2_ldpc_tables.cpp
+    dvb-s2/dvb2_scrambler.cpp
+    dvb-s2/dvbs2_interleave.cpp
+    dvb-s2/dvbs2_modulator.cpp
+    dvb-s2/dvbs2_physical.cpp
+    dvb-s2/dvbs2_scrambler.cpp
+    dvb-s2/dvbs2_tables.cpp
 )
 
 set(moddatv_HEADERS
@@ -20,6 +32,9 @@ set(moddatv_HEADERS
     datvmodsettings.h
     datvmodwebapiadapter.h
     dvb-s/dvb-s.h
+    dvb-s/dvb-s.h
+    dvb-s2/DVB2.h
+    dvb-s2/DVBS2.h
 )
 
 include_directories(
