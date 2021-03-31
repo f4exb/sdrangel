@@ -74,49 +74,10 @@ int DATVModSource::getTSBitrate(const QString& filename)
 // Get data bitrate (i.e. excluding FEC overhead)
 int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings)
 {
-    float rsFactor = DVBS::tsPacketLen/(float)DVBS::rsPacketLen;
-    float convFactor;
+    float fecFactor;
+    float plFactor;
     float bitsPerSymbol;
 
-    switch (settings.m_fec)
-    {
-    case DATVModSettings::FEC12:
-        convFactor = 1.0f/2.0f;
-        break;
-    case DATVModSettings::FEC23:
-        convFactor = 2.0f/3.0f;
-        break;
-    case DATVModSettings::FEC34:
-        convFactor = 3.0f/4.0f;
-        break;
-    case DATVModSettings::FEC56:
-        convFactor = 5.0f/6.0f;
-        break;
-    case DATVModSettings::FEC78:
-        convFactor = 7.0f/8.0f;
-        break;
-    case DATVModSettings::FEC45:
-        convFactor = 4.0f/5.0f;
-        break;
-    case DATVModSettings::FEC89:
-        convFactor = 8.0f/9.0f;
-        break;
-    case DATVModSettings::FEC910:
-        convFactor = 9.0f/10.0f;
-        break;
-    case DATVModSettings::FEC14:
-        convFactor = 1.0f/4.0f;
-        break;
-    case DATVModSettings::FEC13:
-        convFactor = 1.0f/3.0f;
-        break;
-    case DATVModSettings::FEC25:
-        convFactor = 2.0f/5.0f;
-        break;
-    case DATVModSettings::FEC35:
-        convFactor = 3.0f/5.0f;
-        break;
-    }
     switch (settings.m_modulation)
     {
     case DATVModSettings::BPSK:
@@ -136,16 +97,113 @@ int DATVModSource::getDVBSDataBitrate(const DATVModSettings& settings)
         break;
     }
 
-    return std::round(settings.m_symbolRate * bitsPerSymbol * rsFactor * convFactor);
+    if (settings.m_standard == DATVModSettings::DVB_S)
+    {
+        float rsFactor;
+        float convFactor;
+
+        rsFactor = DVBS::tsPacketLen/(float)DVBS::rsPacketLen;
+        switch (settings.m_fec)
+        {
+        case DATVModSettings::FEC12:
+            convFactor = 1.0f/2.0f;
+            break;
+        case DATVModSettings::FEC23:
+            convFactor = 2.0f/3.0f;
+            break;
+        case DATVModSettings::FEC34:
+            convFactor = 3.0f/4.0f;
+            break;
+        case DATVModSettings::FEC56:
+            convFactor = 5.0f/6.0f;
+            break;
+        case DATVModSettings::FEC78:
+            convFactor = 7.0f/8.0f;
+            break;
+        case DATVModSettings::FEC45:
+            convFactor = 4.0f/5.0f;
+            break;
+        case DATVModSettings::FEC89:
+            convFactor = 8.0f/9.0f;
+            break;
+        case DATVModSettings::FEC910:
+            convFactor = 9.0f/10.0f;
+            break;
+        case DATVModSettings::FEC14:
+            convFactor = 1.0f/4.0f;
+            break;
+        case DATVModSettings::FEC13:
+            convFactor = 1.0f/3.0f;
+            break;
+        case DATVModSettings::FEC25:
+            convFactor = 2.0f/5.0f;
+            break;
+        case DATVModSettings::FEC35:
+            convFactor = 3.0f/5.0f;
+            break;
+        }
+        fecFactor = rsFactor * convFactor;
+        plFactor = 1.0f;
+    }
+    else
+    {
+        // For normal frames
+        int codedBlockSize = 64800;
+        int uncodedBlockSize;
+        int bbHeaderBits = 80;
+        // See table 5a in DVBS2 spec
+        switch (settings.m_fec)
+        {
+        case DATVModSettings::FEC12:
+            uncodedBlockSize = 32208;
+            break;
+        case DATVModSettings::FEC23:
+            uncodedBlockSize = 43040;
+            break;
+        case DATVModSettings::FEC34:
+            uncodedBlockSize = 48408;
+            break;
+        case DATVModSettings::FEC56:
+            uncodedBlockSize = 53840;
+            break;
+        case DATVModSettings::FEC45:
+            uncodedBlockSize = 51648;
+            break;
+        case DATVModSettings::FEC89:
+            uncodedBlockSize = 57472;
+            break;
+        case DATVModSettings::FEC910:
+            uncodedBlockSize = 58192;
+            break;
+        case DATVModSettings::FEC14:
+            uncodedBlockSize = 16008;
+            break;
+        case DATVModSettings::FEC13:
+            uncodedBlockSize = 21408;
+            break;
+        case DATVModSettings::FEC25:
+            uncodedBlockSize = 25728;
+            break;
+        case DATVModSettings::FEC35:
+            uncodedBlockSize = 38688;
+            break;
+        }
+        fecFactor = (uncodedBlockSize-bbHeaderBits)/(float)codedBlockSize;
+        float symbolsPerFrame = codedBlockSize/bitsPerSymbol;
+        // 90 symbols for PL header
+        plFactor = symbolsPerFrame / (symbolsPerFrame + 90.0f);
+    }
+
+    return std::round(settings.m_symbolRate * bitsPerSymbol * fecFactor * plFactor);
 }
 
 void DATVModSource::checkBitrates()
 {
     int dataBitrate = getDVBSDataBitrate(m_settings);
     qDebug() << "MPEG-TS bitrate: " << m_mpegTSBitrate;
-    qDebug() << "DVB-S data bitrate: " << dataBitrate;
+    qDebug() << "DVB data bitrate: " << dataBitrate;
     if (dataBitrate < m_mpegTSBitrate)
-        qWarning() << "DVB-S data bitrate is lower than the bitrate of the MPEG transport stream";
+        qWarning() << "DVB data bitrate is lower than the bitrate of the MPEG transport stream";
     m_tsRatio = m_mpegTSBitrate/(float)dataBitrate;
 }
 
@@ -316,6 +374,12 @@ void DATVModSource::modulateSample()
                 // Encode using DVB-S
                 m_symbolCount = m_dvbs.encode(m_mpegTS, m_iqSymbols);
             }
+            else
+            {
+                // Encode using DVB-S2
+                m_symbolCount = m_dvbs2.s2_add_ts_frame((u8 *)m_mpegTS);
+                m_plFrame = m_dvbs2.pl_get_frame();
+            }
 
             // Loop file if we reach the end
             if ((m_frameIdx*DVBS::tsPacketLen >= m_mpegTSSize) && m_settings.m_tsFilePlayLoop)
@@ -372,9 +436,17 @@ void DATVModSource::modulateSample()
                     q = m_pulseShapeQ.filter(sin(5*M_PI/4));
                 }
                 */
+                m_symbolIdx++;
+                m_symbolCount--;
             }
-            m_symbolIdx++;
-            m_symbolCount--;
+            else
+            {
+                // First 90 symbols of DVB-S2 are pi/2 BPSK, then remaining symbols are in specified modulation
+                i = m_pulseShapeI.filter(m_plFrame[m_symbolIdx].re/32767.0);
+                q = m_pulseShapeQ.filter(m_plFrame[m_symbolIdx].im/32767.0);
+                m_symbolIdx++;
+                m_symbolCount--;
+            }
         }
     }
     else
@@ -620,6 +692,77 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
                 qCritical() << "DATVModSource::applySettings: Unsupported FEC code rate for DVB-S: " << settings.m_fec;
                 break;
             }
+        }
+        else
+        {
+            m_dvbs2Format.frame_type = FRAME_NORMAL;
+            m_dvbs2Format.pilots = 0; // PILOTS_OFF;
+            m_dvbs2Format.dummy_frame = 0;
+            m_dvbs2Format.null_deletion = 0;
+            m_dvbs2Format.intface = M_ACM;  // Unused?
+            m_dvbs2Format.broadcasting = 1;
+
+            switch (settings.m_modulation)
+            {
+            case DATVModSettings::QPSK:
+                m_dvbs2Format.constellation = M_QPSK;
+                break;
+            case DATVModSettings::PSK8:
+                m_dvbs2Format.constellation = M_8PSK;
+                break;
+            case DATVModSettings::APSK16:
+                m_dvbs2Format.constellation = M_16APSK;
+                break;
+            case DATVModSettings::APSK32:
+                m_dvbs2Format.constellation = M_32APSK;
+                break;
+            }
+
+            switch (settings.m_fec)
+            {
+            case DATVModSettings::FEC12:
+                m_dvbs2Format.code_rate = CR_1_2;
+                break;
+            case DATVModSettings::FEC23:
+                m_dvbs2Format.code_rate = CR_2_3;
+                break;
+            case DATVModSettings::FEC34:
+                m_dvbs2Format.code_rate = CR_3_4;
+                break;
+            case DATVModSettings::FEC56:
+                m_dvbs2Format.code_rate = CR_5_6;
+                break;
+            case DATVModSettings::FEC45:
+                m_dvbs2Format.code_rate = CR_4_5;
+                break;
+            case DATVModSettings::FEC89:
+                m_dvbs2Format.code_rate = CR_8_9;
+                break;
+            case DATVModSettings::FEC910:
+                m_dvbs2Format.code_rate = CR_9_10;
+                break;
+            case DATVModSettings::FEC14:
+                m_dvbs2Format.code_rate = CR_1_4;
+                break;
+            case DATVModSettings::FEC13:
+                m_dvbs2Format.code_rate = CR_1_3;
+                break;
+            case DATVModSettings::FEC25:
+                m_dvbs2Format.code_rate = CR_2_5;
+                break;
+            case DATVModSettings::FEC35:
+                m_dvbs2Format.code_rate = CR_3_5;
+                break;
+            }
+
+            if (settings.m_rollOff == 0.35f)
+                m_dvbs2Format.roll_off = RO_0_35;
+            else if (settings.m_rollOff == 0.25f)
+                m_dvbs2Format.roll_off = RO_0_25;
+            else
+                m_dvbs2Format.roll_off = RO_0_20;
+
+            m_dvbs2.s2_set_configure(&m_dvbs2Format);
         }
         if (getMessageQueueToGUI())
         {

@@ -84,6 +84,7 @@ private:
     void updateWithStreamTime();
     void setChannelMarkerBandwidth();
     bool handleMessage(const Message& message);
+    void updateFEC();
 
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);

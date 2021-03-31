@@ -246,6 +246,11 @@
           <string>DVB-S</string>
          </property>
         </item>
+        <item>
+         <property name="text">
+          <string>DVB-S2</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

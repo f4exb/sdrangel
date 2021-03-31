@@ -38,6 +38,7 @@
 #include "datvmodsettings.h"
 
 #include "dvb-s/dvb-s.h"
+#include "dvb-s2/DVBS2.h"
 
 class MessageQueue;
 class QUdpSocket;
@@ -87,6 +88,10 @@ private:
     int m_symbolIdx;
     int m_samplesPerSymbol;
     uint8_t m_iqSymbols[DVBS::m_maxIQSymbols*2];
+
+    DVBS2 m_dvbs2;
+    DVB2FrameFormat m_dvbs2Format;
+    scmplx *m_plFrame;
 
     QUdpSocket *m_udpSocket;                                    //!< UDP socket to receive MPEG transport stream via
     int m_udpByteCount;                                         //!< Count of bytes received via UDP for bitrate calculation
