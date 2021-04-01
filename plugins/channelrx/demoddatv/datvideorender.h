@@ -238,7 +238,7 @@ class DATVideoRenderThread : public QThread
         m_renderingVideo = false;
     }
 
-    static const int videoThreadTimeoutMs = 2000;
+    static const int videoThreadTimeoutMs = 500;
 
   private:
     DATVideoRender *m_renderer;

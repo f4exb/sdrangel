@@ -43,6 +43,7 @@ public:
     int pushData(const char * chrData, int intSize);
     bool setMemoryLimit(int intMemoryLimit);
     void resetTotalReceived();
+    void cleanUp();
 
     virtual bool isSequential() const;
     virtual qint64 bytesAvailable() const;
@@ -74,7 +75,6 @@ private:
     qint64 m_intTotalReceived;
     qint64 m_intPacketReceived;
 
-    void cleanUp();
 };
 
 #endif // DATVIDEOSTREAM_H
