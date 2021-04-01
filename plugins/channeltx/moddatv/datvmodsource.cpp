@@ -312,30 +312,30 @@ void DATVModSource::modulateSample()
         while (m_symbolCount == 0)
         {
             bool tsFileReady = (m_settings.m_source == DATVModSettings::SourceFile)
-                             && m_settings.m_tsFilePlay
-                             && m_tsFileOK
-                             && !m_mpegTSStream.eof();
+                && m_settings.m_tsFilePlay
+                && m_tsFileOK
+                && !m_mpegTSStream.eof();
 
-            if (   tsFileReady
+            if (tsFileReady
                 && (m_frameIdx/(m_frameCount+1.0f) < m_tsRatio)  // Insert null packets if file rate is lower than DVB-S data rate
-               )
+            )
             {
                 // Read transport stream packet from file
                 m_mpegTSStream.read((char *)m_mpegTS, sizeof(m_mpegTS));
                 m_frameIdx++;
                 m_frameCount++;
             }
-            else if (   (m_settings.m_source == DATVModSettings::SourceUDP)
-                     && (m_udpBufferIdx < m_udpBufferCount)
-                    )
+            else if ((m_settings.m_source == DATVModSettings::SourceUDP)
+                && (m_udpBufferIdx < m_udpBufferCount)
+            )
             {
                 // Copy transport stream packet from UDP buffer
                 memcpy(m_mpegTS, &m_udpBuffer[m_udpBufferIdx*sizeof(m_mpegTS)], sizeof(m_mpegTS));
                 m_udpBufferIdx++;
             }
-            else if (   (m_settings.m_source == DATVModSettings::SourceUDP)
-                     && ((m_udpSocket != nullptr) && m_udpSocket->hasPendingDatagrams())
-                    )
+            else if ((m_settings.m_source == DATVModSettings::SourceUDP)
+                && ((m_udpSocket != nullptr) && m_udpSocket->hasPendingDatagrams())
+            )
             {
                 // Get transport stream packets from UDP - buffer if more than one
                 QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
@@ -346,15 +346,22 @@ void DATVModSource::modulateSample()
                 if (size <= (int)sizeof(m_udpBuffer))
                 {
                     memcpy(m_mpegTS, data, sizeof(m_mpegTS));
-                    if (size >= (int)sizeof(m_mpegTS))
+
+                    if (size >= (int)sizeof(m_mpegTS)) {
                         memcpy(&m_udpBuffer[0], &data[sizeof(m_mpegTS)], size - sizeof(m_mpegTS));
+                    }
+
                     m_udpBufferIdx = 0;
                     m_udpBufferCount = (size / sizeof(m_mpegTS)) - 1;
-                    if (size % sizeof(m_mpegTS) != 0)
+
+                    if (size % sizeof(m_mpegTS) != 0) {
                         qWarning() << "DATVModSource::modulateSample: UDP packet size (" << size << ") is not a multiple of " << sizeof(m_mpegTS);
+                    }
                 }
                 else
+                {
                     qWarning() << "DATVModSource::modulateSample: UDP packet size (" << size << ") exceeds buffer size " << sizeof(m_udpBuffer) << ")";
+                }
 
                 m_udpByteCount += ba.size();
             }
@@ -367,8 +374,10 @@ void DATVModSource::modulateSample()
                 m_mpegTS[2] = 0xff;
                 m_mpegTS[3] = 0xff;
                 m_mpegTS[4] = 0x10;
-                if (tsFileReady)
+
+                if (tsFileReady) {
                     m_frameCount++;
+                }
                 //qDebug() << "null " << tsFileReady << " " << (m_frameIdx/(m_frameCount+1.0f)) << " " << m_tsRatio;
             }
 
@@ -385,11 +394,17 @@ void DATVModSource::modulateSample()
             }
 
             // Loop file if we reach the end
-            if ((m_frameIdx*DVBS::tsPacketLen >= m_mpegTSSize) && m_settings.m_tsFilePlayLoop)
+            if ((m_settings.m_source == DATVModSettings::SourceFile)
+                && (m_frameIdx*DVBS::tsPacketLen >= m_mpegTSSize)
+                && m_settings.m_tsFilePlayLoop
+            )
             {
+                m_mpegTSStream.clear();
+                m_mpegTSStream.seekg(0, std::ios::beg);
                 m_frameIdx = 0;
                 m_frameCount = 0;
             }
+
             m_symbolIdx = 0;
         }
 
@@ -398,6 +413,7 @@ void DATVModSource::modulateSample()
             // BPSK
             i = m_pulseShapeI.filter(m_iqSymbols[m_symbolIdx*2+m_symbolSel] ? -1.0f : 1.0f);
             q = 0.0f;
+
             if (m_symbolSel == 1)
             {
                 m_symbolIdx++;
@@ -405,7 +421,9 @@ void DATVModSource::modulateSample()
                 m_symbolSel = 0;
             }
             else
+            {
                 m_symbolSel++;
+            }
         }
         else
         {
@@ -457,9 +475,12 @@ void DATVModSource::modulateSample()
         i = m_pulseShapeI.filter(0.0f);
         q = m_pulseShapeQ.filter(0.0f);
     }
+
     m_sampleIdx++;
-    if (m_sampleIdx >= m_samplesPerSymbol)
+
+    if (m_sampleIdx >= m_samplesPerSymbol) {
         m_sampleIdx = 0;
+    }
 
     m_modSample.real(i);
     m_modSample.imag(q);
