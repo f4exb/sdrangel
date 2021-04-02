@@ -1233,8 +1233,52 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     fftfilt::cmplx *objRF;
     int intRFOut;
     double magSq;
-
     int lngWritable=0;
+    leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *objDemodulatorDVBS2 =
+        (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
+
+    // DVBS2: Track change of constellation via MODCOD
+    if ((m_settings.m_standard == DATVDemodSettings::DVB_S2) && objDemodulatorDVBS2)
+    {
+        if (objDemodulatorDVBS2->cstln->m_setByModcod && !m_cstlnSetByModcod)
+        {
+            qDebug("DATVDemodSink::feed: change by MODCOD detected");
+
+            if (r_scope_symbols_dvbs2) {
+                r_scope_symbols_dvbs2->calculate_cstln_points();
+            }
+
+            if (getMessageQueueToGUI())
+            {
+                DATVDemodReport::MsgReportModcodCstlnChange *msg = DATVDemodReport::MsgReportModcodCstlnChange::create(
+                    DATVDemodSettings::getModulationFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_typeCode),
+                    DATVDemodSettings::getCodeRateFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_rateCode)
+                );
+
+                getMessageQueueToGUI()->push(msg);
+            }
+
+            if (
+                (
+                    (m_modcodModulation != objDemodulatorDVBS2->m_modcodType) &&
+                    (m_modcodModulation >= 0) &&
+                    (objDemodulatorDVBS2->m_modcodType >= 0)
+                ) ||
+                (
+                    (m_modcodCodeRate != objDemodulatorDVBS2->m_modcodRate) &&
+                    (m_modcodCodeRate >= 0) &&
+                    (objDemodulatorDVBS2->m_modcodRate >= 0)
+                )
+            )
+            {
+                m_blnNeedConfigUpdate = true;
+            }
+        }
+
+        m_cstlnSetByModcod = objDemodulatorDVBS2->cstln->m_setByModcod;
+        m_modcodModulation = objDemodulatorDVBS2->m_modcodType;
+        m_modcodCodeRate = objDemodulatorDVBS2->m_modcodRate;
+    } // DVBS2: Track change of constellation via MODCOD
 
     //********** Bis repetita : Let's rock and roll buddy ! **********
 #ifdef EXTENDED_DIRECT_SAMPLE
@@ -1299,8 +1343,8 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
             objRF ++;
 
             if (m_blnDVBInitialized
-                && (p_rawiq_writer!=nullptr)
-                && (m_objScheduler!=nullptr))
+                && (p_rawiq_writer != nullptr)
+                && (m_objScheduler != nullptr))
             {
                 p_rawiq_writer->write(objIQ);
                 m_lngReadIQ++;
@@ -1309,7 +1353,7 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
 
                 //Leave +1 by safety
                 //if(((m_lngReadIQ+1)>=lngWritable) || (m_lngReadIQ>=768))
-                if((m_lngReadIQ+1)>=lngWritable)
+                if ((m_lngReadIQ + 1) >= lngWritable)
                 {
                     m_objScheduler->step();
 
@@ -1318,54 +1362,8 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
                     p_rawiq_writer = new leansdr::pipewriter<leansdr::cf32>(*p_rawiq);
                 }
             }
-
         }
     } // Samples for loop
-
-    // DVBS2: Track change of constellation via MODCOD
-    if (m_settings.m_standard == DATVDemodSettings::DVB_S2)
-    {
-        leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> * objDemodulatorDVBS2 = (leansdr::s2_frame_receiver<leansdr::f32, leansdr::llr_ss> *) m_objDemodulatorDVBS2;
-
-        if (objDemodulatorDVBS2->cstln->m_setByModcod && !m_cstlnSetByModcod)
-        {
-            qDebug("DATVDemodSink::feed: change by MODCOD detected");
-
-            if (r_scope_symbols_dvbs2) {
-                r_scope_symbols_dvbs2->calculate_cstln_points();
-            }
-
-            if (getMessageQueueToGUI())
-            {
-                DATVDemodReport::MsgReportModcodCstlnChange *msg = DATVDemodReport::MsgReportModcodCstlnChange::create(
-                    DATVDemodSettings::getModulationFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_typeCode),
-                    DATVDemodSettings::getCodeRateFromLeanDVBCode(objDemodulatorDVBS2->cstln->m_rateCode)
-                );
-
-                getMessageQueueToGUI()->push(msg);
-            }
-
-            if (
-                (
-                    (m_modcodModulation != objDemodulatorDVBS2->m_modcodType) &&
-                    (m_modcodModulation >= 0) &&
-                    (objDemodulatorDVBS2->m_modcodType >= 0)
-                ) ||
-                (
-                    (m_modcodCodeRate != objDemodulatorDVBS2->m_modcodRate) &&
-                    (m_modcodCodeRate >= 0) &&
-                    (objDemodulatorDVBS2->m_modcodRate >= 0)
-                )
-            )
-            {
-                m_blnNeedConfigUpdate = true;
-            }
-        }
-
-        m_cstlnSetByModcod = objDemodulatorDVBS2->cstln->m_setByModcod;
-        m_modcodModulation = objDemodulatorDVBS2->m_modcodType;
-        m_modcodCodeRate = objDemodulatorDVBS2->m_modcodRate;
-    }
 }
 
 void DATVDemodSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
