@@ -25,19 +25,15 @@ class APRSSettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit APRSSettingsDialog(QString igateServer, QString igateCallsign, QString igatePasscode, QString igateFilter, QWidget* parent = 0);
+    explicit APRSSettingsDialog(APRSSettings* settings, QWidget* parent = 0);
     ~APRSSettingsDialog();
-
-    QString m_igateServer;
-    QString m_igateCallsign;
-    QString m_igatePasscode;
-    QString m_igateFilter;
 
 private slots:
     void accept();
 
 private:
     Ui::APRSSettingsDialog* ui;
+    APRSSettings *m_settings;
 };
 
 #endif // INCLUDE_APRSSETTINGSDIALOG_H

@@ -363,7 +363,11 @@ bool APRSGUI::handleMessage(const Message& message)
                             else
                             {
                                 swgMapItem->setImage(new QString(QString("qrc:///%1").arg(aprs->m_symbolImage)));
-                                swgMapItem->setText(new QString(aprs->toText()));
+                                swgMapItem->setText(new QString(aprs->toText(true, false, '\n',
+                                                                        m_settings.m_altitudeUnits == APRSSettings::METRES,
+                                                                        (int)m_settings.m_speedUnits,
+                                                                        m_settings.m_temperatureUnits == APRSSettings::CELSIUS,
+                                                                        m_settings.m_rainfallUnits == APRSSettings::MILLIMETRE)));
                             }
                             swgMapItem->setImageMinZoom(11);
 
@@ -609,6 +613,7 @@ void APRSGUI::displaySettings()
     ui->igate->setChecked(m_settings.m_igateEnabled);
     ui->stationFilter->setCurrentIndex((int)m_settings.m_stationFilter);
     ui->filterAddressee->setText(m_settings.m_filterAddressee);
+    setUnits();
 
     // Order and size columns
     displayTableSettings(ui->packetsTable, packetsTableMenu, m_settings.m_packetsTableColumnSizes, m_settings.m_packetsTableColumnIndexes, APRS_PACKETS_TABLE_COLUMNS);
@@ -693,11 +698,11 @@ void APRSGUI::updateSummary(APRSStation *station)
     ui->status->setText(station->m_latestStatus);
     ui->comment->setText(station->m_latestComment);
     ui->position->setText(station->m_latestPosition);
-    ui->altitude->setText(station->m_latestAltitude);
+    ui->altitude->setText(convertAltitude(station->m_latestAltitude));
     ui->course->setText(station->m_latestCourse);
-    ui->speed->setText(station->m_latestSpeed);
+    ui->speed->setText(convertSpeed(station->m_latestSpeed));
     ui->txPower->setText(station->m_powerWatts);
-    ui->antennaHeight->setText(station->m_antennaHeightFt);
+    ui->antennaHeight->setText(convertAltitude(station->m_antennaHeightFt));
     ui->antennaGain->setText(station->m_antennaGainDB);
     ui->antennaDirectivity->setText(station->m_antennaDirectivity);
     ui->radioRange->setText(station->m_radioRange);
@@ -779,17 +784,17 @@ void APRSGUI::addPacketToGUI(APRSStation *station, APRSPacket *aprs)
         if (aprs->m_hasGust)
             gustsItem->setData(Qt::DisplayRole, aprs->m_gust);
         if (aprs->m_hasTemp)
-            temperatureItem->setData(Qt::DisplayRole, aprs->m_temp);
+            temperatureItem->setData(Qt::DisplayRole, convertTemperature(aprs->m_temp));
         if (aprs->m_hasHumidity)
             humidityItem->setData(Qt::DisplayRole, aprs->m_humidity);
         if (aprs->m_hasBarometricPressure)
             pressureItem->setData(Qt::DisplayRole, aprs->m_barometricPressure/10.0f);
         if (aprs->m_hasRainLastHr)
-            rainLastHourItem->setData(Qt::DisplayRole, aprs->m_rainLastHr);
+            rainLastHourItem->setData(Qt::DisplayRole, convertRainfall(aprs->m_rainLastHr));
         if (aprs->m_hasRainLast24Hrs)
-            rainLast24HoursItem->setData(Qt::DisplayRole, aprs->m_rainLast24Hrs);
+            rainLast24HoursItem->setData(Qt::DisplayRole, convertRainfall(aprs->m_rainLast24Hrs));
         if (aprs->m_hasRainSinceMidnight)
-            rainSinceMidnightItem->setData(Qt::DisplayRole, aprs->m_rainSinceMidnight);
+            rainSinceMidnightItem->setData(Qt::DisplayRole, convertRainfall(aprs->m_rainSinceMidnight));
         if (aprs->m_hasLuminsoity)
             luminosityItem->setData(Qt::DisplayRole, aprs->m_luminosity);
         if (aprs->m_hasSnowfallLast24Hrs)
@@ -939,11 +944,11 @@ void APRSGUI::addPacketToGUI(APRSStation *station, APRSPacket *aprs)
             longitudeItem->setData(Qt::DisplayRole, aprs->m_longitude);
         }
         if (aprs->m_hasAltitude)
-            altitudeItem->setData(Qt::DisplayRole, aprs->m_altitudeFt);
+            altitudeItem->setData(Qt::DisplayRole, convertAltitude(aprs->m_altitudeFt));
         if (aprs->m_hasCourseAndSpeed)
         {
             courseItem->setData(Qt::DisplayRole, aprs->m_course);
-            speedItem->setData(Qt::DisplayRole, aprs->m_speed);
+            speedItem->setData(Qt::DisplayRole, convertSpeed(aprs->m_speed));
         }
     }
 
@@ -1155,17 +1160,17 @@ void APRSGUI::plotWeather()
                 else if (plotSelectIdx == 2 && aprs->m_hasGust)
                     addToSeries(series, dt, aprs->m_gust, minValue, maxValue);
                 else if (plotSelectIdx == 3 && aprs->m_hasTemp)
-                    addToSeries(series, dt, aprs->m_temp, minValue, maxValue);
+                    addToSeries(series, dt, convertTemperature(aprs->m_temp), minValue, maxValue);
                 else if (plotSelectIdx == 4 && aprs->m_hasHumidity)
                     addToSeries(series, dt, aprs->m_humidity, minValue, maxValue);
                 else if (plotSelectIdx == 5 && aprs->m_hasBarometricPressure)
                     addToSeries(series, dt, aprs->m_barometricPressure/10.0, minValue, maxValue);
                 else if (plotSelectIdx == 6 && aprs->m_hasRainLastHr)
-                    addToSeries(series, dt, aprs->m_rainLastHr, minValue, maxValue);
+                    addToSeries(series, dt, convertRainfall(aprs->m_rainLastHr), minValue, maxValue);
                 else if (plotSelectIdx == 7 && aprs->m_hasRainLast24Hrs)
-                    addToSeries(series, dt, aprs->m_rainLast24Hrs, minValue, maxValue);
+                    addToSeries(series, dt, convertRainfall(aprs->m_rainLast24Hrs), minValue, maxValue);
                 else if (plotSelectIdx == 8 && aprs->m_hasRainSinceMidnight)
-                    addToSeries(series, dt, aprs->m_rainSinceMidnight, minValue, maxValue);
+                    addToSeries(series, dt, convertRainfall(aprs->m_rainSinceMidnight), minValue, maxValue);
                 else if (plotSelectIdx == 9 && aprs->m_hasLuminsoity)
                     addToSeries(series, dt, aprs->m_luminosity, minValue, maxValue);
                 else if (plotSelectIdx == 10 && aprs->m_hasSnowfallLast24Hrs)
@@ -1383,11 +1388,11 @@ void APRSGUI::plotMotion()
                 else if (plotSelectIdx == 1 && aprs->m_hasPosition)
                     addToSeries(series, dt, aprs->m_longitude, minValue, maxValue);
                 else if (plotSelectIdx == 2 && aprs->m_hasAltitude)
-                    addToSeries(series, dt, aprs->m_altitudeFt, minValue, maxValue);
+                    addToSeries(series, dt, convertAltitude(aprs->m_altitudeFt), minValue, maxValue);
                 else if (plotSelectIdx == 3 && aprs->m_hasCourseAndSpeed)
                     addToSeries(series, dt, aprs->m_course, minValue, maxValue);
                 else if (plotSelectIdx == 4 && aprs->m_hasCourseAndSpeed)
-                    addToSeries(series, dt, aprs->m_speed, minValue, maxValue);
+                    addToSeries(series, dt, convertSpeed(aprs->m_speed), minValue, maxValue);
             }
         }
     }
@@ -1606,8 +1611,8 @@ void APRSGUI::resizeTable()
     ui->motionTable->setItem(row, MOTION_COL_LATITUDE, new QTableWidgetItem("Latitude"));
     ui->motionTable->setItem(row, MOTION_COL_LONGITUDE, new QTableWidgetItem("Longitude"));
     ui->motionTable->setItem(row, MOTION_COL_ALTITUDE, new QTableWidgetItem("Message No"));
-    ui->motionTable->setItem(row, MOTION_COL_ALTITUDE, new QTableWidgetItem("Course"));
-    ui->motionTable->setItem(row, MOTION_COL_ALTITUDE, new QTableWidgetItem("Speed"));
+    ui->motionTable->setItem(row, MOTION_COL_COURSE, new QTableWidgetItem("Course"));
+    ui->motionTable->setItem(row, MOTION_COL_SPEED, new QTableWidgetItem("Speed"));
     ui->motionTable->resizeColumnsToContents();
     ui->motionTable->removeRow(row);
 
@@ -1905,17 +1910,79 @@ QAction *APRSGUI::motionTable_createCheckableItem(QString &text, int idx, bool c
     return action;
 }
 
+void APRSGUI::setUnits()
+{
+    ui->altitudeUnitsLabel->setText(APRSSettings::m_altitudeUnitNames[m_settings.m_altitudeUnits]);
+    ui->antennaHeightUnitsLabel->setText(APRSSettings::m_altitudeUnitNames[m_settings.m_altitudeUnits]);
+    ui->speedUnitsLabel->setText(APRSSettings::m_speedUnitNames[m_settings.m_speedUnits]);
+
+    ui->weatherTable->horizontalHeaderItem(WEATHER_COL_TEMPERATURE)->setText(QString("Temp (%1)").arg(APRSSettings::m_temperatureUnitNames[m_settings.m_temperatureUnits]));
+
+    // Display data using new units
+    int idx = ui->stationSelect->currentIndex();
+    if (idx >= 0)
+        on_stationSelect_currentIndexChanged(idx);
+}
+
+QString APRSGUI::convertAltitude(const QString& altitude)
+{
+    if ((m_settings.m_altitudeUnits == APRSSettings::FEET) || altitude.isEmpty())
+        return altitude;
+    else
+        return QString::number((int)std::round(Units::feetToMetres(altitude.toFloat())));
+}
+
+float APRSGUI::convertAltitude(float altitude)
+{
+    if (m_settings.m_altitudeUnits == APRSSettings::FEET)
+        return altitude;
+    else
+        return std::round(Units::feetToMetres(altitude));
+}
+
+QString APRSGUI::convertSpeed(const QString& speed)
+{
+    if ((m_settings.m_speedUnits == APRSSettings::KNOTS) || speed.isEmpty())
+        return speed;
+    else if (m_settings.m_speedUnits == APRSSettings::MPH)
+        return QString::number(Units::knotsToIntegerMPH(speed.toFloat()));
+    else
+        return QString::number(Units::knotsToIntegerKPH(speed.toFloat()));
+}
+
+int APRSGUI::convertSpeed(int speed)
+{
+    if (m_settings.m_speedUnits == APRSSettings::KNOTS)
+        return speed;
+    else if (m_settings.m_speedUnits == APRSSettings::MPH)
+        return Units::knotsToIntegerMPH(speed);
+    else
+        return Units::knotsToIntegerKPH(speed);
+}
+
+int APRSGUI::convertTemperature(int temperature)
+{
+    if (m_settings.m_temperatureUnits == APRSSettings::FAHRENHEIT)
+        return temperature;
+    else
+        return (int)std::round(Units::fahrenheitToCelsius(temperature));
+}
+
+int APRSGUI::convertRainfall(int rainfall)
+{
+    if (m_settings.m_rainfallUnits == APRSSettings::HUNDREDTHS_OF_AN_INCH)
+        return rainfall;
+    else
+        return (int)std::round(Units::inchesToMilimetres(rainfall/100.0f));
+}
+
 // Show settings dialog
 void APRSGUI::on_displaySettings_clicked()
 {
-    APRSSettingsDialog dialog(m_settings.m_igateServer, m_settings.m_igateCallsign,
-                                m_settings.m_igatePasscode, m_settings.m_igateFilter);
+    APRSSettingsDialog dialog(&m_settings);
     if (dialog.exec() == QDialog::Accepted)
     {
-        m_settings.m_igateServer = dialog.m_igateServer;
-        m_settings.m_igateCallsign = dialog.m_igateCallsign;
-        m_settings.m_igatePasscode = dialog.m_igatePasscode;
-        m_settings.m_igateFilter = dialog.m_igateFilter;
+        setUnits();
         applySettings();
     }
 }

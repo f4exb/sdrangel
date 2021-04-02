@@ -46,6 +46,18 @@ struct APRSSettings
         ALL, STATIONS, OBJECTS, WEATHER, TELEMETRY, COURSE_AND_SPEED
     } m_stationFilter;
     QString m_filterAddressee;
+    enum AltitudeUnits {
+        FEET, METRES
+    } m_altitudeUnits;
+    enum SpeedUnits {
+        KNOTS, MPH, KPH
+    } m_speedUnits;
+    enum TemperatureUnits {
+        FAHRENHEIT, CELSIUS
+    } m_temperatureUnits;
+    enum RainfallUnits {
+        HUNDREDTHS_OF_AN_INCH, MILLIMETRE
+    } m_rainfallUnits;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
@@ -74,6 +86,10 @@ struct APRSSettings
 
     static const QStringList m_pipeTypes;
     static const QStringList m_pipeURIs;
+
+    static const QStringList m_altitudeUnitNames;
+    static const QStringList m_speedUnitNames;
+    static const QStringList m_temperatureUnitNames;
 };
 
 #endif // INCLUDE_FEATURE_APRSSETTINGS_H_
