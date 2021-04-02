@@ -22,6 +22,7 @@
 
 class DeviceAPI;
 
+#include <QNetworkRequest>
 #include <QThread>
 
 #include "channel/channelapi.h"
@@ -31,6 +32,9 @@ class DeviceAPI;
 #include "util/message.h"
 
 #include "datvdemodbaseband.h"
+
+class QNetworkAccessManager;
+class QNetworkReply;
 
 class DATVDemod : public BasebandSampleSink, public ChannelAPI
 {
@@ -65,6 +69,25 @@ public:
         (void) sinkElseSource;
         return m_settings.m_centerFrequency;
     }
+
+    virtual int webapiSettingsGet(
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    virtual int webapiSettingsPutPatch(
+            bool force,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response,
+            QString& errorMessage);
+
+    static void webapiFormatChannelSettings(
+            SWGSDRangel::SWGChannelSettings& response,
+            const DATVDemodSettings& settings);
+
+    static void webapiUpdateChannelSettings(
+            DATVDemodSettings& settings,
+            const QStringList& channelSettingsKeys,
+            SWGSDRangel::SWGChannelSettings& response);
 
     void setMessageQueueToGUI(MessageQueue* queue) override
     {
@@ -125,6 +148,22 @@ private:
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
 
     void applySettings(const DATVDemodSettings& settings, bool force = false);
+    void webapiReverseSendSettings(QList<QString>& channelSettingsKeys, const DATVDemodSettings& settings, bool force);
+    void sendChannelSettings(
+        QList<MessageQueue*> *messageQueues,
+        QList<QString>& channelSettingsKeys,
+        const DATVDemodSettings& settings,
+        bool force
+    );
+    void webapiFormatChannelSettings(
+        QList<QString>& channelSettingsKeys,
+        SWGSDRangel::SWGChannelSettings *swgChannelSettings,
+        const DATVDemodSettings& settings,
+        bool force
+    );
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_DATVDEMOD_H

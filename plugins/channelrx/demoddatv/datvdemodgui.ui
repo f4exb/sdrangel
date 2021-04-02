@@ -699,7 +699,7 @@
         </rect>
        </property>
        <property name="toolTip">
-        <string>Filter excursion (dB)</string>
+        <string>RRC filter envelope excursion (dB)</string>
        </property>
        <property name="minimum">
         <number>1</number>

@@ -42,6 +42,14 @@ SWGDATVDemodSettings::SWGDATVDemodSettings() {
     m_modulation_isSet = false;
     fec = 0;
     m_fec_isSet = false;
+    soft_ldpc = 0;
+    m_soft_ldpc_isSet = false;
+    soft_ldpc_tool_path = nullptr;
+    m_soft_ldpc_tool_path_isSet = false;
+    soft_ldpc_max_trials = 0;
+    m_soft_ldpc_max_trials_isSet = false;
+    max_bitflips = 0;
+    m_max_bitflips_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     audio_device_name = nullptr;
@@ -74,6 +82,18 @@ SWGDATVDemodSettings::SWGDATVDemodSettings() {
     m_udp_ts_port_isSet = false;
     udp_ts = 0;
     m_udp_ts_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = nullptr;
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
 }
 
 SWGDATVDemodSettings::~SWGDATVDemodSettings() {
@@ -96,6 +116,14 @@ SWGDATVDemodSettings::init() {
     m_modulation_isSet = false;
     fec = 0;
     m_fec_isSet = false;
+    soft_ldpc = 0;
+    m_soft_ldpc_isSet = false;
+    soft_ldpc_tool_path = new QString("");
+    m_soft_ldpc_tool_path_isSet = false;
+    soft_ldpc_max_trials = 0;
+    m_soft_ldpc_max_trials_isSet = false;
+    max_bitflips = 0;
+    m_max_bitflips_isSet = false;
     audio_mute = 0;
     m_audio_mute_isSet = false;
     audio_device_name = new QString("");
@@ -128,6 +156,18 @@ SWGDATVDemodSettings::init() {
     m_udp_ts_port_isSet = false;
     udp_ts = 0;
     m_udp_ts_isSet = false;
+    stream_index = 0;
+    m_stream_index_isSet = false;
+    use_reverse_api = 0;
+    m_use_reverse_api_isSet = false;
+    reverse_api_address = new QString("");
+    m_reverse_api_address_isSet = false;
+    reverse_api_port = 0;
+    m_reverse_api_port_isSet = false;
+    reverse_api_device_index = 0;
+    m_reverse_api_device_index_isSet = false;
+    reverse_api_channel_index = 0;
+    m_reverse_api_channel_index_isSet = false;
 }
 
 void
@@ -139,6 +179,12 @@ SWGDATVDemodSettings::cleanup() {
 
 
 
+
+
+
+    if(soft_ldpc_tool_path != nullptr) { 
+        delete soft_ldpc_tool_path;
+    }
 
 
 
@@ -159,6 +205,14 @@ SWGDATVDemodSettings::cleanup() {
     if(udp_ts_address != nullptr) { 
         delete udp_ts_address;
     }
+
+
+
+
+    if(reverse_api_address != nullptr) { 
+        delete reverse_api_address;
+    }
+
 
 
 }
@@ -187,6 +241,14 @@ SWGDATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&modulation, pJson["modulation"], "qint32", "");
     
     ::SWGSDRangel::setValue(&fec, pJson["fec"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&soft_ldpc, pJson["softLDPC"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&soft_ldpc_tool_path, pJson["softLDPCToolPath"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&soft_ldpc_max_trials, pJson["softLDPCMaxTrials"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&max_bitflips, pJson["maxBitflips"], "qint32", "");
     
     ::SWGSDRangel::setValue(&audio_mute, pJson["audioMute"], "qint32", "");
     
@@ -219,6 +281,18 @@ SWGDATVDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&udp_ts_port, pJson["udpTSPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&udp_ts, pJson["udpTS"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&use_reverse_api, pJson["useReverseAPI"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_address, pJson["reverseAPIAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&reverse_api_port, pJson["reverseAPIPort"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_device_index, pJson["reverseAPIDeviceIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&reverse_api_channel_index, pJson["reverseAPIChannelIndex"], "qint32", "");
     
 }
 
@@ -256,6 +330,18 @@ SWGDATVDemodSettings::asJsonObject() {
     }
     if(m_fec_isSet){
         obj->insert("fec", QJsonValue(fec));
+    }
+    if(m_soft_ldpc_isSet){
+        obj->insert("softLDPC", QJsonValue(soft_ldpc));
+    }
+    if(soft_ldpc_tool_path != nullptr && *soft_ldpc_tool_path != QString("")){
+        toJsonValue(QString("softLDPCToolPath"), soft_ldpc_tool_path, obj, QString("QString"));
+    }
+    if(m_soft_ldpc_max_trials_isSet){
+        obj->insert("softLDPCMaxTrials", QJsonValue(soft_ldpc_max_trials));
+    }
+    if(m_max_bitflips_isSet){
+        obj->insert("maxBitflips", QJsonValue(max_bitflips));
     }
     if(m_audio_mute_isSet){
         obj->insert("audioMute", QJsonValue(audio_mute));
@@ -304,6 +390,24 @@ SWGDATVDemodSettings::asJsonObject() {
     }
     if(m_udp_ts_isSet){
         obj->insert("udpTS", QJsonValue(udp_ts));
+    }
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
+    }
+    if(m_use_reverse_api_isSet){
+        obj->insert("useReverseAPI", QJsonValue(use_reverse_api));
+    }
+    if(reverse_api_address != nullptr && *reverse_api_address != QString("")){
+        toJsonValue(QString("reverseAPIAddress"), reverse_api_address, obj, QString("QString"));
+    }
+    if(m_reverse_api_port_isSet){
+        obj->insert("reverseAPIPort", QJsonValue(reverse_api_port));
+    }
+    if(m_reverse_api_device_index_isSet){
+        obj->insert("reverseAPIDeviceIndex", QJsonValue(reverse_api_device_index));
+    }
+    if(m_reverse_api_channel_index_isSet){
+        obj->insert("reverseAPIChannelIndex", QJsonValue(reverse_api_channel_index));
     }
 
     return obj;
@@ -377,6 +481,46 @@ void
 SWGDATVDemodSettings::setFec(qint32 fec) {
     this->fec = fec;
     this->m_fec_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getSoftLdpc() {
+    return soft_ldpc;
+}
+void
+SWGDATVDemodSettings::setSoftLdpc(qint32 soft_ldpc) {
+    this->soft_ldpc = soft_ldpc;
+    this->m_soft_ldpc_isSet = true;
+}
+
+QString*
+SWGDATVDemodSettings::getSoftLdpcToolPath() {
+    return soft_ldpc_tool_path;
+}
+void
+SWGDATVDemodSettings::setSoftLdpcToolPath(QString* soft_ldpc_tool_path) {
+    this->soft_ldpc_tool_path = soft_ldpc_tool_path;
+    this->m_soft_ldpc_tool_path_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getSoftLdpcMaxTrials() {
+    return soft_ldpc_max_trials;
+}
+void
+SWGDATVDemodSettings::setSoftLdpcMaxTrials(qint32 soft_ldpc_max_trials) {
+    this->soft_ldpc_max_trials = soft_ldpc_max_trials;
+    this->m_soft_ldpc_max_trials_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getMaxBitflips() {
+    return max_bitflips;
+}
+void
+SWGDATVDemodSettings::setMaxBitflips(qint32 max_bitflips) {
+    this->max_bitflips = max_bitflips;
+    this->m_max_bitflips_isSet = true;
 }
 
 qint32
@@ -539,6 +683,66 @@ SWGDATVDemodSettings::setUdpTs(qint32 udp_ts) {
     this->m_udp_ts_isSet = true;
 }
 
+qint32
+SWGDATVDemodSettings::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGDATVDemodSettings::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getUseReverseApi() {
+    return use_reverse_api;
+}
+void
+SWGDATVDemodSettings::setUseReverseApi(qint32 use_reverse_api) {
+    this->use_reverse_api = use_reverse_api;
+    this->m_use_reverse_api_isSet = true;
+}
+
+QString*
+SWGDATVDemodSettings::getReverseApiAddress() {
+    return reverse_api_address;
+}
+void
+SWGDATVDemodSettings::setReverseApiAddress(QString* reverse_api_address) {
+    this->reverse_api_address = reverse_api_address;
+    this->m_reverse_api_address_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getReverseApiPort() {
+    return reverse_api_port;
+}
+void
+SWGDATVDemodSettings::setReverseApiPort(qint32 reverse_api_port) {
+    this->reverse_api_port = reverse_api_port;
+    this->m_reverse_api_port_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getReverseApiDeviceIndex() {
+    return reverse_api_device_index;
+}
+void
+SWGDATVDemodSettings::setReverseApiDeviceIndex(qint32 reverse_api_device_index) {
+    this->reverse_api_device_index = reverse_api_device_index;
+    this->m_reverse_api_device_index_isSet = true;
+}
+
+qint32
+SWGDATVDemodSettings::getReverseApiChannelIndex() {
+    return reverse_api_channel_index;
+}
+void
+SWGDATVDemodSettings::setReverseApiChannelIndex(qint32 reverse_api_channel_index) {
+    this->reverse_api_channel_index = reverse_api_channel_index;
+    this->m_reverse_api_channel_index_isSet = true;
+}
+
 
 bool
 SWGDATVDemodSettings::isSet(){
@@ -563,6 +767,18 @@ SWGDATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_fec_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_soft_ldpc_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(soft_ldpc_tool_path && *soft_ldpc_tool_path != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_soft_ldpc_max_trials_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_max_bitflips_isSet){
             isObjectUpdated = true; break;
         }
         if(m_audio_mute_isSet){
@@ -611,6 +827,24 @@ SWGDATVDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_udp_ts_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_use_reverse_api_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(reverse_api_address && *reverse_api_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_port_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_device_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_reverse_api_channel_index_isSet){
             isObjectUpdated = true; break;
         }
     }while(false);

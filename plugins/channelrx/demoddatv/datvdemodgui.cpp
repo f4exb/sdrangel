@@ -92,6 +92,15 @@ bool DATVDemodGUI::handleMessage(const Message& message)
         displaySystemConfiguration();
         return true;
     }
+    else if (DATVDemod::MsgConfigureDATVDemod::match(message))
+    {
+        DATVDemod::MsgConfigureDATVDemod& cfg = (DATVDemod::MsgConfigureDATVDemod&) message;
+        m_settings = cfg.getSettings();
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        return true;
+    }
     else
     {
         return false;

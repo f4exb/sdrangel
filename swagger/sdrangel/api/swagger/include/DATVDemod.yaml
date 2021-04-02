@@ -10,16 +10,55 @@ DATVDemodSettings:
     centerFrequency:
       type: integer
     standard:
-      description: see DATVDemodSettings::dvb_version
       type: integer
+      description: >
+        DVB bersion (see DATVDemodSettings::dvb_version)
+          * 0 - DVB-S
+          * 1 - DVB-S2
     modulation:
-      description: see DATVDemodSettings::DATVModulation
       type: integer
+      description: >
+        Modulation type (DATVDemodSettings::DATVModulation)
+          * 0 - BPSK
+          * 1 - QPSK
+          * 2 - PSK8
+          * 3 - APSK16
+          * 4 - APSK32
+          * 5 - APSK64E
+          * 6 - QAM16
+          * 7 - QAM64
+          * 8 - QAM256
     fec:
-      description: see DATVDemodSettings::DATVCodeRate
+      type: integer
+      description: >
+        FEC rate (see DATVDemodSettings::DATVCodeRate)
+          * 0 - 1/2
+          * 1 - 2/3
+          * 2 - 4/6
+          * 3 - 3/4
+          * 4 - 4/6
+          * 5 - 7/8
+          * 6 - 4/5
+          * 7 - 8/9
+          * 8 - 9/10
+          * 9 - 1/4
+          * 10 - 1/3
+          * 11 - 2/5
+          * 12 - 3/5
+    softLDPC:
+      description: (boolean) engage sodt LDPC with LDPC tool sub processes (Linux only)
+      type: integer
+    softLDPCToolPath:
+      description: O/S path to the LDPC tool binary
+      type: string
+    softLDPCMaxTrials:
+      description: maximum number of trials in the soft LDPC algorithm (LDPC tool parameter)
+      type: integer
+    maxBitflips:
+      description: maximum number of bit flips allowed in hard LDPC algorithm
       type: integer
     audioMute:
-      description: boolean
+      description: (boolean) mute audio output
       type: integer
     audioDeviceName:
       type: string
@@ -28,24 +67,30 @@ DATVDemodSettings:
     notchFilters:
       type: integer
     allowDrift:
-      description: boolean
+      description: (boolean) allow a larger frequency drift (DVB-S)
       type: integer
     fastLock:
-      description: boolean
+      description: (boolean) faster locking algorithm (DVB-S)
       type: integer
     filter:
-      description: see DATVDemodSettings::dvb_sampler
+      description: >
+        Type of sumbol filtering (see DATVDemodSettings::dvb_sampler)
+          * 0 - Nearest
+          * 1 - Linear
+          * 2 - Root Raised Cosine
       type: integer
     hardMetric:
-      description: boolean
+      description: (boolean) (DVB-S)
       type: integer
     rollOff:
+      description: RRC filter roll-off factor (0..1)
       type: number
       format: float
     viterbi:
-      description: boolean
+      description: (boolean) (DVB-S)
       type: integer
     excursion:
+      description: RRC filter envelope excursion (dB)
       type: integer
     audioVolume:
       type: integer
@@ -58,4 +103,18 @@ DATVDemodSettings:
       type: integer
     udpTS:
       description: boolean
+      type: integer
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
       type: integer

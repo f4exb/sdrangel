@@ -135,7 +135,11 @@ Push this button when you are lost...
 
   - FIR Linear
   - FIR Nearest
-  - RRC (Root Raised Cosine): when selected additional controls for roll-off factor (%) and excursion (dB) are provided.
+  - RRC (Root Raised Cosine).
+
+  When RRC is selected the additional controls for roll-off factor (%) and envelope excursion (dB) are effective. The lower the roll-off factor the steeper the sides of the filter. A higher value of the envelope excursion may help on weak signals.
+
+  Practically the RRC filter is mandatory for proper decoding of normal to weak signals. Strong signals may decode in any condition.
 
 <h5>B.2a.12: Amount of data decoded</h5>
 
