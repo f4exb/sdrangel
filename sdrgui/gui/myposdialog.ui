@@ -77,6 +77,9 @@
         <property name="toolTip">
          <string>Altitude in metres</string>
         </property>
+        <property name="maximum">
+         <number>50000</number>
+        </property>
        </widget>
       </item>
       <item row="4" column="0">
