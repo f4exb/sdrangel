@@ -96,9 +96,7 @@ bool DATVDemodGUI::handleMessage(const Message& message)
     {
         DATVDemod::MsgConfigureDATVDemod& cfg = (DATVDemod::MsgConfigureDATVDemod&) message;
         m_settings = cfg.getSettings();
-        blockApplySettings(true);
         displaySettings();
-        blockApplySettings(false);
         return true;
     }
     else
@@ -294,12 +292,13 @@ void DATVDemodGUI::blockApplySettings(bool blnBlock)
 void DATVDemodGUI::displaySettings()
 {
     m_objChannelMarker.blockSignals(true);
-    blockApplySettings(true);
-
     m_objChannelMarker.setCenterFrequency(m_settings.m_centerFrequency);
-    m_objChannelMarker.setBandwidth(m_settings.m_rfBandwidth);
     m_objChannelMarker.setColor(m_settings.m_rgbColor);
     m_objChannelMarker.setTitle(m_settings.m_title);
+    m_objChannelMarker.blockSignals(false);
+    m_objChannelMarker.setBandwidth(m_settings.m_rfBandwidth);
+
+    blockApplySettings(true);
 
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_objChannelMarker.getTitle());
@@ -379,7 +378,6 @@ void DATVDemodGUI::displaySettings()
     ui->udpTSPort->setText(tr("%1").arg(m_settings.m_udpTSPort));
 
     blockApplySettings(false);
-    m_objChannelMarker.blockSignals(false);
 }
 
 void DATVDemodGUI::displaySystemConfiguration()
