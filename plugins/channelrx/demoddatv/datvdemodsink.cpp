@@ -1280,6 +1280,24 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         m_modcodCodeRate = objDemodulatorDVBS2->m_modcodRate;
     } // DVBS2: Track change of constellation via MODCOD
 
+    //********** init leandvb framework **********
+    if (m_blnNeedConfigUpdate)
+    {
+        qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
+        m_blnNeedConfigUpdate = false;
+
+        if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
+        {
+            qDebug("DATVDemodSink::feed: init DVBS-2");
+            InitDATVS2Framework();
+        }
+        else
+        {
+            qDebug("DATVDemodSink::feed: init DVBS");
+            InitDATVFramework();
+        }
+    }
+
     //********** Bis repetita : Let's rock and roll buddy ! **********
 #ifdef EXTENDED_DIRECT_SAMPLE
 
@@ -1309,25 +1327,6 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
         fltI = it->real();
         fltQ = it->imag();
 #endif
-
-        //********** demodulation **********
-        if (m_blnNeedConfigUpdate)
-        {
-            qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
-            m_blnNeedConfigUpdate = false;
-
-            if(m_settings.m_standard==DATVDemodSettings::DVB_S2)
-            {
-                qDebug("DATVDemodSink::feed: init DVBS-2");
-                InitDATVS2Framework();
-            }
-            else
-            {
-                qDebug("DATVDemodSink::feed: init DVBS");
-                InitDATVFramework();
-            }
-        }
-
         //********** iq stream ****************
         Complex objC(fltI,fltQ);
         objC *= m_objNCO.nextIQ();
@@ -1459,8 +1458,7 @@ void DATVDemodSink::applySettings(const DATVDemodSettings& settings, bool force)
         m_udpStream.setPort(settings.m_udpTSPort);
     }
 
-    if (m_settings.isDifferent(settings) || force)
-    {
+    if (m_settings.isDifferent(settings) || force) {
         m_blnNeedConfigUpdate = true;
     }
 
