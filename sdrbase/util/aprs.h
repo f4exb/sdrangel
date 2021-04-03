@@ -322,7 +322,8 @@ struct SDRBASE_API APRSPacket {
         return bytes;
     }
 
-    QString toText(bool includeFrom=true, bool includePosition=false, char separator='\n')
+    QString toText(bool includeFrom=true, bool includePosition=false, char separator='\n',
+                        bool altitudeMetres=false, int speedUnits=0, bool tempCelsius=false, bool rainfallMM=false)
     {
         QStringList text;
 
@@ -351,9 +352,21 @@ struct SDRBASE_API APRSPacket {
         if (includePosition && m_hasPosition)
             text.append(QString("Latitude: %1 Longitude: %2").arg(m_latitude).arg(m_longitude));
         if (m_hasAltitude)
-            text.append(QString("Altitude: %1 ft").arg(m_altitudeFt));
+        {
+            if (altitudeMetres)
+                text.append(QString("Altitude: %1 m").arg((int)std::round(Units::feetToMetres(m_altitudeFt))));
+            else
+                text.append(QString("Altitude: %1 ft").arg(m_altitudeFt));
+        }
         if (m_hasCourseAndSpeed)
-            text.append(QString("Course: %1%3 Speed: %2 knts").arg(m_course).arg(m_speed).arg(QChar(0xb0)));
+        {
+            if (speedUnits == 0)
+                text.append(QString("Course: %1%3 Speed: %2 knts").arg(m_course).arg(m_speed).arg(QChar(0xb0)));
+            else if (speedUnits == 1)
+                text.append(QString("Course: %1%3 Speed: %2 mph").arg(m_course).arg(Units::knotsToIntegerMPH(m_speed)).arg(QChar(0xb0)));
+            else
+                text.append(QString("Course: %1%3 Speed: %2 kph").arg(m_course).arg(Units::knotsToIntegerKPH(m_speed)).arg(QChar(0xb0)));
+        }
 
         if (m_hasStationDetails)
             text.append(QString("TX Power: %1 Watts Antenna Height: %2 m Gain: %3 dB Direction: %4").arg(m_powerWatts).arg(std::round(Units::feetToMetres(m_antennaHeightFt))).arg(m_antennaGainDB).arg(m_antennaDirectivity));
@@ -379,7 +392,12 @@ struct SDRBASE_API APRSPacket {
             {
                 air.append("Air");
                 if (m_hasTemp)
-                    air.append(QString("Temperature %1C").arg(Units::fahrenheitToCelsius(m_temp), 0, 'f', 1));
+                {
+                    if (tempCelsius)
+                        air.append(QString("Temperature %1C").arg(Units::fahrenheitToCelsius(m_temp), 0, 'f', 1));
+                    else
+                        air.append(QString("Temperature %1F").arg(m_temp));
+                }
                 if (m_hasHumidity)
                     air.append(QString("Humidity %1%").arg(m_humidity));
                 if (m_hasBarometricPressure)
@@ -391,11 +409,26 @@ struct SDRBASE_API APRSPacket {
             {
                 rain.append("Rain");
                 if (m_hasRainLastHr)
-                    rain.append(QString("%1 mm last hour").arg(std::round(Units::inchesToMilimetres(m_rainLastHr/100.0))));
+                {
+                    if (rainfallMM)
+                        rain.append(QString("%1 mm last hour").arg(std::round(Units::inchesToMilimetres(m_rainLastHr/100.0))));
+                    else
+                        rain.append(QString("%1 1/100\" last hour").arg(m_rainLastHr));
+                }
                 if (m_hasRainLast24Hrs)
-                    rain.append(QString("%1 mm last 24 hours").arg(std::round(Units::inchesToMilimetres(m_rainLast24Hrs/100.0))));
+                {
+                    if (rainfallMM)
+                        rain.append(QString("%1 mm last 24 hours").arg(std::round(Units::inchesToMilimetres(m_rainLast24Hrs/100.0))));
+                    else
+                        rain.append(QString("%1 1/100\" last 24 hours").arg(m_rainLast24Hrs));
+                }
                 if (m_hasRainSinceMidnight)
-                    rain.append(QString("%1 mm since midnight").arg(std::round(Units::inchesToMilimetres(m_rainSinceMidnight/100.0))));
+                {
+                    if (rainfallMM)
+                        rain.append(QString("%1 mm since midnight").arg(std::round(Units::inchesToMilimetres(m_rainSinceMidnight/100.0))));
+                    else
+                        rain.append(QString("%1 1/100\" since midnight").arg(m_rainSinceMidnight));
+                }
                 weather.append(rain.join(' '));
             }
 

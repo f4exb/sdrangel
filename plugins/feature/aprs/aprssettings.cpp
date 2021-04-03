@@ -33,6 +33,23 @@ const QStringList APRSSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.chirpchatdemod")
 };
 
+const QStringList APRSSettings::m_altitudeUnitNames = {
+    QStringLiteral("Feet"),
+    QStringLiteral("Metres")
+};
+
+const QStringList APRSSettings::m_speedUnitNames = {
+    QStringLiteral("Knots"),
+    QStringLiteral("MPH"),
+    QStringLiteral("KPH")
+};
+
+const QStringList APRSSettings::m_temperatureUnitNames = {
+    QStringLiteral("F"),
+    QStringLiteral("C")
+};
+
+
 APRSSettings::APRSSettings()
 {
     resetToDefaults();
@@ -48,6 +65,10 @@ void APRSSettings::resetToDefaults()
     m_igateEnabled = false;
     m_stationFilter = ALL;
     m_filterAddressee = "";
+    m_altitudeUnits = FEET;
+    m_speedUnits = KNOTS;
+    m_temperatureUnits = FAHRENHEIT;
+    m_rainfallUnits = HUNDREDTHS_OF_AN_INCH;
     m_title = "APRS";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -106,6 +127,10 @@ QByteArray APRSSettings::serialize() const
     s.writeU32(13, m_reverseAPIPort);
     s.writeU32(14, m_reverseAPIFeatureSetIndex);
     s.writeU32(15, m_reverseAPIFeatureIndex);
+    s.writeS32(16, (int)m_altitudeUnits);
+    s.writeS32(17, (int)m_speedUnits);
+    s.writeS32(18, (int)m_temperatureUnits);
+    s.writeS32(19, (int)m_rainfallUnits);
 
     for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
         s.writeS32(100 + i, m_packetsTableColumnIndexes[i]);
@@ -176,6 +201,11 @@ bool APRSSettings::deserialize(const QByteArray& data)
         m_reverseAPIFeatureSetIndex = utmp > 99 ? 99 : utmp;
         d.readU32(15, &utmp, 0);
         m_reverseAPIFeatureIndex = utmp > 99 ? 99 : utmp;
+
+        d.readS32(16, (int *)&m_altitudeUnits, (int)FEET);
+        d.readS32(17, (int *)&m_speedUnits, (int)KNOTS);
+        d.readS32(18, (int *)&m_temperatureUnits, (int)FAHRENHEIT);
+        d.readS32(19, (int *)&m_rainfallUnits, (int)HUNDREDTHS_OF_AN_INCH);
 
         for (int i = 0; i < APRS_PACKETS_TABLE_COLUMNS; i++)
             d.readS32(100 + i, &m_packetsTableColumnIndexes[i], i);

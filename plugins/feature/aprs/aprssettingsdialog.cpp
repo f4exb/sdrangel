@@ -17,15 +17,20 @@
 
 #include "aprssettingsdialog.h"
 
-APRSSettingsDialog::APRSSettingsDialog(QString igateServer, QString igateCallsign, QString igatePasscode, QString igateFilter, QWidget* parent) :
+APRSSettingsDialog::APRSSettingsDialog(APRSSettings* settings, QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::APRSSettingsDialog)
+    ui(new Ui::APRSSettingsDialog),
+    m_settings(settings)
 {
     ui->setupUi(this);
-    ui->igateServer->setCurrentText(igateServer);
-    ui->igateCallsign->setText(igateCallsign);
-    ui->igatePasscode->setText(igatePasscode);
-    ui->igateFilter->setText(igateFilter);
+    ui->igateServer->setCurrentText(m_settings->m_igateServer);
+    ui->igateCallsign->setText(m_settings->m_igateCallsign);
+    ui->igatePasscode->setText(m_settings->m_igatePasscode);
+    ui->igateFilter->setText(m_settings->m_igateFilter);
+    ui->altitudeUnits->setCurrentIndex((int)m_settings->m_altitudeUnits);
+    ui->speedUnits->setCurrentIndex((int)m_settings->m_speedUnits);
+    ui->temperatureUnits->setCurrentIndex((int)m_settings->m_temperatureUnits);
+    ui->rainfallUnits->setCurrentIndex((int)m_settings->m_rainfallUnits);
 }
 
 APRSSettingsDialog::~APRSSettingsDialog()
@@ -35,9 +40,13 @@ APRSSettingsDialog::~APRSSettingsDialog()
 
 void APRSSettingsDialog::accept()
 {
-    m_igateServer = ui->igateServer->currentText();
-    m_igateCallsign = ui->igateCallsign->text();
-    m_igatePasscode = ui->igatePasscode->text();
-    m_igateFilter = ui->igateFilter->text();
+    m_settings->m_igateServer = ui->igateServer->currentText();
+    m_settings->m_igateCallsign = ui->igateCallsign->text();
+    m_settings->m_igatePasscode = ui->igatePasscode->text();
+    m_settings->m_igateFilter = ui->igateFilter->text();
+    m_settings->m_altitudeUnits = (APRSSettings::AltitudeUnits)ui->altitudeUnits->currentIndex();
+    m_settings->m_speedUnits = (APRSSettings::SpeedUnits)ui->speedUnits->currentIndex();
+    m_settings->m_temperatureUnits = (APRSSettings::TemperatureUnits)ui->temperatureUnits->currentIndex();
+    m_settings->m_rainfallUnits = (APRSSettings::RainfallUnits)ui->rainfallUnits->currentIndex();
     QDialog::accept();
 }

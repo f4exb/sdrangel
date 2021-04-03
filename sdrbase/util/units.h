@@ -61,6 +61,16 @@ public:
         return (int)std::round(knotsToKPH(knots));
     }
 
+    static float knotsToMPH(float knots)
+    {
+        return knots * 1.15078f;
+    }
+
+    static int knotsToIntegerMPH(float knots)
+    {
+        return (int)std::round(knotsToMPH(knots));
+    }
+
     static float kmpsToKPH(float kps)
     {
         return kps * (60.0 * 60.0);

@@ -169,6 +169,13 @@ private:
 
     void updateSummary(APRSStation *station);
     void addPacketToGUI(APRSStation *station, APRSPacket *aprs);
+    void setUnits();
+    QString convertAltitude(const QString& altitude);
+    float convertAltitude(float altitude);
+    QString convertSpeed(const QString& speed);
+    int convertSpeed(int speed);
+    int convertTemperature(int temperature);
+    int convertRainfall(int rainfall);
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
