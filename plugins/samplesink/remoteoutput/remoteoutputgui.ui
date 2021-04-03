@@ -599,7 +599,7 @@
       <widget class="QLabel" name="apiAddressLabel">
        <property name="minimumSize">
         <size>
-         <width>30</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
@@ -607,7 +607,7 @@
         <string>Green if communication OK else KO</string>
        </property>
        <property name="text">
-        <string>API</string>
+        <string>Remote</string>
        </property>
       </widget>
      </item>
@@ -626,7 +626,7 @@
         <string>000.000.000.000</string>
        </property>
        <property name="text">
-        <string>0...</string>
+        <string>0.0.0.0</string>
        </property>
       </widget>
      </item>
@@ -678,10 +678,10 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Set API address and port</string>
+        <string>Get remote information</string>
        </property>
        <property name="text">
-        <string>Set</string>
+        <string>Info</string>
        </property>
       </widget>
      </item>
@@ -693,7 +693,7 @@
       <widget class="QLabel" name="dataAddressLabel">
        <property name="minimumSize">
         <size>
-         <width>30</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
@@ -717,7 +717,7 @@
         <string>000.000.000.000</string>
        </property>
        <property name="text">
-        <string>0...</string>
+        <string>0.0.0.0</string>
        </property>
       </widget>
      </item>

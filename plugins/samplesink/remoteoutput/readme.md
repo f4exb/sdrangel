@@ -6,9 +6,9 @@ This output sample sink plugin sends its samples over the network to a SDRangel 
 
 Forward Error Correction with a Cauchy MDS block erasure codec is used to prevent block loss. This can make the UDP transmission more robust particularly over WiFi links.
 
-The distant SDRangel instance to which the data stream is sent is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
+The remote SDRangel instance to which the data stream is sent is controlled via its REST API using a separate control software for example [SDRangelcli](https://github.com/f4exb/sdrangelcli)
 
-The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the distant Remote source channel plugin to match the Rx sample size of the distant instance. Best performace is obtained when both instances use the same sample size. 
+The sample size used in the I/Q stream is the Rx sample size of the local instance. Possible conversion takes place in the remote Remote source channel plugin to match the Rx sample size of the remote instance. Best performace is obtained when both instances use the same sample size.
 
 It is present only in Linux binary releases.
 
@@ -22,11 +22,11 @@ The plugin will be built only if the [CM256cc library](https://github.com/f4exb/
 
 <h3>1: Start/Stop</h3>
 
-Device start / stop button. 
+Device start / stop button.
 
   - Blue triangle icon: device is ready and can be started
   - Green square icon: device is running and can be stopped
-  
+
 <h3>2: Stream sample rate</h3>
 
 I/Q sample rate in kS/s of the stream that is sent over the network.
@@ -39,7 +39,7 @@ This is the center frequency in kHz of the remote instance device.
 
 This is the remote instance baseband sample rate. It can be a power of two multiple of the stream sample rate (2) but it will not work for other values.
 
-<h3>5: Stream controls and API destination</h3> 
+<h3>5: Stream controls and API destination</h3>
 
 ![SDR Remote output sample rate GUI](../../../doc/img/RemoteOutput_plugin_05.png)
 
@@ -57,8 +57,8 @@ The value is a percentage of the nominal time it takes to process a block of sam
   - Delay percentage: _d_
   - Number of FEC blocks: _F_
   - There are 127 blocks of I/Q data per frame (1 meta block for 128 blocks) and each I/Q data block of 512 bytes (128 samples) has a 8 bytes header (2 samples) thus there are 126 samples remaining effectively. This gives the constant 127*126 = 16002 samples per frame in the formula
-  
-Formula: ((127 &#x2715; 126 &#x2715; _d_) / _SR_) / (128 + _F_)   
+
+Formula: ((127 &#x2715; 126 &#x2715; _d_) / _SR_) / (128 + _F_)
 
 <h4>5.3: remote instance device set index</h4>
 
@@ -105,33 +105,35 @@ This counter counts the unrecoverable error conditions found (i.e. 6.4 between 1
 
 This HH:mm:ss time display shows the time since the reset events counters button (4.6) was pushed.
 
-<h3>7: Distant transmitter queue length gauge</h3>
+<h3>7: Remote transmitter queue length gauge</h3>
 
 This is ratio of the reported number of data frame blocks in the remote queue over the total number of blocks in the queue.
 
-<h3>8: Distant transmitter queue length status</h3>
+<h3>8: Remote transmitter queue length status</h3>
 
 This is the detail of the ratio shown in the gauge. Each frame block is a block of 127 &#x2715; 126 samples (16 bit I or Q samples) or 127 &#x2715; 63 samples (24 bit I or Q samples).
 
-<h3>9: Distant server API address and port</h3>
+<h3>9: Remote server test</h3>
+
+Test remote connection with its API.
 
 ![SDR Remote input stream GUI](../../../doc/img/RemoteInput_plugin_05.png)
 
-<h4>9.1: API connection indicator</h4>
+<h4>9.1: Remote connection indicator</h4>
 
-The "API" label is lit in green when the connection is successful
+The "Remote" label is lit in green when the connection is successful
 
 <h4>9.2: API IP address</h4>
 
-IP address of the distant SDRangel instance REST API
+IP address of the remote SDRangel instance REST API
 
 <h4>9.3: API port</h4>
 
-Port of the distant SDRangel instance REST API
+Port of the remote SDRangel instance REST API
 
-<h4>9.4: Validation button</h4>
+<h4>9.4: Get information button</h4>
 
-When the return key is hit within the address (9.2) or port (9.3) the changes are effective immediately. You can also use this button to set again these values. Clicking on this button will send a request to the API to get the distant SDRangel instance information that is displayed in the API message box (8) 
+When the return key is hit within the address (9.2) or port (9.3) the changes are effective immediately. You can also use this button to set again these values. Clicking on this button will send a request to the API to get the remote SDRangel instance information that is displayed in the API message box (8)
 
 <h3>10: Local data address and port</h3>
 
@@ -139,20 +141,20 @@ When the return key is hit within the address (9.2) or port (9.3) the changes ar
 
 <h4>10.1: Data IP address</h4>
 
-IP address of the local network interface the distant SDRangel instance sends the data to
+IP address of the local network interface the remote SDRangel instance sends the data to
 
 <h4>10.2: Data port</h4>
 
-Local port the distant SDRangel instance sends the data to
+Local port the remote SDRangel instance sends the data to
 
 <h4>10.3: Validation button</h4>
 
-When the return key is hit within the address (10.2) or port (10.3) the changes are effective immediately. You can also use this button to set again these values. 
+When the return key is hit within the address (10.2) or port (10.3) the changes are effective immediately. You can also use this button to set again these values.
 
 <h3>11: Status message</h3>
 
 The API status is displayed in this box. It shows "API OK" when the connection is successful and reply is OK
 
-<h3>12: API information</h3>
+<h3>12: Remote information</h3>
 
-This is the information returned by the API and is the distance SDRangel instance information if transaction is successful
+This is the information returned by the remote when connection with its API is successful
