@@ -58,6 +58,18 @@ In this example we have a Rx device on index 0 and a Tx device on index 1. All s
 
 Important: you should initiate switch over by stopping the active device and not by starting the other.
 
+<h2>qo100_datv.py</h2>
+
+Quick control of configuration for receiving QO-100 DATV to rapidly follow spotted activity on [BATC web sdr](https://eshail.batc.org.uk/wb/)
+
+Options are:
+  - `-h` or `--help` show this help message and exit
+  - `-a` or `--address` address and port of SDRangel instance API. Default: 127.0.0.1:8091
+  - `-d` or `--device` index of device set. Default 0
+  - `-c` or `--channel` index of DATV demod channel. Default 0
+  - `-f` or `--frequency` device center frequency (kHz). Mandatory. Ex: 491500
+  - `-s` or `--symbol-rate` symbol rate (kS/s). Mandatory. Ex: 1500
+
 <h2>config.py</h2>
 
 Sends a sequence of commands recorded in a JSON file which is in the form of a list of commands.

@@ -4,10 +4,18 @@ Constants that refer to SDRangel software
 
 # Device keys depending on hardware type (deviceHwType)
 DEVICE_TYPES = {
+    "Airspy": {
+        "settings": "airspySettings",
+        "cf_key": "centerFrequency",
+    },
     "AirspyHF": {
         "settings": "airspyHFSettings",
         "cf_key": "centerFrequency",
-    }
+    },
+    "RTLSDR": {
+        "settings": "rtlSdrSettings",
+        "cf_key": "centerFrequency",
+    },
 }
 
 # Channel keys depending on channel type (id)
@@ -26,6 +34,11 @@ CHANNEL_TYPES = {
         "settings": "ChirpChatDemodSettings",
         "df_key": "inputFrequencyOffset",
         "mute_key": "decodeActive"
+    },
+    "DATVDemod": {
+        "settings": "DATVDemodSettings",
+        "df_key": "centerFrequency",
+        "mute_key": "audioMute"
     },
     "DSDDemod": {
         "settings": "DSDDemodSettings",
