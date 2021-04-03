@@ -153,7 +153,6 @@ class DATVideoRender : public TVScreen
     bool m_audioMute;
     bool m_videoMute;
     float m_audioVolume;
-    bool m_updateAudioResampler;
 
     uint8_t *m_pbytDecodedData[4];
     int m_pintDecodedLineSize[4];

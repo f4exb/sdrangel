@@ -49,7 +49,6 @@ DATVideoRender::DATVideoRender(QWidget *parent) :
     m_audioMute = false;
     m_videoMute = false;
     m_audioVolume = 0;
-    m_updateAudioResampler = false;
 
     m_currentRenderWidth = -1;
     m_currentRenderHeight = -1;
@@ -206,6 +205,7 @@ bool DATVideoRender::PreprocessStream()
     if (intRet < 0)
     {
         avformat_close_input(&m_formatCtx);
+        m_formatCtx = nullptr;
         qDebug() << "DATVideoRender::PreprocessStream cannot find video stream";
         return false;
     }
@@ -215,8 +215,7 @@ bool DATVideoRender::PreprocessStream()
     //Find audio stream
     intRet = av_find_best_stream(m_formatCtx, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
 
-    if (intRet < 0)
-    {
+    if (intRet < 0) {
         qDebug() << "DATVideoRender::PreprocessStream cannot find audio stream";
     }
 
@@ -272,7 +271,6 @@ bool DATVideoRender::PreprocessStream()
     {
         avformat_close_input(&m_formatCtx);
         m_formatCtx = nullptr;
-
         qDebug() << "DATVideoRender::PreprocessStream cannot find associated video CODEC";
         return false;
     }
@@ -287,7 +285,6 @@ bool DATVideoRender::PreprocessStream()
     {
         avformat_close_input(&m_formatCtx);
         m_formatCtx = nullptr;
-
         qDebug() << "DATVideoRender::PreprocessStream cannot open associated video CODEC";
         return false;
     }
@@ -299,7 +296,6 @@ bool DATVideoRender::PreprocessStream()
     {
         avformat_close_input(&m_formatCtx);
         m_formatCtx = nullptr;
-
         qDebug() << "DATVideoRender::PreprocessStream cannot allocate frame";
         return false;
     }
@@ -360,7 +356,6 @@ bool DATVideoRender::PreprocessStream()
             {
                 setResampler();
             }
-
         }
     }
 
@@ -384,6 +379,8 @@ bool DATVideoRender::OpenStream(DATVideostream *device)
         qDebug() << "DATVideoRender::OpenStream already open";
         return false;
     }
+
+    m_isOpen = false;
 
     if (device->bytesAvailable() <= 0)
     {
@@ -573,12 +570,6 @@ bool DATVideoRender::RenderStream()
     // Audio channel
     else if ((packet.stream_index == m_audioStreamIndex) && (m_audioFifo) && (swr_is_initialized(m_audioSWR)) && (!m_audioMute))
     {
-        if (m_updateAudioResampler)
-        {
-            setResampler();
-            m_updateAudioResampler = false;
-        }
-
         // memset(m_frame, 0, sizeof(AVFrame));
         av_frame_unref(m_frame);
         gotFrame = 0;
@@ -699,9 +690,8 @@ bool DATVideoRender::CloseStream(QIODevice *device)
         return false;
     }
 
-    // maybe done in the avcodec_close
-    //    avformat_close_input(&m_formatCtx);
-    //    m_formatCtx=nullptr;
+    avformat_close_input(&m_formatCtx);
+    m_formatCtx=nullptr;
 
     if (m_videoDecoderCtx)
     {
@@ -714,6 +704,12 @@ bool DATVideoRender::CloseStream(QIODevice *device)
         avcodec_free_context(&m_audioDecoderCtx);
         avcodec_close(m_audioDecoderCtx);
         m_audioDecoderCtx = nullptr;
+    }
+
+    if (m_audioSWR)
+    {
+        swr_free(&m_audioSWR);
+        m_audioSWR = nullptr;
     }
 
     if (m_frame)
