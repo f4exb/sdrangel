@@ -26,9 +26,6 @@
 #include <QMutex>
 #include <QThread>
 
-#define MinStackSize    4
-#define DefaultMemoryLimit  2048000
-
 class DATVideostream : public QIODevice
 {
     Q_OBJECT
@@ -39,6 +36,8 @@ public:
 
     bool MultiThreaded;
     int ThreadTimeOut;
+    static const int m_defaultMemoryLimit = 2048000;
+    static const int m_minStackSize = 4;
 
     int pushData(const char * chrData, int intSize);
     void resetTotalReceived();
@@ -54,7 +53,7 @@ public:
 signals:
 
     void onDataAvailable();
-    void onDataPackets(int *intDataPackets, int *intDataBytes, int *intPercentBuffer,qint64 *intTotalReceived);
+    void onDataPackets(int *intDataBytes, int *intPercentBuffer,qint64 *intTotalReceived);
 
 protected:
 
@@ -69,7 +68,6 @@ private:
     int m_intMemoryLimit;
     int m_intBytesAvailable;
     int m_intBytesWaiting;
-    int m_intQueueWaiting;
     int m_intPercentBuffer;
     qint64 m_intTotalReceived;
     qint64 m_intPacketReceived;

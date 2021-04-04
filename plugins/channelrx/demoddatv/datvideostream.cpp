@@ -25,7 +25,7 @@ DATVideostream::DATVideostream():
     cleanUp();
     m_intTotalReceived = 0;
     m_intPacketReceived = 0;
-    m_intMemoryLimit = DefaultMemoryLimit;
+    m_intMemoryLimit = m_defaultMemoryLimit;
     MultiThreaded = false;
     ThreadTimeOut = -1;
 
@@ -50,14 +50,13 @@ void DATVideostream::cleanUp()
 
     m_intBytesAvailable = 0;
     m_intBytesWaiting = 0;
-    m_intQueueWaiting = 0;
     m_intPercentBuffer = 0;
 }
 
 void DATVideostream::resetTotalReceived()
 {
     m_intTotalReceived = 0;
-    emit onDataPackets(&m_intQueueWaiting, &m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
+    emit onDataPackets(&m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
 }
 
 int DATVideostream::pushData(const char * chrData, int intSize)
@@ -78,17 +77,14 @@ int DATVideostream::pushData(const char * chrData, int intSize)
     m_objFIFO.enqueue(QByteArray(chrData,intSize));
     m_intBytesAvailable = m_objFIFO.head().size();
     m_intTotalReceived += intSize;
-    m_intQueueWaiting=m_objFIFO.count();
 
     m_objMutex.unlock();
 
-    if ((m_objeventLoop.isRunning())
-        && (m_intQueueWaiting >= MinStackSize))
-    {
+    if (m_objeventLoop.isRunning()) {
         emit onDataAvailable();
     }
 
-    if (m_intPacketReceived % MinStackSize == 1)
+    if (m_intPacketReceived % m_minStackSize == 1)
     {
         m_intPercentBuffer = (100*m_intBytesWaiting)/m_intMemoryLimit;
 
@@ -96,7 +92,7 @@ int DATVideostream::pushData(const char * chrData, int intSize)
             m_intPercentBuffer = 100;
         }
 
-        emit onDataPackets(&m_intQueueWaiting, &m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
+        emit onDataPackets(&m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
     }
 
     return intSize;
@@ -146,7 +142,7 @@ qint64 DATVideostream::readData(char *data, qint64 len)
     m_objMutex.lock();
 
     //DATA in FIFO ? -> Waiting for DATA
-    if ((m_objFIFO.isEmpty()) || (m_objFIFO.count()<MinStackSize))
+    if ((m_objFIFO.isEmpty()) || (m_objFIFO.count() < m_minStackSize))
     {
         m_objMutex.unlock();
 
@@ -154,7 +150,7 @@ qint64 DATVideostream::readData(char *data, qint64 len)
         {
             intThreadLoop=0;
 
-            while ((m_objFIFO.isEmpty()) || (m_objFIFO.count() < MinStackSize))
+            while ((m_objFIFO.isEmpty()) || (m_objFIFO.count() < m_minStackSize))
             {
                 QThread::msleep(5);
                 intThreadLoop++;
@@ -195,10 +191,9 @@ qint64 DATVideostream::readData(char *data, qint64 len)
         m_intBytesWaiting -= intEffectiveLen;
     }
 
-    m_intQueueWaiting = m_objFIFO.count();
     m_intPercentBuffer = (100*m_intBytesWaiting) / m_intMemoryLimit;
 
-    emit onDataPackets(&m_intQueueWaiting, &m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
+    emit onDataPackets(&m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
 
     //Next available DATA
     m_intBytesAvailable = m_objFIFO.head().size();

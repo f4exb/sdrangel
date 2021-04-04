@@ -343,7 +343,7 @@ bool DATVideoRender::PreprocessStream()
 
 bool DATVideoRender::OpenStream(DATVideostream *device)
 {
-    int ioBufferSize = 32768;
+    int ioBufferSize = DATVideostream::m_defaultMemoryLimit;
     unsigned char *ptrIOBuffer = nullptr;
     AVIOContext *ioCtx = nullptr;
 

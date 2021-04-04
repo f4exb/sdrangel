@@ -726,9 +726,8 @@ QString DATVDemodGUI::formatBytes(qint64 intBytes)
 }
 
 
-void DATVDemodGUI::on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived)
+void DATVDemodGUI::on_StreamDataAvailable(int *intBytes, int *intPercent, qint64 *intTotalReceived)
 {
-    (void) intPackets;
     ui->lblStatus->setText(QString("Data: %1B").arg(formatBytes(*intTotalReceived)));
     m_intLastDecodedData = *intTotalReceived;
 

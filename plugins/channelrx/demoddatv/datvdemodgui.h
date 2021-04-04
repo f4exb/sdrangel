@@ -78,7 +78,7 @@ private slots:
     void on_chkAllowDrift_clicked();
     void on_fullScreen_clicked();
     void on_mouseEvent(QMouseEvent* obj);
-    void on_StreamDataAvailable(int *intPackets, int *intBytes, int *intPercent, qint64 *intTotalReceived);
+    void on_StreamDataAvailable(int *intBytes, int *intPercent, qint64 *intTotalReceived);
     void on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData);
     void on_chkFastlock_clicked();
     void on_cmbFilter_currentIndexChanged(int index);
