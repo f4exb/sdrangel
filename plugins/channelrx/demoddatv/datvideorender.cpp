@@ -30,11 +30,11 @@ extern "C"
 #include "datvideorender.h"
 
 DATVideoRender::DATVideoRender(QWidget *parent) :
-    TVScreen(true, parent), m_parentWidget(parent)
+    TVScreen(true, parent),
+    m_parentWidget(parent)
 {
     installEventFilter(this);
     m_isFullScreen = false;
-    m_isFFMPEGInitialized = false;
     m_isOpen = false;
     m_formatCtx = nullptr;
     m_videoDecoderCtx = nullptr;
@@ -59,11 +59,7 @@ DATVideoRender::DATVideoRender(QWidget *parent) :
     m_audioDecodeOK = false;
     m_videoDecodeOK = false;
 
-    // for (int i = 0; i < m_audioFifoBufferSize; i++)
-    // {
-    //     m_audioFifoBuffer[2*i]   = 8192.0f * sin((M_PI * i)/(m_audioFifoBufferSize/1000.0f));
-    //     m_audioFifoBuffer[2*i+1] = m_audioFifoBuffer[2*i];
-    // }
+    av_log_set_level(AV_LOG_FATAL);
 }
 
 DATVideoRender::~DATVideoRender()
@@ -161,25 +157,6 @@ void DATVideoRender::ResetMetaData()
     emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
 }
 
-bool DATVideoRender::InitializeFFMPEG()
-{
-    ResetMetaData();
-
-    if (m_isFFMPEGInitialized)
-    {
-        return false;
-    }
-
-    //avcodec_register_all();
-    //av_register_all();
-    av_log_set_level(AV_LOG_FATAL);
-    //av_log_set_level(AV_LOG_ERROR);
-
-    m_isFFMPEGInitialized = true;
-
-    return true;
-}
-
 bool DATVideoRender::PreprocessStream()
 {
     AVDictionary *opts = nullptr;
@@ -188,6 +165,8 @@ bool DATVideoRender::PreprocessStream()
 
     int intRet = -1;
     char *buffer = nullptr;
+
+    ResetMetaData();
 
     //Identify stream
 
@@ -392,14 +371,6 @@ bool DATVideoRender::OpenStream(DATVideostream *device)
 
     m_metaData.OK_Data = true;
     emit onMetaDataChanged(new DataTSMetaData2(m_metaData));
-
-    InitializeFFMPEG();
-
-    if (!m_isFFMPEGInitialized)
-    {
-        qDebug() << "DATVideoRender::OpenStream FFMPEG not initialized";
-        return false;
-    }
 
     if (!device->open(QIODevice::ReadOnly))
     {

@@ -136,7 +136,6 @@ class DATVideoRender : public TVScreen
 
     bool m_isFullScreen;
 
-    bool m_isFFMPEGInitialized;
     bool m_isOpen;
 
     SwsContext *m_swsCtx;
@@ -167,7 +166,6 @@ class DATVideoRender : public TVScreen
     bool m_audioDecodeOK;
     bool m_videoDecodeOK;
 
-    bool InitializeFFMPEG();
     bool PreprocessStream();
     void ResetMetaData();
 

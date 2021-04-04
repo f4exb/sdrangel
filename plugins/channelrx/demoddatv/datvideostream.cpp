@@ -54,17 +54,6 @@ void DATVideostream::cleanUp()
     m_intPercentBuffer = 0;
 }
 
-bool DATVideostream::setMemoryLimit(int intMemoryLimit)
-{
-    if (intMemoryLimit <= 0) {
-        return false;
-    }
-
-    m_intMemoryLimit = intMemoryLimit;
-
-    return true;
-}
-
 void DATVideostream::resetTotalReceived()
 {
     m_intTotalReceived = 0;
