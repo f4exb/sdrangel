@@ -32,10 +32,7 @@ class DATVideostream : public QIODevice
 
 public:
     DATVideostream();
-    ~DATVideostream();
-
-    static const int m_defaultMemoryLimit = 2820000;
-    static const int m_minStackSize = 4;
+    virtual ~DATVideostream();
 
     int pushData(const char * chrData, int intSize);
     void resetTotalReceived();
@@ -48,31 +45,31 @@ public:
     virtual void close();
     virtual bool open(OpenMode mode);
 
-    QQueue<QByteArray> m_objFIFO;
+    static const int m_defaultMemoryLimit = 2820000;
+    static const int m_minStackSize = 4;
 
 signals:
-
-    void onDataAvailable();
-    void onDataPackets(int *intDataBytes, int *intPercentBuffer,qint64 *intTotalReceived);
+    void dataAvailable();
+    void fifoData(int *intDataBytes, int *intPercentBuffer, qint64 *intTotalReceived);
 
 protected:
-
     virtual qint64 readData(char *data, qint64 len);
     virtual qint64 writeData(const char *data, qint64 len);
     virtual qint64 readLineData(char *data, qint64 maxSize);
 
 private:
+    QQueue<QByteArray> m_fifo;
     bool m_multiThreaded;
     int m_threadTimeout;
 
-    QEventLoop m_objeventLoop;
-    QMutex m_objMutex;
-    int m_intMemoryLimit;
-    int m_intBytesAvailable;
-    int m_intBytesWaiting;
-    int m_intPercentBuffer;
-    qint64 m_intTotalReceived;
-    qint64 m_intPacketReceived;
+    QEventLoop m_eventLoop;
+    QMutex m_mutex;
+    int m_memoryLimit;
+    int m_bytesAvailable;
+    int m_bytesWaiting;
+    int m_percentBuffer;
+    qint64 m_totalReceived;
+    qint64 m_packetReceived;
 
 };
 

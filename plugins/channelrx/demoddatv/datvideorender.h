@@ -110,12 +110,12 @@ class DATVideoRender : public TVScreen
     explicit DATVideoRender(QWidget *parent);
     ~DATVideoRender();
 
-    void SetFullScreen(bool blnFullScreen);
+    void setFullScreen(bool blnFullScreen);
 
     void setAudioFIFO(AudioFifo *fifo) { m_audioFifo = fifo; }
-    bool OpenStream(DATVideostream *objDevice);
-    bool RenderStream();
-    bool CloseStream(QIODevice *objDevice);
+    bool openStream(DATVideostream *objDevice);
+    bool renderStream();
+    bool closeStream(QIODevice *objDevice);
 
     int getVideoStreamIndex() const { return m_videoStreamIndex; }
     int getAudioStreamIndex() const { return m_audioStreamIndex; }
@@ -128,16 +128,12 @@ class DATVideoRender : public TVScreen
     bool getVideoDecodeOK() const { return m_videoDecodeOK; }
 
   private:
-
     struct DataTSMetaData2 m_metaData;
     QWidget *m_parentWidget;
     Qt::WindowFlags m_originalWindowFlags;
     QSize m_originalSize;
-
     bool m_isFullScreen;
-
     bool m_isOpen;
-
     SwsContext *m_swsCtx;
     AVFormatContext *m_formatCtx;
     AVCodecContext *m_videoDecoderCtx;
@@ -153,8 +149,8 @@ class DATVideoRender : public TVScreen
     bool m_videoMute;
     float m_audioVolume;
 
-    uint8_t *m_pbytDecodedData[4];
-    int m_pintDecodedLineSize[4];
+    uint8_t *m_decodedData[4];
+    int m_decodedLineSize[4];
 
     int m_frameCount;
     int m_videoStreamIndex;
@@ -166,10 +162,13 @@ class DATVideoRender : public TVScreen
     bool m_audioDecodeOK;
     bool m_videoDecodeOK;
 
-    bool PreprocessStream();
-    void ResetMetaData();
+    static int ReadFunction(void *opaque, uint8_t *buf, int buf_size);
+    static int64_t SeekFunction(void *opaque, int64_t offset, int whence);
 
-    int new_decode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt);
+    bool preprocessStream();
+    void resetMetaData();
+
+    int newDecode(AVCodecContext *avctx, AVFrame *frame, int *got_frame, AVPacket *pkt);
     void setResampler();
 
   protected:
@@ -214,7 +213,7 @@ class DATVideoRenderThread : public QThread
             return;
         }
 
-        m_renderingVideo = m_renderer->OpenStream(m_stream);
+        m_renderingVideo = m_renderer->openStream(m_stream);
 
         if (!m_renderingVideo) {
             return;
@@ -222,12 +221,12 @@ class DATVideoRenderThread : public QThread
 
         while ((m_renderingVideo == true) && (m_renderer))
         {
-            if (!m_renderer->RenderStream()) {
+            if (!m_renderer->renderStream()) {
                 break;
             }
         }
 
-        m_renderer->CloseStream(m_stream);
+        m_renderer->closeStream(m_stream);
         m_renderingVideo = false;
     }
 

@@ -219,7 +219,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_objDATVDemod->setCNRMeter(ui->cnrMeter);
     m_objDATVDemod->SetVideoRender(ui->screenTV_2);
 
-    connect(m_objDATVDemod->getVideoStream(), &DATVideostream::onDataPackets, this, &DATVDemodGUI::on_StreamDataAvailable);
+    connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
 
     m_intPreviousDecodedData=0;
@@ -704,7 +704,7 @@ void DATVDemodGUI::on_chkAllowDrift_clicked()
 
 void DATVDemodGUI::on_fullScreen_clicked()
 {
-    ui->screenTV_2->SetFullScreen(true);
+    ui->screenTV_2->setFullScreen(true);
 }
 
 void DATVDemodGUI::on_mouseEvent(QMouseEvent* obj)
