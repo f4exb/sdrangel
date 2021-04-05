@@ -62,7 +62,7 @@ DATVDemodSink::~DATVDemodSink()
     m_blnInitialized = false;
 
     //Immediately exit from DATVideoStream if waiting for data before killing thread
-    m_objVideoStream->ThreadTimeOut = 0;
+    m_objVideoStream->setThreadTimeout(0);
     m_objVideoStream->deleteLater();
 
     stopVideo();
@@ -173,8 +173,8 @@ bool DATVDemodSink::playVideo()
 
     if (m_objVideoStream->bytesAvailable() > 0)
     {
-        m_objVideoStream->MultiThreaded = true;
-        m_objVideoStream->ThreadTimeOut = DATVideoRenderThread::videoThreadTimeoutMs;
+        m_objVideoStream->setMultiThreaded(true);
+        m_objVideoStream->setThreadTimeout(DATVideoRenderThread::videoThreadTimeoutMs);
         m_objRenderThread->start();
     }
 

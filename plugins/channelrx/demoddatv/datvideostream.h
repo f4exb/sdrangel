@@ -34,14 +34,14 @@ public:
     DATVideostream();
     ~DATVideostream();
 
-    bool MultiThreaded;
-    int ThreadTimeOut;
-    static const int m_defaultMemoryLimit = 2048000;
+    static const int m_defaultMemoryLimit = 2820000;
     static const int m_minStackSize = 4;
 
     int pushData(const char * chrData, int intSize);
     void resetTotalReceived();
     void cleanUp();
+    void setMultiThreaded(bool multiThreaded);
+    void setThreadTimeout(int timeOut) { m_threadTimeout = timeOut; }
 
     virtual bool isSequential() const;
     virtual qint64 bytesAvailable() const;
@@ -62,6 +62,8 @@ protected:
     virtual qint64 readLineData(char *data, qint64 maxSize);
 
 private:
+    bool m_multiThreaded;
+    int m_threadTimeout;
 
     QEventLoop m_objeventLoop;
     QMutex m_objMutex;

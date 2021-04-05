@@ -26,8 +26,8 @@ DATVideostream::DATVideostream():
     m_intTotalReceived = 0;
     m_intPacketReceived = 0;
     m_intMemoryLimit = m_defaultMemoryLimit;
-    MultiThreaded = false;
-    ThreadTimeOut = -1;
+    m_multiThreaded = false;
+    m_threadTimeout = -1;
 
     m_objeventLoop.connect(this,SIGNAL(onDataAvailable()), &m_objeventLoop, SLOT(quit()),Qt::QueuedConnection);
 }
@@ -57,6 +57,18 @@ void DATVideostream::resetTotalReceived()
 {
     m_intTotalReceived = 0;
     emit onDataPackets(&m_intBytesWaiting, &m_intPercentBuffer, &m_intTotalReceived);
+}
+
+void DATVideostream::setMultiThreaded(bool multiThreaded)
+{
+    if (multiThreaded)
+    {
+        if (m_objeventLoop.isRunning()) {
+            m_objeventLoop.exit();
+        }
+    }
+
+    m_multiThreaded = multiThreaded;
 }
 
 int DATVideostream::pushData(const char * chrData, int intSize)
@@ -146,7 +158,7 @@ qint64 DATVideostream::readData(char *data, qint64 len)
     {
         m_objMutex.unlock();
 
-        if (MultiThreaded == true)
+        if (m_multiThreaded == true)
         {
             intThreadLoop=0;
 
@@ -155,9 +167,9 @@ qint64 DATVideostream::readData(char *data, qint64 len)
                 QThread::msleep(5);
                 intThreadLoop++;
 
-                if (ThreadTimeOut >= 0)
+                if (m_threadTimeout >= 0)
                 {
-                    if (intThreadLoop*5 > ThreadTimeOut) {
+                    if (intThreadLoop*5 > m_threadTimeout) {
                         return -1;
                     }
                 }
@@ -172,7 +184,7 @@ qint64 DATVideostream::readData(char *data, qint64 len)
     }
 
     //Read DATA
-    intEffectiveLen=m_objFIFO.head().size();
+    intEffectiveLen = m_objFIFO.head().size();
 
     if (intExpectedLen < intEffectiveLen)
     {
