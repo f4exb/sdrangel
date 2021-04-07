@@ -157,6 +157,13 @@ bool PacketModBaseband::handleMessage(const Message& cmd)
 
         return true;
     }
+    else if (PacketMod::MsgTXPacketBytes::match(cmd))
+    {
+        PacketMod::MsgTXPacketBytes& tx = (PacketMod::MsgTXPacketBytes&) cmd;
+        m_source.addTXPacket(tx.m_data);
+
+        return true;
+    }
     else if (DSPSignalNotification::match(cmd))
     {
         QMutexLocker mutexLocker(&m_mutex);

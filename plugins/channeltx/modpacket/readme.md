@@ -78,6 +78,18 @@ The packet of data to send. To send an APRS status message, use the format <tt>>
 
 Transmits a packet containing the current values in callsign, to, via and data fields.
 
+<h3>18: UDP</h3>
+
+When checked, a UDP port is opened to receive packets from other features or applications that will be transmitted. These packets do not need to contain the CRC, as it is appended automatically.
+
+<h3>19: UDP address</h3>
+
+IP address of the interface open the UDP port on, to receive packets to be transmitted.
+
+<h3>20: UDP port</h3>
+
+UDP port number to receive packets to be transmitted on.
+
 <h2>API</h2>
 
 Full details of the API can be found in the Swagger documentation. Here is a quick example of how to transmit a packet from the command line:

@@ -20,8 +20,10 @@
 #include <QDebug>
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
+#include <QNetworkDatagram>
 #include <QNetworkReply>
 #include <QBuffer>
+#include <QUdpSocket>
 #include <QThread>
 
 #include "SWGChannelSettings.h"
@@ -48,6 +50,7 @@
 
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgConfigurePacketMod, Message)
 MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketMod, Message)
+MESSAGE_CLASS_DEFINITION(PacketMod::MsgTXPacketBytes, Message)
 
 const char* const PacketMod::m_channelIdURI = "sdrangel.channeltx.modpacket";
 const char* const PacketMod::m_channelId = "PacketMod";
@@ -57,7 +60,8 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_TX_SCALEF),
     m_settingsMutex(QMutex::Recursive),
-    m_sampleRate(48000)
+    m_sampleRate(48000),
+    m_udpSocket(nullptr)
 {
     setObjectName(m_channelId);
 
@@ -78,6 +82,7 @@ PacketMod::PacketMod(DeviceAPI *deviceAPI) :
 
 PacketMod::~PacketMod()
 {
+    closeUDP();
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
@@ -225,100 +230,123 @@ void PacketMod::applySettings(const PacketModSettings& settings, bool force)
         reverseAPIKeys.append("spaceFrequency");
     }
 
-    if((settings.m_ax25PreFlags != m_settings.m_ax25PreFlags) || force) {
+    if ((settings.m_ax25PreFlags != m_settings.m_ax25PreFlags) || force) {
         reverseAPIKeys.append("ax25PreFlags");
     }
 
-    if((settings.m_ax25PostFlags != m_settings.m_ax25PostFlags) || force) {
+    if ((settings.m_ax25PostFlags != m_settings.m_ax25PostFlags) || force) {
         reverseAPIKeys.append("ax25PostFlags");
     }
 
-    if((settings.m_ax25Control != m_settings.m_ax25Control) || force) {
+    if ((settings.m_ax25Control != m_settings.m_ax25Control) || force) {
         reverseAPIKeys.append("ax25Control");
     }
 
-    if((settings.m_ax25PID != m_settings.m_ax25PID) || force) {
+    if ((settings.m_ax25PID != m_settings.m_ax25PID) || force) {
         reverseAPIKeys.append("ax25PID");
     }
 
-    if((settings.m_preEmphasis != m_settings.m_preEmphasis) || force) {
+    if ((settings.m_preEmphasis != m_settings.m_preEmphasis) || force) {
         reverseAPIKeys.append("preEmphasis");
     }
 
-    if((settings.m_preEmphasisTau != m_settings.m_preEmphasisTau) || force) {
+    if ((settings.m_preEmphasisTau != m_settings.m_preEmphasisTau) || force) {
         reverseAPIKeys.append("preEmphasisTau");
     }
 
-    if((settings.m_preEmphasisHighFreq != m_settings.m_preEmphasisHighFreq) || force) {
+    if ((settings.m_preEmphasisHighFreq != m_settings.m_preEmphasisHighFreq) || force) {
         reverseAPIKeys.append("preEmphasisHighFreq");
     }
 
-    if((settings.m_lpfTaps != m_settings.m_lpfTaps) || force) {
+    if ((settings.m_lpfTaps != m_settings.m_lpfTaps) || force) {
         reverseAPIKeys.append("lpfTaps");
     }
 
-    if((settings.m_bbNoise != m_settings.m_bbNoise) || force) {
+    if ((settings.m_bbNoise != m_settings.m_bbNoise) || force) {
         reverseAPIKeys.append("bbNoise");
     }
 
-    if((settings.m_rfNoise != m_settings.m_rfNoise) || force) {
+    if ((settings.m_rfNoise != m_settings.m_rfNoise) || force) {
         reverseAPIKeys.append("rfNoise");
     }
 
-    if((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
+    if ((settings.m_writeToFile != m_settings.m_writeToFile) || force) {
         reverseAPIKeys.append("writeToFile");
     }
 
-    if((settings.m_spectrumRate != m_settings.m_spectrumRate) || force) {
+    if ((settings.m_spectrumRate != m_settings.m_spectrumRate) || force) {
         reverseAPIKeys.append("spectrumRate");
     }
 
-    if((settings.m_callsign != m_settings.m_callsign) || force) {
+    if ((settings.m_callsign != m_settings.m_callsign) || force) {
         reverseAPIKeys.append("callsign");
     }
 
-    if((settings.m_to != m_settings.m_to) || force) {
+    if ((settings.m_to != m_settings.m_to) || force) {
         reverseAPIKeys.append("to");
     }
 
-    if((settings.m_via != m_settings.m_via) || force) {
+    if ((settings.m_via != m_settings.m_via) || force) {
         reverseAPIKeys.append("via");
     }
 
-    if((settings.m_data != m_settings.m_data) || force) {
+    if ((settings.m_data != m_settings.m_data) || force) {
         reverseAPIKeys.append("data");
     }
 
-    if((settings.m_bpf != m_settings.m_bpf) || force) {
+    if ((settings.m_bpf != m_settings.m_bpf) || force) {
         reverseAPIKeys.append("bpf");
     }
 
-    if((settings.m_bpfLowCutoff != m_settings.m_bpfLowCutoff) || force) {
+    if ((settings.m_bpfLowCutoff != m_settings.m_bpfLowCutoff) || force) {
         reverseAPIKeys.append("bpfLowCutoff");
     }
 
-    if((settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff) || force) {
+    if ((settings.m_bpfHighCutoff != m_settings.m_bpfHighCutoff) || force) {
         reverseAPIKeys.append("bpfHighCutoff");
     }
 
-    if((settings.m_bpfTaps != m_settings.m_bpfTaps) || force) {
+    if ((settings.m_bpfTaps != m_settings.m_bpfTaps) || force) {
         reverseAPIKeys.append("bpfTaps");
     }
 
-    if((settings.m_scramble != m_settings.m_scramble) || force) {
+    if ((settings.m_scramble != m_settings.m_scramble) || force) {
         reverseAPIKeys.append("scramble");
     }
 
-    if((settings.m_polynomial != m_settings.m_polynomial) || force) {
+    if ((settings.m_polynomial != m_settings.m_polynomial) || force) {
         reverseAPIKeys.append("polynomial");
     }
 
-    if((settings.m_beta != m_settings.m_beta) || force) {
+    if ((settings.m_beta != m_settings.m_beta) || force) {
         reverseAPIKeys.append("beta");
     }
 
-    if((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
+    if ((settings.m_symbolSpan != m_settings.m_symbolSpan) || force) {
         reverseAPIKeys.append("symbolSpan");
+    }
+
+    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
+        reverseAPIKeys.append("udpEnabled");
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
+        reverseAPIKeys.append("udpAddress");
+    }
+
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
+        reverseAPIKeys.append("udpPort");
+    }
+
+    if (   (settings.m_udpEnabled != m_settings.m_udpEnabled)
+        || (settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settings.m_udpPort != m_settings.m_udpPort)
+        || force)
+    {
+        if (settings.m_udpEnabled)
+            openUDP(settings);
+        else
+            closeUDP();
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -559,6 +587,15 @@ void PacketMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("reverseAPIChannelIndex")) {
         settings.m_reverseAPIChannelIndex = response.getPacketModSettings()->getReverseApiChannelIndex();
     }
+    if (channelSettingsKeys.contains("udpEnabled")) {
+        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+    }
 }
 
 int PacketMod::webapiReportGet(
@@ -681,6 +718,9 @@ void PacketMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& res
     response.getPacketModSettings()->setPulseShaping(settings.m_pulseShaping ? 1 : 0);
     response.getPacketModSettings()->setBeta(settings.m_beta);
     response.getPacketModSettings()->setSymbolSpan(settings.m_symbolSpan);
+    response.getPacketModSettings()->setUdpEnabled(settings.m_udpEnabled);
+    response.getPacketModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    response.getPacketModSettings()->setUdpPort(settings.m_udpPort);
 
     response.getPacketModSettings()->setRgbColor(settings.m_rgbColor);
 
@@ -895,6 +935,15 @@ void PacketMod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgPacketModSettings->setStreamIndex(settings.m_streamIndex);
     }
+    if (channelSettingsKeys.contains("udpEnabled") || force) {
+        swgPacketModSettings->setUdpEnabled(settings.m_udpEnabled);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgPacketModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgPacketModSettings->setUdpPort(settings.m_udpPort);
+    }
 }
 
 void PacketMod::networkManagerFinished(QNetworkReply *reply)
@@ -931,4 +980,35 @@ void PacketMod::setLevelMeter(QObject *levelMeter)
 uint32_t PacketMod::getNumberOfDeviceStreams() const
 {
     return m_deviceAPI->getNbSinkStreams();
+}
+
+void PacketMod::openUDP(const PacketModSettings& settings)
+{
+    closeUDP();
+    m_udpSocket = new QUdpSocket();
+    if (!m_udpSocket->bind(QHostAddress(settings.m_udpAddress), settings.m_udpPort))
+        qCritical() << "PacketMod::openUDP: Failed to bind to port " << settings.m_udpAddress << ":" << settings.m_udpPort << ". Error: " << m_udpSocket->error();
+    else
+        qDebug() << "PacketMod::openUDP: Listening for packets on " << settings.m_udpAddress << ":" << settings.m_udpPort;
+    connect(m_udpSocket, &QUdpSocket::readyRead, this, &PacketMod::udpRx);
+}
+
+void PacketMod::closeUDP()
+{
+    if (m_udpSocket != nullptr)
+    {
+        disconnect(m_udpSocket, &QUdpSocket::readyRead, this, &PacketMod::udpRx);
+        delete m_udpSocket;
+        m_udpSocket = nullptr;
+    }
+}
+
+void PacketMod::udpRx()
+{
+    while (m_udpSocket->hasPendingDatagrams())
+    {
+        QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
+        MsgTXPacketBytes *msg = MsgTXPacketBytes::create(datagram.data());
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 }

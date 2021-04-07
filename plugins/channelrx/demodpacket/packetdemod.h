@@ -22,6 +22,7 @@
 #include <vector>
 
 #include <QNetworkRequest>
+#include <QUdpSocket>
 #include <QThread>
 
 #include "dsp/basebandsamplesink.h"
@@ -131,6 +132,7 @@ private:
     PacketDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;
+    QUdpSocket m_udpSocket;
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;

@@ -338,6 +338,24 @@ void PacketModGUI::txSettingsSelect()
     }
 }
 
+void PacketModGUI::on_udpEnabled_clicked(bool checked)
+{
+    m_settings.m_udpEnabled = checked;
+    applySettings();
+}
+
+void PacketModGUI::on_udpAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->udpAddress->text();
+    applySettings();
+}
+
+void PacketModGUI::on_udpPort_editingFinished()
+{
+    m_settings.m_udpPort = ui->udpPort->text().toInt();
+    applySettings();
+}
+
 void PacketModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -531,6 +549,10 @@ void PacketModGUI::displaySettings()
 
     ui->gainText->setText(QString("%1").arg((double)m_settings.m_gain, 0, 'f', 1));
     ui->gain->setValue(m_settings.m_gain);
+
+    ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
+    ui->udpAddress->setText(m_settings.m_udpAddress);
+    ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->repeat->setChecked(m_settings.m_repeat);

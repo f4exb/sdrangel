@@ -36,6 +36,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
+class QUdpSocket;
 class DeviceAPI;
 class PacketModBaseband;
 
@@ -87,6 +88,25 @@ public:
             m_callsign(callsign),
             m_to(to),
             m_via(via),
+            m_data(data)
+        { }
+    };
+
+    class MsgTXPacketBytes : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgTXPacketBytes* create(QByteArray data)
+        {
+            return new MsgTXPacketBytes(data);
+        }
+
+        QByteArray m_data;
+
+   private:
+
+        MsgTXPacketBytes(QByteArray data) :
+            Message(),
             m_data(data)
         { }
     };
@@ -174,6 +194,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QUdpSocket *m_udpSocket;
 
     void applySettings(const PacketModSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
@@ -190,9 +211,12 @@ private:
         const PacketModSettings& settings,
         bool force
     );
+    void openUDP(const PacketModSettings& settings);
+    void closeUDP();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void udpRx();
 };
 
 

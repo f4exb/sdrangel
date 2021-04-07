@@ -79,6 +79,9 @@ struct PacketModSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    bool m_udpEnabled;
+    QString m_udpAddress;
+    uint16_t m_udpPort;
 
     PacketModSettings();
     void resetToDefaults();

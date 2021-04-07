@@ -63,7 +63,7 @@ void PacketModSettings::resetToDefaults()
     m_to = "APRS";
     m_via = "WIDE2-2";
     m_data = ">Using SDRangel";
-    m_rgbColor = QColor(255, 0, 0).rgb();
+    m_rgbColor = QColor(0, 105, 2).rgb();
     m_title = "Packet Modulator";
     m_streamIndex = 0;
     m_useReverseAPI = false;
@@ -80,6 +80,9 @@ void PacketModSettings::resetToDefaults()
     m_pulseShaping = true;
     m_beta = 0.5f;
     m_symbolSpan = 6;
+    m_udpEnabled = false;
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9998;
 }
 
 bool PacketModSettings::setMode(QString mode)
@@ -181,6 +184,9 @@ QByteArray PacketModSettings::serialize() const
     s.writeS32(48, m_symbolSpan);
     s.writeS32(49, m_spectrumRate);
     s.writeS32(50, m_modulation);
+    s.writeBool(51, m_udpEnabled);
+    s.writeString(52, m_udpAddress);
+    s.writeU32(53, m_udpPort);
 
     return s.final();
 }
@@ -267,6 +273,14 @@ bool PacketModSettings::deserialize(const QByteArray& data)
         d.readS32(48, &m_symbolSpan, 6);
         d.readS32(49, &m_spectrumRate, m_baud == 1200 ? 8000 : 24000);
         d.readS32(50, (qint32 *)&m_modulation, m_baud == 1200 ? PacketModSettings::AFSK : PacketModSettings::FSK);
+        d.readBool(51, &m_udpEnabled);
+        d.readString(52, &m_udpAddress, "127.0.0.1");
+        d.readU32(53, &utmp);
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_udpPort = utmp;
+        } else {
+            m_udpPort = 9998;
+        }
 
         return true;
     }

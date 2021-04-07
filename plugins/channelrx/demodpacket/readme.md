@@ -50,6 +50,18 @@ Checking this option displays only packets where the PID (Protocol ID) field is 
 
 Pressing this button clears all packets from the table.
 
+<h3>11: UDP</h3>
+
+When checked, received packets are forwarded to the specified UDP address (12) and port (13).
+
+<h3>12: UDP address</h3>
+
+IP address of the host to forward received packets to via UDP.
+
+<h3>11: UDP port</h3>
+
+UDP port number to forward received packets to.
+
 <h3>Received Packets Table</h3>
 
 The received packets table displays the contexts of the packets that have been received. Only packets with valid CRCs are displayed.

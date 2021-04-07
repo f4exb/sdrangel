@@ -601,6 +601,45 @@ void PacketModSource::addTXPacket(QString callsign, QString to, QString via, QSt
 
     packet_length = p-&packet[0];
 
+    encodePacket(packet, packet_length, crc_start, packet_end);
+}
+
+void PacketModSource::addTXPacket(QByteArray data)
+{
+    uint8_t packet[AX25_MAX_BYTES];
+    uint8_t *crc_start;
+    uint8_t *packet_end;
+    uint8_t *p;
+    crc16x25 crc;
+    uint16_t crcValue;
+    int packet_length;
+
+    // Create AX.25 packet
+    p = packet;
+    // Flag
+    for (int i = 0; i < std::min(m_settings.m_ax25PreFlags, AX25_MAX_FLAGS); i++)
+        *p++ = AX25_FLAG;
+    crc_start = p;
+    // Copy packet payload
+    for (int i = 0; i < data.size(); i++)
+        *p++ = data[i];
+    // CRC (do not include flags)
+    crc.calculate(crc_start, p-crc_start);
+    crcValue = crc.get();
+    *p++ = crcValue & 0xff;
+    *p++ = (crcValue >> 8);
+    packet_end = p;
+    // Flag
+    for (int i = 0; i < std::min(m_settings.m_ax25PostFlags, AX25_MAX_FLAGS); i++)
+        *p++ = AX25_FLAG;
+
+    packet_length = p-&packet[0];
+
+    encodePacket(packet, packet_length, crc_start, packet_end);
+}
+
+void PacketModSource::encodePacket(uint8_t *packet, int packet_length, uint8_t *crc_start, uint8_t *packet_end)
+{
     // HDLC bit stuffing
     m_byteIdx = 0;
     m_bitIdx = 0;
