@@ -20,6 +20,8 @@
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QUdpSocket>
+#include <QNetworkDatagram>
 #include <QBuffer>
 #include <QThread>
 
@@ -52,7 +54,8 @@ ChirpChatMod::ChirpChatMod(DeviceAPI *deviceAPI) :
 	m_deviceAPI(deviceAPI),
     m_currentPayloadTime(0.0),
 	m_settingsMutex(QMutex::Recursive),
-	m_sampleRate(48000)
+	m_sampleRate(48000),
+        m_udpSocket(nullptr)
 {
 	setObjectName(m_channelId);
 
@@ -327,6 +330,27 @@ void ChirpChatMod::applySettings(const ChirpChatModSettings& settings, bool forc
         }
     }
 
+    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
+        reverseAPIKeys.append("udpEnabled");
+    }
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
+        reverseAPIKeys.append("udpAddress");
+    }
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
+        reverseAPIKeys.append("udpPort");
+    }
+
+    if (   (settings.m_udpEnabled != m_settings.m_udpEnabled)
+        || (settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settings.m_udpPort != m_settings.m_udpPort)
+        || force)
+    {
+        if (settings.m_udpEnabled)
+            openUDP(settings);
+        else
+            closeUDP();
+    }
+
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -524,6 +548,15 @@ void ChirpChatMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("messageRepeat")) {
         settings.m_messageRepeat = response.getChirpChatModSettings()->getMessageRepeat();
     }
+    if (channelSettingsKeys.contains("udpEnabled")) {
+        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getChirpChatModSettings()->getRgbColor();
     }
@@ -664,6 +697,10 @@ void ChirpChatMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& 
         unsigned char b = *it;
         bytesStr->push_back(new QString(tr("%1").arg(b, 2, 16, QChar('0'))));
     }
+
+    response.getChirpChatModSettings()->setUdpEnabled(settings.m_udpEnabled);
+    response.getChirpChatModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    response.getChirpChatModSettings()->setUdpPort(settings.m_udpPort);
 
     response.getChirpChatModSettings()->setRgbColor(settings.m_rgbColor);
 
@@ -855,6 +892,16 @@ void ChirpChatMod::webapiFormatChannelSettings(
         swgChirpChatModSettings->setMessageRepeat(settings.m_messageRepeat);
     }
 
+    if (channelSettingsKeys.contains("udpEnabled") || force) {
+        swgChirpChatModSettings->setUdpEnabled(settings.m_udpEnabled);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgChirpChatModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgChirpChatModSettings->setUdpPort(settings.m_udpPort);
+    }
+
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgChirpChatModSettings->setRgbColor(settings.m_rgbColor);
     }
@@ -902,4 +949,50 @@ uint32_t ChirpChatMod::getNumberOfDeviceStreams() const
 bool ChirpChatMod::getModulatorActive() const
 {
     return m_basebandSource->getActive();
+}
+
+void ChirpChatMod::openUDP(const ChirpChatModSettings& settings)
+{
+    closeUDP();
+    m_udpSocket = new QUdpSocket();
+    if (!m_udpSocket->bind(QHostAddress(settings.m_udpAddress), settings.m_udpPort))
+        qCritical() << "ChirpChatMod::openUDP: Failed to bind to port " << settings.m_udpAddress << ":" << settings.m_udpPort << ". Error: " << m_udpSocket->error();
+    else
+        qDebug() << "ChirpChatMod::openUDP: Listening for packets on " << settings.m_udpAddress << ":" << settings.m_udpPort;
+    connect(m_udpSocket, &QUdpSocket::readyRead, this, &ChirpChatMod::udpRx);
+}
+
+void ChirpChatMod::closeUDP()
+{
+    if (m_udpSocket != nullptr)
+    {
+        disconnect(m_udpSocket, &QUdpSocket::readyRead, this, &ChirpChatMod::udpRx);
+        delete m_udpSocket;
+        m_udpSocket = nullptr;
+    }
+}
+
+void ChirpChatMod::udpRx()
+{
+    while (m_udpSocket->hasPendingDatagrams())
+    {
+        QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
+        ChirpChatModBaseband::MsgConfigureChirpChatModPayload *payloadMsg = nullptr;
+        std::vector<unsigned short> symbols;
+
+        m_encoder.encodeBytes(datagram.data(), symbols);
+        payloadMsg = ChirpChatModBaseband::MsgConfigureChirpChatModPayload::create(symbols);
+
+        if (payloadMsg)
+        {
+            m_basebandSource->getInputMessageQueue()->push(payloadMsg);
+            m_currentPayloadTime = (symbols.size()*(1<<m_settings.m_spreadFactor)*1000.0) / ChirpChatModSettings::bandwidths[m_settings.m_bandwidthIndex];
+
+            if (getMessageQueueToGUI())
+            {
+                MsgReportPayloadTime *rpt = MsgReportPayloadTime::create(m_currentPayloadTime);
+                getMessageQueueToGUI()->push(rpt);
+            }
+        }
+    }
 }

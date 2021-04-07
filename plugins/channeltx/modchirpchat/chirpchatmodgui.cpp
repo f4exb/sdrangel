@@ -333,6 +333,24 @@ void ChirpChatModGUI::on_hexText_editingFinished()
     applySettings();
 }
 
+void ChirpChatModGUI::on_udpEnabled_clicked(bool checked)
+{
+    m_settings.m_udpEnabled = checked;
+    applySettings();
+}
+
+void ChirpChatModGUI::on_udpAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->udpAddress->text();
+    applySettings();
+}
+
+void ChirpChatModGUI::on_udpPort_editingFinished()
+{
+    m_settings.m_udpPort = ui->udpPort->text().toInt();
+    applySettings();
+}
+
 void ChirpChatModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -498,6 +516,9 @@ void ChirpChatModGUI::displaySettings()
     ui->repeatMessage->setValue(m_settings.m_messageRepeat);
     ui->repeatText->setText(tr("%1").arg(m_settings.m_messageRepeat));
     ui->msgType->setCurrentIndex((int) m_settings.m_messageType);
+    ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
+    ui->udpAddress->setText(m_settings.m_udpAddress);
+    ui->udpPort->setText(QString::number(m_settings.m_udpPort));
     blockApplySettings(false);
 }
 

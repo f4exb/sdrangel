@@ -104,6 +104,9 @@ private slots:
     void on_generateMessages_clicked(bool checked);
     void on_messageText_editingFinished();
     void on_hexText_editingFinished();
+    void on_udpEnabled_clicked(bool checked);
+    void on_udpAddress_editingFinished();
+    void on_udpPort_editingFinished();
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);
     void tick();

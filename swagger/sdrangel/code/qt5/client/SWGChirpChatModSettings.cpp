@@ -84,6 +84,12 @@ SWGChirpChatModSettings::SWGChirpChatModSettings() {
     m_bytes_message_isSet = false;
     message_repeat = 0;
     m_message_repeat_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_address = nullptr;
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -164,6 +170,12 @@ SWGChirpChatModSettings::init() {
     m_bytes_message_isSet = false;
     message_repeat = 0;
     m_message_repeat_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_address = new QString("");
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -242,6 +254,11 @@ SWGChirpChatModSettings::cleanup() {
             delete o;
         }
         delete bytes_message;
+    }
+
+
+    if(udp_address != nullptr) { 
+        delete udp_address;
     }
 
 
@@ -324,6 +341,12 @@ SWGChirpChatModSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&bytes_message, pJson["bytesMessage"], "QList", "QString");
     ::SWGSDRangel::setValue(&message_repeat, pJson["messageRepeat"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -440,6 +463,15 @@ SWGChirpChatModSettings::asJsonObject() {
     }
     if(m_message_repeat_isSet){
         obj->insert("messageRepeat", QJsonValue(message_repeat));
+    }
+    if(m_udp_enabled_isSet){
+        obj->insert("udpEnabled", QJsonValue(udp_enabled));
+    }
+    if(udp_address != nullptr && *udp_address != QString("")){
+        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
+    }
+    if(m_udp_port_isSet){
+        obj->insert("udpPort", QJsonValue(udp_port));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -750,6 +782,36 @@ SWGChirpChatModSettings::setMessageRepeat(qint32 message_repeat) {
 }
 
 qint32
+SWGChirpChatModSettings::getUdpEnabled() {
+    return udp_enabled;
+}
+void
+SWGChirpChatModSettings::setUdpEnabled(qint32 udp_enabled) {
+    this->udp_enabled = udp_enabled;
+    this->m_udp_enabled_isSet = true;
+}
+
+QString*
+SWGChirpChatModSettings::getUdpAddress() {
+    return udp_address;
+}
+void
+SWGChirpChatModSettings::setUdpAddress(QString* udp_address) {
+    this->udp_address = udp_address;
+    this->m_udp_address_isSet = true;
+}
+
+qint32
+SWGChirpChatModSettings::getUdpPort() {
+    return udp_port;
+}
+void
+SWGChirpChatModSettings::setUdpPort(qint32 udp_port) {
+    this->udp_port = udp_port;
+    this->m_udp_port_isSet = true;
+}
+
+qint32
 SWGChirpChatModSettings::getRgbColor() {
     return rgb_color;
 }
@@ -916,6 +978,15 @@ SWGChirpChatModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_message_repeat_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

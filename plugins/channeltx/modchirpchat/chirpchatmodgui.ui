@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>402</width>
-    <height>373</height>
+    <height>461</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -497,16 +497,16 @@
   <widget class="QWidget" name="messageContainer" native="true">
    <property name="geometry">
     <rect>
-     <x>1</x>
-     <y>150</y>
+     <x>0</x>
+     <y>160</y>
      <width>400</width>
-     <height>221</height>
+     <height>250</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
      <width>0</width>
-     <height>220</height>
+     <height>250</height>
     </size>
    </property>
    <property name="windowTitle">
@@ -1166,6 +1166,103 @@
     </property>
     <property name="text">
      <string>Sync</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="udpEnabled">
+    <property name="geometry">
+     <rect>
+      <x>2</x>
+      <y>230</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Forward messages received via UDP</string>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::RightToLeft</enum>
+    </property>
+    <property name="text">
+     <string>UDP</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="udpPort">
+    <property name="geometry">
+     <rect>
+      <x>199</x>
+      <y>230</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>50</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>50</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>UDP port to listen for messages to forward on</string>
+    </property>
+    <property name="inputMask">
+     <string>00000</string>
+    </property>
+    <property name="text">
+     <string>9997</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="udpSeparator">
+    <property name="geometry">
+     <rect>
+      <x>184</x>
+      <y>230</y>
+      <width>10</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="udpAddress">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>230</y>
+      <width>120</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>120</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::ClickFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>UDP address to listen for messages to forward on</string>
+    </property>
+    <property name="inputMask">
+     <string>000.000.000.000</string>
+    </property>
+    <property name="text">
+     <string>127.0.0.1</string>
     </property>
    </widget>
   </widget>

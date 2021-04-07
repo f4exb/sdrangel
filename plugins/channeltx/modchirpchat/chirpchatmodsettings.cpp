@@ -81,6 +81,9 @@ void ChirpChatModSettings::resetToDefaults()
     m_syncWord = 0x34;
     m_channelMute = false;
     m_messageRepeat = 1;
+    m_udpEnabled = false;
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9998;
     m_rgbColor = QColor(255, 0, 255).rgb();
     m_title = "ChirpChat Modulator";
     m_streamIndex = 0;
@@ -189,6 +192,9 @@ QByteArray ChirpChatModSettings::serialize() const
     s.writeU32(53, m_reverseAPIDeviceIndex);
     s.writeU32(54, m_reverseAPIChannelIndex);
     s.writeS32(55, m_streamIndex);
+    s.writeBool(56, m_udpEnabled);
+    s.writeString(57, m_udpAddress);
+    s.writeU32(58, m_udpPort);
 
     return s.final();
 }
@@ -278,6 +284,15 @@ bool ChirpChatModSettings::deserialize(const QByteArray& data)
         d.readU32(54, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(55, &m_streamIndex, 0);
+
+        d.readBool(56, &m_udpEnabled);
+        d.readString(57, &m_udpAddress, "127.0.0.1");
+        d.readU32(58, &utmp);
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_udpPort = utmp;
+        } else {
+            m_udpPort = 9998;
+        }
 
         return true;
     }

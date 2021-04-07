@@ -77,6 +77,9 @@ struct ChirpChatModSettings
     QString m_textMessage;
     QByteArray m_bytesMessage;
     int m_messageRepeat;
+    bool m_udpEnabled;
+    QString m_udpAddress;
+    uint16_t m_udpPort;
     uint32_t m_rgbColor;
     QString m_title;
     int m_streamIndex;
