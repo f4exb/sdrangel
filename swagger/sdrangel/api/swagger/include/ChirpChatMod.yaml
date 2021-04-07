@@ -130,6 +130,15 @@ ChirpChatModSettings:
     messageRepeat:
       description: number of repetitions of the same message (0 for infinite)
       type: integer
+    udpEnabled:
+      description: boolean 1 to enable forwarding messages via UDP else 0
+      type: integer
+    udpAddress:
+      description: UDP address to listen for messages to transmit on
+      type: string
+    udpPort:
+      description: UDP port to listen for messages to transmit on
+      type: integer
     rgbColor:
       type: integer
     title:

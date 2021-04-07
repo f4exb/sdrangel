@@ -36,6 +36,7 @@
 #include "device/deviceset.h"
 #include "device/deviceapi.h"
 #include "channel/channelwebapiutils.h"
+#include "feature/featurewebapiutils.h"
 #include "maincore.h"
 
 #include "satellitetracker.h"
@@ -460,10 +461,22 @@ void SatelliteTrackerWorker::update()
                                 text = text.append("\nSatellite is visible");
                             else
                                 text = text.append("\nAOS in: %1 mins").arg((int)round((satWorkerState->m_satState.m_passes[0]->m_aos.toSecsSinceEpoch() - qdt.toSecsSinceEpoch())/60.0));
+                            QString aosDateTime;
+                            QString losDateTime;
+                            if (m_settings.m_utc)
+                            {
+                                aosDateTime = satWorkerState->m_satState.m_passes[0]->m_aos.toString(m_settings.m_dateFormat + " hh:mm");
+                                losDateTime = satWorkerState->m_satState.m_passes[0]->m_los.toString(m_settings.m_dateFormat + " hh:mm");
+                            }
+                            else
+                            {
+                                aosDateTime = satWorkerState->m_satState.m_passes[0]->m_aos.toLocalTime().toString(m_settings.m_dateFormat + " hh:mm");
+                                losDateTime = satWorkerState->m_satState.m_passes[0]->m_los.toLocalTime().toString(m_settings.m_dateFormat + " hh:mm");
+                            }
                             text = QString("%1\nAOS: %2\nLOS: %3\nMax El: %4%5")
                                             .arg(text)
-                                            .arg(satWorkerState->m_satState.m_passes[0]->m_aos.toString(m_settings.m_dateFormat + " hh:mm"))
-                                            .arg(satWorkerState->m_satState.m_passes[0]->m_los.toString(m_settings.m_dateFormat + " hh:mm"))
+                                            .arg(aosDateTime)
+                                            .arg(losDateTime)
                                             .arg((int)round(satWorkerState->m_satState.m_passes[0]->m_maxElevation))
                                             .arg(QChar(0xb0));
                         }
@@ -631,9 +644,10 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
                 }
             }
 
-            // Send AOS message to channels
+            // Send AOS message to channels/features
             SatWorkerState *satWorkerState = m_workerState.value(name);
             ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth);
+            FeatureWebAPIUtils::satelliteAOS(name, satWorkerState->m_aos, satWorkerState->m_los);
 
             // Start Doppler correction, if needed
             satWorkerState->m_initFrequencyOffset.clear();
@@ -690,9 +704,10 @@ void SatelliteTrackerWorker::applyDeviceAOSSettings(const QString& name)
     }
     else
     {
-        // Send AOS message to channels
+        // Send AOS message to channels/features
         SatWorkerState *satWorkerState = m_workerState.value(name);
         ChannelWebAPIUtils::satelliteAOS(name, satWorkerState->m_satState.m_passes[0]->m_northToSouth);
+        FeatureWebAPIUtils::satelliteAOS(name, satWorkerState->m_aos, satWorkerState->m_los);
     }
 
 }
@@ -775,8 +790,9 @@ void SatelliteTrackerWorker::los(SatWorkerState *satWorkerState)
                 }
             }
 
-            // Send LOS message to channels
+            // Send LOS message to channels/features
             ChannelWebAPIUtils::satelliteLOS(satWorkerState->m_name);
+            FeatureWebAPIUtils::satelliteLOS(satWorkerState->m_name);
 
             // Stop acquisition
             for (int i = 0; i < m_deviceSettingsList->size(); i++)

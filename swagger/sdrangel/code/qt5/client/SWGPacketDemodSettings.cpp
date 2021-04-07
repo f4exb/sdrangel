@@ -36,6 +36,12 @@ SWGPacketDemodSettings::SWGPacketDemodSettings() {
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_address = nullptr;
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -68,6 +74,12 @@ SWGPacketDemodSettings::init() {
     m_rf_bandwidth_isSet = false;
     fm_deviation = 0.0f;
     m_fm_deviation_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_address = new QString("");
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -93,6 +105,11 @@ SWGPacketDemodSettings::cleanup() {
         delete mode;
     }
 
+
+
+    if(udp_address != nullptr) { 
+        delete udp_address;
+    }
 
 
     if(title != nullptr) { 
@@ -126,6 +143,12 @@ SWGPacketDemodSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&rf_bandwidth, pJson["rfBandwidth"], "float", "");
     
     ::SWGSDRangel::setValue(&fm_deviation, pJson["fmDeviation"], "float", "");
+    
+    ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -170,6 +193,15 @@ SWGPacketDemodSettings::asJsonObject() {
     }
     if(m_fm_deviation_isSet){
         obj->insert("fmDeviation", QJsonValue(fm_deviation));
+    }
+    if(m_udp_enabled_isSet){
+        obj->insert("udpEnabled", QJsonValue(udp_enabled));
+    }
+    if(udp_address != nullptr && *udp_address != QString("")){
+        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
+    }
+    if(m_udp_port_isSet){
+        obj->insert("udpPort", QJsonValue(udp_port));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -237,6 +269,36 @@ void
 SWGPacketDemodSettings::setFmDeviation(float fm_deviation) {
     this->fm_deviation = fm_deviation;
     this->m_fm_deviation_isSet = true;
+}
+
+qint32
+SWGPacketDemodSettings::getUdpEnabled() {
+    return udp_enabled;
+}
+void
+SWGPacketDemodSettings::setUdpEnabled(qint32 udp_enabled) {
+    this->udp_enabled = udp_enabled;
+    this->m_udp_enabled_isSet = true;
+}
+
+QString*
+SWGPacketDemodSettings::getUdpAddress() {
+    return udp_address;
+}
+void
+SWGPacketDemodSettings::setUdpAddress(QString* udp_address) {
+    this->udp_address = udp_address;
+    this->m_udp_address_isSet = true;
+}
+
+qint32
+SWGPacketDemodSettings::getUdpPort() {
+    return udp_port;
+}
+void
+SWGPacketDemodSettings::setUdpPort(qint32 udp_port) {
+    this->udp_port = udp_port;
+    this->m_udp_port_isSet = true;
 }
 
 qint32
@@ -334,6 +396,15 @@ SWGPacketDemodSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_fm_deviation_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

@@ -572,15 +572,12 @@ int APTDemod::webapiActionsPost(
     {
         if (channelActionsKeys.contains("aos"))
         {
-            qDebug() << "Aos action";
             SWGSDRangel::SWGAPTDemodActions_aos* aos = swgAPTDemodActions->getAos();
             QString *satelliteName = aos->getSatelliteName();
             if (satelliteName != nullptr)
             {
-            qDebug() << "sat " << *satelliteName;
                 if (matchSatellite(*satelliteName))
                 {
-                    qDebug() << "Matched sat";
                     // Reset for new pass
                     resetDecoder();
                     m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
@@ -592,7 +589,7 @@ int APTDemod::webapiActionsPost(
                     APTDemodSettings settings = m_settings;
                     settings.m_decodeEnabled = true;
                     settings.m_flip = !aos->getNorthToSouthPass();
-                    qDebug() << "Sending settings";
+
                     m_inputMessageQueue.push(MsgConfigureAPTDemod::create(settings, false));
                     if (m_guiMessageQueue)
                         m_guiMessageQueue->push(MsgConfigureAPTDemod::create(settings, false));

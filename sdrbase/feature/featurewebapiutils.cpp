@@ -19,6 +19,7 @@
 
 #include "SWGFeatureActions.h"
 #include "SWGMapActions.h"
+#include "SWGPERTesterActions.h"
 
 #include "maincore.h"
 #include "feature/featureset.h"
@@ -98,4 +99,50 @@ Feature* FeatureWebAPIUtils::getFeature(int featureSetIndex, int featureIndex, c
         }
         return nullptr;
     }
+}
+
+// Send AOS actions to all features that support it
+bool FeatureWebAPIUtils::satelliteAOS(const QString name, const QDateTime aos, const QDateTime los)
+{
+    std::vector<FeatureSet*>& featureSets = MainCore::instance()->getFeatureeSets();
+
+    for (std::vector<FeatureSet*>::const_iterator it = featureSets.begin(); it != featureSets.end(); ++it)
+    {
+        for (int fi = 0; fi < (*it)->getNumberOfFeatures(); fi++)
+        {
+            Feature *feature = (*it)->getFeatureAt(fi);
+            if (feature->getURI() == "sdrangel.feature.pertester")
+            {
+                QStringList featureActionKeys = {"aos"};
+                SWGSDRangel::SWGFeatureActions featureActions;
+                SWGSDRangel::SWGPERTesterActions *perTesterFeatureAction = new SWGSDRangel::SWGPERTesterActions();
+                SWGSDRangel::SWGPERTesterActions_aos *aosAction = new SWGSDRangel::SWGPERTesterActions_aos();
+                QString errorResponse;
+                int httpRC;
+
+                aosAction->setSatelliteName(new QString(name));
+                aosAction->setAosTime(new QString(aos.toString(Qt::ISODate)));
+                aosAction->setLosTime(new QString(los.toString(Qt::ISODate)));
+                perTesterFeatureAction->setAos(aosAction);
+
+                featureActions.setPerTesterActions(perTesterFeatureAction);
+                httpRC = feature->webapiActionsPost(featureActionKeys, featureActions, errorResponse);
+                if (httpRC/100 != 2)
+                {
+                    qWarning("FeatureWebAPIUtils::satelliteAOS: webapiActionsPost error %d: %s",
+                        httpRC, qPrintable(errorResponse));
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+// Send LOS actions to all features that support it
+bool FeatureWebAPIUtils::satelliteLOS(const QString name)
+{
+    (void) name;
+    // Not currently required by any features
+    return true;
 }

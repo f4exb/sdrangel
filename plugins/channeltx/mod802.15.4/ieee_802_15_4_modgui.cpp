@@ -269,6 +269,24 @@ void IEEE_802_15_4_ModGUI::txSettingsSelect()
     }
 }
 
+void IEEE_802_15_4_ModGUI::on_udpEnabled_clicked(bool checked)
+{
+    m_settings.m_udpEnabled = checked;
+    applySettings();
+}
+
+void IEEE_802_15_4_ModGUI::on_udpAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->udpAddress->text();
+    applySettings();
+}
+
+void IEEE_802_15_4_ModGUI::on_udpPort_editingFinished()
+{
+    m_settings.m_udpPort = ui->udpPort->text().toInt();
+    applySettings();
+}
+
 void IEEE_802_15_4_ModGUI::onWidgetRolled(QWidget* widget, bool rollDown)
 {
     (void) widget;
@@ -513,6 +531,10 @@ void IEEE_802_15_4_ModGUI::displaySettings()
     ui->repeat->setChecked(m_settings.m_repeat);
 
     ui->frame->setText(m_settings.m_data);
+
+    ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
+    ui->udpAddress->setText(m_settings.m_udpAddress);
+    ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
     blockApplySettings(false);
 }

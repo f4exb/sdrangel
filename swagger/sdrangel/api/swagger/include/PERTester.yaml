@@ -1,0 +1,67 @@
+PERTesterSettings:
+  description: "PER Tester settings"
+  properties:
+    packetCount:
+      type: integer
+    interval:
+      type: number
+      format: float
+    start:
+      description: "0 - immediately, 1 - on satellite AOS, 2 - on satellite mid pass"
+      type: integer
+    satellites:
+      description: "Satellite names to start test on"
+      type: array
+      items:
+        type: string
+    packet:
+      description: "Packet of data to send"
+      type: string
+    ignoreLeadingBytes:
+      type: integer
+    ignoreTrailingBytes:
+      type: integer
+    txUDPAddress:
+      description: "UDP address to sent packets to be transmitted to"
+      type: string
+    txUDPPort:
+      description: "UDP port  to sent packets to be transmitted to"
+      type: integer
+    rxUDPAddress:
+      description: "UDP address to receive packets via"
+      type: string
+    rxUDPPort:
+      description: "UDP port to receive packets via"
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+PERTesterActions:
+  description: PERTester
+  properties:
+    aos:
+      description: "Acquisition of signal"
+      type: object
+      properties:
+        satelliteName:
+          description: "Name of the satellite"
+          type: string
+        aosTime:
+          description: "Time of AOS"
+          type: string
+        losTime:
+          description: "Time of LOS"
+          type: string

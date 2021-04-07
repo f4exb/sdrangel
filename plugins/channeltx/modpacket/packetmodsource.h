@@ -68,6 +68,8 @@ public:
     void applySettings(const PacketModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void addTXPacket(QString callsign, QString to, QString via, QString data);
+    void addTXPacket(QByteArray data);
+    void encodePacket(uint8_t *packet, int packet_length, uint8_t *crc_start, uint8_t *packet_end);
     void setChannel(ChannelAPI *channel) { m_channel = channel; }
 
 private:

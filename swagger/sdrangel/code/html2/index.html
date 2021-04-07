@@ -3256,6 +3256,18 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "number of repetitions of the same message (0 for infinite)"
     },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "boolean 1 to enable forwarding messages via UDP else 0"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to listen for messages to transmit on"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to listen for messages to transmit on"
+    },
     "rgbColor" : {
       "type" : "integer"
     },
@@ -3346,35 +3358,19 @@ margin-bottom: 20px;
     },
     "standard" : {
       "type" : "integer",
-      "description" : "DVB bersion (see DATVDemodSettings::dvb_version)\n  * 0 - DVB-S\n  * 1 - DVB-S2\n"
+      "description" : "see DATVDemodSettings::dvb_version"
     },
     "modulation" : {
       "type" : "integer",
-      "description" : "Modulation type (DATVDemodSettings::DATVModulation)\n  * 0 - BPSK\n  * 1 - QPSK\n  * 2 - PSK8\n  * 3 - APSK16\n  * 4 - APSK32\n  * 5 - APSK64E\n  * 6 - QAM16\n  * 7 - QAM64\n  * 8 - QAM256\n"
+      "description" : "see DATVDemodSettings::DATVModulation"
     },
     "fec" : {
       "type" : "integer",
-      "description" : "FEC rate (see DATVDemodSettings::DATVCodeRate)\n  * 0 - 1/2\n  * 1 - 2/3\n  * 2 - 4/6\n  * 3 - 3/4\n  * 4 - 4/6\n  * 5 - 7/8\n  * 6 - 4/5\n  * 7 - 8/9\n  * 8 - 9/10\n  * 9 - 1/4\n  * 10 - 1/3\n  * 11 - 2/5\n  * 12 - 3/5\n"
-    },
-    "softLDPC" : {
-      "type" : "integer",
-      "description" : "(boolean) engage sodt LDPC with LDPC tool sub processes (Linux only)"
-    },
-    "softLDPCToolPath" : {
-      "type" : "string",
-      "description" : "O/S path to the LDPC tool binary"
-    },
-    "softLDPCMaxTrials" : {
-      "type" : "integer",
-      "description" : "maximum number of trials in the soft LDPC algorithm (LDPC tool parameter)"
-    },
-    "maxBitflips" : {
-      "type" : "integer",
-      "description" : "maximum number of bit flips allowed in hard LDPC algorithm"
+      "description" : "see DATVDemodSettings::DATVCodeRate"
     },
     "audioMute" : {
       "type" : "integer",
-      "description" : "(boolean) mute audio output"
+      "description" : "boolean"
     },
     "audioDeviceName" : {
       "type" : "string"
@@ -3387,28 +3383,27 @@ margin-bottom: 20px;
     },
     "allowDrift" : {
       "type" : "integer",
-      "description" : "(boolean) allow a larger frequency drift (DVB-S)"
+      "description" : "boolean"
     },
     "fastLock" : {
       "type" : "integer",
-      "description" : "(boolean) faster locking algorithm (DVB-S)"
+      "description" : "boolean"
     },
     "filter" : {
       "type" : "integer",
-      "description" : "Type of sumbol filtering (see DATVDemodSettings::dvb_sampler)\n  * 0 - Nearest\n  * 1 - Linear\n  * 2 - Root Raised Cosine\n"
+      "description" : "see DATVDemodSettings::dvb_sampler"
     },
     "hardMetric" : {
       "type" : "integer",
-      "description" : "(boolean) (DVB-S)"
+      "description" : "boolean"
     },
     "rollOff" : {
       "type" : "number",
-      "format" : "float",
-      "description" : "RRC filter roll-off factor (0..1)"
+      "format" : "float"
     },
     "viterbi" : {
       "type" : "integer",
-      "description" : "(boolean) (DVB-S)"
+      "description" : "boolean"
     },
     "excursion" : {
       "type" : "integer"
@@ -3429,26 +3424,6 @@ margin-bottom: 20px;
     "udpTS" : {
       "type" : "integer",
       "description" : "boolean"
-    },
-    "streamIndex" : {
-      "type" : "integer",
-      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
-    },
-    "useReverseAPI" : {
-      "type" : "integer",
-      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
-    },
-    "reverseAPIAddress" : {
-      "type" : "string"
-    },
-    "reverseAPIPort" : {
-      "type" : "integer"
-    },
-    "reverseAPIDeviceIndex" : {
-      "type" : "integer"
-    },
-    "reverseAPIChannelIndex" : {
-      "type" : "integer"
     }
   },
   "description" : "DATVDemod"
@@ -4352,6 +4327,9 @@ margin-bottom: 20px;
     "MapActions" : {
       "$ref" : "#/definitions/MapActions"
     },
+    "PERTesterActions" : {
+      "$ref" : "#/definitions/PERTesterActions"
+    },
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
     }
@@ -4467,6 +4445,9 @@ margin-bottom: 20px;
     },
     "MapSettings" : {
       "$ref" : "#/definitions/MapSettings"
+    },
+    "PERTesterSettings" : {
+      "$ref" : "#/definitions/PERTesterSettings"
     },
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
@@ -5465,6 +5446,18 @@ margin-bottom: 20px;
     "repeatCount" : {
       "type" : "integer",
       "description" : "Number of times to repeat the frame (-1 for infinite)."
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Enable forwarding of frames via UDP"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to listen for frames to transmit on"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to listen for frames to transmit on"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7093,6 +7086,102 @@ margin-bottom: 20px;
   },
   "description" : "Enumeration with name for values"
 };
+            defs.PERTesterActions = {
+  "properties" : {
+    "aos" : {
+      "$ref" : "#/definitions/PERTesterActions_aos"
+    }
+  },
+  "description" : "PERTester"
+};
+            defs.PERTesterActions_aos = {
+  "properties" : {
+    "satelliteName" : {
+      "type" : "string",
+      "description" : "Name of the satellite"
+    },
+    "aosTime" : {
+      "type" : "string",
+      "description" : "Time of AOS"
+    },
+    "losTime" : {
+      "type" : "string",
+      "description" : "Time of LOS"
+    }
+  },
+  "description" : "Acquisition of signal"
+};
+            defs.PERTesterSettings = {
+  "properties" : {
+    "packetCount" : {
+      "type" : "integer"
+    },
+    "interval" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "start" : {
+      "type" : "integer",
+      "description" : "0 - immediately, 1 - on satellite AOS, 2 - on satellite mid pass"
+    },
+    "satellites" : {
+      "type" : "array",
+      "description" : "Satellite names to start test on",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "packet" : {
+      "type" : "string",
+      "description" : "Packet of data to send"
+    },
+    "ignoreLeadingBytes" : {
+      "type" : "integer"
+    },
+    "ignoreTrailingBytes" : {
+      "type" : "integer"
+    },
+    "txUDPAddress" : {
+      "type" : "string",
+      "description" : "UDP address to sent packets to be transmitted to"
+    },
+    "txUDPPort" : {
+      "type" : "integer",
+      "description" : "UDP port  to sent packets to be transmitted to"
+    },
+    "rxUDPAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive packets via"
+    },
+    "rxUDPPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive packets via"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PER Tester settings"
+};
             defs.PacketDemodSettings = {
   "properties" : {
     "inputFrequencyOffset" : {
@@ -7110,6 +7199,18 @@ margin-bottom: 20px;
     "fmDeviation" : {
       "type" : "number",
       "format" : "float"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received packets to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received packets to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received packets to"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7319,6 +7420,18 @@ margin-bottom: 20px;
     },
     "symbolSpan" : {
       "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to receive packets to transmit on specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive packets to transmit via"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive packets to transmit via"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -45779,7 +45892,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-04-01T20:39:21.587+02:00
+              Generated 2021-04-02T23:43:06.310+02:00
             </div>
           </div>
       </div>

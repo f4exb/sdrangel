@@ -306,6 +306,24 @@ void PacketDemodGUI::on_clearTable_clicked()
     ui->packets->setRowCount(0);
 }
 
+void PacketDemodGUI::on_udpEnabled_clicked(bool checked)
+{
+    m_settings.m_udpEnabled = checked;
+    applySettings();
+}
+
+void PacketDemodGUI::on_udpAddress_editingFinished()
+{
+    m_settings.m_udpAddress = ui->udpAddress->text();
+    applySettings();
+}
+
+void PacketDemodGUI::on_udpPort_editingFinished()
+{
+    m_settings.m_udpPort = ui->udpPort->text().toInt();
+    applySettings();
+}
+
 void PacketDemodGUI::filterRow(int row)
 {
     bool hidden = false;
@@ -502,6 +520,10 @@ void PacketDemodGUI::displaySettings()
     ui->filterFrom->setText(m_settings.m_filterFrom);
     ui->filterTo->setText(m_settings.m_filterTo);
     ui->filterPID->setChecked(m_settings.m_filterPID == "f0");
+
+    ui->udpEnabled->setChecked(m_settings.m_udpEnabled);
+    ui->udpAddress->setText(m_settings.m_udpAddress);
+    ui->udpPort->setText(QString::number(m_settings.m_udpPort));
 
     // Order and size columns
     QHeaderView *header = ui->packets->horizontalHeader();

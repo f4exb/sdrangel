@@ -119,6 +119,15 @@ PacketModSettings:
       format: float
     symbolSpan:
       type: integer
+    udpEnabled:
+      description: "Whether to receive packets to transmit on specified UDP port"
+      type: integer
+    udpAddress:
+      description: "UDP address to receive packets to transmit via"
+      type: string
+    udpPort:
+      description: "UDP port to receive packets to transmit via"
+      type: integer
     rgbColor:
       type: integer
     title:

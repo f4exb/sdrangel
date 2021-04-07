@@ -38,6 +38,9 @@ void PacketDemodSettings::resetToDefaults()
     m_filterFrom = "";
     m_filterTo = "";
     m_filterPID = "";
+    m_udpEnabled = false;
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9999;
 
     m_rgbColor = QColor(0, 105, 2).rgb();
     m_title = "Packet Demodulator";
@@ -78,6 +81,9 @@ QByteArray PacketDemodSettings::serialize() const
 
     s.writeFloat(20, m_rfBandwidth);
     s.writeFloat(21, m_fmDeviation);
+    s.writeBool(22, m_udpEnabled);
+    s.writeString(23, m_udpAddress);
+    s.writeU32(24, m_udpPort);
 
     for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
         s.writeS32(100 + i, m_columnIndexes[i]);
@@ -133,6 +139,15 @@ bool PacketDemodSettings::deserialize(const QByteArray& data)
 
         d.readFloat(20, &m_rfBandwidth, 12500.0f);
         d.readFloat(21, &m_fmDeviation, 2500.0f);
+
+        d.readBool(22, &m_udpEnabled);
+        d.readString(23, &m_udpAddress);
+        d.readU32(24, &utmp);
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_udpPort = utmp;
+        } else {
+            m_udpPort = 9999;
+        }
 
         for (int i = 0; i < PACKETDEMOD_COLUMNS; i++)
             d.readS32(100 + i, &m_columnIndexes[i], i);

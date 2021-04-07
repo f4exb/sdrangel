@@ -35,6 +35,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
+class QUdpSocket;
 class DeviceAPI;
 class CWKeyer;
 class ChirpChatModBaseband;
@@ -159,6 +160,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QUdpSocket *m_udpSocket;
 
     void applySettings(const ChirpChatModSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
@@ -175,9 +177,12 @@ private:
         const ChirpChatModSettings& settings,
         bool force
     );
+    void openUDP(const ChirpChatModSettings& settings);
+    void closeUDP();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void udpRx();
 };
 
 

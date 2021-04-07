@@ -62,6 +62,9 @@ struct IEEE_802_15_4_ModSettings
     enum PulseShaping {RC, SINE} m_pulseShaping;
     float m_beta;
     int m_symbolSpan;
+    bool m_udpEnabled;
+    QString m_udpAddress;
+    uint16_t m_udpPort;
 
     IEEE_802_15_4_ModSettings();
     void resetToDefaults();

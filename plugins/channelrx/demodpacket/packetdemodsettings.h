@@ -36,6 +36,9 @@ struct PacketDemodSettings
     QString m_filterFrom;
     QString m_filterTo;
     QString m_filterPID;
+    bool m_udpEnabled;
+    QString m_udpAddress;
+    uint16_t m_udpPort;
 
     quint32 m_rgbColor;
     QString m_title;

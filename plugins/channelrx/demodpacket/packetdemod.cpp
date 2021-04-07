@@ -167,6 +167,14 @@ bool PacketDemod::handleMessage(const Message& cmd)
             }
         }
 
+        // Forward via UDP
+        if (m_settings.m_udpEnabled)
+        {
+            qDebug() << "Forwarding to " << m_settings.m_udpAddress << ":" << m_settings.m_udpPort;
+            m_udpSocket.writeDatagram(report.getPacket().data(), report.getPacket().size(),
+                                      QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
+        }
+
         return true;
     }
     else
@@ -197,7 +205,15 @@ void PacketDemod::applySettings(const PacketDemodSettings& settings, bool force)
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
         reverseAPIKeys.append("fmDeviation");
     }
-
+    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
+        reverseAPIKeys.append("udpEnabled");
+    }
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
+        reverseAPIKeys.append("udpAddress");
+    }
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
+        reverseAPIKeys.append("udpPort");
+    }
     if (m_settings.m_streamIndex != settings.m_streamIndex)
     {
         if (m_deviceAPI->getSampleMIMO()) // change of stream is possible for MIMO devices only
@@ -299,6 +315,15 @@ void PacketDemod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("rfBandwidth")) {
         settings.m_rfBandwidth = response.getPacketDemodSettings()->getRfBandwidth();
     }
+    if (channelSettingsKeys.contains("udpEnabled")) {
+        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getPacketDemodSettings()->getRgbColor();
     }
@@ -330,8 +355,11 @@ void PacketDemod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& r
     response.getPacketDemodSettings()->setFmDeviation(settings.m_fmDeviation);
     response.getPacketDemodSettings()->setInputFrequencyOffset(settings.m_inputFrequencyOffset);
     response.getPacketDemodSettings()->setRfBandwidth(settings.m_rfBandwidth);
-    response.getPacketDemodSettings()->setRgbColor(settings.m_rgbColor);
+    response.getPacketDemodSettings()->setUdpEnabled(settings.m_udpEnabled);
+    response.getPacketDemodSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    response.getPacketDemodSettings()->setUdpPort(settings.m_udpPort);
 
+    response.getPacketDemodSettings()->setRgbColor(settings.m_rgbColor);
     if (response.getPacketDemodSettings()->getTitle()) {
         *response.getPacketDemodSettings()->getTitle() = settings.m_title;
     } else {
@@ -401,6 +429,15 @@ void PacketDemod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("rfBandwidth") || force) {
         swgPacketDemodSettings->setRfBandwidth(settings.m_rfBandwidth);
+    }
+    if (channelSettingsKeys.contains("udpEnabled") || force) {
+        swgPacketDemodSettings->setUdpEnabled(settings.m_udpEnabled);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgPacketDemodSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgPacketDemodSettings->setUdpPort(settings.m_udpPort);
     }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgPacketDemodSettings->setRgbColor(settings.m_rgbColor);
