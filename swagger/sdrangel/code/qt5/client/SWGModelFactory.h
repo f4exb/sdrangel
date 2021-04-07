@@ -162,6 +162,9 @@
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
 #include "SWGNamedEnum.h"
+#include "SWGPERTesterActions.h"
+#include "SWGPERTesterActions_aos.h"
+#include "SWGPERTesterSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModActions.h"
 #include "SWGPacketModActions_tx.h"
@@ -700,6 +703,15 @@ namespace SWGSDRangel {
     }
     if(QString("SWGNamedEnum").compare(type) == 0) {
       return new SWGNamedEnum();
+    }
+    if(QString("SWGPERTesterActions").compare(type) == 0) {
+      return new SWGPERTesterActions();
+    }
+    if(QString("SWGPERTesterActions_aos").compare(type) == 0) {
+      return new SWGPERTesterActions_aos();
+    }
+    if(QString("SWGPERTesterSettings").compare(type) == 0) {
+      return new SWGPERTesterSettings();
     }
     if(QString("SWGPacketDemodSettings").compare(type) == 0) {
       return new SWGPacketDemodSettings();

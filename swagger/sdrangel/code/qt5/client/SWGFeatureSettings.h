@@ -27,6 +27,7 @@
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGMapSettings.h"
+#include "SWGPERTesterSettings.h"
 #include "SWGRigCtlServerSettings.h"
 #include "SWGSatelliteTrackerSettings.h"
 #include "SWGSimplePTTSettings.h"
@@ -76,6 +77,9 @@ public:
     SWGMapSettings* getMapSettings();
     void setMapSettings(SWGMapSettings* map_settings);
 
+    SWGPERTesterSettings* getPerTesterSettings();
+    void setPerTesterSettings(SWGPERTesterSettings* per_tester_settings);
+
     SWGRigCtlServerSettings* getRigCtlServerSettings();
     void setRigCtlServerSettings(SWGRigCtlServerSettings* rig_ctl_server_settings);
 
@@ -118,6 +122,9 @@ private:
 
     SWGMapSettings* map_settings;
     bool m_map_settings_isSet;
+
+    SWGPERTesterSettings* per_tester_settings;
+    bool m_per_tester_settings_isSet;
 
     SWGRigCtlServerSettings* rig_ctl_server_settings;
     bool m_rig_ctl_server_settings_isSet;

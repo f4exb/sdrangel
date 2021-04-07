@@ -23,6 +23,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/GS232Controller.yaml#/GS232ControllerSettings"
     MapSettings:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapSettings"
+    PERTesterSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterSettings"
     RigCtlServerSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RigCtlServer.yaml#/RigCtlServerSettings"
     SatelliteTrackerSettings:

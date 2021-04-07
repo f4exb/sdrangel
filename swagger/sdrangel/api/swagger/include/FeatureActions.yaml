@@ -17,5 +17,7 @@ FeatureActions:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCActions"
     MapActions:
       $ref: "http://swgserver:8081/api/swagger/include/Map.yaml#/MapActions"
+    PERTesterActions:
+      $ref: "http://swgserver:8081/api/swagger/include/PERTester.yaml#/PERTesterActions"
     SimplePTTActions:
       $ref: "http://swgserver:8081/api/swagger/include/SimplePTT.yaml#/SimplePTTActions"
