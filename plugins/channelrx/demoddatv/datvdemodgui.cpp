@@ -203,7 +203,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 
     ui->merMeter->setColorTheme(LevelMeterSignalDB::ColorCyanAndBlue);
     ui->merMeter->setRange(0, 30);
-    ui->merMeter->setAverageSmoothing(2);
+    ui->merMeter->setAverageSmoothing(32);
 
     ui->cnrMeter->setColorTheme(LevelMeterSignalDB::ColorGreenAndBlue);
     ui->cnrMeter->setRange(0, 30);
