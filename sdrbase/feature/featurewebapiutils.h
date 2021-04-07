@@ -18,6 +18,8 @@
 #ifndef SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
 #define SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
 
+#include <QDateTime>
+
 #include "export.h"
 
 class Feature;
@@ -27,6 +29,8 @@ class SDRBASE_API FeatureWebAPIUtils
 public:
     static bool mapFind(const QString& target, int featureSetIndex=-1, int featureIndex=-1);
     static Feature *getFeature(int featureSetIndex, int featureIndex, const QString& uri);
+    static bool satelliteAOS(const QString name, const QDateTime aos, const QDateTime los);
+    static bool satelliteLOS(const QString name);
 };
 
 #endif // SDRBASE_FEATURE_FEATUREWEBAPIUTILS_H_
