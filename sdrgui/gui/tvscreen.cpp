@@ -18,32 +18,36 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
+
 #include <QPainter>
 #include <QMouseEvent>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QSurface>
+#include <QDebug>
+#include <QMutexLocker>
+
 #include "tvscreen.h"
 
-#include <algorithm>
-#include <QDebug>
 
 // Note: When this object is created, QWidget* is converted to bool
-TVScreen::TVScreen(bool blnColor, QWidget* parent) :
-        QGLWidget(parent), m_objMutex(QMutex::NonRecursive), m_objGLShaderArray(blnColor)
+TVScreen::TVScreen(bool color, QWidget* parent) :
+    QGLWidget(parent),
+    m_mutex(QMutex::Recursive),
+    m_glShaderArray(color)
 {
     setAttribute(Qt::WA_OpaquePaintEvent);
-    connect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-    m_objTimer.start(40); // capped at 25 FPS
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    m_timer.start(40); // capped at 25 FPS
 
-    m_chrLastData = nullptr;
-    m_blnConfigChanged = false;
-    m_blnDataChanged = false;
-    m_blnGLContextInitialized = false;
+    m_lastData = nullptr;
+    m_dataChanged = false;
+    m_glContextInitialized = false;
 
     //Par défaut
-    m_intAskedCols = TV_COLS;
-    m_intAskedRows = TV_ROWS;
+    m_askedCols = TV_COLS;
+    m_askedRows = TV_ROWS;
     m_cols = TV_COLS;
     m_rows = TV_ROWS;
 }
@@ -52,66 +56,66 @@ TVScreen::~TVScreen()
 {
 }
 
-void TVScreen::setColor(bool blnColor)
+void TVScreen::setColor(bool color)
 {
-	m_objGLShaderArray.setColor(blnColor);
+	m_glShaderArray.setColor(color);
 }
 
-QRgb* TVScreen::getRowBuffer(int intRow)
+QRgb* TVScreen::getRowBuffer(int row)
 {
-    if (!m_blnGLContextInitialized)
-    {
+    if (!m_glContextInitialized) {
         return nullptr;
     }
 
-    return m_objGLShaderArray.GetRowBuffer(intRow);
+    return m_glShaderArray.GetRowBuffer(row);
 }
 
-void TVScreen::renderImage(unsigned char * objData)
+void TVScreen::renderImage(unsigned char * data)
 {
-    m_chrLastData = objData;
-    m_blnDataChanged = true;
+    m_lastData = data;
+    m_dataChanged = true;
 }
 
 void TVScreen::resetImage()
 {
-    m_objGLShaderArray.ResetPixels();
+    m_glShaderArray.ResetPixels();
 }
 
 void TVScreen::resetImage(int alpha)
 {
-    m_objGLShaderArray.ResetPixels(alpha);
+    m_glShaderArray.ResetPixels(alpha);
 }
 
-void TVScreen::resizeTVScreen(int intCols, int intRows)
+void TVScreen::resizeTVScreen(int cols, int intRows)
 {
-    qDebug("TVScreen::resizeTVScreen: cols: %d, rows: %d", intCols, intRows);
-    m_intAskedCols = intCols;
-    m_intAskedRows = intRows;
-    m_cols = intCols;
+    qDebug("TVScreen::resizeTVScreen: cols: %d, rows: %d", cols, intRows);
+    QMutexLocker mlock(&m_mutex);
+    m_askedCols = cols;
+    m_askedRows = intRows;
+    m_cols = cols;
     m_rows = intRows;
 }
 
-void TVScreen::getSize(int& intCols, int& intRows) const
+void TVScreen::getSize(int& cols, int& intRows) const
 {
-    intCols = m_cols;
+    cols = m_cols;
     intRows = m_rows;
 }
 
 void TVScreen::initializeGL()
 {
-    m_objMutex.lock();
+    QMutexLocker mlock(&m_mutex);
 
-    QOpenGLContext *objGlCurrentContext = QOpenGLContext::currentContext();
+    QOpenGLContext *glCurrentContext = QOpenGLContext::currentContext();
 
-    if (objGlCurrentContext)
+    if (glCurrentContext)
     {
         if (QOpenGLContext::currentContext()->isValid())
         {
             qDebug() << "TVScreen::initializeGL: context:"
-                    << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
-                    << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
-                    << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
+                << " major: " << (QOpenGLContext::currentContext()->format()).majorVersion()
+                << " minor: " << (QOpenGLContext::currentContext()->format()).minorVersion()
+                << " ES: " << (QOpenGLContext::currentContext()->isOpenGLES() ? "yes" : "no");
         }
         else
         {
@@ -124,61 +128,63 @@ void TVScreen::initializeGL()
         return;
     }
 
-    QSurface *objSurface = objGlCurrentContext->surface();
+    QSurface *surface = glCurrentContext->surface();
 
-    if (objSurface == nullptr)
+    if (surface == nullptr)
     {
         qCritical() << "TVScreen::initializeGL: no surface attached";
         return;
     }
     else
     {
-        if (objSurface->surfaceType() != QSurface::OpenGLSurface)
+        if (surface->surfaceType() != QSurface::OpenGLSurface)
         {
             qCritical() << "TVScreen::initializeGL: surface is not an OpenGLSurface: "
-                    << objSurface->surfaceType()
-                    << " cannot use an OpenGL context";
+                << surface->surfaceType()
+                << " cannot use an OpenGL context";
             return;
         }
         else
         {
             qDebug() << "TVScreen::initializeGL: OpenGL surface:"
-                    << " class: " << (objSurface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
+                << " class: " << (surface->surfaceClass() == QSurface::Window ? "Window" : "Offscreen");
         }
     }
 
-    connect(objGlCurrentContext, &QOpenGLContext::aboutToBeDestroyed, this,
-            &TVScreen::cleanup); // TODO: when migrating to QOpenGLWidget
+    connect(
+        glCurrentContext,
+        &QOpenGLContext::aboutToBeDestroyed,
+        this,
+        &TVScreen::cleanup
+    ); // TODO: when migrating to QOpenGLWidget
 
-    m_blnGLContextInitialized = true;
-
-    m_objMutex.unlock();
+    m_glContextInitialized = true;
 }
 
-void TVScreen::resizeGL(int intWidth, int intHeight)
+void TVScreen::resizeGL(int width, int height)
 {
-    QOpenGLFunctions *ptrF = QOpenGLContext::currentContext()->functions();
-    ptrF->glViewport(0, 0, intWidth, intHeight);
-    m_blnConfigChanged = true;
+    QMutexLocker mlock(&m_mutex);
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    f->glViewport(0, 0, width, height);
 }
 
 void TVScreen::paintGL()
 {
-    if (!m_objMutex.tryLock(2))
+    if (!m_mutex.tryLock(2)) {
         return;
-
-    m_blnDataChanged = false;
-
-    if ((m_intAskedCols != 0) && (m_intAskedRows != 0))
-    {
-        m_objGLShaderArray.initializeGL(m_intAskedCols, m_intAskedRows);
-        m_intAskedCols = 0;
-        m_intAskedRows = 0;
     }
 
-    m_objGLShaderArray.RenderPixels(m_chrLastData);
+    m_dataChanged = false;
 
-    m_objMutex.unlock();
+    if ((m_askedCols != 0) && (m_askedRows != 0))
+    {
+        m_glShaderArray.initializeGL(m_askedCols, m_askedRows);
+        m_askedCols = 0;
+        m_askedRows = 0;
+    }
+
+    m_glShaderArray.RenderPixels(m_lastData);
+    m_mutex.unlock();
 }
 
 void TVScreen::mousePressEvent(QMouseEvent* event)
@@ -188,59 +194,51 @@ void TVScreen::mousePressEvent(QMouseEvent* event)
 
 void TVScreen::tick()
 {
-    if (m_blnDataChanged) {
+    if (m_dataChanged) {
         update();
     }
 }
 
-void TVScreen::connectTimer(const QTimer& objTimer)
+void TVScreen::connectTimer(const QTimer& timer)
 {
      qDebug() << "TVScreen::connectTimer";
-     disconnect(&m_objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-     connect(&objTimer, SIGNAL(timeout()), this, SLOT(tick()));
-     m_objTimer.stop();
+     disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(tick()));
+     connect(&timer, SIGNAL(timeout()), this, SLOT(tick()));
+     m_timer.stop();
 }
 
 void TVScreen::cleanup()
 {
-    if (m_blnGLContextInitialized)
-    {
-        m_objGLShaderArray.cleanup();
+    QMutexLocker mlock(&m_mutex);
+
+    if (m_glContextInitialized) {
+        m_glShaderArray.cleanup();
     }
 }
 
-bool TVScreen::selectRow(int intLine)
+bool TVScreen::selectRow(int line)
 {
-    if (m_blnGLContextInitialized)
-    {
-        return m_objGLShaderArray.SelectRow(intLine);
-    }
-    else
-    {
+    if (m_glContextInitialized) {
+        return m_glShaderArray.SelectRow(line);
+    } else {
         return false;
     }
 }
 
-bool TVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue)
+bool TVScreen::setDataColor(int col, int red, int green, int blue)
 {
-    if (m_blnGLContextInitialized)
-    {
-        return m_objGLShaderArray.SetDataColor(intCol, qRgb(intBlue, intGreen, intRed)); // FIXME: blue <> red inversion in shader
-    }
-    else
-    {
+    if (m_glContextInitialized) {
+        return m_glShaderArray.SetDataColor(col, qRgb(blue, green, red)); // FIXME: blue <> red inversion in shader
+    } else {
         return false;
     }
 }
 
-bool TVScreen::setDataColor(int intCol, int intRed, int intGreen, int intBlue, int intAlpha)
+bool TVScreen::setDataColor(int col, int red, int green, int blue, int alpha)
 {
-    if (m_blnGLContextInitialized)
-    {
-        return m_objGLShaderArray.SetDataColor(intCol, qRgba(intBlue, intGreen, intRed, intAlpha)); // FIXME: blue <> red inversion in shader
-    }
-    else
-    {
+    if (m_glContextInitialized) {
+        return m_glShaderArray.SetDataColor(col, qRgba(blue, green, red, alpha)); // FIXME: blue <> red inversion in shader
+    } else {
         return false;
     }
 }
