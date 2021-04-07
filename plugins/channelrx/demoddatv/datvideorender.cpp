@@ -554,9 +554,11 @@ bool DATVideoRender::renderStream()
 
             if (gotFrame)
             {
+                int in_samplerate = m_audioDecoderCtx->sample_rate;
+                int out_num_samples = av_rescale_rnd(swr_get_delay(m_audioSWR, in_samplerate) + m_frame->nb_samples, m_audioSampleRate, in_samplerate, AV_ROUND_UP);
                 int16_t *audioBuffer = nullptr;
-                av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, m_frame->nb_samples, AV_SAMPLE_FMT_S16, 0);
-                int samples_per_channel = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, m_frame->nb_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
+                av_samples_alloc((uint8_t**) &audioBuffer, nullptr, 2, out_num_samples, AV_SAMPLE_FMT_S16, 1);
+                int samples_per_channel = swr_convert(m_audioSWR, (uint8_t**) &audioBuffer, out_num_samples, (const uint8_t**) m_frame->data, m_frame->nb_samples);
                 if (samples_per_channel < m_frame->nb_samples) {
                     qDebug("DATVideoRender::renderStream: converted samples missing %d/%d returned", samples_per_channel, m_frame->nb_samples);
                 }
