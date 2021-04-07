@@ -102,6 +102,9 @@ private slots:
     void on_repeat_toggled(bool checked);
     void repeatSelect();
     void txSettingsSelect();
+    void on_udpEnabled_clicked(bool checked);
+    void on_udpAddress_editingFinished();
+    void on_udpPort_editingFinished();
 
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void onMenuDialogCalled(const QPoint& p);

@@ -25,6 +25,15 @@ IEEE_802_15_4_ModSettings:
     repeatCount:
       description: Number of times to repeat the frame (-1 for infinite).
       type: integer
+    udpEnabled:
+      description: Enable forwarding of frames via UDP
+      type: integer
+    udpAddress:
+      description: UDP address to listen for frames to transmit on
+      type: string
+    udpPort:
+      description: UDP port to listen for frames to transmit on
+      type: integer
     rgbColor:
       type: integer
     title:

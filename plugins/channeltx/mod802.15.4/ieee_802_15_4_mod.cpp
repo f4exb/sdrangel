@@ -21,6 +21,8 @@
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QUdpSocket>
+#include <QNetworkDatagram>
 #include <QBuffer>
 #include <QThread>
 
@@ -56,7 +58,8 @@ IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamSingleSource),
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_TX_SCALEF),
-    m_settingsMutex(QMutex::Recursive)
+    m_settingsMutex(QMutex::Recursive),
+    m_udpSocket(nullptr)
 {
     setObjectName(m_channelId);
 
@@ -76,6 +79,7 @@ IEEE_802_15_4_Mod::IEEE_802_15_4_Mod(DeviceAPI *deviceAPI) :
 
 IEEE_802_15_4_Mod::~IEEE_802_15_4_Mod()
 {
+    closeUDP();
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSourceAPI(this);
@@ -191,6 +195,29 @@ void IEEE_802_15_4_Mod::applySettings(const IEEE_802_15_4_ModSettings& settings,
 
     if ((settings.m_repeatCount != m_settings.m_repeatCount) || force) {
         reverseAPIKeys.append("repeatCount");
+    }
+
+    if ((settings.m_udpEnabled != m_settings.m_udpEnabled) || force) {
+        reverseAPIKeys.append("udpEnabled");
+    }
+
+    if ((settings.m_udpAddress != m_settings.m_udpAddress) || force) {
+        reverseAPIKeys.append("udpAddress");
+    }
+
+    if ((settings.m_udpPort != m_settings.m_udpPort) || force) {
+        reverseAPIKeys.append("udpPort");
+    }
+
+    if (   (settings.m_udpEnabled != m_settings.m_udpEnabled)
+        || (settings.m_udpAddress != m_settings.m_udpAddress)
+        || (settings.m_udpPort != m_settings.m_udpPort)
+        || force)
+    {
+        if (settings.m_udpEnabled)
+            openUDP(settings);
+        else
+            closeUDP();
     }
 
     if (m_settings.m_streamIndex != settings.m_streamIndex)
@@ -314,6 +341,15 @@ void IEEE_802_15_4_Mod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("repeatCount")) {
         settings.m_repeatCount = response.getIeee802154ModSettings()->getRepeatCount();
     }
+    if (channelSettingsKeys.contains("udpEnabled")) {
+        settings.m_udpEnabled = response.getPacketDemodSettings()->getUdpEnabled();
+    }
+    if (channelSettingsKeys.contains("udpAddress")) {
+        settings.m_udpAddress = *response.getPacketDemodSettings()->getUdpAddress();
+    }
+    if (channelSettingsKeys.contains("udpPort")) {
+        settings.m_udpPort = response.getPacketDemodSettings()->getUdpPort();
+    }
     if (channelSettingsKeys.contains("rgbColor")) {
         settings.m_rgbColor = response.getIeee802154ModSettings()->getRgbColor();
     }
@@ -401,6 +437,9 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSetti
     response.getIeee802154ModSettings()->setRepeat(settings.m_repeat ? 1 : 0);
     response.getIeee802154ModSettings()->setRepeatDelay(settings.m_repeatDelay);
     response.getIeee802154ModSettings()->setRepeatCount(settings.m_repeatCount);
+    response.getIeee802154ModSettings()->setUdpEnabled(settings.m_udpEnabled);
+    response.getIeee802154ModSettings()->setUdpAddress(new QString(settings.m_udpAddress));
+    response.getIeee802154ModSettings()->setUdpPort(settings.m_udpPort);
     response.getIeee802154ModSettings()->setRgbColor(settings.m_rgbColor);
 
     if (response.getIeee802154ModSettings()->getTitle()) {
@@ -512,6 +551,15 @@ void IEEE_802_15_4_Mod::webapiFormatChannelSettings(
     if (channelSettingsKeys.contains("repeatCount") || force) {
         swgIEEE_802_15_4_ModSettings->setRepeatCount(settings.m_repeatCount);
     }
+    if (channelSettingsKeys.contains("udpEnabled") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpEnabled(settings.m_udpEnabled);
+    }
+    if (channelSettingsKeys.contains("udpAddress") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpAddress(new QString(settings.m_udpAddress));
+    }
+    if (channelSettingsKeys.contains("udpPort") || force) {
+        swgIEEE_802_15_4_ModSettings->setUdpPort(settings.m_udpPort);
+    }
     if (channelSettingsKeys.contains("rgbColor") || force) {
         swgIEEE_802_15_4_ModSettings->setRgbColor(settings.m_rgbColor);
     }
@@ -562,4 +610,37 @@ uint32_t IEEE_802_15_4_Mod::getNumberOfDeviceStreams() const
 void IEEE_802_15_4_Mod::setScopeSink(BasebandSampleSink* scopeSink)
 {
     m_basebandSource->setScopeSink(scopeSink);
+}
+
+void IEEE_802_15_4_Mod::openUDP(const IEEE_802_15_4_ModSettings& settings)
+{
+    closeUDP();
+    m_udpSocket = new QUdpSocket();
+    if (!m_udpSocket->bind(QHostAddress(settings.m_udpAddress), settings.m_udpPort))
+        qCritical() << "IEEE_802_15_4_Mod::openUDP: Failed to bind to port " << settings.m_udpAddress << ":" << settings.m_udpPort << ". Error: " << m_udpSocket->error();
+    else
+        qDebug() << "IEEE_802_15_4_Mod::openUDP: Listening for packets on " << settings.m_udpAddress << ":" << settings.m_udpPort;
+    connect(m_udpSocket, &QUdpSocket::readyRead, this, &IEEE_802_15_4_Mod::udpRx);
+}
+
+void IEEE_802_15_4_Mod::closeUDP()
+{
+    if (m_udpSocket != nullptr)
+    {
+        disconnect(m_udpSocket, &QUdpSocket::readyRead, this, &IEEE_802_15_4_Mod::udpRx);
+        delete m_udpSocket;
+        m_udpSocket = nullptr;
+    }
+}
+
+void IEEE_802_15_4_Mod::udpRx()
+{
+    while (m_udpSocket->hasPendingDatagrams())
+    {
+        QNetworkDatagram datagram = m_udpSocket->receiveDatagram();
+        // Convert from binary to hex string
+        QString string = datagram.data().toHex(' ');
+        IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod *msg = IEEE_802_15_4_Mod::MsgTXIEEE_802_15_4_Mod::create(string);
+        m_basebandSource->getInputMessageQueue()->push(msg);
+    }
 }

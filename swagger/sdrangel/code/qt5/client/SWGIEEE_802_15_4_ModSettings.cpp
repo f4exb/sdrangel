@@ -44,6 +44,12 @@ SWGIEEE_802_15_4_ModSettings::SWGIEEE_802_15_4_ModSettings() {
     m_repeat_delay_isSet = false;
     repeat_count = 0;
     m_repeat_count_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_address = nullptr;
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -84,6 +90,12 @@ SWGIEEE_802_15_4_ModSettings::init() {
     m_repeat_delay_isSet = false;
     repeat_count = 0;
     m_repeat_count_isSet = false;
+    udp_enabled = 0;
+    m_udp_enabled_isSet = false;
+    udp_address = new QString("");
+    m_udp_address_isSet = false;
+    udp_port = 0;
+    m_udp_port_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -113,6 +125,11 @@ SWGIEEE_802_15_4_ModSettings::cleanup() {
 
 
 
+
+
+    if(udp_address != nullptr) { 
+        delete udp_address;
+    }
 
 
     if(title != nullptr) { 
@@ -154,6 +171,12 @@ SWGIEEE_802_15_4_ModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&repeat_delay, pJson["repeatDelay"], "float", "");
     
     ::SWGSDRangel::setValue(&repeat_count, pJson["repeatCount"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_enabled, pJson["udpEnabled"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&udp_address, pJson["udpAddress"], "QString", "QString");
+    
+    ::SWGSDRangel::setValue(&udp_port, pJson["udpPort"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -210,6 +233,15 @@ SWGIEEE_802_15_4_ModSettings::asJsonObject() {
     }
     if(m_repeat_count_isSet){
         obj->insert("repeatCount", QJsonValue(repeat_count));
+    }
+    if(m_udp_enabled_isSet){
+        obj->insert("udpEnabled", QJsonValue(udp_enabled));
+    }
+    if(udp_address != nullptr && *udp_address != QString("")){
+        toJsonValue(QString("udpAddress"), udp_address, obj, QString("QString"));
+    }
+    if(m_udp_port_isSet){
+        obj->insert("udpPort", QJsonValue(udp_port));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -320,6 +352,36 @@ SWGIEEE_802_15_4_ModSettings::setRepeatCount(qint32 repeat_count) {
 }
 
 qint32
+SWGIEEE_802_15_4_ModSettings::getUdpEnabled() {
+    return udp_enabled;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpEnabled(qint32 udp_enabled) {
+    this->udp_enabled = udp_enabled;
+    this->m_udp_enabled_isSet = true;
+}
+
+QString*
+SWGIEEE_802_15_4_ModSettings::getUdpAddress() {
+    return udp_address;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpAddress(QString* udp_address) {
+    this->udp_address = udp_address;
+    this->m_udp_address_isSet = true;
+}
+
+qint32
+SWGIEEE_802_15_4_ModSettings::getUdpPort() {
+    return udp_port;
+}
+void
+SWGIEEE_802_15_4_ModSettings::setUdpPort(qint32 udp_port) {
+    this->udp_port = udp_port;
+    this->m_udp_port_isSet = true;
+}
+
+qint32
 SWGIEEE_802_15_4_ModSettings::getRgbColor() {
     return rgb_color;
 }
@@ -426,6 +488,15 @@ SWGIEEE_802_15_4_ModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_repeat_count_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_enabled_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(udp_address && *udp_address != QString("")){
+            isObjectUpdated = true; break;
+        }
+        if(m_udp_port_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){

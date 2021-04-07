@@ -36,6 +36,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
+class QUdpSocket;
 class DeviceAPI;
 class IEEE_802_15_4_ModBaseband;
 
@@ -163,6 +164,7 @@ private:
 
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
+    QUdpSocket *m_udpSocket;
 
     void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void webapiFormatChannelReport(SWGSDRangel::SWGChannelReport& response);
@@ -179,9 +181,12 @@ private:
         const IEEE_802_15_4_ModSettings& settings,
         bool force
     );
+    void openUDP(const IEEE_802_15_4_ModSettings& settings);
+    void closeUDP();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);
+    void udpRx();
 };
 
 

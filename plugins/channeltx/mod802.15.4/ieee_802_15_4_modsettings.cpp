@@ -69,6 +69,9 @@ void IEEE_802_15_4_ModSettings::resetToDefaults()
     m_pulseShaping = RC;
     m_beta = 1.0f;
     m_symbolSpan = 6;
+    m_udpEnabled = false;
+    m_udpAddress = "127.0.0.1";
+    m_udpPort = 9998;
 }
 
 bool IEEE_802_15_4_ModSettings::setPHY(QString phy)
@@ -176,6 +179,9 @@ QByteArray IEEE_802_15_4_ModSettings::serialize() const
     s.writeS32(31, m_symbolSpan);
     s.writeS32(32, m_spectrumRate);
     s.writeS32(33, m_modulation);
+    s.writeBool(34, m_udpEnabled);
+    s.writeString(35, m_udpAddress);
+    s.writeU32(36, m_udpPort);
 
     return s.final();
 }
@@ -245,6 +251,14 @@ bool IEEE_802_15_4_ModSettings::deserialize(const QByteArray& data)
         d.readS32(31, &m_symbolSpan, 6);
         d.readS32(32, &m_spectrumRate, m_rfBandwidth);
         d.readS32(33, (qint32 *)&m_modulation, m_bitRate < 100000 ? IEEE_802_15_4_ModSettings::BPSK : IEEE_802_15_4_ModSettings::OQPSK);
+        d.readBool(34, &m_udpEnabled);
+        d.readString(35, &m_udpAddress, "127.0.0.1");
+        d.readU32(36, &utmp);
+        if ((utmp > 1023) && (utmp < 65535)) {
+            m_udpPort = utmp;
+        } else {
+            m_udpPort = 9998;
+        }
 
         return true;
     }

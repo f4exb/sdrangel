@@ -577,7 +577,7 @@ void IEEE_802_15_4_ModSource::addTXFrame(QString data)
     // PHY payload
     crcStart = p;
     // Data
-    p = hexToBin(p, data);
+    p = hexToBin(p, data.trimmed());
     // MAC FCS
     crc.calculate(crcStart, p-crcStart);
     crcValue = crc.get();

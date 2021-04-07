@@ -66,6 +66,15 @@ public:
     qint32 getRepeatCount();
     void setRepeatCount(qint32 repeat_count);
 
+    qint32 getUdpEnabled();
+    void setUdpEnabled(qint32 udp_enabled);
+
+    QString* getUdpAddress();
+    void setUdpAddress(QString* udp_address);
+
+    qint32 getUdpPort();
+    void setUdpPort(qint32 udp_port);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -117,6 +126,15 @@ private:
 
     qint32 repeat_count;
     bool m_repeat_count_isSet;
+
+    qint32 udp_enabled;
+    bool m_udp_enabled_isSet;
+
+    QString* udp_address;
+    bool m_udp_address_isSet;
+
+    qint32 udp_port;
+    bool m_udp_port_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;
