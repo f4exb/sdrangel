@@ -142,6 +142,7 @@ bool FeatureWebAPIUtils::satelliteAOS(const QString name, const QDateTime aos, c
 // Send LOS actions to all features that support it
 bool FeatureWebAPIUtils::satelliteLOS(const QString name)
 {
+    (void) name;
     // Not currently required by any features
     return true;
 }
