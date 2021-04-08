@@ -216,7 +216,7 @@ const QMap<QString, QString> WebAPIUtils::m_sourceDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_sinkDeviceHwIdToSettingsKey = {
-    {"AudioOutput", "AudioOutputSettings"},
+    {"AudioOutput", "audioOutputSettings"},
     {"BladeRF1", "bladeRF1OutputSettings"},
     {"BladeRF2", "bladeRF2OutputSettings"},
     {"HackRF", "hackRFOutputSettings"},

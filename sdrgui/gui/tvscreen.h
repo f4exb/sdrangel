@@ -79,7 +79,6 @@ private:
     QTimer m_timer;
     QMutex m_mutex;
     bool m_dataChanged;
-    bool m_configChanged;
 
     GLShaderTVArray m_glShaderArray;
 

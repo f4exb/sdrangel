@@ -717,21 +717,18 @@ int DATVideoRender::newDecode(AVCodecContext *avctx, AVFrame *frame, int *got_fr
         ret = avcodec_send_packet(avctx, pkt);
         // In particular, we don't expect AVERROR(EAGAIN), because we read all
         // decoded frames with avcodec_receive_frame() until done.
-        if (ret < 0)
-        {
+        if (ret < 0) {
             return ret == AVERROR_EOF ? 0 : ret;
         }
     }
 
     ret = avcodec_receive_frame(avctx, frame);
 
-    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
-    {
+    if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF) {
         return ret;
     }
 
-    if (ret >= 0)
-    {
+    if (ret >= 0) {
         *got_frame = 1;
     }
 
