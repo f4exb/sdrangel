@@ -1,3 +1,14 @@
+sdrangel (6.8.0-1) unstable; urgency=medium
+
+  * New Packet Error Tester feature plugin. PR #836
+  * DATV modulator plugin: DVB-S2 implementation. PR #826
+  * DATV demodulator: various fixes including internal player. Issue #833
+  * Fixed station position altitude setting. Issue #828
+  * APRS feature: choose between metric and imperial units. Issue #829
+  * AudioOutput plugin: fixed REST API device settings PUT.PATCH. Issue #837
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Thu, 08 Apr 2021 17:26:09 +0200
+
 sdrangel (6.7.0-1) unstable; urgency=medium
 
   * New DATV modulator plugin: DVB-S modulator. PR #810
