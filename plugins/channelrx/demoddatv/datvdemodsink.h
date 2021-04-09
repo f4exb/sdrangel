@@ -18,6 +18,8 @@
 #ifndef INCLUDE_DATVDEMODSINK_H
 #define INCLUDE_DATVDEMODSINK_H
 
+#include <QMutex>
+
 //LeanSDR
 #include "leansdr/framework.h"
 #include "leansdr/generic.h"
@@ -317,6 +319,7 @@ private:
     MovingAverageUtil<double, double, 32> m_objMagSqAverage;
 
     MessageQueue *m_messageQueueToGUI;
+    QMutex m_mutex;
 
     static const unsigned int m_rfFilterFftLength;
 };

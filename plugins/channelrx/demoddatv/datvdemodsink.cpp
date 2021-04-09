@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QObject>
 #include <QFileInfo>
+#include <QMutexLocker>
 
 #include "audio/audiooutputdevice.h"
 #include "dsp/dspengine.h"
@@ -49,7 +50,8 @@ DATVDemodSink::DATVDemodSink() :
     m_modcodCodeRate(-1),
     m_enmModulation(DATVDemodSettings::BPSK /*DATV_FM1*/),
     m_channelSampleRate(1024000),
-    m_messageQueueToGUI(nullptr)
+    m_messageQueueToGUI(nullptr),
+    m_mutex(QMutex::Recursive)
 {
     //*************** DATV PARAMETERS  ***************
     m_blnInitialized=false;
@@ -155,6 +157,8 @@ bool DATVDemodSink::videoDecodeOK()
 
 bool DATVDemodSink::playVideo()
 {
+    QMutexLocker mlock(&m_mutex);
+
     if (m_objVideoStream == nullptr) {
         return false;
     }
@@ -1283,6 +1287,9 @@ void DATVDemodSink::feed(const SampleVector::const_iterator& begin, const Sample
     //********** init leandvb framework **********
     if (m_blnNeedConfigUpdate)
     {
+        QMutexLocker mlock(&m_mutex);
+        stopVideo();
+
         qDebug("DATVDemodSink::feed: Settings applied. Standard : %d...", m_settings.m_standard);
         m_blnNeedConfigUpdate = false;
 
