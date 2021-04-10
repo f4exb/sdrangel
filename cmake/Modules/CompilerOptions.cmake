@@ -2,7 +2,12 @@ include_guard(GLOBAL)
 
 include(DetectArchitecture)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+if (NOT APPLE)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+  message(STATUS "Interprocedural optimization enabled")
+else()
+  message(STATUS "Interprocedural optimization is disabled for Mac OS")
+endif()
 
 if(WIN32)
   add_compile_definitions(
