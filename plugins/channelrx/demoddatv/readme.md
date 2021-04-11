@@ -44,7 +44,7 @@ Power of signal received in the channel (dB)
 
 This gauge gives the MER estimation. The averaged value appears on the right.
 
-<h4>B.3: CNR estimation</h4>
+<h4>B.4: CNR estimation</h4>
 
 This gauge gives the CNR estimation. The averaged value appears on the right.
 
@@ -59,6 +59,16 @@ This is the address of the TS UDP
 <h4>B.7: UDP port</h4>
 
 This is the port of the TS UDP
+
+<h4>B.8: UDP streaming indicator</h4>
+
+Indicator turns green if UDP data is streaming to destination
+
+<h4>B.9: Video player enable and indicator</h4>
+
+Use the checkbox to enable or disable the internal video player. The indicator next turns green if the video player thread is active.
+
+Use this control to disable the video player if it causes too many crashes...
 
 <h4>B.1: Symbol constellation</h4>
 
@@ -143,13 +153,15 @@ Push this button when you are lost...
 
 <h5>B.2a.12: Amount of data decoded</h5>
 
-Automatically adjusts unit (kB, MB, ...)
+Amount data received in the video player. If the video player is disabled this is the amount of data sent via UDP. Automatically adjusts unit (kB, MB, ...)
 
 <h5>B.2a.13: Stream speed</h5>
 
+Current data flow in the video player. If the video player is disabled this is the flow sent via UDP.
+
 <h5>B.2a.14: Buffer status</h5>
 
-Gauge that shows percentage of buffer queue length
+Gauge that shows percentage of video player buffer queue length
 
 <h4>B.2b: DATV signal settings (DVB-S2 specific)</h4>
 

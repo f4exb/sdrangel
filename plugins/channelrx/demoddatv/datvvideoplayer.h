@@ -31,12 +31,13 @@ template<typename T> struct datvvideoplayer: runnable
     datvvideoplayer(
         scheduler *sch,
         pipebuf<T> &_in,
-        DATVideostream *objVideoStream,
+        DATVideostream *videoStream,
         DATVUDPStream *udpStream) :
         runnable(sch, _in.name),
         in(_in),
-        m_objVideoStream(objVideoStream),
-        m_udpStream(udpStream)
+        m_videoStream(videoStream),
+        m_udpStream(udpStream),
+        m_atomicUDPRunning(0)
     {
     }
 
@@ -48,38 +49,53 @@ template<typename T> struct datvvideoplayer: runnable
             return;
         }
 
+        int nw;
+
         m_udpStream->pushData((const char *) in.rd(), in.readable());
-        int nw = m_objVideoStream->pushData((const char *) in.rd(), size);
+        m_atomicUDPRunning.storeRelaxed(m_udpStream->isActive() && (size > 0) ? 1 : 0);
 
-        if (!nw)
+        if (m_videoStream)
         {
-            fatal("leansdr::datvvideoplayer::run: pipe");
-            return;
-        }
+            nw = m_videoStream->pushData((const char *) in.rd(), size);
 
-        if (nw < 0)
+            if (!nw)
+            {
+                fatal("leansdr::datvvideoplayer::run: pipe");
+                return;
+            }
+
+            if (nw < 0)
+            {
+                fatal("leansdr::datvvideoplayer::run: write");
+                return;
+            }
+
+            if (nw % sizeof(T))
+            {
+                fatal("leansdr::datvvideoplayer::run: partial write");
+                return;
+            }
+
+            if (nw != size) {
+                fprintf(stderr, "leansdr::datvvideoplayer::run: nw: %d size: %d\n", nw, size);
+            }
+        }
+        else
         {
-            fatal("leansdr::datvvideoplayer::run: write");
-            return;
-        }
-
-        if (nw % sizeof(T))
-        {
-            fatal("leansdr::datvvideoplayer::run: partial write");
-            return;
-        }
-
-        if (nw != size) {
-            fprintf(stderr, "leansdr::datvvideoplayer::run: nw: %d size: %d\n", nw, size);
+            nw = size;
         }
 
         in.read(nw / sizeof(T));
     }
 
+    bool isUDPRunning() const { return m_atomicUDPRunning.loadRelaxed() == 1; }
+    void resetUDPRunning() { m_atomicUDPRunning.storeRelaxed(0); }
+
 private:
     pipereader<T> in;
-    DATVideostream *m_objVideoStream;
+    DATVideostream *m_videoStream;
     DATVUDPStream *m_udpStream;
+    QAtomicInt m_atomicUDPRunning;
 };
 
 }

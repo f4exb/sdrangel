@@ -219,7 +219,12 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
     m_objDATVDemod->setCNRMeter(ui->cnrMeter);
     m_objDATVDemod->SetVideoRender(ui->screenTV_2);
 
-    connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    if (m_settings.m_playerEnable) {
+        connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    } else {
+        connect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    }
+
     connect(ui->screenTV_2, &DATVideoRender::onMetaDataChanged, this, &DATVDemodGUI::on_StreamMetaDataChanged);
 
     m_intPreviousDecodedData=0;
@@ -270,6 +275,7 @@ DATVDemodGUI::DATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Ba
 #endif
 
     ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
+    ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     resetToDefaults(); // does applySettings()
 }
 
@@ -376,6 +382,18 @@ void DATVDemodGUI::displaySettings()
     ui->udpTS->setChecked(m_settings.m_udpTS);
     ui->udpTSAddress->setText(m_settings.m_udpTSAddress);
     ui->udpTSPort->setText(tr("%1").arg(m_settings.m_udpTSPort));
+    ui->playerEnable->setChecked(m_settings.m_playerEnable);
+
+    if (m_settings.m_playerEnable)
+    {
+        disconnect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    }
+    else
+    {
+        disconnect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    }
 
     blockApplySettings(false);
 }
@@ -563,6 +581,12 @@ void DATVDemodGUI::tick()
         ui->playerIndicator->setStyleSheet("QLabel { background-color: rgb(85, 232, 85); border-radius: 8px; }"); // green
     } else {
         ui->playerIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
+    }
+
+    if (m_objDATVDemod->udpRunning()) {
+        ui->udpIndicator->setStyleSheet("QLabel { background-color: rgb(85, 232, 85); border-radius: 8px; }"); // green
+    } else {
+        ui->udpIndicator->setStyleSheet("QLabel { background-color: gray; border-radius: 8px; }");
     }
 
     return;
@@ -815,6 +839,24 @@ void DATVDemodGUI::on_StreamMetaDataChanged(DataTSMetaData2 *objMetaData)
 
         delete objMetaData;
     }
+}
+
+void DATVDemodGUI::on_playerEnable_clicked()
+{
+    m_settings.m_playerEnable = ui->playerEnable->isChecked();
+
+    if (m_settings.m_playerEnable)
+    {
+        disconnect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    }
+    else
+    {
+        disconnect(m_objDATVDemod->getVideoStream(), &DATVideostream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+        connect(m_objDATVDemod->getUDPStream(), &DATVUDPStream::fifoData, this, &DATVDemodGUI::on_StreamDataAvailable);
+    }
+
+    applySettings();
 }
 
 void DATVDemodGUI::displayRRCParameters(bool blnVisible)

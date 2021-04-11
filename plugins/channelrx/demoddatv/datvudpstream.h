@@ -22,21 +22,26 @@
 #include <QUdpSocket>
 #include <QHostAddress>
 #include <QString>
+#include <QObject>
 
-class QString;
-
-class DATVUDPStream
+class DATVUDPStream : public QObject
 {
+    Q_OBJECT
 public:
     DATVUDPStream(int tsBlockSize);
     ~DATVUDPStream();
 
     void pushData(const char *chrData, int nbTSBlocks);
+    void resetTotalReceived();
     void setActive(bool active) { m_active = active; }
+    bool isActive() const { return m_active; }
     bool setAddress(const QString& address) { return m_address.setAddress(address); }
     void setPort(quint16 port) { m_port = port; }
 
     static const int m_tsBlocksPerFrame;
+
+signals:
+    void fifoData(int *dataBytes, int *percentBuffer, qint64 *totalReceived);
 
 private:
     bool m_active;
@@ -46,6 +51,10 @@ private:
     int m_tsBlockSize;
     int m_tsBlockIndex;
     char *m_tsBuffer;
+    int m_dataBytes;
+    int m_percentBuffer;
+    qint64 m_totalBytes;
+    int m_fifoSignalCount;
 };
 
 #endif // DATVUDPSTREAM_H

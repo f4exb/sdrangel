@@ -74,10 +74,12 @@ public:
     void setBasebandSampleRate(int sampleRate); //!< To be used when supporting thread is stopped
     void SetVideoRender(DATVideoRender *objScreen) { m_sink.SetVideoRender(objScreen); }
     DATVideostream *getVideoStream() { return m_sink.getVideoStream(); }
+    DATVUDPStream *getUDPStream() { return m_sink.getUDPStream(); }
     bool audioActive() { return m_sink.audioActive(); }
     bool audioDecodeOK() { return m_sink.audioDecodeOK(); }
     bool videoActive() { return m_sink.videoActive(); }
     bool videoDecodeOK() { return m_sink.videoDecodeOK(); }
+    bool udpRunning() { return m_sink.udpRunning(); }
     bool playVideo() { return m_sink.playVideo(); }
 
     int getModcodModulation() const { return m_sink.getModcodModulation(); }

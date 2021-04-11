@@ -92,6 +92,7 @@ private slots:
     void on_udpTS_clicked(bool checked);
     void on_udpTSAddress_editingFinished();
     void on_udpTSPort_editingFinished();
+    void on_playerEnable_clicked();
 
 private:
     Ui::DATVDemodGUI* ui;

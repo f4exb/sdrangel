@@ -26,7 +26,11 @@ DATVUDPStream::DATVUDPStream(int tsBlockSize) :
     m_address(QHostAddress::LocalHost),
     m_port(8882),
     m_tsBlockSize(tsBlockSize),
-    m_tsBlockIndex(0)
+    m_tsBlockIndex(0),
+    m_dataBytes(0),
+    m_percentBuffer(0),
+    m_totalBytes(0),
+    m_fifoSignalCount(0)
 {
     m_tsBuffer = new char[m_tsBlocksPerFrame*m_tsBlockSize];
 }
@@ -45,15 +49,31 @@ void DATVUDPStream::pushData(const char *chrData, int nbTSBlocks)
     for (int i = 0; i < nbTSBlocks; i++)
     {
         std::copy(chrData + i*m_tsBlockSize, chrData + (i+1)*m_tsBlockSize, m_tsBuffer + m_tsBlockIndex*m_tsBlockSize);
-        
-        if (m_tsBlockIndex < m_tsBlocksPerFrame - 1) 
+
+        if (m_tsBlockIndex < m_tsBlocksPerFrame - 1)
         {
             m_tsBlockIndex++;
         }
         else
         {
             m_udpSocket.writeDatagram(m_tsBuffer, m_tsBlocksPerFrame*m_tsBlockSize, m_address, m_port);
+            m_dataBytes += m_tsBlocksPerFrame*m_tsBlockSize;
+            m_totalBytes += m_tsBlocksPerFrame*m_tsBlockSize;
+
+            if (++m_fifoSignalCount == 10)
+            {
+                emit fifoData(&m_dataBytes, &m_percentBuffer, &m_totalBytes);
+                m_fifoSignalCount = 0;
+            }
+
+            m_dataBytes = 0;
             m_tsBlockIndex = 0;
         }
     }
+}
+
+void DATVUDPStream::resetTotalReceived()
+{
+    m_totalBytes = 0;
+    emit fifoData(&m_dataBytes, &m_percentBuffer, &m_totalBytes);
 }

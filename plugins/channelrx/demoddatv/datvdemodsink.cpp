@@ -155,6 +155,18 @@ bool DATVDemodSink::videoDecodeOK()
     }
 }
 
+bool DATVDemodSink::udpRunning()
+{
+    if (!r_videoplayer) {
+        return false;
+    }
+
+    bool udpRunning = r_videoplayer->isUDPRunning();
+    r_videoplayer->resetUDPRunning();
+
+    return udpRunning;
+}
+
 bool DATVDemodSink::playVideo()
 {
     QMutexLocker mlock(&m_mutex);
@@ -565,6 +577,7 @@ void DATVDemodSink::InitDATVFramework()
     m_objCfg.rrc_steps = 0; //auto
 
     m_objVideoStream->resetTotalReceived();
+    m_udpStream.resetTotalReceived();
 
     switch(m_settings.m_modulation)
     {
@@ -861,7 +874,11 @@ void DATVDemodSink::InitDATVFramework()
     r_derand = new leansdr::derandomizer(m_objScheduler, *p_rtspackets, *p_tspackets);
 
     // OUTPUT
-    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
+    if (m_settings.m_playerEnable) {
+        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
+    } else {
+        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, nullptr, &m_udpStream);
+    }
 
     m_blnDVBInitialized = true;
 }
@@ -904,6 +921,7 @@ void DATVDemodSink::InitDATVS2Framework()
     m_objCfg.rrc_steps = 0; //auto
 
     m_objVideoStream->resetTotalReceived();
+    m_udpStream.resetTotalReceived();
 
     switch(m_settings.m_modulation)
     {
@@ -1224,7 +1242,11 @@ void DATVDemodSink::InitDATVS2Framework()
 */
 
     // OUTPUT
-    r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
+    if (m_settings.m_playerEnable) {
+        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, m_objVideoStream, &m_udpStream);
+    } else {
+        r_videoplayer = new leansdr::datvvideoplayer<leansdr::tspacket>(m_objScheduler, *p_tspackets, nullptr, &m_udpStream);
+    }
 
     m_blnDVBInitialized = true;
 }

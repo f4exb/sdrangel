@@ -102,10 +102,12 @@ public:
     void setCNRMeter(LevelMeterSignalDB *cnrMeter) { m_basebandSink->setCNRMeter(cnrMeter); }
     void SetVideoRender(DATVideoRender *objScreen) { m_basebandSink->SetVideoRender(objScreen); }
     DATVideostream *getVideoStream() { return m_basebandSink->getVideoStream(); }
+    DATVUDPStream *getUDPStream() { return m_basebandSink->getUDPStream(); }
     bool audioActive() { return m_basebandSink->audioActive(); }
     bool audioDecodeOK() { return m_basebandSink->audioDecodeOK(); }
     bool videoActive() { return m_basebandSink->videoActive(); }
     bool videoDecodeOK() { return m_basebandSink->videoDecodeOK(); }
+    bool udpRunning() { return m_basebandSink->udpRunning(); }
 
     bool playVideo() { return m_basebandSink->playVideo(); }
 

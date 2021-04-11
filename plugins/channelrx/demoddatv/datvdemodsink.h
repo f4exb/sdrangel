@@ -67,10 +67,12 @@ public:
     void setCNRMeter(LevelMeterSignalDB *cnrMeter);
     void SetVideoRender(DATVideoRender *objScreen);
     DATVideostream *getVideoStream() { return m_objVideoStream; }
+    DATVUDPStream *getUDPStream() { return &m_udpStream; }
     bool audioActive();
     bool audioDecodeOK();
     bool videoActive();
     bool videoDecodeOK();
+    bool udpRunning();
 
     bool playVideo();
     void stopVideo();

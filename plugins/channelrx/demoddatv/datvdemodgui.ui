@@ -785,7 +785,7 @@
      <widget class="QLabel" name="playerIndicator">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>70</x>
         <y>250</y>
         <width>16</width>
         <height>16</height>
@@ -811,6 +811,25 @@
       </property>
       <property name="text">
        <string/>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="playerEnable">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>250</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>Video player enable</string>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Video</string>
       </property>
      </widget>
     </widget>
@@ -889,6 +908,31 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="udpIndicator">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>UDP thread running indicator</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel { background-color: gray; border-radius: 8px; }</string>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

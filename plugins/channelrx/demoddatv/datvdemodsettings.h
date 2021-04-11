@@ -100,6 +100,7 @@ struct DATVDemodSettings
     QString m_udpTSAddress;
     quint32 m_udpTSPort;
     bool m_udpTS;
+    bool m_playerEnable;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

@@ -62,6 +62,7 @@ void DATVDemodSettings::resetToDefaults()
     m_udpTSAddress = "127.0.0.1";
     m_udpTSPort = 8882;
     m_udpTS = false;
+    m_playerEnable = true;
     m_streamIndex = 0;
     m_useReverseAPI = false;
     m_reverseAPIAddress = "127.0.0.1";
@@ -111,6 +112,7 @@ QByteArray DATVDemodSettings::serialize() const
     s.writeS32(33, m_maxBitflips);
     s.writeString(34, m_softLDPCToolPath);
     s.writeS32(35, m_softLDPCMaxTrials);
+    s.writeBool(36, m_playerEnable);
 
     return s.final();
 }
@@ -198,6 +200,7 @@ bool DATVDemodSettings::deserialize(const QByteArray& data)
         d.readString(34, &m_softLDPCToolPath, "/opt/install/sdrangel/bin/ldpctool");
         d.readS32(35, &tmp, 8);
         m_softLDPCMaxTrials = tmp < 1 ? 1 : tmp > m_softLDPCMaxMaxTrials ? m_softLDPCMaxMaxTrials : tmp;
+        d.readBool(36, &m_playerEnable, true);
 
         validateSystemConfiguration();
 
@@ -235,7 +238,11 @@ void DATVDemodSettings::debug(const QString& msg) const
         << " m_audioMute: " << m_audioMute
         << " m_audioDeviceName: " << m_audioDeviceName
         << " m_audioVolume: " << m_audioVolume
-        << " m_videoMute: " << m_videoMute;
+        << " m_videoMute: " << m_videoMute
+        << " m_udpTS: " << m_udpTS
+        << " m_udpTSAddress: " << m_udpTSAddress
+        << " m_udpTSPort: " << m_udpTSPort
+        << " m_playerEnable: " << m_playerEnable;
 }
 
 bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
@@ -255,7 +262,8 @@ bool DATVDemodSettings::isDifferent(const DATVDemodSettings& other)
         || (m_notchFilters != other.m_notchFilters)
         || (m_symbolRate != other.m_symbolRate)
         || (m_excursion != other.m_excursion)
-        || (m_standard != other.m_standard));
+        || (m_standard != other.m_standard)
+        || (m_playerEnable != other.m_playerEnable));
 }
 
 void DATVDemodSettings::validateSystemConfiguration()
