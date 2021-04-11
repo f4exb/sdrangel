@@ -116,7 +116,7 @@ void SDRPlayV3Thread::callbackHelper(short *xi, short *xq, sdrplay_api_StreamCbP
         if (numSamples > 8192)
             qCritical() << "SDRPlayV3Thread::callbackHelper: IQ buffer too small: " << numSamples;
 
-        for (int i = 0; i < numSamples; i++)
+        for (int i = 0; i < (int)numSamples; i++)
         {
             iq[i*2] = xi[i];
             iq[i*2+1] = xq[i];
