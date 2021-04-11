@@ -4243,6 +4243,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setSdrPlaySettings(new SWGSDRangel::SWGSDRPlaySettings());
             deviceSettings->getSdrPlaySettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "sdrPlayV3Settings")
+        {
+            deviceSettings->setSdrPlayV3Settings(new SWGSDRangel::SWGSDRPlayV3Settings());
+            deviceSettings->getSdrPlayV3Settings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "sigMFFileInputSettings")
         {
             deviceSettings->setSigMfFileInputSettings(new SWGSDRangel::SWGSigMFFileInputSettings());
@@ -4546,6 +4551,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setRemoteOutputSettings(nullptr);
     deviceSettings.setRemoteInputSettings(nullptr);
     deviceSettings.setSdrPlaySettings(nullptr);
+    deviceSettings.setSdrPlayV3Settings(nullptr);
     deviceSettings.setTestSourceSettings(nullptr);
     deviceSettings.setUsrpInputSettings(nullptr);
     deviceSettings.setUsrpOutputSettings(nullptr);
@@ -4567,6 +4573,7 @@ void WebAPIRequestMapper::resetDeviceReport(SWGSDRangel::SWGDeviceReport& device
     deviceReport.setRemoteOutputReport(nullptr);
     deviceReport.setRemoteInputReport(nullptr);
     deviceReport.setSdrPlayReport(nullptr);
+    deviceReport.setSdrPlayV3Report(nullptr);
     deviceReport.setUsrpOutputReport(nullptr);
 }
 

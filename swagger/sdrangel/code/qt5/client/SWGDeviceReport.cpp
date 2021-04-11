@@ -70,6 +70,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_remote_input_report_isSet = false;
     sdr_play_report = nullptr;
     m_sdr_play_report_isSet = false;
+    sdr_play_v3_report = nullptr;
+    m_sdr_play_v3_report_isSet = false;
     sig_mf_file_input_report = nullptr;
     m_sig_mf_file_input_report_isSet = false;
     soapy_sdr_input_report = nullptr;
@@ -136,6 +138,8 @@ SWGDeviceReport::init() {
     m_remote_input_report_isSet = false;
     sdr_play_report = new SWGSDRPlayReport();
     m_sdr_play_report_isSet = false;
+    sdr_play_v3_report = new SWGSDRPlayV3Report();
+    m_sdr_play_v3_report_isSet = false;
     sig_mf_file_input_report = new SWGSigMFFileInputReport();
     m_sig_mf_file_input_report_isSet = false;
     soapy_sdr_input_report = new SWGSoapySDRReport();
@@ -217,6 +221,9 @@ SWGDeviceReport::cleanup() {
     if(sdr_play_report != nullptr) { 
         delete sdr_play_report;
     }
+    if(sdr_play_v3_report != nullptr) { 
+        delete sdr_play_v3_report;
+    }
     if(sig_mf_file_input_report != nullptr) { 
         delete sig_mf_file_input_report;
     }
@@ -295,6 +302,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&remote_input_report, pJson["remoteInputReport"], "SWGRemoteInputReport", "SWGRemoteInputReport");
     
     ::SWGSDRangel::setValue(&sdr_play_report, pJson["sdrPlayReport"], "SWGSDRPlayReport", "SWGSDRPlayReport");
+    
+    ::SWGSDRangel::setValue(&sdr_play_v3_report, pJson["sdrPlayV3Report"], "SWGSDRPlayV3Report", "SWGSDRPlayV3Report");
     
     ::SWGSDRangel::setValue(&sig_mf_file_input_report, pJson["sigMFFileInputReport"], "SWGSigMFFileInputReport", "SWGSigMFFileInputReport");
     
@@ -390,6 +399,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((sdr_play_report != nullptr) && (sdr_play_report->isSet())){
         toJsonValue(QString("sdrPlayReport"), sdr_play_report, obj, QString("SWGSDRPlayReport"));
+    }
+    if((sdr_play_v3_report != nullptr) && (sdr_play_v3_report->isSet())){
+        toJsonValue(QString("sdrPlayV3Report"), sdr_play_v3_report, obj, QString("SWGSDRPlayV3Report"));
     }
     if((sig_mf_file_input_report != nullptr) && (sig_mf_file_input_report->isSet())){
         toJsonValue(QString("sigMFFileInputReport"), sig_mf_file_input_report, obj, QString("SWGSigMFFileInputReport"));
@@ -629,6 +641,16 @@ SWGDeviceReport::setSdrPlayReport(SWGSDRPlayReport* sdr_play_report) {
     this->m_sdr_play_report_isSet = true;
 }
 
+SWGSDRPlayV3Report*
+SWGDeviceReport::getSdrPlayV3Report() {
+    return sdr_play_v3_report;
+}
+void
+SWGDeviceReport::setSdrPlayV3Report(SWGSDRPlayV3Report* sdr_play_v3_report) {
+    this->sdr_play_v3_report = sdr_play_v3_report;
+    this->m_sdr_play_v3_report_isSet = true;
+}
+
 SWGSigMFFileInputReport*
 SWGDeviceReport::getSigMfFileInputReport() {
     return sig_mf_file_input_report;
@@ -775,6 +797,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(sdr_play_report && sdr_play_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(sdr_play_v3_report && sdr_play_v3_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(sig_mf_file_input_report && sig_mf_file_input_report->isSet()){

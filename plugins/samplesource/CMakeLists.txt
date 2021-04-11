@@ -38,6 +38,10 @@ if(ENABLE_MIRISDR AND LIBMIRISDR_FOUND)
     add_subdirectory(sdrplay)
 endif()
 
+if(ENABLE_SDRPLAY AND SDRPLAY_FOUND)
+    add_subdirectory(sdrplayv3)
+endif()
+
 if(ENABLE_PERSEUS AND LIBPERSEUS_FOUND AND RX_SAMPLE_24BIT)
     add_subdirectory(perseus)
 endif()

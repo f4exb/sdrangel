@@ -70,6 +70,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
     sdrPlaySettings:
       $ref: "http://swgserver:8081/api/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+    sdrPlayV3Settings:
+      $ref: "http://swgserver:8081/api/swagger/include/SDRPlayV3.yaml#/SDRPlayV3Settings"
     sigMFFileInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
     soapySDRInputSettings:

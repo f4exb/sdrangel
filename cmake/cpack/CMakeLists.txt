@@ -225,6 +225,16 @@ elseif(WIN32 OR MINGW)
     endforeach(uhd_dll)
   endif()
 
+  if(ENABLE_SDRPLAY AND SDRPLAY_FOUND)
+    file(GLOB SDRPLAY_DLLS "${SDRPLAY_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    foreach(sdrplay_dll ${SDRPLAY_DLLS})
+      get_filename_component(sdrplay_dll_name "${sdrplay_dll}"  NAME)
+      add_custom_target(copy_sdrplay_${sdrplay_dll_name} ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${sdrplay_dll}" "${SDRANGEL_BINARY_BIN_DIR}/"
+      )
+    endforeach(sdrplay_dll)
+  endif()
+
   file(GLOB OPENSSL_DLLS "${OPENSSL_DLL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
   foreach(openssl_dll ${OPENSSL_DLLS})
     get_filename_component(openssl_dll_name "${openssl_dll}"  NAME)
@@ -276,6 +286,9 @@ elseif(WIN32 OR MINGW)
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # uhd
     install(DIRECTORY "${UHD_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    # sdrplay
+    install(DIRECTORY "${SDRPLAY_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}")
     # OpenSSL
     install(DIRECTORY "${OPENSSL_DLL_DIR}/" DESTINATION "${INSTALL_LIB_DIR}"

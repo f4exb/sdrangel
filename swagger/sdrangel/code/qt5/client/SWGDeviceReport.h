@@ -41,6 +41,7 @@
 #include "SWGRemoteOutputReport.h"
 #include "SWGRtlSdrReport.h"
 #include "SWGSDRPlayReport.h"
+#include "SWGSDRPlayV3Report.h"
 #include "SWGSigMFFileInputReport.h"
 #include "SWGSoapySDRReport.h"
 #include "SWGUSRPInputReport.h"
@@ -130,6 +131,9 @@ public:
 
     SWGSDRPlayReport* getSdrPlayReport();
     void setSdrPlayReport(SWGSDRPlayReport* sdr_play_report);
+
+    SWGSDRPlayV3Report* getSdrPlayV3Report();
+    void setSdrPlayV3Report(SWGSDRPlayV3Report* sdr_play_v3_report);
 
     SWGSigMFFileInputReport* getSigMfFileInputReport();
     void setSigMfFileInputReport(SWGSigMFFileInputReport* sig_mf_file_input_report);
@@ -221,6 +225,9 @@ private:
 
     SWGSDRPlayReport* sdr_play_report;
     bool m_sdr_play_report_isSet;
+
+    SWGSDRPlayV3Report* sdr_play_v3_report;
+    bool m_sdr_play_v3_report_isSet;
 
     SWGSigMFFileInputReport* sig_mf_file_input_report;
     bool m_sig_mf_file_input_report_isSet;
