@@ -750,18 +750,18 @@ QString DATVDemodGUI::formatBytes(qint64 intBytes)
 }
 
 
-void DATVDemodGUI::on_StreamDataAvailable(int *intBytes, int *intPercent, qint64 *intTotalReceived)
+void DATVDemodGUI::on_StreamDataAvailable(int intBytes, int intPercent, qint64 intTotalReceived)
 {
-    ui->lblStatus->setText(QString("Data: %1B").arg(formatBytes(*intTotalReceived)));
-    m_intLastDecodedData = *intTotalReceived;
+    ui->lblStatus->setText(QString("Data: %1B").arg(formatBytes(intTotalReceived)));
+    m_intLastDecodedData = intTotalReceived;
 
-    if((*intPercent)<100) {
-        ui->prgSynchro->setValue(*intPercent);
+    if ((intPercent)<100) {
+        ui->prgSynchro->setValue(intPercent);
     } else {
         ui->prgSynchro->setValue(100);
     }
 
-    m_intReadyDecodedData = *intBytes;
+    m_intReadyDecodedData = intBytes;
 }
 
 void DATVDemodGUI::on_deltaFrequency_changed(qint64 value)

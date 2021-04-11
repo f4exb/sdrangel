@@ -50,7 +50,7 @@ public:
 
 signals:
     void dataAvailable();
-    void fifoData(int *intDataBytes, int *intPercentBuffer, qint64 *intTotalReceived);
+    void fifoData(int intDataBytes, int intPercentBuffer, qint64 intTotalReceived);
 
 protected:
     virtual qint64 readData(char *data, qint64 len);

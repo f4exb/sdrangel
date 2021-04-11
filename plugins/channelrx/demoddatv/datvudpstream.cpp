@@ -28,7 +28,6 @@ DATVUDPStream::DATVUDPStream(int tsBlockSize) :
     m_tsBlockSize(tsBlockSize),
     m_tsBlockIndex(0),
     m_dataBytes(0),
-    m_percentBuffer(0),
     m_totalBytes(0),
     m_fifoSignalCount(0)
 {
@@ -62,7 +61,7 @@ void DATVUDPStream::pushData(const char *chrData, int nbTSBlocks)
 
             if (++m_fifoSignalCount == 10)
             {
-                emit fifoData(&m_dataBytes, &m_percentBuffer, &m_totalBytes);
+                emit fifoData(m_dataBytes, 0, m_totalBytes);
                 m_fifoSignalCount = 0;
             }
 
@@ -75,5 +74,5 @@ void DATVUDPStream::pushData(const char *chrData, int nbTSBlocks)
 void DATVUDPStream::resetTotalReceived()
 {
     m_totalBytes = 0;
-    emit fifoData(&m_dataBytes, &m_percentBuffer, &m_totalBytes);
+    emit fifoData(m_dataBytes, 0, m_totalBytes);
 }

@@ -56,7 +56,7 @@ void DATVideostream::cleanUp()
 void DATVideostream::resetTotalReceived()
 {
     m_totalReceived = 0;
-    emit fifoData(&m_bytesWaiting, &m_percentBuffer, &m_totalReceived);
+    emit fifoData(m_bytesWaiting, m_percentBuffer, m_totalReceived);
 }
 
 void DATVideostream::setMultiThreaded(bool multiThreaded)
@@ -100,7 +100,7 @@ int DATVideostream::pushData(const char * chrData, int intSize)
     m_percentBuffer = m_percentBuffer > 100 ? 100 : m_percentBuffer;
 
     if (m_packetReceived % 10 == 1) {
-        emit fifoData(&m_bytesWaiting, &m_percentBuffer, &m_totalReceived);
+        emit fifoData(m_bytesWaiting, m_percentBuffer, m_totalReceived);
     }
 
     return intSize;
@@ -209,7 +209,7 @@ qint64 DATVideostream::readData(char *data, qint64 len)
     m_percentBuffer = m_percentBuffer > 100 ? 100 : m_percentBuffer;
 
     if (m_packetReceived % 10 == 0) {
-        emit fifoData(&m_bytesWaiting, &m_percentBuffer, &m_totalReceived);
+        emit fifoData(m_bytesWaiting, m_percentBuffer, m_totalReceived);
     }
 
     //Next available DATA

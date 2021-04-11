@@ -41,7 +41,7 @@ public:
     static const int m_tsBlocksPerFrame;
 
 signals:
-    void fifoData(int *dataBytes, int *percentBuffer, qint64 *totalReceived);
+    void fifoData(int dataBytes, int percentBuffer, qint64 totalReceived);
 
 private:
     bool m_active;
@@ -52,7 +52,6 @@ private:
     int m_tsBlockIndex;
     char *m_tsBuffer;
     int m_dataBytes;
-    int m_percentBuffer;
     qint64 m_totalBytes;
     int m_fifoSignalCount;
 };
