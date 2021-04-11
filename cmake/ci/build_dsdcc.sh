@@ -12,3 +12,4 @@ mkdir -p build && cd build
 cmake ..
 sudo make install
 sudo ldconfig
+sudo chrpath -r /usr/lib/sdrangel  /usr/lib/sdrangel/libdsdcc.so
