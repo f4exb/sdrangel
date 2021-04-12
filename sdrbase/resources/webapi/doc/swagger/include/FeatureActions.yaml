@@ -17,5 +17,7 @@ FeatureActions:
       $ref: "/doc/swagger/include/AFC.yaml#/AFCActions"
     MapActions:
       $ref: "/doc/swagger/include/Map.yaml#/MapActions"
+    PERTesterActions:
+      $ref: "/doc/swagger/include/PERTester.yaml#/PERTesterActions"
     SimplePTTActions:
       $ref: "/doc/swagger/include/SimplePTT.yaml#/SimplePTTActions"

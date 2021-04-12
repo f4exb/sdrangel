@@ -90,6 +90,7 @@ DATVDemodSettings:
       description: (boolean) (DVB-S)
       type: integer
     excursion:
+      description: RRC filter envelope excursion (dB)
       type: integer
     audioVolume:
       type: integer

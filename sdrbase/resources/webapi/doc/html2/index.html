@@ -3256,6 +3256,18 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "number of repetitions of the same message (0 for infinite)"
     },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "boolean 1 to enable forwarding messages via UDP else 0"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to listen for messages to transmit on"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to listen for messages to transmit on"
+    },
     "rgbColor" : {
       "type" : "integer"
     },
@@ -3411,7 +3423,8 @@ margin-bottom: 20px;
       "description" : "(boolean) (DVB-S)"
     },
     "excursion" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "RRC filter envelope excursion (dB)"
     },
     "audioVolume" : {
       "type" : "integer"
@@ -4352,6 +4365,9 @@ margin-bottom: 20px;
     "MapActions" : {
       "$ref" : "#/definitions/MapActions"
     },
+    "PERTesterActions" : {
+      "$ref" : "#/definitions/PERTesterActions"
+    },
     "SimplePTTActions" : {
       "$ref" : "#/definitions/SimplePTTActions"
     }
@@ -4467,6 +4483,9 @@ margin-bottom: 20px;
     },
     "MapSettings" : {
       "$ref" : "#/definitions/MapSettings"
+    },
+    "PERTesterSettings" : {
+      "$ref" : "#/definitions/PERTesterSettings"
     },
     "RigCtlServerSettings" : {
       "$ref" : "#/definitions/RigCtlServerSettings"
@@ -5465,6 +5484,18 @@ margin-bottom: 20px;
     "repeatCount" : {
       "type" : "integer",
       "description" : "Number of times to repeat the frame (-1 for infinite)."
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Enable forwarding of frames via UDP"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to listen for frames to transmit on"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to listen for frames to transmit on"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7039,10 +7070,22 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "ctcssOn" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Enable CTCSS squelch (takes precedence on DCS) * 0 - disabled * 1 - enabled\n"
     },
     "ctcssIndex" : {
       "type" : "integer"
+    },
+    "dcsOn" : {
+      "type" : "integer",
+      "description" : "Enable DCS squelch (only if CTCSS is off) * 0 - disabled * 1 - enabled\n"
+    },
+    "dcsCode" : {
+      "type" : "integer"
+    },
+    "dcsPositive" : {
+      "type" : "integer",
+      "description" : "Modulation direction: * 0 - reverse or negative - 1 for 0 and -1 for 1 * 1 - direct or positive - -1 for 0 and 1 for 1\n"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7093,6 +7136,102 @@ margin-bottom: 20px;
   },
   "description" : "Enumeration with name for values"
 };
+            defs.PERTesterActions = {
+  "properties" : {
+    "aos" : {
+      "$ref" : "#/definitions/PERTesterActions_aos"
+    }
+  },
+  "description" : "PERTester"
+};
+            defs.PERTesterActions_aos = {
+  "properties" : {
+    "satelliteName" : {
+      "type" : "string",
+      "description" : "Name of the satellite"
+    },
+    "aosTime" : {
+      "type" : "string",
+      "description" : "Time of AOS"
+    },
+    "losTime" : {
+      "type" : "string",
+      "description" : "Time of LOS"
+    }
+  },
+  "description" : "Acquisition of signal"
+};
+            defs.PERTesterSettings = {
+  "properties" : {
+    "packetCount" : {
+      "type" : "integer"
+    },
+    "interval" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "start" : {
+      "type" : "integer",
+      "description" : "0 - immediately, 1 - on satellite AOS, 2 - on satellite mid pass"
+    },
+    "satellites" : {
+      "type" : "array",
+      "description" : "Satellite names to start test on",
+      "items" : {
+        "type" : "string"
+      }
+    },
+    "packet" : {
+      "type" : "string",
+      "description" : "Packet of data to send"
+    },
+    "ignoreLeadingBytes" : {
+      "type" : "integer"
+    },
+    "ignoreTrailingBytes" : {
+      "type" : "integer"
+    },
+    "txUDPAddress" : {
+      "type" : "string",
+      "description" : "UDP address to sent packets to be transmitted to"
+    },
+    "txUDPPort" : {
+      "type" : "integer",
+      "description" : "UDP port  to sent packets to be transmitted to"
+    },
+    "rxUDPAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive packets via"
+    },
+    "rxUDPPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive packets via"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PER Tester settings"
+};
             defs.PacketDemodSettings = {
   "properties" : {
     "inputFrequencyOffset" : {
@@ -7110,6 +7249,18 @@ margin-bottom: 20px;
     "fmDeviation" : {
       "type" : "number",
       "format" : "float"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received packets to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received packets to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received packets to"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7319,6 +7470,18 @@ margin-bottom: 20px;
     },
     "symbolSpan" : {
       "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to receive packets to transmit on specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive packets to transmit via"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive packets to transmit via"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -45779,7 +45942,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-04-01T20:39:21.587+02:00
+              Generated 2021-04-12T14:54:42.978+02:00
             </div>
           </div>
       </div>
