@@ -3930,6 +3930,9 @@ margin-bottom: 20px;
     "sdrPlayReport" : {
       "$ref" : "#/definitions/SDRPlayReport"
     },
+    "sdrPlayV3Report" : {
+      "$ref" : "#/definitions/SDRPlayV3Report"
+    },
     "sigMFFileInputReport" : {
       "$ref" : "#/definitions/SigMFFileInputReport"
     },
@@ -4096,6 +4099,9 @@ margin-bottom: 20px;
     },
     "sdrPlaySettings" : {
       "$ref" : "#/definitions/SDRPlaySettings"
+    },
+    "sdrPlayV3Settings" : {
+      "$ref" : "#/definitions/SDRPlayV3Settings"
     },
     "sigMFFileInputSettings" : {
       "$ref" : "#/definitions/SigMFFileInputSettings"
@@ -7070,22 +7076,10 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "ctcssOn" : {
-      "type" : "integer",
-      "description" : "Enable CTCSS squelch (takes precedence on DCS) * 0 - disabled * 1 - enabled\n"
+      "type" : "integer"
     },
     "ctcssIndex" : {
       "type" : "integer"
-    },
-    "dcsOn" : {
-      "type" : "integer",
-      "description" : "Enable DCS squelch (only if CTCSS is off) * 0 - disabled * 1 - enabled\n"
-    },
-    "dcsCode" : {
-      "type" : "integer"
-    },
-    "dcsPositive" : {
-      "type" : "integer",
-      "description" : "Modulation direction: * 0 - reverse or negative - 1 for 0 and -1 for 1 * 1 - direct or positive - -1 for 0 and 1 for 1\n"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -8592,6 +8586,96 @@ margin-bottom: 20px;
     }
   },
   "description" : "SDRplay1"
+};
+            defs.SDRPlayV3Report = {
+  "properties" : {
+    "bandwidths" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Bandwidth"
+      }
+    },
+    "intermediateFrequencies" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/Frequency"
+      }
+    }
+  },
+  "description" : "SDRplayV3"
+};
+            defs.SDRPlayV3Settings = {
+  "properties" : {
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "ifFrequencyIndex" : {
+      "type" : "integer"
+    },
+    "bandwidthIndex" : {
+      "type" : "integer"
+    },
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "fcPos" : {
+      "type" : "integer"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "lnaIndex" : {
+      "type" : "integer"
+    },
+    "ifAGC" : {
+      "type" : "integer"
+    },
+    "ifGain" : {
+      "type" : "integer"
+    },
+    "amNotch" : {
+      "type" : "integer"
+    },
+    "fmNotch" : {
+      "type" : "integer"
+    },
+    "dabNotch" : {
+      "type" : "integer"
+    },
+    "extRef" : {
+      "type" : "integer"
+    },
+    "tuner" : {
+      "type" : "integer"
+    },
+    "antenna" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "SDRplayV3"
 };
             defs.SSBDemodReport = {
   "properties" : {
@@ -45942,7 +46026,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-04-12T14:54:42.978+02:00
+              Generated 2021-04-11T22:11:18.598+02:00
             </div>
           </div>
       </div>

@@ -39,6 +39,7 @@ option(ENABLE_LIMESUITE "Enable limesuite support" ON)
 option(ENABLE_MIRISDR "Enable LibMiri for old SDRPlay" ON)
 option(ENABLE_PERSEUS "Enable perseus support" ON)
 option(ENABLE_RTLSDR "Enable rtl-sdr support" ON)
+option(ENABLE_SDRPLAY "Enable SDRplay support" ON)
 option(ENABLE_SOAPYSDR "Enable SoapySDR support" ON)
 option(ENABLE_XTRX "Enable XTRX support" ON)
 option(ENABLE_PACK_MIRSDRAPI "Enable inclusion of the mirsdr-api library - for personal use only" OFF)
@@ -82,7 +83,7 @@ add_definitions("-DSDRANGEL_VERSION=\"${sdrangel_VERSION}\"")
 
 # configure CPACK information
 set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "SDR Rx/Tx software for Airspy, Airspy HF+, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay, USRP and FunCube")
 set(CPACK_PACKAGE_VENDOR "${COMPANY}")
 set(CPACK_PACKAGE_CONTACT "https://github.com/f4exb/sdrangel")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_SOURCE_DIR}/Readme.md")
@@ -249,6 +250,11 @@ elseif (WIN32)
   # LimeSuite FX3 support
   set(FX3SDK_DIR "${EXTERNAL_LIBRARY_FOLDER}/FX3SDK" CACHE INTERNAL "")
 
+  set(SDRPLAY_FOUND ON CACHE INTERNAL "")
+  set(SDRPLAY_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/sdrplay/inc" CACHE INTERNAL "")
+  set(SDRPLAY_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/sdrplay/x64/sdrplay_api.lib" CACHE INTERNAL "")
+  set(SDRPLAY_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/sdrplay/x64/" CACHE INTERNAL "")
+
   # used on fixup_bundle phase
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
     "${EXTERNAL_LIBRARY_FOLDER}/fftw-3"
@@ -402,6 +408,9 @@ if(ENABLE_PERSEUS)
 endif()
 if(ENABLE_RTLSDR)
   find_package(LibRTLSDR)
+endif()
+if(ENABLE_SDRPLAY)
+  find_package(SDRplay)
 endif()
 if(ENABLE_SOAPYSDR)
   find_package(SoapySDR)

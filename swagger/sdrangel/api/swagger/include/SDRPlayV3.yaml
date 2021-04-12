@@ -1,0 +1,61 @@
+SDRPlayV3Settings:
+  description: SDRplayV3
+  properties:
+    centerFrequency:
+      type: integer
+      format: int64
+    LOppmTenths:
+      type: integer
+    ifFrequencyIndex:
+      type: integer
+    bandwidthIndex:
+      type: integer
+    devSampleRate:
+      type: integer
+    log2Decim:
+      type: integer
+    fcPos:
+      type: integer
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    lnaIndex:
+      type: integer
+    ifAGC:
+      type: integer
+    ifGain:
+      type: integer
+    amNotch:
+      type: integer
+    fmNotch:
+      type: integer
+    dabNotch:
+      type: integer
+    extRef:
+      type: integer
+    tuner:
+      type: integer
+    antenna:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+
+SDRPlayV3Report:
+  description: SDRplayV3
+  properties:
+    bandwidths:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Bandwidth"
+    intermediateFrequencies:
+      type: array
+      items:
+        $ref: "http://swgserver:8081/api/swagger/include/Structs.yaml#/Frequency"

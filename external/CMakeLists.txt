@@ -19,6 +19,7 @@ set(LIBIIO_TAG 826563e41b5ce9890b75506f672017de8d76d52d)
 set(AIRSPYHF_TAG "1.1.5")
 set(PERSEUS_TAG afefa23e3140ac79d845acb68cf0beeb86d09028)
 set(MIRISDR_TAG "v1.1.2")
+set(SDRPLAY_TAG "3.07")
 
 set(PTHREADS4W_TAG "Version-2-11-0-release")
 set(RTLSDR_TAG be1d1206bfb6e6c41f7d91b20b77e20f929fa6a7)
@@ -589,6 +590,24 @@ if (LINUX)
                 TEST_COMMAND ""
                 )
     endif (NOT LIBMIRISDR_FOUND OR LIBMIRISDR_EXTERNAL)
+
+    if (NOT SDRPLAY_FOUND OR SDRPLAY_EXTERNAL)
+        set(SDRPLAY_FOUND ON CACHE INTERNAL "")
+        set(SDRPLAY_EXTERNAL ON CACHE INTERNAL "")
+        set(SDRPLAY_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi/src/sdrplayapi/inc" CACHE INTERNAL "")
+        set(SDRPLAY_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi/src/sdrplayapi/x86_64/libsdrplay_api.so.3.07" CACHE INTERNAL "")
+        ExternalProject_Add(sdrplayapi
+                GIT_REPOSITORY https://github.com/srcejon/sdrplayapi.git
+                GIT_TAG ${SDRPLAY_TAG}
+                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi"
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                CONFIGURE_COMMAND ""
+                BUILD_COMMAND ""
+                BUILD_BYPRODUCTS ""
+                INSTALL_COMMAND ""
+                TEST_COMMAND ""
+                )
+    endif (NOT SDRPLAY_FOUND OR SDRPLAY_EXTERNAL)
 
 endif (LINUX)
 

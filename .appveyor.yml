@@ -97,6 +97,7 @@ for:
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_airspyhf.sh; fi
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_rtlsdr.sh; fi
       - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_limesuite.sh; fi
+      - sh: if [[ ! "${CMAKE_CUSTOM_OPTIONS}" =~ "ENABLE_EXTERNAL_LIBRARIES=ON" ]]; then bash cmake/ci/build_sdrplay.sh; fi
     before_build:
       - sh: bash -c export
       - sh: bash -c pwd

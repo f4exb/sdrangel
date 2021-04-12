@@ -201,6 +201,8 @@
 #include "SWGRtlSdrSettings.h"
 #include "SWGSDRPlayReport.h"
 #include "SWGSDRPlaySettings.h"
+#include "SWGSDRPlayV3Report.h"
+#include "SWGSDRPlayV3Settings.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBDemodSettings.h"
 #include "SWGSSBModReport.h"
@@ -820,6 +822,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGSDRPlaySettings").compare(type) == 0) {
       return new SWGSDRPlaySettings();
+    }
+    if(QString("SWGSDRPlayV3Report").compare(type) == 0) {
+      return new SWGSDRPlayV3Report();
+    }
+    if(QString("SWGSDRPlayV3Settings").compare(type) == 0) {
+      return new SWGSDRPlayV3Settings();
     }
     if(QString("SWGSSBDemodReport").compare(type) == 0) {
       return new SWGSSBDemodReport();
