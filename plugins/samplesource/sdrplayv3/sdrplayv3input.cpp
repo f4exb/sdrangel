@@ -146,8 +146,8 @@ bool SDRPlayV3Input::start()
     m_sdrPlayThread->setFcPos((int) m_settings.m_fcPos);
     m_sdrPlayThread->startWork();
 
-    applySettings(m_settings, true, true);
     m_running = true;
+    applySettings(m_settings, true, true);
 
     return true;
 }
@@ -171,6 +171,7 @@ void SDRPlayV3Input::init()
 void SDRPlayV3Input::stop()
 {
     qDebug() << "SDRPlayV3Input::stop";
+    QMutexLocker mutexLocker(&m_mutex);
 
     if(m_sdrPlayThread)
     {
@@ -291,7 +292,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
 
     if ((m_settings.m_tuner != settings.m_tuner) || force)
     {
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (getDeviceId() == SDRPLAY_RSPduo_ID)
             {
@@ -309,7 +310,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("dcBlock");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
                 m_devParams->rxChannelA->ctrlParams.dcOffset.DCenable = settings.m_dcBlock ? 1 : 0;
@@ -324,7 +325,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("iqCorrection");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
                 m_devParams->rxChannelA->ctrlParams.dcOffset.IQenable = settings.m_iqCorrection ? 1 : 0;
@@ -349,7 +350,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("ifAGC");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
                 m_devParams->rxChannelA->ctrlParams.agc.enable = settings.m_ifAGC ? sdrplay_api_AGC_CTRL_EN : sdrplay_api_AGC_DISABLE;
@@ -365,7 +366,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
         || (m_settings.m_ifGain != settings.m_ifGain)
         || (m_settings.m_ifAGC != settings.m_ifAGC) || force)
     {
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
             {
@@ -388,7 +389,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("devSampleRate");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             int sampleRate = settings.m_devSampleRate;
             m_devParams->devParams->fsFreq.fsHz = (double)sampleRate;
@@ -445,7 +446,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
 
         forwardChange = true;
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (setDeviceCenterFrequency(deviceCenterFrequency)) {
                 qDebug() << "SDRPlayV3Input::applySettings: center freq: " << settings.m_centerFrequency << " Hz";
@@ -457,7 +458,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("bandwidthIndex");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
                 m_devParams->rxChannelA->tunerParams.bwType = SDRPlayV3Bandwidths::getBandwidthEnum(settings.m_bandwidthIndex);
@@ -472,7 +473,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("ifFrequencyIndex");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             if (m_dev->tuner == sdrplay_api_Tuner_A)
                 m_devParams->rxChannelA->tunerParams.ifType = SDRPlayV3IF::getIFEnum(settings.m_ifFrequencyIndex);
@@ -487,7 +488,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("biasTee");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
             sdrplay_api_ReasonForUpdateExtension1T updateExt = sdrplay_api_Update_Ext1_None;
@@ -526,7 +527,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("amNotch");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
             sdrplay_api_ReasonForUpdateExtension1T updateExt = sdrplay_api_Update_Ext1_None;
@@ -552,7 +553,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("fmNotch");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
             sdrplay_api_ReasonForUpdateExtension1T updateExt = sdrplay_api_Update_Ext1_None;
@@ -590,7 +591,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("dabNotch");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
             sdrplay_api_ReasonForUpdateExtension1T updateExt = sdrplay_api_Update_Ext1_None;
@@ -624,7 +625,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("antenna");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
             sdrplay_api_ReasonForUpdateExtension1T updateExt = sdrplay_api_Update_Ext1_None;
@@ -659,7 +660,7 @@ bool SDRPlayV3Input::applySettings(const SDRPlayV3Settings& settings, bool forwa
     {
         reverseAPIKeys.append("extRef");
 
-        if (m_dev != nullptr)
+        if (m_running)
         {
             sdrplay_api_ReasonForUpdateT update = sdrplay_api_Update_None;
             sdrplay_api_ReasonForUpdateExtension1T updateExt = sdrplay_api_Update_Ext1_None;
