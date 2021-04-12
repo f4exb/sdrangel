@@ -24,8 +24,26 @@ NFMModSettings:
     playLoop:
       type: integer
     ctcssOn:
+      description: >
+        Enable CTCSS squelch (takes precedence on DCS)
+        * 0 - disabled
+        * 1 - enabled
       type: integer
     ctcssIndex:
+      type: integer
+    dcsOn:
+      description: >
+        Enable DCS squelch (only if CTCSS is off)
+        * 0 - disabled
+        * 1 - enabled
+      type: integer
+    dcsCode:
+      type: integer
+    dcsPositive:
+      description: >
+        Modulation direction:
+        * 0 - reverse or negative - 1 for 0 and -1 for 1
+        * 1 - direct or positive - -1 for 0 and 1 for 1
       type: integer
     rgbColor:
       type: integer

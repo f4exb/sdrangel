@@ -73,6 +73,15 @@ public:
     qint32 getCtcssIndex();
     void setCtcssIndex(qint32 ctcss_index);
 
+    qint32 getDcsOn();
+    void setDcsOn(qint32 dcs_on);
+
+    qint32 getDcsCode();
+    void setDcsCode(qint32 dcs_code);
+
+    qint32 getDcsPositive();
+    void setDcsPositive(qint32 dcs_positive);
+
     qint32 getRgbColor();
     void setRgbColor(qint32 rgb_color);
 
@@ -139,6 +148,15 @@ private:
 
     qint32 ctcss_index;
     bool m_ctcss_index_isSet;
+
+    qint32 dcs_on;
+    bool m_dcs_on_isSet;
+
+    qint32 dcs_code;
+    bool m_dcs_code_isSet;
+
+    qint32 dcs_positive;
+    bool m_dcs_positive_isSet;
 
     qint32 rgb_color;
     bool m_rgb_color_isSet;

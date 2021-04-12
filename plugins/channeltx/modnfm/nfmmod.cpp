@@ -279,45 +279,44 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force) {
         reverseAPIKeys.append("inputFrequencyOffset");
     }
-
     if ((settings.m_fmDeviation != m_settings.m_fmDeviation) || force) {
         reverseAPIKeys.append("fmDeviation");
     }
-
     if ((settings.m_volumeFactor != m_settings.m_volumeFactor) || force) {
         reverseAPIKeys.append("volumeFactor");
     }
-
     if ((settings.m_ctcssOn != m_settings.m_ctcssOn) || force) {
         reverseAPIKeys.append("ctcssOn");
     }
-
     if ((settings.m_channelMute != m_settings.m_channelMute) || force) {
         reverseAPIKeys.append("channelMute");
     }
-
     if ((settings.m_playLoop != m_settings.m_playLoop) || force) {
         reverseAPIKeys.append("playLoop");
     }
-
     if ((settings.m_modAFInput != m_settings.m_modAFInput) || force) {
         reverseAPIKeys.append("modAFInput");
     }
-
     if((settings.m_rfBandwidth != m_settings.m_rfBandwidth) || force) {
         reverseAPIKeys.append("rfBandwidth");
     }
-
     if ((settings.m_afBandwidth != m_settings.m_afBandwidth) || force) {
         reverseAPIKeys.append("afBandwidth");
     }
-
     if ((settings.m_toneFrequency != m_settings.m_toneFrequency) || force) {
         reverseAPIKeys.append("toneFrequency");
     }
-
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
         reverseAPIKeys.append("ctcssIndex");
+    }
+    if ((settings.m_dcsOn != m_settings.m_dcsOn) || force) {
+        reverseAPIKeys.append("dcsOn");
+    }
+    if ((settings.m_dcsCode != m_settings.m_dcsCode) || force) {
+        reverseAPIKeys.append("dcsCode");
+    }
+    if ((settings.m_dcsPositive != m_settings.m_dcsPositive) || force) {
+        reverseAPIKeys.append("dcsPositive");
     }
     if ((settings.m_audioDeviceName != m_settings.m_audioDeviceName) || force) {
         reverseAPIKeys.append("audioDeviceName");
@@ -482,6 +481,15 @@ void NFMMod::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("volumeFactor")) {
         settings.m_volumeFactor = response.getNfmModSettings()->getVolumeFactor();
     }
+    if (channelSettingsKeys.contains("dcsCode")) {
+        settings.m_dcsCode = response.getNfmModSettings()->getDcsCode() % 512;
+    }
+    if (channelSettingsKeys.contains("dcsOn")) {
+        settings.m_dcsOn = response.getNfmModSettings()->getDcsOn() != 0;
+    }
+    if (channelSettingsKeys.contains("dcsPositive")) {
+        settings.m_dcsPositive = response.getNfmModSettings()->getDcsPositive() != 0;
+    }
     if (channelSettingsKeys.contains("streamIndex")) {
         settings.m_streamIndex = response.getNfmModSettings()->getStreamIndex();
     }
@@ -545,6 +553,9 @@ void NFMMod::webapiFormatChannelSettings(SWGSDRangel::SWGChannelSettings& respon
         response.getNfmModSettings()->setAudioDeviceName(new QString(settings.m_audioDeviceName));
     }
 
+    response.getNfmModSettings()->setDcsCode(settings.m_dcsCode);
+    response.getNfmModSettings()->setDcsOn(settings.m_dcsOn ? 1 : 0);
+    response.getNfmModSettings()->setDcsPositive(settings.m_dcsPositive ? 1 : 0);
     response.getNfmModSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
     if (response.getNfmModSettings()->getReverseApiAddress()) {
@@ -701,6 +712,15 @@ void NFMMod::webapiFormatChannelSettings(
     }
     if (channelSettingsKeys.contains("ctcssIndex") || force) {
         swgNFMModSettings->setCtcssIndex(settings.m_ctcssIndex);
+    }
+    if (channelSettingsKeys.contains("dcsCode") || force) {
+        swgNFMModSettings->setDcsCode(settings.m_dcsCode);
+    }
+    if (channelSettingsKeys.contains("dcsOn") || force) {
+        swgNFMModSettings->setDcsOn(settings.m_dcsOn ? 1 : 0);
+    }
+    if (channelSettingsKeys.contains("dcsPositive") || force) {
+        swgNFMModSettings->setDcsPositive(settings.m_dcsPositive ? 1 : 0);
     }
     if (channelSettingsKeys.contains("streamIndex") || force) {
         swgNFMModSettings->setStreamIndex(settings.m_streamIndex);

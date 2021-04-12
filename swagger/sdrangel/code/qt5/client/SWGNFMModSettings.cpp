@@ -48,6 +48,12 @@ SWGNFMModSettings::SWGNFMModSettings() {
     m_ctcss_on_isSet = false;
     ctcss_index = 0;
     m_ctcss_index_isSet = false;
+    dcs_on = 0;
+    m_dcs_on_isSet = false;
+    dcs_code = 0;
+    m_dcs_code_isSet = false;
+    dcs_positive = 0;
+    m_dcs_positive_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = nullptr;
@@ -98,6 +104,12 @@ SWGNFMModSettings::init() {
     m_ctcss_on_isSet = false;
     ctcss_index = 0;
     m_ctcss_index_isSet = false;
+    dcs_on = 0;
+    m_dcs_on_isSet = false;
+    dcs_code = 0;
+    m_dcs_code_isSet = false;
+    dcs_positive = 0;
+    m_dcs_positive_isSet = false;
     rgb_color = 0;
     m_rgb_color_isSet = false;
     title = new QString("");
@@ -124,6 +136,9 @@ SWGNFMModSettings::init() {
 
 void
 SWGNFMModSettings::cleanup() {
+
+
+
 
 
 
@@ -185,6 +200,12 @@ SWGNFMModSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&ctcss_on, pJson["ctcssOn"], "qint32", "");
     
     ::SWGSDRangel::setValue(&ctcss_index, pJson["ctcssIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dcs_on, pJson["dcsOn"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dcs_code, pJson["dcsCode"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&dcs_positive, pJson["dcsPositive"], "qint32", "");
     
     ::SWGSDRangel::setValue(&rgb_color, pJson["rgbColor"], "qint32", "");
     
@@ -253,6 +274,15 @@ SWGNFMModSettings::asJsonObject() {
     }
     if(m_ctcss_index_isSet){
         obj->insert("ctcssIndex", QJsonValue(ctcss_index));
+    }
+    if(m_dcs_on_isSet){
+        obj->insert("dcsOn", QJsonValue(dcs_on));
+    }
+    if(m_dcs_code_isSet){
+        obj->insert("dcsCode", QJsonValue(dcs_code));
+    }
+    if(m_dcs_positive_isSet){
+        obj->insert("dcsPositive", QJsonValue(dcs_positive));
     }
     if(m_rgb_color_isSet){
         obj->insert("rgbColor", QJsonValue(rgb_color));
@@ -389,6 +419,36 @@ void
 SWGNFMModSettings::setCtcssIndex(qint32 ctcss_index) {
     this->ctcss_index = ctcss_index;
     this->m_ctcss_index_isSet = true;
+}
+
+qint32
+SWGNFMModSettings::getDcsOn() {
+    return dcs_on;
+}
+void
+SWGNFMModSettings::setDcsOn(qint32 dcs_on) {
+    this->dcs_on = dcs_on;
+    this->m_dcs_on_isSet = true;
+}
+
+qint32
+SWGNFMModSettings::getDcsCode() {
+    return dcs_code;
+}
+void
+SWGNFMModSettings::setDcsCode(qint32 dcs_code) {
+    this->dcs_code = dcs_code;
+    this->m_dcs_code_isSet = true;
+}
+
+qint32
+SWGNFMModSettings::getDcsPositive() {
+    return dcs_positive;
+}
+void
+SWGNFMModSettings::setDcsPositive(qint32 dcs_positive) {
+    this->dcs_positive = dcs_positive;
+    this->m_dcs_positive_isSet = true;
 }
 
 qint32
@@ -534,6 +594,15 @@ SWGNFMModSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_ctcss_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dcs_on_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dcs_code_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_dcs_positive_isSet){
             isObjectUpdated = true; break;
         }
         if(m_rgb_color_isSet){
