@@ -31,7 +31,7 @@ void SDRPlayV3Settings::resetToDefaults()
     m_centerFrequency = 7040*1000;
     m_LOppmTenths = 0;
     m_ifFrequencyIndex = 0;
-    m_bandwidthIndex = 0;
+    m_bandwidthIndex = 3;
     m_devSampleRate = 2000000;
     m_log2Decim = 0;
     m_fcPos = FC_POS_CENTER;
@@ -39,7 +39,7 @@ void SDRPlayV3Settings::resetToDefaults()
     m_iqCorrection = false;
     m_lnaIndex = 0;
     m_ifAGC = true;
-    m_ifGain = 29;
+    m_ifGain = -40;
     m_amNotch = false;
     m_fmNotch = false;
     m_dabNotch = false;
@@ -99,7 +99,7 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
 
         d.readS32(1, &m_LOppmTenths, 0);
         d.readU32(3, &m_ifFrequencyIndex, 0);
-        d.readU32(5, &m_bandwidthIndex, 0);
+        d.readU32(5, &m_bandwidthIndex, 3);
         d.readU32(6, &m_devSampleRate, 2000000);
         d.readU32(7, &m_log2Decim, 0);
         d.readS32(8, &intval, 0);
@@ -108,7 +108,7 @@ bool SDRPlayV3Settings::deserialize(const QByteArray& data)
         d.readBool(10, &m_iqCorrection, false);
         d.readS32(11, &m_lnaIndex, 0);
         d.readBool(13, &m_ifAGC, true);
-        d.readS32(14, &m_ifGain, 29);
+        d.readS32(14, &m_ifGain, -40);
         d.readBool(15, &m_useReverseAPI, false);
         d.readString(16, &m_reverseAPIAddress, "127.0.0.1");
         d.readU32(17, &uintval, 0);
