@@ -34,7 +34,7 @@ struct datvgauge: runnable
     leansdr::pipereader<leansdr::f32> m_in;
     QLabel *m_label;
     LevelMeterSignalDB *m_levelMeter;
-    static const int m_nbAvg = 5;
+    static const int m_nbAvg = 10;
     leansdr::f32 m_samples[m_nbAvg];
     leansdr::f32 m_sum;
     int m_index;
@@ -65,7 +65,6 @@ struct datvgauge: runnable
             m_sum += *p - oldest;
             oldest = *p;
             leansdr::f32 avg = m_sum/m_nbAvg;
-            m_index = (m_index + 1) % m_nbAvg;
 
             m_levelMeter->levelChanged(avg/30.0, *p/30.0, m_nbAvg);
             m_label->setText(QString("%1").arg(avg, 0, 'f', 1));
