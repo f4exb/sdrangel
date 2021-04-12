@@ -4,6 +4,10 @@
 
 This plugin supports input from SDRplay RSP devices using V3 of SDRplay's API, including RSP1, RSP1A, RSP2, RSPduo and RSPdx.
 
+<h2>Driver Prerequisites</h2>
+
+This plugin requires the SDRplay API V3.07 to have been installed and for the service to be running. It can be downloaded for Windows, Linux and Mac from: https://www.sdrplay.com/softwarehome/
+
 <h2>Interface</h2>
 
 ![SDRplay v3 plugin GUI](../../../doc/img/SDRPlayV3_plugin.png)
@@ -111,7 +115,7 @@ Sets the LNA and mixer gain dB. The settings available depended upon the RSP dev
 
 <h3>20. IF AGC</h3>
 
-Check this button to enable IF automatic gain control,
+Check this button to enable IF automatic gain control.
 
 <h3>21. IF gain</h3>
 
