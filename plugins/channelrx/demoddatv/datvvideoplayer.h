@@ -52,8 +52,11 @@ template<typename T> struct datvvideoplayer: runnable
         int nw;
 
         m_udpStream->pushData((const char *) in.rd(), in.readable());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
         m_atomicUDPRunning.storeRelaxed(m_udpStream->isActive() && (size > 0) ? 1 : 0);
-
+#else
+        m_atomicUDPRunning.store(m_udpStream->isActive() && (size > 0) ? 1 : 0);
+#endif
         if (m_videoStream)
         {
             nw = m_videoStream->pushData((const char *) in.rd(), size);
@@ -88,8 +91,23 @@ template<typename T> struct datvvideoplayer: runnable
         in.read(nw / sizeof(T));
     }
 
-    bool isUDPRunning() const { return m_atomicUDPRunning.loadRelaxed() == 1; }
-    void resetUDPRunning() { m_atomicUDPRunning.storeRelaxed(0); }
+    bool isUDPRunning() const
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        return m_atomicUDPRunning.loadRelaxed() == 1;
+#else
+        return m_atomicUDPRunning.load() == 1;
+#endif
+    }
+
+    void resetUDPRunning()
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
+        m_atomicUDPRunning.storeRelaxed(0);
+#else
+        m_atomicUDPRunning.store(0);
+#endif
+    }
 
 private:
     pipereader<T> in;
