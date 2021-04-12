@@ -152,6 +152,8 @@ void NFMModSource::modulateSample()
 
     if (m_settings.m_ctcssOn) {
         t1 = (0.85f * m_bandpass.filter(t) + 0.15f * 0.625f * m_ctcssNco.next()) * 1.2f;
+    } else if (m_settings.m_dcsOn) {
+        t1 = (0.9f * m_bandpass.filter(t) + 0.1f * 0.625f * m_dcsMod.next()) * 1.2f;
     } else {
         t1 = m_bandpass.filter(t) * 1.2f;
     }
@@ -344,6 +346,7 @@ void NFMModSource::applyAudioSampleRate(int sampleRate)
     m_bandpass.create(301, sampleRate, 300.0, m_settings.m_afBandwidth);
     m_toneNco.setFreq(m_settings.m_toneFrequency, sampleRate);
     m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(m_settings.m_ctcssIndex), sampleRate);
+    m_dcsMod.setSampleRate(sampleRate);
     m_cwKeyer.setSampleRate(sampleRate);
     m_cwKeyer.reset();
     m_preemphasisFilter.configure(m_preemphasis*sampleRate);
@@ -398,6 +401,14 @@ void NFMModSource::applySettings(const NFMModSettings& settings, bool force)
 
     if ((settings.m_ctcssIndex != m_settings.m_ctcssIndex) || force) {
         m_ctcssNco.setFreq(NFMModSettings::getCTCSSFreq(settings.m_ctcssIndex), m_audioSampleRate);
+    }
+
+    if ((settings.m_dcsCode != m_settings.m_dcsCode) || force) {
+        m_dcsMod.setDCS(settings.m_dcsCode);
+    }
+
+    if ((settings.m_dcsPositive != m_settings.m_dcsPositive) || force) {
+        m_dcsMod.setPositive(settings.m_dcsPositive);
     }
 
     if ((settings.m_modAFInput != m_settings.m_modAFInput) || force)

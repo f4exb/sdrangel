@@ -36,6 +36,7 @@
 #include "audio/audiofifo.h"
 
 #include "nfmmodsettings.h"
+#include "nfmmoddcs.h"
 
 class ChannelAPI;
 
@@ -78,6 +79,7 @@ private:
     NCO m_carrierNco;
     NCOF m_toneNco;
     NCOF m_ctcssNco;
+    NFMModDCS m_dcsMod;
     float m_modPhasor; //!< baseband modulator phasor
     Complex m_modSample;
 

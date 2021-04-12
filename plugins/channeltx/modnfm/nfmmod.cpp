@@ -260,6 +260,9 @@ void NFMMod::applySettings(const NFMModSettings& settings, bool force)
             << " m_toneFrequency: " << settings.m_toneFrequency
             << " m_ctcssIndex: " << settings.m_ctcssIndex
             << " m_ctcssOn: " << settings.m_ctcssOn
+            << " m_dcsOn: " << settings.m_dcsOn
+            << " m_dcsCode: " << settings.m_dcsCode
+            << " m_dcsPositive: " << settings.m_dcsPositive
             << " m_channelMute: " << settings.m_channelMute
             << " m_playLoop: " << settings.m_playLoop
             << " m_modAFInput " << settings.m_modAFInput

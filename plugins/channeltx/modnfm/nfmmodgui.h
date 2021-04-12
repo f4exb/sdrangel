@@ -18,6 +18,8 @@
 #ifndef PLUGINS_CHANNELTX_MODNFM_NFMMODGUI_H_
 #define PLUGINS_CHANNELTX_MODNFM_NFMMODGUI_H_
 
+#include <QRegExpValidator>
+
 #include "channel/channelgui.h"
 #include "dsp/channelmarker.h"
 #include "util/movingaverage.h"
@@ -70,6 +72,7 @@ private:
     bool m_enableNavTime;
     NFMModSettings::NFMModInputAF m_modAFInput;
     MessageQueue m_inputMessageQueue;
+    QRegExpValidator m_dcsCodeValidator;
 
     explicit NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSampleSource *channelTx, QWidget* parent = 0);
     virtual ~NFMModGUI();
@@ -107,6 +110,9 @@ private slots:
 
     void on_ctcss_currentIndexChanged(int index);
     void on_ctcssOn_toggled(bool checked);
+    void on_dcsOn_toggled(bool checked);
+    void on_dcsCode_editingFinished();
+    void on_dcsPositive_toggled(bool checked);
 
     void on_feedbackEnable_toggled(bool checked);
     void on_feedbackVolume_valueChanged(int value);

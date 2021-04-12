@@ -248,3 +248,15 @@ This is the audio file play length in time units
 <h3>23: Play file position slider</h3>
 
 This slider can be used to randomly set the current position in the file when file play is in pause state (button 18.3)
+
+<h3>24: DCS switch</h3>
+
+Checkbox to switch on the DCS (Digital Code Squelch) sub-audio modulation.
+
+<h3>25: DCS code</h3>
+
+This is the DCS octal code (0..511 in decimal 0..777 in octal)
+
+<h3>26: DCS positive modulation</h3>
+
+When checked the "1" bits are represented with positive shift frequency and "0" with negative shift. When unchecked (negative modulation) this is the opposite.

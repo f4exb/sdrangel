@@ -51,6 +51,9 @@ struct NFMModSettings
     bool m_playLoop;
     bool m_ctcssOn;
     int  m_ctcssIndex;
+    bool m_dcsOn;
+    int m_dcsCode;
+    bool m_dcsPositive;
     quint32 m_rgbColor;
     QString m_title;
     NFMModInputAF m_modAFInput;

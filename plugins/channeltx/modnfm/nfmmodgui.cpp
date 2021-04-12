@@ -20,6 +20,7 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QDebug>
+#include <QRegExp>
 
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
@@ -299,10 +300,35 @@ void NFMModGUI::on_ctcss_currentIndexChanged(int index)
 
 void NFMModGUI::on_ctcssOn_toggled(bool checked)
 {
+    ui->dcsOn->setEnabled(!checked);
     m_settings.m_ctcssOn = checked;
     applySettings();
 }
 
+void NFMModGUI::on_dcsOn_toggled(bool checked)
+{
+    ui->ctcssOn->setEnabled(!checked);
+    m_settings.m_dcsOn = checked;
+    applySettings();
+}
+
+void NFMModGUI::on_dcsCode_editingFinished()
+{
+    bool ok;
+    int dcsCode = ui->dcsCode->text().toInt(&ok, 8);
+
+    if (ok)
+    {
+        m_settings.m_dcsCode = dcsCode;
+        applySettings();
+    }
+}
+
+void NFMModGUI::on_dcsPositive_toggled(bool checked)
+{
+    m_settings.m_dcsPositive = checked;
+    applySettings();
+}
 
 void NFMModGUI::configureFileName()
 {
@@ -375,7 +401,8 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     m_audioSampleRate(-1),
     m_feedbackAudioSampleRate(-1),
     m_tickCount(0),
-    m_enableNavTime(false)
+    m_enableNavTime(false),
+    m_dcsCodeValidator(QRegExp("[0-7]{1,3}"))
 {
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
@@ -431,6 +458,7 @@ NFMModGUI::NFMModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
         ui->ctcss->addItem(QString("%1").arg((double) NFMModSettings::getCTCSSFreq(i), 0, 'f', 1));
     }
 
+    ui->dcsCode->setValidator(&m_dcsCodeValidator);
     ui->cwKeyerGUI->setCWKeyer(m_nfmMod->getCWKeyer());
 
 	connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleSourceMessages()));
@@ -499,6 +527,11 @@ void NFMModGUI::displaySettings()
 
     ui->ctcssOn->setChecked(m_settings.m_ctcssOn);
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);
+
+    ui->dcsOn->setChecked(m_settings.m_dcsOn);
+    ui->dcsOn->setEnabled(!m_settings.m_ctcssOn);
+    ui->dcsCode->setText(tr("%1").arg(m_settings.m_dcsCode, 3, 8, QLatin1Char('0')));
+    ui->dcsPositive->setChecked(m_settings.m_dcsPositive);
 
     ui->channelMute->setChecked(m_settings.m_channelMute);
     ui->playLoop->setChecked(m_settings.m_playLoop);

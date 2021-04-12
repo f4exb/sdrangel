@@ -62,6 +62,9 @@ void NFMModSettings::resetToDefaults()
     m_playLoop = false;
     m_ctcssOn = false;
     m_ctcssIndex = 0;
+    m_dcsOn = false;
+    m_dcsCode = 0023;
+    m_dcsPositive = false;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Modulator";
     m_modAFInput = NFMModInputAF::NFMModInputNone;
@@ -113,6 +116,9 @@ QByteArray NFMModSettings::serialize() const
     s.writeReal(21, m_feedbackVolumeFactor);
     s.writeBool(22, m_feedbackAudioEnable);
     s.writeS32(23, m_streamIndex);
+    s.writeBool(24, m_dcsOn);
+    s.writeS32(25, m_dcsCode);
+    s.writeBool(26, m_dcsPositive);
 
     return s.final();
 }
@@ -186,6 +192,10 @@ bool NFMModSettings::deserialize(const QByteArray& data)
         d.readReal(21, &m_feedbackVolumeFactor, 1.0);
         d.readBool(22, &m_feedbackAudioEnable, false);
         d.readS32(23, &m_streamIndex, 0);
+        d.readBool(24, &m_dcsOn, false);
+        d.readS32(25, &tmp, 0023);
+        m_dcsCode = tmp < 0 ? 0 : tmp > 511 ? 511 : tmp;
+        d.readBool(26, &m_dcsPositive, false);
 
         return true;
     }
