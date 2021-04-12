@@ -594,8 +594,8 @@ if (LINUX)
     if (NOT SDRPLAY_FOUND OR SDRPLAY_EXTERNAL)
         set(SDRPLAY_FOUND ON CACHE INTERNAL "")
         set(SDRPLAY_EXTERNAL ON CACHE INTERNAL "")
-        set(SDRPLAY_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi/inc" CACHE INTERNAL "")
-        set(SDRPLAY_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi/x86_64/libsdrplay_api.so.3.07" CACHE INTERNAL "")
+        set(SDRPLAY_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi/src/sdrplayapi/inc" CACHE INTERNAL "")
+        set(SDRPLAY_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/sdrplayapi/src/sdrplayapi/x86_64/libsdrplay_api.so.3.07" CACHE INTERNAL "")
         ExternalProject_Add(sdrplayapi
                 GIT_REPOSITORY https://github.com/srcejon/sdrplayapi.git
                 GIT_TAG ${SDRPLAY_TAG}
