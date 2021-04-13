@@ -143,12 +143,15 @@ public:
     }
 
     void removeAllVORs() {
-        beginRemoveRows(QModelIndex(), 0, m_vors.count());
-        m_vors.clear();
-        m_selected.clear();
-        m_radials.clear();
-        m_vorGUIs.clear();
-        endRemoveRows();
+        if (m_vors.count() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_vors.count() - 1);
+            m_vors.clear();
+            m_selected.clear();
+            m_radials.clear();
+            m_vorGUIs.clear();
+            endRemoveRows();
+        }
     }
 
     QHash<int, QByteArray> roleNames() const {
