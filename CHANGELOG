@@ -1,3 +1,13 @@
+sdrangel (6.9.0-1) unstable; urgency=medium
+
+  * New SDRPlay v3 source plugin. PR #839
+  * NFM modulator. Implemented DCS. Part of #792
+  * DATV demod: option to enable/disable the video player
+  * DATV demod: stop player before initializing DATV framework
+  * Do not enable interprocedural optimization for Mac. Fixes #807
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 13 Apr 2021 08:17:46 +0200
+
 sdrangel (6.8.0-1) unstable; urgency=medium
 
   * New Packet Error Tester feature plugin. PR #836
