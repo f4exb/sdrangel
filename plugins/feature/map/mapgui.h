@@ -351,10 +351,13 @@ public:
 
     void removeAll()
     {
-        beginRemoveRows(QModelIndex(), 0, m_items.count());
-        m_items.clear();
-        m_selected.clear();
-        endRemoveRows();
+        if (m_items.count() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_items.count());
+            m_items.clear();
+            m_selected.clear();
+            endRemoveRows();
+        }
     }
 
     void setDisplayNames(bool displayNames)

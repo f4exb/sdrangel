@@ -378,14 +378,17 @@ public:
     }
 
     void removeAllAirports() {
-        beginRemoveRows(QModelIndex(), 0, m_airports.count());
-        m_airports.clear();
-        m_airportDataFreq.clear();
-        m_airportDataFreqRows.clear();
-        m_showFreq.clear();
-        m_azimuth.clear();
-        m_elevation.clear();
-        endRemoveRows();
+        if (m_airports.count() > 0)
+        {
+            beginRemoveRows(QModelIndex(), 0, m_airports.count() - 1);
+            m_airports.clear();
+            m_airportDataFreq.clear();
+            m_airportDataFreqRows.clear();
+            m_showFreq.clear();
+            m_azimuth.clear();
+            m_elevation.clear();
+            endRemoveRows();
+        }
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
