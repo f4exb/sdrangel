@@ -15,5 +15,3 @@ else
     ;;
   esac
 fi
-
-sudo chrpath -r /usr/lib/sdrangel  /usr/lib/sdrangel/libdsdcc.so
