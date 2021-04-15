@@ -33,8 +33,8 @@ int RemoteOutputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setRemoteOutputSettings(new SWGSDRangel::SWGRemoteOutputSettings());
+    response.getRemoteOutputSettings()->init();
     RemoteOutput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

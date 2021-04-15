@@ -33,8 +33,8 @@ int KiwiSDRWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setKiwiSdrSettings(new SWGSDRangel::SWGKiwiSDRSettings());
+    response.getKiwiSdrSettings()->init();
     KiwiSDRInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

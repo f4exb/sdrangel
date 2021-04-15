@@ -33,8 +33,8 @@ int PlutoSDRInputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setPlutoSdrInputSettings(new SWGSDRangel::SWGPlutoSdrInputSettings());
+    response.getPlutoSdrInputSettings()->init();
     PlutoSDRInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

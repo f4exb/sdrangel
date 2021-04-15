@@ -34,8 +34,8 @@ int USRPInputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setUsrpInputSettings(new SWGSDRangel::SWGUSRPInputSettings());
+    response.getUsrpInputSettings()->init();
     USRPInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

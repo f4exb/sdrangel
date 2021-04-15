@@ -33,8 +33,8 @@ int LimeSDROutputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setLimeSdrOutputSettings(new SWGSDRangel::SWGLimeSdrOutputSettings());
+    response.getLimeSdrOutputSettings()->init();
     LimeSDROutput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

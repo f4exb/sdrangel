@@ -33,8 +33,8 @@ int FileInputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
+    response.getFileInputSettings()->init();
     FileInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

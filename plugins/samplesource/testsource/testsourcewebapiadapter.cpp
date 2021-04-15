@@ -33,8 +33,8 @@ int TestSourceWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setTestSourceSettings(new SWGSDRangel::SWGTestSourceSettings());
+    response.getTestSourceSettings()->init();
     TestSourceInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

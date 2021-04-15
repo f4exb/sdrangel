@@ -33,8 +33,8 @@ int BladeRF2InputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setBladeRf2InputSettings(new SWGSDRangel::SWGBladeRF2InputSettings());
+    response.getBladeRf2InputSettings()->init();
     BladeRF2Input::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

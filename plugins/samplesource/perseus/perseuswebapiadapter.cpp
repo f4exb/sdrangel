@@ -33,8 +33,8 @@ int PerseusWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setPerseusSettings(new SWGSDRangel::SWGPerseusSettings());
+    response.getPerseusSettings()->init();
     PerseusInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

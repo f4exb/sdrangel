@@ -33,8 +33,8 @@ int SigMFFileInputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setSigMfFileInputSettings(new SWGSDRangel::SWGSigMFFileInputSettings());
+    response.getSigMfFileInputSettings()->init();
     SigMFFileInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

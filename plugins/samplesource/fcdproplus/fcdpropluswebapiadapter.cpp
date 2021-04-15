@@ -33,8 +33,8 @@ int FCDProPlusWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setFcdProPlusSettings(new SWGSDRangel::SWGFCDProPlusSettings());
+    response.getFcdProPlusSettings()->init();
     FCDProPlusInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

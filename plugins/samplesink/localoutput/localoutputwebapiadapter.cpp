@@ -33,8 +33,8 @@ int LocalOutputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setLocalOutputSettings(new SWGSDRangel::SWGLocalOutputSettings());
+    response.getLocalOutputSettings()->init();
     LocalOutput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

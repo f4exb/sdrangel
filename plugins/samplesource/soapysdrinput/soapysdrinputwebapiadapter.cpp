@@ -33,8 +33,8 @@ int SoapySDRInputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setSoapySdrInputSettings(new SWGSDRangel::SWGSoapySDRInputSettings());
+    response.getSoapySdrInputSettings()->init();
     SoapySDRInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }

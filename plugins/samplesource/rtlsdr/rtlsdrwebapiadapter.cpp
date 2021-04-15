@@ -33,8 +33,8 @@ int RTLSDRWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setRtlSdrSettings(new SWGSDRangel::SWGRtlSdrSettings());
+    response.getRtlSdrSettings()->init();
     RTLSDRInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
