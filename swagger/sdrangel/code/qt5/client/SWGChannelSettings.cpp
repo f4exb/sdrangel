@@ -62,6 +62,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_datv_mod_settings_isSet = false;
     datv_demod_settings = nullptr;
     m_datv_demod_settings_isSet = false;
+    dab_demod_settings = nullptr;
+    m_dab_demod_settings_isSet = false;
     dsd_demod_settings = nullptr;
     m_dsd_demod_settings_isSet = false;
     file_sink_settings = nullptr;
@@ -154,6 +156,8 @@ SWGChannelSettings::init() {
     m_datv_mod_settings_isSet = false;
     datv_demod_settings = new SWGDATVDemodSettings();
     m_datv_demod_settings_isSet = false;
+    dab_demod_settings = new SWGDABDemodSettings();
+    m_dab_demod_settings_isSet = false;
     dsd_demod_settings = new SWGDSDDemodSettings();
     m_dsd_demod_settings_isSet = false;
     file_sink_settings = new SWGFileSinkSettings();
@@ -252,6 +256,9 @@ SWGChannelSettings::cleanup() {
     }
     if(datv_demod_settings != nullptr) { 
         delete datv_demod_settings;
+    }
+    if(dab_demod_settings != nullptr) { 
+        delete dab_demod_settings;
     }
     if(dsd_demod_settings != nullptr) { 
         delete dsd_demod_settings;
@@ -375,6 +382,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&datv_demod_settings, pJson["DATVDemodSettings"], "SWGDATVDemodSettings", "SWGDATVDemodSettings");
     
+    ::SWGSDRangel::setValue(&dab_demod_settings, pJson["DABDemodSettings"], "SWGDABDemodSettings", "SWGDABDemodSettings");
+    
     ::SWGSDRangel::setValue(&dsd_demod_settings, pJson["DSDDemodSettings"], "SWGDSDDemodSettings", "SWGDSDDemodSettings");
     
     ::SWGSDRangel::setValue(&file_sink_settings, pJson["FileSinkSettings"], "SWGFileSinkSettings", "SWGFileSinkSettings");
@@ -491,6 +500,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((datv_demod_settings != nullptr) && (datv_demod_settings->isSet())){
         toJsonValue(QString("DATVDemodSettings"), datv_demod_settings, obj, QString("SWGDATVDemodSettings"));
+    }
+    if((dab_demod_settings != nullptr) && (dab_demod_settings->isSet())){
+        toJsonValue(QString("DABDemodSettings"), dab_demod_settings, obj, QString("SWGDABDemodSettings"));
     }
     if((dsd_demod_settings != nullptr) && (dsd_demod_settings->isSet())){
         toJsonValue(QString("DSDDemodSettings"), dsd_demod_settings, obj, QString("SWGDSDDemodSettings"));
@@ -739,6 +751,16 @@ void
 SWGChannelSettings::setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings) {
     this->datv_demod_settings = datv_demod_settings;
     this->m_datv_demod_settings_isSet = true;
+}
+
+SWGDABDemodSettings*
+SWGChannelSettings::getDabDemodSettings() {
+    return dab_demod_settings;
+}
+void
+SWGChannelSettings::setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings) {
+    this->dab_demod_settings = dab_demod_settings;
+    this->m_dab_demod_settings_isSet = true;
 }
 
 SWGDSDDemodSettings*
@@ -1045,6 +1067,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(datv_demod_settings && datv_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(dab_demod_settings && dab_demod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(dsd_demod_settings && dsd_demod_settings->isSet()){

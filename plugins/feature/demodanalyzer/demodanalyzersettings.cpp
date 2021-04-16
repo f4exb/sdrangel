@@ -25,6 +25,7 @@
 const QStringList DemodAnalyzerSettings::m_channelTypes = {
     QStringLiteral("AMDemod"),
     QStringLiteral("AMMod"),
+    QStringLiteral("DABDemod"),
     QStringLiteral("DSDDemod"),
     QStringLiteral("NFMDemod"),
     QStringLiteral("NFMMod"),
@@ -39,6 +40,7 @@ const QStringList DemodAnalyzerSettings::m_channelTypes = {
 const QStringList DemodAnalyzerSettings::m_channelURIs = {
     QStringLiteral("sdrangel.channel.amdemod"),
     QStringLiteral("sdrangel.channeltx.modam"),
+    QStringLiteral("sdrangel.channel.dabdemod"),
     QStringLiteral("sdrangel.channel.dsddemod"),
     QStringLiteral("sdrangel.channel.nfmdemod"),
     QStringLiteral("sdrangel.channeltx.modnfm"),

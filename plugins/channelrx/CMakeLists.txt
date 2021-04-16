@@ -18,6 +18,10 @@ add_subdirectory(demodchirpchat)
 add_subdirectory(demodvorsc)
 add_subdirectory(demodpacket)
 
+if(DAB_FOUND AND ZLIB_FOUND AND FAAD_FOUND)
+    add_subdirectory(demoddab)
+endif()
+
 if(APT_FOUND)
     add_subdirectory(demodapt)
 endif()

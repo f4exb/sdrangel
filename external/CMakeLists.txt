@@ -443,6 +443,46 @@ if (WIN32)
     install(FILES "${source_dir}/pthreadVC2${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
 endif (WIN32)
 
+# For DAB demodulator
+if (ZLIB_FOUND AND FAAD_FOUND)
+    if (WIN32)
+        set(DAB_LIBRARIES "${SDRANGEL_BINARY_LIB_DIR}/dab_lib.lib" CACHE INTERNAL "")
+    elseif (LINUX)
+        set(DAB_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libdab${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+    endif()
+    ExternalProject_Add(dab
+            GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
+            GIT_TAG msvc
+            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
+            SOURCE_SUBDIR "library"
+            CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                    -DFFTW3F_INCLUDE_DIRS=${FFTW3F_INCLUDE_DIRS}
+                    -DFFTW3F_LIBRARIES=${FFTW3F_LIBRARIES}
+                    -DFAAD_INCLUDE_DIR=${FAAD_INCLUDE_DIR}
+                    -DFAAD_LIBRARY=${FAAD_LIBRARY}
+                    -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIRS}
+                    -DZLIB_LIBRARY=${ZLIB_LIBRARIES}
+                    -DPTHREADS=${PTHREADS4W_LIBRARIES}
+            BUILD_BYPRODUCTS "${DAB_LIBRARIES}"
+            INSTALL_COMMAND ""
+            TEST_COMMAND ""
+            )
+    ExternalProject_Get_Property(dab source_dir binary_dir)
+    set(DAB_FOUND ON CACHE INTERNAL "")
+    set(DAB_EXTERNAL ON CACHE INTERNAL "")
+    set(DAB_INCLUDE_DIR "${EXTERNAL_BUILD_LIBRARIES}/dab/src/dab" CACHE INTERNAL "")
+    if (WIN32)
+        install(FILES "${SDRANGEL_BINARY_BIN_DIR}/dab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION "${INSTALL_LIB_DIR}")
+    elseif (APPLE)
+        set(DAB_LIBRARIES "${binary_dir}/libapt${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
+        install(DIRECTORY "${binary_dir}/" DESTINATION "${INSTALL_LIB_DIR}"
+                FILES_MATCHING PATTERN "libdab_lib*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        set(MACOS_EXTERNAL_LIBS_FIXUP "${MACOS_EXTERNAL_LIBS_FIXUP};${binary_dir}/")
+    endif ()
+else()
+    message(STATUS "Can't build DAB library as missing zlib or faad")
+endif()
+
 # Device interface libraries. Use external libraries build for these. Only Linux for now.
 if (LINUX)
     # apt install liblimesuite-dev (only on ubuntu 18.04). Can be picky on version though so let's build it.

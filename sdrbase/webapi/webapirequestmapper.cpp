@@ -3871,6 +3871,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setDatvModSettings(new SWGSDRangel::SWGDATVModSettings());
             channelSettings->getDatvModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "DABDemodSettings")
+        {
+            channelSettings->setDabDemodSettings(new SWGSDRangel::SWGDABDemodSettings());
+            channelSettings->getDabDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "DSDDemodSettings")
         {
             channelSettings->setDsdDemodSettings(new SWGSDRangel::SWGDSDDemodSettings());
@@ -4595,6 +4600,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setAtvModSettings(nullptr);
     channelSettings.setBfmDemodSettings(nullptr);
     channelSettings.setDatvModSettings(nullptr);
+    channelSettings.setDabDemodSettings(nullptr);
     channelSettings.setDsdDemodSettings(nullptr);
     channelSettings.setIeee802154ModSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);

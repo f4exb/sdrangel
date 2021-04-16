@@ -33,6 +33,7 @@
 #include "SWGChannelAnalyzerSettings.h"
 #include "SWGChirpChatDemodSettings.h"
 #include "SWGChirpChatModSettings.h"
+#include "SWGDABDemodSettings.h"
 #include "SWGDATVDemodSettings.h"
 #include "SWGDATVModSettings.h"
 #include "SWGDSDDemodSettings.h"
@@ -130,6 +131,9 @@ public:
 
     SWGDATVDemodSettings* getDatvDemodSettings();
     void setDatvDemodSettings(SWGDATVDemodSettings* datv_demod_settings);
+
+    SWGDABDemodSettings* getDabDemodSettings();
+    void setDabDemodSettings(SWGDABDemodSettings* dab_demod_settings);
 
     SWGDSDDemodSettings* getDsdDemodSettings();
     void setDsdDemodSettings(SWGDSDDemodSettings* dsd_demod_settings);
@@ -260,6 +264,9 @@ private:
 
     SWGDATVDemodSettings* datv_demod_settings;
     bool m_datv_demod_settings_isSet;
+
+    SWGDABDemodSettings* dab_demod_settings;
+    bool m_dab_demod_settings_isSet;
 
     SWGDSDDemodSettings* dsd_demod_settings;
     bool m_dsd_demod_settings_isSet;
