@@ -591,27 +591,31 @@ void DATVModSource::applyChannelSettings(int channelSampleRate, int channelFrequ
 
     if ((channelSampleRate != m_channelSampleRate) || force)
     {
-        m_sampleRate = (channelSampleRate/m_settings.m_symbolRate)*m_settings.m_symbolRate;
+        if (m_settings.m_symbolRate > 0)
+        {
+            m_sampleRate = (channelSampleRate/m_settings.m_symbolRate)*m_settings.m_symbolRate;
 
-        // Create interpolator if not integer multiple
-        if (m_sampleRate != channelSampleRate)
-        {
-            m_interpolatorDistanceRemain = 0;
-            m_interpolatorDistance = (Real) m_sampleRate / (Real) channelSampleRate;
-            m_interpolator.create(32, m_sampleRate, m_settings.m_rfBandwidth / 2.2f, 3.0);
-        }
-        if (getMessageQueueToGUI())
-        {
-            getMessageQueueToGUI()->push(DATVModReport::MsgReportRates::create(
-                                                channelSampleRate, m_sampleRate,
-                                                getDVBSDataBitrate(m_settings)));
+            // Create interpolator if not integer multiple
+            if (m_sampleRate != channelSampleRate)
+            {
+                m_interpolatorDistanceRemain = 0;
+                m_interpolatorDistance = (Real) m_sampleRate / (Real) channelSampleRate;
+                m_interpolator.create(32, m_sampleRate, m_settings.m_rfBandwidth / 2.2f, 3.0);
+            }
+            if (getMessageQueueToGUI())
+            {
+                getMessageQueueToGUI()->push(DATVModReport::MsgReportRates::create(
+                                                    channelSampleRate, m_sampleRate,
+                                                    getDVBSDataBitrate(m_settings)));
+            }
         }
     }
 
     m_channelSampleRate = channelSampleRate;
     m_channelFrequencyOffset = channelFrequencyOffset;
 
-    m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;
+    if (m_settings.m_symbolRate > 0)
+        m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;
 
     m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
     m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
@@ -640,20 +644,25 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
         || (settings.m_symbolRate != m_settings.m_symbolRate)
         || force)
     {
-        m_sampleRate = (m_channelSampleRate/settings.m_symbolRate)*settings.m_symbolRate;
+        if (settings.m_symbolRate > 0)
+        {
+            m_sampleRate = (m_channelSampleRate/settings.m_symbolRate)*settings.m_symbolRate;
 
-        if (m_sampleRate != m_channelSampleRate)
-        {
-            m_interpolatorDistanceRemain = 0;
-            m_interpolatorDistance = (Real) m_sampleRate / (Real) m_channelSampleRate;
-            m_interpolator.create(32, m_sampleRate, settings.m_rfBandwidth / 2.2f, 3.0);
+            if (m_sampleRate != m_channelSampleRate)
+            {
+                m_interpolatorDistanceRemain = 0;
+                m_interpolatorDistance = (Real) m_sampleRate / (Real) m_channelSampleRate;
+                m_interpolator.create(32, m_sampleRate, settings.m_rfBandwidth / 2.2f, 3.0);
+            }
+            if (getMessageQueueToGUI())
+            {
+                getMessageQueueToGUI()->push(DATVModReport::MsgReportRates::create(
+                                                    m_channelSampleRate, m_sampleRate,
+                                                    getDVBSDataBitrate(settings)));
+            }
         }
-        if (getMessageQueueToGUI())
-        {
-            getMessageQueueToGUI()->push(DATVModReport::MsgReportRates::create(
-                                                m_channelSampleRate, m_sampleRate,
-                                                getDVBSDataBitrate(settings)));
-        }
+        else
+            qWarning() << "DATVModSource::applySettings: symbolRate must be greater than 0.";
     }
 
     if ((settings.m_source != m_settings.m_source)
@@ -804,7 +813,8 @@ void DATVModSource::applySettings(const DATVModSettings& settings, bool force)
 
     m_settings = settings;
 
-    m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;
+    if (m_settings.m_symbolRate > 0)
+        m_samplesPerSymbol = m_channelSampleRate/m_settings.m_symbolRate;
 
     m_pulseShapeI.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
     m_pulseShapeQ.create(m_settings.m_rollOff, 8, m_samplesPerSymbol, false);
