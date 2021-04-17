@@ -230,6 +230,11 @@ elseif (WIN32)
   set(UHD_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/uhd/lib/uhd.lib" CACHE INTERNAL "")
   set(UHD_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/uhd/bin" CACHE INTERNAL "")
 
+  set(DAB_FOUND ON CACHE INTERNAL "")
+  set(DAB_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/dab" CACHE INTERNAL "")
+  set(DAB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/dab/dab_lib.lib" CACHE INTERNAL "")
+  set(DAB_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/dab" CACHE INTERNAL "")
+
   set(OPENSSL_FOUND ON CACHE INTERNAL "")
   set(OPENSSL_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/openssl" CACHE INTERNAL "")
 
@@ -254,6 +259,14 @@ elseif (WIN32)
   set(SDRPLAY_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/sdrplay/inc" CACHE INTERNAL "")
   set(SDRPLAY_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/sdrplay/x64/sdrplay_api.lib" CACHE INTERNAL "")
   set(SDRPLAY_DLL_DIR "${EXTERNAL_LIBRARY_FOLDER}/sdrplay/x64/" CACHE INTERNAL "")
+
+  set(FAAD_FOUND ON CACHE INTERNAL "")
+  set(FAAD_INCLUDE_DIR "${EXTERNAL_LIBRARY_FOLDER}/faad2/include" CACHE INTERNAL "")
+  set(FAAD_LIBRARY "${EXTERNAL_LIBRARY_FOLDER}/faad2/lib/libfaad.lib" CACHE INTERNAL "")
+
+  set(ZLIB_FOUND ON CACHE INTERNAL "")
+  set(ZLIB_INCLUDE_DIRS "${EXTERNAL_LIBRARY_FOLDER}/zlib/include" CACHE INTERNAL "")
+  set(ZLIB_LIBRARIES "${EXTERNAL_LIBRARY_FOLDER}/zlib/lib/zlibstaticd.lib" CACHE INTERNAL "")
 
   # used on fixup_bundle phase
   set(WINDOWS_FIXUP_BUNDLE_LIB_DIRS
@@ -330,6 +343,8 @@ find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
 find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
 find_package(LibSigMF) # SigMF recording files support
+find_package(ZLIB) # For DAB
+find_package(FAAD) # For DAB
 
 if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_definitions(-DHAS_LIBSIGMF)

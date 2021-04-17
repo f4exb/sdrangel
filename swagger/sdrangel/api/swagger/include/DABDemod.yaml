@@ -1,0 +1,36 @@
+DABDemodSettings:
+  description: DABDemod
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    rfBandwidth:
+      type: number
+      format: float
+    program:
+      type: string
+    volume:
+      type: number
+      format: float
+    audioMute:
+      type: integer
+    audioDeviceName:
+      type: string
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

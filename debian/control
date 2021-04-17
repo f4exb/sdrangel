@@ -20,6 +20,7 @@ Build-Depends: debhelper (>= 9),
  qml-module-qtquick-window2,
  qml-module-qtquick-dialogs,
  qml-module-qtquick-controls,
+ qml-module-qtquick-controls2,
  qml-module-qtquick-layouts,
  libqt5serialport5-dev,
  libqt5charts5-dev,
@@ -36,12 +37,14 @@ Build-Depends: debhelper (>= 9),
  bison,
  flex,
  ffmpeg,
+ libfaad-dev,
  libavcodec-dev,
  libavformat-dev,
  libopus-dev,
  libairspy-dev,
  libhackrf-dev,
- libuhd-dev
+ libuhd-dev,
+ zlib1g-dev
 # TODO:
 #   - more dependencies based on version; newer has more devices
 #   - manage dependencies not present upstream
@@ -51,16 +54,16 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libasound2, libgl1-mesa-glx, libqt5multimedia5-plugins, pulseaudio, ffmpeg
 Description: SDR/Analyzer/Generator front-end for various hardware
  SDR/Analyzer/Generator front-end for Airspy, BladeRF, HackRF,
- RTL-SDR, FunCube, LimeSDR, PlutoSDR, USRP.
+ RTL-SDR, FunCube, LimeSDR, PlutoSDR, RSP, USRP.
  Also File source and sink for I/Q samples, network I/Q sources with
  remote instance.
  Based on Qt5 framework and OpenGL for the spectrum and scope rendering.
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
-   Analog: AM, ATV, NFM, WFM, SSB, broadcast FM
-   Digital: D-Star, Yaesu SF, DMR, dPMR, LoRa, ADS-B, Packet (AX.25/APRS)
+   Analog: AM, ATV, NFM, WFM, SSB, broadcast FM, APT
+   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS)
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM
-   Digital: Packet (AX.25), 802.15.4
+   Digital: DVB-S, Packet (AX.25), 802.15.4
 Homepage: https://github.com/f4exb/sdrangel
