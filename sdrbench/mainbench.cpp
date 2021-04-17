@@ -64,6 +64,8 @@ void MainBench::run()
         testDecimateFF();
     } else if (m_parser.getTestType() == ParserBench::TestAMBE) {
         testAMBE();
+    } else if (m_parser.getTestType() == ParserBench::TestGolay2312) {
+        testGolay2312();
     } else {
         qDebug() << "MainBench::run: unknown test type: " << m_parser.getTestType();
     }
@@ -206,6 +208,7 @@ void MainBench::testAMBE()
         qDebug("MainBench::testAMBE: detected AMBE device %s", qPrintable(*it));
     }
 }
+
 
 void MainBench::decimateII(const qint16* buf, int len)
 {

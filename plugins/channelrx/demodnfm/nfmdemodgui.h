@@ -29,7 +29,6 @@ public:
 	QByteArray serialize() const;
 	bool deserialize(const QByteArray& data);
 	virtual MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; }
-	void setCtcssFreq(Real ctcssFreq);
 
 public slots:
 	void channelMarkerChangedByCursor();
@@ -47,6 +46,8 @@ private:
 	NFMDemod* m_nfmDemod;
 	bool m_squelchOpen;
     int m_audioSampleRate;
+	bool m_reportedDcsCode;
+	bool m_dcsShowPositive;
 	uint32_t m_tickCount;
 	MessageQueue m_inputMessageQueue;
 
@@ -57,6 +58,8 @@ private:
 	void applySettings(bool force = false);
 	void displaySettings();
     void displayStreamIndex();
+	void setCtcssFreq(Real ctcssFreq);
+	void setDcsCode(unsigned int dcsCode);
 	bool handleMessage(const Message& message);
 
 	void leaveEvent(QEvent*);
@@ -74,6 +77,9 @@ private slots:
 	void on_squelch_valueChanged(int value);
 	void on_ctcss_currentIndexChanged(int index);
 	void on_ctcssOn_toggled(bool checked);
+	void on_dcsOn_toggled(bool checked);
+	void on_dcsPositive_toggled(bool checked);
+	void on_dcsCode_currentIndexChanged(int index);
     void on_highPassFilter_toggled(bool checked);
 	void on_audioMute_toggled(bool checked);
 	void onWidgetRolled(QWidget* widget, bool rollDown);

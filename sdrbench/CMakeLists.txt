@@ -3,6 +3,7 @@ project (sdrbench)
 set(sdrbench_SOURCES
     mainbench.cpp
     parserbench.cpp
+    test_golay2312.cpp
 )
 
 set(sdrbench_HEADERS

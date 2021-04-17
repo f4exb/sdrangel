@@ -1,6 +1,7 @@
 project(nfm)
 
 set(nfm_SOURCES
+    dcsdetector.cpp
 	nfmdemod.cpp
     nfmdemodsettings.cpp
     nfmdemodwebapiadapter.cpp
@@ -11,6 +12,7 @@ set(nfm_SOURCES
 )
 
 set(nfm_HEADERS
+    dcsdetector.h
 	nfmdemod.h
     nfmdemodsettings.h
     nfmdemodwebapiadapter.h

@@ -47,6 +47,26 @@ public:
         { }
     };
 
+    class MsgReportDCSCode : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        unsigned int getCode() const { return m_code; }
+
+        static MsgReportDCSCode* create(unsigned int code)
+        {
+            return new MsgReportDCSCode(code);
+        }
+
+    private:
+        unsigned int m_code;
+
+        MsgReportDCSCode(unsigned int code) :
+            Message(),
+            m_code(code)
+        { }
+    };
+
 public:
     NFMDemodReport();
     ~NFMDemodReport();

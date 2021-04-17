@@ -101,6 +101,7 @@ set(sdrbase_SOURCES
     dsp/cwkeyer.cpp
     dsp/cwkeyersettings.cpp
     dsp/datafifo.cpp
+    dsp/dcscodes.cpp
     dsp/decimatorsff.cpp
     dsp/decimatorsfi.cpp
     dsp/decimatorc.cpp
@@ -186,6 +187,7 @@ set(sdrbase_SOURCES
     util/db.cpp
     util/fixedtraits.cpp
     util/fits.cpp
+    util/golay2312.cpp
     util/httpdownloadmanager.cpp
     util/lfsr.cpp
     util/maidenhead.cpp
@@ -262,6 +264,7 @@ set(sdrbase_HEADERS
     dsp/cwkeyer.h
     dsp/cwkeyersettings.h
     dsp/datafifo.h
+    dsp/dcscodes.h
     dsp/decimators.h
     dsp/decimatorsif.h
     dsp/decimatorsff.h
@@ -382,6 +385,7 @@ set(sdrbase_HEADERS
     util/doublebufferfifo.h
     util/fixedtraits.h
     util/fits.h
+    util/golay2312.h
     util/httpdownloadmanager.h
     util/incrementalarray.h
     util/incrementalvector.h

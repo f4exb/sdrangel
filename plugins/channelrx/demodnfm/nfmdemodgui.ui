@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>302</width>
-    <height>182</height>
+    <width>364</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>302</width>
-    <height>0</height>
+    <width>364</width>
+    <height>200</height>
    </size>
   </property>
   <property name="font">
@@ -36,13 +36,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>300</width>
-     <height>141</height>
+     <width>362</width>
+     <height>191</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>300</width>
+     <width>362</width>
      <height>0</height>
     </size>
    </property>
@@ -537,41 +537,39 @@
     <item>
      <layout class="QHBoxLayout" name="ctcssLayout">
       <item>
-       <widget class="QLabel" name="ctcssLabel">
+       <widget class="QCheckBox" name="ctcssOn">
+        <property name="toolTip">
+         <string>Activate CTCSS</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
         <property name="text">
          <string>CTCSS</string>
         </property>
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="CTCSSblock">
-        <item>
-         <widget class="QCheckBox" name="ctcssOn">
-          <property name="toolTip">
-           <string>Activate CTCSS</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="ctcss">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Set CTCSS Frequency</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QComboBox" name="ctcss">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Set CTCSS Frequency</string>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QLabel" name="ctcssText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>CTCSS detected</string>
         </property>
@@ -584,7 +582,85 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="dcsOn">
+        <property name="toolTip">
+         <string>Activate DCS</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>DCS</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="dcsCode">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Set DCS code</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="ButtonSwitch" name="dscPositive">
+        <property name="toolTip">
+         <string>Display DCS code as postive</string>
+        </property>
+        <property name="text">
+         <string>+</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="dcsText">
+        <property name="minimumSize">
+         <size>
+          <width>30</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>DCS detected</string>
+        </property>
+        <property name="text">
+         <string>--</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="audioLayout">
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>6</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -698,12 +774,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>LevelMeterSignalDB</class>
-   <extends>QWidget</extends>
-   <header>gui/levelmeter.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>ButtonSwitch</class>
    <extends>QToolButton</extends>
    <header>gui/buttonswitch.h</header>
@@ -712,6 +782,12 @@
    <class>ValueDialZ</class>
    <extends>QWidget</extends>
    <header>gui/valuedialz.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LevelMeterSignalDB</class>
+   <extends>QWidget</extends>
+   <header>gui/levelmeter.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

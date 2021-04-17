@@ -60,6 +60,9 @@ void NFMDemodSettings::resetToDefaults()
     m_ctcssOn = false;
     m_audioMute = false;
     m_ctcssIndex = 0;
+    m_dcsOn = false;
+    m_dcsCode = 0023;
+    m_dcsPositive = false;
     m_rgbColor = QColor(255, 0, 0).rgb();
     m_title = "NFM Demodulator";
     m_audioDeviceName = AudioDeviceManager::m_defaultDeviceName;
@@ -101,6 +104,9 @@ QByteArray NFMDemodSettings::serialize() const
     s.writeU32(20, m_reverseAPIChannelIndex);
     s.writeS32(21, m_streamIndex);
     s.writeReal(22, m_fmDeviation);
+    s.writeBool(23, m_dcsOn);
+    s.writeU32(24, m_dcsCode);
+    s.writeBool(25, m_dcsPositive);
 
     return s.final();
 }
@@ -160,6 +166,10 @@ bool NFMDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
         d.readS32(21, &m_streamIndex, 0);
         d.readReal(22, &m_fmDeviation, 5000.0);
+        d.readBool(23, &m_dcsOn, false);
+        d.readU32(24, &utmp, 0023);
+        m_dcsCode = utmp < 511 ? utmp : 511;
+        d.readBool(26, &m_dcsPositive, false);
 
         return true;
     }

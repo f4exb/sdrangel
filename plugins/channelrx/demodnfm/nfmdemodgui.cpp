@@ -12,6 +12,7 @@
 #include "gui/crightclickenabler.h"
 #include "gui/audioselectdialog.h"
 #include "dsp/dspengine.h"
+#include "dsp/dcscodes.h"
 #include "maincore.h"
 
 #include "nfmdemodreport.h"
@@ -59,6 +60,12 @@ bool NFMDemodGUI::handleMessage(const Message& message)
     {
         NFMDemodReport::MsgReportCTCSSFreq& report = (NFMDemodReport::MsgReportCTCSSFreq&) message;
         setCtcssFreq(report.getFrequency());
+        return true;
+    }
+    else if (NFMDemodReport::MsgReportDCSCode::match(message))
+    {
+        NFMDemodReport::MsgReportDCSCode& report = (NFMDemodReport::MsgReportDCSCode&) message;
+        setDcsCode(report.getCode());
         return true;
     }
     else if (NFMDemod::MsgConfigureNFMDemod::match(message))
@@ -214,6 +221,42 @@ void NFMDemodGUI::on_ctcssOn_toggled(bool checked)
 	applySettings();
 }
 
+void NFMDemodGUI::on_dcsOn_toggled(bool checked)
+{
+    m_settings.m_dcsOn = checked;
+    applySettings();
+}
+
+void NFMDemodGUI::on_dcsPositive_toggled(bool checked)
+{
+    m_dcsShowPositive = checked;
+    setDcsCode(m_reportedDcsCode);
+}
+
+void NFMDemodGUI::on_dcsCode_currentIndexChanged(int index)
+{
+    if (index == 0)
+    {
+        m_settings.m_dcsCode = 0;
+        applySettings();
+    }
+    else
+    {
+        QString dcsText = ui->dcsCode->currentText();
+        bool positive = (dcsText[3] == 'P');
+        dcsText.chop(1);
+        bool ok;
+        int dcsCode = dcsText.toInt(&ok, 8);
+
+        if (ok)
+        {
+            m_settings.m_dcsCode = dcsCode;
+            m_settings.m_dcsPositive = positive;
+            applySettings();
+        }
+    }
+}
+
 void NFMDemodGUI::on_highPassFilter_toggled(bool checked)
 {
     m_settings.m_highPass = checked;
@@ -297,6 +340,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_doApplySettings(true),
 	m_squelchOpen(false),
     m_audioSampleRate(-1),
+    m_reportedDcsCode(0),
 	m_tickCount(0)
 {
 	ui->setupUi(this);
@@ -328,9 +372,20 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     ui->ctcss->addItem("--");
 
-    for (int i=0; i<ctcss_nbTones; i++)
-    {
+    for (int i=0; i<ctcss_nbTones; i++) {
         ui->ctcss->addItem(QString("%1").arg(ctcss_tones[i]));
+    }
+
+    ui->dcsOn->setChecked(m_settings.m_dcsOn);
+    ui->dscPositive->setChecked(m_settings.m_dcsPositive);
+    QList<unsigned int> dcsCodes;
+    DCSCodes::getCanonicalCodes(dcsCodes);
+    ui->dcsCode->addItem("--");
+
+    for (auto dcsCode : dcsCodes)
+    {
+        ui->dcsCode->addItem(QString("%1P").arg(dcsCode, 3, 8, QLatin1Char('0')));
+        ui->dcsCode->addItem(QString("%1N").arg(dcsCode, 3, 8, QLatin1Char('0')));
     }
 
     blockApplySettings(false);
@@ -440,6 +495,16 @@ void NFMDemodGUI::displaySettings()
 
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);
 
+    if (m_settings.m_dcsCode == 0) {
+        ui->dcsCode->setCurrentText(tr("--"));
+    } else {
+        ui->dcsCode->setCurrentText(tr("%1%2")
+            .arg(m_settings.m_dcsCode, 3, 8, QLatin1Char('0'))
+            .arg(m_settings.m_dcsPositive ? "P" : "N")
+        );
+    }
+
+    setDcsCode(m_reportedDcsCode);
     displayStreamIndex();
 
     blockApplySettings(false);
@@ -466,13 +531,25 @@ void NFMDemodGUI::enterEvent(QEvent*)
 
 void NFMDemodGUI::setCtcssFreq(Real ctcssFreq)
 {
-	if (ctcssFreq == 0)
-	{
+	if (ctcssFreq == 0) {
 		ui->ctcssText->setText("--");
-	}
-	else
-	{
+	} else {
 		ui->ctcssText->setText(QString("%1").arg(ctcssFreq));
+	}
+}
+
+void NFMDemodGUI::setDcsCode(unsigned int dcsCode)
+{
+	if (dcsCode == 0)
+    {
+		ui->dcsText->setText("--");
+	}
+    else
+    {
+        unsigned int normalizedCode;
+        normalizedCode = DCSCodes::m_toCanonicalCode[dcsCode];
+        normalizedCode = m_dcsShowPositive ? normalizedCode : DCSCodes::m_signFlip[normalizedCode];
+		ui->dcsText->setText(tr("%1").arg(normalizedCode, 3, 8, QLatin1Char('0')));
 	}
 }
 

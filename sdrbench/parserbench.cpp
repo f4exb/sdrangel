@@ -24,7 +24,7 @@
 
 ParserBench::ParserBench() :
     m_testOption(QStringList() << "t" << "test",
-        "Test type: decimateii, decimatefi, decimateff, decimateif, decimateinfii, decimatesupii, ambe",
+        "Test type: decimateii, decimatefi, decimateff, decimateif, decimateinfii, decimatesupii, ambe, golay2312",
         "test",
         "decimateii"),
     m_nbSamplesOption(QStringList() << "n" << "nb-samples",
@@ -69,7 +69,7 @@ void ParserBench::parse(const QCoreApplication& app)
 
     QString test = m_parser.value(m_testOption);
 
-    QString testStr = "([a-z]+)";
+    QString testStr = "([a-z0-9]+)";
     QRegExp ipRegex ("^" + testStr + "$");
     QRegExpValidator ipValidator(ipRegex);
 
@@ -127,6 +127,8 @@ ParserBench::TestType ParserBench::getTestType() const
         return TestDecimatorsSupII;
     } else if (m_testStr == "ambe") {
         return TestAMBE;
+    } else if (m_testStr == "golay2312") {
+        return TestGolay2312;
     } else {
         return TestDecimatorsII;
     }

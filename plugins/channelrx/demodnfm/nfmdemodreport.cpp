@@ -18,6 +18,7 @@
 #include "nfmdemodreport.h"
 
 MESSAGE_CLASS_DEFINITION(NFMDemodReport::MsgReportCTCSSFreq, Message)
+MESSAGE_CLASS_DEFINITION(NFMDemodReport::MsgReportDCSCode, Message)
 
 NFMDemodReport::NFMDemodReport()
 { }

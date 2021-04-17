@@ -33,6 +33,7 @@
 #include "util/doublebufferfifo.h"
 #include "audio/audiofifo.h"
 
+#include "dcsdetector.h"
 #include "nfmdemodsettings.h"
 
 class ChannelAPI;
@@ -50,6 +51,10 @@ public:
 
     void setSelectedCtcssIndex(int selectedCtcssIndex) {
         m_ctcssIndexSelected = selectedCtcssIndex;
+    }
+
+    void setSelectedDcsCode(unsigned int selectedDcsCode) {
+        m_dcsCodeSeleted = selectedDcsCode;
     }
 
     bool getSquelchOpen() const { return m_squelchOpen; }
@@ -120,6 +125,9 @@ private:
     CTCSSDetector m_ctcssDetector;
     int m_ctcssIndex; // 0 for nothing detected
     int m_ctcssIndexSelected;
+    DCSDetector m_dcsDetector;
+    unsigned int m_dcsCode;
+    unsigned int m_dcsCodeSeleted;
     int m_sampleCount;
     int m_squelchCount;
     int m_squelchGate;

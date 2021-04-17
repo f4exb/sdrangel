@@ -30,6 +30,7 @@
 #include "dsp/devicesamplemimo.h"
 #include "dsp/misc.h"
 #include "dsp/datafifo.h"
+#include "dsp/dcscodes.h"
 #include "device/deviceapi.h"
 #include "maincore.h"
 
@@ -49,6 +50,7 @@ NFMDemodSink::NFMDemodSink() :
         m_audioFifo(48000),
         m_rfFilter(FFT_FILTER_LENGTH),
         m_ctcssIndex(0),
+        m_dcsCode(0),
         m_sampleCount(0),
         m_squelchCount(0),
         m_squelchGate(4800),
@@ -67,6 +69,9 @@ NFMDemodSink::NFMDemodSink() :
     m_audioBuffer.resize(1<<16);
     m_demodBuffer.resize(1<<12);
     m_demodBufferFill = 0;
+
+    m_dcsDetector.setSampleRate(CTCSS_DETECTOR_RATE);
+    m_dcsDetector.setEqWindow(23);
 
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
@@ -171,14 +176,18 @@ void NFMDemodSink::processOneSample(Complex &ci)
 
     m_squelchOpen = m_squelchCount > m_squelchGate;
     int ctcssIndex = m_squelchOpen && m_settings.m_ctcssOn ? m_ctcssIndex : 0;
+    unsigned int dcsCode = m_squelchOpen && m_settings.m_dcsOn ? m_dcsCode : 0;
+
     if (m_squelchOpen)
     {
         if (m_settings.m_ctcssOn)
         {
             int factor = (m_audioSampleRate / CTCSS_DETECTOR_RATE) - 1; // decimate -> 6k
+
             if ((m_sampleCount & factor) == factor)
             {
                 Real ctcssSample = m_ctcssLowpass.filter(demod);
+
                 if (m_ctcssDetector.analyze(&ctcssSample))
                 {
                     int maxToneIndex;
@@ -186,8 +195,29 @@ void NFMDemodSink::processOneSample(Complex &ci)
                 }
             }
         }
+        else if (m_settings.m_dcsOn)
+        {
+            int factor = (m_audioSampleRate / CTCSS_DETECTOR_RATE) - 1; // decimate -> 6k (same decimation as for CTCSS)
 
-        if (!m_settings.m_audioMute && (!m_settings.m_ctcssOn || m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0))
+            if ((m_sampleCount & factor) == factor)
+            {
+                Real dcsSample = m_ctcssLowpass.filter(demod);
+                unsigned int dcsCodeDetected;
+
+                if (m_dcsDetector.analyze(&dcsSample, dcsCodeDetected))
+                {
+                    dcsCode = DCSCodes::m_toCanonicalCode.value(dcsCodeDetected, 0);
+
+                    if (dcsCode != 0) {
+                        dcsCode = m_settings.m_dcsPositive ? dcsCode : DCSCodes::m_signFlip[dcsCode];
+                    }
+                }
+            }
+        }
+
+        if (!m_settings.m_audioMute &&
+            (!m_settings.m_ctcssOn || m_ctcssIndexSelected == ctcssIndex || m_ctcssIndexSelected == 0) &&
+            (!m_settings.m_dcsOn || m_dcsCodeSeleted == dcsCode || m_dcsCodeSeleted == 0))
         {
             Real audioSample = m_squelchDelayLine.readBack(m_squelchGate);
             audioSample = m_settings.m_highPass ? m_bandpass.filter(audioSample) : m_lowpass.filter(audioSample);
@@ -200,12 +230,25 @@ void NFMDemodSink::processOneSample(Complex &ci)
     if (ctcssIndex != m_ctcssIndex)
     {
         auto *guiQueue = getMessageQueueToGUI();
+
         if (guiQueue)
         {
             guiQueue->push(NFMDemodReport::MsgReportCTCSSFreq::create(
                 ctcssIndex ? m_ctcssDetector.getToneSet()[ctcssIndex - 1] : 0));
         }
+
         m_ctcssIndex = ctcssIndex;
+    }
+
+    if (dcsCode != m_dcsCode)
+    {
+        auto *guiQueue = getMessageQueueToGUI();
+
+        if (guiQueue) {
+            guiQueue->push(NFMDemodReport::MsgReportDCSCode::create(dcsCode));
+        }
+
+        m_dcsCode = dcsCode;
     }
 
     m_audioBuffer[m_audioBufferFill].l = sample;
@@ -286,6 +329,9 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_ctcssIndex: " << settings.m_ctcssIndex
             << " m_ctcssOn: " << settings.m_ctcssOn
+            << " m_dcsOn: " << settings.m_dcsOn
+            << " m_dcsCode: " << settings.m_dcsCode
+            << " m_dcsPositive: " << settings.m_dcsPositive
             << " m_highPass: " << settings.m_highPass
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName
@@ -339,6 +385,10 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
         setSelectedCtcssIndex(settings.m_ctcssIndex);
     }
 
+    if ((settings.m_dcsCode != m_settings.m_dcsCode) || force) {
+        setSelectedDcsCode(settings.m_dcsCode);
+    }
+
     m_settings = settings;
 }
 
@@ -359,8 +409,8 @@ void NFMDemodSink::applyAudioSampleRate(unsigned int sampleRate)
     } else {
         m_afSquelch.setCoefficients(sampleRate/2000, 600, sampleRate, 200, 0, afSqTones); // 0.5ms test period, 300ms average span, audio SR, 100ms attack, no decay
     }
-    m_afSquelch.setThreshold(m_squelchLevel);
 
+    m_afSquelch.setThreshold(m_squelchLevel);
     m_phaseDiscri.setFMScaling(Real(sampleRate) / (2.0f * m_settings.m_fmDeviation));
     m_audioFifo.setSize(sampleRate);
     m_squelchDelayLine.resize(sampleRate/2);

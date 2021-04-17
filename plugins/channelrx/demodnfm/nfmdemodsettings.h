@@ -41,6 +41,9 @@ struct NFMDemodSettings
     bool m_ctcssOn;
     bool m_audioMute;
     int  m_ctcssIndex;
+    bool m_dcsOn;
+    unsigned int m_dcsCode;
+    bool m_dcsPositive;
     quint32 m_rgbColor;
     QString m_title;
     QString m_audioDeviceName;

@@ -151,6 +151,9 @@ void NFMDemod::applySettings(const NFMDemodSettings& settings, bool force)
             << " m_squelch: " << settings.m_squelch
             << " m_ctcssIndex: " << settings.m_ctcssIndex
             << " m_ctcssOn: " << settings.m_ctcssOn
+            << " m_dcsOn: " << settings.m_dcsOn
+            << " m_dcsCode: " << oct << settings.m_dcsCode << dec
+            << " m_dcsPositive: " << settings.m_dcsPositive
             << " m_highPass: " << settings.m_highPass
             << " m_audioMute: " << settings.m_audioMute
             << " m_audioDeviceName: " << settings.m_audioDeviceName

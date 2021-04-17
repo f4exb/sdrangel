@@ -35,7 +35,8 @@ public:
         TestDecimatorsFF,
         TestDecimatorsInfII,
         TestDecimatorsSupII,
-        TestAMBE
+        TestAMBE,
+        TestGolay2312
     } TestType;
 
     ParserBench();
