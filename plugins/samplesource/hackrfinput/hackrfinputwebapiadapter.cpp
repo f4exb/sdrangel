@@ -33,8 +33,8 @@ int HackRFInputWebAPIAdapter::webapiSettingsGet(
         QString& errorMessage)
 {
     (void) errorMessage;
-    response.setAirspyHfSettings(new SWGSDRangel::SWGAirspyHFSettings());
-    response.getAirspyHfSettings()->init();
+    response.setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
+    response.getHackRfInputSettings()->init();
     HackRFInput::webapiFormatDeviceSettings(response, m_settings);
     return 200;
 }
