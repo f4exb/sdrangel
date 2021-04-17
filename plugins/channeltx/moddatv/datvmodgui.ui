@@ -272,6 +272,9 @@
         <property name="toolTip">
          <string>Symbol rate</string>
         </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
         <property name="maximum">
          <number>10000000</number>
         </property>
