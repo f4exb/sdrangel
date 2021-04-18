@@ -1,3 +1,14 @@
+sdrangel (6.10.0-1) unstable; urgency=medium
+
+  * New DAB/DAB+ demodulator plugin. PR #850
+  * DATV modulator: avoid SR=0. PR #851 fixes #849
+  * NFM demod: implemented DCS squelch. Finalizes #792
+  * Fixed webapi adapters. Fixes #842
+  * Package builds: upgrade DSDcc to 1.9.2 contains FEC fixes
+  * ADSB and VOR: Fix assertion when removing all elements from model. PR #841
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 18 Apr 2021 20:36:50 +0200
+
 sdrangel (6.9.0-1) unstable; urgency=medium
 
   * New SDRPlay v3 source plugin. PR #839
