@@ -112,7 +112,6 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
 	const Real *getCtcssToneSet(int& nbTones) const { return m_basebandSink->getCtcssToneSet(nbTones); }
-	void setSelectedCtcssIndex(int selectedCtcssIndex) { m_basebandSink->setSelectedCtcssIndex(selectedCtcssIndex); }
 	bool getSquelchOpen() const { return m_basebandSink->getSquelchOpen(); }
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_basebandSink->getMagSqLevels(avg, peak, nbSamples); }
     void setMessageQueueToGUI(MessageQueue* queue) override {

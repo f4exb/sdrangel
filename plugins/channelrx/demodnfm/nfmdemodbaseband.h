@@ -64,7 +64,6 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) { m_sink.getMagSqLevels(avg, peak, nbSamples); }
-    void setSelectedCtcssIndex(int selectedCtcssIndex) { m_sink.setSelectedCtcssIndex(selectedCtcssIndex); }
     bool getSquelchOpen() const { return m_sink.getSquelchOpen(); }
     const Real *getCtcssToneSet(int& nbTones) const { return m_sink.getCtcssToneSet(nbTones); }
     void setMessageQueueToGUI(MessageQueue *messageQueue) { m_sink.setMessageQueueToGUI(messageQueue); }

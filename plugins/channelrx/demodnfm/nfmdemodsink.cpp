@@ -30,7 +30,6 @@
 #include "dsp/devicesamplemimo.h"
 #include "dsp/misc.h"
 #include "dsp/datafifo.h"
-#include "dsp/dcscodes.h"
 #include "device/deviceapi.h"
 #include "maincore.h"
 
@@ -204,13 +203,8 @@ void NFMDemodSink::processOneSample(Complex &ci)
                 Real dcsSample = m_ctcssLowpass.filter(demod);
                 unsigned int dcsCodeDetected;
 
-                if (m_dcsDetector.analyze(&dcsSample, dcsCodeDetected))
-                {
+                if (m_dcsDetector.analyze(&dcsSample, dcsCodeDetected)) {
                     dcsCode = DCSCodes::m_toCanonicalCode.value(dcsCodeDetected, 0);
-
-                    if (dcsCode != 0) {
-                        dcsCode = m_settings.m_dcsPositive ? dcsCode : DCSCodes::m_signFlip[dcsCode];
-                    }
                 }
             }
         }
@@ -385,8 +379,10 @@ void NFMDemodSink::applySettings(const NFMDemodSettings& settings, bool force)
         setSelectedCtcssIndex(settings.m_ctcssIndex);
     }
 
-    if ((settings.m_dcsCode != m_settings.m_dcsCode) || force) {
-        setSelectedDcsCode(settings.m_dcsCode);
+    if ((settings.m_dcsCode != m_settings.m_dcsCode) ||
+        (settings.m_dcsPositive != m_settings.m_dcsPositive) || force)
+    {
+        setSelectedDcsCode(settings.m_dcsCode, settings.m_dcsPositive);
     }
 
     m_settings = settings;

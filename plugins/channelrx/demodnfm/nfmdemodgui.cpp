@@ -65,6 +65,7 @@ bool NFMDemodGUI::handleMessage(const Message& message)
     else if (NFMDemodReport::MsgReportDCSCode::match(message))
     {
         NFMDemodReport::MsgReportDCSCode& report = (NFMDemodReport::MsgReportDCSCode&) message;
+        m_reportedDcsCode = report.getCode();
         setDcsCode(report.getCode());
         return true;
     }
@@ -227,12 +228,6 @@ void NFMDemodGUI::on_dcsOn_toggled(bool checked)
     applySettings();
 }
 
-void NFMDemodGUI::on_dcsPositive_toggled(bool checked)
-{
-    m_dcsShowPositive = checked;
-    setDcsCode(m_reportedDcsCode);
-}
-
 void NFMDemodGUI::on_dcsCode_currentIndexChanged(int index)
 {
     if (index == 0)
@@ -341,6 +336,7 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 	m_squelchOpen(false),
     m_audioSampleRate(-1),
     m_reportedDcsCode(0),
+    m_dcsShowPositive(false),
 	m_tickCount(0)
 {
 	ui->setupUi(this);
@@ -377,7 +373,6 @@ NFMDemodGUI::NFMDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     }
 
     ui->dcsOn->setChecked(m_settings.m_dcsOn);
-    ui->dscPositive->setChecked(m_settings.m_dcsPositive);
     QList<unsigned int> dcsCodes;
     DCSCodes::getCanonicalCodes(dcsCodes);
     ui->dcsCode->addItem("--");
@@ -494,6 +489,7 @@ void NFMDemodGUI::displaySettings()
     ui->audioMute->setChecked(m_settings.m_audioMute);
 
     ui->ctcss->setCurrentIndex(m_settings.m_ctcssIndex);
+    ui->dcsOn->setChecked(m_settings.m_dcsOn);
 
     if (m_settings.m_dcsCode == 0) {
         ui->dcsCode->setCurrentText(tr("--"));
@@ -547,8 +543,9 @@ void NFMDemodGUI::setDcsCode(unsigned int dcsCode)
     else
     {
         unsigned int normalizedCode;
+        bool showPositive = ui->dcsPositive->isChecked();
         normalizedCode = DCSCodes::m_toCanonicalCode[dcsCode];
-        normalizedCode = m_dcsShowPositive ? normalizedCode : DCSCodes::m_signFlip[normalizedCode];
+        normalizedCode = showPositive ? normalizedCode : DCSCodes::m_signFlip[normalizedCode];
 		ui->dcsText->setText(tr("%1").arg(normalizedCode, 3, 8, QLatin1Char('0')));
 	}
 }

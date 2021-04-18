@@ -608,12 +608,23 @@
        </widget>
       </item>
       <item>
-       <widget class="ButtonSwitch" name="dscPositive">
+       <widget class="QToolButton" name="dcsPositive">
+        <property name="acceptDrops">
+         <bool>true</bool>
+        </property>
         <property name="toolTip">
-         <string>Display DCS code as postive</string>
+         <string>Display DCS code as postive/normal (+) or negative/inverted (-)</string>
         </property>
         <property name="text">
-         <string>+</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/minusw.png</normaloff>
+          <normalon>:/plusw.png</normalon>:/minusw.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

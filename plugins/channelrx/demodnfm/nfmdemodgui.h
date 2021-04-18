@@ -78,7 +78,6 @@ private slots:
 	void on_ctcss_currentIndexChanged(int index);
 	void on_ctcssOn_toggled(bool checked);
 	void on_dcsOn_toggled(bool checked);
-	void on_dcsPositive_toggled(bool checked);
 	void on_dcsCode_currentIndexChanged(int index);
     void on_highPassFilter_toggled(bool checked);
 	void on_audioMute_toggled(bool checked);

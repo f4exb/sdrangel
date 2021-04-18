@@ -29,6 +29,7 @@
 #include "dsp/afsquelch.h"
 #include "dsp/agc.h"
 #include "dsp/ctcssdetector.h"
+#include "dsp/dcscodes.h"
 #include "util/movingaverage.h"
 #include "util/doublebufferfifo.h"
 #include "audio/audiofifo.h"
@@ -47,14 +48,6 @@ public:
     const Real *getCtcssToneSet(int& nbTones) const {
         nbTones = m_ctcssDetector.getNTones();
         return m_ctcssDetector.getToneSet();
-    }
-
-    void setSelectedCtcssIndex(int selectedCtcssIndex) {
-        m_ctcssIndexSelected = selectedCtcssIndex;
-    }
-
-    void setSelectedDcsCode(unsigned int selectedDcsCode) {
-        m_dcsCodeSeleted = selectedDcsCode;
     }
 
     bool getSquelchOpen() const { return m_squelchOpen; }
@@ -153,6 +146,14 @@ private:
     static const double afSqTones_lowrate[];
     static const unsigned FFT_FILTER_LENGTH;
     static const unsigned CTCSS_DETECTOR_RATE;
+
+    void setSelectedCtcssIndex(int selectedCtcssIndex) {
+        m_ctcssIndexSelected = selectedCtcssIndex;
+    }
+
+    void setSelectedDcsCode(unsigned int dcsCode, bool dcsPositive) {
+        m_dcsCodeSeleted = dcsPositive ? dcsCode : DCSCodes::m_signFlip[dcsCode];
+    }
 
     void processOneSample(Complex &ci);
     MessageQueue *getMessageQueueToGUI() { return m_messageQueueToGUI; }

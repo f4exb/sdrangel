@@ -22,9 +22,32 @@ Average total power in dB relative to a +/- 1.0 amplitude signal received in the
   - bottom bar (blue green): instantaneous peak value
   - tip vertical bar (bright green): peak hold value
 
-<h3>4: Channel spacing presets</h3>
+<h3>4: Volume</h3>
 
-Clicking on the "CS" button will apply RF bandwidth, AF bandwidth and FM deviation settings according to the channel spacing scheme selected in the combo box as follows:
+This is the volume of the audio signal from 0% (mute) to 200% (maximum) of volume at nominal frequency deviation. It can be varied continuously 1% steps using the dial button.
+
+<h3>5: Audio high pass filter</h3>
+
+Toggle a 300 Hz cutoff high pass filter on audio to cut-off CTCSS frequencies. It is on by default for normal audio channels usage. You can switch it off to pipe the audio in programs requiring DC like DSD+ or Multimon.
+
+<h3>6: Audio mute and audio output select</h3>
+
+Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+
+If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+
+
+<h3>A: RF parameters</h3>
+
+![NFM Demodulator plugin GUI A](../../../doc/img/NFMdemod_pluginA.png)
+
+<h3>A.1: Apply channel spacing preset</h3>
+
+Use this push button to apply the channel spacing preset selected next (A.2) It will apply RF bandwidth, AF bandwidth and FM deviation settings according to the channel spacing scheme.
+
+<h3>A.2: Select channel spacing preset</h3>
+
+Select the RF bandwidth, AF bandwidth and FM deviation settings according to the channel spacing scheme specified as follows:
 
 <table>
     <tr>
@@ -98,23 +121,27 @@ When changing the RF bandwidth the channel spacing selection in the combo box is
 
 &#9758; The channel sample rate is always the baseband signal rate divided by an integer power of two so depending on the baseband sample rate obtained from the sampling device you could also guarantee a minimal channel bandwidth. For example with a 125 kS/s baseband sample rate and a 8 kS/s audio sample rate the channel sample rate cannot be lower than 125/8 = 15.625 kS/s (125/16 = 7.8125 kS/s is too small) which is still OK for 5 or 6.25 kHz channel bandwidths.
 
-<h3>5: RF bandwidth</h3>
+<h3>A.3: RF bandwidth</h3>
 
 This is the bandwidth in kHz of the filter applied before the discriminator and therefore called "RF" bandwidth but is applied in the device pass band in fact.
 
-<h3>6: AF bandwidth</h3>
+<h3>A.4: AF bandwidth</h3>
 
 This is the bandwidth of the audio signal in kHz (i.e. after demodulation).
 
-<h3>7: Expected FM peak deviation</h3>
+<h3>B: Modulation parameters and squelch</h3>
+
+![NFM Demodulator plugin GUI B](../../../doc/img/NFMdemod_pluginB.png)
+
+<h3>B.1: Expected FM peak deviation</h3>
 
 This is the peak FM deviation in &plusmn;kHz expected in the received signal and corresponds to 100% audio volume
 
-<h3>8: Delta/Level squelch</h3>
+<h3>B.2: Delta/Level squelch</h3>
 
 Use this button to toggle between AF (on) and RF power (off) based squelch.
 
-<h3>9: Squelch threshold</h3>
+<h3>B.3: Squelch threshold</h3>
 
 <h4>Power threshold mode</h4>
 
@@ -132,32 +159,38 @@ The distinct advantage of this type of squelch is that it guarantees the quality
 
 &#9758; The chosen bands around 1000 and 6000 Hz are optimized for standard voice signals in the 300-3000 Hz range.
 
-<h3>10: Squelch gate</h3>
+<h3>B.4: Squelch gate</h3>
 
 This is the squelch gate in milliseconds. The squelch input must be open for this amount of time before the squelch actually opens. This prevents the opening of the squelch by parasitic transients. It can be varied continuously in 10ms steps from 10 to 500ms using the dial button.
 
-<h3>11: CTCSS on/off</h3>
+<h3>C: CTCSS/DCS</h3>
+
+![NFM Demodulator plugin GUI C](../../../doc/img/NFMdemod_pluginC.png)
+
+<h3>C.1: CTCSS on/off</h3>
 
 Use the checkbox to toggle CTCSS activation. When activated it will look for a tone squelch in the demodulated signal and display its frequency (see 10).
 
-<h3>12: CTCSS tone</h3>
+<h3>C.2: CTCSS tone</h3>
 
 This is the tone squelch in Hz. It can be selected using the toolbox among [these CTCSS values](https://en.wikipedia.org/wiki/Continuous_Tone-Coded_Squelch_System) and `--` for none. When a value is given and the CTCSS is activated the squelch will open only for signals with this tone squelch.
 
-<h3>13: CTCSS tone value</h3>
+<h3>C.3: CTCSS tone value</h3>
 
 This is the value of the tone squelch received when the CTCSS is activated. It displays `--` if the CTCSS system is de-activated.
 
-<h3>14: Volume</h3>
+<h3>C.4: DCS on/off</h3>
 
-This is the volume of the audio signal from 0% (mute) to 200% (maximum) of volume at nominal frequency deviation. It can be varied continuously 1% steps using the dial button.
+Use the checkbox to toggle DCS activation. When activated it will look for a squelch code in the demodulated signal and display its octal value in C.7.
 
-<h3>15: Audio high pass filter</h3>
+<h3>C.5: DCS code</h3>
 
-Toggle a 300 Hz cutoff high pass filter on audio to cut-off CTCSS frequencies. It is on by default for normal audio channels usage. You can switch it off to pipe the audio in programs requiring DC like DSD+ or Multimon.
+This is the DCS code to be selected among the normalized values. The value is in octal format suffixed by "P" for positive or normal codes and "N" for negative or inverted codes. The values are those listed [here](http://onfreq.com/syntorx/dcs.html). The special value `--` desactivates the squelch but the DCS code is still searched.
 
-<h3>16: Audio mute and audio output select</h3>
+<h3>C.6: Show positive or negative code</h3>
 
-Left click on this button to toggle audio mute for this channel. The button will light up in green if the squelch is open. This helps identifying which channels are active in a multi-channel configuration.
+The DCS code is searched with a positive modulation (i.e. positive shift for bit "1" else negative). When `+` is selected the code is displayed directly in C.7 and when `-` is selected the corresponding negative code is displayed in C.7
 
-If you right click on it it will open a dialog to select the audio output device. See [audio management documentation](../../../sdrgui/audio.md) for details.
+<h3>C.7: DCS code detected</h3>
+
+This is the value of the code detected when the DCS is activated. It displays `--` if the DCS system is de-activated or no code can be detected.
