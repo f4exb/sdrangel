@@ -277,6 +277,7 @@ void programQualityHandler(int16_t frames, int16_t rs, int16_t aac, void *ctx)
 void motDataHandler(std::string data, int a, void *ctx)
 {
     (void)data;
+    (void)a;
     (void)ctx;
 }
 
