@@ -1,3 +1,11 @@
+sdrangel (6.10.1-1) unstable; urgency=medium
+
+  * DAB/DAB+ demodulator plugin build in Windows package. PR #854 fixes #853
+  * DSD Demodulator: set fixed 48kS/s for requested channel SR. Fixes #752
+  * External libaries (package builds): upgraded DSDcc to v1.9.3
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Mon, 19 Apr 2021 21:48:14 +0200
+
 sdrangel (6.10.0-1) unstable; urgency=medium
 
   * New DAB/DAB+ demodulator plugin. PR #850
