@@ -151,7 +151,7 @@ void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool forc
 {
     if ((settings.m_inputFrequencyOffset != m_settings.m_inputFrequencyOffset) || force)
     {
-        m_channelizer->setChannelization(m_sink.getAudioSampleRate(), settings.m_inputFrequencyOffset);
+        m_channelizer->setChannelization(48000, settings.m_inputFrequencyOffset);
         m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
 
         if (m_channelSampleRate != m_channelizer->getChannelSampleRate())
@@ -172,10 +172,7 @@ void DSDDemodBaseband::applySettings(const DSDDemodSettings& settings, bool forc
         audioDeviceManager->addAudioSink(m_sink.getAudioFifo2(), getInputMessageQueue(), audioDeviceIndex);
         int audioSampleRate = audioDeviceManager->getOutputSampleRate(audioDeviceIndex);
 
-        if (m_sink.getAudioSampleRate() != audioSampleRate)
-        {
-            m_channelizer->setChannelization(audioSampleRate, settings.m_inputFrequencyOffset);
-            m_sink.applyChannelSettings(m_channelizer->getChannelSampleRate(), m_channelizer->getChannelFrequencyOffset());
+        if (m_sink.getAudioSampleRate() != audioSampleRate) {
             m_sink.applyAudioSampleRate(audioSampleRate);
         }
     }
