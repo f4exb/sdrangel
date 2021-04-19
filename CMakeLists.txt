@@ -343,8 +343,10 @@ find_package(FFTW3F REQUIRED)
 find_package(LibUSB REQUIRED)  # used by so many packages
 find_package(OpenCV OPTIONAL_COMPONENTS core highgui imgproc imgcodecs videoio) # channeltx/modatv
 find_package(LibSigMF) # SigMF recording files support
-find_package(ZLIB) # For DAB
-find_package(FAAD) # For DAB
+if(NOT WIN32)
+    find_package(ZLIB) # For DAB
+    find_package(FAAD) # For DAB
+endif()
 
 if (LIBSIGMF_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_definitions(-DHAS_LIBSIGMF)
