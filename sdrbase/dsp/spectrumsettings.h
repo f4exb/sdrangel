@@ -63,6 +63,8 @@ public:
     bool m_usb;    //!< USB display with increasing frequencies towads the right - else decreasing frequencies
     QString m_wsSpectrumAddress;
     uint16_t m_wsSpectrumPort;
+	static const int m_log2FFTSizeMin = 6;   // 64
+	static const int m_log2FFTSizeMax = 13;  // 8k
 
     SpectrumSettings();
 	virtual ~SpectrumSettings();

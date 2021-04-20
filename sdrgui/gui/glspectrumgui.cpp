@@ -138,11 +138,11 @@ void GLSpectrumGUI::displaySettings()
 
 	ui->fftWindow->setCurrentIndex(m_settings.m_fftWindow);
 
-	for (int i = 0; i < 6; i++)
+	for (int i = SpectrumSettings::m_log2FFTSizeMin; i <= SpectrumSettings::m_log2FFTSizeMax; i++)
 	{
-		if (m_settings.m_fftSize == (1 << (i + 7)))
+		if (m_settings.m_fftSize == (1 << i))
 		{
-			ui->fftSize->setCurrentIndex(i);
+			ui->fftSize->setCurrentIndex(i - SpectrumSettings::m_log2FFTSizeMin);
 			break;
 		}
 	}
@@ -236,7 +236,7 @@ void GLSpectrumGUI::on_fftWindow_currentIndexChanged(int index)
 void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
 	qDebug("GLSpectrumGUI::on_fftSize_currentIndexChanged: %d", index);
-	m_settings.m_fftSize = 1 << (7 + index);
+	m_settings.m_fftSize = 1 << (SpectrumSettings::m_log2FFTSizeMin + index);
     setMaximumOverlap();
 	applySettings();
 	setAveragingToolitp();
@@ -576,7 +576,13 @@ void GLSpectrumGUI::setAveragingToolitp()
 
 void GLSpectrumGUI::setFFTSize(int log2FFTSize)
 {
-    ui->fftSize->setCurrentIndex(log2FFTSize < 7 ? 0 : log2FFTSize > 12 ? 5 : log2FFTSize - 7); // 128 to 4096 in powers of 2
+    ui->fftSize->setCurrentIndex(
+        log2FFTSize < SpectrumSettings::m_log2FFTSizeMin ?
+            0
+            : log2FFTSize > SpectrumSettings::m_log2FFTSizeMax ?
+                SpectrumSettings::m_log2FFTSizeMax - SpectrumSettings::m_log2FFTSizeMin
+                : log2FFTSize - SpectrumSettings::m_log2FFTSizeMin
+    );
 }
 
 void GLSpectrumGUI::setMaximumOverlap()

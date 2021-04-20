@@ -131,6 +131,11 @@
        </property>
        <item>
         <property name="text">
+         <string>64</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>128</string>
         </property>
        </item>
@@ -157,6 +162,11 @@
        <item>
         <property name="text">
          <string>4k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>8k</string>
         </property>
        </item>
       </widget>

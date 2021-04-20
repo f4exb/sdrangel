@@ -30,8 +30,6 @@
 
 #include "spectrumvis.h"
 
-#define MAX_FFT_SIZE 4096
-
 #ifndef LINUX
 inline double log2(double n)
 {
@@ -53,9 +51,9 @@ SpectrumVis::SpectrumVis(Real scalef) :
     m_running(true),
 	m_fft(nullptr),
     m_fftEngineSequence(0),
-	m_fftBuffer(MAX_FFT_SIZE),
-	m_powerSpectrum(MAX_FFT_SIZE),
-    m_psd(MAX_FFT_SIZE),
+	m_fftBuffer(4096),
+	m_powerSpectrum(4096),
+    m_psd(4096),
 	m_fftBufferFill(0),
 	m_needMoreSamples(false),
     m_frequencyZoomFactor(1.0f),
@@ -774,10 +772,10 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
-    int fftSize = settings.m_fftSize > MAX_FFT_SIZE ?
-        MAX_FFT_SIZE :
-        settings.m_fftSize < 64 ?
-            64 :
+    int fftSize = settings.m_fftSize > (1<<SpectrumSettings::m_log2FFTSizeMax) ?
+        (1<<SpectrumSettings::m_log2FFTSizeMax) :
+        settings.m_fftSize < (1<<SpectrumSettings::m_log2FFTSizeMin) ?
+            (1<<SpectrumSettings::m_log2FFTSizeMin) :
             settings.m_fftSize;
 
     qDebug() << "SpectrumVis::applySettings:"
@@ -808,6 +806,13 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
         m_fftEngineSequence = fftFactory->getEngine(fftSize, false, &m_fft);
         m_ofs = 20.0f * log10f(1.0f / fftSize);
         m_powFFTDiv = fftSize * fftSize;
+
+        if (fftSize > m_settings.m_fftSize)
+        {
+            m_fftBuffer.resize(fftSize);
+            m_powerSpectrum.resize(fftSize);
+            m_psd.resize(fftSize);
+        }
     }
 
     if ((fftSize != m_settings.m_fftSize)
