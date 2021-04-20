@@ -143,6 +143,7 @@ private slots:
     void on_chartSelect_currentIndexChanged(int index);
     void on_nextPass_clicked();
     void on_prevPass_clicked();
+    void on_darkTheme_clicked(bool checked);
     void on_satTable_cellDoubleClicked(int row, int column);
     void satTable_sectionMoved(int logicalIndex, int oldVisualIndex, int newVisualIndex);
     void satTable_sectionResized(int logicalIndex, int oldSize, int newSize);

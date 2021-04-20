@@ -304,6 +304,9 @@ void StarTrackerGUI::displaySettings()
     setTitleColor(m_settings.m_rgbColor);
     setWindowTitle(m_settings.m_title);
     blockApplySettings(true);
+    ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
+    m_solarFluxChart.setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
+    m_chart.setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
@@ -944,6 +947,7 @@ void StarTrackerGUI::plotElevationLineChart()
     QChart *oldChart = m_azElLineChart;
 
     m_azElLineChart = new QChart();
+    m_azElLineChart->setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
     QDateTimeAxis *xAxis = new QDateTimeAxis();
     QValueAxis *yLeftAxis = new QValueAxis();
     QValueAxis *yRightAxis = new QValueAxis();
@@ -1060,6 +1064,7 @@ void StarTrackerGUI::plotElevationPolarChart()
     QChart *oldChart = m_azElPolarChart;
 
     m_azElPolarChart = new QPolarChart();
+    m_azElPolarChart->setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
     QValueAxis *angularAxis = new QValueAxis();
     QCategoryAxis *radialAxis = new QCategoryAxis();
 
@@ -1453,7 +1458,7 @@ void StarTrackerGUI::updateSolarFlux(bool all)
         QString solarFluxFile = getSolarFluxFilename();
         if (m_dlm.confirmDownload(solarFluxFile, nullptr, 1))
         {
-            QString urlString = QString("http://www.sws.bom.gov.au/Category/World Data Centre/Data Display and Download/Solar Radio/station/learmonth/SRD/%1/L%2.SRD")
+            QString urlString = QString("https://www.sws.bom.gov.au/Category/World Data Centre/Data Display and Download/Solar Radio/station/learmonth/SRD/%1/L%2.SRD")
                                     .arg(today.year()).arg(today.toString("yyMMdd"));
             m_dlm.download(QUrl(urlString), solarFluxFile, this);
         }
@@ -1473,6 +1478,15 @@ void StarTrackerGUI::autoUpdateSolarFlux()
 void StarTrackerGUI::on_downloadSolarFlux_clicked()
 {
     updateSolarFlux(true);
+}
+
+void StarTrackerGUI::on_darkTheme_clicked(bool checked)
+{
+    m_settings.m_chartsDarkTheme = checked;
+    m_solarFluxChart.setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
+    m_chart.setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
+    plotChart();
+    applySettings();
 }
 
 void StarTrackerGUI::downloadFinished(const QString& filename, bool success)

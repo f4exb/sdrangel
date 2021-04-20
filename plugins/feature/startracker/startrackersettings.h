@@ -52,6 +52,7 @@ struct StarTrackerSettings
     bool m_drawSunOnMap;
     bool m_drawMoonOnMap;
     bool m_drawStarOnMap;
+    bool m_chartsDarkTheme;     // Dark theme for charts
 
     QString m_title;
     quint32 m_rgbColor;

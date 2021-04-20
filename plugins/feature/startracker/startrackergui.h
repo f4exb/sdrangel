@@ -146,6 +146,7 @@ private slots:
     void plotAreaChanged(const QRectF &plotArea);
     void autoUpdateSolarFlux();
     void on_downloadSolarFlux_clicked();
+    void on_darkTheme_clicked(bool checked);
     void networkManagerFinished(QNetworkReply *reply);
     void downloadFinished(const QString& filename, bool success);
 };

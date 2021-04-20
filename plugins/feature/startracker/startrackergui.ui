@@ -563,6 +563,24 @@ This can be specified as a decimal (E.g. 12.23) or in hours, minutes and seconds
       <item>
        <widget class="QComboBox" name="chartSubSelect"/>
       </item>
+      <item>
+       <widget class="QToolButton" name="darkTheme">
+        <property name="toolTip">
+         <string>Choose between light and dark themes</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../../sdrgui/resources/res.qrc">
+          <normaloff>:/lightdark.png</normaloff>
+          <normalon>:/darklight.png</normalon>:/lightdark.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>

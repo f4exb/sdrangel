@@ -120,6 +120,10 @@ Displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zen
 
 <h2>Plots</h2>
 
+<h3>Light or dark theme</h3>
+
+click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
+
 <h3>Elevation vs time</h3>
 
 ![Star Tracker Elevation vs Time](../../../doc/img/StarTracker_elevationvstime.png)
@@ -137,11 +141,11 @@ The Solar flux vs frequency plot, shows the solar flux density data from the Lea
 
 ![Star Tracker sky temperature](../../../doc/img/StarTracker_skytemp.png)
 
-Background sky temperature maps are available for display at 150MHz, 408MHz and 1420MHz, in both equatorial and galactic coordinates. 
-For these first six temperature maps, the temperature reported, which is in Kelvin, is for the single pixel corresponding to the target coordinates. 
-This temperature is therefore valid for a beamwidth of less than 1 degree.   
+Background sky temperature maps are available for display at 150MHz, 408MHz and 1420MHz, in both equatorial and galactic coordinates.
+For these first six temperature maps, the temperature reported, which is in Kelvin, is for the single pixel corresponding to the target coordinates.
+This temperature is therefore valid for a beamwidth of less than 1 degree.
 
-The Star Tracker plugin can also estimate a sky temperature based on the user entered observation frequency and beamwidth. 
+The Star Tracker plugin can also estimate a sky temperature based on the user entered observation frequency and beamwidth.
 To see this figure, which will be typically lower than the above, select one of the last two temperature maps from the right hand combo box.
 
 <h2>Map</h2>

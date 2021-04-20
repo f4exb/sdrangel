@@ -152,6 +152,8 @@ Pass charts can be plotted showing the azimuth and elevation of the target satel
 The arrows next to the chart combobox, allow the pass number to be selected. Pass 0 is the next pass, with higher numbered passes occurring later in time.
 The amount of passes is determined by the prediction period, which can be set in the Settings dialog.
 
+click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
+
 <h2>Satellite Data</h2>
 
 The satellite data table displays calculated data about the selected satellites.

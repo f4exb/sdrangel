@@ -54,6 +54,7 @@ void StarTrackerSettings::resetToDefaults()
     m_drawSunOnMap = true;
     m_drawMoonOnMap = true;
     m_drawStarOnMap = true;
+    m_chartsDarkTheme = false;
     m_title = "Star Tracker";
     m_rgbColor = QColor(225, 25, 99).rgb();
     m_useReverseAPI = false;
@@ -98,6 +99,7 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeU32(29, m_solarFluxUnits);
     s.writeDouble(30, m_beamwidth);
     s.writeU32(31, m_solarFluxData);
+    s.writeBool(32, m_chartsDarkTheme);
 
     return s.final();
 }
@@ -165,6 +167,7 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readU32(29, (quint32 *)&m_solarFluxUnits, SFU);
         d.readDouble(30, &m_beamwidth, 25.0);
         d.readU32(31, (quint32 *)&m_solarFluxData, DRAO_2800);
+        d.readBool(32, &m_chartsDarkTheme, false);
 
         return true;
     }

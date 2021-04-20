@@ -326,6 +326,7 @@ void SatelliteTrackerGUI::displaySettings()
         ui->dateTimeSelect->setCurrentIndex(1);
     }
     ui->autoTarget->setChecked(m_settings.m_autoTarget);
+    ui->darkTheme->setChecked(m_settings.m_chartsDarkTheme);
     plotChart();
     blockApplySettings(false);
 }
@@ -649,6 +650,13 @@ void SatelliteTrackerGUI::on_prevPass_clicked()
     }
 }
 
+void SatelliteTrackerGUI::on_darkTheme_clicked(bool checked)
+{
+    m_settings.m_chartsDarkTheme = checked;
+    plotChart();
+    applySettings();
+}
+
 void SatelliteTrackerGUI::on_chartSelect_currentIndexChanged(int index)
 {
     (void) index;
@@ -689,6 +697,7 @@ void SatelliteTrackerGUI::plotPolarChart()
 
     // Always create a new chart, otherwise sometimes they aren't drawn properly
     m_polarChart = new QPolarChart();
+    m_polarChart->setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
     QValueAxis *angularAxis = new QValueAxis();
     QCategoryAxis *radialAxis = new QCategoryAxis();
 
@@ -892,6 +901,7 @@ void SatelliteTrackerGUI::plotAzElChart()
 
     // Always create a new chart, otherwise sometimes they aren't drawn properly
     m_lineChart = new QChart();
+    m_lineChart->setTheme(m_settings.m_chartsDarkTheme ? QChart::ChartThemeDark : QChart::ChartThemeLight);
     QDateTimeAxis *xAxis = new QDateTimeAxis();
     QValueAxis *yLeftAxis = new QValueAxis();
     QValueAxis *yRightAxis = new QValueAxis();

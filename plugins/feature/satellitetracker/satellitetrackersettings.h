@@ -74,6 +74,7 @@ struct SatelliteTrackerSettings
     QString m_losSpeech;                //!< Text to say on LOS
     QString m_aosCommand;               //!< Command/script to execute on AOS
     QString m_losCommand;               //!< Command/script to execute on LOS
+    bool m_chartsDarkTheme;             //!< Set dark theme for charts (effective for GUI only)
     QHash<QString, QList<SatelliteDeviceSettings *> *> m_deviceSettings; //!< Settings for each device set for each satellite
 
     int m_columnIndexes[SAT_COL_COLUMNS];//!< How the columns are ordered in the table
