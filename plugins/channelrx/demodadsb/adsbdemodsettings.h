@@ -27,7 +27,7 @@
 class Serializable;
 
 // Number of columns in the table
-#define ADSBDEMOD_COLUMNS 23
+#define ADSBDEMOD_COLUMNS 25
 
 struct ADSBDemodSettings
 {
