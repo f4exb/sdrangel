@@ -835,7 +835,9 @@ void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
      || (settings.m_averagingMode != m_settings.m_averagingMode) || force)
     {
         unsigned int averagingValue = SpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
-        m_movingAverage.resize(fftSize, averagingValue > 1000 ? 1000 : averagingValue); // Capping to avoid out of memory condition
+        averagingValue = averagingValue > SpectrumSettings::getMaxAveragingValue(fftSize, settings.m_averagingMode) ?
+            SpectrumSettings::getMaxAveragingValue(fftSize, settings.m_averagingMode) : averagingValue; // Capping to avoid out of memory condition
+        m_movingAverage.resize(fftSize, averagingValue);
         m_fixedAverage.resize(fftSize, averagingValue);
         m_max.resize(fftSize, averagingValue);
     }

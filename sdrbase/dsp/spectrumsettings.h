@@ -73,9 +73,10 @@ public:
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
 
-    static int getAveragingMaxScale(AveragingMode averagingMode);
+    static int getAveragingMaxScale(AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
     static int getAveragingValue(int averagingIndex, AveragingMode averagingMode);
     static int getAveragingIndex(int averagingValue, AveragingMode averagingMode);
+	static uint64_t getMaxAveragingValue(int fftSize, AveragingMode averagingMode);
 };
 
 #endif // SDRBASE_DSP_SPECTRUMSETTNGS_H

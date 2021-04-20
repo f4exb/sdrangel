@@ -148,9 +148,9 @@ bool SpectrumSettings::deserialize(const QByteArray& data)
 int SpectrumSettings::getAveragingMaxScale(AveragingMode averagingMode)
 {
     if (averagingMode == AvgModeMoving) {
-        return 2;
+        return 3; // max 10k
     } else {
-        return 5;
+        return 5; // max 1M
     }
 }
 
@@ -205,4 +205,17 @@ int SpectrumSettings::getAveragingIndex(int averagingValue, AveragingMode averag
     }
 
     return 3*getAveragingMaxScale(averagingMode) + 3;
+}
+
+uint64_t SpectrumSettings::getMaxAveragingValue(int fftSize, AveragingMode averagingMode)
+{
+	if (averagingMode == AvgModeMoving)
+	{
+		uint64_t limit = (1UL<<28) / (sizeof(double)*fftSize); // 256 MB max
+		return limit > (1<<14) ? (1<<14) : limit; // limit to 16 kS anyway
+	}
+	else
+	{
+		return (1<<20); // fixed 1 MS
+	}
 }

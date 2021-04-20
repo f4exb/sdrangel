@@ -73,9 +73,6 @@ private:
 	void applySettings();
     void applySpectrumSettings();
     void displaySettings();
-    static int getAveragingMaxScale(SpectrumSettings::AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
-	static int getAveragingIndex(int averaging, SpectrumSettings::AveragingMode averagingMode);
-	static int getAveragingValue(int averagingIndex, SpectrumSettings::AveragingMode averagingMode);
 	void setAveragingCombo();
 	void setNumberStr(int n, QString& s);
 	void setNumberStr(float v, int decimalPlaces, QString& s);

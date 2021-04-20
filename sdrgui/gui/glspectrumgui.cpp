@@ -98,6 +98,7 @@ bool GLSpectrumGUI::deserialize(const QByteArray& data)
 {
     if (m_settings.deserialize(data))
     {
+        setAveragingCombo();
         displaySettings(); // ends with blockApplySettings(false)
         applySettings();
         return true;
@@ -210,9 +211,9 @@ void GLSpectrumGUI::applySpectrumSettings()
     m_glSpectrum->setWaterfallShare(m_settings.m_waterfallShare);
 
     if ((m_settings.m_averagingMode == SpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == SpectrumSettings::AvgModeMax)) {
-        m_glSpectrum->setTimingRate(getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
+        m_glSpectrum->setTimingRate(SpectrumSettings::getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
             1 :
-            getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode));
+           SpectrumSettings::getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode));
     } else {
         m_glSpectrum->setTimingRate(1);
     }
@@ -237,6 +238,7 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
 {
 	qDebug("GLSpectrumGUI::on_fftSize_currentIndexChanged: %d", index);
 	m_settings.m_fftSize = 1 << (SpectrumSettings::m_log2FFTSizeMin + index);
+    setAveragingCombo();
     setMaximumOverlap();
 	applySettings();
 	setAveragingToolitp();
@@ -432,86 +434,34 @@ void GLSpectrumGUI::on_freeze_toggled(bool checked)
     m_spectrumVis->getInputMessageQueue()->push(msg);
 }
 
-int GLSpectrumGUI::getAveragingMaxScale(SpectrumSettings::AveragingMode averagingMode)
-{
-    if (averagingMode == SpectrumSettings::AvgModeMoving) {
-        return 2;
-    } else {
-        return 5;
-    }
-}
-
-int GLSpectrumGUI::getAveragingIndex(int averagingValue, SpectrumSettings::AveragingMode averagingMode)
-{
-    if (averagingValue <= 1) {
-        return 0;
-    }
-
-    int v = averagingValue;
-    int j = 0;
-
-    for (int i = 0; i <= getAveragingMaxScale(averagingMode); i++)
-    {
-        if (v < 20)
-        {
-            if (v < 2) {
-                j = 0;
-            } else if (v < 5) {
-                j = 1;
-            } else if (v < 10) {
-                j = 2;
-            } else {
-                j = 3;
-            }
-
-            return 3*i + j;
-        }
-
-        v /= 10;
-    }
-
-    return 3 * getAveragingMaxScale(averagingMode) + 3;
-}
-
-int GLSpectrumGUI::getAveragingValue(int averagingIndex, SpectrumSettings::AveragingMode averagingMode)
-{
-    if (averagingIndex <= 0) {
-        return 1;
-    }
-
-    int v = averagingIndex - 1;
-    int m = pow(10.0, v/3 > getAveragingMaxScale(averagingMode) ? getAveragingMaxScale(averagingMode) : v/3);
-    int x = 1;
-
-    if (v % 3 == 0) {
-        x = 2;
-    } else if (v % 3 == 1) {
-        x = 5;
-    } else if (v % 3 == 2) {
-        x = 10;
-    }
-
-    return x * m;
-}
-
 void GLSpectrumGUI::setAveragingCombo()
 {
     int index = ui->averaging->currentIndex();
 	ui->averaging->blockSignals(true);
     ui->averaging->clear();
     ui->averaging->addItem(QString("1"));
+    uint64_t maxAveraging = SpectrumSettings::getMaxAveragingValue(m_settings.m_fftSize, m_settings.m_averagingMode);
 
-    for (int i = 0; i <= getAveragingMaxScale(m_settings.m_averagingMode); i++)
+    for (int i = 0; i <= SpectrumSettings::getAveragingMaxScale(m_settings.m_averagingMode); i++)
     {
         QString s;
         int m = pow(10.0, i);
-        int x = 2*m;
+        uint64_t x = 2*m;
+        if (x > maxAveraging) {
+            break;
+        }
         setNumberStr(x, s);
         ui->averaging->addItem(s);
         x = 5*m;
+        if (x > maxAveraging) {
+            break;
+        }
         setNumberStr(x, s);
         ui->averaging->addItem(s);
         x = 10*m;
+        if (x > maxAveraging) {
+            break;
+        }
         setNumberStr(x, s);
         ui->averaging->addItem(s);
     }
@@ -562,9 +512,9 @@ void GLSpectrumGUI::setAveragingToolitp()
         int averagingIndex = m_settings.m_averagingMode == SpectrumSettings::AvgModeNone ? 0 : m_settings.m_averagingIndex;
         float halfSize = m_settings.m_fftSize / 2;
         float overlapFactor = (halfSize - m_settings.m_fftOverlap) / halfSize;
-        float averagingTime = (m_settings.m_fftSize * (getAveragingValue(averagingIndex, m_settings.m_averagingMode) == 0 ?
+        float averagingTime = (m_settings.m_fftSize * (SpectrumSettings::getAveragingValue(averagingIndex, m_settings.m_averagingMode) == 0 ?
             1 :
-            getAveragingValue(averagingIndex, m_settings.m_averagingMode))) / (float) m_glSpectrum->getSampleRate();
+            SpectrumSettings::getAveragingValue(averagingIndex, m_settings.m_averagingMode))) / (float) m_glSpectrum->getSampleRate();
         setNumberStr(averagingTime*overlapFactor, 2, s);
         ui->averaging->setToolTip(QString("Number of averaging samples (avg time: %1s)").arg(s));
     }
