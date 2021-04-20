@@ -184,7 +184,7 @@ void GLSpectrumGUI::applySettings()
     }
 
     if (m_glSpectrum) {
-        applyGLSpectrumSettings();
+        applySpectrumSettings();
     }
 
     if (m_spectrumVis)
@@ -194,7 +194,7 @@ void GLSpectrumGUI::applySettings()
     }
 }
 
-void GLSpectrumGUI::applyGLSpectrumSettings()
+void GLSpectrumGUI::applySpectrumSettings()
 {
     m_glSpectrum->setDisplayWaterfall(m_settings.m_displayWaterfall);
     m_glSpectrum->setInvertedWaterfall(m_settings.m_invertedWaterfall);
@@ -209,7 +209,7 @@ void GLSpectrumGUI::applyGLSpectrumSettings()
     m_glSpectrum->setDisplayTraceIntensity(m_settings.m_displayTraceIntensity);
     m_glSpectrum->setWaterfallShare(m_settings.m_waterfallShare);
 
-    if ((m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)) {
+    if ((m_settings.m_averagingMode == SpectrumSettings::AvgModeFixed) || (m_settings.m_averagingMode == SpectrumSettings::AvgModeMax)) {
         m_glSpectrum->setTimingRate(getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode) == 0 ?
             1 :
             getAveragingValue(m_settings.m_averagingIndex, m_settings.m_averagingMode));
@@ -293,10 +293,10 @@ void GLSpectrumGUI::on_averagingMode_currentIndexChanged(int index)
 {
 	qDebug("GLSpectrumGUI::on_averagingMode_currentIndexChanged: %d", index);
     m_settings.m_averagingMode = index < 0 ?
-        GLSpectrumSettings::AvgModeNone :
+        SpectrumSettings::AvgModeNone :
         index > 3 ?
-            GLSpectrumSettings::AvgModeMax :
-            (GLSpectrumSettings::AveragingMode) index;
+            SpectrumSettings::AvgModeMax :
+            (SpectrumSettings::AveragingMode) index;
 
     setAveragingCombo();
 	applySettings();
@@ -432,16 +432,16 @@ void GLSpectrumGUI::on_freeze_toggled(bool checked)
     m_spectrumVis->getInputMessageQueue()->push(msg);
 }
 
-int GLSpectrumGUI::getAveragingMaxScale(GLSpectrumSettings::AveragingMode averagingMode)
+int GLSpectrumGUI::getAveragingMaxScale(SpectrumSettings::AveragingMode averagingMode)
 {
-    if (averagingMode == GLSpectrumSettings::AvgModeMoving) {
+    if (averagingMode == SpectrumSettings::AvgModeMoving) {
         return 2;
     } else {
         return 5;
     }
 }
 
-int GLSpectrumGUI::getAveragingIndex(int averagingValue, GLSpectrumSettings::AveragingMode averagingMode)
+int GLSpectrumGUI::getAveragingIndex(int averagingValue, SpectrumSettings::AveragingMode averagingMode)
 {
     if (averagingValue <= 1) {
         return 0;
@@ -473,7 +473,7 @@ int GLSpectrumGUI::getAveragingIndex(int averagingValue, GLSpectrumSettings::Ave
     return 3 * getAveragingMaxScale(averagingMode) + 3;
 }
 
-int GLSpectrumGUI::getAveragingValue(int averagingIndex, GLSpectrumSettings::AveragingMode averagingMode)
+int GLSpectrumGUI::getAveragingValue(int averagingIndex, SpectrumSettings::AveragingMode averagingMode)
 {
     if (averagingIndex <= 0) {
         return 1;
@@ -559,7 +559,7 @@ void GLSpectrumGUI::setAveragingToolitp()
     if (m_glSpectrum)
     {
         QString s;
-        int averagingIndex = m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone ? 0 : m_settings.m_averagingIndex;
+        int averagingIndex = m_settings.m_averagingMode == SpectrumSettings::AvgModeNone ? 0 : m_settings.m_averagingIndex;
         float halfSize = m_settings.m_fftSize / 2;
         float overlapFactor = (halfSize - m_settings.m_fftOverlap) / halfSize;
         float averagingTime = (m_settings.m_fftSize * (getAveragingValue(averagingIndex, m_settings.m_averagingMode) == 0 ?
@@ -606,7 +606,7 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
         displaySettings();
 
         if (m_glSpectrum) {
-            applyGLSpectrumSettings();
+            applySpectrumSettings();
         }
 
         return true;

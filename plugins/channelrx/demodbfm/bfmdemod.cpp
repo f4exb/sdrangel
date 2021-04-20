@@ -102,7 +102,7 @@ void BFMDemod::start()
     m_basebandSink->reset();
     m_thread->start();
 
-    GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+    SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
     spectrumSettings.m_ssb = true;
     SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);
     m_spectrumVis.getInputMessageQueue()->push(msg);

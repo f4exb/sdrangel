@@ -23,7 +23,7 @@
 ChannelAnalyzerWebAPIAdapter::ChannelAnalyzerWebAPIAdapter()
 {
     m_settings.setScopeGUI(&m_glScopeSettings);
-    m_settings.setSpectrumGUI(&m_glSpectrumSettings);
+    m_settings.setSpectrumGUI(&m_SpectrumSettings);
 }
 
 ChannelAnalyzerWebAPIAdapter::~ChannelAnalyzerWebAPIAdapter()
@@ -36,7 +36,7 @@ int ChannelAnalyzerWebAPIAdapter::webapiSettingsGet(
     (void) errorMessage;
     response.setChannelAnalyzerSettings(new SWGSDRangel::SWGChannelAnalyzerSettings());
     response.getChannelAnalyzerSettings()->init();
-    webapiFormatChannelSettings(response, m_settings, m_glScopeSettings, m_glSpectrumSettings);
+    webapiFormatChannelSettings(response, m_settings, m_glScopeSettings, m_SpectrumSettings);
     return 200;
 }
 
@@ -44,7 +44,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const ChannelAnalyzerSettings& settings,
         const GLScopeSettings& scopeSettings,
-        const GLSpectrumSettings& spectrumSettings)
+        const SpectrumSettings& spectrumSettings)
 {
     response.getChannelAnalyzerSettings()->setFrequency(settings.m_inputFrequencyOffset);
     response.getChannelAnalyzerSettings()->setDownSample(settings.m_rationalDownSample ? 1 : 0);
@@ -136,7 +136,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
     swgSpectrum->init();
     response.getChannelAnalyzerSettings()->setSpectrumConfig(swgSpectrum);
     swgSpectrum->setAveragingMode((int) spectrumSettings.m_averagingMode);
-    swgSpectrum->setAveragingValue(GLSpectrumSettings::getAveragingValue(spectrumSettings.m_averagingIndex, spectrumSettings.m_averagingMode));
+    swgSpectrum->setAveragingValue(SpectrumSettings::getAveragingValue(spectrumSettings.m_averagingIndex, spectrumSettings.m_averagingMode));
     swgSpectrum->setDecay(spectrumSettings.m_decay);
     swgSpectrum->setDecayDivisor(spectrumSettings.m_decayDivisor);
     swgSpectrum->setDisplayCurrent(spectrumSettings.m_displayCurrent ? 1 : 0);
@@ -159,14 +159,14 @@ int ChannelAnalyzerWebAPIAdapter::webapiSettingsPutPatch(
 {
     (void) force;
     (void) errorMessage;
-    webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_glSpectrumSettings, channelSettingsKeys, response);
+    webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_SpectrumSettings, channelSettingsKeys, response);
     return 200;
 }
 
 void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
         ChannelAnalyzerSettings& settings,
         GLScopeSettings& scopeSettings,
-        GLSpectrumSettings& spectrumSettings,
+        SpectrumSettings& spectrumSettings,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
@@ -394,12 +394,12 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("spectrumConfig"))
     {
         if (channelSettingsKeys.contains("spectrumConfig.averagingMode")) {
-            spectrumSettings.m_averagingMode = (GLSpectrumSettings::AveragingMode) response.getChannelAnalyzerSettings()->getSpectrumConfig()->getAveragingMode();
+            spectrumSettings.m_averagingMode = (SpectrumSettings::AveragingMode) response.getChannelAnalyzerSettings()->getSpectrumConfig()->getAveragingMode();
         }
         if (channelSettingsKeys.contains("spectrumConfig.averagingValue"))
         {
             spectrumSettings.m_averagingValue = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getAveragingValue();
-            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
+            spectrumSettings.m_averagingIndex = SpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
         }
         if (channelSettingsKeys.contains("spectrumConfig.decay")) {
             spectrumSettings.m_decay = response.getChannelAnalyzerSettings()->getSpectrumConfig()->getDecay();

@@ -25,7 +25,7 @@
 #include <QWidget>
 
 #include "dsp/dsptypes.h"
-#include "dsp/glspectrumsettings.h"
+#include "dsp/spectrumsettings.h"
 #include "export.h"
 #include "settings/serializable.h"
 #include "util/messagequeue.h"
@@ -65,17 +65,17 @@ private:
 	SpectrumVis* m_spectrumVis;
 	GLSpectrum* m_glSpectrum;
 	MessageQueue m_messageQueue;
-    GLSpectrumSettings m_settings;
+    SpectrumSettings m_settings;
     bool m_doApplySettings;
     static const int m_fpsMs[];
 
     void blockApplySettings(bool block);
 	void applySettings();
-    void applyGLSpectrumSettings();
+    void applySpectrumSettings();
     void displaySettings();
-    static int getAveragingMaxScale(GLSpectrumSettings::AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
-	static int getAveragingIndex(int averaging, GLSpectrumSettings::AveragingMode averagingMode);
-	static int getAveragingValue(int averagingIndex, GLSpectrumSettings::AveragingMode averagingMode);
+    static int getAveragingMaxScale(SpectrumSettings::AveragingMode averagingMode); //!< Max power of 10 multiplier to 2,5,10 base ex: 2 -> 2,5,10,20,50,100,200,500,1000
+	static int getAveragingIndex(int averaging, SpectrumSettings::AveragingMode averagingMode);
+	static int getAveragingValue(int averagingIndex, SpectrumSettings::AveragingMode averagingMode);
 	void setAveragingCombo();
 	void setNumberStr(int n, QString& s);
 	void setNumberStr(float v, int decimalPlaces, QString& s);

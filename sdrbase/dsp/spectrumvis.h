@@ -26,7 +26,7 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/fftengine.h"
 #include "dsp/fftwindow.h"
-#include "dsp/glspectrumsettings.h"
+#include "dsp/spectrumsettings.h"
 #include "export.h"
 #include "util/message.h"
 #include "util/movingaverage2d.h"
@@ -50,18 +50,18 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
-        const GLSpectrumSettings& getSettings() const { return m_settings; }
+        const SpectrumSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureSpectrumVis* create(const GLSpectrumSettings& settings, bool force) {
+        static MsgConfigureSpectrumVis* create(const SpectrumSettings& settings, bool force) {
             return new MsgConfigureSpectrumVis(settings, force);
         }
 
     private:
-        GLSpectrumSettings m_settings;
+        SpectrumSettings m_settings;
         bool m_force;
 
-        MsgConfigureSpectrumVis(const GLSpectrumSettings& settings, bool force) :
+        MsgConfigureSpectrumVis(const SpectrumSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
@@ -144,7 +144,7 @@ public:
 
     void setScalef(Real scalef);
     void configureWSSpectrum(const QString& address, uint16_t port);
-    const GLSpectrumSettings& getSettings() const { return m_settings; }
+    const SpectrumSettings& getSettings() const { return m_settings; }
     Real getSpecMax() const { return m_specMax / m_powFFTDiv; }
     void getPowerSpectrumCopy(std::vector<Real>& copy) { copy.assign(m_powerSpectrum.begin(), m_powerSpectrum.end()); }
     void getPSDCopy(std::vector<Real>& copy) const { copy.assign(m_psd.begin(), m_psd.begin() + m_settings.m_fftSize); }
@@ -215,7 +215,7 @@ private:
 	std::vector<Real> m_powerSpectrum; //!< displayable power spectrum
     std::vector<Real> m_psd; //!< real PSD
 
-    GLSpectrumSettings m_settings;
+    SpectrumSettings m_settings;
 	int m_overlapSize;
 	int m_refillSize;
 	int m_fftBufferFill;
@@ -244,15 +244,15 @@ private:
 	QMutex m_mutex;
 
     void setRunning(bool running) { m_running = running; }
-    void applySettings(const GLSpectrumSettings& settings, bool force = false);
+    void applySettings(const SpectrumSettings& settings, bool force = false);
     void handleConfigureDSP(uint64_t centerFrequency, int sampleRate);
     void handleScalef(Real scalef);
     void handleWSOpenClose(bool openClose);
     void handleConfigureWSSpectrum(const QString& address, uint16_t port);
 
-    static void webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const GLSpectrumSettings& settings);
+    static void webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const SpectrumSettings& settings);
     static void webapiUpdateSpectrumSettings(
-            GLSpectrumSettings& settings,
+            SpectrumSettings& settings,
             const QStringList& spectrumSettingsKeys,
             SWGSDRangel::SWGGLSpectrum& response);
 };

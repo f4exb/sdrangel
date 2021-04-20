@@ -229,7 +229,7 @@ void SSBDemod::applySettings(const SSBDemodSettings& settings, bool force)
      || (settings.m_rfBandwidth != m_settings.m_rfBandwidth)
      || (settings.m_lowCutoff != m_settings.m_lowCutoff) || force)
     {
-        GLSpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
+        SpectrumSettings spectrumSettings = m_spectrumVis.getSettings();
         spectrumSettings.m_ssb = !settings.m_dsb;
         spectrumSettings.m_usb = (settings.m_lowCutoff < settings.m_rfBandwidth);
         SpectrumVis::MsgConfigureSpectrumVis *msg = SpectrumVis::MsgConfigureSpectrumVis::create(spectrumSettings, false);

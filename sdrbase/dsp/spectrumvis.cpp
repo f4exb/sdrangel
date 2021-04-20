@@ -130,7 +130,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
     int fftMax = (m_frequencyZoomFactor == 1.0f) ?
         m_settings.m_fftSize : (m_frequencyZoomPos + (0.5f / m_frequencyZoomFactor)) * m_settings.m_fftSize;
 
-    if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone)
+    if (m_settings.m_averagingMode == SpectrumSettings::AvgModeNone)
     {
         for (int i = 0; i < m_settings.m_fftSize; i++)
         {
@@ -170,7 +170,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             );
         }
     }
-    else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMoving)
+    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMoving)
     {
         for (int i = 0; i < m_settings.m_fftSize; i++)
         {
@@ -213,7 +213,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
 
         m_movingAverage.nextAverage();
     }
-    else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed)
+    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeFixed)
     {
         double avg;
 
@@ -264,7 +264,7 @@ void SpectrumVis::feed(const Complex *begin, unsigned int length)
             }
         }
     }
-    else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)
+    else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMax)
     {
         double max;
 
@@ -367,7 +367,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 			Real v;
 			std::size_t halfSize = m_settings.m_fftSize / 2;
 
-			if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeNone)
+			if (m_settings.m_averagingMode == SpectrumSettings::AvgModeNone)
 			{
                 m_specMax = 0.0f;
 
@@ -428,7 +428,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     );
                 }
 			}
-			else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMoving)
+			else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMoving)
 			{
                 m_specMax = 0.0f;
 
@@ -494,7 +494,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
 
 	            m_movingAverage.nextAverage();
 			}
-			else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeFixed)
+			else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeFixed)
 			{
 			    double avg;
                 Real specMax = 0.0f;
@@ -577,7 +577,7 @@ void SpectrumVis::feed(const SampleVector::const_iterator& cbegin, const SampleV
                     }
                 }
 			}
-			else if (m_settings.m_averagingMode == GLSpectrumSettings::AvgModeMax)
+			else if (m_settings.m_averagingMode == SpectrumSettings::AvgModeMax)
 			{
 			    double max;
                 Real specMax = 0.0f;
@@ -770,7 +770,7 @@ bool SpectrumVis::handleMessage(const Message& message)
 	}
 }
 
-void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
+void SpectrumVis::applySettings(const SpectrumSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
 
@@ -829,7 +829,7 @@ void SpectrumVis::applySettings(const GLSpectrumSettings& settings, bool force)
      || (settings.m_averagingIndex != m_settings.m_averagingIndex)
      || (settings.m_averagingMode != m_settings.m_averagingMode) || force)
     {
-        unsigned int averagingValue = GLSpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
+        unsigned int averagingValue = SpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
         m_movingAverage.resize(fftSize, averagingValue > 1000 ? 1000 : averagingValue); // Capping to avoid out of memory condition
         m_fixedAverage.resize(fftSize, averagingValue);
         m_max.resize(fftSize, averagingValue);
@@ -895,7 +895,7 @@ int SpectrumVis::webapiSpectrumSettingsPutPatch(
     QString& errorMessage)
 {
     (void) errorMessage;
-    GLSpectrumSettings settings = m_settings;
+    SpectrumSettings settings = m_settings;
     webapiUpdateSpectrumSettings(settings, spectrumSettingsKeys, response);
 
     MsgConfigureSpectrumVis *msg = MsgConfigureSpectrumVis::create(settings, force);
@@ -980,7 +980,7 @@ int SpectrumVis::webapiSpectrumServerDelete(SWGSDRangel::SWGSuccessResponse& res
     return 200;
 }
 
-void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const GLSpectrumSettings& settings)
+void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& response, const SpectrumSettings& settings)
 {
     response.setFftSize(settings.m_fftSize);
     response.setFftOverlap(settings.m_fftOverlap);
@@ -1001,7 +1001,7 @@ void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& respo
     response.setDisplayHistogram(settings.m_displayHistogram ? 1 : 0);
     response.setDisplayGrid(settings.m_displayGrid ? 1 : 0);
     response.setAveragingMode((int) settings.m_averagingMode);
-    response.setAveragingValue(GLSpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode));
+    response.setAveragingValue(SpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode));
     response.setLinear(settings.m_linear ? 1 : 0);
     response.setSsb(settings.m_ssb ? 1 : 0);
     response.setUsb(settings.m_usb ? 1 : 0);
@@ -1015,7 +1015,7 @@ void SpectrumVis::webapiFormatSpectrumSettings(SWGSDRangel::SWGGLSpectrum& respo
 }
 
 void SpectrumVis::webapiUpdateSpectrumSettings(
-    GLSpectrumSettings& settings,
+    SpectrumSettings& settings,
     const QStringList& spectrumSettingsKeys,
     SWGSDRangel::SWGGLSpectrum& response)
 {
@@ -1074,13 +1074,13 @@ void SpectrumVis::webapiUpdateSpectrumSettings(
         settings.m_displayGrid = response.getDisplayGrid() != 0;
     }
     if (spectrumSettingsKeys.contains("averagingMode")) {
-        settings.m_averagingMode = (GLSpectrumSettings::AveragingMode) response.getAveragingMode();
+        settings.m_averagingMode = (SpectrumSettings::AveragingMode) response.getAveragingMode();
     }
     if (spectrumSettingsKeys.contains("averagingValue"))
     {
         qint32 tmp = response.getAveragingValue();
-        settings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(tmp, settings.m_averagingMode);
-        settings.m_averagingValue = GLSpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
+        settings.m_averagingIndex = SpectrumSettings::getAveragingIndex(tmp, settings.m_averagingMode);
+        settings.m_averagingValue = SpectrumSettings::getAveragingValue(settings.m_averagingIndex, settings.m_averagingMode);
     }
     if (spectrumSettingsKeys.contains("linear")) {
         settings.m_linear = response.getLinear() != 0;

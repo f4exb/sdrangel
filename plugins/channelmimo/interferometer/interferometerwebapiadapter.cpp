@@ -23,7 +23,7 @@
 InterferometerWebAPIAdapter::InterferometerWebAPIAdapter()
 {
     m_settings.setScopeGUI(&m_glScopeSettings);
-    m_settings.setSpectrumGUI(&m_glSpectrumSettings);
+    m_settings.setSpectrumGUI(&m_SpectrumSettings);
 }
 
 InterferometerWebAPIAdapter::~InterferometerWebAPIAdapter()
@@ -36,7 +36,7 @@ int InterferometerWebAPIAdapter::webapiSettingsGet(
     (void) errorMessage;
     response.setInterferometerSettings(new SWGSDRangel::SWGInterferometerSettings());
     response.getInterferometerSettings()->init();
-    webapiFormatChannelSettings(response, m_settings, m_glScopeSettings, m_glSpectrumSettings);
+    webapiFormatChannelSettings(response, m_settings, m_glScopeSettings, m_SpectrumSettings);
     return 200;
 }
 
@@ -44,7 +44,7 @@ void InterferometerWebAPIAdapter::webapiFormatChannelSettings(
         SWGSDRangel::SWGChannelSettings& response,
         const InterferometerSettings& settings,
         const GLScopeSettings& scopeSettings,
-        const GLSpectrumSettings& spectrumSettings)
+        const SpectrumSettings& spectrumSettings)
 {
     response.getInterferometerSettings()->setCorrelationType((int) settings.m_correlationType);
     response.getInterferometerSettings()->setRgbColor(settings.m_rgbColor);
@@ -120,7 +120,7 @@ void InterferometerWebAPIAdapter::webapiFormatChannelSettings(
     swgSpectrum->init();
     response.getInterferometerSettings()->setSpectrumConfig(swgSpectrum);
     swgSpectrum->setAveragingMode((int) spectrumSettings.m_averagingMode);
-    swgSpectrum->setAveragingValue(GLSpectrumSettings::getAveragingValue(spectrumSettings.m_averagingIndex, spectrumSettings.m_averagingMode));
+    swgSpectrum->setAveragingValue(SpectrumSettings::getAveragingValue(spectrumSettings.m_averagingIndex, spectrumSettings.m_averagingMode));
     swgSpectrum->setDecay(spectrumSettings.m_decay);
     swgSpectrum->setDecayDivisor(spectrumSettings.m_decayDivisor);
     swgSpectrum->setDisplayCurrent(spectrumSettings.m_displayCurrent ? 1 : 0);
@@ -143,14 +143,14 @@ int InterferometerWebAPIAdapter::webapiSettingsPutPatch(
 {
     (void) force; // no action
     (void) errorMessage;
-    webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_glSpectrumSettings, channelSettingsKeys, response);
+    webapiUpdateChannelSettings(m_settings, m_glScopeSettings, m_SpectrumSettings, channelSettingsKeys, response);
     return 200;
 }
 
 void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
         InterferometerSettings& settings,
         GLScopeSettings& scopeSettings,
-        GLSpectrumSettings& spectrumSettings,
+        SpectrumSettings& spectrumSettings,
         const QStringList& channelSettingsKeys,
         SWGSDRangel::SWGChannelSettings& response)
 {
@@ -330,12 +330,12 @@ void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
     if (channelSettingsKeys.contains("spectrumConfig"))
     {
         if (channelSettingsKeys.contains("spectrumConfig.averagingMode")) {
-            spectrumSettings.m_averagingMode = (GLSpectrumSettings::AveragingMode) response.getInterferometerSettings()->getSpectrumConfig()->getAveragingMode();
+            spectrumSettings.m_averagingMode = (SpectrumSettings::AveragingMode) response.getInterferometerSettings()->getSpectrumConfig()->getAveragingMode();
         }
         if (channelSettingsKeys.contains("spectrumConfig.averagingValue"))
         {
             spectrumSettings.m_averagingValue = response.getInterferometerSettings()->getSpectrumConfig()->getAveragingValue();
-            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
+            spectrumSettings.m_averagingIndex = SpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
         }
         if (channelSettingsKeys.contains("spectrumConfig.decay")) {
             spectrumSettings.m_decay = response.getInterferometerSettings()->getSpectrumConfig()->getDecay();

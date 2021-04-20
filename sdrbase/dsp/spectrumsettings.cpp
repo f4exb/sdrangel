@@ -16,18 +16,18 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #include "util/simpleserializer.h"
-#include "glspectrumsettings.h"
+#include "spectrumsettings.h"
 
-GLSpectrumSettings::GLSpectrumSettings()
+SpectrumSettings::SpectrumSettings()
 {
     resetToDefaults();
 }
 
-GLSpectrumSettings::~GLSpectrumSettings()
+SpectrumSettings::~SpectrumSettings()
 {}
 
 
-void GLSpectrumSettings::resetToDefaults()
+void SpectrumSettings::resetToDefaults()
 {
 	m_fftSize = 1024;
 	m_fftOverlap = 0;
@@ -57,7 +57,7 @@ void GLSpectrumSettings::resetToDefaults()
     m_wsSpectrumPort = 8887;
 }
 
-QByteArray GLSpectrumSettings::serialize() const
+QByteArray SpectrumSettings::serialize() const
 {
 	SimpleSerializer s(1);
 
@@ -90,7 +90,7 @@ QByteArray GLSpectrumSettings::serialize() const
 	return s.final();
 }
 
-bool GLSpectrumSettings::deserialize(const QByteArray& data)
+bool SpectrumSettings::deserialize(const QByteArray& data)
 {
 	SimpleDeserializer d(data);
 
@@ -145,7 +145,7 @@ bool GLSpectrumSettings::deserialize(const QByteArray& data)
 	}
 }
 
-int GLSpectrumSettings::getAveragingMaxScale(AveragingMode averagingMode)
+int SpectrumSettings::getAveragingMaxScale(AveragingMode averagingMode)
 {
     if (averagingMode == AvgModeMoving) {
         return 2;
@@ -154,7 +154,7 @@ int GLSpectrumSettings::getAveragingMaxScale(AveragingMode averagingMode)
     }
 }
 
-int GLSpectrumSettings::getAveragingValue(int averagingIndex, AveragingMode averagingMode)
+int SpectrumSettings::getAveragingValue(int averagingIndex, AveragingMode averagingMode)
 {
     if (averagingIndex <= 0) {
         return 1;
@@ -175,7 +175,7 @@ int GLSpectrumSettings::getAveragingValue(int averagingIndex, AveragingMode aver
     return x * m;
 }
 
-int GLSpectrumSettings::getAveragingIndex(int averagingValue, AveragingMode averagingMode)
+int SpectrumSettings::getAveragingIndex(int averagingValue, AveragingMode averagingMode)
 {
     if (averagingValue <= 1) {
         return 0;

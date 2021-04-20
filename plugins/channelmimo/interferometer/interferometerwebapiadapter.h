@@ -20,7 +20,7 @@
 
 #include "channel/channelwebapiadapter.h"
 #include "dsp/glscopesettings.h"
-#include "dsp/glspectrumsettings.h"
+#include "dsp/spectrumsettings.h"
 #include "interferometersettings.h"
 
 /**
@@ -48,19 +48,19 @@ public:
             SWGSDRangel::SWGChannelSettings& response,
             const InterferometerSettings& settings,
             const GLScopeSettings& scopeSettings,
-            const GLSpectrumSettings& spectrumSettings);
+            const SpectrumSettings& spectrumSettings);
 
     static void webapiUpdateChannelSettings(
             InterferometerSettings& settings,
             GLScopeSettings& scopeSettings,
-            GLSpectrumSettings& spectrumSettings,
+            SpectrumSettings& spectrumSettings,
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
 private:
     InterferometerSettings m_settings;
     GLScopeSettings m_glScopeSettings;
-    GLSpectrumSettings m_glSpectrumSettings;
+    SpectrumSettings m_SpectrumSettings;
 
     static int qColorToInt(const QColor& color);
     static QColor intToQColor(int intColor);

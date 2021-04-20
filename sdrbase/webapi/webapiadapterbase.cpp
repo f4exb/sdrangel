@@ -24,7 +24,7 @@
 #include "device/deviceutils.h"
 #include "feature/featurewebapiadapter.h"
 #include "feature/featureutils.h"
-#include "dsp/glspectrumsettings.h"
+#include "dsp/spectrumsettings.h"
 #include "webapiadapterbase.h"
 
 WebAPIAdapterBase::WebAPIAdapterBase()
@@ -138,7 +138,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
     apiPreset->setDcOffsetCorrection(preset.hasDCOffsetCorrection() ? 1 : 0);
     apiPreset->setIqImbalanceCorrection(preset.hasIQImbalanceCorrection() ? 1 : 0);
     const QByteArray& spectrumConfig = preset.getSpectrumConfig();
-    GLSpectrumSettings m_spectrumSettings;
+    SpectrumSettings m_spectrumSettings;
 
     if (m_spectrumSettings.deserialize(spectrumConfig))
     {
@@ -163,7 +163,7 @@ void WebAPIAdapterBase::webapiFormatPreset(
         swgSpectrumConfig->setDisplayTraceIntensity(m_spectrumSettings.m_displayTraceIntensity);
         swgSpectrumConfig->setWaterfallShare(m_spectrumSettings.m_waterfallShare);
         swgSpectrumConfig->setAveragingMode((int) m_spectrumSettings.m_averagingMode);
-        swgSpectrumConfig->setAveragingValue(GLSpectrumSettings::getAveragingValue(m_spectrumSettings.m_averagingIndex, m_spectrumSettings.m_averagingMode));
+        swgSpectrumConfig->setAveragingValue(SpectrumSettings::getAveragingValue(m_spectrumSettings.m_averagingIndex, m_spectrumSettings.m_averagingMode));
         swgSpectrumConfig->setLinear(m_spectrumSettings.m_linear ? 1 : 0);
     }
 
@@ -302,7 +302,7 @@ void WebAPIAdapterBase::webapiUpdatePreset(
         preset->setLayout(QByteArray::fromBase64(apiPreset->getLayout()->toUtf8()));
     }
 
-    GLSpectrumSettings spectrumSettings;
+    SpectrumSettings spectrumSettings;
 
     if (!force) {
         spectrumSettings.deserialize(preset->getSpectrumConfig());
@@ -312,12 +312,12 @@ void WebAPIAdapterBase::webapiUpdatePreset(
     for (; spectrumIt != presetKeys.m_spectrumKeys.end(); ++spectrumIt)
     {
         if (spectrumIt->contains("averagingMode")) {
-            spectrumSettings.m_averagingMode = (GLSpectrumSettings::AveragingMode) apiPreset->getSpectrumConfig()->getAveragingMode();
+            spectrumSettings.m_averagingMode = (SpectrumSettings::AveragingMode) apiPreset->getSpectrumConfig()->getAveragingMode();
         }
         if (spectrumIt->contains("averagingValue"))
         {
             spectrumSettings.m_averagingValue = apiPreset->getSpectrumConfig()->getAveragingValue();
-            spectrumSettings.m_averagingIndex = GLSpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
+            spectrumSettings.m_averagingIndex = SpectrumSettings::getAveragingIndex(spectrumSettings.m_averagingValue, spectrumSettings.m_averagingMode);
         }
         if (spectrumIt->contains("decay")) {
             spectrumSettings.m_decay = apiPreset->getSpectrumConfig()->getDecay();

@@ -15,17 +15,18 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SDRBASE_DSP_GLSPECTRUMSETTNGS_H
-#define SDRBASE_DSP_GLSPECTRUMSETTNGS_H
+#ifndef SDRBASE_DSP_SPECTRUMSETTNGS_H
+#define SDRBASE_DSP_SPECTRUMSETTNGS_H
 
 #include <QByteArray>
+#include <QString>
 
 #include "export.h"
 #include "dsp/dsptypes.h"
 #include "dsp/fftwindow.h"
 #include "settings/serializable.h"
 
-class SDRBASE_API GLSpectrumSettings : public Serializable
+class SDRBASE_API SpectrumSettings : public Serializable
 {
 public:
     enum AveragingMode
@@ -63,8 +64,8 @@ public:
     QString m_wsSpectrumAddress;
     uint16_t m_wsSpectrumPort;
 
-    GLSpectrumSettings();
-	virtual ~GLSpectrumSettings();
+    SpectrumSettings();
+	virtual ~SpectrumSettings();
     void resetToDefaults();
 
     virtual QByteArray serialize() const;
@@ -75,4 +76,4 @@ public:
     static int getAveragingIndex(int averagingValue, AveragingMode averagingMode);
 };
 
-#endif // SDRBASE_DSP_GLSPECTRUMSETTNGS_H
+#endif // SDRBASE_DSP_SPECTRUMSETTNGS_H
