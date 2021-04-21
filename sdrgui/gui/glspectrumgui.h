@@ -77,6 +77,7 @@ private:
 	void setNumberStr(int n, QString& s);
 	void setNumberStr(float v, int decimalPlaces, QString& s);
 	void setAveragingToolitp();
+	void setFFTSizeToolitp();
 	void setMaximumOverlap();
 	bool handleMessage(const Message& message);
 

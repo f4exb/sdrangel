@@ -50,7 +50,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>60</width>
+         <width>70</width>
          <height>0</height>
         </size>
        </property>
@@ -167,6 +167,16 @@
        <item>
         <property name="text">
          <string>8k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>16k</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>32k</string>
         </property>
        </item>
       </widget>

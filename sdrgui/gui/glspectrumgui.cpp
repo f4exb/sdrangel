@@ -148,6 +148,7 @@ void GLSpectrumGUI::displaySettings()
 		}
 	}
 
+    setFFTSizeToolitp();
     unsigned int i = 0;
 
     for (; i < sizeof(m_fpsMs)/sizeof(m_fpsMs[0]); i++)
@@ -242,6 +243,7 @@ void GLSpectrumGUI::on_fftSize_currentIndexChanged(int index)
     setMaximumOverlap();
 	applySettings();
 	setAveragingToolitp();
+    setFFTSizeToolitp();
 }
 
 void GLSpectrumGUI::on_fftOverlap_valueChanged(int value)
@@ -524,6 +526,20 @@ void GLSpectrumGUI::setAveragingToolitp()
     }
 }
 
+void GLSpectrumGUI::setFFTSizeToolitp()
+{
+    if (m_glSpectrum)
+    {
+        QString s;
+        setNumberStr((float) m_glSpectrum->getSampleRate() / m_settings.m_fftSize, 2, s);
+        ui->fftSize->setToolTip(QString("FFT size (resolution: %1Hz)").arg(s));
+    }
+    else
+    {
+        ui->fftSize->setToolTip(QString("FFT size"));
+    }
+}
+
 void GLSpectrumGUI::setFFTSize(int log2FFTSize)
 {
     ui->fftSize->setCurrentIndex(
@@ -553,6 +569,7 @@ bool GLSpectrumGUI::handleMessage(const Message& message)
     if (GLSpectrum::MsgReportSampleRate::match(message))
     {
         setAveragingToolitp();
+        setFFTSizeToolitp();
         return true;
     }
     else if (SpectrumVis::MsgConfigureSpectrumVis::match(message))

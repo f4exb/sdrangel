@@ -64,7 +64,7 @@ public:
     QString m_wsSpectrumAddress;
     uint16_t m_wsSpectrumPort;
 	static const int m_log2FFTSizeMin = 6;   // 64
-	static const int m_log2FFTSizeMax = 13;  // 8k
+	static const int m_log2FFTSizeMax = 15;  // 32k
 
     SpectrumSettings();
 	virtual ~SpectrumSettings();
