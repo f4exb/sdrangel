@@ -381,7 +381,6 @@ DSDDemodGUI::DSDDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
 DSDDemodGUI::~DSDDemodGUI()
 {
-    m_dsdDemod->setScopeXYSink(nullptr);
 	delete m_scopeVisXY;
 	delete ui;
 }

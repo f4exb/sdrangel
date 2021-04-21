@@ -275,9 +275,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    m_atvDemod->setScopeSink(nullptr);
-    m_atvDemod->setTVScreen(nullptr);
-
     delete m_scopeVis;
     delete ui;
 }

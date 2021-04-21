@@ -178,8 +178,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 
 DemodAnalyzerGUI::~DemodAnalyzerGUI()
 {
-    m_demodAnalyzer->setSampleSink(nullptr);
-
 	delete ui;
 	delete m_spectrumScopeComboVis;
 	delete m_scopeVis;

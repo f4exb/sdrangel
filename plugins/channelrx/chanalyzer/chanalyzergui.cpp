@@ -525,7 +525,6 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 
 ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 {
-    m_channelAnalyzer->setSampleSink(nullptr);
     qDebug("ChannelAnalyzerGUI::~ChannelAnalyzerGUI");
 	ui->glScope->disconnectTimer();
 	delete ui;
