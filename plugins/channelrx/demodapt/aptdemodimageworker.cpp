@@ -121,7 +121,25 @@ bool APTDemodImageWorker::handleMessage(const Message& cmd)
 void APTDemodImageWorker::applySettings(const APTDemodSettings& settings, bool force)
 {
     (void) force;
+    bool callProcessImage = false;
+
+    if ((settings.m_cropNoise != m_settings.m_cropNoise) ||
+        (settings.m_denoise != m_settings.m_denoise) ||
+        (settings.m_linearEqualise != m_settings.m_linearEqualise) ||
+        (settings.m_histogramEqualise != m_settings.m_histogramEqualise) ||
+        (settings.m_precipitationOverlay != m_settings.m_precipitationOverlay) ||
+        (settings.m_flip != m_settings.m_flip) ||
+        (settings.m_channels != m_settings.m_channels))
+    {
+        // Call after settings have been applied
+        callProcessImage = true;
+    }
+
     m_settings = settings;
+
+    if (callProcessImage) {
+        sendImageToGUI();
+    }
 }
 
 void APTDemodImageWorker::resetDecoder()

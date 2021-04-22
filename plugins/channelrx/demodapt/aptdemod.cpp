@@ -309,8 +309,13 @@ void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
         reverseAPIKeys.append("streamIndex");
     }
 
-    APTDemodBaseband::MsgConfigureAPTDemodBaseband *msg = APTDemodBaseband::MsgConfigureAPTDemodBaseband::create(settings, force);
+    APTDemodBaseband::MsgConfigureAPTDemodBaseband *msg
+        = APTDemodBaseband::MsgConfigureAPTDemodBaseband::create(settings, force);
     m_basebandSink->getInputMessageQueue()->push(msg);
+
+    APTDemodImageWorker::MsgConfigureAPTDemodImageWorker *msgToImg
+        = APTDemodImageWorker::MsgConfigureAPTDemodImageWorker::create(settings, force);
+    m_imageWorker->getInputMessageQueue()->push(msgToImg);
 
     if (settings.m_useReverseAPI)
     {
@@ -336,8 +341,8 @@ void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
 
     m_settings = settings;
 
-    if (callProcessImage)
-        sendImageToGUI();
+    // if (callProcessImage)
+    //     sendImageToGUI();
 }
 
 QByteArray APTDemod::serialize() const
