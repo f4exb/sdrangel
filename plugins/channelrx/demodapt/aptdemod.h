@@ -224,11 +224,6 @@ private:
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 
-    // Image buffers
-    apt_image_t m_image;                // Received image
-    apt_image_t m_tempImage;            // Processed image
-    QImage m_greyImage;
-    QImage m_colourImage;
     QString m_satelliteName;
 
     void applySettings(const APTDemodSettings& settings, bool force = false);
@@ -241,12 +236,6 @@ private:
     );
 
     bool matchSatellite(const QString satelliteName);
-    void resetDecoder();
-    void processPixels(const float *pixels);
-    QImage extractImage(QImage image);
-    QImage processImage(QStringList& imageTypes);
-    void sendImageToGUI();
-    void saveImageToDisk();
 
 private slots:
     void networkManagerFinished(QNetworkReply *reply);

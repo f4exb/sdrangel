@@ -71,14 +71,6 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
 
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
-
-    for (int y = 0; y < APT_MAX_HEIGHT; y++)
-    {
-        m_image.prow[y] = new float[APT_PROW_WIDTH];
-        m_tempImage.prow[y] = new float[APT_PROW_WIDTH];
-    }
-
-    resetDecoder(); // FIXME: to be removed
 }
 
 APTDemod::~APTDemod()
@@ -100,12 +92,6 @@ APTDemod::~APTDemod()
     }
 
     delete m_basebandSink;
-
-    for (int y = 0; y < APT_MAX_HEIGHT; y++)
-    {
-        delete[] m_image.prow[y];
-        delete[] m_tempImage.prow[y];
-    }
 }
 
 uint32_t APTDemod::getNumberOfDeviceStreams() const
@@ -209,16 +195,8 @@ bool APTDemod::handleMessage(const Message& cmd)
 
         return true;
     }
-    else if (APTDemod::MsgPixels::match(cmd))
-    {
-        const APTDemod::MsgPixels& pixelsMsg = (APTDemod::MsgPixels&) cmd;
-        const float *pixels = pixelsMsg.getPixels();
-        processPixels(pixels);
-        return true;
-    }
     else if (APTDemod::MsgResetDecoder::match(cmd))
     {
-        resetDecoder(); // FIXME: to be removed
         m_imageWorker->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
         // Forward to sink
         m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
@@ -232,8 +210,6 @@ bool APTDemod::handleMessage(const Message& cmd)
 
 void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
 {
-    bool callProcessImage = false;
-
     qDebug() << "APTDemod::applySettings:"
              << " m_cropNoise: " << settings.m_cropNoise
              << " m_denoise: " << settings.m_denoise
@@ -327,22 +303,7 @@ void APTDemod::applySettings(const APTDemodSettings& settings, bool force)
         webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
     }
 
-    if ((settings.m_cropNoise != m_settings.m_cropNoise) ||
-        (settings.m_denoise != m_settings.m_denoise) ||
-        (settings.m_linearEqualise != m_settings.m_linearEqualise) ||
-        (settings.m_histogramEqualise != m_settings.m_histogramEqualise) ||
-        (settings.m_precipitationOverlay != m_settings.m_precipitationOverlay) ||
-        (settings.m_flip != m_settings.m_flip) ||
-        (settings.m_channels != m_settings.m_channels))
-    {
-        // Call after settings have been applied
-        callProcessImage = true;
-    }
-
     m_settings = settings;
-
-    // if (callProcessImage)
-    //     sendImageToGUI();
 }
 
 QByteArray APTDemod::serialize() const
@@ -627,7 +588,6 @@ int APTDemod::webapiActionsPost(
                 if (matchSatellite(*satelliteName))
                 {
                     // Reset for new pass
-                    resetDecoder(); // FIXME: to be removed
                     m_imageWorker->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
                     m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
 
@@ -717,187 +677,4 @@ void APTDemod::networkManagerFinished(QNetworkReply *reply)
     }
 
     reply->deleteLater();
-}
-
-void APTDemod::resetDecoder()
-{
-    m_image.nrow = 0;
-    m_tempImage.nrow = 0;
-    m_greyImage = QImage(APT_IMG_WIDTH, APT_MAX_HEIGHT, QImage::Format_Grayscale8);
-    m_greyImage.fill(0);
-    m_colourImage = QImage(APT_IMG_WIDTH, APT_MAX_HEIGHT, QImage::Format_RGB888);
-    m_colourImage.fill(0);
-    m_satelliteName = "";
-}
-
-void APTDemod::processPixels(const float *pixels)
-{
-    memcpy(m_image.prow[m_image.nrow], pixels, sizeof(float) * APT_PROW_WIDTH);
-    m_image.nrow++;
-    sendImageToGUI();
-}
-
-static void copyImage(apt_image_t *dst, apt_image_t *src)
-{
-    dst->nrow = src->nrow;
-    dst->zenith = src->zenith;
-    dst->chA = src->chA;
-    dst->chB = src->chB;
-    for (int i = 0; i < src->nrow; i++)
-        memcpy(dst->prow[i], src->prow[i], sizeof(float) * APT_PROW_WIDTH);
-}
-
-static uchar roundAndClip(float p)
-{
-    int q = (int)round(p);
-    if (q > 255)
-        q = 255;
-    else if (q < 0)
-        q = 0;
-    return q;
-}
-
-QImage APTDemod::extractImage(QImage image)
-{
-    if (m_settings.m_channels == APTDemodSettings::BOTH_CHANNELS)
-        return image.copy(0, 0, APT_IMG_WIDTH, m_tempImage.nrow);
-    else if (m_settings.m_channels == APTDemodSettings::CHANNEL_A)
-        return image.copy(APT_CHA_OFFSET, 0, APT_CH_WIDTH, m_tempImage.nrow);
-    else
-        return image.copy(APT_CHB_OFFSET, 0, APT_CH_WIDTH, m_tempImage.nrow);
-}
-
-QImage APTDemod::processImage(QStringList& imageTypes)
-{
-    copyImage(&m_tempImage, &m_image);
-
-    // Calibrate channels according to wavelength
-    if (m_tempImage.nrow >= APT_CALIBRATION_ROWS)
-    {
-        m_tempImage.chA = apt_calibrate(m_tempImage.prow, m_tempImage.nrow, APT_CHA_OFFSET, APT_CH_WIDTH);
-        m_tempImage.chB = apt_calibrate(m_tempImage.prow, m_tempImage.nrow, APT_CHB_OFFSET, APT_CH_WIDTH);
-        QStringList channelTypes({
-            "",  // Unknown
-            "Visible (0.58-0.68 um)",
-            "Near-IR (0.725-1.0 um)",
-            "Near-IR (1.58-1.64 um)",
-            "Mid-infrared (3.55-3.93 um)",
-            "Thermal-infrared (10.3-11.3 um)",
-            "Thermal-infrared (11.5-12.5 um)"
-            });
-
-        imageTypes.append(channelTypes[m_tempImage.chA]);
-        imageTypes.append(channelTypes[m_tempImage.chB]);
-    }
-
-    // Crop noise due to low elevation at top and bottom of image
-    if (m_settings.m_cropNoise)
-        m_tempImage.zenith -= apt_cropNoise(&m_tempImage);
-
-    // Denoise filter
-    if (m_settings.m_denoise)
-    {
-        apt_denoise(m_tempImage.prow, m_tempImage.nrow, APT_CHA_OFFSET, APT_CH_WIDTH);
-        apt_denoise(m_tempImage.prow, m_tempImage.nrow, APT_CHB_OFFSET, APT_CH_WIDTH);
-    }
-
-    // Flip image if satellite pass is North to South
-    if (m_settings.m_flip)
-    {
-        apt_flipImage(&m_tempImage, APT_CH_WIDTH, APT_CHA_OFFSET);
-        apt_flipImage(&m_tempImage, APT_CH_WIDTH, APT_CHB_OFFSET);
-    }
-
-    // Linear equalise to improve contrast
-    if (m_settings.m_linearEqualise)
-    {
-        apt_linearEnhance(m_tempImage.prow, m_tempImage.nrow, APT_CHA_OFFSET, APT_CH_WIDTH);
-        apt_linearEnhance(m_tempImage.prow, m_tempImage.nrow, APT_CHB_OFFSET, APT_CH_WIDTH);
-    }
-
-    // Histogram equalise to improve contrast
-    if (m_settings.m_histogramEqualise)
-    {
-        apt_histogramEqualise(m_tempImage.prow, m_tempImage.nrow, APT_CHA_OFFSET, APT_CH_WIDTH);
-        apt_histogramEqualise(m_tempImage.prow, m_tempImage.nrow, APT_CHB_OFFSET, APT_CH_WIDTH);
-    }
-
-    if (m_settings.m_precipitationOverlay)
-    {
-        // Overlay precipitation
-        for (int r = 0; r < m_tempImage.nrow; r++)
-        {
-            uchar *l = m_colourImage.scanLine(r);
-            for (int i = 0; i < APT_IMG_WIDTH; i++)
-            {
-                float p = m_tempImage.prow[r][i];
-
-                if ((i >= APT_CHB_OFFSET) && (i < APT_CHB_OFFSET + APT_CH_WIDTH) && (p >= 198))
-                {
-                    apt_rgb_t rgb = apt_applyPalette(apt_PrecipPalette, p - 198);
-                    // Negative float values get converted to positive uchars here
-                    l[i*3] = (uchar)rgb.r;
-                    l[i*3+1] = (uchar)rgb.g;
-                    l[i*3+2] = (uchar)rgb.b;
-                    int a = i - APT_CHB_OFFSET + APT_CHA_OFFSET;
-                    l[a*3] = (uchar)rgb.r;
-                    l[a*3+1] = (uchar)rgb.g;
-                    l[a*3+2] = (uchar)rgb.b;
-                }
-                else
-                {
-                    uchar q = roundAndClip(p);
-                    l[i*3] = q;
-                    l[i*3+1] = q;
-                    l[i*3+2] = q;
-                }
-            }
-        }
-        return extractImage(m_colourImage);
-    }
-    else
-    {
-        for (int r = 0; r < m_tempImage.nrow; r++)
-        {
-            uchar *l = m_greyImage.scanLine(r);
-            for (int i = 0; i < APT_IMG_WIDTH; i++)
-            {
-                float p = m_tempImage.prow[r][i];
-                l[i] = roundAndClip(p);
-            }
-        }
-        return extractImage(m_greyImage);
-    }
-}
-
-void APTDemod::sendImageToGUI()
-{
-    // Send image to GUI
-    if (getMessageQueueToGUI())
-    {
-        QStringList imageTypes;
-        QImage image = processImage(imageTypes);
-        getMessageQueueToGUI()->push(APTDemod::MsgImage::create(image, imageTypes, m_satelliteName));
-    }
-}
-
-void APTDemod::saveImageToDisk()
-{
-    QStringList imageTypes;
-    QImage image = processImage(imageTypes);
-    if (image.height() >= m_settings.m_autoSaveMinScanLines)
-    {
-        QString filename;
-        QDateTime datetime = QDateTime::currentDateTime();
-        filename = QString("apt_%1_%2.png").arg(m_satelliteName).arg(datetime.toString("yyyyMMdd_hhmm"));
-        if (!m_settings.m_autoSavePath.isEmpty())
-        {
-            if (m_settings.m_autoSavePath.endsWith('/'))
-                filename = m_settings.m_autoSavePath + filename;
-            else
-                filename = m_settings.m_autoSavePath + '/' + filename;
-        }
-        if (!image.save(filename))
-            qCritical() << "Failed to save APT image to: " << filename;
-    }
 }
