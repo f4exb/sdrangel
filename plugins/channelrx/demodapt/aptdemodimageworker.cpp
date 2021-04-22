@@ -18,10 +18,14 @@
 
 #include <algorithm>
 
+#include <QTime>
+#include <QDebug>
+
 #include "aptdemod.h"
 #include "aptdemodimageworker.h"
 
 MESSAGE_CLASS_DEFINITION(APTDemodImageWorker::MsgConfigureAPTDemodImageWorker, Message)
+MESSAGE_CLASS_DEFINITION(APTDemodImageWorker::MsgSaveImageToDisk, Message)
 
 APTDemodImageWorker::APTDemodImageWorker() :
     m_messageQueueToGUI(nullptr),
@@ -88,6 +92,11 @@ bool APTDemodImageWorker::handleMessage(const Message& cmd)
         MsgConfigureAPTDemodImageWorker& cfg = (MsgConfigureAPTDemodImageWorker&) cmd;
         qDebug("APTDemodImageWorker::handleMessage: MsgConfigureAPTDemodImageWorker");
         applySettings(cfg.getSettings(), cfg.getForce());
+        return true;
+    }
+    else if (MsgSaveImageToDisk::match(cmd))
+    {
+        saveImageToDisk();
         return true;
     }
     else if (APTDemod::MsgPixels::match(cmd))
@@ -256,6 +265,32 @@ QImage APTDemodImageWorker::extractImage(QImage image)
         return image.copy(APT_CHA_OFFSET, 0, APT_CH_WIDTH, m_tempImage.nrow);
     } else {
         return image.copy(APT_CHB_OFFSET, 0, APT_CH_WIDTH, m_tempImage.nrow);
+    }
+}
+
+void APTDemodImageWorker::saveImageToDisk()
+{
+    QStringList imageTypes;
+    QImage image = processImage(imageTypes);
+
+    if (image.height() >= m_settings.m_autoSaveMinScanLines)
+    {
+        QString filename;
+        QDateTime datetime = QDateTime::currentDateTime();
+        filename = QString("apt_%1_%2.png").arg(m_satelliteName).arg(datetime.toString("yyyyMMdd_hhmm"));
+
+        if (!m_settings.m_autoSavePath.isEmpty())
+        {
+            if (m_settings.m_autoSavePath.endsWith('/')) {
+                filename = m_settings.m_autoSavePath + filename;
+            } else {
+                filename = m_settings.m_autoSavePath + '/' + filename;
+            }
+        }
+
+        if (!image.save(filename)) {
+            qCritical() << "Failed to save APT image to: " << filename;
+        }
     }
 }
 

@@ -651,19 +651,25 @@ int APTDemod::webapiActionsPost(
         {
             SWGSDRangel::SWGAPTDemodActions_los* los = swgAPTDemodActions->getLos();
             QString *satelliteName = los->getSatelliteName();
+
             if (satelliteName != nullptr)
             {
                 if (matchSatellite(*satelliteName))
                 {
                     // Save image
                     if (m_settings.m_autoSave)
-                        saveImageToDisk();
+                    {
+                        APTDemodImageWorker::MsgSaveImageToDisk *msg = APTDemodImageWorker::MsgSaveImageToDisk::create();
+                        m_imageWorker->getInputMessageQueue()->push(msg);
+                    }
                     // Disable decoder
                     APTDemodSettings settings = m_settings;
                     settings.m_decodeEnabled = false;
                     m_inputMessageQueue.push(MsgConfigureAPTDemod::create(settings, false));
-                    if (m_guiMessageQueue)
+
+                    if (m_guiMessageQueue) {
                         m_guiMessageQueue->push(MsgConfigureAPTDemod::create(settings, false));
+                    }
                 }
 
                 return 202;

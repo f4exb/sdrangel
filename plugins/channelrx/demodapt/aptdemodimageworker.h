@@ -57,6 +57,23 @@ public:
         { }
     };
 
+    class MsgSaveImageToDisk : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgSaveImageToDisk* create()
+        {
+            return new MsgSaveImageToDisk();
+        }
+
+    private:
+
+        MsgSaveImageToDisk() :
+            Message()
+        {
+        }
+    };
+
     APTDemodImageWorker();
     ~APTDemodImageWorker();
     void reset();
@@ -87,6 +104,7 @@ private:
     void resetDecoder();
     void processPixels(const float *pixels);
     void sendImageToGUI();
+    void saveImageToDisk();
     QImage processImage(QStringList& imageTypes);
     QImage extractImage(QImage image);
 
