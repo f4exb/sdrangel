@@ -37,7 +37,7 @@ APTDemodSink::APTDemodSink(APTDemod *packetDemod) :
         m_magsqSum(0.0f),
         m_magsqPeak(0.0f),
         m_magsqCount(0),
-        m_messageQueueToChannel(nullptr),
+        m_imageWorkerMessageQueue(nullptr),
         m_samples(nullptr)
 {
     m_magsq = 0.0;
@@ -124,7 +124,11 @@ void APTDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     {
         float pixels[APT_PROW_WIDTH];
         apt_getpixelrow(pixels, m_row, &m_zenith, m_row == 0, getsamples, this);
-        getMessageQueueToChannel()->push(APTDemod::MsgPixels::create(pixels, m_zenith));
+
+        if (getImageWorkerMessageQueue()) {
+            getImageWorkerMessageQueue()->push(APTDemod::MsgPixels::create(pixels, m_zenith));
+        }
+
         m_row++;
     }
 }

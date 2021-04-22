@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////
-// Copyright (C) 2019 Edouard Griffiths, F4EXB                                   //
+// Copyright (C) 2015-2018 Edouard Griffiths, F4EXB.                             //
 // Copyright (C) 2021 Jon Beniston, M7RCE                                        //
 //                                                                               //
 // This program is free software; you can redistribute it and/or modify          //
@@ -16,79 +16,85 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_APTDEMODBASEBAND_H
-#define INCLUDE_APTDEMODBASEBAND_H
+#ifndef INCLUDE_APTDEMODIMAGEWORKER_H
+#define INCLUDE_APTDEMODIMAGEWORKER_H
 
 #include <QObject>
 #include <QMutex>
+#include <QImage>
 
-#include "dsp/samplesinkfifo.h"
-#include "util/message.h"
+#include <apt.h>
+
 #include "util/messagequeue.h"
+#include "util/message.h"
 
-#include "aptdemodsink.h"
+#include "aptdemodsettings.h"
 
-class DownChannelizer;
-class APTDemod;
-
-class APTDemodBaseband : public QObject
+class APTDemodImageWorker : public QObject
 {
     Q_OBJECT
 public:
-    class MsgConfigureAPTDemodBaseband : public Message {
+    class MsgConfigureAPTDemodImageWorker : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
         const APTDemodSettings& getSettings() const { return m_settings; }
         bool getForce() const { return m_force; }
 
-        static MsgConfigureAPTDemodBaseband* create(const APTDemodSettings& settings, bool force)
+        static MsgConfigureAPTDemodImageWorker* create(const APTDemodSettings& settings, bool force)
         {
-            return new MsgConfigureAPTDemodBaseband(settings, force);
+            return new MsgConfigureAPTDemodImageWorker(settings, force);
         }
 
     private:
         APTDemodSettings m_settings;
         bool m_force;
 
-        MsgConfigureAPTDemodBaseband(const APTDemodSettings& settings, bool force) :
+        MsgConfigureAPTDemodImageWorker(const APTDemodSettings& settings, bool force) :
             Message(),
             m_settings(settings),
             m_force(force)
         { }
     };
 
-    APTDemodBaseband(APTDemod *packetDemod);
-    ~APTDemodBaseband();
+    APTDemodImageWorker();
+    ~APTDemodImageWorker();
     void reset();
     void startWork();
     void stopWork();
-    void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
-    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-    void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
-        m_sink.getMagSqLevels(avg, peak, nbSamples);
-    }
-    void setImagWorkerMessageQueue(MessageQueue *messageQueue) { m_sink.setImageWorkerMessageQueue(messageQueue); }
-    void setBasebandSampleRate(int sampleRate);
-    double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }
 
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
+    void setMessageQueueToGUI(MessageQueue *messageQueue) { m_messageQueueToGUI = messageQueue; }
+
 private:
-    SampleSinkFifo m_sampleFifo;
-    DownChannelizer *m_channelizer;
-    APTDemodSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
+    MessageQueue *m_messageQueueToGUI;
     APTDemodSettings m_settings;
+
+    // Image buffers
+    apt_image_t m_image;                // Received image
+    apt_image_t m_tempImage;            // Processed image
+    QImage m_greyImage;
+    QImage m_colourImage;
+    QString m_satelliteName;
+
     bool m_running;
     QMutex m_mutex;
 
     bool handleMessage(const Message& cmd);
-    void calculateOffset(APTDemodSink *sink);
     void applySettings(const APTDemodSettings& settings, bool force = false);
+    void resetDecoder();
+    void processPixels(const float *pixels);
+    void sendImageToGUI();
+    QImage processImage(QStringList& imageTypes);
+    QImage extractImage(QImage image);
+
+    static void copyImage(apt_image_t *dst, apt_image_t *src);
+    static uchar roundAndClip(float p);
 
 private slots:
     void handleInputMessages();
-    void handleData(); //!< Handle data when samples have to be processed
 };
 
-#endif // INCLUDE_APTDEMODBASEBAND_H
+#endif // INCLUDE_APTDEMODIMAGEWORKER_H

@@ -32,12 +32,14 @@
 #include "util/message.h"
 
 #include "aptdemodbaseband.h"
+#include "aptdemodimageworker.h"
 #include "aptdemodsettings.h"
 
 class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
 class DeviceAPI;
+class APTDemodImageWorker;
 
 class APTDemod : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT
@@ -144,7 +146,17 @@ public:
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool po);
     virtual void start();
     virtual void stop();
+    virtual void startBasebandSink();
+    virtual void stopBasebandSink();
+    virtual void startImageWorker();
+    virtual void stopImageWorker();
     virtual bool handleMessage(const Message& cmd);
+
+    void setMessageQueueToGUI(MessageQueue* queue) override
+    {
+        ChannelAPI::setMessageQueueToGUI(queue);
+        m_imageWorker->setMessageQueueToGUI(queue);
+    }
 
     virtual void getIdentifier(QString& id) { id = objectName(); }
     virtual const QString& getURI() const { return getName(); }
@@ -202,7 +214,9 @@ public:
 private:
     DeviceAPI *m_deviceAPI;
     QThread m_thread;
+    QThread m_imageThread;
     APTDemodBaseband* m_basebandSink;
+    APTDemodImageWorker *m_imageWorker;
     APTDemodSettings m_settings;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency;

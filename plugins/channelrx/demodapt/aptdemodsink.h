@@ -51,7 +51,7 @@ public:
 
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const APTDemodSettings& settings, bool force = false);
-    void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
+    void setImageWorkerMessageQueue(MessageQueue *messageQueue) { m_imageWorkerMessageQueue = messageQueue; }
 
     double getMagSq() const { return m_magsq; }
 
@@ -103,7 +103,7 @@ private:
     int  m_magsqCount;
     MagSqLevelsStore m_magSqLevelStore;
 
-    MessageQueue *m_messageQueueToChannel;
+    MessageQueue *m_imageWorkerMessageQueue;
 
     MovingAverageUtil<Real, double, 16> m_movingAverage;
 
@@ -120,7 +120,7 @@ private:
     int m_zenith;       // Row number of Zenith
 
     void processOneSample(Complex &ci);
-    MessageQueue *getMessageQueueToChannel() { return m_messageQueueToChannel; }
+    MessageQueue *getImageWorkerMessageQueue() { return m_imageWorkerMessageQueue; }
 };
 
 #endif // INCLUDE_APTDEMODSINK_H

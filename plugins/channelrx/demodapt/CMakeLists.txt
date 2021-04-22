@@ -5,6 +5,7 @@ set(demodapt_SOURCES
     aptdemodsettings.cpp
     aptdemodbaseband.cpp
     aptdemodsink.cpp
+    aptdemodimageworker.cpp
     aptdemodplugin.cpp
     aptdemodwebapiadapter.cpp
 )
@@ -14,6 +15,7 @@ set(demodapt_HEADERS
     aptdemodsettings.h
     aptdemodbaseband.h
     aptdemodsink.h
+    aptdemodimageworker.h
     aptdemodplugin.h
     aptdemodwebapiadapter.h
 )

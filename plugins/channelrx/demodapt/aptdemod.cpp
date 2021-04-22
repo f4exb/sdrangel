@@ -58,8 +58,11 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
     setObjectName(m_channelId);
 
     m_basebandSink = new APTDemodBaseband(this);
-    m_basebandSink->setMessageQueueToChannel(getInputMessageQueue());
     m_basebandSink->moveToThread(&m_thread);
+
+    m_imageWorker = new APTDemodImageWorker();
+    m_basebandSink->setImagWorkerMessageQueue(m_imageWorker->getInputMessageQueue());
+    m_imageWorker->moveToThread(&m_imageThread);
 
     applySettings(m_settings, true);
 
@@ -74,7 +77,8 @@ APTDemod::APTDemod(DeviceAPI *deviceAPI) :
         m_image.prow[y] = new float[APT_PROW_WIDTH];
         m_tempImage.prow[y] = new float[APT_PROW_WIDTH];
     }
-    resetDecoder();
+
+    resetDecoder(); // FIXME: to be removed
 }
 
 APTDemod::~APTDemod()
@@ -85,16 +89,22 @@ APTDemod::~APTDemod()
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
 
+    if (m_imageWorker->isRunning()) {
+        stopImageWorker();
+    }
+
+    delete m_imageWorker;
+
     if (m_basebandSink->isRunning()) {
-        stop();
+        stopBasebandSink();
     }
 
     delete m_basebandSink;
 
     for (int y = 0; y < APT_MAX_HEIGHT; y++)
     {
-        delete m_image.prow[y];
-        delete m_tempImage.prow[y];
+        delete[] m_image.prow[y];
+        delete[] m_tempImage.prow[y];
     }
 }
 
@@ -111,6 +121,12 @@ void APTDemod::feed(const SampleVector::const_iterator& begin, const SampleVecto
 
 void APTDemod::start()
 {
+    startBasebandSink();
+    startImageWorker();
+}
+
+void APTDemod::startBasebandSink()
+{
     qDebug("APTDemod::start");
 
     m_basebandSink->reset();
@@ -124,12 +140,38 @@ void APTDemod::start()
     m_basebandSink->getInputMessageQueue()->push(msg);
 }
 
+void APTDemod::startImageWorker()
+{
+    qDebug("APTDemod::startImageWorker");
+
+    m_imageWorker->reset();
+    m_imageWorker->startWork();
+    m_imageThread.start();
+
+    APTDemodImageWorker::MsgConfigureAPTDemodImageWorker *msg = APTDemodImageWorker::MsgConfigureAPTDemodImageWorker::create(m_settings, true);
+    m_imageWorker->getInputMessageQueue()->push(msg);
+}
+
 void APTDemod::stop()
+{
+    stopImageWorker();
+    stopBasebandSink();
+}
+
+void APTDemod::stopBasebandSink()
 {
     qDebug("APTDemod::stop");
     m_basebandSink->stopWork();
     m_thread.quit();
     m_thread.wait();
+}
+
+void APTDemod::stopImageWorker()
+{
+    qDebug("APTDemod::stopImageWorker");
+    m_imageWorker->stopWork();
+    m_imageThread.quit();
+    m_imageThread.wait();
 }
 
 bool APTDemod::matchSatellite(const QString satelliteName)
@@ -176,7 +218,8 @@ bool APTDemod::handleMessage(const Message& cmd)
     }
     else if (APTDemod::MsgResetDecoder::match(cmd))
     {
-        resetDecoder();
+        resetDecoder(); // FIXME: to be removed
+        m_imageWorker->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
         // Forward to sink
         m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
         return true;
@@ -579,7 +622,8 @@ int APTDemod::webapiActionsPost(
                 if (matchSatellite(*satelliteName))
                 {
                     // Reset for new pass
-                    resetDecoder();
+                    resetDecoder(); // FIXME: to be removed
+                    m_imageWorker->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
                     m_basebandSink->getInputMessageQueue()->push(APTDemod::MsgResetDecoder::create());
 
                     // Save satellite name
