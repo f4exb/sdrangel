@@ -274,11 +274,10 @@ void programQualityHandler(int16_t frames, int16_t rs, int16_t aac, void *ctx)
     sink->programQuality(frames, rs, aac);
 }
 
-void motDataHandler(std::string data, int a, void *ctx)
+void motDataHandler(std::string filename, int contentsubType, void *ctx)
 {
-    (void)data;
-    (void)a;
-    (void)ctx;
+    DABDemodSink *sink = (DABDemodSink *)ctx;
+    sink->motData(filename.c_str(), contentsubType);
 }
 
 void DABDemodSink::systemData(bool sync, int16_t snr, int32_t freqOffset)
@@ -339,6 +338,15 @@ void DABDemodSink::data(const QString& data)
     if (getMessageQueueToChannel())
     {
         DABDemod::MsgDABData *msg = DABDemod::MsgDABData::create(data);
+        getMessageQueueToChannel()->push(msg);
+    }
+}
+
+void DABDemodSink::motData(const QString& filename, int contentSubType)
+{
+    if (getMessageQueueToChannel())
+    {
+        DABDemod::MsgDABMOTData *msg = DABDemod::MsgDABMOTData::create(filename, contentSubType);
         getMessageQueueToChannel()->push(msg);
     }
 }

@@ -451,27 +451,42 @@ if (ZLIB_FOUND AND FAAD_FOUND)
         set(DAB_LIBRARIES "${EXTERNAL_BUILD_LIBRARIES}/lib/libdab_lib${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE INTERNAL "")
     endif()
     if (WIN32)
-        set(PTHREADS_OPT_FOR_DAB "-DPTHREADS=${PTHREADS4W_LIBRARIES}" CACHE INTERNAL "")
-    else()
-        set(PTHREADS_OPT_FOR_DAB "" CACHE INTERNAL "")
-    endif()
-    ExternalProject_Add(dab
-            GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
-            GIT_TAG msvc
-            PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
-            SOURCE_SUBDIR "library"
-            CMAKE_ARGS ${COMMON_CMAKE_ARGS}
-                    -DFFTW3F_INCLUDE_DIRS=${FFTW3F_INCLUDE_DIRS}
-                    -DFFTW3F_LIBRARIES=${FFTW3F_LIBRARIES}
-                    -DFAAD_INCLUDE_DIR=${FAAD_INCLUDE_DIR}
-                    -DFAAD_LIBRARY=${FAAD_LIBRARY}
-                    -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIRS}
-                    -DZLIB_LIBRARY=${ZLIB_LIBRARIES}
-                    ${PTHREADS_OPT_FOR_DAB}
-            BUILD_BYPRODUCTS "${DAB_LIBRARIES}"
-            INSTALL_COMMAND ""
-            TEST_COMMAND ""
-            )
+        ExternalProject_Add(dab
+                GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
+                GIT_TAG msvc
+                DEPENDS ${PTHREADS4W_DEPENDS}
+                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
+                SOURCE_SUBDIR "library"
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                        -DFFTW3F_INCLUDE_DIRS=${FFTW3F_INCLUDE_DIRS}
+                        -DFFTW3F_LIBRARIES=${FFTW3F_LIBRARIES}
+                        -DFAAD_INCLUDE_DIR=${FAAD_INCLUDE_DIR}
+                        -DFAAD_LIBRARY=${FAAD_LIBRARY}
+                        -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIRS}
+                        -DZLIB_LIBRARY=${ZLIB_LIBRARIES}
+                        -DPTHREADS=${PTHREADS4W_LIBRARIES}
+                BUILD_BYPRODUCTS "${DAB_LIBRARIES}"
+                INSTALL_COMMAND ""
+                TEST_COMMAND ""
+                )
+    else(WIN32)
+        ExternalProject_Add(dab
+                GIT_REPOSITORY https://github.com/srcejon/dab-cmdline.git
+                GIT_TAG msvc
+                PREFIX "${EXTERNAL_BUILD_LIBRARIES}/dab"
+                SOURCE_SUBDIR "library"
+                CMAKE_ARGS ${COMMON_CMAKE_ARGS}
+                        -DFFTW3F_INCLUDE_DIRS=${FFTW3F_INCLUDE_DIRS}
+                        -DFFTW3F_LIBRARIES=${FFTW3F_LIBRARIES}
+                        -DFAAD_INCLUDE_DIR=${FAAD_INCLUDE_DIR}
+                        -DFAAD_LIBRARY=${FAAD_LIBRARY}
+                        -DZLIB_INCLUDE_DIR=${ZLIB_INCLUDE_DIRS}
+                        -DZLIB_LIBRARY=${ZLIB_LIBRARIES}
+                BUILD_BYPRODUCTS "${DAB_LIBRARIES}"
+                INSTALL_COMMAND ""
+                TEST_COMMAND ""
+                )
+    endif(WIN32)
     ExternalProject_Get_Property(dab source_dir binary_dir)
     set(DAB_FOUND ON CACHE INTERNAL "")
     set(DAB_EXTERNAL ON CACHE INTERNAL "")

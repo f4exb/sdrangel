@@ -85,6 +85,7 @@ private:
     void leaveEvent(QEvent*);
     void enterEvent(QEvent*);
     void resetService();
+    void clearProgram();
     void resizeTable();
     QAction *createCheckableItem(QString& text, int idx, bool checked);
 
