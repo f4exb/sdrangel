@@ -48,6 +48,7 @@ MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABProgramQuality, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABFIBQuality, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABSampleRate, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABData, Message)
+MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABMOTData, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABReset, Message)
 MESSAGE_CLASS_DEFINITION(DABDemod::MsgDABResetService, Message)
 
@@ -228,6 +229,16 @@ bool DABDemod::handleMessage(const Message& cmd)
         if (getMessageQueueToGUI())
         {
             getMessageQueueToGUI()->push(new MsgDABData(report));
+        }
+
+        return true;
+    }
+    else if (MsgDABMOTData::match(cmd))
+    {
+        MsgDABMOTData& report = (MsgDABMOTData&)cmd;
+        if (getMessageQueueToGUI())
+        {
+            getMessageQueueToGUI()->push(new MsgDABMOTData(report));
         }
 
         return true;

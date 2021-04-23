@@ -89,6 +89,7 @@ public:
     void programQuality(int16_t frames, int16_t rs, int16_t aac);
     void fibQuality(int16_t percent);
     void data(const QString& data);
+    void motData(const QString& filename, int contentSubType);
 
 private:
     struct MagSqLevelsStore

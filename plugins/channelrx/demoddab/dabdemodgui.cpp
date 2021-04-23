@@ -180,6 +180,8 @@ void DABDemodGUI::on_programs_cellDoubleClicked(int row, int column)
     double frequencyInHz = ui->programs->item(row, PROGRAMS_COL_FREQUENCY)->data(Qt::UserRole).toDouble();
     ChannelWebAPIUtils::setCenterFrequency(m_dabDemod->getDeviceSetIndex(), frequencyInHz-m_settings.m_inputFrequencyOffset);
 
+    clearProgram();
+
     applySettings();
 }
 
@@ -259,6 +261,16 @@ bool DABDemodGUI::handleMessage(const Message& message)
     {
         DABDemod::MsgDABData& report = (DABDemod::MsgDABData&) message;
         ui->data->setText(report.getData());
+        return true;
+    }
+    else if (DABDemod::MsgDABMOTData::match(message))
+    {
+        DABDemod::MsgDABMOTData& report = (DABDemod::MsgDABMOTData&) message;
+        QPixmap pixmap(report.getFilename());
+        ui->motImage->resize(ui->motImage->width(), pixmap.height());
+        ui->motImage->setVisible(true);
+        ui->motImage->setPixmap(pixmap, pixmap.size());
+        arrangeRollups();
         return true;
     }
 
@@ -452,6 +464,8 @@ DABDemodGUI::DABDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     connect(&m_channelMarker, SIGNAL(highlightedByCursor()), this, SLOT(channelMarkerHighlightedByCursor()));
     connect(getInputMessageQueue(), SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 
+    ui->motImage->setVisible(false);
+
     // Resize the table using dummy data
     resizeTable();
     // Allow user to reorder columns
@@ -557,11 +571,8 @@ void DABDemodGUI::enterEvent(QEvent*)
     m_channelMarker.setHighlighted(true);
 }
 
-void DABDemodGUI::resetService()
+void DABDemodGUI::clearProgram()
 {
-    // Reset DAB audio service, to avoid unpleasent noise when changing frequency
-    DABDemod::MsgDABResetService* message = DABDemod::MsgDABResetService::create();
-    m_dabDemod->getInputMessageQueue()->push(message);
     // Clear current program
     ui->program->setText("-");
     ui->ensemble->setText("-");
@@ -571,6 +582,17 @@ void DABDemodGUI::resetService()
     ui->bitrate->setText("-");
     ui->sampleRate->setText("-");
     ui->data->setText("");
+    ui->motImage->setPixmap(QPixmap());
+    ui->motImage->setVisible(false);
+    arrangeRollups();
+}
+
+void DABDemodGUI::resetService()
+{
+    // Reset DAB audio service, to avoid unpleasent noise when changing frequency
+    DABDemod::MsgDABResetService* message = DABDemod::MsgDABResetService::create();
+    m_dabDemod->getInputMessageQueue()->push(message);
+    clearProgram();
 }
 
 void DABDemodGUI::on_channel_currentIndexChanged(int index)

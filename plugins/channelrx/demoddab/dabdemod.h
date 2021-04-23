@@ -250,6 +250,29 @@ public:
         { }
     };
 
+    class MsgDABMOTData : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const QString getFilename() const { return m_filename; }
+        int getContentSubType() const { return m_contentSubType; }
+
+        static MsgDABMOTData* create(const QString& filename, int contentSubType)
+        {
+            return new MsgDABMOTData(filename, contentSubType);
+        }
+
+    private:
+        QString m_filename;
+        int m_contentSubType;
+
+        MsgDABMOTData(const QString& filename, int contentSubType) :
+            Message(),
+            m_filename(filename),
+            m_contentSubType(contentSubType)
+        { }
+    };
+
     class MsgDABReset : public Message {
         MESSAGE_CLASS_DECLARATION
 

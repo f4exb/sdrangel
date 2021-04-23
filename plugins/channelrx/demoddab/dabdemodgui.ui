@@ -825,6 +825,22 @@
       </property>
      </widget>
     </item>
+    <item>
+     <widget class="ScaledImage" name="motImage">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="statistics" native="true">
@@ -1005,6 +1021,11 @@
    <extends>QWidget</extends>
    <header>gui/levelmeter.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ScaledImage</class>
+   <extends>QLabel</extends>
+   <header>gui/scaledimage.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
