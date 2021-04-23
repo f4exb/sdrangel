@@ -120,6 +120,32 @@ public:
         }
     };
 
+    // Unprocessed line to be sent to GUI
+    class MsgLine : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        const uchar* getLine() const { return m_line; }
+        int getSize() const { return m_size; }
+        void setSize(int size) { m_size = size;}
+
+        static MsgLine* create(uchar **line)
+        {
+            MsgLine *msg =  new MsgLine();
+            *line = msg->m_line;
+            return msg;
+        }
+
+    private:
+        uchar m_line[APT_PROW_WIDTH];
+        int m_size;
+
+        MsgLine() :
+            Message(),
+            m_size(APT_PROW_WIDTH)
+        {}
+    };
+
     // Sent from GUI to reset decoder
     class MsgResetDecoder : public Message {
         MESSAGE_CLASS_DECLARATION

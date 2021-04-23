@@ -157,8 +157,14 @@ void APTDemodImageWorker::resetDecoder()
 void APTDemodImageWorker::processPixels(const float *pixels)
 {
     std::copy(pixels, pixels + APT_PROW_WIDTH, m_image.prow[m_image.nrow]);
+
+    if (m_image.nrow % 20 == 0) { // send full image only every 20 lines
+        sendImageToGUI();
+    } else { // else send unprocessed line just to show stg is moving
+        sendLineToGUI();
+    }
+
     m_image.nrow++;
-    sendImageToGUI();
 }
 
 void APTDemodImageWorker::sendImageToGUI()
@@ -169,6 +175,40 @@ void APTDemodImageWorker::sendImageToGUI()
         QStringList imageTypes;
         QImage image = processImage(imageTypes);
         m_messageQueueToGUI->push(APTDemod::MsgImage::create(image, imageTypes, m_satelliteName));
+    }
+}
+
+void APTDemodImageWorker::sendLineToGUI()
+{
+    if (m_messageQueueToGUI)
+    {
+        float *pixels = m_image.prow[m_image.nrow];
+        uchar *line;
+        APTDemod::MsgLine *msg = APTDemod::MsgLine::create(&line);
+
+        if (m_settings.m_channels == APTDemodSettings::BOTH_CHANNELS)
+        {
+            for (int i = 0; i < APT_IMG_WIDTH; i++) {
+                line[i] = roundAndClip(pixels[i]);
+            }
+            msg->setSize(APT_IMG_WIDTH);
+        }
+        else if (m_settings.m_channels == APTDemodSettings::CHANNEL_A)
+        {
+            for (int i = 0; i < APT_CH_WIDTH; i++) {
+                line[i] = roundAndClip(pixels[i + APT_CHA_OFFSET]);
+            }
+            msg->setSize(APT_CH_WIDTH);
+        }
+        else
+        {
+            for (int i = 0; i < APT_CH_WIDTH; i++) {
+                line[i] = roundAndClip(pixels[i + APT_CHB_OFFSET]);
+            }
+            msg->setSize(APT_CH_WIDTH);
+        }
+
+        m_messageQueueToGUI->push(msg);
     }
 }
 

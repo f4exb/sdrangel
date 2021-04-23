@@ -126,6 +126,37 @@ bool APTDemodGUI::handleMessage(const Message& message)
             ui->imageContainer->setWindowTitle("Received image");
         return true;
     }
+    else if (APTDemod::MsgLine::match(message))
+    {
+        const APTDemod::MsgLine& lineMsg = (APTDemod::MsgLine&) message;
+
+        if (m_image.width() == 0)
+        {
+            m_image = QImage(lineMsg.getSize(), 1, QImage::Format_Grayscale8);
+        }
+        else
+        {
+            m_image = m_image.copy(0, 0, m_image.width(), m_image.height()+1); // Add a line at tne bottom
+
+            if (m_settings.m_flip)
+            {
+                m_pixmap.convertFromImage(m_image);
+                m_pixmap.scroll(0, 1, 0, 0, m_image.width(), m_image.height()-1); // scroll down 1 line
+                m_image = m_pixmap.toImage();
+            }
+        }
+
+        int len = std::min(m_image.width(), lineMsg.getSize());
+        std::copy(
+            lineMsg.getLine(),
+            lineMsg.getLine() + len,
+            m_image.scanLine(m_settings.m_flip ? 0 : m_image.height()-1)
+        );
+        m_pixmap.convertFromImage(m_image);
+        ui->image->setPixmap(m_pixmap);
+
+        return true;
+    }
     else if (DSPSignalNotification::match(message))
     {
         DSPSignalNotification& notif = (DSPSignalNotification&) message;

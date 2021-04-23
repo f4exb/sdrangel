@@ -45,6 +45,7 @@
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgConfigureAPTDemod, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgPixels, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgImage, Message)
+MESSAGE_CLASS_DEFINITION(APTDemod::MsgLine, Message)
 MESSAGE_CLASS_DEFINITION(APTDemod::MsgResetDecoder, Message)
 
 const char * const APTDemod::m_channelIdURI = "sdrangel.channel.aptdemod";

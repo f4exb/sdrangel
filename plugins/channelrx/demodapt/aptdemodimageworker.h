@@ -104,6 +104,7 @@ private:
     void resetDecoder();
     void processPixels(const float *pixels);
     void sendImageToGUI();
+    void sendLineToGUI();
     void saveImageToDisk();
     QImage processImage(QStringList& imageTypes);
     QImage extractImage(QImage image);
