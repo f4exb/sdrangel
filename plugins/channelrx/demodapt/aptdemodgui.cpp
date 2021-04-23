@@ -144,7 +144,11 @@ bool APTDemodGUI::handleMessage(const Message& message)
                 m_pixmap.convertFromImage(m_image);
                 m_pixmap.scroll(0, 1, 0, 0, m_image.width(), m_image.height()-1); // scroll down 1 line
                 m_image = m_pixmap.toImage();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 13, 0)
                 m_image.convertTo(imageFormat); // restore format
+#else
+                m_image = m_image.convertToFormat(imageFormat);
+#endif
             }
         }
 
