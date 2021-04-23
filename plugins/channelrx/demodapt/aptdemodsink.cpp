@@ -122,7 +122,7 @@ void APTDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     // 2 lines per second
     if (m_sampleCount >= APTDEMOD_AUDIO_SAMPLE_RATE)
     {
-        float pixels[APT_PROW_WIDTH];
+        float *pixels = new float[APT_PROW_WIDTH];
         apt_getpixelrow(pixels, m_row, &m_zenith, m_row == 0, getsamples, this);
 
         if (getImageWorkerMessageQueue()) {

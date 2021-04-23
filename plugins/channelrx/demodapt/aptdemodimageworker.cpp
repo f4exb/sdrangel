@@ -105,6 +105,7 @@ bool APTDemodImageWorker::handleMessage(const Message& cmd)
         const APTDemod::MsgPixels& pixelsMsg = (APTDemod::MsgPixels&) cmd;
         const float *pixels = pixelsMsg.getPixels();
         processPixels(pixels);
+        delete[] pixels;
         return true;
     }
     else if (APTDemod::MsgResetDecoder::match(cmd))

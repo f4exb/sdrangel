@@ -81,14 +81,14 @@ public:
         }
 
     private:
-        float m_pixels[APT_PROW_WIDTH];
+        const float *m_pixels;
         int m_zenith;
 
         MsgPixels(const float *pixels, int zenith) :
             Message(),
+            m_pixels(pixels),
             m_zenith(zenith)
         {
-            memcpy(m_pixels, pixels, sizeof(m_pixels));
         }
     };
 
