@@ -140,18 +140,32 @@ bool APTDemodGUI::handleMessage(const Message& message)
 
             if (m_settings.m_flip)
             {
+                QImage::Format imageFormat = m_image.format(); // save format
                 m_pixmap.convertFromImage(m_image);
                 m_pixmap.scroll(0, 1, 0, 0, m_image.width(), m_image.height()-1); // scroll down 1 line
                 m_image = m_pixmap.toImage();
+                m_image.convertTo(imageFormat); // restore format
             }
         }
 
         int len = std::min(m_image.width(), lineMsg.getSize());
-        std::copy(
-            lineMsg.getLine(),
-            lineMsg.getLine() + len,
-            m_image.scanLine(m_settings.m_flip ? 0 : m_image.height()-1)
-        );
+        uchar *p = m_image.scanLine(m_settings.m_flip ? 0 : m_image.height()-1);
+
+        // imageDepth == 8 ? QImage::Format_Grayscale8 : QImage::Format_RGB888
+
+        if (m_image.format() == QImage::Format_Grayscale8)
+        {
+            std::copy( lineMsg.getLine(), lineMsg.getLine() + len, p);
+        }
+        else if (m_image.format() == QImage::Format_RGB888)
+        {
+            for (int i = 0; i < len; i++)
+            {
+                uchar q = lineMsg.getLine()[i];
+                std::fill(&p[3*i], &p[3*i+3], q); // RGB888
+            }
+        }
+
         m_pixmap.convertFromImage(m_image);
         ui->image->setPixmap(m_pixmap);
 
