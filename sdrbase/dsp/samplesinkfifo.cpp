@@ -22,7 +22,6 @@
 
 void SampleSinkFifo::create(unsigned int s)
 {
-	m_size = 0;
 	m_fill = 0;
 	m_head = 0;
 	m_tail = 0;
@@ -85,6 +84,11 @@ bool SampleSinkFifo::setSize(int size)
 unsigned int SampleSinkFifo::write(const quint8* data, unsigned int count)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_size == 0) {
+		return 0;
+	}
+
 	unsigned int total;
 	unsigned int remaining;
 	unsigned int len;
@@ -139,6 +143,11 @@ unsigned int SampleSinkFifo::write(const quint8* data, unsigned int count)
 unsigned int SampleSinkFifo::write(SampleVector::const_iterator begin, SampleVector::const_iterator end)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_size == 0) {
+		return 0;
+	}
+
 	unsigned int count = end - begin;
 	unsigned int total;
 	unsigned int remaining;
@@ -192,6 +201,11 @@ unsigned int SampleSinkFifo::write(SampleVector::const_iterator begin, SampleVec
 unsigned int SampleSinkFifo::read(SampleVector::iterator begin, SampleVector::iterator end)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_size == 0) {
+		return 0;
+	}
+
 	unsigned int count = end - begin;
 	unsigned int total;
 	unsigned int remaining;
@@ -224,6 +238,11 @@ unsigned int SampleSinkFifo::readBegin(unsigned int count,
 	SampleVector::iterator* part2Begin, SampleVector::iterator* part2End)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_size == 0) {
+		return 0;
+	}
+
 	unsigned int total;
 	unsigned int remaining;
 	unsigned int len;
@@ -270,6 +289,10 @@ unsigned int SampleSinkFifo::readBegin(unsigned int count,
 unsigned int SampleSinkFifo::readCommit(unsigned int count)
 {
 	QMutexLocker mutexLocker(&m_mutex);
+
+	if (m_size == 0) {
+		return 0;
+	}
 
 	if (count > m_fill)
     {
