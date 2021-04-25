@@ -65,7 +65,7 @@ void APTDemodSink::resetDecoder()
 
 APTDemodSink::~APTDemodSink()
 {
-    delete m_samples;
+    delete[] m_samples;
 }
 
 // callback from APT library to get audio samples
@@ -122,10 +122,10 @@ void APTDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
     // 2 lines per second
     if (m_sampleCount >= APTDEMOD_AUDIO_SAMPLE_RATE)
     {
-        float *pixels = new float[APT_PROW_WIDTH];
-        apt_getpixelrow(pixels, m_row, &m_zenith, m_row == 0, getsamples, this);
-
-        if (getImageWorkerMessageQueue()) {
+        if (getImageWorkerMessageQueue())
+        {
+            float *pixels = new float[APT_PROW_WIDTH];
+            apt_getpixelrow(pixels, m_row, &m_zenith, m_row == 0, getsamples, this);
             getImageWorkerMessageQueue()->push(APTDemod::MsgPixels::create(pixels, m_zenith));
         }
 
