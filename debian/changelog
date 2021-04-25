@@ -1,3 +1,16 @@
+sdrangel (6.10.2-1) unstable; urgency=medium
+
+  * Satellite and Star tracker plugins: dark theme option for charts as default
+  * Spectrum: increase maximum FFT size to 32k
+  * Change delete order of channel and GUI. Fixes #860
+  * APT demod: moved processPixels process to a separate thread. Implements #865
+  * APT demod optimization: do a full image process only every 20 lines
+  * DAB/DAB+ demod: added images in GUI and various fixes. PR #866
+  * DAB/DAB+ demod: fixed right-click audio selection. PR #856 fixes #853
+  * SampleSinkFIFO: read/write return immediately if size is zero. Fixes #868
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sun, 25 Apr 2021 19:01:51 +0200
+
 sdrangel (6.10.1-1) unstable; urgency=medium
 
   * DAB/DAB+ demodulator plugin build in Windows package. PR #854 fixes #853
