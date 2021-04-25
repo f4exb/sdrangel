@@ -36,16 +36,12 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_lpfFIRlog2Decim(0),
         m_lpfFIRRxGain(0),
         m_lpfFIRTxGain(0),
-        m_ctx(0),
-        m_devPhy(0),
-        m_devRx(0),
-        m_devTx(0),
-        m_chnRx0i(0),
-        m_chnRx0q(0),
-        m_chnTx0i(0),
-        m_chnTx0q(0),
-        m_rxBuf(0),
-        m_txBuf(0),
+        m_ctx(nullptr),
+        m_devPhy(nullptr),
+        m_devRx(nullptr),
+        m_devTx(nullptr),
+        m_rxBuf(nullptr),
+        m_txBuf(nullptr),
         m_xoInitial(0),
         m_temp(0.0f)
 {
@@ -64,16 +60,40 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
 
     m_valid = m_ctx && m_devPhy && m_devRx && m_devTx;
 
-    if (m_valid) {
+    if (m_valid)
+    {
+        std::regex channelIdReg("voltage([0-9]+)");
+
         getXO();
-//        int nb_channels = iio_device_get_channels_count(m_devRx);
-//        for (int i = 0; i < nb_channels; i++) {
-//            iio_channel_disable(iio_device_get_channel(m_devRx, i));
-//        }
-//        nb_channels = iio_device_get_channels_count(m_devTx);
-//        for (int i = 0; i < nb_channels; i++) {
-//            iio_channel_disable(iio_device_get_channel(m_devTx, i));
-//        }
+        int nbRxChannels = iio_device_get_channels_count(m_devRx);
+
+        for (int i = 0; i < nbRxChannels; i++)
+        {
+            iio_channel *chn = iio_device_get_channel(m_devRx, i);
+            std::string channelId(iio_channel_get_id(chn));
+
+            if (std::regex_match(channelId, channelIdReg))
+            {
+                m_rxChannelIds.append(QString(channelId.c_str()));
+                m_rxChannels.append(chn);
+                qDebug("DevicePlutoSDRBox::DevicePlutoSDRBox: Rx: %s", channelId.c_str());
+            }
+        }
+
+        int nbTxChannels = iio_device_get_channels_count(m_devTx);
+
+        for (int i = 0; i < nbTxChannels; i++)
+        {
+            iio_channel *chn = iio_device_get_channel(m_devTx, i);
+            std::string channelId(iio_channel_get_id(chn));
+
+            if (std::regex_match(channelId, channelIdReg))
+            {
+                m_txChannelIds.append(QString(channelId.c_str()));
+                m_txChannels.append(chn);
+                qDebug("DevicePlutoSDRBox::DevicePlutoSDRBox: Tx: %s", channelId.c_str());
+            }
+        }
     }
 }
 
@@ -259,14 +279,11 @@ bool DevicePlutoSDRBox::openRx()
 {
     if (!m_valid) { return false; }
 
-    if (!m_chnRx0i) {
-        m_chnRx0i = iio_device_find_channel(m_devRx, "voltage0", false);
-    }
+    if (m_rxChannels.size() > 0)
+    {
+        iio_channel_enable(m_rxChannels.at(0));
 
-    if (m_chnRx0i) {
-        iio_channel_enable(m_chnRx0i);
-        
-        const struct iio_data_format *df = iio_channel_get_data_format(m_chnRx0i);
+        const struct iio_data_format *df = iio_channel_get_data_format(m_rxChannels.at(0));
         qDebug("DevicePlutoSDRBox::openRx channel I: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
                 df->length,
                 df->bits,
@@ -276,19 +293,18 @@ bool DevicePlutoSDRBox::openRx()
                 df->with_scale? "true" : "false",
                 df->scale,
                 df->repeat);
-    } else {
+    }
+    else
+    {
         std::cerr << "DevicePlutoSDRBox::openRx: failed" << std::endl;
         return false;
     }
 
-    if (!m_chnRx0q) {
-        m_chnRx0q = iio_device_find_channel(m_devRx, "voltage1", false);
-    }
+    if (m_rxChannels.size() > 1)
+    {
+        iio_channel_enable(m_rxChannels.at(1));
 
-    if (m_chnRx0q) {
-        iio_channel_enable(m_chnRx0q);
-
-        const struct iio_data_format* df = iio_channel_get_data_format(m_chnRx0q);
+        const struct iio_data_format* df = iio_channel_get_data_format(m_rxChannels.at(1));
         qDebug("DevicePlutoSDRBox::openRx channel Q: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
             df->length,
             df->bits,
@@ -300,7 +316,8 @@ bool DevicePlutoSDRBox::openRx()
             df->repeat);
         return true;
     }
-    else {
+    else
+    {
         std::cerr << "DevicePlutoSDRBox::openRx: failed" << std::endl;
         return false;
     }
@@ -310,13 +327,10 @@ bool DevicePlutoSDRBox::openTx()
 {
     if (!m_valid) { return false; }
 
-    if (!m_chnTx0i) {
-        m_chnTx0i = iio_device_find_channel(m_devTx, "voltage0", true);
-    }
-
-    if (m_chnTx0i) {
-        iio_channel_enable(m_chnTx0i);
-        const struct iio_data_format *df = iio_channel_get_data_format(m_chnTx0i);
+    if (m_txChannels.size() > 0)
+    {
+        iio_channel_enable(m_txChannels.at(0));
+        const struct iio_data_format *df = iio_channel_get_data_format(m_txChannels.at(0));
         qDebug("DevicePlutoSDRBox::openTx: channel I: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
                 df->length,
                 df->bits,
@@ -326,18 +340,17 @@ bool DevicePlutoSDRBox::openTx()
                 df->with_scale? "true" : "false",
                 df->scale,
                 df->repeat);
-    } else {
+    }
+    else
+    {
         std::cerr << "DevicePlutoSDRBox::openTx: failed to open I channel" << std::endl;
         return false;
     }
 
-    if (!m_chnTx0q) {
-        m_chnTx0q = iio_device_find_channel(m_devTx, "voltage1", true);
-    }
-
-    if (m_chnTx0q) {
-        iio_channel_enable(m_chnTx0q);
-        const struct iio_data_format *df = iio_channel_get_data_format(m_chnTx0q);
+    if (m_txChannels.size() > 1)
+    {
+        iio_channel_enable(m_txChannels.at(1));
+        const struct iio_data_format *df = iio_channel_get_data_format(m_txChannels.at(1));
         qDebug("DevicePlutoSDRBox::openTx: channel Q: length: %u bits: %u shift: %u signed: %s be: %s with_scale: %s scale: %lf repeat: %u",
                 df->length,
                 df->bits,
@@ -348,7 +361,9 @@ bool DevicePlutoSDRBox::openTx()
                 df->scale,
                 df->repeat);
         return true;
-    } else {
+    }
+    else
+    {
         std::cerr << "DevicePlutoSDRBox::openTx: failed to open Q channel" << std::endl;
         return false;
     }
@@ -356,14 +371,14 @@ bool DevicePlutoSDRBox::openTx()
 
 void DevicePlutoSDRBox::closeRx()
 {
-    if (m_chnRx0i) { iio_channel_disable(m_chnRx0i); }
-    if (m_chnRx0q) { iio_channel_disable(m_chnRx0q); }
+    if (m_rxChannels.size() > 0) { iio_channel_disable(m_rxChannels.at(0)); }
+    if (m_rxChannels.size() > 1) { iio_channel_disable(m_rxChannels.at(1)); }
 }
 
 void DevicePlutoSDRBox::closeTx()
 {
-    if (m_chnTx0i) { iio_channel_disable(m_chnTx0i); }
-    if (m_chnTx0q) { iio_channel_disable(m_chnTx0q); }
+    if (m_txChannels.size() > 0) { iio_channel_disable(m_txChannels.at(0)); }
+    if (m_txChannels.size() > 1) { iio_channel_disable(m_txChannels.at(1)); }
 }
 
 struct iio_buffer *DevicePlutoSDRBox::createRxBuffer(unsigned int size, bool cyclic)
@@ -454,16 +469,16 @@ char* DevicePlutoSDRBox::rxBufferEnd()
     if (m_rxBuf) {
         return (char *) iio_buffer_end(m_rxBuf);
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
 char* DevicePlutoSDRBox::rxBufferFirst()
 {
     if (m_rxBuf) {
-        return (char *) iio_buffer_first(m_rxBuf, m_chnRx0i);
+        return (char *) iio_buffer_first(m_rxBuf, m_rxChannels.at(0));
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
@@ -481,26 +496,26 @@ char* DevicePlutoSDRBox::txBufferEnd()
     if (m_txBuf) {
         return (char *) iio_buffer_end(m_txBuf);
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
 char* DevicePlutoSDRBox::txBufferFirst()
 {
     if (m_txBuf) {
-        return (char *) iio_buffer_first(m_txBuf, m_chnTx0i);
+        return (char *) iio_buffer_first(m_txBuf, m_txChannels.at(0));
     } else {
-        return 0;
+        return nullptr;
     }
 }
 
 void DevicePlutoSDRBox::txChannelConvert(int16_t *dst, int16_t *src)
 {
-    if (m_chnTx0i) {
-        iio_channel_convert_inverse(m_chnTx0i, &dst[0], &src[0]);
+    if (m_txChannels.size() > 0) {
+        iio_channel_convert_inverse(m_txChannels.at(0), &dst[0], &src[0]);
     }
-    if (m_chnTx0q) {
-        iio_channel_convert_inverse(m_chnTx0q, &dst[1], &src[1]);
+    if (m_txChannels.size() > 1) {
+        iio_channel_convert_inverse(m_txChannels.at(1), &dst[1], &src[1]);
     }
 }
 

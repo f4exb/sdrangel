@@ -113,7 +113,6 @@ void PlutoSDRInputThread::run()
         {
             m_buf[ihs++] = *((int16_t *) p_dat);
             m_buf[ihs++] = *(((int16_t *) p_dat) + 1);
-//            iio_channel_convert(m_plutoBox->getRxChannel0(), (void *) &m_bufConv[ihs], (const void *) &m_buf[ihs]);
         }
 
         if (m_iqOrder) {

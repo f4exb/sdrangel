@@ -21,14 +21,19 @@
 #include <sstream>
 #include <stdint.h>
 #include <sys/types.h>
-#include "deviceplutosdrscan.h"
 
+#include <QList>
+#include <QString>
+
+#include "deviceplutosdrscan.h"
 #include "export.h"
 
 #if defined(_MSC_VER)
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 #endif
+
+struct iio_channel;
 
 class DEVICES_API DevicePlutoSDRBox
 {
@@ -75,19 +80,18 @@ public:
 
     void set_params(DeviceType devType, const std::vector<std::string> &params);
     bool get_param(DeviceType devType, const std::string &param, std::string &value);
-    bool openRx();
-    bool openTx();
-    void closeRx();
-    void closeTx();
+    bool openRx();   //!< Open first Rx (Rx0)
+    bool openTx();   //!< Open first Tx (Tx0)
+    void closeRx();  //!< Close first Rx (Rx0)
+    void closeTx();  //!< Close first Tx (Tx0)
+    int getNbRx() const { return m_rxChannels.size() / 2; }
+    int getNbTx() const { return m_txChannels.size() / 2; }
     struct iio_buffer *createRxBuffer(unsigned int size, bool cyclic);
     struct iio_buffer *createTxBuffer(unsigned int size, bool cyclic);
     void deleteRxBuffer();
     void deleteTxBuffer();
     ssize_t getRxSampleSize();
     ssize_t getTxSampleSize();
-    struct iio_channel *getRxChannel0() { return m_chnRx0i; }
-    struct iio_channel *getTxChannel0I() { return m_chnTx0i; }
-    struct iio_channel *getTxChannel0Q() { return m_chnTx0q; }
     ssize_t rxBufferRefill();
     ssize_t txBufferPush();
     std::ptrdiff_t rxBufferStep();
@@ -119,15 +123,15 @@ private:
     struct iio_device  *m_devPhy;
     struct iio_device  *m_devRx;
     struct iio_device  *m_devTx;
-    struct iio_channel *m_chnRx0i;
-    struct iio_channel* m_chnRx0q;
-    struct iio_channel *m_chnTx0i;
-    struct iio_channel *m_chnTx0q;
     struct iio_buffer  *m_rxBuf;
     struct iio_buffer  *m_txBuf;
     bool m_valid;
     int64_t m_xoInitial;
     float m_temp;
+    QList<QString> m_rxChannelIds;
+    QList<iio_channel*> m_rxChannels;
+    QList<QString> m_txChannelIds;
+    QList<iio_channel*> m_txChannels;
 
     bool parseSampleRates(const std::string& rateStr, SampleRates& sampleRates);
     void setFilter(const std::string& filterConfigStr);
