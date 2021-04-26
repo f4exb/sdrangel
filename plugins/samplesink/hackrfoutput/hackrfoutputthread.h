@@ -23,7 +23,6 @@
 #include <QWaitCondition>
 #include <libhackrf/hackrf.h>
 
-#include "dsp/samplesourcefifodb.h"
 #include "dsp/interpolators.h"
 
 #define HACKRF_BLOCKSIZE (1<<17)

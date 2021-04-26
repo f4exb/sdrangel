@@ -21,7 +21,6 @@
 
 #include <QObject>
 #include "dsp/dsptypes.h"
-#include "dsp/samplesourcefifodb.h"
 #include "export.h"
 #include "util/messagequeue.h"
 

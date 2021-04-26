@@ -26,7 +26,6 @@
 #include "dsp/basebandsamplesink.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/dspcommands.h"
-#include "samplesourcefifodb.h"
 
 DSPDeviceSinkEngine::DSPDeviceSinkEngine(uint32_t uid, QObject* parent) :
 	QThread(parent),
