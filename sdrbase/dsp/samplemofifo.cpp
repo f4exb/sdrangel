@@ -27,13 +27,15 @@ SampleMOFifo::SampleMOFifo(QObject *parent) :
 {}
 
 SampleMOFifo::SampleMOFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_mutex(QMutex::Recursive)
 {
     init(nbStreams, size);
 }
 
 void SampleMOFifo::init(unsigned int nbStreams, unsigned int size)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_data.resize(nbStreams);
     m_vReadCount.resize(nbStreams);
     m_vReadHead.resize(nbStreams);

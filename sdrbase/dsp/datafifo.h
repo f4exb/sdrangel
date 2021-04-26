@@ -31,11 +31,10 @@ class SDRBASE_API DataFifo : public QObject {
 	Q_OBJECT
 
 private:
-	QMutex m_mutex;
 	QElapsedTimer m_msgRateTimer;
 	int m_suppressed;
-
 	QByteArray m_data;
+	QMutex m_mutex;
 
 	unsigned int m_size;
 	unsigned int m_fill;

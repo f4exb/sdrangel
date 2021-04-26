@@ -19,6 +19,7 @@
 
 void SampleMIFifo::init(unsigned int nbStreams, unsigned int size)
 {
+    QMutexLocker mutexLocker(&m_mutex);
     m_nbStreams = nbStreams;
     m_size = size;
 	m_fill = 0;
@@ -52,12 +53,14 @@ SampleMIFifo::SampleMIFifo(QObject *parent) :
     m_nbStreams(0),
     m_size(0),
     m_fill(0),
-    m_head(0)
+    m_head(0),
+    m_mutex(QMutex::Recursive)
 {
 }
 
 SampleMIFifo::SampleMIFifo(unsigned int nbStreams, unsigned int size, QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    m_mutex(QMutex::Recursive)
 {
     init(nbStreams, size);
 }
@@ -234,6 +237,8 @@ void SampleMIFifo::readSync(
     if (m_data.size() == 0) {
         return;
     }
+
+    QMutexLocker mutexLocker(&m_mutex);
 
     if (m_head < m_fill)
     {

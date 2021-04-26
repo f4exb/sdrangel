@@ -31,6 +31,7 @@ void DataFifo::create(unsigned int s)
 
 void DataFifo::reset()
 {
+	QMutexLocker mutexLocker(&m_mutex);
 	m_suppressed = -1;
 	m_fill = 0;
 	m_head = 0;
@@ -39,7 +40,8 @@ void DataFifo::reset()
 
 DataFifo::DataFifo(QObject* parent) :
 	QObject(parent),
-	m_data()
+	m_data(),
+	m_mutex(QMutex::Recursive)
 {
 	m_suppressed = -1;
 	m_size = 0;
@@ -50,7 +52,8 @@ DataFifo::DataFifo(QObject* parent) :
 
 DataFifo::DataFifo(int size, QObject* parent) :
 	QObject(parent),
-	m_data()
+	m_data(),
+	m_mutex(QMutex::Recursive)
 {
 	m_suppressed = -1;
 	create(size);
@@ -58,7 +61,8 @@ DataFifo::DataFifo(int size, QObject* parent) :
 
 DataFifo::DataFifo(const DataFifo& other) :
     QObject(other.parent()),
-    m_data(other.m_data)
+    m_data(other.m_data),
+	m_mutex(QMutex::Recursive)
 {
   	m_suppressed = -1;
 	m_size = m_data.size();
@@ -75,8 +79,8 @@ DataFifo::~DataFifo()
 
 bool DataFifo::setSize(int size)
 {
+	QMutexLocker mutexLocker(&m_mutex);
 	create(size);
-
 	return m_data.size() == size;
 }
 

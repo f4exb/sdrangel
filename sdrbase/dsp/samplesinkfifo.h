@@ -29,11 +29,10 @@ class SDRBASE_API SampleSinkFifo : public QObject {
 	Q_OBJECT
 
 private:
-	QMutex m_mutex;
 	QElapsedTimer m_msgRateTimer;
 	int m_suppressed;
-
 	SampleVector m_data;
+	QMutex m_mutex;
 
 	unsigned int m_size;
 	unsigned int m_fill;
@@ -50,7 +49,7 @@ public:
 
 	bool setSize(int size);
     void reset();
-	inline unsigned int size() const { return m_size; }
+	inline unsigned int size() { QMutexLocker mutexLocker(&m_mutex); unsigned int size = m_size; return size; }
 	inline unsigned int fill() { QMutexLocker mutexLocker(&m_mutex); unsigned int fill = m_fill; return fill; }
 
 	unsigned int write(const quint8* data, unsigned int count);

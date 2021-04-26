@@ -32,6 +32,7 @@ void SampleSinkFifo::create(unsigned int s)
 
 void SampleSinkFifo::reset()
 {
+	QMutexLocker mutexLocker(&m_mutex);
 	m_suppressed = -1;
 	m_fill = 0;
 	m_head = 0;
@@ -40,7 +41,8 @@ void SampleSinkFifo::reset()
 
 SampleSinkFifo::SampleSinkFifo(QObject* parent) :
 	QObject(parent),
-	m_data()
+	m_data(),
+	m_mutex(QMutex::Recursive)
 {
 	m_suppressed = -1;
 	m_size = 0;
@@ -51,7 +53,8 @@ SampleSinkFifo::SampleSinkFifo(QObject* parent) :
 
 SampleSinkFifo::SampleSinkFifo(int size, QObject* parent) :
 	QObject(parent),
-	m_data()
+	m_data(),
+	m_mutex(QMutex::Recursive)
 {
 	m_suppressed = -1;
 	create(size);
@@ -59,7 +62,8 @@ SampleSinkFifo::SampleSinkFifo(int size, QObject* parent) :
 
 SampleSinkFifo::SampleSinkFifo(const SampleSinkFifo& other) :
     QObject(other.parent()),
-    m_data(other.m_data)
+    m_data(other.m_data),
+	m_mutex(QMutex::Recursive)
 {
   	m_suppressed = -1;
 	m_size = m_data.size();
@@ -76,8 +80,8 @@ SampleSinkFifo::~SampleSinkFifo()
 
 bool SampleSinkFifo::setSize(int size)
 {
+	QMutexLocker mutexLocker(&m_mutex);
 	create(size);
-
 	return m_data.size() == (unsigned int)size;
 }
 
