@@ -1063,13 +1063,6 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
     {
         BasebandSampleSink* spectrumSink = ((DSPRemoveSpectrumSink*) message)->getSampleSink();
         spectrumSink->stop();
-
-        // if (!m_spectrumInputSourceElseSink && m_deviceSampleMIMO && (m_spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams()))
-        // {
-        //     SampleSourceFifoDB *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
-        //     disconnect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-        // }
-
         m_spectrumSink = nullptr;
     }
     else if (SetSpectrumSinkInput::match(*message))
@@ -1080,17 +1073,8 @@ void DSPDeviceMIMOEngine::handleSynchronousMessages()
 
         if ((spectrumInputSourceElseSink != m_spectrumInputSourceElseSink) || (spectrumInputIndex != m_spectrumInputIndex))
         {
-            // if (!m_spectrumInputSourceElseSink) // remove the source listener
-            // {
-            //     SampleSourceFifoDB *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(m_spectrumInputIndex);
-            //     disconnect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-            // }
-
             if ((!spectrumInputSourceElseSink) && (spectrumInputIndex <  m_deviceSampleMIMO->getNbSinkStreams())) // add the source listener
             {
-                // SampleSourceFifoDB *inputFIFO = m_deviceSampleMIMO->getSampleSourceFifo(spectrumInputIndex);
-                // connect(inputFIFO, SIGNAL(dataRead(int)), this, SLOT(handleForwardToSpectrumSink(int)));
-
                 if (m_spectrumSink)
                 {
                     DSPSignalNotification notif(
