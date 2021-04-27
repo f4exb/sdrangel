@@ -599,7 +599,7 @@ void DABDemodSink::applySettings(const DABDemodSettings& settings, bool force)
     {
         if (!settings.m_program.isEmpty())
         {
-            QByteArray ba = settings.m_program.toLatin1();
+            QByteArray ba = settings.m_program.toUtf8();
             const char *program = ba.data();
             if (!is_audioService (m_dab, program))
                 qWarning() << settings.m_program << " is not an audio service";
