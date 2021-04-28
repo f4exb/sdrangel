@@ -23,8 +23,6 @@
 #include <QAbstractListModel>
 #include <QModelIndex>
 #include <QProgressDialog>
-#include <QGeoLocation>
-#include <QGeoCoordinate>
 #include <QTableWidgetItem>
 #include <QPushButton>
 #include <QToolButton>

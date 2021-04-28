@@ -479,6 +479,8 @@ void getSatelliteState(QDateTime dateTime,
                                                 noOfPasses);
         }
 
+        qDeleteAll(satState->m_groundTrack);
+        qDeleteAll(satState->m_predictedGroundTrack);
         getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, false, satState->m_groundTrack);
         getGroundTrack(dateTime, tle0, tle1, tle2, groundTrackSteps, true, satState->m_predictedGroundTrack);
     }

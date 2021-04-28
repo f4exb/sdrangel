@@ -64,7 +64,7 @@ UDP port number to forward received packets to.
 
 <h3>Received Packets Table</h3>
 
-The received packets table displays the contexts of the packets that have been received. Only packets with valid CRCs are displayed.
+The received packets table displays the contents of the packets that have been received. Only packets with valid CRCs are displayed.
 
 * From - The source address / callsign of the sender of the packet.
 * To - The destination address.

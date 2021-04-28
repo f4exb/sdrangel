@@ -55,6 +55,9 @@ PacketDemodSink::PacketDemodSink(PacketDemod *packetDemod) :
 
 PacketDemodSink::~PacketDemodSink()
 {
+    delete[] m_f1;
+    delete[] m_f0;
+    delete[] m_corrBuf;
 }
 
 void PacketDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -301,9 +304,9 @@ void PacketDemodSink::applySettings(const PacketDemodSettings& settings, bool fo
 
     if (force)
     {
-        delete m_f1;
-        delete m_f0;
-        delete m_corrBuf;
+        delete[] m_f1;
+        delete[] m_f0;
+        delete[] m_corrBuf;
         m_correlationLength = PACKETDEMOD_CHANNEL_SAMPLE_RATE/settings.m_baud;
         m_f1 = new Complex[m_correlationLength]();
         m_f0 = new Complex[m_correlationLength]();

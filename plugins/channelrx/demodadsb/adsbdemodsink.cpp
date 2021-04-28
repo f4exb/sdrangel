@@ -55,7 +55,7 @@ ADSBDemodSink::ADSBDemodSink() :
 ADSBDemodSink::~ADSBDemodSink()
 {
     for (int i = 0; i < m_buffers; i++)
-        delete m_sampleBuffer[i];
+        delete[] m_sampleBuffer[i];
 }
 
 void ADSBDemodSink::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end)
@@ -207,7 +207,7 @@ void ADSBDemodSink::init(int samplesPerBit)
     for (int i = 0; i < m_buffers; i++)
     {
         if (m_sampleBuffer[i])
-            delete m_sampleBuffer[i];
+            delete[] m_sampleBuffer[i];
     }
 
     m_samplesPerFrame = samplesPerBit*(ADS_B_PREAMBLE_BITS+ADS_B_ES_BITS);

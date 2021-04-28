@@ -848,6 +848,8 @@ void StarTrackerGUI::plotSkyTemperatureChart()
 
             // Scale marker size by beamwidth
             markerSize = std::max((int)round(beamWidth * degPerPixel), 5);
+
+            delete[] beam;
         }
         else
             qDebug() << "StarTrackerGUI::plotSkyTemperatureChart: FITS temperature file not valid";
