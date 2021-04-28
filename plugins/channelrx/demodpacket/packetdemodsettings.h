@@ -43,7 +43,6 @@ struct PacketDemodSettings
     quint32 m_rgbColor;
     QString m_title;
     Serializable *m_channelMarker;
-    QString m_audioDeviceName;
     int m_streamIndex; //!< MIMO channel. Not relevant when connected to SI (single Rx).
     bool m_useReverseAPI;
     QString m_reverseAPIAddress;

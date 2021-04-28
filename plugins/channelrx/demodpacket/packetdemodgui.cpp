@@ -21,10 +21,6 @@
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QDebug>
-#include <QQuickItem>
-#include <QGeoLocation>
-#include <QGeoCoordinate>
-#include <QQmlContext>
 #include <QMessageBox>
 #include <QAction>
 #include <QRegExp>
