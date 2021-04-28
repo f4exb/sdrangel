@@ -53,7 +53,7 @@ IEEE_802_15_4_ModSource::IEEE_802_15_4_ModSource() :
 
 IEEE_802_15_4_ModSource::~IEEE_802_15_4_ModSource()
 {
-    delete m_sinLUT;
+    delete[] m_sinLUT;
 }
 
 void IEEE_802_15_4_ModSource::pull(SampleVector::iterator begin, unsigned int nbSamples)
@@ -406,8 +406,7 @@ void IEEE_802_15_4_ModSource::createHalfSine(int sampleRate, int chipRate)
     int samplesPerChip = sampleRate / chipRate;
     double tc = 1.0 / chipRate;
 
-    if (m_sinLUT)
-        delete m_sinLUT;
+    delete[] m_sinLUT;
     m_sinLUT = new double[2*samplesPerChip];
     for (int i = 0; i < 2*samplesPerChip; i++)
     {

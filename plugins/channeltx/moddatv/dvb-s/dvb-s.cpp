@@ -47,13 +47,13 @@ DVBS::~DVBS()
 {
     // Free interleaver FIFO memory
     for (int i = 1; i < interleaveDepth; i++)
-        delete m_interleaveFIFO[i];
-    delete m_interleaveIdx;
-    delete m_interleaveLen;
-    delete m_interleaveFIFO;
+        delete[] m_interleaveFIFO[i];
+    delete[] m_interleaveIdx;
+    delete[] m_interleaveLen;
+    delete[] m_interleaveFIFO;
 
     // Free packet buffer
-    delete m_packet;
+    delete[] m_packet;
 }
 
 // Scramble input packet (except for sync bytes) with psuedo random binary sequence
