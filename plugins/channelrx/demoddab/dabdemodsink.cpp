@@ -43,16 +43,16 @@ void systemDataHandler(bool sync, int16_t snr, int32_t freqOffset, void *ctx)
     sink->systemData(sync, snr, freqOffset);
 }
 
-void ensembleNameHandler(std::string name, int32_t id, void *ctx)
+void ensembleNameHandler(const char *name, int32_t id, void *ctx)
 {
     DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->ensembleName(QString::fromStdString(name), id);
+    sink->ensembleName(QString::fromUtf8(name), id);
 }
 
-void programNameHandler(std::string name, int32_t id, void *ctx)
+void programNameHandler(const char *name, int32_t id, void *ctx)
 {
     DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->programName(QString::fromStdString(name), id);
+    sink->programName(QString::fromUtf8(name), id);
 }
 
 void fibQualityHandler(int16_t percent, void *ctx)
@@ -67,10 +67,10 @@ void audioHandler(int16_t *buffer, int size, int samplerate, bool stereo, void *
     sink->audio(buffer, size, samplerate, stereo);
 }
 
-void dataHandler(std::string data, void *ctx)
+void dataHandler(const char *data, void *ctx)
 {
     DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->data(QString::fromStdString(data));
+    sink->data(QString::fromUtf8(data));
 }
 
 void byteHandler(uint8_t *data, int16_t a, uint8_t b, void *ctx)
@@ -274,10 +274,10 @@ void programQualityHandler(int16_t frames, int16_t rs, int16_t aac, void *ctx)
     sink->programQuality(frames, rs, aac);
 }
 
-void motDataHandler(std::string filename, int contentsubType, void *ctx)
+void motDataHandler(uint8_t *data, int len, const char *filename, int contentsubType, void *ctx)
 {
     DABDemodSink *sink = (DABDemodSink *)ctx;
-    sink->motData(filename.c_str(), contentsubType);
+    sink->motData(data, len, QString::fromUtf8(filename), contentsubType);
 }
 
 void DABDemodSink::systemData(bool sync, int16_t snr, int32_t freqOffset)
@@ -342,11 +342,12 @@ void DABDemodSink::data(const QString& data)
     }
 }
 
-void DABDemodSink::motData(const QString& filename, int contentSubType)
+void DABDemodSink::motData(const uint8_t *data, int len, const QString& filename, int contentSubType)
 {
     if (getMessageQueueToChannel())
     {
-        DABDemod::MsgDABMOTData *msg = DABDemod::MsgDABMOTData::create(filename, contentSubType);
+        QByteArray byteArray((const char *)data, len);
+        DABDemod::MsgDABMOTData *msg = DABDemod::MsgDABMOTData::create(byteArray, filename, contentSubType);
         getMessageQueueToChannel()->push(msg);
     }
 }
@@ -482,20 +483,22 @@ DABDemodSink::DABDemodSink(DABDemod *packetDemod) :
     applySettings(m_settings, true);
     applyChannelSettings(m_channelSampleRate, m_channelFrequencyOffset, true);
 
-    int mode = 1; // Latest DAB spec only has mode 1
+    m_api.dabMode = 1; // Latest DAB spec only has mode 1
+    m_api.syncsignal_Handler = syncHandler;
+    m_api.systemdata_Handler = systemDataHandler;
+    m_api.ensemblename_Handler = ensembleNameHandler;
+    m_api.programname_Handler = programNameHandler;
+    m_api.fib_quality_Handler = fibQualityHandler;
+    m_api.audioOut_Handler = audioHandler;
+    m_api.dataOut_Handler = dataHandler;
+    m_api.bytesOut_Handler = byteHandler;
+    m_api.programdata_Handler = programDataHandler;
+    m_api.program_quality_Handler = programQualityHandler;
+    m_api.motdata_Handler = motDataHandler;
+    m_api.tii_data_Handler = nullptr;
+    m_api.timeHandler = nullptr;
     m_dab = dabInit(&m_device,
-                mode,
-                syncHandler,
-                systemDataHandler,
-                ensembleNameHandler,
-                programNameHandler,
-                fibQualityHandler,
-                audioHandler,
-                dataHandler,
-                byteHandler,
-                programDataHandler,
-                programQualityHandler,
-                motDataHandler,
+                &m_api,
                 nullptr,
                 nullptr,
                 this);
