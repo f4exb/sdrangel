@@ -254,20 +254,23 @@ public:
         MESSAGE_CLASS_DECLARATION
 
     public:
+        QByteArray getData() const { return m_data; }
         const QString getFilename() const { return m_filename; }
         int getContentSubType() const { return m_contentSubType; }
 
-        static MsgDABMOTData* create(const QString& filename, int contentSubType)
+        static MsgDABMOTData* create(QByteArray data, const QString& filename, int contentSubType)
         {
-            return new MsgDABMOTData(filename, contentSubType);
+            return new MsgDABMOTData(data, filename, contentSubType);
         }
 
     private:
+        QByteArray m_data;
         QString m_filename;
         int m_contentSubType;
 
-        MsgDABMOTData(const QString& filename, int contentSubType) :
+        MsgDABMOTData(QByteArray data, const QString& filename, int contentSubType) :
             Message(),
+            m_data(data),
             m_filename(filename),
             m_contentSubType(contentSubType)
         { }

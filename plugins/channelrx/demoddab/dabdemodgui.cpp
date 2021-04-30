@@ -253,7 +253,6 @@ bool DABDemodGUI::handleMessage(const Message& message)
     else if (DABDemod::MsgDABSampleRate::match(message))
     {
         DABDemod::MsgDABSampleRate& report = (DABDemod::MsgDABSampleRate&) message;
-        qDebug() << "Ssample rate: " << report.getSampleRate();
         ui->sampleRate->setText(QString("%1k").arg(report.getSampleRate()/1000.0, 0, 'f', 0));
         return true;
     }
@@ -266,11 +265,16 @@ bool DABDemodGUI::handleMessage(const Message& message)
     else if (DABDemod::MsgDABMOTData::match(message))
     {
         DABDemod::MsgDABMOTData& report = (DABDemod::MsgDABMOTData&) message;
-        QPixmap pixmap(report.getFilename());
-        ui->motImage->resize(ui->motImage->width(), pixmap.height());
-        ui->motImage->setVisible(true);
-        ui->motImage->setPixmap(pixmap, pixmap.size());
-        arrangeRollups();
+        QString filename = report.getFilename();
+        if (filename.endsWith(".png") || filename.endsWith(".PNG") || filename.endsWith(".jpg") || filename.endsWith(".JPG"))
+        {
+            QPixmap pixmap;
+            pixmap.loadFromData(report.getData());
+            ui->motImage->resize(ui->motImage->width(), pixmap.height());
+            ui->motImage->setVisible(true);
+            ui->motImage->setPixmap(pixmap, pixmap.size());
+            arrangeRollups();
+        }
         return true;
     }
 

@@ -89,7 +89,7 @@ public:
     void programQuality(int16_t frames, int16_t rs, int16_t aac);
     void fibQuality(int16_t percent);
     void data(const QString& data);
-    void motData(const QString& filename, int contentSubType);
+    void motData(const uint8_t *data, int len, const QString& filename, int contentSubType);
 
 private:
     struct MagSqLevelsStore
@@ -114,6 +114,8 @@ private:
     void *m_dab;
     DABDemodDevice m_device;
     audiodata m_ad;
+    packetdata m_pd;
+    API_struct m_api;
 
     NCO m_nco;
     Interpolator m_interpolator;
