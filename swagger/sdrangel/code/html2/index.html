@@ -2832,6 +2832,9 @@ margin-bottom: 20px;
     "DATVDemodSettings" : {
       "$ref" : "#/definitions/DATVDemodSettings"
     },
+    "DABDemodSettings" : {
+      "$ref" : "#/definitions/DABDemodSettings"
+    },
     "DSDDemodSettings" : {
       "$ref" : "#/definitions/DSDDemodSettings"
     },
@@ -3341,6 +3344,58 @@ margin-bottom: 20px;
     }
   },
   "description" : "A complex number"
+};
+            defs.DABDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "program" : {
+      "type" : "string"
+    },
+    "volume" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "audioMute" : {
+      "type" : "integer"
+    },
+    "audioDeviceName" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "DABDemod"
 };
             defs.DATVDemodSettings = {
   "properties" : {
@@ -3918,6 +3973,9 @@ margin-bottom: 20px;
     "plutoSdrOutputReport" : {
       "$ref" : "#/definitions/PlutoSdrOutputReport"
     },
+    "plutoSdrMIMOReport" : {
+      "$ref" : "#/definitions/PlutoSdrMIMOReport"
+    },
     "rtlSdrReport" : {
       "$ref" : "#/definitions/RtlSdrReport"
     },
@@ -4087,6 +4145,9 @@ margin-bottom: 20px;
     },
     "plutoSdrOutputSettings" : {
       "$ref" : "#/definitions/PlutoSdrOutputSettings"
+    },
+    "plutoSdrMIMOSettings" : {
+      "$ref" : "#/definitions/PlutoSdrMIMOSettings"
     },
     "rtlSdrSettings" : {
       "$ref" : "#/definitions/RtlSdrSettings"
@@ -7076,10 +7137,22 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "ctcssOn" : {
-      "type" : "integer"
+      "type" : "integer",
+      "description" : "Enable CTCSS squelch (takes precedence on DCS) * 0 - disabled * 1 - enabled\n"
     },
     "ctcssIndex" : {
       "type" : "integer"
+    },
+    "dcsOn" : {
+      "type" : "integer",
+      "description" : "Enable DCS squelch (only if CTCSS is off) * 0 - disabled * 1 - enabled\n"
+    },
+    "dcsCode" : {
+      "type" : "integer"
+    },
+    "dcsPositive" : {
+      "type" : "integer",
+      "description" : "Modulation direction: * 0 - reverse or negative - 1 for 0 and -1 for 1 * 1 - direct or positive - -1 for 0 and 1 for 1\n"
     },
     "rgbColor" : {
       "type" : "integer"
@@ -7679,6 +7752,175 @@ margin-bottom: 20px;
       "type" : "integer"
     },
     "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "PlutoSDR"
+};
+            defs.PlutoSdrMIMOReport = {
+  "properties" : {
+    "adcRate" : {
+      "type" : "integer"
+    },
+    "dacRate" : {
+      "type" : "integer"
+    },
+    "rx0GainDB" : {
+      "type" : "integer"
+    },
+    "rx1GainDB" : {
+      "type" : "integer"
+    },
+    "rssiRx0" : {
+      "type" : "string"
+    },
+    "rssiRx1" : {
+      "type" : "string"
+    },
+    "rssiTx0" : {
+      "type" : "string"
+    },
+    "rssiTx1" : {
+      "type" : "string"
+    }
+  },
+  "description" : "PlutoSDR"
+};
+            defs.PlutoSdrMIMOSettings = {
+  "properties" : {
+    "devSampleRate" : {
+      "type" : "integer"
+    },
+    "LOppmTenths" : {
+      "type" : "integer"
+    },
+    "rxCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "dcBlock" : {
+      "type" : "integer"
+    },
+    "iqCorrection" : {
+      "type" : "integer"
+    },
+    "hwBBDCBlock" : {
+      "type" : "integer"
+    },
+    "hwRFDCBlock" : {
+      "type" : "integer"
+    },
+    "hwIQCorrection" : {
+      "type" : "integer"
+    },
+    "fcPosRx" : {
+      "type" : "integer",
+      "description" : "0=Infra 1=Supra 2=Center"
+    },
+    "rxTransverterMode" : {
+      "type" : "integer"
+    },
+    "rxTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "iqOrder" : {
+      "type" : "integer",
+      "description" : "IQ samples order\n  * 0 - Q then I (swapped)\n  * 1 - I then Q (straight)\n"
+    },
+    "lpfBWRx" : {
+      "type" : "integer",
+      "description" : "Analog lowpass filter bandwidth (Hz)"
+    },
+    "lpfRxFIREnable" : {
+      "type" : "integer",
+      "description" : "Low pass FIR filter enable (1 if enabled else 0)"
+    },
+    "lpfRxFIRBW" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter bandwidth (Hz)"
+    },
+    "lpfRxFIRlog2Decim" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter log2 of decimation factor (0..2)"
+    },
+    "lpfRxFIRGain" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter gain (dB)"
+    },
+    "log2Decim" : {
+      "type" : "integer"
+    },
+    "rx0Gain" : {
+      "type" : "integer",
+      "description" : "Hardware gain"
+    },
+    "rx0GainMode" : {
+      "type" : "integer"
+    },
+    "rx0AntennaPath" : {
+      "type" : "integer"
+    },
+    "rx1Gain" : {
+      "type" : "integer",
+      "description" : "Hardware gain"
+    },
+    "rx1GainMode" : {
+      "type" : "integer"
+    },
+    "rx1AntennaPath" : {
+      "type" : "integer"
+    },
+    "txCenterFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fcPosTx" : {
+      "type" : "integer",
+      "description" : "0=Infra 1=Supra 2=Center"
+    },
+    "txTransverterMode" : {
+      "type" : "integer"
+    },
+    "txTransverterDeltaFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "lpfBWTx" : {
+      "type" : "integer",
+      "description" : "Analog lowpass filter bandwidth (Hz)"
+    },
+    "lpfTxFIREnable" : {
+      "type" : "integer",
+      "description" : "Low pass FIR filter enable (1 if enabled else 0)"
+    },
+    "lpfTxFIRBW" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter bandwidth (Hz)"
+    },
+    "lpfTxFIRlog2Interp" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter log2 of interpolation factor (0..2)"
+    },
+    "lpfTxFIRGain" : {
+      "type" : "integer",
+      "description" : "digital lowpass FIR filter gain (dB)"
+    },
+    "log2Interp" : {
+      "type" : "integer"
+    },
+    "tx0Att" : {
+      "type" : "integer",
+      "description" : "Hardware attenuator gain in decibel fourths (negative)"
+    },
+    "tx0AntennaPath" : {
+      "type" : "integer"
+    },
+    "tx1Att" : {
+      "type" : "integer",
+      "description" : "Hardware attenuator gain in decibel fourths (negative)"
+    },
+    "tx1AntennaPath" : {
       "type" : "integer"
     }
   },
@@ -46026,7 +46268,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-04-11T22:11:18.598+02:00
+              Generated 2021-04-29T21:19:02.297+02:00
             </div>
           </div>
       </div>

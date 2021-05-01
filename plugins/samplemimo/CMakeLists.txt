@@ -12,6 +12,10 @@ if(ENABLE_XTRX AND LIBXTRX_FOUND)
     add_subdirectory(xtrxmimo)
 endif()
 
+if(ENABLE_IIO AND LIBIIO_FOUND)
+    add_subdirectory(plutosdrmimo)
+endif()
+
 add_subdirectory(metismiso)
 add_subdirectory(testmi)
 add_subdirectory(testmosync)

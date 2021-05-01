@@ -62,6 +62,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputSettings"
     plutoSdrOutputSettings:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputSettings"
+    plutoSdrMIMOSettings:
+      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrMIMOSettings"
     rtlSdrSettings:
       $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrSettings"
     remoteOutputSettings:
@@ -70,6 +72,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputSettings"
     sdrPlaySettings:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlaySettings"
+    sdrPlayV3Settings:
+      $ref: "/doc/swagger/include/SDRPlayV3.yaml#/SDRPlayV3Settings"
     sigMFFileInputSettings:
       $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputSettings"
     soapySDRInputSettings:

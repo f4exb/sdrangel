@@ -45,6 +45,7 @@
 #include "SWGMetisMISOSettings.h"
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputSettings.h"
+#include "SWGPlutoSdrMIMOSettings.h"
 #include "SWGPlutoSdrOutputSettings.h"
 #include "SWGRemoteInputSettings.h"
 #include "SWGRemoteOutputSettings.h"
@@ -162,6 +163,9 @@ public:
 
     SWGPlutoSdrOutputSettings* getPlutoSdrOutputSettings();
     void setPlutoSdrOutputSettings(SWGPlutoSdrOutputSettings* pluto_sdr_output_settings);
+
+    SWGPlutoSdrMIMOSettings* getPlutoSdrMimoSettings();
+    void setPlutoSdrMimoSettings(SWGPlutoSdrMIMOSettings* pluto_sdr_mimo_settings);
 
     SWGRtlSdrSettings* getRtlSdrSettings();
     void setRtlSdrSettings(SWGRtlSdrSettings* rtl_sdr_settings);
@@ -295,6 +299,9 @@ private:
 
     SWGPlutoSdrOutputSettings* pluto_sdr_output_settings;
     bool m_pluto_sdr_output_settings_isSet;
+
+    SWGPlutoSdrMIMOSettings* pluto_sdr_mimo_settings;
+    bool m_pluto_sdr_mimo_settings_isSet;
 
     SWGRtlSdrSettings* rtl_sdr_settings;
     bool m_rtl_sdr_settings_isSet;

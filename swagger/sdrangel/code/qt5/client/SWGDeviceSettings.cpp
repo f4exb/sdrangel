@@ -82,6 +82,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_pluto_sdr_input_settings_isSet = false;
     pluto_sdr_output_settings = nullptr;
     m_pluto_sdr_output_settings_isSet = false;
+    pluto_sdr_mimo_settings = nullptr;
+    m_pluto_sdr_mimo_settings_isSet = false;
     rtl_sdr_settings = nullptr;
     m_rtl_sdr_settings_isSet = false;
     remote_output_settings = nullptr;
@@ -176,6 +178,8 @@ SWGDeviceSettings::init() {
     m_pluto_sdr_input_settings_isSet = false;
     pluto_sdr_output_settings = new SWGPlutoSdrOutputSettings();
     m_pluto_sdr_output_settings_isSet = false;
+    pluto_sdr_mimo_settings = new SWGPlutoSdrMIMOSettings();
+    m_pluto_sdr_mimo_settings_isSet = false;
     rtl_sdr_settings = new SWGRtlSdrSettings();
     m_rtl_sdr_settings_isSet = false;
     remote_output_settings = new SWGRemoteOutputSettings();
@@ -288,6 +292,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(pluto_sdr_output_settings != nullptr) { 
         delete pluto_sdr_output_settings;
+    }
+    if(pluto_sdr_mimo_settings != nullptr) { 
+        delete pluto_sdr_mimo_settings;
     }
     if(rtl_sdr_settings != nullptr) { 
         delete rtl_sdr_settings;
@@ -403,6 +410,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pluto_sdr_input_settings, pJson["plutoSdrInputSettings"], "SWGPlutoSdrInputSettings", "SWGPlutoSdrInputSettings");
     
     ::SWGSDRangel::setValue(&pluto_sdr_output_settings, pJson["plutoSdrOutputSettings"], "SWGPlutoSdrOutputSettings", "SWGPlutoSdrOutputSettings");
+    
+    ::SWGSDRangel::setValue(&pluto_sdr_mimo_settings, pJson["plutoSdrMIMOSettings"], "SWGPlutoSdrMIMOSettings", "SWGPlutoSdrMIMOSettings");
     
     ::SWGSDRangel::setValue(&rtl_sdr_settings, pJson["rtlSdrSettings"], "SWGRtlSdrSettings", "SWGRtlSdrSettings");
     
@@ -532,6 +541,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((pluto_sdr_output_settings != nullptr) && (pluto_sdr_output_settings->isSet())){
         toJsonValue(QString("plutoSdrOutputSettings"), pluto_sdr_output_settings, obj, QString("SWGPlutoSdrOutputSettings"));
+    }
+    if((pluto_sdr_mimo_settings != nullptr) && (pluto_sdr_mimo_settings->isSet())){
+        toJsonValue(QString("plutoSdrMIMOSettings"), pluto_sdr_mimo_settings, obj, QString("SWGPlutoSdrMIMOSettings"));
     }
     if((rtl_sdr_settings != nullptr) && (rtl_sdr_settings->isSet())){
         toJsonValue(QString("rtlSdrSettings"), rtl_sdr_settings, obj, QString("SWGRtlSdrSettings"));
@@ -855,6 +867,16 @@ SWGDeviceSettings::setPlutoSdrOutputSettings(SWGPlutoSdrOutputSettings* pluto_sd
     this->m_pluto_sdr_output_settings_isSet = true;
 }
 
+SWGPlutoSdrMIMOSettings*
+SWGDeviceSettings::getPlutoSdrMimoSettings() {
+    return pluto_sdr_mimo_settings;
+}
+void
+SWGDeviceSettings::setPlutoSdrMimoSettings(SWGPlutoSdrMIMOSettings* pluto_sdr_mimo_settings) {
+    this->pluto_sdr_mimo_settings = pluto_sdr_mimo_settings;
+    this->m_pluto_sdr_mimo_settings_isSet = true;
+}
+
 SWGRtlSdrSettings*
 SWGDeviceSettings::getRtlSdrSettings() {
     return rtl_sdr_settings;
@@ -1099,6 +1121,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(pluto_sdr_output_settings && pluto_sdr_output_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pluto_sdr_mimo_settings && pluto_sdr_mimo_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(rtl_sdr_settings && rtl_sdr_settings->isSet()){

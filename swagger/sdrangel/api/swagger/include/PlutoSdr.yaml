@@ -113,6 +113,110 @@ PlutoSdrOutputSettings:
     reverseAPIDeviceIndex:
       type: integer
 
+PlutoSdrMIMOSettings:
+  description: PlutoSDR
+  properties:
+    devSampleRate:
+      type: integer
+    LOppmTenths:
+      type: integer
+    rxCenterFrequency:
+      type: integer
+      format: int64
+    dcBlock:
+      type: integer
+    iqCorrection:
+      type: integer
+    hwBBDCBlock:
+      type: integer
+    hwRFDCBlock:
+      type: integer
+    hwIQCorrection:
+      type: integer
+    fcPosRx:
+      description: 0=Infra 1=Supra 2=Center
+      type: integer
+    rxTransverterMode:
+      type: integer
+    rxTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    iqOrder:
+      type: integer
+      description: >
+        IQ samples order
+          * 0 - Q then I (swapped)
+          * 1 - I then Q (straight)
+    lpfBWRx:
+      description: Analog lowpass filter bandwidth (Hz)
+      type: integer
+    lpfRxFIREnable:
+      description: Low pass FIR filter enable (1 if enabled else 0)
+      type: integer
+    lpfRxFIRBW:
+      description: digital lowpass FIR filter bandwidth (Hz)
+      type: integer
+    lpfRxFIRlog2Decim:
+      description: digital lowpass FIR filter log2 of decimation factor (0..2)
+      type: integer
+    lpfRxFIRGain:
+      description: digital lowpass FIR filter gain (dB)
+      type: integer
+    log2Decim:
+      type: integer
+    rx0Gain:
+      description: Hardware gain
+      type: integer
+    rx0GainMode:
+      type: integer
+    rx0AntennaPath:
+      type: integer
+    rx1Gain:
+      description: Hardware gain
+      type: integer
+    rx1GainMode:
+      type: integer
+    rx1AntennaPath:
+      type: integer
+    txCenterFrequency:
+      type: integer
+      format: int64
+    fcPosTx:
+      description: 0=Infra 1=Supra 2=Center
+      type: integer
+    txTransverterMode:
+      type: integer
+    txTransverterDeltaFrequency:
+      type: integer
+      format: int64
+    lpfBWTx:
+      description: Analog lowpass filter bandwidth (Hz)
+      type: integer
+    lpfTxFIREnable:
+      description: Low pass FIR filter enable (1 if enabled else 0)
+      type: integer
+    lpfTxFIRBW:
+      description: digital lowpass FIR filter bandwidth (Hz)
+      type: integer
+    lpfTxFIRlog2Interp:
+      description: digital lowpass FIR filter log2 of interpolation factor (0..2)
+      type: integer
+    lpfTxFIRGain:
+      description: digital lowpass FIR filter gain (dB)
+      type: integer
+    log2Interp:
+      type: integer
+    tx0Att:
+      description: Hardware attenuator gain in decibel fourths (negative)
+      type: integer
+    tx0AntennaPath:
+      type: integer
+    tx1Att:
+      description: Hardware attenuator gain in decibel fourths (negative)
+      type: integer
+    tx1AntennaPath:
+      type: integer
+
 PlutoSdrInputReport:
   description: PlutoSDR
   properties:
@@ -136,3 +240,23 @@ PlutoSdrOutputReport:
     temperature:
       type: number
       format: float
+
+PlutoSdrMIMOReport:
+  description: PlutoSDR
+  properties:
+    adcRate:
+      type: integer
+    dacRate:
+      type: integer
+    rx0GainDB:
+      type: integer
+    rx1GainDB:
+      type: integer
+    rssiRx0:
+      type: string
+    rssiRx1:
+      type: string
+    rssiTx0:
+      type: string
+    rssiTx1:
+      type: string

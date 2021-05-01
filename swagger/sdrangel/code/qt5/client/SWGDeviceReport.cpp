@@ -62,6 +62,8 @@ SWGDeviceReport::SWGDeviceReport() {
     m_pluto_sdr_input_report_isSet = false;
     pluto_sdr_output_report = nullptr;
     m_pluto_sdr_output_report_isSet = false;
+    pluto_sdr_mimo_report = nullptr;
+    m_pluto_sdr_mimo_report_isSet = false;
     rtl_sdr_report = nullptr;
     m_rtl_sdr_report_isSet = false;
     remote_output_report = nullptr;
@@ -130,6 +132,8 @@ SWGDeviceReport::init() {
     m_pluto_sdr_input_report_isSet = false;
     pluto_sdr_output_report = new SWGPlutoSdrOutputReport();
     m_pluto_sdr_output_report_isSet = false;
+    pluto_sdr_mimo_report = new SWGPlutoSdrMIMOReport();
+    m_pluto_sdr_mimo_report_isSet = false;
     rtl_sdr_report = new SWGRtlSdrReport();
     m_rtl_sdr_report_isSet = false;
     remote_output_report = new SWGRemoteOutputReport();
@@ -208,6 +212,9 @@ SWGDeviceReport::cleanup() {
     }
     if(pluto_sdr_output_report != nullptr) { 
         delete pluto_sdr_output_report;
+    }
+    if(pluto_sdr_mimo_report != nullptr) { 
+        delete pluto_sdr_mimo_report;
     }
     if(rtl_sdr_report != nullptr) { 
         delete rtl_sdr_report;
@@ -294,6 +301,8 @@ SWGDeviceReport::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&pluto_sdr_input_report, pJson["plutoSdrInputReport"], "SWGPlutoSdrInputReport", "SWGPlutoSdrInputReport");
     
     ::SWGSDRangel::setValue(&pluto_sdr_output_report, pJson["plutoSdrOutputReport"], "SWGPlutoSdrOutputReport", "SWGPlutoSdrOutputReport");
+    
+    ::SWGSDRangel::setValue(&pluto_sdr_mimo_report, pJson["plutoSdrMIMOReport"], "SWGPlutoSdrMIMOReport", "SWGPlutoSdrMIMOReport");
     
     ::SWGSDRangel::setValue(&rtl_sdr_report, pJson["rtlSdrReport"], "SWGRtlSdrReport", "SWGRtlSdrReport");
     
@@ -387,6 +396,9 @@ SWGDeviceReport::asJsonObject() {
     }
     if((pluto_sdr_output_report != nullptr) && (pluto_sdr_output_report->isSet())){
         toJsonValue(QString("plutoSdrOutputReport"), pluto_sdr_output_report, obj, QString("SWGPlutoSdrOutputReport"));
+    }
+    if((pluto_sdr_mimo_report != nullptr) && (pluto_sdr_mimo_report->isSet())){
+        toJsonValue(QString("plutoSdrMIMOReport"), pluto_sdr_mimo_report, obj, QString("SWGPlutoSdrMIMOReport"));
     }
     if((rtl_sdr_report != nullptr) && (rtl_sdr_report->isSet())){
         toJsonValue(QString("rtlSdrReport"), rtl_sdr_report, obj, QString("SWGRtlSdrReport"));
@@ -601,6 +613,16 @@ SWGDeviceReport::setPlutoSdrOutputReport(SWGPlutoSdrOutputReport* pluto_sdr_outp
     this->m_pluto_sdr_output_report_isSet = true;
 }
 
+SWGPlutoSdrMIMOReport*
+SWGDeviceReport::getPlutoSdrMimoReport() {
+    return pluto_sdr_mimo_report;
+}
+void
+SWGDeviceReport::setPlutoSdrMimoReport(SWGPlutoSdrMIMOReport* pluto_sdr_mimo_report) {
+    this->pluto_sdr_mimo_report = pluto_sdr_mimo_report;
+    this->m_pluto_sdr_mimo_report_isSet = true;
+}
+
 SWGRtlSdrReport*
 SWGDeviceReport::getRtlSdrReport() {
     return rtl_sdr_report;
@@ -785,6 +807,9 @@ SWGDeviceReport::isSet(){
             isObjectUpdated = true; break;
         }
         if(pluto_sdr_output_report && pluto_sdr_output_report->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(pluto_sdr_mimo_report && pluto_sdr_mimo_report->isSet()){
             isObjectUpdated = true; break;
         }
         if(rtl_sdr_report && rtl_sdr_report->isSet()){

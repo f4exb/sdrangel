@@ -175,6 +175,8 @@
 #include "SWGPerseusSettings.h"
 #include "SWGPlutoSdrInputReport.h"
 #include "SWGPlutoSdrInputSettings.h"
+#include "SWGPlutoSdrMIMOReport.h"
+#include "SWGPlutoSdrMIMOSettings.h"
 #include "SWGPlutoSdrOutputReport.h"
 #include "SWGPlutoSdrOutputSettings.h"
 #include "SWGPreferences.h"
@@ -745,6 +747,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGPlutoSdrInputSettings").compare(type) == 0) {
       return new SWGPlutoSdrInputSettings();
+    }
+    if(QString("SWGPlutoSdrMIMOReport").compare(type) == 0) {
+      return new SWGPlutoSdrMIMOReport();
+    }
+    if(QString("SWGPlutoSdrMIMOSettings").compare(type) == 0) {
+      return new SWGPlutoSdrMIMOSettings();
     }
     if(QString("SWGPlutoSdrOutputReport").compare(type) == 0) {
       return new SWGPlutoSdrOutputReport();

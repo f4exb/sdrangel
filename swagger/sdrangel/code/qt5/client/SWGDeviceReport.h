@@ -36,6 +36,7 @@
 #include "SWGLocalOutputReport.h"
 #include "SWGPerseusReport.h"
 #include "SWGPlutoSdrInputReport.h"
+#include "SWGPlutoSdrMIMOReport.h"
 #include "SWGPlutoSdrOutputReport.h"
 #include "SWGRemoteInputReport.h"
 #include "SWGRemoteOutputReport.h"
@@ -119,6 +120,9 @@ public:
 
     SWGPlutoSdrOutputReport* getPlutoSdrOutputReport();
     void setPlutoSdrOutputReport(SWGPlutoSdrOutputReport* pluto_sdr_output_report);
+
+    SWGPlutoSdrMIMOReport* getPlutoSdrMimoReport();
+    void setPlutoSdrMimoReport(SWGPlutoSdrMIMOReport* pluto_sdr_mimo_report);
 
     SWGRtlSdrReport* getRtlSdrReport();
     void setRtlSdrReport(SWGRtlSdrReport* rtl_sdr_report);
@@ -213,6 +217,9 @@ private:
 
     SWGPlutoSdrOutputReport* pluto_sdr_output_report;
     bool m_pluto_sdr_output_report_isSet;
+
+    SWGPlutoSdrMIMOReport* pluto_sdr_mimo_report;
+    bool m_pluto_sdr_mimo_report_isSet;
 
     SWGRtlSdrReport* rtl_sdr_report;
     bool m_rtl_sdr_report_isSet;

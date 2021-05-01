@@ -41,6 +41,8 @@ DeviceReport:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrInputReport"
     plutoSdrOutputReport:
       $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrOutputReport"
+    plutoSdrMIMOReport:
+      $ref: "/doc/swagger/include/PlutoSdr.yaml#/PlutoSdrMIMOReport"
     rtlSdrReport:
       $ref: "/doc/swagger/include/RtlSdr.yaml#/RtlSdrReport"
     remoteOutputReport:
@@ -49,6 +51,8 @@ DeviceReport:
       $ref: "/doc/swagger/include/RemoteInput.yaml#/RemoteInputReport"
     sdrPlayReport:
       $ref: "/doc/swagger/include/SDRPlay.yaml#/SDRPlayReport"
+    sdrPlayV3Report:
+      $ref: "/doc/swagger/include/SDRPlayV3.yaml#/SDRPlayV3Report"
     sigMFFileInputReport:
       $ref: "/doc/swagger/include/SigMFFileInput.yaml#/SigMFFileInputReport"
     soapySDRInputReport:

@@ -80,10 +80,14 @@ public:
 
     void set_params(DeviceType devType, const std::vector<std::string> &params);
     bool get_param(DeviceType devType, const std::string &param, std::string &value);
-    bool openRx();   //!< Open first Rx (Rx0)
-    bool openTx();   //!< Open first Tx (Tx0)
-    void closeRx();  //!< Close first Rx (Rx0)
-    void closeTx();  //!< Close first Tx (Tx0)
+    bool openRx();        //!< Open first Rx (Rx0)
+    bool openTx();        //!< Open first Tx (Tx0)
+    bool openSecondRx();  //!< Open second Rx (Rx1)
+    bool openSecondTx();  //!< Open second Tx (Tx1)
+    void closeRx();       //!< Close first Rx (Rx0)
+    void closeTx();       //!< Close first Tx (Tx0)
+    void closeSecondRx(); //!< Close second Rx (Rx1)
+    void closeSecondTx(); //!< Close second Tx (Tx1)
     int getNbRx() const { return m_rxChannels.size() / 2; }
     int getNbTx() const { return m_txChannels.size() / 2; }
     struct iio_buffer *createRxBuffer(unsigned int size, bool cyclic);
@@ -101,6 +105,7 @@ public:
     char* txBufferEnd();
     char* txBufferFirst();
     void txChannelConvert(int16_t *dst, int16_t *src);
+    void txChannelConvert(int chanIndex, int16_t *dst, int16_t *src);
     bool getRxSampleRates(SampleRates& sampleRates);
     bool getTxSampleRates(SampleRates& sampleRates);
     void setSampleRate(uint32_t sampleRate);
