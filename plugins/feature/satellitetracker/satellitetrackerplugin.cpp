@@ -30,7 +30,7 @@
 const PluginDescriptor SatelliteTrackerPlugin::m_pluginDescriptor = {
     SatelliteTracker::m_featureId,
     QStringLiteral("Satellite Tracker"),
-    QStringLiteral("6.10.2"),
+    QStringLiteral("6.10.3s"),
     QStringLiteral("(c) Jon Beniston, M7RCE and Daniel Warner (SGP4 library)"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

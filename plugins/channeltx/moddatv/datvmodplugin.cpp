@@ -29,7 +29,7 @@
 const PluginDescriptor DATVModPlugin::m_pluginDescriptor = {
     DATVMod::m_channelId,
     QStringLiteral("DATV Modulator"),
-    QStringLiteral("6.10.0"),
+    QStringLiteral("6.10.3"),
     QStringLiteral("(c) Jon Beniston, M7RCE, Edouard Griffiths, F4EXB. DVB-S2 by G4GUO"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

@@ -1,3 +1,13 @@
+sdrangel (6.10.3-1) unstable; urgency=medium
+
+  * Satellite tracker plugin: Fixed memory leaks. PR #979, Fixes #877.
+  * More memory leak fixes in some plugins. PR #879.
+  * Revision of mutex locks in FIFOs. Fixes #870.
+  * DAB: Use UTF-8 rather than latin encoding for program names. Fixes #874.
+  * DAB: Use latest DAB lib API. Don't write MOT data to files. PR #880
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 01 May 2021 09:03:34 +0200
+
 sdrangel (6.10.2-1) unstable; urgency=medium
 
   * Satellite and Star tracker plugins: dark theme option for charts as default
