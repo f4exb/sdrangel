@@ -87,8 +87,10 @@ private:
 
     PluginInterface *getRxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
     PluginInterface *getTxRegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
+    PluginInterface *getMIMORegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId);
     bool isRxEnumerated(const QString& deviceHwId, int deviceSequence);
     bool isTxEnumerated(const QString& deviceHwId, int deviceSequence);
+    bool isMIMOEnumerated(const QString& deviceHwId, int deviceSequence);
 };
 
 #endif /* SDRBASE_DEVICE_DEVICEENUMERATOR_H_ */

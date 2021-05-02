@@ -307,6 +307,10 @@ public:
 
     virtual void deleteSampleMIMOPluginInstanceMIMO(DeviceSampleMIMO *mimo);
 
+    virtual int getDefaultMIMONbItems() const {
+        return 1;
+    }
+
     // Callback to allow plugin to add elements to top-level GUI (such as menu items)
     virtual bool createTopLevelGUI()
     {

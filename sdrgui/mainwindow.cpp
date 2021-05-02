@@ -1794,6 +1794,14 @@ void MainWindow::sampleSourceChanged(int tabIndex, int newDeviceIndex)
         deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getRxPluginInterface(newDeviceIndex));
 
+        qDebug() << "MainWindow::sampleSourceChanged:"
+            << "newDeviceIndex:" << newDeviceIndex
+            << "hardwareId:" << samplingDevice->hardwareId
+            << "sequence:" << samplingDevice->sequence
+            << "id:" << samplingDevice->id
+            << "serial:" << samplingDevice->serial
+            << "displayedName:" << samplingDevice->displayedName;
+
         if (deviceUI->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {
             qDebug("MainWindow::sampleSourceChanged: non existent device replaced by File Input");
@@ -1899,6 +1907,14 @@ void MainWindow::sampleSinkChanged(int tabIndex, int newDeviceIndex)
         deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getTxPluginInterface(newDeviceIndex));
 
+        qDebug() << "MainWindow::sampleSinkChanged:"
+            << "newDeviceIndex:" << newDeviceIndex
+            << "hardwareId:" << samplingDevice->hardwareId
+            << "sequence:" << samplingDevice->sequence
+            << "id:" << samplingDevice->id
+            << "serial:" << samplingDevice->serial
+            << "displayedName:" << samplingDevice->displayedName;
+
         if (deviceUI->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {
             qDebug("MainWindow::sampleSinkChanged: non existent device replaced by File Sink");
@@ -1996,6 +2012,13 @@ void MainWindow::sampleMIMOChanged(int tabIndex, int newDeviceIndex)
         deviceUI->m_deviceAPI->setSamplingDeviceSerial(samplingDevice->serial);
         deviceUI->m_deviceAPI->setSamplingDeviceDisplayName(samplingDevice->displayedName);
         deviceUI->m_deviceAPI->setSamplingDevicePluginInterface(DeviceEnumerator::instance()->getMIMOPluginInterface(newDeviceIndex));
+        qDebug() << "MainWindow::sampleMIMOChanged:"
+            << "newDeviceIndex:" << newDeviceIndex
+            << "hardwareId:" << samplingDevice->hardwareId
+            << "sequence:" << samplingDevice->sequence
+            << "id:" << samplingDevice->id
+            << "serial:" << samplingDevice->serial
+            << "displayedName:" << samplingDevice->displayedName;
 
         if (deviceUI->m_deviceAPI->getSamplingDeviceId().size() == 0) // non existent device => replace by default
         {

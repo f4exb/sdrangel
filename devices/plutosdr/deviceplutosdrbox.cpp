@@ -494,7 +494,7 @@ struct iio_buffer *DevicePlutoSDRBox::createRxBuffer(unsigned int size, bool cyc
     if (m_devRx) {
         m_rxBuf = iio_device_create_buffer(m_devRx, size, cyclic ? '\1' : '\0');
     } else {
-        m_rxBuf = 0;
+        m_rxBuf = nullptr;
     }
 
     return m_rxBuf;
@@ -505,7 +505,7 @@ struct iio_buffer *DevicePlutoSDRBox::createTxBuffer(unsigned int size, bool cyc
     if (m_devTx) {
         m_txBuf =  iio_device_create_buffer(m_devTx, size, cyclic ? '\1' : '\0');
     } else {
-        m_txBuf = 0;
+        m_txBuf = nullptr;
     }
 
     return m_txBuf;
@@ -513,17 +513,19 @@ struct iio_buffer *DevicePlutoSDRBox::createTxBuffer(unsigned int size, bool cyc
 
 void DevicePlutoSDRBox::deleteRxBuffer()
 {
-    if (m_rxBuf) {
+    if (m_rxBuf)
+    {
         iio_buffer_destroy(m_rxBuf);
-        m_rxBuf = 0;
+        m_rxBuf = nullptr;
     }
 }
 
 void DevicePlutoSDRBox::deleteTxBuffer()
 {
-    if (m_txBuf) {
+    if (m_txBuf)
+    {
         iio_buffer_destroy(m_txBuf);
-        m_txBuf = 0;
+        m_txBuf = nullptr;
     }
 }
 

@@ -39,7 +39,7 @@ const PluginDescriptor PlutoSDRMIMOPlugin::m_pluginDescriptor = {
 };
 
 static constexpr const char* const m_hardwareID = "PlutoSDR";
-static constexpr const char* const m_deviceTypeID = PLUTOSDRMIMO_DEVICE_TYPE_ID;
+const char* const PlutoSDRMIMOPlugin::m_deviceTypeID = PLUTOSDRMIMO_DEVICE_TYPE_ID;
 
 PlutoSDRMIMOPlugin::PlutoSDRMIMOPlugin(QObject* parent) :
 	QObject(parent)

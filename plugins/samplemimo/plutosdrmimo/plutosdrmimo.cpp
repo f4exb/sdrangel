@@ -44,9 +44,11 @@ PlutoSDRMIMO::PlutoSDRMIMO(DeviceAPI *deviceAPI) :
 	m_settings(),
     m_sourceThread(nullptr),
     m_sinkThread(nullptr),
-	m_deviceDescription("BladeRF2MIMO"),
+	m_deviceDescription("PlutoSDRMIMO"),
 	m_runningRx(false),
     m_runningTx(false),
+    m_plutoRxBuffer(nullptr),
+    m_plutoTxBuffer(nullptr),
     m_plutoParams(nullptr),
     m_open(false),
     m_nbRx(0),
@@ -83,6 +85,7 @@ void PlutoSDRMIMO::destroy()
 
 bool PlutoSDRMIMO::openDevice()
 {
+    qDebug("PlutoSDRMIMO::openDevice: open device here");
     m_plutoParams = new DevicePlutoSDRParams();
 
     if (m_deviceAPI->getHardwareUserArguments().size() != 0)
@@ -116,7 +119,11 @@ bool PlutoSDRMIMO::openDevice()
         char serial[256];
         strcpy(serial, qPrintable(m_deviceAPI->getSamplingDeviceSerial()));
 
-        if (!m_plutoParams->open(serial))
+        if (m_plutoParams->open(serial))
+        {
+            qDebug("PlutoSDRMIMO::openDevice: device serial %s opened", serial);
+        }
+        else
         {
             qCritical("PlutoSDRMIMO::openDevice: open serial %s failed", serial);
             return false;
@@ -182,6 +189,7 @@ bool PlutoSDRMIMO::startRx()
         m_plutoParams->getBox()->openSecondRx();
     }
 
+    m_plutoRxBuffer = m_plutoParams->getBox()->createRxBuffer(PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples, false);
 	m_sourceThread->startWork();
 	mutexLocker.unlock();
 	m_runningRx = true;
@@ -219,6 +227,7 @@ bool PlutoSDRMIMO::startTx()
         m_plutoParams->getBox()->openSecondTx();
     }
 
+    m_plutoTxBuffer = m_plutoParams->getBox()->createRxBuffer(PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples, false);
 	m_sinkThread->startWork();
 	mutexLocker.unlock();
 	m_runningTx = true;
@@ -248,6 +257,9 @@ void PlutoSDRMIMO::stopRx()
     if (m_nbRx > 0) {
         m_plutoParams->getBox()->closeRx();
     }
+
+    m_plutoParams->getBox()->deleteRxBuffer();
+    m_plutoRxBuffer = nullptr;
 }
 
 void PlutoSDRMIMO::stopTx()
@@ -272,6 +284,9 @@ void PlutoSDRMIMO::stopTx()
     if (m_nbTx > 0) {
         m_plutoParams->getBox()->closeTx();
     }
+
+    m_plutoParams->getBox()->deleteTxBuffer();
+    m_plutoRxBuffer = nullptr;
 }
 
 QByteArray PlutoSDRMIMO::serialize() const

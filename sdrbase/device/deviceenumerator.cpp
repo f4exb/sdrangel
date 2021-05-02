@@ -40,6 +40,7 @@ void DeviceEnumerator::addNonDiscoverableDevices(PluginManager *pluginManager, c
     QList<DeviceUserArgs::Args>::const_iterator argsIt = args.begin();
     unsigned int rxIndex = m_rxEnumeration.size();
     unsigned int txIndex = m_txEnumeration.size();
+    unsigned int mimoIndex = m_mimoEnumeration.size();
 
     for (; argsIt != args.end(); ++argsIt)
     {
@@ -47,6 +48,7 @@ void DeviceEnumerator::addNonDiscoverableDevices(PluginManager *pluginManager, c
             continue;
         }
 
+        // qDebug("DeviceEnumerator::addNonDiscoverableDevices: device: %s[%d]", qPrintable(argsIt->m_id), argsIt->m_sequence);
         QString serial = QString("%1-%2").arg(argsIt->m_id).arg(argsIt->m_sequence);
 
         PluginInterface *rxPlugin = getRxRegisteredPlugin(pluginManager, argsIt->m_id);
@@ -99,7 +101,7 @@ void DeviceEnumerator::addNonDiscoverableDevices(PluginManager *pluginManager, c
                     deviceId, // id
                     serial,
                     argsIt->m_sequence,
-                    rxPlugin->getSamplingDeviceType(),
+                    txPlugin->getSamplingDeviceType(),
                     PluginInterface::SamplingDevice::StreamSingleTx,
                     deviceNbItems, // deviceNbItems
                     deviceIndex    // deviceItemIndex
@@ -112,6 +114,39 @@ void DeviceEnumerator::addNonDiscoverableDevices(PluginManager *pluginManager, c
                     )
                 );
                 txIndex++;
+            }
+        }
+
+        PluginInterface *mimoPlugin = getMIMORegisteredPlugin(pluginManager, argsIt->m_id);
+
+        if (mimoPlugin && !isMIMOEnumerated(argsIt->m_id, argsIt->m_sequence))
+        {
+            int deviceNbItems = mimoPlugin->getDefaultMIMONbItems();
+            QString deviceId = mimoPlugin->getDeviceTypeId();
+
+            for (int deviceIndex = 0; deviceIndex < deviceNbItems; deviceIndex++)
+            {
+                QString description = QString("%1[%2:%3] user defined").arg(argsIt->m_id).arg(argsIt->m_sequence).arg(deviceIndex);
+                qDebug("DeviceEnumerator::addNonDiscoverableDevices: MIMO: %s", qPrintable(description));
+                PluginInterface::SamplingDevice ndDevice(
+                    description,
+                    argsIt->m_id,
+                    deviceId, // id
+                    serial,
+                    argsIt->m_sequence,
+                    mimoPlugin->getSamplingDeviceType(),
+                    PluginInterface::SamplingDevice::StreamMIMO,
+                    deviceNbItems, // deviceNbItems
+                    deviceIndex    // deviceItemIndex
+                );
+                m_mimoEnumeration.push_back(
+                    DeviceEnumeration(
+                        ndDevice,
+                        mimoPlugin,
+                        mimoIndex
+                    )
+                );
+                mimoIndex++;
             }
         }
     } // loop through user args
@@ -173,6 +208,37 @@ bool DeviceEnumerator::isTxEnumerated(const QString& deviceHwId, int deviceSeque
     for (; txIt != m_txEnumeration.end(); ++txIt)
     {
         if ((txIt->m_samplingDevice.hardwareId == deviceHwId) && (txIt->m_samplingDevice.sequence == deviceSequence)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+PluginInterface *DeviceEnumerator::getMIMORegisteredPlugin(PluginManager *pluginManager, const QString& deviceHwId)
+{
+    PluginAPI::SamplingDeviceRegistrations& mimoDeviceRegistrations = pluginManager->getMIMODeviceRegistrations();
+    PluginInterface *mimoPlugin = nullptr;
+
+    for (int i = 0; i < mimoDeviceRegistrations.count(); i++)
+    {
+        if (deviceHwId == mimoDeviceRegistrations[i].m_deviceHardwareId)
+        {
+            mimoPlugin = mimoDeviceRegistrations[i].m_plugin;
+            break;
+        }
+    }
+
+    return mimoPlugin;
+}
+
+bool DeviceEnumerator::isMIMOEnumerated(const QString& deviceHwId, int deviceSequence)
+{
+    std::vector<DeviceEnumeration>::const_iterator mimoIt = m_mimoEnumeration.begin();
+
+    for (; mimoIt != m_mimoEnumeration.end(); ++mimoIt)
+    {
+        if ((mimoIt->m_samplingDevice.hardwareId == deviceHwId) && (mimoIt->m_samplingDevice.sequence == deviceSequence)) {
             return true;
         }
     }

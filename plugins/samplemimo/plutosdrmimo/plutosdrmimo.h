@@ -177,6 +177,8 @@ private:
 	QString m_deviceDescription;
 	bool m_runningRx;
 	bool m_runningTx;
+    struct iio_buffer *m_plutoRxBuffer;
+    struct iio_buffer *m_plutoTxBuffer;
     QNetworkAccessManager *m_networkManager;
     QNetworkRequest m_networkRequest;
 

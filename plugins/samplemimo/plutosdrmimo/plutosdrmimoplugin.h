@@ -23,7 +23,7 @@
 
 class PluginAPI;
 
-#define PLUTOSDRMIMO_DEVICE_TYPE_ID "sdrangel.samplemimo.bladerf2mimo"
+#define PLUTOSDRMIMO_DEVICE_TYPE_ID "sdrangel.samplemimo.plutosdrmimo"
 
 class PlutoSDRMIMOPlugin : public QObject, public PluginInterface {
 	Q_OBJECT
@@ -45,6 +45,9 @@ public:
 	        DeviceUISet *deviceUISet);
 	virtual DeviceSampleMIMO* createSampleMIMOPluginInstance(const QString& sourceId, DeviceAPI *deviceAPI);
     virtual DeviceWebAPIAdapter* createDeviceWebAPIAdapter() const;
+	virtual QString getDeviceTypeId() const { return m_deviceTypeID; }
+
+	static const char* const m_deviceTypeID;
 
 private:
 	static const PluginDescriptor m_pluginDescriptor;
