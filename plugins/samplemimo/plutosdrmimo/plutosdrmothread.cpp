@@ -86,11 +86,12 @@ int PlutoSDRMOThread::getFcPos() const
 void PlutoSDRMOThread::run()
 {
     std::ptrdiff_t p_inc = m_plutoBox->txBufferStep();
-    int sampleSize = m_plutoBox->getTxSampleSize(); // I/Q sample size in bytes
+    int sampleSize = 4; // I/Q sample size in bytes
     int nbChan = p_inc / sampleSize; // number of I/Q channels
 
+    qDebug("PlutoSDRMOThread::run: nbChan: %d", nbChan);
     qDebug("PlutoSDRMOThread::run: txBufferStep: %ld bytes", p_inc);
-    qDebug("PlutoSDRMOThread::run: Rx sample size is %ld bytes", m_plutoBox->getRxSampleSize());
+    qDebug("PlutoSDRMOThread::run: Rx sample size is %ld bytes", m_plutoBox->getRxSampleSize()); // couple of I/Q
     qDebug("PlutoSDRMOThread::run: Tx sample size is %ld bytes", m_plutoBox->getTxSampleSize());
     qDebug("PlutoSDRMOThread::run: nominal nbytes_tx is %ld bytes", PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples*p_inc);
 

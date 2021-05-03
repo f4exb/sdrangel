@@ -55,8 +55,8 @@ PlutoSDRMIMO::PlutoSDRMIMO(DeviceAPI *deviceAPI) :
     m_nbTx(0)
 {
     m_mimoType = MIMOHalfSynchronous;
-    m_sampleMIFifo.init(2, PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);
-    m_sampleMOFifo.init(2, PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);
+    m_sampleMIFifo.init(2, 16 * PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);
+    m_sampleMOFifo.init(2, 16 * PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);
     m_networkManager = new QNetworkAccessManager();
     connect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
 
@@ -68,6 +68,7 @@ PlutoSDRMIMO::PlutoSDRMIMO(DeviceAPI *deviceAPI) :
         m_deviceAPI->setNbSourceStreams(m_nbRx);
         m_nbTx = m_plutoParams->getBox()->getNbTx();
         m_deviceAPI->setNbSinkStreams(m_nbTx);
+        qDebug("PlutoSDRMIMO::PlutoSDRMIMO: m_nbRx: %d m_nbTx: %d", m_nbRx, m_nbTx);
     }
 }
 
