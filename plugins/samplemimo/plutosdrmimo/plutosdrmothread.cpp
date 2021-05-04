@@ -86,13 +86,14 @@ int PlutoSDRMOThread::getFcPos() const
 void PlutoSDRMOThread::run()
 {
     std::ptrdiff_t p_inc = m_plutoBox->txBufferStep();
-    int sampleSize = 4; // I/Q sample size in bytes
+    int sampleSize = 2*m_plutoBox->getTxSampleBytes(); // I/Q sample size in bytes
     int nbChan = p_inc / sampleSize; // number of I/Q channels
 
     qDebug("PlutoSDRMOThread::run: nbChan: %d", nbChan);
+    qDebug("PlutoSDRMOThread::run: I+Q bytes %d", sampleSize);
     qDebug("PlutoSDRMOThread::run: txBufferStep: %ld bytes", p_inc);
-    qDebug("PlutoSDRMOThread::run: Rx sample size is %ld bytes", m_plutoBox->getRxSampleSize()); // couple of I/Q
-    qDebug("PlutoSDRMOThread::run: Tx sample size is %ld bytes", m_plutoBox->getTxSampleSize());
+    qDebug("PlutoSDRMOThread::run: Rx all samples size is %ld bytes", m_plutoBox->getRxSampleSize());
+    qDebug("PlutoSDRMOThread::run: Tx all samples size is %ld bytes", m_plutoBox->getTxSampleSize());
     qDebug("PlutoSDRMOThread::run: nominal nbytes_tx is %ld bytes", PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples*p_inc);
 
     m_running = true;
@@ -126,7 +127,7 @@ void PlutoSDRMOThread::run()
         // Schedule TX buffer for sending
         nbytes_tx = m_plutoBox->txBufferPush();
 
-        if (nbytes_tx != sampleSize*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples)
+        if (nbytes_tx != nbChan*sampleSize*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples)
         {
             qDebug("PlutoSDRMOThread::run: error pushing buf %d / %d",
                 (int) nbytes_tx, (int) sampleSize*PlutoSDRMIMOSettings::m_plutoSDRBlockSizeSamples);

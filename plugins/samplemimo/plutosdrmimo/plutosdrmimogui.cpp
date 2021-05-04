@@ -771,6 +771,19 @@ void PlutoSDRMIMOGUI::on_gain_valueChanged(int value)
     sendSettings();
 }
 
+void PlutoSDRMIMOGUI::on_att_valueChanged(int value)
+{
+    ui->attText->setText(QString("%1 dB").arg(QString::number(value*0.25, 'f', 2)));
+
+    if (m_streamIndex == 0) {
+        m_settings.m_tx0Att = value;
+    } else {
+        m_settings.m_tx1Att = value;
+    }
+
+    sendSettings();
+}
+
 void PlutoSDRMIMOGUI::on_antenna_currentIndexChanged(int index)
 {
     if (m_rxElseTx)

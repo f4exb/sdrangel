@@ -43,7 +43,9 @@ DevicePlutoSDRBox::DevicePlutoSDRBox(const std::string& uri) :
         m_rxBuf(nullptr),
         m_txBuf(nullptr),
         m_xoInitial(0),
-        m_temp(0.0f)
+        m_temp(0.0f),
+        m_rxSampleBytes(0),
+        m_txSampleBytes(0)
 {
     m_ctx = iio_create_context_from_uri(uri.c_str());
 
@@ -295,6 +297,7 @@ bool DevicePlutoSDRBox::openRx()
                 df->with_scale? "true" : "false",
                 df->scale,
                 df->repeat);
+        m_rxSampleBytes = df->length / 8;
     }
     else
     {
@@ -343,6 +346,7 @@ bool DevicePlutoSDRBox::openSecondRx()
                 df->with_scale? "true" : "false",
                 df->scale,
                 df->repeat);
+        m_rxSampleBytes = df->length / 8;
     }
     else
     {
@@ -390,6 +394,7 @@ bool DevicePlutoSDRBox::openTx()
                 df->with_scale? "true" : "false",
                 df->scale,
                 df->repeat);
+        m_txSampleBytes = df->length / 8;
     }
     else
     {
@@ -436,6 +441,7 @@ bool DevicePlutoSDRBox::openSecondTx()
                 df->with_scale? "true" : "false",
                 df->scale,
                 df->repeat);
+        m_txSampleBytes = df->length / 8;
     }
     else
     {

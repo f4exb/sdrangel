@@ -90,6 +90,8 @@ public:
     void closeSecondTx(); //!< Close second Tx (Tx1)
     int getNbRx() const { return m_rxChannels.size() / 2; }
     int getNbTx() const { return m_txChannels.size() / 2; }
+    int getRxSampleBytes() const { return m_rxSampleBytes; }
+    int getTxSampleBytes() const { return m_txSampleBytes; }
     struct iio_buffer *createRxBuffer(unsigned int size, bool cyclic);
     struct iio_buffer *createTxBuffer(unsigned int size, bool cyclic);
     void deleteRxBuffer();
@@ -133,6 +135,8 @@ private:
     bool m_valid;
     int64_t m_xoInitial;
     float m_temp;
+    int m_rxSampleBytes; //!< size in bytes of a Rx I or Q sample. Rx must be opened.
+    int m_txSampleBytes; //!< size in bytes of a Tx I or Q sample. Tx must be opened.
     QList<QString> m_rxChannelIds;
     QList<iio_channel*> m_rxChannels;
     QList<QString> m_txChannelIds;
