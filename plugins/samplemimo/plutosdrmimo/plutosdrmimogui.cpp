@@ -169,6 +169,7 @@ void PlutoSDRMIMOGUI::displaySettings()
         ui->lpFIREnable->setChecked(m_settings.m_lpfRxFIREnable);
         ui->lpFIR->setValue(m_settings.m_lpfRxFIRBW / 1000);
         ui->lpFIRDecimation->setCurrentIndex(m_settings.m_lpfRxFIRlog2Decim);
+        updateGainCombo();
         ui->lpFIRGain->setCurrentIndex((m_settings.m_lpfRxFIRGain + 12)/6);
         ui->lpFIRDecimation->setEnabled(m_settings.m_lpfRxFIREnable);
         ui->lpFIRGain->setEnabled(m_settings.m_lpfRxFIREnable);
@@ -211,6 +212,7 @@ void PlutoSDRMIMOGUI::displaySettings()
         ui->lpFIREnable->setChecked(m_settings.m_lpfTxFIREnable);
         ui->lpFIR->setValue(m_settings.m_lpfTxFIRBW / 1000);
         ui->lpFIRDecimation->setCurrentIndex(m_settings.m_lpfTxFIRlog2Interp);
+        updateGainCombo();
         ui->lpFIRGain->setCurrentIndex((m_settings.m_lpfTxFIRGain + 6)/6);
         ui->lpFIRDecimation->setEnabled(m_settings.m_lpfTxFIREnable);
         ui->lpFIRGain->setEnabled(m_settings.m_lpfTxFIREnable);
@@ -533,6 +535,20 @@ void PlutoSDRMIMOGUI::updateStatus()
     }
 
     m_statusCounter++;
+}
+
+void PlutoSDRMIMOGUI::updateGainCombo()
+{
+    ui->lpFIRGain->blockSignals(true);
+    ui->lpFIRGain->clear();
+
+    if (m_rxElseTx) {
+        ui->lpFIRGain->addItems(QStringList{"-12", "-6", "0", "+6"});
+    } else {
+        ui->lpFIRGain->addItems(QStringList{"-6", "0"});
+    }
+
+    ui->lpFIRGain->blockSignals(false);
 }
 
 void PlutoSDRMIMOGUI::on_streamSide_currentIndexChanged(int index)

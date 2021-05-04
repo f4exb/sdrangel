@@ -875,11 +875,11 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
 
     if (forwardChangeTxDSP)
     {
-        qDebug("PlutoSDROutput::applySettings: forward change to self");
-
-        int sampleRate = m_settings.m_devSampleRate/(1<<m_settings.m_log2Interp);
-        DSPSignalNotification *notif = new DSPSignalNotification(sampleRate, m_settings.m_txCenterFrequency);
-        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
+        int sampleRate = settings.m_devSampleRate/(1<<settings.m_log2Interp);
+        DSPMIMOSignalNotification *notif0 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency, false, 0);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif0);
+        DSPMIMOSignalNotification *notif1 = new DSPMIMOSignalNotification(sampleRate, settings.m_txCenterFrequency, false, 1);
+        m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif1);
     }
 
     return true;
