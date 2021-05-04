@@ -1236,6 +1236,25 @@ void Interpolators<T, SdrBits, OutputBits>::interpolate64_cen(SampleVector::iter
         buf[pos+107] = intbuf[107] >> interpolation_shifts<SdrBits, OutputBits>::post64;
         buf[pos+108] = intbuf[108] >> interpolation_shifts<SdrBits, OutputBits>::post64;
         buf[pos+109] = intbuf[109] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+109] = intbuf[109] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+110] = intbuf[110] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+111] = intbuf[111] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+112] = intbuf[112] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+113] = intbuf[113] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+114] = intbuf[114] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+115] = intbuf[115] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+116] = intbuf[116] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+117] = intbuf[117] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+118] = intbuf[118] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+119] = intbuf[119] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+120] = intbuf[120] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+121] = intbuf[121] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+122] = intbuf[122] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+123] = intbuf[123] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+124] = intbuf[124] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+125] = intbuf[125] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+126] = intbuf[126] >> interpolation_shifts<SdrBits, OutputBits>::post64;
+        buf[pos+127] = intbuf[127] >> interpolation_shifts<SdrBits, OutputBits>::post64;
 
         ++(*it);
 	}
