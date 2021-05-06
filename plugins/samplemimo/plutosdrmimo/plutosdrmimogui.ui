@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>382</width>
-    <height>344</height>
+    <width>344</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>350</width>
-    <height>260</height>
+    <width>344</width>
+    <height>320</height>
    </size>
   </property>
   <property name="font">
@@ -1006,6 +1006,25 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="temperatureText">
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Board temperature (degrees C)</string>
+       </property>
+       <property name="text">
+        <string>00C</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -1016,6 +1035,24 @@
      <property name="bottomMargin">
       <number>2</number>
      </property>
+     <item>
+      <widget class="QToolButton" name="gainLock">
+       <property name="toolTip">
+        <string>Lock both channels gain</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../sdrgui/resources/res.qrc">
+         <normaloff>:/unlocked.png</normaloff>
+         <normalon>:/locked.png</normalon>:/unlocked.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QComboBox" name="gainMode">
        <property name="maximumSize">
@@ -1215,25 +1252,6 @@
       <widget class="Line" name="line_5">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="temperatureText">
-       <property name="minimumSize">
-        <size>
-         <width>24</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Board temperature (degrees C)</string>
-       </property>
-       <property name="text">
-        <string>00C</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
      </item>

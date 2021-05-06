@@ -197,7 +197,15 @@ The FIR filter block can provide a decimation or interpolation by 1 (no decimati
 
 The FIR filter can introduce a gain that can be set to -12, -6, 0 or 6 dB. The FIR has a fixed gain of 6 dB so to maximize dynamic range one would set the gain at -6 dB so that the overall gain is set at 0 dB.
 
-<h3>20: Rx gain mode</h3>
+<h3>20: Board temperature</h3>
+
+This is the board temperature in degrees Celsius updated every ~5s.
+
+<h3>21. Lock both streams gains</h3>
+
+When engaged this applies the same gain controls (22, 23, 25) to both streams (Rx or Tx)
+
+<h3>22: Rx gain mode</h3>
 
 Use this combo to select between gain options:
 
@@ -208,22 +216,18 @@ Use this combo to select between gain options:
 
 See AD9363 documentation for details on AGC options.
 
-<h3>21: Rx global manual gain</h3>
+<h3>23: Rx global manual gain</h3>
 
 Use this button to adjust the global gain manually in manual gain mode. This button is disabled when AGC modes are selected with combo (15).
 
-<h3>22: Actual Rx gain fetched from device</h3>
+<h3>24: Actual Rx gain fetched from device</h3>
 
 This is the actual gain in dB set in the device.
 
-<h4>23: Tx attenuation</h4>
+<h4>25: Tx attenuation</h4>
 
 Use this button to adjust the attenuation. It can be varied from -89.75 to 0 dB in 0.25 dB steps.
 
-<h3>24: Indicative RSSI</h3>
+<h3>26: Indicative RSSI</h3>
 
 This is the indicative RSSI of the receiver.
-
-<h3>25: Board temperature</h3>
-
-This is the board temperature in degrees Celsius updated every ~5s.

@@ -758,6 +758,22 @@ void PlutoSDRMIMOGUI::on_lpFIRGain_currentIndexChanged(int index)
     sendSettings();
 }
 
+void PlutoSDRMIMOGUI::on_gainLock_toggled(bool checked)
+{
+    if (!m_gainLock && checked)
+    {
+        m_settings.m_rx1GainMode = m_settings.m_rx0GainMode;
+        m_settings.m_rx1Gain = m_settings.m_rx0Gain;
+        m_settings.m_tx1Att = m_settings.m_rx0Gain;
+        blockApplySettings(true);
+        displaySettings();
+        blockApplySettings(false);
+        sendSettings();
+    }
+
+    m_gainLock = checked;
+}
+
 void PlutoSDRMIMOGUI::on_gainMode_currentIndexChanged(int index)
 {
     if (m_streamIndex == 0)
