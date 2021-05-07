@@ -144,8 +144,6 @@ void AISDemodSink::processOneSample(Complex &ci)
     bool scopeCRCInvalid = false;
     Real dcOffset = 0.0f;
     bool thresholdMet = false;
-    Real peakFreq = 0.0f;
-    Real freqOffset = 0.0f;
     if (m_rxBufCnt >= m_rxBufLength)
     {
         Real trainingSum = 0.0f;

@@ -118,7 +118,7 @@ QString AISMessage::typeToString(quint8 type)
         return "N/A";
     } else if ((type >= 100) && (type < 199)) {
         return "Preserved for regional use";
-    } else if ((type >= 200) && (type <= 255)) {
+    } else if (type >= 200) {
         return "Preserved for future use";
     } else if ((type >= 50) && (type <= 59)) {
         const QStringList specialCrafts = {
@@ -267,7 +267,7 @@ QString AISMessage::getString(const QByteArray ba, int byteIdx, int bitsLeft, in
 AISPositionReport::AISPositionReport(QByteArray ba) :
     AISMessage(ba)
 {
-    m_status = ((ba[4] & 0x3) << 2) | (ba[5] >> 6) & 0x3;
+    m_status = ((ba[4] & 0x3) << 2) | ((ba[5] >> 6) & 0x3);
 
     int rateOfTurn = ((ba[5] << 2) & 0xfc) | ((ba[6] >> 6) & 0x3);
     if (rateOfTurn == 127) {
