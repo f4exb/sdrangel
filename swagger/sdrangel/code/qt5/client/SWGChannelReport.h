@@ -23,6 +23,8 @@
 
 
 #include "SWGADSBDemodReport.h"
+#include "SWGAISDemodReport.h"
+#include "SWGAISModReport.h"
 #include "SWGAMDemodReport.h"
 #include "SWGAMModReport.h"
 #include "SWGATVModReport.h"
@@ -78,6 +80,12 @@ public:
 
     SWGADSBDemodReport* getAdsbDemodReport();
     void setAdsbDemodReport(SWGADSBDemodReport* adsb_demod_report);
+
+    SWGAISDemodReport* getAisDemodReport();
+    void setAisDemodReport(SWGAISDemodReport* ais_demod_report);
+
+    SWGAISModReport* getAisModReport();
+    void setAisModReport(SWGAISModReport* ais_mod_report);
 
     SWGAMDemodReport* getAmDemodReport();
     void setAmDemodReport(SWGAMDemodReport* am_demod_report);
@@ -172,6 +180,12 @@ private:
 
     SWGADSBDemodReport* adsb_demod_report;
     bool m_adsb_demod_report_isSet;
+
+    SWGAISDemodReport* ais_demod_report;
+    bool m_ais_demod_report_isSet;
+
+    SWGAISModReport* ais_mod_report;
+    bool m_ais_mod_report_isSet;
 
     SWGAMDemodReport* am_demod_report;
     bool m_am_demod_report_isSet;

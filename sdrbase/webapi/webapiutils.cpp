@@ -23,6 +23,8 @@
 
 const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.adsbdemod", "ADSBDemodSettings"},
+    {"sdrangel.channel.modais", "AISModSettings"},
+    {"sdrangel.channel.aisdemod", "AISDemodSettings"},
     {"sdrangel.channel.amdemod", "AMDemodSettings"},
     {"sdrangel.channel.aptdemod", "APTDemodSettings"},
     {"de.maintech.sdrangelove.channel.am", "AMDemodSettings"}, // remap
@@ -122,6 +124,8 @@ const QMap<QString, QString> WebAPIUtils::m_deviceIdToSettingsKey = {
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"ADSBDemod", "ADSBDemodSettings"},
+    {"AISDemod", "AISDemodSettings"},
+    {"AISMod", "AISModSettings"},
     {"APTDemod", "APTemodSettings"},
     {"AMDemod", "AMDemodSettings"},
     {"AMMod", "AMModSettings"},
@@ -162,6 +166,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_channelTypeToActionsKey = {
+    {"AISMod", "AISModActions"},
     {"APTDemod", "APTDemodActions"},
     {"FileSink", "FileSinkActions"},
     {"FileSource", "FileSourceActions"},
@@ -249,6 +254,7 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
+    {"AIS", "AISSettings"},
     {"APRS", "APRSSettings"},
     {"GS232Controller", "GS232ControllerSettings"},
     {"Map", "MapSettings"},
@@ -264,6 +270,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
 };
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
+    {"sdrangel.feature.ais", "AISSSettings"},
     {"sdrangel.feature.aprs", "APRSSettings"},
     {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.map", "MapSettings"},

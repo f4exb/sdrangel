@@ -36,6 +36,8 @@ SWGChannelActions::SWGChannelActions() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    ais_mod_actions = nullptr;
+    m_ais_mod_actions_isSet = false;
     apt_demod_actions = nullptr;
     m_apt_demod_actions_isSet = false;
     file_sink_actions = nullptr;
@@ -64,6 +66,8 @@ SWGChannelActions::init() {
     m_originator_device_set_index_isSet = false;
     originator_channel_index = 0;
     m_originator_channel_index_isSet = false;
+    ais_mod_actions = new SWGAISModActions();
+    m_ais_mod_actions_isSet = false;
     apt_demod_actions = new SWGAPTDemodActions();
     m_apt_demod_actions_isSet = false;
     file_sink_actions = new SWGFileSinkActions();
@@ -86,6 +90,9 @@ SWGChannelActions::cleanup() {
 
 
 
+    if(ais_mod_actions != nullptr) { 
+        delete ais_mod_actions;
+    }
     if(apt_demod_actions != nullptr) { 
         delete apt_demod_actions;
     }
@@ -124,6 +131,8 @@ SWGChannelActions::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&originator_device_set_index, pJson["originatorDeviceSetIndex"], "qint32", "");
     
     ::SWGSDRangel::setValue(&originator_channel_index, pJson["originatorChannelIndex"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&ais_mod_actions, pJson["AISModActions"], "SWGAISModActions", "SWGAISModActions");
     
     ::SWGSDRangel::setValue(&apt_demod_actions, pJson["APTDemodActions"], "SWGAPTDemodActions", "SWGAPTDemodActions");
     
@@ -164,6 +173,9 @@ SWGChannelActions::asJsonObject() {
     }
     if(m_originator_channel_index_isSet){
         obj->insert("originatorChannelIndex", QJsonValue(originator_channel_index));
+    }
+    if((ais_mod_actions != nullptr) && (ais_mod_actions->isSet())){
+        toJsonValue(QString("AISModActions"), ais_mod_actions, obj, QString("SWGAISModActions"));
     }
     if((apt_demod_actions != nullptr) && (apt_demod_actions->isSet())){
         toJsonValue(QString("APTDemodActions"), apt_demod_actions, obj, QString("SWGAPTDemodActions"));
@@ -225,6 +237,16 @@ void
 SWGChannelActions::setOriginatorChannelIndex(qint32 originator_channel_index) {
     this->originator_channel_index = originator_channel_index;
     this->m_originator_channel_index_isSet = true;
+}
+
+SWGAISModActions*
+SWGChannelActions::getAisModActions() {
+    return ais_mod_actions;
+}
+void
+SWGChannelActions::setAisModActions(SWGAISModActions* ais_mod_actions) {
+    this->ais_mod_actions = ais_mod_actions;
+    this->m_ais_mod_actions_isSet = true;
 }
 
 SWGAPTDemodActions*
@@ -302,6 +324,9 @@ SWGChannelActions::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_originator_channel_index_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(ais_mod_actions && ais_mod_actions->isSet()){
             isObjectUpdated = true; break;
         }
         if(apt_demod_actions && apt_demod_actions->isSet()){

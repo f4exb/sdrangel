@@ -38,6 +38,10 @@ SWGChannelSettings::SWGChannelSettings() {
     m_originator_channel_index_isSet = false;
     adsb_demod_settings = nullptr;
     m_adsb_demod_settings_isSet = false;
+    ais_demod_settings = nullptr;
+    m_ais_demod_settings_isSet = false;
+    ais_mod_settings = nullptr;
+    m_ais_mod_settings_isSet = false;
     am_demod_settings = nullptr;
     m_am_demod_settings_isSet = false;
     am_mod_settings = nullptr;
@@ -132,6 +136,10 @@ SWGChannelSettings::init() {
     m_originator_channel_index_isSet = false;
     adsb_demod_settings = new SWGADSBDemodSettings();
     m_adsb_demod_settings_isSet = false;
+    ais_demod_settings = new SWGAISDemodSettings();
+    m_ais_demod_settings_isSet = false;
+    ais_mod_settings = new SWGAISModSettings();
+    m_ais_mod_settings_isSet = false;
     am_demod_settings = new SWGAMDemodSettings();
     m_am_demod_settings_isSet = false;
     am_mod_settings = new SWGAMModSettings();
@@ -220,6 +228,12 @@ SWGChannelSettings::cleanup() {
 
     if(adsb_demod_settings != nullptr) { 
         delete adsb_demod_settings;
+    }
+    if(ais_demod_settings != nullptr) { 
+        delete ais_demod_settings;
+    }
+    if(ais_mod_settings != nullptr) { 
+        delete ais_mod_settings;
     }
     if(am_demod_settings != nullptr) { 
         delete am_demod_settings;
@@ -358,6 +372,10 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&adsb_demod_settings, pJson["ADSBDemodSettings"], "SWGADSBDemodSettings", "SWGADSBDemodSettings");
     
+    ::SWGSDRangel::setValue(&ais_demod_settings, pJson["AISDemodSettings"], "SWGAISDemodSettings", "SWGAISDemodSettings");
+    
+    ::SWGSDRangel::setValue(&ais_mod_settings, pJson["AISModSettings"], "SWGAISModSettings", "SWGAISModSettings");
+    
     ::SWGSDRangel::setValue(&am_demod_settings, pJson["AMDemodSettings"], "SWGAMDemodSettings", "SWGAMDemodSettings");
     
     ::SWGSDRangel::setValue(&am_mod_settings, pJson["AMModSettings"], "SWGAMModSettings", "SWGAMModSettings");
@@ -464,6 +482,12 @@ SWGChannelSettings::asJsonObject() {
     }
     if((adsb_demod_settings != nullptr) && (adsb_demod_settings->isSet())){
         toJsonValue(QString("ADSBDemodSettings"), adsb_demod_settings, obj, QString("SWGADSBDemodSettings"));
+    }
+    if((ais_demod_settings != nullptr) && (ais_demod_settings->isSet())){
+        toJsonValue(QString("AISDemodSettings"), ais_demod_settings, obj, QString("SWGAISDemodSettings"));
+    }
+    if((ais_mod_settings != nullptr) && (ais_mod_settings->isSet())){
+        toJsonValue(QString("AISModSettings"), ais_mod_settings, obj, QString("SWGAISModSettings"));
     }
     if((am_demod_settings != nullptr) && (am_demod_settings->isSet())){
         toJsonValue(QString("AMDemodSettings"), am_demod_settings, obj, QString("SWGAMDemodSettings"));
@@ -631,6 +655,26 @@ void
 SWGChannelSettings::setAdsbDemodSettings(SWGADSBDemodSettings* adsb_demod_settings) {
     this->adsb_demod_settings = adsb_demod_settings;
     this->m_adsb_demod_settings_isSet = true;
+}
+
+SWGAISDemodSettings*
+SWGChannelSettings::getAisDemodSettings() {
+    return ais_demod_settings;
+}
+void
+SWGChannelSettings::setAisDemodSettings(SWGAISDemodSettings* ais_demod_settings) {
+    this->ais_demod_settings = ais_demod_settings;
+    this->m_ais_demod_settings_isSet = true;
+}
+
+SWGAISModSettings*
+SWGChannelSettings::getAisModSettings() {
+    return ais_mod_settings;
+}
+void
+SWGChannelSettings::setAisModSettings(SWGAISModSettings* ais_mod_settings) {
+    this->ais_mod_settings = ais_mod_settings;
+    this->m_ais_mod_settings_isSet = true;
 }
 
 SWGAMDemodSettings*
@@ -1031,6 +1075,12 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(adsb_demod_settings && adsb_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ais_demod_settings && ais_demod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ais_mod_settings && ais_mod_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(am_demod_settings && am_demod_settings->isSet()){

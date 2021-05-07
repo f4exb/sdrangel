@@ -61,9 +61,9 @@ Description: SDR/Analyzer/Generator front-end for various hardware
  Builds on Linux, Windows and Mac O/S
  Reception modes supported:
    Analog: AM, ATV, NFM, WFM, SSB, broadcast FM, APT
-   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS)
+   Digital: D-Star, Yaesu SF, DMR, dPMR, FreeDV, DAB, DVB-S, LoRa, ADS-B, Packet (AX.25/APRS), AIS
    Analyzer: Generic channel
  Transmission modes supported:
    Analog: AM, ATV, NFM, SSB, WFM
-   Digital: DVB-S, Packet (AX.25), 802.15.4
+   Digital: DVB-S, Packet (AX.25), AIS, 802.15.4
 Homepage: https://github.com/f4exb/sdrangel

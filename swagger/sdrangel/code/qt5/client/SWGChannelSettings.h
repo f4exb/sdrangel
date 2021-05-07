@@ -23,6 +23,8 @@
 
 
 #include "SWGADSBDemodSettings.h"
+#include "SWGAISDemodSettings.h"
+#include "SWGAISModSettings.h"
 #include "SWGAMDemodSettings.h"
 #include "SWGAMModSettings.h"
 #include "SWGAPTDemodSettings.h"
@@ -95,6 +97,12 @@ public:
 
     SWGADSBDemodSettings* getAdsbDemodSettings();
     void setAdsbDemodSettings(SWGADSBDemodSettings* adsb_demod_settings);
+
+    SWGAISDemodSettings* getAisDemodSettings();
+    void setAisDemodSettings(SWGAISDemodSettings* ais_demod_settings);
+
+    SWGAISModSettings* getAisModSettings();
+    void setAisModSettings(SWGAISModSettings* ais_mod_settings);
 
     SWGAMDemodSettings* getAmDemodSettings();
     void setAmDemodSettings(SWGAMDemodSettings* am_demod_settings);
@@ -228,6 +236,12 @@ private:
 
     SWGADSBDemodSettings* adsb_demod_settings;
     bool m_adsb_demod_settings_isSet;
+
+    SWGAISDemodSettings* ais_demod_settings;
+    bool m_ais_demod_settings_isSet;
+
+    SWGAISModSettings* ais_mod_settings;
+    bool m_ais_mod_settings_isSet;
 
     SWGAMDemodSettings* am_demod_settings;
     bool m_am_demod_settings_isSet;

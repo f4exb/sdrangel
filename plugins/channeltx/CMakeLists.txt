@@ -1,5 +1,6 @@
 project(mod)
 
+add_subdirectory(modais)
 add_subdirectory(modam)
 add_subdirectory(modchirpchat)
 add_subdirectory(modnfm)

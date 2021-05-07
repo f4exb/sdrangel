@@ -3811,6 +3811,16 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setAdsbDemodSettings(new SWGSDRangel::SWGADSBDemodSettings());
             channelSettings->getAdsbDemodSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "AISDemodSettings")
+        {
+            channelSettings->setAisDemodSettings(new SWGSDRangel::SWGAISDemodSettings());
+            channelSettings->getAisDemodSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (channelSettingsKey == "AISModSettings")
+        {
+            channelSettings->setAisModSettings(new SWGSDRangel::SWGAISModSettings());
+            channelSettings->getAisModSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "AMDemodSettings")
         {
             channelSettings->setAmDemodSettings(new SWGSDRangel::SWGAMDemodSettings());
@@ -4023,7 +4033,12 @@ bool WebAPIRequestMapper::getChannelActions(
         QJsonObject actionsJsonObject = channelActionsJson[channelActionsKey].toObject();
         channelActionsKeys = actionsJsonObject.keys();
 
-        if (channelActionsKey == "APTDemodActions")
+        if (channelActionsKey == "AISModActions")
+        {
+            channelActions->setAisModActions(new SWGSDRangel::SWGAISModActions());
+            channelActions->getAisModActions()->fromJsonObject(actionsJsonObject);
+        }
+        else if (channelActionsKey == "APTDemodActions")
         {
             channelActions->setAptDemodActions(new SWGSDRangel::SWGAPTDemodActions());
             channelActions->getAptDemodActions()->fromJsonObject(actionsJsonObject);
@@ -4405,7 +4420,12 @@ bool WebAPIRequestMapper::getFeatureSettings(
         QJsonObject settingsJsonObject = featureSettingsJson[featureSettingsKey].toObject();
         featureSettingsKeys = settingsJsonObject.keys();
 
-        if (featureSettingsKey == "APRSSettings")
+        if (featureSettingsKey == "AISSSettings")
+        {
+            featureSettings->setAisSettings(new SWGSDRangel::SWGAISSettings());
+            featureSettings->getAisSettings()->fromJsonObject(settingsJsonObject);
+        }
+        else if (featureSettingsKey == "APRSSettings")
         {
             featureSettings->setAprsSettings(new SWGSDRangel::SWGAPRSSettings());
             featureSettings->getAprsSettings()->fromJsonObject(settingsJsonObject);
@@ -4594,6 +4614,8 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.cleanup();
     channelSettings.setChannelType(nullptr);
     channelSettings.setAdsbDemodSettings(nullptr);
+    channelSettings.setAisDemodSettings(nullptr);
+    channelSettings.setAisModSettings(nullptr);
     channelSettings.setAmDemodSettings(nullptr);
     channelSettings.setAmModSettings(nullptr);
     channelSettings.setAptDemodSettings(nullptr);
@@ -4623,6 +4645,8 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.cleanup();
     channelReport.setChannelType(nullptr);
     channelReport.setAdsbDemodReport(nullptr);
+    channelReport.setAisDemodReport(nullptr);
+    channelReport.setAisModReport(nullptr);
     channelReport.setAmDemodReport(nullptr);
     channelReport.setAmModReport(nullptr);
     channelReport.setAtvModReport(nullptr);
@@ -4646,6 +4670,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
 void WebAPIRequestMapper::resetChannelActions(SWGSDRangel::SWGChannelActions& channelActions)
 {
     channelActions.cleanup();
+    channelActions.setAisModActions(nullptr);
     channelActions.setAptDemodActions(nullptr);
     channelActions.setChannelType(nullptr);
     channelActions.setFileSourceActions(nullptr);
