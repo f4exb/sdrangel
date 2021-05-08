@@ -58,11 +58,12 @@ struct MapSettings
 
     // The first few should match the order in m_pipeTypes for MapGUI::getSourceMask to work
     static const quint32 SOURCE_ADSB = 0x1;
-    static const quint32 SOURCE_APRS = 0x2;
-    static const quint32 SOURCE_STAR_TRACKER = 0x4;
-    static const quint32 SOURCE_SATELLITE_TRACKER = 0x8;
-    static const quint32 SOURCE_BEACONS = 0x10;
-    static const quint32 SOURCE_STATION = 0x20;
+    static const quint32 SOURCE_AIS = 0x2;
+    static const quint32 SOURCE_APRS = 0x4;
+    static const quint32 SOURCE_STAR_TRACKER = 0x8;
+    static const quint32 SOURCE_SATELLITE_TRACKER = 0x10;
+    static const quint32 SOURCE_BEACONS = 0x20;
+    static const quint32 SOURCE_STATION = 0x40;
 };
 
 #endif // INCLUDE_FEATURE_MAPSETTINGS_H_

@@ -23,6 +23,7 @@
 
 
 #include "SWGAFCSettings.h"
+#include "SWGAISSettings.h"
 #include "SWGAPRSSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
@@ -64,6 +65,9 @@ public:
 
     SWGAFCSettings* getAfcSettings();
     void setAfcSettings(SWGAFCSettings* afc_settings);
+
+    SWGAISSettings* getAisSettings();
+    void setAisSettings(SWGAISSettings* ais_settings);
 
     SWGAPRSSettings* getAprsSettings();
     void setAprsSettings(SWGAPRSSettings* aprs_settings);
@@ -110,6 +114,9 @@ private:
 
     SWGAFCSettings* afc_settings;
     bool m_afc_settings_isSet;
+
+    SWGAISSettings* ais_settings;
+    bool m_ais_settings_isSet;
 
     SWGAPRSSettings* aprs_settings;
     bool m_aprs_settings_isSet;

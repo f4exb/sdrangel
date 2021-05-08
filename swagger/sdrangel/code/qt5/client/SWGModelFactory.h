@@ -19,6 +19,13 @@
 #include "SWGAFCActions.h"
 #include "SWGAFCReport.h"
 #include "SWGAFCSettings.h"
+#include "SWGAISDemodReport.h"
+#include "SWGAISDemodSettings.h"
+#include "SWGAISModActions.h"
+#include "SWGAISModActions_tx.h"
+#include "SWGAISModReport.h"
+#include "SWGAISModSettings.h"
+#include "SWGAISSettings.h"
 #include "SWGAMBEDevice.h"
 #include "SWGAMBEDevices.h"
 #include "SWGAMDemodReport.h"
@@ -279,6 +286,27 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAFCSettings").compare(type) == 0) {
       return new SWGAFCSettings();
+    }
+    if(QString("SWGAISDemodReport").compare(type) == 0) {
+      return new SWGAISDemodReport();
+    }
+    if(QString("SWGAISDemodSettings").compare(type) == 0) {
+      return new SWGAISDemodSettings();
+    }
+    if(QString("SWGAISModActions").compare(type) == 0) {
+      return new SWGAISModActions();
+    }
+    if(QString("SWGAISModActions_tx").compare(type) == 0) {
+      return new SWGAISModActions_tx();
+    }
+    if(QString("SWGAISModReport").compare(type) == 0) {
+      return new SWGAISModReport();
+    }
+    if(QString("SWGAISModSettings").compare(type) == 0) {
+      return new SWGAISModSettings();
+    }
+    if(QString("SWGAISSettings").compare(type) == 0) {
+      return new SWGAISSettings();
     }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
       return new SWGAMBEDevice();

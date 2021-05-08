@@ -25,6 +25,7 @@
 
 const QStringList MapSettings::m_pipeTypes = {
     QStringLiteral("ADSBDemod"),
+    QStringLiteral("AIS"),
     QStringLiteral("APRS"),
     QStringLiteral("StarTracker"),
     QStringLiteral("SatelliteTracker")
@@ -32,6 +33,7 @@ const QStringList MapSettings::m_pipeTypes = {
 
 const QStringList MapSettings::m_pipeURIs = {
     QStringLiteral("sdrangel.channel.adsbdemod"),
+    QStringLiteral("sdrangel.feature.ais"),
     QStringLiteral("sdrangel.feature.aprs"),
     QStringLiteral("sdrangel.feature.startracker"),
     QStringLiteral("sdrangel.feature.satellitetracker")

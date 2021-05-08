@@ -23,6 +23,8 @@
 #include "demodanalyzersettings.h"
 
 const QStringList DemodAnalyzerSettings::m_channelTypes = {
+    QStringLiteral("AISDemod"),
+    QStringLiteral("AISMod"),
     QStringLiteral("AMDemod"),
     QStringLiteral("AMMod"),
     QStringLiteral("DABDemod"),
@@ -38,6 +40,8 @@ const QStringList DemodAnalyzerSettings::m_channelTypes = {
 };
 
 const QStringList DemodAnalyzerSettings::m_channelURIs = {
+    QStringLiteral("sdrangel.channel.aisdemod"),
+    QStringLiteral("sdrangel.channel.modais"),
     QStringLiteral("sdrangel.channel.amdemod"),
     QStringLiteral("sdrangel.channeltx.modam"),
     QStringLiteral("sdrangel.channel.dabdemod"),

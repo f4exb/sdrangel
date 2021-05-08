@@ -176,6 +176,7 @@ set(sdrbase_SOURCES
     settings/preset.cpp
     settings/mainsettings.cpp
 
+    util/ais.cpp
     util/ax25.cpp
     util/aprs.cpp
     util/astronomy.cpp
@@ -313,6 +314,7 @@ set(sdrbase_HEADERS
     dsp/kissfft.h
     dsp/kissengine.h
     dsp/firfilter.h
+    dsp/gaussian.h
     dsp/mimochannel.h
     dsp/misc.h
     dsp/movingaverage.h
@@ -372,6 +374,7 @@ set(sdrbase_HEADERS
     settings/preset.h
     settings/mainsettings.h
 
+    util/ais.h
     util/ax25.h
     util/aprs.h
     util/astronomy.h

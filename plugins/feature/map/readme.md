@@ -7,11 +7,12 @@ On top of this, it can plot data from other plugins, such as:
 
 * APRS symbols from the APRS Feature,
 * Aircraft from the ADS-B Demodulator,
+* Ships from the AIS Demodulator,
 * Satellites from the Satellite Tracker,
 * The Sun, Moon and Stars from the Star Tracker,
 * Beacons based on the IARU Region 1 beacon database.
 
-It can also create tracks showing the path aircraft and APRS objects have taken, as well as predicted paths for satellites.
+It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
 
 ![Map feature](../../../doc/img/Map_plugin_beacons.png)
 

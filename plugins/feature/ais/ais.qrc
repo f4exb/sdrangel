@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="/ais/">
+    <file>map/aircraft.png</file>
+    <file>map/helicopter.png</file>
+    <file>map/ship.png</file>
+    <file>map/tanker.png</file>
+    <file>map/cargo.png</file>
+    <file>map/tug.png</file>
+    <file>map/bouy.png</file>
+    <file>map/anchor.png</file>
+  </qresource>
+</RCC>

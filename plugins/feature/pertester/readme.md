@@ -2,7 +2,7 @@
 
 <h2>Introduction</h2>
 
-The Packet Error Rate (PER) Tester feature can be used to measure the packet error rate over digital, packet based protcols such as AX.25 (Packet mod/demod), LoRa (ChipChat mod/demod) and 802.15.4.
+The Packet Error Rate (PER) Tester feature can be used to measure the packet error rate over digital, packet based protcols such as AX.25 (Packet mod/demod), LoRa (ChipChat mod/demod), AIS and 802.15.4.
 
 The PER Tester feature allows you to define the contents of the packets to transmit, which can include a per-packet 32-bit identifier, as well as a user-defined or random payload, how many packets are sent and the interval between them.
 
@@ -42,7 +42,7 @@ Specify the interval in seconds between packet transmissions.
 
 Specify the contents of the packet to transmit and expect to be received. Data should be entered in hexidecimal bytes (E.g: 00 11 22 33 44).
 
-The exact format required will depend on the underlying protocol being used. For AX.25 using the Packet modulator, LoRo using the ChirpChat modulator and 802.15.4, it is not necessary to include the trailing CRC, as this is appended automatically by the SDRangel modulators.
+The exact format required will depend on the underlying protocol being used. For AX.25 using the Packet modulator, LoRo using the ChirpChat modulator, AIS and 802.15.4, it is not necessary to include the trailing CRC, as this is appended automatically by the SDRangel modulators.
 
 Aside from hex values, a number of variables can be used:
 
@@ -74,6 +74,7 @@ This can be used in cases where the demodulator outputs a different byte sequenc
 
 * For AX.25 (with Packet mod/demod), set Leading to 0 and Trailing to 2.
 * For LoRa (with ChirpChat mod/demod), set Leading to 0 and Trailing to 0.
+* For AIS set Leading to 0 and Trailing to 0.
 
 <h3>8: TX UDP port</h3>
 

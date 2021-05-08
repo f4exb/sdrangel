@@ -36,6 +36,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_originator_feature_index_isSet = false;
     afc_settings = nullptr;
     m_afc_settings_isSet = false;
+    ais_settings = nullptr;
+    m_ais_settings_isSet = false;
     aprs_settings = nullptr;
     m_aprs_settings_isSet = false;
     demod_analyzer_settings = nullptr;
@@ -72,6 +74,8 @@ SWGFeatureSettings::init() {
     m_originator_feature_index_isSet = false;
     afc_settings = new SWGAFCSettings();
     m_afc_settings_isSet = false;
+    ais_settings = new SWGAISSettings();
+    m_ais_settings_isSet = false;
     aprs_settings = new SWGAPRSSettings();
     m_aprs_settings_isSet = false;
     demod_analyzer_settings = new SWGDemodAnalyzerSettings();
@@ -103,6 +107,9 @@ SWGFeatureSettings::cleanup() {
 
     if(afc_settings != nullptr) { 
         delete afc_settings;
+    }
+    if(ais_settings != nullptr) { 
+        delete ais_settings;
     }
     if(aprs_settings != nullptr) { 
         delete aprs_settings;
@@ -155,6 +162,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&afc_settings, pJson["AFCSettings"], "SWGAFCSettings", "SWGAFCSettings");
     
+    ::SWGSDRangel::setValue(&ais_settings, pJson["AISSettings"], "SWGAISSettings", "SWGAISSettings");
+    
     ::SWGSDRangel::setValue(&aprs_settings, pJson["APRSSettings"], "SWGAPRSSettings", "SWGAPRSSettings");
     
     ::SWGSDRangel::setValue(&demod_analyzer_settings, pJson["DemodAnalyzerSettings"], "SWGDemodAnalyzerSettings", "SWGDemodAnalyzerSettings");
@@ -202,6 +211,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((afc_settings != nullptr) && (afc_settings->isSet())){
         toJsonValue(QString("AFCSettings"), afc_settings, obj, QString("SWGAFCSettings"));
+    }
+    if((ais_settings != nullptr) && (ais_settings->isSet())){
+        toJsonValue(QString("AISSettings"), ais_settings, obj, QString("SWGAISSettings"));
     }
     if((aprs_settings != nullptr) && (aprs_settings->isSet())){
         toJsonValue(QString("APRSSettings"), aprs_settings, obj, QString("SWGAPRSSettings"));
@@ -275,6 +287,16 @@ void
 SWGFeatureSettings::setAfcSettings(SWGAFCSettings* afc_settings) {
     this->afc_settings = afc_settings;
     this->m_afc_settings_isSet = true;
+}
+
+SWGAISSettings*
+SWGFeatureSettings::getAisSettings() {
+    return ais_settings;
+}
+void
+SWGFeatureSettings::setAisSettings(SWGAISSettings* ais_settings) {
+    this->ais_settings = ais_settings;
+    this->m_ais_settings_isSet = true;
 }
 
 SWGAPRSSettings*
@@ -392,6 +414,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(afc_settings && afc_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(ais_settings && ais_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(aprs_settings && aprs_settings->isSet()){

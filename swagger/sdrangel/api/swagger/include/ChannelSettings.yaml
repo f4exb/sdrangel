@@ -19,6 +19,10 @@ ChannelSettings:
       type: integer
     ADSBDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/ADSBDemod.yaml#/ADSBDemodSettings"
+    AISDemodSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AISDemod.yaml#/AISDemodSettings"
+    AISModSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AISMod.yaml#/AISModSettings"
     AMDemodSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AMDemod.yaml#/AMDemodSettings"
     AMModSettings:
