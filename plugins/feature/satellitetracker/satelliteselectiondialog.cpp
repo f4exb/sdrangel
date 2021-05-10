@@ -224,14 +224,21 @@ void SatelliteSelectionDialog::displaySatInfo(const QString& name)
     }
     if (sat->m_tle != nullptr)
     {
-        info.append("Orbit:");
-        Tle tle = Tle(sat->m_tle->m_tle0.toStdString(),
-                        sat->m_tle->m_tle1.toStdString(),
-                        sat->m_tle->m_tle2.toStdString());
-        OrbitalElements ele(tle);
-        info.append(QString("  Period: %1 mins").arg(ele.Period()));
-        info.append(QString("  Inclination: %1%2").arg(Units::radiansToDegrees(ele.Inclination())).arg(QChar(0xb0)));
-        info.append(QString("  Eccentricity: %1").arg(ele.Eccentricity()));
+        try
+        {
+            info.append("Orbit:");
+            Tle tle = Tle(sat->m_tle->m_tle0.toStdString(),
+                            sat->m_tle->m_tle1.toStdString(),
+                            sat->m_tle->m_tle2.toStdString());
+            OrbitalElements ele(tle);
+            info.append(QString("  Period: %1 mins").arg(ele.Period()));
+            info.append(QString("  Inclination: %1%2").arg(Units::radiansToDegrees(ele.Inclination())).arg(QChar(0xb0)));
+            info.append(QString("  Eccentricity: %1").arg(ele.Eccentricity()));
+        }
+        catch (TleException tlee)
+        {
+            qDebug() << "SatelliteSelectionDialog::displaySatInfo: TleException " << tlee.what();
+        }
     }
 
     ui->satInfo->setText(info.join("\n"));
