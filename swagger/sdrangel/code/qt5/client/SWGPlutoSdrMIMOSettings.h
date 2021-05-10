@@ -22,6 +22,7 @@
 #include <QJsonObject>
 
 
+#include <QString>
 
 #include "SWGObject.h"
 #include "export.h"
@@ -155,6 +156,18 @@ public:
     qint32 getTx1AntennaPath();
     void setTx1AntennaPath(qint32 tx1_antenna_path);
 
+    qint32 getUseReverseApi();
+    void setUseReverseApi(qint32 use_reverse_api);
+
+    QString* getReverseApiAddress();
+    void setReverseApiAddress(QString* reverse_api_address);
+
+    qint32 getReverseApiPort();
+    void setReverseApiPort(qint32 reverse_api_port);
+
+    qint32 getReverseApiDeviceIndex();
+    void setReverseApiDeviceIndex(qint32 reverse_api_device_index);
+
 
     virtual bool isSet() override;
 
@@ -272,6 +285,18 @@ private:
 
     qint32 tx1_antenna_path;
     bool m_tx1_antenna_path_isSet;
+
+    qint32 use_reverse_api;
+    bool m_use_reverse_api_isSet;
+
+    QString* reverse_api_address;
+    bool m_reverse_api_address_isSet;
+
+    qint32 reverse_api_port;
+    bool m_reverse_api_port_isSet;
+
+    qint32 reverse_api_device_index;
+    bool m_reverse_api_device_index_isSet;
 
 };
 

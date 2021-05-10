@@ -260,7 +260,7 @@ void PlutoSDRMIMO::stopRx()
     }
 
     m_plutoParams->getBox()->deleteRxBuffer();
-    m_plutoRxBuffer = nullptr;
+    m_plutoTxBuffer = nullptr;
 }
 
 void PlutoSDRMIMO::stopTx()
@@ -790,14 +790,21 @@ bool PlutoSDRMIMO::applySettings(const PlutoSDRMIMOSettings& settings, bool forc
     }
 
     if (force || (m_settings.m_txCenterFrequency != settings.m_txCenterFrequency)
+        || (m_settings.m_log2Interp != settings.m_log2Interp)
+        || (m_settings.m_fcPosTx != settings.m_fcPosTx)
+        || (m_settings.m_devSampleRate != settings.m_devSampleRate)
         || (m_settings.m_txTransverterMode != settings.m_txTransverterMode)
         || (m_settings.m_txTransverterDeltaFrequency != settings.m_txTransverterDeltaFrequency))
 
     {
-        qint64 deviceCenterFrequency = settings.m_txCenterFrequency;
-        deviceCenterFrequency -= settings.m_txTransverterMode ? settings.m_txTransverterDeltaFrequency : 0;
-        deviceCenterFrequency = deviceCenterFrequency < 0 ? 0 : deviceCenterFrequency;
-
+        qint64 deviceCenterFrequency = DeviceSampleSink::calculateDeviceCenterFrequency(
+            settings.m_txCenterFrequency,
+            settings.m_txTransverterDeltaFrequency,
+            settings.m_log2Interp,
+            (DeviceSampleSink::fcPos_t) settings.m_fcPosTx,
+            settings.m_devSampleRate,
+            settings.m_txTransverterMode
+        );
 
         params.push_back(QString(tr("out_altvoltage1_TX_LO_frequency=%1").arg(deviceCenterFrequency)).toStdString());
         paramsToSet = true;
@@ -1039,16 +1046,16 @@ void PlutoSDRMIMO::webapiUpdateDeviceSettings(
         settings.m_tx1AntennaPath = static_cast<PlutoSDRMIMOSettings::RFPathTx>(response.getPlutoSdrMimoSettings()->getTx1AntennaPath());
     }
     if (deviceSettingsKeys.contains("useReverseAPI")) {
-        settings.m_useReverseAPI = response.getBladeRf2MimoSettings()->getUseReverseApi() != 0;
+        settings.m_useReverseAPI = response.getPlutoSdrMimoSettings()->getUseReverseApi() != 0;
     }
     if (deviceSettingsKeys.contains("reverseAPIAddress")) {
-        settings.m_reverseAPIAddress = *response.getBladeRf2MimoSettings()->getReverseApiAddress();
+        settings.m_reverseAPIAddress = *response.getPlutoSdrMimoSettings()->getReverseApiAddress();
     }
     if (deviceSettingsKeys.contains("reverseAPIPort")) {
-        settings.m_reverseAPIPort = response.getBladeRf2MimoSettings()->getReverseApiPort();
+        settings.m_reverseAPIPort = response.getPlutoSdrMimoSettings()->getReverseApiPort();
     }
     if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
-        settings.m_reverseAPIDeviceIndex = response.getBladeRf2MimoSettings()->getReverseApiDeviceIndex();
+        settings.m_reverseAPIDeviceIndex = response.getPlutoSdrMimoSettings()->getReverseApiDeviceIndex();
     }
 }
 
@@ -1071,6 +1078,7 @@ void PlutoSDRMIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getPlutoSdrMimoSettings()->setLpfRxFirbw(settings.m_lpfRxFIRBW);
     response.getPlutoSdrMimoSettings()->setLpfRxFiRlog2Decim(settings.m_lpfRxFIRlog2Decim);
     response.getPlutoSdrMimoSettings()->setLpfRxFirGain(settings.m_lpfRxFIRGain);
+    response.getPlutoSdrMimoSettings()->setLog2Decim(settings.m_log2Decim);
     response.getPlutoSdrMimoSettings()->setRx0Gain(settings.m_rx0Gain);
     response.getPlutoSdrMimoSettings()->setRx0GainMode((int) settings.m_rx0GainMode);
     response.getPlutoSdrMimoSettings()->setRx0AntennaPath((int) settings.m_rx0AntennaPath);
@@ -1091,16 +1099,16 @@ void PlutoSDRMIMO::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& re
     response.getPlutoSdrMimoSettings()->setTx0AntennaPath((int) settings.m_tx0AntennaPath);
     response.getPlutoSdrMimoSettings()->setTx1Att(settings.m_tx1Att);
     response.getPlutoSdrMimoSettings()->setTx1AntennaPath((int) settings.m_tx1AntennaPath);
-    response.getBladeRf2MimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+    response.getPlutoSdrMimoSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
 
-    if (response.getBladeRf2MimoSettings()->getReverseApiAddress()) {
-        *response.getBladeRf2MimoSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    if (response.getPlutoSdrMimoSettings()->getReverseApiAddress()) {
+        *response.getPlutoSdrMimoSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
     } else {
-        response.getBladeRf2MimoSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+        response.getPlutoSdrMimoSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
     }
 
-    response.getBladeRf2MimoSettings()->setReverseApiPort(settings.m_reverseAPIPort);
-    response.getBladeRf2MimoSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+    response.getPlutoSdrMimoSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getPlutoSdrMimoSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
 }
 
 int PlutoSDRMIMO::webapiRunGet(
