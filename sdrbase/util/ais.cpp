@@ -687,12 +687,12 @@ AISStaticDataReport::AISStaticDataReport(QByteArray ba) :
     m_partNumber = ba[4] & 0x3;
     if (m_partNumber == 0)
     {
-        m_name = AISMessage::getString(ba, 5, 0, 20);
+        m_name = AISMessage::getString(ba, 5, 8, 20);
     }
     else if (m_partNumber == 1)
     {
         m_type = ba[5] & 0xff;
-        m_vendorId = AISMessage::getString(ba, 6, 0, 7);
+        m_vendorId = AISMessage::getString(ba, 6, 8, 7);
         m_callsign = AISMessage::getString(ba, 11, 6, 7);
     }
 }
