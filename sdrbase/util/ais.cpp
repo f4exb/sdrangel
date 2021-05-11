@@ -531,7 +531,7 @@ AISStandardClassBPositionReport::AISStandardClassBPositionReport(QByteArray ba) 
     m_longitudeAvailable = longitude != 0x6791ac0;
     m_longitude = longitude / 60.0f / 10000.0f;
 
-    int32_t latitude = ((ba[10] & 0x3) << 24) | ((ba[11] & 0xff) << 16) | ((ba[12] & 0xff) << 8) | (ba[13] & 0xff);
+    int32_t latitude = ((ba[10] & 0x7) << 24) | ((ba[11] & 0xff) << 16) | ((ba[12] & 0xff) << 8) | (ba[13] & 0xff);
     latitude = (latitude << 5) >> 5;
     m_latitudeAvailable = latitude != 0x3412140;
     m_latitude = latitude / 60.0f / 10000.0f;
@@ -540,10 +540,10 @@ AISStandardClassBPositionReport::AISStandardClassBPositionReport(QByteArray ba) 
     m_courseAvailable = cog != 3600;
     m_course = cog * 0.1f;
 
-    m_heading = ((ba[15] & 0xf) << 5) | ((ba[17] >> 3) & 0x1f);
+    m_heading = ((ba[15] & 0xf) << 5) | ((ba[16] >> 3) & 0x1f);
     m_headingAvailable = m_heading != 511;
 
-    m_timeStamp = ((ba[17] & 0x7) << 3) | ((ba[18] >> 5) & 0x7);
+    m_timeStamp = ((ba[16] & 0x7) << 3) | ((ba[17] >> 5) & 0x7);
 }
 
 QString AISStandardClassBPositionReport::toString()
@@ -571,7 +571,7 @@ AISExtendedClassBPositionReport::AISExtendedClassBPositionReport(QByteArray ba) 
     m_longitudeAvailable = longitude != 0x6791ac0;
     m_longitude = longitude / 60.0f / 10000.0f;
 
-    int32_t latitude = ((ba[10] & 0x3) << 24) | ((ba[11] & 0xff) << 16) | ((ba[12] & 0xff) << 8) | (ba[13] & 0xff);
+    int32_t latitude = ((ba[10] & 0x7) << 24) | ((ba[11] & 0xff) << 16) | ((ba[12] & 0xff) << 8) | (ba[13] & 0xff);
     latitude = (latitude << 5) >> 5;
     m_latitudeAvailable = latitude != 0x3412140;
     m_latitude = latitude / 60.0f / 10000.0f;
@@ -580,23 +580,26 @@ AISExtendedClassBPositionReport::AISExtendedClassBPositionReport(QByteArray ba) 
     m_courseAvailable = cog != 3600;
     m_course = cog * 0.1f;
 
-    m_heading = ((ba[15] & 0xf) << 5) | ((ba[17] >> 3) & 0x1f);
+    m_heading = ((ba[15] & 0xf) << 5) | ((ba[16] >> 3) & 0x1f);
     m_headingAvailable = m_heading != 511;
 
-    m_timeStamp = ((ba[17] & 0x7) << 3) | ((ba[18] >> 5) & 0x7);
+    m_timeStamp = ((ba[16] & 0x7) << 3) | ((ba[17] >> 5) & 0x7);
 
-    m_name = AISMessage::getString(ba, 18, 1, 20);
+    m_name = AISMessage::getString(ba, 17, 1, 20);
+
+    m_type = ((ba[32] & 1) << 7) | ((ba[33] >> 1) & 0x3f);
 }
 
 QString AISExtendedClassBPositionReport::toString()
 {
-    return QString("Lat: %1%5 Lon: %2%5 Speed: %3 knts Course: %4%5 Name: %6")
+    return QString("Lat: %1%5 Lon: %2%5 Speed: %3 knts Course: %4%5 Name: %6 Type: %7")
                 .arg(m_latitude)
                 .arg(m_longitude)
                 .arg(m_speedOverGround)
                 .arg(m_course)
                 .arg(QChar(0xb0))
-                .arg(m_name);
+                .arg(m_name)
+                .arg(typeToString(m_type));
 }
 
 AISDatalinkManagement::AISDatalinkManagement(QByteArray ba) :
