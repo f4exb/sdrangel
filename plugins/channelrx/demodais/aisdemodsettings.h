@@ -56,6 +56,7 @@ struct AISDemodSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIDeviceIndex;
     uint16_t m_reverseAPIChannelIndex;
+    Serializable *m_scopeGUI;
 
     int m_messageColumnIndexes[AISDEMOD_MESSAGE_COLUMNS];//!< How the columns are ordered in the table
     int m_messageColumnSizes[AISDEMOD_MESSAGE_COLUMNS];  //!< Size of the columns in the table
@@ -63,6 +64,7 @@ struct AISDemodSettings
     AISDemodSettings();
     void resetToDefaults();
     void setChannelMarker(Serializable *channelMarker) { m_channelMarker = channelMarker; }
+    void setScopeGUI(Serializable *scopeGUI) { m_scopeGUI = scopeGUI; }
     QByteArray serialize() const;
     bool deserialize(const QByteArray& data);
 };

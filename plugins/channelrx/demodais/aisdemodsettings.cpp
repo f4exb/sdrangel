@@ -24,7 +24,8 @@
 #include "aisdemodsettings.h"
 
 AISDemodSettings::AISDemodSettings() :
-    m_channelMarker(0)
+    m_channelMarker(0),
+    m_scopeGUI(0)
 {
     resetToDefaults();
 }
@@ -85,6 +86,7 @@ QByteArray AISDemodSettings::serialize() const
     s.writeU32(18, m_reverseAPIPort);
     s.writeU32(19, m_reverseAPIDeviceIndex);
     s.writeU32(20, m_reverseAPIChannelIndex);
+    s.writeBlob(21, m_scopeGUI->serialize());
 
     for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
         s.writeS32(100 + i, m_messageColumnIndexes[i]);
@@ -145,6 +147,12 @@ bool AISDemodSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(20, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+
+        if (m_scopeGUI)
+        {
+            d.readBlob(21, &bytetmp);
+            m_scopeGUI->deserialize(bytetmp);
+        }
 
         for (int i = 0; i < AISDEMOD_MESSAGE_COLUMNS; i++)
             d.readS32(100 + i, &m_messageColumnIndexes[i], i);
