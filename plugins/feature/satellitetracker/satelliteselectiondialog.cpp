@@ -235,7 +235,7 @@ void SatelliteSelectionDialog::displaySatInfo(const QString& name)
             info.append(QString("  Inclination: %1%2").arg(Units::radiansToDegrees(ele.Inclination())).arg(QChar(0xb0)));
             info.append(QString("  Eccentricity: %1").arg(ele.Eccentricity()));
         }
-        catch (TleException tlee)
+        catch (TleException& tlee)
         {
             qDebug() << "SatelliteSelectionDialog::displaySatInfo: TleException " << tlee.what();
         }
