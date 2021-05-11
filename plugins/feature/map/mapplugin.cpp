@@ -30,7 +30,7 @@
 const PluginDescriptor MapPlugin::m_pluginDescriptor = {
     Map::m_featureId,
     QStringLiteral("Map"),
-    QStringLiteral("6.5.1"),
+    QStringLiteral("6.12.0"),
     QStringLiteral("(c) Jon Beniston, M7RCE"),
     QStringLiteral("https://github.com/f4exb/sdrangel"),
     true,

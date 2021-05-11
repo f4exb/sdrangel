@@ -1,3 +1,11 @@
+sdrangel (6.12.0-1) unstable; urgency=medium
+
+  * New AIS mod, demod and feature plugins. PR #891. Implements #858.
+  * PlutoSDR MIMO. Fixes in REST API
+  * Sat Tracker: catch TLE exception to avoid crash. PR #894.
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Tue, 11 May 2021 08:48:43 +0200
+
 sdrangel (6.11.0-1) unstable; urgency=medium
 
   * New PlutoSDR MIMO plugin for Pluto+. Implements #869.
