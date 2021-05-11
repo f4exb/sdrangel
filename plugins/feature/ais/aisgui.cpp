@@ -450,6 +450,13 @@ void AISGUI::updateVessels(AISMessage *ais)
             statusItem->setText(AISPositionReport::getStatusString(lrpr->m_status));
         }
     }
+    if (ais->m_id == 19)
+    {
+        AISExtendedClassBPositionReport *ext = dynamic_cast<AISExtendedClassBPositionReport*>(ais);
+        if (ext) {
+             shipTypeItem->setText(AISMessage::typeToString(ext->m_type));
+        }
+    }
     if (ais->m_id == 24)
     {
         AISStaticDataReport *dr = dynamic_cast<AISStaticDataReport*>(ais);
