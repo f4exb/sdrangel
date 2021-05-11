@@ -276,6 +276,7 @@ public:
     int m_heading;                  // Degrees
     int m_timeStamp;
     QString m_name;
+    quint8 m_type;
 
     AISExtendedClassBPositionReport(const QByteArray ba);
     virtual QString getType() override { return "Extended Class B equipment position report"; }
