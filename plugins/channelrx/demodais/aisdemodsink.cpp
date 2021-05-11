@@ -186,21 +186,21 @@ void AISDemodSink::processOneSample(Complex &ci)
                 for (int i = 0; i < sampleCnt; i++) {
                     sampleSum += m_rxBuf[(x + sampleOffset + i) % m_rxBufLength] - dcOffset;
                 }
-                int sample = sampleSum >= 0.0f ? 1 : 0;
+                int symbol = sampleSum >= 0.0f ? 1 : 0;
 
-                // Move to next sample
+                // Move to next symbol
                 x = (x + m_samplesPerSymbol) % m_rxBufLength;
 
                 // HDLC deframing
 
                 // NRZI decoding
                 int bit;
-                if (sample != symbolPrev) {
+                if (symbol != symbolPrev) {
                     bit = 0;
                 } else {
                     bit = 1;
                 }
-                symbolPrev = sample;
+                symbolPrev = symbol;
 
                 // Store in shift reg
                 bits |= bit << bitCount;
