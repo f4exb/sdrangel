@@ -33,6 +33,8 @@ SatelliteTrackerSettingsDialog::SatelliteTrackerSettingsDialog(SatelliteTrackerS
     ui->minimumPassElevation->setValue(settings->m_minPassElevation);
     ui->aosSpeech->setText(settings->m_aosSpeech);
     ui->losSpeech->setText(settings->m_losSpeech);
+    ui->rotatorMaximumAzimuth->setValue(settings->m_rotatorMaxAzimuth);
+    ui->rotatorMaximumElevation->setValue(settings->m_rotatorMaxElevation);
     ui->aosCommand->setText(settings->m_aosCommand);
     ui->losCommand->setText(settings->m_losCommand);
     ui->updatePeriod->setValue(settings->m_updatePeriod);
@@ -78,6 +80,8 @@ void SatelliteTrackerSettingsDialog::accept()
     m_settings->m_passFinishTime = ui->passFinishTime->time();
     m_settings->m_minAOSElevation = ui->minimumAOSElevation->value();
     m_settings->m_minPassElevation = ui->minimumPassElevation->value();
+    m_settings->m_rotatorMaxAzimuth = ui->rotatorMaximumAzimuth->value();
+    m_settings->m_rotatorMaxElevation = ui->rotatorMaximumElevation->value();
     m_settings->m_aosSpeech = ui->aosSpeech->text();
     m_settings->m_losSpeech = ui->losSpeech->text();
     m_settings->m_aosCommand = ui->aosCommand->text();
