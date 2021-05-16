@@ -197,7 +197,8 @@ void GS232ControllerWorker::readSerialData()
         if (len != -1)
         {
             QString response = QString::fromUtf8(buf, len);
-            QRegularExpression re("AZ=(\\d\\d\\d) *EL=(\\d\\d\\d)");
+            // MD-02 can return AZ=-00 EL=-00 and other negative angles
+            QRegularExpression re("AZ=([-\\d]\\d\\d) *EL=([-\\d]\\d\\d)");
             QRegularExpressionMatch match = re.match(response);
             if (match.hasMatch())
             {
