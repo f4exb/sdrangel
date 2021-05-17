@@ -6,6 +6,9 @@
         <file>webapi/doc/swagger/include/AFC.yaml</file>
         <file>webapi/doc/swagger/include/Airspy.yaml</file>
         <file>webapi/doc/swagger/include/AirspyHF.yaml</file>
+        <file>webapi/doc/swagger/include/AIS.yaml</file>
+        <file>webapi/doc/swagger/include/AISDemod.yaml</file>
+        <file>webapi/doc/swagger/include/AISMod.yaml</file>
         <file>webapi/doc/swagger/include/AMDemod.yaml</file>
         <file>webapi/doc/swagger/include/AMMod.yaml</file>
         <file>webapi/doc/swagger/include/ATVDemod.yaml</file>
@@ -39,6 +42,7 @@
         <file>webapi/doc/swagger/include/FileSink.yaml</file>
         <file>webapi/doc/swagger/include/FileSource.yaml</file>
         <file>webapi/doc/swagger/include/FileInput.yaml</file>
+        <file>webapi/doc/swagger/include/FileOutput.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVDemod.yaml</file>
         <file>webapi/doc/swagger/include/FreeDVMod.yaml</file>
         <file>webapi/doc/swagger/include/FreqTracker.yaml</file>
@@ -70,6 +74,7 @@
         <file>webapi/doc/swagger/include/RemoteOutput.yaml</file>
         <file>webapi/doc/swagger/include/RigCtlServer.yaml</file>
         <file>webapi/doc/swagger/include/SDRPlay.yaml</file>
+        <file>webapi/doc/swagger/include/SDRPlayV3.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileInput.yaml</file>
         <file>webapi/doc/swagger/include/SigMFFileSink.yaml</file>
         <file>webapi/doc/swagger/include/SimplePTT.yaml</file>

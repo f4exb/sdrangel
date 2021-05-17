@@ -43,7 +43,6 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
 	m_doApplySettings(true),
 	m_forceSettings(true),
 	m_settings(),
-	m_fileName("./test.sdriq"),
     m_deviceSampleSink(0),
     m_sampleRate(0),
     m_generation(false),
@@ -60,7 +59,7 @@ FileOutputGui::FileOutputGui(DeviceUISet *deviceUISet, QWidget* parent) :
     ui->sampleRate->setColorMapper(ColorMapper(ColorMapper::GrayGreenYellow));
     ui->sampleRate->setValueRange(8, 32000U, 90000000U);
 
-	ui->fileNameText->setText(m_fileName);
+	ui->fileNameText->setText(m_settings.m_fileName);
 
 	connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 	connect(&m_updateTimer, SIGNAL(timeout()), this, SLOT(updateHardware()));
@@ -186,6 +185,7 @@ void FileOutputGui::displaySettings()
 {
     ui->centerFrequency->setValue(m_settings.m_centerFrequency / 1000);
     ui->sampleRate->setValue(m_settings.m_sampleRate);
+    ui->fileNameText->setText(m_settings.m_fileName);
 }
 
 void FileOutputGui::sendSettings()
@@ -273,16 +273,16 @@ void FileOutputGui::on_showFileDialog_clicked(bool checked)
 
 	if (fileName != "")
 	{
-		m_fileName = fileName;
-		ui->fileNameText->setText(m_fileName);
+		m_settings.m_fileName = fileName;
+		ui->fileNameText->setText(m_settings.m_fileName);
 		configureFileName();
 	}
 }
 
 void FileOutputGui::configureFileName()
 {
-	qDebug() << "FileOutputGui::configureFileName: " << m_fileName.toStdString().c_str();
-	FileOutput::MsgConfigureFileOutputName* message = FileOutput::MsgConfigureFileOutputName::create(m_fileName);
+	qDebug() << "FileOutputGui::configureFileName: " << m_settings.m_fileName.toStdString().c_str();
+	FileOutput::MsgConfigureFileOutputName* message = FileOutput::MsgConfigureFileOutputName::create(m_settings.m_fileName);
 	m_deviceSampleSink->getInputMessageQueue()->push(message);
 }
 

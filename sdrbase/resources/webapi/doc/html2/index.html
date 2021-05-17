@@ -862,6 +862,276 @@ margin-bottom: 20px;
   },
   "description" : "AFC settings"
 };
+            defs.AISDemodReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AISDemod"
+};
+            defs.AISDemodSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "fmDeviation" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "correlationThreshold" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to forward received messages to specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to forward received messages to"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to forward received messages to"
+    },
+    "udpFormat" : {
+      "type" : "integer",
+      "description" : "0 for binary, 1 for NMEA"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AISDemod"
+};
+            defs.AISModActions = {
+  "properties" : {
+    "tx" : {
+      "$ref" : "#/definitions/AISModActions_tx"
+    }
+  },
+  "description" : "AISMod"
+};
+            defs.AISModActions_tx = {
+  "properties" : {
+    "data" : {
+      "type" : "string"
+    }
+  },
+  "description" : "Transmit a message\n"
+};
+            defs.AISModReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power transmitted in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AISMod"
+};
+            defs.AISModSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64",
+      "description" : "channel center frequency shift from baseband center in Hz"
+    },
+    "baud" : {
+      "type" : "integer"
+    },
+    "rfBandwidth" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "channel RF bandwidth in Hz"
+    },
+    "fmDeviation" : {
+      "type" : "integer",
+      "description" : "frequency deviation in Hz"
+    },
+    "gain" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "channelMute" : {
+      "type" : "integer"
+    },
+    "repeat" : {
+      "type" : "integer"
+    },
+    "repeatDelay" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "repeatCount" : {
+      "type" : "integer"
+    },
+    "rampUpBits" : {
+      "type" : "integer"
+    },
+    "rampDownBits" : {
+      "type" : "integer"
+    },
+    "rampRange" : {
+      "type" : "integer"
+    },
+    "lpfTaps" : {
+      "type" : "integer"
+    },
+    "rfNoise" : {
+      "type" : "integer",
+      "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
+    },
+    "writeToFile" : {
+      "type" : "integer",
+      "description" : "Boolean\n  * 0 - off\n  * 1 - on\n"
+    },
+    "spectrumRate" : {
+      "type" : "integer"
+    },
+    "msgId" : {
+      "type" : "integer"
+    },
+    "mmsi" : {
+      "type" : "string"
+    },
+    "status" : {
+      "type" : "integer"
+    },
+    "latitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "longitude" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "course" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "speed" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "heading" : {
+      "type" : "integer"
+    },
+    "data" : {
+      "type" : "string"
+    },
+    "bt" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "symbolSpan" : {
+      "type" : "integer"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    },
+    "udpEnabled" : {
+      "type" : "integer",
+      "description" : "Whether to receive messages to transmit on specified UDP port"
+    },
+    "udpAddress" : {
+      "type" : "string",
+      "description" : "UDP address to receive messages to transmit via"
+    },
+    "udpPort" : {
+      "type" : "integer",
+      "description" : "UDP port to receive messages to transmit via"
+    }
+  },
+  "description" : "AISMod"
+};
+            defs.AISSettings = {
+  "properties" : {
+    "title" : {
+      "type" : "string"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "AIS settings"
+};
             defs.AMBEDevice = {
   "properties" : {
     "deviceRef" : {
@@ -2532,6 +2802,9 @@ margin-bottom: 20px;
       "type" : "integer",
       "description" : "Optional for reverse API. This is the channel index from where the message comes from."
     },
+    "AISModActions" : {
+      "$ref" : "#/definitions/AISModActions"
+    },
     "APTDemodActions" : {
       "$ref" : "#/definitions/APTDemodActions"
     },
@@ -2689,6 +2962,12 @@ margin-bottom: 20px;
     "ADSBDemodReport" : {
       "$ref" : "#/definitions/ADSBDemodReport"
     },
+    "AISDemodReport" : {
+      "$ref" : "#/definitions/AISDemodReport"
+    },
+    "AISModReport" : {
+      "$ref" : "#/definitions/AISModReport"
+    },
     "AMDemodReport" : {
       "$ref" : "#/definitions/AMDemodReport"
     },
@@ -2795,6 +3074,12 @@ margin-bottom: 20px;
     },
     "ADSBDemodSettings" : {
       "$ref" : "#/definitions/ADSBDemodSettings"
+    },
+    "AISDemodSettings" : {
+      "$ref" : "#/definitions/AISDemodSettings"
+    },
+    "AISModSettings" : {
+      "$ref" : "#/definitions/AISModSettings"
     },
     "AMDemodSettings" : {
       "$ref" : "#/definitions/AMDemodSettings"
@@ -4110,6 +4395,9 @@ margin-bottom: 20px;
     "fileInputSettings" : {
       "$ref" : "#/definitions/FileInputSettings"
     },
+    "fileOutputSettings" : {
+      "$ref" : "#/definitions/FileOutputSettings"
+    },
     "hackRFInputSettings" : {
       "$ref" : "#/definitions/HackRFInputSettings"
     },
@@ -4539,6 +4827,9 @@ margin-bottom: 20px;
     "AFCSettings" : {
       "$ref" : "#/definitions/AFCSettings"
     },
+    "AISSettings" : {
+      "$ref" : "#/definitions/AISSettings"
+    },
     "APRSSettings" : {
       "$ref" : "#/definitions/APRSSettings"
     },
@@ -4613,6 +4904,39 @@ margin-bottom: 20px;
     "loop" : {
       "type" : "integer",
       "description" : "1 if playing in a loop else 0"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "FileInput"
+};
+            defs.FileOutputSettings = {
+  "properties" : {
+    "fileName" : {
+      "type" : "string",
+      "description" : "The name (path) of the file being read"
+    },
+    "centerFrequency" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "sampleRate" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "log2Interp" : {
+      "type" : "integer"
     },
     "useReverseAPI" : {
       "type" : "integer",
@@ -7921,6 +8245,19 @@ margin-bottom: 20px;
       "description" : "Hardware attenuator gain in decibel fourths (negative)"
     },
     "tx1AntennaPath" : {
+      "type" : "integer"
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
       "type" : "integer"
     }
   },
@@ -46268,7 +46605,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-04-29T21:19:02.297+02:00
+              Generated 2021-05-18T01:26:07.311+02:00
             </div>
           </div>
       </div>

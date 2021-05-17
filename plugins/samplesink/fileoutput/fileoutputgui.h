@@ -55,7 +55,6 @@ private:
 	bool m_doApplySettings;
 	bool m_forceSettings;
 	FileOutputSettings m_settings;
-    QString m_fileName;
 	QTimer m_updateTimer;
     QTimer m_statusTimer;
 	DeviceSampleSink* m_deviceSampleSink;

@@ -21,6 +21,7 @@
 #include <QString>
 #include <QTimer>
 #include <QThread>
+#include <QNetworkRequest>
 
 #include <ctime>
 #include <iostream>
@@ -29,6 +30,8 @@
 #include "dsp/devicesamplesink.h"
 #include "fileoutputsettings.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 class FileOutputWorker;
 class DeviceAPI;
 
@@ -194,6 +197,16 @@ public:
 
 	virtual bool handleMessage(const Message& message);
 
+	virtual int webapiSettingsGet(
+	            SWGSDRangel::SWGDeviceSettings& response,
+	            QString& errorMessage);
+
+	virtual int webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage);
+
     virtual int webapiRunGet(
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
@@ -203,6 +216,15 @@ public:
             SWGSDRangel::SWGDeviceState& response,
             QString& errorMessage);
 
+    static void webapiFormatDeviceSettings(
+            SWGSDRangel::SWGDeviceSettings& response,
+            const FileOutputSettings& settings);
+
+    static void webapiUpdateDeviceSettings(
+            FileOutputSettings& settings,
+            const QStringList& deviceSettingsKeys,
+            SWGSDRangel::SWGDeviceSettings& response);
+
 private:
     DeviceAPI *m_deviceAPI;
 	QMutex m_mutex;
@@ -211,14 +233,20 @@ private:
 	FileOutputWorker* m_fileOutputWorker;
     QThread m_fileOutputWorkerThread;
 	QString m_deviceDescription;
-	QString m_fileName;
 	std::time_t m_startingTimeStamp;
 	const QTimer& m_masterTimer;
+    QNetworkAccessManager *m_networkManager;
+    QNetworkRequest m_networkRequest;
 
     void startWorker();
     void stopWorker();
 	void openFileStream();
 	void applySettings(const FileOutputSettings& settings, bool force = false);
+    void webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force);
+    void webapiReverseSendStartStop(bool start);
+
+private slots:
+    void networkManagerFinished(QNetworkReply *reply);
 };
 
 #endif // INCLUDE_FILEOUTPUT_H

@@ -19,6 +19,10 @@ ChannelSettings:
       type: integer
     ADSBDemodSettings:
       $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodSettings"
+    AISDemodSettings:
+      $ref: "/doc/swagger/include/AISDemod.yaml#/AISDemodSettings"
+    AISModSettings:
+      $ref: "/doc/swagger/include/AISMod.yaml#/AISModSettings"
     AMDemodSettings:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodSettings"
     AMModSettings:

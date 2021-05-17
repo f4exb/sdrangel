@@ -58,6 +58,8 @@ SWGDeviceSettings::SWGDeviceSettings() {
     m_fcd_pro_plus_settings_isSet = false;
     file_input_settings = nullptr;
     m_file_input_settings_isSet = false;
+    file_output_settings = nullptr;
+    m_file_output_settings_isSet = false;
     hack_rf_input_settings = nullptr;
     m_hack_rf_input_settings_isSet = false;
     hack_rf_output_settings = nullptr;
@@ -154,6 +156,8 @@ SWGDeviceSettings::init() {
     m_fcd_pro_plus_settings_isSet = false;
     file_input_settings = new SWGFileInputSettings();
     m_file_input_settings_isSet = false;
+    file_output_settings = new SWGFileOutputSettings();
+    m_file_output_settings_isSet = false;
     hack_rf_input_settings = new SWGHackRFInputSettings();
     m_hack_rf_input_settings_isSet = false;
     hack_rf_output_settings = new SWGHackRFOutputSettings();
@@ -256,6 +260,9 @@ SWGDeviceSettings::cleanup() {
     }
     if(file_input_settings != nullptr) { 
         delete file_input_settings;
+    }
+    if(file_output_settings != nullptr) { 
+        delete file_output_settings;
     }
     if(hack_rf_input_settings != nullptr) { 
         delete hack_rf_input_settings;
@@ -387,6 +394,8 @@ SWGDeviceSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&file_input_settings, pJson["fileInputSettings"], "SWGFileInputSettings", "SWGFileInputSettings");
     
+    ::SWGSDRangel::setValue(&file_output_settings, pJson["fileOutputSettings"], "SWGFileOutputSettings", "SWGFileOutputSettings");
+    
     ::SWGSDRangel::setValue(&hack_rf_input_settings, pJson["hackRFInputSettings"], "SWGHackRFInputSettings", "SWGHackRFInputSettings");
     
     ::SWGSDRangel::setValue(&hack_rf_output_settings, pJson["hackRFOutputSettings"], "SWGHackRFOutputSettings", "SWGHackRFOutputSettings");
@@ -505,6 +514,9 @@ SWGDeviceSettings::asJsonObject() {
     }
     if((file_input_settings != nullptr) && (file_input_settings->isSet())){
         toJsonValue(QString("fileInputSettings"), file_input_settings, obj, QString("SWGFileInputSettings"));
+    }
+    if((file_output_settings != nullptr) && (file_output_settings->isSet())){
+        toJsonValue(QString("fileOutputSettings"), file_output_settings, obj, QString("SWGFileOutputSettings"));
     }
     if((hack_rf_input_settings != nullptr) && (hack_rf_input_settings->isSet())){
         toJsonValue(QString("hackRFInputSettings"), hack_rf_input_settings, obj, QString("SWGHackRFInputSettings"));
@@ -745,6 +757,16 @@ void
 SWGDeviceSettings::setFileInputSettings(SWGFileInputSettings* file_input_settings) {
     this->file_input_settings = file_input_settings;
     this->m_file_input_settings_isSet = true;
+}
+
+SWGFileOutputSettings*
+SWGDeviceSettings::getFileOutputSettings() {
+    return file_output_settings;
+}
+void
+SWGDeviceSettings::setFileOutputSettings(SWGFileOutputSettings* file_output_settings) {
+    this->file_output_settings = file_output_settings;
+    this->m_file_output_settings_isSet = true;
 }
 
 SWGHackRFInputSettings*
@@ -1085,6 +1107,9 @@ SWGDeviceSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(file_input_settings && file_input_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(file_output_settings && file_output_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(hack_rf_input_settings && hack_rf_input_settings->isSet()){

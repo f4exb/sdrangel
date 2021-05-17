@@ -1,0 +1,23 @@
+FileOutputSettings:
+    description: FileInput
+    properties:
+      fileName:
+        description: The name (path) of the file being read
+        type: string
+      centerFrequency:
+        type: integer
+        format: int64
+      sampleRate:
+        type: integer
+        format: int64
+      log2Interp:
+        type: integer
+      useReverseAPI:
+        description: Synchronize with reverse API (1 for yes, 0 for no)
+        type: integer
+      reverseAPIAddress:
+        type: string
+      reverseAPIPort:
+        type: integer
+      reverseAPIDeviceIndex:
+        type: integer

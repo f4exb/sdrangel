@@ -109,6 +109,7 @@
 #include "SWGFeatureSettings.h"
 #include "SWGFileInputReport.h"
 #include "SWGFileInputSettings.h"
+#include "SWGFileOutputSettings.h"
 #include "SWGFileSinkActions.h"
 #include "SWGFileSinkReport.h"
 #include "SWGFileSinkSettings.h"
@@ -556,6 +557,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGFileInputSettings").compare(type) == 0) {
       return new SWGFileInputSettings();
+    }
+    if(QString("SWGFileOutputSettings").compare(type) == 0) {
+      return new SWGFileOutputSettings();
     }
     if(QString("SWGFileSinkActions").compare(type) == 0) {
       return new SWGFileSinkActions();

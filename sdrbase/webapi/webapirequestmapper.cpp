@@ -4195,6 +4195,11 @@ bool WebAPIRequestMapper::getDeviceSettings(
             deviceSettings->setFileInputSettings(new SWGSDRangel::SWGFileInputSettings());
             deviceSettings->getFileInputSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (deviceSettingsKey == "fileOutputSettings")
+        {
+            deviceSettings->setFileOutputSettings(new SWGSDRangel::SWGFileOutputSettings());
+            deviceSettings->getFileOutputSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (deviceSettingsKey == "hackRFInputSettings")
         {
             deviceSettings->setHackRfInputSettings(new SWGSDRangel::SWGHackRFInputSettings());
@@ -4565,6 +4570,7 @@ void WebAPIRequestMapper::resetDeviceSettings(SWGSDRangel::SWGDeviceSettings& de
     deviceSettings.setFcdProPlusSettings(nullptr);
     deviceSettings.setFcdProSettings(nullptr);
     deviceSettings.setFileInputSettings(nullptr);
+    deviceSettings.setFileOutputSettings(nullptr);
     deviceSettings.setHackRfInputSettings(nullptr);
     deviceSettings.setHackRfOutputSettings(nullptr);
     deviceSettings.setLimeSdrInputSettings(nullptr);

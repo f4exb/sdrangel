@@ -38,6 +38,8 @@ DeviceSettings:
       $ref: "/doc/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
     fileInputSettings:
       $ref: "/doc/swagger/include/FileInput.yaml#/FileInputSettings"
+    fileOutputSettings:
+      $ref: "/doc/swagger/include/FileOutput.yaml#/FileOutputSettings"
     hackRFInputSettings:
       $ref: "/doc/swagger/include/HackRF.yaml#/HackRFInputSettings"
     hackRFOutputSettings:

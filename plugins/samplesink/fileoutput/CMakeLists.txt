@@ -4,14 +4,16 @@ set(fileoutput_SOURCES
 	fileoutput.cpp
 	fileoutputplugin.cpp
 	fileoutputsettings.cpp
-	fileoutputworker.cpp
+    fileoutputworker.cpp
+    fileoutputwebapiadapter.cpp
 )
 
 set(fileoutput_HEADERS
 	fileoutput.h
 	fileoutputplugin.h
 	fileoutputsettings.h
-	fileoutputworker.h
+    fileoutputworker.h
+    fileoutputwebapiadapter.h
 )
 
 include_directories(

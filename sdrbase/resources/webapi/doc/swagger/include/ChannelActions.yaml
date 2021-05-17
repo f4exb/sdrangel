@@ -17,6 +17,8 @@ ChannelActions:
     originatorChannelIndex:
       description: Optional for reverse API. This is the channel index from where the message comes from.
       type: integer
+    AISModActions:
+      $ref: "/doc/swagger/include/AISMod.yaml#/AISModActions"
     APTDemodActions:
       $ref: "/doc/swagger/include/APTDemod.yaml#/APTDemodActions"
     FileSinkActions:

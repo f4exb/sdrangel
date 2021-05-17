@@ -17,6 +17,8 @@
 
 #include <errno.h>
 #include <QDebug>
+#include <QNetworkReply>
+#include <QBuffer>
 
 #include "SWGDeviceSettings.h"
 #include "SWGDeviceState.h"
@@ -44,7 +46,6 @@ FileOutput::FileOutput(DeviceAPI *deviceAPI) :
 	m_settings(),
 	m_fileOutputWorker(nullptr),
 	m_deviceDescription("FileOutput"),
-	m_fileName("./test.sdriq"),
 	m_startingTimeStamp(0),
 	m_masterTimer(deviceAPI->getMasterTimer())
 {
@@ -67,7 +68,7 @@ void FileOutput::openFileStream()
 		m_ofstream.close();
 	}
 
-	m_ofstream.open(m_fileName.toStdString().c_str(), std::ios::binary);
+	m_ofstream.open(m_settings.m_fileName.toStdString().c_str(), std::ios::binary);
 
     FileRecord::Header header;
 	int actualSampleRate = m_settings.m_sampleRate * (1<<m_settings.m_log2Interp);
@@ -79,7 +80,7 @@ void FileOutput::openFileStream()
 
     FileRecord::writeHeader(m_ofstream, header);
 
-	qDebug() << "FileOutput::openFileStream: " << m_fileName.toStdString().c_str();
+	qDebug() << "FileOutput::openFileStream: " << m_settings.m_fileName.toStdString().c_str();
 }
 
 void FileOutput::init()
@@ -217,7 +218,7 @@ bool FileOutput::handleMessage(const Message& message)
 	if (MsgConfigureFileOutputName::match(message))
 	{
 		MsgConfigureFileOutputName& conf = (MsgConfigureFileOutputName&) message;
-		m_fileName = conf.getFileName();
+		m_settings.m_fileName = conf.getFileName();
 		openFileStream();
 		return true;
 	}
@@ -236,6 +237,10 @@ bool FileOutput::handleMessage(const Message& message)
         else
         {
             m_deviceAPI->stopDeviceEngine();
+        }
+
+        if (m_settings.m_useReverseAPI) {
+            webapiReverseSendStartStop(cmd.getStartStop());
         }
 
         return true;
@@ -285,36 +290,48 @@ void FileOutput::applySettings(const FileOutputSettings& settings, bool force)
 {
     QMutexLocker mutexLocker(&m_mutex);
     bool forwardChange = false;
+    QList<QString> reverseAPIKeys;
+
+    if (force || (m_settings.m_fileName != settings.m_fileName)) {
+        reverseAPIKeys.append("fileName");
+    }
 
     if (force || (m_settings.m_centerFrequency != settings.m_centerFrequency))
     {
-        m_settings.m_centerFrequency = settings.m_centerFrequency;
+        reverseAPIKeys.append("centerFrequency");
         forwardChange = true;
     }
 
     if (force || (m_settings.m_sampleRate != settings.m_sampleRate))
     {
-        m_settings.m_sampleRate = settings.m_sampleRate;
-
-        if (m_fileOutputWorker != 0)
-        {
-            m_fileOutputWorker->setSamplerate(m_settings.m_sampleRate);
+        if (m_fileOutputWorker != 0) {
+            m_fileOutputWorker->setSamplerate(settings.m_sampleRate);
         }
 
+        reverseAPIKeys.append("sampleRate");
         forwardChange = true;
     }
 
     if (force || (m_settings.m_log2Interp != settings.m_log2Interp))
     {
-        m_settings.m_log2Interp = settings.m_log2Interp;
-
-        if (m_fileOutputWorker != 0)
-        {
-            m_fileOutputWorker->setLog2Interpolation(m_settings.m_log2Interp);
+        if (m_fileOutputWorker != 0) {
+            m_fileOutputWorker->setLog2Interpolation(settings.m_log2Interp);
         }
 
+        reverseAPIKeys.append("log2Interp");
         forwardChange = true;
     }
+
+    if (settings.m_useReverseAPI)
+    {
+        bool fullUpdate = ((m_settings.m_useReverseAPI != settings.m_useReverseAPI) && settings.m_useReverseAPI) ||
+                (m_settings.m_reverseAPIAddress != settings.m_reverseAPIAddress) ||
+                (m_settings.m_reverseAPIPort != settings.m_reverseAPIPort) ||
+                (m_settings.m_reverseAPIDeviceIndex != settings.m_reverseAPIDeviceIndex);
+        webapiReverseSendSettings(reverseAPIKeys, settings, fullUpdate || force);
+    }
+
+    m_settings = settings;
 
     if (forwardChange)
     {
@@ -325,7 +342,40 @@ void FileOutput::applySettings(const FileOutputSettings& settings, bool force)
         DSPSignalNotification *notif = new DSPSignalNotification(m_settings.m_sampleRate, m_settings.m_centerFrequency);
         m_deviceAPI->getDeviceEngineInputMessageQueue()->push(notif);
     }
+}
 
+int FileOutput::webapiSettingsGet(
+                SWGSDRangel::SWGDeviceSettings& response,
+                QString& errorMessage)
+{
+    (void) errorMessage;
+    response.setFileOutputSettings(new SWGSDRangel::SWGFileOutputSettings());
+    response.getFileOutputSettings()->init();
+    webapiFormatDeviceSettings(response, m_settings);
+    return 200;
+}
+
+int FileOutput::webapiSettingsPutPatch(
+                bool force,
+                const QStringList& deviceSettingsKeys,
+                SWGSDRangel::SWGDeviceSettings& response, // query + response
+                QString& errorMessage)
+{
+    (void) errorMessage;
+    FileOutputSettings settings = m_settings;
+    webapiUpdateDeviceSettings(settings, deviceSettingsKeys, response);
+
+    MsgConfigureFileOutput *msg = MsgConfigureFileOutput::create(settings, force);
+    m_inputMessageQueue.push(msg);
+
+    if (m_guiMessageQueue) // forward to GUI if any
+    {
+        MsgConfigureFileOutput *msgToGUI = MsgConfigureFileOutput::create(settings, force);
+        m_guiMessageQueue->push(msgToGUI);
+    }
+
+    webapiFormatDeviceSettings(response, settings);
+    return 200;
 }
 
 int FileOutput::webapiRunGet(
@@ -356,4 +406,146 @@ int FileOutput::webapiRun(
     return 200;
 }
 
+void FileOutput::webapiFormatDeviceSettings(SWGSDRangel::SWGDeviceSettings& response, const FileOutputSettings& settings)
+{
+    response.getFileOutputSettings()->setFileName(new QString(settings.m_fileName));
+    response.getFileOutputSettings()->setCenterFrequency(settings.m_centerFrequency);
+    response.getFileOutputSettings()->setSampleRate(settings.m_sampleRate);
+    response.getFileOutputSettings()->setLog2Interp(settings.m_log2Interp);
 
+    response.getFileOutputSettings()->setUseReverseApi(settings.m_useReverseAPI ? 1 : 0);
+
+    if (response.getFileOutputSettings()->getReverseApiAddress()) {
+        *response.getFileOutputSettings()->getReverseApiAddress() = settings.m_reverseAPIAddress;
+    } else {
+        response.getFileOutputSettings()->setReverseApiAddress(new QString(settings.m_reverseAPIAddress));
+    }
+
+    response.getFileOutputSettings()->setReverseApiPort(settings.m_reverseAPIPort);
+    response.getFileOutputSettings()->setReverseApiDeviceIndex(settings.m_reverseAPIDeviceIndex);
+}
+
+void FileOutput::webapiUpdateDeviceSettings(
+        FileOutputSettings& settings,
+        const QStringList& deviceSettingsKeys,
+        SWGSDRangel::SWGDeviceSettings& response)
+{
+    if (deviceSettingsKeys.contains("fileName")) {
+        settings.m_fileName = *response.getFileOutputSettings()->getFileName();
+    }
+    if (deviceSettingsKeys.contains("centerFrequency")) {
+        settings.m_centerFrequency = response.getFileOutputSettings()->getCenterFrequency();
+    }
+    if (deviceSettingsKeys.contains("sampleRate")) {
+        settings.m_sampleRate = response.getFileOutputSettings()->getSampleRate();
+    }
+    if (deviceSettingsKeys.contains("log2Interp")) {
+        settings.m_log2Interp = response.getFileOutputSettings()->getLog2Interp();
+    }
+    if (deviceSettingsKeys.contains("useReverseAPI")) {
+        settings.m_useReverseAPI = response.getFileOutputSettings()->getUseReverseApi() != 0;
+    }
+    if (deviceSettingsKeys.contains("reverseAPIAddress")) {
+        settings.m_reverseAPIAddress = *response.getFileOutputSettings()->getReverseApiAddress();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIPort")) {
+        settings.m_reverseAPIPort = response.getFileOutputSettings()->getReverseApiPort();
+    }
+    if (deviceSettingsKeys.contains("reverseAPIDeviceIndex")) {
+        settings.m_reverseAPIDeviceIndex = response.getFileOutputSettings()->getReverseApiDeviceIndex();
+    }
+}
+
+void FileOutput::webapiReverseSendSettings(QList<QString>& deviceSettingsKeys, const FileOutputSettings& settings, bool force)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(1); // single Tx
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("FileOutput"));
+    swgDeviceSettings->setFileOutputSettings(new SWGSDRangel::SWGFileOutputSettings());
+    SWGSDRangel::SWGFileOutputSettings *swgFileOutputSettings = swgDeviceSettings->getFileOutputSettings();
+
+    // transfer data that has been modified. When force is on transfer all data except reverse API data
+
+    if (deviceSettingsKeys.contains("centerFrequency") || force) {
+        swgFileOutputSettings->setCenterFrequency(settings.m_centerFrequency);
+    }
+    if (deviceSettingsKeys.contains("sampleRate") || force) {
+        swgFileOutputSettings->setSampleRate(settings.m_sampleRate);
+    }
+    if (deviceSettingsKeys.contains("log2Interp") || force) {
+        swgFileOutputSettings->setLog2Interp(settings.m_log2Interp);
+    }
+    if (deviceSettingsKeys.contains("fileName") || force) {
+        swgFileOutputSettings->setFileName(new QString(settings.m_fileName));
+    }
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/settings")
+            .arg(settings.m_reverseAPIAddress)
+            .arg(settings.m_reverseAPIPort)
+            .arg(settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+
+    // Always use PATCH to avoid passing reverse API settings
+    QNetworkReply *reply = m_networkManager->sendCustomRequest(m_networkRequest, "PATCH", buffer);
+    buffer->setParent(reply);
+
+    delete swgDeviceSettings;
+}
+
+void FileOutput::webapiReverseSendStartStop(bool start)
+{
+    SWGSDRangel::SWGDeviceSettings *swgDeviceSettings = new SWGSDRangel::SWGDeviceSettings();
+    swgDeviceSettings->setDirection(1); // single Tx
+    swgDeviceSettings->setOriginatorIndex(m_deviceAPI->getDeviceSetIndex());
+    swgDeviceSettings->setDeviceHwType(new QString("FileOutput"));
+
+    QString deviceSettingsURL = QString("http://%1:%2/sdrangel/deviceset/%3/device/run")
+            .arg(m_settings.m_reverseAPIAddress)
+            .arg(m_settings.m_reverseAPIPort)
+            .arg(m_settings.m_reverseAPIDeviceIndex);
+    m_networkRequest.setUrl(QUrl(deviceSettingsURL));
+    m_networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+
+    QBuffer *buffer = new QBuffer();
+    buffer->open((QBuffer::ReadWrite));
+    buffer->write(swgDeviceSettings->asJson().toUtf8());
+    buffer->seek(0);
+    QNetworkReply *reply;
+
+    if (start) {
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "POST", buffer);
+    } else {
+        reply = m_networkManager->sendCustomRequest(m_networkRequest, "DELETE", buffer);
+    }
+
+    buffer->setParent(reply);
+    delete swgDeviceSettings;
+}
+
+void FileOutput::networkManagerFinished(QNetworkReply *reply)
+{
+    QNetworkReply::NetworkError replyError = reply->error();
+
+    if (replyError)
+    {
+        qWarning() << "FileOutput::networkManagerFinished:"
+                << " error(" << (int) replyError
+                << "): " << replyError
+                << ": " << reply->errorString();
+    }
+    else
+    {
+        QString answer = reply->readAll();
+        answer.chop(1); // remove last \n
+        qDebug("FileOutput::networkManagerFinished: reply:\n%s", answer.toStdString().c_str());
+    }
+
+    reply->deleteLater();
+}

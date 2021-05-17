@@ -38,6 +38,8 @@ DeviceSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FCDProPlus.yaml#/FCDProPlusSettings"
     fileInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/FileInput.yaml#/FileInputSettings"
+    fileOutputSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/FileOutput.yaml#/FileOutputSettings"
     hackRFInputSettings:
       $ref: "http://swgserver:8081/api/swagger/include/HackRF.yaml#/HackRFInputSettings"
     hackRFOutputSettings:

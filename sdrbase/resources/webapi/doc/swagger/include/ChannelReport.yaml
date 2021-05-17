@@ -13,6 +13,10 @@ ChannelReport:
       type: integer
     ADSBDemodReport:
       $ref: "/doc/swagger/include/ADSBDemod.yaml#/ADSBDemodReport"
+    AISDemodReport:
+      $ref: "/doc/swagger/include/AISDemod.yaml#/AISDemodReport"
+    AISModReport:
+      $ref: "/doc/swagger/include/AISMod.yaml#/AISModReport"
     AMDemodReport:
       $ref: "/doc/swagger/include/AMDemod.yaml#/AMDemodReport"
     AMModReport:

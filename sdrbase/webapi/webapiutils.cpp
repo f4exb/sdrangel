@@ -229,6 +229,7 @@ const QMap<QString, QString> WebAPIUtils::m_sinkDeviceHwIdToSettingsKey = {
     {"AudioOutput", "audioOutputSettings"},
     {"BladeRF1", "bladeRF1OutputSettings"},
     {"BladeRF2", "bladeRF2OutputSettings"},
+    {"FileOutput", "fileOutputSettings"},
     {"HackRF", "hackRFOutputSettings"},
     {"LimeSDR", "limeSdrOutputSettings"},
     {"LocalOutput", "localOutputSettings"},
