@@ -32,7 +32,7 @@ QString AISMessage::toHex()
 }
 
 // See: https://gpsd.gitlab.io/gpsd/AIVDM.html
-QString AISMessage::toNMEA(QByteArray bytes)
+QString AISMessage::toNMEA(const QByteArray bytes)
 {
     QStringList nmeaSentences;
 

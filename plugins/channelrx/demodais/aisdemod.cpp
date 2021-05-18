@@ -171,7 +171,7 @@ bool AISDemod::handleMessage(const Message& cmd)
             }
             else
             {
-                QString nmea = AISMessage::toNMEA(report.getMessage().data());
+                QString nmea = AISMessage::toNMEA(report.getMessage());
                 QByteArray bytes = nmea.toLatin1();
                 m_udpSocket.writeDatagram(bytes.data(), bytes.size(),
                                           QHostAddress(m_settings.m_udpAddress), m_settings.m_udpPort);
