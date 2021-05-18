@@ -81,7 +81,6 @@ bool FileSourceGUI::handleMessage(const Message& message)
     {
         const FileSource::MsgConfigureFileSource& cfg = (FileSource::MsgConfigureFileSource&) message;
         m_settings = cfg.getSettings();
-        m_fileName = m_settings.m_fileName;
         blockApplySettings(true);
         displaySettings();
         blockApplySettings(false);
@@ -188,7 +187,6 @@ FileSourceGUI::FileSourceGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Bas
 
     m_fileSource = (FileSource*) channelTx;
     m_fileSource->setMessageQueueToGUI(getInputMessageQueue());
-    m_fileName = m_settings.m_fileName;
 
     connect(&(m_deviceUISet->m_deviceAPI->getMasterTimer()), SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -236,8 +234,7 @@ void FileSourceGUI::applySettings(bool force)
 
 void FileSourceGUI::configureFileName()
 {
-	qDebug() << "FileSourceGui::configureFileName: " << m_fileName.toStdString().c_str();
-    m_settings.m_fileName = m_fileName;
+	qDebug() << "FileSourceGui::configureFileName: " << m_settings.m_fileName.toStdString().c_str();
     applySettings();
 }
 
@@ -305,7 +302,7 @@ void FileSourceGUI::displaySettings()
     displayStreamIndex();
 
     blockApplySettings(true);
-    ui->fileNameText->setText(m_fileName);
+    ui->fileNameText->setText(m_settings.m_fileName);
     ui->gain->setValue(m_settings.m_gainDB);
     ui->gainText->setText(tr("%1 dB").arg(m_settings.m_gainDB));
     ui->interpolationFactor->setCurrentIndex(m_settings.m_log2Interp);
@@ -434,8 +431,8 @@ void FileSourceGUI::on_showFileDialog_clicked(bool checked)
 
 	if (fileName != "")
 	{
-		m_fileName = fileName;
-		ui->fileNameText->setText(m_fileName);
+		m_settings.m_fileName = fileName;
+		ui->fileNameText->setText(m_settings.m_fileName);
 		ui->crcLabel->setStyleSheet("QLabel { background:rgb(79,79,79); }");
 		configureFileName();
 	}

@@ -56,7 +56,6 @@ private:
     FileSourceSettings m_settings;
     int m_sampleRate;
     double m_shiftFrequencyFactor; //!< Channel frequency shift factor
-    QString m_fileName;
     int m_fileSampleRate;
     quint32 m_fileSampleSize;
     quint64 m_recordLengthMuSec;
