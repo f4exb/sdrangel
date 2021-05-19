@@ -21,7 +21,7 @@ set(plutosdrmimo_HEADERS
 include_directories(
     ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
 	${CMAKE_SOURCE_DIR}/devices
-	${LIBBLADERF_INCLUDE_DIRS}
+	${LIBIIO_INCLUDE_DIR}
 )
 
 if (NOT SERVER_MODE)
@@ -59,7 +59,7 @@ target_link_libraries(${TARGET_NAME}
 	sdrbase
 	${TARGET_LIB_GUI}
     swagger
-    ${LIBBLADERF_LIBRARIES}
+    ${LIBIIO_LIBRARIES}
     plutosdrdevice
 )
 
