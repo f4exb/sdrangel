@@ -461,7 +461,7 @@ void AntennaToolsGUI::on_dishEfficiency_valueChanged(int value)
 double AntennaToolsGUI::getDeviceSetFrequencyMHz(int index)
 {
     std::vector<DeviceSet*> deviceSets = MainCore::instance()->getDeviceSets();
-    if (index < deviceSets.size())
+    if (index < (int)deviceSets.size())
     {
         double frequencyInHz;
         if (ChannelWebAPIUtils::getCenterFrequency(index, frequencyInHz))
