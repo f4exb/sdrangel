@@ -32,7 +32,7 @@ This field displays the total length of a half wave dipole corresponding to the 
 
 When a length is entered in this field, the calculator will calculate the corresponding frequency (1) and element length (5).
 
-The dipole length is calculated as: l=0.5*k*c/f
+The dipole length is calculated as: l=0.5\*k\*c/f
 
 <h3>4: Dipole Length Units</h3>
 
@@ -64,7 +64,7 @@ is needed in finding the true value.
 
 <h3>7: Frequency</h3>
 
-When entering a frequency in MHz in this field, the calculator will calculate the beamwidth (15) and gain (16) for a dish of the given dimensions at the entered frequency.
+When entering a frequency in MHz in this field, the calculator will calculate the beamwidth (15) and gain (16) for a dish of the given dimensions (10 & 11) at the entered frequency.
 
 <h3>8: Frequency Select</h3>
 
@@ -73,9 +73,9 @@ Select how the frequency is chosen:
 * MHz - A frequency can be manually entered in (7) in MHz.
 * Device set N - The frequency automatically tracks the centre frequency of Device Set N.
 
-<h3>9: Efficiency<h3>
+<h3>9: Efficiency</h3>
 
-Specifies the efficiency of the dish in %. When entered, the calculator will calculate the gain (16), according to the entered frequency and dimensions.
+Specifies the efficiency of the dish in %. When entered, the calculator will calculate the gain (16), according to the entered frequency (7) and dimensions (10 & 11).
 
 <h3>10: Diameter</h3>
 
@@ -113,4 +113,4 @@ Beamwidth is calculated as: 70*lambda/D.
 
 Displays the calculated gain in dB.
 
-The gain is calculated as: 10*log10(eff/100.0*(pi*D/lambda)^2)
+The gain is calculated as: 10\*log10(eff/100.0\*(pi*D/lambda)^2)
