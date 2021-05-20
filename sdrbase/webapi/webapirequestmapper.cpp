@@ -4430,6 +4430,11 @@ bool WebAPIRequestMapper::getFeatureSettings(
             featureSettings->setAisSettings(new SWGSDRangel::SWGAISSettings());
             featureSettings->getAisSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (featureSettingsKey == "AntennaToolsSettings")
+        {
+            featureSettings->setAntennaToolsSettings(new SWGSDRangel::SWGAntennaToolsSettings());
+            featureSettings->getAntennaToolsSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (featureSettingsKey == "APRSSettings")
         {
             featureSettings->setAprsSettings(new SWGSDRangel::SWGAPRSSettings());
@@ -4701,6 +4706,7 @@ void WebAPIRequestMapper::resetFeatureSettings(SWGSDRangel::SWGFeatureSettings& 
 {
     featureSettings.cleanup();
     featureSettings.setFeatureType(nullptr);
+    featureSettings.setAntennaToolsSettings(nullptr);
     featureSettings.setAprsSettings(nullptr);
     featureSettings.setGs232ControllerSettings(nullptr);
     featureSettings.setMapSettings(nullptr);

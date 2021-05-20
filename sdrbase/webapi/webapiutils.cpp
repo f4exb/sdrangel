@@ -256,6 +256,7 @@ const QMap<QString, QString> WebAPIUtils::m_mimoDeviceHwIdToActionsKey = {
 
 const QMap<QString, QString> WebAPIUtils::m_featureTypeToSettingsKey = {
     {"AIS", "AISSettings"},
+    {"AntennaTools", "AntennaToolsSettings"},
     {"APRS", "APRSSettings"},
     {"GS232Controller", "GS232ControllerSettings"},
     {"Map", "MapSettings"},
@@ -272,6 +273,7 @@ const QMap<QString, QString> WebAPIUtils::m_featureTypeToActionsKey = {
 
 const QMap<QString, QString> WebAPIUtils::m_featureURIToSettingsKey = {
     {"sdrangel.feature.ais", "AISSSettings"},
+    {"sdrangel.feature.antennatools", "AntennaToolsSettings"},
     {"sdrangel.feature.aprs", "APRSSettings"},
     {"sdrangel.feature.gs232controller", "GS232ControllerSettings"},
     {"sdrangel.feature.map", "MapSettings"},

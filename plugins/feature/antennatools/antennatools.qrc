@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/antennatools/">
+    <file>antennatools/dipole.png</file>
+    <file>antennatools/dish.png</file>
+  </qresource>
+</RCC>

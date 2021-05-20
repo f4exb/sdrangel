@@ -44,6 +44,7 @@
 #include "SWGAirspyHFSettings.h"
 #include "SWGAirspyReport.h"
 #include "SWGAirspySettings.h"
+#include "SWGAntennaToolsSettings.h"
 #include "SWGArgInfo.h"
 #include "SWGArgValue.h"
 #include "SWGAudioDevices.h"
@@ -362,6 +363,9 @@ namespace SWGSDRangel {
     }
     if(QString("SWGAirspySettings").compare(type) == 0) {
       return new SWGAirspySettings();
+    }
+    if(QString("SWGAntennaToolsSettings").compare(type) == 0) {
+      return new SWGAntennaToolsSettings();
     }
     if(QString("SWGArgInfo").compare(type) == 0) {
       return new SWGArgInfo();

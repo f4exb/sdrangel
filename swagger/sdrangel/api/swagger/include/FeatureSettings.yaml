@@ -17,6 +17,8 @@ FeatureSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AFC.yaml#/AFCSettings"
     AISSettings:
       $ref: "http://swgserver:8081/api/swagger/include/AIS.yaml#/AISSettings"
+    AntennaToolsSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/AntennaTools.yaml#/AntennaToolsSettings"
     APRSSettings:
       $ref: "http://swgserver:8081/api/swagger/include/APRS.yaml#/APRSSettings"
     DemodAnalyzerSettings:

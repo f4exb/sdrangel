@@ -25,6 +25,7 @@
 #include "SWGAFCSettings.h"
 #include "SWGAISSettings.h"
 #include "SWGAPRSSettings.h"
+#include "SWGAntennaToolsSettings.h"
 #include "SWGDemodAnalyzerSettings.h"
 #include "SWGGS232ControllerSettings.h"
 #include "SWGMapSettings.h"
@@ -68,6 +69,9 @@ public:
 
     SWGAISSettings* getAisSettings();
     void setAisSettings(SWGAISSettings* ais_settings);
+
+    SWGAntennaToolsSettings* getAntennaToolsSettings();
+    void setAntennaToolsSettings(SWGAntennaToolsSettings* antenna_tools_settings);
 
     SWGAPRSSettings* getAprsSettings();
     void setAprsSettings(SWGAPRSSettings* aprs_settings);
@@ -117,6 +121,9 @@ private:
 
     SWGAISSettings* ais_settings;
     bool m_ais_settings_isSet;
+
+    SWGAntennaToolsSettings* antenna_tools_settings;
+    bool m_antenna_tools_settings_isSet;
 
     SWGAPRSSettings* aprs_settings;
     bool m_aprs_settings_isSet;
