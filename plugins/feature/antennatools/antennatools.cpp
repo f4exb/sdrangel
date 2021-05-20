@@ -22,8 +22,6 @@
 #include <QBuffer>
 
 #include "SWGFeatureSettings.h"
-#include "SWGFeatureReport.h"
-#include "SWGFeatureActions.h"
 #include "SWGDeviceState.h"
 
 #include "dsp/dspengine.h"
@@ -108,6 +106,24 @@ void AntennaTools::applySettings(const AntennaToolsSettings& settings, bool forc
 
     QList<QString> reverseAPIKeys;
 
+    if ((m_settings.m_dipoleFrequencyMHz != settings.m_dipoleFrequencyMHz) || force) {
+        reverseAPIKeys.append("dipoleFrequencyMHz");
+    }
+    if ((m_settings.m_dipoleEndEffectFactor != settings.m_dipoleEndEffectFactor) || force) {
+        reverseAPIKeys.append("dipoleEndEffectFactor");
+    }
+    if ((m_settings.m_dishFrequencyMHz != settings.m_dishFrequencyMHz) || force) {
+        reverseAPIKeys.append("dishFrequencyMHz");
+    }
+    if ((m_settings.m_dishDiameter != settings.m_dishDiameter) || force) {
+        reverseAPIKeys.append("dishDiameter");
+    }
+    if ((m_settings.m_dishDepth != settings.m_dishDepth) || force) {
+        reverseAPIKeys.append("dishDepth");
+    }
+    if ((m_settings.m_dishEfficiency != settings.m_dishEfficiency) || force) {
+        reverseAPIKeys.append("dishEfficiency");
+    }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
     }
@@ -167,6 +183,12 @@ void AntennaTools::webapiFormatFeatureSettings(
     SWGSDRangel::SWGFeatureSettings& response,
     const AntennaToolsSettings& settings)
 {
+    response.getAntennaToolsSettings()->setDipoleFrequencyMHz(settings.m_dipoleFrequencyMHz);
+    response.getAntennaToolsSettings()->setDipoleEndEffectFactor(settings.m_dipoleEndEffectFactor);
+    response.getAntennaToolsSettings()->setDishFrequencyMHz(settings.m_dishFrequencyMHz);
+    response.getAntennaToolsSettings()->setDishDiameter(settings.m_dishDiameter);
+    response.getAntennaToolsSettings()->setDishDepth(settings.m_dishDepth);
+    response.getAntennaToolsSettings()->setDishEfficiency(settings.m_dishEfficiency);
     if (response.getAntennaToolsSettings()->getTitle()) {
         *response.getAntennaToolsSettings()->getTitle() = settings.m_title;
     } else {
@@ -192,6 +214,24 @@ void AntennaTools::webapiUpdateFeatureSettings(
     const QStringList& featureSettingsKeys,
     SWGSDRangel::SWGFeatureSettings& response)
 {
+    if (featureSettingsKeys.contains("dipoleFrequencyMHz")) {
+        settings.m_dipoleFrequencyMHz = response.getAntennaToolsSettings()->getDipoleFrequencyMHz();
+    }
+    if (featureSettingsKeys.contains("dipoleEndEffectFactor")) {
+        settings.m_dipoleEndEffectFactor = response.getAntennaToolsSettings()->getDipoleEndEffectFactor();
+    }
+    if (featureSettingsKeys.contains("dishFrequencyMHz")) {
+        settings.m_dishFrequencyMHz = response.getAntennaToolsSettings()->getDishFrequencyMHz();
+    }
+    if (featureSettingsKeys.contains("dishDiameter")) {
+        settings.m_dishDiameter = response.getAntennaToolsSettings()->getDishDiameter();
+    }
+    if (featureSettingsKeys.contains("dishDepth")) {
+        settings.m_dishDepth = response.getAntennaToolsSettings()->getDishDepth();
+    }
+    if (featureSettingsKeys.contains("dishEfficiency")) {
+        settings.m_dishEfficiency = response.getAntennaToolsSettings()->getDishEfficiency();
+    }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getAntennaToolsSettings()->getTitle();
     }
@@ -226,6 +266,24 @@ void AntennaTools::webapiReverseSendSettings(QList<QString>& featureSettingsKeys
 
     // transfer data that has been modified. When force is on transfer all data except reverse API data
 
+    if (featureSettingsKeys.contains("dipoleFrequencyMHz") || force) {
+        swgAntennaToolsSettings->setDipoleFrequencyMHz(settings.m_dipoleFrequencyMHz);
+    }
+    if (featureSettingsKeys.contains("dipoleEndEffectFactor") || force) {
+        swgAntennaToolsSettings->setDipoleEndEffectFactor(settings.m_dipoleEndEffectFactor);
+    }
+    if (featureSettingsKeys.contains("dishFrequencyMHz") || force) {
+        swgAntennaToolsSettings->setDishFrequencyMHz(settings.m_dishFrequencyMHz);
+    }
+    if (featureSettingsKeys.contains("dishDiameter") || force) {
+        swgAntennaToolsSettings->setDishDiameter(settings.m_dishDiameter);
+    }
+    if (featureSettingsKeys.contains("dishDepth") || force) {
+        swgAntennaToolsSettings->setDishDepth(settings.m_dishDepth);
+    }
+    if (featureSettingsKeys.contains("dishEfficiency") || force) {
+        swgAntennaToolsSettings->setDishEfficiency(settings.m_dishEfficiency);
+    }
     if (featureSettingsKeys.contains("title") || force) {
         swgAntennaToolsSettings->setTitle(new QString(settings.m_title));
     }

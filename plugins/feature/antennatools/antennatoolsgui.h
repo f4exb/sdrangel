@@ -56,7 +56,7 @@ private:
     AntennaTools* m_antennatools;
     MessageQueue m_inputMessageQueue;
     QTimer m_statusTimer;
-    int m_deviceSets;
+    unsigned int m_deviceSets;
 
     explicit AntennaToolsGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~AntennaToolsGUI();
