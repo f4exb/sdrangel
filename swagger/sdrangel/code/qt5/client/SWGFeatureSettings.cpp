@@ -38,6 +38,8 @@ SWGFeatureSettings::SWGFeatureSettings() {
     m_afc_settings_isSet = false;
     ais_settings = nullptr;
     m_ais_settings_isSet = false;
+    antenna_tools_settings = nullptr;
+    m_antenna_tools_settings_isSet = false;
     aprs_settings = nullptr;
     m_aprs_settings_isSet = false;
     demod_analyzer_settings = nullptr;
@@ -76,6 +78,8 @@ SWGFeatureSettings::init() {
     m_afc_settings_isSet = false;
     ais_settings = new SWGAISSettings();
     m_ais_settings_isSet = false;
+    antenna_tools_settings = new SWGAntennaToolsSettings();
+    m_antenna_tools_settings_isSet = false;
     aprs_settings = new SWGAPRSSettings();
     m_aprs_settings_isSet = false;
     demod_analyzer_settings = new SWGDemodAnalyzerSettings();
@@ -110,6 +114,9 @@ SWGFeatureSettings::cleanup() {
     }
     if(ais_settings != nullptr) { 
         delete ais_settings;
+    }
+    if(antenna_tools_settings != nullptr) { 
+        delete antenna_tools_settings;
     }
     if(aprs_settings != nullptr) { 
         delete aprs_settings;
@@ -164,6 +171,8 @@ SWGFeatureSettings::fromJsonObject(QJsonObject &pJson) {
     
     ::SWGSDRangel::setValue(&ais_settings, pJson["AISSettings"], "SWGAISSettings", "SWGAISSettings");
     
+    ::SWGSDRangel::setValue(&antenna_tools_settings, pJson["AntennaToolsSettings"], "SWGAntennaToolsSettings", "SWGAntennaToolsSettings");
+    
     ::SWGSDRangel::setValue(&aprs_settings, pJson["APRSSettings"], "SWGAPRSSettings", "SWGAPRSSettings");
     
     ::SWGSDRangel::setValue(&demod_analyzer_settings, pJson["DemodAnalyzerSettings"], "SWGDemodAnalyzerSettings", "SWGDemodAnalyzerSettings");
@@ -214,6 +223,9 @@ SWGFeatureSettings::asJsonObject() {
     }
     if((ais_settings != nullptr) && (ais_settings->isSet())){
         toJsonValue(QString("AISSettings"), ais_settings, obj, QString("SWGAISSettings"));
+    }
+    if((antenna_tools_settings != nullptr) && (antenna_tools_settings->isSet())){
+        toJsonValue(QString("AntennaToolsSettings"), antenna_tools_settings, obj, QString("SWGAntennaToolsSettings"));
     }
     if((aprs_settings != nullptr) && (aprs_settings->isSet())){
         toJsonValue(QString("APRSSettings"), aprs_settings, obj, QString("SWGAPRSSettings"));
@@ -297,6 +309,16 @@ void
 SWGFeatureSettings::setAisSettings(SWGAISSettings* ais_settings) {
     this->ais_settings = ais_settings;
     this->m_ais_settings_isSet = true;
+}
+
+SWGAntennaToolsSettings*
+SWGFeatureSettings::getAntennaToolsSettings() {
+    return antenna_tools_settings;
+}
+void
+SWGFeatureSettings::setAntennaToolsSettings(SWGAntennaToolsSettings* antenna_tools_settings) {
+    this->antenna_tools_settings = antenna_tools_settings;
+    this->m_antenna_tools_settings_isSet = true;
 }
 
 SWGAPRSSettings*
@@ -417,6 +439,9 @@ SWGFeatureSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(ais_settings && ais_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(antenna_tools_settings && antenna_tools_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(aprs_settings && aprs_settings->isSet()){

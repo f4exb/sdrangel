@@ -41,6 +41,11 @@ public:
         return (int)std::round(feetToMetres(feet));
     }
 
+    static inline float metresToFeet(float metres)
+    {
+        return metres * 3.28084f;
+    }
+
     static inline float nauticalMilesToMetres(float nauticalMiles)
     {
         return nauticalMiles * 1855.0f;

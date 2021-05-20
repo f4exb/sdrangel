@@ -13,6 +13,7 @@ endif()
 
 add_subdirectory(afc)
 add_subdirectory(ais)
+add_subdirectory(antennatools)
 add_subdirectory(aprs)
 add_subdirectory(demodanalyzer)
 add_subdirectory(pertester)
