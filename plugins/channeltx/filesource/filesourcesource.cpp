@@ -27,11 +27,13 @@
 #endif
 
 #include <QDebug>
+#include <QRegExp>
 
 #include "dsp/dspcommands.h"
 #include "dsp/devicesamplesink.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/filerecord.h"
+#include "dsp/wavfilerecord.h"
 #include "util/db.h"
 
 FileSourceSource::FileSourceSource() :
@@ -173,7 +175,74 @@ void FileSourceSource::openFileStream(const QString& fileName)
 	quint64 fileSize = m_ifstream.tellg();
     m_samplesCount = 0;
 
-	if (fileSize > sizeof(FileRecord::Header))
+    if (m_settings.m_fileName.endsWith(".wav"))
+    {
+        WavFileRecord::Header header;
+        m_ifstream.seekg(0, std::ios_base::beg);
+        bool headerOK = WavFileRecord::readHeader(m_ifstream, header);
+        m_fileSampleRate = header.m_sampleRate;
+        if (header.m_auxiHeader.m_size > 0)
+        {
+            // Some WAV files written by SDR tools have auxi header
+            m_centerFrequency = header.m_auxi.m_centerFreq;
+            m_startingTimeStamp = QDateTime(QDate(
+                                                header.m_auxi.m_startTime.m_year,
+                                                header.m_auxi.m_startTime.m_month,
+                                                header.m_auxi.m_startTime.m_day
+                                            ), QTime(
+                                                header.m_auxi.m_startTime.m_hour,
+                                                header.m_auxi.m_startTime.m_minute,
+                                                header.m_auxi.m_startTime.m_second,
+                                                header.m_auxi.m_startTime.m_milliseconds
+                                            )).toMSecsSinceEpoch() / 1000;
+        }
+        else
+        {
+            // Attempt to extract time and frequency from filename
+            QRegExp dateTimeRE("([12][0-9][0-9][0-9]).?([01][0-9]).?([0-3][0-9]).?([0-2][0-9]).?([0-5][0-9]).?([0-5][0-9])");
+            if (dateTimeRE.indexIn(m_settings.m_fileName) != -1)
+            {
+                m_startingTimeStamp = QDateTime(QDate(
+                                                    dateTimeRE.capturedTexts()[1].toInt(),
+                                                    dateTimeRE.capturedTexts()[2].toInt(),
+                                                    dateTimeRE.capturedTexts()[3].toInt()
+                                                ), QTime(
+                                                    dateTimeRE.capturedTexts()[4].toInt(),
+                                                    dateTimeRE.capturedTexts()[5].toInt(),
+                                                    dateTimeRE.capturedTexts()[6].toInt()
+                                                )).toMSecsSinceEpoch() / 1000;
+            }
+            // Attempt to extract centre frequency from filename
+            QRegExp freqkRE("(([0-9]+)kHz)");
+            QRegExp freqRE("(([0-9]+)Hz)");
+            if (freqkRE.indexIn(m_settings.m_fileName))
+            {
+                m_centerFrequency = freqkRE.capturedTexts()[2].toLongLong() * 1000LL;
+            }
+            else if (freqRE.indexIn(m_settings.m_fileName))
+            {
+                m_centerFrequency = freqRE.capturedTexts()[2].toLongLong();
+            }
+        }
+        m_sampleSize = header.m_bitsPerSample;
+
+        if (headerOK && (m_fileSampleRate > 0) && (m_sampleSize > 0))
+        {
+            m_recordLengthMuSec = ((fileSize - m_ifstream.tellg()) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
+        }
+        else
+        {
+            qCritical("FileSourceSource::openFileStream: invalid .wav file");
+            m_recordLengthMuSec = 0;
+        }
+
+        if (getMessageQueueToGUI())
+        {
+            FileSourceReport::MsgReportHeaderCRC *report = FileSourceReport::MsgReportHeaderCRC::create(headerOK);
+            getMessageQueueToGUI()->push(report);
+        }
+    }
+    else if (fileSize > sizeof(FileRecord::Header))
 	{
 	    FileRecord::Header header;
 	    m_ifstream.seekg(0,std::ios_base::beg);

@@ -427,7 +427,7 @@ void FileSourceGUI::on_showFileDialog_clicked(bool checked)
 {
     (void) checked;
 	QString fileName = QFileDialog::getOpenFileName(this,
-	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq)"), 0, QFileDialog::DontUseNativeDialog);
+	    tr("Open I/Q record file"), ".", tr("SDR I/Q Files (*.sdriq *.wav)"), 0, QFileDialog::DontUseNativeDialog);
 
 	if (fileName != "")
 	{
