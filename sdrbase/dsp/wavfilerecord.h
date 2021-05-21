@@ -66,7 +66,7 @@ public:
         quint32 m_unused5;
         char m_nextFilename[96];
     };
-    struct Header
+    struct SDRBASE_API Header
     {
         Chunk m_riffHeader;
         char m_type[4];        // "WAVE"
@@ -80,6 +80,8 @@ public:
         Chunk m_auxiHeader;
         Auxi m_auxi;
         Chunk m_dataHeader;
+
+        QDateTime getStartTime() const;
     };
 #pragma pack(pop)
 
@@ -106,6 +108,10 @@ public:
 
     static bool readHeader(std::ifstream& samplefile, Header& header);
     static void writeHeader(std::ofstream& samplefile, Header& header);
+
+    // These functions guess from the filename, not contents
+    static bool getCenterFrequency(QString fileName, quint64& centerFrequency);
+    static bool getStartTime(QString fileName, QDateTime& startTime);
 
 private:
     QString m_fileBase;
