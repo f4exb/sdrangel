@@ -39,18 +39,19 @@ public:
     SigMFFileRecord(const QString& filename, const QString& hardwareId);
     virtual ~SigMFFileRecord();
 
-    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-	virtual void start();
-	virtual void stop();
-	virtual bool handleMessage(const Message& message);
+    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly) override;
+	virtual void start() override;
+	virtual void stop() override;
+	virtual bool handleMessage(const Message& message) override;
 
-    virtual void setFileName(const QString& filename);
-    virtual bool startRecording();
-    virtual bool stopRecording();
-    virtual bool isRecording() const { return m_recordOn; }
+    virtual void setFileName(const QString& filename) override;
+    virtual const QString& getCurrentFileName() override { return m_fileName; }
+    virtual bool startRecording() override;
+    virtual bool stopRecording() override;
+    virtual bool isRecording() const override { return m_recordOn; }
 
     void setHardwareId(const QString& hardwareId) { m_hardwareId = hardwareId; }
-    void setMsShift(qint64 msShift) { m_msShift = msShift; }
+    void setMsShift(qint64 msShift) override { m_msShift = msShift; }
     unsigned int getNbCaptures() const;
     uint64_t getInitialMsCount() const { return m_initialMsCount; }
     uint64_t getInitialBytesCount() const { return m_initialBytesCount; }

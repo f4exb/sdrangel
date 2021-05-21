@@ -2,7 +2,9 @@
 
 <h2>Introduction</h2>
 
-This plugin reads a file of I/Q samples that have been previously saved with the file record button of other sampling source devices. The file starts with a 32 byte header of all unsigned integer of various sizes containing meta data:
+This plugin reads a file of I/Q samples that have been previously saved with the file record button of other sampling source devices. The plugin supports SDRangel's own .sdriq file format as well as signed 16-bit PCM, 2 channel .wav files (including support for optional auxi headers, containing centre frequency).
+
+An .sdriq file starts with a 32 byte header of all unsigned integer of various sizes containing meta data:
 
 <table>
   <tr>
@@ -66,7 +68,7 @@ This is the center frequency of reception in kHz when the record was taken and w
 
 <h3>4: Open file</h3>
 
-Opens a file dialog to select the input file. It expects a default extension of `.sdriq`. This button is disabled when the stream is running. You need to pause (button 11) to make it active and thus be able to select another file.
+Opens a file dialog to select the input file. It expects an extension of `.sdriq` or `.wav`. This button is disabled when the stream is running. You need to pause (button 11) to make it active and thus be able to select another file.
 
 <h3>5: File path</h3>
 

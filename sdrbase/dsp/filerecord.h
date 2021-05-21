@@ -44,12 +44,12 @@ public:
     };
 #pragma pack(pop)
 
-	FileRecord();
+	FileRecord(quint32 sampleRate=0, quint64 centerFrequency=0);
     FileRecord(const QString& fileBase);
 	virtual ~FileRecord();
 
     quint64 getByteCount() const { return m_byteCount; }
-    void setMsShift(int shift) { m_msShift = shift; }
+    void setMsShift(qint64 shift) { m_msShift = shift; }
     const QString& getCurrentFileName() { return m_curentFileName; }
 
     void genUniqueFileName(uint deviceUID, int istream = -1);
@@ -76,7 +76,7 @@ private:
     std::ofstream m_sampleFile;
     QString m_curentFileName;
     quint64 m_byteCount;
-    int m_msShift;
+    qint64 m_msShift;
     QMutex m_mutex;
 
     void writeHeader();

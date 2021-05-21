@@ -35,7 +35,8 @@ public:
     {
         RecordTypeUndefined = 0,
         RecordTypeSdrIQ,
-        RecordTypeSigMF
+        RecordTypeSigMF,
+        RecordTypeWav
     };
 
     FileRecordInterface();
@@ -51,9 +52,13 @@ public:
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
     virtual void setFileName(const QString &filename) = 0;
+    virtual const QString& getCurrentFileName() = 0;
     virtual bool startRecording() = 0;
     virtual bool stopRecording() = 0;
     virtual bool isRecording() const = 0;
+
+    virtual void setMsShift(qint64 msShift) = 0;
+    virtual int getBytesPerSample() { return sizeof(Sample); };
 
     static QString genUniqueFileName(unsigned int deviceUID, int istream = -1);
     static RecordType guessTypeFromFileName(const QString& fileName, QString& fileBase);

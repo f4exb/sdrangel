@@ -27,11 +27,11 @@
 
 #include "filerecord.h"
 
-FileRecord::FileRecord() :
+FileRecord::FileRecord(quint32 sampleRate, quint64 centerFrequency) :
 	FileRecordInterface(),
     m_fileBase("test"),
-    m_sampleRate(0),
-    m_centerFrequency(0),
+    m_sampleRate(sampleRate),
+    m_centerFrequency(centerFrequency),
 	m_recordOn(false),
     m_recordStart(false),
     m_byteCount(0),

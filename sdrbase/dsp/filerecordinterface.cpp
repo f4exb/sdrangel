@@ -61,6 +61,11 @@ FileRecordInterface::RecordType FileRecordInterface::guessTypeFromFileName(const
             fileBase = dotBreakout.join(QLatin1Char('.'));
             return RecordTypeSigMF;
         }
+        else if (extension == "wav")
+        {
+            fileBase = dotBreakout.join(QLatin1Char('.'));
+            return RecordTypeWav;
+        }
         else
         {
             fileBase = fileName;

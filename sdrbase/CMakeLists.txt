@@ -149,6 +149,7 @@ set(sdrbase_SOURCES
     dsp/devicesamplemimo.cpp
     dsp/devicesamplestatic.cpp
     dsp/spectrumvis.cpp
+    dsp/wavfilerecord.cpp
 
     device/deviceapi.cpp
     device/deviceenumerator.cpp
@@ -341,6 +342,7 @@ set(sdrbase_HEADERS
     dsp/devicesamplemimo.h
     dsp/devicesamplestatic.h
     dsp/spectrumvis.h
+    dsp/wavfilerecord.h
 
     device/deviceapi.h
     device/deviceenumerator.h
