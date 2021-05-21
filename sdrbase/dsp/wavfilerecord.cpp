@@ -174,7 +174,7 @@ bool WavFileRecord::handleMessage(const Message& message)
         DSPSignalNotification& notif = (DSPSignalNotification&) message;
 
         int sampleRate = notif.getSampleRate();
-        if ((sampleRate != m_sampleRate) && m_recordOn) {
+        if ((sampleRate != (int)m_sampleRate) && m_recordOn) {
             qDebug() << "WavFileRecord::handleMessage: sample rate has changed. Creating a new .wav file";
             stopRecording();
             m_recordOn = true;
