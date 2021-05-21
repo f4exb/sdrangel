@@ -500,7 +500,7 @@ void FileSinkGUI::on_showFileDialog_clicked(bool checked)
         this,
         tr("Save record file"),
         m_settings.m_fileRecordName,
-        tr("SDR I/Q Files (*.sdriq)")
+        tr("SDR I/Q Files (*.sdriq *.wav)")
     );
 
     fileDialog.setOptions(QFileDialog::DontUseNativeDialog);

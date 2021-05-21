@@ -22,6 +22,8 @@
 
 #include "filesinkmessages.h"
 #include "filesinksink.h"
+#include "dsp/filerecord.h"
+#include "dsp/wavfilerecord.h"
 
 FileSinkSink::FileSinkSink() :
     m_nbCaptures(0),
@@ -34,8 +36,11 @@ FileSinkSink::FileSinkSink() :
     m_squelchOpen(false),
     m_postSquelchCounter(0),
     m_msCount(0),
-    m_byteCount(0)
-{}
+    m_byteCount(0),
+    m_bytesPerSample(sizeof(Sample))
+{
+    m_fileSink = new FileRecord();
+}
 
 FileSinkSink::~FileSinkSink()
 {}
@@ -46,16 +51,16 @@ void FileSinkSink::startRecording()
     {
         // set the length of pre record time
         qint64 mSShift = (m_preRecordFill * 1000) / m_sinkSampleRate;
-        m_fileSink.setMsShift(-mSShift);
+        m_fileSink->setMsShift(-mSShift);
 
         // notify capture start
-        if (!m_fileSink.startRecording())
+        if (!m_fileSink->startRecording())
         {
             // qWarning already output in startRecording, just need to send to GUI
             if (m_msgQueueToGUI)
             {
                 FileSinkMessages::MsgReportRecordFileError *msg
-                    = FileSinkMessages::MsgReportRecordFileError::create(QString("Failed to open %1").arg(m_fileSink.getCurrentFileName()));
+                    = FileSinkMessages::MsgReportRecordFileError::create(QString("Failed to open %1").arg(m_fileSink->getCurrentFileName()));
                 m_msgQueueToGUI->push(msg);
             }
             return;
@@ -66,7 +71,7 @@ void FileSinkSink::startRecording()
         if (m_msgQueueToGUI)
         {
             FileSinkMessages::MsgReportRecordFileName *msg1
-                = FileSinkMessages::MsgReportRecordFileName::create(m_fileSink.getCurrentFileName());
+                = FileSinkMessages::MsgReportRecordFileName::create(m_fileSink->getCurrentFileName());
             m_msgQueueToGUI->push(msg1);
             FileSinkMessages::MsgReportRecording *msg2 = FileSinkMessages::MsgReportRecording::create(true);
             m_msgQueueToGUI->push(msg2);
@@ -77,13 +82,13 @@ void FileSinkSink::startRecording()
         m_preRecordBuffer.readBegin(m_preRecordFill, &p1Begin, &p1End, &p2Begin, &p2End);
 
         if (p1Begin != p1End) {
-            m_fileSink.feed(p1Begin, p1End, false);
+            m_fileSink->feed(p1Begin, p1End, false);
         }
         if (p2Begin != p2End) {
-            m_fileSink.feed(p2Begin, p2End, false);
+            m_fileSink->feed(p2Begin, p2End, false);
         }
 
-        m_byteCount += m_preRecordFill * sizeof(Sample);
+        m_byteCount += m_preRecordFill * m_bytesPerSample;
 
         if (m_sinkSampleRate > 0) {
             m_msCount += (m_preRecordFill * 1000) / m_sinkSampleRate;
@@ -97,13 +102,13 @@ void FileSinkSink::stopRecording()
     {
         m_preRecordBuffer.reset();
 
-        if (!m_fileSink.stopRecording())
+        if (!m_fileSink->stopRecording())
         {
             // qWarning already output stopRecording, just need to send to GUI
             if (m_msgQueueToGUI)
             {
                 FileSinkMessages::MsgReportRecordFileError *msg
-                    = FileSinkMessages::MsgReportRecordFileError::create(QString("Error while writing to %1").arg(m_fileSink.getCurrentFileName()));
+                    = FileSinkMessages::MsgReportRecordFileError::create(QString("Error while writing to %1").arg(m_fileSink->getCurrentFileName()));
                 m_msgQueueToGUI->push(msg);
             }
         }
@@ -151,18 +156,18 @@ void FileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
         if (m_squelchOpen)
         {
-            m_fileSink.feed(beginw, endw, true);
+            m_fileSink->feed(beginw, endw, true);
         }
         else
         {
             if (nbToWrite < m_postSquelchCounter)
             {
-                m_fileSink.feed(beginw, endw, true);
+                m_fileSink->feed(beginw, endw, true);
                 m_postSquelchCounter -= nbToWrite;
             }
             else
             {
-                m_fileSink.feed(beginw, endw + m_postSquelchCounter, true);
+                m_fileSink->feed(beginw, endw + m_postSquelchCounter, true);
                 nbToWrite = m_postSquelchCounter;
                 m_postSquelchCounter = 0;
 
@@ -170,7 +175,7 @@ void FileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleV
             }
         }
 
-        m_byteCount += nbToWrite * sizeof(Sample);
+        m_byteCount += nbToWrite * m_bytesPerSample;
 
         if (m_sinkSampleRate > 0) {
             m_msCount += (nbToWrite * 1000) / m_sinkSampleRate;
@@ -178,9 +183,9 @@ void FileSinkSink::feed(const SampleVector::const_iterator& begin, const SampleV
     }
     else if (m_record)
     {
-        m_fileSink.feed(beginw, endw, true);
+        m_fileSink->feed(beginw, endw, true);
         int nbSamples = endw - beginw;
-        m_byteCount += nbSamples * sizeof(Sample);
+        m_byteCount += nbSamples * m_bytesPerSample;
 
         if (m_sinkSampleRate > 0) {
             m_msCount += (nbSamples * 1000) / m_sinkSampleRate;
@@ -240,7 +245,7 @@ void FileSinkSink::applyChannelSettings(
     {
         DSPSignalNotification *notif = new DSPSignalNotification(sinkSampleRate, centerFrequency);
         DSPSignalNotification *notifToSpectrum = new DSPSignalNotification(*notif);
-        m_fileSink.getInputMessageQueue()->push(notif);
+        m_fileSink->getInputMessageQueue()->push(notif);
         m_spectrumSink->getInputMessageQueue()->push(notifToSpectrum);
 
         if (m_msgQueueToGUI)
@@ -277,7 +282,7 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
         if (dotBreakout.size() > 1) {
             QString extension = dotBreakout.last();
 
-            if (extension != "sdriq") {
+            if ((extension != "sdriq") && (extension != "wav")) {
                 dotBreakout.last() = "sdriq";
             }
         }
@@ -291,11 +296,18 @@ void FileSinkSink::applySettings(const FileSinkSettings& settings, bool force)
         QString fileBase;
         FileRecordInterface::RecordType recordType = FileRecordInterface::guessTypeFromFileName(fileRecordName, fileBase);
 
-        if (recordType == FileRecordInterface::RecordTypeSdrIQ)
+        if ((recordType == FileRecordInterface::RecordTypeSdrIQ) || (recordType == FileRecordInterface::RecordTypeWav))
         {
-            m_fileSink.setFileName(fileBase);
+            delete m_fileSink;
+            if (recordType == FileRecordInterface::RecordTypeSdrIQ) {
+                m_fileSink = new FileRecord(m_sinkSampleRate, m_centerFrequency);
+            } else {
+                m_fileSink = new WavFileRecord(m_sinkSampleRate, m_centerFrequency);
+            }
+            m_fileSink->setFileName(fileBase);
             m_msCount = 0;
             m_byteCount = 0;
+            m_bytesPerSample = m_fileSink->getBytesPerSample();
             m_nbCaptures = 0;
             m_recordEnabled = true;
         }

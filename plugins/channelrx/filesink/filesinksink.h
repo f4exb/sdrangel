@@ -19,7 +19,7 @@
 #define INCLUDE_FILESINKSINK_H_
 
 #include "dsp/channelsamplesink.h"
-#include "dsp/filerecord.h"
+#include "dsp/filerecordinterface.h"
 #include "dsp/decimatorc.h"
 #include "dsp/samplesimplefifo.h"
 #include "dsp/ncof.h"
@@ -36,7 +36,7 @@ public:
 
 	virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    FileRecord *getFileSink() { return &m_fileSink; }
+    FileRecordInterface *getFileSink() { return m_fileSink; }
     void setSpectrumSink(SpectrumVis* spectrumSink) { m_spectrumSink = spectrumSink; }
     void startRecording();
     void stopRecording();
@@ -66,7 +66,7 @@ private:
     DecimatorC m_decimator;
     SampleVector m_sampleBuffer;
     FileSinkSettings m_settings;
-    FileRecord m_fileSink;
+    FileRecordInterface *m_fileSink;
     unsigned int m_nbCaptures;
     SampleSimpleFifo m_preRecordBuffer;
     unsigned int m_preRecordFill;
@@ -81,6 +81,7 @@ private:
     int m_deviceUId;
     uint64_t m_msCount;
     uint64_t m_byteCount;
+    int m_bytesPerSample;
 };
 
 #endif // INCLUDE_FILESINKSINK_H_

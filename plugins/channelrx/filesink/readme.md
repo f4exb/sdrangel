@@ -2,11 +2,11 @@
 
 <h2>Introduction</h2>
 
-Use this plugin to record its channel IQ data in [sdriq](../../samplesource/fileinput/readme.md#introduction) format. The baseband sample rate can be decimated by a factor of two and its center shifted to accomodate different requirements than recording the full baseband. More than one such plugin can be used in the same baseband to record different parts of the baseband spectrum. Of course in this case file output collision should be avoided.
+Use this plugin to record its channel IQ data in [sdriq](../../samplesource/fileinput/readme.md#introduction) or signed 16-bit PCM `.wav` format. The baseband sample rate can be decimated by a factor of two and its center shifted to accomodate different requirements than recording the full baseband. More than one such plugin can be used in the same baseband to record different parts of the baseband spectrum. Of course in this case file output collision should be avoided.
 
 Such files can be read in SDRangel using the [File input plugin](../../samplesource/fileinput/readme.md).
 
-Each recording is written in a new file with the starting timestamp before the `.sdriq` extension in `yyyy-MM-ddTHH_mm_ss_zzz` format. It keeps the first dot limted groups of the filename before the `.sdriq` extension if there are two such groups or before the two last groups if there are more than two groups. Examples:
+Each recording is written in a new file with the starting timestamp before the `.sdriq` extension in `yyyy-MM-ddTHH_mm_ss_zzz` format. It keeps the first dot limted groups of the filename before the `.sdriq` or `.wav` extension if there are two such groups or before the two last groups if there are more than two groups. Examples:
 
   - Given file name: `test.sdriq` then a recording file will be like: `test.2020-08-05T21_39_07_974.sdriq`
   - Given file name: `test.2020-08-05T20_36_15_974.sdriq` then a recording file will be like (with timestamp updated): `test.2020-08-05T21_41_21_173.sdriq`
@@ -14,7 +14,7 @@ Each recording is written in a new file with the starting timestamp before the `
   - Given file name: `record.test.first.sdriq` then a recording file will be like: `reocrd.test.2020-08-05T21_39_52_974.sdriq`
 
 If a filename is given without `.sdriq` extension then the `.sdriq` extension is appended automatically before the above algorithm is applied.
-If a filename is given with an extension different of `.sdriq` then the extension is replaced by `.sdriq` automatically before the above algorithm is applied.
+If a filename is given with an extension different of `.sdriq` or `.wav` then the extension is replaced by `.sdriq` automatically before the above algorithm is applied.
 
 <h2>Interface</h2>
 
