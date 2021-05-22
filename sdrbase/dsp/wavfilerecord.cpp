@@ -21,6 +21,7 @@
 
 #include <QDebug>
 #include <QDateTime>
+#include <QRegExp>
 
 #include "dsp/dspcommands.h"
 #include "util/simpleserializer.h"
@@ -339,4 +340,52 @@ bool WavFileRecord::readHeader(std::ifstream& sampleFile, Header& header)
 void WavFileRecord::writeHeader(std::ofstream& sampleFile, Header& header)
 {
     sampleFile.write((const char *) &header, sizeof(Header));
+}
+
+bool WavFileRecord::getCenterFrequency(QString fileName, quint64& centerFrequency)
+{
+    // Attempt to extract center frequency from filename
+    QRegExp freqkRE("(([0-9]+)kHz)");
+    QRegExp freqRE("(([0-9]+)Hz)");
+    if (freqkRE.indexIn(fileName))
+    {
+        centerFrequency = freqkRE.capturedTexts()[2].toLongLong() * 1000LL;
+        return true;
+    }
+    else if (freqRE.indexIn(fileName))
+    {
+        centerFrequency = freqRE.capturedTexts()[2].toLongLong();
+        return true;
+    }
+    return false;
+}
+
+bool WavFileRecord::getStartTime(QString fileName, QDateTime& startTime)
+{
+    // Attempt to extract start time from filename
+    QRegExp dateTimeRE("([12][0-9][0-9][0-9]).?([01][0-9]).?([0-3][0-9]).?([0-2][0-9]).?([0-5][0-9]).?([0-5][0-9])");
+    if (dateTimeRE.indexIn(fileName) != -1)
+    {
+        startTime = QDateTime(QDate(
+                                  dateTimeRE.capturedTexts()[1].toInt(),
+                                  dateTimeRE.capturedTexts()[2].toInt(),
+                                  dateTimeRE.capturedTexts()[3].toInt()),
+                              QTime(
+                                  dateTimeRE.capturedTexts()[4].toInt(),
+                                  dateTimeRE.capturedTexts()[5].toInt(),
+                                  dateTimeRE.capturedTexts()[6].toInt()));
+        return true;
+    }
+    return false;
+}
+
+QDateTime WavFileRecord::Header::getStartTime() const
+{
+    return QDateTime(QDate(m_auxi.m_startTime.m_year,
+                           m_auxi.m_startTime.m_month,
+                           m_auxi.m_startTime.m_day),
+                     QTime(m_auxi.m_startTime.m_hour,
+                           m_auxi.m_startTime.m_minute,
+                           m_auxi.m_startTime.m_second,
+                           m_auxi.m_startTime.m_milliseconds));
 }

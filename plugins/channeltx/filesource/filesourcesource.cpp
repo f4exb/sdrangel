@@ -32,6 +32,7 @@
 #include "dsp/devicesamplesink.h"
 #include "dsp/hbfilterchainconverter.h"
 #include "dsp/filerecord.h"
+#include "dsp/wavfilerecord.h"
 #include "util/db.h"
 
 FileSourceSource::FileSourceSource() :
@@ -173,7 +174,46 @@ void FileSourceSource::openFileStream(const QString& fileName)
 	quint64 fileSize = m_ifstream.tellg();
     m_samplesCount = 0;
 
-	if (fileSize > sizeof(FileRecord::Header))
+    if (m_fileName.endsWith(".wav"))
+    {
+        WavFileRecord::Header header;
+        m_ifstream.seekg(0, std::ios_base::beg);
+        bool headerOK = WavFileRecord::readHeader(m_ifstream, header);
+        m_fileSampleRate = header.m_sampleRate;
+        if (header.m_auxiHeader.m_size > 0)
+        {
+            // Some WAV files written by SDR tools have auxi header
+            m_centerFrequency = header.m_auxi.m_centerFreq;
+            m_startingTimeStamp = header.getStartTime().toMSecsSinceEpoch() / 1000;
+        }
+        else
+        {
+            // Attempt to extract start time and frequency from filename
+            QDateTime startTime;
+            if (WavFileRecord::getStartTime(m_fileName, startTime)) {
+                m_startingTimeStamp = startTime.toMSecsSinceEpoch() / 1000;
+            }
+            WavFileRecord::getCenterFrequency(m_fileName, m_centerFrequency);
+        }
+        m_sampleSize = header.m_bitsPerSample;
+
+        if (headerOK && (m_fileSampleRate > 0) && (m_sampleSize > 0))
+        {
+            m_recordLengthMuSec = ((fileSize - m_ifstream.tellg()) * 1000000UL) / ((m_sampleSize == 24 ? 8 : 4) * m_fileSampleRate);
+        }
+        else
+        {
+            qCritical("FileSourceSource::openFileStream: invalid .wav file");
+            m_recordLengthMuSec = 0;
+        }
+
+        if (getMessageQueueToGUI())
+        {
+            FileSourceReport::MsgReportHeaderCRC *report = FileSourceReport::MsgReportHeaderCRC::create(headerOK);
+            getMessageQueueToGUI()->push(report);
+        }
+    }
+    else if (fileSize > sizeof(FileRecord::Header))
 	{
 	    FileRecord::Header header;
 	    m_ifstream.seekg(0,std::ios_base::beg);
