@@ -29,7 +29,7 @@
 
 #include "wavfilerecord.h"
 
-WavFileRecord::WavFileRecord(quint32 sampleRate=0, quint64 centerFrequency=0) :
+WavFileRecord::WavFileRecord(quint32 sampleRate, quint64 centerFrequency) :
     FileRecordInterface(),
     m_fileBase("test"),
     m_sampleRate(sampleRate),

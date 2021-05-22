@@ -85,7 +85,7 @@ public:
     };
 #pragma pack(pop)
 
-    WavFileRecord(quint32 sampleRate, quint64 centerFrequency);
+    WavFileRecord(quint32 sampleRate=0, quint64 centerFrequency=0);
     WavFileRecord(const QString& fileBase);
     virtual ~WavFileRecord();
 
