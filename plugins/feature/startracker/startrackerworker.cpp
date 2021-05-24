@@ -463,6 +463,13 @@ void StarTrackerWorker::update()
        rd = moonRD;
        aa = moonAA;
     }
+    else if (m_settings.m_target == "Custom Az/El")
+    {
+        // Convert Alt/Az to RA/Dec
+        aa.alt = m_settings.m_el;
+        aa.az = m_settings.m_az;
+        rd = Astronomy::azAltToRaDec(aa, m_settings.m_latitude, m_settings.m_longitude, dt);
+    }
     else
     {
         // Convert RA/Dec to Alt/Az
@@ -491,8 +498,11 @@ void StarTrackerWorker::update()
     // Send to GUI
     if (getMessageQueueToGUI())
     {
-        StarTrackerReport::MsgReportAzAl *msg = StarTrackerReport::MsgReportAzAl::create(aa.az, aa.alt);
-        getMessageQueueToGUI()->push(msg);
+        if (m_settings.m_target == "Custom Az/El") {
+            getMessageQueueToGUI()->push(StarTrackerReport::MsgReportRADec::create(rd.ra, rd.dec));
+        } else {
+            getMessageQueueToGUI()->push(StarTrackerReport::MsgReportAzAl::create(aa.az, aa.alt));
+        }
     }
 
     // Send Az/El to Rotator Controllers
@@ -542,7 +552,7 @@ void StarTrackerWorker::update()
             {
                 double starLongitude = Astronomy::lstAndRAToLongitude(lst, rd.ra);
                 double starLatitude = rd.dec;
-                QString text = m_settings.m_target == "Custom" ? "Star" : m_settings.m_target;
+                QString text = m_settings.m_target.startsWith("Custom") ? "Star" : m_settings.m_target;
                 sendToMap(mapMessageQueues, "Star", "qrc:///startracker/startracker/pulsar-32.png", text, starLatitude, starLongitude);
             }
         }

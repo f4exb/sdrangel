@@ -51,7 +51,7 @@ StarTrackerSettingsDialog::~StarTrackerSettingsDialog()
 void StarTrackerSettingsDialog::accept()
 {
     m_settings->m_jnow = ui->epoch->currentIndex() == 1;
-    m_settings->m_azElUnits = (StarTrackerSettings::AzElUnits)ui->azElUnits->currentIndex();
+    m_settings->m_azElUnits = (DMSSpinBox::DisplayUnits)ui->azElUnits->currentIndex();
     m_settings->m_updatePeriod = ui->updatePeriod->value();
     m_settings->m_serverPort = (uint16_t)ui->serverPort->value();
     m_settings->m_enableServer = ui->enableServer->isChecked();

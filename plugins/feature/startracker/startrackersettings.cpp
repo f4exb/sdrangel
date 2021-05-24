@@ -46,7 +46,7 @@ void StarTrackerSettings::resetToDefaults()
     m_beamwidth = 25.0;
     m_enableServer = true;
     m_serverPort = 10001;
-    m_azElUnits = DM;
+    m_azElUnits = DMSSpinBox::DM;
     m_solarFluxData = DRAO_2800;
     m_solarFluxUnits = SFU;
     m_updatePeriod = 1.0;
@@ -62,6 +62,8 @@ void StarTrackerSettings::resetToDefaults()
     m_reverseAPIPort = 8888;
     m_reverseAPIFeatureSetIndex = 0;
     m_reverseAPIFeatureIndex = 0;
+    m_az = 0.0;
+    m_el = 0.0;
 }
 
 QByteArray StarTrackerSettings::serialize() const
@@ -100,6 +102,8 @@ QByteArray StarTrackerSettings::serialize() const
     s.writeDouble(30, m_beamwidth);
     s.writeU32(31, m_solarFluxData);
     s.writeBool(32, m_chartsDarkTheme);
+    s.writeDouble(33, m_az);
+    s.writeDouble(34, m_el);
 
     return s.final();
 }
@@ -133,7 +137,7 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         } else {
             m_serverPort = 10001;
         }
-        d.readS32(9, (qint32 *)&m_azElUnits, DM);
+        d.readS32(9, (qint32 *)&m_azElUnits, DMSSpinBox::DM);
         d.readFloat(10, &m_updatePeriod, 1.0f);
         d.readBool(11, &m_jnow, false);
         d.readString(12, &m_refraction, "Positional Astronomy Library");
@@ -168,6 +172,9 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         d.readDouble(30, &m_beamwidth, 25.0);
         d.readU32(31, (quint32 *)&m_solarFluxData, DRAO_2800);
         d.readBool(32, &m_chartsDarkTheme, true);
+
+        d.readDouble(33, &m_az, 0.0);
+        d.readDouble(34, &m_el, 0.0);
 
         return true;
     }

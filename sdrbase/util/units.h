@@ -142,9 +142,50 @@ public:
         return hours + minutes * 1.0f/60.0f + seconds * 1.0f/(60.0f*60.0f);
     }
 
+    // Also supports decimal degrees
+    static bool degreeMinuteAndSecondsToDecimalDegrees(const QString& string, float& degrees)
+    {
+        QRegExp decimal("(-?[0-9]+(\\.[0-9]+)?)");
+        if (decimal.exactMatch(string))
+        {
+             degrees = decimal.capturedTexts()[1].toFloat();
+             return true;
+        }
+        QRegExp dms(QString("(-)?([0-9]+)[%1d](([0-9]+)['m](([0-9]+(\\.[0-9]+)?)[\"s])?)?").arg(QChar(0xb0)));
+        if (dms.exactMatch(string))
+        {
+            float d = 0.0f;
+            bool neg = false;
+            for (int i = 0; i < dms.captureCount(); i++) {
+                qDebug() << dms.capturedTexts()[i];
+            }
+            if (dms.captureCount() >= 1) {
+                neg = dms.capturedTexts()[1] == "-";
+            }
+            if (dms.captureCount() >= 3) {
+                d = dms.capturedTexts()[2].toFloat();
+            }
+            float m = 0.0f;
+            if (dms.captureCount() >= 5) {
+                m = dms.capturedTexts()[4].toFloat();
+            }
+            float s = 0.0f;
+            if (dms.captureCount() >= 7) {
+                s = dms.capturedTexts()[6].toFloat();
+            }
+            qDebug() << neg << d << m << s;
+            degrees = d + m/60.0 + s/(60.0*60.0);
+            if (neg) {
+                degrees = -degrees;
+            }
+            return true;
+        }
+        return false;
+    }
+
     static QString decimalDegreesToDegreeMinutesAndSeconds(float decimal, int secondsFieldWidth=5)
     {
-        float v, d, m, s;
+        double v, d, m, s;
         int neg;
 
         v = decimal;
@@ -162,7 +203,7 @@ public:
 
     static QString decimalDegreesToDegreesAndMinutes(float decimal)
     {
-        float v, d, m;
+        double v, d, m;
         int neg;
 
         v = decimal;
@@ -172,12 +213,21 @@ public:
         v -= d;
         v *= 60.0;
         m = round(v);
+        if (m == 60)
+        {
+            if (neg) {
+                d--;
+            } else {
+                d++;
+            }
+            m = 0;
+        }
         return QString("%1%2%3%4'").arg(neg ? "-" : "").arg((int)d).arg(QChar(0xb0)).arg((int)m, 2, 10, QChar('0'));
     }
 
     static QString decimalDegreesToDegrees(float decimal)
     {
-        float v, d;
+        double v, d;
         int neg;
 
         v = decimal;
@@ -189,7 +239,7 @@ public:
 
     static QString decimalHoursToHoursMinutesAndSeconds(float decimal, int precision=2)
     {
-        float v, h, m, s;
+        double v, h, m, s;
 
         v = decimal;
         v = fabs(v);
@@ -218,7 +268,6 @@ public:
         QRegExp dms(QString("([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([NS]) *,? *([0-9]+)[%1d]([0-9]+)['m]([0-9]+(\\.[0-9]+)?)[\"s]([EW])").arg(QChar(0xb0)));
         if (dms.exactMatch(string))
         {
-             qDebug() << "Captured: " << dms.capturedTexts();
              float latD = dms.capturedTexts()[1].toFloat();
              float latM = dms.capturedTexts()[2].toFloat();
              float latS = dms.capturedTexts()[3].toFloat();
@@ -233,8 +282,6 @@ public:
              longitude = lonD + lonM/60.0 + lonS/(60.0*60.0);
              if (!east)
                  longitude = -longitude;
-             qDebug() << "Lat " << latitude;
-             qDebug() << "Long " << longitude;
              return true;
         }
         return false;

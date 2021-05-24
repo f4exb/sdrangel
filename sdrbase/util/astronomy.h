@@ -46,6 +46,7 @@ public:
 
     static RADec precess(RADec rd_in, double jd_from, double jd_to);
     static AzAlt raDecToAzAlt(RADec rd, double latitude, double longitude, QDateTime dt, bool j2000=true);
+    static RADec azAltToRaDec(AzAlt aa, double latitude, double longitude, QDateTime dt);
 
     static double localSiderealTime(QDateTime dateTime, double longitude);
 
