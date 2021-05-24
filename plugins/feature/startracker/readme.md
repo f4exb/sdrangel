@@ -132,7 +132,7 @@ For all other target settings, this displays the calculated elevation (angle in 
 
 <h3>Light or dark theme</h3>
 
-click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
+Click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
 
 <h3>Elevation vs time</h3>
 
@@ -162,7 +162,7 @@ To see this figure, which will be typically lower than the above, select one of 
 <h3>Drift scan path</h3>
 
 When the target (11) is set to Custom Az/El and the Sky temperature plot is displayed, a curve showing the drift scan path over a 24 hour period will be displayed.
-This assumes the azimuth and elevation will be held constant and the path shows how the part of the sky the antenna will point to as the Earth rotates.
+This assumes the azimuth and elevation will be held constant and the path shows the part of the sky the antenna will point to as the Earth rotates.
 
 ![Drift scan path](../../../doc/img/StarTracker_driftscan.png)
 

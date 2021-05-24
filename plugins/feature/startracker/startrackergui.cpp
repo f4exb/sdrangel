@@ -109,8 +109,10 @@ bool StarTrackerGUI::handleMessage(const Message& message)
     else if (StarTrackerReport::MsgReportAzAl::match(message))
     {
         StarTrackerReport::MsgReportAzAl& azAl = (StarTrackerReport::MsgReportAzAl&) message;
+        blockApplySettings(true);
         ui->azimuth->setValue(azAl.getAzimuth());
         ui->elevation->setValue(azAl.getElevation());
+        blockApplySettings(false);
         return true;
     }
     else if (StarTrackerReport::MsgReportRADec::match(message))
