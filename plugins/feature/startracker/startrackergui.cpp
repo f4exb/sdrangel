@@ -32,6 +32,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/dmsspinbox.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -304,8 +305,8 @@ void StarTrackerGUI::displaySettings()
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
-    ui->azimuth->setUnits(m_settings.m_azElUnits);
-    ui->elevation->setUnits(m_settings.m_azElUnits);
+    ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+    ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
     if (m_settings.m_target == "Custom RA/Dec")
     {
         ui->rightAscension->setText(m_settings.m_ra);
@@ -599,8 +600,8 @@ void StarTrackerGUI::on_displaySettings_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         applySettings();
-        ui->elevation->setUnits(m_settings.m_azElUnits);
-        ui->azimuth->setUnits(m_settings.m_azElUnits);
+        ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+        ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
         displaySolarFlux();
         if (ui->chartSelect->currentIndex() == 1)
             plotChart();

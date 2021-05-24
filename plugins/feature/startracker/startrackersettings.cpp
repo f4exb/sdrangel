@@ -46,7 +46,7 @@ void StarTrackerSettings::resetToDefaults()
     m_beamwidth = 25.0;
     m_enableServer = true;
     m_serverPort = 10001;
-    m_azElUnits = DMSSpinBox::DM;
+    m_azElUnits = DM;
     m_solarFluxData = DRAO_2800;
     m_solarFluxUnits = SFU;
     m_updatePeriod = 1.0;
@@ -137,7 +137,7 @@ bool StarTrackerSettings::deserialize(const QByteArray& data)
         } else {
             m_serverPort = 10001;
         }
-        d.readS32(9, (qint32 *)&m_azElUnits, DMSSpinBox::DM);
+        d.readS32(9, (qint32 *)&m_azElUnits, DM);
         d.readFloat(10, &m_updatePeriod, 1.0f);
         d.readBool(11, &m_jnow, false);
         d.readString(12, &m_refraction, "Positional Astronomy Library");
