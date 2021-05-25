@@ -44,7 +44,7 @@ struct StarTrackerSettings
     double m_beamwidth;         // Beamwidth in degrees
     uint16_t m_serverPort;
     bool m_enableServer;        // Enable Stellarium server
-    enum AzElUnits {DMS, DM, D, Decimal} m_azElUnits;
+    enum AzElUnits {DMS, DM, D, Decimal} m_azElUnits; // This needs to match DMSSpinBox::DisplayUnits
     enum SolarFluxData {DRAO_2800, L_245, L_410, L_610, L_1415, L2695, L_4995, L_8800, L_15400, TARGET_FREQ} m_solarFluxData; // What Solar flux density data to display
     enum SolarFluxUnits {SFU, JANSKY, WATTS_M_HZ} m_solarFluxUnits;
     float m_updatePeriod;
@@ -53,7 +53,6 @@ struct StarTrackerSettings
     bool m_drawMoonOnMap;
     bool m_drawStarOnMap;
     bool m_chartsDarkTheme;     // Dark theme for charts
-
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;
@@ -61,6 +60,8 @@ struct StarTrackerSettings
     uint16_t m_reverseAPIPort;
     uint16_t m_reverseAPIFeatureSetIndex;
     uint16_t m_reverseAPIFeatureIndex;
+    double m_az;               // Azimuth for Custom Az/El
+    double m_el;               // Elevation for Custom Az/El
 
     StarTrackerSettings();
     void resetToDefaults();

@@ -28,6 +28,7 @@ set(sdrgui_SOURCES
     gui/cwkeyergui.cpp
     gui/devicestreamselectiondialog.cpp
     gui/deviceuserargsdialog.cpp
+    gui/dmsspinbox.cpp
     gui/editcommanddialog.cpp
     gui/externalclockbutton.cpp
     gui/externalclockdialog.cpp
@@ -114,6 +115,7 @@ set(sdrgui_HEADERS
     gui/cwkeyergui.h
     gui/devicestreamselectiondialog.h
     gui/deviceuserargsdialog.h
+    gui/dmsspinbox.h
     gui/doublevalidator.h
     gui/editcommanddialog.h
     gui/externalclockbutton.h

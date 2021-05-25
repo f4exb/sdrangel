@@ -32,6 +32,7 @@
 #include "feature/featureuiset.h"
 #include "feature/featurewebapiutils.h"
 #include "gui/basicfeaturesettingsdialog.h"
+#include "gui/dmsspinbox.h"
 #include "mainwindow.h"
 #include "device/deviceuiset.h"
 #include "util/units.h"
@@ -93,18 +94,6 @@ bool StarTrackerGUI::deserialize(const QByteArray& data)
     }
 }
 
-QString StarTrackerGUI::convertDegreesToText(double degrees)
-{
-    if (m_settings.m_azElUnits == StarTrackerSettings::DMS)
-        return Units::decimalDegreesToDegreeMinutesAndSeconds(degrees);
-    else if (m_settings.m_azElUnits == StarTrackerSettings::DM)
-        return Units::decimalDegreesToDegreesAndMinutes(degrees);
-    else if (m_settings.m_azElUnits == StarTrackerSettings::D)
-        return Units::decimalDegreesToDegrees(degrees);
-    else
-        return QString("%1").arg(degrees, 0, 'f', 2);
-}
-
 bool StarTrackerGUI::handleMessage(const Message& message)
 {
     if (StarTracker::MsgConfigureStarTracker::match(message))
@@ -121,8 +110,10 @@ bool StarTrackerGUI::handleMessage(const Message& message)
     else if (StarTrackerReport::MsgReportAzAl::match(message))
     {
         StarTrackerReport::MsgReportAzAl& azAl = (StarTrackerReport::MsgReportAzAl&) message;
-        ui->azimuth->setText(convertDegreesToText(azAl.getAzimuth()));
-        ui->elevation->setText(convertDegreesToText(azAl.getElevation()));
+        blockApplySettings(true);
+        ui->azimuth->setValue(azAl.getAzimuth());
+        ui->elevation->setValue(azAl.getElevation());
+        blockApplySettings(false);
         return true;
     }
     else if (StarTrackerReport::MsgReportRADec::match(message))
@@ -196,6 +187,10 @@ StarTrackerGUI::StarTrackerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet,
 
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(1000);
+
+    connect(ui->azimuth, SIGNAL(valueChanged(double)), this, SLOT(on_azimuth_valueChanged(double)));
+    ui->azimuth->setRange(0, 360.0);
+    ui->elevation->setRange(-90.0, 90.0);
 
     // Intialise chart
     m_chart.legend()->hide();
@@ -310,10 +305,17 @@ void StarTrackerGUI::displaySettings()
     ui->latitude->setValue(m_settings.m_latitude);
     ui->longitude->setValue(m_settings.m_longitude);
     ui->target->setCurrentIndex(ui->target->findText(m_settings.m_target));
-    if (m_settings.m_target == "Custom")
+    ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+    ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+    if (m_settings.m_target == "Custom RA/Dec")
     {
         ui->rightAscension->setText(m_settings.m_ra);
         ui->declination->setText(m_settings.m_dec);
+    }
+    else if (m_settings.m_target == "Custom Az/El")
+    {
+        ui->azimuth->setValue(m_settings.m_az);
+        ui->elevation->setValue(m_settings.m_el);
     }
     if (m_settings.m_dateTime == "")
     {
@@ -413,6 +415,20 @@ void StarTrackerGUI::on_declination_editingFinished()
     plotChart();
 }
 
+void StarTrackerGUI::on_azimuth_valueChanged(double value)
+{
+    m_settings.m_az = value;
+    applySettings();
+    plotChart();
+}
+
+void StarTrackerGUI::on_elevation_valueChanged(double value)
+{
+    m_settings.m_el = value;
+    applySettings();
+    plotChart();
+}
+
 void StarTrackerGUI::updateForTarget()
 {
     if (m_settings.m_target == "Sun")
@@ -429,7 +445,7 @@ void StarTrackerGUI::updateForTarget()
         ui->rightAscension->setText("");
         ui->declination->setText("");
     }
-    else if (m_settings.m_target == "Custom")
+    else if (m_settings.m_target == "Custom RA/Dec")
     {
         ui->rightAscension->setReadOnly(false);
         ui->declination->setReadOnly(false);
@@ -476,9 +492,21 @@ void StarTrackerGUI::updateForTarget()
         on_rightAscension_editingFinished();
         on_declination_editingFinished();
     }
-    // Clear as no longer valid when target has changed
-    ui->azimuth->setText("");
-    ui->elevation->setText("");
+    if (m_settings.m_target != "Custom Az/El")
+    {
+        ui->azimuth->setReadOnly(true);
+        ui->elevation->setReadOnly(true);
+        // Clear as no longer valid when target has changed
+        ui->azimuth->setText("");
+        ui->elevation->setText("");
+    }
+    else
+    {
+        ui->rightAscension->setReadOnly(true);
+        ui->declination->setReadOnly(true);
+        ui->azimuth->setReadOnly(false);
+        ui->elevation->setReadOnly(false);
+    }
 }
 
 void StarTrackerGUI::on_target_currentTextChanged(const QString &text)
@@ -572,6 +600,8 @@ void StarTrackerGUI::on_displaySettings_clicked()
     if (dialog.exec() == QDialog::Accepted)
     {
         applySettings();
+        ui->elevation->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
+        ui->azimuth->setUnits((DMSSpinBox::DisplayUnits)m_settings.m_azElUnits);
         displaySolarFlux();
         if (ui->chartSelect->currentIndex() == 1)
             plotChart();
@@ -691,12 +721,132 @@ void StarTrackerGUI::plotSolarFluxChart()
 //    disconnect(&m_chart, SIGNAL(plotAreaChanged(QRectF)), this, SLOT(plotAreaChanged(QRectF)));
 }
 
+QList<QLineSeries*> StarTrackerGUI::createDriftScan(bool galactic)
+{
+    QList<QLineSeries *>list;
+    QLineSeries *series = new QLineSeries();
+    list.append(series);
+
+    QDateTime dt;
+
+    // Get date and time to calculate position at
+    if (m_settings.m_dateTime == "") {
+        dt = QDateTime::currentDateTime();
+    } else {
+        dt = QDateTime::fromString(m_settings.m_dateTime, Qt::ISODateWithMs);
+    }
+
+    // Create a list of RA/Dec points of drift scan path
+    AzAlt aa;
+    aa.alt = m_settings.m_el;
+    aa.az = m_settings.m_az;
+    double prevX, prevY;
+    // Plot every 30min over a day
+    for (int i = 0; i <= 24*2; i++)
+    {
+        dt = dt.addSecs(30*60);
+        RADec rd = Astronomy::azAltToRaDec(aa, m_settings.m_latitude, m_settings.m_longitude, dt);
+        double x, y;
+        mapRaDec(rd.ra, rd.dec, galactic, x, y);
+        if (i == 0)
+        {
+            series->append(x, y);
+        }
+        else
+        {
+            // Check for crossing edge of chart
+            if (galactic)
+            {
+                if (((prevX < 90.0) && (x > 270.0)) || ((prevX > 270.0) && (x < 90.0)))
+                {
+                    // Start new series, so we don't have lines crossing across the chart
+                    series = new QLineSeries();
+                    list.append(series);
+                }
+            }
+            series->append(x, y);
+        }
+        prevX = x;
+        prevY = y;
+    }
+
+    return list;
+}
+
+void StarTrackerGUI::mapRaDec(double ra, double dec, bool galactic, double& x, double& y)
+{
+    if (galactic)
+    {
+        // Convert to category coordinates
+        double l, b;
+        Astronomy::equatorialToGalactic(ra, dec, l, b);
+        // Map to linear axis
+        double lAxis;
+        if (l < 180.0) {
+            lAxis = 180.0 - l;
+        } else {
+            lAxis = 360.0 - l + 180.0;
+        }
+
+        x = lAxis;
+        y = b;
+    }
+    else
+    {
+        // Map to category axis
+        double raAxis;
+        if (ra <= 12.0) {
+            raAxis = 12.0 - ra;
+        } else {
+            raAxis = 24 - ra + 12;
+        }
+
+        x = raAxis;
+        y = dec;
+    }
+}
+
+// Is there a way to get this from the theme? Got these values from the source
+QColor StarTrackerGUI::getSeriesColor(int series)
+{
+    if (m_settings.m_chartsDarkTheme)
+    {
+        if (series == 0) {
+            return QColor(0x38ad6b);
+        } else if (series == 1) {
+            return QColor(0x3c84a7);
+        } else {
+            return QColor(0xeb8817);
+        }
+    }
+    else
+    {
+        if (series == 0) {
+            return QColor(0x209fdf);
+        } else if (series == 1) {
+            return QColor(0x99ca53);
+        } else {
+            return QColor(0xf6a625);
+        }
+    }
+}
+
 void StarTrackerGUI::plotSkyTemperatureChart()
 {
     bool galactic = (ui->chartSubSelect->currentIndex() & 1) == 1;
 
     m_chart.removeAllSeries();
     removeAllAxes();
+
+    // Plot drift scan path
+    QList<QLineSeries*> lineSeries;
+    if (m_settings.m_target == "Custom Az/El") {
+        lineSeries = createDriftScan(galactic);
+        QPen pen(getSeriesColor(1), 2, Qt::SolidLine);
+        for (int i = 0; i < lineSeries.length(); i++) {
+            lineSeries[i]->setPen(pen);
+        }
+    }
 
     QScatterSeries *series = new QScatterSeries();
     float ra = Astronomy::raToDecimal(m_settings.m_ra);
@@ -709,30 +859,9 @@ void StarTrackerGUI::plotSkyTemperatureChart()
     double degPerPixel = std::min(degPerPixelW, degPerPixelH);
     double markerSize;
 
-    if (galactic)
-    {
-        // Convert to category coordinates
-        double l, b;
-        Astronomy::equatorialToGalactic(ra, dec, l, b);
-
-        // Map to linear axis
-        double lAxis;
-        if (l < 180.0)
-            lAxis = 180.0 - l;
-        else
-            lAxis = 360.0 - l + 180.0;
-        series->append(lAxis, b);
-    }
-    else
-    {
-        // Map to category axis
-        double raAxis;
-        if (ra <= 12.0)
-            raAxis = 12.0 - ra;
-        else
-            raAxis = 24 - ra + 12;
-        series->append(raAxis, dec);
-    }
+    double x, y;
+    mapRaDec(ra, dec, galactic, x, y);
+    series->append(x, y);
 
     // Get temperature
     int idx = ui->chartSubSelect->currentIndex();
@@ -757,10 +886,12 @@ void StarTrackerGUI::plotSkyTemperatureChart()
             double degreesPerPixelV = abs(fits->degreesPerPixelV());
             int numberOfCoeffsH = ceil(beamwidth/degreesPerPixelH);
             int numberOfCoeffsV = ceil(beamwidth/degreesPerPixelV);
-            if ((numberOfCoeffsH & 1) == 0)
+            if ((numberOfCoeffsH & 1) == 0) {
                 numberOfCoeffsH++;
-            if ((numberOfCoeffsV & 1) == 0)
+            }
+            if ((numberOfCoeffsV & 1) == 0) {
                 numberOfCoeffsV++;
+            }
             double *beam = new double[numberOfCoeffsH*numberOfCoeffsV];
             double sum = 0.0;
             int y0 = numberOfCoeffsV/2;
@@ -780,16 +911,19 @@ void StarTrackerGUI::plotSkyTemperatureChart()
                         nonZeroCount++;
                     }
                     else
+                    {
                         beam[y*numberOfCoeffsH+x] = 0.0;
+                    }
                 }
             }
 
             // Get centre pixel coordinates
             double centreX;
-            if (ra <= 12.0)
+            if (ra <= 12.0) {
                 centreX = (12.0 - ra) / 24.0;
-            else
+            } else {
                 centreX = (24 - ra + 12) / 24.0;
+            }
             double centreY = (90.0-dec) / 180.0;
             int imgX = centreX * fits->width();
             int imgY = centreY * fits->height();
@@ -831,12 +965,13 @@ void StarTrackerGUI::plotSkyTemperatureChart()
             else
             {
                 // See https://arxiv.org/abs/1812.10084 fig 2
-                if (m_settings.m_frequency < 200e6)
+                if (m_settings.m_frequency < 200e6) {
                     spectralIndex = 2.55;
-                else if (m_settings.m_frequency < 20e9)
+                } else if (m_settings.m_frequency < 20e9) {
                      spectralIndex = 2.695;
-                else
+                } else {
                      spectralIndex = 3.1;
+                }
             }
             double galactic480 = temp408 - cmbT - iso408;
             double galacticT = galactic480 * pow(408e6/m_settings.m_frequency, spectralIndex); // Scale galactic contribution by frequency
@@ -860,16 +995,19 @@ void StarTrackerGUI::plotSkyTemperatureChart()
         QImage *img = &m_images[idx];
         FITS *fits = &m_temps[idx/2];
         double x;
-        if (ra <= 12.0)
+        if (ra <= 12.0) {
             x = (12.0 - ra) / 24.0;
-        else
+        } else {
             x = (24 - ra + 12) / 24.0;
-        int imgX = x * img->width();
-        if (imgX >= img->width())
-            imgX = img->width();
-        int imgY = (90.0-dec)/180.0 * img->height();
-        if (imgY >= img->height())
-            imgY = img->height();
+        }
+        int imgX = x * (img->width() - 1);
+        if (imgX >= img->width()) {
+            imgX = img->width() - 1;
+        }
+        int imgY = (90.0-dec)/180.0 * (img->height() - 1);
+        if (imgY >= img->height()) {
+            imgY = img->height() - 1;
+        }
 
         if (fits->valid())
         {
@@ -883,8 +1021,13 @@ void StarTrackerGUI::plotSkyTemperatureChart()
         markerSize = 5;
     }
     series->setMarkerSize(markerSize);
+    series->setColor(getSeriesColor(0));
 
     m_chart.setTitle("");
+    // We want scatter to be on top of line, but same color even when no drift line
+    for (int i = 0; i < lineSeries.length(); i++) {
+        m_chart.addSeries(lineSeries[i]);
+    }
     m_chart.addSeries(series);
     if (galactic)
     {
@@ -894,6 +1037,12 @@ void StarTrackerGUI::plotSkyTemperatureChart()
         m_skyTempYAxis.setTitleText(QString("Galactic latitude (%1)").arg(QChar(0xb0)));
         m_chart.addAxis(&m_skyTempYAxis, Qt::AlignLeft);
         series->attachAxis(&m_skyTempYAxis);
+
+        for (int i = 0; i < lineSeries.length(); i++)
+        {
+            lineSeries[i]->attachAxis(&m_skyTempGalacticLXAxis);
+            lineSeries[i]->attachAxis(&m_skyTempYAxis);
+        }
     }
     else
     {
@@ -903,6 +1052,12 @@ void StarTrackerGUI::plotSkyTemperatureChart()
         m_skyTempYAxis.setTitleText(QString("Declination (%1)").arg(QChar(0xb0)));
         m_chart.addAxis(&m_skyTempYAxis, Qt::AlignLeft);
         series->attachAxis(&m_skyTempYAxis);
+
+        for (int i = 0; i < lineSeries.length(); i++)
+        {
+            lineSeries[i]->attachAxis(&m_skyTempRAXAxis);
+            lineSeries[i]->attachAxis(&m_skyTempYAxis);
+        }
     }
     ui->chart->setChart(&m_chart);
     plotAreaChanged(m_chart.plotArea());
@@ -965,7 +1120,7 @@ void StarTrackerGUI::plotElevationLineChart()
     QList<QLineSeries *> azSeriesList;
     QLineSeries *azSeries = new QLineSeries();
     azSeriesList.append(azSeries);
-    QPen pen(QColor(153, 202, 83), 2, Qt::SolidLine);
+    QPen pen(getSeriesColor(1), 2, Qt::SolidLine);
     azSeries->setPen(pen);
 
     QDateTime dt;
@@ -1172,7 +1327,7 @@ void StarTrackerGUI::plotElevationPolarChart()
     QList<QLineSeries *> series;
     series.append(new QLineSeries());
     QLineSeries *s = series.first();
-    QPen pen(QColor(32, 159, 223), 2, Qt::SolidLine);
+    QPen pen(getSeriesColor(0), 2, Qt::SolidLine);
     s->setPen(pen);
 
     qreal prevAz = polarSeries->at(0).x();
@@ -1467,7 +1622,7 @@ void StarTrackerGUI::updateSolarFlux(bool all)
     }
     if ((m_settings.m_solarFluxData == StarTrackerSettings::DRAO_2800) || all)
     {
-        m_networkRequest.setUrl(QUrl("https://www.spaceweather.gc.ca/solarflux/sx-4-en.php"));
+        m_networkRequest.setUrl(QUrl("https://www.spaceweather.gc.ca/forecast-prevision/solar-solaire/solarflux/sx-4-en.php"));
         m_networkManager->get(m_networkRequest);
     }
 }

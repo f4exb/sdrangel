@@ -4,6 +4,7 @@
 
 The Star Tracker feature plugin is for use in radio astronomy and EME (Earth-Moon-Earth) communication.
 It calculates the azimuth and elevation of celestial objects and can send them to the Rotator Controller or other plugins to point an antenna at that object.
+It can plot drift scan paths in both equatorial and galactic charts.
 The overhead position of the Sun, Moon and selected star can be displayed on the Map Feature.
 It can display local Sidereal time, solar flux density and sky temperature.
 The plugin can communicate with Stellarium, allowing Stellarium to control SDRangel as though it was a telescope and for the direction the antenna is pointing to be displayed in Stellarium.
@@ -72,8 +73,8 @@ Displays the Solar flux density. The observatory where the data is sourced from,
 <h3>11: Target</h3>
 
 Select a target object to track from the list.
-To manually enter RA (right ascension) and Dec (declination) of an unlisted target, select Custom.
-To allow Stellarium to set the RA and Dec, select Custom, and ensure the Stellarium Server option is checked in the Star Tracker Settings dialog.
+To manually enter RA (right ascension) and Dec (declination) of an unlisted target, select Custom RA/Dec.
+To allow Stellarium to set the RA and Dec, select Custom RA/Dec, and ensure the Stellarium Server option is checked in the Star Tracker Settings dialog.
 
 | Target           | Type              | Details                                        | Flux density (Jy)                          |
 |------------------|-------------------|------------------------------------------------|---------------------------------------------
@@ -86,7 +87,8 @@ To allow Stellarium to set the RA and Dec, select Custom, and ensure the Stellar
 | Cygnus A         | Galaxy            | First radio galaxy                             | 22k (50MHz), 11k (150MHz), 1579 (1.4GHz)   |
 | Taurus A (M1)    | Supernova/Pulsar  | Crab Nebular                                   | 2008 (50MHz), 1368 (150MHz), 829 (1.4GHz)  |
 | Virgo A (M87)    | Galaxy            |                                                | 2635 (50MHz), 1209 (150MHz), 212 (1.4GHz)  |
-| Custom           |                   | Manually enter RA and Dec                      |                                            |
+| Custom RA/Dec    |                   | Manually enter RA and Dec                      |                                            |
+| Custom Az/El     |                   | Manually enter azimuth and elevation           |                                            |
 
 References:
 
@@ -104,31 +106,40 @@ Enter the half power (-3dB) beamwidth of your antenna. This value is used for sk
 
 <h3>14: Right Ascension</h3>
 
-When target is set to Custom, you can specify the right ascension in hours of the target object. This can be specified as a decimal (E.g. 12.23, from 0 to 24) or in hours, minutes and seconds (E.g. 12h05m10.2s or 12 05 10.2). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
+When target is set to Custom RA/Dec, you can specify the right ascension in hours of the target object. This can be specified as a decimal (E.g. 12.23, from 0 to 24) or in hours, minutes and seconds (E.g. 12h05m10.2s or 12 05 10.2). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
+
+When target is set to Custom Az/El, this will display the corresponding right ascension.
 
 <h3>15: Declination</h3>
 
-When target is set to Custom, you can specify the declination in degrees of the target object. This can be specified as a decimal (E.g. 34.6, from -90.0 to 90.0) or in degrees, minutes and seconds (E.g. 34d12m5.6s, 34d12'5.6"  34 12 5.6). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
+When target is set to Custom RA/Dec, you can specify the declination in degrees of the target object. This can be specified as a decimal (E.g. 34.6, from -90.0 to 90.0) or in degrees, minutes and seconds (E.g. 34d12m5.6s, 34d12'5.6"  34 12 5.6). Whether the epoch is J2000 or JNOW can be set in the Star Tracker Settings dialog.
+
+When target is set to Custom Az/El, this will display the corresponding declination.
 
 <h3>16: Azimuth</h3>
 
-Displays the calculated azimuth (angle in degrees, clockwise from North) to the object.
+When target is set to Custom Az/El, you specify the azimuth in degrees of the target object. The corresponding RA/Dec will be calculated and displayed.
+
+For all other target settings, this displays the calculated azimuth (angle in degrees, clockwise from North) to the object.
 
 <h3>17: Elevation</h3>
 
-Displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
+When target is set to Custom Az/El, you specify the elevation in degrees of the target object. The corresponding RA/Dec will be calculated and displayed.
+
+For all other target settings, this displays the calculated elevation (angle in degrees - 0 to horizon and 90 to zenith) to the object.
 
 <h2>Plots</h2>
 
 <h3>Light or dark theme</h3>
 
-click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
+Click on this icon ![Star Tracker Chart theme](../../../doc/img/StarTracker_chart_theme.png) to switch between light and dark themes for the charts.
 
 <h3>Elevation vs time</h3>
 
-![Star Tracker Elevation vs Time](../../../doc/img/StarTracker_elevationvstime.png)
+![Star Tracker Elevation vs Time](../../../doc/img/StarTracker_elevationvstime.png) ![Star Tracker Elevation vs Time Polar](../../../doc/img/StarTracker_elevationvstime_polar.png)
 
 In order to assist in determining whether and when observations of the target object may be possible, an elevation vs time plot is drawn for the 24 hours encompassing the selected date and time.
+This can be plotted on Cartesian or polar axis.
 Some objects may not be visible from a particular latitude for the specified time, in which case, the graph title will indicate the object is not visible on that particular date.
 
 <h3>Solar flux vs frequency</h3>
@@ -148,6 +159,17 @@ This temperature is therefore valid for a beamwidth of less than 1 degree.
 The Star Tracker plugin can also estimate a sky temperature based on the user entered observation frequency and beamwidth.
 To see this figure, which will be typically lower than the above, select one of the last two temperature maps from the right hand combo box.
 
+<h3>Drift scan path</h3>
+
+When the target (11) is set to Custom Az/El and the Sky temperature plot is displayed, a curve showing the drift scan path over a 24 hour period will be displayed.
+This assumes the azimuth and elevation will be held constant and the path shows the part of the sky the antenna will point to as the Earth rotates.
+
+![Drift scan path](../../../doc/img/StarTracker_driftscan.png)
+
+To setup a drift scan through a particular target object, first set the target (11) to that object. This will set the azimuth and elevation to point at the object.
+You may want to set the Time (8) to Custom and a few hours in the future, so that the elevation is at a maximum when pointing at the target.
+Then switch the target to Custom Az/El and Time back to Now, and the drift scan path that sweeps through the object will displayed.
+
 <h2>Map</h2>
 
 The Star Tracker feature can send the overhead position of the Sun, Moon and target Star to the Map. These can be enabled individually in the settings dialog. The Moon should be displayed with an approximate phase. Stars (or galaxies) are displayed as an image of a pulsar.
@@ -160,7 +182,7 @@ When using the Find feature in the Map GUI, you can search for "Sun", "Moon" or 
 
 In Star Tracker:
 
-* Set target to Custom
+* Set target to Custom RA/Dec
 * Press Show settings dialog and ensure Stellarium server is checked
 * Press Start
 
@@ -186,7 +208,7 @@ Then select the SDRangel telescope reticle and press Ocular view.
 
 <h2>Attribution</h2>
 
-Solar radio flux measurement at 10.7cm/2800MHz is from National Research Council Canada and Natural Resources Canada: https://www.spaceweather.gc.ca/solarflux/sx-4-en.php
+Solar radio flux measurement at 10.7cm/2800MHz is from National Research Council Canada and Natural Resources Canada: https://www.spaceweather.gc.ca/forecast-prevision/solar-solaire/solarflux/sx-4-en.php
 
 Solar radio flux measurements at 245, 410, 610, 1415, 2695, 4995, 8800 and 15400MHz from the Learmonth Observatory: http://www.sws.bom.gov.au/World_Data_Centre/1/10
 

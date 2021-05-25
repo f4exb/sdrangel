@@ -102,9 +102,11 @@ private:
     void applySettings(bool force = false);
     void displaySettings();
     void updateForTarget();
-    QString convertDegreesToText(double degrees);
     bool handleMessage(const Message& message);
     void updateLST();
+    void mapRaDec(double ra, double dec, bool galactic, double& x, double& y);
+    QList<QLineSeries*> createDriftScan(bool galactic);
+    QColor getSeriesColor(int series);
     void plotElevationLineChart();
     void plotElevationPolarChart();
     void plotSkyTemperatureChart();
@@ -133,6 +135,8 @@ private slots:
     void on_longitude_valueChanged(double value);
     void on_rightAscension_editingFinished();
     void on_declination_editingFinished();
+    void on_azimuth_valueChanged(double value);
+    void on_elevation_valueChanged(double value);
     void on_frequency_valueChanged(int value);
     void on_beamwidth_valueChanged(double value);
     void on_target_currentTextChanged(const QString &text);

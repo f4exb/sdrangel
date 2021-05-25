@@ -141,6 +141,8 @@ void StarTracker::applySettings(const StarTrackerSettings& settings, bool force)
             << " m_target: " << settings.m_target
             << " m_ra: " << settings.m_ra
             << " m_dec: " << settings.m_dec
+            << " m_az: " << settings.m_az
+            << " m_el: " << settings.m_el
             << " m_latitude: " << settings.m_latitude
             << " m_longitude: " << settings.m_longitude
             << " m_serverPort: " << settings.m_serverPort

@@ -216,6 +216,47 @@ AzAlt Astronomy::raDecToAzAlt(RADec rd, double latitude, double longitude, QDate
     return aa;
 }
 
+// Convert from altitude and azimuth, for location (decimal degrees) and time, to Jnow right ascension (decimal hours) and declination (decimal degrees)
+// See: http://jonvoisey.net/blog/2018/07/data-converting-alt-az-to-ra-dec-example/
+RADec Astronomy::azAltToRaDec(AzAlt aa, double latitude, double longitude, QDateTime dt)
+{
+    RADec rd;
+    double lst_deg; // Local sidereal time
+    double ha_rad, ha_deg; // Hour angle
+    double alt_rad, az_rad, lat_rad, dec_rad; // Corresponding variables as radians
+
+    // Calculate local mean sidereal time (LMST) in degrees (see raDecToAzAlt)
+    lst_deg = Astronomy::localSiderealTime(dt, longitude);
+
+    // Convert degrees to radians
+    alt_rad = Units::degreesToRadians(aa.alt);
+    az_rad = Units::degreesToRadians(aa.az);
+    lat_rad = Units::degreesToRadians(latitude);
+
+    // Calculate declination
+    dec_rad = asin(sin(lat_rad)*sin(alt_rad)+cos(lat_rad)*cos(alt_rad)*cos(az_rad));
+
+    // Calculate hour angle
+    double quotient = (sin(alt_rad)-sin(lat_rad)*sin(dec_rad))/(cos(lat_rad)*cos(dec_rad));
+    // At extreme altitudes, we seem to get small numerical errors that causes values to be out of range, so clip to [-1,1]
+    if (quotient < -1.0) {
+        ha_rad = acos(-1.0);
+    } else if (quotient > 1.0) {
+        ha_rad = acos(1.0);
+    } else {
+        ha_rad = acos(quotient);
+    }
+
+    // Convert radians to degrees
+    rd.dec = Units::radiansToDegrees(dec_rad);
+    ha_deg = Units::radiansToDegrees(ha_rad);
+
+    // Calculate right ascension in decimal hours
+    rd.ra = modulo((lst_deg - ha_deg) / (360.0/24.0), 24.0);
+
+    return rd;
+}
+
 // Needs to work for negative a
 double Astronomy::modulo(double a, double b)
 {
@@ -493,10 +534,11 @@ double Astronomy::lstAndRAToLongitude(double lst, double raHours)
 }
 
 // Return right ascension and declination of North Galactic Pole in J2000 Epoch
+// http://www.lsc-group.phys.uwm.edu/lal/lsd/node1777.html
 void Astronomy::northGalacticPoleJ2000(double& ra, double& dec)
 {
-    ra = 12 + 51.4 / 60.0;
-    dec = 27.13;
+    ra = 192.8594813/15.0;
+    dec = 27.1282511;
 }
 
 // Convert from equatorial to Galactic coordinates, J2000 Epoch
@@ -511,40 +553,24 @@ void Astronomy::equatorialToGalactic(double ra, double dec, double& l, double& b
     const double ngpRaRad = Units::degreesToRadians(ngpRa * 15.0);
     const double ngpDecRad = Units::degreesToRadians(ngpDec);
 
-    // Calculate galactic latitude for North Celestial pole, J2000
-    const double ncpLRad = Units::degreesToRadians(122.93192);
-
     // Calculate galactic longitude in radians
     double bRad = asin(sin(ngpDecRad)*sin(decRad)+cos(ngpDecRad)*cos(decRad)*cos(raRad - ngpRaRad));
 
-    // Find the two possible solutions for galactic longitude in radians
-    double rhs1 = cos(decRad)*sin(raRad-ngpRaRad)/cos(bRad);
-    double rhs2 = (-cos(decRad)*sin(ngpDecRad)*cos(raRad-ngpRaRad)+sin(decRad)*cos(ngpDecRad))/cos(bRad);
-    double l1 = ncpLRad - asin(rhs1);
-    double l2 = ncpLRad - acos(rhs2);
+    // Calculate galactic latitiude in radians
+    double lRad = atan2(sin(decRad)-sin(bRad)*sin(ngpDecRad), cos(decRad)*cos(ngpDecRad)*sin(raRad - ngpRaRad));
 
-    // Plug them back in and select solution which is valid for both equations
-    // (Error should be 0, but we have to allow for small numerical differences)
-    // There's probably a better way to solve this.
-    double l1lhs1 = sin(ncpLRad - l1);
-    double l1lhs2 = cos(ncpLRad - l1);
-    double l2lhs1 = sin(ncpLRad - l2);
-    double l2lhs2 = cos(ncpLRad - l2);
-    double l1Diff = abs(l1lhs1 - rhs1) + abs(l1lhs2 - rhs2);
-    double l2Diff = abs(l2lhs1 - rhs1) + abs(l2lhs2 - rhs2);
-    double lRad;
-    if (l1Diff < l2Diff)
-        lRad = l1;
-    else
-        lRad = l2;
+    // Ascending node of the galactic plane in degrees
+    double lAscend = 33.0;
 
     // Convert to degrees in range -90,90 and 0,360
     b = Units::radiansToDegrees(bRad);
-    l = Units::radiansToDegrees(lRad);
-    if (l < 0.0)
+    l = Units::radiansToDegrees(lRad) + lAscend;
+    if (l < 0.0) {
         l += 360.0;
-    if (l > 360.0)
+    }
+    if (l > 360.0) {
         l -= 360.0;
+    }
 }
 
 // The following functions are from Starlink Positional Astronomy Library

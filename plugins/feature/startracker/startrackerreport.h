@@ -20,8 +20,10 @@
 #define INCLUDE_FEATURE_STARTRACKERREPORT_H_
 
 #include <QObject>
+#include <QList>
 
 #include "util/message.h"
+#include "util/astronomy.h"
 
 class StarTrackerReport : public QObject
 {
