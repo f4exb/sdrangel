@@ -24,6 +24,7 @@
 
 #include "dsp/spectrumvis.h"
 #include "dsp/scopevis.h"
+#include "dsp/glscopesettings.h"
 #include "device/deviceuiset.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -496,7 +497,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     // Scope settings to display the IQ waveforms
     ui->scopeGUI->setPreTrigger(1);
-    ScopeVis::TraceData traceDataI, traceDataQ;
+    GLScopeSettings::TraceData traceDataI, traceDataQ;
     traceDataI.m_projectionType = Projector::ProjectionReal;
     traceDataI.m_amp = 1.0;      // for -1 to +1
     traceDataI.m_ampIndex = 0;

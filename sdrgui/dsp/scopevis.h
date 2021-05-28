@@ -32,6 +32,7 @@
 #include "dsp/dsptypes.h"
 #include "dsp/basebandsamplesink.h"
 #include "dsp/projector.h"
+#include "dsp/glscopesettings.h"
 #include "export.h"
 #include "util/message.h"
 #include "util/doublebuffer.h"
@@ -42,60 +43,9 @@ class GLScope;
 class SDRGUI_API ScopeVis : public BasebandSampleSink {
 
 public:
-    struct TraceData
-    {
-        Projector::ProjectionType m_projectionType; //!< Complex to real projection type
-        uint32_t m_inputIndex;           //!< Input or feed index this trace is associated with
-        float m_amp;                     //!< Amplification factor
-        uint32_t m_ampIndex;             //!< Index in list of amplification factors
-        float m_ofs;                     //!< Offset factor
-        int m_ofsCoarse;                 //!< Coarse offset slider value
-        int m_ofsFine;                   //!< Fine offset slider value
-        int m_traceDelay;                //!< Trace delay in number of samples
-        int m_traceDelayCoarse;          //!< Coarse delay slider value
-        int m_traceDelayFine;            //!< Fine delay slider value
-        float m_triggerDisplayLevel;     //!< Displayable trigger display level in -1:+1 scale. Off scale if not displayable.
-        QColor m_traceColor;             //!< Trace display color
-        float m_traceColorR;             //!< Trace display color - red shortcut
-        float m_traceColorG;             //!< Trace display color - green shortcut
-        float m_traceColorB;             //!< Trace display color - blue shortcut
-        bool m_hasTextOverlay;           //!< True if a text overlay has to be displayed
-        QString m_textOverlay;           //!< Text overlay to display
-        bool m_viewTrace;                //!< Trace visibility
-
-        TraceData() :
-            m_projectionType(Projector::ProjectionReal),
-            m_inputIndex(0),
-            m_amp(1.0f),
-            m_ampIndex(0),
-            m_ofs(0.0f),
-            m_ofsCoarse(0),
-            m_ofsFine(0),
-            m_traceDelay(0),
-            m_traceDelayCoarse(0),
-            m_traceDelayFine(0),
-			m_triggerDisplayLevel(2.0),  // OVer scale by default (2.0)
-			m_traceColor(255,255,64),
-			m_hasTextOverlay(false),
-			m_viewTrace(true)
-        {
-            setColor(m_traceColor);
-        }
-
-        void setColor(QColor color)
-        {
-            m_traceColor = color;
-            qreal r,g,b,a;
-            m_traceColor.getRgbF(&r, &g, &b, &a);
-            m_traceColorR = r;
-            m_traceColorG = g;
-            m_traceColorB = b;
-        }
-    };
-
-
     struct TriggerData
     {
+        uint32_t m_streamIndex;          //!< I/Q stream index
         Projector::ProjectionType m_projectionType; //!< Complex to real projection type
         uint32_t m_inputIndex;           //!< Input or feed index this trigger is associated with
         Real m_triggerLevel;             //!< Level in real units
@@ -115,6 +65,7 @@ public:
         float m_triggerColorB;           //!< Trigger line display color - blue shortcut
 
         TriggerData() :
+            m_streamIndex(0),
             m_projectionType(Projector::ProjectionReal),
             m_inputIndex(0),
             m_triggerLevel(0.0f),
@@ -154,8 +105,8 @@ public:
 
     void setLiveRate(int sampleRate);
     void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
-    void addTrace(const TraceData& traceData);
-    void changeTrace(const TraceData& traceData, uint32_t traceIndex);
+    void addTrace(const GLScopeSettings::TraceData& traceData);
+    void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
     void moveTrace(uint32_t traceIndex, bool upElseDown);
     void focusOnTrace(uint32_t traceIndex);
@@ -220,22 +171,20 @@ public:
 
     void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
     {
-        if (triggerIndex < m_triggerConditions.size())
-        {
+        if (triggerIndex < m_triggerConditions.size()) {
             triggerData = m_triggerConditions[triggerIndex]->m_triggerData;
         }
     }
 
-    void getTraceData(TraceData& traceData, uint32_t traceIndex)
+    void getTraceData(GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
     {
-        if (traceIndex < m_traces.m_tracesData.size())
-        {
+        if (traceIndex < m_traces.m_tracesData.size()) {
             traceData = m_traces.m_tracesData[traceIndex];
         }
     }
 
     const TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex]->m_triggerData; }
-    const std::vector<TraceData>& getTracesData() const { return m_traces.m_tracesData; }
+    const std::vector<GLScopeSettings::TraceData>& getTracesData() const { return m_traces.m_tracesData; }
     uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
 
     using BasebandSampleSink::feed;
@@ -407,17 +356,17 @@ private:
 
     public:
         static MsgScopeVisNGAddTrace* create(
-                const TraceData& traceData)
+                const GLScopeSettings::TraceData& traceData)
         {
             return new MsgScopeVisNGAddTrace(traceData);
         }
 
-        const TraceData& getTraceData() const { return m_traceData; }
+        const GLScopeSettings::TraceData& getTraceData() const { return m_traceData; }
 
     private:
-        TraceData m_traceData;
+        GLScopeSettings::TraceData m_traceData;
 
-        MsgScopeVisNGAddTrace(const TraceData& traceData) :
+        MsgScopeVisNGAddTrace(const GLScopeSettings::TraceData& traceData) :
             m_traceData(traceData)
         {}
     };
@@ -428,19 +377,19 @@ private:
 
     public:
         static MsgScopeVisNGChangeTrace* create(
-                const TraceData& traceData, uint32_t traceIndex)
+                const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
         {
             return new MsgScopeVisNGChangeTrace(traceData, traceIndex);
         }
 
-        const TraceData& getTraceData() const { return m_traceData; }
+        const GLScopeSettings::TraceData& getTraceData() const { return m_traceData; }
         uint32_t getTraceIndex() const { return m_traceIndex; }
 
     private:
-        TraceData m_traceData;
+        GLScopeSettings::TraceData m_traceData;
         uint32_t m_traceIndex;
 
-        MsgScopeVisNGChangeTrace(TraceData traceData, uint32_t traceIndex) :
+        MsgScopeVisNGChangeTrace(GLScopeSettings::TraceData traceData, uint32_t traceIndex) :
             m_traceData(traceData),
             m_traceIndex(traceIndex)
         {}
@@ -874,7 +823,7 @@ private:
     struct Traces
     {
         std::vector<TraceControl*> m_tracesControl;   //!< Corresponding traces control data
-        std::vector<TraceData> m_tracesData;          //!< Corresponding traces data
+        std::vector<GLScopeSettings::TraceData> m_tracesData; //!< Corresponding traces data
         std::vector<float *> m_traces[2];             //!< Double buffer of traces processed by glScope
         std::vector<Projector::ProjectionType> m_projectionTypes;
         int m_traceSize;                              //!< Current size of a trace in buffer
@@ -907,7 +856,7 @@ private:
             m_maxTraceSize = 0;
         }
 
-        bool isVerticalDisplayChange(const TraceData& traceData, uint32_t traceIndex)
+        bool isVerticalDisplayChange(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
         {
         	return (m_tracesData[traceIndex].m_projectionType != traceData.m_projectionType)
         			|| (m_tracesData[traceIndex].m_amp != traceData.m_amp)
@@ -915,7 +864,7 @@ private:
 					|| (m_tracesData[traceIndex].m_traceColor != traceData.m_traceColor));
         }
 
-        void addTrace(const TraceData& traceData, int traceSize)
+        void addTrace(const GLScopeSettings::TraceData& traceData, int traceSize)
         {
             if (m_traces[0].size() < m_maxNbTraces)
             {
@@ -932,7 +881,7 @@ private:
             }
         }
 
-        void changeTrace(const TraceData& traceData, uint32_t traceIndex)
+        void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
         {
             if (traceIndex < m_tracesControl.size()) {
                 TraceControl *traceControl = m_tracesControl[traceIndex];
@@ -984,7 +933,7 @@ private:
             m_tracesControl[nextControlIndex] = traceControl;
             m_tracesControl[traceIndex] = nextTraceControl;
 
-            TraceData nextData = m_tracesData[nextDataIndex];
+            GLScopeSettings::TraceData nextData = m_tracesData[nextDataIndex];
             m_tracesData[nextDataIndex] = m_tracesData[traceIndex];
             m_tracesData[traceIndex] = nextData;
 

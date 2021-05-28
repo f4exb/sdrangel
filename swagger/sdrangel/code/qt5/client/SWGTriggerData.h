@@ -41,6 +41,9 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGTriggerData* fromJson(QString &jsonString) override;
 
+    qint32 getStreamIndex();
+    void setStreamIndex(qint32 stream_index);
+
     qint32 getProjectionType();
     void setProjectionType(qint32 projection_type);
 
@@ -96,6 +99,9 @@ public:
     virtual bool isSet() override;
 
 private:
+    qint32 stream_index;
+    bool m_stream_index_isSet;
+
     qint32 projection_type;
     bool m_projection_type_isSet;
 

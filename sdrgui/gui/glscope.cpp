@@ -120,7 +120,7 @@ void GLScope::setDisplayTraceIntensity(int intensity)
     update();
 }
 
-void GLScope::setTraces(std::vector<ScopeVis::TraceData> *tracesData, std::vector<float *> *traces)
+void GLScope::setTraces(std::vector<GLScopeSettings::TraceData> *tracesData, std::vector<float *> *traces)
 {
     m_tracesData = tracesData;
     m_traces = traces;
@@ -345,7 +345,7 @@ void GLScope::paintGL()
         if (m_traceSize > 0)
         {
             const float *trace = (*m_traces)[0];
-            const ScopeVis::TraceData &traceData = (*m_tracesData)[0];
+            const GLScopeSettings::TraceData &traceData = (*m_tracesData)[0];
 
             if (traceData.m_viewTrace)
             {
@@ -438,7 +438,7 @@ void GLScope::paintGL()
             for (unsigned int i = 1; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
-                const ScopeVis::TraceData &traceData = (*m_tracesData)[i];
+                const GLScopeSettings::TraceData &traceData = (*m_tracesData)[i];
 
                 if (!traceData.m_viewTrace) {
                     continue;
@@ -657,7 +657,7 @@ void GLScope::paintGL()
             for (unsigned int i = 0; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
-                const ScopeVis::TraceData &traceData = (*m_tracesData)[i];
+                const GLScopeSettings::TraceData &traceData = (*m_tracesData)[i];
 
                 if (!traceData.m_viewTrace) {
                     continue;
@@ -771,7 +771,7 @@ void GLScope::paintGL()
             for (unsigned int i = 1; i < m_traces->size(); i++)
             {
                 const float *trace = (*m_traces)[i];
-                const ScopeVis::TraceData &traceData = (*m_tracesData)[i];
+                const GLScopeSettings::TraceData &traceData = (*m_tracesData)[i];
 
                 if (!traceData.m_viewTrace) {
                     continue;
@@ -1863,7 +1863,7 @@ void GLScope::setPolarDisplays()
 
 void GLScope::setYScale(ScaleEngine &scale, uint32_t highlightedTraceIndex)
 {
-    ScopeVis::TraceData &traceData = (*m_tracesData)[highlightedTraceIndex];
+    GLScopeSettings::TraceData &traceData = (*m_tracesData)[highlightedTraceIndex];
     double amp_range = 2.0 / traceData.m_amp;
     double amp_ofs = traceData.m_ofs;
     double pow_floor = -100.0 + traceData.m_ofs * 100.0;

@@ -1,6 +1,9 @@
 TraceData:
   description: see GLScopeSettings::TraceData
   properties:
+    streamIndex:
+      description: Source I/Q stream index
+      type: integer
     projectionType:
       description: Complex to real projection type. See Projector::ProjectionType
       type: integer
@@ -65,6 +68,9 @@ TraceData:
 TriggerData:
   description: see GLScopeSettings::TriggerData
   properties:
+    streamIndex:
+      description: Source I/Q stream index
+      type: integer
     projectionType:
       description: Complex to real projection type. See Projector::ProjectionType
       type: integer

@@ -16,6 +16,9 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
+#ifndef SDRBASE_DSP_PROJECTOR_H
+#define SDRBASE_DSP_PROJECTOR_H
+
 #include "export.h"
 #include "dsptypes.h"
 
@@ -57,3 +60,5 @@ private:
     Real *m_cache;
     bool m_cacheMaster;
 };
+
+#endif // SDRBASE_DSP_PROJECTOR_H

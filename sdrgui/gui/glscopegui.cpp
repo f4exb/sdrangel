@@ -99,7 +99,7 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     m_scopeVis->addTrigger(triggerData);
 
     // Add a trace
-    ScopeVis::TraceData traceData;
+    GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
     m_scopeVis->addTrace(traceData);
 
@@ -185,8 +185,8 @@ QByteArray GLScopeGUI::serialize() const
     s.writeS32(6, ui->traceLen->value());
 
     // second row - by trace
-    const std::vector<ScopeVis::TraceData>& tracesData = m_scopeVis->getTracesData();
-    std::vector<ScopeVis::TraceData>::const_iterator traceDataIt = tracesData.begin();
+    const std::vector<GLScopeSettings::TraceData>& tracesData = m_scopeVis->getTracesData();
+    std::vector<GLScopeSettings::TraceData>::const_iterator traceDataIt = tracesData.begin();
     s.writeU32(10, (uint32_t) tracesData.size());
     int i = 0;
 
@@ -201,6 +201,7 @@ QByteArray GLScopeGUI::serialize() const
         s.writeFloat(26 + 16*i, traceDataIt->m_traceColorR);
         s.writeFloat(27 + 16*i, traceDataIt->m_traceColorG);
         s.writeFloat(28 + 16*i, traceDataIt->m_traceColorB);
+        s.writeU32(29 + 16*i, traceDataIt->m_streamIndex);
     }
 
     // third row - by trigger
@@ -295,7 +296,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         uint32_t nbTracesSaved;
         d.readU32(10, &nbTracesSaved, 1);
-        const std::vector<ScopeVis::TraceData>& tracesData = m_scopeVis->getTracesData();
+        const std::vector<GLScopeSettings::TraceData>& tracesData = m_scopeVis->getTracesData();
         uint32_t iTrace = tracesData.size();
 
         qDebug("GLScopeGUI::deserialize: nbTracesSaved: %u tracesData.size(): %lu", nbTracesSaved, tracesData.size());
@@ -308,7 +309,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         for (iTrace = 0; iTrace < nbTracesSaved; iTrace++)
         {
-            ScopeVis::TraceData traceData;
+            GLScopeSettings::TraceData traceData;
             float r, g, b;
 
             d.readS32(20 + 16*iTrace, &intValue, 0);
@@ -327,6 +328,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
             d.readFloat(27 + 16*iTrace, &g, 1.0f);
             d.readFloat(28 + 16*iTrace, &b, 1.0f);
             m_focusedTraceColor.setRgbF(r, g, b);
+            d.readU32(29 + 16*iTrace, &uintValue, 0);
+            ui->traceStream->setCurrentIndex(uintValue);
 
             fillTraceData(traceData);
 
@@ -607,7 +610,7 @@ void GLScopeGUI::on_trace_valueChanged(int value)
 {
     ui->traceText->setText(value == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 
-    ScopeVis::TraceData traceData;
+    GLScopeSettings::TraceData traceData;
     m_scopeVis->getTraceData(traceData, value);
 
     qDebug() << "GLScopeGUI::on_trace_valueChanged:"
@@ -624,7 +627,7 @@ void GLScopeGUI::on_trace_valueChanged(int value)
 void GLScopeGUI::on_traceAdd_clicked(bool checked)
 {
     (void) checked;
-    ScopeVis::TraceData traceData;
+    GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
     addTrace(traceData);
 }
@@ -659,7 +662,7 @@ void GLScopeGUI::on_traceUp_clicked(bool checked)
         int newTraceIndex = (ui->trace->value() + 1) % (ui->trace->maximum()+1);
         m_scopeVis->moveTrace(ui->trace->value(), true);
         ui->trace->setValue(newTraceIndex); // follow trace
-        ScopeVis::TraceData traceData;
+        GLScopeSettings::TraceData traceData;
         m_scopeVis->getTraceData(traceData, ui->trace->value());
         setTraceUI(traceData);
         m_scopeVis->focusOnTrace(ui->trace->value());
@@ -674,7 +677,7 @@ void GLScopeGUI::on_traceDown_clicked(bool checked)
         int newTraceIndex = (ui->trace->value() - 1) % (ui->trace->maximum()+1);
         m_scopeVis->moveTrace(ui->trace->value(), false);
         ui->trace->setValue(newTraceIndex); // follow trace
-        ScopeVis::TraceData traceData;
+        GLScopeSettings::TraceData traceData;
         m_scopeVis->getTraceData(traceData, ui->trace->value());
         setTraceUI(traceData);
         m_scopeVis->focusOnTrace(ui->trace->value());
@@ -1290,7 +1293,7 @@ void GLScopeGUI::setTrigPreDisplay()
 
 void GLScopeGUI::changeCurrentTrace()
 {
-    ScopeVis::TraceData traceData;
+    GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
     uint32_t currentTraceIndex = ui->trace->value();
     m_scopeVis->changeTrace(traceData, currentTraceIndex);
@@ -1343,8 +1346,9 @@ void GLScopeGUI::disableLiveMode(bool disable)
     ui->memoryLoad->setEnabled(disable);
 }
 
-void GLScopeGUI::fillTraceData(ScopeVis::TraceData& traceData)
+void GLScopeGUI::fillTraceData(GLScopeSettings::TraceData& traceData)
 {
+    traceData.m_streamIndex = ui->traceStream->currentIndex();
     traceData.m_projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
     traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB) || (traceData.m_projectionType == Projector::ProjectionMagSq);
     traceData.m_textOverlay.clear();
@@ -1386,10 +1390,11 @@ void GLScopeGUI::fillTriggerData(ScopeVis::TriggerData& triggerData)
     triggerData.setColor(m_focusedTriggerColor);
 }
 
-void GLScopeGUI::setTraceUI(const ScopeVis::TraceData& traceData)
+void GLScopeGUI::setTraceUI(const GLScopeSettings::TraceData& traceData)
 {
     TraceUIBlocker traceUIBlocker(ui);
 
+    ui->traceStream->setCurrentIndex(traceData.m_streamIndex);
     ui->traceMode->setCurrentIndex((int) traceData.m_projectionType);
     ui->amp->setValue(traceData.m_ampIndex);
     setAmpScaleDisplay();
@@ -1653,12 +1658,12 @@ void GLScopeGUI::setPreTrigger(int step)
     ui->trigPre->setValue(step);
 }
 
-void GLScopeGUI::changeTrace(int traceIndex, const ScopeVis::TraceData& traceData)
+void GLScopeGUI::changeTrace(int traceIndex, const GLScopeSettings::TraceData& traceData)
 {
     m_scopeVis->changeTrace(traceData, traceIndex);
 }
 
-void GLScopeGUI::addTrace(const ScopeVis::TraceData& traceData)
+void GLScopeGUI::addTrace(const GLScopeSettings::TraceData& traceData)
 {
     if (ui->trace->maximum() < 3)
     {

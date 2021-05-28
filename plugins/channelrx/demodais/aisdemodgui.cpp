@@ -40,6 +40,7 @@
 #include "gui/basicchannelsettingsdialog.h"
 #include "gui/devicestreamselectiondialog.h"
 #include "dsp/dspengine.h"
+#include "dsp/glscopesettings.h"
 #include "gui/crightclickenabler.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
@@ -421,7 +422,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     // Scope settings to display the IQ waveforms
     ui->scopeGUI->setPreTrigger(1);
-    ScopeVis::TraceData traceDataI, traceDataQ;
+    GLScopeSettings::TraceData traceDataI, traceDataQ;
     traceDataI.m_projectionType = Projector::ProjectionReal;
     traceDataI.m_amp = 1.0;      // for -1 to +1
     traceDataI.m_ampIndex = 0;

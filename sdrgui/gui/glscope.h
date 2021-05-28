@@ -27,6 +27,7 @@
 #include <QMatrix4x4>
 #include <QAtomicInt>
 
+#include "dsp/glscopeinterface.h"
 #include "dsp/dsptypes.h"
 #include "dsp/scopevis.h"
 #include "gui/scaleengine.h"
@@ -39,7 +40,8 @@
 
 class QPainter;
 
-class SDRGUI_API GLScope: public QGLWidget {
+class SDRGUI_API GLScope: public QGLWidget, public GLScopeInterface
+{
     Q_OBJECT
 
 public:
@@ -57,8 +59,8 @@ public:
     void connectTimer(const QTimer& timer);
     void disconnectTimer();
 
-    void setTraces(std::vector<ScopeVis::TraceData>* tracesData, std::vector<float *>* traces);
-    void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes);
+    virtual void setTraces(std::vector<GLScopeSettings::TraceData>* tracesData, std::vector<float *>* traces);
+    virtual void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes);
 
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
@@ -136,7 +138,7 @@ private:
     QList<ScopeMarker> m_markers1;
     QList<ScopeMarker> m_markers2;
 
-    std::vector<ScopeVis::TraceData> *m_tracesData;
+    std::vector<GLScopeSettings::TraceData> *m_tracesData;
     std::vector<float *> *m_traces;
     std::vector<Projector::ProjectionType> *m_projectionTypes;
     QAtomicInt m_processingTraceIndex;

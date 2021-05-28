@@ -127,7 +127,7 @@ void ScopeVis::configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfs
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::addTrace(const TraceData& traceData)
+void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
 {
     qDebug() << "ScopeVis::addTrace:"
             << " m_amp: " << traceData.m_amp
@@ -137,7 +137,7 @@ void ScopeVis::addTrace(const TraceData& traceData)
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::changeTrace(const TraceData& traceData, uint32_t traceIndex)
+void ScopeVis::changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
 {
     qDebug() << "ScopeVis::changeTrace:"
             << " trace: " << traceIndex
@@ -495,7 +495,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
     while ((begin < end) && (m_nbSamples > 0))
     {
         std::vector<TraceControl*>::iterator itCtl = m_traces.m_tracesControl.begin();
-        std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
+        std::vector<GLScopeSettings::TraceData>::iterator itData = m_traces.m_tracesData.begin();
         std::vector<float *>::iterator itTrace = m_traces.m_traces[m_traces.currentBufferIndex()].begin();
 
         for (; itCtl != m_traces.m_tracesControl.end(); ++itCtl, ++itData, ++itTrace)
@@ -930,7 +930,7 @@ void ScopeVis::updateMaxTraceDelay()
     bool allocateCache = false;
     uint32_t projectorCounts[(int) Projector::nbProjectionTypes];
     memset(projectorCounts, 0, ((int) Projector::nbProjectionTypes)*sizeof(uint32_t));
-    std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
+    std::vector<GLScopeSettings::TraceData>::iterator itData = m_traces.m_tracesData.begin();
     std::vector<TraceControl*>::iterator itCtrl = m_traces.m_tracesControl.begin();
 
     for (; itData != m_traces.m_tracesData.end(); ++itData, ++itCtrl)
@@ -992,7 +992,7 @@ void ScopeVis::initTraceBuffers()
 
 void ScopeVis::computeDisplayTriggerLevels()
 {
-    std::vector<TraceData>::iterator itData = m_traces.m_tracesData.begin();
+    std::vector<GLScopeSettings::TraceData>::iterator itData = m_traces.m_tracesData.begin();
 
     for (; itData != m_traces.m_tracesData.end(); ++itData)
     {

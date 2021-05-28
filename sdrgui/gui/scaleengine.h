@@ -22,7 +22,7 @@
 #include <QFont>
 #include <QString>
 #include <QList>
-#include "physicalunit.h"
+#include "dsp/physicalunit.h"
 #include "export.h"
 
 class SDRGUI_API ScaleEngine {

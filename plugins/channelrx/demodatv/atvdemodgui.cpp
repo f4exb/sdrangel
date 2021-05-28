@@ -23,6 +23,7 @@
 
 #include "device/deviceuiset.h"
 #include "dsp/scopevis.h"
+#include "dsp/glscopesettings.h"
 #include "ui_atvdemodgui.h"
 #include "plugin/pluginapi.h"
 #include "util/simpleserializer.h"
@@ -251,7 +252,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     resetToDefaults(); // does applySettings()
 
     ui->scopeGUI->setPreTrigger(1);
-    ScopeVis::TraceData traceData;
+    GLScopeSettings::TraceData traceData;
     traceData.m_amp = 2.0;      // amplification factor
     traceData.m_ampIndex = 1;   // this is second step
     traceData.m_ofs = 0.5;      // direct offset

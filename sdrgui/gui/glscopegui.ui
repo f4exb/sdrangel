@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>758</width>
-    <height>121</height>
+    <height>138</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -773,64 +773,47 @@ kS/s</string>
       </layout>
      </item>
      <item>
-      <widget class="Line" name="line_4">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="traceMode">
-       <property name="maximumSize">
-        <size>
-         <width>65</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Trace mode</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>TBD</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDial" name="sourcePort">
-       <property name="maximumSize">
-        <size>
-         <width>24</width>
-         <height>24</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Source port selection</string>
-       </property>
-       <property name="maximum">
+      <layout class="QVBoxLayout" name="traceModeLayout">
+       <property name="spacing">
         <number>0</number>
        </property>
-       <property name="pageStep">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="sourcePortText">
-       <property name="minimumSize">
-        <size>
-         <width>12</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Source port number</string>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-      </widget>
+       <item>
+        <widget class="QComboBox" name="traceStream">
+         <property name="maximumSize">
+          <size>
+           <width>65</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Trace stream source</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="traceMode">
+         <property name="maximumSize">
+          <size>
+           <width>65</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Trace mode</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>TBD</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="Line" name="line_16">
@@ -1463,28 +1446,53 @@ kS/s</string>
       </layout>
      </item>
      <item>
+      <layout class="QVBoxLayout" name="trigModeLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QComboBox" name="trigStream">
+         <property name="maximumSize">
+          <size>
+           <width>65</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Trigger stream source</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>0</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="trigMode">
+         <property name="maximumSize">
+          <size>
+           <width>65</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Trigger mode</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>TBD</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <widget class="Line" name="line_10">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="trigMode">
-       <property name="maximumSize">
-        <size>
-         <width>65</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Trigger mode</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>TBD</string>
-        </property>
-       </item>
       </widget>
      </item>
      <item>

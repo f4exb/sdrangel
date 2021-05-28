@@ -79,6 +79,7 @@ QByteArray GLScopeSettings::serialize() const
         s.writeFloat(26 + 16*i, traceDataIt->m_traceColorR);
         s.writeFloat(27 + 16*i, traceDataIt->m_traceColorG);
         s.writeFloat(28 + 16*i, traceDataIt->m_traceColorB);
+        s.writeU32(29 + 16*i, traceDataIt->m_streamIndex);
     }
 
     s.writeU32(10, i);
@@ -101,6 +102,7 @@ QByteArray GLScopeSettings::serialize() const
         s.writeFloat(219 + 16*i, triggerDataIt->m_triggerColorG);
         s.writeFloat(220 + 16*i, triggerDataIt->m_triggerColorB);
         s.writeU32(221 + 16*i, triggerDataIt->m_triggerHoldoff);
+        s.writeU32(222 + 16*i, triggerDataIt->m_streamIndex);
     }
 
     return s.final();
@@ -165,6 +167,8 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
             m_tracesData.back().m_traceColor.setRedF(r);
             m_tracesData.back().m_traceColor.setGreenF(g);
             m_tracesData.back().m_traceColor.setBlueF(b);
+            d.readU32(29 + 16*iTrace, &uintValue, 0);
+            m_tracesData.back().m_streamIndex = uintValue;
         }
 
         uint32_t nbTriggersSaved;
@@ -202,6 +206,8 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
             m_triggersData.back().m_triggerColor.setBlueF(b);
             d.readU32(221 + 16*iTrigger, &uintValue, 1);
             m_triggersData.back().m_triggerHoldoff = uintValue;
+            d.readU32(222 + 16*iTrigger, &uintValue, 0);
+            m_triggersData.back().m_streamIndex = uintValue;
         }
 
         return true;

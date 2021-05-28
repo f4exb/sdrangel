@@ -200,6 +200,9 @@ void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
                     SWGSDRangel::SWGTraceData *traceData = tracesData->at(i);
                     scopeSettings.m_tracesData.push_back(GLScopeSettings::TraceData());
 
+                    if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].streamIndex").arg(i))) {
+                        scopeSettings.m_tracesData.back().m_streamIndex = traceData->getStreamIndex();
+                    }
                     if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].amp").arg(i))) {
                         scopeSettings.m_tracesData.back().m_amp = traceData->getAmp();
                     }
@@ -271,6 +274,9 @@ void InterferometerWebAPIAdapter::webapiUpdateChannelSettings(
                     SWGSDRangel::SWGTriggerData *triggerData = triggersData->at(i);
                     scopeSettings.m_triggersData.push_back(GLScopeSettings::TriggerData());
 
+                    if (channelSettingsKeys.contains(QString("scopeConfig.triggersData[%1].streamIndex").arg(i))) {
+                        scopeSettings.m_triggersData.back().m_streamIndex = triggerData->getStreamIndex();
+                    }
                     if (channelSettingsKeys.contains(QString("scopeConfig.triggersData[%1].inputIndex").arg(i))) {
                         scopeSettings.m_triggersData.back().m_inputIndex = triggerData->getInputIndex();
                     }

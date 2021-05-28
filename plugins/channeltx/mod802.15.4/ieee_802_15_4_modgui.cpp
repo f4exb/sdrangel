@@ -30,6 +30,7 @@
 #include "dsp/scopevis.h"
 #include "dsp/dspcommands.h"
 #include "dsp/dspengine.h"
+#include "dsp/glscopesettings.h"
 #include "gui/glspectrum.h"
 #include "gui/crightclickenabler.h"
 #include "gui/basicchannelsettingsdialog.h"
@@ -366,7 +367,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
     // Scope settings to display the IQ waveforms
     ui->scopeGUI->setPreTrigger(1);
-    ScopeVis::TraceData traceDataI, traceDataQ;
+    GLScopeSettings::TraceData traceDataI, traceDataQ;
     traceDataI.m_projectionType = Projector::ProjectionReal;
     traceDataI.m_amp = 1.0;      // for -1 to +1
     traceDataI.m_ampIndex = 0;

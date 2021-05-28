@@ -1,0 +1,35 @@
+AntennaToolsSettings:
+  description: Antenna Tools
+  properties:
+    dipoleFrequencyMHz:
+      type: number
+      format: float
+    dipoleEndEffectFactor:
+      type: number
+      format: float
+    dishFrequencyMHz:
+      type: number
+      format: float
+    dishDiameter:
+      type: number
+      format: float
+    dishDepth:
+      type: number
+      format: float
+    dishEfficiency:
+      type: integer
+    title:
+      type: string
+    rgbColor:
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer

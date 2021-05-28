@@ -85,6 +85,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
     for (; traceIt != scopeSettings.m_tracesData.end(); ++traceIt)
     {
         swgScope->getTracesData()->append(new SWGSDRangel::SWGTraceData);
+        swgScope->getTracesData()->back()->setStreamIndex(traceIt->m_streamIndex);
         swgScope->getTracesData()->back()->setAmp(traceIt->m_amp);
         swgScope->getTracesData()->back()->setAmpIndex(traceIt->m_ampIndex);
         swgScope->getTracesData()->back()->setHasTextOverlay(traceIt->m_hasTextOverlay ? 1 : 0);
@@ -112,6 +113,7 @@ void ChannelAnalyzerWebAPIAdapter::webapiFormatChannelSettings(
     for (; triggerIt != scopeSettings.m_triggersData.end(); ++triggerIt)
     {
         swgScope->getTriggersData()->append(new SWGSDRangel::SWGTriggerData);
+        swgScope->getTriggersData()->back()->setStreamIndex(triggerIt->m_streamIndex);
         swgScope->getTriggersData()->back()->setInputIndex(triggerIt->m_inputIndex);
         swgScope->getTriggersData()->back()->setProjectionType((int) triggerIt->m_projectionType);
         swgScope->getTriggersData()->back()->setTriggerBothEdges(triggerIt->m_triggerBothEdges ? 1 : 0);
@@ -264,6 +266,9 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
                     SWGSDRangel::SWGTraceData *traceData = tracesData->at(i);
                     scopeSettings.m_tracesData.push_back(GLScopeSettings::TraceData());
 
+                    if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].streamIndex").arg(i))) {
+                        scopeSettings.m_tracesData.back().m_streamIndex = traceData->getStreamIndex();
+                    }
                     if (channelSettingsKeys.contains(QString("scopeConfig.tracesData[%1].amp").arg(i))) {
                         scopeSettings.m_tracesData.back().m_amp = traceData->getAmp();
                     }
@@ -335,6 +340,9 @@ void ChannelAnalyzerWebAPIAdapter::webapiUpdateChannelSettings(
                     SWGSDRangel::SWGTriggerData *triggerData = triggersData->at(i);
                     scopeSettings.m_triggersData.push_back(GLScopeSettings::TriggerData());
 
+                    if (channelSettingsKeys.contains(QString("scopeConfig.triggersData[%1].streamIndex").arg(i))) {
+                        scopeSettings.m_triggersData.back().m_streamIndex = triggerData->getStreamIndex();
+                    }
                     if (channelSettingsKeys.contains(QString("scopeConfig.triggersData[%1].inputIndex").arg(i))) {
                         scopeSettings.m_triggersData.back().m_inputIndex = triggerData->getInputIndex();
                     }

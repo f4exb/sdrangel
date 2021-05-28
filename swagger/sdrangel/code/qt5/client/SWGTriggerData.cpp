@@ -28,6 +28,8 @@ SWGTriggerData::SWGTriggerData(QString* json) {
 }
 
 SWGTriggerData::SWGTriggerData() {
+    stream_index = 0;
+    m_stream_index_isSet = false;
     projection_type = 0;
     m_projection_type_isSet = false;
     input_index = 0;
@@ -70,6 +72,8 @@ SWGTriggerData::~SWGTriggerData() {
 
 void
 SWGTriggerData::init() {
+    stream_index = 0;
+    m_stream_index_isSet = false;
     projection_type = 0;
     m_projection_type_isSet = false;
     input_index = 0;
@@ -125,6 +129,7 @@ SWGTriggerData::cleanup() {
 
 
 
+
 }
 
 SWGTriggerData*
@@ -138,6 +143,8 @@ SWGTriggerData::fromJson(QString &json) {
 
 void
 SWGTriggerData::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&projection_type, pJson["projectionType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&input_index, pJson["inputIndex"], "qint32", "");
@@ -188,6 +195,9 @@ SWGTriggerData::asJson ()
 QJsonObject*
 SWGTriggerData::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
+    }
     if(m_projection_type_isSet){
         obj->insert("projectionType", QJsonValue(projection_type));
     }
@@ -241,6 +251,16 @@ SWGTriggerData::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGTriggerData::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGTriggerData::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
 }
 
 qint32
@@ -418,6 +438,9 @@ bool
 SWGTriggerData::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_projection_type_isSet){
             isObjectUpdated = true; break;
         }

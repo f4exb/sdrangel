@@ -28,6 +28,8 @@ SWGTraceData::SWGTraceData(QString* json) {
 }
 
 SWGTraceData::SWGTraceData() {
+    stream_index = 0;
+    m_stream_index_isSet = false;
     projection_type = 0;
     m_projection_type_isSet = false;
     input_index = 0;
@@ -72,6 +74,8 @@ SWGTraceData::~SWGTraceData() {
 
 void
 SWGTraceData::init() {
+    stream_index = 0;
+    m_stream_index_isSet = false;
     projection_type = 0;
     m_projection_type_isSet = false;
     input_index = 0;
@@ -128,6 +132,7 @@ SWGTraceData::cleanup() {
 
 
 
+
     if(text_overlay != nullptr) { 
         delete text_overlay;
     }
@@ -145,6 +150,8 @@ SWGTraceData::fromJson(QString &json) {
 
 void
 SWGTraceData::fromJsonObject(QJsonObject &pJson) {
+    ::SWGSDRangel::setValue(&stream_index, pJson["streamIndex"], "qint32", "");
+    
     ::SWGSDRangel::setValue(&projection_type, pJson["projectionType"], "qint32", "");
     
     ::SWGSDRangel::setValue(&input_index, pJson["inputIndex"], "qint32", "");
@@ -197,6 +204,9 @@ SWGTraceData::asJson ()
 QJsonObject*
 SWGTraceData::asJsonObject() {
     QJsonObject* obj = new QJsonObject();
+    if(m_stream_index_isSet){
+        obj->insert("streamIndex", QJsonValue(stream_index));
+    }
     if(m_projection_type_isSet){
         obj->insert("projectionType", QJsonValue(projection_type));
     }
@@ -253,6 +263,16 @@ SWGTraceData::asJsonObject() {
     }
 
     return obj;
+}
+
+qint32
+SWGTraceData::getStreamIndex() {
+    return stream_index;
+}
+void
+SWGTraceData::setStreamIndex(qint32 stream_index) {
+    this->stream_index = stream_index;
+    this->m_stream_index_isSet = true;
 }
 
 qint32
@@ -440,6 +460,9 @@ bool
 SWGTraceData::isSet(){
     bool isObjectUpdated = false;
     do{
+        if(m_stream_index_isSet){
+            isObjectUpdated = true; break;
+        }
         if(m_projection_type_isSet){
             isObjectUpdated = true; break;
         }
