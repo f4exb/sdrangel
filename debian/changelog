@@ -1,3 +1,15 @@
+sdrangel (6.13.0-1) unstable; urgency=medium
+
+  * New antenna tool feature PR #906
+  * Sat tracker: fix rotator max azimuth and elevation settings in GUI. PR #900
+  * GS232: support SPID MD-02 controller. PR #901
+  * File Output: make file name persistent
+  * PlutoSDR MIMO: fixed wrong reference to BladeRF library in CMakeLists.txt. Fixes #905
+  * Add .wav file support to File Input File Source and File Record plugins. PR #907
+  * Star Tracker: Add Custom Az/El target and drift scan plot. PR #910
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Fri, 28 May 2021 10:25:48 +0200
+
 sdrangel (6.12.1-1) unstable; urgency=medium
 
   * AIS: Fix decoding of AIS class B messages PR #895
