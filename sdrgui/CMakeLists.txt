@@ -68,7 +68,6 @@ set(sdrgui_SOURCES
     gui/wsspectrumsettingsdialog.cpp
     gui/wrappingdatetimeedit.cpp
 
-    dsp/scopevis.cpp
     dsp/scopevisxy.cpp
     dsp/spectrumscopecombovis.cpp
 
@@ -157,7 +156,6 @@ set(sdrgui_HEADERS
     gui/wsspectrumsettingsdialog.h
     gui/wrappingdatetimeedit.h
 
-    dsp/scopevis.h
     dsp/scopevisxy.h
     dsp/spectrumscopecombovis.h
 

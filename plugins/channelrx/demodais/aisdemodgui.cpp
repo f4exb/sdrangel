@@ -438,7 +438,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     ui->scopeGUI->setDisplayMode(GLScopeGUI::DisplayXYV);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
 
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     triggerData.m_triggerLevel = 0.1;
     triggerData.m_triggerLevelCoarse = 10;
     triggerData.m_triggerPositiveEdge = true;

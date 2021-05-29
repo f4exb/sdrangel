@@ -73,8 +73,8 @@ public:
     void addTrace(const GLScopeSettings::TraceData& traceData);
     void focusOnTrace(int traceIndex);
     // trigger (third line):
-    void changeTrigger(int triggerIndex, const ScopeVis::TriggerData& triggerData);
-    void addTrigger(const ScopeVis::TriggerData& triggerData);
+    void changeTrigger(int triggerIndex, const GLScopeSettings::TriggerData& triggerData);
+    void addTrigger(const GLScopeSettings::TriggerData& triggerData);
     void focusOnTrigger(int triggerIndex);
     void traceLengthChange();
 
@@ -178,8 +178,8 @@ private:
     void changeCurrentTrigger();
 
     void fillTraceData(GLScopeSettings::TraceData& traceData);
-    void fillTriggerData(ScopeVis::TriggerData& triggerData);
-    void setTriggerUI(const ScopeVis::TriggerData& triggerData);
+    void fillTriggerData(GLScopeSettings::TriggerData& triggerData);
+    void setTriggerUI(const GLScopeSettings::TriggerData& triggerData);
     void setTraceUI(const GLScopeSettings::TraceData& traceData);
 
     void fillProjectionCombo(QComboBox* comboBox);

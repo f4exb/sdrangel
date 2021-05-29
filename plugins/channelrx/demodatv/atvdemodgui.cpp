@@ -259,7 +259,7 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     traceData.m_ofsCoarse = 50; // this is 50 coarse steps
     ui->scopeGUI->changeTrace(0, traceData);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     triggerData.m_triggerLevel = 0.1;
     triggerData.m_triggerLevelCoarse = 10;
     triggerData.m_triggerPositiveEdge = false;

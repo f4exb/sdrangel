@@ -383,7 +383,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     ui->scopeGUI->setDisplayMode(GLScopeGUI::DisplayPol);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
 
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     triggerData.m_triggerLevel = 0.1;
     triggerData.m_triggerLevelCoarse = 10;
     triggerData.m_triggerPositiveEdge = true;

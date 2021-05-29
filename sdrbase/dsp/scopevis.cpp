@@ -22,7 +22,7 @@
 
 #include "scopevis.h"
 #include "dsp/dspcommands.h"
-#include "gui/glscope.h"
+#include "dsp/glscopeinterface.h"
 
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGAddTrigger, Message)
@@ -41,7 +41,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 const uint ScopeVis::m_traceChunkDefaultSize = 4800;
 
 
-ScopeVis::ScopeVis(GLScope* glScope) :
+ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     m_glScope(glScope),
     m_preTriggerDelay(0),
     m_livePreTriggerDelay(0),
@@ -171,13 +171,13 @@ void ScopeVis::focusOnTrace(uint32_t traceIndex)
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::addTrigger(const TriggerData& triggerData)
+void ScopeVis::addTrigger(const GLScopeSettings::TriggerData& triggerData)
 {
     Message* cmd = MsgScopeVisNGAddTrigger::create(triggerData);
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex)
+void ScopeVis::changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
 {
     Message* cmd = MsgScopeVisNGChangeTrigger::create(triggerData, triggerIndex);
     getInputMessageQueue()->push(cmd);
@@ -1034,10 +1034,13 @@ void ScopeVis::computeDisplayTriggerLevels()
 
 void ScopeVis::updateGLScopeDisplay()
 {
-    if (m_currentTraceMemoryIndex > 0) {
+    if (m_currentTraceMemoryIndex > 0)
+    {
         m_glScope->setConfigChanged();
         processMemoryTrace();
-    } else {
+    }
+    else
+    {
         m_glScope->updateDisplay();
     }
 }

@@ -38,7 +38,7 @@
 #include "util/doublebuffer.h"
 
 
-class GLScope;
+class GLScopeInterface;
 
 class SDRGUI_API ScopeVis : public BasebandSampleSink {
 
@@ -100,7 +100,7 @@ public:
     static const uint32_t m_maxNbTraces = 10;
     static const uint32_t m_nbTraceMemories = 50;
 
-    ScopeVis(GLScope* glScope = 0);
+    ScopeVis(GLScopeInterface* glScope = nullptr);
     virtual ~ScopeVis();
 
     void setLiveRate(int sampleRate);
@@ -110,8 +110,8 @@ public:
     void removeTrace(uint32_t traceIndex);
     void moveTrace(uint32_t traceIndex, bool upElseDown);
     void focusOnTrace(uint32_t traceIndex);
-    void addTrigger(const TriggerData& triggerData);
-    void changeTrigger(const TriggerData& triggerData, uint32_t triggerIndex);
+    void addTrigger(const GLScopeSettings::TriggerData& triggerData);
+    void changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex);
     void removeTrigger(uint32_t triggerIndex);
     void moveTrigger(uint32_t triggerIndex, bool upElseDown);
     void focusOnTrigger(uint32_t triggerIndex);
@@ -169,7 +169,7 @@ public:
         }
     }
 
-    void getTriggerData(TriggerData& triggerData, uint32_t triggerIndex)
+    void getTriggerData(GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
     {
         if (triggerIndex < m_triggerConditions.size()) {
             triggerData = m_triggerConditions[triggerIndex]->m_triggerData;
@@ -183,7 +183,7 @@ public:
         }
     }
 
-    const TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex]->m_triggerData; }
+    const GLScopeSettings::TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex]->m_triggerData; }
     const std::vector<GLScopeSettings::TraceData>& getTracesData() const { return m_traces.m_tracesData; }
     uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
 
@@ -244,17 +244,17 @@ private:
 
     public:
         static MsgScopeVisNGAddTrigger* create(
-                const TriggerData& triggerData)
+                const GLScopeSettings::TriggerData& triggerData)
         {
             return new MsgScopeVisNGAddTrigger(triggerData);
         }
 
-        const TriggerData& getTriggerData() const { return m_triggerData; }
+        const GLScopeSettings::TriggerData& getTriggerData() const { return m_triggerData; }
 
     private:
-        TriggerData m_triggerData;
+        GLScopeSettings::TriggerData m_triggerData;
 
-        MsgScopeVisNGAddTrigger(const TriggerData& triggerData) :
+        MsgScopeVisNGAddTrigger(const GLScopeSettings::TriggerData& triggerData) :
             m_triggerData(triggerData)
         {}
     };
@@ -265,19 +265,19 @@ private:
 
     public:
         static MsgScopeVisNGChangeTrigger* create(
-                const TriggerData& triggerData, uint32_t triggerIndex)
+            const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
         {
             return new MsgScopeVisNGChangeTrigger(triggerData, triggerIndex);
         }
 
-        const TriggerData& getTriggerData() const { return m_triggerData; }
+        const GLScopeSettings::TriggerData& getTriggerData() const { return m_triggerData; }
         uint32_t getTriggerIndex() const { return m_triggerIndex; }
 
     private:
-        TriggerData m_triggerData;
+        GLScopeSettings::TriggerData m_triggerData;
         uint32_t m_triggerIndex;
 
-        MsgScopeVisNGChangeTrigger(const TriggerData& triggerData, uint32_t triggerIndex) :
+        MsgScopeVisNGChangeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex) :
             m_triggerData(triggerData),
             m_triggerIndex(triggerIndex)
         {}
@@ -520,7 +520,7 @@ private:
     {
     public:
         Projector m_projector;
-        TriggerData m_triggerData;    //!< Trigger data
+        GLScopeSettings::TriggerData m_triggerData; //!< Trigger data
         bool m_prevCondition;         //!< Condition (above threshold) at previous sample
         uint32_t m_triggerDelayCount; //!< Counter of samples for delay
         uint32_t m_triggerCounter;    //!< Counter of trigger occurrences
@@ -528,7 +528,7 @@ private:
         uint32_t m_falses;            //!< Count of false conditions for holdoff processing
 
 
-        TriggerCondition(const TriggerData& triggerData) :
+        TriggerCondition(const GLScopeSettings::TriggerData& triggerData) :
             m_projector(Projector::ProjectionReal),
             m_triggerData(triggerData),
             m_prevCondition(false),
@@ -552,7 +552,7 @@ private:
         {
         }
 
-        void setData(const TriggerData& triggerData)
+        void setData(const GLScopeSettings::TriggerData& triggerData)
         {
             m_triggerData = triggerData;
 
@@ -1078,7 +1078,7 @@ private:
         bool m_reset;
     };
 
-    GLScope* m_glScope;
+    GLScopeInterface* m_glScope;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     uint32_t m_livePreTriggerDelay;                //!< Pre-trigger delay in number of samples in live mode
     std::vector<TriggerCondition*> m_triggerConditions; //!< Chain of triggers

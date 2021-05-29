@@ -29,6 +29,16 @@ public:
     virtual ~GLScopeInterface() {}
     virtual void setTraces(std::vector<GLScopeSettings::TraceData>* tracesData, std::vector<float *>* traces) = 0;
     virtual void newTraces(std::vector<float *>* traces, int traceIndex, std::vector<Projector::ProjectionType>* projectionTypes) = 0;
+    virtual void setSampleRate(int sampleRate) = 0;
+    virtual void setTraceSize(int trceSize, bool emitSignal = false) = 0;
+    virtual void setTriggerPre(uint32_t triggerPre, bool emitSignal = false) = 0;
+    virtual const QAtomicInt& getProcessingTraceIndex() const = 0;
+    virtual void setTimeBase(int timeBase) = 0;
+    virtual void setTimeOfsProMill(int timeOfsProMill) = 0;
+    virtual void setFocusedTriggerData(GLScopeSettings::TriggerData& triggerData) = 0;
+    virtual void setFocusedTraceIndex(uint32_t traceIndex) = 0;
+    virtual void setConfigChanged() = 0;
+    virtual void updateDisplay() = 0;
 };
 
 #endif // SDRBASE_DSP_GLSCOPEINTERFACE_H_

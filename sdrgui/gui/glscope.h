@@ -65,25 +65,25 @@ public:
     int getSampleRate() const { return m_sampleRate; }
     int getTraceSize() const { return m_traceSize; }
 
-    void setTriggerPre(uint32_t triggerPre, bool emitSignal = false); //!< number of samples
-    void setTimeOfsProMill(int timeOfsProMill);
-    void setSampleRate(int sampleRate);
-    void setTimeBase(int timeBase);
-    void setFocusedTraceIndex(uint32_t traceIndex);
+    virtual void setTriggerPre(uint32_t triggerPre, bool emitSignal = false); //!< number of samples
+    virtual void setTimeOfsProMill(int timeOfsProMill);
+    virtual void setSampleRate(int sampleRate);
+    virtual void setTimeBase(int timeBase);
+    virtual void setFocusedTraceIndex(uint32_t traceIndex);
     void setDisplayMode(DisplayMode displayMode);
-    void setTraceSize(int trceSize, bool emitSignal = false);
-    void updateDisplay();
+    virtual void setTraceSize(int trceSize, bool emitSignal = false);
+    virtual void updateDisplay();
     void setDisplayGridIntensity(int intensity);
     void setDisplayTraceIntensity(int intensity);
-    void setFocusedTriggerData(ScopeVis::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
-    void setConfigChanged() { m_configChanged = true; }
+    virtual void setFocusedTriggerData(GLScopeSettings::TriggerData& triggerData) { m_focusedTriggerData = triggerData; }
+    virtual void setConfigChanged() { m_configChanged = true; }
     //void incrementTraceCounter() { m_traceCounter++; }
 
     bool getDataChanged() const { return m_dataChanged; }
     DisplayMode getDisplayMode() const { return m_displayMode; }
     void setDisplayXYPoints(bool value) { m_displayXYPoints = value; }
     void setDisplayXYPolarGrid(bool value) { m_displayPolGrid = value; }
-    const QAtomicInt& getProcessingTraceIndex() const { return m_processingTraceIndex; }
+    virtual const QAtomicInt& getProcessingTraceIndex() const { return m_processingTraceIndex; }
     void setTraceModulo(int modulo) { m_traceModulo = modulo; }
 
 signals:
@@ -142,7 +142,7 @@ private:
     std::vector<float *> *m_traces;
     std::vector<Projector::ProjectionType> *m_projectionTypes;
     QAtomicInt m_processingTraceIndex;
-    ScopeVis::TriggerData m_focusedTriggerData;
+    GLScopeSettings::TriggerData m_focusedTriggerData;
     //int m_traceCounter;
     uint32_t m_bufferIndex;
     DisplayMode m_displayMode;

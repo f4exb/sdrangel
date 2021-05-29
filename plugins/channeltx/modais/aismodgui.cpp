@@ -513,7 +513,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     ui->scopeGUI->setDisplayMode(GLScopeGUI::DisplayPol);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
 
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     triggerData.m_triggerLevel = 0.1;
     triggerData.m_triggerLevelCoarse = 10;
     triggerData.m_triggerPositiveEdge = true;

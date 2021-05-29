@@ -94,7 +94,7 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     ui->freerun->setChecked(true);
 
     // Add a trigger
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     fillTriggerData(triggerData);
     m_scopeVis->addTrigger(triggerData);
 
@@ -210,7 +210,7 @@ QByteArray GLScopeGUI::serialize() const
 
     for (unsigned int i = 0; i < m_scopeVis->getNbTriggers(); i++)
     {
-        const ScopeVis::TriggerData& triggerData = m_scopeVis->getTriggerData(i);
+        const GLScopeSettings::TriggerData& triggerData = m_scopeVis->getTriggerData(i);
         s.writeS32(210 + 16*i, (int) triggerData.m_projectionType);
         s.writeS32(211 + 16*i, triggerData.m_triggerRepeat);
         s.writeBool(212 + 16*i, triggerData.m_triggerPositiveEdge);
@@ -223,6 +223,7 @@ QByteArray GLScopeGUI::serialize() const
         s.writeFloat(219 + 16*i, triggerData.m_triggerColorG);
         s.writeFloat(220 + 16*i, triggerData.m_triggerColorB);
         s.writeU32(221 + 16*i, triggerData.m_triggerHoldoff);
+        s.writeU32(222 + 16*i, triggerData.m_streamIndex);
     }
 
     return s.final();
@@ -383,7 +384,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         for (iTrigger = 0; iTrigger < nbTriggersSaved; iTrigger++)
         {
-            ScopeVis::TriggerData triggerData;
+            GLScopeSettings::TriggerData triggerData;
             float r, g, b;
 
             d.readS32(210 + 16*iTrigger, &intValue, 0);
@@ -409,6 +410,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
             d.readU32(221 + 16*iTrigger, &uintValue, 1);
             ui->trigHoldoff->setValue(uintValue);
             ui->trigHoldoffText->setText(tr("%1").arg(uintValue));
+            d.readU32(222 + 16*iTrigger, &uintValue, 0);
+            ui->traceStream->setCurrentIndex(uintValue);
 
             fillTriggerData(triggerData);
 
@@ -688,7 +691,7 @@ void GLScopeGUI::on_trig_valueChanged(int value)
 {
     ui->trigText->setText(tr("%1").arg(value));
 
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     m_scopeVis->getTriggerData(triggerData, value);
 
     qDebug() << "GLScopeGUI::on_trig_valueChanged:"
@@ -706,7 +709,7 @@ void GLScopeGUI::on_trig_valueChanged(int value)
 void GLScopeGUI::on_trigAdd_clicked(bool checked)
 {
     (void) checked;
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     fillTriggerData(triggerData);
     addTrigger(triggerData);
 }
@@ -729,7 +732,7 @@ void GLScopeGUI::on_trigUp_clicked(bool checked)
         int newTriggerIndex = (ui->trig->value() + 1) % (ui->trig->maximum()+1);
         m_scopeVis->moveTrigger(ui->trace->value(), true);
         ui->trig->setValue(newTriggerIndex); // follow trigger
-        ScopeVis::TriggerData triggerData;
+        GLScopeSettings::TriggerData triggerData;
         m_scopeVis->getTriggerData(triggerData, ui->trig->value());
         setTriggerUI(triggerData);
         m_scopeVis->focusOnTrigger(ui->trig->value());
@@ -744,7 +747,7 @@ void GLScopeGUI::on_trigDown_clicked(bool checked)
         int newTriggerIndex = (ui->trig->value() - 1) % (ui->trig->maximum()+1);
         m_scopeVis->moveTrigger(ui->trace->value(), false);
         ui->trig->setValue(newTriggerIndex); // follow trigger
-        ScopeVis::TriggerData triggerData;
+        GLScopeSettings::TriggerData triggerData;
         m_scopeVis->getTriggerData(triggerData, ui->trig->value());
         setTriggerUI(triggerData);
         m_scopeVis->focusOnTrigger(ui->trig->value());
@@ -1301,7 +1304,7 @@ void GLScopeGUI::changeCurrentTrace()
 
 void GLScopeGUI::changeCurrentTrigger()
 {
-    ScopeVis::TriggerData triggerData;
+    GLScopeSettings::TriggerData triggerData;
     fillTriggerData(triggerData);
     uint32_t currentTriggerIndex = ui->trig->value();
     m_scopeVis->changeTrigger(triggerData, currentTriggerIndex);
@@ -1372,7 +1375,7 @@ void GLScopeGUI::fillTraceData(GLScopeSettings::TraceData& traceData)
     traceData.m_viewTrace = ui->traceView->isChecked();
 }
 
-void GLScopeGUI::fillTriggerData(ScopeVis::TriggerData& triggerData)
+void GLScopeGUI::fillTriggerData(GLScopeSettings::TriggerData& triggerData)
 {
     triggerData.m_projectionType = (Projector::ProjectionType) ui->trigMode->currentIndex();
     triggerData.m_inputIndex = 0;
@@ -1415,7 +1418,7 @@ void GLScopeGUI::setTraceUI(const GLScopeSettings::TraceData& traceData)
     ui->traceView->setChecked(traceData.m_viewTrace);
 }
 
-void GLScopeGUI::setTriggerUI(const ScopeVis::TriggerData& triggerData)
+void GLScopeGUI::setTriggerUI(const GLScopeSettings::TriggerData& triggerData)
 {
     TrigUIBlocker trigUIBlocker(ui);
 
@@ -1685,12 +1688,12 @@ void GLScopeGUI::focusOnTrace(int traceIndex)
     on_trace_valueChanged(traceIndex);
 }
 
-void GLScopeGUI::changeTrigger(int triggerIndex, const ScopeVis::TriggerData& triggerData)
+void GLScopeGUI::changeTrigger(int triggerIndex, const GLScopeSettings::TriggerData& triggerData)
 {
     m_scopeVis->changeTrigger(triggerData, triggerIndex);
 }
 
-void GLScopeGUI::addTrigger(const ScopeVis::TriggerData& triggerData)
+void GLScopeGUI::addTrigger(const GLScopeSettings::TriggerData& triggerData)
 {
     if (ui->trig->maximum() < 9)
     {
