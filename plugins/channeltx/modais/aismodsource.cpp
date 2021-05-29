@@ -20,6 +20,7 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/datafifo.h"
+#include "dsp/scopevis.h"
 #include "aismodsource.h"
 #include "util/crc.h"
 #include "util/messagequeue.h"
@@ -125,7 +126,9 @@ void AISModSource::sampleToScope(Complex sample)
         Real r = std::real(sample) * SDR_RX_SCALEF;
         Real i = std::imag(sample) * SDR_RX_SCALEF;
         m_sampleBuffer.push_back(Sample(r, i));
-        m_scopeSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+        std::vector<SampleVector::const_iterator> vbegin;
+        vbegin.push_back(m_sampleBuffer.begin());
+        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
         m_sampleBuffer.clear();
     }
 }

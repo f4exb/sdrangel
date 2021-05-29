@@ -65,7 +65,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
     int getChannelSampleRate() const;
     double getMagSq() const { return m_sink.getMagSq(); }
-    void setScopeSink(BasebandSampleSink* scopeSink) { m_sink.setScopeSink(scopeSink); }
+    void setScopeSink(ScopeVis* scopeSink) { m_sink.setScopeSink(scopeSink); }
     void setTVScreen(TVScreenAnalog *tvScreen) { m_sink.setTVScreen(tvScreen); }
     bool getBFOLocked() { return m_sink.getBFOLocked(); }
     void setVideoTabIndex(int videoTabIndex) { m_sink.setVideoTabIndex(videoTabIndex); }

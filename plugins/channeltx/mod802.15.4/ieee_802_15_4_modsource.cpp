@@ -20,6 +20,7 @@
 #include <QDebug>
 
 #include "dsp/basebandsamplesink.h"
+#include "dsp/scopevis.h"
 #include "ieee_802_15_4_modsource.h"
 #include "util/crc.h"
 
@@ -120,7 +121,8 @@ void IEEE_802_15_4_ModSource::sampleToScope(Complex sample)
         Real r = std::real(sample) * SDR_RX_SCALEF;
         Real i = std::imag(sample) * SDR_RX_SCALEF;
         m_sampleBuffer.push_back(Sample(r, i));
-        m_scopeSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+        std::vector<SampleVector::const_iterator> vbegin;
+        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
         m_sampleBuffer.clear();
     }
 }

@@ -20,6 +20,7 @@
 
 #include "dsp/downchannelizer.h"
 #include "dsp/basebandsamplesink.h"
+#include "dsp/scopevis.h"
 #include "dsp/dspcommands.h"
 
 #include "interferometerbaseband.h"
@@ -141,8 +142,11 @@ void InterferometerBaseband::run()
 {
     if (m_correlator.performCorr(m_sinks[0].getData(), m_sinks[0].getSize(), m_sinks[1].getData(), m_sinks[1].getSize()))
     {
-        if (m_scopeSink) {
-            m_scopeSink->feed(m_correlator.m_tcorr.begin(), m_correlator.m_tcorr.begin() + m_correlator.m_processed, false);
+        if (m_scopeSink)
+        {
+            std::vector<SampleVector::const_iterator> vbegin;
+            vbegin.push_back(m_correlator.m_tcorr.begin());
+            m_scopeSink->feed(vbegin, m_correlator.m_processed);
         }
 
         if (m_spectrumSink)

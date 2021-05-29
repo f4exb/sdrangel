@@ -607,7 +607,7 @@ uint32_t IEEE_802_15_4_Mod::getNumberOfDeviceStreams() const
     return m_deviceAPI->getNbSinkStreams();
 }
 
-void IEEE_802_15_4_Mod::setScopeSink(BasebandSampleSink* scopeSink)
+void IEEE_802_15_4_Mod::setScopeSink(ScopeVis* scopeSink)
 {
     m_basebandSource->setScopeSink(scopeSink);
 }

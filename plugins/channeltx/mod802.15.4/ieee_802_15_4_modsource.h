@@ -38,6 +38,7 @@
 #include "ieee_802_15_4_modsettings.h"
 
 class BasebandSampleSink;
+class ScopeVis;
 
 class IEEE_802_15_4_ModSource : public ChannelSampleSource
 {
@@ -57,7 +58,7 @@ public:
         numSamples = m_levelNbSamples;
     }
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
-    void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
+    void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void applySettings(const IEEE_802_15_4_ModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
 
@@ -84,7 +85,7 @@ private:
     LFSR m_scrambler;                   // Scrambler
 
     BasebandSampleSink* m_spectrumSink; // Spectrum GUI to display baseband waveform
-    BasebandSampleSink* m_scopeSink;    // Scope GUI to display baseband waveform
+    ScopeVis* m_scopeSink;              // Scope GUI to display baseband waveform
     SampleVector m_sampleBuffer;
     Interpolator m_interpolator;        // Interpolator to downsample to 4k in spectrum
     Real m_interpolatorDistance;

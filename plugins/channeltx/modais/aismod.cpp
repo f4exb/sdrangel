@@ -140,7 +140,7 @@ bool AISMod::handleMessage(const Message& cmd)
     }
 }
 
-void AISMod::setScopeSink(BasebandSampleSink* scopeSink)
+void AISMod::setScopeSink(ScopeVis* scopeSink)
 {
     m_basebandSource->setScopeSink(scopeSink);
 }

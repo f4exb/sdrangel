@@ -30,18 +30,18 @@
 #include <stdint.h>
 #include <vector>
 #include "dsp/dsptypes.h"
-#include "dsp/basebandsamplesink.h"
 #include "dsp/projector.h"
 #include "dsp/glscopesettings.h"
 #include "export.h"
 #include "util/message.h"
+#include "util/messagequeue.h"
 #include "util/doublebuffer.h"
 
 
 class GLScopeInterface;
 
-class SDRGUI_API ScopeVis : public BasebandSampleSink {
-
+class SDRGUI_API ScopeVis : public QObject {
+    Q_OBJECT
 public:
     struct TriggerData
     {
@@ -102,6 +102,9 @@ public:
 
     ScopeVis(GLScopeInterface* glScope = nullptr);
     virtual ~ScopeVis();
+
+    void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setLiveRate(int sampleRate);
     void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
@@ -187,11 +190,11 @@ public:
     const std::vector<GLScopeSettings::TraceData>& getTracesData() const { return m_traces.m_tracesData; }
     uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
 
-    using BasebandSampleSink::feed;
-    virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
-    virtual void start();
-    virtual void stop();
-    virtual bool handleMessage(const Message& message);
+    void feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples);
+    //virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
+    //virtual void start();
+    //virtual void stop();
+    bool handleMessage(const Message& message);
     int getTriggerLocation() const { return m_triggerLocation; }
     bool getFreeRun() const { return m_freeRun; }
 
@@ -1079,6 +1082,8 @@ private:
     };
 
     GLScopeInterface* m_glScope;
+    MessageQueue m_inputMessageQueue;
+    MessageQueue *m_messageQueueToGUI;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
     uint32_t m_livePreTriggerDelay;                //!< Pre-trigger delay in number of samples in live mode
     std::vector<TriggerCondition*> m_triggerConditions; //!< Chain of triggers
@@ -1171,6 +1176,9 @@ private:
      * Set the pre trigger delay
      */
     void setPreTriggerDelay(uint32_t preTriggerDelay, bool emitSignal = false);
+
+private slots:
+    void handleInputMessages();
 };
 
 

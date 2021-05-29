@@ -37,6 +37,7 @@ class QThread;
 class QUdpSocket;
 class DeviceAPI;
 class AISModBaseband;
+class ScopeVis;
 
 class AISMod : public BasebandSampleSource, public ChannelAPI {
     Q_OBJECT
@@ -160,7 +161,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    void setScopeSink(BasebandSampleSink* scopeSink);
+    void setScopeSink(ScopeVis* scopeSink);
     double getMagSq() const;
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;

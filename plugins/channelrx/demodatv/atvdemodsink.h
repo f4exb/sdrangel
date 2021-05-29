@@ -23,7 +23,6 @@
 #include <memory>
 
 #include "dsp/channelsamplesink.h"
-#include "dsp/basebandsamplesink.h"
 #include "dsp/nco.h"
 #include "dsp/interpolator.h"
 #include "dsp/fftfilt.h"
@@ -37,6 +36,8 @@
 
 #include "atvdemodsettings.h"
 
+class ScopeVis;
+
 class ATVDemodSink : public ChannelSampleSink {
 public:
     ATVDemodSink();
@@ -44,7 +45,7 @@ public:
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-  	void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
+  	void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void setTVScreen(TVScreenAnalog *tvScreen) //!< set by the GUI
     {
         m_registeredTVScreen = tvScreen;
@@ -108,7 +109,7 @@ private:
 
     //*************** SCOPE  ***************
 
-    BasebandSampleSink* m_scopeSink;
+    ScopeVis* m_scopeSink;
     SampleVector m_scopeSampleBuffer;
 
     //*************** ATV PARAMETERS  ***************

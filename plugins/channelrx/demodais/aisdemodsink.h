@@ -48,6 +48,7 @@
 
 class ChannelAPI;
 class AISDemod;
+class ScopeVis;
 
 class AISDemodSink : public ChannelSampleSink {
 public:
@@ -56,7 +57,7 @@ public:
 
     virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end);
 
-    void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
+    void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void applySettings(const AISDemodSettings& settings, bool force = false);
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_messageQueueToChannel = messageQueue; }
@@ -94,7 +95,7 @@ private:
         double m_magsqPeak;
     };
 
-    BasebandSampleSink* m_scopeSink;    // Scope GUI to display baseband waveform
+    ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
     AISDemod *m_aisDemod;
     AISDemodSettings m_settings;
     ChannelAPI *m_channel;

@@ -34,7 +34,7 @@ class DeviceAPI;
 class InterferometerBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
-class BasebandSampleSink;
+class ScopeVis;
 
 class Interferometer: public MIMOChannel, public ChannelAPI
 {
@@ -121,7 +121,7 @@ public:
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    void setScopeSink(BasebandSampleSink *scopeSink);
+    void setScopeSink(ScopeVis *scopeSink);
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
 
     virtual int webapiSettingsGet(
@@ -152,7 +152,7 @@ private:
     QThread *m_thread;
     SpectrumVis m_spectrumVis;
     InterferometerBaseband* m_basebandSink;
-    BasebandSampleSink* m_scopeSink;
+    ScopeVis* m_scopeSink;
     InterferometerSettings m_settings;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI

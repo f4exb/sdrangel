@@ -29,6 +29,7 @@
 #include "ieee_802_15_4_modsource.h"
 
 class UpChannelizer;
+class ScopeVis;
 
 class IEEE_802_15_4_ModBaseband : public QObject
 {
@@ -65,7 +66,7 @@ public:
     double getMagSq() const { return m_source.getMagSq(); }
     int getChannelSampleRate() const;
     void setSpectrumSampleSink(BasebandSampleSink* sampleSink) { m_source.setSpectrumSink(sampleSink); }
-    void setScopeSink(BasebandSampleSink* scopeSink) { m_source.setScopeSink(scopeSink); }
+    void setScopeSink(ScopeVis* scopeSink) { m_source.setScopeSink(scopeSink); }
 
 
 signals:

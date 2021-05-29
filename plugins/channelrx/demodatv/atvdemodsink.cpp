@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <complex.h>
 
+#include "dsp/scopevis.h"
 #include "atvdemodsink.h"
 
 const int ATVDemodSink::m_ssbFftLen = 1024;
@@ -97,7 +98,9 @@ void ATVDemodSink::feed(const SampleVector::const_iterator& begin, const SampleV
 
     if ((m_videoTabIndex == 1) && (m_scopeSink)) // do only if scope tab is selected and scope is available
     {
-        m_scopeSink->feed(m_scopeSampleBuffer.begin(), m_scopeSampleBuffer.end(), false); // m_ssb = positive only
+        std::vector<SampleVector::const_iterator> vbegin;
+        vbegin.push_back(m_scopeSampleBuffer.begin());
+        m_scopeSink->feed(vbegin, m_scopeSampleBuffer.end() - m_scopeSampleBuffer.begin()); // m_ssb = positive only
         m_scopeSampleBuffer.clear();
     }
 }

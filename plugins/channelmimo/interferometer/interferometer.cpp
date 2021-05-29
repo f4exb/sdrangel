@@ -73,7 +73,7 @@ Interferometer::~Interferometer()
     delete m_thread;
 }
 
-void Interferometer::setScopeSink(BasebandSampleSink *scopeSink)
+void Interferometer::setScopeSink(ScopeVis *scopeSink)
 {
     m_scopeSink = scopeSink;
     m_basebandSink->setScopeSink(scopeSink);

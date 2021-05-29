@@ -47,6 +47,7 @@
 // Is there any benefit to having this higher?
 #define AISMOD_SAMPLE_RATE (9600*6)
 
+class ScopeVis;
 class BasebandSampleSink;
 class ChannelAPI;
 
@@ -68,7 +69,7 @@ public:
         numSamples = m_levelNbSamples;
     }
     void setSpectrumSink(BasebandSampleSink *sampleSink) { m_spectrumSink = sampleSink; }
-    void setScopeSink(BasebandSampleSink* scopeSink) { m_scopeSink = scopeSink; }
+    void setScopeSink(ScopeVis* scopeSink) { m_scopeSink = scopeSink; }
     void applySettings(const AISModSettings& settings, bool force = false);
     void applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force = false);
     void addTXPacket(const QString& data);
@@ -92,7 +93,7 @@ private:
     Gaussian<Real> m_pulseShape;        // Pulse shaping filter
 
     BasebandSampleSink* m_spectrumSink; // Spectrum GUI to display baseband waveform
-    BasebandSampleSink* m_scopeSink;    // Scope GUI to display baseband waveform
+    ScopeVis* m_scopeSink;    // Scope GUI to display baseband waveform
     SampleVector m_sampleBuffer;
 
     Interpolator m_interpolator;        // Interpolator to channel sample rate

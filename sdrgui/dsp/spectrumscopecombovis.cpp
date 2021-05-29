@@ -17,7 +17,9 @@ SpectrumScopeComboVis::~SpectrumScopeComboVis()
 void SpectrumScopeComboVis::feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     (void) positiveOnly;
-	m_scopeVis->feed(begin, end, false);
+	std::vector<SampleVector::const_iterator> vbegin;
+	vbegin.push_back(begin);
+	m_scopeVis->feed(vbegin, end - begin);
 	//SampleVector::const_iterator triggerPoint = m_scopeVis->getTriggerPoint();
 	//m_spectrumVis->feedTriggered(triggerPoint, end, positiveOnly);
     int triggerPointLocation = m_scopeVis->getTriggerLocation();
@@ -34,13 +36,11 @@ void SpectrumScopeComboVis::feed(const SampleVector::const_iterator& begin, cons
 void SpectrumScopeComboVis::start()
 {
 	m_spectrumVis->start();
-	m_scopeVis->start();
 }
 
 void SpectrumScopeComboVis::stop()
 {
 	m_spectrumVis->stop();
-	m_scopeVis->stop();
 }
 
 bool SpectrumScopeComboVis::handleMessage(const Message& message)

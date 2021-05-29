@@ -28,6 +28,7 @@
 
 class DownChannelizer;
 class BasebandSampleSink;
+class ScopeVis;
 
 class InterferometerBaseband : public QObject
 {
@@ -105,7 +106,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setSpectrumSink(BasebandSampleSink *spectrumSink) { m_spectrumSink = spectrumSink; }
-    void setScopeSink(BasebandSampleSink *scopeSink) { m_scopeSink = scopeSink; }
+    void setScopeSink(ScopeVis *scopeSink) { m_scopeSink = scopeSink; }
     void setPhase(int phase) { m_correlator.setPhase(phase); }
 
 	void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, unsigned int streamIndex);
@@ -123,7 +124,7 @@ private:
     InterferometerStreamSink m_sinks[2];
     DownChannelizer *m_channelizers[2];
     BasebandSampleSink *m_spectrumSink;
-    BasebandSampleSink *m_scopeSink;
+    ScopeVis *m_scopeSink;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     QMutex m_mutex;
     unsigned int m_lastStream;

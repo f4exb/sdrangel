@@ -22,6 +22,7 @@
 
 #include "dsp/dspengine.h"
 #include "dsp/datafifo.h"
+#include "dsp/scopevis.h"
 #include "util/db.h"
 #include "util/stepfunctions.h"
 #include "pipes/pipeendpoint.h"
@@ -67,7 +68,9 @@ void AISDemodSink::sampleToScope(Complex sample)
         Real i = std::imag(sample) * SDR_RX_SCALEF;
         SampleVector m_sampleBuffer;
         m_sampleBuffer.push_back(Sample(r, i));
-        m_scopeSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), true);
+        std::vector<SampleVector::const_iterator> vbegin;
+        vbegin.push_back(m_sampleBuffer.begin());
+        m_scopeSink->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
         m_sampleBuffer.clear();
     }
 }

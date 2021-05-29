@@ -43,6 +43,7 @@ const uint ScopeVis::m_traceChunkDefaultSize = 4800;
 
 ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     m_glScope(glScope),
+    m_messageQueueToGUI(nullptr),
     m_preTriggerDelay(0),
     m_livePreTriggerDelay(0),
     m_currentTriggerIndex(0),
@@ -72,10 +73,12 @@ ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;
     }
+    connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 ScopeVis::~ScopeVis()
 {
+    disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
         delete *it;
     }
@@ -213,9 +216,12 @@ void ScopeVis::setMemoryIndex(uint32_t memoryIndex)
     getInputMessageQueue()->push(cmd);
 }
 
-void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
+void ScopeVis::feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples)
+//void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
-    (void) positiveOnly;
+    if (vbegin.size() == 0) {
+        return;
+    }
 
     if (m_currentTraceMemoryIndex > 0) { // in memory mode live trace is suspended
         return;
@@ -231,6 +237,9 @@ void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVect
         m_mutex.unlock();
         return;
     }
+
+    const SampleVector::const_iterator& cbegin = vbegin[0];
+    const SampleVector::const_iterator end = cbegin + nbSamples;
 
     if (m_freeRun) {
         m_triggerLocation = end - cbegin;
@@ -650,12 +659,16 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
     }
 }
 
-void ScopeVis::start()
+void ScopeVis::handleInputMessages()
 {
-}
+	Message* message;
 
-void ScopeVis::stop()
-{
+	while ((message = m_inputMessageQueue.pop()) != nullptr)
+	{
+		if (handleMessage(*message)) {
+			delete message;
+		}
+	}
 }
 
 bool ScopeVis::handleMessage(const Message& message)

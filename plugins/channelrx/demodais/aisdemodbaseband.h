@@ -31,6 +31,7 @@
 class DownChannelizer;
 class ChannelAPI;
 class AISDemod;
+class ScopeVis;
 
 class AISDemodBaseband : public QObject
 {
@@ -71,7 +72,7 @@ public:
     }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
-    void setScopeSink(BasebandSampleSink* scopeSink) { m_sink.setScopeSink(scopeSink); }
+    void setScopeSink(ScopeVis* scopeSink) { m_sink.setScopeSink(scopeSink); }
     void setChannel(ChannelAPI *channel);
     double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }

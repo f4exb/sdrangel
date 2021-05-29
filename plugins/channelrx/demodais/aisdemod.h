@@ -37,6 +37,7 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QThread;
 class DeviceAPI;
+class ScopeVis;
 
 class AISDemod : public BasebandSampleSink, public ChannelAPI {
     Q_OBJECT
@@ -135,7 +136,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    void setScopeSink(BasebandSampleSink* scopeSink);
+    void setScopeSink(ScopeVis* scopeSink);
     double getMagSq() const { return m_basebandSink->getMagSq(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
