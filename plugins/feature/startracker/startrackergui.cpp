@@ -740,7 +740,7 @@ QList<QLineSeries*> StarTrackerGUI::createDriftScan(bool galactic)
     AzAlt aa;
     aa.alt = m_settings.m_el;
     aa.az = m_settings.m_az;
-    double prevX, prevY;
+    double prevX;
     // Plot every 30min over a day
     for (int i = 0; i <= 24*2; i++)
     {
@@ -767,7 +767,6 @@ QList<QLineSeries*> StarTrackerGUI::createDriftScan(bool galactic)
             series->append(x, y);
         }
         prevX = x;
-        prevY = y;
     }
 
     return list;
