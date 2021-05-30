@@ -359,7 +359,7 @@ void ChannelAnalyzerGUI::on_signalSelect_currentIndexChanged(int index)
     if (m_settings.m_inputType == ChannelAnalyzerSettings::InputAutoCorr) {
         m_scopeVis->setTraceChunkSize(ChannelAnalyzerSink::m_corrFFTLen);
     } else {
-        m_scopeVis->setTraceChunkSize(ScopeVis::m_traceChunkDefaultSize);
+        m_scopeVis->setTraceChunkSize(GLScopeSettings::m_traceChunkDefaultSize);
     }
 
     ui->scopeGUI->traceLengthChange();

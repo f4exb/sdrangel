@@ -165,6 +165,11 @@ public:
     std::vector<TraceData> m_tracesData;
     std::vector<TriggerData> m_triggersData;
     static const double AMPS[27];
+    static const uint32_t m_traceChunkDefaultSize = 4800;
+    static const uint32_t m_maxNbTriggers = 10;
+    static const uint32_t m_maxNbTraces = 10;
+    static const uint32_t m_nbTraceMemories = 50;
+    static const uint32_t m_nbTraceBuffers = 2;
 
     GLScopeSettings();
     virtual ~GLScopeSettings();

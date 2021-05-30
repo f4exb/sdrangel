@@ -38,8 +38,6 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGFocusOnTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGOneShot, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 
-const uint ScopeVis::m_traceChunkDefaultSize = 4800;
-
 
 ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     m_glScope(glScope),
@@ -50,9 +48,9 @@ ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
     m_focusedTraceIndex(0),
-    m_traceChunkSize(m_traceChunkDefaultSize),
-    m_traceSize(m_traceChunkDefaultSize),
-    m_liveTraceSize(m_traceChunkDefaultSize),
+    m_traceChunkSize(GLScopeSettings::m_traceChunkDefaultSize),
+    m_traceSize(GLScopeSettings::m_traceChunkDefaultSize),
+    m_liveTraceSize(GLScopeSettings::m_traceChunkDefaultSize),
     m_nbSamples(0),
     m_timeBase(1),
     m_timeOfsProMill(0),
@@ -60,7 +58,7 @@ ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     m_triggerLocation(0),
     m_sampleRate(0),
     m_liveSampleRate(0),
-    m_traceDiscreteMemory(m_nbTraceMemories),
+    m_traceDiscreteMemory(GLScopeSettings::m_nbTraceMemories),
     m_freeRun(true),
     m_maxTraceDelay(0),
     m_triggerOneShot(false),
@@ -68,7 +66,7 @@ ScopeVis::ScopeVis(GLScopeInterface* glScope) :
     m_currentTraceMemoryIndex(0)
 {
     setObjectName("ScopeVis");
-    m_traceDiscreteMemory.resize(m_traceChunkDefaultSize); // arbitrary
+    m_traceDiscreteMemory.resize(GLScopeSettings::m_traceChunkDefaultSize); // arbitrary
     m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
     for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;
@@ -217,7 +215,6 @@ void ScopeVis::setMemoryIndex(uint32_t memoryIndex)
 }
 
 void ScopeVis::feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples)
-//void ScopeVis::feed(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool positiveOnly)
 {
     if (vbegin.size() == 0) {
         return;
@@ -286,12 +283,12 @@ void ScopeVis::feed(const std::vector<SampleVector::const_iterator>& vbegin, int
 
 void ScopeVis::processMemoryTrace()
 {
-    if ((m_currentTraceMemoryIndex > 0) && (m_currentTraceMemoryIndex < m_nbTraceMemories))
+    if ((m_currentTraceMemoryIndex > 0) && (m_currentTraceMemoryIndex < GLScopeSettings::m_nbTraceMemories))
     {
         int traceMemoryIndex = m_traceDiscreteMemory.currentIndex() - m_currentTraceMemoryIndex; // actual index in memory bank
 
         if (traceMemoryIndex < 0) {
-            traceMemoryIndex += m_nbTraceMemories;
+            traceMemoryIndex += GLScopeSettings::m_nbTraceMemories;
         }
 
         SampleVector::const_iterator mend = m_traceDiscreteMemory.at(traceMemoryIndex).m_endPoint;

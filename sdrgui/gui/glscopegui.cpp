@@ -51,13 +51,13 @@ GLScopeGUI::GLScopeGUI(QWidget* parent) :
     qDebug("GLScopeGUI::GLScopeGUI");
     setEnabled(false);
     ui->setupUi(this);
-    ui->trigDelayFine->setMaximum(ScopeVis::m_traceChunkDefaultSize / 10.0);
+    ui->trigDelayFine->setMaximum(GLScopeSettings::m_traceChunkDefaultSize / 10.0);
     ui->traceColor->setStyleSheet("QLabel { background-color : rgb(255,255,64); }");
     m_focusedTraceColor.setRgb(255,255,64);
     ui->trigColor->setStyleSheet("QLabel { background-color : rgb(0,255,0); }");
     m_focusedTriggerColor.setRgb(0,255,0);
     ui->traceText->setText("X");
-    ui->mem->setMaximum(ScopeVis::m_nbTraceMemories - 1);
+    ui->mem->setMaximum(GLScopeSettings::m_nbTraceMemories - 1);
 }
 
 GLScopeGUI::~GLScopeGUI()

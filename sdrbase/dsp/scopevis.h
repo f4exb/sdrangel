@@ -43,63 +43,6 @@ class GLScopeInterface;
 class SDRGUI_API ScopeVis : public QObject {
     Q_OBJECT
 public:
-    struct TriggerData
-    {
-        uint32_t m_streamIndex;          //!< I/Q stream index
-        Projector::ProjectionType m_projectionType; //!< Complex to real projection type
-        uint32_t m_inputIndex;           //!< Input or feed index this trigger is associated with
-        Real m_triggerLevel;             //!< Level in real units
-        int  m_triggerLevelCoarse;
-        int  m_triggerLevelFine;
-        bool m_triggerPositiveEdge;      //!< Trigger on the positive edge (else negative)
-        bool m_triggerBothEdges;         //!< Trigger on both edges (else only one)
-        uint32_t m_triggerHoldoff;       //!< Trigger holdoff in number of samples
-        uint32_t m_triggerDelay;         //!< Delay before the trigger is kicked off in number of samples (trigger delay)
-        double m_triggerDelayMult;       //!< Trigger delay as a multiplier of trace length
-        int m_triggerDelayCoarse;
-        int m_triggerDelayFine;
-        uint32_t m_triggerRepeat;        //!< Number of trigger conditions before the final decisive trigger
-        QColor m_triggerColor;           //!< Trigger line display color
-        float m_triggerColorR;           //!< Trigger line display color - red shortcut
-        float m_triggerColorG;           //!< Trigger line display color - green shortcut
-        float m_triggerColorB;           //!< Trigger line display color - blue shortcut
-
-        TriggerData() :
-            m_streamIndex(0),
-            m_projectionType(Projector::ProjectionReal),
-            m_inputIndex(0),
-            m_triggerLevel(0.0f),
-            m_triggerLevelCoarse(0),
-            m_triggerLevelFine(0),
-            m_triggerPositiveEdge(true),
-            m_triggerBothEdges(false),
-            m_triggerHoldoff(1),
-            m_triggerDelay(0),
-            m_triggerDelayMult(0.0),
-            m_triggerDelayCoarse(0),
-            m_triggerDelayFine(0),
-			m_triggerRepeat(0),
-			m_triggerColor(0,255,0)
-        {
-            setColor(m_triggerColor);
-        }
-
-        void setColor(QColor color)
-        {
-            m_triggerColor = color;
-            qreal r,g,b,a;
-            m_triggerColor.getRgbF(&r, &g, &b, &a);
-            m_triggerColorR = r;
-            m_triggerColorG = g;
-            m_triggerColorB = b;
-        }
-    };
-
-    static const uint32_t m_traceChunkDefaultSize;
-    static const uint32_t m_maxNbTriggers = 10;
-    static const uint32_t m_maxNbTraces = 10;
-    static const uint32_t m_nbTraceMemories = 50;
-
     ScopeVis(GLScopeInterface* glScope = nullptr);
     virtual ~ScopeVis();
 
@@ -151,7 +94,7 @@ public:
             QByteArray buf;
             bool traceDiscreteMemorySuccess;
 
-            d.readU32(1, &traceSize, m_traceChunkDefaultSize);
+            d.readU32(1, &traceSize, GLScopeSettings::m_traceChunkDefaultSize);
             d.readU32(2, &preTriggerDelay, 0);
             d.readS32(3, &sampleRate, 0);
             setSampleRate(sampleRate);
@@ -191,7 +134,6 @@ public:
     uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
 
     void feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples);
-    //virtual void feed(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool positiveOnly);
     //virtual void start();
     //virtual void stop();
     bool handleMessage(const Message& message);
@@ -869,7 +811,7 @@ private:
 
         void addTrace(const GLScopeSettings::TraceData& traceData, int traceSize)
         {
-            if (m_traces[0].size() < m_maxNbTraces)
+            if (m_traces[0].size() < GLScopeSettings::m_maxNbTraces)
             {
                 qDebug("ScopeVis::addTrace");
                 m_traces[0].push_back(0);
@@ -955,8 +897,8 @@ private:
             {
                 delete[] m_x0;
                 delete[] m_x1;
-                m_x0 = new float[2*m_traceSize*m_maxNbTraces];
-                m_x1 = new float[2*m_traceSize*m_maxNbTraces];
+                m_x0 = new float[2*m_traceSize*GLScopeSettings::m_maxNbTraces];
+                m_x1 = new float[2*m_traceSize*GLScopeSettings::m_maxNbTraces];
 
                 m_maxTraceSize = m_traceSize;
             }
