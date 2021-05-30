@@ -3,10 +3,12 @@ GS232ControllerSettings:
   properties:
     azimuth:
       description: Target azimuth in degrees (0-450)
-      type: integer
+      type: number
+      format: float
     elevation:
       description: Target elevation in degrees (0-180)
-      type: integer
+      type: number
+      format: float
     serialPort:
       description: The serial port the GS-232 controller is connected to
       type: string
@@ -36,6 +38,12 @@ GS232ControllerSettings:
       type: integer
     elevationMax:
       description: Maximum elevation the controller will output
+      type: integer
+    tolerance:
+      description: Tolerance in degrees
+      type: integer
+    protocol:
+      description: (0 GS-232, 1 SPID rot2prog)
       type: integer
     title:
       type: string

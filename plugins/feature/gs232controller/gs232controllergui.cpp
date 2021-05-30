@@ -94,8 +94,8 @@ bool GS232ControllerGUI::handleMessage(const Message& message)
     else if (GS232ControllerReport::MsgReportAzAl::match(message))
     {
         GS232ControllerReport::MsgReportAzAl& azAl = (GS232ControllerReport::MsgReportAzAl&) message;
-        ui->azimuthCurrentText->setText(QString("%1").arg(round(azAl.getAzimuth())));
-        ui->elevationCurrentText->setText(QString("%1").arg(round(azAl.getElevation())));
+        ui->azimuthCurrentText->setText(QString("%1").arg(azAl.getAzimuth()));
+        ui->elevationCurrentText->setText(QString("%1").arg(azAl.getElevation()));
         return true;
     }
     else if (MainCore::MsgTargetAzimuthElevation::match(message))
@@ -153,6 +153,9 @@ GS232ControllerGUI::GS232ControllerGUI(PluginAPI* pluginAPI, FeatureUISet *featu
     connect(&m_statusTimer, SIGNAL(timeout()), this, SLOT(updateStatus()));
     m_statusTimer.start(1000);
 
+    ui->azimuthCurrentText->setText("-");
+    ui->elevationCurrentText->setText("-");
+
     updateSerialPortList();
     displaySettings();
     applySettings(true);
@@ -175,6 +178,8 @@ void GS232ControllerGUI::displaySettings()
     blockApplySettings(true);
     ui->azimuth->setValue(m_settings.m_azimuth);
     ui->elevation->setValue(m_settings.m_elevation);
+    ui->protocol->setCurrentIndex((int)m_settings.m_protocol);
+    updateDecimals(m_settings.m_protocol);
     if (m_settings.m_serialPort.length() > 0)
         ui->serialPort->lineEdit()->setText(m_settings.m_serialPort);
     ui->baudRate->setCurrentText(QString("%1").arg(m_settings.m_baudRate));
@@ -281,6 +286,27 @@ void GS232ControllerGUI::on_startStop_toggled(bool checked)
     }
 }
 
+void GS232ControllerGUI::updateDecimals(GS232ControllerSettings::Protocol protocol)
+{
+    if (protocol == GS232ControllerSettings::GS232)
+    {
+        ui->azimuth->setDecimals(0);
+        ui->elevation->setDecimals(0);
+    }
+    else
+    {
+        ui->azimuth->setDecimals(1);
+        ui->elevation->setDecimals(1);
+    }
+}
+
+void GS232ControllerGUI::on_protocol_currentIndexChanged(int index)
+{
+    m_settings.m_protocol = (GS232ControllerSettings::Protocol)index;
+    updateDecimals(m_settings.m_protocol);
+    applySettings();
+}
+
 void GS232ControllerGUI::on_serialPort_currentIndexChanged(int index)
 {
     (void) index;
@@ -295,16 +321,16 @@ void GS232ControllerGUI::on_baudRate_currentIndexChanged(int index)
     applySettings();
 }
 
-void GS232ControllerGUI::on_azimuth_valueChanged(int value)
+void GS232ControllerGUI::on_azimuth_valueChanged(double value)
 {
-    m_settings.m_azimuth = value;
+    m_settings.m_azimuth = (float)value;
     ui->targetName->setText("");
     applySettings();
 }
 
-void GS232ControllerGUI::on_elevation_valueChanged(int value)
+void GS232ControllerGUI::on_elevation_valueChanged(double value)
 {
-    m_settings.m_elevation = value;
+    m_settings.m_elevation = (float)value;
     ui->targetName->setText("");
     applySettings();
 }
@@ -342,6 +368,12 @@ void GS232ControllerGUI::on_elevationMin_valueChanged(int value)
 void GS232ControllerGUI::on_elevationMax_valueChanged(int value)
 {
     m_settings.m_elevationMax = value;
+    applySettings();
+}
+
+void GS232ControllerGUI::on_tolerance_valueChanged(int value)
+{
+    m_settings.m_tolerance = value;
     applySettings();
 }
 

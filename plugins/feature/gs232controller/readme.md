@@ -38,28 +38,40 @@ Specify the SDRangel Channel or Feature that that will control the target aziumt
 When tracking is enabled, this field will display a name for the target being tracked, as indicated by the selected Source plugin (5).
 For example, the ADS-B plugin will display the flight number of the target aircraft. The Star Tracker plugin will display Sun, Moon or Star.
 
-<h3>7: Serial Port</h3>
+<h3>7: Protocol</h3>
+
+Selects which serial protocol to use. This can be GS-232 or SPID (rot2prog).
+
+<h3>8: Tolerance</h3>
+
+Specifies a tolerance in degrees, below which, changes in target azimuth or elevation will not be sent to the rotator.
+This can prevent some rotators that have a limited accuracy from making unbeneficial movements.
+
+If this set to 0, every target azimuth and elevation received by the controller will be send to the rotator.
+If it is set to 2, then a change in azimuth of +-1 degree from the previous azimuth, would not be sent to the rotator.
+
+<h3>9: Serial Port</h3>
 
 Specifies the serial port (E.g. COM3 on Windows or /dev/ttyS0 on Linux) that will be used to send commands to the GS-232 rotator.
 
-<h3>8: Baud rate</h3>
+<h3>10: Baud rate</h3>
 
 Specifies the baud rate that will be used to send commands to the GS-232 rotator. Typically this is 9600.
 
-<h3>9: Azimuth Offset</h3>
+<h3>11: Azimuth Offset</h3>
 
 The azimuth offset specifies an angle in degrees that is added to the target azimuth before sending to the controller. This allows for a misalignment of the rotator to be corrected.
 
-<h3>10: Elevation Offset</h3>
+<h3>12: Elevation Offset</h3>
 
 The elevation offset specifies an angle in degrees that is added to the target elevation before sending to the controller. This allows for a misalignment of the rotator to be corrected.
 
-<h3>11 and 12: Azimuth Min and Max</h3>
+<h3>13 and 14: Azimuth Min and Max</h3>
 
 The azimuth min and max values specify the minimum and maximum azimuth values (after offset has been applied), that will be sent to the rotator.
 These values can be used to prevent the rotator from rotating an antenna in to an obstable.
 
-<h3>13 and 14: Elevation Min and Max</h3>
+<h3>15 and 16: Elevation Min and Max</h3>
 
 The elevation min and max values specify the minimum and maximum elevation values (after offset has been applied), that will be sent to the rotator.
 These values can be used to prevent the rotator from rotating an antenna in to an obstable.
@@ -70,6 +82,13 @@ If the maximum elevation is set to 0, the controller will only use the M GS-232 
 The controller uses the Waaa eee command when elevation needs to be set.
 When only azimuth needs to be set, the Maaa command is used.
 The C2 command is used to read current azimuth and elevation. A response of AZ=aaaEL=eee is expected.
+
+<h2>SPID rot2prog Protocol Implementation</h2>
+
+The controller uses the 0x2f set command with PH/PV=2 to set azimuth and elevation.
+The 0x1f status command is used to read current azimuth and elevation.
+A 12 byte response is expected for set and status commands.
+All frames start with 0x57 and end with 0x20.
 
 <h2>API</h2>
 

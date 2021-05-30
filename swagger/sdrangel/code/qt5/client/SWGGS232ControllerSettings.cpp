@@ -28,9 +28,9 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings(QString* json) {
 }
 
 SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
-    azimuth = 0;
+    azimuth = 0.0f;
     m_azimuth_isSet = false;
-    elevation = 0;
+    elevation = 0.0f;
     m_elevation_isSet = false;
     serial_port = nullptr;
     m_serial_port_isSet = false;
@@ -52,6 +52,10 @@ SWGGS232ControllerSettings::SWGGS232ControllerSettings() {
     m_elevation_min_isSet = false;
     elevation_max = 0;
     m_elevation_max_isSet = false;
+    tolerance = 0;
+    m_tolerance_isSet = false;
+    protocol = 0;
+    m_protocol_isSet = false;
     title = nullptr;
     m_title_isSet = false;
     rgb_color = 0;
@@ -74,9 +78,9 @@ SWGGS232ControllerSettings::~SWGGS232ControllerSettings() {
 
 void
 SWGGS232ControllerSettings::init() {
-    azimuth = 0;
+    azimuth = 0.0f;
     m_azimuth_isSet = false;
-    elevation = 0;
+    elevation = 0.0f;
     m_elevation_isSet = false;
     serial_port = new QString("");
     m_serial_port_isSet = false;
@@ -98,6 +102,10 @@ SWGGS232ControllerSettings::init() {
     m_elevation_min_isSet = false;
     elevation_max = 0;
     m_elevation_max_isSet = false;
+    tolerance = 0;
+    m_tolerance_isSet = false;
+    protocol = 0;
+    m_protocol_isSet = false;
     title = new QString("");
     m_title_isSet = false;
     rgb_color = 0;
@@ -132,6 +140,8 @@ SWGGS232ControllerSettings::cleanup() {
 
 
 
+
+
     if(title != nullptr) { 
         delete title;
     }
@@ -156,9 +166,9 @@ SWGGS232ControllerSettings::fromJson(QString &json) {
 
 void
 SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
-    ::SWGSDRangel::setValue(&azimuth, pJson["azimuth"], "qint32", "");
+    ::SWGSDRangel::setValue(&azimuth, pJson["azimuth"], "float", "");
     
-    ::SWGSDRangel::setValue(&elevation, pJson["elevation"], "qint32", "");
+    ::SWGSDRangel::setValue(&elevation, pJson["elevation"], "float", "");
     
     ::SWGSDRangel::setValue(&serial_port, pJson["serialPort"], "QString", "QString");
     
@@ -179,6 +189,10 @@ SWGGS232ControllerSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&elevation_min, pJson["elevationMin"], "qint32", "");
     
     ::SWGSDRangel::setValue(&elevation_max, pJson["elevationMax"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&tolerance, pJson["tolerance"], "qint32", "");
+    
+    ::SWGSDRangel::setValue(&protocol, pJson["protocol"], "qint32", "");
     
     ::SWGSDRangel::setValue(&title, pJson["title"], "QString", "QString");
     
@@ -246,6 +260,12 @@ SWGGS232ControllerSettings::asJsonObject() {
     if(m_elevation_max_isSet){
         obj->insert("elevationMax", QJsonValue(elevation_max));
     }
+    if(m_tolerance_isSet){
+        obj->insert("tolerance", QJsonValue(tolerance));
+    }
+    if(m_protocol_isSet){
+        obj->insert("protocol", QJsonValue(protocol));
+    }
     if(title != nullptr && *title != QString("")){
         toJsonValue(QString("title"), title, obj, QString("QString"));
     }
@@ -271,22 +291,22 @@ SWGGS232ControllerSettings::asJsonObject() {
     return obj;
 }
 
-qint32
+float
 SWGGS232ControllerSettings::getAzimuth() {
     return azimuth;
 }
 void
-SWGGS232ControllerSettings::setAzimuth(qint32 azimuth) {
+SWGGS232ControllerSettings::setAzimuth(float azimuth) {
     this->azimuth = azimuth;
     this->m_azimuth_isSet = true;
 }
 
-qint32
+float
 SWGGS232ControllerSettings::getElevation() {
     return elevation;
 }
 void
-SWGGS232ControllerSettings::setElevation(qint32 elevation) {
+SWGGS232ControllerSettings::setElevation(float elevation) {
     this->elevation = elevation;
     this->m_elevation_isSet = true;
 }
@@ -389,6 +409,26 @@ void
 SWGGS232ControllerSettings::setElevationMax(qint32 elevation_max) {
     this->elevation_max = elevation_max;
     this->m_elevation_max_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getTolerance() {
+    return tolerance;
+}
+void
+SWGGS232ControllerSettings::setTolerance(qint32 tolerance) {
+    this->tolerance = tolerance;
+    this->m_tolerance_isSet = true;
+}
+
+qint32
+SWGGS232ControllerSettings::getProtocol() {
+    return protocol;
+}
+void
+SWGGS232ControllerSettings::setProtocol(qint32 protocol) {
+    this->protocol = protocol;
+    this->m_protocol_isSet = true;
 }
 
 QString*
@@ -500,6 +540,12 @@ SWGGS232ControllerSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(m_elevation_max_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_tolerance_isSet){
+            isObjectUpdated = true; break;
+        }
+        if(m_protocol_isSet){
             isObjectUpdated = true; break;
         }
         if(title && *title != QString("")){
