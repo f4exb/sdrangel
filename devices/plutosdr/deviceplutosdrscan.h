@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
 #include "plugin/plugininterface.h"
 #include "export.h"
@@ -46,9 +47,9 @@ public:
     void enumOriginDevices(const QString& hardwareId, PluginInterface::OriginDevices& originDevices);
 
 private:
-    std::vector<DeviceScan> m_scans;
-    std::map<std::string, DeviceScan*> m_serialMap;
-    std::map<std::string, DeviceScan*> m_urilMap;
+    std::vector<std::shared_ptr<DeviceScan>> m_scans;
+    std::map<std::string, std::shared_ptr<DeviceScan>> m_serialMap;
+    std::map<std::string, std::shared_ptr<DeviceScan>> m_urilMap;
 };
 
 
