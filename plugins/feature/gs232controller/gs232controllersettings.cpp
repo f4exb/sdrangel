@@ -44,8 +44,8 @@ GS232ControllerSettings::GS232ControllerSettings()
 
 void GS232ControllerSettings::resetToDefaults()
 {
-    m_azimuth = 0;
-    m_elevation = 0;
+    m_azimuth = 0.0f;
+    m_elevation = 0.0f;
     m_serialPort = "";
     m_baudRate = 9600;
     m_track = false;
@@ -63,14 +63,16 @@ void GS232ControllerSettings::resetToDefaults()
     m_azimuthMax = 450;
     m_elevationMin = 0;
     m_elevationMax = 180;
+    m_tolerance = 0;
+    m_protocol = GS232;
 }
 
 QByteArray GS232ControllerSettings::serialize() const
 {
     SimpleSerializer s(1);
 
-    s.writeS32(1, m_azimuth);
-    s.writeS32(2, m_elevation);
+    s.writeFloat(1, m_azimuth);
+    s.writeFloat(2, m_elevation);
     s.writeString(3, m_serialPort);
     s.writeS32(4, m_baudRate);
     s.writeBool(5, m_track);
@@ -88,6 +90,8 @@ QByteArray GS232ControllerSettings::serialize() const
     s.writeS32(18, m_azimuthMax);
     s.writeS32(19, m_elevationMin);
     s.writeS32(20, m_elevationMax);
+    s.writeS32(21, m_tolerance);
+    s.writeS32(22, (int)m_protocol);
 
     return s.final();
 }
@@ -108,8 +112,8 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         uint32_t utmp;
         QString strtmp;
 
-        d.readS32(1, &m_azimuth, 0);
-        d.readS32(2, &m_elevation, 0);
+        d.readFloat(1, &m_azimuth, 0);
+        d.readFloat(2, &m_elevation, 0);
         d.readString(3, &m_serialPort, "");
         d.readS32(4, &m_baudRate, 9600);
         d.readBool(5, &m_track, false);
@@ -136,6 +140,8 @@ bool GS232ControllerSettings::deserialize(const QByteArray& data)
         d.readS32(18, &m_azimuthMax, 450);
         d.readS32(19, &m_elevationMin, 0);
         d.readS32(20, &m_elevationMax, 180);
+        d.readS32(21, &m_tolerance, 0);
+        d.readS32(22, (int*)&m_protocol, GS232);
 
         return true;
     }

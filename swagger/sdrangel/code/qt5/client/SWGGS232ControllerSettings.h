@@ -42,11 +42,11 @@ public:
     virtual void fromJsonObject(QJsonObject &json) override;
     virtual SWGGS232ControllerSettings* fromJson(QString &jsonString) override;
 
-    qint32 getAzimuth();
-    void setAzimuth(qint32 azimuth);
+    float getAzimuth();
+    void setAzimuth(float azimuth);
 
-    qint32 getElevation();
-    void setElevation(qint32 elevation);
+    float getElevation();
+    void setElevation(float elevation);
 
     QString* getSerialPort();
     void setSerialPort(QString* serial_port);
@@ -78,6 +78,12 @@ public:
     qint32 getElevationMax();
     void setElevationMax(qint32 elevation_max);
 
+    qint32 getTolerance();
+    void setTolerance(qint32 tolerance);
+
+    qint32 getProtocol();
+    void setProtocol(qint32 protocol);
+
     QString* getTitle();
     void setTitle(QString* title);
 
@@ -103,10 +109,10 @@ public:
     virtual bool isSet() override;
 
 private:
-    qint32 azimuth;
+    float azimuth;
     bool m_azimuth_isSet;
 
-    qint32 elevation;
+    float elevation;
     bool m_elevation_isSet;
 
     QString* serial_port;
@@ -138,6 +144,12 @@ private:
 
     qint32 elevation_max;
     bool m_elevation_max_isSet;
+
+    qint32 tolerance;
+    bool m_tolerance_isSet;
+
+    qint32 protocol;
+    bool m_protocol_isSet;
 
     QString* title;
     bool m_title_isSet;

@@ -64,6 +64,7 @@ private:
     void blockApplySettings(bool block);
     void applySettings(bool force = false);
     void displaySettings();
+    void updateDecimals(GS232ControllerSettings::Protocol protocol);
     void updatePipeList();
     void updateSerialPortList();
     bool handleMessage(const Message& message);
@@ -76,11 +77,12 @@ private slots:
     void onWidgetRolled(QWidget* widget, bool rollDown);
     void handleInputMessages();
     void on_startStop_toggled(bool checked);
+    void on_protocol_currentIndexChanged(int index);
     void on_serialPort_currentIndexChanged(int index);
     void on_baudRate_currentIndexChanged(int index);
     void on_track_stateChanged(int state);
-    void on_azimuth_valueChanged(int value);
-    void on_elevation_valueChanged(int value);
+    void on_azimuth_valueChanged(double value);
+    void on_elevation_valueChanged(double value);
     void on_targets_currentTextChanged(const QString& text);
     void on_azimuthOffset_valueChanged(int value);
     void on_elevationOffset_valueChanged(int value);
@@ -88,8 +90,8 @@ private slots:
     void on_azimuthMax_valueChanged(int value);
     void on_elevationMin_valueChanged(int value);
     void on_elevationMax_valueChanged(int value);
+    void on_tolerance_valueChanged(int value);
     void updateStatus();
 };
-
 
 #endif // INCLUDE_FEATURE_GS232CONTROLLERGUI_H_

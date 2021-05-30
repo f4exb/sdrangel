@@ -28,8 +28,8 @@ class Serializable;
 
 struct GS232ControllerSettings
 {
-    int m_azimuth;
-    int m_elevation;
+    float m_azimuth;
+    float m_elevation;
     QString m_serialPort;
     int m_baudRate;
     bool m_track;
@@ -40,6 +40,8 @@ struct GS232ControllerSettings
     int m_azimuthMax;
     int m_elevationMin;
     int m_elevationMax;
+    int m_tolerance;
+    enum Protocol { GS232, SPID } m_protocol;
     QString m_title;
     quint32 m_rgbColor;
     bool m_useReverseAPI;

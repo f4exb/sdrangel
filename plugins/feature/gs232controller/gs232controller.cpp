@@ -216,6 +216,8 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
             << " m_azimuthMax: " << settings.m_azimuthMax
             << " m_elevationMin: " << settings.m_elevationMin
             << " m_elevationMax: " << settings.m_elevationMax
+            << " m_tolerance: " << settings.m_tolerance
+            << " m_protocol: " << settings.m_protocol
             << " m_serialPort: " << settings.m_serialPort
             << " m_baudRate: " << settings.m_baudRate
             << " m_track: " << settings.m_track
@@ -273,6 +275,12 @@ void GS232Controller::applySettings(const GS232ControllerSettings& settings, boo
     }
     if ((m_settings.m_elevationMin != settings.m_elevationMin) || force) {
         reverseAPIKeys.append("elevationMin");
+    }
+    if ((m_settings.m_tolerance != settings.m_tolerance) || force) {
+        reverseAPIKeys.append("tolerance");
+    }
+    if ((m_settings.m_protocol != settings.m_protocol) || force) {
+        reverseAPIKeys.append("m_protocol");
     }
     if ((m_settings.m_title != settings.m_title) || force) {
         reverseAPIKeys.append("title");
@@ -360,6 +368,8 @@ void GS232Controller::webapiFormatFeatureSettings(
     response.getGs232ControllerSettings()->setAzimuthMax(settings.m_azimuthMax);
     response.getGs232ControllerSettings()->setElevationMin(settings.m_elevationMin);
     response.getGs232ControllerSettings()->setElevationMax(settings.m_elevationMax);
+    response.getGs232ControllerSettings()->setTolerance(settings.m_tolerance);
+    response.getGs232ControllerSettings()->setProtocol(settings.m_protocol);
 
     if (response.getGs232ControllerSettings()->getTitle()) {
         *response.getGs232ControllerSettings()->getTitle() = settings.m_title;
@@ -419,6 +429,12 @@ void GS232Controller::webapiUpdateFeatureSettings(
     }
     if (featureSettingsKeys.contains("elevationMax")) {
         settings.m_elevationMax = response.getGs232ControllerSettings()->getElevationMax();
+    }
+    if (featureSettingsKeys.contains("tolerance")) {
+        settings.m_tolerance = response.getGs232ControllerSettings()->getTolerance();
+    }
+    if (featureSettingsKeys.contains("protocol")) {
+        settings.m_protocol = (GS232ControllerSettings::Protocol)response.getGs232ControllerSettings()->getProtocol();
     }
     if (featureSettingsKeys.contains("title")) {
         settings.m_title = *response.getGs232ControllerSettings()->getTitle();
@@ -483,6 +499,12 @@ void GS232Controller::webapiReverseSendSettings(QList<QString>& featureSettingsK
     }
     if (featureSettingsKeys.contains("elevationMax") || force) {
         swgGS232ControllerSettings->setElevationMax(settings.m_elevationMax);
+    }
+    if (featureSettingsKeys.contains("tolerance") || force) {
+        swgGS232ControllerSettings->setTolerance(settings.m_tolerance);
+    }
+    if (featureSettingsKeys.contains("protocol") || force) {
+        swgGS232ControllerSettings->setProtocol((int)settings.m_protocol);
     }
     if (featureSettingsKeys.contains("title") || force) {
         swgGS232ControllerSettings->setTitle(new QString(settings.m_title));
