@@ -415,8 +415,8 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
 
-    m_scopeVis = new ScopeVis(ui->glScope);
-    m_aisDemod->setScopeSink(m_scopeVis);
+    m_scopeVis = m_aisDemod->getScopeSink();
+    m_scopeVis->setGLScope(ui->glScope);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 

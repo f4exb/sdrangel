@@ -32,6 +32,7 @@ IEEE_802_15_4_ModBaseband::IEEE_802_15_4_ModBaseband() :
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);
+    m_source.setScopeSink(&m_scopeSink);
 
     qDebug("IEEE_802_15_4_ModBaseband::IEEE_802_15_4_ModBaseband");
     QObject::connect(

@@ -23,6 +23,7 @@
 #include <QMutex>
 
 #include "dsp/samplesourcefifo.h"
+#include "dsp/scopevis.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 
@@ -67,7 +68,7 @@ public:
     double getMagSq() const { return m_source.getMagSq(); }
     int getChannelSampleRate() const;
     void setSpectrumSampleSink(BasebandSampleSink* sampleSink) { m_source.setSpectrumSink(sampleSink); }
-    void setScopeSink(ScopeVis* scopeSink) { m_source.setScopeSink(scopeSink); }
+    ScopeVis *getScopeSink() { return &m_scopeSink; }
     void setChannel(ChannelAPI *channel);
 
 signals:
@@ -85,6 +86,7 @@ private:
     AISModSource m_source;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AISModSettings m_settings;
+    ScopeVis m_scopeSink;
     QMutex m_mutex;
 
     void processFifo(SampleVector& data, unsigned int iBegin, unsigned int iEnd);

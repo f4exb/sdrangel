@@ -490,8 +490,8 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    m_scopeVis = new ScopeVis(ui->glScope);
-    m_aisMod->setScopeSink(m_scopeVis);
+    m_scopeVis = m_aisMod->getScopeSink();
+    m_scopeVis->setGLScope(ui->glScope);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
 

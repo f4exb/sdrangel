@@ -467,13 +467,14 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	ui->setupUi(this);
 	setAttribute(Qt::WA_DeleteOnClose, true);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	m_scopeVis = new ScopeVis(ui->glScope);
 
 	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
 	m_channelAnalyzer = (ChannelAnalyzer*) rxChannel;
     m_spectrumVis = m_channelAnalyzer->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
+    m_scopeVis = m_channelAnalyzer->getScopeVis();
+    m_scopeVis->setGLScope(ui->glScope);
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
     m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
     m_channelAnalyzer->setSampleSink(m_spectrumScopeComboVis);
@@ -529,7 +530,6 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
 	ui->glScope->disconnectTimer();
 	delete ui;
 	delete m_spectrumScopeComboVis;
-	delete m_scopeVis;
     qDebug("ChannelAnalyzerGUI::~ChannelAnalyzerGUI: done");
 }
 

@@ -88,7 +88,7 @@ public:
         return m_settings.m_inputFrequencyOffset;
     }
 
-	void setScopeSink(ScopeVis* scopeSink) { m_basebandSink->setScopeSink(scopeSink); }
+	ScopeVis *getScopeSink() { return m_basebandSink->getScopeSink(); }
     void setTVScreen(TVScreenAnalog *tvScreen) { m_basebandSink->setTVScreen(tvScreen); }; //!< set by the GUI
     double getMagSq() const { return m_basebandSink->getMagSq(); } //!< Beware this is scaled to 2^30
     bool getBFOLocked() { return m_basebandSink->getBFOLocked(); }

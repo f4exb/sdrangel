@@ -186,9 +186,9 @@ bool AISDemod::handleMessage(const Message& cmd)
     }
 }
 
-void AISDemod::setScopeSink(ScopeVis* scopeSink)
+ScopeVis *AISDemod::getScopeSink()
 {
-    m_basebandSink->setScopeSink(scopeSink);
+    return m_basebandSink->getScopeSink();
 }
 
 void AISDemod::applySettings(const AISDemodSettings& settings, bool force)

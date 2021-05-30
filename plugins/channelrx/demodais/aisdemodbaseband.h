@@ -23,6 +23,7 @@
 #include <QMutex>
 
 #include "dsp/samplesinkfifo.h"
+#include "dsp/scopevis.h"
 #include "util/message.h"
 #include "util/messagequeue.h"
 
@@ -72,7 +73,7 @@ public:
     }
     void setMessageQueueToChannel(MessageQueue *messageQueue) { m_sink.setMessageQueueToChannel(messageQueue); }
     void setBasebandSampleRate(int sampleRate);
-    void setScopeSink(ScopeVis* scopeSink) { m_sink.setScopeSink(scopeSink); }
+    ScopeVis *getScopeSink() { return &m_scopeSink; }
     void setChannel(ChannelAPI *channel);
     double getMagSq() const { return m_sink.getMagSq(); }
     bool isRunning() const { return m_running; }
@@ -83,6 +84,7 @@ private:
     AISDemodSink m_sink;
     MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     AISDemodSettings m_settings;
+    ScopeVis m_scopeSink;
     bool m_running;
     QMutex m_mutex;
 

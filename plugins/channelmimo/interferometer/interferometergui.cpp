@@ -110,11 +110,11 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
     connect(this, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(onMenuDialogCalled(const QPoint &)));
 
-	m_scopeVis = new ScopeVis(ui->glScope);
-
     m_interferometer = (Interferometer*) channelMIMO;
     m_spectrumVis = m_interferometer->getSpectrumVis();
-    m_interferometer->setScopeSink(m_scopeVis);
+    m_spectrumVis->setGLSpectrum(ui->glSpectrum);
+    m_scopeVis = m_interferometer->getScopeVis();
+    m_scopeVis->setGLScope(ui->glScope);
     m_interferometer->setMessageQueueToGUI(getInputMessageQueue());
     m_sampleRate = m_interferometer->getDeviceSampleRate();
 
@@ -159,7 +159,6 @@ InterferometerGUI::InterferometerGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUI
 
 InterferometerGUI::~InterferometerGUI()
 {
-	delete m_scopeVis;
     delete ui;
 }
 

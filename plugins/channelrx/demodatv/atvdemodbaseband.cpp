@@ -30,6 +30,7 @@ ATVDemodBaseband::ATVDemodBaseband() :
     m_mutex(QMutex::Recursive)
 {
     qDebug("ATVDemodBaseband::ATVDemodBaseband");
+    m_sink.setScopeSink(&m_scopeSink);
     m_sampleFifo.setSize(SampleSinkFifo::getSizePolicy(48000));
     m_channelizer = new DownChannelizer(&m_sink);
 }

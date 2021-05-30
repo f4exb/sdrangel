@@ -136,7 +136,7 @@ public:
             const QStringList& channelSettingsKeys,
             SWGSDRangel::SWGChannelSettings& response);
 
-    void setScopeSink(ScopeVis* scopeSink);
+    ScopeVis *getScopeSink();
     double getMagSq() const { return m_basebandSink->getMagSq(); }
 
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {

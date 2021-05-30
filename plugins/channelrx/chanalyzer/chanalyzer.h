@@ -24,6 +24,7 @@
 
 #include "dsp/basebandsamplesink.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/scopevis.h"
 #include "channel/channelapi.h"
 #include "util/message.h"
 #include "util/movingaverage.h"
@@ -60,6 +61,7 @@ public:
 	virtual ~ChannelAnalyzer();
 	virtual void destroy() { delete this; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
+    ScopeVis *getScopeVis() { return &m_scopeVis; }
     void setSampleSink(BasebandSampleSink *sink) { m_basebandSink->setSampleSink(sink); }
 
     int getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
@@ -103,6 +105,7 @@ private:
     ChannelAnalyzerBaseband *m_basebandSink;
     ChannelAnalyzerSettings m_settings;
     SpectrumVis m_spectrumVis;
+    ScopeVis m_scopeVis;
     int m_basebandSampleRate; //!< stored from device message used when starting baseband sink
     qint64 m_centerFrequency; //!< stored from device message used when starting baseband sink
 

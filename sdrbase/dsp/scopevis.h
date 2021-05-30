@@ -43,9 +43,10 @@ class GLScopeInterface;
 class SDRGUI_API ScopeVis : public QObject {
     Q_OBJECT
 public:
-    ScopeVis(GLScopeInterface* glScope = nullptr);
+    ScopeVis();
     virtual ~ScopeVis();
 
+    void setGLScope(GLScopeInterface* glScope);
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 

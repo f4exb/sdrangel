@@ -144,7 +144,7 @@ public:
             SWGSDRangel::SWGChannelSettings& response);
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    void setScopeSink(ScopeVis* scopeSink);
+    ScopeVis *getScopeSink();
     double getMagSq() const;
     void setLevelMeter(QObject *levelMeter);
     uint32_t getNumberOfDeviceStreams() const;

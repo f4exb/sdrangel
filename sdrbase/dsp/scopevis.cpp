@@ -39,8 +39,8 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGOneShot, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 
 
-ScopeVis::ScopeVis(GLScopeInterface* glScope) :
-    m_glScope(glScope),
+ScopeVis::ScopeVis() :
+    m_glScope(nullptr),
     m_messageQueueToGUI(nullptr),
     m_preTriggerDelay(0),
     m_livePreTriggerDelay(0),
@@ -67,7 +67,6 @@ ScopeVis::ScopeVis(GLScopeInterface* glScope) :
 {
     setObjectName("ScopeVis");
     m_traceDiscreteMemory.resize(GLScopeSettings::m_traceChunkDefaultSize); // arbitrary
-    m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
     for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;
     }
@@ -80,6 +79,12 @@ ScopeVis::~ScopeVis()
     for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
         delete *it;
     }
+}
+
+void ScopeVis::setGLScope(GLScopeInterface* glScope)
+{
+    m_glScope = glScope;
+    m_glScope->setTraces(&m_traces.m_tracesData, &m_traces.m_traces[0]);
 }
 
 void ScopeVis::setLiveRate(int sampleRate)
@@ -617,11 +622,11 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const Sa
 
     float traceTime = ((float) m_traceSize) / m_sampleRate;
 
-    if (traceTime >= 1.0f) { // display continuously if trace time is 1 second or more
+    if (m_glScope && (traceTime >= 1.0f)) { // display continuously if trace time is 1 second or more
         m_glScope->newTraces(m_traces.m_traces, m_traces.currentBufferIndex(), &m_traces.m_projectionTypes);
     }
 
-    if (m_nbSamples == 0) // finished
+    if (m_glScope && (m_nbSamples == 0)) // finished
     {
         // display only at trace end if trace time is less than 1 second
         if (traceTime < 1.0f)
@@ -756,7 +761,11 @@ bool ScopeVis::handleMessage(const Message& message)
             if (triggerIndex == m_focusedTriggerIndex)
             {
                 computeDisplayTriggerLevels();
-                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+
+                if (m_glScope) {
+                    m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+                }
+
                 updateGLScopeDisplay();
             }
         }
@@ -797,7 +806,11 @@ bool ScopeVis::handleMessage(const Message& message)
         m_triggerConditions[triggerIndex] = nextTrigger;
 
         computeDisplayTriggerLevels();
-        m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+
+        if (m_glScope) {
+            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+        }
+
         updateGLScopeDisplay();
 
         return true;
@@ -812,7 +825,11 @@ bool ScopeVis::handleMessage(const Message& message)
         {
             m_focusedTriggerIndex = triggerIndex;
             computeDisplayTriggerLevels();
-            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+
+            if (m_glScope) {
+                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+            }
+
             updateGLScopeDisplay();
         }
 
@@ -877,7 +894,11 @@ bool ScopeVis::handleMessage(const Message& message)
         {
             m_focusedTraceIndex = traceIndex;
             computeDisplayTriggerLevels();
-            m_glScope->setFocusedTraceIndex(m_focusedTraceIndex);
+
+            if (m_glScope) {
+                m_glScope->setFocusedTraceIndex(m_focusedTraceIndex);
+            }
+
             updateGLScopeDisplay();
         }
 
@@ -1044,6 +1065,10 @@ void ScopeVis::computeDisplayTriggerLevels()
 
 void ScopeVis::updateGLScopeDisplay()
 {
+    if (!m_glScope) {
+        return;
+    }
+
     if (m_currentTraceMemoryIndex > 0)
     {
         m_glScope->setConfigChanged();

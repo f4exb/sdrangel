@@ -359,8 +359,8 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-    m_scopeVis = new ScopeVis(ui->glScope);
-    m_IEEE_802_15_4_Mod->setScopeSink(m_scopeVis);
+    m_scopeVis = m_IEEE_802_15_4_Mod->getScopeSink();
+    m_scopeVis->setGLScope(ui->glScope);
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
     connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick())); // 50 ms
     ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
@@ -442,7 +442,6 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
 
 IEEE_802_15_4_ModGUI::~IEEE_802_15_4_ModGUI()
 {
-    delete m_scopeVis;
     delete ui;
 }
 

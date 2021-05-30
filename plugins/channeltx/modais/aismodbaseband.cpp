@@ -32,6 +32,7 @@ AISModBaseband::AISModBaseband() :
 {
     m_sampleFifo.resize(SampleSourceFifo::getSizePolicy(48000));
     m_channelizer = new UpChannelizer(&m_source);
+    m_source.setScopeSink(&m_scopeSink);
 
     qDebug("AISModBaseband::AISModBaseband");
     QObject::connect(

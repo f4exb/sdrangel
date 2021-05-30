@@ -25,6 +25,7 @@
 #include "feature/feature.h"
 #include "util/message.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/scopevis.h"
 
 #include "demodanalyzersettings.h"
 
@@ -156,6 +157,7 @@ public:
     virtual ~DemodAnalyzer();
     virtual void destroy() { delete this; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
+    ScopeVis *getScopeVis() { return &m_scopeVis; }
     void setSampleSink(BasebandSampleSink *sink);
     double getMagSqAvg() const;
     virtual bool handleMessage(const Message& cmd);
@@ -197,6 +199,7 @@ private:
     DemodAnalyzerWorker *m_worker;
     DemodAnalyzerSettings m_settings;
     SpectrumVis m_spectrumVis;
+    ScopeVis m_scopeVis;
     QHash<ChannelAPI*, DemodAnalyzerSettings::AvailableChannel> m_availableChannels;
     ChannelAPI *m_selectedChannel;
     DataFifo *m_dataFifo;

@@ -43,7 +43,6 @@ Interferometer::Interferometer(DeviceAPI *deviceAPI) :
     ChannelAPI(m_channelIdURI, ChannelAPI::StreamMIMO),
     m_deviceAPI(deviceAPI),
     m_spectrumVis(SDR_RX_SCALEF),
-    m_scopeSink(nullptr),
     m_guiMessageQueue(nullptr),
     m_frequencyOffset(0),
     m_deviceSampleRate(48000)
@@ -71,12 +70,6 @@ Interferometer::~Interferometer()
     m_deviceAPI->removeMIMOChannel(this);
     delete m_basebandSink;
     delete m_thread;
-}
-
-void Interferometer::setScopeSink(ScopeVis *scopeSink)
-{
-    m_scopeSink = scopeSink;
-    m_basebandSink->setScopeSink(scopeSink);
 }
 
 void Interferometer::startSinks()

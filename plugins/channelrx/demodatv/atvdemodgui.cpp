@@ -222,10 +222,10 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
     setAttribute(Qt::WA_DeleteOnClose, true);
     connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
 
-    m_scopeVis = new ScopeVis(ui->glScope);
     m_atvDemod = (ATVDemod*) rxChannel;
     m_atvDemod->setMessageQueueToGUI(getInputMessageQueue());
-    m_atvDemod->setScopeSink(m_scopeVis);
+    m_scopeVis = m_atvDemod->getScopeSink();
+    m_scopeVis->setGLScope(ui->glScope);
     m_atvDemod->setTVScreen(ui->screenTV);
 
     ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
@@ -276,7 +276,6 @@ ATVDemodGUI::ATVDemodGUI(PluginAPI* objPluginAPI, DeviceUISet *deviceUISet, Base
 
 ATVDemodGUI::~ATVDemodGUI()
 {
-    delete m_scopeVis;
     delete ui;
 }
 

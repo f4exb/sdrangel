@@ -23,6 +23,7 @@
 
 #include "dsp/mimochannel.h"
 #include "dsp/spectrumvis.h"
+#include "dsp/scopevis.h"
 #include "channel/channelapi.h"
 #include "util/messagequeue.h"
 #include "util/message.h"
@@ -34,7 +35,6 @@ class DeviceAPI;
 class InterferometerBaseband;
 class QNetworkReply;
 class QNetworkAccessManager;
-class ScopeVis;
 
 class Interferometer: public MIMOChannel, public ChannelAPI
 {
@@ -121,7 +121,7 @@ public:
     MessageQueue *getMessageQueueToGUI() { return m_guiMessageQueue; }
 
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
-    void setScopeSink(ScopeVis *scopeSink);
+    ScopeVis *getScopeVis() { return &m_scopeSink; }
     void applyChannelSettings(uint32_t log2Decim, uint32_t filterChainHash);
 
     virtual int webapiSettingsGet(
@@ -151,8 +151,8 @@ private:
     DeviceAPI *m_deviceAPI;
     QThread *m_thread;
     SpectrumVis m_spectrumVis;
+    ScopeVis m_scopeSink;
     InterferometerBaseband* m_basebandSink;
-    ScopeVis* m_scopeSink;
     InterferometerSettings m_settings;
 	MessageQueue m_inputMessageQueue; //!< Queue for asynchronous inbound communication
     MessageQueue *m_guiMessageQueue;  //!< Input message queue to the GUI

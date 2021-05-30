@@ -139,10 +139,11 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	setAttribute(Qt::WA_DeleteOnClose, true);
     setChannelWidget(false);
 	connect(this, SIGNAL(widgetRolled(QWidget*,bool)), this, SLOT(onWidgetRolled(QWidget*,bool)));
-	m_scopeVis = new ScopeVis(ui->glScope);
 
     m_demodAnalyzer = reinterpret_cast<DemodAnalyzer*>(feature);
     m_demodAnalyzer->setMessageQueueToGUI(&m_inputMessageQueue);
+    m_scopeVis = m_demodAnalyzer->getScopeVis();
+    m_scopeVis->setGLScope(ui->glScope);
     m_spectrumVis = m_demodAnalyzer->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
 	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
@@ -180,7 +181,6 @@ DemodAnalyzerGUI::~DemodAnalyzerGUI()
 {
 	delete ui;
 	delete m_spectrumScopeComboVis;
-	delete m_scopeVis;
 }
 
 void DemodAnalyzerGUI::blockApplySettings(bool block)
