@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <cstring>
 #include <regex>
+#include <memory>
 #include <iio.h>
 
 #include <QtGlobal>
@@ -49,6 +50,7 @@ void DevicePlutoSDRScan::scan()
     }
 
     m_scans.clear();
+    m_scans.reserve(num_contexts);
 
     for (i = 0; i < num_contexts; i++)
     {
@@ -64,17 +66,25 @@ void DevicePlutoSDRScan::scan()
 
         if (pch)
         {
-            m_scans.push_back({std::string(description), std::string("TBD"), std::string(uri)});
-            m_urilMap[m_scans.back().m_uri] = &m_scans.back();
+            // As device scan is used across multiple vectors it's best to use a
+            // managed pointer, as to keep track of when it's safe to delete.
+            std::shared_ptr<DeviceScan> dev_scan = std::make_shared<DeviceScan>(
+                DeviceScan({
+                    .m_name = std::string(description),
+                    .m_serial = std::string("TBD"),
+                    .m_uri = std::string(uri)
+                }));
+            m_scans.push_back(dev_scan);
+            m_urilMap[m_scans.back()->m_uri] = m_scans.back();
 
             std::regex desc_regex(".*serial=(.+)");
             std::smatch desc_match;
-            std::regex_search(m_scans.back().m_name, desc_match, desc_regex);
+            std::regex_search(m_scans.back()->m_name, desc_match, desc_regex);
 
             if (desc_match.size() == 2)
             {
-                m_scans.back().m_serial = desc_match[1];
-                m_serialMap[m_scans.back().m_serial] = &m_scans.back();
+                m_scans.back()->m_serial = desc_match[1];
+                m_serialMap[m_scans.back()->m_serial] = m_scans.back();
             }
         }
     }
@@ -86,7 +96,7 @@ void DevicePlutoSDRScan::scan()
 const std::string* DevicePlutoSDRScan::getURIAt(unsigned int index) const
 {
     if (index < m_scans.size()) {
-        return &(m_scans[index].m_uri);
+        return &(m_scans[index]->m_uri);
     } else {
         return 0;
     }
@@ -95,7 +105,7 @@ const std::string* DevicePlutoSDRScan::getURIAt(unsigned int index) const
 const std::string* DevicePlutoSDRScan::getSerialAt(unsigned int index) const
 {
     if (index < m_scans.size()) {
-        return &(m_scans[index].m_serial);
+        return &(m_scans[index]->m_serial);
     } else {
         return 0;
     }
@@ -104,7 +114,7 @@ const std::string* DevicePlutoSDRScan::getSerialAt(unsigned int index) const
 const std::string* DevicePlutoSDRScan::getURIFromSerial(
         const std::string& serial) const
 {
-    std::map<std::string, DeviceScan*>::const_iterator it = m_serialMap.find(serial);
+    std::map<std::string, std::shared_ptr<DeviceScan>>::const_iterator it = m_serialMap.find(serial);
     if (it == m_serialMap.end()) {
         return 0;
     } else {
@@ -114,11 +124,11 @@ const std::string* DevicePlutoSDRScan::getURIFromSerial(
 
 void DevicePlutoSDRScan::getSerials(std::vector<std::string>& serials) const
 {
-    std::vector<DeviceScan>::const_iterator it = m_scans.begin();
+    std::vector<std::shared_ptr<DeviceScan>>::const_iterator it = m_scans.begin();
     serials.clear();
 
     for (; it != m_scans.end(); ++it) {
-        serials.push_back(it->m_serial);
+        serials.push_back((*it)->m_serial);
     }
 }
 
