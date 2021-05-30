@@ -70,9 +70,9 @@ void DevicePlutoSDRScan::scan()
             // managed pointer, as to keep track of when it's safe to delete.
             std::shared_ptr<DeviceScan> dev_scan = std::make_shared<DeviceScan>(
                 DeviceScan({
-                    .m_name = std::string(description),
-                    .m_serial = std::string("TBD"),
-                    .m_uri = std::string(uri)
+                    std::string(description),
+                    std::string("TBD"),
+                    std::string(uri)
                 }));
             m_scans.push_back(dev_scan);
             m_urilMap[m_scans.back()->m_uri] = m_scans.back();
