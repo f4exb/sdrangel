@@ -36,6 +36,7 @@
 #include "util/message.h"
 #include "util/messagequeue.h"
 #include "util/doublebuffer.h"
+#include "util/doublebuffermultiple.h"
 
 
 class GLScopeInterface;
@@ -542,12 +543,8 @@ private:
     	    m_traceBuffer.reset();
     	}
 
-    	void write(const SampleVector::const_iterator begin, const SampleVector::const_iterator end) {
-    		m_traceBuffer.write(begin, end);
-    	}
-
     	void write(const SampleVector::const_iterator begin, int nbSamples) {
-    		m_traceBuffer.write(begin, begin + nbSamples);
+    		m_traceBuffer.write(begin, nbSamples);
     	}
 
     	unsigned int absoluteFill() const {
@@ -634,8 +631,10 @@ private:
     	{
     	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
             m_traceBackBuffers[nextMemIndex].reset();
-            m_traceBackBuffers[nextMemIndex].write(m_traceBackBuffers[m_currentMemIndex].m_endPoint - samplesToReport,
-                    m_traceBackBuffers[m_currentMemIndex].m_endPoint);
+            m_traceBackBuffers[nextMemIndex].write(
+                m_traceBackBuffers[m_currentMemIndex].m_endPoint - samplesToReport,
+                samplesToReport
+            );
     	    m_currentMemIndex = nextMemIndex;
     		return m_traceBackBuffers[m_currentMemIndex]; // new trace
     	}

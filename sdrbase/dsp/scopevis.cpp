@@ -318,7 +318,7 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
 
     // memory storage
 
-    m_traceDiscreteMemory.current().write(begin, end);
+    m_traceDiscreteMemory.current().write(begin, length);
 
     // Removed in 4.2.4 may cause trigger bug
     // if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
