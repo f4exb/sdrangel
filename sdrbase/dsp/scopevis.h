@@ -530,31 +530,33 @@ private:
     	TraceBuffer m_traceBuffer;
     	SampleVector::iterator m_endPoint;
 
-    	TraceBackBuffer()
-    	{
+    	TraceBackBuffer() {
     		m_endPoint = m_traceBuffer.getCurrent();
     	}
 
-    	void resize(uint32_t size)
-    	{
+    	void resize(uint32_t size) {
     		m_traceBuffer.resize(size);
     	}
 
-    	void reset()
-    	{
+    	void reset() {
     	    m_traceBuffer.reset();
     	}
 
-    	void write(const SampleVector::const_iterator begin, const SampleVector::const_iterator end)
-    	{
+    	void write(const SampleVector::const_iterator begin, const SampleVector::const_iterator end) {
     		m_traceBuffer.write(begin, end);
+    	}
+
+    	void write(const SampleVector::const_iterator begin, int nbSamples) {
+    		m_traceBuffer.write(begin, begin + nbSamples);
     	}
 
     	unsigned int absoluteFill() const {
     		return m_traceBuffer.absoluteFill();
     	}
 
-    	SampleVector::iterator current() { return m_traceBuffer.getCurrent(); }
+    	SampleVector::iterator current() {
+            return m_traceBuffer.getCurrent();
+        }
 
         QByteArray serialize() const
         {
@@ -1065,7 +1067,7 @@ private:
     /**
      * Process a sample trace which length is at most the trace length (m_traceSize)
      */
-    void processTrace(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, int& triggerPointToEnd);
+    void processTrace(const std::vector<SampleVector::const_iterator>& vbegin, int length, int& triggerPointToEnd);
 
     /**
      * process a trace in memory at current trace index in memory

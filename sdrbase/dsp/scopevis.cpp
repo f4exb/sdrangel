@@ -240,46 +240,51 @@ void ScopeVis::feed(const std::vector<SampleVector::const_iterator>& vbegin, int
         return;
     }
 
-    const SampleVector::const_iterator& cbegin = vbegin[0];
-    const SampleVector::const_iterator end = cbegin + nbSamples;
-
     if (m_freeRun) {
-        m_triggerLocation = end - cbegin;
+        m_triggerLocation = nbSamples;
     }
     else if (m_triggerState == TriggerTriggered) {
-        m_triggerLocation = end - cbegin;
+        m_triggerLocation = nbSamples;
     }
     else if (m_triggerState == TriggerUntriggered) {
         m_triggerLocation = 0;
     }
     else {
-        m_triggerLocation = end - cbegin;
+        m_triggerLocation = nbSamples;
     }
 
-    SampleVector::const_iterator begin(cbegin);
+    SampleVector::const_iterator begin(vbegin[0]);
+    //const SampleVector::const_iterator end = vbegin[0] + nbSamples;
     int triggerPointToEnd;
+    int remainder = nbSamples;
+    std::vector<SampleVector::const_iterator> nvbegin(vbegin);
 
-    while (begin < end)
+    //while (begin < end)
+    while (remainder > 0)
     {
-        if (end - begin < m_traceSize) // buffer smaller than trace size (end - bagin) < m_traceSize
+        if (remainder < (int) m_traceSize) // buffer smaller than trace size (end - bagin) < m_traceSize
         {
             triggerPointToEnd = -1;
-            processTrace(begin, end, triggerPointToEnd); // use all buffer
+            processTrace(nvbegin, remainder, triggerPointToEnd); // use all buffer
             m_triggerLocation = triggerPointToEnd < 0 ? 0 : triggerPointToEnd; // trim negative values
-            m_triggerLocation = m_triggerLocation > end - begin ? end - begin : m_triggerLocation; // trim past begin values
+            m_triggerLocation = m_triggerLocation > remainder ? remainder : m_triggerLocation; // trim past begin values
 
-            begin = end; // effectively breaks out the loop
+            remainder = 0; // effectively breaks out the loop
         }
         else // trace size fits in buffer
         {
             triggerPointToEnd = -1;
-            processTrace(begin, begin + m_traceSize, triggerPointToEnd); // use part of buffer to fit trace size
+            processTrace(nvbegin, m_traceSize, triggerPointToEnd); // use part of buffer to fit trace size
             //m_triggerPoint = begin + m_traceSize - triggerPointToEnd;
-            m_triggerLocation = end - begin + m_traceSize - triggerPointToEnd; // should always refer to end iterator
+            m_triggerLocation = remainder + m_traceSize - triggerPointToEnd; // should always refer to end iterator
             m_triggerLocation = m_triggerLocation < 0 ? 0 : m_triggerLocation; // trim negative values
-            m_triggerLocation = m_triggerLocation > end - begin ? end - begin : m_triggerLocation; // trim past begin values
+            m_triggerLocation = m_triggerLocation > remainder ? remainder : m_triggerLocation; // trim past begin values
 
-            begin += m_traceSize;
+            for (auto begin : nvbegin) {
+                begin += m_traceSize;
+            }
+
+            remainder -= m_traceSize;
         }
     }
 
@@ -306,13 +311,14 @@ void ScopeVis::processMemoryTrace()
     }
 }
 
-void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, int& triggerPointToEnd)
+void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbegin, int length, int& triggerPointToEnd)
 {
-    SampleVector::const_iterator begin(cbegin);
+    SampleVector::const_iterator begin(vbegin[0]);
+    const SampleVector::const_iterator end(begin + length);
 
     // memory storage
 
-    m_traceDiscreteMemory.current().write(cbegin, end);
+    m_traceDiscreteMemory.current().write(begin, end);
 
     // Removed in 4.2.4 may cause trigger bug
     // if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
@@ -450,7 +456,10 @@ void ScopeVis::processTrace(const SampleVector::const_iterator& cbegin, const Sa
             {
                 int mTriggerPointToEnd = -1;
 
-                processTrace(mbegin, mend, mTriggerPointToEnd);
+                // FIXME:
+                std::vector<SampleVector::const_iterator> vbegin;
+                vbegin.push_back(mbegin);
+                processTrace(vbegin, remainder, mTriggerPointToEnd);
 
                 if (mTriggerPointToEnd >= 0) {
                     triggerPointToEnd = mTriggerPointToEnd;
