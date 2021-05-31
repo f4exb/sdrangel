@@ -84,6 +84,7 @@ public:
     }
 
 	typename std::vector<T>::iterator getCurrent() { return m_data.begin() + m_currentPosition + m_size; }
+    void getCurrent(typename std::vector<T>::iterator& it) { it = m_data.begin() + m_currentPosition + m_size; }
 	typename std::vector<T>::const_iterator begin() const { return m_data.begin(); }
     typename std::vector<T>::iterator begin() { return m_data.begin(); }
 	unsigned int absoluteFill() const { return m_currentPosition; }

@@ -529,7 +529,6 @@ private:
     struct TraceBackBuffer
     {
     	TraceBuffer m_traceBuffer;
-    	SampleVector::iterator m_endPoint;
 
     	TraceBackBuffer() {
     		m_endPoint = m_traceBuffer.getCurrent();
@@ -551,8 +550,8 @@ private:
     		return m_traceBuffer.absoluteFill();
     	}
 
-    	SampleVector::iterator current() {
-            return m_traceBuffer.getCurrent();
+        void current(SampleVector::iterator& it) {
+            m_traceBuffer.getCurrent(it);
         }
 
         QByteArray serialize() const
@@ -592,6 +591,17 @@ private:
                 return false;
             }
         }
+
+        void setEndPoint(const SampleVector::iterator& endPoint) {
+            m_endPoint = endPoint;
+        }
+
+        SampleVector::iterator getEndPoint() {
+            return m_endPoint;
+        }
+
+    private:
+    	SampleVector::iterator m_endPoint;
     };
 
     struct TraceBackDiscreteMemory
@@ -632,7 +642,7 @@ private:
     	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
             m_traceBackBuffers[nextMemIndex].reset();
             m_traceBackBuffers[nextMemIndex].write(
-                m_traceBackBuffers[m_currentMemIndex].m_endPoint - samplesToReport,
+                m_traceBackBuffers[m_currentMemIndex].getEndPoint() - samplesToReport,
                 samplesToReport
             );
     	    m_currentMemIndex = nextMemIndex;
@@ -1078,7 +1088,7 @@ private:
      * - if finished it returns the number of unprocessed samples left in the buffer
      * - if not finished it returns -1
      */
-    int processTraces(const SampleVector::const_iterator& begin, const SampleVector::const_iterator& end, bool traceBack = false);
+    int processTraces(const SampleVector::const_iterator& begin, int length, bool traceBack = false);
 
     /**
      * Get maximum trace delay

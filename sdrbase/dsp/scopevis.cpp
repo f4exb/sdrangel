@@ -301,13 +301,13 @@ void ScopeVis::processMemoryTrace()
             traceMemoryIndex += GLScopeSettings::m_nbTraceMemories;
         }
 
-        SampleVector::const_iterator mend = m_traceDiscreteMemory.at(traceMemoryIndex).m_endPoint;
+        SampleVector::const_iterator mend = m_traceDiscreteMemory.at(traceMemoryIndex).getEndPoint();
         SampleVector::const_iterator mbegin = mend - m_traceSize;
         SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
         m_nbSamples = m_traceSize + m_maxTraceDelay;
 
-        processTraces(mbegin_tb, mbegin, true); // traceback
-        processTraces(mbegin, mend, false);
+        processTraces(mbegin_tb, m_maxTraceDelay, true); // traceback
+        processTraces(mbegin, m_traceSize, false);
     }
 }
 
@@ -408,7 +408,8 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
     {
         int remainder;
         int count = end - begin; // number of samples in traceback buffer past the current point
-        SampleVector::iterator mend = m_traceDiscreteMemory.current().current();
+        SampleVector::iterator mend;
+        m_traceDiscreteMemory.current().current(mend);
         SampleVector::iterator mbegin = mend - count;
 
         if (m_traceStart) // start of trace processing
@@ -424,27 +425,27 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
             // process until begin point
 
             if (m_maxTraceDelay > 0) { // trace back
-                processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, mbegin - m_preTriggerDelay, true);
+                processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, m_maxTraceDelay, true);
             }
 
             if (m_preTriggerDelay > 0) { // pre-trigger
-                processTraces(mbegin - m_preTriggerDelay, mbegin);
+                processTraces(mbegin - m_preTriggerDelay, m_preTriggerDelay);
             }
 
             // process the rest of the trace
 
-            remainder = processTraces(mbegin, mend);
+            remainder = processTraces(mbegin, count);
             m_traceStart = false;
         }
         else // process the current trace
         {
-            remainder = processTraces(mbegin, mend);
+            remainder = processTraces(mbegin, count);
         }
 
         if (remainder >= 0) // finished
         {
             mbegin = mend - remainder;
-            m_traceDiscreteMemory.current().m_endPoint = mbegin;
+            m_traceDiscreteMemory.current().setEndPoint(mbegin);
             m_traceDiscreteMemory.store(m_preTriggerDelay+remainder); // next memory trace.
             m_triggerState = TriggerUntriggered;
             m_triggerWaitForReset = m_triggerOneShot;
@@ -506,9 +507,10 @@ bool ScopeVis::nextTrigger()
     }
 }
 
-int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, const SampleVector::const_iterator& end, bool traceBack)
+int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilength, bool traceBack)
 {
     SampleVector::const_iterator begin(cbegin);
+    SampleVector::const_iterator end(cbegin + ilength);
     uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     uint32_t length = m_traceSize / m_timeBase;
 
