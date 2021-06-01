@@ -388,6 +388,7 @@ set(sdrbase_HEADERS
     util/db.h
     util/doublebuffer.h
     util/doublebufferfifo.h
+    util/doublebuffermultiple.h
     util/fixedtraits.h
     util/fits.h
     util/golay2312.h
