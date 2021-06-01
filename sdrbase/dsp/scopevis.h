@@ -600,6 +600,10 @@ private:
             return m_endPoint;
         }
 
+        void getEndPoint(SampleVector::const_iterator& it) {
+            it = m_endPoint;
+        }
+
     private:
     	SampleVector::iterator m_endPoint;
     };

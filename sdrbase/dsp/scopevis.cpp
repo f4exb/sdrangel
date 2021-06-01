@@ -301,7 +301,8 @@ void ScopeVis::processMemoryTrace()
             traceMemoryIndex += GLScopeSettings::m_nbTraceMemories;
         }
 
-        SampleVector::const_iterator mend = m_traceDiscreteMemory.at(traceMemoryIndex).getEndPoint();
+        SampleVector::const_iterator mend;
+        m_traceDiscreteMemory.at(traceMemoryIndex).getEndPoint(mend);
         SampleVector::const_iterator mbegin = mend - m_traceSize;
         SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
         m_nbSamples = m_traceSize + m_maxTraceDelay;
@@ -314,7 +315,7 @@ void ScopeVis::processMemoryTrace()
 void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbegin, int length, int& triggerPointToEnd)
 {
     SampleVector::const_iterator begin(vbegin[0]);
-    const SampleVector::const_iterator end(begin + length);
+    int firstRemainder = length;
 
     // memory storage
 
@@ -340,14 +341,17 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
     else if ((m_triggerState == TriggerUntriggered) || (m_triggerState == TriggerDelay)) // look for trigger or past trigger in delay mode
     {
         TriggerCondition* triggerCondition = m_triggerConditions[m_currentTriggerIndex]; // current trigger condition
+        int processed = 0;
 
-        while (begin < end)
+        while (firstRemainder > 0)
         {
             if (m_triggerState == TriggerDelay) // delayed trigger
             {
                 if (triggerCondition->m_triggerDelayCount > 0) // skip samples during delay period
                 {
                     begin += triggerCondition->m_triggerDelayCount;
+                    processed += triggerCondition->m_triggerDelayCount;
+                    firstRemainder -= triggerCondition->m_triggerDelayCount;
                     triggerCondition->m_triggerDelayCount = 0;
                     continue;
                 }
@@ -358,6 +362,8 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                         m_triggerComparator.reset();
                         m_triggerState = TriggerUntriggered;
                         ++begin;
+                        ++processed;
+                        --firstRemainder;
                         continue;
                     }
                     else // this was the last trigger then start trace
@@ -366,7 +372,7 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                         m_nbSamples = m_traceSize + m_maxTraceDelay;
                         m_triggerComparator.reset();
                         m_triggerState = TriggerTriggered;
-                        triggerPointToEnd = end - begin;
+                        triggerPointToEnd = firstRemainder;
                         break;
                     }
                 }
@@ -379,6 +385,8 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                     triggerCondition->m_triggerDelayCount = triggerCondition->m_triggerData.m_triggerDelay; // initialize delayed samples counter
                     m_triggerState = TriggerDelay;
                     ++begin;
+                    ++processed;
+                    --firstRemainder;
                     continue;
                 }
 
@@ -393,12 +401,14 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                     m_nbSamples = m_traceSize + m_maxTraceDelay;
                     m_triggerComparator.reset();
                     m_triggerState = TriggerTriggered;
-                    triggerPointToEnd = end - begin;
+                    triggerPointToEnd = firstRemainder;
                     break;
                 }
             }
 
             ++begin;
+            ++processed;
+            --firstRemainder;
         } // look for trigger
     } // untriggered or delayed
 
@@ -407,7 +417,7 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
     if (m_triggerState == TriggerTriggered)
     {
         int remainder;
-        int count = end - begin; // number of samples in traceback buffer past the current point
+        int count = firstRemainder; // number of samples in traceback buffer past the current point
         SampleVector::iterator mend;
         m_traceDiscreteMemory.current().current(mend);
         SampleVector::iterator mbegin = mend - count;
@@ -510,11 +520,11 @@ bool ScopeVis::nextTrigger()
 int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilength, bool traceBack)
 {
     SampleVector::const_iterator begin(cbegin);
-    SampleVector::const_iterator end(cbegin + ilength);
     uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     uint32_t length = m_traceSize / m_timeBase;
+    int remainder = ilength;
 
-    while ((begin < end) && (m_nbSamples > 0))
+    while ((remainder > 0) && (m_nbSamples > 0))
     {
         std::vector<TraceControl*>::iterator itCtl = m_traces.m_tracesControl.begin();
         std::vector<GLScopeSettings::TraceData>::iterator itData = m_traces.m_tracesData.begin();
@@ -522,7 +532,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
 
         for (; itCtl != m_traces.m_tracesControl.end(); ++itCtl, ++itData, ++itTrace)
         {
-            if (traceBack && ((end - begin) > itData->m_traceDelay)) { // before start of trace
+            if (traceBack && ((remainder) > itData->m_traceDelay)) { // before start of trace
                 continue;
             }
 
@@ -628,6 +638,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
         }
 
         ++begin;
+        remainder--;
         m_nbSamples--;
     }
 
@@ -664,7 +675,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
         }
 #endif
 
-        return end - begin; // return remainder count
+        return remainder; // return remainder count
     }
     else
     {
