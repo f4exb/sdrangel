@@ -41,7 +41,7 @@
 
 class GLScopeInterface;
 
-class SDRGUI_API ScopeVis : public QObject {
+class SDRBASE_API ScopeVis : public QObject {
     Q_OBJECT
 public:
     ScopeVis();
