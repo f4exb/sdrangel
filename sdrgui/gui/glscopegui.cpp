@@ -588,6 +588,12 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
             m_timeOffset*10,
             (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
             ui->freerun->isChecked());
+
+    if (value > 0)
+    {
+        ui->mem->setValue(1);
+        ui->memText->setText("01");
+    }
 }
 
 void GLScopeGUI::on_traceLen_valueChanged(int value)
