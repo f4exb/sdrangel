@@ -57,6 +57,11 @@ void ADSBDemodWorker::reset()
 bool ADSBDemodWorker::startWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    if (m_running) {
+        return m_running;
+    }
+
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     m_heartbeatTimer.start(60*1000);
     m_running = true;
@@ -66,6 +71,11 @@ bool ADSBDemodWorker::startWork()
 void ADSBDemodWorker::stopWork()
 {
     QMutexLocker mutexLocker(&m_mutex);
+
+    if (!m_running) {
+        return;
+    }
+
     m_heartbeatTimer.stop();
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
     m_running = false;
