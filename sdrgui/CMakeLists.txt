@@ -69,7 +69,6 @@ set(sdrgui_SOURCES
     gui/wrappingdatetimeedit.cpp
 
     dsp/scopevisxy.cpp
-    dsp/spectrumscopecombovis.cpp
 
     device/deviceuiset.cpp
 
@@ -157,7 +156,6 @@ set(sdrgui_HEADERS
     gui/wrappingdatetimeedit.h
 
     dsp/scopevisxy.h
-    dsp/spectrumscopecombovis.h
 
     device/deviceuiset.h
 

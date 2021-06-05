@@ -67,7 +67,7 @@ public:
     int getChannelSampleRate() const;
     double getMagSq() { return m_sink.getMagSq(); }
     double getMagSqAvg() const { return (double) m_sink.getMagSqAvg(); }
-    void setSampleSink(BasebandSampleSink* sampleSink) { m_sink.setSampleSink(sampleSink); }
+    void setScopeVis(ScopeVis *scopeVis) { m_sink.setScopeVis(scopeVis); }
     bool isPllLocked() const { return m_sink.isPllLocked(); }
     Real getPllFrequency() const { return m_sink.getPllFrequency(); }
     Real getPllDeltaPhase() const { return m_sink.getPllDeltaPhase(); }

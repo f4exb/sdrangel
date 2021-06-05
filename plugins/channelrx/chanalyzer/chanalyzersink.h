@@ -33,7 +33,7 @@
 
 #include "chanalyzersettings.h"
 
-class BasebandSampleSink;
+class ScopeVis;
 
 class ChannelAnalyzerSink : public ChannelSampleSink {
 public:
@@ -51,7 +51,7 @@ public:
     Real getPllFrequency() const;
     Real getPllDeltaPhase() const;
     Real getPllPhase() const;
-    void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
+    void setScopeVis(ScopeVis* scopeVis) { m_scopeVis = scopeVis; }
 
     static const unsigned int m_corrFFTLen;
     static const unsigned int m_ssbFftLen;
@@ -82,7 +82,7 @@ private:
 	SampleVector m_sampleBuffer;
 	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
 
-    BasebandSampleSink* m_sampleSink;
+    ScopeVis* m_scopeVis;
 
 	void setFilters(int sampleRate, float bandwidth, float lowCutoff);
 	void processOneSample(Complex& c, fftfilt::cmplx *sideband);

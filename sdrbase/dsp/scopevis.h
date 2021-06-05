@@ -40,6 +40,7 @@
 
 
 class GLScopeInterface;
+class SpectrumVis;
 
 class SDRBASE_API ScopeVis : public QObject {
     Q_OBJECT
@@ -48,6 +49,7 @@ public:
     virtual ~ScopeVis();
 
     void setGLScope(GLScopeInterface* glScope);
+    void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
     void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
@@ -1040,6 +1042,7 @@ private:
     };
 
     GLScopeInterface* m_glScope;
+    SpectrumVis *m_spectrumVis;
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_messageQueueToGUI;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples

@@ -17,7 +17,7 @@
 
 #include <QDebug>
 
-#include "dsp/basebandsamplesink.h"
+#include "dsp/scopevis.h"
 #include "dsp/datafifo.h"
 
 #include "demodanalyzerworker.h"
@@ -95,8 +95,11 @@ void DemodAnalyzerWorker::feedPart(const QByteArray::const_iterator& begin, cons
         }
     }
 
-	if (m_sampleSink) {
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.begin() + countSamples/(1<<m_settings.m_log2Decim), false);
+	if (m_scopeVis)
+    {
+        std::vector<SampleVector::const_iterator> vbegin;
+        vbegin.push_back(m_sampleBuffer.begin());
+        m_scopeVis->feed(vbegin, countSamples/(1<<m_settings.m_log2Decim));
 	}
 }
 

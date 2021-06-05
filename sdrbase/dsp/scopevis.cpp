@@ -21,6 +21,7 @@
 #include <QMutexLocker>
 
 #include "scopevis.h"
+#include "spectrumvis.h"
 #include "dsp/dspcommands.h"
 #include "dsp/glscopeinterface.h"
 
@@ -41,6 +42,7 @@ MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 
 ScopeVis::ScopeVis() :
     m_glScope(nullptr),
+    m_spectrumVis(nullptr),
     m_messageQueueToGUI(nullptr),
     m_preTriggerDelay(0),
     m_livePreTriggerDelay(0),
@@ -523,6 +525,10 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
     uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     uint32_t length = m_traceSize / m_timeBase;
     int remainder = ilength;
+
+    if (m_spectrumVis) {
+        m_spectrumVis->feed(cbegin, cbegin + ilength, false);
+    }
 
     while ((remainder > 0) && (m_nbSamples > 0))
     {

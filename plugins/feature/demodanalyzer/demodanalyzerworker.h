@@ -33,6 +33,7 @@
 #include "demodanalyzersettings.h"
 
 class BasebandSampleSink;
+class ScopeVis;
 class ChannelAPI;
 class Feature;
 class DataFifo;
@@ -99,7 +100,7 @@ public:
 
 	double getMagSq() const { return m_magsq; }
 	double getMagSqAvg() const { return (double) m_channelPowerAvg; }
-    void setSampleSink(BasebandSampleSink* sampleSink) { m_sampleSink = sampleSink; }
+    void setScopeVis(ScopeVis* scopeVis) { m_scopeVis = scopeVis; }
 
     static const unsigned int m_corrFFTLen;
     static const unsigned int m_ssbFftLen;
@@ -117,7 +118,7 @@ private:
     Decimators<qint32, qint16, SDR_RX_SAMP_SZ, 16, true> m_decimators;
     int m_sampleBufferSize;
 	MovingAverageUtil<double, double, 480> m_channelPowerAvg;
-    BasebandSampleSink* m_sampleSink;
+    ScopeVis* m_scopeVis;
     bool m_running;
     QMutex m_mutex;
 

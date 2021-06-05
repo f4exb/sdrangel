@@ -21,7 +21,7 @@
 #include <QDebug>
 #include <stdio.h>
 
-#include "dsp/basebandsamplesink.h"
+#include "dsp/scopevis.h"
 
 const unsigned int ChannelAnalyzerSink::m_ssbFftLen = 1024;
 const unsigned int ChannelAnalyzerSink::m_corrFFTLen = 4*m_ssbFftLen;
@@ -31,7 +31,7 @@ ChannelAnalyzerSink::ChannelAnalyzerSink() :
     m_channelFrequencyOffset(0),
     m_sinkSampleRate(48000),
     m_costasLoop(0.002, 2),
-    m_sampleSink(nullptr)
+    m_scopeVis(nullptr)
 {
 	m_usb = true;
 	m_magsq = 0;
@@ -90,9 +90,12 @@ void ChannelAnalyzerSink::feed(const SampleVector::const_iterator& begin, const 
         }
 	}
 
-	if (m_sampleSink) {
-		m_sampleSink->feed(m_sampleBuffer.begin(), m_sampleBuffer.end(), m_settings.m_ssb); // m_ssb = positive only
-	}
+    if (m_scopeVis)
+    {
+        std::vector<SampleVector::const_iterator> vbegin;
+        vbegin.push_back(m_sampleBuffer.begin());
+        m_scopeVis->feed(vbegin, m_sampleBuffer.end() - m_sampleBuffer.begin());
+    }
 
 	m_sampleBuffer.clear();
 }

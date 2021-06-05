@@ -30,7 +30,6 @@ class PluginAPI;
 class FeatureUISet;
 class DemodAnalyzer;
 class Feature;
-class SpectrumScopeComboVis;
 class SpectrumVis;
 class ScopeVis;
 
@@ -58,7 +57,6 @@ private:
 	bool m_doApplySettings;
 
 	DemodAnalyzer* m_demodAnalyzer;
-	SpectrumScopeComboVis* m_spectrumScopeComboVis;
 	SpectrumVis* m_spectrumVis;
 	ScopeVis* m_scopeVis;
 	MessageQueue m_inputMessageQueue;

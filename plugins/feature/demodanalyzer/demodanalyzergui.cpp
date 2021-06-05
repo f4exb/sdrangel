@@ -18,7 +18,6 @@
 #include <QMessageBox>
 
 #include "feature/featureuiset.h"
-#include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
 #include "gui/basicfeaturesettingsdialog.h"
 #include "gui/glspectrum.h"
@@ -146,8 +145,7 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
     m_scopeVis->setGLScope(ui->glScope);
     m_spectrumVis = m_demodAnalyzer->getSpectrumVis();
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
-	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
-    m_demodAnalyzer->setSampleSink(m_spectrumScopeComboVis);
+    m_scopeVis->setSpectrumVis(m_spectrumVis);
 
 	m_featureUISet->addRollupWidget(this);
 
@@ -180,7 +178,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 DemodAnalyzerGUI::~DemodAnalyzerGUI()
 {
 	delete ui;
-	delete m_spectrumScopeComboVis;
 }
 
 void DemodAnalyzerGUI::blockApplySettings(bool block)

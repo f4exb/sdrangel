@@ -158,7 +158,6 @@ public:
     virtual void destroy() { delete this; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeVis; }
-    void setSampleSink(BasebandSampleSink *sink);
     double getMagSqAvg() const;
     virtual bool handleMessage(const Message& cmd);
 

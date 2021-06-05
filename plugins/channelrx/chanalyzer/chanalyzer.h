@@ -62,7 +62,7 @@ public:
 	virtual void destroy() { delete this; }
     SpectrumVis *getSpectrumVis() { return &m_spectrumVis; }
     ScopeVis *getScopeVis() { return &m_scopeVis; }
-    void setSampleSink(BasebandSampleSink *sink) { m_basebandSink->setSampleSink(sink); }
+    void setScopeVis(ScopeVis *scopeVis) { m_basebandSink->setScopeVis(scopeVis); }
 
     int getChannelSampleRate() const { return m_basebandSink->getChannelSampleRate(); }
     int getDecimation() const { return 1<<m_settings.m_log2Decim; }

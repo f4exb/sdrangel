@@ -19,7 +19,6 @@
 #include <QMainWindow>
 
 #include "device/deviceuiset.h"
-#include "dsp/spectrumscopecombovis.h"
 #include "dsp/spectrumvis.h"
 #include "dsp/dspengine.h"
 #include "dsp/dspcommands.h"
@@ -475,9 +474,9 @@ ChannelAnalyzerGUI::ChannelAnalyzerGUI(PluginAPI* pluginAPI, DeviceUISet *device
 	m_spectrumVis->setGLSpectrum(ui->glSpectrum);
     m_scopeVis = m_channelAnalyzer->getScopeVis();
     m_scopeVis->setGLScope(ui->glScope);
-	m_spectrumScopeComboVis = new SpectrumScopeComboVis(m_spectrumVis, m_scopeVis);
     m_basebandSampleRate = m_channelAnalyzer->getChannelSampleRate();
-    m_channelAnalyzer->setSampleSink(m_spectrumScopeComboVis);
+    m_scopeVis->setSpectrumVis(m_spectrumVis);
+    m_channelAnalyzer->setScopeVis(m_scopeVis);
 	m_channelAnalyzer->setMessageQueueToGUI(getInputMessageQueue());
 
     ui->deltaFrequencyLabel->setText(QString("%1f").arg(QChar(0x94, 0x03)));
@@ -529,7 +528,6 @@ ChannelAnalyzerGUI::~ChannelAnalyzerGUI()
     qDebug("ChannelAnalyzerGUI::~ChannelAnalyzerGUI");
 	ui->glScope->disconnectTimer();
 	delete ui;
-	delete m_spectrumScopeComboVis;
     qDebug("ChannelAnalyzerGUI::~ChannelAnalyzerGUI: done");
 }
 
