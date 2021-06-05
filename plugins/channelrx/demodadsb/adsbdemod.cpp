@@ -83,11 +83,11 @@ ADSBDemod::~ADSBDemod()
     if (m_worker->isRunning()) {
         stop();
     }
-    delete m_worker;
     disconnect(m_networkManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(networkManagerFinished(QNetworkReply*)));
     delete m_networkManager;
     m_deviceAPI->removeChannelSinkAPI(this);
     m_deviceAPI->removeChannelSink(this);
+    delete m_worker;
     delete m_basebandSink;
     delete m_thread;
 }
