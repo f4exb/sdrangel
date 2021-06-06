@@ -50,6 +50,7 @@ ScopeVis::ScopeVis() :
     m_focusedTriggerIndex(0),
     m_triggerState(TriggerUntriggered),
     m_focusedTraceIndex(0),
+    m_nbStreams(1),
     m_traceChunkSize(GLScopeSettings::m_traceChunkDefaultSize),
     m_traceSize(GLScopeSettings::m_traceChunkDefaultSize),
     m_liveTraceSize(GLScopeSettings::m_traceChunkDefaultSize),
@@ -129,9 +130,16 @@ void ScopeVis::setPreTriggerDelay(uint32_t preTriggerDelay, bool emitSignal)
     }
 }
 
-void ScopeVis::configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun)
+void ScopeVis::configure(
+    uint32_t nbStreams,
+    uint32_t traceSize,
+    uint32_t timeBase,
+    uint32_t timeOfsProMill,
+    uint32_t triggerPre,
+    bool freeRun
+)
 {
-    Message* cmd = MsgConfigureScopeVisNG::create(traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
+    Message* cmd = MsgConfigureScopeVisNG::create(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
     getInputMessageQueue()->push(cmd);
 }
 
@@ -311,8 +319,8 @@ void ScopeVis::processMemoryTrace()
         TraceBackDiscreteMemory::moveIt(mbegin, mbegin_tb, -m_maxTraceDelay);
         m_nbSamples = m_traceSize + m_maxTraceDelay;
 
-        processTraces(mbegin_tb[0], m_maxTraceDelay, true); // traceback
-        processTraces(mbegin[0], m_traceSize, false);
+        processTraces(mbegin_tb, m_maxTraceDelay, true); // traceback
+        processTraces(mbegin, m_traceSize, false);
     }
 }
 
@@ -454,24 +462,24 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
             { // trace back
                 std::vector<SampleVector::const_iterator> tbegin(mbegin.size());
                 TraceBackDiscreteMemory::moveIt(mbegin, tbegin, - m_preTriggerDelay - m_maxTraceDelay);
-                processTraces(tbegin[0] , m_maxTraceDelay, true);
+                processTraces(tbegin, m_maxTraceDelay, true);
             }
 
             if (m_preTriggerDelay > 0)
             { // pre-trigger
                 std::vector<SampleVector::const_iterator> tbegin(mbegin.size());
                 TraceBackDiscreteMemory::moveIt(mbegin, tbegin, -m_preTriggerDelay);
-                processTraces(tbegin[0], m_preTriggerDelay);
+                processTraces(tbegin, m_preTriggerDelay);
             }
 
             // process the rest of the trace
 
-            remainder = processTraces(mbegin[0], count);
+            remainder = processTraces(mbegin, count);
             m_traceStart = false;
         }
         else // process the current trace
         {
-            remainder = processTraces(mbegin[0], count);
+            remainder = processTraces(mbegin, count);
         }
 
         if (remainder >= 0) // finished
@@ -535,15 +543,15 @@ bool ScopeVis::nextTrigger()
     }
 }
 
-int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilength, bool traceBack)
+int ScopeVis::processTraces(const std::vector<SampleVector::const_iterator>& vcbegin, int ilength, bool traceBack)
 {
-    SampleVector::const_iterator begin(cbegin);
+    std::vector<SampleVector::const_iterator> vbegin(vcbegin);
     uint32_t shift = (m_timeOfsProMill / 1000.0) * m_traceSize;
     uint32_t length = m_traceSize / m_timeBase;
     int remainder = ilength;
 
     if (m_spectrumVis) {
-        m_spectrumVis->feed(cbegin, cbegin + ilength, false);
+        m_spectrumVis->feed(vcbegin[0], vcbegin[0] + ilength, false); // TODO: use spectrum stream index
     }
 
     while ((remainder > 0) && (m_nbSamples > 0))
@@ -564,14 +572,15 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
             {
                 uint32_t& traceCount = (*itCtl)->m_traceCount[m_traces.currentBufferIndex()]; // reference for code clarity
                 float v;
+                uint32_t streamIndex = itData->m_streamIndex;
 
                 if (projectionType == Projector::ProjectionMagLin)
                 {
-                    v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs)*itData->m_amp - 1.0f;
+                    v = ((*itCtl)->m_projector.run(*vbegin[streamIndex]) - itData->m_ofs)*itData->m_amp - 1.0f;
                 }
                 else if (projectionType == Projector::ProjectionMagSq)
                 {
-                    Real magsq = (*itCtl)->m_projector.run(*begin);
+                    Real magsq = (*itCtl)->m_projector.run(*vbegin[streamIndex]);
                     v = (magsq - itData->m_ofs)*itData->m_amp - 1.0f;
 
                     if ((traceCount >= shift) && (traceCount < shift+length)) // power display overlay values construction
@@ -604,8 +613,8 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
                 }
                 else if (projectionType == Projector::ProjectionMagDB)
                 {
-                    Real re = begin->m_real / SDR_RX_SCALEF;
-                    Real im = begin->m_imag / SDR_RX_SCALEF;
+                    Real re = vbegin[streamIndex]->m_real / SDR_RX_SCALEF;
+                    Real im = vbegin[streamIndex]->m_imag / SDR_RX_SCALEF;
                     double magsq = re*re + im*im;
                     float pdB = log10f(magsq) * 10.0f;
                     float p = pdB - (100.0f * itData->m_ofs);
@@ -643,7 +652,7 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
                 }
                 else
                 {
-                    v = ((*itCtl)->m_projector.run(*begin) - itData->m_ofs) * itData->m_amp;
+                    v = ((*itCtl)->m_projector.run(*vbegin[streamIndex]) - itData->m_ofs) * itData->m_amp;
                 }
 
                 if(v > 1.0f) {
@@ -659,7 +668,9 @@ int ScopeVis::processTraces(const SampleVector::const_iterator& cbegin, int ilen
             }
         }
 
-        ++begin;
+        for (unsigned int i = 0; i < vbegin.size(); i++) {
+            ++vbegin[i];
+        }
         remainder--;
         m_nbSamples--;
     }
@@ -731,15 +742,21 @@ bool ScopeVis::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
 
+        uint32_t nbStreams = conf.getNbStreams();
         uint32_t traceSize = conf.getTraceSize();
         uint32_t timeBase = conf.getTimeBase();
         uint32_t timeOfsProMill = conf.getTimeOfsProMill();
         uint32_t triggerPre = conf.getTriggerPre();
         bool freeRun = conf.getFreeRun();
 
-        if (m_traceSize != traceSize)
-        {
+        if (m_traceSize != traceSize) {
             setTraceSize(traceSize);
+        }
+
+        if (m_nbStreams != nbStreams)
+        {
+            m_traceDiscreteMemory.setNbStreams(nbStreams);
+            m_nbStreams = nbStreams;
         }
 
         if (m_timeBase != timeBase)
@@ -760,21 +777,20 @@ bool ScopeVis::handleMessage(const Message& message)
             }
         }
 
-        if (m_preTriggerDelay != triggerPre)
-        {
+        if (m_preTriggerDelay != triggerPre) {
             setPreTriggerDelay(triggerPre);
         }
 
-        if (freeRun != m_freeRun)
-        {
+        if (freeRun != m_freeRun) {
             m_freeRun = freeRun;
         }
 
         qDebug() << "ScopeVis::handleMessage: MsgConfigureScopeVisNG:"
-                << " m_traceSize: " << m_traceSize
-                << " m_timeOfsProMill: " << m_timeOfsProMill
-                << " m_preTriggerDelay: " << m_preTriggerDelay
-                << " m_freeRun: " << m_freeRun;
+            << " m_nbStreams: " << m_nbStreams
+            << " m_traceSize: " << m_traceSize
+            << " m_timeOfsProMill: " << m_timeOfsProMill
+            << " m_preTriggerDelay: " << m_preTriggerDelay
+            << " m_freeRun: " << m_freeRun;
 
         if ((m_glScope) && (m_currentTraceMemoryIndex > 0)) {
             processMemoryTrace();

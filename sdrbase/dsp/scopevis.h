@@ -54,7 +54,7 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setLiveRate(int sampleRate);
-    void configure(uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
+    void configure(uint32_t nbStreams, uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
     void addTrace(const GLScopeSettings::TraceData& traceData);
     void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
@@ -152,15 +152,17 @@ private:
 
     public:
         static MsgConfigureScopeVisNG* create(
+            uint32_t nbStreams,
             uint32_t traceSize,
             uint32_t timeBase,
             uint32_t timeOfsProMill,
 			uint32_t triggerPre,
             bool freeRun)
         {
-            return new MsgConfigureScopeVisNG(traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
+            return new MsgConfigureScopeVisNG(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
         }
 
+        uint32_t getNbStreams() const { return m_nbStreams; }
         uint32_t getTraceSize() const { return m_traceSize; }
         uint32_t getTimeBase() const { return m_timeBase; }
         uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
@@ -168,17 +170,22 @@ private:
         bool getFreeRun() const { return m_freeRun; }
 
     private:
+        uint32_t m_nbStreams;
         uint32_t m_traceSize;
         uint32_t m_timeBase;
         uint32_t m_timeOfsProMill;
         uint32_t m_triggerPre;
         bool m_freeRun;
 
-        MsgConfigureScopeVisNG(uint32_t traceSize,
-                uint32_t timeBase,
-                uint32_t timeOfsProMill,
-				uint32_t triggerPre,
-                bool freeRun) :
+        MsgConfigureScopeVisNG(
+            uint32_t nbStreams,
+            uint32_t traceSize,
+            uint32_t timeBase,
+            uint32_t timeOfsProMill,
+            uint32_t triggerPre,
+            bool freeRun
+        ) :
+            m_nbStreams(nbStreams),
             m_traceSize(traceSize),
             m_timeBase(timeBase),
             m_timeOfsProMill(timeOfsProMill),
@@ -627,6 +634,12 @@ private:
         		m_traceBackBuffersStreams[s].resize(m_memSize);
             }
     	}
+
+        void setNbStreams(uint32_t nbStreams)
+        {
+            m_traceBackBuffersStreams.resize(nbStreams);
+            resize(m_traceSize);
+        }
 
     	/**
     	 * Resize all trace buffers in memory
@@ -1178,6 +1191,7 @@ private:
     TriggerState m_triggerState;                   //!< Current trigger state
     Traces m_traces;                               //!< Displayable traces
     int m_focusedTraceIndex;                       //!< Index of the trace that has focus
+    uint32_t m_nbStreams;
     uint32_t m_traceChunkSize;                     //!< Trace length unit size in number of samples
     uint32_t m_traceSize;                          //!< Size of traces in number of samples
     uint32_t m_liveTraceSize;                      //!< Size of traces in number of samples in live mode
@@ -1220,7 +1234,7 @@ private:
      * - if finished it returns the number of unprocessed samples left in the buffer
      * - if not finished it returns -1
      */
-    int processTraces(const SampleVector::const_iterator& begin, int length, bool traceBack = false);
+    int processTraces(const std::vector<SampleVector::const_iterator>& vbegin, int length, bool traceBack = false);
 
     /**
      * Get maximum trace delay

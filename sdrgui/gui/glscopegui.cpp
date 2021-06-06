@@ -114,17 +114,23 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     ui->trigMode->clear();
     fillProjectionCombo(ui->trigMode);
 
-    m_scopeVis->configure(2*m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        2*m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
 
-    m_scopeVis->configure(m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
 
     setTraceLenDisplay();
     setTimeScaleDisplay();
@@ -568,11 +574,14 @@ void GLScopeGUI::on_time_valueChanged(int value)
     m_timeBase = value;
     setTimeScaleDisplay();
     setTraceDelayDisplay();
-    m_scopeVis->configure(m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
 }
 
 void GLScopeGUI::on_timeOfs_valueChanged(int value)
@@ -583,11 +592,14 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
 
     m_timeOffset = value;
     setTimeOfsDisplay();
-    m_scopeVis->configure(m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
 
     if (value > 0)
     {
@@ -603,11 +615,14 @@ void GLScopeGUI::on_traceLen_valueChanged(int value)
     }
 
     m_traceLenMult = value;
-    m_scopeVis->configure(m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
     setTraceLenDisplay();
     setTimeScaleDisplay();
     setTimeOfsDisplay();
@@ -972,11 +987,14 @@ void GLScopeGUI::on_trigPre_valueChanged(int value)
 {
     (void) value;
     setTrigPreDisplay();
-    m_scopeVis->configure(m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
 }
 
 void GLScopeGUI::on_trigColor_clicked()
@@ -1010,11 +1028,14 @@ void GLScopeGUI::on_freerun_toggled(bool checked)
         ui->trigOneShot->setEnabled(true);
     }
 
-    m_scopeVis->configure(m_traceLenMult*m_scopeVis->getTraceChunkSize(),
-            m_timeBase,
-            m_timeOffset*10,
-            (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
-            ui->freerun->isChecked());
+    m_scopeVis->configure(
+        1,
+        m_traceLenMult*m_scopeVis->getTraceChunkSize(),
+        m_timeBase,
+        m_timeOffset*10,
+        (uint32_t) (m_glScope->getTraceSize() * (ui->trigPre->value()/100.0f)),
+        ui->freerun->isChecked()
+    );
 }
 
 void GLScopeGUI::setTraceIndexDisplay()
