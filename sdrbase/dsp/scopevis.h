@@ -594,11 +594,11 @@ private:
             }
         }
 
-        void setEndPoint(const SampleVector::iterator& endPoint) {
+        void setEndPoint(const SampleVector::const_iterator& endPoint) {
             m_endPoint = endPoint;
         }
 
-        SampleVector::iterator getEndPoint() {
+        SampleVector::const_iterator getEndPoint() {
             return m_endPoint;
         }
 
@@ -607,7 +607,7 @@ private:
         }
 
     private:
-    	SampleVector::iterator m_endPoint;
+    	SampleVector::const_iterator m_endPoint;
     };
 
     typedef std::vector<TraceBackBuffer> TraceBackBufferStream;
@@ -617,12 +617,15 @@ private:
     	/**
     	 * Give memory size in number of traces
     	 */
-        TraceBackDiscreteMemory(uint32_t size) :
+        TraceBackDiscreteMemory(uint32_t size, uint32_t nbStreams = 1) :
+            m_traceBackBuffersStreams(nbStreams),
             m_memSize(size),
             m_currentMemIndex(0),
             m_traceSize(0)
     	{
-    		m_traceBackBuffers.resize(m_memSize);
+            for (unsigned int s = 0; s < m_traceBackBuffersStreams.size(); s++) {
+        		m_traceBackBuffersStreams[s].resize(m_memSize);
+            }
     	}
 
     	/**
@@ -632,10 +635,12 @@ private:
     	{
     	    m_traceSize = size;
 
-    		for (std::vector<TraceBackBuffer>::iterator it = m_traceBackBuffers.begin(); it != m_traceBackBuffers.end(); ++it)
-    		{
-                it->resize(2*m_traceSize); // was multiplied by 4
-    		}
+            for (unsigned int s = 0; s < m_traceBackBuffersStreams.size(); s++)
+            {
+                for (std::vector<TraceBackBuffer>::iterator it = m_traceBackBuffersStreams[s].begin(); it != m_traceBackBuffersStreams[s].end(); ++it) {
+                    it->resize(2*m_traceSize); // was multiplied by 4
+                }
+            }
     	}
 
     	/**
@@ -646,11 +651,16 @@ private:
         void store(int samplesToReport)
     	{
     	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
-            m_traceBackBuffers[nextMemIndex].reset();
-            m_traceBackBuffers[nextMemIndex].write(
-                m_traceBackBuffers[m_currentMemIndex].getEndPoint() - samplesToReport,
-                samplesToReport
-            );
+
+            for (unsigned int s = 0; s < m_traceBackBuffersStreams.size(); s++)
+            {
+                m_traceBackBuffersStreams[s][nextMemIndex].reset();
+                m_traceBackBuffersStreams[s][nextMemIndex].write(
+                    m_traceBackBuffersStreams[s][m_currentMemIndex].getEndPoint() - samplesToReport,
+                    samplesToReport
+                );
+            }
+
     	    m_currentMemIndex = nextMemIndex;
     	}
 
@@ -666,14 +676,22 @@ private:
         {
             SimpleSerializer s(1);
 
-            s.writeU32(1, m_memSize);
-            s.writeU32(2, m_currentMemIndex);
-            s.writeU32(3, m_traceSize);
+            s.writeU32(1, m_traceBackBuffersStreams.size());
+            s.writeU32(2, m_memSize);
+            s.writeU32(3, m_currentMemIndex);
+            s.writeU32(4, m_traceSize);
 
-            for (unsigned int i = 0; i < m_memSize; i++)
+            for (unsigned int is = 0; is < m_traceBackBuffersStreams.size(); is++)
             {
-                QByteArray buffer = m_traceBackBuffers[i].serialize();
-                s.writeBlob(100+i, buffer);
+                SimpleSerializer ss(1);
+
+                for (unsigned int i = 0; i < m_memSize; i++)
+                {
+                    QByteArray buffer = m_traceBackBuffersStreams[is][i].serialize();
+                    ss.writeBlob(i, buffer);
+                }
+
+                s.writeBlob(5+is, ss.final());
             }
 
             return s.final();
@@ -692,21 +710,35 @@ private:
 
             if (d.getVersion() == 1)
             {
-                d.readU32(1, &m_memSize, 0);
-                d.readU32(2, &m_currentMemIndex, 0);
+                unsigned int nbStreams;
+                d.readU32(1, &nbStreams, 0);
+                d.readU32(2, &m_memSize, 0);
+                d.readU32(3, &m_currentMemIndex, 0);
                 uint32_t traceSize;
-                d.readU32(3, &traceSize, 0);
-                m_traceBackBuffers.resize(m_memSize);
+                d.readU32(4, &traceSize, 0);
 
-                if (traceSize != m_traceSize) {
-                    resize(traceSize);
-                }
-
-                for (unsigned int i = 0; i < m_memSize; i++)
+                for (unsigned int is = 0; is < nbStreams; is++)
                 {
-                    QByteArray buffer;
-                    d.readBlob(100+i, &buffer);
-                    m_traceBackBuffers[i].deserialize(buffer);
+                    if (is >= m_traceBackBuffersStreams.size()) {
+                        break;
+                    }
+
+                    m_traceBackBuffersStreams[is].resize(m_memSize);
+
+                    if (traceSize != m_traceSize) {
+                        resize(traceSize);
+                    }
+
+                    QByteArray streamData;
+                    d.readBlob(5+is, &streamData);
+                    SimpleDeserializer ds(streamData);
+
+                    for (unsigned int i = 0; i < m_memSize; i++)
+                    {
+                        QByteArray buffer;
+                        ds.readBlob(i, &buffer);
+                        m_traceBackBuffersStreams[is][i].deserialize(buffer);
+                    }
                 }
 
                 return true;
@@ -718,52 +750,122 @@ private:
         }
 
         /**
-         * Get current point at current memory position
+         * Get current point at current memory position (first stream)
          */
         void getCurrent(SampleVector::iterator& it) {
             current().current(it);
         }
 
         /**
-         * Set end point at current memory position
+         * Get current points at current memory position
+         */
+        void getCurrent(std::vector<SampleVector::const_iterator>& vit)
+        {
+            vit.clear();
+
+            for (unsigned int is = 0; is < m_traceBackBuffersStreams.size(); is++)
+            {
+                SampleVector::iterator it;
+                current(is).current(it);
+                vit.push_back(it);
+            }
+        }
+
+        /**
+         * Set end point at current memory position (first stream)
          */
         void setCurrentEndPoint(const SampleVector::iterator& it) {
             current().setEndPoint(it);
         }
 
         /**
-         * Get end point at given memory position
+         * Set end points at current memory position
+         */
+        void setCurrentEndPoint(const std::vector<SampleVector::const_iterator>& vit)
+        {
+            for (unsigned int is = 0; is < vit.size(); is++)
+            {
+                if (is >= m_traceBackBuffersStreams.size()) {
+                    break;
+                }
+
+                current(is).setEndPoint(vit[is]);
+            }
+        }
+
+        /**
+         * Get end point at given memory position (first stream)
          */
         void getEndPointAt(int index, SampleVector::const_iterator& mend) {
             at(index).getEndPoint(mend);
         }
 
         /**
-         * Write trace at current memory position
+         * Get end points at given memory position
+         */
+        void getEndPointAt(int index, std::vector<SampleVector::const_iterator>& vend)
+        {
+            vend.clear();
+
+            for (unsigned int is = 0; is < m_traceBackBuffersStreams.size(); is++)
+            {
+                SampleVector::const_iterator mend;
+                at(index, is).getEndPoint(mend);
+                vend.push_back(mend);
+            }
+        }
+
+        /**
+         * Write trace at current memory position (first stream)
          */
         void writeCurrent(const SampleVector::const_iterator& begin, int length) {
             current().write(begin, length);
         }
 
         /**
-         * Move buffer iterator by a certain amount
+         * Write traces at current memory position
+         */
+        void writeCurrent(const std::vector<SampleVector::const_iterator>& vbegin, int length)
+        {
+            for (unsigned int i = 0; i < vbegin.size(); i++) {
+                current().write(vbegin[i], length);
+            }
+        }
+
+        /**
+         * Move buffer iterator by a certain amount (first stream)
          */
         static void moveIt(const SampleVector::iterator& x, SampleVector::iterator& y, int amount) {
             y = x + amount;
         }
 
+        /**
+         * Move buffers iterators by a certain amount
+         */
+        static void moveIt(const std::vector<SampleVector::const_iterator>& vx, std::vector<SampleVector::const_iterator>& vy, int amount)
+        {
+            for (unsigned int i = 0; i < vx.size(); i++)
+            {
+                if (i >= vy.size()) {
+                    break;
+                }
+
+                vy[i] = vx[i] + amount;
+            }
+        }
+
     private:
-        std::vector<TraceBackBuffer> m_traceBackBuffers;
+        std::vector<TraceBackBufferStream> m_traceBackBuffersStreams;
         uint32_t m_memSize;
         uint32_t m_currentMemIndex;
         uint32_t m_traceSize;
 
-        TraceBackBuffer& current() { //!< Return trace at current memory position
-            return m_traceBackBuffers[m_currentMemIndex];
+        TraceBackBuffer& current(uint32_t streamIndex = 0) { //!< Return trace at current memory position
+            return m_traceBackBuffersStreams[streamIndex][m_currentMemIndex];
         }
 
-        TraceBackBuffer& at(int index) { //!< Return trace at given memory position
-            return m_traceBackBuffers[index];
+        TraceBackBuffer& at(int index, uint32_t streamIndex = 0) { //!< Return trace at given memory position
+            return m_traceBackBuffersStreams[streamIndex][index];
         }
     };
 

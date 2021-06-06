@@ -321,7 +321,7 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
 
     // memory storage
 
-    m_traceDiscreteMemory.writeCurrent(vbegin[0], length);
+    m_traceDiscreteMemory.writeCurrent(vbegin, length);
 
     // Removed in 4.2.4 may cause trigger bug
     // if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
@@ -431,9 +431,9 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
     {
         int remainder;
         int count = firstRemainder; // number of samples in traceback buffer past the current point
-        SampleVector::iterator mend;
+        std::vector<SampleVector::const_iterator> mend;
         m_traceDiscreteMemory.getCurrent(mend);
-        SampleVector::iterator mbegin;
+        std::vector<SampleVector::const_iterator> mbegin(mend.size());
         TraceBackDiscreteMemory::moveIt(mend, mbegin, -count);
 
         if (m_traceStart) // start of trace processing
@@ -450,26 +450,26 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
 
             if (m_maxTraceDelay > 0)
             { // trace back
-                SampleVector::iterator tbegin;
+                std::vector<SampleVector::const_iterator> tbegin(mbegin.size());
                 TraceBackDiscreteMemory::moveIt(mbegin, tbegin, - m_preTriggerDelay - m_maxTraceDelay);
-                processTraces(tbegin , m_maxTraceDelay, true);
+                processTraces(tbegin[0] , m_maxTraceDelay, true);
             }
 
             if (m_preTriggerDelay > 0)
             { // pre-trigger
-                SampleVector::iterator tbegin;
+                std::vector<SampleVector::const_iterator> tbegin(mbegin.size());
                 TraceBackDiscreteMemory::moveIt(mbegin, tbegin, -m_preTriggerDelay);
-                processTraces(tbegin, m_preTriggerDelay);
+                processTraces(tbegin[0], m_preTriggerDelay);
             }
 
             // process the rest of the trace
 
-            remainder = processTraces(mbegin, count);
+            remainder = processTraces(mbegin[0], count);
             m_traceStart = false;
         }
         else // process the current trace
         {
-            remainder = processTraces(mbegin, count);
+            remainder = processTraces(mbegin[0], count);
         }
 
         if (remainder >= 0) // finished
@@ -486,11 +486,7 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcb
             if (remainder != 0)
             {
                 int mTriggerPointToEnd = -1;
-
-                // FIXME:
-                std::vector<SampleVector::const_iterator> vbegin;
-                vbegin.push_back(mbegin);
-                processTrace(vbegin, remainder, mTriggerPointToEnd);
+                processTrace(mbegin, remainder, mTriggerPointToEnd);
 
                 if (mTriggerPointToEnd >= 0) {
                     triggerPointToEnd = mTriggerPointToEnd;
