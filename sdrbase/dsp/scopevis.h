@@ -835,7 +835,7 @@ private:
         /**
          * Move buffer iterator by a certain amount (first stream)
          */
-        static void moveIt(const SampleVector::iterator& x, SampleVector::iterator& y, int amount) {
+        static void moveIt(const SampleVector::const_iterator& x, SampleVector::const_iterator& y, int amount) {
             y = x + amount;
         }
 

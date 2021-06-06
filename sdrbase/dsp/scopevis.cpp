@@ -303,14 +303,16 @@ void ScopeVis::processMemoryTrace()
             traceMemoryIndex += GLScopeSettings::m_nbTraceMemories;
         }
 
-        SampleVector::const_iterator mend;
+        std::vector<SampleVector::const_iterator> mend;
         m_traceDiscreteMemory.getEndPointAt(traceMemoryIndex, mend);
-        SampleVector::const_iterator mbegin = mend - m_traceSize;
-        SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
+        std::vector<SampleVector::const_iterator> mbegin(mend.size());
+        TraceBackDiscreteMemory::moveIt(mend, mbegin, -m_traceSize);
+        std::vector<SampleVector::const_iterator> mbegin_tb(mbegin.size());
+        TraceBackDiscreteMemory::moveIt(mbegin, mbegin_tb, -m_maxTraceDelay);
         m_nbSamples = m_traceSize + m_maxTraceDelay;
 
-        processTraces(mbegin_tb, m_maxTraceDelay, true); // traceback
-        processTraces(mbegin, m_traceSize, false);
+        processTraces(mbegin_tb[0], m_maxTraceDelay, true); // traceback
+        processTraces(mbegin[0], m_traceSize, false);
     }
 }
 
