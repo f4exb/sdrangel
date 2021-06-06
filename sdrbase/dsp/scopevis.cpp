@@ -304,7 +304,7 @@ void ScopeVis::processMemoryTrace()
         }
 
         SampleVector::const_iterator mend;
-        m_traceDiscreteMemory.at(traceMemoryIndex).getEndPoint(mend);
+        m_traceDiscreteMemory.getEndPointAt(traceMemoryIndex, mend);
         SampleVector::const_iterator mbegin = mend - m_traceSize;
         SampleVector::const_iterator mbegin_tb = mbegin - m_maxTraceDelay;
         m_nbSamples = m_traceSize + m_maxTraceDelay;
@@ -314,14 +314,14 @@ void ScopeVis::processMemoryTrace()
     }
 }
 
-void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbegin, int length, int& triggerPointToEnd)
+void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vcbegin, int length, int& triggerPointToEnd)
 {
-    SampleVector::const_iterator begin(vbegin[0]);
+    std::vector<SampleVector::const_iterator> vbegin(vcbegin);
     int firstRemainder = length;
 
     // memory storage
 
-    m_traceDiscreteMemory.current().write(begin, length);
+    m_traceDiscreteMemory.writeCurrent(vbegin[0], length);
 
     // Removed in 4.2.4 may cause trigger bug
     // if (m_traceDiscreteMemory.current().absoluteFill() < m_traceSize)
@@ -351,7 +351,9 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
             {
                 if (triggerCondition->m_triggerDelayCount > 0) // skip samples during delay period
                 {
-                    begin += triggerCondition->m_triggerDelayCount;
+                    for (auto begin : vbegin) {
+                        begin += triggerCondition->m_triggerDelayCount;
+                    }
                     processed += triggerCondition->m_triggerDelayCount;
                     firstRemainder -= triggerCondition->m_triggerDelayCount;
                     triggerCondition->m_triggerDelayCount = 0;
@@ -363,7 +365,9 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                     {
                         m_triggerComparator.reset();
                         m_triggerState = TriggerUntriggered;
-                        ++begin;
+                        for (auto begin : vbegin) {
+                            ++begin;
+                        }
                         ++processed;
                         --firstRemainder;
                         continue;
@@ -380,13 +384,18 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                 }
             }
 
-            if (m_triggerComparator.triggered(*begin, *triggerCondition)) // matched the current trigger
+            uint32_t triggerStreamIndex = triggerCondition->m_triggerData.m_streamIndex;
+            const Sample& s = *vbegin[triggerStreamIndex];
+
+            if (m_triggerComparator.triggered(s, *triggerCondition)) // matched the current trigger
             {
                 if (triggerCondition->m_triggerData.m_triggerDelay > 0)
                 {
                     triggerCondition->m_triggerDelayCount = triggerCondition->m_triggerData.m_triggerDelay; // initialize delayed samples counter
                     m_triggerState = TriggerDelay;
-                    ++begin;
+                    for (auto begin : vbegin) {
+                        ++begin;
+                    }
                     ++processed;
                     --firstRemainder;
                     continue;
@@ -408,7 +417,9 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
                 }
             }
 
-            ++begin;
+            for (auto begin : vbegin) {
+                ++begin;
+            }
             ++processed;
             --firstRemainder;
         } // look for trigger
@@ -421,8 +432,9 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
         int remainder;
         int count = firstRemainder; // number of samples in traceback buffer past the current point
         SampleVector::iterator mend;
-        m_traceDiscreteMemory.current().current(mend);
-        SampleVector::iterator mbegin = mend - count;
+        m_traceDiscreteMemory.getCurrent(mend);
+        SampleVector::iterator mbegin;
+        TraceBackDiscreteMemory::moveIt(mend, mbegin, -count);
 
         if (m_traceStart) // start of trace processing
         {
@@ -436,12 +448,18 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
 
             // process until begin point
 
-            if (m_maxTraceDelay > 0) { // trace back
-                processTraces(mbegin - m_preTriggerDelay - m_maxTraceDelay, m_maxTraceDelay, true);
+            if (m_maxTraceDelay > 0)
+            { // trace back
+                SampleVector::iterator tbegin;
+                TraceBackDiscreteMemory::moveIt(mbegin, tbegin, - m_preTriggerDelay - m_maxTraceDelay);
+                processTraces(tbegin , m_maxTraceDelay, true);
             }
 
-            if (m_preTriggerDelay > 0) { // pre-trigger
-                processTraces(mbegin - m_preTriggerDelay, m_preTriggerDelay);
+            if (m_preTriggerDelay > 0)
+            { // pre-trigger
+                SampleVector::iterator tbegin;
+                TraceBackDiscreteMemory::moveIt(mbegin, tbegin, -m_preTriggerDelay);
+                processTraces(tbegin, m_preTriggerDelay);
             }
 
             // process the rest of the trace
@@ -456,8 +474,8 @@ void ScopeVis::processTrace(const std::vector<SampleVector::const_iterator>& vbe
 
         if (remainder >= 0) // finished
         {
-            mbegin = mend - remainder;
-            m_traceDiscreteMemory.current().setEndPoint(mbegin);
+            TraceBackDiscreteMemory::moveIt(mend, mbegin, -remainder);
+            m_traceDiscreteMemory.setCurrentEndPoint(mbegin);
             m_traceDiscreteMemory.store(m_preTriggerDelay+remainder); // next memory trace.
             m_triggerState = TriggerUntriggered;
             m_triggerWaitForReset = m_triggerOneShot;

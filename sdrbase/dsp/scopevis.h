@@ -610,17 +610,17 @@ private:
     	SampleVector::iterator m_endPoint;
     };
 
+    typedef std::vector<TraceBackBuffer> TraceBackBufferStream;
+
     struct TraceBackDiscreteMemory
     {
-    	std::vector<TraceBackBuffer> m_traceBackBuffers;
-    	uint32_t m_memSize;
-    	uint32_t m_currentMemIndex;
-    	uint32_t m_traceSize;
-
     	/**
     	 * Give memory size in number of traces
     	 */
-    	TraceBackDiscreteMemory(uint32_t size) : m_memSize(size), m_currentMemIndex(0), m_traceSize(0)
+        TraceBackDiscreteMemory(uint32_t size) :
+            m_memSize(size),
+            m_currentMemIndex(0),
+            m_traceSize(0)
     	{
     		m_traceBackBuffers.resize(m_memSize);
     	}
@@ -643,7 +643,7 @@ private:
     	 * Copy a trace length of samples into the new memory slot
          * samplesToReport are the number of samples to report on the next trace
     	 */
-        TraceBackBuffer &store(int samplesToReport)
+        void store(int samplesToReport)
     	{
     	    uint32_t nextMemIndex = m_currentMemIndex < (m_memSize-1) ? m_currentMemIndex+1 : 0;
             m_traceBackBuffers[nextMemIndex].reset();
@@ -652,33 +652,7 @@ private:
                 samplesToReport
             );
     	    m_currentMemIndex = nextMemIndex;
-    		return m_traceBackBuffers[m_currentMemIndex]; // new trace
     	}
-
-    	/**
-    	 * Recalls trace at shift positions back. Therefore 0 is current. Wraps around memory size.
-    	 */
-    	TraceBackBuffer& recall(uint32_t shift)
-    	{
-    		int index = (m_currentMemIndex + (m_memSize - (shift % m_memSize))) % m_memSize;
-    		return m_traceBackBuffers[index];
-    	}
-
-    	/**
-    	 * Return trace at current memory position
-    	 */
-    	TraceBackBuffer& current()
-    	{
-    		return m_traceBackBuffers[m_currentMemIndex];
-    	}
-
-        /**
-         * Return trace at given memory position
-         */
-        TraceBackBuffer& at(int index)
-        {
-            return m_traceBackBuffers[index];
-        }
 
     	/**
     	 * Return current memory index
@@ -741,6 +715,55 @@ private:
             {
                 return false;
             }
+        }
+
+        /**
+         * Get current point at current memory position
+         */
+        void getCurrent(SampleVector::iterator& it) {
+            current().current(it);
+        }
+
+        /**
+         * Set end point at current memory position
+         */
+        void setCurrentEndPoint(const SampleVector::iterator& it) {
+            current().setEndPoint(it);
+        }
+
+        /**
+         * Get end point at given memory position
+         */
+        void getEndPointAt(int index, SampleVector::const_iterator& mend) {
+            at(index).getEndPoint(mend);
+        }
+
+        /**
+         * Write trace at current memory position
+         */
+        void writeCurrent(const SampleVector::const_iterator& begin, int length) {
+            current().write(begin, length);
+        }
+
+        /**
+         * Move buffer iterator by a certain amount
+         */
+        static void moveIt(const SampleVector::iterator& x, SampleVector::iterator& y, int amount) {
+            y = x + amount;
+        }
+
+    private:
+        std::vector<TraceBackBuffer> m_traceBackBuffers;
+        uint32_t m_memSize;
+        uint32_t m_currentMemIndex;
+        uint32_t m_traceSize;
+
+        TraceBackBuffer& current() { //!< Return trace at current memory position
+            return m_traceBackBuffers[m_currentMemIndex];
+        }
+
+        TraceBackBuffer& at(int index) { //!< Return trace at given memory position
+            return m_traceBackBuffers[index];
         }
     };
 
