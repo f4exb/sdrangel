@@ -139,8 +139,65 @@ void ScopeVis::configure(
     bool freeRun
 )
 {
-    Message* cmd = MsgConfigureScopeVisNG::create(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
-    getInputMessageQueue()->push(cmd);
+    QMutexLocker configLocker(&m_mutex);
+    // MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
+
+    // uint32_t nbStreams = conf.getNbStreams();
+    // uint32_t traceSize = conf.getTraceSize();
+    // uint32_t timeBase = conf.getTimeBase();
+    // uint32_t timeOfsProMill = conf.getTimeOfsProMill();
+    // uint32_t triggerPre = conf.getTriggerPre();
+    // bool freeRun = conf.getFreeRun();
+
+    if (m_traceSize != traceSize) {
+        setTraceSize(traceSize);
+    }
+
+    if (m_nbStreams != nbStreams)
+    {
+        m_traceDiscreteMemory.setNbStreams(nbStreams);
+        m_nbStreams = nbStreams;
+    }
+
+    if (m_timeBase != timeBase)
+    {
+        m_timeBase = timeBase;
+
+        if (m_glScope) {
+            m_glScope->setTimeBase(m_timeBase);
+        }
+    }
+
+    if (m_timeOfsProMill != timeOfsProMill)
+    {
+        m_timeOfsProMill = timeOfsProMill;
+
+        if (m_glScope) {
+            m_glScope->setTimeOfsProMill(m_timeOfsProMill);
+        }
+    }
+
+    if (m_preTriggerDelay != triggerPre) {
+        setPreTriggerDelay(triggerPre);
+    }
+
+    if (freeRun != m_freeRun) {
+        m_freeRun = freeRun;
+    }
+
+    qDebug() << "ScopeVis::handleMessage: MsgConfigureScopeVisNG:"
+        << " m_nbStreams: " << m_nbStreams
+        << " m_traceSize: " << m_traceSize
+        << " m_timeOfsProMill: " << m_timeOfsProMill
+        << " m_preTriggerDelay: " << m_preTriggerDelay
+        << " m_freeRun: " << m_freeRun;
+
+    if ((m_glScope) && (m_currentTraceMemoryIndex > 0)) {
+        processMemoryTrace();
+    }
+
+    // Message* cmd = MsgConfigureScopeVisNG::create(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
+    // getInputMessageQueue()->push(cmd);
 }
 
 void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
