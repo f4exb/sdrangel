@@ -40,13 +40,15 @@ const double GLScopeGUI::amps[27] = {
 GLScopeGUI::GLScopeGUI(QWidget* parent) :
     QWidget(parent),
     ui(new Ui::GLScopeGUI),
-    m_messageQueue(0),
-    m_scopeVis(0),
-    m_glScope(0),
+    m_messageQueue(nullptr),
+    m_scopeVis(nullptr),
+    m_glScope(nullptr),
     m_sampleRate(0),
     m_timeBase(1),
     m_timeOffset(0),
-    m_traceLenMult(1)
+    m_traceLenMult(1),
+    m_ctlTraceIndex(0),
+    m_ctlTriggerIndex(0)
 {
     qDebug("GLScopeGUI::GLScopeGUI");
     setEnabled(false);
@@ -74,11 +76,6 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     m_glScope = glScope;
 
     // initialize display combo
-    ui->onlyX->setChecked(true);
-    ui->onlyY->setChecked(false);
-    ui->horizontalXY->setChecked(false);
-    ui->verticalXY->setChecked(false);
-    ui->polar->setChecked(false);
     ui->onlyY->setEnabled(false);
     ui->horizontalXY->setEnabled(false);
     ui->verticalXY->setEnabled(false);
@@ -101,7 +98,8 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     // Add a trace
     GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
-    m_scopeVis->addTrace(traceData);
+    ScopeVis::MsgScopeVisAddTrace *msg = ScopeVis::MsgScopeVisAddTrace::create(traceData);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 
     setEnabled(true);
     connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
@@ -239,12 +237,12 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 {
     SimpleDeserializer d(data);
 
-    if(!d.isValid()) {
+    if (!d.isValid()) {
         resetToDefaults();
         return false;
     }
 
-    if(d.getVersion() == 1)
+    if (d.getVersion() == 1)
     {
         TraceUIBlocker traceUIBlocker(ui);
         TrigUIBlocker trigUIBlocker(ui);
@@ -252,42 +250,9 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
         uint32_t uintValue;
         bool boolValue;
 
-        ui->onlyX->setEnabled(false);
-        ui->onlyY->setEnabled(false);
-        ui->horizontalXY->setEnabled(false);
-        ui->verticalXY->setEnabled(false);
-        ui->polar->setEnabled(false);
-
         ui->traceMode->setCurrentIndex(0);
         d.readS32(1, &intValue, (int) GLScope::DisplayX);
-        m_glScope->setDisplayMode((GLScope::DisplayMode) intValue);
-
-        ui->onlyX->setChecked(false);
-        ui->onlyY->setChecked(false);
-        ui->horizontalXY->setChecked(false);
-        ui->verticalXY->setChecked(false);
-        ui->polar->setChecked(false);
-
-        switch (m_glScope->getDisplayMode())
-        {
-        case GLScope::DisplayY:
-            ui->onlyY->setChecked(true);
-            break;
-        case GLScope::DisplayXYH:
-            ui->horizontalXY->setChecked(true);
-            break;
-        case GLScope::DisplayXYV:
-            ui->verticalXY->setChecked(true);
-            break;
-        case GLScope::DisplayPol:
-            ui->polar->setChecked(true);
-            break;
-        case GLScope::DisplayX:
-        default:
-            ui->onlyX->setChecked(true);
-            break;
-        }
-
+        GLScopeSettings::DisplayMode displayMode = (GLScopeSettings::DisplayMode) intValue;
         d.readS32(2, &intValue, 50);
         ui->traceIntensity->setValue(intValue);
         d.readS32(3, &intValue, 10);
@@ -310,7 +275,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         while (iTrace > nbTracesSaved) // remove possible traces in excess
         {
-            m_scopeVis->removeTrace(iTrace - 1);
+            ScopeVis::MsgScopeVisRemoveTrace *msg = ScopeVis::MsgScopeVisRemoveTrace::create(iTrace - 1);
+            m_scopeVis->getInputMessageQueue()->push(msg);
             iTrace--;
         }
 
@@ -342,14 +308,15 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
             if (iTrace < tracesData.size()) // change existing traces
             {
-                m_scopeVis->changeTrace(traceData, iTrace);
+                ScopeVis::MsgScopeVisChangeTrace *msg = ScopeVis::MsgScopeVisChangeTrace::create(traceData, iTrace);
+                m_scopeVis->getInputMessageQueue()->push(msg);
             }
             else // add new traces
             {
-                m_scopeVis->addTrace(traceData);
+                ScopeVis::MsgScopeVisAddTrace *msg = ScopeVis::MsgScopeVisAddTrace::create(traceData);
+                m_scopeVis->getInputMessageQueue()->push(msg);
             }
         }
-
 
         ui->trace->setMaximum(nbTracesSaved-1);
         ui->trace->setValue(nbTracesSaved-1);
@@ -363,12 +330,7 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
         setAmpScaleDisplay();
         setAmpOfsDisplay();
         setTraceDelayDisplay();
-
-        ui->onlyX->setEnabled(true);
-        ui->onlyY->setEnabled(nbTracesSaved > 1);
-        ui->horizontalXY->setEnabled(nbTracesSaved > 1);
-        ui->verticalXY->setEnabled(nbTracesSaved > 1);
-        ui->polar->setEnabled(nbTracesSaved > 1);
+        setDisplayMode(displayMode);
 
         // trigger stuff
 
@@ -461,17 +423,16 @@ void GLScopeGUI::on_onlyX_toggled(bool checked)
 {
     if (checked)
     {
+        m_glScope->setDisplayMode(GLScope::DisplayX);
+        ui->onlyX->setEnabled(false);
+        ui->onlyY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->horizontalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->verticalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->polar->setEnabled(m_scopeVis->getNbTraces() > 1);
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScope::DisplayX);
-    }
-    else
-    {
-        if (!ui->onlyY->isChecked() && !ui->horizontalXY->isChecked() && !ui->verticalXY->isChecked() && !ui->polar->isChecked()) {
-            ui->polar->setChecked(true);
-        }
     }
 }
 
@@ -479,17 +440,16 @@ void GLScopeGUI::on_onlyY_toggled(bool checked)
 {
     if (checked)
     {
+        m_glScope->setDisplayMode(GLScope::DisplayY);
+        ui->onlyX->setEnabled(true);
+        ui->onlyY->setEnabled(false);
+        ui->horizontalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->verticalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->polar->setEnabled(m_scopeVis->getNbTraces() > 1);
         ui->onlyX->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScope::DisplayY);
-    }
-    else
-    {
-        if (!ui->onlyX->isChecked() && !ui->horizontalXY->isChecked() && !ui->verticalXY->isChecked() && !ui->polar->isChecked()) {
-            ui->polar->setChecked(true);
-        }
     }
 }
 
@@ -497,17 +457,16 @@ void GLScopeGUI::on_horizontalXY_toggled(bool checked)
 {
     if (checked)
     {
+        m_glScope->setDisplayMode(GLScope::DisplayXYH);
+        ui->onlyX->setEnabled(true);
+        ui->onlyY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->horizontalXY->setEnabled(false);
+        ui->verticalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->polar->setEnabled(m_scopeVis->getNbTraces() > 1);
         ui->onlyX->setChecked(false);
         ui->onlyY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScope::DisplayXYH);
-    }
-    else
-    {
-        if (!ui->onlyX->isChecked() && !ui->onlyY->isChecked() && !ui->verticalXY->isChecked() && !ui->polar->isChecked()) {
-            ui->polar->setChecked(true);
-        }
     }
 }
 
@@ -515,17 +474,16 @@ void GLScopeGUI::on_verticalXY_toggled(bool checked)
 {
     if (checked)
     {
+        m_glScope->setDisplayMode(GLScope::DisplayXYV);
+        ui->onlyX->setEnabled(true);
+        ui->onlyY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->horizontalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->verticalXY->setEnabled(false);
+        ui->polar->setEnabled(m_scopeVis->getNbTraces() > 1);
         ui->onlyX->setChecked(false);
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->polar->setChecked(false);
-        m_glScope->setDisplayMode(GLScope::DisplayXYV);
-    }
-    else
-    {
-        if (!ui->onlyX->isChecked() && !ui->onlyY->isChecked() && !ui->horizontalXY->isChecked() && !ui->polar->isChecked()) {
-            ui->polar->setChecked(true);
-        }
     }
 }
 
@@ -533,17 +491,16 @@ void GLScopeGUI::on_polar_toggled(bool checked)
 {
     if (checked)
     {
+        m_glScope->setDisplayMode(GLScope::DisplayPol);
+        ui->onlyX->setEnabled(true);
+        ui->onlyY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->horizontalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->verticalXY->setEnabled(m_scopeVis->getNbTraces() > 1);
+        ui->polar->setEnabled(false);
         ui->onlyX->setChecked(false);
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
-        m_glScope->setDisplayMode(GLScope::DisplayPol);
-    }
-    else
-    {
-        if (!ui->onlyX->isChecked() && !ui->onlyY->isChecked() && !ui->horizontalXY->isChecked() && !ui->verticalXY->isChecked()) {
-            ui->polar->setChecked(true);
-        }
     }
 }
 
@@ -634,6 +591,7 @@ void GLScopeGUI::on_trace_valueChanged(int value)
 {
     ui->traceText->setText(value == 0 ? "X" : QString("Y%1").arg(ui->trace->value()));
 
+    m_ctlTraceIndex = value;
     GLScopeSettings::TraceData traceData;
     m_scopeVis->getTraceData(traceData, value);
 
@@ -665,7 +623,6 @@ void GLScopeGUI::on_traceDel_clicked(bool checked)
 
         if (ui->trace->value() == 0)
         {
-            ui->onlyX->setChecked(true);
             ui->onlyY->setEnabled(false);
             ui->horizontalXY->setEnabled(false);
             ui->verticalXY->setEnabled(false);
@@ -673,7 +630,9 @@ void GLScopeGUI::on_traceDel_clicked(bool checked)
             m_glScope->setDisplayMode(GLScope::DisplayX);
         }
 
-        m_scopeVis->removeTrace(ui->trace->value());
+        ScopeVis::MsgScopeVisRemoveTrace *msg = ScopeVis::MsgScopeVisRemoveTrace::create(ui->trace->value());
+        m_scopeVis->getInputMessageQueue()->push(msg);
+
         changeCurrentTrace();
     }
 }
@@ -712,6 +671,7 @@ void GLScopeGUI::on_trig_valueChanged(int value)
 {
     ui->trigText->setText(tr("%1").arg(value));
 
+    m_ctlTriggerIndex = value;
     GLScopeSettings::TriggerData triggerData;
     m_scopeVis->getTriggerData(triggerData, value);
 
@@ -1326,7 +1286,8 @@ void GLScopeGUI::changeCurrentTrace()
     GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
     uint32_t currentTraceIndex = ui->trace->value();
-    m_scopeVis->changeTrace(traceData, currentTraceIndex);
+    ScopeVis::MsgScopeVisChangeTrace *msg = ScopeVis::MsgScopeVisChangeTrace::create(traceData, currentTraceIndex);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 }
 
 void GLScopeGUI::changeCurrentTrigger()
@@ -1382,7 +1343,6 @@ void GLScopeGUI::fillTraceData(GLScopeSettings::TraceData& traceData)
     traceData.m_projectionType = (Projector::ProjectionType) ui->traceMode->currentIndex();
     traceData.m_hasTextOverlay = (traceData.m_projectionType == Projector::ProjectionMagDB) || (traceData.m_projectionType == Projector::ProjectionMagSq);
     traceData.m_textOverlay.clear();
-    traceData.m_inputIndex = 0;
     traceData.m_amp = 0.2 / amps[ui->amp->value()];
     traceData.m_ampIndex = ui->amp->value();
 
@@ -1496,8 +1456,40 @@ void GLScopeGUI::setTriggerUI(const GLScopeSettings::TriggerData& triggerData)
     ui->trigColor->setStyleSheet(tr("QLabel { background-color : rgb(%1,%2,%3); }").arg(r).arg(g).arg(b));
 }
 
-void GLScopeGUI::applySettings()
+void GLScopeGUI::applySettings(const GLScopeSettings& settings, bool force)
 {
+    if (m_scopeVis)
+    {
+        ScopeVis::MsgConfigureScopeVis *msg = ScopeVis::MsgConfigureScopeVis::create(settings, force);
+        m_scopeVis->getInputMessageQueue()->push(msg);
+    }
+}
+
+void GLScopeGUI::displaySettings()
+{
+    TraceUIBlocker traceUIBlocker(ui);
+    TrigUIBlocker trigUIBlocker(ui);
+    MainUIBlocker mainUIBlocker(ui);
+
+    ui->traceText->setText(m_ctlTraceIndex == 0 ? "X" : QString("Y%1").arg(m_ctlTraceIndex));
+    ui->trace->setValue(m_ctlTraceIndex);
+    const GLScopeSettings::TraceData& traceData = m_settings.m_tracesData[m_ctlTraceIndex];
+    setTraceUI(traceData);
+    ui->trigText->setText(tr("%1").arg(m_ctlTriggerIndex));
+    ui->trig->setValue(m_ctlTriggerIndex);
+    const GLScopeSettings::TriggerData& triggerData = m_settings.m_triggersData[m_ctlTriggerIndex];
+    setTriggerUI(triggerData);
+    setDisplayMode(m_settings.m_displayMode);
+    ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(m_settings.m_traceIntensity));
+    ui->traceIntensity->setValue(m_settings.m_traceIntensity);
+    m_glScope->setDisplayTraceIntensity(m_settings.m_traceIntensity);
+    ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(m_settings.m_gridIntensity));
+    ui->gridIntensity->setValue(m_settings.m_gridIntensity);
+    m_glScope->setDisplayGridIntensity(m_settings.m_gridIntensity);
+    setTimeScaleDisplay();
+    ui->timeOfs->setValue(m_settings.m_timeOfs);
+    setTimeOfsDisplay();
+    ui->traceLen->setValue(m_traceLenMult);
 }
 
 bool GLScopeGUI::handleMessage(Message* message)
@@ -1602,33 +1594,54 @@ void GLScopeGUI::MainUIBlocker::unBlock()
 //    m_ui->traceLen->blockSignals(m_oldStateTraceLen);
 }
 
-void GLScopeGUI::setDisplayMode(DisplayMode displayMode)
+void GLScopeGUI::setDisplayMode(GLScopeSettings::DisplayMode displayMode)
 {
+    uint32_t nbTraces = m_scopeVis->getNbTraces();
+
+    ui->onlyX->setChecked(false);
+    ui->onlyY->setChecked(false);
+    ui->horizontalXY->setChecked(false);
+    ui->verticalXY->setChecked(false);
+    ui->polar->setChecked(false);
+
+    ui->onlyX->setEnabled(true);
+    ui->onlyY->setEnabled(nbTraces > 1);
+    ui->horizontalXY->setEnabled(nbTraces > 1);
+    ui->verticalXY->setEnabled(nbTraces > 1);
+    ui->polar->setEnabled(nbTraces > 1);
+
     if (ui->trace->maximum() == 0)
     {
         ui->onlyX->setChecked(true);
+        ui->onlyX->setEnabled(false);
     }
     else
     {
         switch (displayMode)
         {
-        case DisplayX:
+        case GLScopeSettings::DisplayX:
             ui->onlyX->setChecked(true);
+            ui->onlyX->setEnabled(false);
             break;
-        case DisplayY:
+        case GLScopeSettings::DisplayY:
             ui->onlyY->setChecked(true);
+            ui->onlyY->setEnabled(false);
             break;
-        case DisplayXYH:
+        case GLScopeSettings::DisplayXYH:
             ui->horizontalXY->setChecked(true);
+            ui->horizontalXY->setEnabled(false);
             break;
-        case DisplayXYV:
+        case GLScopeSettings::DisplayXYV:
             ui->verticalXY->setChecked(true);
+            ui->verticalXY->setEnabled(false);
             break;
-        case DisplayPol:
+        case GLScopeSettings::DisplayPol:
             ui->polar->setChecked(true);
+            ui->polar->setEnabled(false);
             break;
         default:
             ui->onlyX->setChecked(true);
+            ui->onlyX->setEnabled(false);
             break;
         }
     }
@@ -1690,7 +1703,8 @@ void GLScopeGUI::setPreTrigger(int step)
 
 void GLScopeGUI::changeTrace(int traceIndex, const GLScopeSettings::TraceData& traceData)
 {
-    m_scopeVis->changeTrace(traceData, traceIndex);
+    ScopeVis::MsgScopeVisChangeTrace *msg = ScopeVis::MsgScopeVisChangeTrace::create(traceData, traceIndex);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 }
 
 void GLScopeGUI::addTrace(const GLScopeSettings::TraceData& traceData)
@@ -1705,7 +1719,8 @@ void GLScopeGUI::addTrace(const GLScopeSettings::TraceData& traceData)
             ui->polar->setEnabled(true);
         }
 
-        m_scopeVis->addTrace(traceData);
+        ScopeVis::MsgScopeVisAddTrace *msg = ScopeVis::MsgScopeVisAddTrace::create(traceData);
+        m_scopeVis->getInputMessageQueue()->push(msg);
         ui->trace->setMaximum(ui->trace->maximum() + 1);
     }
 }

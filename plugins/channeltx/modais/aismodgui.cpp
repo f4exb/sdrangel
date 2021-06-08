@@ -510,7 +510,7 @@ AISModGUI::AISModGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, BasebandSam
     traceDataQ.m_ofsCoarse = 0;
     ui->scopeGUI->changeTrace(0, traceDataI);
     ui->scopeGUI->addTrace(traceDataQ);
-    ui->scopeGUI->setDisplayMode(GLScopeGUI::DisplayPol);
+    ui->scopeGUI->setDisplayMode(GLScopeSettings::DisplayPol);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
 
     GLScopeSettings::TriggerData triggerData;

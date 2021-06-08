@@ -26,6 +26,7 @@
 #include "export.h"
 #include "util/message.h"
 #include "dsp/scopevis.h"
+#include "dsp/glscopesettings.h"
 #include "settings/serializable.h"
 
 namespace Ui {
@@ -39,14 +40,6 @@ class SDRGUI_API GLScopeGUI : public QWidget, public Serializable {
     Q_OBJECT
 
 public:
-    enum DisplayMode {
-        DisplayXYH,
-        DisplayXYV,
-        DisplayX,
-        DisplayY,
-        DisplayPol
-    };
-
     explicit GLScopeGUI(QWidget* parent = 0);
     ~GLScopeGUI();
 
@@ -61,7 +54,7 @@ public:
 
     // preconfiguration methods
     // global (first line):
-    void setDisplayMode(DisplayMode displayMode);
+    void setDisplayMode(GLScopeSettings::DisplayMode displayMode);
     void setTraceIntensity(int value);
     void setGridIntensity(int value);
     void setTimeBase(int step);
@@ -147,6 +140,7 @@ private:
     MessageQueue* m_messageQueue;
     ScopeVis* m_scopeVis;
     GLScope* m_glScope;
+    GLScopeSettings m_settings;
 
     int m_sampleRate;
     int m_timeBase;
@@ -154,10 +148,13 @@ private:
     int m_traceLenMult;
     QColor m_focusedTraceColor;
     QColor m_focusedTriggerColor;
+    int m_ctlTraceIndex;    //!< controlled trace index
+    int m_ctlTriggerIndex;  //!< controlled trigger index
 
     static const double amps[27];
 
-    void applySettings();
+    void applySettings(const GLScopeSettings& settings, bool force = false);
+    void displaySettings();
     // First row
     void setTraceIndexDisplay();
     void setTimeScaleDisplay();

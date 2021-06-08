@@ -25,15 +25,16 @@
 #include "dsp/dspcommands.h"
 #include "dsp/glscopeinterface.h"
 
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGAddTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGChangeTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGRemoveTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMoveTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGFocusOnTrigger, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGAddTrace, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGChangeTrace, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGRemoveTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisAddTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisChangeTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisRemoveTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMoveTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGFocusOnTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGOneShot, Message)
@@ -206,8 +207,11 @@ void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
             << " m_amp: " << traceData.m_amp
             << " m_ofs: " << traceData.m_ofs
             << " m_traceDelay: " << traceData.m_traceDelay;
-    Message* cmd = MsgScopeVisNGAddTrace::create(traceData);
-    getInputMessageQueue()->push(cmd);
+    m_traces.addTrace(traceData, m_traceSize);
+    initTraceBuffers();
+    updateMaxTraceDelay();
+    computeDisplayTriggerLevels();
+    updateGLScopeDisplay();
 }
 
 void ScopeVis::changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
@@ -217,16 +221,25 @@ void ScopeVis::changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t
             << " m_amp: " << traceData.m_amp
             << " m_ofs: " << traceData.m_ofs
             << " m_traceDelay: " << traceData.m_traceDelay;
-    Message* cmd = MsgScopeVisNGChangeTrace::create(traceData, traceIndex);
-    getInputMessageQueue()->push(cmd);
+    bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(traceData, traceIndex);
+    m_traces.changeTrace(traceData, traceIndex);
+    updateMaxTraceDelay();
+
+    if (doComputeTriggerLevelsOnDisplay) {
+        computeDisplayTriggerLevels();
+    }
+
+    updateGLScopeDisplay();
 }
 
 void ScopeVis::removeTrace(uint32_t traceIndex)
 {
     qDebug() << "ScopeVis::removeTrace:"
             << " trace: " << traceIndex;
-    Message* cmd = MsgScopeVisNGRemoveTrace::create(traceIndex);
-    getInputMessageQueue()->push(cmd);
+    m_traces.removeTrace(traceIndex);
+    updateMaxTraceDelay();
+    computeDisplayTriggerLevels();
+    updateGLScopeDisplay();
 }
 
 void ScopeVis::moveTrace(uint32_t traceIndex, bool upElseDown)
@@ -794,6 +807,13 @@ bool ScopeVis::handleMessage(const Message& message)
         qDebug() << "ScopeVis::handleMessage: DSPSignalNotification: m_sampleRate: " << m_sampleRate;
         return true;
     }
+    else if (MsgConfigureScopeVis::match(message))
+    {
+        QMutexLocker configLocker(&m_mutex);
+        const MsgConfigureScopeVis& cmd = (const MsgConfigureScopeVis&) message;
+        applySettings(cmd.getSettings(), cmd.getForce());
+        return true;
+    }
     else if (MsgConfigureScopeVisNG::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
@@ -952,41 +972,30 @@ bool ScopeVis::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgScopeVisNGAddTrace::match(message))
+    else if (MsgScopeVisAddTrace::match(message))
     {
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGAddTrace";
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisAddTrace";
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGAddTrace& conf = (MsgScopeVisNGAddTrace&) message;
-        m_traces.addTrace(conf.getTraceData(), m_traceSize);
-        initTraceBuffers();
-        updateMaxTraceDelay();
-        computeDisplayTriggerLevels();
-        updateGLScopeDisplay();
+        MsgScopeVisAddTrace& conf = (MsgScopeVisAddTrace&) message;
+        addTrace(conf.getTraceData());
         return true;
     }
-    else if (MsgScopeVisNGChangeTrace::match(message))
+    else if (MsgScopeVisChangeTrace::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGChangeTrace& conf = (MsgScopeVisNGChangeTrace&) message;
-        bool doComputeTriggerLevelsOnDisplay = m_traces.isVerticalDisplayChange(conf.getTraceData(), conf.getTraceIndex());
+        MsgScopeVisChangeTrace& conf = (MsgScopeVisChangeTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGChangeTrace: " << traceIndex;
-        m_traces.changeTrace(conf.getTraceData(), traceIndex);
-        updateMaxTraceDelay();
-        if (doComputeTriggerLevelsOnDisplay) computeDisplayTriggerLevels();
-        updateGLScopeDisplay();
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisRemoveTrace: " << traceIndex;
+        changeTrace(conf.getTraceData(), traceIndex);
         return true;
     }
-    else if (MsgScopeVisNGRemoveTrace::match(message))
+    else if (MsgScopeVisRemoveTrace::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGRemoveTrace& conf = (MsgScopeVisNGRemoveTrace&) message;
+        MsgScopeVisRemoveTrace& conf = (MsgScopeVisRemoveTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGRemoveTrace: " << traceIndex;
-        m_traces.removeTrace(traceIndex);
-        updateMaxTraceDelay();
-        computeDisplayTriggerLevels();
-        updateGLScopeDisplay();
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisRemoveTrace: " << traceIndex;
+        removeTrace(traceIndex);
         return true;
     }
     else if (MsgScopeVisNGMoveTrace::match(message))
@@ -1070,6 +1079,29 @@ bool ScopeVis::handleMessage(const Message& message)
         qDebug() << "ScopeVis::handleMessage" << message.getIdentifier() << " not handled";
         return false;
     }
+}
+
+void ScopeVis::applySettings(const GLScopeSettings& settings, bool force)
+{
+    (void) force;
+
+    if (m_traces.size() > m_settings.m_tracesData.size())
+    {
+        for (unsigned int i = m_traces.size(); i > m_settings.m_tracesData.size(); i--) {
+            removeTrace(i-1);
+        }
+    }
+
+    for (unsigned int i = 0; i < m_settings.m_tracesData.size(); i++)
+    {
+        if (i < m_traces.size()) { // change trace
+            changeTrace(m_settings.m_tracesData[i], i);
+        } else {  // add trace
+            addTrace(m_settings.m_tracesData[i]);
+        }
+    }
+
+    m_settings = settings;
 }
 
 void ScopeVis::updateMaxTraceDelay()

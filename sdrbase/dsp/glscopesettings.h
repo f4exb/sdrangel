@@ -44,7 +44,6 @@ public:
     {
         uint32_t m_streamIndex;          //!< I/Q stream index
         Projector::ProjectionType m_projectionType; //!< Complex to real projection type
-        uint32_t m_inputIndex;           //!< Input or feed index this trace is associated with
         float m_amp;                     //!< Amplification factor
         uint32_t m_ampIndex;             //!< Index in list of amplification factors
         float m_ofs;                     //!< Offset factor
@@ -81,7 +80,6 @@ public:
         {
             m_streamIndex = 0;
             m_projectionType = Projector::ProjectionReal;
-            m_inputIndex = 0;
             m_amp = 1.0f;
             m_ampIndex = 0;
             m_ofs = 0.0f;
@@ -172,12 +170,14 @@ public:
     static const uint32_t m_nbTraceBuffers = 2;
 
     GLScopeSettings();
+    GLScopeSettings(const GLScopeSettings& t);
     virtual ~GLScopeSettings();
 
     void resetToDefaults();
 
     virtual QByteArray serialize() const;
     virtual bool deserialize(const QByteArray& data);
+    GLScopeSettings& operator=(const GLScopeSettings& t);
 
 };
 

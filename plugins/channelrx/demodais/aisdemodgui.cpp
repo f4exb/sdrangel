@@ -435,7 +435,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     traceDataQ.m_ofsCoarse = 0;
     ui->scopeGUI->changeTrace(0, traceDataI);
     ui->scopeGUI->addTrace(traceDataQ);
-    ui->scopeGUI->setDisplayMode(GLScopeGUI::DisplayXYV);
+    ui->scopeGUI->setDisplayMode(GLScopeSettings::DisplayXYV);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
 
     GLScopeSettings::TriggerData triggerData;

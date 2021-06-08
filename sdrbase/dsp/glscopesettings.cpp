@@ -35,6 +35,27 @@ GLScopeSettings::GLScopeSettings()
     resetToDefaults();
 }
 
+GLScopeSettings::GLScopeSettings(const GLScopeSettings& t)
+{
+    resetToDefaults();
+
+    for (unsigned int i = 0; i < m_maxNbTraces; i++) {
+        m_tracesData[i] = t.m_tracesData[i];
+    }
+
+    for (unsigned int i = 0; i < m_maxNbTriggers; i++) {
+        m_triggersData[i] = t.m_triggersData[i];
+    }
+
+    m_displayMode = t.m_displayMode;
+    m_traceIntensity = t.m_traceIntensity;
+    m_gridIntensity = t.m_gridIntensity;
+    m_time = t.m_time;
+    m_timeOfs = t.m_timeOfs;
+    m_traceLen = t.m_traceLen;
+    m_trigPre = t.m_trigPre;
+}
+
 GLScopeSettings::~GLScopeSettings()
 {}
 
@@ -217,4 +238,29 @@ bool GLScopeSettings::deserialize(const QByteArray& data)
         resetToDefaults();
         return false;
     }
+}
+
+GLScopeSettings& GLScopeSettings::operator=(const GLScopeSettings& t)
+{
+    // Check for self assignment
+    if (this != &t)
+    {
+        for (unsigned int i = 0; i < m_maxNbTraces; i++) {
+            m_tracesData[i] = t.m_tracesData[i];
+        }
+
+        for (unsigned int i = 0; i < m_maxNbTriggers; i++) {
+            m_triggersData[i] = t.m_triggersData[i];
+        }
+
+        m_displayMode = t.m_displayMode;
+        m_traceIntensity = t.m_traceIntensity;
+        m_gridIntensity = t.m_gridIntensity;
+        m_time = t.m_time;
+        m_timeOfs = t.m_timeOfs;
+        m_traceLen = t.m_traceLen;
+        m_trigPre = t.m_trigPre;
+    }
+
+    return *this;
 }

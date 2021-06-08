@@ -380,7 +380,7 @@ IEEE_802_15_4_ModGUI::IEEE_802_15_4_ModGUI(PluginAPI* pluginAPI, DeviceUISet *de
     traceDataQ.m_ofsCoarse = 0;
     ui->scopeGUI->changeTrace(0, traceDataI);
     ui->scopeGUI->addTrace(traceDataQ);
-    ui->scopeGUI->setDisplayMode(GLScopeGUI::DisplayPol);
+    ui->scopeGUI->setDisplayMode(GLScopeSettings::DisplayPol);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
 
     GLScopeSettings::TriggerData triggerData;

@@ -45,153 +45,28 @@ class SpectrumVis;
 class SDRBASE_API ScopeVis : public QObject {
     Q_OBJECT
 public:
-    ScopeVis();
-    virtual ~ScopeVis();
-
-    void setGLScope(GLScopeInterface* glScope);
-    void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
-    void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
-    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
-
-    void setLiveRate(int sampleRate);
-    void configure(uint32_t nbStreams, uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
-    void addTrace(const GLScopeSettings::TraceData& traceData);
-    void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex);
-    void removeTrace(uint32_t traceIndex);
-    void moveTrace(uint32_t traceIndex, bool upElseDown);
-    void focusOnTrace(uint32_t traceIndex);
-    void addTrigger(const GLScopeSettings::TriggerData& triggerData);
-    void changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex);
-    void removeTrigger(uint32_t triggerIndex);
-    void moveTrigger(uint32_t triggerIndex, bool upElseDown);
-    void focusOnTrigger(uint32_t triggerIndex);
-    void setOneShot(bool oneShot);
-    void setMemoryIndex(uint32_t memoryIndex);
-    void setTraceChunkSize(uint32_t chunkSize) { m_traceChunkSize = chunkSize; }
-    uint32_t getTraceChunkSize() const { return m_traceChunkSize; }
-
-    QByteArray serializeMemory() const
-    {
-        SimpleSerializer s(1);
-
-        s.writeU32(1, m_traceSize);
-        s.writeU32(2, m_preTriggerDelay);
-        s.writeS32(3, m_sampleRate);
-        QByteArray buffer = m_traceDiscreteMemory.serialize();
-        s.writeBlob(4, buffer);
-
-        return s.final();
-    }
-
-    bool deserializeMemory(const QByteArray& data)
-    {
-        SimpleDeserializer d(data);
-
-        if(!d.isValid()) {
-            return false;
-        }
-
-        if (d.getVersion() == 1)
-        {
-            uint32_t traceSize, preTriggerDelay;
-            int sampleRate;
-            QByteArray buf;
-            bool traceDiscreteMemorySuccess;
-
-            d.readU32(1, &traceSize, GLScopeSettings::m_traceChunkDefaultSize);
-            d.readU32(2, &preTriggerDelay, 0);
-            d.readS32(3, &sampleRate, 0);
-            setSampleRate(sampleRate);
-            setTraceSize(traceSize, true);
-            setPreTriggerDelay(preTriggerDelay, true);
-            d.readBlob(4, &buf);
-            traceDiscreteMemorySuccess = m_traceDiscreteMemory.deserialize(buf);
-
-            if (traceDiscreteMemorySuccess && (m_glScope) && (m_currentTraceMemoryIndex > 0)) {
-                processMemoryTrace();
-            }
-
-            return traceDiscreteMemorySuccess;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    void getTriggerData(GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
-    {
-        if (triggerIndex < m_triggerConditions.size()) {
-            triggerData = m_triggerConditions[triggerIndex]->m_triggerData;
-        }
-    }
-
-    void getTraceData(GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
-    {
-        if (traceIndex < m_traces.m_tracesData.size()) {
-            traceData = m_traces.m_tracesData[traceIndex];
-        }
-    }
-
-    const GLScopeSettings::TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex]->m_triggerData; }
-    const std::vector<GLScopeSettings::TraceData>& getTracesData() const { return m_traces.m_tracesData; }
-    uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
-
-    void feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples);
-    //virtual void start();
-    //virtual void stop();
-    bool handleMessage(const Message& message);
-    int getTriggerLocation() const { return m_triggerLocation; }
-    bool getFreeRun() const { return m_freeRun; }
-
-private:
-    // === messages ===
     // ---------------------------------------------
-    class MsgConfigureScopeVisNG : public Message {
+    class MsgConfigureScopeVis : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgConfigureScopeVisNG* create(
-            uint32_t nbStreams,
-            uint32_t traceSize,
-            uint32_t timeBase,
-            uint32_t timeOfsProMill,
-			uint32_t triggerPre,
-            bool freeRun)
+        const GLScopeSettings& getSettings() const { return m_settings; }
+        bool getForce() const { return m_force; }
+
+        static MsgConfigureScopeVis* create(const GLScopeSettings& settings, bool force)
         {
-            return new MsgConfigureScopeVisNG(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
+            return new MsgConfigureScopeVis(settings, force);
         }
 
-        uint32_t getNbStreams() const { return m_nbStreams; }
-        uint32_t getTraceSize() const { return m_traceSize; }
-        uint32_t getTimeBase() const { return m_timeBase; }
-        uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
-        uint32_t getTriggerPre() const { return m_triggerPre; }
-        bool getFreeRun() const { return m_freeRun; }
-
     private:
-        uint32_t m_nbStreams;
-        uint32_t m_traceSize;
-        uint32_t m_timeBase;
-        uint32_t m_timeOfsProMill;
-        uint32_t m_triggerPre;
-        bool m_freeRun;
+        GLScopeSettings m_settings;
+        bool m_force;
 
-        MsgConfigureScopeVisNG(
-            uint32_t nbStreams,
-            uint32_t traceSize,
-            uint32_t timeBase,
-            uint32_t timeOfsProMill,
-            uint32_t triggerPre,
-            bool freeRun
-        ) :
-            m_nbStreams(nbStreams),
-            m_traceSize(traceSize),
-            m_timeBase(timeBase),
-            m_timeOfsProMill(timeOfsProMill),
-			m_triggerPre(triggerPre),
-            m_freeRun(freeRun)
-        {}
+        MsgConfigureScopeVis(const GLScopeSettings& settings, bool force) :
+            Message(),
+            m_settings(settings),
+            m_force(force)
+        { }
     };
 
     // ---------------------------------------------
@@ -307,14 +182,14 @@ private:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGAddTrace : public Message {
+    class MsgScopeVisAddTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGAddTrace* create(
+        static MsgScopeVisAddTrace* create(
                 const GLScopeSettings::TraceData& traceData)
         {
-            return new MsgScopeVisNGAddTrace(traceData);
+            return new MsgScopeVisAddTrace(traceData);
         }
 
         const GLScopeSettings::TraceData& getTraceData() const { return m_traceData; }
@@ -322,20 +197,20 @@ private:
     private:
         GLScopeSettings::TraceData m_traceData;
 
-        MsgScopeVisNGAddTrace(const GLScopeSettings::TraceData& traceData) :
+        MsgScopeVisAddTrace(const GLScopeSettings::TraceData& traceData) :
             m_traceData(traceData)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGChangeTrace : public Message {
+    class MsgScopeVisChangeTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGChangeTrace* create(
+        static MsgScopeVisChangeTrace* create(
                 const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
         {
-            return new MsgScopeVisNGChangeTrace(traceData, traceIndex);
+            return new MsgScopeVisChangeTrace(traceData, traceIndex);
         }
 
         const GLScopeSettings::TraceData& getTraceData() const { return m_traceData; }
@@ -345,21 +220,21 @@ private:
         GLScopeSettings::TraceData m_traceData;
         uint32_t m_traceIndex;
 
-        MsgScopeVisNGChangeTrace(GLScopeSettings::TraceData traceData, uint32_t traceIndex) :
+        MsgScopeVisChangeTrace(GLScopeSettings::TraceData traceData, uint32_t traceIndex) :
             m_traceData(traceData),
             m_traceIndex(traceIndex)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGRemoveTrace : public Message {
+    class MsgScopeVisRemoveTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGRemoveTrace* create(
+        static MsgScopeVisRemoveTrace* create(
                 uint32_t traceIndex)
         {
-            return new MsgScopeVisNGRemoveTrace(traceIndex);
+            return new MsgScopeVisRemoveTrace(traceIndex);
         }
 
         uint32_t getTraceIndex() const { return m_traceIndex; }
@@ -367,7 +242,7 @@ private:
     private:
         uint32_t m_traceIndex;
 
-        MsgScopeVisNGRemoveTrace(uint32_t traceIndex) :
+        MsgScopeVisRemoveTrace(uint32_t traceIndex) :
             m_traceIndex(traceIndex)
         {}
     };
@@ -460,7 +335,152 @@ private:
         {}
     };
 
+    ScopeVis();
+    virtual ~ScopeVis();
+
+    void setGLScope(GLScopeInterface* glScope);
+    void setSpectrumVis(SpectrumVis *spectrumVis) { m_spectrumVis = spectrumVis; }
+    void setMessageQueueToGUI(MessageQueue* messageQueue) { m_messageQueueToGUI = messageQueue; }
+    MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
+
+    void setLiveRate(int sampleRate);
+    void configure(uint32_t nbStreams, uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
+    void moveTrace(uint32_t traceIndex, bool upElseDown);
+    void focusOnTrace(uint32_t traceIndex);
+    void addTrigger(const GLScopeSettings::TriggerData& triggerData);
+    void changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex);
+    void removeTrigger(uint32_t triggerIndex);
+    void moveTrigger(uint32_t triggerIndex, bool upElseDown);
+    void focusOnTrigger(uint32_t triggerIndex);
+    void setOneShot(bool oneShot);
+    void setMemoryIndex(uint32_t memoryIndex);
+    void setTraceChunkSize(uint32_t chunkSize) { m_traceChunkSize = chunkSize; }
+    uint32_t getTraceChunkSize() const { return m_traceChunkSize; }
+
+    QByteArray serializeMemory() const
+    {
+        SimpleSerializer s(1);
+
+        s.writeU32(1, m_traceSize);
+        s.writeU32(2, m_preTriggerDelay);
+        s.writeS32(3, m_sampleRate);
+        QByteArray buffer = m_traceDiscreteMemory.serialize();
+        s.writeBlob(4, buffer);
+
+        return s.final();
+    }
+
+    bool deserializeMemory(const QByteArray& data)
+    {
+        SimpleDeserializer d(data);
+
+        if(!d.isValid()) {
+            return false;
+        }
+
+        if (d.getVersion() == 1)
+        {
+            uint32_t traceSize, preTriggerDelay;
+            int sampleRate;
+            QByteArray buf;
+            bool traceDiscreteMemorySuccess;
+
+            d.readU32(1, &traceSize, GLScopeSettings::m_traceChunkDefaultSize);
+            d.readU32(2, &preTriggerDelay, 0);
+            d.readS32(3, &sampleRate, 0);
+            setSampleRate(sampleRate);
+            setTraceSize(traceSize, true);
+            setPreTriggerDelay(preTriggerDelay, true);
+            d.readBlob(4, &buf);
+            traceDiscreteMemorySuccess = m_traceDiscreteMemory.deserialize(buf);
+
+            if (traceDiscreteMemorySuccess && (m_glScope) && (m_currentTraceMemoryIndex > 0)) {
+                processMemoryTrace();
+            }
+
+            return traceDiscreteMemorySuccess;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    void getTriggerData(GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
+    {
+        if (triggerIndex < m_triggerConditions.size()) {
+            triggerData = m_triggerConditions[triggerIndex]->m_triggerData;
+        }
+    }
+
+    void getTraceData(GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
+    {
+        if (traceIndex < m_traces.m_tracesData.size()) {
+            traceData = m_traces.m_tracesData[traceIndex];
+        }
+    }
+
+    const GLScopeSettings::TriggerData& getTriggerData(uint32_t triggerIndex) const { return m_triggerConditions[triggerIndex]->m_triggerData; }
+    const std::vector<GLScopeSettings::TraceData>& getTracesData() const { return m_traces.m_tracesData; }
+    uint32_t getNbTriggers() const { return m_triggerConditions.size(); }
+    uint32_t getNbTraces() const { return m_traces.size(); }
+
+    void feed(const std::vector<SampleVector::const_iterator>& vbegin, int nbSamples);
+    //virtual void start();
+    //virtual void stop();
+    bool handleMessage(const Message& message);
+    int getTriggerLocation() const { return m_triggerLocation; }
+    bool getFreeRun() const { return m_freeRun; }
+
+private:
+    // === messages ===
     // ---------------------------------------------
+    class MsgConfigureScopeVisNG : public Message {
+        MESSAGE_CLASS_DECLARATION
+
+    public:
+        static MsgConfigureScopeVisNG* create(
+            uint32_t nbStreams,
+            uint32_t traceSize,
+            uint32_t timeBase,
+            uint32_t timeOfsProMill,
+			uint32_t triggerPre,
+            bool freeRun)
+        {
+            return new MsgConfigureScopeVisNG(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
+        }
+
+        uint32_t getNbStreams() const { return m_nbStreams; }
+        uint32_t getTraceSize() const { return m_traceSize; }
+        uint32_t getTimeBase() const { return m_timeBase; }
+        uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
+        uint32_t getTriggerPre() const { return m_triggerPre; }
+        bool getFreeRun() const { return m_freeRun; }
+
+    private:
+        uint32_t m_nbStreams;
+        uint32_t m_traceSize;
+        uint32_t m_timeBase;
+        uint32_t m_timeOfsProMill;
+        uint32_t m_triggerPre;
+        bool m_freeRun;
+
+        MsgConfigureScopeVisNG(
+            uint32_t nbStreams,
+            uint32_t traceSize,
+            uint32_t timeBase,
+            uint32_t timeOfsProMill,
+            uint32_t triggerPre,
+            bool freeRun
+        ) :
+            m_nbStreams(nbStreams),
+            m_traceSize(traceSize),
+            m_timeBase(timeBase),
+            m_timeOfsProMill(timeOfsProMill),
+			m_triggerPre(triggerPre),
+            m_freeRun(freeRun)
+        {}
+    };
 
     /**
      * Trigger stuff
@@ -984,7 +1004,8 @@ private:
 
         void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
         {
-            if (traceIndex < m_tracesControl.size()) {
+            if (traceIndex < m_tracesControl.size())
+            {
                 TraceControl *traceControl = m_tracesControl[traceIndex];
                 traceControl->releaseProjector();
                 traceControl->initProjector(traceData.m_projectionType);
@@ -1076,8 +1097,7 @@ private:
         {
             evenOddIndex = !evenOddIndex;
 
-            for (std::vector<TraceControl*>::iterator it = m_tracesControl.begin(); it != m_tracesControl.end(); ++it)
-            {
+            for (std::vector<TraceControl*>::iterator it = m_tracesControl.begin(); it != m_tracesControl.end(); ++it) {
                 (*it)->m_traceCount[currentBufferIndex()] = 0;
             }
         }
@@ -1090,8 +1110,7 @@ private:
     class TriggerComparator
     {
     public:
-        TriggerComparator() : m_level(0), m_reset(true)
-        {
+        TriggerComparator() : m_level(0), m_reset(true) {
             computeLevels();
         }
 
@@ -1120,7 +1139,9 @@ private:
                 if (triggerCondition.m_trues < triggerCondition.m_triggerData.m_triggerHoldoff) {
                     condition = false;
                     triggerCondition.m_trues++;
-                } else {
+                }
+                else
+                {
                     triggerCondition.m_falses = 0;
                 }
             }
@@ -1129,7 +1150,9 @@ private:
                 if (triggerCondition.m_falses < triggerCondition.m_triggerData.m_triggerHoldoff) {
                     condition = true;
                     triggerCondition.m_falses++;
-                } else {
+                }
+                else
+                {
                     triggerCondition.m_trues = 0;
                 }
             }
@@ -1161,8 +1184,7 @@ private:
             return trigger;
         }
 
-        void reset()
-        {
+        void reset() {
             m_reset = true;
         }
 
@@ -1181,6 +1203,7 @@ private:
 
     GLScopeInterface* m_glScope;
     SpectrumVis *m_spectrumVis;
+    GLScopeSettings m_settings;
     MessageQueue m_inputMessageQueue;
     MessageQueue *m_messageQueueToGUI;
     uint32_t m_preTriggerDelay;                    //!< Pre-trigger delay in number of samples
@@ -1211,6 +1234,12 @@ private:
     bool m_triggerOneShot;                         //!< True when one shot mode is active
     bool m_triggerWaitForReset;                    //!< In one shot mode suspended until reset by UI
     uint32_t m_currentTraceMemoryIndex;            //!< The current index of trace in memory (0: current)
+
+
+    void applySettings(const GLScopeSettings& settings, bool force = false);
+    void addTrace(const GLScopeSettings::TraceData& traceData);
+    void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex);
+    void removeTrace(uint32_t traceIndex);
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode
