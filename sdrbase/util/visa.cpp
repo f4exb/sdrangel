@@ -37,17 +37,17 @@ VISA::VISA() :
 #ifdef _MSC_VER
     const char *visaName = "visa32.dll";  // Loads visa64.dll on WIN64
 #else
-    const char *visaName = "visakt32.so";  // Keysight library
+    const char *visaName = "libktvisa32.so";  // Keysight library
 #endif
 
     visaLibrary = libraryOpen(visaName);
     if (visaLibrary)
     {
-        viOpenDefaultRM = (ViStatus (WINAPI *)(ViPSession)) libraryFunc(visaLibrary, "viOpenDefaultRM");
-        viOpen = (ViStatus (WINAPI *)(ViSession sesn, ViRsrc name, ViAccessMode mode, ViUInt32 timeout, ViPSession vi)) libraryFunc(visaLibrary, "viOpen");
-        viClose = (ViStatus (WINAPI *)(ViObject vi)) libraryFunc(visaLibrary, "viClose");
-        viPrintf = (ViStatus (WINAPI *) (ViSession vi, ViString writeFmt, ...))  libraryFunc(visaLibrary, "viPrintf");
-        viScanf = (ViStatus (WINAPI *) (ViSession vi, ViString writeFmt, ...))  libraryFunc(visaLibrary, "viScanf");
+        viOpenDefaultRM = (ViStatus (*)(ViPSession)) libraryFunc(visaLibrary, "viOpenDefaultRM");
+        viOpen = (ViStatus (*)(ViSession sesn, ViRsrc name, ViAccessMode mode, ViUInt32 timeout, ViPSession vi)) libraryFunc(visaLibrary, "viOpen");
+        viClose = (ViStatus (*)(ViObject vi)) libraryFunc(visaLibrary, "viClose");
+        viPrintf = (ViStatus (*) (ViSession vi, ViString writeFmt, ...)) libraryFunc(visaLibrary, "viPrintf");
+        viScanf = (ViStatus (*) (ViSession vi, ViString writeFmt, ...)) libraryFunc(visaLibrary, "viScanf");
 
         if (viOpenDefaultRM && viOpen && viClose && viPrintf) {
             m_available = true;

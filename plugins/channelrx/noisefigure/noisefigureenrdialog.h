@@ -18,7 +18,7 @@
 #ifndef INCLUDE_NOISEFIGUREENRDIALOG_H
 #define INCLUDE_NOISEFIGUREENRDIALOG_H
 
-#include "ui_NoiseFigureENRDialog.h"
+#include "ui_noisefigureenrdialog.h"
 #include "noisefiguresettings.h"
 
 class NoiseFigureENRDialog : public QDialog {

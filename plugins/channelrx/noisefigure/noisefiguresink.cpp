@@ -122,6 +122,7 @@ void NoiseFigureSink::processOneSample(Complex &ci)
 
 void NoiseFigureSink::applyChannelSettings(int channelSampleRate, int channelFrequencyOffset, bool force)
 {
+    (void) force;
     qDebug() << "NoiseFigureSink::applyChannelSettings:"
             << " channelSampleRate: " << channelSampleRate
             << " channelFrequencyOffset: " << channelFrequencyOffset;

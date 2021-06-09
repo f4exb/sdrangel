@@ -51,6 +51,7 @@ public:
 
     virtual QString displayText(const QVariant &value, const QLocale &locale) const override
     {
+        (void) locale;
         return QString::number(value.toDouble(), 'f', m_precision);
     }
 

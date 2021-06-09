@@ -148,7 +148,8 @@ void NoiseFigure::processVISA(QStringList commands)
                 if (command.endsWith("?"))
                 {
                     char buf[1024] = "";
-                    m_visa.viScanf(m_session, "%t", buf);
+                    char format[] = "%t";
+                    m_visa.viScanf(m_session, format, buf);
                     qDebug() << "VISA <-: " << buf;
                 }
             }
