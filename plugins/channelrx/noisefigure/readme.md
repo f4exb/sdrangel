@@ -16,7 +16,7 @@ The noise figure will vary with frequency and gain settings. Typically, the nois
 
 Use the wheels to adjust the measurement frequency in Hz from the center frequency of reception. Left click on a digit sets the cursor position at this digit. Right click on a digit sets all digits on the right to zero. This effectively floors value at the digit position. Wheels are moved with the mousewheel while pointing at the wheel or by selecting the wheel with the left mouse click and using the keyboard arrows. Pressing shift simultaneously moves digit by 5 and pressing control moves it by 2.
 
-Many SDRs have a large DC offset, which can significantly interfer with the NF measurement, so this setting should be used to move the measurement frequency away from the radio's center frequency or any other spurs.
+Many SDRs have a large DC offset, which can significantly interfere with the NF measurement, so this setting should be used to move the measurement frequency away from the radio's center frequency or any other spurs.
 
 <h3>2: Channel power</h3>
 
@@ -38,7 +38,7 @@ Displays the measurement bandwidth in kHz as determined by (2).
 
 <h3>6: FFTs to average</h3>
 
-Determines the number of FFTs that are used to measure the average power. The more values that are used in the average, the more accurate the result will be, at the expense of increase test time.
+Determines the number of FFTs that are used to measure the average noise power. Using more FFTs can improve accuracy, at the expense of increased measurement time.
 
 <h3>7: Frequency range</h3>
 
@@ -54,7 +54,7 @@ Starts or stops the noise figure measurement. When starting a new measurement, e
 
 <h3>9: Save results</h3>
 
-Saves the results in the table to a CSV file.
+Saves the results in the table to a .csv file.
 
 <h3>10: Clear results</h3>
 
@@ -63,7 +63,7 @@ Clears the current results from the table and chart.
 <h3>11: Open ENR dialog</h3>
 
 Opens the ENR dialog to allow entering the Excess Noise Ratios (ENRs) for noise source. ENR specifies the difference in noise source power output in dB from when the source is powered off compared to when it is powered on.
-This typically varies with frequency, so values should be entered for each frequency. When a measurement is attempted at a frequency for which a value is not specified, an interpolated value will be used.
+This typically varies with frequency, so values should be entered for each calibrated frequency. When a measurement is attempted at a frequency for which a value is not specified, an interpolated value will be used.
 Barycentric Rational Interpolation is used.
 
 ![Noise figure ENR dialog](../../../doc/img/NoiseFigure_plugin_enr.png)
@@ -71,7 +71,7 @@ Barycentric Rational Interpolation is used.
 <h3>12: Open Noise Source Control dialog</h3>
 
 Opens the noise source control dialog, to allow setting how the plugin turns the power to the noise source off and on. Two control methods are supported: A program or script can be run to turn the power on or off,
-or the VISA library (if available) can be used to send SCPI commands to a programmable power supply or other test equipment. If a VISA library is not found, the VISA and SCPI fields will be disabled.
+or the VISA library (if installed) can be used to send SCPI commands to a programmable power supply or other test equipment. If a VISA library is not found, the VISA and SCPI fields will be disabled.
 
 The delay setting determines how long after the noise source's power is turned on or off, before the noise figure measurement starts. This should be long enough to allow the noise source output to settle, but
 not too long so that tests over a large number of frequencies take a long time to run. The ideal value will vary with the noise source and power supply.
@@ -96,7 +96,7 @@ Plots the results (NF, T or Y) vs frequency as a line chart.
 
 <h3>15: Open reference data</h3>
 
-A set of reference data in CSV format can be loaded for comparisons with the measurement results. The first column of the CSV file should contain frequency and the second the noise figure in dB. The first row should contain a header (E.g. "Frequency,NF" allthough the exact text is ignored).
+A set of reference data in .csv format can be loaded for comparisons with the measurement results. The first column of the .csv file should contain frequency and the second the noise figure in dB. The first row should contain a header (E.g. "Frequency,NF" allthough the exact text is ignored).
 
 ![SDRPlay Duo Noise figure comparison](../../../doc/img/NoiseFigure_plugin_duo_comparison.png)
 
@@ -113,7 +113,7 @@ A typical h/w setup for measuring the noise figure of a receiver is shown below:
 A DC blocking capacitor at the output of the noise source for SDRs with a bias tee is recommended.
 
 The noise source may be a device from the 346 family (E.g. Keysight 346B or NoiseCom NC346), but also can be a lower cost device that is supplied with accurate ENR calibration data.
-(Inaccurate ENR values can significantly effect the calculated NF).
+(Inaccurate ENR values can significantly impact the calculated NF).
 The ENR calibration data indicates the difference in power output when the noise source is powered off compared with when it is powered on. As the first setup step, this calibration data should
 be entered in to the ENR dialog (11).
 
@@ -121,12 +121,12 @@ Next, we need to setup how the SDRangel powers on and off the noise source. This
 For a 346 device, a programmable power supply outputting 28V would be used. Providing the VISA libraries are installed (see below), we can send SCPI commands to enable and disable the PSU's output.
 As an example, for a Rigol DP832, we can set the channel 1 output to be 28V and enable it, with:
 
-   :SOURCE1:VOLTage 28
-   :OUTPut:STATe CH1,ON
+    :SOURCE1:VOLTage 28
+    :OUTPut:STATe CH1,ON
 
 And then disable it with:
 
-   :OUTPut:STATe CH1,OFF
+    :OUTPut:STATe CH1,OFF
 
 The final settings needed are the frequencies to measure the NF at. This can be set with (7), to step through a range or a list of specific point frequencies.
 
@@ -138,7 +138,7 @@ Here is a plot comparing the measured noise figure for tuner 1 of a SDRplay Duo,
 
 ![SDRPlay Duo NF comparison](../../../doc/img/NoiseFigure_plugin_duo_comparison.png)
 
-Here is a plot comparing measured values for a USRP B210 RF A RX2 port to measured values for the TX/RX port. As we can see, there is lower noise on the RX2 port:
+Here is a plot comparing measured values for a USRP B210 for the RF A RX2 port to measured values for the TX/RX port. As we can see, there is lower noise on the RX2 port:
 
 ![B210 input NF comparison](../../../doc/img/NoiseFigure_plugin_b210_comparison.png)
 
@@ -152,5 +152,5 @@ as the total NF is primarily determined by the LNA, if it has a decent amount of
 
 VISA libraries are available for Windows, Linux and MacOS from:
 
-[Keysight](https://www.keysight.com/us/en/lib/software-detail/computer-software/io-libraries-suite-downloads-2175637.html)
-[NI](https://www.ni.com/en-gb/support/downloads/drivers/download.ni-visa.html)
+* [Keysight](https://www.keysight.com/us/en/lib/software-detail/computer-software/io-libraries-suite-downloads-2175637.html)
+* [NI](https://www.ni.com/en-gb/support/downloads/drivers/download.ni-visa.html)
