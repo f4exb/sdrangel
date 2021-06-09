@@ -120,10 +120,11 @@ void NoiseFigure::stop()
     m_thread.wait();
 }
 
-void NoiseFigure::openVISADevice()
+bool NoiseFigure::openVISADevice()
 {
     m_visa.openDefault();
     m_session = m_visa.open(m_settings.m_visaDevice);
+    return m_session != 0;
 }
 
 void NoiseFigure::closeVISADevice()
@@ -406,8 +407,18 @@ bool NoiseFigure::handleMessage(const Message& cmd)
     {
         if (m_state == IDLE)
         {
-            openVISADevice();
-            QTimer::singleShot(0, this, SLOT(nextState()));
+            if (!m_settings.m_visaDevice.isEmpty()) 
+            {
+                if (openVISADevice()) {
+                    QTimer::singleShot(0, this, SLOT(nextState()));
+                } else if (getMessageQueueToGUI()) {
+                    getMessageQueueToGUI()->push(MsgFinished::create(QString("Failed to open VISA device %1").arg(m_settings.m_visaDevice)));
+                }
+            }
+            else 
+            {
+                QTimer::singleShot(0, this, SLOT(nextState()));
+            }
         }
         else
         {

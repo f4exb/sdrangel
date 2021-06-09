@@ -49,9 +49,9 @@ NoiseFigureControlDialog::~NoiseFigureControlDialog()
 
 void NoiseFigureControlDialog::accept()
 {
-    m_settings->m_powerOnCommand = ui->powerOnCommand->text();
-    m_settings->m_powerOffCommand = ui->powerOffCommand->text();
-    m_settings->m_visaDevice = ui->device->text();
+    m_settings->m_powerOnCommand = ui->powerOnCommand->text().trimmed();
+    m_settings->m_powerOffCommand = ui->powerOffCommand->text().trimmed();
+    m_settings->m_visaDevice = ui->device->text().trimmed();
     m_settings->m_powerOnSCPI = ui->powerOnSCPI->toPlainText();
     m_settings->m_powerOffSCPI = ui->powerOffSCPI->toPlainText();
     m_settings->m_powerDelay = ui->delay->value();

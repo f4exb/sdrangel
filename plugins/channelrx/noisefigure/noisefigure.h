@@ -219,12 +219,8 @@ public:
     void getMagSqLevels(double& avg, double& peak, int& nbSamples) {
         m_basebandSink->getMagSqLevels(avg, peak, nbSamples);
     }
-/*    void setMessageQueueToGUI(MessageQueue* queue) override {
-        ChannelAPI::setMessageQueueToGUI(queue);
-        m_basebandSink->setMessageQueueToGUI(queue);
-    }*/
 
-    void openVISADevice();
+    bool openVISADevice();
     void closeVISADevice();
     void processVISA(QStringList commands);
     void powerOn();
