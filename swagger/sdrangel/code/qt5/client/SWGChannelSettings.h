@@ -50,6 +50,7 @@
 #include "SWGLocalSourceSettings.h"
 #include "SWGNFMDemodSettings.h"
 #include "SWGNFMModSettings.h"
+#include "SWGNoiseFigureSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModSettings.h"
 #include "SWGRemoteSinkSettings.h"
@@ -172,6 +173,9 @@ public:
 
     SWGNFMModSettings* getNfmModSettings();
     void setNfmModSettings(SWGNFMModSettings* nfm_mod_settings);
+
+    SWGNoiseFigureSettings* getNoiseFigureSettings();
+    void setNoiseFigureSettings(SWGNoiseFigureSettings* noise_figure_settings);
 
     SWGLocalSinkSettings* getLocalSinkSettings();
     void setLocalSinkSettings(SWGLocalSinkSettings* local_sink_settings);
@@ -311,6 +315,9 @@ private:
 
     SWGNFMModSettings* nfm_mod_settings;
     bool m_nfm_mod_settings_isSet;
+
+    SWGNoiseFigureSettings* noise_figure_settings;
+    bool m_noise_figure_settings_isSet;
 
     SWGLocalSinkSettings* local_sink_settings;
     bool m_local_sink_settings_isSet;

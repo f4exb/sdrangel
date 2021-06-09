@@ -49,6 +49,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelURIToSettingsKey = {
     {"sdrangel.channel.nfmdemod", "NFMDemodSettings"},
     {"de.maintech.sdrangelove.channel.nfm", "NFMDemodSettings"}, // remap
     {"sdrangel.channeltx.modnfm", "NFMModSettings"},
+    {"sdrangel.channel.noisefigure", "NoiseFigureSettings"},
     {"sdrangel.demod.localsink", "LocalSinkSettings"},
     {"sdrangel.channel.localsink", "LocalSinkSettings"}, // remap
     {"sdrangel.channel.localsource", "LocalSourceSettings"},
@@ -147,6 +148,7 @@ const QMap<QString, QString> WebAPIUtils::m_channelTypeToSettingsKey = {
     {"IEEE_802_15_4_Mod", "IEEE_802_15_4_ModSettings"},
     {"NFMDemod", "NFMDemodSettings"},
     {"NFMMod", "NFMModSettings"},
+    {"NoiseFigure", "NoiseFigureSettings"},
     {"PacketDemod", "PacketDemodSettings"},
     {"PacketMod", "PacketModSettings"},
     {"LocalSink", "LocalSinkSettings"},

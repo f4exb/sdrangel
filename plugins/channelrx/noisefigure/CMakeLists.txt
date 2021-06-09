@@ -1,0 +1,65 @@
+project(noisefigure)
+
+set(noisefigure_SOURCES
+    noisefigure.cpp
+    noisefiguresettings.cpp
+    noisefigurebaseband.cpp
+    noisefiguresink.cpp
+    noisefigureplugin.cpp
+    noisefigurewebapiadapter.cpp
+)
+
+set(noisefigure_HEADERS
+    noisefigure.h
+    noisefiguresettings.h
+    noisefigurebaseband.h
+    noisefiguresink.h
+    noisefigureplugin.h
+    noisefigurewebapiadapter.h
+)
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}/swagger/sdrangel/code/qt5/client
+	${Boost_INCLUDE_DIRS}
+)
+
+if(NOT SERVER_MODE)
+    set(noisefigure_SOURCES
+        ${noisefigure_SOURCES}
+        noisefiguregui.cpp
+        noisefiguregui.ui
+        noisefigurecontroldialog.ui
+        noisefigurecontroldialog.cpp
+        noisefigureenrdialog.ui
+        noisefigureenrdialog.cpp
+    )
+    set(noisefigure_HEADERS
+        ${noisefigure_HEADERS}
+        noisefiguregui.h
+        noisefigurecontroldialog.h
+        noisefigureenrdialog.h
+    )
+
+    set(TARGET_NAME noisefigure)
+    set(TARGET_LIB "Qt5::Widgets" Qt5::Charts)
+    set(TARGET_LIB_GUI "sdrgui")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINS_DIR})
+else()
+    set(TARGET_NAME noisefiguresrv)
+    set(TARGET_LIB "")
+    set(TARGET_LIB_GUI "")
+    set(INSTALL_FOLDER ${INSTALL_PLUGINSSRV_DIR})
+endif()
+
+add_library(${TARGET_NAME} SHARED
+    ${noisefigure_SOURCES}
+)
+
+target_link_libraries(${TARGET_NAME}
+    Qt5::Core
+    ${TARGET_LIB}
+    sdrbase
+    ${TARGET_LIB_GUI}
+)
+
+install(TARGETS ${TARGET_NAME} DESTINATION ${INSTALL_FOLDER})

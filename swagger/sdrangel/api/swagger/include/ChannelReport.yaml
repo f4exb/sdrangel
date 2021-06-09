@@ -49,6 +49,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:
       $ref: "http://swgserver:8081/api/swagger/include/NFMMod.yaml#/NFMModReport"
+    NoiseFigureReport:
+      $ref: "http://swgserver:8081/api/swagger/include/NoiseFigure.yaml#/NoiseFigureReport"
     SSBDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
     RemoteSourceReport:
