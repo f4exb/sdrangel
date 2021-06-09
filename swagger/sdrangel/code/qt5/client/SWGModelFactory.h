@@ -172,6 +172,8 @@
 #include "SWGNFMModReport.h"
 #include "SWGNFMModSettings.h"
 #include "SWGNamedEnum.h"
+#include "SWGNoiseFigureReport.h"
+#include "SWGNoiseFigureSettings.h"
 #include "SWGPERTesterActions.h"
 #include "SWGPERTesterActions_aos.h"
 #include "SWGPERTesterSettings.h"
@@ -747,6 +749,12 @@ namespace SWGSDRangel {
     }
     if(QString("SWGNamedEnum").compare(type) == 0) {
       return new SWGNamedEnum();
+    }
+    if(QString("SWGNoiseFigureReport").compare(type) == 0) {
+      return new SWGNoiseFigureReport();
+    }
+    if(QString("SWGNoiseFigureSettings").compare(type) == 0) {
+      return new SWGNoiseFigureSettings();
     }
     if(QString("SWGPERTesterActions").compare(type) == 0) {
       return new SWGPERTesterActions();

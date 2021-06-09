@@ -3936,6 +3936,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setNfmModSettings(new SWGSDRangel::SWGNFMModSettings());
             channelSettings->getNfmModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "NoiseFigureSettings")
+        {
+            channelSettings->setNoiseFigureSettings(new SWGSDRangel::SWGNoiseFigureSettings());
+            channelSettings->getNoiseFigureSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "LocalSinkSettings")
         {
             channelSettings->setLocalSinkSettings(new SWGSDRangel::SWGLocalSinkSettings());
@@ -4638,6 +4643,7 @@ void WebAPIRequestMapper::resetChannelSettings(SWGSDRangel::SWGChannelSettings& 
     channelSettings.setIeee802154ModSettings(nullptr);
     channelSettings.setNfmDemodSettings(nullptr);
     channelSettings.setNfmModSettings(nullptr);
+    channelSettings.setNoiseFigureSettings(nullptr);
     channelSettings.setPacketDemodSettings(nullptr);
     channelSettings.setPacketModSettings(nullptr);
     channelSettings.setRemoteSinkSettings(nullptr);
@@ -4666,6 +4672,7 @@ void WebAPIRequestMapper::resetChannelReport(SWGSDRangel::SWGChannelReport& chan
     channelReport.setDsdDemodReport(nullptr);
     channelReport.setNfmDemodReport(nullptr);
     channelReport.setNfmModReport(nullptr);
+    channelReport.setNoiseFigureReport(nullptr);
     channelReport.setIeee802154ModReport(nullptr);
     channelReport.setPacketModReport(nullptr);
     channelReport.setRemoteSourceReport(nullptr);

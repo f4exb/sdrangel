@@ -69,6 +69,8 @@ ChannelSettings:
       $ref: "http://swgserver:8081/api/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:
       $ref: "http://swgserver:8081/api/swagger/include/NFMMod.yaml#/NFMModSettings"
+    NoiseFigureSettings:
+      $ref: "http://swgserver:8081/api/swagger/include/NoiseFigure.yaml#/NoiseFigureSettings"
     LocalSinkSettings:
       $ref: "http://swgserver:8081/api/swagger/include/LocalSink.yaml#/LocalSinkSettings"
     LocalSourceSettings:

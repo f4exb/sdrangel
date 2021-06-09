@@ -41,6 +41,7 @@
 #include "SWGIEEE_802_15_4_ModReport.h"
 #include "SWGNFMDemodReport.h"
 #include "SWGNFMModReport.h"
+#include "SWGNoiseFigureReport.h"
 #include "SWGPacketModReport.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
@@ -134,6 +135,9 @@ public:
 
     SWGNFMModReport* getNfmModReport();
     void setNfmModReport(SWGNFMModReport* nfm_mod_report);
+
+    SWGNoiseFigureReport* getNoiseFigureReport();
+    void setNoiseFigureReport(SWGNoiseFigureReport* noise_figure_report);
 
     SWGSSBDemodReport* getSsbDemodReport();
     void setSsbDemodReport(SWGSSBDemodReport* ssb_demod_report);
@@ -234,6 +238,9 @@ private:
 
     SWGNFMModReport* nfm_mod_report;
     bool m_nfm_mod_report_isSet;
+
+    SWGNoiseFigureReport* noise_figure_report;
+    bool m_noise_figure_report_isSet;
 
     SWGSSBDemodReport* ssb_demod_report;
     bool m_ssb_demod_report_isSet;

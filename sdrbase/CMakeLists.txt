@@ -206,6 +206,7 @@ set(sdrbase_SOURCES
     util/uid.cpp
     util/units.cpp
     util/timeutil.cpp
+    util/visa.cpp
 
     plugin/plugininterface.cpp
     plugin/pluginapi.cpp
@@ -411,6 +412,7 @@ set(sdrbase_HEADERS
     util/uid.h
     util/units.h
     util/timeutil.h
+    util/visa.h
 
     webapi/webapiadapter.h
     webapi/webapiadapterbase.h

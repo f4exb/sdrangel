@@ -88,6 +88,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = nullptr;
     m_nfm_mod_settings_isSet = false;
+    noise_figure_settings = nullptr;
+    m_noise_figure_settings_isSet = false;
     local_sink_settings = nullptr;
     m_local_sink_settings_isSet = false;
     local_source_settings = nullptr;
@@ -186,6 +188,8 @@ SWGChannelSettings::init() {
     m_nfm_demod_settings_isSet = false;
     nfm_mod_settings = new SWGNFMModSettings();
     m_nfm_mod_settings_isSet = false;
+    noise_figure_settings = new SWGNoiseFigureSettings();
+    m_noise_figure_settings_isSet = false;
     local_sink_settings = new SWGLocalSinkSettings();
     m_local_sink_settings_isSet = false;
     local_source_settings = new SWGLocalSourceSettings();
@@ -304,6 +308,9 @@ SWGChannelSettings::cleanup() {
     if(nfm_mod_settings != nullptr) { 
         delete nfm_mod_settings;
     }
+    if(noise_figure_settings != nullptr) { 
+        delete noise_figure_settings;
+    }
     if(local_sink_settings != nullptr) { 
         delete local_sink_settings;
     }
@@ -421,6 +428,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&nfm_demod_settings, pJson["NFMDemodSettings"], "SWGNFMDemodSettings", "SWGNFMDemodSettings");
     
     ::SWGSDRangel::setValue(&nfm_mod_settings, pJson["NFMModSettings"], "SWGNFMModSettings", "SWGNFMModSettings");
+    
+    ::SWGSDRangel::setValue(&noise_figure_settings, pJson["NoiseFigureSettings"], "SWGNoiseFigureSettings", "SWGNoiseFigureSettings");
     
     ::SWGSDRangel::setValue(&local_sink_settings, pJson["LocalSinkSettings"], "SWGLocalSinkSettings", "SWGLocalSinkSettings");
     
@@ -557,6 +566,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((nfm_mod_settings != nullptr) && (nfm_mod_settings->isSet())){
         toJsonValue(QString("NFMModSettings"), nfm_mod_settings, obj, QString("SWGNFMModSettings"));
+    }
+    if((noise_figure_settings != nullptr) && (noise_figure_settings->isSet())){
+        toJsonValue(QString("NoiseFigureSettings"), noise_figure_settings, obj, QString("SWGNoiseFigureSettings"));
     }
     if((local_sink_settings != nullptr) && (local_sink_settings->isSet())){
         toJsonValue(QString("LocalSinkSettings"), local_sink_settings, obj, QString("SWGLocalSinkSettings"));
@@ -907,6 +919,16 @@ SWGChannelSettings::setNfmModSettings(SWGNFMModSettings* nfm_mod_settings) {
     this->m_nfm_mod_settings_isSet = true;
 }
 
+SWGNoiseFigureSettings*
+SWGChannelSettings::getNoiseFigureSettings() {
+    return noise_figure_settings;
+}
+void
+SWGChannelSettings::setNoiseFigureSettings(SWGNoiseFigureSettings* noise_figure_settings) {
+    this->noise_figure_settings = noise_figure_settings;
+    this->m_noise_figure_settings_isSet = true;
+}
+
 SWGLocalSinkSettings*
 SWGChannelSettings::getLocalSinkSettings() {
     return local_sink_settings;
@@ -1150,6 +1172,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(nfm_mod_settings && nfm_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(noise_figure_settings && noise_figure_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(local_sink_settings && local_sink_settings->isSet()){
