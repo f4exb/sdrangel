@@ -70,14 +70,14 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGAddTrigger : public Message {
+    class MsgScopeVisAddTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGAddTrigger* create(
+        static MsgScopeVisAddTrigger* create(
                 const GLScopeSettings::TriggerData& triggerData)
         {
-            return new MsgScopeVisNGAddTrigger(triggerData);
+            return new MsgScopeVisAddTrigger(triggerData);
         }
 
         const GLScopeSettings::TriggerData& getTriggerData() const { return m_triggerData; }
@@ -85,20 +85,20 @@ public:
     private:
         GLScopeSettings::TriggerData m_triggerData;
 
-        MsgScopeVisNGAddTrigger(const GLScopeSettings::TriggerData& triggerData) :
+        MsgScopeVisAddTrigger(const GLScopeSettings::TriggerData& triggerData) :
             m_triggerData(triggerData)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGChangeTrigger : public Message {
+    class MsgScopeVisChangeTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGChangeTrigger* create(
+        static MsgScopeVisChangeTrigger* create(
             const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
         {
-            return new MsgScopeVisNGChangeTrigger(triggerData, triggerIndex);
+            return new MsgScopeVisChangeTrigger(triggerData, triggerIndex);
         }
 
         const GLScopeSettings::TriggerData& getTriggerData() const { return m_triggerData; }
@@ -108,21 +108,21 @@ public:
         GLScopeSettings::TriggerData m_triggerData;
         uint32_t m_triggerIndex;
 
-        MsgScopeVisNGChangeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex) :
+        MsgScopeVisChangeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex) :
             m_triggerData(triggerData),
             m_triggerIndex(triggerIndex)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGRemoveTrigger : public Message {
+    class MsgScopeVisRemoveTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGRemoveTrigger* create(
+        static MsgScopeVisRemoveTrigger* create(
                 uint32_t triggerIndex)
         {
-            return new MsgScopeVisNGRemoveTrigger(triggerIndex);
+            return new MsgScopeVisRemoveTrigger(triggerIndex);
         }
 
         uint32_t getTriggerIndex() const { return m_triggerIndex; }
@@ -130,21 +130,21 @@ public:
     private:
         uint32_t m_triggerIndex;
 
-        MsgScopeVisNGRemoveTrigger(uint32_t triggerIndex) :
+        MsgScopeVisRemoveTrigger(uint32_t triggerIndex) :
             m_triggerIndex(triggerIndex)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGMoveTrigger : public Message {
+    class MsgScopeVisMoveTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGMoveTrigger* create(
+        static MsgScopeVisMoveTrigger* create(
                 uint32_t triggerIndex,
                 bool moveUpElseDown)
         {
-            return new MsgScopeVisNGMoveTrigger(triggerIndex, moveUpElseDown);
+            return new MsgScopeVisMoveTrigger(triggerIndex, moveUpElseDown);
         }
 
         uint32_t getTriggerIndex() const { return m_triggerIndex; }
@@ -154,21 +154,21 @@ public:
         uint32_t m_triggerIndex;
         bool m_moveUpElseDown;
 
-        MsgScopeVisNGMoveTrigger(uint32_t triggerIndex, bool moveUpElseDown) :
+        MsgScopeVisMoveTrigger(uint32_t triggerIndex, bool moveUpElseDown) :
             m_triggerIndex(triggerIndex),
             m_moveUpElseDown(moveUpElseDown)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGFocusOnTrigger : public Message {
+    class MsgScopeVisFocusOnTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGFocusOnTrigger* create(
+        static MsgScopeVisFocusOnTrigger* create(
                 uint32_t triggerIndex)
         {
-            return new MsgScopeVisNGFocusOnTrigger(triggerIndex);
+            return new MsgScopeVisFocusOnTrigger(triggerIndex);
         }
 
         uint32_t getTriggerIndex() const { return m_triggerIndex; }
@@ -176,7 +176,7 @@ public:
     private:
         uint32_t m_triggerIndex;
 
-        MsgScopeVisNGFocusOnTrigger(uint32_t triggerIndex) :
+        MsgScopeVisFocusOnTrigger(uint32_t triggerIndex) :
             m_triggerIndex(triggerIndex)
         {}
     };
@@ -248,15 +248,15 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGMoveTrace : public Message {
+    class MsgScopeVisMoveTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGMoveTrace* create(
+        static MsgScopeVisMoveTrace* create(
                 uint32_t traceIndex,
                 bool moveUpElseDown)
         {
-            return new MsgScopeVisNGMoveTrace(traceIndex, moveUpElseDown);
+            return new MsgScopeVisMoveTrace(traceIndex, moveUpElseDown);
         }
 
         uint32_t getTraceIndex() const { return m_traceIndex; }
@@ -266,21 +266,21 @@ public:
         uint32_t m_traceIndex;
         bool m_moveUpElseDown;
 
-        MsgScopeVisNGMoveTrace(uint32_t traceIndex, bool moveUpElseDown) :
+        MsgScopeVisMoveTrace(uint32_t traceIndex, bool moveUpElseDown) :
             m_traceIndex(traceIndex),
             m_moveUpElseDown(moveUpElseDown)
         {}
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGFocusOnTrace : public Message {
+    class MsgScopeVisFocusOnTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
-        static MsgScopeVisNGFocusOnTrace* create(
+        static MsgScopeVisFocusOnTrace* create(
                 uint32_t traceIndex)
         {
-            return new MsgScopeVisNGFocusOnTrace(traceIndex);
+            return new MsgScopeVisFocusOnTrace(traceIndex);
         }
 
         uint32_t getTraceIndex() const { return m_traceIndex; }
@@ -288,7 +288,7 @@ public:
     private:
         uint32_t m_traceIndex;
 
-        MsgScopeVisNGFocusOnTrace(uint32_t traceIndex) :
+        MsgScopeVisFocusOnTrace(uint32_t traceIndex) :
             m_traceIndex(traceIndex)
         {}
     };
@@ -345,13 +345,6 @@ public:
 
     void setLiveRate(int sampleRate);
     void configure(uint32_t nbStreams, uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
-    void moveTrace(uint32_t traceIndex, bool upElseDown);
-    void focusOnTrace(uint32_t traceIndex);
-    void addTrigger(const GLScopeSettings::TriggerData& triggerData);
-    void changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex);
-    void removeTrigger(uint32_t triggerIndex);
-    void moveTrigger(uint32_t triggerIndex, bool upElseDown);
-    void focusOnTrigger(uint32_t triggerIndex);
     void setOneShot(bool oneShot);
     void setMemoryIndex(uint32_t memoryIndex);
     void setTraceChunkSize(uint32_t chunkSize) { m_traceChunkSize = chunkSize; }
@@ -1240,6 +1233,13 @@ private:
     void addTrace(const GLScopeSettings::TraceData& traceData);
     void changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex);
     void removeTrace(uint32_t traceIndex);
+    void moveTrace(uint32_t traceIndex, bool upElseDown);
+    void focusOnTrace(uint32_t traceIndex);
+    void addTrigger(const GLScopeSettings::TriggerData& triggerData);
+    void changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex);
+    void removeTrigger(uint32_t triggerIndex);
+    void moveTrigger(uint32_t triggerIndex, bool upElseDown);
+    void focusOnTrigger(uint32_t triggerIndex);
 
     /**
      * Moves on to the next trigger if any or increments trigger count if in repeat mode

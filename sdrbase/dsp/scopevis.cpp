@@ -27,16 +27,16 @@
 
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVisNG, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGAddTrigger, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGChangeTrigger, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGRemoveTrigger, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMoveTrigger, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGFocusOnTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisAddTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisChangeTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisRemoveTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisMoveTrigger, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisFocusOnTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisAddTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisChangeTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisRemoveTrace, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMoveTrace, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGFocusOnTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisMoveTrace, Message)
+MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisFocusOnTrace, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGOneShot, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisNGMemoryTrace, Message)
 
@@ -247,44 +247,91 @@ void ScopeVis::moveTrace(uint32_t traceIndex, bool upElseDown)
     qDebug() << "ScopeVis::moveTrace:"
             << " trace: " << traceIndex
             << " up: " << upElseDown;
-    Message* cmd = MsgScopeVisNGMoveTrace::create(traceIndex, upElseDown);
-    getInputMessageQueue()->push(cmd);
+    m_traces.moveTrace(traceIndex, upElseDown);
+    computeDisplayTriggerLevels();
+    updateGLScopeDisplay();
 }
 
 void ScopeVis::focusOnTrace(uint32_t traceIndex)
 {
-    Message* cmd = MsgScopeVisNGFocusOnTrace::create(traceIndex);
-    getInputMessageQueue()->push(cmd);
+    if (traceIndex < m_traces.m_tracesData.size())
+    {
+        m_focusedTraceIndex = traceIndex;
+        computeDisplayTriggerLevels();
+
+        if (m_glScope) {
+            m_glScope->setFocusedTraceIndex(m_focusedTraceIndex);
+        }
+
+        updateGLScopeDisplay();
+    }
 }
 
 void ScopeVis::addTrigger(const GLScopeSettings::TriggerData& triggerData)
 {
-    Message* cmd = MsgScopeVisNGAddTrigger::create(triggerData);
-    getInputMessageQueue()->push(cmd);
+    m_triggerConditions.push_back(new TriggerCondition(triggerData));
+    m_triggerConditions.back()->initProjector();
 }
 
 void ScopeVis::changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
 {
-    Message* cmd = MsgScopeVisNGChangeTrigger::create(triggerData, triggerIndex);
-    getInputMessageQueue()->push(cmd);
+    if (triggerIndex < m_triggerConditions.size())
+    {
+        m_triggerConditions[triggerIndex]->setData(triggerData);
+
+        if (triggerIndex == m_focusedTriggerIndex)
+        {
+            computeDisplayTriggerLevels();
+
+            if (m_glScope) {
+                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+            }
+
+            updateGLScopeDisplay();
+        }
+    }
 }
 
 void ScopeVis::removeTrigger(uint32_t triggerIndex)
 {
-    Message* cmd = MsgScopeVisNGRemoveTrigger::create(triggerIndex);
-    getInputMessageQueue()->push(cmd);
+    if (triggerIndex < m_triggerConditions.size())
+    {
+        TriggerCondition *triggerCondition = m_triggerConditions[triggerIndex];
+        m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
+        delete triggerCondition;
+    }
 }
 
 void ScopeVis::moveTrigger(uint32_t triggerIndex, bool upElseDown)
 {
-    Message* cmd = MsgScopeVisNGMoveTrigger::create(triggerIndex, upElseDown);
-    getInputMessageQueue()->push(cmd);
+    int nextTriggerIndex = (triggerIndex + (upElseDown ? 1 : -1)) % m_triggerConditions.size();
+
+    TriggerCondition *nextTrigger = m_triggerConditions[nextTriggerIndex];
+    m_triggerConditions[nextTriggerIndex] = m_triggerConditions[triggerIndex];
+    m_triggerConditions[triggerIndex] = nextTrigger;
+
+    computeDisplayTriggerLevels();
+
+    if (m_glScope) {
+        m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+    }
+
+    updateGLScopeDisplay();
 }
 
 void ScopeVis::focusOnTrigger(uint32_t triggerIndex)
 {
-    Message* cmd = MsgScopeVisNGFocusOnTrigger::create(triggerIndex);
-    getInputMessageQueue()->push(cmd);
+    if (triggerIndex < m_triggerConditions.size())
+    {
+        m_focusedTriggerIndex = triggerIndex;
+        computeDisplayTriggerLevels();
+
+        if (m_glScope) {
+            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
+        }
+
+        updateGLScopeDisplay();
+    }
 }
 
 void ScopeVis::setOneShot(bool oneShot)
@@ -875,101 +922,52 @@ bool ScopeVis::handleMessage(const Message& message)
 
         return true;
     }
-    else if (MsgScopeVisNGAddTrigger::match(message))
+    else if (MsgScopeVisAddTrigger::match(message))
     {
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGAddTrigger";
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisAddTrigger";
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGAddTrigger& conf = (MsgScopeVisNGAddTrigger&) message;
-        m_triggerConditions.push_back(new TriggerCondition(conf.getTriggerData()));
-        m_triggerConditions.back()->initProjector();
+        MsgScopeVisAddTrigger& conf = (MsgScopeVisAddTrigger&) message;
+        addTrigger(conf.getTriggerData());
         return true;
     }
-    else if (MsgScopeVisNGChangeTrigger::match(message))
+    else if (MsgScopeVisChangeTrigger::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGChangeTrigger& conf = (MsgScopeVisNGChangeTrigger&) message;
+        MsgScopeVisChangeTrigger& conf = (MsgScopeVisChangeTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGChangeTrigger: " << triggerIndex;
-
-        if (triggerIndex < m_triggerConditions.size())
-        {
-            m_triggerConditions[triggerIndex]->setData(conf.getTriggerData());
-
-            if (triggerIndex == m_focusedTriggerIndex)
-            {
-                computeDisplayTriggerLevels();
-
-                if (m_glScope) {
-                    m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
-                }
-
-                updateGLScopeDisplay();
-            }
-        }
-
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisChangeTrigger: " << triggerIndex;
+        changeTrigger(conf.getTriggerData(), triggerIndex);
         return true;
     }
-    else if (MsgScopeVisNGRemoveTrigger::match(message))
+    else if (MsgScopeVisRemoveTrigger::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGRemoveTrigger& conf = (MsgScopeVisNGRemoveTrigger&) message;
+        MsgScopeVisRemoveTrigger& conf = (MsgScopeVisRemoveTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGRemoveTrigger: " << triggerIndex;
-
-        if (triggerIndex < m_triggerConditions.size())
-        {
-            TriggerCondition *triggerCondition = m_triggerConditions[triggerIndex];
-            m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
-            delete triggerCondition;
-        }
-
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisRemoveTrigger: " << triggerIndex;
+        removeTrigger(triggerIndex);
         return true;
     }
-    else if (MsgScopeVisNGMoveTrigger::match(message))
+    else if (MsgScopeVisMoveTrigger::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGMoveTrigger& conf = (MsgScopeVisNGMoveTrigger&) message;
+        MsgScopeVisMoveTrigger& conf = (MsgScopeVisMoveTrigger&) message;
         int triggerIndex = conf.getTriggerIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGMoveTrigger: " << triggerIndex;
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisMoveTrigger: " << triggerIndex;
 
         if (!conf.getMoveUp() && (triggerIndex == 0)) {
             return true;
         }
 
-        int nextTriggerIndex = (triggerIndex + (conf.getMoveUp() ? 1 : -1)) % m_triggerConditions.size();
-
-        TriggerCondition *nextTrigger = m_triggerConditions[nextTriggerIndex];
-        m_triggerConditions[nextTriggerIndex] = m_triggerConditions[triggerIndex];
-        m_triggerConditions[triggerIndex] = nextTrigger;
-
-        computeDisplayTriggerLevels();
-
-        if (m_glScope) {
-            m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
-        }
-
-        updateGLScopeDisplay();
-
+        moveTrigger(triggerIndex, conf.getMoveUp());
         return true;
     }
-    else if (MsgScopeVisNGFocusOnTrigger::match(message))
+    else if (MsgScopeVisFocusOnTrigger::match(message))
     {
-        MsgScopeVisNGFocusOnTrigger& conf = (MsgScopeVisNGFocusOnTrigger&) message;
+        MsgScopeVisFocusOnTrigger& conf = (MsgScopeVisFocusOnTrigger&) message;
         uint32_t triggerIndex = conf.getTriggerIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGFocusOnTrigger: " << triggerIndex;
-
-        if (triggerIndex < m_triggerConditions.size())
-        {
-            m_focusedTriggerIndex = triggerIndex;
-            computeDisplayTriggerLevels();
-
-            if (m_glScope) {
-                m_glScope->setFocusedTriggerData(m_triggerConditions[m_focusedTriggerIndex]->m_triggerData);
-            }
-
-            updateGLScopeDisplay();
-        }
-
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisFocusOnTrigger: " << triggerIndex;
+        focusOnTrigger(triggerIndex);
         return true;
     }
     else if (MsgScopeVisAddTrace::match(message))
@@ -998,36 +996,21 @@ bool ScopeVis::handleMessage(const Message& message)
         removeTrace(traceIndex);
         return true;
     }
-    else if (MsgScopeVisNGMoveTrace::match(message))
+    else if (MsgScopeVisMoveTrace::match(message))
     {
         QMutexLocker configLocker(&m_mutex);
-        MsgScopeVisNGMoveTrace& conf = (MsgScopeVisNGMoveTrace&) message;
+        MsgScopeVisMoveTrace& conf = (MsgScopeVisMoveTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGMoveTrace: " << traceIndex;
-        m_traces.moveTrace(traceIndex, conf.getMoveUp());
-        //updateMaxTraceDelay();
-        computeDisplayTriggerLevels();
-        updateGLScopeDisplay();
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisMoveTrace: " << traceIndex;
+        moveTrace(traceIndex, conf.getMoveUp());
         return true;
     }
-    else if (MsgScopeVisNGFocusOnTrace::match(message))
+    else if (MsgScopeVisFocusOnTrace::match(message))
     {
-        MsgScopeVisNGFocusOnTrace& conf = (MsgScopeVisNGFocusOnTrace&) message;
+        MsgScopeVisFocusOnTrace& conf = (MsgScopeVisFocusOnTrace&) message;
         uint32_t traceIndex = conf.getTraceIndex();
-        qDebug() << "ScopeVis::handleMessage: MsgScopeVisNGFocusOnTrace: " << traceIndex;
-
-        if (traceIndex < m_traces.m_tracesData.size())
-        {
-            m_focusedTraceIndex = traceIndex;
-            computeDisplayTriggerLevels();
-
-            if (m_glScope) {
-                m_glScope->setFocusedTraceIndex(m_focusedTraceIndex);
-            }
-
-            updateGLScopeDisplay();
-        }
-
+        qDebug() << "ScopeVis::handleMessage: MsgScopeVisFocusOnTrace: " << traceIndex;
+        focusOnTrace(traceIndex);
         return true;
     }
     else if (MsgScopeVisNGOneShot::match(message))

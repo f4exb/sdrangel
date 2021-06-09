@@ -93,13 +93,14 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     // Add a trigger
     GLScopeSettings::TriggerData triggerData;
     fillTriggerData(triggerData);
-    m_scopeVis->addTrigger(triggerData);
+    ScopeVis::MsgScopeVisAddTrigger *msgAddTrigger = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
+    m_scopeVis->getInputMessageQueue()->push(msgAddTrigger);
 
     // Add a trace
     GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
-    ScopeVis::MsgScopeVisAddTrace *msg = ScopeVis::MsgScopeVisAddTrace::create(traceData);
-    m_scopeVis->getInputMessageQueue()->push(msg);
+    ScopeVis::MsgScopeVisAddTrace *msgAddTrace = ScopeVis::MsgScopeVisAddTrace::create(traceData);
+    m_scopeVis->getInputMessageQueue()->push(msgAddTrace);
 
     setEnabled(true);
     connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
@@ -346,7 +347,8 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
         while (iTrigger > nbTriggersSaved) // remove possible triggers in excess
         {
-            m_scopeVis->removeTrigger(iTrigger - 1);
+            ScopeVis::MsgScopeVisRemoveTrigger *msg = ScopeVis::MsgScopeVisRemoveTrigger::create(iTrigger - 1);
+            m_scopeVis->getInputMessageQueue()->push(msg);
             iTrigger--;
         }
 
@@ -385,11 +387,13 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
 
             if (iTrigger < nbTriggers) // change existing triggers
             {
-                m_scopeVis->changeTrigger(triggerData, iTrigger);
+                ScopeVis::MsgScopeVisChangeTrigger *msg = ScopeVis::MsgScopeVisChangeTrigger::create(triggerData, iTrigger);
+                m_scopeVis->getInputMessageQueue()->push(msg);
             }
             else // add new trigers
             {
-                m_scopeVis->addTrigger(triggerData);
+                ScopeVis::MsgScopeVisAddTrigger *msg = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
+                m_scopeVis->getInputMessageQueue()->push(msg);
             }
 
             if (iTrigger == nbTriggersSaved-1)
@@ -603,7 +607,8 @@ void GLScopeGUI::on_trace_valueChanged(int value)
 
     setTraceUI(traceData);
 
-    m_scopeVis->focusOnTrace(value);
+    ScopeVis::MsgScopeVisFocusOnTrace *msg = ScopeVis::MsgScopeVisFocusOnTrace::create(value);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 }
 
 void GLScopeGUI::on_traceAdd_clicked(bool checked)
@@ -643,12 +648,15 @@ void GLScopeGUI::on_traceUp_clicked(bool checked)
     if (ui->trace->maximum() > 0) // more than one trace
     {
         int newTraceIndex = (ui->trace->value() + 1) % (ui->trace->maximum()+1);
-        m_scopeVis->moveTrace(ui->trace->value(), true);
+        ScopeVis::MsgScopeVisMoveTrace *msgMoveTrace = ScopeVis::MsgScopeVisMoveTrace::create(ui->trace->value(), true);
+        m_scopeVis->getInputMessageQueue()->push(msgMoveTrace);
         ui->trace->setValue(newTraceIndex); // follow trace
         GLScopeSettings::TraceData traceData;
         m_scopeVis->getTraceData(traceData, ui->trace->value());
         setTraceUI(traceData);
-        m_scopeVis->focusOnTrace(ui->trace->value());
+        ScopeVis::MsgScopeVisFocusOnTrace *msgFocusOnTrace = ScopeVis::MsgScopeVisFocusOnTrace::create(ui->trace->value());
+        m_scopeVis->getInputMessageQueue()->push(msgFocusOnTrace);
+
     }
 }
 
@@ -658,12 +666,14 @@ void GLScopeGUI::on_traceDown_clicked(bool checked)
     if (ui->trace->value() > 0) // not the X (lowest) trace
     {
         int newTraceIndex = (ui->trace->value() - 1) % (ui->trace->maximum()+1);
-        m_scopeVis->moveTrace(ui->trace->value(), false);
+        ScopeVis::MsgScopeVisMoveTrace *msgMoveTrace = ScopeVis::MsgScopeVisMoveTrace::create(ui->trace->value(), false);
+        m_scopeVis->getInputMessageQueue()->push(msgMoveTrace);
         ui->trace->setValue(newTraceIndex); // follow trace
         GLScopeSettings::TraceData traceData;
         m_scopeVis->getTraceData(traceData, ui->trace->value());
         setTraceUI(traceData);
-        m_scopeVis->focusOnTrace(ui->trace->value());
+        ScopeVis::MsgScopeVisFocusOnTrace *msgFocusOnTrace = ScopeVis::MsgScopeVisFocusOnTrace::create(ui->trace->value());
+        m_scopeVis->getInputMessageQueue()->push(msgFocusOnTrace);
     }
 }
 
@@ -683,8 +693,8 @@ void GLScopeGUI::on_trig_valueChanged(int value)
             << " m_triggerLevel" << triggerData.m_triggerLevel;
 
     setTriggerUI(triggerData);
-
-    m_scopeVis->focusOnTrigger(value);
+    ScopeVis::MsgScopeVisFocusOnTrigger *msg = ScopeVis::MsgScopeVisFocusOnTrigger::create(value);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 }
 
 void GLScopeGUI::on_trigAdd_clicked(bool checked)
@@ -700,7 +710,8 @@ void GLScopeGUI::on_trigDel_clicked(bool checked)
     (void) checked;
     if (ui->trig->value() > 0)
     {
-        m_scopeVis->removeTrigger(ui->trig->value());
+        ScopeVis::MsgScopeVisRemoveTrigger *msg = ScopeVis::MsgScopeVisRemoveTrigger::create(ui->trig->value());
+        m_scopeVis->getInputMessageQueue()->push(msg);
         ui->trig->setMaximum(ui->trig->maximum() - 1);
     }
 }
@@ -711,12 +722,14 @@ void GLScopeGUI::on_trigUp_clicked(bool checked)
     if (ui->trig->maximum() > 0) // more than one trigger
     {
         int newTriggerIndex = (ui->trig->value() + 1) % (ui->trig->maximum()+1);
-        m_scopeVis->moveTrigger(ui->trace->value(), true);
+        ScopeVis::MsgScopeVisMoveTrigger *msgMoveTrigger = ScopeVis::MsgScopeVisMoveTrigger::create(ui->trace->value(), true);
+        m_scopeVis->getInputMessageQueue()->push(msgMoveTrigger);
         ui->trig->setValue(newTriggerIndex); // follow trigger
         GLScopeSettings::TriggerData triggerData;
         m_scopeVis->getTriggerData(triggerData, ui->trig->value());
         setTriggerUI(triggerData);
-        m_scopeVis->focusOnTrigger(ui->trig->value());
+        ScopeVis::MsgScopeVisFocusOnTrigger *msgFocusOnTrigger = ScopeVis::MsgScopeVisFocusOnTrigger::create(ui->trig->value());
+        m_scopeVis->getInputMessageQueue()->push(msgFocusOnTrigger);
     }
 }
 
@@ -726,12 +739,14 @@ void GLScopeGUI::on_trigDown_clicked(bool checked)
     if (ui->trig->value() > 0) // not the 0 (lowest) trigger
     {
         int newTriggerIndex = (ui->trig->value() - 1) % (ui->trig->maximum()+1);
-        m_scopeVis->moveTrigger(ui->trace->value(), false);
+        ScopeVis::MsgScopeVisMoveTrigger *msgMoveTrigger = ScopeVis::MsgScopeVisMoveTrigger::create(ui->trace->value(), false);
+        m_scopeVis->getInputMessageQueue()->push(msgMoveTrigger);
         ui->trig->setValue(newTriggerIndex); // follow trigger
         GLScopeSettings::TriggerData triggerData;
         m_scopeVis->getTriggerData(triggerData, ui->trig->value());
         setTriggerUI(triggerData);
-        m_scopeVis->focusOnTrigger(ui->trig->value());
+        ScopeVis::MsgScopeVisFocusOnTrigger *msgFocusOnTrigger = ScopeVis::MsgScopeVisFocusOnTrigger::create(ui->trig->value());
+        m_scopeVis->getInputMessageQueue()->push(msgFocusOnTrigger);
     }
 }
 
@@ -1295,7 +1310,8 @@ void GLScopeGUI::changeCurrentTrigger()
     GLScopeSettings::TriggerData triggerData;
     fillTriggerData(triggerData);
     uint32_t currentTriggerIndex = ui->trig->value();
-    m_scopeVis->changeTrigger(triggerData, currentTriggerIndex);
+    ScopeVis::MsgScopeVisChangeTrigger *msg = ScopeVis::MsgScopeVisChangeTrigger::create(triggerData, currentTriggerIndex);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 }
 
 void GLScopeGUI::fillProjectionCombo(QComboBox* comboBox)
@@ -1732,14 +1748,16 @@ void GLScopeGUI::focusOnTrace(int traceIndex)
 
 void GLScopeGUI::changeTrigger(int triggerIndex, const GLScopeSettings::TriggerData& triggerData)
 {
-    m_scopeVis->changeTrigger(triggerData, triggerIndex);
+    ScopeVis::MsgScopeVisChangeTrigger *msg = ScopeVis::MsgScopeVisChangeTrigger::create(triggerData, triggerIndex);
+    m_scopeVis->getInputMessageQueue()->push(msg);
 }
 
 void GLScopeGUI::addTrigger(const GLScopeSettings::TriggerData& triggerData)
 {
     if (ui->trig->maximum() < 9)
     {
-        m_scopeVis->addTrigger(triggerData);
+        ScopeVis::MsgScopeVisAddTrigger *msg = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
+        m_scopeVis->getInputMessageQueue()->push(msg);
         ui->trig->setMaximum(ui->trig->maximum() + 1);
     }
 }
