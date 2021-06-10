@@ -45,6 +45,7 @@ class SpectrumVis;
 class SDRBASE_API ScopeVis : public QObject {
     Q_OBJECT
 public:
+    // === messages ===
     // ---------------------------------------------
     class MsgConfigureScopeVis : public Message {
         MESSAGE_CLASS_DECLARATION
@@ -344,7 +345,19 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setLiveRate(int sampleRate);
-    void configure(uint32_t nbStreams, uint32_t traceSize, uint32_t timeBase, uint32_t timeOfsProMill, uint32_t triggerPre, bool freeRun);
+    void configure(
+        uint32_t nbStreams,
+        uint32_t traceSize,
+        uint32_t timeBase,
+        uint32_t timeOfsProMill,
+        uint32_t triggerPre,
+        bool freeRun
+    );
+    void configure(
+        GLScopeSettings::DisplayMode displayMode,
+        uint32_t traceIntensity,
+        uint32_t gridIntensity
+    );
     void setOneShot(bool oneShot);
     void setMemoryIndex(uint32_t memoryIndex);
     void setTraceChunkSize(uint32_t chunkSize) { m_traceChunkSize = chunkSize; }
@@ -426,55 +439,6 @@ public:
     bool getFreeRun() const { return m_freeRun; }
 
 private:
-    // === messages ===
-    // ---------------------------------------------
-    class MsgConfigureScopeVisNG : public Message {
-        MESSAGE_CLASS_DECLARATION
-
-    public:
-        static MsgConfigureScopeVisNG* create(
-            uint32_t nbStreams,
-            uint32_t traceSize,
-            uint32_t timeBase,
-            uint32_t timeOfsProMill,
-			uint32_t triggerPre,
-            bool freeRun)
-        {
-            return new MsgConfigureScopeVisNG(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
-        }
-
-        uint32_t getNbStreams() const { return m_nbStreams; }
-        uint32_t getTraceSize() const { return m_traceSize; }
-        uint32_t getTimeBase() const { return m_timeBase; }
-        uint32_t getTimeOfsProMill() const { return m_timeOfsProMill; }
-        uint32_t getTriggerPre() const { return m_triggerPre; }
-        bool getFreeRun() const { return m_freeRun; }
-
-    private:
-        uint32_t m_nbStreams;
-        uint32_t m_traceSize;
-        uint32_t m_timeBase;
-        uint32_t m_timeOfsProMill;
-        uint32_t m_triggerPre;
-        bool m_freeRun;
-
-        MsgConfigureScopeVisNG(
-            uint32_t nbStreams,
-            uint32_t traceSize,
-            uint32_t timeBase,
-            uint32_t timeOfsProMill,
-            uint32_t triggerPre,
-            bool freeRun
-        ) :
-            m_nbStreams(nbStreams),
-            m_traceSize(traceSize),
-            m_timeBase(timeBase),
-            m_timeOfsProMill(timeOfsProMill),
-			m_triggerPre(triggerPre),
-            m_freeRun(freeRun)
-        {}
-    };
-
     /**
      * Trigger stuff
      */

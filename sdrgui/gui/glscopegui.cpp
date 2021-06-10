@@ -437,6 +437,12 @@ void GLScopeGUI::on_onlyX_toggled(bool checked)
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
+        m_settings.m_displayMode = GLScopeSettings::DisplayX;
+        m_scopeVis->configure(
+            m_settings.m_displayMode,
+            m_settings.m_traceIntensity,
+            m_settings.m_gridIntensity
+        );
     }
 }
 
@@ -454,6 +460,12 @@ void GLScopeGUI::on_onlyY_toggled(bool checked)
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
+        m_settings.m_displayMode = GLScopeSettings::DisplayY;
+        m_scopeVis->configure(
+            m_settings.m_displayMode,
+            m_settings.m_traceIntensity,
+            m_settings.m_gridIntensity
+        );
     }
 }
 
@@ -471,6 +483,12 @@ void GLScopeGUI::on_horizontalXY_toggled(bool checked)
         ui->onlyY->setChecked(false);
         ui->verticalXY->setChecked(false);
         ui->polar->setChecked(false);
+        m_settings.m_displayMode = GLScopeSettings::DisplayXYH;
+        m_scopeVis->configure(
+            m_settings.m_displayMode,
+            m_settings.m_traceIntensity,
+            m_settings.m_gridIntensity
+        );
     }
 }
 
@@ -488,6 +506,12 @@ void GLScopeGUI::on_verticalXY_toggled(bool checked)
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->polar->setChecked(false);
+        m_settings.m_displayMode = GLScopeSettings::DisplayXYV;
+        m_scopeVis->configure(
+            m_settings.m_displayMode,
+            m_settings.m_traceIntensity,
+            m_settings.m_gridIntensity
+        );
     }
 }
 
@@ -505,6 +529,12 @@ void GLScopeGUI::on_polar_toggled(bool checked)
         ui->onlyY->setChecked(false);
         ui->horizontalXY->setChecked(false);
         ui->verticalXY->setChecked(false);
+        m_settings.m_displayMode = GLScopeSettings::DisplayPol;
+        m_scopeVis->configure(
+            m_settings.m_displayMode,
+            m_settings.m_traceIntensity,
+            m_settings.m_gridIntensity
+        );
     }
 }
 
@@ -522,12 +552,24 @@ void GLScopeGUI::on_traceIntensity_valueChanged(int value)
 {
     ui->traceIntensity->setToolTip(QString("Trace intensity: %1").arg(value));
     m_glScope->setDisplayTraceIntensity(value);
+    m_settings.m_traceIntensity = value;
+    m_scopeVis->configure(
+        m_settings.m_displayMode,
+        m_settings.m_traceIntensity,
+        m_settings.m_gridIntensity
+    );
 }
 
 void GLScopeGUI::on_gridIntensity_valueChanged(int value)
 {
     ui->gridIntensity->setToolTip(QString("Grid intensity: %1").arg(value));
     m_glScope->setDisplayGridIntensity(value);
+    m_settings.m_gridIntensity = value;
+    m_scopeVis->configure(
+        m_settings.m_displayMode,
+        m_settings.m_traceIntensity,
+        m_settings.m_gridIntensity
+    );
 }
 
 void GLScopeGUI::on_time_valueChanged(int value)
@@ -1661,6 +1703,13 @@ void GLScopeGUI::setDisplayMode(GLScopeSettings::DisplayMode displayMode)
             break;
         }
     }
+
+    m_settings.m_displayMode = displayMode;
+    m_scopeVis->configure(
+        m_settings.m_displayMode,
+        m_settings.m_traceIntensity,
+        m_settings.m_gridIntensity
+    );
 }
 
 void GLScopeGUI::setTraceIntensity(int value)

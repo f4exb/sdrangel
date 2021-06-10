@@ -26,7 +26,6 @@
 #include "dsp/glscopeinterface.h"
 
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVis, Message)
-MESSAGE_CLASS_DEFINITION(ScopeVis::MsgConfigureScopeVisNG, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisAddTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisChangeTrigger, Message)
 MESSAGE_CLASS_DEFINITION(ScopeVis::MsgScopeVisRemoveTrigger, Message)
@@ -71,15 +70,18 @@ ScopeVis::ScopeVis() :
 {
     setObjectName("ScopeVis");
     m_traceDiscreteMemory.resize(GLScopeSettings::m_traceChunkDefaultSize); // arbitrary
+
     for (int i = 0; i < (int) Projector::nbProjectionTypes; i++) {
         m_projectorCache[i] = 0.0;
     }
+
     connect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
 }
 
 ScopeVis::~ScopeVis()
 {
     disconnect(&m_inputMessageQueue, SIGNAL(messageEnqueued()), this, SLOT(handleInputMessages()));
+
     for (std::vector<TriggerCondition*>::iterator it = m_triggerConditions.begin(); it != m_triggerConditions.end(); ++ it) {
         delete *it;
     }
@@ -141,17 +143,11 @@ void ScopeVis::configure(
 )
 {
     QMutexLocker configLocker(&m_mutex);
-    // MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
 
-    // uint32_t nbStreams = conf.getNbStreams();
-    // uint32_t traceSize = conf.getTraceSize();
-    // uint32_t timeBase = conf.getTimeBase();
-    // uint32_t timeOfsProMill = conf.getTimeOfsProMill();
-    // uint32_t triggerPre = conf.getTriggerPre();
-    // bool freeRun = conf.getFreeRun();
-
-    if (m_traceSize != traceSize) {
+    if (m_traceSize != traceSize)
+    {
         setTraceSize(traceSize);
+        m_settings.m_traceLen = traceSize;
     }
 
     if (m_nbStreams != nbStreams)
@@ -163,6 +159,7 @@ void ScopeVis::configure(
     if (m_timeBase != timeBase)
     {
         m_timeBase = timeBase;
+        m_settings.m_time = timeBase;
 
         if (m_glScope) {
             m_glScope->setTimeBase(m_timeBase);
@@ -172,21 +169,24 @@ void ScopeVis::configure(
     if (m_timeOfsProMill != timeOfsProMill)
     {
         m_timeOfsProMill = timeOfsProMill;
+        m_settings.m_timeOfs = timeOfsProMill;
 
         if (m_glScope) {
             m_glScope->setTimeOfsProMill(m_timeOfsProMill);
         }
     }
 
-    if (m_preTriggerDelay != triggerPre) {
+    if (m_preTriggerDelay != triggerPre)
+    {
         setPreTriggerDelay(triggerPre);
+        m_settings.m_trigPre = triggerPre;
     }
 
     if (freeRun != m_freeRun) {
         m_freeRun = freeRun;
     }
 
-    qDebug() << "ScopeVis::handleMessage: MsgConfigureScopeVisNG:"
+    qDebug() << "ScopeVis::configure:"
         << " m_nbStreams: " << m_nbStreams
         << " m_traceSize: " << m_traceSize
         << " m_timeOfsProMill: " << m_timeOfsProMill
@@ -196,9 +196,24 @@ void ScopeVis::configure(
     if ((m_glScope) && (m_currentTraceMemoryIndex > 0)) {
         processMemoryTrace();
     }
+}
 
-    // Message* cmd = MsgConfigureScopeVisNG::create(nbStreams, traceSize, timeBase, timeOfsProMill, triggerPre, freeRun);
-    // getInputMessageQueue()->push(cmd);
+void ScopeVis::configure(
+    GLScopeSettings::DisplayMode displayMode,
+    uint32_t traceIntensity,
+    uint32_t gridIntensity
+)
+{
+    QMutexLocker configLocker(&m_mutex);
+
+    m_settings.m_displayMode = displayMode;
+    m_settings.m_traceIntensity = traceIntensity;
+    m_settings.m_gridIntensity = gridIntensity;
+
+    qDebug() << "ScopeVis::configure:"
+        << " displayMode: " << displayMode
+        << " traceIntensity: " << traceIntensity
+        << " gridIntensity: " << gridIntensity;
 }
 
 void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
@@ -212,6 +227,7 @@ void ScopeVis::addTrace(const GLScopeSettings::TraceData& traceData)
     updateMaxTraceDelay();
     computeDisplayTriggerLevels();
     updateGLScopeDisplay();
+    m_settings.m_tracesData.push_back(traceData);
 }
 
 void ScopeVis::changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex)
@@ -230,6 +246,10 @@ void ScopeVis::changeTrace(const GLScopeSettings::TraceData& traceData, uint32_t
     }
 
     updateGLScopeDisplay();
+
+    if (traceIndex < m_settings.m_tracesData.size()) {
+        m_settings.m_tracesData[traceIndex] = traceData;
+    }
 }
 
 void ScopeVis::removeTrace(uint32_t traceIndex)
@@ -240,6 +260,15 @@ void ScopeVis::removeTrace(uint32_t traceIndex)
     updateMaxTraceDelay();
     computeDisplayTriggerLevels();
     updateGLScopeDisplay();
+
+    unsigned int iDest = 0;
+
+    for (unsigned int iSource = 0; iSource < m_settings.m_tracesData.size(); iSource++)
+    {
+        if (iSource != traceIndex) {
+            m_settings.m_tracesData[iDest++] = m_settings.m_tracesData[iSource];
+        }
+    }
 }
 
 void ScopeVis::moveTrace(uint32_t traceIndex, bool upElseDown)
@@ -250,6 +279,11 @@ void ScopeVis::moveTrace(uint32_t traceIndex, bool upElseDown)
     m_traces.moveTrace(traceIndex, upElseDown);
     computeDisplayTriggerLevels();
     updateGLScopeDisplay();
+
+    int nextTraceIndex = (traceIndex + (upElseDown ? 1 : -1)) % m_settings.m_tracesData.size();
+    GLScopeSettings::TraceData nextTraceData = m_settings.m_tracesData[nextTraceIndex];
+    m_settings.m_tracesData[nextTraceIndex] = m_settings.m_tracesData[traceIndex];
+    m_settings.m_tracesData[traceIndex] = nextTraceData;
 }
 
 void ScopeVis::focusOnTrace(uint32_t traceIndex)
@@ -271,6 +305,7 @@ void ScopeVis::addTrigger(const GLScopeSettings::TriggerData& triggerData)
 {
     m_triggerConditions.push_back(new TriggerCondition(triggerData));
     m_triggerConditions.back()->initProjector();
+    m_settings.m_triggersData.push_back(triggerData);
 }
 
 void ScopeVis::changeTrigger(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex)
@@ -290,6 +325,10 @@ void ScopeVis::changeTrigger(const GLScopeSettings::TriggerData& triggerData, ui
             updateGLScopeDisplay();
         }
     }
+
+    if (triggerIndex < m_settings.m_triggersData.size()) {
+        m_settings.m_triggersData[triggerIndex] = triggerData;
+    }
 }
 
 void ScopeVis::removeTrigger(uint32_t triggerIndex)
@@ -299,6 +338,15 @@ void ScopeVis::removeTrigger(uint32_t triggerIndex)
         TriggerCondition *triggerCondition = m_triggerConditions[triggerIndex];
         m_triggerConditions.erase(m_triggerConditions.begin() + triggerIndex);
         delete triggerCondition;
+    }
+
+    unsigned int iDest = 0;
+
+    for (unsigned int iSource = 0; iSource < m_settings.m_triggersData.size(); iSource++)
+    {
+        if (iSource != triggerIndex) {
+            m_settings.m_triggersData[iDest++] = m_settings.m_triggersData[iSource];
+        }
     }
 }
 
@@ -317,6 +365,11 @@ void ScopeVis::moveTrigger(uint32_t triggerIndex, bool upElseDown)
     }
 
     updateGLScopeDisplay();
+
+    int nextTriggerIndexSettings = (triggerIndex + (upElseDown ? 1 : -1)) % m_settings.m_triggersData.size();
+    GLScopeSettings::TriggerData nextTriggerData = m_settings.m_triggersData[nextTriggerIndexSettings];
+    m_settings.m_triggersData[nextTriggerIndexSettings] = m_settings.m_triggersData[triggerIndex];
+    m_settings.m_triggersData[triggerIndex] = nextTriggerData;
 }
 
 void ScopeVis::focusOnTrigger(uint32_t triggerIndex)
@@ -859,67 +912,6 @@ bool ScopeVis::handleMessage(const Message& message)
         QMutexLocker configLocker(&m_mutex);
         const MsgConfigureScopeVis& cmd = (const MsgConfigureScopeVis&) message;
         applySettings(cmd.getSettings(), cmd.getForce());
-        return true;
-    }
-    else if (MsgConfigureScopeVisNG::match(message))
-    {
-        QMutexLocker configLocker(&m_mutex);
-        MsgConfigureScopeVisNG& conf = (MsgConfigureScopeVisNG&) message;
-
-        uint32_t nbStreams = conf.getNbStreams();
-        uint32_t traceSize = conf.getTraceSize();
-        uint32_t timeBase = conf.getTimeBase();
-        uint32_t timeOfsProMill = conf.getTimeOfsProMill();
-        uint32_t triggerPre = conf.getTriggerPre();
-        bool freeRun = conf.getFreeRun();
-
-        if (m_traceSize != traceSize) {
-            setTraceSize(traceSize);
-        }
-
-        if (m_nbStreams != nbStreams)
-        {
-            m_traceDiscreteMemory.setNbStreams(nbStreams);
-            m_nbStreams = nbStreams;
-        }
-
-        if (m_timeBase != timeBase)
-        {
-            m_timeBase = timeBase;
-
-            if (m_glScope) {
-                m_glScope->setTimeBase(m_timeBase);
-            }
-        }
-
-        if (m_timeOfsProMill != timeOfsProMill)
-        {
-            m_timeOfsProMill = timeOfsProMill;
-
-            if (m_glScope) {
-                m_glScope->setTimeOfsProMill(m_timeOfsProMill);
-            }
-        }
-
-        if (m_preTriggerDelay != triggerPre) {
-            setPreTriggerDelay(triggerPre);
-        }
-
-        if (freeRun != m_freeRun) {
-            m_freeRun = freeRun;
-        }
-
-        qDebug() << "ScopeVis::handleMessage: MsgConfigureScopeVisNG:"
-            << " m_nbStreams: " << m_nbStreams
-            << " m_traceSize: " << m_traceSize
-            << " m_timeOfsProMill: " << m_timeOfsProMill
-            << " m_preTriggerDelay: " << m_preTriggerDelay
-            << " m_freeRun: " << m_freeRun;
-
-        if ((m_glScope) && (m_currentTraceMemoryIndex > 0)) {
-            processMemoryTrace();
-        }
-
         return true;
     }
     else if (MsgScopeVisAddTrigger::match(message))
