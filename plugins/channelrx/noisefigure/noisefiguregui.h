@@ -106,7 +106,8 @@ private:
         RESULTS_COL_NF,
         RESULTS_COL_TEMP,
         RESULTS_COL_Y,
-        RESULTS_COL_ENR
+        RESULTS_COL_ENR,
+        RESULTS_COL_FLOOR
     };
 
 private slots:

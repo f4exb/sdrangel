@@ -191,6 +191,7 @@ set(sdrbase_SOURCES
     util/fits.cpp
     util/golay2312.cpp
     util/httpdownloadmanager.cpp
+    util/interpolation.cpp
     util/lfsr.cpp
     util/maidenhead.cpp
     util/message.cpp
@@ -396,6 +397,7 @@ set(sdrbase_HEADERS
     util/httpdownloadmanager.h
     util/incrementalarray.h
     util/incrementalvector.h
+    util/interpolation.h
     util/lfsr.h
     util/maidenhead.h
     util/message.h

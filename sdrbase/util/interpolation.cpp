@@ -15,43 +15,4 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.          //
 ///////////////////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDE_NOISEFIGUREENRDIALOG_H
-#define INCLUDE_NOISEFIGUREENRDIALOG_H
-
-#include <QtCharts>
-
-#include "ui_noisefigureenrdialog.h"
-#include "noisefiguresettings.h"
-
-using namespace QtCharts;
-
-class NoiseFigureENRDialog : public QDialog {
-    Q_OBJECT
-
-public:
-    explicit NoiseFigureENRDialog(NoiseFigureSettings *settings, QWidget* parent = 0);
-    ~NoiseFigureENRDialog();
-
-    NoiseFigureSettings *m_settings;
-
-    enum ENRCol {
-        ENR_COL_FREQ,
-        ENR_COL_ENR
-    };
-
-private slots:
-    void accept();
-    void on_addRow_clicked();
-    void on_deleteRow_clicked();
-    void on_enr_cellChanged(int row, int column);
-    void on_start_valueChanged(int value);
-    void on_stop_valueChanged(int value);
-
-private:
-    QChart *m_chart;
-    Ui::NoiseFigureENRDialog* ui;
-    void addRow(double freq, double enr);
-    void plotChart();
-};
-
-#endif // INCLUDE_NOISEFIGUREENRDIALOG_H
+#include "interpolation.h"
