@@ -19,6 +19,7 @@
 #define INCLUDE_INTERPOLATION_H
 
 #include "export.h"
+#include <iterator>
 
 class SDRBASE_API Interpolation {
 public:
