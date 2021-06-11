@@ -696,6 +696,14 @@
         <string>Excess noise ratio of the noise source in dB</string>
        </property>
       </column>
+      <column>
+       <property name="text">
+        <string>Floor (dBm)</string>
+       </property>
+       <property name="toolTip">
+        <string>Noise floor in dBm for 1Hz bandwidth at 290K</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>
@@ -765,6 +773,11 @@
         <item>
          <property name="text">
           <string>ENR (dB)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Noise floor (dBm)</string>
          </property>
         </item>
        </widget>
@@ -849,15 +862,20 @@
   <tabstop>deltaFrequency</tabstop>
   <tabstop>fftSize</tabstop>
   <tabstop>fftCount</tabstop>
+  <tabstop>frequencySpec</tabstop>
   <tabstop>start</tabstop>
   <tabstop>stop</tabstop>
   <tabstop>steps</tabstop>
+  <tabstop>step</tabstop>
+  <tabstop>frequencies</tabstop>
   <tabstop>startStop</tabstop>
   <tabstop>saveResults</tabstop>
   <tabstop>clearResults</tabstop>
   <tabstop>enr</tabstop>
   <tabstop>control</tabstop>
   <tabstop>chartSelect</tabstop>
+  <tabstop>openReference</tabstop>
+  <tabstop>clearReference</tabstop>
   <tabstop>chart</tabstop>
   <tabstop>results</tabstop>
  </tabstops>

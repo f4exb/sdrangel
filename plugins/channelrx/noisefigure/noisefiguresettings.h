@@ -28,7 +28,7 @@
 class Serializable;
 
 // Number of columns in the table
-#define NOISEFIGURE_COLUMNS 5
+#define NOISEFIGURE_COLUMNS 6
 
 struct NoiseFigureSettings
 {
@@ -69,6 +69,10 @@ struct NoiseFigureSettings
     double m_powerDelay;       //<! Delay in seconds before starting a measurement
 
     QList<ENR *> m_enr;
+    enum Interpolation {
+        LINEAR,
+        BARYCENTRIC
+    } m_interpolation;
 
     quint32 m_rgbColor;
     QString m_title;

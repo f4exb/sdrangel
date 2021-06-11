@@ -71,6 +71,7 @@ void NoiseFigureGUI::resizeTable()
     ui->results->setItem(row, RESULTS_COL_TEMP, new QTableWidgetItem("10000"));
     ui->results->setItem(row, RESULTS_COL_Y, new QTableWidgetItem("10.00"));
     ui->results->setItem(row, RESULTS_COL_ENR, new QTableWidgetItem("10.00"));
+    ui->results->setItem(row, RESULTS_COL_FLOOR, new QTableWidgetItem("-174.00"));
     ui->results->resizeColumnsToContents();
     ui->results->removeRow(row);
 }
@@ -86,17 +87,20 @@ void NoiseFigureGUI::measurementReceived(NoiseFigure::MsgNFMeasurement& report)
     QTableWidgetItem *tempItem = new QTableWidgetItem();
     QTableWidgetItem *yItem = new QTableWidgetItem();
     QTableWidgetItem *enrItem = new QTableWidgetItem();
+    QTableWidgetItem *floorItem = new QTableWidgetItem();
     ui->results->setItem(row, RESULTS_COL_FREQ, freqItem);
     ui->results->setItem(row, RESULTS_COL_NF, nfItem);
     ui->results->setItem(row, RESULTS_COL_TEMP, tempItem);
     ui->results->setItem(row, RESULTS_COL_Y, yItem);
     ui->results->setItem(row, RESULTS_COL_ENR, enrItem);
+    ui->results->setItem(row, RESULTS_COL_FLOOR, floorItem);
 
     freqItem->setData(Qt::DisplayRole, report.getFrequency());
     nfItem->setData(Qt::DisplayRole, report.getNF());
     tempItem->setData(Qt::DisplayRole, report.getTemp());
     yItem->setData(Qt::DisplayRole, report.getY());
     enrItem->setData(Qt::DisplayRole, report.getENR());
+    floorItem->setData(Qt::DisplayRole, report.getFloor());
 
     ui->results->setSortingEnabled(true);
     plotChart();
@@ -647,6 +651,7 @@ NoiseFigureGUI::NoiseFigureGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, B
     ui->results->setItemDelegateForColumn(RESULTS_COL_TEMP, new DecimalDelegate(0));
     ui->results->setItemDelegateForColumn(RESULTS_COL_Y, new DecimalDelegate(2));
     ui->results->setItemDelegateForColumn(RESULTS_COL_ENR, new DecimalDelegate(2));
+    ui->results->setItemDelegateForColumn(RESULTS_COL_FLOOR, new DecimalDelegate(1));
 
     displaySettings();
     applySettings(true);

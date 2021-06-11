@@ -34,7 +34,7 @@ Determines the size (number of points) of the FFT used to measure noise power. O
 
 <h3>5: BW</h3>
 
-Displays the measurement bandwidth in kHz as determined by (2).
+Displays the measurement bandwidth in Hz as determined by the FFT size (4) and the sample rate.
 
 <h3>6: FFTs to average</h3>
 
@@ -64,7 +64,7 @@ Clears the current results from the table and chart.
 
 Opens the ENR dialog to allow entering the Excess Noise Ratios (ENRs) for noise source. ENR specifies the difference in noise source power output in dB from when the source is powered off compared to when it is powered on.
 This typically varies with frequency, so values should be entered for each calibrated frequency. When a measurement is attempted at a frequency for which a value is not specified, an interpolated value will be used.
-Barycentric Rational Interpolation is used.
+You can choose between linear and barycentric rational interpolation, and the difference between the two is shown in the chart.
 
 ![Noise figure ENR dialog](../../../doc/img/NoiseFigure_plugin_enr.png)
 
@@ -87,6 +87,7 @@ Displays measurement results.
 * T - Calculated noise temperature in Kelvin with a reference temperature of 290K.
 * Y - Measured Y factor in dB (difference in measured power when the noise source is on and off).
 * ENR - Excess noise factor of the noise source in dB.
+* Floor - Noise floor in dBm assuming 1Hz bandwidth at 290K.
 
 ![Noise figure results table](../../../doc/img/NoiseFigure_plugin_results.png)
 

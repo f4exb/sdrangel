@@ -54,6 +54,7 @@ void NoiseFigureSettings::resetToDefaults()
     m_powerDelay = 0.5;
     qDeleteAll(m_enr);
     m_enr << new ENR(1000.0, 15.0);
+    m_interpolation = LINEAR;
     m_rgbColor = QColor(0, 100, 200).rgb();
     m_title = "Noise Figure";
     m_streamIndex = 0;
@@ -105,6 +106,8 @@ QByteArray NoiseFigureSettings::serialize() const
     s.writeU32(23, m_reverseAPIPort);
     s.writeU32(24, m_reverseAPIDeviceIndex);
     s.writeU32(25, m_reverseAPIChannelIndex);
+
+    s.writeS32(26, (int)m_interpolation);
 
     for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
         s.writeS32(100 + i, m_resultsColumnIndexes[i]);
@@ -173,6 +176,8 @@ bool NoiseFigureSettings::deserialize(const QByteArray& data)
         m_reverseAPIDeviceIndex = utmp > 99 ? 99 : utmp;
         d.readU32(25, &utmp, 0);
         m_reverseAPIChannelIndex = utmp > 99 ? 99 : utmp;
+
+        d.readS32(26, (int*)&m_interpolation, LINEAR);
 
         for (int i = 0; i < NOISEFIGURE_COLUMNS; i++) {
             d.readS32(100 + i, &m_resultsColumnIndexes[i], i);

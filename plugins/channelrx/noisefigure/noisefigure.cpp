@@ -37,6 +37,7 @@
 #include "device/deviceapi.h"
 #include "feature/feature.h"
 #include "util/db.h"
+#include "util/interpolation.h"
 #include "channel/channelwebapiutils.h"
 #include "maincore.h"
 
@@ -161,10 +162,10 @@ void NoiseFigure::processVISA(QStringList commands)
 // Calculate ENR at specified frequency
 double NoiseFigure::calcENR(double frequency)
 {
+    double enr;
     int size = m_settings.m_enr.size();
     if (size >= 2)
     {
-        int order = size > 3 ? 3 : size - 1;
         std::vector<double> x(size);
         std::vector<double> y(size);
         for (int i = 0; i < size; i++)
@@ -172,19 +173,28 @@ double NoiseFigure::calcENR(double frequency)
             x[i] = m_settings.m_enr[i]->m_frequency;
             y[i] = m_settings.m_enr[i]->m_enr;
         }
-        boost::math::barycentric_rational<double> interpolant(std::move(x), std::move(y), order);
-        double enr = interpolant(frequency);
-        qDebug() << "ENR at " << frequency << " interpolated to " << enr;
-        return enr;
+        if (m_settings.m_interpolation == NoiseFigureSettings::LINEAR)
+        {
+            enr = Interpolation::linear(x.begin(), x.end(), y.begin(), frequency);
+        }
+        else
+        {
+            int order = size - 1;
+            boost::math::barycentric_rational<double> interpolant(std::move(x), std::move(y), order);
+            enr = interpolant(frequency);
+        }
     }
     else if (size == 1)
     {
-        return m_settings.m_enr[0]->m_enr;
+        enr = m_settings.m_enr[0]->m_enr;
     }
     else
     {
-        return 0.0;
+        // Shouldn't get here
+        enr = 0.0;
     }
+    qDebug() << "ENR at " << frequency << " interpolated to " << enr;
+    return enr;
 }
 
 // FSM for running measurements over multiple frequencies
@@ -295,15 +305,19 @@ void NoiseFigure::nextState()
 
     case COMPLETE:
         // Calculate noise figure and temperature using Y-factor method
+        double t = 290.0;
+        double k = 1.38064852e-23;
+        double bw = 1;
         double y = m_onPower - m_offPower;
         double enr = calcENR(m_measurementFrequency/1e6);
         double nf = 10.0*log10(pow(10.0, enr/10.0)/(pow(10.0, y/10.0)-1.0));
-        double temp = 290.0*(pow(10.0, nf/10.0)-1.0);
+        double temp = t*(pow(10.0, nf/10.0)-1.0);
+        double floor = 10.0*log10(1000.0*k*t) + nf + 10*log10(bw);
 
         // Send result to GUI
         if (getMessageQueueToGUI())
         {
-            MsgNFMeasurement *msg = MsgNFMeasurement::create(m_measurementFrequency/1e6, nf, temp, y, enr);
+            MsgNFMeasurement *msg = MsgNFMeasurement::create(m_measurementFrequency/1e6, nf, temp, y, enr, floor);
             getMessageQueueToGUI()->push(msg);
         }
 
@@ -407,7 +421,7 @@ bool NoiseFigure::handleMessage(const Message& cmd)
     {
         if (m_state == IDLE)
         {
-            if (!m_settings.m_visaDevice.isEmpty()) 
+            if (!m_settings.m_visaDevice.isEmpty())
             {
                 if (openVISADevice()) {
                     QTimer::singleShot(0, this, SLOT(nextState()));
@@ -415,7 +429,7 @@ bool NoiseFigure::handleMessage(const Message& cmd)
                     getMessageQueueToGUI()->push(MsgFinished::create(QString("Failed to open VISA device %1").arg(m_settings.m_visaDevice)));
                 }
             }
-            else 
+            else
             {
                 QTimer::singleShot(0, this, SLOT(nextState()));
             }

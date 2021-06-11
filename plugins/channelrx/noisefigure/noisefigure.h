@@ -95,10 +95,11 @@ public:
         double getTemp() const { return m_temp; }
         double getY() const { return m_y; }
         double getENR() const { return m_enr; }
+        double getFloor() const { return m_floor; }
 
-        static MsgNFMeasurement* create(double frequency, double nf, double temp, double y, double enr)
+        static MsgNFMeasurement* create(double frequency, double nf, double temp, double y, double enr, double floor)
         {
-            return new MsgNFMeasurement(frequency, nf, temp, y, enr);
+            return new MsgNFMeasurement(frequency, nf, temp, y, enr, floor);
         }
 
     private:
@@ -107,14 +108,16 @@ public:
         double m_temp;      // In Kelvin
         double m_y;         // In dB
         double m_enr;       // In dB
+        double m_floor;     // In dBm
 
-        MsgNFMeasurement(double frequency, double nf, double temp, double y, double enr) :
+        MsgNFMeasurement(double frequency, double nf, double temp, double y, double enr, double floor) :
             Message(),
             m_frequency(frequency),
             m_nf(nf),
             m_temp(temp),
             m_y(y),
-            m_enr(enr)
+            m_enr(enr),
+            m_floor(floor)
         {
         }
     };
