@@ -47,7 +47,7 @@ class SDRBASE_API ScopeVis : public QObject {
 public:
     // === messages ===
     // ---------------------------------------------
-    class MsgConfigureScopeVis : public Message {
+    class SDRBASE_API MsgConfigureScopeVis : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -71,7 +71,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisAddTrigger : public Message {
+    class SDRBASE_API MsgScopeVisAddTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -92,7 +92,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisChangeTrigger : public Message {
+    class SDRBASE_API MsgScopeVisChangeTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -116,7 +116,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisRemoveTrigger : public Message {
+    class SDRBASE_API MsgScopeVisRemoveTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -137,7 +137,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisMoveTrigger : public Message {
+    class SDRBASE_API MsgScopeVisMoveTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -162,7 +162,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisFocusOnTrigger : public Message {
+    class SDRBASE_API MsgScopeVisFocusOnTrigger : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -183,7 +183,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisAddTrace : public Message {
+    class SDRBASE_API MsgScopeVisAddTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -204,7 +204,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisChangeTrace : public Message {
+    class SDRBASE_API MsgScopeVisChangeTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -228,7 +228,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisRemoveTrace : public Message {
+    class SDRBASE_API MsgScopeVisRemoveTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -249,7 +249,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisMoveTrace : public Message {
+    class SDRBASE_API MsgScopeVisMoveTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -274,7 +274,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisFocusOnTrace : public Message {
+    class SDRBASE_API MsgScopeVisFocusOnTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -295,7 +295,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGOneShot : public Message {
+    class SDRBASE_API MsgScopeVisNGOneShot : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
@@ -316,7 +316,7 @@ public:
     };
 
     // ---------------------------------------------
-    class MsgScopeVisNGMemoryTrace : public Message {
+    class SDRBASE_API MsgScopeVisNGMemoryTrace : public Message {
         MESSAGE_CLASS_DECLARATION
 
     public:
