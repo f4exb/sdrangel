@@ -133,8 +133,18 @@ void ScopeVis::setPreTriggerDelay(uint32_t preTriggerDelay, bool emitSignal)
     }
 }
 
+void ScopeVis::setNbStreams(uint32_t nbStreams)
+{
+    QMutexLocker configLocker(&m_mutex);
+
+    if (m_nbStreams != nbStreams)
+    {
+        m_traceDiscreteMemory.setNbStreams(nbStreams);
+        m_nbStreams = nbStreams;
+    }
+}
+
 void ScopeVis::configure(
-    uint32_t nbStreams,
     uint32_t traceSize,
     uint32_t timeBase,
     uint32_t timeOfsProMill,
@@ -148,12 +158,6 @@ void ScopeVis::configure(
     {
         setTraceSize(traceSize);
         m_settings.m_traceLen = traceSize;
-    }
-
-    if (m_nbStreams != nbStreams)
-    {
-        m_traceDiscreteMemory.setNbStreams(nbStreams);
-        m_nbStreams = nbStreams;
     }
 
     if (m_timeBase != timeBase)

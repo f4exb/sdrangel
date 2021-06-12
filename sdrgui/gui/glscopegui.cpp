@@ -114,7 +114,6 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     fillProjectionCombo(ui->trigMode);
 
     m_scopeVis->configure(
-        1,
         2*m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,
@@ -123,7 +122,6 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     );
 
     m_scopeVis->configure(
-        1,
         m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,
@@ -591,7 +589,6 @@ void GLScopeGUI::on_time_valueChanged(int value)
     setTimeScaleDisplay();
     setTraceDelayDisplay();
     m_scopeVis->configure(
-        1,
         m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,
@@ -610,7 +607,6 @@ void GLScopeGUI::on_timeOfs_valueChanged(int value)
     m_settings.m_timeOfs = value;
     setTimeOfsDisplay();
     m_scopeVis->configure(
-        1,
         m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,
@@ -634,7 +630,6 @@ void GLScopeGUI::on_traceLen_valueChanged(int value)
     m_traceLenMult = value;
     m_settings.m_traceLen = m_traceLenMult*m_scopeVis->getTraceChunkSize();
     m_scopeVis->configure(
-        1,
         m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,
@@ -1022,7 +1017,6 @@ void GLScopeGUI::on_trigPre_valueChanged(int value)
     (void) value;
     setTrigPreDisplay();
     m_scopeVis->configure(
-        1,
         m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,
@@ -1064,7 +1058,6 @@ void GLScopeGUI::on_freerun_toggled(bool checked)
     }
 
     m_scopeVis->configure(
-        1,
         m_traceLenMult*m_scopeVis->getTraceChunkSize(),
         m_timeBase,
         m_timeOffset*10,

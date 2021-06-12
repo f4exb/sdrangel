@@ -345,8 +345,8 @@ public:
     MessageQueue *getInputMessageQueue() { return &m_inputMessageQueue; } //!< Get the queue for asynchronous inbound communication
 
     void setLiveRate(int sampleRate);
+    void setNbStreams(uint32_t nbStreams);
     void configure(
-        uint32_t nbStreams,
         uint32_t traceSize,
         uint32_t timeBase,
         uint32_t timeOfsProMill,
