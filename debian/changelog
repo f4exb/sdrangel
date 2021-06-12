@@ -1,3 +1,13 @@
+sdrangel (6.14.0-1) unstable; urgency=medium
+
+  * New noise figure Rx channel plugin PR #917 and #919
+  * GLscope rework featuring a multiple I/Q stream input. Issues #898 and #872
+  * ADS-B demod: Delete m_worker after removing sink from DSP. PR #916 Issue #915
+  * ADS-B demod: ADSBDemodWorker: check running state before actual start/stop
+  * GS232: SPID rotator fixes. PR #914
+
+  -- Edouard Griffiths, F4EXB <f4exb06@gmail.com>  Sat, 11 Jun 2021 17:44:52 +0200
+
 sdrangel (6.13.0-1) unstable; urgency=medium
 
   * New antenna tool feature PR #906

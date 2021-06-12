@@ -11,9 +11,13 @@ LoRa is a property of Semtech and the details of the protocol are not made publi
   - To get an idea of what is LoRa: [here](https://www.link-labs.com/blog/what-is-lora)
   - A detailed inspection of LoRa modulation and protocol: [here](https://static1.squarespace.com/static/54cecce7e4b054df1848b5f9/t/57489e6e07eaa0105215dc6c/1464376943218/Reversing-Lora-Knight.pdf)
 
-Transmissions from the RN2483 module with the Distance Enhancement feature (spread factors 11 and 12) could be successfully received. It has not been tested with Semtech SX127x hardware. This LoRa decoder is designed for experimentation. For production grade applications it is recommended to use dedicated hardware instead.
+&#9888; Only spread factors of 11 and 12 are working in LoRa mode thus with the distance enhancement active (DE=2)
+
+Transmissions from the RN2483 module (SF=11 and SF=12 with DE=2) could be successfully received. It has not been tested with Semtech SX127x hardware. This LoRa decoder is designed for experimentation. For production grade applications it is recommended to use dedicated hardware instead.
 
 Modulation characteristics from LoRa have been augmented with more bandwidths and FFT bin collations (DE factor). Plain TTY and ASCII have also been added and there are plans to add some more complex typically amateur radio MFSK based modes like JT65.
+
+In any case it is recommended to use a non zero distance enhancement factor for successful transmissions.
 
 Note: this plugin is officially supported since version 6.
 

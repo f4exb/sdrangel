@@ -29,7 +29,7 @@
 const PluginDescriptor DemodAnalyzerPlugin::m_pluginDescriptor = {
     DemodAnalyzer::m_featureId,
 	QStringLiteral("Demod Analyzer"),
-	QStringLiteral("6.7.0"),
+	QStringLiteral("6.14.0"),
 	QStringLiteral("(c) Edouard Griffiths, F4EXB"),
 	QStringLiteral("https://github.com/f4exb/sdrangel"),
 	true,
