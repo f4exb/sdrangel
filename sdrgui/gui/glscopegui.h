@@ -182,6 +182,16 @@ private:
     void fillProjectionCombo(QComboBox* comboBox);
     void disableLiveMode(bool disable);
 
+    void settingsTraceAdd(const GLScopeSettings::TraceData& traceData);
+    void settingsTraceChange(const GLScopeSettings::TraceData& traceData, uint32_t traceIndex);
+    void settingsTraceDel(uint32_t traceIndex);
+    void settingsTraceMove(uint32_t traceIndex, bool upElseDown);
+
+    void settingsTriggerAdd(const GLScopeSettings::TriggerData& triggerData);
+    void settingsTriggerChange(const GLScopeSettings::TriggerData& triggerData, uint32_t triggerIndex);
+    void settingsTriggerDel(uint32_t triggerIndex);
+    void settingsTriggerMove(uint32_t triggerIndex, bool upElseDown);
+
 private slots:
     void on_scope_sampleRateChanged(int value);
     void on_scope_traceSizeChanged(uint32_t value);

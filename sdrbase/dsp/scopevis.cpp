@@ -269,6 +269,10 @@ void ScopeVis::removeTrace(uint32_t traceIndex)
             m_settings.m_tracesData[iDest++] = m_settings.m_tracesData[iSource];
         }
     }
+
+    if (m_settings.m_tracesData.size() != 0) {
+        m_settings.m_tracesData.pop_back();
+    }
 }
 
 void ScopeVis::moveTrace(uint32_t traceIndex, bool upElseDown)
@@ -347,6 +351,10 @@ void ScopeVis::removeTrigger(uint32_t triggerIndex)
         if (iSource != triggerIndex) {
             m_settings.m_triggersData[iDest++] = m_settings.m_triggersData[iSource];
         }
+    }
+
+    if (m_settings.m_triggersData.size() != 0) {
+        m_settings.m_triggersData.pop_back();
     }
 }
 
