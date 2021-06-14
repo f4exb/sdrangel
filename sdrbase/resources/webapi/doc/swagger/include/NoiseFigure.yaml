@@ -1,0 +1,66 @@
+NoiseFigureSettings:
+  description: NoiseFigure
+  properties:
+    inputFrequencyOffset:
+      type: integer
+      format: int64
+    fftSize:
+      type: integer
+    fftCount:
+      type: integer
+    frequencySpec:
+      type: integer
+    startFrequency:
+      type: number
+      format: float
+    stopFrequency:
+      type: number
+      format: float
+    steps:
+      type: integer
+    step:
+      type: number
+      format: float
+    frequencies:
+      type: string
+    visaDevice:
+      type: string
+    powerOnSCPI:
+      type: string
+    powerOffSCPI:
+      type: string
+    powerOnCommand:
+      type: string
+    powerOffCommand:
+      type: string
+    powerDelay:
+      type: number
+      format: float
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+NoiseFigureReport:
+  description: NoiseFigure
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
