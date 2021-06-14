@@ -3066,6 +3066,9 @@ margin-bottom: 20px;
     "NFMModReport" : {
       "$ref" : "#/definitions/NFMModReport"
     },
+    "NoiseFigureReport" : {
+      "$ref" : "#/definitions/NoiseFigureReport"
+    },
     "SSBDemodReport" : {
       "$ref" : "#/definitions/SSBDemodReport"
     },
@@ -3199,6 +3202,9 @@ margin-bottom: 20px;
     },
     "NFMModSettings" : {
       "$ref" : "#/definitions/NFMModSettings"
+    },
+    "NoiseFigureSettings" : {
+      "$ref" : "#/definitions/NoiseFigureSettings"
     },
     "LocalSinkSettings" : {
       "$ref" : "#/definitions/LocalSinkSettings"
@@ -5664,11 +5670,13 @@ margin-bottom: 20px;
             defs.GS232ControllerSettings = {
   "properties" : {
     "azimuth" : {
-      "type" : "integer",
+      "type" : "number",
+      "format" : "float",
       "description" : "Target azimuth in degrees (0-450)"
     },
     "elevation" : {
-      "type" : "integer",
+      "type" : "number",
+      "format" : "float",
       "description" : "Target elevation in degrees (0-180)"
     },
     "serialPort" : {
@@ -5710,6 +5718,14 @@ margin-bottom: 20px;
     "elevationMax" : {
       "type" : "integer",
       "description" : "Maximum elevation the controller will output"
+    },
+    "tolerance" : {
+      "type" : "integer",
+      "description" : "Tolerance in degrees"
+    },
+    "protocol" : {
+      "type" : "integer",
+      "description" : "(0 GS-232, 1 SPID rot2prog)"
     },
     "title" : {
       "type" : "string"
@@ -7579,6 +7595,100 @@ margin-bottom: 20px;
     }
   },
   "description" : "Enumeration with name for values"
+};
+            defs.NoiseFigureReport = {
+  "properties" : {
+    "channelPowerDB" : {
+      "type" : "number",
+      "format" : "float",
+      "description" : "power received in channel (dB)"
+    },
+    "channelSampleRate" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "NoiseFigure"
+};
+            defs.NoiseFigureSettings = {
+  "properties" : {
+    "inputFrequencyOffset" : {
+      "type" : "integer",
+      "format" : "int64"
+    },
+    "fftSize" : {
+      "type" : "integer"
+    },
+    "fftCount" : {
+      "type" : "integer"
+    },
+    "frequencySpec" : {
+      "type" : "integer"
+    },
+    "startFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "stopFrequency" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "steps" : {
+      "type" : "integer"
+    },
+    "step" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "frequencies" : {
+      "type" : "string"
+    },
+    "visaDevice" : {
+      "type" : "string"
+    },
+    "powerOnSCPI" : {
+      "type" : "string"
+    },
+    "powerOffSCPI" : {
+      "type" : "string"
+    },
+    "powerOnCommand" : {
+      "type" : "string"
+    },
+    "powerOffCommand" : {
+      "type" : "string"
+    },
+    "powerDelay" : {
+      "type" : "number",
+      "format" : "float"
+    },
+    "rgbColor" : {
+      "type" : "integer"
+    },
+    "title" : {
+      "type" : "string"
+    },
+    "streamIndex" : {
+      "type" : "integer",
+      "description" : "MIMO channel. Not relevant when connected to SI (single Rx)."
+    },
+    "useReverseAPI" : {
+      "type" : "integer",
+      "description" : "Synchronize with reverse API (1 for yes, 0 for no)"
+    },
+    "reverseAPIAddress" : {
+      "type" : "string"
+    },
+    "reverseAPIPort" : {
+      "type" : "integer"
+    },
+    "reverseAPIDeviceIndex" : {
+      "type" : "integer"
+    },
+    "reverseAPIChannelIndex" : {
+      "type" : "integer"
+    }
+  },
+  "description" : "NoiseFigure"
 };
             defs.PERTesterActions = {
   "properties" : {
@@ -46666,7 +46776,7 @@ except ApiException as e:
           </div>
           <div id="generator">
             <div class="content">
-              Generated 2021-05-29T00:16:39.973+02:00
+              Generated 2021-06-14T15:03:45.792+02:00
             </div>
           </div>
       </div>

@@ -69,6 +69,8 @@ ChannelSettings:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodSettings"
     NFMModSettings:
       $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModSettings"
+    NoiseFigureSettings:
+      $ref: "/doc/swagger/include/NoiseFigure.yaml#/NoiseFigureSettings"
     LocalSinkSettings:
       $ref: "/doc/swagger/include/LocalSink.yaml#/LocalSinkSettings"
     LocalSourceSettings:

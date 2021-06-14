@@ -49,6 +49,8 @@ ChannelReport:
       $ref: "/doc/swagger/include/NFMDemod.yaml#/NFMDemodReport"
     NFMModReport:
       $ref: "/doc/swagger/include/NFMMod.yaml#/NFMModReport"
+    NoiseFigureReport:
+      $ref: "/doc/swagger/include/NoiseFigure.yaml#/NoiseFigureReport"
     SSBDemodReport:
       $ref: "/doc/swagger/include/SSBDemod.yaml#/SSBDemodReport"
     RemoteSourceReport:
