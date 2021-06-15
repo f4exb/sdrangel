@@ -105,9 +105,9 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     settingsTraceAdd(traceData);
 
     setEnabled(true);
-    connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
-    connect(m_glScope, SIGNAL(traceSizeChanged(uint32_t)), this, SLOT(on_scope_traceSizeChanged(uint32_t)));
-    connect(m_glScope, SIGNAL(preTriggerChanged(uint32_t)), this, SLOT(on_scope_preTriggerChanged(uint32_t)));
+    connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(onScopeSampleRateChanged(int)));
+    connect(m_glScope, SIGNAL(traceSizeChanged(uint32_t)), this, SLOT(onScopeTraceSizeChanged(uint32_t)));
+    connect(m_glScope, SIGNAL(preTriggerChanged(uint32_t)), this, SLOT(onScopePreTriggerChanged(uint32_t)));
 
     ui->traceMode->clear();
     fillProjectionCombo(ui->traceMode);
@@ -144,7 +144,7 @@ void GLScopeGUI::setSampleRate(int sampleRate)
     m_sampleRate = sampleRate;
 }
 
-void GLScopeGUI::on_scope_sampleRateChanged(int sampleRate)
+void GLScopeGUI::onScopeSampleRateChanged(int sampleRate)
 {
     //m_sampleRate = m_glScope->getSampleRate();
     m_sampleRate = sampleRate;
@@ -157,17 +157,17 @@ void GLScopeGUI::on_scope_sampleRateChanged(int sampleRate)
     setTrigDelayDisplay();
 }
 
-void GLScopeGUI::on_scope_traceSizeChanged(uint32_t traceNbSamples)
+void GLScopeGUI::onScopeTraceSizeChanged(uint32_t traceNbSamples)
 {
-    qDebug("GLScopeGUI::on_scope_traceSizeChanged: %u", traceNbSamples);
+    qDebug("GLScopeGUI::onScopeTraceSizeChanged: %u", traceNbSamples);
     m_traceLenMult = traceNbSamples / m_scopeVis->getTraceChunkSize();
     ui->traceLen->setValue(m_traceLenMult);
     setTraceLenDisplay();
 }
 
-void GLScopeGUI::on_scope_preTriggerChanged(uint32_t preTriggerNbSamples)
+void GLScopeGUI::onScopePreTriggerChanged(uint32_t preTriggerNbSamples)
 {
-    qDebug("GLScopeGUI::on_scope_preTriggerChanged: %u", preTriggerNbSamples);
+    qDebug("GLScopeGUI::onScopePreTriggerChanged: %u", preTriggerNbSamples);
     ui->trigPre->setValue(preTriggerNbSamples*100 / m_glScope->getTraceSize()); // slider position is a percentage value of the trace size
     setTrigPreDisplay();
 }
