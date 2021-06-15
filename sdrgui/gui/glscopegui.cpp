@@ -95,12 +95,14 @@ void GLScopeGUI::setBuddies(MessageQueue* messageQueue, ScopeVis* scopeVis, GLSc
     fillTriggerData(triggerData);
     ScopeVis::MsgScopeVisAddTrigger *msgAddTrigger = ScopeVis::MsgScopeVisAddTrigger::create(triggerData);
     m_scopeVis->getInputMessageQueue()->push(msgAddTrigger);
+    settingsTriggerAdd(triggerData);
 
     // Add a trace
     GLScopeSettings::TraceData traceData;
     fillTraceData(traceData);
     ScopeVis::MsgScopeVisAddTrace *msgAddTrace = ScopeVis::MsgScopeVisAddTrace::create(traceData);
     m_scopeVis->getInputMessageQueue()->push(msgAddTrace);
+    settingsTraceAdd(traceData);
 
     setEnabled(true);
     connect(m_glScope, SIGNAL(sampleRateChanged(int)), this, SLOT(on_scope_sampleRateChanged(int)));
