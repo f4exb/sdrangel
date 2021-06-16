@@ -165,9 +165,6 @@ DemodAnalyzerGUI::DemodAnalyzerGUI(PluginAPI* pluginAPI, FeatureUISet *featureUI
 	ui->glScope->connectTimer(MainCore::instance()->getMasterTimer());
 	connect(&MainCore::instance()->getMasterTimer(), SIGNAL(timeout()), this, SLOT(tick()));
 
-	ui->spectrumGUI->setBuddies(m_spectrumVis, ui->glSpectrum);
-	ui->scopeGUI->setBuddies(m_scopeVis->getInputMessageQueue(), m_scopeVis, ui->glScope);
-
     m_settings.setSpectrumGUI(ui->spectrumGUI);
     m_settings.setScopeGUI(ui->scopeGUI);
 
