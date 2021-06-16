@@ -433,7 +433,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     traceDataQ.m_ampIndex = 0;
     traceDataQ.m_ofs = 0.0;
     traceDataQ.m_ofsCoarse = 0;
-    ui->scopeGUI->addTrace(traceDataI);
+    ui->scopeGUI->changeTrace(0, traceDataI);
     ui->scopeGUI->addTrace(traceDataQ);
     ui->scopeGUI->setDisplayMode(GLScopeSettings::DisplayXYV);
     ui->scopeGUI->focusOnTrace(0); // re-focus to take changes into account in the GUI
@@ -442,7 +442,7 @@ AISDemodGUI::AISDemodGUI(PluginAPI* pluginAPI, DeviceUISet *deviceUISet, Baseban
     triggerData.m_triggerLevel = 0.1;
     triggerData.m_triggerLevelCoarse = 10;
     triggerData.m_triggerPositiveEdge = true;
-    ui->scopeGUI->addTrigger(triggerData);
+    ui->scopeGUI->changeTrigger(0, triggerData);
     ui->scopeGUI->focusOnTrigger(0); // re-focus to take changes into account in the GUI
 
     m_scopeVis->setLiveRate(9600*6);

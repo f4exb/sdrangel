@@ -51,6 +51,8 @@ public:
     virtual bool deserialize(const QByteArray& data);
 
     bool handleMessage(Message* message);
+    unsigned int getNbTraces() const { return m_settings.m_tracesData.size(); }
+    unsigned int getNbTriggers() const { return m_settings.m_triggersData.size(); }
 
     // preconfiguration methods
     // global (first line):
