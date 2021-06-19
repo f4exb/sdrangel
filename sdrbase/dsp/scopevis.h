@@ -1059,6 +1059,13 @@ private:
             }
         }
 
+        void resetControls()
+        {
+            for (auto traceControl : m_tracesControl) {
+                traceControl->reset();
+            }
+        }
+
     private:
         float *m_x0;
         float *m_x1;

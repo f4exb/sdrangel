@@ -158,6 +158,8 @@ void ScopeVis::configure(
     {
         setTraceSize(traceSize);
         m_settings.m_traceLen = traceSize;
+        m_triggerState = TriggerUntriggered;
+        m_traces.resetControls();
     }
 
     if (m_timeBase != timeBase)
