@@ -27,7 +27,7 @@ set(SOAPYSDR_TAG "soapy-sdr-0.7.1")
 set(SOAPYSDR_SDRPLAY_TAG "soapy-sdrplay-0.2.0")
 set(SOAPYSDR_AUDIO_TAG "soapy-audio-0.1.1")
 set(SOAPYSDR_REMOTE_TAG "soapy-remote-0.5.1")
-set(AIRSPY_TAG bfb667080936ca5c2d23b3282f5893931ec38d3f)
+set(AIRSPY_TAG "v1.0.10")
 set(HACKRF_TAG "v2018.01.1")
 set(LIBXML2_TAG "v2.9.9")
 
