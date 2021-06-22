@@ -3961,6 +3961,11 @@ bool WebAPIRequestMapper::getChannelSettings(
             channelSettings->setPacketModSettings(new SWGSDRangel::SWGPacketModSettings());
             channelSettings->getPacketModSettings()->fromJsonObject(settingsJsonObject);
         }
+        else if (channelSettingsKey == "RadioClockSettings")
+        {
+            channelSettings->setRadioClockSettings(new SWGSDRangel::SWGRadioClockSettings());
+            channelSettings->getRadioClockSettings()->fromJsonObject(settingsJsonObject);
+        }
         else if (channelSettingsKey == "RemoteSinkSettings")
         {
             channelSettings->setRemoteSinkSettings(new SWGSDRangel::SWGRemoteSinkSettings());

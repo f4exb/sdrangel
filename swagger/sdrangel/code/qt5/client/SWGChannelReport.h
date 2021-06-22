@@ -43,6 +43,7 @@
 #include "SWGNFMModReport.h"
 #include "SWGNoiseFigureReport.h"
 #include "SWGPacketModReport.h"
+#include "SWGRadioClockReport.h"
 #include "SWGRemoteSourceReport.h"
 #include "SWGSSBDemodReport.h"
 #include "SWGSSBModReport.h"
@@ -141,6 +142,9 @@ public:
 
     SWGSSBDemodReport* getSsbDemodReport();
     void setSsbDemodReport(SWGSSBDemodReport* ssb_demod_report);
+
+    SWGRadioClockReport* getRadioClockReport();
+    void setRadioClockReport(SWGRadioClockReport* radio_clock_report);
 
     SWGRemoteSourceReport* getRemoteSourceReport();
     void setRemoteSourceReport(SWGRemoteSourceReport* remote_source_report);
@@ -244,6 +248,9 @@ private:
 
     SWGSSBDemodReport* ssb_demod_report;
     bool m_ssb_demod_report_isSet;
+
+    SWGRadioClockReport* radio_clock_report;
+    bool m_radio_clock_report_isSet;
 
     SWGRemoteSourceReport* remote_source_report;
     bool m_remote_source_report_isSet;

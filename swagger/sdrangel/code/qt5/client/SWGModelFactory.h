@@ -1,6 +1,6 @@
 /**
  * SDRangel
- * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    ---
+ * This is the web REST/JSON API of SDRangel SDR software. SDRangel is an Open Source Qt5/OpenGL 3.0+ (4.3+ in Windows) GUI and server Software Defined Radio and signal analyzer in software. It supports Airspy, BladeRF, HackRF, LimeSDR, PlutoSDR, RTL-SDR, SDRplay RSP1 and FunCube    ---   Limitations and specifcities:    * In SDRangel GUI the first Rx device set cannot be deleted. Conversely the server starts with no device sets and its number of device sets can be reduced to zero by as many calls as necessary to /sdrangel/deviceset with DELETE method.   * Preset import and export from/to file is a server only feature.   * Device set focus is a GUI only feature.   * The following channels are not implemented (status 501 is returned): ATV and DATV demodulators, Channel Analyzer NG, LoRa demodulator   * The device settings and report structures contains only the sub-structure corresponding to the device type. The DeviceSettings and DeviceReport structures documented here shows all of them but only one will be or should be present at a time   * The channel settings and report structures contains only the sub-structure corresponding to the channel type. The ChannelSettings and ChannelReport structures documented here shows all of them but only one will be or should be present at a time    --- 
  *
  * OpenAPI spec version: 6.0.0
  * Contact: f4exb06@gmail.com
@@ -201,6 +201,8 @@
 #include "SWGPresets.h"
 #include "SWGRDSReport.h"
 #include "SWGRDSReport_altFrequencies.h"
+#include "SWGRadioClockReport.h"
+#include "SWGRadioClockSettings.h"
 #include "SWGRange.h"
 #include "SWGRangeFloat.h"
 #include "SWGRemoteInputReport.h"
@@ -277,1296 +279,786 @@ namespace SWGSDRangel {
 
   inline void* create(QString type) {
     if(QString("SWGADSBDemodReport").compare(type) == 0) {
-      SWGADSBDemodReport *obj = new SWGADSBDemodReport();
-      obj->init();
-      return obj;
+      return new SWGADSBDemodReport();
     }
     if(QString("SWGADSBDemodSettings").compare(type) == 0) {
-      SWGADSBDemodSettings *obj = new SWGADSBDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGADSBDemodSettings();
     }
     if(QString("SWGAFCActions").compare(type) == 0) {
-      SWGAFCActions *obj = new SWGAFCActions();
-      obj->init();
-      return obj;
+      return new SWGAFCActions();
     }
     if(QString("SWGAFCReport").compare(type) == 0) {
-      SWGAFCReport *obj = new SWGAFCReport();
-      obj->init();
-      return obj;
+      return new SWGAFCReport();
     }
     if(QString("SWGAFCSettings").compare(type) == 0) {
-      SWGAFCSettings *obj = new SWGAFCSettings();
-      obj->init();
-      return obj;
+      return new SWGAFCSettings();
     }
     if(QString("SWGAISDemodReport").compare(type) == 0) {
-      SWGAISDemodReport *obj = new SWGAISDemodReport();
-      obj->init();
-      return obj;
+      return new SWGAISDemodReport();
     }
     if(QString("SWGAISDemodSettings").compare(type) == 0) {
-      SWGAISDemodSettings *obj = new SWGAISDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGAISDemodSettings();
     }
     if(QString("SWGAISModActions").compare(type) == 0) {
-      SWGAISModActions *obj = new SWGAISModActions();
-      obj->init();
-      return obj;
+      return new SWGAISModActions();
     }
     if(QString("SWGAISModActions_tx").compare(type) == 0) {
-      SWGAISModActions_tx *obj = new SWGAISModActions_tx();
-      obj->init();
-      return obj;
+      return new SWGAISModActions_tx();
     }
     if(QString("SWGAISModReport").compare(type) == 0) {
-      SWGAISModReport *obj = new SWGAISModReport();
-      obj->init();
-      return obj;
+      return new SWGAISModReport();
     }
     if(QString("SWGAISModSettings").compare(type) == 0) {
-      SWGAISModSettings *obj = new SWGAISModSettings();
-      obj->init();
-      return obj;
+      return new SWGAISModSettings();
     }
     if(QString("SWGAISSettings").compare(type) == 0) {
-      SWGAISSettings *obj = new SWGAISSettings();
-      obj->init();
-      return obj;
+      return new SWGAISSettings();
     }
     if(QString("SWGAMBEDevice").compare(type) == 0) {
-      SWGAMBEDevice *obj = new SWGAMBEDevice();
-      obj->init();
-      return obj;
+      return new SWGAMBEDevice();
     }
     if(QString("SWGAMBEDevices").compare(type) == 0) {
-      SWGAMBEDevices *obj = new SWGAMBEDevices();
-      obj->init();
-      return obj;
+      return new SWGAMBEDevices();
     }
     if(QString("SWGAMDemodReport").compare(type) == 0) {
-      SWGAMDemodReport *obj = new SWGAMDemodReport();
-      obj->init();
-      return obj;
+      return new SWGAMDemodReport();
     }
     if(QString("SWGAMDemodSettings").compare(type) == 0) {
-      SWGAMDemodSettings *obj = new SWGAMDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGAMDemodSettings();
     }
     if(QString("SWGAMModReport").compare(type) == 0) {
-      SWGAMModReport *obj = new SWGAMModReport();
-      obj->init();
-      return obj;
+      return new SWGAMModReport();
     }
     if(QString("SWGAMModSettings").compare(type) == 0) {
-      SWGAMModSettings *obj = new SWGAMModSettings();
-      obj->init();
-      return obj;
+      return new SWGAMModSettings();
     }
     if(QString("SWGAPRSSettings").compare(type) == 0) {
-      SWGAPRSSettings *obj = new SWGAPRSSettings();
-      obj->init();
-      return obj;
+      return new SWGAPRSSettings();
     }
     if(QString("SWGAPTDemodActions").compare(type) == 0) {
-      SWGAPTDemodActions *obj = new SWGAPTDemodActions();
-      obj->init();
-      return obj;
+      return new SWGAPTDemodActions();
     }
     if(QString("SWGAPTDemodActions_aos").compare(type) == 0) {
-      SWGAPTDemodActions_aos *obj = new SWGAPTDemodActions_aos();
-      obj->init();
-      return obj;
+      return new SWGAPTDemodActions_aos();
     }
     if(QString("SWGAPTDemodActions_los").compare(type) == 0) {
-      SWGAPTDemodActions_los *obj = new SWGAPTDemodActions_los();
-      obj->init();
-      return obj;
+      return new SWGAPTDemodActions_los();
     }
     if(QString("SWGAPTDemodSettings").compare(type) == 0) {
-      SWGAPTDemodSettings *obj = new SWGAPTDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGAPTDemodSettings();
     }
     if(QString("SWGATVDemodSettings").compare(type) == 0) {
-      SWGATVDemodSettings *obj = new SWGATVDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGATVDemodSettings();
     }
     if(QString("SWGATVModReport").compare(type) == 0) {
-      SWGATVModReport *obj = new SWGATVModReport();
-      obj->init();
-      return obj;
+      return new SWGATVModReport();
     }
     if(QString("SWGATVModSettings").compare(type) == 0) {
-      SWGATVModSettings *obj = new SWGATVModSettings();
-      obj->init();
-      return obj;
+      return new SWGATVModSettings();
     }
     if(QString("SWGAirspyHFReport").compare(type) == 0) {
-      SWGAirspyHFReport *obj = new SWGAirspyHFReport();
-      obj->init();
-      return obj;
+      return new SWGAirspyHFReport();
     }
     if(QString("SWGAirspyHFSettings").compare(type) == 0) {
-      SWGAirspyHFSettings *obj = new SWGAirspyHFSettings();
-      obj->init();
-      return obj;
+      return new SWGAirspyHFSettings();
     }
     if(QString("SWGAirspyReport").compare(type) == 0) {
-      SWGAirspyReport *obj = new SWGAirspyReport();
-      obj->init();
-      return obj;
+      return new SWGAirspyReport();
     }
     if(QString("SWGAirspySettings").compare(type) == 0) {
-      SWGAirspySettings *obj = new SWGAirspySettings();
-      obj->init();
-      return obj;
+      return new SWGAirspySettings();
     }
     if(QString("SWGAntennaToolsSettings").compare(type) == 0) {
-      SWGAntennaToolsSettings *obj = new SWGAntennaToolsSettings();
-      obj->init();
-      return obj;
+      return new SWGAntennaToolsSettings();
     }
     if(QString("SWGArgInfo").compare(type) == 0) {
-      SWGArgInfo *obj = new SWGArgInfo();
-      obj->init();
-      return obj;
+      return new SWGArgInfo();
     }
     if(QString("SWGArgValue").compare(type) == 0) {
-      SWGArgValue *obj = new SWGArgValue();
-      obj->init();
-      return obj;
+      return new SWGArgValue();
     }
     if(QString("SWGAudioDevices").compare(type) == 0) {
-      SWGAudioDevices *obj = new SWGAudioDevices();
-      obj->init();
-      return obj;
+      return new SWGAudioDevices();
     }
     if(QString("SWGAudioInputDevice").compare(type) == 0) {
-      SWGAudioInputDevice *obj = new SWGAudioInputDevice();
-      obj->init();
-      return obj;
+      return new SWGAudioInputDevice();
     }
     if(QString("SWGAudioInputSettings").compare(type) == 0) {
-      SWGAudioInputSettings *obj = new SWGAudioInputSettings();
-      obj->init();
-      return obj;
+      return new SWGAudioInputSettings();
     }
     if(QString("SWGAudioOutputDevice").compare(type) == 0) {
-      SWGAudioOutputDevice *obj = new SWGAudioOutputDevice();
-      obj->init();
-      return obj;
+      return new SWGAudioOutputDevice();
     }
     if(QString("SWGAudioOutputSettings").compare(type) == 0) {
-      SWGAudioOutputSettings *obj = new SWGAudioOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGAudioOutputSettings();
     }
     if(QString("SWGBFMDemodReport").compare(type) == 0) {
-      SWGBFMDemodReport *obj = new SWGBFMDemodReport();
-      obj->init();
-      return obj;
+      return new SWGBFMDemodReport();
     }
     if(QString("SWGBFMDemodSettings").compare(type) == 0) {
-      SWGBFMDemodSettings *obj = new SWGBFMDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGBFMDemodSettings();
     }
     if(QString("SWGBandwidth").compare(type) == 0) {
-      SWGBandwidth *obj = new SWGBandwidth();
-      obj->init();
-      return obj;
+      return new SWGBandwidth();
     }
     if(QString("SWGBeamSteeringCWModSettings").compare(type) == 0) {
-      SWGBeamSteeringCWModSettings *obj = new SWGBeamSteeringCWModSettings();
-      obj->init();
-      return obj;
+      return new SWGBeamSteeringCWModSettings();
     }
     if(QString("SWGBladeRF1InputSettings").compare(type) == 0) {
-      SWGBladeRF1InputSettings *obj = new SWGBladeRF1InputSettings();
-      obj->init();
-      return obj;
+      return new SWGBladeRF1InputSettings();
     }
     if(QString("SWGBladeRF1OutputSettings").compare(type) == 0) {
-      SWGBladeRF1OutputSettings *obj = new SWGBladeRF1OutputSettings();
-      obj->init();
-      return obj;
+      return new SWGBladeRF1OutputSettings();
     }
     if(QString("SWGBladeRF2InputReport").compare(type) == 0) {
-      SWGBladeRF2InputReport *obj = new SWGBladeRF2InputReport();
-      obj->init();
-      return obj;
+      return new SWGBladeRF2InputReport();
     }
     if(QString("SWGBladeRF2InputSettings").compare(type) == 0) {
-      SWGBladeRF2InputSettings *obj = new SWGBladeRF2InputSettings();
-      obj->init();
-      return obj;
+      return new SWGBladeRF2InputSettings();
     }
     if(QString("SWGBladeRF2MIMOReport").compare(type) == 0) {
-      SWGBladeRF2MIMOReport *obj = new SWGBladeRF2MIMOReport();
-      obj->init();
-      return obj;
+      return new SWGBladeRF2MIMOReport();
     }
     if(QString("SWGBladeRF2MIMOSettings").compare(type) == 0) {
-      SWGBladeRF2MIMOSettings *obj = new SWGBladeRF2MIMOSettings();
-      obj->init();
-      return obj;
+      return new SWGBladeRF2MIMOSettings();
     }
     if(QString("SWGBladeRF2OutputReport").compare(type) == 0) {
-      SWGBladeRF2OutputReport *obj = new SWGBladeRF2OutputReport();
-      obj->init();
-      return obj;
+      return new SWGBladeRF2OutputReport();
     }
     if(QString("SWGBladeRF2OutputSettings").compare(type) == 0) {
-      SWGBladeRF2OutputSettings *obj = new SWGBladeRF2OutputSettings();
-      obj->init();
-      return obj;
+      return new SWGBladeRF2OutputSettings();
     }
     if(QString("SWGCWKeyerSettings").compare(type) == 0) {
-      SWGCWKeyerSettings *obj = new SWGCWKeyerSettings();
-      obj->init();
-      return obj;
+      return new SWGCWKeyerSettings();
     }
     if(QString("SWGCapture").compare(type) == 0) {
-      SWGCapture *obj = new SWGCapture();
-      obj->init();
-      return obj;
+      return new SWGCapture();
     }
     if(QString("SWGChannel").compare(type) == 0) {
-      SWGChannel *obj = new SWGChannel();
-      obj->init();
-      return obj;
+      return new SWGChannel();
     }
     if(QString("SWGChannelActions").compare(type) == 0) {
-      SWGChannelActions *obj = new SWGChannelActions();
-      obj->init();
-      return obj;
+      return new SWGChannelActions();
     }
     if(QString("SWGChannelAnalyzerSettings").compare(type) == 0) {
-      SWGChannelAnalyzerSettings *obj = new SWGChannelAnalyzerSettings();
-      obj->init();
-      return obj;
+      return new SWGChannelAnalyzerSettings();
     }
     if(QString("SWGChannelConfig").compare(type) == 0) {
-      SWGChannelConfig *obj = new SWGChannelConfig();
-      obj->init();
-      return obj;
+      return new SWGChannelConfig();
     }
     if(QString("SWGChannelListItem").compare(type) == 0) {
-      SWGChannelListItem *obj = new SWGChannelListItem();
-      obj->init();
-      return obj;
+      return new SWGChannelListItem();
     }
     if(QString("SWGChannelReport").compare(type) == 0) {
-      SWGChannelReport *obj = new SWGChannelReport();
-      obj->init();
-      return obj;
+      return new SWGChannelReport();
     }
     if(QString("SWGChannelSettings").compare(type) == 0) {
-      SWGChannelSettings *obj = new SWGChannelSettings();
-      obj->init();
-      return obj;
+      return new SWGChannelSettings();
     }
     if(QString("SWGChannelsDetail").compare(type) == 0) {
-      SWGChannelsDetail *obj = new SWGChannelsDetail();
-      obj->init();
-      return obj;
+      return new SWGChannelsDetail();
     }
     if(QString("SWGChirpChatDemodReport").compare(type) == 0) {
-      SWGChirpChatDemodReport *obj = new SWGChirpChatDemodReport();
-      obj->init();
-      return obj;
+      return new SWGChirpChatDemodReport();
     }
     if(QString("SWGChirpChatDemodSettings").compare(type) == 0) {
-      SWGChirpChatDemodSettings *obj = new SWGChirpChatDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGChirpChatDemodSettings();
     }
     if(QString("SWGChirpChatModReport").compare(type) == 0) {
-      SWGChirpChatModReport *obj = new SWGChirpChatModReport();
-      obj->init();
-      return obj;
+      return new SWGChirpChatModReport();
     }
     if(QString("SWGChirpChatModSettings").compare(type) == 0) {
-      SWGChirpChatModSettings *obj = new SWGChirpChatModSettings();
-      obj->init();
-      return obj;
+      return new SWGChirpChatModSettings();
     }
     if(QString("SWGCommand").compare(type) == 0) {
-      SWGCommand *obj = new SWGCommand();
-      obj->init();
-      return obj;
+      return new SWGCommand();
     }
     if(QString("SWGComplex").compare(type) == 0) {
-      SWGComplex *obj = new SWGComplex();
-      obj->init();
-      return obj;
+      return new SWGComplex();
     }
     if(QString("SWGDABDemodSettings").compare(type) == 0) {
-      SWGDABDemodSettings *obj = new SWGDABDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGDABDemodSettings();
     }
     if(QString("SWGDATVDemodSettings").compare(type) == 0) {
-      SWGDATVDemodSettings *obj = new SWGDATVDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGDATVDemodSettings();
     }
     if(QString("SWGDATVModReport").compare(type) == 0) {
-      SWGDATVModReport *obj = new SWGDATVModReport();
-      obj->init();
-      return obj;
+      return new SWGDATVModReport();
     }
     if(QString("SWGDATVModSettings").compare(type) == 0) {
-      SWGDATVModSettings *obj = new SWGDATVModSettings();
-      obj->init();
-      return obj;
+      return new SWGDATVModSettings();
     }
     if(QString("SWGDSDDemodReport").compare(type) == 0) {
-      SWGDSDDemodReport *obj = new SWGDSDDemodReport();
-      obj->init();
-      return obj;
+      return new SWGDSDDemodReport();
     }
     if(QString("SWGDSDDemodSettings").compare(type) == 0) {
-      SWGDSDDemodSettings *obj = new SWGDSDDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGDSDDemodSettings();
     }
     if(QString("SWGDVSerialDevice").compare(type) == 0) {
-      SWGDVSerialDevice *obj = new SWGDVSerialDevice();
-      obj->init();
-      return obj;
+      return new SWGDVSerialDevice();
     }
     if(QString("SWGDVSerialDevices").compare(type) == 0) {
-      SWGDVSerialDevices *obj = new SWGDVSerialDevices();
-      obj->init();
-      return obj;
+      return new SWGDVSerialDevices();
     }
     if(QString("SWGDemodAnalyzerSettings").compare(type) == 0) {
-      SWGDemodAnalyzerSettings *obj = new SWGDemodAnalyzerSettings();
-      obj->init();
-      return obj;
+      return new SWGDemodAnalyzerSettings();
     }
     if(QString("SWGDeviceActions").compare(type) == 0) {
-      SWGDeviceActions *obj = new SWGDeviceActions();
-      obj->init();
-      return obj;
+      return new SWGDeviceActions();
     }
     if(QString("SWGDeviceConfig").compare(type) == 0) {
-      SWGDeviceConfig *obj = new SWGDeviceConfig();
-      obj->init();
-      return obj;
+      return new SWGDeviceConfig();
     }
     if(QString("SWGDeviceListItem").compare(type) == 0) {
-      SWGDeviceListItem *obj = new SWGDeviceListItem();
-      obj->init();
-      return obj;
+      return new SWGDeviceListItem();
     }
     if(QString("SWGDeviceReport").compare(type) == 0) {
-      SWGDeviceReport *obj = new SWGDeviceReport();
-      obj->init();
-      return obj;
+      return new SWGDeviceReport();
     }
     if(QString("SWGDeviceSet").compare(type) == 0) {
-      SWGDeviceSet *obj = new SWGDeviceSet();
-      obj->init();
-      return obj;
+      return new SWGDeviceSet();
     }
     if(QString("SWGDeviceSetList").compare(type) == 0) {
-      SWGDeviceSetList *obj = new SWGDeviceSetList();
-      obj->init();
-      return obj;
+      return new SWGDeviceSetList();
     }
     if(QString("SWGDeviceSettings").compare(type) == 0) {
-      SWGDeviceSettings *obj = new SWGDeviceSettings();
-      obj->init();
-      return obj;
+      return new SWGDeviceSettings();
     }
     if(QString("SWGDeviceState").compare(type) == 0) {
-      SWGDeviceState *obj = new SWGDeviceState();
-      obj->init();
-      return obj;
+      return new SWGDeviceState();
     }
     if(QString("SWGErrorResponse").compare(type) == 0) {
-      SWGErrorResponse *obj = new SWGErrorResponse();
-      obj->init();
-      return obj;
+      return new SWGErrorResponse();
     }
     if(QString("SWGFCDProPlusSettings").compare(type) == 0) {
-      SWGFCDProPlusSettings *obj = new SWGFCDProPlusSettings();
-      obj->init();
-      return obj;
+      return new SWGFCDProPlusSettings();
     }
     if(QString("SWGFCDProSettings").compare(type) == 0) {
-      SWGFCDProSettings *obj = new SWGFCDProSettings();
-      obj->init();
-      return obj;
+      return new SWGFCDProSettings();
     }
     if(QString("SWGFeature").compare(type) == 0) {
-      SWGFeature *obj = new SWGFeature();
-      obj->init();
-      return obj;
+      return new SWGFeature();
     }
     if(QString("SWGFeatureActions").compare(type) == 0) {
-      SWGFeatureActions *obj = new SWGFeatureActions();
-      obj->init();
-      return obj;
+      return new SWGFeatureActions();
     }
     if(QString("SWGFeatureConfig").compare(type) == 0) {
-      SWGFeatureConfig *obj = new SWGFeatureConfig();
-      obj->init();
-      return obj;
+      return new SWGFeatureConfig();
     }
     if(QString("SWGFeatureReport").compare(type) == 0) {
-      SWGFeatureReport *obj = new SWGFeatureReport();
-      obj->init();
-      return obj;
+      return new SWGFeatureReport();
     }
     if(QString("SWGFeatureSet").compare(type) == 0) {
-      SWGFeatureSet *obj = new SWGFeatureSet();
-      obj->init();
-      return obj;
+      return new SWGFeatureSet();
     }
     if(QString("SWGFeatureSetList").compare(type) == 0) {
-      SWGFeatureSetList *obj = new SWGFeatureSetList();
-      obj->init();
-      return obj;
+      return new SWGFeatureSetList();
     }
     if(QString("SWGFeatureSetPreset").compare(type) == 0) {
-      SWGFeatureSetPreset *obj = new SWGFeatureSetPreset();
-      obj->init();
-      return obj;
+      return new SWGFeatureSetPreset();
     }
     if(QString("SWGFeatureSettings").compare(type) == 0) {
-      SWGFeatureSettings *obj = new SWGFeatureSettings();
-      obj->init();
-      return obj;
+      return new SWGFeatureSettings();
     }
     if(QString("SWGFileInputReport").compare(type) == 0) {
-      SWGFileInputReport *obj = new SWGFileInputReport();
-      obj->init();
-      return obj;
+      return new SWGFileInputReport();
     }
     if(QString("SWGFileInputSettings").compare(type) == 0) {
-      SWGFileInputSettings *obj = new SWGFileInputSettings();
-      obj->init();
-      return obj;
+      return new SWGFileInputSettings();
     }
     if(QString("SWGFileOutputSettings").compare(type) == 0) {
-      SWGFileOutputSettings *obj = new SWGFileOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGFileOutputSettings();
     }
     if(QString("SWGFileSinkActions").compare(type) == 0) {
-      SWGFileSinkActions *obj = new SWGFileSinkActions();
-      obj->init();
-      return obj;
+      return new SWGFileSinkActions();
     }
     if(QString("SWGFileSinkReport").compare(type) == 0) {
-      SWGFileSinkReport *obj = new SWGFileSinkReport();
-      obj->init();
-      return obj;
+      return new SWGFileSinkReport();
     }
     if(QString("SWGFileSinkSettings").compare(type) == 0) {
-      SWGFileSinkSettings *obj = new SWGFileSinkSettings();
-      obj->init();
-      return obj;
+      return new SWGFileSinkSettings();
     }
     if(QString("SWGFileSourceActions").compare(type) == 0) {
-      SWGFileSourceActions *obj = new SWGFileSourceActions();
-      obj->init();
-      return obj;
+      return new SWGFileSourceActions();
     }
     if(QString("SWGFileSourceReport").compare(type) == 0) {
-      SWGFileSourceReport *obj = new SWGFileSourceReport();
-      obj->init();
-      return obj;
+      return new SWGFileSourceReport();
     }
     if(QString("SWGFileSourceSettings").compare(type) == 0) {
-      SWGFileSourceSettings *obj = new SWGFileSourceSettings();
-      obj->init();
-      return obj;
+      return new SWGFileSourceSettings();
     }
     if(QString("SWGFreeDVDemodReport").compare(type) == 0) {
-      SWGFreeDVDemodReport *obj = new SWGFreeDVDemodReport();
-      obj->init();
-      return obj;
+      return new SWGFreeDVDemodReport();
     }
     if(QString("SWGFreeDVDemodSettings").compare(type) == 0) {
-      SWGFreeDVDemodSettings *obj = new SWGFreeDVDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGFreeDVDemodSettings();
     }
     if(QString("SWGFreeDVModReport").compare(type) == 0) {
-      SWGFreeDVModReport *obj = new SWGFreeDVModReport();
-      obj->init();
-      return obj;
+      return new SWGFreeDVModReport();
     }
     if(QString("SWGFreeDVModSettings").compare(type) == 0) {
-      SWGFreeDVModSettings *obj = new SWGFreeDVModSettings();
-      obj->init();
-      return obj;
+      return new SWGFreeDVModSettings();
     }
     if(QString("SWGFreqTrackerReport").compare(type) == 0) {
-      SWGFreqTrackerReport *obj = new SWGFreqTrackerReport();
-      obj->init();
-      return obj;
+      return new SWGFreqTrackerReport();
     }
     if(QString("SWGFreqTrackerSettings").compare(type) == 0) {
-      SWGFreqTrackerSettings *obj = new SWGFreqTrackerSettings();
-      obj->init();
-      return obj;
+      return new SWGFreqTrackerSettings();
     }
     if(QString("SWGFrequency").compare(type) == 0) {
-      SWGFrequency *obj = new SWGFrequency();
-      obj->init();
-      return obj;
+      return new SWGFrequency();
     }
     if(QString("SWGFrequencyBand").compare(type) == 0) {
-      SWGFrequencyBand *obj = new SWGFrequencyBand();
-      obj->init();
-      return obj;
+      return new SWGFrequencyBand();
     }
     if(QString("SWGFrequencyRange").compare(type) == 0) {
-      SWGFrequencyRange *obj = new SWGFrequencyRange();
-      obj->init();
-      return obj;
+      return new SWGFrequencyRange();
     }
     if(QString("SWGGLScope").compare(type) == 0) {
-      SWGGLScope *obj = new SWGGLScope();
-      obj->init();
-      return obj;
+      return new SWGGLScope();
     }
     if(QString("SWGGLSpectrum").compare(type) == 0) {
-      SWGGLSpectrum *obj = new SWGGLSpectrum();
-      obj->init();
-      return obj;
+      return new SWGGLSpectrum();
     }
     if(QString("SWGGS232ControllerSettings").compare(type) == 0) {
-      SWGGS232ControllerSettings *obj = new SWGGS232ControllerSettings();
-      obj->init();
-      return obj;
+      return new SWGGS232ControllerSettings();
     }
     if(QString("SWGGain").compare(type) == 0) {
-      SWGGain *obj = new SWGGain();
-      obj->init();
-      return obj;
+      return new SWGGain();
     }
     if(QString("SWGHackRFInputSettings").compare(type) == 0) {
-      SWGHackRFInputSettings *obj = new SWGHackRFInputSettings();
-      obj->init();
-      return obj;
+      return new SWGHackRFInputSettings();
     }
     if(QString("SWGHackRFOutputSettings").compare(type) == 0) {
-      SWGHackRFOutputSettings *obj = new SWGHackRFOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGHackRFOutputSettings();
     }
     if(QString("SWGIEEE_802_15_4_ModActions").compare(type) == 0) {
-      SWGIEEE_802_15_4_ModActions *obj = new SWGIEEE_802_15_4_ModActions();
-      obj->init();
-      return obj;
+      return new SWGIEEE_802_15_4_ModActions();
     }
     if(QString("SWGIEEE_802_15_4_ModActions_tx").compare(type) == 0) {
-      SWGIEEE_802_15_4_ModActions_tx *obj = new SWGIEEE_802_15_4_ModActions_tx();
-      obj->init();
-      return obj;
+      return new SWGIEEE_802_15_4_ModActions_tx();
     }
     if(QString("SWGIEEE_802_15_4_ModReport").compare(type) == 0) {
-      SWGIEEE_802_15_4_ModReport *obj = new SWGIEEE_802_15_4_ModReport();
-      obj->init();
-      return obj;
+      return new SWGIEEE_802_15_4_ModReport();
     }
     if(QString("SWGIEEE_802_15_4_ModSettings").compare(type) == 0) {
-      SWGIEEE_802_15_4_ModSettings *obj = new SWGIEEE_802_15_4_ModSettings();
-      obj->init();
-      return obj;
+      return new SWGIEEE_802_15_4_ModSettings();
     }
     if(QString("SWGInstanceChannelsResponse").compare(type) == 0) {
-      SWGInstanceChannelsResponse *obj = new SWGInstanceChannelsResponse();
-      obj->init();
-      return obj;
+      return new SWGInstanceChannelsResponse();
     }
     if(QString("SWGInstanceConfigResponse").compare(type) == 0) {
-      SWGInstanceConfigResponse *obj = new SWGInstanceConfigResponse();
-      obj->init();
-      return obj;
+      return new SWGInstanceConfigResponse();
     }
     if(QString("SWGInstanceDevicesResponse").compare(type) == 0) {
-      SWGInstanceDevicesResponse *obj = new SWGInstanceDevicesResponse();
-      obj->init();
-      return obj;
+      return new SWGInstanceDevicesResponse();
     }
     if(QString("SWGInstanceSummaryResponse").compare(type) == 0) {
-      SWGInstanceSummaryResponse *obj = new SWGInstanceSummaryResponse();
-      obj->init();
-      return obj;
+      return new SWGInstanceSummaryResponse();
     }
     if(QString("SWGInterferometerSettings").compare(type) == 0) {
-      SWGInterferometerSettings *obj = new SWGInterferometerSettings();
-      obj->init();
-      return obj;
+      return new SWGInterferometerSettings();
     }
     if(QString("SWGKiwiSDRReport").compare(type) == 0) {
-      SWGKiwiSDRReport *obj = new SWGKiwiSDRReport();
-      obj->init();
-      return obj;
+      return new SWGKiwiSDRReport();
     }
     if(QString("SWGKiwiSDRSettings").compare(type) == 0) {
-      SWGKiwiSDRSettings *obj = new SWGKiwiSDRSettings();
-      obj->init();
-      return obj;
+      return new SWGKiwiSDRSettings();
     }
     if(QString("SWGLimeRFEDevice").compare(type) == 0) {
-      SWGLimeRFEDevice *obj = new SWGLimeRFEDevice();
-      obj->init();
-      return obj;
+      return new SWGLimeRFEDevice();
     }
     if(QString("SWGLimeRFEDevices").compare(type) == 0) {
-      SWGLimeRFEDevices *obj = new SWGLimeRFEDevices();
-      obj->init();
-      return obj;
+      return new SWGLimeRFEDevices();
     }
     if(QString("SWGLimeRFEPower").compare(type) == 0) {
-      SWGLimeRFEPower *obj = new SWGLimeRFEPower();
-      obj->init();
-      return obj;
+      return new SWGLimeRFEPower();
     }
     if(QString("SWGLimeRFESettings").compare(type) == 0) {
-      SWGLimeRFESettings *obj = new SWGLimeRFESettings();
-      obj->init();
-      return obj;
+      return new SWGLimeRFESettings();
     }
     if(QString("SWGLimeSdrInputReport").compare(type) == 0) {
-      SWGLimeSdrInputReport *obj = new SWGLimeSdrInputReport();
-      obj->init();
-      return obj;
+      return new SWGLimeSdrInputReport();
     }
     if(QString("SWGLimeSdrInputSettings").compare(type) == 0) {
-      SWGLimeSdrInputSettings *obj = new SWGLimeSdrInputSettings();
-      obj->init();
-      return obj;
+      return new SWGLimeSdrInputSettings();
     }
     if(QString("SWGLimeSdrMIMOReport").compare(type) == 0) {
-      SWGLimeSdrMIMOReport *obj = new SWGLimeSdrMIMOReport();
-      obj->init();
-      return obj;
+      return new SWGLimeSdrMIMOReport();
     }
     if(QString("SWGLimeSdrMIMOSettings").compare(type) == 0) {
-      SWGLimeSdrMIMOSettings *obj = new SWGLimeSdrMIMOSettings();
-      obj->init();
-      return obj;
+      return new SWGLimeSdrMIMOSettings();
     }
     if(QString("SWGLimeSdrOutputReport").compare(type) == 0) {
-      SWGLimeSdrOutputReport *obj = new SWGLimeSdrOutputReport();
-      obj->init();
-      return obj;
+      return new SWGLimeSdrOutputReport();
     }
     if(QString("SWGLimeSdrOutputSettings").compare(type) == 0) {
-      SWGLimeSdrOutputSettings *obj = new SWGLimeSdrOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGLimeSdrOutputSettings();
     }
     if(QString("SWGLocalInputReport").compare(type) == 0) {
-      SWGLocalInputReport *obj = new SWGLocalInputReport();
-      obj->init();
-      return obj;
+      return new SWGLocalInputReport();
     }
     if(QString("SWGLocalInputSettings").compare(type) == 0) {
-      SWGLocalInputSettings *obj = new SWGLocalInputSettings();
-      obj->init();
-      return obj;
+      return new SWGLocalInputSettings();
     }
     if(QString("SWGLocalOutputReport").compare(type) == 0) {
-      SWGLocalOutputReport *obj = new SWGLocalOutputReport();
-      obj->init();
-      return obj;
+      return new SWGLocalOutputReport();
     }
     if(QString("SWGLocalOutputSettings").compare(type) == 0) {
-      SWGLocalOutputSettings *obj = new SWGLocalOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGLocalOutputSettings();
     }
     if(QString("SWGLocalSinkSettings").compare(type) == 0) {
-      SWGLocalSinkSettings *obj = new SWGLocalSinkSettings();
-      obj->init();
-      return obj;
+      return new SWGLocalSinkSettings();
     }
     if(QString("SWGLocalSourceSettings").compare(type) == 0) {
-      SWGLocalSourceSettings *obj = new SWGLocalSourceSettings();
-      obj->init();
-      return obj;
+      return new SWGLocalSourceSettings();
     }
     if(QString("SWGLocationInformation").compare(type) == 0) {
-      SWGLocationInformation *obj = new SWGLocationInformation();
-      obj->init();
-      return obj;
+      return new SWGLocationInformation();
     }
     if(QString("SWGLoggingInfo").compare(type) == 0) {
-      SWGLoggingInfo *obj = new SWGLoggingInfo();
-      obj->init();
-      return obj;
+      return new SWGLoggingInfo();
     }
     if(QString("SWGMapActions").compare(type) == 0) {
-      SWGMapActions *obj = new SWGMapActions();
-      obj->init();
-      return obj;
+      return new SWGMapActions();
     }
     if(QString("SWGMapCoordinate").compare(type) == 0) {
-      SWGMapCoordinate *obj = new SWGMapCoordinate();
-      obj->init();
-      return obj;
+      return new SWGMapCoordinate();
     }
     if(QString("SWGMapItem").compare(type) == 0) {
-      SWGMapItem *obj = new SWGMapItem();
-      obj->init();
-      return obj;
+      return new SWGMapItem();
     }
     if(QString("SWGMapItem_2").compare(type) == 0) {
-      SWGMapItem_2 *obj = new SWGMapItem_2();
-      obj->init();
-      return obj;
+      return new SWGMapItem_2();
     }
     if(QString("SWGMapSettings").compare(type) == 0) {
-      SWGMapSettings *obj = new SWGMapSettings();
-      obj->init();
-      return obj;
+      return new SWGMapSettings();
     }
     if(QString("SWGMetisMISOSettings").compare(type) == 0) {
-      SWGMetisMISOSettings *obj = new SWGMetisMISOSettings();
-      obj->init();
-      return obj;
+      return new SWGMetisMISOSettings();
     }
     if(QString("SWGNFMDemodReport").compare(type) == 0) {
-      SWGNFMDemodReport *obj = new SWGNFMDemodReport();
-      obj->init();
-      return obj;
+      return new SWGNFMDemodReport();
     }
     if(QString("SWGNFMDemodSettings").compare(type) == 0) {
-      SWGNFMDemodSettings *obj = new SWGNFMDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGNFMDemodSettings();
     }
     if(QString("SWGNFMModReport").compare(type) == 0) {
-      SWGNFMModReport *obj = new SWGNFMModReport();
-      obj->init();
-      return obj;
+      return new SWGNFMModReport();
     }
     if(QString("SWGNFMModSettings").compare(type) == 0) {
-      SWGNFMModSettings *obj = new SWGNFMModSettings();
-      obj->init();
-      return obj;
+      return new SWGNFMModSettings();
     }
     if(QString("SWGNamedEnum").compare(type) == 0) {
-      SWGNamedEnum *obj = new SWGNamedEnum();
-      obj->init();
-      return obj;
+      return new SWGNamedEnum();
     }
     if(QString("SWGNoiseFigureReport").compare(type) == 0) {
-      SWGNoiseFigureReport *obj = new SWGNoiseFigureReport();
-      obj->init();
-      return obj;
+      return new SWGNoiseFigureReport();
     }
     if(QString("SWGNoiseFigureSettings").compare(type) == 0) {
-      SWGNoiseFigureSettings *obj = new SWGNoiseFigureSettings();
-      obj->init();
-      return obj;
+      return new SWGNoiseFigureSettings();
     }
     if(QString("SWGPERTesterActions").compare(type) == 0) {
-      SWGPERTesterActions *obj = new SWGPERTesterActions();
-      obj->init();
-      return obj;
+      return new SWGPERTesterActions();
     }
     if(QString("SWGPERTesterActions_aos").compare(type) == 0) {
-      SWGPERTesterActions_aos *obj = new SWGPERTesterActions_aos();
-      obj->init();
-      return obj;
+      return new SWGPERTesterActions_aos();
     }
     if(QString("SWGPERTesterSettings").compare(type) == 0) {
-      SWGPERTesterSettings *obj = new SWGPERTesterSettings();
-      obj->init();
-      return obj;
+      return new SWGPERTesterSettings();
     }
     if(QString("SWGPacketDemodSettings").compare(type) == 0) {
-      SWGPacketDemodSettings *obj = new SWGPacketDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGPacketDemodSettings();
     }
     if(QString("SWGPacketModActions").compare(type) == 0) {
-      SWGPacketModActions *obj = new SWGPacketModActions();
-      obj->init();
-      return obj;
+      return new SWGPacketModActions();
     }
     if(QString("SWGPacketModActions_tx").compare(type) == 0) {
-      SWGPacketModActions_tx *obj = new SWGPacketModActions_tx();
-      obj->init();
-      return obj;
+      return new SWGPacketModActions_tx();
     }
     if(QString("SWGPacketModReport").compare(type) == 0) {
-      SWGPacketModReport *obj = new SWGPacketModReport();
-      obj->init();
-      return obj;
+      return new SWGPacketModReport();
     }
     if(QString("SWGPacketModSettings").compare(type) == 0) {
-      SWGPacketModSettings *obj = new SWGPacketModSettings();
-      obj->init();
-      return obj;
+      return new SWGPacketModSettings();
     }
     if(QString("SWGPerseusReport").compare(type) == 0) {
-      SWGPerseusReport *obj = new SWGPerseusReport();
-      obj->init();
-      return obj;
+      return new SWGPerseusReport();
     }
     if(QString("SWGPerseusSettings").compare(type) == 0) {
-      SWGPerseusSettings *obj = new SWGPerseusSettings();
-      obj->init();
-      return obj;
+      return new SWGPerseusSettings();
     }
     if(QString("SWGPlutoSdrInputReport").compare(type) == 0) {
-      SWGPlutoSdrInputReport *obj = new SWGPlutoSdrInputReport();
-      obj->init();
-      return obj;
+      return new SWGPlutoSdrInputReport();
     }
     if(QString("SWGPlutoSdrInputSettings").compare(type) == 0) {
-      SWGPlutoSdrInputSettings *obj = new SWGPlutoSdrInputSettings();
-      obj->init();
-      return obj;
+      return new SWGPlutoSdrInputSettings();
     }
     if(QString("SWGPlutoSdrMIMOReport").compare(type) == 0) {
-      SWGPlutoSdrMIMOReport *obj = new SWGPlutoSdrMIMOReport();
-      obj->init();
-      return obj;
+      return new SWGPlutoSdrMIMOReport();
     }
     if(QString("SWGPlutoSdrMIMOSettings").compare(type) == 0) {
-      SWGPlutoSdrMIMOSettings *obj = new SWGPlutoSdrMIMOSettings();
-      obj->init();
-      return obj;
+      return new SWGPlutoSdrMIMOSettings();
     }
     if(QString("SWGPlutoSdrOutputReport").compare(type) == 0) {
-      SWGPlutoSdrOutputReport *obj = new SWGPlutoSdrOutputReport();
-      obj->init();
-      return obj;
+      return new SWGPlutoSdrOutputReport();
     }
     if(QString("SWGPlutoSdrOutputSettings").compare(type) == 0) {
-      SWGPlutoSdrOutputSettings *obj = new SWGPlutoSdrOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGPlutoSdrOutputSettings();
     }
     if(QString("SWGPreferences").compare(type) == 0) {
-      SWGPreferences *obj = new SWGPreferences();
-      obj->init();
-      return obj;
+      return new SWGPreferences();
     }
     if(QString("SWGPreset").compare(type) == 0) {
-      SWGPreset *obj = new SWGPreset();
-      obj->init();
-      return obj;
+      return new SWGPreset();
     }
     if(QString("SWGPresetExport").compare(type) == 0) {
-      SWGPresetExport *obj = new SWGPresetExport();
-      obj->init();
-      return obj;
+      return new SWGPresetExport();
     }
     if(QString("SWGPresetGroup").compare(type) == 0) {
-      SWGPresetGroup *obj = new SWGPresetGroup();
-      obj->init();
-      return obj;
+      return new SWGPresetGroup();
     }
     if(QString("SWGPresetIdentifier").compare(type) == 0) {
-      SWGPresetIdentifier *obj = new SWGPresetIdentifier();
-      obj->init();
-      return obj;
+      return new SWGPresetIdentifier();
     }
     if(QString("SWGPresetImport").compare(type) == 0) {
-      SWGPresetImport *obj = new SWGPresetImport();
-      obj->init();
-      return obj;
+      return new SWGPresetImport();
     }
     if(QString("SWGPresetItem").compare(type) == 0) {
-      SWGPresetItem *obj = new SWGPresetItem();
-      obj->init();
-      return obj;
+      return new SWGPresetItem();
     }
     if(QString("SWGPresetTransfer").compare(type) == 0) {
-      SWGPresetTransfer *obj = new SWGPresetTransfer();
-      obj->init();
-      return obj;
+      return new SWGPresetTransfer();
     }
     if(QString("SWGPresets").compare(type) == 0) {
-      SWGPresets *obj = new SWGPresets();
-      obj->init();
-      return obj;
+      return new SWGPresets();
     }
     if(QString("SWGRDSReport").compare(type) == 0) {
-      SWGRDSReport *obj = new SWGRDSReport();
-      obj->init();
-      return obj;
+      return new SWGRDSReport();
     }
     if(QString("SWGRDSReport_altFrequencies").compare(type) == 0) {
-      SWGRDSReport_altFrequencies *obj = new SWGRDSReport_altFrequencies();
-      obj->init();
-      return obj;
+      return new SWGRDSReport_altFrequencies();
+    }
+    if(QString("SWGRadioClockReport").compare(type) == 0) {
+      return new SWGRadioClockReport();
+    }
+    if(QString("SWGRadioClockSettings").compare(type) == 0) {
+      return new SWGRadioClockSettings();
     }
     if(QString("SWGRange").compare(type) == 0) {
-      SWGRange *obj = new SWGRange();
-      obj->init();
-      return obj;
+      return new SWGRange();
     }
     if(QString("SWGRangeFloat").compare(type) == 0) {
-      SWGRangeFloat *obj = new SWGRangeFloat();
-      obj->init();
-      return obj;
+      return new SWGRangeFloat();
     }
     if(QString("SWGRemoteInputReport").compare(type) == 0) {
-      SWGRemoteInputReport *obj = new SWGRemoteInputReport();
-      obj->init();
-      return obj;
+      return new SWGRemoteInputReport();
     }
     if(QString("SWGRemoteInputSettings").compare(type) == 0) {
-      SWGRemoteInputSettings *obj = new SWGRemoteInputSettings();
-      obj->init();
-      return obj;
+      return new SWGRemoteInputSettings();
     }
     if(QString("SWGRemoteOutputReport").compare(type) == 0) {
-      SWGRemoteOutputReport *obj = new SWGRemoteOutputReport();
-      obj->init();
-      return obj;
+      return new SWGRemoteOutputReport();
     }
     if(QString("SWGRemoteOutputSettings").compare(type) == 0) {
-      SWGRemoteOutputSettings *obj = new SWGRemoteOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGRemoteOutputSettings();
     }
     if(QString("SWGRemoteSinkSettings").compare(type) == 0) {
-      SWGRemoteSinkSettings *obj = new SWGRemoteSinkSettings();
-      obj->init();
-      return obj;
+      return new SWGRemoteSinkSettings();
     }
     if(QString("SWGRemoteSourceReport").compare(type) == 0) {
-      SWGRemoteSourceReport *obj = new SWGRemoteSourceReport();
-      obj->init();
-      return obj;
+      return new SWGRemoteSourceReport();
     }
     if(QString("SWGRemoteSourceSettings").compare(type) == 0) {
-      SWGRemoteSourceSettings *obj = new SWGRemoteSourceSettings();
-      obj->init();
-      return obj;
+      return new SWGRemoteSourceSettings();
     }
     if(QString("SWGRigCtlServerSettings").compare(type) == 0) {
-      SWGRigCtlServerSettings *obj = new SWGRigCtlServerSettings();
-      obj->init();
-      return obj;
+      return new SWGRigCtlServerSettings();
     }
     if(QString("SWGRtlSdrReport").compare(type) == 0) {
-      SWGRtlSdrReport *obj = new SWGRtlSdrReport();
-      obj->init();
-      return obj;
+      return new SWGRtlSdrReport();
     }
     if(QString("SWGRtlSdrSettings").compare(type) == 0) {
-      SWGRtlSdrSettings *obj = new SWGRtlSdrSettings();
-      obj->init();
-      return obj;
+      return new SWGRtlSdrSettings();
     }
     if(QString("SWGSDRPlayReport").compare(type) == 0) {
-      SWGSDRPlayReport *obj = new SWGSDRPlayReport();
-      obj->init();
-      return obj;
+      return new SWGSDRPlayReport();
     }
     if(QString("SWGSDRPlaySettings").compare(type) == 0) {
-      SWGSDRPlaySettings *obj = new SWGSDRPlaySettings();
-      obj->init();
-      return obj;
+      return new SWGSDRPlaySettings();
     }
     if(QString("SWGSDRPlayV3Report").compare(type) == 0) {
-      SWGSDRPlayV3Report *obj = new SWGSDRPlayV3Report();
-      obj->init();
-      return obj;
+      return new SWGSDRPlayV3Report();
     }
     if(QString("SWGSDRPlayV3Settings").compare(type) == 0) {
-      SWGSDRPlayV3Settings *obj = new SWGSDRPlayV3Settings();
-      obj->init();
-      return obj;
+      return new SWGSDRPlayV3Settings();
     }
     if(QString("SWGSSBDemodReport").compare(type) == 0) {
-      SWGSSBDemodReport *obj = new SWGSSBDemodReport();
-      obj->init();
-      return obj;
+      return new SWGSSBDemodReport();
     }
     if(QString("SWGSSBDemodSettings").compare(type) == 0) {
-      SWGSSBDemodSettings *obj = new SWGSSBDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGSSBDemodSettings();
     }
     if(QString("SWGSSBModReport").compare(type) == 0) {
-      SWGSSBModReport *obj = new SWGSSBModReport();
-      obj->init();
-      return obj;
+      return new SWGSSBModReport();
     }
     if(QString("SWGSSBModSettings").compare(type) == 0) {
-      SWGSSBModSettings *obj = new SWGSSBModSettings();
-      obj->init();
-      return obj;
+      return new SWGSSBModSettings();
     }
     if(QString("SWGSampleRate").compare(type) == 0) {
-      SWGSampleRate *obj = new SWGSampleRate();
-      obj->init();
-      return obj;
+      return new SWGSampleRate();
     }
     if(QString("SWGSamplingDevice").compare(type) == 0) {
-      SWGSamplingDevice *obj = new SWGSamplingDevice();
-      obj->init();
-      return obj;
+      return new SWGSamplingDevice();
     }
     if(QString("SWGSatelliteTrackerSettings").compare(type) == 0) {
-      SWGSatelliteTrackerSettings *obj = new SWGSatelliteTrackerSettings();
-      obj->init();
-      return obj;
+      return new SWGSatelliteTrackerSettings();
     }
     if(QString("SWGSigMFFileInputActions").compare(type) == 0) {
-      SWGSigMFFileInputActions *obj = new SWGSigMFFileInputActions();
-      obj->init();
-      return obj;
+      return new SWGSigMFFileInputActions();
     }
     if(QString("SWGSigMFFileInputReport").compare(type) == 0) {
-      SWGSigMFFileInputReport *obj = new SWGSigMFFileInputReport();
-      obj->init();
-      return obj;
+      return new SWGSigMFFileInputReport();
     }
     if(QString("SWGSigMFFileInputSettings").compare(type) == 0) {
-      SWGSigMFFileInputSettings *obj = new SWGSigMFFileInputSettings();
-      obj->init();
-      return obj;
+      return new SWGSigMFFileInputSettings();
     }
     if(QString("SWGSigMFFileSinkActions").compare(type) == 0) {
-      SWGSigMFFileSinkActions *obj = new SWGSigMFFileSinkActions();
-      obj->init();
-      return obj;
+      return new SWGSigMFFileSinkActions();
     }
     if(QString("SWGSigMFFileSinkReport").compare(type) == 0) {
-      SWGSigMFFileSinkReport *obj = new SWGSigMFFileSinkReport();
-      obj->init();
-      return obj;
+      return new SWGSigMFFileSinkReport();
     }
     if(QString("SWGSigMFFileSinkSettings").compare(type) == 0) {
-      SWGSigMFFileSinkSettings *obj = new SWGSigMFFileSinkSettings();
-      obj->init();
-      return obj;
+      return new SWGSigMFFileSinkSettings();
     }
     if(QString("SWGSimplePTTActions").compare(type) == 0) {
-      SWGSimplePTTActions *obj = new SWGSimplePTTActions();
-      obj->init();
-      return obj;
+      return new SWGSimplePTTActions();
     }
     if(QString("SWGSimplePTTReport").compare(type) == 0) {
-      SWGSimplePTTReport *obj = new SWGSimplePTTReport();
-      obj->init();
-      return obj;
+      return new SWGSimplePTTReport();
     }
     if(QString("SWGSimplePTTSettings").compare(type) == 0) {
-      SWGSimplePTTSettings *obj = new SWGSimplePTTSettings();
-      obj->init();
-      return obj;
+      return new SWGSimplePTTSettings();
     }
     if(QString("SWGSoapySDRFrequencySetting").compare(type) == 0) {
-      SWGSoapySDRFrequencySetting *obj = new SWGSoapySDRFrequencySetting();
-      obj->init();
-      return obj;
+      return new SWGSoapySDRFrequencySetting();
     }
     if(QString("SWGSoapySDRGainSetting").compare(type) == 0) {
-      SWGSoapySDRGainSetting *obj = new SWGSoapySDRGainSetting();
-      obj->init();
-      return obj;
+      return new SWGSoapySDRGainSetting();
     }
     if(QString("SWGSoapySDRInputSettings").compare(type) == 0) {
-      SWGSoapySDRInputSettings *obj = new SWGSoapySDRInputSettings();
-      obj->init();
-      return obj;
+      return new SWGSoapySDRInputSettings();
     }
     if(QString("SWGSoapySDROutputSettings").compare(type) == 0) {
-      SWGSoapySDROutputSettings *obj = new SWGSoapySDROutputSettings();
-      obj->init();
-      return obj;
+      return new SWGSoapySDROutputSettings();
     }
     if(QString("SWGSoapySDRReport").compare(type) == 0) {
-      SWGSoapySDRReport *obj = new SWGSoapySDRReport();
-      obj->init();
-      return obj;
+      return new SWGSoapySDRReport();
     }
     if(QString("SWGSpectrumServer").compare(type) == 0) {
-      SWGSpectrumServer *obj = new SWGSpectrumServer();
-      obj->init();
-      return obj;
+      return new SWGSpectrumServer();
     }
     if(QString("SWGSpectrumServer_clients").compare(type) == 0) {
-      SWGSpectrumServer_clients *obj = new SWGSpectrumServer_clients();
-      obj->init();
-      return obj;
+      return new SWGSpectrumServer_clients();
     }
     if(QString("SWGStarTrackerSettings").compare(type) == 0) {
-      SWGStarTrackerSettings *obj = new SWGStarTrackerSettings();
-      obj->init();
-      return obj;
+      return new SWGStarTrackerSettings();
     }
     if(QString("SWGSuccessResponse").compare(type) == 0) {
-      SWGSuccessResponse *obj = new SWGSuccessResponse();
-      obj->init();
-      return obj;
+      return new SWGSuccessResponse();
     }
     if(QString("SWGTargetAzimuthElevation").compare(type) == 0) {
-      SWGTargetAzimuthElevation *obj = new SWGTargetAzimuthElevation();
-      obj->init();
-      return obj;
+      return new SWGTargetAzimuthElevation();
     }
     if(QString("SWGTestMISettings").compare(type) == 0) {
-      SWGTestMISettings *obj = new SWGTestMISettings();
-      obj->init();
-      return obj;
+      return new SWGTestMISettings();
     }
     if(QString("SWGTestMOSyncSettings").compare(type) == 0) {
-      SWGTestMOSyncSettings *obj = new SWGTestMOSyncSettings();
-      obj->init();
-      return obj;
+      return new SWGTestMOSyncSettings();
     }
     if(QString("SWGTestMiStreamSettings").compare(type) == 0) {
-      SWGTestMiStreamSettings *obj = new SWGTestMiStreamSettings();
-      obj->init();
-      return obj;
+      return new SWGTestMiStreamSettings();
     }
     if(QString("SWGTestSourceSettings").compare(type) == 0) {
-      SWGTestSourceSettings *obj = new SWGTestSourceSettings();
-      obj->init();
-      return obj;
+      return new SWGTestSourceSettings();
     }
     if(QString("SWGTraceData").compare(type) == 0) {
-      SWGTraceData *obj = new SWGTraceData();
-      obj->init();
-      return obj;
+      return new SWGTraceData();
     }
     if(QString("SWGTriggerData").compare(type) == 0) {
-      SWGTriggerData *obj = new SWGTriggerData();
-      obj->init();
-      return obj;
+      return new SWGTriggerData();
     }
     if(QString("SWGUDPSinkReport").compare(type) == 0) {
-      SWGUDPSinkReport *obj = new SWGUDPSinkReport();
-      obj->init();
-      return obj;
+      return new SWGUDPSinkReport();
     }
     if(QString("SWGUDPSinkSettings").compare(type) == 0) {
-      SWGUDPSinkSettings *obj = new SWGUDPSinkSettings();
-      obj->init();
-      return obj;
+      return new SWGUDPSinkSettings();
     }
     if(QString("SWGUDPSourceReport").compare(type) == 0) {
-      SWGUDPSourceReport *obj = new SWGUDPSourceReport();
-      obj->init();
-      return obj;
+      return new SWGUDPSourceReport();
     }
     if(QString("SWGUDPSourceSettings").compare(type) == 0) {
-      SWGUDPSourceSettings *obj = new SWGUDPSourceSettings();
-      obj->init();
-      return obj;
+      return new SWGUDPSourceSettings();
     }
     if(QString("SWGUSRPInputReport").compare(type) == 0) {
-      SWGUSRPInputReport *obj = new SWGUSRPInputReport();
-      obj->init();
-      return obj;
+      return new SWGUSRPInputReport();
     }
     if(QString("SWGUSRPInputSettings").compare(type) == 0) {
-      SWGUSRPInputSettings *obj = new SWGUSRPInputSettings();
-      obj->init();
-      return obj;
+      return new SWGUSRPInputSettings();
     }
     if(QString("SWGUSRPOutputReport").compare(type) == 0) {
-      SWGUSRPOutputReport *obj = new SWGUSRPOutputReport();
-      obj->init();
-      return obj;
+      return new SWGUSRPOutputReport();
     }
     if(QString("SWGUSRPOutputSettings").compare(type) == 0) {
-      SWGUSRPOutputSettings *obj = new SWGUSRPOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGUSRPOutputSettings();
     }
     if(QString("SWGVORDemodReport").compare(type) == 0) {
-      SWGVORDemodReport *obj = new SWGVORDemodReport();
-      obj->init();
-      return obj;
+      return new SWGVORDemodReport();
     }
     if(QString("SWGVORDemodSCReport").compare(type) == 0) {
-      SWGVORDemodSCReport *obj = new SWGVORDemodSCReport();
-      obj->init();
-      return obj;
+      return new SWGVORDemodSCReport();
     }
     if(QString("SWGVORDemodSCSettings").compare(type) == 0) {
-      SWGVORDemodSCSettings *obj = new SWGVORDemodSCSettings();
-      obj->init();
-      return obj;
+      return new SWGVORDemodSCSettings();
     }
     if(QString("SWGVORDemodSettings").compare(type) == 0) {
-      SWGVORDemodSettings *obj = new SWGVORDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGVORDemodSettings();
     }
     if(QString("SWGVORLocalizerSettings").compare(type) == 0) {
-      SWGVORLocalizerSettings *obj = new SWGVORLocalizerSettings();
-      obj->init();
-      return obj;
+      return new SWGVORLocalizerSettings();
     }
     if(QString("SWGWFMDemodReport").compare(type) == 0) {
-      SWGWFMDemodReport *obj = new SWGWFMDemodReport();
-      obj->init();
-      return obj;
+      return new SWGWFMDemodReport();
     }
     if(QString("SWGWFMDemodSettings").compare(type) == 0) {
-      SWGWFMDemodSettings *obj = new SWGWFMDemodSettings();
-      obj->init();
-      return obj;
+      return new SWGWFMDemodSettings();
     }
     if(QString("SWGWFMModReport").compare(type) == 0) {
-      SWGWFMModReport *obj = new SWGWFMModReport();
-      obj->init();
-      return obj;
+      return new SWGWFMModReport();
     }
     if(QString("SWGWFMModSettings").compare(type) == 0) {
-      SWGWFMModSettings *obj = new SWGWFMModSettings();
-      obj->init();
-      return obj;
+      return new SWGWFMModSettings();
     }
     if(QString("SWGXtrxInputReport").compare(type) == 0) {
-      SWGXtrxInputReport *obj = new SWGXtrxInputReport();
-      obj->init();
-      return obj;
+      return new SWGXtrxInputReport();
     }
     if(QString("SWGXtrxInputSettings").compare(type) == 0) {
-      SWGXtrxInputSettings *obj = new SWGXtrxInputSettings();
-      obj->init();
-      return obj;
+      return new SWGXtrxInputSettings();
     }
     if(QString("SWGXtrxMIMOReport").compare(type) == 0) {
-      SWGXtrxMIMOReport *obj = new SWGXtrxMIMOReport();
-      obj->init();
-      return obj;
+      return new SWGXtrxMIMOReport();
     }
     if(QString("SWGXtrxMIMOSettings").compare(type) == 0) {
-      SWGXtrxMIMOSettings *obj = new SWGXtrxMIMOSettings();
-      obj->init();
-      return obj;
+      return new SWGXtrxMIMOSettings();
     }
     if(QString("SWGXtrxOutputReport").compare(type) == 0) {
-      SWGXtrxOutputReport *obj = new SWGXtrxOutputReport();
-      obj->init();
-      return obj;
+      return new SWGXtrxOutputReport();
     }
     if(QString("SWGXtrxOutputSettings").compare(type) == 0) {
-      SWGXtrxOutputSettings *obj = new SWGXtrxOutputSettings();
-      obj->init();
-      return obj;
+      return new SWGXtrxOutputSettings();
     }
-
+    
     return nullptr;
   }
 
