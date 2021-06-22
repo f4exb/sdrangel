@@ -1,0 +1,52 @@
+RadioClockSettings:
+  description: RadioClock
+  properties:
+    inputFrequencyOffset:
+      description: channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: channel RF bandwidth in Hz
+      type: number
+      format: float
+    threshold:
+      type: number
+      format: float
+    modulation:
+      description: 0 - MSF, 1 - DCF77, 2 - TDF
+      type: integer
+    timezone:
+      description: 0 - Broadcast, 1 - Local, 2 - UTC
+      type: integer
+    rgbColor:
+      type: integer
+    title:
+      type: string
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+    reverseAPIAddress:
+      type: string
+    reverseAPIPort:
+      type: integer
+    reverseAPIDeviceIndex:
+      type: integer
+    reverseAPIChannelIndex:
+      type: integer
+
+RadioClockReport:
+  description: RadioClock
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    channelSampleRate:
+      type: integer
+    date:
+      type: string
+    time:
+      type: string

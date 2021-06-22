@@ -53,6 +53,7 @@
 #include "SWGNoiseFigureSettings.h"
 #include "SWGPacketDemodSettings.h"
 #include "SWGPacketModSettings.h"
+#include "SWGRadioClockSettings.h"
 #include "SWGRemoteSinkSettings.h"
 #include "SWGRemoteSourceSettings.h"
 #include "SWGSSBDemodSettings.h"
@@ -188,6 +189,9 @@ public:
 
     SWGPacketModSettings* getPacketModSettings();
     void setPacketModSettings(SWGPacketModSettings* packet_mod_settings);
+
+    SWGRadioClockSettings* getRadioClockSettings();
+    void setRadioClockSettings(SWGRadioClockSettings* radio_clock_settings);
 
     SWGRemoteSinkSettings* getRemoteSinkSettings();
     void setRemoteSinkSettings(SWGRemoteSinkSettings* remote_sink_settings);
@@ -330,6 +334,9 @@ private:
 
     SWGPacketModSettings* packet_mod_settings;
     bool m_packet_mod_settings_isSet;
+
+    SWGRadioClockSettings* radio_clock_settings;
+    bool m_radio_clock_settings_isSet;
 
     SWGRemoteSinkSettings* remote_sink_settings;
     bool m_remote_sink_settings_isSet;

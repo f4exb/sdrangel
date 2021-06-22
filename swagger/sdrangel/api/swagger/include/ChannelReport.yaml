@@ -53,6 +53,8 @@ ChannelReport:
       $ref: "http://swgserver:8081/api/swagger/include/NoiseFigure.yaml#/NoiseFigureReport"
     SSBDemodReport:
       $ref: "http://swgserver:8081/api/swagger/include/SSBDemod.yaml#/SSBDemodReport"
+    RadioClockReport:
+      $ref: "http://swgserver:8081/api/swagger/include/RadioClock.yaml#/RadioClockReport"
     RemoteSourceReport:
       $ref: "http://swgserver:8081/api/swagger/include/RemoteSource.yaml#/RemoteSourceReport"
     PacketModReport:

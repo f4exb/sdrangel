@@ -98,6 +98,8 @@ SWGChannelSettings::SWGChannelSettings() {
     m_packet_demod_settings_isSet = false;
     packet_mod_settings = nullptr;
     m_packet_mod_settings_isSet = false;
+    radio_clock_settings = nullptr;
+    m_radio_clock_settings_isSet = false;
     remote_sink_settings = nullptr;
     m_remote_sink_settings_isSet = false;
     remote_source_settings = nullptr;
@@ -198,6 +200,8 @@ SWGChannelSettings::init() {
     m_packet_demod_settings_isSet = false;
     packet_mod_settings = new SWGPacketModSettings();
     m_packet_mod_settings_isSet = false;
+    radio_clock_settings = new SWGRadioClockSettings();
+    m_radio_clock_settings_isSet = false;
     remote_sink_settings = new SWGRemoteSinkSettings();
     m_remote_sink_settings_isSet = false;
     remote_source_settings = new SWGRemoteSourceSettings();
@@ -323,6 +327,9 @@ SWGChannelSettings::cleanup() {
     if(packet_mod_settings != nullptr) { 
         delete packet_mod_settings;
     }
+    if(radio_clock_settings != nullptr) { 
+        delete radio_clock_settings;
+    }
     if(remote_sink_settings != nullptr) { 
         delete remote_sink_settings;
     }
@@ -438,6 +445,8 @@ SWGChannelSettings::fromJsonObject(QJsonObject &pJson) {
     ::SWGSDRangel::setValue(&packet_demod_settings, pJson["PacketDemodSettings"], "SWGPacketDemodSettings", "SWGPacketDemodSettings");
     
     ::SWGSDRangel::setValue(&packet_mod_settings, pJson["PacketModSettings"], "SWGPacketModSettings", "SWGPacketModSettings");
+    
+    ::SWGSDRangel::setValue(&radio_clock_settings, pJson["RadioClockSettings"], "SWGRadioClockSettings", "SWGRadioClockSettings");
     
     ::SWGSDRangel::setValue(&remote_sink_settings, pJson["RemoteSinkSettings"], "SWGRemoteSinkSettings", "SWGRemoteSinkSettings");
     
@@ -581,6 +590,9 @@ SWGChannelSettings::asJsonObject() {
     }
     if((packet_mod_settings != nullptr) && (packet_mod_settings->isSet())){
         toJsonValue(QString("PacketModSettings"), packet_mod_settings, obj, QString("SWGPacketModSettings"));
+    }
+    if((radio_clock_settings != nullptr) && (radio_clock_settings->isSet())){
+        toJsonValue(QString("RadioClockSettings"), radio_clock_settings, obj, QString("SWGRadioClockSettings"));
     }
     if((remote_sink_settings != nullptr) && (remote_sink_settings->isSet())){
         toJsonValue(QString("RemoteSinkSettings"), remote_sink_settings, obj, QString("SWGRemoteSinkSettings"));
@@ -969,6 +981,16 @@ SWGChannelSettings::setPacketModSettings(SWGPacketModSettings* packet_mod_settin
     this->m_packet_mod_settings_isSet = true;
 }
 
+SWGRadioClockSettings*
+SWGChannelSettings::getRadioClockSettings() {
+    return radio_clock_settings;
+}
+void
+SWGChannelSettings::setRadioClockSettings(SWGRadioClockSettings* radio_clock_settings) {
+    this->radio_clock_settings = radio_clock_settings;
+    this->m_radio_clock_settings_isSet = true;
+}
+
 SWGRemoteSinkSettings*
 SWGChannelSettings::getRemoteSinkSettings() {
     return remote_sink_settings;
@@ -1187,6 +1209,9 @@ SWGChannelSettings::isSet(){
             isObjectUpdated = true; break;
         }
         if(packet_mod_settings && packet_mod_settings->isSet()){
+            isObjectUpdated = true; break;
+        }
+        if(radio_clock_settings && radio_clock_settings->isSet()){
             isObjectUpdated = true; break;
         }
         if(remote_sink_settings && remote_sink_settings->isSet()){
