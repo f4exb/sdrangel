@@ -373,7 +373,7 @@
       <item>
        <widget class="QLabel" name="timezoneLabel">
         <property name="text">
-         <string>Display Timezone</string>
+         <string>Display Time Zone</string>
         </property>
        </widget>
       </item>

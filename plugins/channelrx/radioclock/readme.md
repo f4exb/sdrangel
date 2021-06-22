@@ -12,8 +12,7 @@ If you'd like other transmitters to be supported (such as WWVB), please upload a
 
 Typically, it will take two minutes before the time is able to be displayed (up to one minute to find the minute marker, then another minute to receive the timecode).
 
-Although the atomic clocks used to transmit the timecode are extremely accurate, propagation, SDR data transfer and demodulation delays limit accuracy of the displayed time to around 1 second, 
-although if you receive multiple clocks simultaneously, they are all fairly synchronous.
+Although the atomic clocks used to transmit the timecode are extremely accurate, propagation, SDR data transfer and demodulation delays limit accuracy of the displayed time to around 1 second. 
 
 <h2>Interface</h2>
 
@@ -49,12 +48,12 @@ Specifies the modulation and timecode encoding used:
 * DCF77 - OOK (On-off keying)
 * TDF - PM (Phase modulation)
 
-<h3>7: Display Timezone</h3>
+<h3>7: Display Time Zone</h3>
 
-Specifies the timezone used to display the received time. This can be:
+Specifies the time zone used to display the received time. This can be:
 
-* Broadcast - the time is displayed as broadcast (which is typically the timezone of the country the signal is broadcast from, adjusted for summer time).
-* Local - the time is converted to the local time (as determined by your operating system's timezone).
+* Broadcast - the time is displayed as broadcast (which is typically the time zone of the country the signal is broadcast from, adjusted for summer time).
+* Local - the time is converted to the local time (as determined by your operating system's time zone).
 * UTC - the time is converted to Coordinated Universal Time.
 
 <h3>8: Date</h3>
@@ -63,7 +62,7 @@ Displays the decoded date.
 
 <h3>9: Time</h3>
 
-Displays the decoded time, adjusted for the timezone set by (7).
+Displays the decoded time, adjusted for the time zone set by (7).
 
 <h3>10: Status</h3>
 
@@ -72,7 +71,8 @@ Displays the demodulator status. This can be:
 * Looking for minute marker - Indicated at startup or after signal lost, while looking for the minute marker.
 * Got minute marker - Indicated after finding the minute marker and waiting for the first timecode to be received.
 * OK - Indicates timecodes are being received.
+* Parity error - Indicates a parity error in received timecode.
 
 The date and time fields are only valid when the status indicates OK.
 
-If while in the OK state several second markers are missed, the status will return to Acquiring Signal.
+If while in the OK state several second markers are not detected, the status will return to Looking for minute marker.
