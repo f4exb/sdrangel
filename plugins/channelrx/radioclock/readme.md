@@ -12,11 +12,12 @@ If you'd like other transmitters to be supported (such as WWVB), please upload a
 
 Typically, it will take two minutes before the time is able to be displayed (up to one minute to find the minute marker, then another minute to receive the timecode).
 
-Although the atomic clocks used to transmit the timecode are extremely accurate, propagation, SDR data transfer and demodulation delays limit accuracy of the displayed time to around 1 second.
+Although the atomic clocks used to transmit the timecode are extremely accurate, propagation, SDR data transfer and demodulation delays limit accuracy of the displayed time to around 1 second, 
+although if you receive multiple clocks simultaneously, they are all fairly synchronous.
 
 <h2>Interface</h2>
 
-![Radio clock plugin GUI](../../../doc/img/Radio_clock_plugin.png)
+![Radio clock plugin GUI](../../../doc/img/RadioClock_plugin.png)
 
 <h3>1: Frequency shift from center frequency of reception</h3>
 
