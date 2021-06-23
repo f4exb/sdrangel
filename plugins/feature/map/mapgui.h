@@ -31,6 +31,7 @@
 #include "mapsettings.h"
 #include "SWGMapItem.h"
 #include "mapbeacondialog.h"
+#include "mapradiotimedialog.h"
 
 class PluginAPI;
 class FeatureUISet;
@@ -44,6 +45,14 @@ class MapGUI;
 class MapModel;
 class QQuickItem;
 struct Beacon;
+
+struct RadioTimeTransmitter {
+    QString m_callsign;
+    int m_frequency;        // In Hz
+    float m_latitude;       // In degrees
+    float m_longitude;      // In degrees
+    int m_power;            // In kW
+};
 
 // Information required about each item displayed on the map
 class MapItem {
@@ -471,6 +480,8 @@ public:
     static QString getBeaconFilename();
     QList<Beacon *> *getBeacons() { return m_beacons; }
     void setBeacons(QList<Beacon *> *beacons);
+    QList<RadioTimeTransmitter> getRadioTimeTransmitters() { return m_radioTimeTransmitters; }
+    void addRadioTimeTransmitters();
     void find(const QString& target);
 
 private:
@@ -487,6 +498,7 @@ private:
     AzEl m_azEl;                        // Position of station
     QList<Beacon *> *m_beacons;
     MapBeaconDialog m_beaconDialog;
+    MapRadioTimeDialog m_radioTimeDialog;
 
     explicit MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *feature, QWidget* parent = nullptr);
     virtual ~MapGUI();
@@ -502,6 +514,7 @@ private:
     void enterEvent(QEvent*);
 
     static QString getDataDir();
+    static const QList<RadioTimeTransmitter> m_radioTimeTransmitters;
 
 private slots:
     void onMenuDialogCalled(const QPoint &p);
@@ -516,6 +529,7 @@ private slots:
     void on_displaySettings_clicked();
     void on_mapTypes_currentIndexChanged(int index);
     void on_beacons_clicked();
+    void on_radiotime_clicked();
 };
 
 

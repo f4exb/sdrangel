@@ -141,6 +141,20 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="radiotime">
+        <property name="toolTip">
+         <string>Display radio time transmitters dialog</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="icons.qrc">
+          <normaloff>:/map/icons/clock.png</normaloff>:/map/icons/clock.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="ButtonSwitch" name="displayNames">
         <property name="toolTip">
          <string>Display names</string>
@@ -165,6 +179,7 @@
         <property name="font">
          <font>
           <family>Adobe Devanagari</family>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -190,6 +205,7 @@
         <property name="font">
          <font>
           <family>Adobe Devanagari</family>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">

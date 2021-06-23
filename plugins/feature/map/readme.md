@@ -11,6 +11,7 @@ On top of this, it can plot data from other plugins, such as:
 * Satellites from the Satellite Tracker,
 * The Sun, Moon and Stars from the Star Tracker,
 * Beacons based on the IARU Region 1 beacon database.
+* Radio time transmitters.
 
 It can also create tracks showing the path aircraft, ships and APRS objects have taken, as well as predicted paths for satellites.
 
@@ -48,23 +49,32 @@ The beacons will then be displayed in the table and on the map.
 
 ![Beacon dialog](../../../doc/img/Map_plugin_beacon_dialog.png)
 
-<h3>5: Display Names</h3>
+<h3>5: Display Radio Time Transmitters dialog</h3>
+
+When clicked, opens the Radio Time Transmitters dialog.
+
+* Double clicking in a cell in the table in the Callsign or Location columns, will centre the map on that transmitter.
+* Double clicking on the Frequency column will set the Device center frequency.
+
+![Radio Time transmitters dialog](../../../doc/img/Map_plugin_radiotime_dialog.png)
+
+<h3>6: Display Names</h3>
 
 When checked, names of objects are displayed in a bubble next to each object.
 
-<h3>6: Display tracks for selected object</h3>
+<h3>7: Display tracks for selected object</h3>
 
 When checked, displays the track (taken or predicted) for the selected object.
 
-<h3>7: Display tracks for all objects</h3>
+<h3>8: Display tracks for all objects</h3>
 
 When checked, displays the track (taken or predicted) for the all objects.
 
-<h3>8: Delete</h3>
+<h3>9: Delete</h3>
 
 When clicked, all items will be deleted from the map.
 
-<h3>9: Display settings</h3>
+<h3>10: Display settings</h3>
 
 When clicked, opens the Map Display Settings dialog, which allows setting:
 
@@ -92,6 +102,8 @@ The map displays objects reported by other SDRangel channels and features, as we
 IARU Region 1 beacon list used with permission from: https://iaru-r1-c5-beacons.org/  To add or update a beacon, see: https://iaru-r1-c5-beacons.org/index.php/beacon-update/
 
 Mapping and geolocation services are by Open Street Map: https://www.openstreetmap.org/ esri: https://www.esri.com/ and Mapbox: https://www.mapbox.com/
+
+Icons made by Google from Flaticon https://www.flaticon.com
 
 <h2>API</h2>
 

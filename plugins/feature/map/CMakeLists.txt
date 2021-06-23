@@ -33,6 +33,8 @@ if(NOT SERVER_MODE)
         mapsettingsdialog.ui
         mapbeacondialog.cpp
         mapbeacondialog.ui
+        mapradiotimedialog.cpp
+        mapradiotimedialog.ui
         map.qrc
         icons.qrc
     )
@@ -43,6 +45,7 @@ if(NOT SERVER_MODE)
         mapmaidenheaddialog.h
         mapsettingsdialog.h
         mapbeacondialog.h
+        mapradiotimedialog.h
     )
 
     set(TARGET_NAME map)
