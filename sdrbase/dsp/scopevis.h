@@ -615,6 +615,11 @@ private:
         void setNbStreams(uint32_t nbStreams)
         {
             m_traceBackBuffersStreams.resize(nbStreams);
+
+            for (unsigned int s = 0; s < m_traceBackBuffersStreams.size(); s++) {
+                m_traceBackBuffersStreams[s].resize(m_memSize);
+            }
+
             resize(m_traceSize);
         }
 
