@@ -109,7 +109,7 @@ void PacketDemodSink::processOneSample(Complex &ci)
     m_magsqCount++;
 
     m_corrBuf[m_corrIdx] = fmDemod;
-    if (m_corrCnt >= m_correlationLength && magsq > 1e-7)
+    if (m_corrCnt >= m_correlationLength)
     {
         // Correlate with 1200 + 2200 baud complex exponentials
         Complex corrF0 = 0.0f;
