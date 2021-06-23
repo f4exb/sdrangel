@@ -63,7 +63,8 @@ struct MapSettings
     static const quint32 SOURCE_STAR_TRACKER = 0x8;
     static const quint32 SOURCE_SATELLITE_TRACKER = 0x10;
     static const quint32 SOURCE_BEACONS = 0x20;
-    static const quint32 SOURCE_STATION = 0x40;
+    static const quint32 SOURCE_RADIO_TIME = 0x40;
+    static const quint32 SOURCE_STATION = 0x80;
 };
 
 #endif // INCLUDE_FEATURE_MAPSETTINGS_H_

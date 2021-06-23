@@ -679,7 +679,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     m_doApplySettings(true),
     m_mapModel(this),
     m_beacons(nullptr),
-    m_beaconDialog(this)
+    m_beaconDialog(this),
+    m_radioTimeDialog(this)
 {
     ui->setupUi(this);
 
@@ -738,6 +739,8 @@ MapGUI::MapGUI(PluginAPI* pluginAPI, FeatureUISet *featureUISet, Feature *featur
     QList<Beacon *> *beacons = Beacon::readIARUCSV(MapGUI::getBeaconFilename());
     if (beacons != nullptr)
         setBeacons(beacons);
+
+    addRadioTimeTransmitters();
 }
 
 MapGUI::~MapGUI()
@@ -767,6 +770,37 @@ void MapGUI::setBeacons(QList<Beacon *> *beacons)
         beaconMapItem.setImageMinZoom(8);
         beaconMapItem.setText(new QString(beacon->getText()));
         m_mapModel.update(m_map, &beaconMapItem, MapSettings::SOURCE_BEACONS);
+    }
+}
+
+const QList<RadioTimeTransmitter> MapGUI::m_radioTimeTransmitters = {
+    {"MSF", 60000, 54.9075f, -3.27333f, 17},
+    {"DCF77", 77500, 50.01611111f, 9.00805556f, 50},
+    {"TDF", 162000, 47.1694f, 2.2044f, 800},
+    {"WWVB", 60000, 40.67805556f, -105.04666667f, 70},
+    {"JJY", 60000, 33.465f, 130.175555f, 50}
+};
+
+void MapGUI::addRadioTimeTransmitters()
+{
+    for (int i = 0; i < m_radioTimeTransmitters.size(); i++)
+    {
+        SWGSDRangel::SWGMapItem timeMapItem;
+        // Need to suffix frequency, as there are multiple becaons with same callsign at different locations
+        QString name = QString("%1").arg(m_radioTimeTransmitters[i].m_callsign);
+        timeMapItem.setName(new QString(name));
+        timeMapItem.setLatitude(m_radioTimeTransmitters[i].m_latitude);
+        timeMapItem.setLongitude(m_radioTimeTransmitters[i].m_longitude);
+        timeMapItem.setAltitude(0.0);
+        timeMapItem.setImage(new QString("antennatime.png"));
+        timeMapItem.setImageRotation(0);
+        timeMapItem.setImageMinZoom(8);
+        QString text = QString("Radio Time Transmitter\nCallsign: %1\nFrequency: %2 kHz\nPower: %3 kW")
+                                .arg(m_radioTimeTransmitters[i].m_callsign)
+                                .arg(m_radioTimeTransmitters[i].m_frequency/1000.0)
+                                .arg(m_radioTimeTransmitters[i].m_power);
+        timeMapItem.setText(new QString(text));
+        m_mapModel.update(m_map, &timeMapItem, MapSettings::SOURCE_RADIO_TIME);
     }
 }
 
@@ -1031,6 +1065,12 @@ void MapGUI::on_displaySettings_clicked()
 void MapGUI::on_beacons_clicked()
 {
     m_beaconDialog.show();
+}
+
+void MapGUI::on_radiotime_clicked()
+{
+    m_radioTimeDialog.updateTable();
+    m_radioTimeDialog.show();
 }
 
 quint32 MapGUI::getSourceMask(const PipeEndPoint *sourcePipe)

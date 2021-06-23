@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/map/">
     <file>icons/groundtracks.png</file>
+    <file>icons/clock.png</file>
   </qresource>
 </RCC>
