@@ -52,6 +52,7 @@ public:
     void setCacheMaster(bool cacheMaster) { m_cacheMaster = cacheMaster; }
 
     Real run(const Sample& s);
+    Real run(const std::complex<float>& s);
 
 private:
     static Real normalizeAngle(Real angle);
