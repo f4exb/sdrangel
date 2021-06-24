@@ -53,6 +53,8 @@ public:
     bool handleMessage(Message* message);
     unsigned int getNbTraces() const { return m_settings.m_tracesData.size(); }
     unsigned int getNbTriggers() const { return m_settings.m_triggersData.size(); }
+    void setNbStreams(unsigned int nbStreams); //!< Set number of streams with default names (indexes)
+    void setStreams(const QStringList& streamNames); //!< Give streans by their names in a list
 
     // preconfiguration methods
     // global (first line):
@@ -217,6 +219,7 @@ private slots:
     void on_traceDel_clicked(bool checked);
     void on_traceUp_clicked(bool checked);
     void on_traceDown_clicked(bool checked);
+    void on_traceStream_currentIndexChanged(int index);
     void on_traceMode_currentIndexChanged(int index);
     void on_amp_valueChanged(int value);
     void on_ofsCoarse_valueChanged(int value);
@@ -234,6 +237,7 @@ private slots:
     void on_trigDel_clicked(bool checked);
     void on_trigUp_clicked(bool checked);
     void on_trigDown_clicked(bool checked);
+    void on_trigStream_currentIndexChanged(int index);
     void on_trigMode_currentIndexChanged(int index);
     void on_trigCount_valueChanged(int value);
     void on_trigPos_toggled(bool checked);

@@ -435,6 +435,51 @@ bool GLScopeGUI::deserialize(const QByteArray& data)
     }
 }
 
+void GLScopeGUI::setNbStreams(unsigned int nbStreams)
+{
+    QStringList streamNames;
+
+    for (unsigned int s = 0; s < nbStreams; s++) {
+        streamNames.append(tr("%1").arg(s));
+    }
+
+    setStreams(streamNames);
+}
+
+void GLScopeGUI::setStreams(const QStringList& streamNames)
+{
+    int traceStreamIndex = ui->traceStream->currentIndex();
+    int triggerStreamIndex = ui->trigStream->currentIndex();
+    ui->traceStream->blockSignals(true);
+    ui->trigStream->blockSignals(true);
+    ui->traceStream->clear();
+    ui->trigStream->clear();
+
+    for (QString s : streamNames)
+    {
+        ui->traceStream->addItem(s);
+        ui->trigStream->addItem(s);
+    }
+
+    int newTraceStreamIndex = traceStreamIndex < streamNames.size() ? traceStreamIndex : streamNames.size() - 1;
+    int newTriggerStreamIndex = triggerStreamIndex < streamNames.size() ? triggerStreamIndex: streamNames.size() - 1;
+
+    ui->traceStream->setCurrentIndex(newTraceStreamIndex);
+
+    if (newTraceStreamIndex != traceStreamIndex) {
+        changeCurrentTrace();
+    }
+
+    ui->trigStream->setCurrentIndex(newTriggerStreamIndex);
+
+    if (newTriggerStreamIndex != triggerStreamIndex) {
+        changeCurrentTrigger();
+    }
+
+    ui->traceStream->blockSignals(false);
+    ui->trigStream->blockSignals(false);
+}
+
 void GLScopeGUI::on_onlyX_toggled(bool checked)
 {
     if (checked)
@@ -806,6 +851,12 @@ void GLScopeGUI::on_trigDown_clicked(bool checked)
     }
 }
 
+void GLScopeGUI::on_traceStream_currentIndexChanged(int index)
+{
+    (void) index;
+    changeCurrentTrace();
+}
+
 void GLScopeGUI::on_traceMode_currentIndexChanged(int index)
 {
     (void) index;
@@ -934,6 +985,12 @@ void GLScopeGUI::on_mem_valueChanged(int value)
     ui->memText->setText(text);
    	disableLiveMode(value > 0); // live / memory mode toggle
    	m_scopeVis->setMemoryIndex(value);
+}
+
+void GLScopeGUI::on_trigStream_currentIndexChanged(int index)
+{
+    (void) index;
+    changeCurrentTrigger();
 }
 
 void GLScopeGUI::on_trigMode_currentIndexChanged(int index)
